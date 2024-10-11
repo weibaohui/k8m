@@ -2,7 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8"/>
-    <title>Power K8S 管理平台</title>
+    <title>K8M</title>
+    <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta
             name="viewport"
@@ -48,25 +49,12 @@
 
         const app = {
             type: 'app',
-            brandName: 'PowerK8S',
+            brandName: '',
             logo: '/public/logo.png',
             header: {
                 type: 'tpl',
                 inline: false,
                 className: 'w-full',
-                // 添加获取用户信息的服务
-                data: {
-                    username: ''  // 初始为空，后续会更新
-                },
-                tpl: `
-            <div class="flex justify-between">
-                <div>顶部区域左侧</div>
-                <div>
-                    <span>欢迎</span> &nbsp; <!-- 显示用户名 -->
-                    <a href="/profile" target="_self">profile</a> &nbsp;
-                    <a href="/logout" target="_self">logout</a>
-                </div>
-            </div>`
             },
             // footer: '<div class="p-2 text-center bg-light">底部区域</div>',
             // asideBefore: '<div class="p-2 text-center">菜单前面区域</div>',
