@@ -1,0 +1,273 @@
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "pages": [
+      {
+        "children": [
+          {
+            "label": "Apply",
+            "url": "/apply",
+            "icon": "fa fa-list",
+            "schemaApi": "get:/pages/apply/apply.json"
+          },
+          {
+            "label": "Namespace",
+            "url": "/cluster/ns/list",
+            "icon": "fa fa-list",
+            "schemaApi": "get:/pages/cluster/ns.json"
+          },
+          {
+            "label": "Node",
+            "url": "/cluster/node/list",
+            "icon": "fa fa-list",
+            "schemaApi": "get:/pages/cluster/node.json"
+          },
+          {
+            "label": "Workload",
+            "url": "/workload",
+            "icon": "fa fa-cube",
+            "children": [
+              {
+                "label": "Deployment",
+                "url": "/deploy/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/deploy.json"
+              },
+              {
+                "label": "Pod",
+                "url": "/pod/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/pod.json"
+              },
+              {
+                "label": "DaemonSet",
+                "url": "/daemonset/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/daemonset.json"
+              },
+              {
+                "label": "StatefulSet",
+                "url": "/statefulset/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/statefulset.json"
+              },
+              {
+                "label": "RC",
+                "url": "/rc/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/rc.json"
+              },
+              {
+                "label": "Job",
+                "url": "/job/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/job.json"
+              },
+              {
+                "label": "CronJob",
+                "url": "/cronjob/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/cronjob.json"
+              },
+              {
+                "label": "ReplicaSet",
+                "url": "/replicaset/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/replicaset.json"
+              }
+            ]
+          },
+          {
+            "label": "Config",
+            "url": "/config",
+            "icon": "fa fa-cube",
+            "children": [
+              {
+                "label": "ConfigMap",
+                "url": "/configmap/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/configmap.json"
+              },
+              {
+                "label": "Secret",
+                "url": "/secret/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/secret.json"
+              },
+              {
+                "label": "ResourceQuota",
+                "url": "/resourcequota/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/resourcequota.json"
+              },
+              {
+                "label": "LimitsRange",
+                "url": "/limitsrange/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/limitsrange.json"
+              },
+              {
+                "label": "HPA",
+                "url": "/hpa/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/hpa.json"
+              },
+              {
+                "label": "PDB",
+                "url": "/pdb/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/pdb.json"
+              },
+              {
+                "label": "Lease",
+                "url": "/lease/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/lease.json"
+              },
+
+
+              {
+                "label": "PriorityClass",
+                "url": "/cluster/priority_class/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/cluster/priority_class.json"
+              },
+              {
+                "label": "RuntimeClass",
+                "url": "/cluster/runtime_class/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/cluster/runtime_class.json"
+              }
+            ]
+          },
+
+          {
+            "label": "Network",
+            "url": "/network",
+            "icon": "fa fa-cube",
+            "children": [
+              {
+                "label": "Service",
+                "url": "/svc/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/svc.json"
+              },
+              {
+                "label": "Endpoint",
+                "url": "/endpoint/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/endpoint.json"
+              },
+              {
+                "label": "EndpointSlice",
+                "url": "/endpointslice/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/endpointslice.json"
+              },
+              {
+                "label": "Ingress",
+                "url": "/ingress/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/ing.json"
+              },
+              {
+                "label": "IngressClass",
+                "url": "/cluster/ingress_class/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/cluster/ingress_class.json"
+              },
+              {
+                "label": "NetworkPolicy",
+                "url": "/network_policy/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/network_policy.json"
+              }
+            ]
+          },
+          {
+            "label": "Storage",
+            "url": "/storage",
+            "icon": "fa fa-cube",
+            "children": [
+              {
+                "label": "PVC",
+                "url": "/pvc/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/pvc.json"
+              },
+              {
+                "label": "PV",
+                "url": "/cluster/pv/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/cluster/pv.json"
+              },
+              {
+                "label": "StorageClass",
+                "url": "/storage_class/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/cluster/storage_class.json"
+              }
+            ]
+          },
+          {
+            "label": "AccessControl",
+            "url": "/access_control",
+            "icon": "fa fa-cube",
+            "children": [
+              {
+                "label": "ServiceAccount",
+                "url": "/service_account/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/service_account.json"
+              },
+              {
+                "label": "Role",
+                "url": "/role/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/role.json"
+              },
+              {
+                "label": "RoleBinding",
+                "url": "/role_binding/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/role_binding.json"
+              },
+              {
+                "label": "ClusterRole",
+                "url": "/cluster/cluster_role/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/cluster/cluster_role.json"
+              },
+              {
+                "label": "ClusterRoleBinding",
+                "url": "/cluster/cluster_role_binding/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/cluster/cluster_role_binding.json"
+              }
+            ]
+          },
+          {
+            "label": "CRD",
+            "url": "/crd",
+            "icon": "fa fa-cube",
+            "children": [
+              {
+                "label": "CRD",
+                "url": "/crd/crd/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/crd/crd.json"
+              },
+              {
+                "label": "CronTab",
+                "url": "/crd/crontab/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/crd/crontab.json"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "grid",
+      "columns": [
+        {
+          "md": 2,
+          "body": [
+            {
+              "type": "crud",
+              "api": "/k8s/ns/list",
+              "headerToolbar": [],
+              "perPage": 10,
+              "loadDataOnce": true,
+              "syncLocation": false,
+              "itemAction": {
+                "actionType": "reload",
+                "target": "detailCRUD?ns=${metadata.name}"
+              },
+              "columns": [
+                {
+                  "name": "metadata.name",
+                  "label": "namespace",
+                  "type": "text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "md": 10,
+          "body": [
+            {
+              "type": "crud",
+               "name": "detailCRUD",
+              "headerToolbar": [
+                "reload",
+                {
+                  "type": "tpl",
+                  "tpl": "<span class='text-primary bg-light p-2 rounded'>当前选择的 Namespace: ${ns}</span>",
+                  "visibleOn": "this.ns"
+                },
+                {
+                  "type": "pagination",
+                  "align": "right"
+                },
+                {
+                  "type": "statistics",
+                  "align": "right"
+                },
+                {
+                  "type": "switch-per-page",
+                  "align": "right"
+                }
+              ],
+              "data": {
+                "kind": "deploy"
+              },
+              "loadDataOnce": true,
+              "syncLocation": false,
+              "initFetch": false,
+              "perPage": 20,
+              "footerToolbar": [
+                {
+                  "type": "pagination",
+                  "align": "right"
+                },
+                {
+                  "type": "statistics",
+                  "align": "right"
+                },
+                {
+                  "type": "switch-per-page",
+                  "align": "right"
+                }
+              ],
+              "api": "get:/k8s/$kind/list/ns/${ns}",
+              "columns": [
+                {
+                  "type": "operation",
+                  "label": "action",
+                  "buttons": [
+                    {
+                      "type": "button",
+                      "icon": "fas fa-wrench",
+                      "tooltip": "更新tag",
+                      "actionType": "drawer",
+                      "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "position": "left",
+                        "title": "编辑",
+                        "body": {
+                          "type": "form",
+                          "name": "sample-edit-form",
+                          "data": {
+                            "env": ""
+                          },
+                          "api": {
+                            "method": "post",
+                            "url": "/k8s/deploy/update/ns/$metadata.namespace/name/$metadata.name/container/$container_name/tag/$tag"
+                          },
+                          "body": [
+                            {
+                              "type": "select",
+                              "name": "container_name",
+                              "label": "容器",
+                              "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                              "value": "${spec.template.spec.containers[0].name}",
+                              "required": true
+                            },
+                            {
+                              "type": "input-text",
+                              "name": "tag",
+                              "label": "tag",
+                              "required": true
+                            },
+                            {
+                              "type": "divider"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fas fa-redo-alt text-warning",
+                      "actionType": "ajax",
+                      "tooltip": "重启",
+                      "confirmText": "您确认要重启?",
+                      "api": "post:/k8s/deploy/restart/ns/$metadata.namespace/name/$metadata.name"
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fab fa-y-combinator text-success",
+                      "actionType": "drawer",
+                      "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "size": "lg",
+                        "title": "YAML 编辑器",
+                        "body": {
+                          "type": "service",
+                          "api": "get:/k8s/$kind/ns/$metadata.namespace/name/$metadata.name",
+                          "body": [
+                            {
+                              "type": "form",
+                              "api": "post:/k8s/$kind/update/ns/$metadata.namespace/name/$metadata.name",
+                              "wrapWithPanel": false,
+                              "body": [
+                                {
+                                  "type": "editor",
+                                  "name": "yaml",
+                                  "size": "xxl",
+                                  "allowFullscreen": true,
+                                  "placeholder": "loading",
+                                  "language": "yaml",
+                                  "value": "${yaml}",
+                                  "options": {
+                                    "wordWrap": "on",
+                                    "scrollbar": {
+                                      "vertical": "auto"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fas fa-trash text-danger",
+                      "actionType": "ajax",
+                      "tooltip": "停止",
+                      "confirmText": "您确认删除?",
+                      "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
+                    }
+                  ],
+                  "toggled": true
+                },
+                {
+                  "name": "metadata.namespace",
+                  "label": "ns",
+                  "type": "text"
+                },
+                {
+                  "name": "metadata.name",
+                  "label": "name",
+                  "type": "text"
+                },
+                {
+                  "name": "metadata.creationTimestamp",
+                  "label": "age",
+                  "type": "k8sAge"
+                },
+                {
+                  "name": "metadata.labels",
+                  "label": "labels",
+                  "type": "k8sLabels"
+                },
+                {
+                  "name": "spec.template.spec.containers",
+                  "label": "containers",
+                  "type": "each",
+                  "items": {
+                    "type": "tpl",
+                    "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+                  }
+                },
+                {
+                  "name": "spec.replicas",
+                  "label": "replicas",
+                  "type": "text"
+                },
+                {
+                  "name": "status.conditions",
+                  "label": "conditions",
+                  "type": "k8sConditions"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+
+
+
+

@@ -1,0 +1,65 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "form",
+      "actions": [
+        {
+          "type": "button",
+          "label": "Apply",
+          "level": "primary",
+          "actionType": "ajax",
+          "api": "post:/k8s/yaml/apply",
+          "validate": true,
+          "onSuccess": [
+            {
+              "actionType": "setValue",
+              "args": {
+                "result": "${msg}"
+              }
+            }
+          ]
+        },
+        {
+          "type": "button",
+          "label": "Delete",
+          "level": "danger",
+          "actionType": "ajax",
+          "api": "post:/k8s/yaml/delete",
+          "validate": true,
+          "onSuccess": [
+            {
+              "actionType": "setValue",
+              "args": {
+                "result": "${msg}"
+              }
+            }
+          ]
+        }
+      ],
+      "body": [
+        {
+          "type": "editor",
+          "name": "yaml",
+          "size": "xxl",
+          "allowFullscreen": true,
+          "placeholder": "loading",
+          "language": "yaml",
+          "value": "${yaml}",
+          "options": {
+            "wordWrap": "on",
+            "scrollbar": {
+              "vertical": "auto"
+            }
+          }
+        },
+
+        {
+          "type": "tpl",
+          "tpl": "${result|join:<br>}"
+        }
+      ]
+    }
+  ]
+}
+

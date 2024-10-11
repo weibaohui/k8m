@@ -1,0 +1,131 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "name": "detailCRUD",
+      "headerToolbar": [
+                "reload",
+                {
+                  "type": "pagination",
+                  "align": "right"
+                },
+                {
+                  "type": "statistics",
+                  "align": "right"
+                },
+                {
+                  "type": "switch-per-page",
+                  "align": "right"
+                }
+              ],
+      "data": {
+        "kind": "node"
+      },
+      "loadDataOnce": true,
+      "syncLocation": false,
+      "perPage": 20,
+      "api": "get:/k8s/$kind/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "action",
+          "width": 100,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fab fa-y-combinator text-success",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "YAML 编辑器",
+                "body": {
+                  "type": "service",
+                  "api": "get:/k8s/$kind/ns/$metadata.namespace/name/$metadata.name",
+                  "body": [
+                    {
+                      "type": "form",
+                      "api": "post:/k8s/$kind/update/ns/$metadata.namespace/name/$metadata.name",
+                      "wrapWithPanel": false,
+                      "body": [
+                        {
+                          "type": "editor",
+                          "name": "yaml",
+                          "size": "xxl",
+                          "allowFullscreen": true,
+                          "placeholder": "loading",
+                          "language": "yaml",
+                          "value": "${yaml}",
+                          "options": {
+                            "wordWrap": "on",
+                            "scrollbar": {
+                              "vertical": "auto"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.name",
+          "label": "name",
+          "type": "text"
+        },
+        {
+          "name": "roles",
+          "label": "节点角色",
+          "type": "nodeRoles"
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "age",
+          "type": "k8sAge"
+        },
+        {
+          "name": "status",
+          "label": "资源信息",
+          "type": "tpl",
+          "tpl": "${status.capacity.cpu}C/${status.capacity.memory|autoConvertMemory}"
+        },
+        {
+          "name": "status.nodeInfo.architecture",
+          "label": "arch",
+          "type": "text"
+        },
+        {
+          "name": "status.nodeInfo.containerRuntimeVersion",
+          "label": "cri",
+          "type": "text"
+        },
+        {
+          "name": "status.addresses",
+          "label": "addresses",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "${type}:${address}<br>"
+          }
+        },
+        {
+          "name": "status.conditions",
+          "label": "conditions",
+          "type": "k8sConditions"
+        },
+        {
+          "name": "status.images",
+          "label": "images",
+          "type": "tpl",
+          "tpl": "${count(status.images)}"
+        }
+      ]
+    }
+  ]
+}

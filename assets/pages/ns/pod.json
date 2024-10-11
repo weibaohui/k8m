@@ -1,0 +1,318 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "grid",
+      "columns": [
+        {
+          "md": 2,
+          "body": [
+            {
+              "type": "crud",
+              "api": "/k8s/ns/list",
+              "headerToolbar": [],
+              "perPage": 10,
+              "loadDataOnce": true,
+              "syncLocation": false,
+              "itemAction": {
+                "actionType": "reload",
+                "target": "detailCRUD?ns=${metadata.name}"
+              },
+              "columns": [
+                {
+                  "name": "metadata.name",
+                  "label": "namespace",
+                  "type": "text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "md": 10,
+          "body": [
+            {
+              "type": "crud",
+              "name": "detailCRUD",
+              "headerToolbar": [
+                "reload",
+                {
+                  "type": "tpl",
+                  "tpl": "<span class='text-primary bg-light p-2 rounded'>当前选择的 Namespace: ${ns}</span>",
+                  "visibleOn": "this.ns"
+                },
+                {
+                  "type": "pagination",
+                  "align": "right"
+                },
+                {
+                  "type": "statistics",
+                  "align": "right"
+                },
+                {
+                  "type": "switch-per-page",
+                  "align": "right"
+                }
+              ],
+              "data": {
+                "kind": "pod"
+              },
+              "loadDataOnce": true,
+              "syncLocation": false,
+              "initFetch": false,
+              "perPage": 20,
+              "footerToolbar": [
+                {
+                  "type": "pagination",
+                  "align": "right"
+                },
+                {
+                  "type": "statistics",
+                  "align": "right"
+                },
+                {
+                  "type": "switch-per-page",
+                  "align": "right"
+                }
+              ],
+              "api": "get:/k8s/$kind/list/ns/${ns}",
+              "columns": [
+                {
+                  "type": "operation",
+                  "label": "action",
+                  "width": 100,
+                  "buttons": [
+                    {
+                      "type": "button",
+                      "icon": "fas fa-trash text-danger",
+                      "actionType": "ajax",
+                      "tooltip": "删除",
+                      "confirmText": "您确认要删除$metadata.name?",
+                      "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fab fa-y-combinator text-success",
+                      "actionType": "drawer",
+                      "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "size": "lg",
+                        "title": "YAML 编辑器",
+                        "body": {
+                          "type": "service",
+                          "api": "get:/k8s/$kind/ns/$metadata.namespace/name/$metadata.name",
+                          "body": [
+                            {
+                              "type": "form",
+                              "api": "post:/k8s/$kind/update/ns/$metadata.namespace/name/$metadata.name",
+                              "wrapWithPanel": false,
+                              "body": [
+                                {
+                                  "type": "editor",
+                                  "name": "yaml",
+                                  "size": "xxl",
+                                  "allowFullscreen": true,
+                                  "placeholder": "loading",
+                                  "language": "yaml",
+                                  "value": "${yaml}",
+                                  "options": {
+                                    "wordWrap": "on",
+                                    "scrollbar": {
+                                      "vertical": "auto"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fa fa-list",
+                      "actionType": "dialog",
+                      "dialog": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "title": "选择容器",
+                        "body": [
+                          {
+                            "type": "select",
+                            "name": "containerName",
+                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                            "value": "${spec.containers[0].name}",
+                            "required": true
+                          },
+                          {
+                            "type": "input-number",
+                            "name": "tailLines",
+                            "label": "读取最近行数",
+                            "value": 100,
+                            "description": "设置为0将读取全部日志",
+                            "min": 0
+                          },
+                          {
+                            "type": "input-number",
+                            "name": "sinceSeconds",
+                            "label": "过去几秒开始读取",
+                            "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
+                            "min": 0
+                          },
+                          {
+                            "type": "input-datetime",
+                            "name": "sinceTime",
+                            "label": "开始时间",
+                            "format": "YYYY-MM-DD HH:mm:ss",
+                            "description": "与上面的秒数互斥。该时间为服务器时间，注意时区时差",
+                            "placeholder": "选择开始时间",
+                            "value": "${_|now|dateModify:subtract:10:minutes|dateModify:subtract:8:hours}"
+                          },
+                          {
+                            "type": "switch",
+                            "name": "timestamps",
+                            "label": "显示时间戳",
+                            "description": "选择时间无日志时，请开启本选项确认时间范围",
+                            "value": false,
+                            "onText": "是",
+                            "offText": "否"
+                          },
+                          {
+                            "type": "switch",
+                            "name": "follow",
+                            "label": "实时跟踪",
+                            "value": true,
+                            "onText": "开启",
+                            "offText": "关闭"
+                          },
+                          {
+                            "type": "switch",
+                            "name": "previous",
+                            "label": "读取上一个实例日志",
+                            "value": false,
+                            "onText": "是",
+                            "offText": "否"
+                          },
+                          {
+                            "type": "button",
+                            "label": "查看日志",
+                            "level": "primary",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "closeOnOutside": true,
+                              "closeOnEsc": true,
+                              "position": "left",
+                              "size": "xl",
+                              "body": [
+                                {
+                                  "type": "log-download",
+                                  "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                  "data": {
+                                    "containerName": "${containerName}",
+                                    "tailLines": "${tailLines}",
+                                    "sinceTime": "${sinceTime}",
+                                    "previous": "${previous}",
+                                    "timestamps": "${timestamps}",
+                                    "sinceSeconds": "${sinceSeconds}"
+                                  }
+                                },
+                                {
+                                  "type": "sse",
+                                  "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                  "data": {
+                                    "containerName": "${containerName}",
+                                    "tailLines": "${tailLines}",
+                                    "sinceTime": "${sinceTime}",
+                                    "follow": "${follow}",
+                                    "previous": "${previous}",
+                                    "timestamps": "${timestamps}",
+                                    "sinceSeconds": "${sinceSeconds}"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "actions": []
+                      }
+                    }
+                  ],
+                  "toggled": true
+                },
+                {
+                  "name": "metadata.namespace",
+                  "label": "ns",
+                  "type": "text"
+                },
+                {
+                  "name": "metadata.name",
+                  "label": "name",
+                  "type": "text"
+                },
+                {
+                  "name": "ready",
+                  "label": "ready",
+                  "type": "k8sPodReady"
+                },
+                {
+                  "name": "metadata.labels",
+                  "label": "labels",
+                  "type": "k8sLabels"
+                },
+                {
+                  "name": "spec.containers",
+                  "label": "containers",
+                  "type": "each",
+                  "items": {
+                    "type": "tpl",
+                    "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+                  }
+                },
+                {
+                  "name": "metadata.creationTimestamp",
+                  "label": "age",
+                  "type": "k8sAge"
+                },
+                {
+                  "name": "status.podIP",
+                  "label": "ip",
+                  "type": "text"
+                },
+                {
+                  "name": "spec.nodeName",
+                  "label": "node",
+                  "type": "text"
+                },
+                {
+                  "name": "status.conditions",
+                  "label": "conditions",
+                  "type": "k8sConditions"
+                },
+                {
+                  "name": "status.containerStatuses",
+                  "label": "restarts",
+                  "type": "tpl",
+                  "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
+                },
+                {
+                  "name": "status.phase",
+                  "label": "phase",
+                  "type": "mapping",
+                  "map": {
+                    "Running": "<span class='label label-info'>Running</span>",
+                    "Pending": "<span class='label label-warning'>Pending</span>",
+                    "Succeeded": "<span class='label label-success'>Succeeded</span>",
+                    "Failed": "<span class='label label-danger'>Failed</span>",
+                    "Unknown": "<span class='label label-default'>Unknown</span>"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
