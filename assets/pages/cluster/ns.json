@@ -114,7 +114,7 @@
         },
         {
           "name": "status.phase",
-          "label": "phase",
+          "label": "status",
           "type": "mapping",
           "map": {
             "Active": "<span class='label label-success'>Active</span>",
