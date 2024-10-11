@@ -95,7 +95,6 @@
                 {
                   "type": "operation",
                   "label": "action",
-
                   "buttons": [
                     {
                       "type": "button",
@@ -266,6 +265,24 @@
                   "type": "k8sPodReady"
                 },
                 {
+                  "name": "status.phase",
+                  "label": "status",
+                  "type": "mapping",
+                  "map": {
+                    "Running": "<span class='label label-info'>Running</span>",
+                    "Pending": "<span class='label label-warning'>Pending</span>",
+                    "Succeeded": "<span class='label label-success'>Succeeded</span>",
+                    "Failed": "<span class='label label-danger'>Failed</span>",
+                    "Unknown": "<span class='label label-default'>Unknown</span>"
+                  }
+                },
+                {
+                  "name": "status.containerStatuses",
+                  "label": "restarts",
+                  "type": "tpl",
+                  "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
+                },
+                {
                   "name": "metadata.labels",
                   "label": "labels",
                   "type": "k8sLabels"
@@ -298,24 +315,6 @@
                   "name": "status.conditions",
                   "label": "conditions",
                   "type": "k8sConditions"
-                },
-                {
-                  "name": "status.containerStatuses",
-                  "label": "restarts",
-                  "type": "tpl",
-                  "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
-                },
-                {
-                  "name": "status.phase",
-                  "label": "phase",
-                  "type": "mapping",
-                  "map": {
-                    "Running": "<span class='label label-info'>Running</span>",
-                    "Pending": "<span class='label label-warning'>Pending</span>",
-                    "Succeeded": "<span class='label label-success'>Succeeded</span>",
-                    "Failed": "<span class='label label-danger'>Failed</span>",
-                    "Unknown": "<span class='label label-default'>Unknown</span>"
-                  }
                 }
               ]
             }
