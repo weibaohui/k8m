@@ -201,10 +201,17 @@
                   "label": "name",
                   "type": "text"
                 },
+
                 {
                   "name": "metadata.creationTimestamp",
                   "label": "age",
                   "type": "k8sAge"
+                },
+                {
+                  "name": "ready",
+                  "label": "ready",
+                  "type": "tpl",
+                  "tpl": "${status.readyReplicas}/${status.replicas}"
                 },
                 {
                   "name": "metadata.labels",
@@ -221,7 +228,12 @@
                   }
                 },
                 {
-                  "name": "spec.replicas",
+                  "name": "status.updatedReplicas",
+                  "label": "updated",
+                  "type": "text"
+                },
+                {
+                  "name": "status.availableReplicas",
                   "label": "replicas",
                   "type": "text"
                 },
