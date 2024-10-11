@@ -153,6 +153,15 @@
                   "type": "text"
                 },
                 {
+                  "name": "subsets",
+                  "label": "endpoints",
+                  "type": "each",
+                  "items": {
+                    "type": "tpl",
+                    "tpl": "${addresses|pick:ip}"
+                  }
+                },
+                {
                   "name": "metadata.labels",
                   "label": "labels",
                   "type": "k8sLabels"

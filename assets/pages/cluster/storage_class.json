@@ -103,6 +103,21 @@
           "type": "text"
         },
         {
+          "name": "provisioner",
+          "label": "provisioner",
+          "type": "text"
+        },
+        {
+          "name": "reclaimPolicy",
+          "label": "policy",
+          "type": "text"
+        },
+        {
+          "name": "volumeBindingMode",
+          "label": "mode",
+          "type": "text"
+        },
+        {
           "name": "metadata.labels",
           "label": "labels",
           "type": "k8sLabels"

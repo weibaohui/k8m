@@ -153,6 +153,35 @@
                   "type": "text"
                 },
                 {
+                  "name": "spec.type",
+                  "label": "type",
+                  "type": "text"
+                },
+                {
+                  "name": "spec.clusterIP",
+                  "label": "clusterIP",
+                  "type": "text"
+                },
+                {
+                  "name": "spec.ports",
+                  "label": "ports",
+                  "type": "each",
+                  "items": {
+                    "type": "tpl",
+                    "tpl": "<div>${port}${nodePort?':<span class=\"text text-danger\">'+nodePort+'</span>':''}/${protocol}  <span class=\"text text-success\">=>${targetPort}</span></div>"
+                  }
+                },
+                {
+                  "name": "spec.ipFamilyPolicy",
+                  "label": "ipFamily",
+                  "type": "text"
+                },
+                {
+                  "name": "spec.sessionAffinity",
+                  "label": "session",
+                  "type": "text"
+                },
+                {
                   "name": "metadata.labels",
                   "label": "labels",
                   "type": "k8sLabels"

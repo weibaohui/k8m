@@ -153,6 +153,26 @@
                   "type": "text"
                 },
                 {
+                  "name": "addressType",
+                  "label": "addressType",
+                  "type": "text"
+                },
+                {
+                  "name": "endpoints",
+                  "label": "endpoints",
+                  "type": "tpl",
+                  "tpl": "${endpoints|pick:addresses }"
+                },
+                {
+                  "name": "ports",
+                  "label": "ports",
+                  "type": "each",
+                  "items": {
+                    "type": "tpl",
+                    "tpl": "<div>${port}/${protocol}</div>"
+                  }
+                },
+                {
                   "name": "metadata.labels",
                   "label": "labels",
                   "type": "k8sLabels"

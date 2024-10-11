@@ -152,6 +152,46 @@
                   "label": "name",
                   "type": "text"
                 },
+
+
+                {
+                  "name": "status.phase",
+                  "label": "status",
+                  "type": "text"
+                },
+                {
+                  "name": "spec.volumeName",
+                  "label": "volume",
+                  "type": "text"
+                },
+                {
+                  "name": "request",
+                  "label": "request",
+                  "type": "tpl",
+                  "tpl": "${spec.resources.requests.storage}"
+                },
+                {
+                  "name": "capacity",
+                  "label": "capacity",
+                  "type": "tpl",
+                  "tpl": "${status.capacity.storage}"
+                },
+                {
+                  "name": "spec.accessModes",
+                  "label": "mode",
+                  "type": "tpl",
+                  "tpl": "${spec.accessModes| map  }"
+                },
+                {
+                  "name": "spec.storageClassName",
+                  "label": "StorageClass",
+                  "type": "text"
+                },
+                {
+                  "name": "spec.volumeMode",
+                  "label": "volumeMode",
+                  "type": "text"
+                },
                 {
                   "name": "metadata.labels",
                   "label": "labels",

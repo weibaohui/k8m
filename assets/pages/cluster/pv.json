@@ -103,9 +103,46 @@
           "type": "text"
         },
         {
+          "name": "spec.capacity.storage",
+          "label": "capacity",
+          "type": "text"
+        },
+        {
+          "name": "spec.accessModes",
+          "label": "mode",
+          "type": "tpl",
+          "tpl": "${spec.accessModes| map  }"
+        },
+        {
+          "name": "spec.persistentVolumeReclaimPolicy",
+          "label": "reclaimPolicy",
+          "type": "text"
+        },
+        {
+          "name": "status.phase",
+          "label": "status",
+          "type": "text"
+        },
+        {
+          "name": "claim",
+          "label": "claim",
+          "type": "tpl",
+          "tpl": "${spec.claimRef.namespace}/${spec.claimRef.name}"
+        },
+        {
+          "name": "spec.storageClassName",
+          "label": "storageClass",
+          "type": "text"
+        },
+        {
           "name": "metadata.labels",
           "label": "labels",
           "type": "k8sLabels"
+        },
+        {
+          "name": "spec.volumeMode",
+          "label": "volumeMode",
+          "type": "text"
         },
         {
           "name": "metadata.creationTimestamp",
