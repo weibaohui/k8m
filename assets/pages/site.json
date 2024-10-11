@@ -59,6 +59,12 @@
                 "schemaApi": "get:/pages/ns/rc.json"
               },
               {
+                "label": "ReplicaSet",
+                "url": "/replicaset/list",
+                "icon": "fa fa-list",
+                "schemaApi": "get:/pages/ns/replicaset.json"
+              },
+              {
                 "label": "Job",
                 "url": "/job/list",
                 "icon": "fa fa-list",
@@ -69,12 +75,6 @@
                 "url": "/cronjob/list",
                 "icon": "fa fa-list",
                 "schemaApi": "get:/pages/ns/cronjob.json"
-              },
-              {
-                "label": "ReplicaSet",
-                "url": "/replicaset/list",
-                "icon": "fa fa-list",
-                "schemaApi": "get:/pages/ns/replicaset.json"
               }
             ]
           },

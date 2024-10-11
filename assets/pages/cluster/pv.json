@@ -5,26 +5,41 @@
       "type": "crud",
       "name": "detailCRUD",
       "headerToolbar": [
-                "reload",
-                {
-                  "type": "pagination",
-                  "align": "right"
-                },
-                {
-                  "type": "statistics",
-                  "align": "right"
-                },
-                {
-                  "type": "switch-per-page",
-                  "align": "right"
-                }
-              ],
+        "bulkActions",
+        "reload",
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
       "data": {
         "kind": "pv"
       },
       "loadDataOnce": true,
       "syncLocation": false,
-      "perPage": 20,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
+            "method": "post",
+            "data": {
+              "names": "${selectedItems | pick:metadata.name }"
+            }
+          }
+        }
+      ],
       "api": "get:/k8s/$kind/list",
       "columns": [
         {

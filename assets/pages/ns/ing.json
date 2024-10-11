@@ -11,7 +11,7 @@
               "type": "crud",
               "api": "/k8s/ns/list",
               "headerToolbar": [],
-              "perPage": 10,
+              "perPage": 20,
               "loadDataOnce": true,
               "syncLocation": false,
               "itemAction": {
@@ -33,8 +33,9 @@
           "body": [
             {
               "type": "crud",
-               "name": "detailCRUD",
+              "name": "detailCRUD",
               "headerToolbar": [
+                "bulkActions",
                 "reload",
                 {
                   "type": "tpl",
@@ -60,7 +61,21 @@
               "loadDataOnce": true,
               "syncLocation": false,
               "initFetch": false,
-              "perPage": 20,
+              "perPage": 10,
+              "bulkActions": [
+                {
+                  "label": "批量删除",
+                  "actionType": "ajax",
+                  "confirmText": "确定要批量删除?",
+                  "api": {
+                    "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
+                    "method": "post",
+                    "data": {
+                      "names": "${selectedItems | pick:metadata.name }"
+                    }
+                  }
+                }
+              ],
               "footerToolbar": [
                 {
                   "type": "pagination",
@@ -131,11 +146,6 @@
                     }
                   ],
                   "toggled": true
-                },
-                {
-                  "name": "metadata.namespace",
-                  "label": "ns",
-                  "type": "text"
                 },
                 {
                   "name": "metadata.name",
