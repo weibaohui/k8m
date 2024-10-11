@@ -34,7 +34,7 @@ build:
 	@echo "构建当前平台可执行文件..."
 	@mkdir -p $(OUTPUT_DIR)
 	@GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) \
-	    go build -ldflags "-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)" \
+	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)" \
 	    -o "$(OUTPUT_DIR)/$(BINARY_NAME)" .
 
 # 为所有指定的平台和架构构建可执行文件
@@ -52,8 +52,8 @@ build-all:
 		fi; \
 		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
-		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)\" -o $$OUTPUT_FILE ."; \
-		GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags "-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)" -o "$$OUTPUT_FILE" .; \
+		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)\" -o $$OUTPUT_FILE ."; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)" -o "$$OUTPUT_FILE" .; \
 	done
 
 # 清理生成的可执行文件
