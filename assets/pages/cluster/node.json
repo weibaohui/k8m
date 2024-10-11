@@ -45,7 +45,7 @@
         {
           "type": "operation",
           "label": "action",
-          "width": 100,
+
           "buttons": [
             {
               "type": "button",
