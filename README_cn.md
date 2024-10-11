@@ -77,17 +77,6 @@
   make help
   ```
 
-### **变量说明**
-
-- **BINARY_NAME**：编译后的二进制文件名称。默认设置为 `k8m`。
-- **OUTPUT_DIR**：存放编译后二进制文件的目录。默认设置为 `bin`。
-- **VERSION**：应用程序的版本信息。默认值为 `v1.0.0`，可通过命令行覆盖。
-  - **覆盖示例**：
-    ```bash
-    make build VERSION=v1.1.0
-    ```
-- **GIT_COMMIT**：当前 Git 提交的简短哈希值。通过 `git rev-parse --short HEAD` 自动获取。
-
 ### **跨平台编译支持**
 
 **build-all** 目标支持以下操作系统和架构组合的交叉编译：
