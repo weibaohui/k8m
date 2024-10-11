@@ -24,7 +24,7 @@ const (
 	ServiceAccount                 ResourceType = "ServiceAccount"
 	Event                          ResourceType = "Event"
 	Endpoints                      ResourceType = "Endpoints"
-	LimitsRange                    ResourceType = "LimitRange"
+	LimitRange                     ResourceType = "LimitRange"
 	ResourceQuota                  ResourceType = "ResourceQuota"
 	Deployment                     ResourceType = "Deployment"
 	StatefulSet                    ResourceType = "StatefulSet"
@@ -106,9 +106,9 @@ var resourceTypeMap = map[string]ResourceType{
 	"events":                         Event,
 	"ep":                             Endpoints,
 	"endpoints":                      Endpoints,
-	"limits":                         LimitsRange,
-	"limitsrange":                    LimitsRange,
-	"limitsranges":                   LimitsRange,
+	"limits":                         LimitRange,
+	"limitrange":                     LimitRange,
+	"limitranges":                    LimitRange,
 	"quota":                          ResourceQuota,
 	"resourcequota":                  ResourceQuota,
 	"resourcequotas":                 ResourceQuota,
@@ -224,7 +224,7 @@ var gvrMap = map[ResourceType]schema.GroupVersionResource{
 	ServiceAccount:                 {Group: "", Version: "v1", Resource: "serviceaccounts"},
 	Event:                          {Group: "", Version: "v1", Resource: "events"},
 	Endpoints:                      {Group: "", Version: "v1", Resource: "endpoints"},
-	LimitsRange:                    {Group: "", Version: "v1", Resource: "limitranges"},
+	LimitRange:                     {Group: "", Version: "v1", Resource: "limitranges"},
 	ResourceQuota:                  {Group: "", Version: "v1", Resource: "resourcequotas"},
 	Deployment:                     {Group: "apps", Version: "v1", Resource: "deployments"},
 	StatefulSet:                    {Group: "apps", Version: "v1", Resource: "statefulsets"},
@@ -284,7 +284,7 @@ var nsMap = map[ResourceType]bool{
 	ServiceAccount:                 true,
 	Event:                          true,
 	Endpoints:                      true,
-	LimitsRange:                    true,
+	LimitRange:                     true,
 	ResourceQuota:                  true,
 	Deployment:                     true,
 	StatefulSet:                    true,
