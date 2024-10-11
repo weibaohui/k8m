@@ -61,7 +61,8 @@
               "loadDataOnce": true,
               "syncLocation": false,
               "initFetch": false,
-              "perPage": 10,              "bulkActions": [
+              "perPage": 10,
+              "bulkActions": [
                 {
                   "label": "批量删除",
                   "actionType": "ajax",
