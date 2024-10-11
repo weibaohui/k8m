@@ -66,27 +66,60 @@ func Remove(c *gin.Context) {
 	var name = c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
+
+	err := removeSingle(kind, group, ns, name)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+
+}
+func removeSingle(kind, group, ns, name string) error {
 	rt, err := kubectl.ParseResourceType(kind)
 	if err != nil {
 		// CRD 类型资源
 		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
 			err = kubectl.Init().RemoveCRD(crd, ns, name)
 			if err != nil {
-				amis.WriteJsonError(c, err)
-				return
+				return err
 			}
 		}
 	} else {
+		// 内置资源类型
 		err = kubectl.Init().RemoveResource(rt, ns, name)
 		if err != nil {
-			amis.WriteJsonError(c, err)
-			return
+			return err
 		}
 	}
-
-	amis.WriteJsonOK(c)
+	return err
 	// todo 校验是否有权限删除，ns为为本人名字开头
 
+}
+
+// NamesPayload 定义结构体以匹配批量删除 JSON 结构
+type NamesPayload struct {
+	Names []string `json:"names"`
+}
+
+func BatchRemove(c *gin.Context) {
+	var ns = c.Param("ns")
+	kind := c.Param("kind")
+	group := c.Param("group")
+
+	// 初始化结构体实例
+	var payload NamesPayload
+
+	// 反序列化 JSON 数据到结构体
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	for _, name := range payload.Names {
+		_ = removeSingle(kind, group, ns, name)
+	}
+	amis.WriteJsonOK(c)
 }
 
 type ApplyYAMLRequest struct {
