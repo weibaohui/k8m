@@ -1,0 +1,22 @@
+# .air.toml
+
+# 构建配置
+[build]
+cmd = "make build"  # 使用 Makefile 的 build 目标
+bin = "bin/k8m"     # 可执行文件路径
+include_ext = ["go", "tpl", "tmpl", "html", "css", "js", "json", "png", "jpg"]  # 根据需要添加文件扩展名
+exclude_dir = ["bin", "vendor"]
+exclude_file = ["*.test"]
+
+# 颜色配置
+[color]
+main = "yellow"
+
+# 监听配置
+[watch]
+include = ["*.go", "assets/**/*"]  # 监听 .go 文件和 assets 目录下的所有文件
+exclude = ["bin/*", "vendor/*"]
+
+# 事件钩子（可选）
+[event]
+post_build = "echo \"Build 完成！\""
