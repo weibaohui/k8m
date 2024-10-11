@@ -115,6 +115,22 @@
           "label": "arch",
           "type": "text"
         },
+
+        {
+          "name": "status.nodeInfo.kubeletVersion",
+          "label": "version",
+          "type": "text"
+        },
+        {
+          "name": "status.nodeInfo.osImage",
+          "label": "osImage",
+          "type": "text"
+        },
+        {
+          "name": "status.nodeInfo.kernelVersion",
+          "label": "kernelVersion",
+          "type": "text"
+        },
         {
           "name": "status.nodeInfo.containerRuntimeVersion",
           "label": "cri",
