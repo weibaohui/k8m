@@ -97,15 +97,15 @@
               },
               {
                 "label": "ResourceQuota",
-                "url": "/resourcequota/list",
+                "url": "/resource_quota/list",
                 "icon": "fas fa-dungeon",
-                "schemaApi": "get:/pages/ns/resourcequota.json"
+                "schemaApi": "get:/pages/ns/resource_quota.json"
               },
               {
                 "label": "LimitsRange",
-                "url": "/limitsrange/list",
+                "url": "/limit_range/list",
                 "icon": "fas fa-compress",
-                "schemaApi": "get:/pages/ns/limitsrange.json"
+                "schemaApi": "get:/pages/ns/limit_range.json"
               },
               {
                 "label": "HPA",

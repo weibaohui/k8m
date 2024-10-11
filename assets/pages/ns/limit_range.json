@@ -56,7 +56,7 @@
                 }
               ],
               "data": {
-                "kind": "limitsrange"
+                "kind": "limitrange"
               },
               "loadDataOnce": true,
               "syncLocation": false,
