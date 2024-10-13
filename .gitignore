@@ -18,3 +18,5 @@ go.work
 k8m
 tmp/
 bin/
+/def.json
+/example.json
