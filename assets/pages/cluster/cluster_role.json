@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "clusterrole"
+        "kind": "ClusterRole"
       },
       "loadDataOnce": true,
       "syncLocation": false,

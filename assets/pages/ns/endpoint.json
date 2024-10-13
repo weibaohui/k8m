@@ -9,7 +9,7 @@
           "body": [
             {
               "type": "crud",
-              "api": "/k8s/ns/list",
+              "api": "/k8s/Namespace/list",
               "headerToolbar": [],
               "perPage": 20,
               "loadDataOnce": true,
@@ -56,7 +56,7 @@
                 }
               ],
               "data": {
-                "kind": "ep"
+                "kind": "Endpoints"
               },
               "loadDataOnce": true,
               "syncLocation": false,

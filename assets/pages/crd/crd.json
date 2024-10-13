@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "crd"
+        "kind": "CustomResourceDefinition"
       },
       "loadDataOnce": true,
       "syncLocation": false,

@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "node"
+        "kind": "Node"
       },
       "loadDataOnce": true,
       "syncLocation": false,

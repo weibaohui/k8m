@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "runtimeclass"
+        "kind": "RuntimeClass"
       },
       "loadDataOnce": true,
       "syncLocation": false,

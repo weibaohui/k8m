@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "clusterrolebinding"
+        "kind": "ClusterRoleBinding"
       },
       "loadDataOnce": true,
       "syncLocation": false,

@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "pv"
+        "kind": "PersistentVolume"
       },
       "loadDataOnce": true,
       "syncLocation": false,

@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "ingressclass"
+        "kind": "IngressClass"
       },
       "loadDataOnce": true,
       "syncLocation": false,

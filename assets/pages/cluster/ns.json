@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "namespace"
+        "kind": "Namespace"
       },
       "loadDataOnce": true,
       "syncLocation": false,

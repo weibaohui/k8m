@@ -21,7 +21,7 @@
         }
       ],
       "data": {
-        "kind": "priorityclass"
+        "kind": "PriorityClass"
       },
       "loadDataOnce": true,
       "syncLocation": false,
