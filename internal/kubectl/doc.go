@@ -252,6 +252,9 @@ func initDoc() {
 
 	}
 
+	// todo 数组类型的还没处理
+	// deployment containers[] item数组类型
+
 	// 进行遍历处理，将child中ref对应的类型提取出来
 	// 此时应该所有的类型都已经存在了
 	for _, item := range trees {
