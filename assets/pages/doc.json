@@ -1,0 +1,48 @@
+{
+  "type": "page",
+  "body": {
+    "type": "form",
+    "api": "/amis/api/mock2/form/saveForm",
+    "debug": true,
+    "body": [
+      {
+        "type": "input-tree",
+        "name": "tree",
+        "label": "Tree",
+        "deferApi": "/amis/api/mock2/form/deferOptions?label=${label}&waitSeconds=2",
+        "options": [
+          {
+            "label": "Folder A",
+            "value": 1,
+            "collapsed": true,
+            "children": [
+              {
+                "label": "file A",
+                "value": 2
+              },
+              {
+                "label": "file B",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "label": "这下面是懒加载的",
+            "value": 4,
+            "defer": true
+          },
+          {
+            "label": "file D",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "type": "input-tree",
+        "name": "tree",
+        "label": "Tree",
+        "source": "get:/k8s/doc/Pod"
+      }
+    ]
+  }
+}
