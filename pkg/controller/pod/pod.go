@@ -19,7 +19,7 @@ func StreamLogs(c *gin.Context) {
 	StreamPodLogsBySelector(c, ns, containerName, kubectl.WithFieldSelector(selector))
 }
 func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, opts ...kubectl.ListOption) {
-	pods, err := kubectl.Init().ListResources(kubectl.Pod, ns, opts...)
+	pods, err := kubectl.Init().ListResources("Pod", ns, opts...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -52,7 +52,7 @@ func DownloadLogs(c *gin.Context) {
 	DownloadPodLogsBySelector(c, ns, containerName, kubectl.WithFieldSelector(selector))
 }
 func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, opts ...kubectl.ListOption) {
-	pods, err := kubectl.Init().ListResources(kubectl.Pod, ns, opts...)
+	pods, err := kubectl.Init().ListResources("Pod", ns, opts...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

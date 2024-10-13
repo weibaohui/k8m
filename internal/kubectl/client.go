@@ -2,11 +2,12 @@ package kubectl
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"path/filepath"
-	"sync"
+	"strings"
 
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -23,9 +24,7 @@ type Kubectl struct {
 	config        *rest.Config
 	dynamicClient dynamic.Interface
 
-	// cache 存储已发现的 GroupVersionResource
-	cache      map[string]schema.GroupVersionResource
-	cacheMutex sync.RWMutex
+	apiResources []metav1.APIResource
 }
 
 func Init() *Kubectl {
@@ -53,8 +52,29 @@ func init() {
 	kubectl.client = client
 	kubectl.config = config
 	kubectl.dynamicClient = dynClient
-	kubectl.cache = make(map[string]schema.GroupVersionResource)
+	_, lists, _ := kubectl.client.Discovery().ServerGroupsAndResources()
+	for _, list := range lists {
 
+		resources := list.APIResources
+		version := list.GroupVersionKind().Version
+		group := list.GroupVersionKind().Group
+		groupVersion := list.GroupVersion
+		gvs := strings.Split(groupVersion, "/")
+		if len(gvs) == 2 {
+			group = gvs[0]
+			version = gvs[1]
+		} else {
+			// 只有version的情况"v1"
+			version = groupVersion
+		}
+
+		fmt.Print(groupVersion)
+		for _, resource := range resources {
+			resource.Group = group
+			resource.Version = version
+			kubectl.apiResources = append(kubectl.apiResources, resource)
+		}
+	}
 }
 
 func getConfig() (*rest.Config, error) {

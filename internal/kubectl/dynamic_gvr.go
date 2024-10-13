@@ -123,45 +123,27 @@ func (k8s *Kubectl) UpdateResourceDynamic(gvr schema.GroupVersionResource, isNam
 	removeManagedFields(updatedResource)
 	return updatedResource, nil
 }
-func (k8s *Kubectl) DiscoverResourceGVR(kind, group, version string) (schema.GroupVersionResource, error) {
-	// 构建 API GroupVersion
-	apiGroupVersion := version
-	if group != "" {
-		apiGroupVersion = fmt.Sprintf("%s/%s", group, version)
-	}
 
-	// 检查缓存
-	cacheKey := fmt.Sprintf("%s/%s/%s", kind, group, version)
-	k8s.cacheMutex.RLock()
-	if gvr, exists := k8s.cache[cacheKey]; exists {
-		k8s.cacheMutex.RUnlock()
-		return gvr, nil
-	}
-	k8s.cacheMutex.RUnlock()
-
-	// 进行资源发现
-	resources, err := k8s.client.Discovery().ServerResourcesForGroupVersion(apiGroupVersion)
-	if err != nil {
-		return schema.GroupVersionResource{}, fmt.Errorf("无法发现资源: %w", err)
-	}
-
-	// 查找资源对应的 Kind
-	for _, resource := range resources.APIResources {
+// GetGVR 返回对应 string 的 GroupVersionResource
+func (k8s *Kubectl) GetGVR(kind string) (gvr schema.GroupVersionResource, namespaced bool) {
+	for _, resource := range k8s.apiResources {
 		if resource.Kind == kind {
-			discoveredGVR := schema.GroupVersionResource{
-				Group:    group,
+			version := resource.Version
+			gvr = schema.GroupVersionResource{
+				Group:    resource.Group,
 				Version:  version,
 				Resource: resource.Name, // 通常是 Kind 的复数形式
 			}
-
-			// 更新缓存
-			k8s.cacheMutex.Lock()
-			k8s.cache[cacheKey] = discoveredGVR
-			k8s.cacheMutex.Unlock()
-
-			return discoveredGVR, nil
+			return gvr, resource.Namespaced
 		}
 	}
-
-	return schema.GroupVersionResource{}, fmt.Errorf("未找到 Kind 为 %s 的资源", kind)
+	return schema.GroupVersionResource{}, false
+}
+func (k8s *Kubectl) IsBuiltinResource(kind string) bool {
+	for _, list := range k8s.apiResources {
+		if list.Kind == kind {
+			return true
+		}
+	}
+	return false
 }

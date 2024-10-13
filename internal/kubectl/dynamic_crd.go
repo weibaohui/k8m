@@ -49,7 +49,7 @@ func (k8s *Kubectl) ListCRD(crd *unstructured.Unstructured, ns string) ([]unstru
 }
 
 func (k8s *Kubectl) GetCRD(kind string, group string) (*unstructured.Unstructured, error) {
-	crdList, err := k8s.ListResources(CustomResourceDefinition, "")
+	crdList, err := k8s.ListResources("CustomResourceDefinition", "")
 	if err != nil {
 		return nil, err
 	}
@@ -58,17 +58,14 @@ func (k8s *Kubectl) GetCRD(kind string, group string) (*unstructured.Unstructure
 		if err != nil || !found {
 			continue
 		}
-
 		crdKind, found, err := unstructured.NestedString(spec, "names", "kind")
 		if err != nil || !found {
 			continue
 		}
-
 		crdGroup, found, err := unstructured.NestedString(spec, "group")
 		if err != nil || !found {
 			continue
 		}
-
 		if crdKind != kind || crdGroup != group {
 			continue
 		}

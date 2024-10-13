@@ -14,9 +14,11 @@ func List(c *gin.Context) {
 	kind := c.Param("kind")
 	var list []unstructured.Unstructured
 	var err error
-	if rt, err := kubectl.ParseResourceType(kind); err == nil {
+
+	builtIn := kubectl.Init().IsBuiltinResource(kind)
+	if builtIn {
 		// 内置资源
-		list, err = kubectl.Init().ListResources(rt, ns)
+		list, err = kubectl.Init().ListResources(kind, ns)
 	} else {
 		// CRD 类型资源
 		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
@@ -34,8 +36,8 @@ func Fetch(c *gin.Context) {
 
 	var obj *unstructured.Unstructured
 	var err error
-	rt, err := kubectl.ParseResourceType(kind)
-	if err != nil {
+	builtIn := kubectl.Init().IsBuiltinResource(kind)
+	if !builtIn {
 		// CRD 类型资源
 		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
 			obj, err = kubectl.Init().FetchCRD(crd, ns, name)
@@ -45,7 +47,7 @@ func Fetch(c *gin.Context) {
 			}
 		}
 	} else {
-		obj, err = kubectl.Init().GetResource(rt, ns, name)
+		obj, err = kubectl.Init().GetResource(kind, ns, name)
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
@@ -76,8 +78,8 @@ func Remove(c *gin.Context) {
 
 }
 func removeSingle(kind, group, ns, name string) error {
-	rt, err := kubectl.ParseResourceType(kind)
-	if err != nil {
+	builtIn := kubectl.Init().IsBuiltinResource(kind)
+	if !builtIn {
 		// CRD 类型资源
 		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
 			err = kubectl.Init().RemoveCRD(crd, ns, name)
@@ -87,12 +89,12 @@ func removeSingle(kind, group, ns, name string) error {
 		}
 	} else {
 		// 内置资源类型
-		err = kubectl.Init().RemoveResource(rt, ns, name)
+		err := kubectl.Init().RemoveResource(kind, ns, name)
 		if err != nil {
 			return err
 		}
 	}
-	return err
+	return nil
 	// todo 校验是否有权限删除，ns为为本人名字开头
 
 }
@@ -149,8 +151,8 @@ func Save(c *gin.Context) {
 	obj.SetName(name)
 	obj.SetNamespace(ns)
 
-	rt, err := kubectl.ParseResourceType(kind)
-	if err != nil {
+	builtIn := kubectl.Init().IsBuiltinResource(kind)
+	if !builtIn {
 		// CRD 类型资源
 		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
 			_, err = kubectl.Init().UpdateCRD(crd, &obj)
@@ -160,7 +162,7 @@ func Save(c *gin.Context) {
 			}
 		}
 	} else {
-		_, err = kubectl.Init().UpdateResource(rt, ns, &obj)
+		_, err := kubectl.Init().UpdateResource(kind, ns, &obj)
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
