@@ -249,3 +249,12 @@ func (d *Docs) ListNames() {
 		log.Println(tree.Label)
 	}
 }
+
+func (d *Docs) Fetch(kind string) *TreeNode {
+	for _, tree := range d.Trees {
+		if tree.Label == kind {
+			return &tree
+		}
+	}
+	return nil
+}
