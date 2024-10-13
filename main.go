@@ -9,7 +9,9 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/internal/kubectl"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
+	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 )
@@ -24,7 +26,8 @@ func main() {
 	// 打印版本和 Git commit 信息
 	log.Printf("版本: %s\n", Version)
 	log.Printf("Git Commit: %s\n", GitCommit)
-
+	docs := kubectl.NewDocs()
+	docs.ListNames()
 	r := gin.Default()
 
 	r.Use(cors.Default())
@@ -77,6 +80,9 @@ func main() {
 		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
 
 		// 其他 API 路由
+		api.GET("/doc/:kind", doc.Doc)
+		// k8s pod
+
 	}
 
 	err := r.Run(":3618")
