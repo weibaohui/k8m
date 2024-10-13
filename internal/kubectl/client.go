@@ -2,7 +2,6 @@ package kubectl
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
@@ -68,7 +67,6 @@ func init() {
 			version = groupVersion
 		}
 
-		fmt.Print(groupVersion)
 		for _, resource := range resources {
 			resource.Group = group
 			resource.Version = version
