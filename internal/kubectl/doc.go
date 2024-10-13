@@ -29,11 +29,12 @@ var trees []TreeNode
 type TreeNode struct {
 	ID              string      `json:"id"`
 	Label           string      `json:"label"`
+	Value           string      `json:"value"` // amis tree 需要
 	Description     string      `json:"description,omitempty"`
 	Type            string      `json:"type,omitempty"`
 	Ref             string      `json:"ref,omitempty"`
 	VendorExtension interface{} `json:"vendor_extension,omitempty"`
-	Children        []TreeNode  `json:"children,omitempty"`
+	Children        []*TreeNode `json:"children,omitempty"`
 }
 
 // SchemaDefinition 表示根定义
@@ -83,9 +84,11 @@ func parseOpenAPISchema(schemaJSON string) (TreeNode, error) {
 	if err != nil {
 		return TreeNode{}, err
 	}
+	log.Printf("add def cache %s", def.Name)
+	definitionsMap[def.Name] = def
+	log.Printf("add def length %d", len(definitionsMap))
 
-	rootDef := def
-	return buildTree(rootDef), nil
+	return buildTree(def), nil
 }
 
 // buildTree 根据 SchemaDefinition 构建 TreeNode
@@ -98,7 +101,7 @@ func buildTree(def SchemaDefinition) TreeNode {
 		nodeType = def.Value.Type.Value[0]
 	}
 
-	var children []TreeNode
+	var children []*TreeNode
 	for _, prop := range def.Value.Properties.AdditionalProperties {
 		children = append(children, buildPropertyNode(prop))
 	}
@@ -106,6 +109,7 @@ func buildTree(def SchemaDefinition) TreeNode {
 	return TreeNode{
 		ID:          def.Name,
 		Label:       label,
+		Value:       label,
 		Description: def.Value.Description,
 		Type:        nodeType,
 		Children:    children,
@@ -113,7 +117,7 @@ func buildTree(def SchemaDefinition) TreeNode {
 }
 
 // buildPropertyNode 根据 Property 构建 TreeNode
-func buildPropertyNode(prop Property) TreeNode {
+func buildPropertyNode(prop Property) *TreeNode {
 	label := prop.Name
 	nodeID := prop.Name
 	description := prop.Value.Description
@@ -127,32 +131,35 @@ func buildPropertyNode(prop Property) TreeNode {
 		ref = prop.Value.Ref
 	}
 
-	var children []TreeNode
+	var children []*TreeNode
 
 	// 如果有引用，查找定义并递归构建子节点
-	if ref != "" {
+	if ref != "" && !strings.Contains(ref, "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaProps") {
 		// 假设 ref 的格式为 "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
 		refParts := strings.Split(ref, "/")
 		refName := refParts[len(refParts)-1]
 		// 构建完整的引用路径
-		fullRef := strings.Join(refParts[1:], ".")
+		// fullRef := strings.Join(refParts[1:], ".")
 
-		if def, exists := definitionsMap[fullRef]; exists {
+		// 这个可能会导致 循环引用溢出
+		if def, exists := definitionsMap[refName]; exists {
 			childNode := buildTree(def)
-			children = append(children, childNode)
+			children = append(children, &childNode)
 		} else {
 			// 如果引用的定义不存在，可以记录为一个叶子节点或处理为需要进一步扩展
-			children = append(children, TreeNode{
-				ID:          ref,
+			children = append(children, &TreeNode{
+				ID:          refName,
 				Label:       refName,
+				Value:       refName,
 				Description: "Referenced definition not found",
 			})
 		}
 	}
 
-	return TreeNode{
+	return &TreeNode{
 		ID:          nodeID,
 		Label:       label,
+		Value:       label,
 		Description: description,
 		Type:        nodeType,
 		Ref:         ref,
@@ -161,7 +168,7 @@ func buildPropertyNode(prop Property) TreeNode {
 }
 
 // printTree 递归打印 TreeNode
-func printTree(node TreeNode, level int) {
+func printTree(node *TreeNode, level int) {
 	indent := strings.Repeat("  ", level)
 	fmt.Printf("%s%s (ID: %s)\n", indent, node.Label, node.ID)
 	if node.Description != "" {
@@ -180,6 +187,7 @@ func printTree(node TreeNode, level int) {
 }
 
 func initDoc() {
+	definitionsMap = make(map[string]SchemaDefinition)
 
 	// 获取 OpenAPI Schema
 	openAPISchema, err := kubectl.client.DiscoveryClient.OpenAPISchema()
@@ -222,6 +230,7 @@ func initDoc() {
 		os.Exit(1)
 	}
 
+	// 进行第一遍处理，此时Ref并没有读取，只是记录了引用
 	for _, item := range definitionList {
 		definition, ok := item.(map[string]interface{})
 		jsonUtils := utils.JSONUtils{}
@@ -242,6 +251,42 @@ func initDoc() {
 		// printTree(treeRoot, 0)
 
 	}
+
+	// 进行遍历处理，将child中ref对应的类型提取出来
+	// 此时应该所有的类型都已经存在了
+	for _, item := range trees {
+		loadChild(&item)
+	}
+
+	// 此时 层级结构当中是ref 下面是具体的一个结构体A
+	// 结构体A的child是各个属性
+	// 我们需要把child下的属性上提一级，避免出现A、再展开才是具体属性的情况
+	for _, item := range trees {
+		childMoveUpLevel(&item)
+	}
+}
+func childMoveUpLevel(item *TreeNode) {
+	name := strings.TrimPrefix(item.Ref, "#/definitions/")
+	if item.Ref != "" && len(item.Children) == 1 && item.Children[0].ID == name && len(item.Children[0].Children) > 0 {
+
+		item.Children = item.Children[0].Children
+	}
+	for i := range item.Children {
+		childMoveUpLevel(item.Children[i])
+	}
+
+}
+func loadChild(item *TreeNode) {
+	name := strings.TrimPrefix(item.Ref, "#/definitions/")
+
+	if item.Ref != "" && len(item.Children) > 0 && item.Children[0].ID == name {
+		refNode := NewDocs().FetchByRef(item.Ref)
+		item.Children[0] = refNode
+	}
+	for i := range item.Children {
+		loadChild(item.Children[i])
+	}
+
 }
 
 func (d *Docs) ListNames() {
@@ -249,7 +294,16 @@ func (d *Docs) ListNames() {
 		log.Println(tree.Label)
 	}
 }
-
+func (d *Docs) FetchByRef(ref string) *TreeNode {
+	// #/definitions/io.k8s.api.core.v1.PodSpec
+	id := strings.TrimPrefix(ref, "#/definitions/")
+	for _, tree := range d.Trees {
+		if tree.ID == id {
+			return &tree
+		}
+	}
+	return nil
+}
 func (d *Docs) Fetch(kind string) *TreeNode {
 	for _, tree := range d.Trees {
 		if tree.Label == kind {

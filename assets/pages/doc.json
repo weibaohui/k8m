@@ -1,48 +1,63 @@
 {
   "type": "page",
-  "body": {
-    "type": "form",
-    "api": "/amis/api/mock2/form/saveForm",
-    "debug": true,
-    "body": [
-      {
-        "type": "input-tree",
-        "name": "tree",
-        "label": "Tree",
-        "deferApi": "/amis/api/mock2/form/deferOptions?label=${label}&waitSeconds=2",
-        "options": [
-          {
-            "label": "Folder A",
-            "value": 1,
-            "collapsed": true,
-            "children": [
-              {
-                "label": "file A",
-                "value": 2
+  "body": [
+    {
+      "type": "grid",
+      "columns": [
+        {
+          "md": 4,
+          "body": [
+            {
+              "type": "input-tree",
+              "name": "tree",
+              "initiallyOpen": false,
+              "unfoldedLevel": 1,
+              "searchable": true,
+              "showOutline": true,
+              "showIcon": false,
+              "searchConfig": {
+                "sticky": true
               },
-              {
-                "label": "file B",
-                "value": 3
+              "selectFirst": true,
+              "heightAuto": true,
+              "inputClassName": "no-border no-padder mt-1",
+              "source": "get:/k8s/doc/${kind}",
+              "onEvent": {
+                "change": {
+                  "actions": [
+                    {
+                      "componentId": "detail",
+                      "actionType": "reload",
+                      "data": {
+                        "description": "${event.data.item.description}"
+                      }
+                    }
+                  ]
+                }
               }
-            ]
-          },
-          {
-            "label": "这下面是懒加载的",
-            "value": 4,
-            "defer": true
-          },
-          {
-            "label": "file D",
-            "value": 5
-          }
-        ]
-      },
-      {
-        "type": "input-tree",
-        "name": "tree",
-        "label": "Tree",
-        "source": "get:/k8s/doc/Pod"
-      }
-    ]
-  }
+            }
+          ]
+        },
+        {
+          "md": 8,
+          "body": [
+            {
+              "type": "service",
+              "api": "post:/k8s/doc/detail",
+              "body": [
+                {
+                  "type": "tpl",
+                  "tpl": "${description}</br></br></br>${translate?translate:''}",
+                  "wrapperComponent": "",
+                  "inline": false
+                }
+              ],
+              "id": "detail"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
+

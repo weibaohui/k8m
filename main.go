@@ -81,6 +81,7 @@ func main() {
 
 		// 其他 API 路由
 		api.GET("/doc/:kind", doc.Doc)
+		api.POST("/doc/detail", doc.Detail)
 		// k8s pod
 
 	}
