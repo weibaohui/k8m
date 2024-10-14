@@ -26,8 +26,7 @@ func main() {
 	// 打印版本和 Git commit 信息
 	log.Printf("版本: %s\n", Version)
 	log.Printf("Git Commit: %s\n", GitCommit)
-	docs := kubectl.NewDocs()
-	docs.ListNames()
+	_ = kubectl.NewDocs()
 	r := gin.Default()
 
 	r.Use(cors.Default())
