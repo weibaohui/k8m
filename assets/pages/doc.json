@@ -14,7 +14,7 @@
               "unfoldedLevel": 1,
               "searchable": true,
               "showOutline": true,
-              "showIcon": false,
+              "showIcon": true,
               "searchConfig": {
                 "sticky": true
               },
