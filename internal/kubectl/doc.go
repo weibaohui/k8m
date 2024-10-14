@@ -27,12 +27,14 @@ var trees []TreeNode
 
 // TreeNode 表示树形结构的节点
 type TreeNode struct {
-	ID              string      `json:"id"`
+	ID              string      `json:"id"` // GVK形式io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime
 	Label           string      `json:"label"`
 	Value           string      `json:"value"` // amis tree 需要
 	Description     string      `json:"description,omitempty"`
 	Type            string      `json:"type,omitempty"`
 	Ref             string      `json:"ref,omitempty"`
+	Enum            []Enum      `json:"enum,omitempty"`
+	Items           Items       `json:"items,omitempty"`
 	VendorExtension interface{} `json:"vendor_extension,omitempty"`
 	Children        []*TreeNode `json:"children,omitempty"`
 }
@@ -45,10 +47,10 @@ type SchemaDefinition struct {
 
 // SchemaValue 表示定义的值
 type SchemaValue struct {
-	Description string           `json:"description"`
-	Properties  SchemaProperties `json:"properties"`
-	Type        SchemaType       `json:"type"`
-	// VendorExtension []VendorExtension `json:"vendor_extension,omitempty"`
+	Description     string           `json:"description"`
+	Properties      SchemaProperties `json:"properties"`
+	Type            SchemaType       `json:"type"`
+	VendorExtension []interface{}    `json:"vendor_extension,omitempty"`
 }
 
 // SchemaProperties 表示属性
@@ -64,14 +66,27 @@ type Property struct {
 
 // PropertyValue 表示属性的值
 type PropertyValue struct {
-	Description string      `json:"description,omitempty"`
-	Type        *SchemaType `json:"type,omitempty"`
-	Ref         string      `json:"_ref,omitempty"`
+	Description     string           `json:"description,omitempty"`
+	Type            *SchemaType      `json:"type,omitempty"`
+	Ref             string           `json:"_ref,omitempty"`
+	Enum            []Enum           `json:"enum,omitempty"`
+	Items           Items            `json:"items,omitempty"`
+	VendorExtension interface{}      `json:"vendor_extension,omitempty"`
+	Properties      SchemaProperties `json:"properties"`
+}
+type Enum struct {
+	Yaml string `json:"yaml,omitempty"`
+}
+type Schema struct {
+	Ref string `json:"_ref,omitempty"`
+}
+type Items struct {
+	Schema []Schema `json:"schema,omitempty"`
 }
 
 // SchemaType 表示类型
 type SchemaType struct {
-	Value []string `json:"value"`
+	Value []string `json:"value,omitempty"`
 }
 
 // definitionsMap 存储所有定义，以便处理引用
@@ -84,9 +99,9 @@ func parseOpenAPISchema(schemaJSON string) (TreeNode, error) {
 	if err != nil {
 		return TreeNode{}, err
 	}
-	log.Printf("add def cache %s", def.Name)
+	// log.Printf("add def cache %s", def.Name)
 	definitionsMap[def.Name] = def
-	log.Printf("add def length %d", len(definitionsMap))
+	// log.Printf("add def length %d", len(definitionsMap))
 
 	return buildTree(def), nil
 }
@@ -109,7 +124,7 @@ func buildTree(def SchemaDefinition) TreeNode {
 	return TreeNode{
 		ID:          def.Name,
 		Label:       label,
-		Value:       label,
+		Value:       utils.RandNLengthString(20),
 		Description: def.Value.Description,
 		Type:        nodeType,
 		Children:    children,
@@ -156,13 +171,19 @@ func buildPropertyNode(prop Property) *TreeNode {
 		}
 	}
 
+	for _, pp := range prop.Value.Properties.AdditionalProperties {
+		children = append(children, buildPropertyNode(pp))
+	}
+
 	return &TreeNode{
 		ID:          nodeID,
 		Label:       label,
-		Value:       label,
+		Value:       nodeID,
 		Description: description,
 		Type:        nodeType,
 		Ref:         ref,
+		Items:       prop.Value.Items,
+		Enum:        prop.Value.Enum,
 		Children:    children,
 	}
 }
@@ -233,8 +254,7 @@ func initDoc() {
 	// 进行第一遍处理，此时Ref并没有读取，只是记录了引用
 	for _, item := range definitionList {
 		definition, ok := item.(map[string]interface{})
-		jsonUtils := utils.JSONUtils{}
-		jstr := jsonUtils.ToJSON(definition)
+		jstr := utils.ToJSON(definition)
 		if !ok {
 			fmt.Printf("convert definition error\n")
 			os.Exit(1)
@@ -252,13 +272,14 @@ func initDoc() {
 
 	}
 
-	// todo 数组类型的还没处理
-	// deployment containers[] item数组类型
-
 	// 进行遍历处理，将child中ref对应的类型提取出来
 	// 此时应该所有的类型都已经存在了
 	for _, item := range trees {
 		loadChild(&item)
+	}
+
+	for _, item := range trees {
+		loadArrayItems(&item)
 	}
 
 	// 此时 层级结构当中是ref 下面是具体的一个结构体A
@@ -266,6 +287,34 @@ func initDoc() {
 	// 我们需要把child下的属性上提一级，避免出现A、再展开才是具体属性的情况
 	for _, item := range trees {
 		childMoveUpLevel(&item)
+	}
+
+	// 处理Array Items的情况
+	// "items": {
+	//   "schema": [
+	//     {
+	//        "_ref": "#/definitions/io.k8s.api.core.v1.Container"
+	//     }
+	//    ]
+	// }
+
+	// 将所有节点的ID，改为唯一的
+	for _, item := range trees {
+		uniqueID(&item)
+	}
+}
+func loadArrayItems(node *TreeNode) {
+
+	if len(node.Items.Schema) > 0 && node.Items.Schema[0].Ref != "" {
+
+		ref := node.Items.Schema[0].Ref
+		if !strings.Contains(ref, "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaProps") {
+			refNode := NewDocs().FetchByRef(ref)
+			node.Children = refNode.Children
+		}
+	}
+	for i := range node.Children {
+		loadArrayItems(node.Children[i])
 	}
 }
 func childMoveUpLevel(item *TreeNode) {
@@ -277,7 +326,6 @@ func childMoveUpLevel(item *TreeNode) {
 	for i := range item.Children {
 		childMoveUpLevel(item.Children[i])
 	}
-
 }
 func loadChild(item *TreeNode) {
 	name := strings.TrimPrefix(item.Ref, "#/definitions/")
@@ -289,12 +337,17 @@ func loadChild(item *TreeNode) {
 	for i := range item.Children {
 		loadChild(item.Children[i])
 	}
-
+}
+func uniqueID(item *TreeNode) {
+	item.Value = utils.RandNLengthString(20)
+	for i := range item.Children {
+		uniqueID(item.Children[i])
+	}
 }
 
 func (d *Docs) ListNames() {
 	for _, tree := range d.Trees {
-		log.Println(tree.Label)
+		log.Println(tree.ID)
 	}
 }
 func (d *Docs) FetchByRef(ref string) *TreeNode {
@@ -302,7 +355,10 @@ func (d *Docs) FetchByRef(ref string) *TreeNode {
 	id := strings.TrimPrefix(ref, "#/definitions/")
 	for _, tree := range d.Trees {
 		if tree.ID == id {
-			return &tree
+			// 为了避免多个node引用同一个节点，需要深拷贝
+			// 否则会有相同的value，前端显示会有点显示错位
+			dcp, _ := utils.DeepCopy(tree)
+			return &dcp
 		}
 	}
 	return nil
