@@ -105,6 +105,16 @@ type Definitions struct {
 var definitionsMap map[string]SchemaDefinition
 
 // parseOpenAPISchema 解析 OpenAPI Schema JSON 字符串并返回根 TreeNode
+// Example:
+//
+//	  JSON样例
+//		 "name": "com.example.stable.v1.CronTab",
+//			"value": { },
+//			"properties": {
+//			    "additional_properties": [ {},{}]
+//			  },
+//			  "vendor_extension": [ {},{}]
+//			}
 func parseOpenAPISchema(schemaJSON string) (TreeNode, error) {
 	var def SchemaDefinition
 	err := json.Unmarshal([]byte(schemaJSON), &def)
