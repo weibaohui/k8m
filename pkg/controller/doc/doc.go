@@ -30,7 +30,7 @@ type DetailReq struct {
 }
 
 func Detail(c *gin.Context) {
-	// 考虑增加AI翻译
+	// TODO 考虑增加AI翻译
 	detail := &DetailReq{}
 	err := c.ShouldBindBodyWithJSON(&detail)
 	if err != nil {
