@@ -105,120 +105,121 @@
                       "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
                     },
                     {
-              "type": "button",
-              "icon": "fab fa-y-combinator text-success",
-              "actionType": "drawer",
-              "drawer": {
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "size": "lg",
-                "title": "SmartEdit",
-                "body": [
-                  {
-                    "type": "tabs",
-                    "tabsMode": "tiled",
-                    "tabs": [
-                      {
-                        "title": "View",
+                      "type": "button",
+                      "icon": "fab fa-y-combinator text-success",
+                      "actionType": "drawer",
+                      "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "size": "lg",
+                        "title": "SmartEdit",
                         "body": [
                           {
-                            "type": "service",
-                            "api": "get:/k8s/$kind/group/$group/ns/$metadata.namespace/name/$metadata.name",
-                            "body": [
+                            "type": "tabs",
+                            "tabsMode": "tiled",
+                            "tabs": [
                               {
-                                "type": "form",
-                                "api": "post:/k8s/$kind/group/$group/update/ns/$metadata.namespace/name/$metadata.name",
-                                "wrapWithPanel": false,
+                                "title": "View",
                                 "body": [
                                   {
-                                    "type": "editor",
-                                    "name": "yaml",
-                                    "size": "xxl",
-                                    "allowFullscreen": true,
-                                    "placeholder": "loading",
-                                    "language": "yaml",
-                                    "value": "${yaml}",
-                                    "options": {
-                                      "wordWrap": "on",
-                                      "scrollbar": {
-                                        "vertical": "auto"
+                                    "type": "service",
+                                    "api": "get:/k8s/$kind/group/$group/ns/$metadata.namespace/name/$metadata.name",
+                                    "body": [
+                                      {
+                                        "type": "form",
+                                        "api": "post:/k8s/$kind/group/$group/update/ns/$metadata.namespace/name/$metadata.name",
+                                        "wrapWithPanel": false,
+                                        "body": [
+                                          {
+                                            "type": "editor",
+                                            "name": "yaml",
+                                            "size": "xxl",
+                                            "allowFullscreen": true,
+                                            "placeholder": "loading",
+                                            "language": "yaml",
+                                            "value": "${yaml}",
+                                            "options": {
+                                              "wordWrap": "on",
+                                              "scrollbar": {
+                                                "vertical": "auto"
+                                              }
+                                            }
+                                          }
+                                        ]
                                       }
-                                    }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "title": "Doc",
+                                "body": [
+                                  {
+                                    "type": "page",
+                                    "asideResizor": true,
+                                    "asideSticky": false,
+                                    "asideMinWidth": 150,
+                                    "asideMaxWidth": 400,
+                                    "aside": [
+                                      {
+                                        "type": "input-tree",
+                                        "name": "tree",
+                                        "initiallyOpen": false,
+                                        "unfoldedLevel": 1,
+                                        "searchable": true,
+                                        "showOutline": true,
+                                        "showIcon": true,
+                                        "searchConfig": {
+                                          "sticky": true
+                                        },
+                                        "selectFirst": true,
+                                        "heightAuto": true,
+                                        "inputClassName": "no-border no-padder mt-1",
+                                        "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                        "onEvent": {
+                                          "change": {
+                                            "actions": [
+                                              {
+                                                "componentId": "detail",
+                                                "actionType": "reload",
+                                                "data": {
+                                                  "description": "${event.data.item.description}"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "toolbar": [
+                                      {
+                                        "type": "tpl",
+                                        "tpl": ""
+                                      }
+                                    ],
+                                    "body": [
+                                      {
+                                        "type": "service",
+                                        "api": "post:/k8s/doc/detail",
+                                        "body": [
+                                          {
+                                            "type": "tpl",
+                                            "tpl": "${description}</br></br></br>${translate?translate:''}",
+                                            "wrapperComponent": "",
+                                            "inline": false
+                                          }
+                                        ],
+                                        "id": "detail"
+                                      }
+                                    ]
                                   }
                                 ]
                               }
                             ]
                           }
                         ]
-                      },
-                      {
-                        "title": "Doc",
-                        "body": [
-                          {
-                            "type": "page",
-                            "asideResizor": true,
-                            "asideMinWidth": 150,
-                            "asideMaxWidth": 400,
-                            "aside": [
-                              {
-                                "type": "input-tree",
-                                "name": "tree",
-                                "initiallyOpen": false,
-                                "unfoldedLevel": 1,
-                                "searchable": true,
-                                "showOutline": true,
-                                "showIcon": true,
-                                "searchConfig": {
-                                  "sticky": true
-                                },
-                                "selectFirst": true,
-                                "heightAuto": true,
-                                "inputClassName": "no-border no-padder mt-1",
-                                "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
-                                "onEvent": {
-                                  "change": {
-                                    "actions": [
-                                      {
-                                        "componentId": "detail",
-                                        "actionType": "reload",
-                                        "data": {
-                                          "description": "${event.data.item.description}"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            ],
-                            "toolbar": [
-                              {
-                                "type": "tpl",
-                                "tpl": ""
-                              }
-                            ],
-                            "body": [
-                              {
-                                "type": "service",
-                                "api": "post:/k8s/doc/detail",
-                                "body": [
-                                  {
-                                    "type": "tpl",
-                                    "tpl": "${description}</br></br></br>${translate?translate:''}",
-                                    "wrapperComponent": "",
-                                    "inline": false
-                                  }
-                                ],
-                                "id": "detail"
-                              }
-                            ]
-                          }
-                        ]
                       }
-                    ]
-                  }
-                ]
-              }
-            },
+                    },
                     {
                       "type": "button",
                       "icon": "fa fa-list",

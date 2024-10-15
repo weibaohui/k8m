@@ -108,6 +108,7 @@
                           {
                             "type": "page",
                             "asideResizor": true,
+                            "asideSticky": false,
                             "asideMinWidth": 150,
                             "asideMaxWidth": 400,
                             "aside": [
