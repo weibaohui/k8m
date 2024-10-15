@@ -80,8 +80,10 @@ func main() {
 
 		// 其他 API 路由
 		api.GET("/doc/:kind", doc.Doc)
+		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
 		api.POST("/doc/detail", doc.Detail)
 		// k8s pod
+		// http://127.0.0.1:3618/k8s/doc/gvk/stable.example.com%2Fv1/CronTab
 
 	}
 
