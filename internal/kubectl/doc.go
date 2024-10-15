@@ -94,8 +94,11 @@ type RootDefinitions struct {
 	Swagger     string      `json:"swagger"`
 	Definitions Definitions `json:"definitions,omitempty"`
 }
+
+// Definitions 表示所有定义
+// 使用interface{}
 type Definitions struct {
-	AdditionalProperties []interface{} `json:"additional_properties"`
+	AdditionalProperties []map[string]interface{} `json:"additional_properties"`
 }
 
 // definitionsMap 存储所有定义，以便处理引用
@@ -245,24 +248,15 @@ func initDoc() {
 	definitionList := root.Definitions.AdditionalProperties
 
 	// 进行第一遍处理，此时Ref并没有读取，只是记录了引用
-	for _, item := range definitionList {
-		definition, ok := item.(map[string]interface{})
-		jstr := utils.ToJSON(definition)
-		if !ok {
-			fmt.Printf("convert definition error\n")
-			os.Exit(1)
-		}
-
+	for _, definition := range definitionList {
+		str := utils.ToJSON(definition)
 		// 解析 Schema 并构建树形结构
-		treeRoot, err := parseOpenAPISchema(jstr)
+		treeRoot, err := parseOpenAPISchema(str)
 		if err != nil {
 			fmt.Printf("Error parsing OpenAPI schema: %v\n", err)
 			os.Exit(1)
 		}
 		trees = append(trees, treeRoot)
-		// // 打印树形结构
-		// printTree(treeRoot, 0)
-
 	}
 
 	// 进行遍历处理，将child中ref对应的类型提取出来
