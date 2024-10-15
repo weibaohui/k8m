@@ -36,6 +36,6 @@ func Detail(c *gin.Context) {
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
-	detail.Translate = detail.Description
+	// detail.Translate = detail.Description
 	amis.WriteJsonData(c, detail)
 }
