@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/weibaohui/k8m/internal/utils"
@@ -213,15 +212,15 @@ func buildPropertyNode(prop Property) *TreeNode {
 // printTree 递归打印 TreeNode
 func printTree(node *TreeNode, level int) {
 	indent := strings.Repeat("  ", level)
-	fmt.Printf("%s%s (ID: %s)\n", indent, node.Label, node.ID)
+	log.Printf("%s%s (ID: %s)\n", indent, node.Label, node.ID)
 	if node.Description != "" {
-		fmt.Printf("%s  Description: %s\n", indent, node.Description)
+		log.Printf("%s  Description: %s\n", indent, node.Description)
 	}
 	if node.Type != "" {
-		fmt.Printf("%s  Type: %s\n", indent, node.Type)
+		log.Printf("%s  Type: %s\n", indent, node.Type)
 	}
 	if node.Ref != "" {
-		fmt.Printf("%s  Ref: %s\n", indent, node.Ref)
+		log.Printf("%s  Ref: %s\n", indent, node.Ref)
 	}
 
 	for _, child := range node.Children {
@@ -235,25 +234,25 @@ func initDoc() {
 	// 获取 OpenAPI Schema
 	openAPISchema, err := kubectl.client.DiscoveryClient.OpenAPISchema()
 	if err != nil {
-		fmt.Printf("Error fetching OpenAPI schema: %v\n", err)
-		os.Exit(1)
+		log.Printf("Error fetching OpenAPI schema: %v\n", err)
+		return
 	}
 
 	// 将 OpenAPI Schema 转换为 JSON 字符串
 	schemaBytes, err := json.Marshal(openAPISchema)
 	if err != nil {
-		fmt.Printf("Error marshaling OpenAPI schema to JSON: %v\n", err)
-		os.Exit(1)
+		log.Printf("Error marshaling OpenAPI schema to JSON: %v\n", err)
+		return
 	}
 	// os.WriteFile("def.json", schemaBytes, 0644)
 	// 打印部分 Schema 以供调试
-	// fmt.Println(string(schemaBytes))
+	// log.Println(string(schemaBytes))
 
 	root := &RootDefinitions{}
 	err = json.Unmarshal(schemaBytes, root)
 	if err != nil {
-		fmt.Printf("Error unmarshaling OpenAPI schema: %v\n", err)
-		os.Exit(1)
+		log.Printf("Error unmarshaling OpenAPI schema: %v\n", err)
+		return
 	}
 	definitionList := root.Definitions.AdditionalProperties
 
@@ -263,8 +262,8 @@ func initDoc() {
 		// 解析 Schema 并构建树形结构
 		treeRoot, err := parseOpenAPISchema(str)
 		if err != nil {
-			fmt.Printf("Error parsing OpenAPI schema: %v\n", err)
-			os.Exit(1)
+			log.Printf("Error parsing OpenAPI schema: %v\n", err)
+			continue
 		}
 		trees = append(trees, treeRoot)
 	}
