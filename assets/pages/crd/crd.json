@@ -170,6 +170,13 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-list text-success",
+              "actionType": "link",
+              "tooltip": "查看实例",
+              "link": "/crd/${spec.scope=='Namespaced'?'namespaced_cr':'cluster_cr'}?kind=${spec.names.kind}&group=${spec.group}"
             }
           ],
           "toggled": true
@@ -180,10 +187,11 @@
           "type": "text"
         },
         {
-          "name": "metadata.labels",
-          "label": "labels",
-          "type": "k8sLabels"
+          "name": "spec.scope",
+          "label": "name",
+          "type": "text"
         },
+
         {
           "name": "metadata.creationTimestamp",
           "label": "age",
