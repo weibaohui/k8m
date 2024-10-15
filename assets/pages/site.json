@@ -6,12 +6,6 @@
       {
         "children": [
           {
-            "label": "Doc",
-            "url": "/doc",
-            "icon": "fas fa-dharmachakra",
-            "schemaApi": "get:/pages/doc.json"
-          },
-          {
             "label": "Apply",
             "url": "/apply",
             "icon": "fas fa-dharmachakra",
