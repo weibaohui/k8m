@@ -262,6 +262,20 @@
                 "url": "/crd/crontab/list",
                 "icon": "fas fa-business-time",
                 "schemaApi": "get:/pages/crd/crontab.json"
+              },
+              {
+                "label": "NamespacedCR",
+                "url": "/crd/namespaced_cr",
+                "icon": "fas fa-business-time",
+                "visibleOn": "1==2",
+                "schemaApi": "get:/pages/crd/namespaced_cr.json"
+              },
+              {
+                "label": "ClusterCR",
+                "url": "/crd/cluster_cr",
+                "icon": "fas fa-business-time",
+                "visibleOn": "1==2",
+                "schemaApi": "get:/pages/crd/cluster_cr.json"
               }
             ]
           }
