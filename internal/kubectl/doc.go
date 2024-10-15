@@ -89,6 +89,15 @@ type SchemaType struct {
 	Value []string `json:"value,omitempty"`
 }
 
+// RootDefinitions 最外层定义
+type RootDefinitions struct {
+	Swagger     string      `json:"swagger"`
+	Definitions Definitions `json:"definitions,omitempty"`
+}
+type Definitions struct {
+	AdditionalProperties []interface{} `json:"additional_properties"`
+}
+
 // definitionsMap 存储所有定义，以便处理引用
 var definitionsMap map[string]SchemaDefinition
 
@@ -227,31 +236,13 @@ func initDoc() {
 	// 打印部分 Schema 以供调试
 	// fmt.Println(string(schemaBytes))
 
-	// 解析 OpenAPI Schema 并构建 TreeNode 结构
-	// 由于客户端返回的 OpenAPI Schema 格式与之前的硬编码 JSON 不同，
-	// 我们需要提取 "definitions" 部分并转换为所需的格式。
-
-	var openapiSchema map[string]interface{}
-	err = json.Unmarshal(schemaBytes, &openapiSchema)
+	root := &RootDefinitions{}
+	err = json.Unmarshal(schemaBytes, root)
 	if err != nil {
 		fmt.Printf("Error unmarshaling OpenAPI schema: %v\n", err)
 		os.Exit(1)
 	}
-	// 提取 swagger 下的第一个 definitions
-	definitionsSw, ok := openapiSchema["definitions"].(map[string]interface{})
-	if !ok {
-		fmt.Printf("No definitions found in OpenAPI schema top level\n")
-		os.Exit(1)
-	}
-
-	definitionList, ok := definitionsSw["additional_properties"].([]interface{})
-
-	if !ok {
-		fmt.Printf("No definitions found in OpenAPI schema\n")
-		os.Exit(1)
-	}
-	// todo 以上做成一个结构体，Unmarshal出来
-	// 最后一个层级使用interface{}承接
+	definitionList := root.Definitions.AdditionalProperties
 
 	// 进行第一遍处理，此时Ref并没有读取，只是记录了引用
 	for _, item := range definitionList {
