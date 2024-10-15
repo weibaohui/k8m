@@ -250,6 +250,8 @@ func initDoc() {
 		fmt.Printf("No definitions found in OpenAPI schema\n")
 		os.Exit(1)
 	}
+	// todo 以上做成一个结构体，Unmarshal出来
+	// 最后一个层级使用interface{}承接
 
 	// 进行第一遍处理，此时Ref并没有读取，只是记录了引用
 	for _, item := range definitionList {
@@ -370,4 +372,25 @@ func (d *Docs) Fetch(kind string) *TreeNode {
 		}
 	}
 	return nil
+}
+
+// FetchByGVK
+// com.example.stable.v1.CronTabList
+// apiVersion: stable.example.com/v1
+// kind: CronTab
+func (d *Docs) FetchByGVK(apiVersion, kind string) *TreeNode {
+	// 先从kind查找，如果找不到，再从apiVersion+kind查找
+	// 应采用HasSuffix来匹配,因为内置资源的apiVersion会省略前面的io.k8s.api.core等类似的前缀
+	// "id": "io.k8s.api.core.v1.Namespace",
+	node := d.Fetch(kind)
+	if node == nil {
+		strings.ReplaceAll(apiVersion, "/", ".")
+		id := fmt.Sprintf("%s.%s", apiVersion, kind)
+		for _, tree := range d.Trees {
+			if strings.HasSuffix(tree.ID, id) {
+				return &tree
+			}
+		}
+	}
+	return node
 }
