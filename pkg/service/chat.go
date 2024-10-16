@@ -14,7 +14,12 @@ import (
 
 // Init 设置一个自检提示
 func init() {
-	getChatGPTAuth()
+	apiKey, apiURL, _ := getChatGPTAuth()
+	if apiKey == "" || apiURL == "" {
+		// 前端不显示，后端提示
+		log.Println("ChatService：请配置环境变量，设置OPENAI_API_URL、OPENAI_API_KEY")
+		return
+	}
 }
 
 var model = "Qwen/Qwen2.5-Coder-7B-Instruct"
@@ -23,7 +28,11 @@ type ChatService struct {
 }
 
 func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
-	key, apiURL := getChatGPTAuth()
+	key, apiURL, enable := getChatGPTAuth()
+	if !enable {
+		return nil, fmt.Errorf("chatGPT not enable")
+	}
+
 	// url := "https://api.siliconflow.cn/v1/chat/completions"
 	url := fmt.Sprintf("%s/chat/completions", apiURL)
 
@@ -67,8 +76,10 @@ func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
 	return resp, err
 }
 func (c *ChatService) Chat(chat string) string {
-	apiKey, apiURL := getChatGPTAuth()
-
+	apiKey, apiURL, enable := getChatGPTAuth()
+	if !enable {
+		return ""
+	}
 	// 初始化OpenAI客户端
 	cfg := openai.DefaultConfig(apiKey)
 	cfg.BaseURL = apiURL
@@ -96,14 +107,12 @@ func (c *ChatService) Chat(chat string) string {
 	return result
 }
 
-func getChatGPTAuth() (apiKey string, apiURL string) {
+func getChatGPTAuth() (apiKey string, apiURL string, enable bool) {
 	// 从环境变量读取OpenAI API Key和API URL
 	apiKey = os.Getenv("OPENAI_API_KEY")
 	apiURL = os.Getenv("OPENAI_API_URL")
-	if apiKey == "" || apiURL == "" {
-		// 前端不显示，后端提示
-		log.Println("ChatService：请配置环境变量，设置OPENAI_API_URL、OPENAI_API_KEY")
-		return
+	if apiKey != "" && apiURL != "" {
+		enable = true
 	}
 	return
 }
