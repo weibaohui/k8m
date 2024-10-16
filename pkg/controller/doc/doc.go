@@ -1,10 +1,13 @@
 package doc
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/kubectl"
 	"github.com/weibaohui/k8m/internal/utils"
 	"github.com/weibaohui/k8m/internal/utils/amis"
+	"github.com/weibaohui/k8m/pkg/service"
 )
 
 func Doc(c *gin.Context) {
@@ -30,12 +33,17 @@ type DetailReq struct {
 }
 
 func Detail(c *gin.Context) {
-	// TODO 考虑增加AI翻译
 	detail := &DetailReq{}
 	err := c.ShouldBindBodyWithJSON(&detail)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
-	// detail.Translate = detail.Description
+	if detail.Description != "" {
+		q := fmt.Sprintf("请翻译下面的语句，注意直接给出翻译内容，不要解释。待翻译内如如下：\n\n%s", detail.Description)
+		chatService := service.ChatService{}
+		result := chatService.Chat(q)
+		detail.Translate = result
+	}
+
 	amis.WriteJsonData(c, detail)
 }
