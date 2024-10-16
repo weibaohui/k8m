@@ -148,7 +148,7 @@
                     },
                     {
               "type": "button",
-              "icon": "fab fa-y-combinator text-success",
+              "icon": "fas fa-file-code text-success",,
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
