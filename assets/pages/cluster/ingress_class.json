@@ -180,6 +180,11 @@
           "type": "text"
         },
         {
+          "name": "metadata.annotations",
+          "label": "default",
+          "tpl": "${metadata.annotations['ingressclass.kubernetes.io/is-default-class']}"
+        },
+        {
           "name": "metadata.labels",
           "label": "labels",
           "type": "k8sLabels"

@@ -188,10 +188,14 @@
         },
         {
           "name": "spec.scope",
-          "label": "name",
+          "label": "scope",
           "type": "text"
         },
-
+        {
+          "name": "spec.group",
+          "label": "group",
+          "type": "text"
+        },
         {
           "name": "metadata.creationTimestamp",
           "label": "age",
