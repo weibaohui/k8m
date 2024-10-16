@@ -6,11 +6,22 @@
 - **跨平台支持**：兼容多种架构，包括 **x86**、**ARM**、**PPC64LE**、**MIPS** 以及 **x390s**，确保在所有主要平台上顺畅运行。
 - **简便易用**：用户友好的界面和直观的操作流程，使 Kubernetes 管理变得轻而易举。
 - **高效性能**：利用 Golang 构建后端，确保高效的资源利用和快速响应。
+- **ChatGPT**：在资源编辑页面doc文档显示中，开启了ChatGPT翻译，自动将英文文档翻译为中文。
 
 **k8m** 让你无需繁琐的配置，即可轻松管理 Kubernetes 集群，是开发者和运维人员的理想选择。
 
 
+## **ChatGPT 配置指南**
 
+### **环境变量配置**
+需要设置环境变量，以启用ChatGPT。
+```bash
+export OPENAI_API_KEY="sk-XXXXX"
+export OPENAI_API_URL="https://api.siliconflow.cn/v1"
+```
+### **ChatGPT 账户**
+本项目集成了[github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai)SDK。
+国内访问推荐使用[硅基流动](https://cloud.siliconflow.cn/)的服务。 登录后，在[https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak)创建API_KEY
 
 
 ## **Makefile 使用指南**
