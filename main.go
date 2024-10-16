@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/kubectl"
+	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
@@ -82,6 +83,10 @@ func main() {
 		api.GET("/doc/:kind", doc.Doc)
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
 		api.POST("/doc/detail", doc.Detail)
+
+		api.POST("/chat", chat.Chat)
+		api.GET("/chat/sse", chat.Sse)
+
 		// k8s pod
 		// http://127.0.0.1:3618/k8s/doc/gvk/stable.example.com%2Fv1/CronTab
 
