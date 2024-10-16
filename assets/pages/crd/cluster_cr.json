@@ -76,7 +76,7 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-file-code text-success",,
+              "icon": "fas fa-file-code text-success",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
