@@ -2,6 +2,7 @@ package sse
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -30,7 +31,10 @@ func WriteSSE(c *gin.Context, stream io.ReadCloser) {
 			if err == io.EOF {
 				break
 			}
-			log.Fatalf("Error reading log stream: %v", err)
+			// 处理读取错误，向客户端发送错误消息
+			c.SSEvent("error", fmt.Sprintf("Error reading stream: %v", err))
+			c.Writer.Flush()
+			break
 		}
 		// 发送 SSE 消息
 		c.SSEvent("message", line)
