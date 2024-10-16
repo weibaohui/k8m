@@ -424,6 +424,66 @@
         test: /(^|\/)ciExecutionAge/
     })(CIExecutionAgeDisplayComponent);
 
+    // 自定义组件，props 中可以拿到配置中的所有参数，比如 props.label 是 'Name'
+    function ChatGPTComponent(props) {
+        // props.url="/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}?a=b&c=d"
+        let url = replacePlaceholders(props.url, props.data);
+        const params = {
+            q: props.data.q,
+        };
+        finalUrl = appendQueryParam(url, params);
+        let dom = React.useRef(null);
+        let eventSourceRef = React.useRef(null);
+        const [errorMessage, setErrorMessage] = React.useState('');
+        React.useEffect(function () {
+            // 处理 SSE 数据
+            eventSourceRef.current = new EventSource(finalUrl);
+
+            const handleMessage = (event) => {
+                if (dom.current != null) {
+                    dom.current.textContent += event.data;
+                }
+            };
+
+            const handleError = (event) => {
+                if (eventSourceRef.current.readyState === EventSource.CLOSED) {
+                    console.log('连接已关闭');
+                } else if (eventSourceRef.current.readyState === EventSource.CONNECTING) {
+                    console.log('正在尝试重新连接...');
+                } else {
+                    console.log('发生未知错误...');
+                }
+                eventSourceRef.current.close();
+            };
+
+
+            eventSourceRef.current.addEventListener('message', handleMessage);
+            eventSourceRef.current.addEventListener('error', handleError);
+
+            return () => {
+                if (eventSourceRef.current) {
+                    eventSourceRef.current.removeEventListener('message', handleMessage);
+                    eventSourceRef.current.removeEventListener('error', handleError);
+                    eventSourceRef.current.close();
+                }
+            };
+        }, [url]);
+        return React.createElement('div', {
+            ref: dom,
+            style: {
+                whiteSpace: 'pre-wrap'
+            }
+        }, errorMessage && React.createElement('div', {style: {color: 'red'}}, errorMessage));
+    }
+
+    //注册自定义组件，请参考后续对工作原理的介绍
+    amisLib.Renderer({
+        test: /(^|\/)chatgpt/
+    })(ChatGPTComponent);
+
+
+
+
     // 定义自动转换内存单位的过滤器
     amisLib.registerFilter('autoConvertMemory', function (input) {
         // 定义单位和对应的倍数
