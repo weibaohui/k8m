@@ -433,11 +433,20 @@
                                       "change": {
                                         "actions": [
                                           {
+                                            "actionType": "setValue",
+                                            "componentId": "fileContext",
+                                            "args": {
+                                              "value": ""
+                                            }
+                                          },
+                                          {
                                             "componentId": "detail",
                                             "actionType": "reload",
                                             "data": {
                                               "path": "${event.data.item.path}",
-                                              "isDir": "${event.data.item.isDir}"
+                                              "isDir": "${event.data.item.isDir}",
+                                              "size": "${event.data.item.size}",
+                                              "type": "${event.data.item.type}"
                                             }
                                           }
                                         ]
@@ -458,7 +467,9 @@
                                         "podName": "${metadata.name}",
                                         "namespace": "${metadata.namespace}",
                                         "isDir": "${isDir?isDir:false}",
-                                        "path": "${path}"
+                                        "path": "${path}",
+                                        "size": "${size?size:0}",
+                                        "type": "${type}"
                                       }
                                     },
                                     "body": [
@@ -546,9 +557,7 @@
                                                               "type": "page",
                                                               "body": {
                                                                 "type": "form",
-
                                                                 "body": [
-
                                                                   {
                                                                     "type": "input-file",
                                                                     "name": "file",
@@ -600,6 +609,7 @@
                                           {
                                             "type": "editor",
                                             "name": "fileContext",
+                                            "id": "fileContext",
                                             "size": "xxl",
                                             "allowFullscreen": true,
                                             "visibleOn": "${isDir===false}",
