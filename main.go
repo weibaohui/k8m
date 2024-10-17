@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"flag"
 	"io/fs"
 	"log"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
+	"k8s.io/klog/v2"
 )
 
 //go:embed assets
@@ -23,10 +25,15 @@ var Version string
 var GitCommit string
 
 func main() {
+	// 初始化 klog，解析命令行参数
+	klog.InitFlags(nil)
+	_ = flag.Set("v", "2") // 设置日志级别为 2，等同于运行时使用 --v=2
+	flag.Parse()
+	defer klog.Flush()
 
 	// 打印版本和 Git commit 信息
-	log.Printf("版本: %s\n", Version)
-	log.Printf("Git Commit: %s\n", GitCommit)
+	klog.V(2).Infof("版本: %s\n", Version)
+	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 	_ = kubectl.NewDocs()
 	r := gin.Default()
 

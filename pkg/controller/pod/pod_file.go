@@ -2,7 +2,6 @@ package pod
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"path/filepath"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/weibaohui/k8m/internal/kubectl"
 	"github.com/weibaohui/k8m/internal/utils"
 	"github.com/weibaohui/k8m/internal/utils/amis"
+	"k8s.io/klog/v2"
 )
 
 type info struct {
@@ -45,7 +45,7 @@ func FileListHandler(c *gin.Context) {
 	// 获取文件列表
 	nodes, err := pf.GetFileList(info.Path)
 	if err != nil {
-		log.Printf("Error getting file list: %v", err)
+		klog.V(2).Infof("Error getting file list: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -134,7 +134,7 @@ func SaveFileHandler(c *gin.Context) {
 	}
 	// 上传文件
 	if err := pf.SaveFile(info.Path, context); err != nil {
-		log.Printf("Error uploading file: %v", err)
+		klog.V(2).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -159,7 +159,7 @@ func DownloadFileHandler(c *gin.Context) {
 	// 从容器中下载文件
 	fileContent, err := pf.DownloadFile(info.Path)
 	if err != nil {
-		log.Printf("Error downloading file: %v", err)
+		klog.V(2).Infof("Error downloading file: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -198,17 +198,17 @@ func UploadFileHandler(c *gin.Context) {
 	// 获取上传的文件
 	file, _, err := c.Request.FormFile("file")
 	if err != nil {
-		log.Printf("Error retrieving file: %v", err)
+		klog.V(2).Infof("Error retrieving file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
 	defer file.Close()
 
 	savePath := fmt.Sprintf("%s/%s", info.Path, info.FileName)
-	// log.Printf("存储文件路径%s", savePath)
+	// klog.V(2).Infof("存储文件路径%s", savePath)
 	// 上传文件
 	if err := pf.UploadFile(savePath, file); err != nil {
-		log.Printf("Error uploading file: %v", err)
+		klog.V(2).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}

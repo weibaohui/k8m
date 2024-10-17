@@ -5,11 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/sashabaranov/go-openai"
+	"k8s.io/klog/v2"
 )
 
 // Init 设置一个自检提示
@@ -17,7 +17,7 @@ func init() {
 	apiKey, apiURL, _ := getChatGPTAuth()
 	if apiKey == "" || apiURL == "" {
 		// 前端不显示，后端提示
-		log.Println("ChatService：请配置环境变量，设置OPENAI_API_URL、OPENAI_API_KEY")
+		klog.V(2).Infof("ChatService：请配置环境变量，设置OPENAI_API_URL、OPENAI_API_KEY")
 		return
 	}
 }
@@ -51,14 +51,14 @@ func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
 	// 将请求体编码为JSON
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		log.Printf("Error marshaling JSON:%v\n", err)
+		klog.V(2).Infof("Error marshaling JSON:%v\n", err)
 		return nil, err
 	}
 
 	// 设置请求头
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		log.Printf("Error creating request:%v\n", err)
+		klog.V(2).Infof("Error creating request:%v\n", err)
 		return nil, err
 	}
 
@@ -70,7 +70,7 @@ func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error making request:%v\n\n", err)
+		klog.V(2).Infof("Error making request:%v\n\n", err)
 		return nil, err
 	}
 	return resp, err
@@ -99,7 +99,7 @@ func (c *ChatService) Chat(chat string) string {
 	)
 
 	if err != nil {
-		log.Printf("ChatCompletion error: %v\n", err)
+		klog.V(2).Infof("ChatCompletion error: %v\n", err)
 		return ""
 	}
 

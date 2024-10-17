@@ -3,18 +3,18 @@ package sse
 import (
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/utils/amis"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
 )
 
 func DownloadLog(c *gin.Context, opt *v1.PodLogOptions, stream io.ReadCloser) {
 	defer func() {
 		if err := stream.Close(); err != nil {
 			// 处理关闭流时的错误
-			log.Printf("stream close error:%v", err)
+			klog.V(6).Infof("stream close error:%v", err)
 		}
 	}()
 

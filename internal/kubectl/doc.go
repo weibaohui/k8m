@@ -3,10 +3,10 @@ package kubectl
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/weibaohui/k8m/internal/utils"
+	"k8s.io/klog/v2"
 )
 
 type Docs struct {
@@ -120,9 +120,9 @@ func parseOpenAPISchema(schemaJSON string) (TreeNode, error) {
 	if err != nil {
 		return TreeNode{}, err
 	}
-	// log.Printf("add def cache %s", def.Name)
+	// klog.V(2).Infof("add def cache %s", def.Name)
 	definitionsMap[def.Name] = def
-	// log.Printf("add def length %d", len(definitionsMap))
+	// klog.V(2).Infof("add def length %d", len(definitionsMap))
 
 	return buildTree(def), nil
 }
@@ -212,15 +212,15 @@ func buildPropertyNode(prop Property) *TreeNode {
 // printTree 递归打印 TreeNode
 func printTree(node *TreeNode, level int) {
 	indent := strings.Repeat("  ", level)
-	log.Printf("%s%s (ID: %s)\n", indent, node.Label, node.ID)
+	klog.V(2).Infof("%s%s (ID: %s)\n", indent, node.Label, node.ID)
 	if node.Description != "" {
-		log.Printf("%s  Description: %s\n", indent, node.Description)
+		klog.V(2).Infof("%s  Description: %s\n", indent, node.Description)
 	}
 	if node.Type != "" {
-		log.Printf("%s  Type: %s\n", indent, node.Type)
+		klog.V(2).Infof("%s  Type: %s\n", indent, node.Type)
 	}
 	if node.Ref != "" {
-		log.Printf("%s  Ref: %s\n", indent, node.Ref)
+		klog.V(2).Infof("%s  Ref: %s\n", indent, node.Ref)
 	}
 
 	for _, child := range node.Children {
@@ -234,24 +234,24 @@ func initDoc() {
 	// 获取 OpenAPI Schema
 	openAPISchema, err := kubectl.client.DiscoveryClient.OpenAPISchema()
 	if err != nil {
-		log.Printf("Error fetching OpenAPI schema: %v\n", err)
+		klog.V(2).Infof("Error fetching OpenAPI schema: %v\n", err)
 		return
 	}
 
 	// 将 OpenAPI Schema 转换为 JSON 字符串
 	schemaBytes, err := json.Marshal(openAPISchema)
 	if err != nil {
-		log.Printf("Error marshaling OpenAPI schema to JSON: %v\n", err)
+		klog.V(2).Infof("Error marshaling OpenAPI schema to JSON: %v\n", err)
 		return
 	}
 	// os.WriteFile("def.json", schemaBytes, 0644)
 	// 打印部分 Schema 以供调试
-	// log.Println(string(schemaBytes))
+	// klog.V(2).Infof(string(schemaBytes))
 
 	root := &RootDefinitions{}
 	err = json.Unmarshal(schemaBytes, root)
 	if err != nil {
-		log.Printf("Error unmarshaling OpenAPI schema: %v\n", err)
+		klog.V(2).Infof("Error unmarshaling OpenAPI schema: %v\n", err)
 		return
 	}
 	definitionList := root.Definitions.AdditionalProperties
@@ -262,7 +262,7 @@ func initDoc() {
 		// 解析 Schema 并构建树形结构
 		treeRoot, err := parseOpenAPISchema(str)
 		if err != nil {
-			log.Printf("Error parsing OpenAPI schema: %v\n", err)
+			klog.V(2).Infof("Error parsing OpenAPI schema: %v\n", err)
 			continue
 		}
 		trees = append(trees, treeRoot)
@@ -343,7 +343,7 @@ func uniqueID(item *TreeNode) {
 
 func (d *Docs) ListNames() {
 	for _, tree := range d.Trees {
-		log.Println(tree.ID)
+		klog.V(2).Infof(tree.ID)
 	}
 }
 func (d *Docs) FetchByRef(ref string) *TreeNode {

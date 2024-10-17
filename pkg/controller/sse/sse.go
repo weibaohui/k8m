@@ -4,17 +4,17 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"k8s.io/klog/v2"
 )
 
 func WriteSSE(c *gin.Context, stream io.ReadCloser) {
 	defer func() {
 		if err := stream.Close(); err != nil {
 			// 处理关闭流时的错误
-			log.Printf("stream close error:%v", err)
+			klog.V(6).Infof("stream close error:%v", err)
 		}
 	}()
 

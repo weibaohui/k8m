@@ -2,7 +2,6 @@ package kubectl
 
 import (
 	"flag"
-	"log"
 	"path/filepath"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+	"k8s.io/klog/v2"
 )
 
 var (
@@ -31,7 +31,7 @@ func Init() *Kubectl {
 }
 
 func init() {
-	log.Println("k8s client init")
+	klog.V(2).Infof("k8s client init")
 	kubectl = &Kubectl{}
 
 	config, err := getConfig()
@@ -79,8 +79,8 @@ func getConfig() (*rest.Config, error) {
 	config, err := rest.InClusterConfig()
 
 	if err != nil {
-		log.Printf("尝试读取集群内访问配置：%v\n", err)
-		log.Println("尝试读取本地配置")
+		klog.V(2).Infof("尝试读取集群内访问配置：%v\n", err)
+		klog.V(2).Infof("尝试读取本地配置")
 		// 不是在集群中,读取参数配置
 		var kubeConfig *string
 		if home := homedir.HomeDir(); home != "" {
@@ -91,10 +91,10 @@ func getConfig() (*rest.Config, error) {
 		flag.Parse()
 		config, err = clientcmd.BuildConfigFromFlags("", *kubeConfig)
 		if err != nil {
-			log.Println(err.Error())
+			klog.V(2).Infof(err.Error())
 		}
 
-		log.Printf("服务器地址：%s\n", config.Host)
+		klog.V(2).Infof("服务器地址：%s\n", config.Host)
 	}
 
 	return config, err

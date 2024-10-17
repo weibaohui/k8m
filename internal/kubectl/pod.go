@@ -38,7 +38,7 @@ func (k8s *Kubectl) StreamPodLogs(ns, name string, logOptions *v1.PodLogOptions)
 		logOptions.SinceSeconds = nil
 	}
 	// json := &utils.JSONUtils{}
-	// log.Println(json.ToJSON(logOptions))
+	// klog.V(2).Infof(json.ToJSON(logOptions))
 	// 获取 Pod 日志
 	podLogs := k8s.client.CoreV1().Pods(ns).GetLogs(name, logOptions)
 

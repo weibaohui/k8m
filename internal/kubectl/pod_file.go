@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"os"
 	"strings"
 
 	"github.com/weibaohui/k8m/internal/utils"
 	"k8s.io/client-go/tools/remotecommand"
+	"k8s.io/klog/v2"
 )
 
 // PodFileNode 文件节点结构
@@ -111,7 +111,8 @@ func (p *PodFile) parseFileList(path, output string) []*PodFileNode {
 // DownloadFile 从指定容器下载文件
 func (p *PodFile) DownloadFile(filePath string) ([]byte, error) {
 	cmd := []string{"cat", filePath}
-	log.Printf("DownloadFile %s", filePath)
+	klog.V(8).Infof("DownloadFile %s", filePath)
+
 	req := kubectl.client.CoreV1().RESTClient().
 		Get().
 		Namespace(p.Namespace).

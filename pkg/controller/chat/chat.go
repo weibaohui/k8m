@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/internal/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
+	"k8s.io/klog/v2"
 )
 
 func Chat(c *gin.Context) {
@@ -26,13 +26,13 @@ func Sse(c *gin.Context) {
 	chatService := service.ChatService{}
 	resp, err := chatService.GetChatStream(q)
 	if err != nil {
-		log.Printf("Error making request:%v\n\n", err)
+		klog.V(2).Infof("Error making request:%v\n\n", err)
 		return
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Printf("Body close error:%v\n", err)
+			klog.V(6).Infof("Body close error:%v\n", err)
 		}
 	}(resp.Body)
 
