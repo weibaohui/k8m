@@ -63,12 +63,35 @@
                   "path": "${path}"
                 }
               },
-              "inline": false,
+              "inline": true,
               "body": [
+                {
+                  "type": "button",
+                  "label": "Download File",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/k8s/file/download",
+                    "data": {
+                      "path": "${path}"
+                    },
+                    "responseType": "blob"
+                  },
+                  "onEvent": {
+                    "submit": {
+                      "actions": [
+                        {
+                          "actionType": "custom",
+                          "script": "downloadFile(event.data)"
+                        }
+                      ]
+                    }
+                  }
+                },
+
                 {
                   "type": "input-text",
                   "name": "path",
-                  "label": "path",
                   "disabled": true
                 },
                 {

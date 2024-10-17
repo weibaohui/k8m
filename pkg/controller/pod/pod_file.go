@@ -115,17 +115,25 @@ func SaveFileHandler(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// downloadFileHandler 处理下载文件的 HTTP 请求
-func downloadFileHandler(c *gin.Context) {
+// DownloadFileHandler 处理下载文件的 HTTP 请求
+func DownloadFileHandler(c *gin.Context) {
 	pf := kubectl.PodFile{
 		Namespace:     c.Query("namespace"),
 		PodName:       c.Query("podName"),
 		ContainerName: c.Query("containerName"),
 	}
-	filePath := c.Query("filePath")
+	pf.Namespace = "default"
+	pf.PodName = "nginx-deployment-7484bcf4c5-4jh7m"
+	pf.ContainerName = "nginx"
 
+	info := &kubectl.PodFileNode{}
+	err := c.ShouldBindBodyWithJSON(info)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	// 从容器中下载文件
-	fileContent, err := pf.DownloadFile(filePath)
+	fileContent, err := pf.DownloadFile(info.Path)
 	if err != nil {
 		log.Printf("Error downloading file: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -133,7 +141,7 @@ func downloadFileHandler(c *gin.Context) {
 	}
 
 	// 设置响应头，指定文件名和类型
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(filePath)))
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(info.Path)))
 	c.Data(http.StatusOK, "application/octet-stream", fileContent)
 }
 
