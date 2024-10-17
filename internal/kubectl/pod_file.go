@@ -19,9 +19,8 @@ type PodFileNode struct {
 	Permissions string `json:"permissions"`
 	Size        int64  `json:"size"`
 	ModTime     string `json:"modTime"`
-	Path        string `json:"path"`         // 存储路径
-	IsDir       bool   `json:"isDir"`        // 指示是否
-	FileContext string `json:"file_context"` // 文件内容，保存文件时作为DTO字段使用，读取时不加载
+	Path        string `json:"path"`  // 存储路径
+	IsDir       bool   `json:"isDir"` // 指示是否
 }
 
 // PodFile 应用配置结构
@@ -149,7 +148,7 @@ func (p *PodFile) DownloadFile(filePath string) ([]byte, error) {
 	return stdout.Bytes(), nil
 }
 
-// uploadFile 将文件上传到指定容器
+// UploadFile 将文件上传到指定容器
 func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 	// 创建临时文件
 	tempFile, err := os.CreateTemp("", "upload-*")
@@ -169,8 +168,7 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 		return fmt.Errorf("Error closing temp file: %v", err)
 	}
 
-	// 使用 kubectl cp 命令将文件复制到容器内
-	cmd := []string{"cp", tempFile.Name(), fmt.Sprintf("%s/%s:%s", p.Namespace, p.PodName, destPath)}
+	cmd := []string{"sh", "-c", fmt.Sprintf("cat > %s", destPath)}
 
 	req := kubectl.client.CoreV1().RESTClient().
 		Post().
@@ -179,12 +177,11 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 		Name(p.PodName).
 		SubResource("exec").
 		Param("container", p.ContainerName).
+		Param("tty", "false").
 		Param("command", cmd[0]).
 		Param("command", cmd[1]).
 		Param("command", cmd[2]).
-		Param("command", cmd[3]).
-		Param("tty", "false").
-		Param("stdin", "false").
+		Param("stdin", "true").
 		Param("stdout", "true").
 		Param("stderr", "true")
 
@@ -193,9 +190,15 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 		return fmt.Errorf("Error creating executor: %v", err)
 	}
 
+	// 打开本地文件进行传输
+	readFile, err := os.Open(tempFile.Name())
+	if err != nil {
+		return fmt.Errorf("error opening file: %v", err)
+	}
+	defer readFile.Close()
 	var stdout, stderr bytes.Buffer
 	err = executor.Stream(remotecommand.StreamOptions{
-		Stdin:  bytes.NewReader([]byte{}),
+		Stdin:  readFile,
 		Stdout: &stdout,
 		Stderr: &stderr,
 	})

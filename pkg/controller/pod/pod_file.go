@@ -12,23 +12,36 @@ import (
 	"github.com/weibaohui/k8m/internal/utils/amis"
 )
 
+type info struct {
+	ContainerName string `json:"containerName,omitempty"`
+	PodName       string `json:"podName,omitempty"`
+	Namespace     string `json:"namespace,omitempty"`
+	IsDir         bool   `json:"isDir,omitempty"`
+	Path          string `json:"path,omitempty"`
+	FileContext   string `json:"fileContext,omitempty"`
+	FileName      string `json:"fileName,omitempty"`
+}
+
 // FileListHandler  处理获取文件列表的 HTTP 请求
 func FileListHandler(c *gin.Context) {
-	pf := kubectl.PodFile{
-		Namespace:     c.Query("namespace"),
-		PodName:       c.Query("podName"),
-		ContainerName: c.Query("containerName"),
+	info := &info{}
+	err := c.ShouldBindBodyWithJSON(info)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
-	pf.Namespace = "default"
-	pf.PodName = "nginx-deployment-7484bcf4c5-4jh7m"
-	pf.ContainerName = "nginx"
-	path := c.Query("path")
 
-	if path == "" {
-		path = "/"
+	pf := kubectl.PodFile{
+		Namespace:     info.Namespace,
+		PodName:       info.PodName,
+		ContainerName: info.ContainerName,
+	}
+
+	if info.Path == "" {
+		info.Path = "/"
 	}
 	// 获取文件列表
-	nodes, err := pf.GetFileList(path)
+	nodes, err := pf.GetFileList(info.Path)
 	if err != nil {
 		log.Printf("Error getting file list: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -39,20 +52,17 @@ func FileListHandler(c *gin.Context) {
 
 // ShowFileHandler 处理下载文件的 HTTP 请求
 func ShowFileHandler(c *gin.Context) {
-	pf := kubectl.PodFile{
-		Namespace:     c.Query("namespace"),
-		PodName:       c.Query("podName"),
-		ContainerName: c.Query("containerName"),
-	}
-	pf.Namespace = "default"
-	pf.PodName = "nginx-deployment-7484bcf4c5-4jh7m"
-	pf.ContainerName = "nginx"
-
-	info := &kubectl.PodFileNode{}
+	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+
+	pf := kubectl.PodFile{
+		Namespace:     info.Namespace,
+		PodName:       info.PodName,
+		ContainerName: info.ContainerName,
 	}
 
 	if info.Path == "" {
@@ -75,20 +85,17 @@ func ShowFileHandler(c *gin.Context) {
 	})
 }
 func SaveFileHandler(c *gin.Context) {
-	pf := kubectl.PodFile{
-		Namespace:     c.Query("namespace"),
-		PodName:       c.Query("podName"),
-		ContainerName: c.Query("containerName"),
-	}
-	pf.Namespace = "default"
-	pf.PodName = "nginx-deployment-7484bcf4c5-4jh7m"
-	pf.ContainerName = "nginx"
-
-	info := &kubectl.PodFileNode{}
+	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+
+	pf := kubectl.PodFile{
+		Namespace:     info.Namespace,
+		PodName:       info.PodName,
+		ContainerName: info.ContainerName,
 	}
 
 	if info.Path == "" {
@@ -117,20 +124,17 @@ func SaveFileHandler(c *gin.Context) {
 
 // DownloadFileHandler 处理下载文件的 HTTP 请求
 func DownloadFileHandler(c *gin.Context) {
-	pf := kubectl.PodFile{
-		Namespace:     c.Query("namespace"),
-		PodName:       c.Query("podName"),
-		ContainerName: c.Query("containerName"),
-	}
-	pf.Namespace = "default"
-	pf.PodName = "nginx-deployment-7484bcf4c5-4jh7m"
-	pf.ContainerName = "nginx"
-
-	info := &kubectl.PodFileNode{}
+	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+
+	pf := kubectl.PodFile{
+		Namespace:     info.Namespace,
+		PodName:       info.PodName,
+		ContainerName: info.ContainerName,
 	}
 	// 从容器中下载文件
 	fileContent, err := pf.DownloadFile(info.Path)
@@ -145,37 +149,51 @@ func DownloadFileHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "application/octet-stream", fileContent)
 }
 
-// uploadFileHandler 处理上传文件的 HTTP 请求
-func uploadFileHandler(c *gin.Context) {
-	pf := kubectl.PodFile{
-		Namespace:     c.Query("namespace"),
-		PodName:       c.Query("podName"),
-		ContainerName: c.Query("containerName"),
-	}
-	destPath := c.Query("destPath")
+// UploadFileHandler 处理上传文件的 HTTP 请求
+func UploadFileHandler(c *gin.Context) {
+	info := &info{}
 
-	// 解析表单
-	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
-		log.Printf("Error parsing form: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form"})
+	info.ContainerName = c.PostForm("containerName")
+	info.Namespace = c.PostForm("namespace")
+	info.PodName = c.PostForm("podName")
+	info.Path = c.PostForm("path")
+	info.FileName = c.PostForm("fileName")
+
+	if info.FileName == "" {
+		amis.WriteJsonError(c, fmt.Errorf("文件名不能为空"))
 		return
+	}
+	if info.Path == "" {
+		amis.WriteJsonError(c, fmt.Errorf("路径不能为空"))
+		return
+	}
+	// 删除path最后一个/后面的内容，取当前选中文件的父级路径
+
+	pf := kubectl.PodFile{
+		Namespace:     info.Namespace,
+		PodName:       info.PodName,
+		ContainerName: info.ContainerName,
 	}
 
 	// 获取上传的文件
 	file, _, err := c.Request.FormFile("file")
 	if err != nil {
 		log.Printf("Error retrieving file: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File not found"})
+		amis.WriteJsonError(c, err)
 		return
 	}
 	defer file.Close()
 
+	savePath := fmt.Sprintf("%s/%s", info.Path, info.FileName)
+	log.Printf("存储文件路径%s", savePath)
 	// 上传文件
-	if err := pf.UploadFile(destPath, file); err != nil {
+	if err := pf.UploadFile(savePath, file); err != nil {
 		log.Printf("Error uploading file: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		amis.WriteJsonError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully"})
+	amis.WriteJsonData(c, gin.H{
+		"value": "/#",
+	})
 }
