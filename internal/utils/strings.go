@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -77,4 +78,22 @@ func ToInt64(str string) int64 {
 		return 0
 	}
 	return id
+}
+func IsTextFile(ob []byte) (bool, error) {
+
+	n := len(ob)
+	if n > 1024 {
+		n = 1024
+	}
+	// 检查是否包含非文本字符
+	if !utf8.Valid(ob[:n]) {
+		return false, nil
+	}
+
+	// 检查是否包含空字节（\x00），空字节通常代表二进制文件
+	if bytes.Contains(ob[:n], []byte{0}) {
+		return false, nil
+	}
+
+	return true, nil
 }
