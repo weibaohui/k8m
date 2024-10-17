@@ -327,6 +327,302 @@
                         ],
                         "actions": []
                       }
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fas fa-folder",
+                      "actionType": "drawer",
+                      "drawer": {
+                        "closeOnOutside": true,
+                        "closeOnEsc": true,
+                        "position": "left",
+                        "size": "xl",
+                        "body": [
+                          {
+                            "type": "wrapper",
+                            "size": "lg",
+                            "className": "b",
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "containerName",
+                                "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.containers[0].name}",
+                                "onEvent": {
+                                  "change": {
+                                    "actions": [
+                                      {
+                                        "componentId": "tree",
+                                        "actionType": "reload",
+                                        "data": {
+                                          "path": "${event.data.item.path}",
+                                          "isDir": "${event.data.item.isDir}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "tag",
+                                "label": "${metadata.namespace}",
+                                "displayMode": "normal",
+                                "color": "active"
+                              },
+                              {
+                                "type": "tag",
+                                "label": "${metadata.name}",
+                                "displayMode": "normal",
+                                "color": "processing"
+                              },
+                              {
+                                "type": "tag",
+                                "label": "${containerName}",
+                                "displayMode": "normal",
+                                "color": "inactive"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "page",
+                            "body": [
+                              {
+                                "type": "page",
+                                "asideResizor": true,
+                                "asideMinWidth": 400,
+                                "asideMaxWidth": 800,
+                                "aside": [
+                                  {
+                                    "type": "input-tree",
+                                    "name": "tree",
+                                    "id": "tree",
+                                    "initiallyOpen": false,
+                                    "unfoldedLevel": 1,
+                                    "searchable": true,
+                                    "showOutline": true,
+                                    "showIcon": true,
+                                    "searchConfig": {
+                                      "sticky": true
+                                    },
+                                    "heightAuto": true,
+                                    "inputClassName": "no-border no-padder mt-1",
+                                    "source": {
+                                      "method": "post",
+                                      "url": "/k8s/file/list?path=/",
+                                      "data": {
+                                        "containerName": "${containerName}",
+                                        "podName": "${metadata.name}",
+                                        "namespace": "${metadata.namespace}"
+                                      }
+                                    },
+                                    "deferApi": {
+                                      "method": "post",
+                                      "url": "/k8s/file/list?path=$path",
+                                      "data": {
+                                        "containerName": "${containerName}",
+                                        "podName": "${metadata.name}",
+                                        "namespace": "${metadata.namespace}",
+                                        "path": "$path",
+                                        "isDir": "$isDir"
+                                      }
+                                    },
+                                    "labelField": "name",
+                                    "valueField": "path",
+                                    "deferField": "isDir",
+                                    "onEvent": {
+                                      "change": {
+                                        "actions": [
+                                          {
+                                            "componentId": "detail",
+                                            "actionType": "reload",
+                                            "data": {
+                                              "path": "${event.data.item.path}",
+                                              "isDir": "${event.data.item.isDir}"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ],
+                                "toolbar": [
+                                ],
+                                "body": [
+                                  {
+                                    "type": "service",
+                                    "api": {
+                                      "method": "post",
+                                      "url": "/k8s/file/show",
+                                      "data": {
+                                        "containerName": "${containerName}",
+                                        "podName": "${metadata.name}",
+                                        "namespace": "${metadata.namespace}",
+                                        "isDir": "${isDir?isDir:false}",
+                                        "path": "${path}"
+                                      }
+                                    },
+                                    "body": [
+                                      {
+                                        "type": "form",
+                                        "title": "编辑",
+                                        "api": {
+                                          "method": "post",
+                                          "url": "/k8s/file/save",
+                                          "data": {
+                                            "fileContext": "${fileContext | base64Encode}",
+                                            "path": "${path}",
+                                            "containerName": "${containerName}",
+                                            "podName": "${metadata.name}",
+                                            "namespace": "${metadata.namespace}",
+                                            "isDir": false
+                                          }
+                                        },
+                                        "inline": true,
+                                        "body": [
+                                          {
+                                            "type": "wrapper",
+                                            "size": "lg",
+                                            "className": "b",
+                                            "body": [
+                                              {
+                                                "type": "grid",
+                                                "columns": [
+                                                  {
+                                                    "body": [
+                                                      {
+                                                        "type": "tpl",
+                                                        "label": "当前选中",
+                                                        "tpl": "<span class='text-primary bg-yellow-100 p-2 rounded'>${isDir?'Folder':'File'}</span>&nbsp;<span class='text-primary bg-indigo-100 p-2 rounded'>${path}</span>",
+                                                        "visibleOn": "${path}"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "body": [
+                                                      {
+                                                        "type": "button",
+                                                        "label": "Download File",
+                                                        "actionType": "ajax",
+                                                        "api": {
+                                                          "method": "post",
+                                                          "url": "/k8s/file/download",
+                                                          "data": {
+                                                            "path": "${path}",
+                                                            "containerName": "${containerName}",
+                                                            "podName": "${metadata.name}",
+                                                            "namespace": "${metadata.namespace}",
+                                                            "isDir": false
+                                                          },
+                                                          "responseType": "blob"
+                                                        },
+                                                        "onEvent": {
+                                                          "submit": {
+                                                            "actions": [
+                                                              {
+                                                                "actionType": "custom",
+                                                                "script": "downloadFile(event.data)"
+                                                              }
+                                                            ]
+                                                          }
+                                                        },
+                                                        "visibleOn": "${isDir===false}"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "body": [
+                                                      {
+                                                        "type": "button",
+                                                        "label": "上传文件",
+                                                        "visibleOn": "${isDir===true}",
+                                                        "icon": "fa fa-list",
+                                                        "actionType": "dialog",
+                                                        "dialog": {
+                                                          "closeOnEsc": true,
+                                                          "closeOnOutside": true,
+                                                          "title": "上传文件",
+                                                          "body": [
+                                                            {
+                                                              "type": "page",
+                                                              "body": {
+                                                                "type": "form",
+
+                                                                "body": [
+
+                                                                  {
+                                                                    "type": "input-file",
+                                                                    "name": "file",
+                                                                    "label": "File",
+                                                                    "accept": "*",
+                                                                    "asBlob": true
+                                                                  },
+                                                                  {
+                                                                    "type": "input-text",
+                                                                    "name": "fileName",
+                                                                    "label": "文件名",
+                                                                    "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
+                                                                  }
+                                                                ],
+                                                                "actions": [
+                                                                  {
+                                                                    "type": "button",
+                                                                    "label": "上传",
+                                                                    "level": "primary",
+                                                                    "actionType": "ajax",
+                                                                    "close": true,
+                                                                    "api": {
+                                                                      "method": "post",
+                                                                      "url": "/k8s/file/upload",
+                                                                      "data": {
+                                                                        "containerName": "${containerName}",
+                                                                        "podName": "${metadata.name}",
+                                                                        "namespace": "${metadata.namespace}",
+                                                                        "isDir": "${isDir?isDir:false}",
+                                                                        "path": "${path}",
+                                                                        "file": "${file}",
+                                                                        "fileName": "${fileName}"
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              }
+                                                            }
+                                                          ],
+                                                          "actions": []
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "editor",
+                                            "name": "fileContext",
+                                            "size": "xxl",
+                                            "allowFullscreen": true,
+                                            "visibleOn": "${isDir===false}",
+                                            "value": "${content|base64Decode}",
+                                            "language": "shell",
+                                            "options": {
+                                              "wordWrap": "on",
+                                              "scrollbar": {
+                                                "vertical": "auto"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "id": "detail"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
                   ],
                   "toggled": true
