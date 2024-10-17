@@ -45,8 +45,7 @@ func FileListHandler(c *gin.Context) {
 	// 获取文件列表
 	nodes, err := pf.GetFileList(info.Path)
 	if err != nil {
-		klog.V(2).Infof("Error getting file list: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		amis.WriteJsonError(c, fmt.Errorf("获取文件列表失败,容器内没有shell或者没有ls命令：%v", err))
 		return
 	}
 	amis.WriteJsonList(c, nodes)
