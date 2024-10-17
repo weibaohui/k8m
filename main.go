@@ -89,10 +89,11 @@ func main() {
 		api.GET("/chat/sse", chat.Sse)
 
 		// pod 文件浏览上传下载
-		api.GET("/file/list", pod.FileListHandler)
+		api.POST("/file/list", pod.FileListHandler)
 		api.POST("/file/show", pod.ShowFileHandler)
 		api.POST("/file/save", pod.SaveFileHandler)
 		api.POST("/file/download", pod.DownloadFileHandler)
+		api.POST("/file/upload", pod.UploadFileHandler)
 
 		// k8s pod
 		// http://127.0.0.1:3618/k8s/doc/gvk/stable.example.com%2Fv1/CronTab
