@@ -25,7 +25,6 @@ var Version string
 var GitCommit string
 
 func main() {
-	// 初始化 klog，解析命令行参数
 	klog.InitFlags(nil)
 	_ = flag.Set("v", "2") // 设置日志级别为 2，等同于运行时使用 --v=2
 	flag.Parse()
