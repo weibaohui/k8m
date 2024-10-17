@@ -20,6 +20,8 @@ type info struct {
 	Path          string `json:"path,omitempty"`
 	FileContext   string `json:"fileContext,omitempty"`
 	FileName      string `json:"fileName,omitempty"`
+	Size          int64  `json:"size,omitempty"`
+	FileType      string `json:"type,omitempty"` // 只有file类型可以查、下载
 }
 
 // FileListHandler  处理获取文件列表的 HTTP 请求
@@ -64,7 +66,10 @@ func ShowFileHandler(c *gin.Context) {
 		PodName:       info.PodName,
 		ContainerName: info.ContainerName,
 	}
-
+	if info.FileType != "" && info.FileType != "file" && info.FileType != "directory" {
+		amis.WriteJsonError(c, fmt.Errorf("无法查看%s类型文件", info.FileType))
+		return
+	}
 	if info.Path == "" {
 		amis.WriteJsonOK(c)
 		return
@@ -73,10 +78,25 @@ func ShowFileHandler(c *gin.Context) {
 		amis.WriteJsonOK(c)
 		return
 	}
+
+	// if info.Size > 1024*10 {
+	// 	// 大于10KB
+	// 	amis.WriteJsonError(c, fmt.Errorf("文件较大，请下载后查看"))
+	// 	return
+	// }
 	// 从容器中下载文件
 	fileContent, err := pf.DownloadFile(info.Path)
 	if err != nil {
 		amis.WriteJsonError(c, err)
+		return
+	}
+	isText, err := utils.IsTextFile(fileContent)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	if !isText {
+		amis.WriteJsonError(c, fmt.Errorf("%s包含非文本内容，请下载后查看", info.Path))
 		return
 	}
 
@@ -185,7 +205,7 @@ func UploadFileHandler(c *gin.Context) {
 	defer file.Close()
 
 	savePath := fmt.Sprintf("%s/%s", info.Path, info.FileName)
-	log.Printf("存储文件路径%s", savePath)
+	// log.Printf("存储文件路径%s", savePath)
 	// 上传文件
 	if err := pf.UploadFile(savePath, file); err != nil {
 		log.Printf("Error uploading file: %v", err)

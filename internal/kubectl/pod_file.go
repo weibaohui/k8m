@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/weibaohui/k8m/internal/utils"
 	"k8s.io/client-go/tools/remotecommand"
 )
 
@@ -33,7 +34,6 @@ type PodFile struct {
 // GetFileList  获取容器中指定路径的文件和目录列表
 func (p *PodFile) GetFileList(path string) ([]*PodFileNode, error) {
 	cmd := []string{"ls", "-l", path}
-	log.Println("GetFileList", cmd)
 	req := kubectl.client.CoreV1().RESTClient().
 		Get().
 		Namespace(p.Namespace).
@@ -51,7 +51,7 @@ func (p *PodFile) GetFileList(path string) ([]*PodFileNode, error) {
 
 	executor, err := remotecommand.NewSPDYExecutor(kubectl.config, "POST", req.URL())
 	if err != nil {
-		return nil, fmt.Errorf("Error creating executor: %v", err)
+		return nil, fmt.Errorf("error creating executor: %v", err)
 	}
 
 	var stdout bytes.Buffer
@@ -61,12 +61,10 @@ func (p *PodFile) GetFileList(path string) ([]*PodFileNode, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Error executing command: %v", err)
+		return nil, fmt.Errorf("error executing command: %v", err)
 	}
 
-	s := stdout.String()
-	log.Printf("输出%s", s)
-	return p.parseFileList(path, s), nil
+	return p.parseFileList(path, stdout.String()), nil
 }
 
 // parseFileList 解析输出并生成 PodFileNode 列表
@@ -84,14 +82,12 @@ func (p *PodFile) parseFileList(path, output string) []*PodFileNode {
 
 		permissions := parts[0]
 		name := parts[8]
-		size := int64(0)
+		size := parts[4]
 		modTime := strings.Join(parts[5:8], " ")
 
 		// 判断文件类型
-		fileType := "file"
-		if permissions[0] == 'd' {
-			fileType = "directory"
-		}
+
+		fileType := getFileType(permissions)
 
 		// 封装成 PodFileNode
 		node := PodFileNode{
@@ -99,7 +95,7 @@ func (p *PodFile) parseFileList(path, output string) []*PodFileNode {
 			Name:        name,
 			Type:        fileType,
 			Permissions: permissions,
-			Size:        size,
+			Size:        utils.ToInt64(size),
 			ModTime:     modTime,
 			IsDir:       fileType == "directory",
 		}
@@ -112,10 +108,10 @@ func (p *PodFile) parseFileList(path, output string) []*PodFileNode {
 	return nodes
 }
 
-// downloadFile 从指定容器下载文件
+// DownloadFile 从指定容器下载文件
 func (p *PodFile) DownloadFile(filePath string) ([]byte, error) {
 	cmd := []string{"cat", filePath}
-
+	log.Printf("DownloadFile %s", filePath)
 	req := kubectl.client.CoreV1().RESTClient().
 		Get().
 		Namespace(p.Namespace).
@@ -132,17 +128,22 @@ func (p *PodFile) DownloadFile(filePath string) ([]byte, error) {
 
 	executor, err := remotecommand.NewSPDYExecutor(kubectl.config, "POST", req.URL())
 	if err != nil {
-		return nil, fmt.Errorf("Error creating executor: %v", err)
+		return nil, fmt.Errorf("error creating executor: %v", err)
 	}
 
 	var stdout bytes.Buffer
+	var stderr bytes.Buffer
 	err = executor.Stream(remotecommand.StreamOptions{
 		Stdout: &stdout,
-		Stderr: os.Stderr,
+		Stderr: &stderr,
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Error executing command: %v", err)
+		s := stderr.String()
+		if strings.Contains(s, "Invalid argument") {
+			return nil, fmt.Errorf("系统参数错误 %v", s)
+		}
+		return nil, fmt.Errorf("error executing command: %v %v", err, s)
 	}
 
 	return stdout.Bytes(), nil
@@ -153,19 +154,19 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 	// 创建临时文件
 	tempFile, err := os.CreateTemp("", "upload-*")
 	if err != nil {
-		return fmt.Errorf("Error creating temp file: %v", err)
+		return fmt.Errorf("error creating temp file: %v", err)
 	}
 	defer os.Remove(tempFile.Name()) // 确保临时文件在函数结束时被删除
 
 	// 将上传的文件内容写入临时文件
 	_, err = io.Copy(tempFile, file)
 	if err != nil {
-		return fmt.Errorf("Error writing to temp file: %v", err)
+		return fmt.Errorf("error writing to temp file: %v", err)
 	}
 
 	// 确保文件关闭
 	if err := tempFile.Close(); err != nil {
-		return fmt.Errorf("Error closing temp file: %v", err)
+		return fmt.Errorf("error closing temp file: %v", err)
 	}
 
 	cmd := []string{"sh", "-c", fmt.Sprintf("cat > %s", destPath)}
@@ -187,7 +188,7 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 
 	executor, err := remotecommand.NewSPDYExecutor(kubectl.config, "POST", req.URL())
 	if err != nil {
-		return fmt.Errorf("Error creating executor: %v", err)
+		return fmt.Errorf("error creating executor: %v", err)
 	}
 
 	// 打开本地文件进行传输
@@ -204,7 +205,7 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error executing command: %v: %s", err, stderr.String())
+		return fmt.Errorf("error executing command: %v: %s", err, stderr.String())
 	}
 
 	return nil
@@ -270,4 +271,40 @@ func (p *PodFile) SaveFile(path string, context string) error {
 	}
 
 	return nil
+}
+
+// getFileType 根据文件权限获取文件类型
+//
+// l 代表符号链接（Symbolic link）
+// - 代表普通文件（Regular file）
+// d 代表目录（Directory）
+// b 代表块设备（Block device）
+// c 代表字符设备（Character device）
+// p 代表命名管道（Named pipe）
+// s 代表套接字（Socket）
+func getFileType(permissions string) string {
+	// 获取文件类型标志位
+	p := permissions[0]
+	var fileType string
+
+	switch p {
+	case 'd':
+		fileType = "directory" // 目录
+	case '-':
+		fileType = "file" // 普通文件
+	case 'l':
+		fileType = "link" // 符号链接
+	case 'b':
+		fileType = "block" // 块设备
+	case 'c':
+		fileType = "character" // 字符设备
+	case 'p':
+		fileType = "pipe" // 命名管道
+	case 's':
+		fileType = "socket" // 套接字
+	default:
+		fileType = "unknown" // 未知类型
+	}
+
+	return fileType
 }
