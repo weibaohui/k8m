@@ -2,110 +2,110 @@
   "type": "page",
   "body": [
     {
-      "type": "grid",
-      "columns": [
+      "type": "form",
+      "mode": "horizontal",
+      "wrapWithPanel": false,
+      "body": [
         {
-          "md": 2,
-          "body": [
-            {
-              "type": "crud",
-              "api": "/k8s/Namespace/list",
-              "headerToolbar": [],
-              "perPage": 20,
-              "loadDataOnce": true,
-              "syncLocation": false,
-              "itemAction": {
-                "actionType": "reload",
-                "target": "detailCRUD?ns=${metadata.name}"
-              },
-              "columns": [
+          "label": "Namespace",
+          "type": "select",
+          "name": "ns",
+          "id": "ns",
+          "searchable": true,
+          "source": "/k8s/ns/option_list",
+          "value": "${ls:selectedNs||'default'}",
+          "onEvent": {
+            "change": {
+              "actions": [
                 {
-                  "name": "metadata.name",
-                  "label": "namespace",
-                  "type": "text"
+                  "actionType": "reload",
+                  "componentId": "detailCRUD",
+                  "data": {
+                    "ns": "${ns}"
+                  }
+                },
+                {
+                  "actionType": "custom",
+                  "script": "localStorage.setItem('selectedNs', event.data.ns)"
                 }
               ]
             }
-          ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "headerToolbar": [
+        "bulkActions",
+        "reload",
+        {
+          "type": "pagination",
+          "align": "right"
         },
         {
-          "md": 10,
-          "body": [
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "data": {
+        "ns": "${ls:selectedNs||'default'}",
+        "kind": "Service"
+      },
+      "loadDataOnce": true,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
+            "method": "post",
+            "data": {
+              "names": "${selectedItems | pick:metadata.name }"
+            }
+          }
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/k8s/$kind/list/ns/${ns}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "action",
+          "width": 110,
+          "buttons": [
             {
-              "type": "crud",
-              "name": "detailCRUD",
-              "headerToolbar": [
-                "bulkActions",
-                "reload",
-                {
-                  "type": "tpl",
-                  "tpl": "<span class='text-primary bg-light p-2 rounded'>当前选择的 Namespace: ${ns}</span>",
-                  "visibleOn": "this.ns"
-                },
-                {
-                  "type": "pagination",
-                  "align": "right"
-                },
-                {
-                  "type": "statistics",
-                  "align": "right"
-                },
-                {
-                  "type": "switch-per-page",
-                  "align": "right"
-                }
-              ],
-              "data": {
-                "kind": "Service"
-              },
-              "loadDataOnce": true,
-              "syncLocation": false,
-              "initFetch": false,
-              "perPage": 10,
-              "bulkActions": [
-                {
-                  "label": "批量删除",
-                  "actionType": "ajax",
-                  "confirmText": "确定要批量删除?",
-                  "api": {
-                    "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
-                    "method": "post",
-                    "data": {
-                      "names": "${selectedItems | pick:metadata.name }"
-                    }
-                  }
-                }
-              ],
-              "footerToolbar": [
-                {
-                  "type": "pagination",
-                  "align": "right"
-                },
-                {
-                  "type": "statistics",
-                  "align": "right"
-                },
-                {
-                  "type": "switch-per-page",
-                  "align": "right"
-                }
-              ],
-              "api": "get:/k8s/$kind/list/ns/${ns}",
-              "columns": [
-                {
-                  "type": "operation",
-                  "label": "action",
-
-                  "buttons": [
-                    {
-                      "type": "button",
-                      "icon": "fas fa-trash text-danger",
-                      "actionType": "ajax",
-                      "tooltip": "删除",
-                      "confirmText": "您确认要删除$metadata.name?",
-                      "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
-                    },
-                    {
+              "type": "button",
+              "icon": "fas fa-trash text-danger",
+              "actionType": "ajax",
+              "tooltip": "删除",
+              "confirmText": "您确认要删除$metadata.name?",
+              "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
+            },
+            {
               "type": "button",
               "icon": "fas fa-file-code text-success",
               "actionType": "drawer",
@@ -221,59 +221,54 @@
                 ]
               }
             }
-                  ],
-                  "toggled": true
-                },
-                {
-                  "name": "metadata.name",
-                  "label": "name",
-                  "type": "text"
-                },
-                {
-                  "name": "spec.type",
-                  "label": "type",
-                  "type": "text"
-                },
-                {
-                  "name": "spec.clusterIP",
-                  "label": "clusterIP",
-                  "type": "text"
-                },
-                {
-                  "name": "spec.ports",
-                  "label": "ports",
-                  "type": "each",
-                  "items": {
-                    "type": "tpl",
-                    "tpl": "<div>${port}${nodePort?':<span class=\"text text-danger\">'+nodePort+'</span>':''}/${protocol}  <span class=\"text text-success\">=>${targetPort}</span></div>"
-                  }
-                },
-                {
-                  "name": "spec.ipFamilyPolicy",
-                  "label": "ipFamily",
-                  "type": "text"
-                },
-                {
-                  "name": "spec.sessionAffinity",
-                  "label": "session",
-                  "type": "text"
-                },
-                {
-                  "name": "metadata.labels",
-                  "label": "labels",
-                  "type": "k8sLabels"
-                },
-                {
-                  "name": "metadata.creationTimestamp",
-                  "label": "age",
-                  "type": "k8sAge"
-                }
-              ]
-            }
-          ]
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.name",
+          "label": "name",
+          "type": "text"
+        },
+        {
+          "name": "spec.type",
+          "label": "type",
+          "type": "text"
+        },
+        {
+          "name": "spec.clusterIP",
+          "label": "clusterIP",
+          "type": "text"
+        },
+        {
+          "name": "spec.ports",
+          "label": "ports",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div>${port}${nodePort?':<span class=\"text text-danger\">'+nodePort+'</span>':''}/${protocol}  <span class=\"text text-success\">=>${targetPort}</span></div>"
+          }
+        },
+        {
+          "name": "spec.ipFamilyPolicy",
+          "label": "ipFamily",
+          "type": "text"
+        },
+        {
+          "name": "spec.sessionAffinity",
+          "label": "session",
+          "type": "text"
+        },
+        {
+          "name": "metadata.labels",
+          "label": "labels",
+          "type": "k8sLabels"
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "age",
+          "type": "k8sAge"
         }
       ]
     }
   ]
 }
-

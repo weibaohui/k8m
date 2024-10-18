@@ -3,15 +3,11 @@
   "body": [
     {
       "type": "crud",
+      "id": "detailCRUD",
       "name": "detailCRUD",
       "headerToolbar": [
         "bulkActions",
         "reload",
-        {
-          "type": "tpl",
-          "tpl": "<span class='text-primary bg-light p-2 rounded'>当前选择的 Namespace: ${ns}</span>",
-          "visibleOn": "this.ns"
-        },
         {
           "type": "pagination",
           "align": "right"
@@ -65,6 +61,7 @@
         {
           "type": "operation",
           "label": "action",
+          "width": 110,
           "buttons": [
             {
               "type": "button",

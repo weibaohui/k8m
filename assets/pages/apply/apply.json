@@ -43,7 +43,6 @@
           "name": "yaml",
           "size": "xxl",
           "allowFullscreen": true,
-          "placeholder": "loading",
           "language": "yaml",
           "value": "${yaml}",
           "options": {
@@ -53,7 +52,6 @@
             }
           }
         },
-
         {
           "type": "tpl",
           "tpl": "${result|join:<br>}"

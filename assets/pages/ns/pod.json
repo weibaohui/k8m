@@ -2,706 +2,703 @@
   "type": "page",
   "body": [
     {
-      "type": "grid",
-      "columns": [
+      "type": "form",
+      "mode": "horizontal",
+      "wrapWithPanel": false,
+      "body": [
         {
-          "md": 2,
-          "body": [
-            {
-              "type": "crud",
-              "api": "/k8s/Namespace/list",
-              "headerToolbar": [],
-              "perPage": 20,
-              "loadDataOnce": true,
-              "syncLocation": false,
-              "itemAction": {
-                "actionType": "reload",
-                "target": "detailCRUD?ns=${metadata.name}"
-              },
-              "columns": [
+          "label": "Namespace",
+          "type": "select",
+          "name": "ns",
+          "id": "ns",
+          "searchable": true,
+          "source": "/k8s/ns/option_list",
+          "value": "${ls:selectedNs||'default'}",
+          "onEvent": {
+            "change": {
+              "actions": [
                 {
-                  "name": "metadata.name",
-                  "label": "namespace",
-                  "type": "text"
+                  "actionType": "reload",
+                  "componentId": "detailCRUD",
+                  "data": {
+                    "ns": "${ns}"
+                  }
+                },
+                {
+                  "actionType": "custom",
+                  "script": "localStorage.setItem('selectedNs', event.data.ns)"
                 }
               ]
             }
-          ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "headerToolbar": [
+        "bulkActions",
+        "reload",
+        {
+          "type": "pagination",
+          "align": "right"
         },
         {
-          "md": 10,
-          "body": [
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "data": {
+        "ns": "${ls:selectedNs||'default'}",
+        "kind": "Pod"
+      },
+      "loadDataOnce": true,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
+            "method": "post",
+            "data": {
+              "names": "${selectedItems | pick:metadata.name }"
+            }
+          }
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/k8s/$kind/list/ns/${ns}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "action",
+          "width": 110,
+          "buttons": [
             {
-              "type": "crud",
-              "name": "detailCRUD",
-              "headerToolbar": [
-                "bulkActions",
-                "reload",
-                {
-                  "type": "tpl",
-                  "tpl": "<span class='text-primary bg-light p-2 rounded'>当前选择的 Namespace: ${ns}</span>",
-                  "visibleOn": "this.ns"
-                },
-                {
-                  "type": "pagination",
-                  "align": "right"
-                },
-                {
-                  "type": "statistics",
-                  "align": "right"
-                },
-                {
-                  "type": "switch-per-page",
-                  "align": "right"
-                }
-              ],
-              "data": {
-                "kind": "Pod"
-              },
-              "loadDataOnce": true,
-              "syncLocation": false,
-              "initFetch": false,
-              "perPage": 10,
-              "bulkActions": [
-                {
-                  "label": "批量删除",
-                  "actionType": "ajax",
-                  "confirmText": "确定要批量删除?",
-                  "api": {
-                    "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
-                    "method": "post",
-                    "data": {
-                      "names": "${selectedItems | pick:metadata.name }"
-                    }
-                  }
-                }
-              ],
-              "footerToolbar": [
-                {
-                  "type": "pagination",
-                  "align": "right"
-                },
-                {
-                  "type": "statistics",
-                  "align": "right"
-                },
-                {
-                  "type": "switch-per-page",
-                  "align": "right"
-                }
-              ],
-              "api": "get:/k8s/$kind/list/ns/${ns}",
-              "columns": [
-                {
-                  "type": "operation",
-                  "label": "action",
-                  "buttons": [
-                    {
-                      "type": "button",
-                      "icon": "fas fa-trash text-danger",
-                      "actionType": "ajax",
-                      "tooltip": "删除",
-                      "confirmText": "您确认要删除$metadata.name?",
-                      "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
-                    },
-                    {
-                      "type": "button",
-                      "icon": "fas fa-file-code text-success",
-                      "actionType": "drawer",
-                      "drawer": {
-                        "closeOnEsc": true,
-                        "closeOnOutside": true,
-                        "size": "lg",
-                        "title": "SmartEdit",
+              "type": "button",
+              "icon": "fas fa-trash text-danger",
+              "actionType": "ajax",
+              "tooltip": "删除",
+              "confirmText": "您确认要删除$metadata.name?",
+              "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-file-code text-success",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "SmartEdit",
+                "body": [
+                  {
+                    "type": "tabs",
+                    "tabsMode": "tiled",
+                    "tabs": [
+                      {
+                        "title": "View",
                         "body": [
                           {
-                            "type": "tabs",
-                            "tabsMode": "tiled",
-                            "tabs": [
+                            "type": "service",
+                            "api": "get:/k8s/$kind/group/$group/ns/$metadata.namespace/name/$metadata.name",
+                            "body": [
                               {
-                                "title": "View",
+                                "type": "form",
+                                "api": "post:/k8s/$kind/group/$group/update/ns/$metadata.namespace/name/$metadata.name",
+                                "wrapWithPanel": false,
                                 "body": [
                                   {
-                                    "type": "service",
-                                    "api": "get:/k8s/$kind/group/$group/ns/$metadata.namespace/name/$metadata.name",
-                                    "body": [
-                                      {
-                                        "type": "form",
-                                        "api": "post:/k8s/$kind/group/$group/update/ns/$metadata.namespace/name/$metadata.name",
-                                        "wrapWithPanel": false,
-                                        "body": [
-                                          {
-                                            "type": "editor",
-                                            "name": "yaml",
-                                            "size": "xxl",
-                                            "allowFullscreen": true,
-                                            "placeholder": "loading",
-                                            "language": "yaml",
-                                            "value": "${yaml}",
-                                            "options": {
-                                              "wordWrap": "on",
-                                              "scrollbar": {
-                                                "vertical": "auto"
-                                              }
-                                            }
-                                          }
-                                        ]
+                                    "type": "editor",
+                                    "name": "yaml",
+                                    "size": "xxl",
+                                    "allowFullscreen": true,
+                                    "placeholder": "loading",
+                                    "language": "yaml",
+                                    "value": "${yaml}",
+                                    "options": {
+                                      "wordWrap": "on",
+                                      "scrollbar": {
+                                        "vertical": "auto"
                                       }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "title": "Doc",
-                                "body": [
-                                  {
-                                    "type": "page",
-                                    "asideResizor": true,
-                                    "asideSticky": false,
-                                    "asideMinWidth": 150,
-                                    "asideMaxWidth": 400,
-                                    "aside": [
-                                      {
-                                        "type": "input-tree",
-                                        "name": "tree",
-                                        "initiallyOpen": false,
-                                        "unfoldedLevel": 1,
-                                        "searchable": true,
-                                        "showOutline": true,
-                                        "showIcon": true,
-                                        "searchConfig": {
-                                          "sticky": true
-                                        },
-                                        "selectFirst": true,
-                                        "heightAuto": true,
-                                        "inputClassName": "no-border no-padder mt-1",
-                                        "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
-                                        "onEvent": {
-                                          "change": {
-                                            "actions": [
-                                              {
-                                                "componentId": "detail",
-                                                "actionType": "reload",
-                                                "data": {
-                                                  "description": "${event.data.item.description}"
-                                                }
-                                              }
-                                            ]
-                                          }
-                                        }
-                                      }
-                                    ],
-                                    "toolbar": [
-                                      {
-                                        "type": "tpl",
-                                        "tpl": ""
-                                      }
-                                    ],
-                                    "body": [
-                                      {
-                                        "type": "service",
-                                        "api": "post:/k8s/doc/detail",
-                                        "body": [
-                                          {
-                                            "type": "tpl",
-                                            "tpl": "${description}</br></br></br>${translate?translate:''}",
-                                            "wrapperComponent": "",
-                                            "inline": false
-                                          }
-                                        ],
-                                        "id": "detail"
-                                      }
-                                    ]
+                                    }
                                   }
                                 ]
                               }
                             ]
                           }
                         ]
-                      }
-                    },
-                    {
-                      "type": "button",
-                      "icon": "fa fa-list",
-                      "actionType": "dialog",
-                      "dialog": {
-                        "closeOnEsc": true,
-                        "closeOnOutside": true,
-                        "title": "选择容器",
+                      },
+                      {
+                        "title": "Doc",
                         "body": [
                           {
-                            "type": "select",
-                            "name": "containerName",
-                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                            "value": "${spec.containers[0].name}",
-                            "required": true
-                          },
-                          {
-                            "type": "input-number",
-                            "name": "tailLines",
-                            "label": "读取最近行数",
-                            "value": 100,
-                            "description": "设置为0将读取全部日志",
-                            "min": 0
-                          },
-                          {
-                            "type": "input-number",
-                            "name": "sinceSeconds",
-                            "label": "过去几秒开始读取",
-                            "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
-                            "min": 0
-                          },
-                          {
-                            "type": "input-datetime",
-                            "name": "sinceTime",
-                            "label": "开始时间",
-                            "format": "YYYY-MM-DD HH:mm:ss",
-                            "description": "与上面的秒数互斥。该时间为服务器时间，注意时区时差",
-                            "placeholder": "选择开始时间",
-                            "value": "${_|now|dateModify:subtract:10:minutes|dateModify:subtract:8:hours}"
-                          },
-                          {
-                            "type": "switch",
-                            "name": "timestamps",
-                            "label": "显示时间戳",
-                            "description": "选择时间无日志时，请开启本选项确认时间范围",
-                            "value": false,
-                            "onText": "是",
-                            "offText": "否"
-                          },
-                          {
-                            "type": "switch",
-                            "name": "follow",
-                            "label": "实时跟踪",
-                            "value": true,
-                            "onText": "开启",
-                            "offText": "关闭"
-                          },
-                          {
-                            "type": "switch",
-                            "name": "previous",
-                            "label": "读取上一个实例日志",
-                            "value": false,
-                            "onText": "是",
-                            "offText": "否"
-                          },
-                          {
-                            "type": "button",
-                            "label": "查看日志",
-                            "level": "primary",
-                            "actionType": "drawer",
-                            "drawer": {
-                              "closeOnOutside": true,
-                              "closeOnEsc": true,
-                              "position": "left",
-                              "size": "xl",
-                              "body": [
-                                {
-                                  "type": "log-download",
-                                  "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                  "data": {
-                                    "containerName": "${containerName}",
-                                    "tailLines": "${tailLines}",
-                                    "sinceTime": "${sinceTime}",
-                                    "previous": "${previous}",
-                                    "timestamps": "${timestamps}",
-                                    "sinceSeconds": "${sinceSeconds}"
-                                  }
-                                },
-                                {
-                                  "type": "sse",
-                                  "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                  "data": {
-                                    "containerName": "${containerName}",
-                                    "tailLines": "${tailLines}",
-                                    "sinceTime": "${sinceTime}",
-                                    "follow": "${follow}",
-                                    "previous": "${previous}",
-                                    "timestamps": "${timestamps}",
-                                    "sinceSeconds": "${sinceSeconds}"
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        ],
-                        "actions": []
-                      }
-                    },
-                    {
-                      "type": "button",
-                      "icon": "fas fa-folder",
-                      "actionType": "drawer",
-                      "drawer": {
-                        "closeOnOutside": true,
-                        "closeOnEsc": true,
-                        "position": "left",
-                        "size": "xl",
-                        "body": [
-                          {
-                            "type": "wrapper",
-                            "size": "lg",
-                            "className": "b",
-                            "body": [
+                            "type": "page",
+                            "asideResizor": true,
+                            "asideSticky": false,
+                            "asideMinWidth": 150,
+                            "asideMaxWidth": 400,
+                            "aside": [
                               {
-                                "type": "select",
-                                "name": "containerName",
-                                "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                                "value": "${spec.containers[0].name}",
+                                "type": "input-tree",
+                                "name": "tree",
+                                "initiallyOpen": false,
+                                "unfoldedLevel": 1,
+                                "searchable": true,
+                                "showOutline": true,
+                                "showIcon": true,
+                                "searchConfig": {
+                                  "sticky": true
+                                },
+                                "selectFirst": true,
+                                "heightAuto": true,
+                                "inputClassName": "no-border no-padder mt-1",
+                                "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
                                 "onEvent": {
                                   "change": {
                                     "actions": [
                                       {
-                                        "componentId": "tree",
+                                        "componentId": "detail",
                                         "actionType": "reload",
                                         "data": {
-                                          "path": "${event.data.item.path}",
-                                          "isDir": "${event.data.item.isDir}"
+                                          "description": "${event.data.item.description}"
                                         }
                                       }
                                     ]
                                   }
                                 }
-                              },
-                              {
-                                "type": "tag",
-                                "label": "${metadata.namespace}",
-                                "displayMode": "normal",
-                                "color": "active"
-                              },
-                              {
-                                "type": "tag",
-                                "label": "${metadata.name}",
-                                "displayMode": "normal",
-                                "color": "processing"
-                              },
-                              {
-                                "type": "tag",
-                                "label": "${containerName}",
-                                "displayMode": "normal",
-                                "color": "inactive"
                               }
-                            ]
-                          },
-                          {
-                            "type": "page",
+                            ],
+                            "toolbar": [
+                              {
+                                "type": "tpl",
+                                "tpl": ""
+                              }
+                            ],
                             "body": [
                               {
-                                "type": "page",
-                                "asideResizor": true,
-                                "asideMinWidth": 400,
-                                "asideMaxWidth": 800,
-                                "aside": [
-                                  {
-                                    "type": "input-tree",
-                                    "name": "tree",
-                                    "id": "tree",
-                                    "initiallyOpen": false,
-                                    "unfoldedLevel": 1,
-                                    "searchable": true,
-                                    "showOutline": true,
-                                    "showIcon": true,
-                                    "searchConfig": {
-                                      "sticky": true
-                                    },
-                                    "heightAuto": true,
-                                    "inputClassName": "no-border no-padder mt-1",
-                                    "source": {
-                                      "method": "post",
-                                      "url": "/k8s/file/list?path=/",
-                                      "data": {
-                                        "containerName": "${containerName}",
-                                        "podName": "${metadata.name}",
-                                        "namespace": "${metadata.namespace}"
-                                      }
-                                    },
-                                    "deferApi": {
-                                      "method": "post",
-                                      "url": "/k8s/file/list?path=$path",
-                                      "data": {
-                                        "containerName": "${containerName}",
-                                        "podName": "${metadata.name}",
-                                        "namespace": "${metadata.namespace}",
-                                        "path": "$path",
-                                        "isDir": "$isDir"
-                                      }
-                                    },
-                                    "labelField": "name",
-                                    "valueField": "path",
-                                    "deferField": "isDir",
-                                    "onEvent": {
-                                      "change": {
-                                        "actions": [
-                                          {
-                                            "actionType": "setValue",
-                                            "componentId": "fileContext",
-                                            "args": {
-                                              "value": ""
-                                            }
-                                          },
-                                          {
-                                            "componentId": "detail",
-                                            "actionType": "reload",
-                                            "data": {
-                                              "path": "${event.data.item.path}",
-                                              "isDir": "${event.data.item.isDir}",
-                                              "size": "${event.data.item.size}",
-                                              "type": "${event.data.item.type}"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  }
-                                ],
-                                "toolbar": [
-                                ],
+                                "type": "service",
+                                "api": "post:/k8s/doc/detail",
                                 "body": [
                                   {
-                                    "type": "service",
-                                    "api": {
-                                      "method": "post",
-                                      "url": "/k8s/file/show",
-                                      "data": {
-                                        "containerName": "${containerName}",
-                                        "podName": "${metadata.name}",
-                                        "namespace": "${metadata.namespace}",
-                                        "isDir": "${isDir?isDir:false}",
-                                        "path": "${path}",
-                                        "size": "${size?size:0}",
-                                        "type": "${type}"
-                                      }
-                                    },
-                                    "body": [
-                                      {
-                                        "type": "form",
-                                        "title": "编辑",
-                                        "api": {
-                                          "method": "post",
-                                          "url": "/k8s/file/save",
-                                          "data": {
-                                            "fileContext": "${fileContext | base64Encode}",
-                                            "path": "${path}",
-                                            "containerName": "${containerName}",
-                                            "podName": "${metadata.name}",
-                                            "namespace": "${metadata.namespace}",
-                                            "isDir": false
-                                          }
-                                        },
-                                        "inline": true,
-                                        "body": [
-                                          {
-                                            "type": "wrapper",
-                                            "size": "lg",
-                                            "className": "b",
-                                            "body": [
-                                              {
-                                                "type": "grid",
-                                                "columns": [
-                                                  {
-                                                    "body": [
-                                                      {
-                                                        "type": "tpl",
-                                                        "label": "当前选中",
-                                                        "tpl": "<span class='text-primary bg-yellow-100 p-2 rounded'>${isDir?'Folder':'File'}</span>&nbsp;<span class='text-primary bg-indigo-100 p-2 rounded'>${path}</span>",
-                                                        "visibleOn": "${path}"
-                                                      }
-                                                    ]
-                                                  },
-                                                  {
-                                                    "body": [
-                                                      {
-                                                        "type": "button",
-                                                        "label": "Download File",
-                                                        "actionType": "ajax",
-                                                        "api": {
-                                                          "method": "post",
-                                                          "url": "/k8s/file/download",
-                                                          "data": {
-                                                            "path": "${path}",
-                                                            "containerName": "${containerName}",
-                                                            "podName": "${metadata.name}",
-                                                            "namespace": "${metadata.namespace}",
-                                                            "isDir": false
-                                                          },
-                                                          "responseType": "blob"
-                                                        },
-                                                        "onEvent": {
-                                                          "submit": {
-                                                            "actions": [
-                                                              {
-                                                                "actionType": "custom",
-                                                                "script": "downloadFile(event.data)"
-                                                              }
-                                                            ]
-                                                          }
-                                                        },
-                                                        "visibleOn": "${isDir===false}"
-                                                      }
-                                                    ]
-                                                  },
-                                                  {
-                                                    "body": [
-                                                      {
-                                                        "type": "button",
-                                                        "label": "上传文件",
-                                                        "visibleOn": "${isDir===true}",
-                                                        "icon": "fa fa-list",
-                                                        "actionType": "dialog",
-                                                        "dialog": {
-                                                          "closeOnEsc": true,
-                                                          "closeOnOutside": true,
-                                                          "title": "上传文件",
-                                                          "body": [
-                                                            {
-                                                              "type": "page",
-                                                              "body": {
-                                                                "type": "form",
-                                                                "body": [
-                                                                  {
-                                                                    "type": "input-file",
-                                                                    "name": "file",
-                                                                    "label": "File",
-                                                                    "accept": "*",
-                                                                    "asBlob": true
-                                                                  },
-                                                                  {
-                                                                    "type": "input-text",
-                                                                    "name": "fileName",
-                                                                    "label": "文件名",
-                                                                    "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
-                                                                  }
-                                                                ],
-                                                                "actions": [
-                                                                  {
-                                                                    "type": "button",
-                                                                    "label": "上传",
-                                                                    "level": "primary",
-                                                                    "actionType": "ajax",
-                                                                    "close": true,
-                                                                    "api": {
-                                                                      "method": "post",
-                                                                      "url": "/k8s/file/upload",
-                                                                      "data": {
-                                                                        "containerName": "${containerName}",
-                                                                        "podName": "${metadata.name}",
-                                                                        "namespace": "${metadata.namespace}",
-                                                                        "isDir": "${isDir?isDir:false}",
-                                                                        "path": "${path}",
-                                                                        "file": "${file}",
-                                                                        "fileName": "${fileName}"
-                                                                      }
-                                                                    }
-                                                                  }
-                                                                ]
-                                                              }
-                                                            }
-                                                          ],
-                                                          "actions": []
-                                                        }
-                                                      }
-                                                    ]
-                                                  }
-                                                ]
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "type": "editor",
-                                            "name": "fileContext",
-                                            "id": "fileContext",
-                                            "size": "xxl",
-                                            "allowFullscreen": true,
-                                            "visibleOn": "${isDir===false}",
-                                            "value": "${content|base64Decode}",
-                                            "language": "shell",
-                                            "options": {
-                                              "wordWrap": "on",
-                                              "scrollbar": {
-                                                "vertical": "auto"
-                                              }
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ],
-                                    "id": "detail"
+                                    "type": "tpl",
+                                    "tpl": "${description}</br></br></br>${translate?translate:''}",
+                                    "wrapperComponent": "",
+                                    "inline": false
                                   }
-                                ]
+                                ],
+                                "id": "detail"
                               }
                             ]
                           }
                         ]
                       }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fa fa-list",
+              "actionType": "dialog",
+              "dialog": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "选择容器",
+                "body": [
+                  {
+                    "type": "select",
+                    "name": "containerName",
+                    "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                    "value": "${spec.containers[0].name}",
+                    "required": true
+                  },
+                  {
+                    "type": "input-number",
+                    "name": "tailLines",
+                    "label": "读取最近行数",
+                    "value": 100,
+                    "description": "设置为0将读取全部日志",
+                    "min": 0
+                  },
+                  {
+                    "type": "input-number",
+                    "name": "sinceSeconds",
+                    "label": "过去几秒开始读取",
+                    "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
+                    "min": 0
+                  },
+                  {
+                    "type": "input-datetime",
+                    "name": "sinceTime",
+                    "label": "开始时间",
+                    "format": "YYYY-MM-DD HH:mm:ss",
+                    "description": "与上面的秒数互斥。该时间为服务器时间，注意时区时差",
+                    "placeholder": "选择开始时间",
+                    "value": "${_|now|dateModify:subtract:10:minutes|dateModify:subtract:8:hours}"
+                  },
+                  {
+                    "type": "switch",
+                    "name": "timestamps",
+                    "label": "显示时间戳",
+                    "description": "选择时间无日志时，请开启本选项确认时间范围",
+                    "value": false,
+                    "onText": "是",
+                    "offText": "否"
+                  },
+                  {
+                    "type": "switch",
+                    "name": "follow",
+                    "label": "实时跟踪",
+                    "value": true,
+                    "onText": "开启",
+                    "offText": "关闭"
+                  },
+                  {
+                    "type": "switch",
+                    "name": "previous",
+                    "label": "读取上一个实例日志",
+                    "value": false,
+                    "onText": "是",
+                    "offText": "否"
+                  },
+                  {
+                    "type": "button",
+                    "label": "查看日志",
+                    "level": "primary",
+                    "actionType": "drawer",
+                    "drawer": {
+                      "closeOnOutside": true,
+                      "closeOnEsc": true,
+                      "position": "left",
+                      "size": "xl",
+                      "body": [
+                        {
+                          "type": "log-download",
+                          "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                          "data": {
+                            "containerName": "${containerName}",
+                            "tailLines": "${tailLines}",
+                            "sinceTime": "${sinceTime}",
+                            "previous": "${previous}",
+                            "timestamps": "${timestamps}",
+                            "sinceSeconds": "${sinceSeconds}"
+                          }
+                        },
+                        {
+                          "type": "sse",
+                          "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                          "data": {
+                            "containerName": "${containerName}",
+                            "tailLines": "${tailLines}",
+                            "sinceTime": "${sinceTime}",
+                            "follow": "${follow}",
+                            "previous": "${previous}",
+                            "timestamps": "${timestamps}",
+                            "sinceSeconds": "${sinceSeconds}"
+                          }
+                        }
+                      ]
                     }
-                  ],
-                  "toggled": true
-                },
-                {
-                  "name": "metadata.name",
-                  "label": "name",
-                  "type": "text"
-                },
-                {
-                  "name": "ready",
-                  "label": "ready",
-                  "type": "k8sPodReady"
-                },
-                {
-                  "name": "status.phase",
-                  "label": "status",
-                  "type": "mapping",
-                  "map": {
-                    "Running": "<span class='label label-info'>Running</span>",
-                    "Pending": "<span class='label label-warning'>Pending</span>",
-                    "Succeeded": "<span class='label label-success'>Succeeded</span>",
-                    "Failed": "<span class='label label-danger'>Failed</span>",
-                    "Unknown": "<span class='label label-default'>Unknown</span>"
                   }
-                },
-                {
-                  "name": "status.containerStatuses",
-                  "label": "restarts",
-                  "type": "tpl",
-                  "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
-                },
-                {
-                  "name": "metadata.labels",
-                  "label": "labels",
-                  "type": "k8sLabels"
-                },
-                {
-                  "name": "spec.containers",
-                  "label": "containers",
-                  "type": "each",
-                  "items": {
-                    "type": "tpl",
-                    "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+                ],
+                "actions": []
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-folder",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnOutside": true,
+                "closeOnEsc": true,
+                "position": "left",
+                "size": "xl",
+                "body": [
+                  {
+                    "type": "wrapper",
+                    "size": "lg",
+                    "className": "b",
+                    "body": [
+                      {
+                        "type": "select",
+                        "name": "containerName",
+                        "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                        "value": "${spec.containers[0].name}",
+                        "onEvent": {
+                          "change": {
+                            "actions": [
+                              {
+                                "componentId": "tree",
+                                "actionType": "reload",
+                                "data": {
+                                  "path": "${event.data.item.path}",
+                                  "isDir": "${event.data.item.isDir}"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "type": "tag",
+                        "label": "${metadata.namespace}",
+                        "displayMode": "normal",
+                        "color": "active"
+                      },
+                      {
+                        "type": "tag",
+                        "label": "${metadata.name}",
+                        "displayMode": "normal",
+                        "color": "processing"
+                      },
+                      {
+                        "type": "tag",
+                        "label": "${containerName}",
+                        "displayMode": "normal",
+                        "color": "inactive"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "page",
+                    "body": [
+                      {
+                        "type": "page",
+                        "asideResizor": true,
+                        "asideMinWidth": 400,
+                        "asideMaxWidth": 800,
+                        "aside": [
+                          {
+                            "type": "input-tree",
+                            "name": "tree",
+                            "id": "tree",
+                            "initiallyOpen": false,
+                            "unfoldedLevel": 1,
+                            "searchable": true,
+                            "showOutline": true,
+                            "showIcon": true,
+                            "searchConfig": {
+                              "sticky": true
+                            },
+                            "heightAuto": true,
+                            "inputClassName": "no-border no-padder mt-1",
+                            "source": {
+                              "method": "post",
+                              "url": "/k8s/file/list?path=/",
+                              "data": {
+                                "containerName": "${containerName}",
+                                "podName": "${metadata.name}",
+                                "namespace": "${metadata.namespace}"
+                              }
+                            },
+                            "deferApi": {
+                              "method": "post",
+                              "url": "/k8s/file/list?path=$path",
+                              "data": {
+                                "containerName": "${containerName}",
+                                "podName": "${metadata.name}",
+                                "namespace": "${metadata.namespace}",
+                                "path": "$path",
+                                "isDir": "$isDir"
+                              }
+                            },
+                            "labelField": "name",
+                            "valueField": "path",
+                            "deferField": "isDir",
+                            "onEvent": {
+                              "change": {
+                                "actions": [
+                                  {
+                                    "actionType": "setValue",
+                                    "componentId": "fileContext",
+                                    "args": {
+                                      "value": ""
+                                    }
+                                  },
+                                  {
+                                    "componentId": "detail",
+                                    "actionType": "reload",
+                                    "data": {
+                                      "path": "${event.data.item.path}",
+                                      "isDir": "${event.data.item.isDir}",
+                                      "size": "${event.data.item.size}",
+                                      "type": "${event.data.item.type}"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "toolbar": [
+                        ],
+                        "body": [
+                          {
+                            "type": "service",
+                            "api": {
+                              "method": "post",
+                              "url": "/k8s/file/show",
+                              "data": {
+                                "containerName": "${containerName}",
+                                "podName": "${metadata.name}",
+                                "namespace": "${metadata.namespace}",
+                                "isDir": "${isDir?isDir:false}",
+                                "path": "${path}",
+                                "size": "${size?size:0}",
+                                "type": "${type}"
+                              }
+                            },
+                            "body": [
+                              {
+                                "type": "form",
+                                "title": "编辑",
+                                "api": {
+                                  "method": "post",
+                                  "url": "/k8s/file/save",
+                                  "data": {
+                                    "fileContext": "${fileContext | base64Encode}",
+                                    "path": "${path}",
+                                    "containerName": "${containerName}",
+                                    "podName": "${metadata.name}",
+                                    "namespace": "${metadata.namespace}",
+                                    "isDir": false
+                                  }
+                                },
+                                "inline": true,
+                                "body": [
+                                  {
+                                    "type": "wrapper",
+                                    "size": "lg",
+                                    "className": "b",
+                                    "body": [
+                                      {
+                                        "type": "grid",
+                                        "columns": [
+                                          {
+                                            "body": [
+                                              {
+                                                "type": "tpl",
+                                                "label": "当前选中",
+                                                "tpl": "<span class='text-primary bg-yellow-100 p-2 rounded'>${isDir?'Folder':'File'}</span>&nbsp;<span class='text-primary bg-indigo-100 p-2 rounded'>${path}</span>",
+                                                "visibleOn": "${path}"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "body": [
+                                              {
+                                                "type": "button",
+                                                "label": "Download File",
+                                                "actionType": "ajax",
+                                                "api": {
+                                                  "method": "post",
+                                                  "url": "/k8s/file/download",
+                                                  "data": {
+                                                    "path": "${path}",
+                                                    "containerName": "${containerName}",
+                                                    "podName": "${metadata.name}",
+                                                    "namespace": "${metadata.namespace}",
+                                                    "isDir": false
+                                                  },
+                                                  "responseType": "blob"
+                                                },
+                                                "onEvent": {
+                                                  "submit": {
+                                                    "actions": [
+                                                      {
+                                                        "actionType": "custom",
+                                                        "script": "downloadFile(event.data)"
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "visibleOn": "${isDir===false}"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "body": [
+                                              {
+                                                "type": "button",
+                                                "label": "上传文件",
+                                                "visibleOn": "${isDir===true}",
+                                                "icon": "fa fa-list",
+                                                "actionType": "dialog",
+                                                "dialog": {
+                                                  "closeOnEsc": true,
+                                                  "closeOnOutside": true,
+                                                  "title": "上传文件",
+                                                  "body": [
+                                                    {
+                                                      "type": "page",
+                                                      "body": {
+                                                        "type": "form",
+                                                        "body": [
+                                                          {
+                                                            "type": "input-file",
+                                                            "name": "file",
+                                                            "label": "File",
+                                                            "accept": "*",
+                                                            "asBlob": true
+                                                          },
+                                                          {
+                                                            "type": "input-text",
+                                                            "name": "fileName",
+                                                            "label": "文件名",
+                                                            "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
+                                                          }
+                                                        ],
+                                                        "actions": [
+                                                          {
+                                                            "type": "button",
+                                                            "label": "上传",
+                                                            "level": "primary",
+                                                            "actionType": "ajax",
+                                                            "close": true,
+                                                            "api": {
+                                                              "method": "post",
+                                                              "url": "/k8s/file/upload",
+                                                              "data": {
+                                                                "containerName": "${containerName}",
+                                                                "podName": "${metadata.name}",
+                                                                "namespace": "${metadata.namespace}",
+                                                                "isDir": "${isDir?isDir:false}",
+                                                                "path": "${path}",
+                                                                "file": "${file}",
+                                                                "fileName": "${fileName}"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  ],
+                                                  "actions": []
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "editor",
+                                    "name": "fileContext",
+                                    "id": "fileContext",
+                                    "size": "xxl",
+                                    "allowFullscreen": true,
+                                    "visibleOn": "${isDir===false}",
+                                    "value": "${content|base64Decode}",
+                                    "language": "shell",
+                                    "options": {
+                                      "wordWrap": "on",
+                                      "scrollbar": {
+                                        "vertical": "auto"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ],
+                            "id": "detail"
+                          }
+                        ]
+                      }
+                    ]
                   }
-                },
-                {
-                  "name": "metadata.creationTimestamp",
-                  "label": "age",
-                  "type": "k8sAge"
-                },
-                {
-                  "name": "status.podIP",
-                  "label": "ip",
-                  "type": "text"
-                },
-                {
-                  "name": "spec.nodeName",
-                  "label": "node",
-                  "type": "text"
-                },
-                {
-                  "name": "status.conditions",
-                  "label": "conditions",
-                  "type": "k8sConditions"
-                }
-              ]
+                ]
+              }
             }
-          ]
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.name",
+          "label": "name",
+          "type": "text"
+        },
+        {
+          "name": "ready",
+          "label": "ready",
+          "type": "k8sPodReady"
+        },
+        {
+          "name": "status.phase",
+          "label": "status",
+          "type": "mapping",
+          "map": {
+            "Running": "<span class='label label-info'>Running</span>",
+            "Pending": "<span class='label label-warning'>Pending</span>",
+            "Succeeded": "<span class='label label-success'>Succeeded</span>",
+            "Failed": "<span class='label label-danger'>Failed</span>",
+            "Unknown": "<span class='label label-default'>Unknown</span>"
+          }
+        },
+        {
+          "name": "status.containerStatuses",
+          "label": "restarts",
+          "type": "tpl",
+          "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
+        },
+        {
+          "name": "metadata.labels",
+          "label": "labels",
+          "type": "k8sLabels"
+        },
+        {
+          "name": "spec.containers",
+          "label": "containers",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+          }
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "age",
+          "type": "k8sAge"
+        },
+        {
+          "name": "status.podIP",
+          "label": "ip",
+          "type": "text"
+        },
+        {
+          "name": "spec.nodeName",
+          "label": "node",
+          "type": "text"
+        },
+        {
+          "name": "status.conditions",
+          "label": "conditions",
+          "type": "k8sConditions"
         }
       ]
     }

@@ -3,10 +3,11 @@
   "body": [
     {
       "type": "crud",
+      "id": "detailCRUD",
       "name": "detailCRUD",
       "headerToolbar": [
-                "bulkActions",
-                "reload",
+        "bulkActions",
+        "reload",
         {
           "type": "pagination",
           "align": "right"
@@ -45,7 +46,7 @@
         {
           "type": "operation",
           "label": "action",
-
+          "width": 110,
           "buttons": [
             {
               "type": "button",

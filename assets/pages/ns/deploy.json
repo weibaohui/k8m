@@ -2,151 +2,152 @@
   "type": "page",
   "body": [
     {
-      "type": "grid",
-      "columns": [
+      "type": "form",
+      "mode": "horizontal",
+      "wrapWithPanel": false,
+      "body": [
         {
-          "md": 2,
-          "body": [
-            {
-              "type": "crud",
-              "api": "/k8s/Namespace/list",
-              "headerToolbar": [],
-              "perPage": 20,
-              "loadDataOnce": true,
-              "syncLocation": false,
-              "itemAction": {
-                "actionType": "reload",
-                "target": "detailCRUD?ns=${metadata.name}"
-              },
-              "columns": [
+          "label": "Namespace",
+          "type": "select",
+          "name": "ns",
+          "id": "ns",
+          "searchable": true,
+          "source": "/k8s/ns/option_list",
+          "value": "${ls:selectedNs||'default'}",
+          "onEvent": {
+            "change": {
+              "actions": [
                 {
-                  "name": "metadata.name",
-                  "label": "namespace",
-                  "type": "text"
+                  "actionType": "reload",
+                  "componentId": "detailCRUD",
+                  "data": {
+                    "ns": "${ns}"
+                  }
+                },
+                {
+                  "actionType": "custom",
+                  "script": "localStorage.setItem('selectedNs', event.data.ns)"
                 }
               ]
             }
-          ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "headerToolbar": [
+        "bulkActions",
+        "reload",
+        {
+          "type": "pagination",
+          "align": "right"
         },
         {
-          "md": 10,
-          "body": [
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "data": {
+        "ns": "${ls:selectedNs||'default'}",
+        "kind": "Deployment"
+      },
+      "loadDataOnce": true,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
+            "method": "post",
+            "data": {
+              "names": "${selectedItems | pick:metadata.name }"
+            }
+          }
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/k8s/$kind/list/ns/${ns}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "action",
+          "width": 110,
+          "buttons": [
             {
-              "type": "crud",
-              "name": "detailCRUD",
-              "headerToolbar": [
-                "bulkActions",
-                "reload",
-                {
-                  "type": "tpl",
-                  "tpl": "<span class='text-primary bg-light p-2 rounded'>当前选择的 Namespace: ${ns}</span>",
-                  "visibleOn": "this.ns"
-                },
-                {
-                  "type": "pagination",
-                  "align": "right"
-                },
-                {
-                  "type": "statistics",
-                  "align": "right"
-                },
-                {
-                  "type": "switch-per-page",
-                  "align": "right"
-                }
-              ],
-              "data": {
-                "kind": "Deployment"
-              },
-              "loadDataOnce": true,
-              "syncLocation": false,
-              "initFetch": false,
-              "perPage": 10,
-              "bulkActions": [
-                {
-                  "label": "批量删除",
-                  "actionType": "ajax",
-                  "confirmText": "确定要批量删除?",
+              "type": "button",
+              "icon": "fas fa-wrench",
+              "tooltip": "更新tag",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "position": "left",
+                "title": "编辑",
+                "body": {
+                  "type": "form",
+                  "name": "sample-edit-form",
+                  "data": {
+                    "env": ""
+                  },
                   "api": {
-                    "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
                     "method": "post",
-                    "data": {
-                      "names": "${selectedItems | pick:metadata.name }"
+                    "url": "/k8s/deploy/update/ns/$metadata.namespace/name/$metadata.name/container/$container_name/tag/$tag"
+                  },
+                  "body": [
+                    {
+                      "type": "select",
+                      "name": "container_name",
+                      "label": "容器",
+                      "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                      "value": "${spec.template.spec.containers[0].name}",
+                      "required": true
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "tag",
+                      "label": "tag",
+                      "required": true
+                    },
+                    {
+                      "type": "divider"
                     }
-                  }
+                  ]
                 }
-              ],
-              "footerToolbar": [
-                {
-                  "type": "pagination",
-                  "align": "right"
-                },
-                {
-                  "type": "statistics",
-                  "align": "right"
-                },
-                {
-                  "type": "switch-per-page",
-                  "align": "right"
-                }
-              ],
-              "api": "get:/k8s/$kind/list/ns/${ns}",
-              "columns": [
-                {
-                  "type": "operation",
-                  "label": "action",
-                  "buttons": [
-                    {
-                      "type": "button",
-                      "icon": "fas fa-wrench",
-                      "tooltip": "更新tag",
-                      "actionType": "drawer",
-                      "drawer": {
-                        "closeOnEsc": true,
-                        "closeOnOutside": true,
-                        "position": "left",
-                        "title": "编辑",
-                        "body": {
-                          "type": "form",
-                          "name": "sample-edit-form",
-                          "data": {
-                            "env": ""
-                          },
-                          "api": {
-                            "method": "post",
-                            "url": "/k8s/deploy/update/ns/$metadata.namespace/name/$metadata.name/container/$container_name/tag/$tag"
-                          },
-                          "body": [
-                            {
-                              "type": "select",
-                              "name": "container_name",
-                              "label": "容器",
-                              "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
-                              "value": "${spec.template.spec.containers[0].name}",
-                              "required": true
-                            },
-                            {
-                              "type": "input-text",
-                              "name": "tag",
-                              "label": "tag",
-                              "required": true
-                            },
-                            {
-                              "type": "divider"
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    {
-                      "type": "button",
-                      "icon": "fas fa-redo-alt text-warning",
-                      "actionType": "ajax",
-                      "tooltip": "重启",
-                      "confirmText": "您确认要重启?",
-                      "api": "post:/k8s/deploy/restart/ns/$metadata.namespace/name/$metadata.name"
-                    },
-                    {
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-redo-alt text-warning",
+              "actionType": "ajax",
+              "tooltip": "重启",
+              "confirmText": "您确认要重启?",
+              "api": "post:/k8s/deploy/restart/ns/$metadata.namespace/name/$metadata.name"
+            },
+            {
               "type": "button",
               "icon": "fas fa-file-code text-success",
               "actionType": "drawer",
@@ -262,66 +263,61 @@
                 ]
               }
             },
-                    {
-                      "type": "button",
-                      "icon": "fas fa-trash text-danger",
-                      "actionType": "ajax",
-                      "tooltip": "停止",
-                      "confirmText": "您确认删除?",
-                      "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
-                    }
-                  ],
-                  "toggled": true
-                },
-                {
-                  "name": "metadata.name",
-                  "label": "name",
-                  "type": "text"
-                },
-
-                {
-                  "name": "metadata.creationTimestamp",
-                  "label": "age",
-                  "type": "k8sAge"
-                },
-                {
-                  "name": "ready",
-                  "label": "ready",
-                  "type": "tpl",
-                  "tpl": "${status.readyReplicas}/${status.replicas}"
-                },
-                {
-                  "name": "metadata.labels",
-                  "label": "labels",
-                  "type": "k8sLabels"
-                },
-                {
-                  "name": "spec.template.spec.containers",
-                  "label": "containers",
-                  "type": "each",
-                  "items": {
-                    "type": "tpl",
-                    "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
-                  }
-                },
-                {
-                  "name": "status.updatedReplicas",
-                  "label": "updated",
-                  "type": "text"
-                },
-                {
-                  "name": "status.availableReplicas",
-                  "label": "replicas",
-                  "type": "text"
-                },
-                {
-                  "name": "status.conditions",
-                  "label": "conditions",
-                  "type": "k8sConditions"
-                }
-              ]
+            {
+              "type": "button",
+              "icon": "fas fa-trash text-danger",
+              "actionType": "ajax",
+              "tooltip": "停止",
+              "confirmText": "您确认删除?",
+              "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
             }
-          ]
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.name",
+          "label": "name",
+          "type": "text"
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "age",
+          "type": "k8sAge"
+        },
+        {
+          "name": "ready",
+          "label": "ready",
+          "type": "tpl",
+          "tpl": "${status.readyReplicas}/${status.replicas}"
+        },
+        {
+          "name": "metadata.labels",
+          "label": "labels",
+          "type": "k8sLabels"
+        },
+        {
+          "name": "spec.template.spec.containers",
+          "label": "containers",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+          }
+        },
+        {
+          "name": "status.updatedReplicas",
+          "label": "updated",
+          "type": "text"
+        },
+        {
+          "name": "status.availableReplicas",
+          "label": "replicas",
+          "type": "text"
+        },
+        {
+          "name": "status.conditions",
+          "label": "conditions",
+          "type": "k8sConditions"
         }
       ]
     }
