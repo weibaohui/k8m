@@ -24,15 +24,15 @@ type PodFileNode struct {
 	IsDir       bool   `json:"isDir"` // 指示是否
 }
 
-// PodFile 应用配置结构
-type PodFile struct {
+// PodFileInfo 应用配置结构
+type PodFileInfo struct {
 	Namespace     string
 	PodName       string
 	ContainerName string
 }
 
 // GetFileList  获取容器中指定路径的文件和目录列表
-func (p *PodFile) GetFileList(path string) ([]*PodFileNode, error) {
+func (p *PodFileInfo) GetFileList(path string) ([]*PodFileNode, error) {
 	cmd := []string{"ls", "-l", path}
 	req := kubectl.client.CoreV1().RESTClient().
 		Get().
@@ -67,49 +67,8 @@ func (p *PodFile) GetFileList(path string) ([]*PodFileNode, error) {
 	return p.parseFileList(path, stdout.String()), nil
 }
 
-// parseFileList 解析输出并生成 PodFileNode 列表
-func (p *PodFile) parseFileList(path, output string) []*PodFileNode {
-	var nodes []*PodFileNode
-	lines := strings.Split(output, "\n")
-	for _, line := range lines {
-		if line == "" {
-			continue
-		}
-		parts := strings.Fields(line)
-		if len(parts) < 9 {
-			continue // 不完整的行
-		}
-
-		permissions := parts[0]
-		name := parts[8]
-		size := parts[4]
-		modTime := strings.Join(parts[5:8], " ")
-
-		// 判断文件类型
-
-		fileType := getFileType(permissions)
-
-		// 封装成 PodFileNode
-		node := PodFileNode{
-			Path:        fmt.Sprintf("/%s", name),
-			Name:        name,
-			Type:        fileType,
-			Permissions: permissions,
-			Size:        utils.ToInt64(size),
-			ModTime:     modTime,
-			IsDir:       fileType == "directory",
-		}
-		if path != "/" {
-			node.Path = fmt.Sprintf("%s/%s", path, name)
-		}
-		nodes = append(nodes, &node)
-	}
-
-	return nodes
-}
-
 // DownloadFile 从指定容器下载文件
-func (p *PodFile) DownloadFile(filePath string) ([]byte, error) {
+func (p *PodFileInfo) DownloadFile(filePath string) ([]byte, error) {
 	cmd := []string{"cat", filePath}
 	klog.V(8).Infof("DownloadFile %s", filePath)
 
@@ -151,13 +110,18 @@ func (p *PodFile) DownloadFile(filePath string) ([]byte, error) {
 }
 
 // UploadFile 将文件上传到指定容器
-func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
+func (p *PodFileInfo) UploadFile(destPath string, file multipart.File) error {
 	// 创建临时文件
 	tempFile, err := os.CreateTemp("", "upload-*")
 	if err != nil {
 		return fmt.Errorf("error creating temp file: %v", err)
 	}
-	defer os.Remove(tempFile.Name()) // 确保临时文件在函数结束时被删除
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			klog.V(6).Infof("remve %s error:%v", name, err)
+		}
+	}(tempFile.Name()) // 确保临时文件在函数结束时被删除
 
 	// 将上传的文件内容写入临时文件
 	_, err = io.Copy(tempFile, file)
@@ -197,7 +161,12 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 	if err != nil {
 		return fmt.Errorf("error opening file: %v", err)
 	}
-	defer readFile.Close()
+	defer func(readFile *os.File) {
+		err := readFile.Close()
+		if err != nil {
+			klog.V(6).Infof("readFile.Close() error:%v", err)
+		}
+	}(readFile)
 	var stdout, stderr bytes.Buffer
 	err = executor.Stream(remotecommand.StreamOptions{
 		Stdin:  readFile,
@@ -212,14 +181,19 @@ func (p *PodFile) UploadFile(destPath string, file multipart.File) error {
 	return nil
 }
 
-func (p *PodFile) SaveFile(path string, context string) error {
+func (p *PodFileInfo) SaveFile(path string, context string) error {
 
 	// 创建临时文件
 	tempFile, err := os.CreateTemp("", "upload-*")
 	if err != nil {
 		return fmt.Errorf("error creating temp file: %v", err)
 	}
-	defer os.Remove(tempFile.Name()) // 确保临时文件在函数结束时被删除
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			klog.V(6).Infof("remve %s error:%v", name, err)
+		}
+	}(tempFile.Name()) // 确保临时文件在函数结束时被删除
 
 	// 将上传的文件内容写入临时文件
 	_, err = io.WriteString(tempFile, context)
@@ -259,7 +233,12 @@ func (p *PodFile) SaveFile(path string, context string) error {
 	if err != nil {
 		return fmt.Errorf("error opening file: %v", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			klog.V(6).Infof("file.Close() error:%v", err)
+		}
+	}(file)
 	var stdout, stderr bytes.Buffer
 	err = executor.Stream(remotecommand.StreamOptions{
 		Stdin:  file,
@@ -308,4 +287,45 @@ func getFileType(permissions string) string {
 	}
 
 	return fileType
+}
+
+// parseFileList 解析输出并生成 PodFileNode 列表
+func (p *PodFileInfo) parseFileList(path, output string) []*PodFileNode {
+	var nodes []*PodFileNode
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		parts := strings.Fields(line)
+		if len(parts) < 9 {
+			continue // 不完整的行
+		}
+
+		permissions := parts[0]
+		name := parts[8]
+		size := parts[4]
+		modTime := strings.Join(parts[5:8], " ")
+
+		// 判断文件类型
+
+		fileType := getFileType(permissions)
+
+		// 封装成 PodFileNode
+		node := PodFileNode{
+			Path:        fmt.Sprintf("/%s", name),
+			Name:        name,
+			Type:        fileType,
+			Permissions: permissions,
+			Size:        utils.ToInt64(size),
+			ModTime:     modTime,
+			IsDir:       fileType == "directory",
+		}
+		if path != "/" {
+			node.Path = fmt.Sprintf("%s/%s", path, name)
+		}
+		nodes = append(nodes, &node)
+	}
+
+	return nodes
 }

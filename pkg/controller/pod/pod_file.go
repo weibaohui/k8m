@@ -24,8 +24,8 @@ type info struct {
 	FileType      string `json:"type,omitempty"` // 只有file类型可以查、下载
 }
 
-// FileListHandler  处理获取文件列表的 HTTP 请求
-func FileListHandler(c *gin.Context) {
+// FileList  处理获取文件列表的 HTTP 请求
+func FileList(c *gin.Context) {
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -33,7 +33,7 @@ func FileListHandler(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFile{
+	pf := kubectl.PodFileInfo{
 		Namespace:     info.Namespace,
 		PodName:       info.PodName,
 		ContainerName: info.ContainerName,
@@ -51,8 +51,8 @@ func FileListHandler(c *gin.Context) {
 	amis.WriteJsonList(c, nodes)
 }
 
-// ShowFileHandler 处理下载文件的 HTTP 请求
-func ShowFileHandler(c *gin.Context) {
+// ShowFile 处理下载文件的 HTTP 请求
+func ShowFile(c *gin.Context) {
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -60,7 +60,7 @@ func ShowFileHandler(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFile{
+	pf := kubectl.PodFileInfo{
 		Namespace:     info.Namespace,
 		PodName:       info.PodName,
 		ContainerName: info.ContainerName,
@@ -78,11 +78,6 @@ func ShowFileHandler(c *gin.Context) {
 		return
 	}
 
-	// if info.Size > 1024*10 {
-	// 	// 大于10KB
-	// 	amis.WriteJsonError(c, fmt.Errorf("文件较大，请下载后查看"))
-	// 	return
-	// }
 	// 从容器中下载文件
 	fileContent, err := pf.DownloadFile(info.Path)
 	if err != nil {
@@ -103,7 +98,7 @@ func ShowFileHandler(c *gin.Context) {
 		"content": fileContent,
 	})
 }
-func SaveFileHandler(c *gin.Context) {
+func SaveFile(c *gin.Context) {
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -111,7 +106,7 @@ func SaveFileHandler(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFile{
+	pf := kubectl.PodFileInfo{
 		Namespace:     info.Namespace,
 		PodName:       info.PodName,
 		ContainerName: info.ContainerName,
@@ -141,8 +136,8 @@ func SaveFileHandler(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// DownloadFileHandler 处理下载文件的 HTTP 请求
-func DownloadFileHandler(c *gin.Context) {
+// DownloadFile 处理下载文件的 HTTP 请求
+func DownloadFile(c *gin.Context) {
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -150,7 +145,7 @@ func DownloadFileHandler(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFile{
+	pf := kubectl.PodFileInfo{
 		Namespace:     info.Namespace,
 		PodName:       info.PodName,
 		ContainerName: info.ContainerName,
@@ -168,8 +163,8 @@ func DownloadFileHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "application/octet-stream", fileContent)
 }
 
-// UploadFileHandler 处理上传文件的 HTTP 请求
-func UploadFileHandler(c *gin.Context) {
+// UploadFile 处理上传文件的 HTTP 请求
+func UploadFile(c *gin.Context) {
 	info := &info{}
 
 	info.ContainerName = c.PostForm("containerName")
@@ -188,7 +183,7 @@ func UploadFileHandler(c *gin.Context) {
 	}
 	// 删除path最后一个/后面的内容，取当前选中文件的父级路径
 
-	pf := kubectl.PodFile{
+	pf := kubectl.PodFileInfo{
 		Namespace:     info.Namespace,
 		PodName:       info.PodName,
 		ContainerName: info.ContainerName,
