@@ -11,6 +11,32 @@
 **k8m** 让你无需繁琐的配置，即可轻松管理 Kubernetes 集群，是开发者和运维人员的理想选择。
 
 
+## **运行**
+1. **下载**：从 [GitHub](https://github.com/weibaohui/k8m) 下载最新版本。
+2. **运行**：使用 `./k8m` 命令启动。
+3. **参数**：
+```shell
+  ./k8m -h
+      --add_dir_header                   If true, adds the file directory to the header of the log messages
+      --alsologtostderr                  log to standard error as well as files (no effect when -logtostderr=true)
+  -k, --chatgpt-key string               API Key for ChatGPT (default "sk-XXXX")
+  -u, --chatgpt-url string               API URL for ChatGPT (default "https://api.siliconflow.cn/v1")
+  -d, --debug                            Debug mode,same as GIN_MODE
+  -c, --kubeconfig string                Absolute path to the kubeConfig file (default "/Users/xxx/.kube/config")
+      --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
+      --log_dir string                   If non-empty, write log files in this directory (no effect when -logtostderr=true)
+      --log_file string                  If non-empty, use this log file (no effect when -logtostderr=true)
+      --log_file_max_size uint           Defines the maximum size a log file can grow to (no effect when -logtostderr=true). Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
+      --logtostderr                      log to standard error instead of files (default true)
+      --one_output                       If true, only write logs to their native severity level (vs also writing to each lower severity level; no effect when -logtostderr=true)
+  -p, --port int                         Port for the server to listen on (default 3618)
+      --skip_headers                     If true, avoid header prefixes in the log messages
+      --skip_log_headers                 If true, avoid headers when opening log files (no effect when -logtostderr=true)
+      --stderrthreshold severity         logs at or above this threshold go to stderr when writing to files and stderr (no effect when -logtostderr=true or -alsologtostderr=true) (default 2)
+  -v, --v Level                          number for the log level verbosity (default 0)
+      --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
+```
+
 ## **ChatGPT 配置指南**
 
 ### **环境变量配置**
