@@ -10,7 +10,7 @@ import (
 )
 
 func (k8s *Kubectl) ListPod(ns string) ([]v1.Pod, error) {
-	list, err := k8s.client.CoreV1().Pods(ns).List(context.Background(), metav1.ListOptions{})
+	list, err := k8s.client.CoreV1().Pods(ns).List(context.TODO(), metav1.ListOptions{})
 	if err == nil && list != nil && list.Items != nil && len(list.Items) > 0 {
 		// 按创建时间倒序排序 Pods 列表
 		sort.Slice(list.Items, func(i, j int) bool {
@@ -22,7 +22,7 @@ func (k8s *Kubectl) ListPod(ns string) ([]v1.Pod, error) {
 }
 
 func (k8s *Kubectl) GetPod(ns, name string) (*v1.Pod, error) {
-	pod, err := k8s.client.CoreV1().Pods(ns).Get(context.Background(), name, metav1.GetOptions{})
+	pod, err := k8s.client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
 	return pod, err
 }
 
@@ -49,7 +49,7 @@ func (k8s *Kubectl) StreamPodLogs(ns, name string, logOptions *v1.PodLogOptions)
 
 // ListPodByLabelSelector key1=value1,key2=value2
 func (k8s *Kubectl) ListPodByLabelSelector(ns, selector string) ([]v1.Pod, error) {
-	list, err := k8s.client.CoreV1().Pods(ns).List(context.Background(), metav1.ListOptions{LabelSelector: selector})
+	list, err := k8s.client.CoreV1().Pods(ns).List(context.TODO(), metav1.ListOptions{LabelSelector: selector})
 	if err == nil && list != nil && list.Items != nil && len(list.Items) > 0 {
 		sort.Slice(list.Items, func(i, j int) bool {
 			return list.Items[i].CreationTimestamp.Time.After(list.Items[j].CreationTimestamp.Time)

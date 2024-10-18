@@ -10,12 +10,12 @@ import (
 )
 
 func (k8s *Kubectl) GetDeploy(ns, name string) (*v1.Deployment, error) {
-	deployment, err := k8s.client.AppsV1().Deployments(ns).Get(context.Background(), name, metav1.GetOptions{})
+	deployment, err := k8s.client.AppsV1().Deployments(ns).Get(context.TODO(), name, metav1.GetOptions{})
 	return deployment, err
 }
 
 func (k8s *Kubectl) CreateDeploy(deploy *v1.Deployment) (*v1.Deployment, error) {
-	deployment, err := k8s.client.AppsV1().Deployments(deploy.Namespace).Create(context.Background(), deploy, metav1.CreateOptions{})
+	deployment, err := k8s.client.AppsV1().Deployments(deploy.Namespace).Create(context.TODO(), deploy, metav1.CreateOptions{})
 	return deployment, err
 }
 
@@ -50,7 +50,7 @@ func (k8s *Kubectl) UpdateDeployImageTag(ns string, name string, containerName s
 			c.Image = replaceImageTag(c.Image, tag)
 		}
 	}
-	deployment, err := k8s.client.AppsV1().Deployments(deploy.Namespace).Update(context.Background(), deploy, metav1.UpdateOptions{})
+	deployment, err := k8s.client.AppsV1().Deployments(deploy.Namespace).Update(context.TODO(), deploy, metav1.UpdateOptions{})
 	return deployment, err
 }
 

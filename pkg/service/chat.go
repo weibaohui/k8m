@@ -76,7 +76,7 @@ func (c *ChatService) Chat(chat string) string {
 	openaiClient := openai.NewClientWithConfig(cfg)
 
 	resp, err := openaiClient.CreateChatCompletion(
-		context.Background(),
+		context.TODO(),
 		openai.ChatCompletionRequest{
 			Model: model,
 			Messages: []openai.ChatCompletionMessage{
