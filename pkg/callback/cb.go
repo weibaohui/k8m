@@ -12,6 +12,6 @@ func RegisterCallback() {
 
 func Query(k8s *kubectl.Kubectl) error {
 	json := k8s.Stmt.String()
-	klog.V(4).Infof("k8s stmt json:\n%s\n", json)
+	klog.V(2).Infof("k8s Query stmt json:\n%s\n", json)
 	return nil
 }

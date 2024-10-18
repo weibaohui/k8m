@@ -1,6 +1,8 @@
 package dynamic
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/kubectl"
 	"github.com/weibaohui/k8m/internal/utils/amis"
@@ -14,8 +16,7 @@ func List(c *gin.Context) {
 	kind := c.Param("kind")
 	var list []unstructured.Unstructured
 	var err error
-
-	builtIn := kubectl.Init().IsBuiltinResource(kind)
+	builtIn := kubectl.Init().WithContext(context.TODO()).IsBuiltinResource(kind)
 	if builtIn {
 		// 内置资源
 		list, err = kubectl.Init().ListResources(kind, ns)
