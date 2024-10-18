@@ -1,7 +1,6 @@
 package kubectl
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -54,9 +53,9 @@ func (k8s *Kubectl) ListResources(kind string, ns string, opts ...ListOption) ([
 
 	var list *unstructured.UnstructuredList
 	if namespaced {
-		list, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).List(context.TODO(), listOptions)
+		list, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).List(k8s.Stmt.Context, listOptions)
 	} else {
-		list, err = k8s.dynamicClient.Resource(gvr).List(context.TODO(), listOptions)
+		list, err = k8s.dynamicClient.Resource(gvr).List(k8s.Stmt.Context, listOptions)
 	}
 	if err != nil {
 		return nil, err
@@ -89,9 +88,9 @@ func (k8s *Kubectl) GetResource(kind string, ns, name string) (*unstructured.Uns
 	}
 
 	if namespaced {
-		res, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
+		res, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Get(k8s.Stmt.Context, name, metav1.GetOptions{})
 	} else {
-		res, err = k8s.dynamicClient.Resource(gvr).Get(context.TODO(), name, metav1.GetOptions{})
+		res, err = k8s.dynamicClient.Resource(gvr).Get(k8s.Stmt.Context, name, metav1.GetOptions{})
 	}
 	if err != nil {
 		return nil, err
@@ -118,9 +117,9 @@ func (k8s *Kubectl) CreateResource(kind string, ns string, resource *unstructure
 		return nil, err
 	}
 	if namespaced {
-		createdResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Create(context.TODO(), resource, metav1.CreateOptions{})
+		createdResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Create(k8s.Stmt.Context, resource, metav1.CreateOptions{})
 	} else {
-		createdResource, err = k8s.dynamicClient.Resource(gvr).Create(context.TODO(), resource, metav1.CreateOptions{})
+		createdResource, err = k8s.dynamicClient.Resource(gvr).Create(k8s.Stmt.Context, resource, metav1.CreateOptions{})
 	}
 	if err != nil {
 		return nil, err
@@ -148,9 +147,9 @@ func (k8s *Kubectl) UpdateResource(kind string, ns string, resource *unstructure
 		return nil, err
 	}
 	if namespaced {
-		updatedResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Update(context.TODO(), resource, metav1.UpdateOptions{})
+		updatedResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Update(k8s.Stmt.Context, resource, metav1.UpdateOptions{})
 	} else {
-		updatedResource, err = k8s.dynamicClient.Resource(gvr).Update(context.TODO(), resource, metav1.UpdateOptions{})
+		updatedResource, err = k8s.dynamicClient.Resource(gvr).Update(k8s.Stmt.Context, resource, metav1.UpdateOptions{})
 	}
 
 	if err != nil {
@@ -179,9 +178,9 @@ func (k8s *Kubectl) DeleteResource(kind string, ns, name string) error {
 	}
 
 	if namespaced {
-		return k8s.dynamicClient.Resource(gvr).Namespace(ns).Delete(context.TODO(), name, metav1.DeleteOptions{})
+		return k8s.dynamicClient.Resource(gvr).Namespace(ns).Delete(k8s.Stmt.Context, name, metav1.DeleteOptions{})
 	} else {
-		return k8s.dynamicClient.Resource(gvr).Delete(context.TODO(), name, metav1.DeleteOptions{})
+		return k8s.dynamicClient.Resource(gvr).Delete(k8s.Stmt.Context, name, metav1.DeleteOptions{})
 	}
 }
 
@@ -204,9 +203,9 @@ func (k8s *Kubectl) PatchResource(kind string, ns, name string, patchType types.
 	}
 
 	if namespaced {
-		obj, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(), name, patchType, patchData, metav1.PatchOptions{})
+		obj, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Patch(k8s.Stmt.Context, name, patchType, patchData, metav1.PatchOptions{})
 	} else {
-		obj, err = k8s.dynamicClient.Resource(gvr).Patch(context.TODO(), name, patchType, patchData, metav1.PatchOptions{})
+		obj, err = k8s.dynamicClient.Resource(gvr).Patch(k8s.Stmt.Context, name, patchType, patchData, metav1.PatchOptions{})
 	}
 	if err != nil {
 		return nil, err

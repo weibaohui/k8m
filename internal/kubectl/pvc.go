@@ -1,7 +1,6 @@
 package kubectl
 
 import (
-	"context"
 	"sort"
 
 	v1 "k8s.io/api/core/v1"
@@ -9,7 +8,7 @@ import (
 )
 
 func (k8s *Kubectl) ListPVC(ns string) ([]v1.PersistentVolumeClaim, error) {
-	list, err := k8s.client.CoreV1().PersistentVolumeClaims(ns).List(context.TODO(), metav1.ListOptions{})
+	list, err := k8s.client.CoreV1().PersistentVolumeClaims(ns).List(k8s.Stmt.Context, metav1.ListOptions{})
 	if err == nil && list != nil && list.Items != nil && len(list.Items) > 0 {
 		// 按创建时间倒序排序 Pods 列表
 		sort.Slice(list.Items, func(i, j int) bool {
@@ -21,11 +20,11 @@ func (k8s *Kubectl) ListPVC(ns string) ([]v1.PersistentVolumeClaim, error) {
 }
 
 func (k8s *Kubectl) GetPVC(ns, name string) (*v1.PersistentVolumeClaim, error) {
-	pvc, err := k8s.client.CoreV1().PersistentVolumeClaims(ns).Get(context.TODO(), name, metav1.GetOptions{})
+	pvc, err := k8s.client.CoreV1().PersistentVolumeClaims(ns).Get(k8s.Stmt.Context, name, metav1.GetOptions{})
 	return pvc, err
 }
 
 func (k8s *Kubectl) CreatePVC(pvc *v1.PersistentVolumeClaim) (*v1.PersistentVolumeClaim, error) {
-	pvc, err := k8s.client.CoreV1().PersistentVolumeClaims(pvc.Namespace).Create(context.TODO(), pvc, metav1.CreateOptions{})
+	pvc, err := k8s.client.CoreV1().PersistentVolumeClaims(pvc.Namespace).Create(k8s.Stmt.Context, pvc, metav1.CreateOptions{})
 	return pvc, err
 }
