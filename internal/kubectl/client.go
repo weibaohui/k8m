@@ -1,8 +1,6 @@
 package kubectl
 
 import (
-	"flag"
-	"path/filepath"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -10,7 +8,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 	"k8s.io/klog/v2"
 )
 
@@ -27,14 +24,16 @@ type Kubectl struct {
 }
 
 func Init() *Kubectl {
+
 	return kubectl
 }
 
-func init() {
+// InitConnection 在主入口处进行初始化
+func InitConnection(path string) {
 	klog.V(2).Infof("k8s client init")
 	kubectl = &Kubectl{}
 
-	config, err := getConfig()
+	config, err := getKubeConfig(path)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -75,27 +74,21 @@ func init() {
 	}
 }
 
-func getConfig() (*rest.Config, error) {
+func getKubeConfig(path string) (*rest.Config, error) {
 	config, err := rest.InClusterConfig()
 
 	if err != nil {
 		klog.V(2).Infof("尝试读取集群内访问配置：%v\n", err)
-		klog.V(2).Infof("尝试读取本地配置")
+		klog.V(2).Infof("尝试读取本地配置%s", path)
 		// 不是在集群中,读取参数配置
-		var kubeConfig *string
-		if home := homedir.HomeDir(); home != "" {
-			kubeConfig = flag.String("kubeConfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeConfig file")
-		} else {
-			kubeConfig = flag.String("kubeConfig", "", "absolute path to the kubeConfig file")
-		}
-		flag.Parse()
-		config, err = clientcmd.BuildConfigFromFlags("", *kubeConfig)
+		config, err = clientcmd.BuildConfigFromFlags("", path)
 		if err != nil {
-			klog.V(2).Infof(err.Error())
+			klog.Errorf(err.Error())
 		}
 
+	}
+	if config != nil {
 		klog.V(2).Infof("服务器地址：%s\n", config.Host)
 	}
-
 	return config, err
 }

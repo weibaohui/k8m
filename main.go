@@ -2,14 +2,14 @@ package main
 
 import (
 	"embed"
-	"flag"
+	"fmt"
 	"io/fs"
-	"log"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/config"
 	"github.com/weibaohui/k8m/internal/kubectl"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
@@ -25,16 +25,28 @@ var embeddedFiles embed.FS
 var Version string
 var GitCommit string
 
-func main() {
-	klog.InitFlags(nil)
-	_ = flag.Set("v", "2") // 设置日志级别为 2，等同于运行时使用 --v=2
-	flag.Parse()
-	defer klog.Flush()
+func Init() {
+	// 初始化配置
+	cfg := config.Init()
 
 	// 打印版本和 Git commit 信息
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
+
+	// 初始化kubectl 连接
+	kubectl.InitConnection(cfg.Kubeconfig)
+
+	// 初始化文档
 	_ = kubectl.NewDocs()
+
+	if !cfg.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+}
+
+func main() {
+	Init()
+
 	r := gin.Default()
 
 	r.Use(cors.Default())
@@ -110,9 +122,9 @@ func main() {
 
 	}
 
-	err := r.Run(":3618")
+	err := r.Run(fmt.Sprintf(":%d", config.Init().Port))
 	if err != nil {
-		log.Fatalf("Error %v", err)
+		klog.Fatalf("Error %v", err)
 	}
 	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
