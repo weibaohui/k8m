@@ -15,6 +15,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
+	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"k8s.io/klog/v2"
 )
@@ -85,7 +86,10 @@ func main() {
 		api.POST("/deploy/restart/ns/:ns/name/:name", deploy.Restart)
 		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
 
-		// 其他 API 路由
+		// k8s ns
+		api.GET("/ns/option_list", ns.OptionList)
+
+		// doc
 		api.GET("/doc/:kind", doc.Doc)
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
 		api.POST("/doc/detail", doc.Detail)
