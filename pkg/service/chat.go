@@ -12,16 +12,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// Init 设置一个自检提示
-func init() {
-	apiKey, apiURL, _ := getChatGPTAuth()
-	if apiKey == "" || apiURL == "" {
-		// 前端不显示，后端提示
-		klog.V(2).Infof("ChatService：请配置环境变量，设置OPENAI_API_URL、OPENAI_API_KEY")
-		return
-	}
-}
-
 var model = "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 type ChatService struct {
