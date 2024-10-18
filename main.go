@@ -9,7 +9,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/config"
+	"github.com/weibaohui/k8m/flag"
 	"github.com/weibaohui/k8m/internal/kubectl"
 	"github.com/weibaohui/k8m/pkg/callback"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
@@ -28,7 +28,7 @@ var GitCommit string
 
 func Init() {
 	// 初始化配置
-	cfg := config.Init()
+	cfg := flag.Init()
 
 	// 打印版本和 Git commit 信息
 	klog.V(2).Infof("版本: %s\n", Version)
@@ -123,7 +123,7 @@ func main() {
 
 	}
 
-	err := r.Run(fmt.Sprintf(":%d", config.Init().Port))
+	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))
 	if err != nil {
 		klog.Fatalf("Error %v", err)
 	}
