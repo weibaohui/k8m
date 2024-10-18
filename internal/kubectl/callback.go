@@ -109,14 +109,7 @@ func (p *processor) Replace(name string, fn func(*Kubectl) error) error {
 }
 
 func (p *processor) Execute(k8s *Kubectl) error {
-	fmt.Println("len(p.fns)", len(p.fns))
-	fmt.Println("len(p.fns)", len(p.fns))
-	fmt.Println("len(p.fns)", len(p.fns))
-	fmt.Println("len(p.fns)", len(p.fns))
-	fmt.Println("len(p.fns)", len(p.fns))
-	fmt.Println("len(p.fns)", len(p.fns))
 	for _, f := range p.fns {
-		klog.V(2).Infof("(p *processor) Execute")
 		err := f(k8s)
 		if err != nil {
 			return err
