@@ -79,7 +79,9 @@ func InitConnection(path string) {
 
 	// 注册回调参数
 	kubectl.callbacks = initializeCallbacks(kubectl)
-	kubectl.Stmt = &Statement{}
+	kubectl.Stmt = &Statement{
+		Context: context.TODO(),
+	}
 }
 
 func getKubeConfig(path string) (*rest.Config, error) {
