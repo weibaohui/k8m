@@ -129,7 +129,7 @@ func (k8s *Kubectl) DeleteYAML(yamlStr string) (result []string) {
 			ns = "default" // 默认命名空间
 		}
 
-		err := k8s.RemoveResource(gvk.Kind, ns, obj.GetName())
+		err := k8s.DeleteResource(gvk.Kind, ns, obj.GetName())
 		if err != nil {
 			result = append(result, fmt.Sprintf("%s/%s deleted error:%v", obj.GetKind(), obj.GetName(), err))
 		} else {

@@ -21,6 +21,9 @@ type Kubectl struct {
 	dynamicClient dynamic.Interface
 
 	apiResources []metav1.APIResource
+
+	callbacks *callbacks
+	Stmt      *Statement
 }
 
 func Init() *Kubectl {
@@ -72,6 +75,10 @@ func InitConnection(path string) {
 			kubectl.apiResources = append(kubectl.apiResources, resource)
 		}
 	}
+
+	// 注册回调参数
+	kubectl.callbacks = initializeCallbacks(kubectl)
+	kubectl.Stmt = &Statement{}
 }
 
 func getKubeConfig(path string) (*rest.Config, error) {
@@ -91,4 +98,8 @@ func getKubeConfig(path string) (*rest.Config, error) {
 		klog.V(2).Infof("服务器地址：%s\n", config.Host)
 	}
 	return config, err
+}
+
+func (k8s *Kubectl) Callback() *callbacks {
+	return k8s.callbacks
 }

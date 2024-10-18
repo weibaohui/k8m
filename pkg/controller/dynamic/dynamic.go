@@ -89,7 +89,7 @@ func removeSingle(kind, group, ns, name string) error {
 		}
 	} else {
 		// 内置资源类型
-		err := kubectl.Init().RemoveResource(kind, ns, name)
+		err := kubectl.Init().DeleteResource(kind, ns, name)
 		if err != nil {
 			return err
 		}
