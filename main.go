@@ -34,7 +34,7 @@ func Init() {
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 
 	// 初始化kubectl 连接
-	kubectl.InitConnection(cfg.Kubeconfig)
+	kubectl.InitConnection(cfg.KubeConfig)
 
 	// 初始化文档
 	_ = kubectl.NewDocs()

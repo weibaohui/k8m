@@ -15,9 +15,9 @@ var config *Config
 
 type Config struct {
 	Port       int
-	Kubeconfig string
-	APIKey     string
-	APIURL     string
+	KubeConfig string
+	ApiKey     string
+	ApiURL     string
 	Debug      bool
 }
 
@@ -30,14 +30,13 @@ func Init() *Config {
 }
 
 func (c *Config) InitFlags() {
-	// todo 获取默认值，从ENV中获取
+	// 如果有其他类似的引用，请参考下面的方式进行整合
 	// 初始化klog
 	klog.InitFlags(nil)
 	// 将Go的flag绑定到pflag
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
 	// 环境变量绑定
-	// GIN_MODE
 	defaultPort := 3618
 	if envPort := os.Getenv("PORT"); envPort != "" {
 		defaultPort, _ = strconv.Atoi(envPort)
@@ -58,9 +57,9 @@ func (c *Config) InitFlags() {
 
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "Debug mode,same as GIN_MODE")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "Port for the server to listen on")
-	pflag.StringVarP(&c.APIKey, "chatgpt-key", "k", defaultApiKey, "API Key for ChatGPT")
-	pflag.StringVarP(&c.APIURL, "chatgpt-url", "u", defaultApiURL, "API URL for ChatGPT")
-	pflag.StringVarP(&c.Kubeconfig, "kubeconfig", "c", defaultKubeConfig, "Absolute path to the kubeConfig file")
+	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "API Key for ChatGPT")
+	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "API URL for ChatGPT")
+	pflag.StringVarP(&c.KubeConfig, "kubeconfig", "c", defaultKubeConfig, "Absolute path to the kubeConfig file")
 
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
