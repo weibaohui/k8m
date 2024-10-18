@@ -1,6 +1,7 @@
 package kubectl
 
 import (
+	"context"
 	"io"
 	"sort"
 
@@ -8,8 +9,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (k8s *Kubectl) ListPod(ns string) ([]v1.Pod, error) {
-	list, err := k8s.client.CoreV1().Pods(ns).List(k8s.Stmt.Context, metav1.ListOptions{})
+func (k8s *Kubectl) ListPod(ctx context.Context, ns string) ([]v1.Pod, error) {
+	list, err := k8s.client.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
 	if err == nil && list != nil && list.Items != nil && len(list.Items) > 0 {
 		// 按创建时间倒序排序 Pods 列表
 		sort.Slice(list.Items, func(i, j int) bool {
@@ -20,12 +21,12 @@ func (k8s *Kubectl) ListPod(ns string) ([]v1.Pod, error) {
 	return nil, err
 }
 
-func (k8s *Kubectl) GetPod(ns, name string) (*v1.Pod, error) {
-	pod, err := k8s.client.CoreV1().Pods(ns).Get(k8s.Stmt.Context, name, metav1.GetOptions{})
+func (k8s *Kubectl) GetPod(ctx context.Context, ns, name string) (*v1.Pod, error) {
+	pod, err := k8s.client.CoreV1().Pods(ns).Get(ctx, name, metav1.GetOptions{})
 	return pod, err
 }
 
-func (k8s *Kubectl) StreamPodLogs(ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
+func (k8s *Kubectl) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
 
 	// 检查logOptions
 	//  at most one of `sinceTime` or `sinceSeconds` may be specified
@@ -41,14 +42,14 @@ func (k8s *Kubectl) StreamPodLogs(ns, name string, logOptions *v1.PodLogOptions)
 	// 获取 Pod 日志
 	podLogs := k8s.client.CoreV1().Pods(ns).GetLogs(name, logOptions)
 
-	logStream, err := podLogs.Stream(k8s.Stmt.Context)
+	logStream, err := podLogs.Stream(ctx)
 
 	return logStream, err
 }
 
 // ListPodByLabelSelector key1=value1,key2=value2
-func (k8s *Kubectl) ListPodByLabelSelector(ns, selector string) ([]v1.Pod, error) {
-	list, err := k8s.client.CoreV1().Pods(ns).List(k8s.Stmt.Context, metav1.ListOptions{LabelSelector: selector})
+func (k8s *Kubectl) ListPodByLabelSelector(ctx context.Context, ns, selector string) ([]v1.Pod, error) {
+	list, err := k8s.client.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{LabelSelector: selector})
 	if err == nil && list != nil && list.Items != nil && len(list.Items) > 0 {
 		sort.Slice(list.Items, func(i, j int) bool {
 			return list.Items[i].CreationTimestamp.Time.After(list.Items[j].CreationTimestamp.Time)

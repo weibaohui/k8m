@@ -1,6 +1,7 @@
 package kubectl
 
 import (
+	"context"
 	"fmt"
 	"sort"
 
@@ -26,7 +27,7 @@ type callbacks struct {
 
 type processor struct {
 	kubectl   *Kubectl
-	fns       []func(*Kubectl) error
+	fns       []func(context.Context, *Kubectl) error
 	callbacks []*callback
 }
 type callback struct {
@@ -35,7 +36,7 @@ type callback struct {
 	after     string
 	remove    bool
 	replace   bool
-	handler   func(*Kubectl) error
+	handler   func(context.Context, *Kubectl) error
 	processor *processor
 }
 
@@ -65,7 +66,7 @@ func (c *callback) Remove(name string) error {
 	return c.processor.compile()
 }
 
-func (c *callback) Replace(name string, fn func(*Kubectl) error) error {
+func (c *callback) Replace(name string, fn func(context.Context, *Kubectl) error) error {
 	klog.V(4).Infof("replacing callback `%s` \n", name)
 	c.name = name
 	c.handler = fn
@@ -84,14 +85,14 @@ func (c *callback) After(name string) *callback {
 	return c
 }
 
-func (c *callback) Register(name string, fn func(*Kubectl) error) error {
+func (c *callback) Register(name string, fn func(context.Context, *Kubectl) error) error {
 	c.name = name
 	c.handler = fn
 	c.processor.callbacks = append(c.processor.callbacks, c)
 	return c.processor.compile()
 }
 
-func (p *processor) Get(name string) func(*Kubectl) error {
+func (p *processor) Get(name string) func(context.Context, *Kubectl) error {
 	for i := len(p.callbacks) - 1; i >= 0; i-- {
 		if v := p.callbacks[i]; v.name == name && !v.remove {
 			return v.handler
@@ -104,13 +105,13 @@ func (p *processor) Remove(name string) error {
 	return (&callback{processor: p}).Remove(name)
 }
 
-func (p *processor) Replace(name string, fn func(*Kubectl) error) error {
+func (p *processor) Replace(name string, fn func(context.Context, *Kubectl) error) error {
 	return (&callback{processor: p}).Replace(name, fn)
 }
 
-func (p *processor) Execute(k8s *Kubectl) error {
+func (p *processor) Execute(ctx context.Context, k8s *Kubectl) error {
 	for _, f := range p.fns {
-		err := f(k8s)
+		err := f(ctx, k8s)
 		if err != nil {
 			return err
 		}
@@ -126,7 +127,7 @@ func (p *processor) After(name string) *callback {
 	return &callback{after: name, processor: p}
 }
 
-func (p *processor) Register(name string, fn func(*Kubectl) error) error {
+func (p *processor) Register(name string, fn func(context.Context, *Kubectl) error) error {
 	return (&callback{processor: p}).Register(name, fn)
 }
 
@@ -150,7 +151,7 @@ func (p *processor) compile() (err error) {
 	}
 	return
 }
-func sortCallbacks(cs []*callback) (fns []func(*Kubectl) error, err error) {
+func sortCallbacks(cs []*callback) (fns []func(context.Context, *Kubectl) error, err error) {
 	var (
 		names, sorted []string
 		sortCallback  func(*callback) error

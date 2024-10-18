@@ -11,13 +11,15 @@ func UpdateImageTag(c *gin.Context) {
 	var name = c.Param("name")
 	var tag = c.Param("tag")
 	var containerName = c.Param("container_name")
-	deploy, _ := kubectl.Init().UpdateDeployImageTag(ns, name, containerName, tag)
+	ctx := c.Request.Context()
+	deploy, _ := kubectl.Init().UpdateDeployImageTag(ctx, ns, name, containerName, tag)
 	amis.WriteJsonData(c, deploy)
 
 }
 func Restart(c *gin.Context) {
 	var ns = c.Param("ns")
 	var name = c.Param("name")
-	deploy, _ := kubectl.Init().RestartDeploy(ns, name)
+	ctx := c.Request.Context()
+	deploy, _ := kubectl.Init().RestartDeploy(ctx, ns, name)
 	amis.WriteJsonData(c, deploy)
 }

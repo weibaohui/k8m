@@ -1,7 +1,6 @@
 package kubectl
 
 import (
-	"context"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -79,9 +78,7 @@ func InitConnection(path string) {
 
 	// 注册回调参数
 	kubectl.callbacks = initializeCallbacks(kubectl)
-	kubectl.Stmt = &Statement{
-		Context: context.TODO(),
-	}
+	kubectl.Stmt = &Statement{}
 }
 
 func getKubeConfig(path string) (*rest.Config, error) {
@@ -105,9 +102,4 @@ func getKubeConfig(path string) (*rest.Config, error) {
 
 func (k8s *Kubectl) Callback() *callbacks {
 	return k8s.callbacks
-}
-
-func (k8s *Kubectl) WithContext(c context.Context) *Kubectl {
-	k8s.Stmt.Context = c
-	return kubectl
 }

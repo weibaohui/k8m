@@ -7,7 +7,8 @@ import (
 )
 
 func OptionList(c *gin.Context) {
-	namespace, err := kubectl.Init().ListNamespace()
+	ctx := c.Request.Context()
+	namespace, err := kubectl.Init().ListNamespace(ctx)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}

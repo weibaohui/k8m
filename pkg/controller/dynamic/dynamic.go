@@ -14,16 +14,18 @@ func List(c *gin.Context) {
 	ns := c.Param("ns")
 	group := c.Param("group")
 	kind := c.Param("kind")
+	ctx := context.WithValue(c, "user", "zhangsan")
 	var list []unstructured.Unstructured
 	var err error
-	builtIn := kubectl.Init().WithContext(context.TODO()).IsBuiltinResource(kind)
+	builtIn := kubectl.Init().IsBuiltinResource(kind)
 	if builtIn {
 		// 内置资源
-		list, err = kubectl.Init().ListResources(kind, ns)
+
+		list, err = kubectl.Init().ListResources(ctx, kind, ns)
 	} else {
 		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
-			list, err = kubectl.Init().ListCRD(crd, ns)
+		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
+			list, err = kubectl.Init().ListCRD(ctx, crd, ns)
 		}
 	}
 
@@ -34,21 +36,22 @@ func Fetch(c *gin.Context) {
 	var name = c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	ctx := c.Request.Context()
 
 	var obj *unstructured.Unstructured
 	var err error
 	builtIn := kubectl.Init().IsBuiltinResource(kind)
 	if !builtIn {
 		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
-			obj, err = kubectl.Init().FetchCRD(crd, ns, name)
+		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
+			obj, err = kubectl.Init().FetchCRD(ctx, crd, ns, name)
 			if err != nil {
 				amis.WriteJsonError(c, err)
 				return
 			}
 		}
 	} else {
-		obj, err = kubectl.Init().GetResource(kind, ns, name)
+		obj, err = kubectl.Init().GetResource(ctx, kind, ns, name)
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
@@ -69,8 +72,9 @@ func Remove(c *gin.Context) {
 	var name = c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	ctx := c.Request.Context()
 
-	err := removeSingle(kind, group, ns, name)
+	err := removeSingle(ctx, kind, group, ns, name)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -78,19 +82,19 @@ func Remove(c *gin.Context) {
 	amis.WriteJsonOK(c)
 
 }
-func removeSingle(kind, group, ns, name string) error {
+func removeSingle(ctx context.Context, kind, group, ns, name string) error {
 	builtIn := kubectl.Init().IsBuiltinResource(kind)
 	if !builtIn {
 		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
-			err = kubectl.Init().RemoveCRD(crd, ns, name)
+		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
+			err = kubectl.Init().RemoveCRD(ctx, crd, ns, name)
 			if err != nil {
 				return err
 			}
 		}
 	} else {
 		// 内置资源类型
-		err := kubectl.Init().DeleteResource(kind, ns, name)
+		err := kubectl.Init().DeleteResource(ctx, kind, ns, name)
 		if err != nil {
 			return err
 		}
@@ -109,6 +113,7 @@ func BatchRemove(c *gin.Context) {
 	var ns = c.Param("ns")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	ctx := c.Request.Context()
 
 	// 初始化结构体实例
 	var payload NamesPayload
@@ -120,7 +125,7 @@ func BatchRemove(c *gin.Context) {
 	}
 
 	for _, name := range payload.Names {
-		_ = removeSingle(kind, group, ns, name)
+		_ = removeSingle(ctx, kind, group, ns, name)
 	}
 	amis.WriteJsonOK(c)
 }
@@ -134,6 +139,7 @@ func Save(c *gin.Context) {
 	var name = c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	ctx := c.Request.Context()
 
 	var req ApplyYAMLRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -155,15 +161,15 @@ func Save(c *gin.Context) {
 	builtIn := kubectl.Init().IsBuiltinResource(kind)
 	if !builtIn {
 		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(kind, group); err == nil {
-			_, err = kubectl.Init().UpdateCRD(crd, &obj)
+		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
+			_, err = kubectl.Init().UpdateCRD(ctx, crd, &obj)
 			if err != nil {
 				amis.WriteJsonError(c, err)
 				return
 			}
 		}
 	} else {
-		_, err := kubectl.Init().UpdateResource(kind, ns, &obj)
+		_, err := kubectl.Init().UpdateResource(ctx, kind, ns, &obj)
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
@@ -176,13 +182,15 @@ func Save(c *gin.Context) {
 }
 
 func Apply(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	var req ApplyYAMLRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	yamlStr := req.YAML
-	result := kubectl.Init().ApplyYAML(yamlStr)
+	result := kubectl.Init().ApplyYAML(ctx, yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
@@ -190,13 +198,15 @@ func Apply(c *gin.Context) {
 
 }
 func Delete(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	var req ApplyYAMLRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	yamlStr := req.YAML
-	result := kubectl.Init().DeleteYAML(yamlStr)
+	result := kubectl.Init().DeleteYAML(ctx, yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})

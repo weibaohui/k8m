@@ -1,6 +1,7 @@
 package kubectl
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -27,7 +28,7 @@ func WithFieldSelector(fieldSelector string) ListOption {
 	}
 }
 
-func (k8s *Kubectl) ListResources(kind string, ns string, opts ...ListOption) ([]unstructured.Unstructured, error) {
+func (k8s *Kubectl) ListResources(ctx context.Context, kind string, ns string, opts ...ListOption) ([]unstructured.Unstructured, error) {
 	gvr, namespaced := k8s.GetGVR(kind)
 	if gvr.Empty() {
 		return nil, fmt.Errorf("不支持的资源类型: %s", kind)
@@ -46,16 +47,16 @@ func (k8s *Kubectl) ListResources(kind string, ns string, opts ...ListOption) ([
 		SetNamespaced(namespaced).
 		SetType(Query).
 		SetListOptions(&listOptions)
-	err = k8s.Callback().Query().Execute(k8s)
+	err = k8s.Callback().Query().Execute(ctx, k8s)
 	if err != nil {
 		return nil, err
 	}
 
 	var list *unstructured.UnstructuredList
 	if namespaced {
-		list, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).List(k8s.Stmt.Context, listOptions)
+		list, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).List(ctx, listOptions)
 	} else {
-		list, err = k8s.dynamicClient.Resource(gvr).List(k8s.Stmt.Context, listOptions)
+		list, err = k8s.dynamicClient.Resource(gvr).List(ctx, listOptions)
 	}
 	if err != nil {
 		return nil, err
@@ -69,7 +70,7 @@ func (k8s *Kubectl) ListResources(kind string, ns string, opts ...ListOption) ([
 
 	return sortByCreationTime(resources), nil
 }
-func (k8s *Kubectl) GetResource(kind string, ns, name string) (*unstructured.Unstructured, error) {
+func (k8s *Kubectl) GetResource(ctx context.Context, kind string, ns, name string) (*unstructured.Unstructured, error) {
 	gvr, namespaced := k8s.GetGVR(kind)
 	if gvr.Empty() {
 		return nil, fmt.Errorf("不支持的资源类型: %s", kind)
@@ -82,15 +83,15 @@ func (k8s *Kubectl) GetResource(kind string, ns, name string) (*unstructured.Uns
 		SetKind(kind).
 		SetNamespaced(namespaced).
 		SetType(Query)
-	err = k8s.Callback().Query().Execute(k8s)
+	err = k8s.Callback().Query().Execute(ctx, k8s)
 	if err != nil {
 		return nil, err
 	}
 
 	if namespaced {
-		res, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Get(k8s.Stmt.Context, name, metav1.GetOptions{})
+		res, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Get(ctx, name, metav1.GetOptions{})
 	} else {
-		res, err = k8s.dynamicClient.Resource(gvr).Get(k8s.Stmt.Context, name, metav1.GetOptions{})
+		res, err = k8s.dynamicClient.Resource(gvr).Get(ctx, name, metav1.GetOptions{})
 	}
 	if err != nil {
 		return nil, err
@@ -99,7 +100,7 @@ func (k8s *Kubectl) GetResource(kind string, ns, name string) (*unstructured.Uns
 	removeManagedFields(res)
 	return res, nil
 }
-func (k8s *Kubectl) CreateResource(kind string, ns string, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+func (k8s *Kubectl) CreateResource(ctx context.Context, kind string, ns string, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 	gvr, namespaced := k8s.GetGVR(kind)
 	if gvr.Empty() {
 		return nil, fmt.Errorf("不支持的资源类型: %s", kind)
@@ -112,14 +113,14 @@ func (k8s *Kubectl) CreateResource(kind string, ns string, resource *unstructure
 		SetKind(kind).
 		SetNamespaced(namespaced).
 		SetType(Create)
-	err = k8s.Callback().Create().Execute(k8s)
+	err = k8s.Callback().Create().Execute(ctx, k8s)
 	if err != nil {
 		return nil, err
 	}
 	if namespaced {
-		createdResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Create(k8s.Stmt.Context, resource, metav1.CreateOptions{})
+		createdResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Create(ctx, resource, metav1.CreateOptions{})
 	} else {
-		createdResource, err = k8s.dynamicClient.Resource(gvr).Create(k8s.Stmt.Context, resource, metav1.CreateOptions{})
+		createdResource, err = k8s.dynamicClient.Resource(gvr).Create(ctx, resource, metav1.CreateOptions{})
 	}
 	if err != nil {
 		return nil, err
@@ -129,7 +130,7 @@ func (k8s *Kubectl) CreateResource(kind string, ns string, resource *unstructure
 	return createdResource, nil
 }
 
-func (k8s *Kubectl) UpdateResource(kind string, ns string, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+func (k8s *Kubectl) UpdateResource(ctx context.Context, kind string, ns string, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 	gvr, namespaced := k8s.GetGVR(kind)
 	if gvr.Empty() {
 		return nil, fmt.Errorf("不支持的资源类型: %s", kind)
@@ -142,14 +143,14 @@ func (k8s *Kubectl) UpdateResource(kind string, ns string, resource *unstructure
 		SetKind(kind).
 		SetNamespaced(namespaced).
 		SetType(Update)
-	err = k8s.Callback().Update().Execute(k8s)
+	err = k8s.Callback().Update().Execute(ctx, k8s)
 	if err != nil {
 		return nil, err
 	}
 	if namespaced {
-		updatedResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Update(k8s.Stmt.Context, resource, metav1.UpdateOptions{})
+		updatedResource, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Update(ctx, resource, metav1.UpdateOptions{})
 	} else {
-		updatedResource, err = k8s.dynamicClient.Resource(gvr).Update(k8s.Stmt.Context, resource, metav1.UpdateOptions{})
+		updatedResource, err = k8s.dynamicClient.Resource(gvr).Update(ctx, resource, metav1.UpdateOptions{})
 	}
 
 	if err != nil {
@@ -159,7 +160,7 @@ func (k8s *Kubectl) UpdateResource(kind string, ns string, resource *unstructure
 	return updatedResource, nil
 }
 
-func (k8s *Kubectl) DeleteResource(kind string, ns, name string) error {
+func (k8s *Kubectl) DeleteResource(ctx context.Context, kind string, ns, name string) error {
 	gvr, namespaced := k8s.GetGVR(kind)
 	if gvr.Empty() {
 		return fmt.Errorf("不支持的资源类型: %s", kind)
@@ -172,19 +173,19 @@ func (k8s *Kubectl) DeleteResource(kind string, ns, name string) error {
 		SetKind(kind).
 		SetNamespaced(namespaced).
 		SetType(Delete)
-	err = k8s.Callback().Delete().Execute(k8s)
+	err = k8s.Callback().Delete().Execute(ctx, k8s)
 	if err != nil {
 		return err
 	}
 
 	if namespaced {
-		return k8s.dynamicClient.Resource(gvr).Namespace(ns).Delete(k8s.Stmt.Context, name, metav1.DeleteOptions{})
+		return k8s.dynamicClient.Resource(gvr).Namespace(ns).Delete(ctx, name, metav1.DeleteOptions{})
 	} else {
-		return k8s.dynamicClient.Resource(gvr).Delete(k8s.Stmt.Context, name, metav1.DeleteOptions{})
+		return k8s.dynamicClient.Resource(gvr).Delete(ctx, name, metav1.DeleteOptions{})
 	}
 }
 
-func (k8s *Kubectl) PatchResource(kind string, ns, name string, patchType types.PatchType, patchData []byte) (*unstructured.Unstructured, error) {
+func (k8s *Kubectl) PatchResource(ctx context.Context, kind string, ns, name string, patchType types.PatchType, patchData []byte) (*unstructured.Unstructured, error) {
 	gvr, namespaced := k8s.GetGVR(kind)
 	if gvr.Empty() {
 		return nil, fmt.Errorf("不支持的资源类型: %s", kind)
@@ -197,15 +198,15 @@ func (k8s *Kubectl) PatchResource(kind string, ns, name string, patchType types.
 		SetKind(kind).
 		SetNamespaced(namespaced).
 		SetType(Patch)
-	err = k8s.Callback().Update().Execute(k8s)
+	err = k8s.Callback().Update().Execute(ctx, k8s)
 	if err != nil {
 		return nil, err
 	}
 
 	if namespaced {
-		obj, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Patch(k8s.Stmt.Context, name, patchType, patchData, metav1.PatchOptions{})
+		obj, err = k8s.dynamicClient.Resource(gvr).Namespace(ns).Patch(ctx, name, patchType, patchData, metav1.PatchOptions{})
 	} else {
-		obj, err = k8s.dynamicClient.Resource(gvr).Patch(k8s.Stmt.Context, name, patchType, patchData, metav1.PatchOptions{})
+		obj, err = k8s.dynamicClient.Resource(gvr).Patch(ctx, name, patchType, patchData, metav1.PatchOptions{})
 	}
 	if err != nil {
 		return nil, err

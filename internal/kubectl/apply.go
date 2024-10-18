@@ -1,6 +1,7 @@
 package kubectl
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // ApplyYAML  解析并应用 YAML 字符串到 Kubernetes
-func (k8s *Kubectl) ApplyYAML(yamlStr string) (result []string) {
+func (k8s *Kubectl) ApplyYAML(ctx context.Context, yamlStr string) (result []string) {
 	docs := splitYAML(yamlStr)
 
 	for _, doc := range docs {
@@ -34,11 +35,11 @@ func (k8s *Kubectl) ApplyYAML(yamlStr string) (result []string) {
 
 		builtin := k8s.IsBuiltinResource(gvk.Kind)
 		if !builtin {
-			crd, err := k8s.GetCRD(gvk.Kind, gvk.Group)
+			crd, err := k8s.GetCRD(ctx, gvk.Kind, gvk.Group)
 			if err != nil {
 				result = append(result, fmt.Sprintf("%v", err))
 			} else {
-				crdResult := k8s.ApplyCRD(crd, &obj)
+				crdResult := k8s.ApplyCRD(ctx, crd, &obj)
 				result = append(result, crdResult)
 			}
 			continue
@@ -54,11 +55,11 @@ func (k8s *Kubectl) ApplyYAML(yamlStr string) (result []string) {
 		}
 
 		// 使用 CreateOrUpdateResource 应用资源
-		_, err := k8s.CreateResource(kind, ns, &obj)
+		_, err := k8s.CreateResource(ctx, kind, ns, &obj)
 		if err != nil {
 			if errors.IsAlreadyExists(err) {
 				// 已经存在，更新
-				existingResource, err := k8s.GetResource(kind, ns, obj.GetName())
+				existingResource, err := k8s.GetResource(ctx, kind, ns, obj.GetName())
 				if err != nil {
 					result = append(result, fmt.Sprintf("获取应用失败%v", err.Error()))
 					continue
@@ -67,7 +68,7 @@ func (k8s *Kubectl) ApplyYAML(yamlStr string) (result []string) {
 					obj.SetResourceVersion(existingResource.GetResourceVersion())
 				}
 
-				_, err = k8s.UpdateResource(kind, ns, &obj)
+				_, err = k8s.UpdateResource(ctx, kind, ns, &obj)
 				if err != nil {
 					result = append(result, fmt.Sprintf("更新应用失败：%v", err.Error()))
 					continue
@@ -86,7 +87,7 @@ func (k8s *Kubectl) ApplyYAML(yamlStr string) (result []string) {
 
 	return result
 }
-func (k8s *Kubectl) DeleteYAML(yamlStr string) (result []string) {
+func (k8s *Kubectl) DeleteYAML(ctx context.Context, yamlStr string) (result []string) {
 	docs := splitYAML(yamlStr)
 
 	for _, doc := range docs {
@@ -112,12 +113,12 @@ func (k8s *Kubectl) DeleteYAML(yamlStr string) (result []string) {
 		builtIn := k8s.IsBuiltinResource(gvk.Kind)
 		if !builtIn {
 			// CRD 类型资源
-			crd, err := k8s.GetCRD(gvk.Kind, gvk.Group)
+			crd, err := k8s.GetCRD(ctx, gvk.Kind, gvk.Group)
 			if err != nil {
 				result = append(result, fmt.Sprintf("%v", err))
 			} else {
 				// 确认为 CRD
-				crdResult := k8s.DeleteCRD(crd, &obj)
+				crdResult := k8s.DeleteCRD(ctx, crd, &obj)
 				result = append(result, crdResult)
 			}
 			continue
@@ -129,7 +130,7 @@ func (k8s *Kubectl) DeleteYAML(yamlStr string) (result []string) {
 			ns = "default" // 默认命名空间
 		}
 
-		err := k8s.DeleteResource(gvk.Kind, ns, obj.GetName())
+		err := k8s.DeleteResource(ctx, gvk.Kind, ns, obj.GetName())
 		if err != nil {
 			result = append(result, fmt.Sprintf("%s/%s deleted error:%v", obj.GetKind(), obj.GetName(), err))
 		} else {

@@ -1,13 +1,14 @@
 package kubectl
 
 import (
+	"context"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func (k8s *Kubectl) FetchCRD(crd *unstructured.Unstructured, ns, name string) (*unstructured.Unstructured, error) {
+func (k8s *Kubectl) FetchCRD(ctx context.Context, crd *unstructured.Unstructured, ns, name string) (*unstructured.Unstructured, error) {
 	gvr := k8s.getGRVFromCRD(crd)
 	// 检查CRD是否是Namespaced
 	isNamespaced := crd.Object["spec"].(map[string]interface{})["scope"].(string) == "Namespaced"
@@ -15,9 +16,9 @@ func (k8s *Kubectl) FetchCRD(crd *unstructured.Unstructured, ns, name string) (*
 	if ns == "" && isNamespaced {
 		ns = "default" // 默认命名空间
 	}
-	return k8s.GetResourceDynamic(gvr, isNamespaced, ns, name)
+	return k8s.GetResourceDynamic(ctx, gvr, isNamespaced, ns, name)
 }
-func (k8s *Kubectl) RemoveCRD(crd *unstructured.Unstructured, ns, name string) error {
+func (k8s *Kubectl) RemoveCRD(ctx context.Context, crd *unstructured.Unstructured, ns, name string) error {
 	gvr := k8s.getGRVFromCRD(crd)
 	// 检查CRD是否是Namespaced
 	isNamespaced := crd.Object["spec"].(map[string]interface{})["scope"].(string) == "Namespaced"
@@ -25,9 +26,9 @@ func (k8s *Kubectl) RemoveCRD(crd *unstructured.Unstructured, ns, name string) e
 	if ns == "" && isNamespaced {
 		ns = "default" // 默认命名空间
 	}
-	return k8s.RemoveResourceDynamic(gvr, isNamespaced, ns, name)
+	return k8s.RemoveResourceDynamic(ctx, gvr, isNamespaced, ns, name)
 }
-func (k8s *Kubectl) UpdateCRD(crd *unstructured.Unstructured, res *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+func (k8s *Kubectl) UpdateCRD(ctx context.Context, crd *unstructured.Unstructured, res *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 	gvr := k8s.getGRVFromCRD(crd)
 	// 检查CRD是否是Namespaced
 	isNamespaced := crd.Object["spec"].(map[string]interface{})["scope"].(string) == "Namespaced"
@@ -35,9 +36,9 @@ func (k8s *Kubectl) UpdateCRD(crd *unstructured.Unstructured, res *unstructured.
 	if res.GetNamespace() == "" && isNamespaced {
 		res.SetNamespace("default") // 默认命名空间
 	}
-	return k8s.UpdateResourceDynamic(gvr, isNamespaced, res)
+	return k8s.UpdateResourceDynamic(ctx, gvr, isNamespaced, res)
 }
-func (k8s *Kubectl) ListCRD(crd *unstructured.Unstructured, ns string) ([]unstructured.Unstructured, error) {
+func (k8s *Kubectl) ListCRD(ctx context.Context, crd *unstructured.Unstructured, ns string) ([]unstructured.Unstructured, error) {
 	gvr := k8s.getGRVFromCRD(crd)
 	// 检查CRD是否是Namespaced
 	isNamespaced := crd.Object["spec"].(map[string]interface{})["scope"].(string) == "Namespaced"
@@ -45,11 +46,11 @@ func (k8s *Kubectl) ListCRD(crd *unstructured.Unstructured, ns string) ([]unstru
 	if ns == "" && isNamespaced {
 		ns = "default" // 默认命名空间
 	}
-	return k8s.ListResourcesDynamic(gvr, isNamespaced, ns)
+	return k8s.ListResourcesDynamic(ctx, gvr, isNamespaced, ns)
 }
 
-func (k8s *Kubectl) GetCRD(kind string, group string) (*unstructured.Unstructured, error) {
-	crdList, err := k8s.ListResources("CustomResourceDefinition", "")
+func (k8s *Kubectl) GetCRD(ctx context.Context, kind string, group string) (*unstructured.Unstructured, error) {
+	crdList, err := k8s.ListResources(ctx, "CustomResourceDefinition", "")
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (k8s *Kubectl) getGRVFromCRD(crd *unstructured.Unstructured) schema.GroupVe
 	}
 	return gvr
 }
-func (k8s *Kubectl) DeleteCRD(crd *unstructured.Unstructured, obj *unstructured.Unstructured) (result string) {
+func (k8s *Kubectl) DeleteCRD(ctx context.Context, crd *unstructured.Unstructured, obj *unstructured.Unstructured) (result string) {
 	gvr := k8s.getGRVFromCRD(crd)
 	// 检查CRD是否是Namespaced
 	isNamespaced := crd.Object["spec"].(map[string]interface{})["scope"].(string) == "Namespaced"
@@ -98,7 +99,7 @@ func (k8s *Kubectl) DeleteCRD(crd *unstructured.Unstructured, obj *unstructured.
 		ns = "default" // 默认命名空间
 		obj.SetNamespace(ns)
 	}
-	err := k8s.RemoveResourceDynamic(gvr, isNamespaced, ns, name)
+	err := k8s.RemoveResourceDynamic(ctx, gvr, isNamespaced, ns, name)
 	if err != nil {
 		result = fmt.Sprintf("%s/%s deleted error:%v", obj.GetKind(), obj.GetName(), err)
 	} else {
@@ -106,7 +107,7 @@ func (k8s *Kubectl) DeleteCRD(crd *unstructured.Unstructured, obj *unstructured.
 	}
 	return result
 }
-func (k8s *Kubectl) ApplyCRD(crd *unstructured.Unstructured, obj *unstructured.Unstructured) (result string) {
+func (k8s *Kubectl) ApplyCRD(ctx context.Context, crd *unstructured.Unstructured, obj *unstructured.Unstructured) (result string) {
 	gvr := k8s.getGRVFromCRD(crd)
 	// 检查CRD是否是Namespaced
 	isNamespaced := crd.Object["spec"].(map[string]interface{})["scope"].(string) == "Namespaced"
@@ -118,11 +119,11 @@ func (k8s *Kubectl) ApplyCRD(crd *unstructured.Unstructured, obj *unstructured.U
 		ns = "default" // 默认命名空间
 		obj.SetNamespace(ns)
 	}
-	exist, err := k8s.GetResourceDynamic(gvr, isNamespaced, ns, name)
+	exist, err := k8s.GetResourceDynamic(ctx, gvr, isNamespaced, ns, name)
 	if err == nil && exist != nil && exist.GetName() != "" {
 		// 已经存在资源，那么就更新
 		obj.SetResourceVersion(exist.GetResourceVersion())
-		_, err := k8s.UpdateResourceDynamic(gvr, isNamespaced, obj)
+		_, err := k8s.UpdateResourceDynamic(ctx, gvr, isNamespaced, obj)
 		if err != nil {
 			result = fmt.Sprintf("更新CRD应用失败：%v", err.Error())
 			return result
@@ -130,7 +131,7 @@ func (k8s *Kubectl) ApplyCRD(crd *unstructured.Unstructured, obj *unstructured.U
 		result = fmt.Sprintf("%s/%s updated", kind, name)
 	} else {
 		// 不存在，那么就创建
-		_, err := k8s.CreateResourceDynamic(gvr, isNamespaced, obj)
+		_, err := k8s.CreateResourceDynamic(ctx, gvr, isNamespaced, obj)
 		if err != nil {
 			result = fmt.Sprintf("创建CRD应用失败：%v %s/%s %v", err.Error(), gvr.GroupResource(), name, isNamespaced)
 			return result

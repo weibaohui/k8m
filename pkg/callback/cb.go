@@ -1,6 +1,8 @@
 package callback
 
 import (
+	"context"
+
 	"github.com/weibaohui/k8m/internal/kubectl"
 	"k8s.io/klog/v2"
 )
@@ -10,8 +12,9 @@ func RegisterCallback() {
 	_ = queryCallback.Register("k8m:query", Query)
 }
 
-func Query(k8s *kubectl.Kubectl) error {
+func Query(ctx context.Context, k8s *kubectl.Kubectl) error {
 	json := k8s.Stmt.String()
-	klog.V(2).Infof("k8s Query stmt json:\n%s\n", json)
+	u := ctx.Value("user")
+	klog.V(2).Infof("%s k8s Query stmt json:\n %s\n", u, json)
 	return nil
 }

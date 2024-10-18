@@ -19,7 +19,9 @@ func StreamLogs(c *gin.Context) {
 	StreamPodLogsBySelector(c, ns, containerName, kubectl.WithFieldSelector(selector))
 }
 func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, opts ...kubectl.ListOption) {
-	pods, err := kubectl.Init().ListResources("Pod", ns, opts...)
+	ctx := c.Request.Context()
+
+	pods, err := kubectl.Init().ListResources(ctx, "Pod", ns, opts...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -35,7 +37,7 @@ func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, op
 		amis.WriteJsonError(c, err)
 		return
 	}
-	stream, err := kubectl.Init().StreamPodLogs(ns, podName, logOpt)
+	stream, err := kubectl.Init().StreamPodLogs(ctx, ns, podName, logOpt)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -52,7 +54,9 @@ func DownloadLogs(c *gin.Context) {
 	DownloadPodLogsBySelector(c, ns, containerName, kubectl.WithFieldSelector(selector))
 }
 func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, opts ...kubectl.ListOption) {
-	pods, err := kubectl.Init().ListResources("Pod", ns, opts...)
+	ctx := c.Request.Context()
+
+	pods, err := kubectl.Init().ListResources(ctx, "Pod", ns, opts...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -70,7 +74,7 @@ func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, 
 	}
 	logOpt.Follow = false
 
-	stream, err := kubectl.Init().StreamPodLogs(ns, podName, logOpt)
+	stream, err := kubectl.Init().StreamPodLogs(ctx, ns, podName, logOpt)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)

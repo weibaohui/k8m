@@ -1,18 +1,19 @@
 package kubectl
 
 import (
+	"context"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (k8s *Kubectl) CreateImagePullSecret(ns string, serviceAccount string, pullSecret string) error {
+func (k8s *Kubectl) CreateImagePullSecret(ctx context.Context, ns string, serviceAccount string, pullSecret string) error {
 
 	secretName := "pull-secret"
 
 	// 先查查Secrets 有没有
-	_, err := k8s.GetSecret(ns, secretName)
+	_, err := k8s.GetSecret(ctx, ns, secretName)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		secret := &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
@@ -25,14 +26,14 @@ func (k8s *Kubectl) CreateImagePullSecret(ns string, serviceAccount string, pull
 			},
 		}
 		// 创建 secret
-		_, err := k8s.CreateSecret(secret)
+		_, err := k8s.CreateSecret(ctx, secret)
 		if err != nil {
 			return err
 		}
 	}
 
 	// 将 secret 绑定到 ServiceAccount
-	sa, err := k8s.GetServiceAccount(ns, serviceAccount)
+	sa, err := k8s.GetServiceAccount(ctx, ns, serviceAccount)
 	if err != nil {
 		return err
 	}
@@ -46,6 +47,6 @@ func (k8s *Kubectl) CreateImagePullSecret(ns string, serviceAccount string, pull
 
 	// 绑定 imagePullSecret
 	sa.ImagePullSecrets = append(sa.ImagePullSecrets, corev1.LocalObjectReference{Name: secretName})
-	_, err = k8s.UpdateServiceAccount(sa)
+	_, err = k8s.UpdateServiceAccount(ctx, sa)
 	return err
 }

@@ -1,14 +1,15 @@
 package kubectl
 
 import (
+	"context"
 	"sort"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (k8s *Kubectl) ListConfigMap(ns string) ([]v1.ConfigMap, error) {
-	list, err := k8s.client.CoreV1().ConfigMaps(ns).List(k8s.Stmt.Context, metav1.ListOptions{})
+func (k8s *Kubectl) ListConfigMap(ctx context.Context, ns string) ([]v1.ConfigMap, error) {
+	list, err := k8s.client.CoreV1().ConfigMaps(ns).List(ctx, metav1.ListOptions{})
 	if err == nil && list != nil && list.Items != nil && len(list.Items) > 0 {
 		// 按创建时间倒序排序 Pods 列表
 		sort.Slice(list.Items, func(i, j int) bool {
@@ -19,15 +20,15 @@ func (k8s *Kubectl) ListConfigMap(ns string) ([]v1.ConfigMap, error) {
 	return nil, err
 }
 
-func (k8s *Kubectl) GetConfigMap(ns, name string) (*v1.ConfigMap, error) {
-	ConfigMap, err := k8s.client.CoreV1().ConfigMaps(ns).Get(k8s.Stmt.Context, name, metav1.GetOptions{})
+func (k8s *Kubectl) GetConfigMap(ctx context.Context, ns, name string) (*v1.ConfigMap, error) {
+	ConfigMap, err := k8s.client.CoreV1().ConfigMaps(ns).Get(ctx, name, metav1.GetOptions{})
 	return ConfigMap, err
 }
-func (k8s *Kubectl) RemoveConfigMap(ns, name string) error {
-	err := k8s.client.CoreV1().ConfigMaps(ns).Delete(k8s.Stmt.Context, name, metav1.DeleteOptions{})
+func (k8s *Kubectl) RemoveConfigMap(ctx context.Context, ns, name string) error {
+	err := k8s.client.CoreV1().ConfigMaps(ns).Delete(ctx, name, metav1.DeleteOptions{})
 	return err
 }
-func (k8s *Kubectl) CreateConfigMap(cm *v1.ConfigMap) (*v1.ConfigMap, error) {
-	cm, err := k8s.client.CoreV1().ConfigMaps(cm.Namespace).Create(k8s.Stmt.Context, cm, metav1.CreateOptions{})
+func (k8s *Kubectl) CreateConfigMap(ctx context.Context, cm *v1.ConfigMap) (*v1.ConfigMap, error) {
+	cm, err := k8s.client.CoreV1().ConfigMaps(cm.Namespace).Create(ctx, cm, metav1.CreateOptions{})
 	return cm, err
 }
