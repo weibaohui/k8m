@@ -4,7 +4,7 @@
 [build]
 cmd = "make build"  # 使用 Makefile 的 build 目标
 bin = "bin/k8m -d -v 6"     # 可执行文件路径
-include_ext = ["go", "tpl", "tmpl", "html", "css", "js", "json", "png", "jpg"]  # 根据需要添加文件扩展名
+include_ext = ["go", "html", "css", "js", "json"]  # 根据需要添加文件扩展名
 exclude_dir = ["bin", "vendor"]
 exclude_file = ["*.test"]
 
