@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/config"
 	"github.com/weibaohui/k8m/internal/kubectl"
+	"github.com/weibaohui/k8m/pkg/callback"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
@@ -38,6 +39,9 @@ func Init() {
 
 	// 初始化文档
 	_ = kubectl.NewDocs()
+
+	// 初始化回调
+	callback.RegisterCallback()
 
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
