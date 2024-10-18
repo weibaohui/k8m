@@ -1,6 +1,8 @@
 package kubectl
 
 import (
+	"context"
+
 	"github.com/weibaohui/k8m/internal/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -30,6 +32,7 @@ type Statement struct {
 	ListOptions  *metav1.ListOptions
 	Type         StatementType // list get create update remove
 	Resource     string
+	Context      context.Context
 }
 
 func (s *Statement) SetNamespace(ns string) *Statement {
