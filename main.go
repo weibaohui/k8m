@@ -9,7 +9,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/flag"
 	"github.com/weibaohui/k8m/pkg/callback"
 	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
@@ -18,6 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"k8s.io/klog/v2"
 )
 
