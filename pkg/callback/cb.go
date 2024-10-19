@@ -3,7 +3,7 @@ package callback
 import (
 	"context"
 
-	"github.com/weibaohui/k8m/internal/kubectl"
+	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"k8s.io/klog/v2"
 )
 

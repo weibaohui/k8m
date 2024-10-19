@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/weibaohui/k8m/internal/utils"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/klog/v2"
 )

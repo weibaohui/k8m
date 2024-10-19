@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/internal/utils/amis"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog/v2"
 )

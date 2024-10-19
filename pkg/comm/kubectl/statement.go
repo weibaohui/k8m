@@ -1,7 +1,7 @@
 package kubectl
 
 import (
-	"github.com/weibaohui/k8m/internal/utils"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )

@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
-	"github.com/weibaohui/k8m/internal/utils/amis"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )

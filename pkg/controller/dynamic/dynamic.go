@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/internal/kubectl"
-	"github.com/weibaohui/k8m/internal/utils/amis"
+	"github.com/weibaohui/k8m/pkg/comm/kubectl"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 )

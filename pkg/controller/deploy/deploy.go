@@ -2,8 +2,8 @@ package deploy
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/internal/kubectl"
-	"github.com/weibaohui/k8m/internal/utils/amis"
+	"github.com/weibaohui/k8m/pkg/comm/kubectl"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 )
 
 func UpdateImageTag(c *gin.Context) {
