@@ -64,24 +64,18 @@ export OPENAI_API_URL="https://api.siliconflow.cn/v1"
 
 ### **可用目标**
 
-#### 1. **all**
+#### 1. **make**
 - **描述**：默认目标，构建当前平台的可执行文件。
 - **使用方法**：
   ```bash
   make
   ```
-  或
-  ```bash
-  make all
-  ```
-
 #### 2. **build**
 - **描述**：根据当前系统的操作系统和架构，为当前平台构建可执行文件。
 - **使用方法**：
-  ```bash
-  make build
-  ```
-- **输出**：编译后的二进制文件将位于 `bin/` 目录中，文件名为 `k8m`（或 `k8m.exe` 适用于 Windows）。
+```bash
+make build
+```
 
 #### 3. **build-all**
 - **描述**：为所有指定的平台和架构进行交叉编译，生成相应的可执行文件。
