@@ -5,6 +5,7 @@ BINARY_NAME=k8m
 OUTPUT_DIR=bin
 
 # 定义版本信息，默认值为 v1.0.0，可以通过命令行覆盖
+# 例如 make build-all VERSION=v0.0.1
 VERSION ?= v1.0.0
 
 # 获取当前 Git commit 的简短哈希
@@ -50,7 +51,7 @@ build-all:
 		else \
 			EXT=""; \
 		fi; \
-		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
+		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$(VERSION)-$$GOOS-$$GOARCH$$EXT"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
 		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)\" -o $$OUTPUT_FILE ."; \
 		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)" -o "$$OUTPUT_FILE" .; \
