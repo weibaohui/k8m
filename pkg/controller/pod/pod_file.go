@@ -181,7 +181,8 @@ func UploadFile(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("路径不能为空"))
 		return
 	}
-	// 删除path最后一个/后面的内容，取当前选中文件的父级路径
+	// 替换FileName中非法字符
+	info.FileName = utils.SanitizeFileName(info.FileName)
 
 	pf := kubectl.PodFileInfo{
 		Namespace:     info.Namespace,

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -96,4 +97,15 @@ func IsTextFile(ob []byte) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// SanitizeFileName 去除文件名中的非法字符，并替换为下划线 '_'
+func SanitizeFileName(filename string) string {
+	// 定义非法字符的正则表达式，包括 \ / : * ? " < > | 以及小括号 ()
+	reg := regexp.MustCompile(`[\\/:*?"<>|()]+`)
+
+	// 替换非法字符为下划线 '_'
+	sanitizedFilename := reg.ReplaceAllString(filename, "_")
+
+	return sanitizedFilename
 }
