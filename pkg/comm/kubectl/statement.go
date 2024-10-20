@@ -2,12 +2,16 @@ package kubectl
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 )
 
@@ -28,14 +32,11 @@ type Statement struct {
 	Statement     *Statement
 	Namespace     string
 	Name          string
-	Group         string
-	Version       string
-	Kind          string
 	GVR           schema.GroupVersionResource
+	GVK           schema.GroupVersionKind
 	Namespaced    bool
 	ListOptions   *metav1.ListOptions
 	Type          StatementType // list get create update remove
-	Resource      string
 	Context       context.Context
 	client        *kubernetes.Clientset
 	config        *rest.Config
@@ -59,19 +60,6 @@ func (s *Statement) SetType(t StatementType) *Statement {
 
 func (s *Statement) setGVR(gvr schema.GroupVersionResource) *Statement {
 	s.GVR = gvr
-	s.Group = gvr.Group
-	s.Version = gvr.Version
-	s.Resource = gvr.Resource
-
-	return s
-}
-
-func (s *Statement) SetError(err error) *Statement {
-	s.Error = err
-	return s
-}
-func (s *Statement) SetRowsAffected(rows int64) *Statement {
-	s.RowsAffected = rows
 	return s
 }
 
@@ -87,11 +75,8 @@ func (s *Statement) clone() *Statement {
 	newStmt := &Statement{
 		Namespace:   s.Namespace,
 		Name:        s.Name,
-		Group:       s.Group,
-		Version:     s.Version,
-		Kind:        s.Kind,
 		GVR:         s.GVR,
-		Resource:    s.Resource,
+		GVK:         s.GVK,
 		Namespaced:  s.Namespaced,
 		ListOptions: s.ListOptions,
 		Type:        s.Type,
@@ -101,33 +86,20 @@ func (s *Statement) clone() *Statement {
 	return newStmt
 }
 
-func (s *Statement) SetGVKs(gvks []schema.GroupVersionKind, version ...string) *Statement {
-	var v string
-	if len(version) > 0 {
-		// 指定了版本
-		v = version[0]
-		for _, gvk := range gvks {
-			if gvk.Version == v {
-				s.Kind = gvk.Kind
-				s.Group = gvk.Group
-				s.Kind = gvk.Kind
-				break
-			}
-		}
-	} else {
-		// 取第一个
-		s.Kind = gvks[0].Kind
-		s.Group = gvks[0].Group
-		s.Version = gvks[0].Version
-	}
+func (s *Statement) ParseGVKs(gvks []schema.GroupVersionKind, versions ...string) *Statement {
 
-	gvr, namespaced := s.GetGVR(s.Kind)
+	// 获取单个GVK
+	gvk := s.GetParsedGVK(gvks, versions...)
+	s.GVK = gvk
+
+	// 获取GVR
+	gvr, namespaced := s.GetGVR(gvk.Kind)
 	s.setGVR(gvr)
 	s.Namespaced = namespaced
 
 	// 检查是否CRD，CRD需要检查scope
-	if !s.IsBuiltinResource(s.Kind) {
-		crd, err := s.GetCRD(context.TODO(), s.Kind, gvks[0].Group)
+	if !s.IsBuiltinResource(gvk.Kind) {
+		crd, err := s.GetCRD(s.Context, gvk.Kind, gvk.Group)
 		if err != nil {
 			return s
 		}
@@ -137,4 +109,61 @@ func (s *Statement) SetGVKs(gvks []schema.GroupVersionKind, version ...string) *
 	}
 
 	return s
+}
+func (s *Statement) GetParsedGVK(gvks []schema.GroupVersionKind, versions ...string) (gvk schema.GroupVersionKind) {
+	if len(gvks) == 0 {
+		return schema.GroupVersionKind{}
+	}
+	if len(versions) > 0 {
+		// 指定了版本
+		v := versions[0]
+		for _, g := range gvks {
+			if g.Version == v {
+				return schema.GroupVersionKind{
+					Kind:    g.Kind,
+					Group:   g.Group,
+					Version: g.Version,
+				}
+			}
+		}
+	} else {
+		// 取第一个
+		return schema.GroupVersionKind{
+			Kind:    gvks[0].Kind,
+			Group:   gvks[0].Group,
+			Version: gvks[0].Version,
+		}
+
+	}
+
+	return
+}
+
+func (s *Statement) ParseNsNameFromRuntimeObj(obj runtime.Object) *Statement {
+	// 获取元数据（比如Name和Namespace）
+	accessor, err := meta.Accessor(obj)
+	if err != nil {
+		s.Error = err
+		return s
+	}
+	s.Name = accessor.GetName()           // 获取资源的名称
+	s.Namespace = accessor.GetNamespace() // 获取资源的命名空间
+	return s
+}
+
+func (s *Statement) ParseGVKFromRuntimeObj(obj runtime.Object) *Statement {
+	// 使用 scheme.Scheme.ObjectKinds() 获取 Kind
+	gvks, _, err := scheme.Scheme.ObjectKinds(obj)
+	if err != nil {
+		s.Error = fmt.Errorf("error getting kind by scheme.Scheme.ObjectKinds : %v", err)
+		return s
+	}
+	s.ParseGVKs(gvks)
+	return s
+}
+
+func (s *Statement) ParseFromRuntimeObj(obj runtime.Object) *Statement {
+	return s.
+		ParseGVKFromRuntimeObj(obj).
+		ParseNsNameFromRuntimeObj(obj)
 }
