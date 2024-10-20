@@ -42,6 +42,7 @@ type Statement struct {
 	config        *rest.Config
 	DynamicClient dynamic.Interface
 	Dest          interface{}
+	Unstructured  bool // 返回Unstructured，适用于没有定义结构体的CRD
 }
 
 func (s *Statement) SetNamespace(ns string) *Statement {
@@ -93,18 +94,19 @@ func (s *Statement) ParseGVKs(gvks []schema.GroupVersionKind, versions ...string
 	s.GVK = gvk
 
 	// 获取GVR
-	gvr, namespaced := s.GetGVR(gvk.Kind)
-	s.setGVR(gvr)
-	s.Namespaced = namespaced
+	if s.IsBuiltinResource(gvk.Kind) {
+		// 内置资源
+		s.GVR, s.Namespaced = s.GetGVR(gvk.Kind)
 
-	// 检查是否CRD，CRD需要检查scope
-	if !s.IsBuiltinResource(gvk.Kind) {
+	} else {
 		crd, err := s.GetCRD(s.Context, gvk.Kind, gvk.Group)
 		if err != nil {
+			s.Error = err
 			return s
 		}
 		// 检查CRD是否是Namespaced
 		s.Namespaced = crd.Object["spec"].(map[string]interface{})["scope"].(string) == "Namespaced"
+		s.GVR = s.getGRVFromCRD(crd)
 
 	}
 

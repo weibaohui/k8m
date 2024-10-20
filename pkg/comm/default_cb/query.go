@@ -32,6 +32,11 @@ func Query(ctx context.Context, k8s *kubectl.Kubectl) error {
 		return err
 	}
 
+	if stmt.Unstructured {
+		stmt.Dest = res
+		return nil
+	}
+
 	// 将 unstructured 转换回原始对象
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(res.Object, stmt.Dest)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
 )
 
@@ -29,12 +30,39 @@ func (k8s *Kubectl) Name(ns string) *Kubectl {
 	tx.Statement.Name = ns
 	return tx
 }
+
+func (k8s *Kubectl) CRD(group string, version string, kind string) *Kubectl {
+	gvk := schema.GroupVersionKind{
+		Group:   group,
+		Version: version,
+		Kind:    kind,
+	}
+	k8s.Statement.ParseGVKs([]schema.GroupVersionKind{
+		gvk,
+	})
+
+	return k8s
+}
+func (k8s *Kubectl) Unstructured() *Kubectl {
+	tx := k8s.getInstance()
+	tx.Statement.Unstructured = true
+	return tx
+}
 func (k8s *Kubectl) Get(obj runtime.Object) error {
 	tx := k8s.getInstance()
 
 	tx.Statement.SetType(Query)
 	tx.Statement.Dest = obj
 	return tx.Callback().Query().Execute(tx.Statement.Context, tx)
+}
+func (k8s *Kubectl) Fill(m interface{}) error {
+	tx := k8s.getInstance()
+	err := tx.Callback().Query().Execute(tx.Statement.Context, tx)
+	if err != nil {
+		return err
+	}
+	m = tx.Statement.Dest
+	return err
 }
 
 func (k8s *Kubectl) sqlTest() {
