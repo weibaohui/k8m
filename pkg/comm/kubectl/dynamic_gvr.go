@@ -125,6 +125,9 @@ func (k8s *Kubectl) UpdateResourceDynamic(ctx context.Context, gvr schema.GroupV
 }
 
 // GetGVR 返回对应 string 的 GroupVersionResource
+// 从k8s API接口中获取的值
+// 如果同时存在多个version，则返回第一个
+// 因此也有可能version不对
 func (k8s *Kubectl) GetGVR(kind string) (gvr schema.GroupVersionResource, namespaced bool) {
 	for _, resource := range apiResources {
 		if resource.Kind == kind {
