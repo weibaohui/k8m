@@ -1,6 +1,7 @@
 package kubectl
 
 import (
+	"context"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,27 +15,27 @@ import (
 var (
 	kubectl *Kubectl
 )
+var apiResources []metav1.APIResource
 
 type Kubectl struct {
 	client        *kubernetes.Clientset
 	config        *rest.Config
 	dynamicClient dynamic.Interface
 
-	apiResources []metav1.APIResource
-
 	callbacks *callbacks
-	Stmt      *Statement
+	Statement *Statement
+	clone     int
+	Error     error
 }
 
 func Init() *Kubectl {
-
 	return kubectl
 }
 
 // InitConnection 在主入口处进行初始化
 func InitConnection(path string) {
 	klog.V(2).Infof("k8s client init")
-	kubectl = &Kubectl{}
+	kubectl = &Kubectl{clone: 1}
 
 	config, err := getKubeConfig(path)
 	if err != nil {
@@ -72,13 +73,21 @@ func InitConnection(path string) {
 		for _, resource := range resources {
 			resource.Group = group
 			resource.Version = version
-			kubectl.apiResources = append(kubectl.apiResources, resource)
+			apiResources = append(apiResources, resource)
 		}
 	}
 
 	// 注册回调参数
+	kubectl.Statement = &Statement{
+		Kubectl:       kubectl,
+		Context:       context.Background(),
+		client:        client,
+		DynamicClient: dynClient,
+		config:        config,
+	}
+
 	kubectl.callbacks = initializeCallbacks(kubectl)
-	kubectl.Stmt = &Statement{}
+
 }
 
 func getKubeConfig(path string) (*rest.Config, error) {
@@ -100,6 +109,34 @@ func getKubeConfig(path string) (*rest.Config, error) {
 	return config, err
 }
 
+func (k8s *Kubectl) getInstance() *Kubectl {
+	if k8s.clone > 0 {
+		tx := &Kubectl{Error: k8s.Error}
+
+		if k8s.clone == 1 {
+			// clone with new statement
+			tx.Statement = &Statement{
+				Kubectl:       tx,
+				Context:       k8s.Statement.Context,
+				client:        k8s.Statement.client,
+				DynamicClient: k8s.Statement.DynamicClient,
+				config:        k8s.Statement.config,
+			}
+			tx.callbacks = k8s.callbacks
+
+		} else {
+			// with clone statement
+			tx.Statement = k8s.Statement.clone()
+			tx.callbacks = k8s.callbacks
+			tx.Statement.Kubectl = tx
+
+		}
+
+		return tx
+	}
+
+	return k8s
+}
 func (k8s *Kubectl) Callback() *callbacks {
 	return k8s.callbacks
 }

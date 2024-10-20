@@ -32,7 +32,7 @@ func (k8s *Kubectl) ListResourcesDynamic(ctx context.Context, gvr schema.GroupVe
 	var resources []unstructured.Unstructured
 	for _, item := range list.Items {
 		obj := item.DeepCopy()
-		removeManagedFields(obj)
+		k8s.removeManagedFields(obj)
 		resources = append(resources, *obj)
 	}
 
@@ -53,7 +53,7 @@ func (k8s *Kubectl) GetResourceDynamic(ctx context.Context, gvr schema.GroupVers
 		return nil, err
 	}
 
-	removeManagedFields(obj)
+	k8s.removeManagedFields(obj)
 	return obj, nil
 }
 func (k8s *Kubectl) CreateResourceDynamic(ctx context.Context, gvr schema.GroupVersionResource, isNamespaced bool, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
@@ -71,7 +71,7 @@ func (k8s *Kubectl) CreateResourceDynamic(ctx context.Context, gvr schema.GroupV
 		return nil, err
 	}
 
-	removeManagedFields(createdResource)
+	k8s.removeManagedFields(createdResource)
 	return createdResource, nil
 }
 
@@ -101,7 +101,7 @@ func (k8s *Kubectl) PatchResourceDynamic(ctx context.Context, gvr schema.GroupVe
 		return nil, err
 	}
 
-	removeManagedFields(obj)
+	k8s.removeManagedFields(obj)
 	return obj, nil
 }
 func (k8s *Kubectl) UpdateResourceDynamic(ctx context.Context, gvr schema.GroupVersionResource, isNamespaced bool, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
@@ -120,13 +120,13 @@ func (k8s *Kubectl) UpdateResourceDynamic(ctx context.Context, gvr schema.GroupV
 	if err != nil {
 		return nil, fmt.Errorf("无法更新资源: %v", err)
 	}
-	removeManagedFields(updatedResource)
+	k8s.removeManagedFields(updatedResource)
 	return updatedResource, nil
 }
 
 // GetGVR 返回对应 string 的 GroupVersionResource
 func (k8s *Kubectl) GetGVR(kind string) (gvr schema.GroupVersionResource, namespaced bool) {
-	for _, resource := range k8s.apiResources {
+	for _, resource := range apiResources {
 		if resource.Kind == kind {
 			version := resource.Version
 			gvr = schema.GroupVersionResource{
@@ -140,7 +140,7 @@ func (k8s *Kubectl) GetGVR(kind string) (gvr schema.GroupVersionResource, namesp
 	return schema.GroupVersionResource{}, false
 }
 func (k8s *Kubectl) IsBuiltinResource(kind string) bool {
-	for _, list := range k8s.apiResources {
+	for _, list := range apiResources {
 		if list.Kind == kind {
 			return true
 		}

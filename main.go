@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/callback"
+	"github.com/weibaohui/k8m/pkg/comm/default_cb"
 	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
@@ -40,6 +41,7 @@ func Init() {
 	// 初始化文档
 	_ = kubectl.NewDocs()
 
+	default_cb.RegisterDefaultCallbacks()
 	// 初始化回调
 	callback.RegisterCallback()
 

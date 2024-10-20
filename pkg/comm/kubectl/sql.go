@@ -1,7 +1,6 @@
 package kubectl
 
 import (
-	"context"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -14,16 +13,26 @@ import (
 
 func (k8s *Kubectl) SQLGet(obj runtime.Object) error {
 	// 使用 scheme.Scheme.ObjectKinds() 获取 Kind
-	gvk, _, err := scheme.Scheme.ObjectKinds(obj)
+	gvks, _, err := scheme.Scheme.ObjectKinds(obj)
 	if err != nil {
-		fmt.Println("Error getting kind:", err)
+		return fmt.Errorf("error getting kind by scheme.Scheme.ObjectKinds : %v", err)
 	}
 
+	// 寻找kind
 	var kind string
-	// 打印 Kind 信息
-	for _, gv := range gvk {
-		kind = gv.Kind
-		fmt.Printf("Group: %s, Version: %s, Kind: %s\n", gv.Group, gv.Version, gv.Kind)
+	typeAccessor, err := meta.TypeAccessor(obj)
+	if err != nil {
+		return fmt.Errorf("error getting typeMeta by meta.TypeAccessor(obj) : %v", err)
+	}
+	kind = typeAccessor.GetKind()
+
+	if kind == "" {
+		for _, gv := range gvks {
+			if gv.Kind != "" {
+				kind = gv.Kind
+				break
+			}
+		}
 	}
 
 	// 获取元数据（比如Name和Namespace）
@@ -31,17 +40,17 @@ func (k8s *Kubectl) SQLGet(obj runtime.Object) error {
 	if err != nil {
 		return err
 	}
-
 	name := accessor.GetName()           // 获取资源的名称
 	namespace := accessor.GetNamespace() // 获取资源的命名空间
 
-	resource, err := kubectl.GetResource(context.TODO(), kind, namespace, name)
-	if err != nil {
-		return err
-	}
+	tx := k8s.getInstance()
 
-	// 将 unstructured 转换回原始对象
-	return runtime.DefaultUnstructuredConverter.FromUnstructured(resource.Object, obj)
+	tx.Statement.SetGVKs(gvks).
+		SetNamespace(namespace).
+		SetName(name).
+		SetType(Query).
+		SetDest(obj)
+	return tx.Callback().Query().Execute(tx.Statement.Context, tx)
 }
 
 func (k8s *Kubectl) sqlTest() {
