@@ -7,9 +7,12 @@ import (
 func RegisterDefaultCallbacks() {
 
 	queryCallback := kubectl.Init().Callback().Get()
-	queryCallback.Register("k8m:get", Get)
+	_ = queryCallback.Register("k8m:get", Get)
 
 	listCallback := kubectl.Init().Callback().List()
-	listCallback.Register("k8m:list", List)
+	_ = listCallback.Register("k8m:list", List)
+
+	createCallback := kubectl.Init().Callback().Create()
+	_ = createCallback.Register("k8m:create", Create)
 
 }
