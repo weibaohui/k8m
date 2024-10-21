@@ -55,7 +55,7 @@ func (k8s *Kubectl) ListResources(ctx context.Context, kind string, ns string, o
 	var resources []unstructured.Unstructured
 	for _, item := range list.Items {
 		obj := item.DeepCopy()
-		k8s.removeManagedFields(obj)
+		k8s.RemoveManagedFields(obj)
 		resources = append(resources, *obj)
 	}
 
@@ -64,7 +64,7 @@ func (k8s *Kubectl) ListResources(ctx context.Context, kind string, ns string, o
 func (k8s *Kubectl) GetResource(ctx context.Context, kind string, ns, name string) (*unstructured.Unstructured, error) {
 	gvr, namespaced := k8s.GetGVR(kind)
 	gvrString := utils.ToJSON(gvr)
-	klog.V(1).Infof("(k8s *Kubectl) GetResource GVR %s", gvrString)
+	klog.V(8).Infof("(k8s *Kubectl) GetResource GVR %s", gvrString)
 	if gvr.Empty() {
 		return nil, fmt.Errorf("不支持的资源类型: %s", kind)
 	}
@@ -80,7 +80,7 @@ func (k8s *Kubectl) GetResource(ctx context.Context, kind string, ns, name strin
 		return nil, err
 	}
 
-	k8s.removeManagedFields(res)
+	k8s.RemoveManagedFields(res)
 	return res, nil
 }
 func (k8s *Kubectl) CreateResource(ctx context.Context, kind string, ns string, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
@@ -100,7 +100,7 @@ func (k8s *Kubectl) CreateResource(ctx context.Context, kind string, ns string, 
 		return nil, err
 	}
 
-	k8s.removeManagedFields(createdResource)
+	k8s.RemoveManagedFields(createdResource)
 	return createdResource, nil
 }
 
@@ -121,7 +121,7 @@ func (k8s *Kubectl) UpdateResource(ctx context.Context, kind string, ns string, 
 	if err != nil {
 		return nil, fmt.Errorf("无法更新资源: %v", err)
 	}
-	k8s.removeManagedFields(updatedResource)
+	k8s.RemoveManagedFields(updatedResource)
 	return updatedResource, nil
 }
 
@@ -155,7 +155,7 @@ func (k8s *Kubectl) PatchResource(ctx context.Context, kind string, ns, name str
 		return nil, err
 	}
 
-	k8s.removeManagedFields(obj)
+	k8s.RemoveManagedFields(obj)
 	return obj, nil
 }
 
@@ -164,8 +164,8 @@ func splitYAML(yamlStr string) []string {
 	return strings.Split(yamlStr, "\n---\n")
 }
 
-// removeManagedFields 删除 unstructured.Unstructured 对象中的 metadata.managedFields 字段
-func (k8s *Kubectl) removeManagedFields(obj *unstructured.Unstructured) {
+// RemoveManagedFields 删除 unstructured.Unstructured 对象中的 metadata.managedFields 字段
+func (k8s *Kubectl) RemoveManagedFields(obj *unstructured.Unstructured) {
 	// 获取 metadata
 	metadata, found, err := unstructured.NestedMap(obj.Object, "metadata")
 	if err != nil || !found {

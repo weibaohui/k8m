@@ -32,7 +32,7 @@ func (k8s *Kubectl) ListResourcesDynamic(ctx context.Context, gvr schema.GroupVe
 	var resources []unstructured.Unstructured
 	for _, item := range list.Items {
 		obj := item.DeepCopy()
-		k8s.removeManagedFields(obj)
+		k8s.RemoveManagedFields(obj)
 		resources = append(resources, *obj)
 	}
 
@@ -53,7 +53,7 @@ func (k8s *Kubectl) GetResourceDynamic(ctx context.Context, gvr schema.GroupVers
 		return nil, err
 	}
 
-	k8s.removeManagedFields(obj)
+	k8s.RemoveManagedFields(obj)
 	return obj, nil
 }
 func (k8s *Kubectl) CreateResourceDynamic(ctx context.Context, gvr schema.GroupVersionResource, isNamespaced bool, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
@@ -71,7 +71,7 @@ func (k8s *Kubectl) CreateResourceDynamic(ctx context.Context, gvr schema.GroupV
 		return nil, err
 	}
 
-	k8s.removeManagedFields(createdResource)
+	k8s.RemoveManagedFields(createdResource)
 	return createdResource, nil
 }
 
@@ -101,7 +101,7 @@ func (k8s *Kubectl) PatchResourceDynamic(ctx context.Context, gvr schema.GroupVe
 		return nil, err
 	}
 
-	k8s.removeManagedFields(obj)
+	k8s.RemoveManagedFields(obj)
 	return obj, nil
 }
 func (k8s *Kubectl) UpdateResourceDynamic(ctx context.Context, gvr schema.GroupVersionResource, isNamespaced bool, resource *unstructured.Unstructured) (*unstructured.Unstructured, error) {
@@ -120,7 +120,7 @@ func (k8s *Kubectl) UpdateResourceDynamic(ctx context.Context, gvr schema.GroupV
 	if err != nil {
 		return nil, fmt.Errorf("无法更新资源: %v", err)
 	}
-	k8s.removeManagedFields(updatedResource)
+	k8s.RemoveManagedFields(updatedResource)
 	return updatedResource, nil
 }
 
