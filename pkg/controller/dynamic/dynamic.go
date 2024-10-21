@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 )
@@ -14,21 +15,9 @@ func List(c *gin.Context) {
 	ns := c.Param("ns")
 	group := c.Param("group")
 	kind := c.Param("kind")
-	ctx := context.WithValue(c, "user", "zhangsan")
+	ctx := c.Request.Context()
 	var list []unstructured.Unstructured
-	var err error
-	builtIn := kubectl.Init().IsBuiltinResource(kind)
-	if builtIn {
-		// 内置资源
-
-		list, err = kubectl.Init().ListResources(ctx, kind, ns)
-	} else {
-		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
-			list, err = kubectl.Init().ListCRD(ctx, crd, ns)
-		}
-	}
-
+	err := kom.Init().WithContext(ctx).Namespace(ns).CRD(group, "v1", kind).List(&list).Error
 	amis.WriteJsonListWithError(c, list, err)
 }
 func Fetch(c *gin.Context) {
@@ -39,23 +28,11 @@ func Fetch(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	var obj *unstructured.Unstructured
-	var err error
-	builtIn := kubectl.Init().IsBuiltinResource(kind)
-	if !builtIn {
-		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
-			obj, err = kubectl.Init().FetchCRD(ctx, crd, ns, name)
-			if err != nil {
-				amis.WriteJsonError(c, err)
-				return
-			}
-		}
-	} else {
-		obj, err = kubectl.Init().GetResource(ctx, kind, ns, name)
-		if err != nil {
-			amis.WriteJsonError(c, err)
-			return
-		}
+
+	err := kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Get(&obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
 
 	yamlStr, err := kubectl.Init().ConvertUnstructuredToYAML(obj)
@@ -83,25 +60,8 @@ func Remove(c *gin.Context) {
 
 }
 func removeSingle(ctx context.Context, kind, group, ns, name string) error {
-	builtIn := kubectl.Init().IsBuiltinResource(kind)
-	if !builtIn {
-		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
-			err = kubectl.Init().RemoveCRD(ctx, crd, ns, name)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		// 内置资源类型
-		err := kubectl.Init().DeleteResource(ctx, kind, ns, name)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-	// todo 校验是否有权限删除，ns为为本人名字开头
-
+	var obj unstructured.Unstructured
+	return kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Delete(&obj).Error
 }
 
 // NamesPayload 定义结构体以匹配批量删除 JSON 结构
@@ -157,28 +117,12 @@ func Save(c *gin.Context) {
 	}
 	obj.SetName(name)
 	obj.SetNamespace(ns)
-
-	builtIn := kubectl.Init().IsBuiltinResource(kind)
-	if !builtIn {
-		// CRD 类型资源
-		if crd, err := kubectl.Init().GetCRD(ctx, kind, group); err == nil {
-			_, err = kubectl.Init().UpdateCRD(ctx, crd, &obj)
-			if err != nil {
-				amis.WriteJsonError(c, err)
-				return
-			}
-		}
-	} else {
-		_, err := kubectl.Init().UpdateResource(ctx, kind, ns, &obj)
-		if err != nil {
-			amis.WriteJsonError(c, err)
-			return
-		}
+	err := kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Update(&obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
-
 	amis.WriteJsonOK(c)
-	// todo 做一个机制，限制每个人的可操作ns，只能是自己权限下的ns,
-	// todo 给资源增加label标签 ，后续按ns、标签进行过滤
 }
 
 func Apply(c *gin.Context) {

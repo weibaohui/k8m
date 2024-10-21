@@ -1,7 +1,6 @@
 package kubectl
 
 import (
-	"context"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,11 +20,6 @@ type Kubectl struct {
 	client        *kubernetes.Clientset
 	config        *rest.Config
 	dynamicClient dynamic.Interface
-
-	callbacks *callbacks
-	Statement *Statement
-	clone     int
-	Error     error
 }
 
 func Init() *Kubectl {
@@ -35,7 +29,7 @@ func Init() *Kubectl {
 // InitConnection 在主入口处进行初始化
 func InitConnection(path string) {
 	klog.V(2).Infof("k8s client init")
-	kubectl = &Kubectl{clone: 1}
+	kubectl = &Kubectl{}
 
 	config, err := getKubeConfig(path)
 	if err != nil {
@@ -77,17 +71,6 @@ func InitConnection(path string) {
 		}
 	}
 
-	// 注册回调参数
-	kubectl.Statement = &Statement{
-		Kubectl:       kubectl,
-		Context:       context.Background(),
-		client:        client,
-		DynamicClient: dynClient,
-		config:        config,
-	}
-
-	kubectl.callbacks = initializeCallbacks(kubectl)
-
 }
 
 func getKubeConfig(path string) (*rest.Config, error) {
@@ -107,36 +90,4 @@ func getKubeConfig(path string) (*rest.Config, error) {
 		klog.V(2).Infof("服务器地址：%s\n", config.Host)
 	}
 	return config, err
-}
-
-func (k8s *Kubectl) getInstance() *Kubectl {
-	if k8s.clone > 0 {
-		tx := &Kubectl{Error: k8s.Error}
-
-		if k8s.clone == 1 {
-			// clone with new statement
-			tx.Statement = &Statement{
-				Kubectl:       tx,
-				Context:       k8s.Statement.Context,
-				client:        k8s.Statement.client,
-				DynamicClient: k8s.Statement.DynamicClient,
-				config:        k8s.Statement.config,
-			}
-			tx.callbacks = k8s.callbacks
-
-		} else {
-			// with clone statement
-			tx.Statement = k8s.Statement.clone()
-			tx.callbacks = k8s.callbacks
-			tx.Statement.Kubectl = tx
-
-		}
-
-		return tx
-	}
-
-	return k8s
-}
-func (k8s *Kubectl) Callback() *callbacks {
-	return k8s.callbacks
 }

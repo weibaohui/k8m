@@ -10,7 +10,6 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/callback"
-	"github.com/weibaohui/k8m/pkg/comm/default_cb"
 	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
@@ -19,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/kom/starter"
 	"k8s.io/klog/v2"
 )
 
@@ -35,13 +35,14 @@ func Init() {
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 
+	// 初始化kom
+	starter.Init()
 	// 初始化kubectl 连接
 	kubectl.InitConnection(cfg.KubeConfig)
 
 	// 初始化文档
 	_ = kubectl.NewDocs()
 
-	default_cb.RegisterDefaultCallbacks()
 	// 初始化回调
 	callback.RegisterCallback()
 

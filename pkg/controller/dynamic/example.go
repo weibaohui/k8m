@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,7 +37,7 @@ func crdExample(c *gin.Context) {
 		},
 	}
 	// 删除CRD
-	err := kubectl.Init().
+	err := kom.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").
 		Name(crontab.GetName()).
@@ -46,7 +46,7 @@ func crdExample(c *gin.Context) {
 	if err != nil {
 		klog.Errorf("CronTab Delete(&item) error :%v", err)
 	}
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").
 		Name(crontab.GetName()).
@@ -55,7 +55,7 @@ func crdExample(c *gin.Context) {
 	if err != nil {
 		fmt.Printf("CRD Get %v\n", err)
 	}
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").
 		Name(crontab.GetName()).
@@ -66,7 +66,7 @@ func crdExample(c *gin.Context) {
 	}
 
 	var crontabList []unstructured.Unstructured
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").
 		Namespace(crontab.GetNamespace()).
@@ -87,7 +87,7 @@ func crdExample(c *gin.Context) {
         }
     }
 }`
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").
 		Name(crontab.GetName()).
@@ -96,7 +96,7 @@ func crdExample(c *gin.Context) {
 	if err != nil {
 		klog.Errorf("CronTab Get(&item) error :%v", err)
 	}
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").
 		Name(crontab.GetName()).
@@ -111,7 +111,7 @@ func crdExample(c *gin.Context) {
 }
 func builtInExample(c *gin.Context) {
 	item := v1.Deployment{}
-	err := kubectl.Init().
+	err := kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&item).
 		Namespace("default").
@@ -123,7 +123,7 @@ func builtInExample(c *gin.Context) {
 	fmt.Printf("Get Item %s\n", item.Spec.Template.Spec.Containers[0].Image)
 
 	var items []v1.Deployment
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&item).
 		Namespace("default").
@@ -137,7 +137,7 @@ func builtInExample(c *gin.Context) {
 	}
 
 	var crontabList []unstructured.Unstructured
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").
 		Namespace("default").
@@ -176,14 +176,14 @@ func builtInExample(c *gin.Context) {
 			},
 		},
 	}
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&createItem).
 		Create(&createItem).Error
 	if err != nil {
 		klog.Errorf("Deployment Create(&item) error :%v", err)
 	}
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&createItem).
 		Namespace(createItem.Namespace).
@@ -195,8 +195,8 @@ func builtInExample(c *gin.Context) {
 	if createItem.Spec.Template.Annotations == nil {
 		createItem.Spec.Template.Annotations = map[string]string{}
 	}
-	createItem.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
-	err = kubectl.Init().
+	createItem.Spec.Template.Annotations["kom.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&createItem).
 		Update(&createItem).Error
@@ -214,13 +214,13 @@ func builtInExample(c *gin.Context) {
         }
     }
 }`
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&createItem).
 		Namespace(createItem.Namespace).
 		Name(createItem.Name).
 		Get(&createItem).Error
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&createItem).
 		PatchData(patchData).
@@ -229,7 +229,7 @@ func builtInExample(c *gin.Context) {
 	if err != nil {
 		klog.Errorf("Deployment Patch(&item) error :%v", err)
 	}
-	err = kubectl.Init().
+	err = kom.Init().
 		WithContext(c.Request.Context()).
 		Resource(&createItem).
 		Namespace(createItem.Namespace).
