@@ -10,9 +10,9 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Query(ctx context.Context, k8s *kubectl.Kubectl) error {
+func Get(ctx context.Context, k8s *kubectl.Kubectl) error {
 	json := k8s.Statement.String()
-	klog.V(1).Infof("DefaultCB Query %s", json)
+	klog.V(1).Infof("DefaultCB Get %s", json)
 
 	stmt := k8s.Statement
 	gvr := stmt.GVR
@@ -30,11 +30,6 @@ func Query(ctx context.Context, k8s *kubectl.Kubectl) error {
 	}
 	if err != nil {
 		return err
-	}
-
-	if stmt.Unstructured {
-		stmt.Dest = res
-		return nil
 	}
 
 	// 将 unstructured 转换回原始对象
