@@ -18,7 +18,8 @@ import (
 type StatementType string
 
 const (
-	Query  StatementType = "query"
+	Get    StatementType = "get"
+	List   StatementType = "list"
 	Update StatementType = "update"
 	Patch  StatementType = "patch"
 	Delete StatementType = "delete"

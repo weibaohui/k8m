@@ -2,6 +2,7 @@ package kubectl
 
 import (
 	"context"
+	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,29 +45,32 @@ func (k8s *Kubectl) CRD(group string, version string, kind string) *Kubectl {
 
 	return k8s
 }
-func (k8s *Kubectl) Unstructured() *Kubectl {
+
+func (k8s *Kubectl) Get(dest interface{}) *Kubectl {
 	tx := k8s.getInstance()
-	tx.Statement.Unstructured = true
+	tx.Statement.SetType(Get)
+	// 设置目标对象为 obj 的指针
+	tx.Statement.Dest = dest
+	tx.Error = tx.Callback().Get().Execute(tx.Statement.Context, tx)
 	return tx
 }
-func (k8s *Kubectl) Get(obj runtime.Object) error {
+func (k8s *Kubectl) List(dest interface{}) *Kubectl {
 	tx := k8s.getInstance()
-
-	tx.Statement.SetType(Query)
-	tx.Statement.Dest = obj
-	return tx.Callback().Query().Execute(tx.Statement.Context, tx)
+	tx.Statement.SetType(List)
+	tx.Statement.Dest = dest
+	tx.Error = tx.Callback().List().Execute(tx.Statement.Context, tx)
+	return tx
 }
-func (k8s *Kubectl) Fill(m *unstructured.Unstructured) error {
+func (k8s *Kubectl) Fill(m *unstructured.Unstructured) *Kubectl {
 	tx := k8s.getInstance()
-	err := tx.Callback().Query().Execute(tx.Statement.Context, tx)
-	if err != nil {
-		return err
+	if tx.Statement.Dest == nil {
+		tx.Error = fmt.Errorf("请先执行Get()、List()等方法")
 	}
 	// 确保将数据填充到传入的 m 中
 	if dest, ok := tx.Statement.Dest.(*unstructured.Unstructured); ok {
 		*m = *dest
 	}
-	return nil
+	return k8s
 }
 
 func (k8s *Kubectl) sqlTest() {
