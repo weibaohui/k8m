@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 )
 
@@ -27,9 +28,9 @@ func (k8s *Kubectl) Namespace(ns string) *Kubectl {
 	tx.Statement.Namespace = ns
 	return tx
 }
-func (k8s *Kubectl) Name(ns string) *Kubectl {
+func (k8s *Kubectl) Name(name string) *Kubectl {
 	tx := k8s.getInstance()
-	tx.Statement.Name = ns
+	tx.Statement.Name = name
 	return tx
 }
 
@@ -48,7 +49,6 @@ func (k8s *Kubectl) CRD(group string, version string, kind string) *Kubectl {
 
 func (k8s *Kubectl) Get(dest interface{}) *Kubectl {
 	tx := k8s.getInstance()
-	tx.Statement.SetType(Get)
 	// 设置目标对象为 obj 的指针
 	tx.Statement.Dest = dest
 	tx.Error = tx.Callback().Get().Execute(tx.Statement.Context, tx)
@@ -56,23 +56,42 @@ func (k8s *Kubectl) Get(dest interface{}) *Kubectl {
 }
 func (k8s *Kubectl) List(dest interface{}) *Kubectl {
 	tx := k8s.getInstance()
-	tx.Statement.SetType(List)
 	tx.Statement.Dest = dest
 	tx.Error = tx.Callback().List().Execute(tx.Statement.Context, tx)
 	return tx
 }
 func (k8s *Kubectl) Create(dest interface{}) *Kubectl {
 	tx := k8s.getInstance()
-	tx.Statement.SetType(Create)
 	tx.Statement.Dest = dest
 	tx.Error = tx.Callback().Create().Execute(tx.Statement.Context, tx)
 	return tx
 }
+func (k8s *Kubectl) Update(dest interface{}) *Kubectl {
+	tx := k8s.getInstance()
+	tx.Statement.Dest = dest
+	tx.Error = tx.Callback().Update().Execute(tx.Statement.Context, tx)
+	return tx
+}
 func (k8s *Kubectl) Delete(dest interface{}) *Kubectl {
 	tx := k8s.getInstance()
-	tx.Statement.SetType(Delete)
 	tx.Statement.Dest = dest
 	tx.Error = tx.Callback().Delete().Execute(tx.Statement.Context, tx)
+	return tx
+}
+func (k8s *Kubectl) Patch(dest interface{}) *Kubectl {
+	tx := k8s.getInstance()
+	tx.Statement.Dest = dest
+	tx.Error = tx.Callback().Patch().Execute(tx.Statement.Context, tx)
+	return tx
+}
+func (k8s *Kubectl) PatchData(data string) *Kubectl {
+	tx := k8s.getInstance()
+	tx.Statement.PatchData = data
+	return tx
+}
+func (k8s *Kubectl) PatchType(t types.PatchType) *Kubectl {
+	tx := k8s.getInstance()
+	tx.Statement.PatchType = t
 	return tx
 }
 func (k8s *Kubectl) Fill(m *unstructured.Unstructured) *Kubectl {
