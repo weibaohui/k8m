@@ -11,10 +11,10 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Get(ctx context.Context, k8s *kubectl.Kubectl) error {
+func Patch(ctx context.Context, k8s *kubectl.Kubectl) error {
 	if klog.V(8).Enabled() {
 		json := k8s.Statement.String()
-		klog.V(8).Infof("DefaultCB Get %s", json)
+		klog.V(8).Infof("DefaultCB Patch %s", json)
 	}
 
 	stmt := k8s.Statement
@@ -23,21 +23,24 @@ func Get(ctx context.Context, k8s *kubectl.Kubectl) error {
 	ns := stmt.Namespace
 	name := stmt.Name
 	ctx = stmt.Context
+	patchType := stmt.PatchType
+	patchData := stmt.PatchData
+
 	var res *unstructured.Unstructured
 	var err error
 	if name == "" {
-		err = fmt.Errorf("获取对象必须指定名称")
+		err = fmt.Errorf("patch对象必须指定名称")
 		return err
 	}
 	if namespaced {
-		res, err = stmt.DynamicClient.Resource(gvr).Namespace(ns).Get(ctx, name, metav1.GetOptions{})
+		res, err = stmt.DynamicClient.Resource(gvr).Namespace(ns).Patch(ctx, name, patchType, []byte(patchData), metav1.PatchOptions{})
 	} else {
-		res, err = stmt.DynamicClient.Resource(gvr).Get(ctx, name, metav1.GetOptions{})
+		res, err = stmt.DynamicClient.Resource(gvr).Patch(ctx, name, patchType, []byte(patchData), metav1.PatchOptions{})
 	}
-
 	if err != nil {
 		return err
 	}
+
 	stmt.RemoveManagedFields(res)
 
 	// 将 unstructured 转换回原始对象
@@ -45,5 +48,6 @@ func Get(ctx context.Context, k8s *kubectl.Kubectl) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

@@ -15,7 +15,7 @@ import (
 func List(ctx context.Context, k8s *kubectl.Kubectl) error {
 	if klog.V(8).Enabled() {
 		json := k8s.Statement.String()
-		klog.V(8).Infof("DefaultCB Get %s", json)
+		klog.V(8).Infof("DefaultCB List %s", json)
 	}
 
 	stmt := k8s.Statement
@@ -49,6 +49,7 @@ func List(ctx context.Context, k8s *kubectl.Kubectl) error {
 
 	for _, item := range list.Items {
 		obj := item.DeepCopy()
+		stmt.RemoveManagedFields(obj)
 
 		// 创建新的指向元素类型的指针
 		newElemPtr := reflect.New(elemType)
