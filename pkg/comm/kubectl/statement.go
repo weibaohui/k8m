@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -16,15 +17,6 @@ import (
 )
 
 type StatementType string
-
-const (
-	Get    StatementType = "get"
-	List   StatementType = "list"
-	Update StatementType = "update"
-	Patch  StatementType = "patch"
-	Delete StatementType = "delete"
-	Create StatementType = "create"
-)
 
 type Statement struct {
 	*Kubectl
@@ -37,13 +29,13 @@ type Statement struct {
 	GVK           schema.GroupVersionKind
 	Namespaced    bool
 	ListOptions   *metav1.ListOptions
-	Type          StatementType // list get create update remove
 	Context       context.Context
 	client        *kubernetes.Clientset
 	config        *rest.Config
 	DynamicClient dynamic.Interface
 	Dest          interface{}
-	Unstructured  bool // 返回Unstructured，适用于没有定义结构体的CRD
+	PatchType     types.PatchType
+	PatchData     string
 }
 
 func (s *Statement) SetNamespace(ns string) *Statement {
@@ -52,11 +44,6 @@ func (s *Statement) SetNamespace(ns string) *Statement {
 }
 func (s *Statement) SetName(name string) *Statement {
 	s.Name = name
-	return s
-}
-
-func (s *Statement) SetType(t StatementType) *Statement {
-	s.Type = t
 	return s
 }
 
@@ -81,7 +68,6 @@ func (s *Statement) clone() *Statement {
 		GVK:         s.GVK,
 		Namespaced:  s.Namespaced,
 		ListOptions: s.ListOptions,
-		Type:        s.Type,
 		Context:     s.Context,
 	}
 
