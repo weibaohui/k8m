@@ -13,8 +13,10 @@ import (
 )
 
 func List(ctx context.Context, k8s *kubectl.Kubectl) error {
-	json := k8s.Statement.String()
-	klog.V(1).Infof("DefaultCB List %s", json)
+	if klog.V(8).Enabled() {
+		json := k8s.Statement.String()
+		klog.V(8).Infof("DefaultCB Get %s", json)
+	}
 
 	stmt := k8s.Statement
 	gvr := stmt.GVR
