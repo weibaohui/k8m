@@ -11,11 +11,12 @@ import (
 func initializeCallbacks(kubectl *Kubectl) *callbacks {
 	return &callbacks{
 		processors: map[string]*processor{
+			"get":    {kubectl: kubectl},
+			"patch":  {kubectl: kubectl},
 			"create": {kubectl: kubectl},
-			"query":  {kubectl: kubectl},
 			"update": {kubectl: kubectl},
 			"delete": {kubectl: kubectl},
-			"patch":  {kubectl: kubectl},
+			"list":   {kubectl: kubectl},
 		},
 	}
 }
@@ -46,8 +47,8 @@ func (cs *callbacks) Create() *processor {
 func (cs *callbacks) Patch() *processor {
 	return cs.processors["patch"]
 }
-func (cs *callbacks) Query() *processor {
-	return cs.processors["query"]
+func (cs *callbacks) Get() *processor {
+	return cs.processors["get"]
 }
 
 func (cs *callbacks) Update() *processor {
@@ -56,6 +57,9 @@ func (cs *callbacks) Update() *processor {
 
 func (cs *callbacks) Delete() *processor {
 	return cs.processors["delete"]
+}
+func (cs *callbacks) List() *processor {
+	return cs.processors["list"]
 }
 
 func (c *callback) Remove(name string) error {
