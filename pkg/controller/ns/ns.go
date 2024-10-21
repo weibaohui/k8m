@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	v1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 )
 
@@ -27,7 +28,7 @@ func TestDel(c *gin.Context) {
 	fmt.Println(item.Spec.Template.Spec.Containers[0].Image)
 	fmt.Println(item.Spec.Template.Spec.Containers[0].Image)
 	fmt.Println(item.Spec.Template.Spec.Containers[0].Image)
-	var crontab interface{}
+	var crontab unstructured.Unstructured
 	err = kubectl.Init().
 		WithContext(c.Request.Context()).
 		CRD("stable.example.com", "v1", "CronTab").

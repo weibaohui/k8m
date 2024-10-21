@@ -5,6 +5,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
@@ -55,14 +56,17 @@ func (k8s *Kubectl) Get(obj runtime.Object) error {
 	tx.Statement.Dest = obj
 	return tx.Callback().Query().Execute(tx.Statement.Context, tx)
 }
-func (k8s *Kubectl) Fill(m interface{}) error {
+func (k8s *Kubectl) Fill(m *unstructured.Unstructured) error {
 	tx := k8s.getInstance()
 	err := tx.Callback().Query().Execute(tx.Statement.Context, tx)
 	if err != nil {
 		return err
 	}
-	m = tx.Statement.Dest
-	return err
+	// 确保将数据填充到传入的 m 中
+	if dest, ok := tx.Statement.Dest.(*unstructured.Unstructured); ok {
+		*m = *dest
+	}
+	return nil
 }
 
 func (k8s *Kubectl) sqlTest() {
