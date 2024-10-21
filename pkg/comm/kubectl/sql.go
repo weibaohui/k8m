@@ -61,6 +61,20 @@ func (k8s *Kubectl) List(dest interface{}) *Kubectl {
 	tx.Error = tx.Callback().List().Execute(tx.Statement.Context, tx)
 	return tx
 }
+func (k8s *Kubectl) Create(dest interface{}) *Kubectl {
+	tx := k8s.getInstance()
+	tx.Statement.SetType(Create)
+	tx.Statement.Dest = dest
+	tx.Error = tx.Callback().Create().Execute(tx.Statement.Context, tx)
+	return tx
+}
+func (k8s *Kubectl) Delete(dest interface{}) *Kubectl {
+	tx := k8s.getInstance()
+	tx.Statement.SetType(Delete)
+	tx.Statement.Dest = dest
+	tx.Error = tx.Callback().Delete().Execute(tx.Statement.Context, tx)
+	return tx
+}
 func (k8s *Kubectl) Fill(m *unstructured.Unstructured) *Kubectl {
 	tx := k8s.getInstance()
 	if tx.Statement.Dest == nil {
