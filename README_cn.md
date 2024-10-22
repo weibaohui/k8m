@@ -1,6 +1,8 @@
 ### **k8m**
 
-**k8m** 是一个轻量级的 Kubernetes 仪表板，旨在提供简洁高效的集群管理体验。其主要特点包括：
+**k8m** 是一个轻量级的 Kubernetes 仪表板，旨在提供简洁高效的集群管理体验。
+基于[AMIS](https://github.com/baidu/amis)构建，并使用[kom](https://github.com/weibaohui/kom)作为 Kubernetes API 客户端。
+其主要特点包括：
 
 - **迷你化设计**：所有功能集成在一个单一的可执行文件中，方便部署和使用。
 - **跨平台支持**：兼容多种架构，包括 **x86**、**ARM**、**PPC64LE**、**MIPS** 以及 **x390s**，确保在所有主要平台上顺畅运行。
