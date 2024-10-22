@@ -19,7 +19,9 @@ func StreamLogs(c *gin.Context) {
 	var podName = c.Param("pod_name")
 	var containerName = c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
-	StreamPodLogsBySelector(c, ns, containerName, metav1.ListOptions{LabelSelector: selector})
+	StreamPodLogsBySelector(c, ns, containerName, metav1.ListOptions{
+		FieldSelector: selector,
+	})
 }
 func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := c.Request.Context()
@@ -55,7 +57,7 @@ func DownloadLogs(c *gin.Context) {
 	var podName = c.Param("pod_name")
 	var containerName = c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
-	DownloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{LabelSelector: selector})
+	DownloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{FieldSelector: selector})
 }
 func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := c.Request.Context()

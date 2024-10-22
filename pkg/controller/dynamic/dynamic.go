@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
+	"github.com/weibaohui/kom/kom/applier"
+	"github.com/weibaohui/kom/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 )
@@ -35,7 +36,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	yamlStr, err := kubectl.Init().ConvertUnstructuredToYAML(obj)
+	yamlStr, err := utils.ConvertUnstructuredToYAML(obj)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -133,7 +134,7 @@ func Apply(c *gin.Context) {
 		return
 	}
 	yamlStr := req.YAML
-	result := kubectl.Init().ApplyYAML(ctx, yamlStr)
+	result := applier.Instance().WithContext(ctx).Apply(yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
@@ -149,7 +150,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 	yamlStr := req.YAML
-	result := kubectl.Init().DeleteYAML(ctx, yamlStr)
+	result := applier.Instance().WithContext(ctx).Delete(yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})

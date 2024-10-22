@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/kom/kom/poder"
 	"k8s.io/klog/v2"
 )
 
@@ -33,17 +33,17 @@ func FileList(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFileInfo{
-		Namespace:     info.Namespace,
-		PodName:       info.PodName,
-		ContainerName: info.ContainerName,
-	}
+	poder := poder.Instance().
+		WithContext(c.Request.Context()).
+		Namespace(info.Namespace).
+		Name(info.PodName).
+		ContainerName(info.ContainerName)
 
 	if info.Path == "" {
 		info.Path = "/"
 	}
 	// 获取文件列表
-	nodes, err := pf.GetFileList(info.Path)
+	nodes, err := poder.GetFileList(info.Path)
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("获取文件列表失败,容器内没有shell或者没有ls命令"))
 		return
@@ -60,11 +60,11 @@ func ShowFile(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFileInfo{
-		Namespace:     info.Namespace,
-		PodName:       info.PodName,
-		ContainerName: info.ContainerName,
-	}
+	poder := poder.Instance().
+		WithContext(c.Request.Context()).
+		Namespace(info.Namespace).
+		Name(info.PodName).
+		ContainerName(info.ContainerName)
 	if info.FileType != "" && info.FileType != "file" && info.FileType != "directory" {
 		amis.WriteJsonError(c, fmt.Errorf("无法查看%s类型文件", info.FileType))
 		return
@@ -79,7 +79,7 @@ func ShowFile(c *gin.Context) {
 	}
 
 	// 从容器中下载文件
-	fileContent, err := pf.DownloadFile(info.Path)
+	fileContent, err := poder.DownloadFile(info.Path)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -106,11 +106,11 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFileInfo{
-		Namespace:     info.Namespace,
-		PodName:       info.PodName,
-		ContainerName: info.ContainerName,
-	}
+	poder := poder.Instance().
+		WithContext(c.Request.Context()).
+		Namespace(info.Namespace).
+		Name(info.PodName).
+		ContainerName(info.ContainerName)
 
 	if info.Path == "" {
 		amis.WriteJsonOK(c)
@@ -127,7 +127,7 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 	// 上传文件
-	if err := pf.SaveFile(info.Path, context); err != nil {
+	if err := poder.SaveFile(info.Path, context); err != nil {
 		klog.V(2).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
@@ -145,13 +145,13 @@ func DownloadFile(c *gin.Context) {
 		return
 	}
 
-	pf := kubectl.PodFileInfo{
-		Namespace:     info.Namespace,
-		PodName:       info.PodName,
-		ContainerName: info.ContainerName,
-	}
+	poder := poder.Instance().
+		WithContext(c.Request.Context()).
+		Namespace(info.Namespace).
+		Name(info.PodName).
+		ContainerName(info.ContainerName)
 	// 从容器中下载文件
-	fileContent, err := pf.DownloadFile(info.Path)
+	fileContent, err := poder.DownloadFile(info.Path)
 	if err != nil {
 		klog.V(2).Infof("Error downloading file: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -184,11 +184,11 @@ func UploadFile(c *gin.Context) {
 	// 替换FileName中非法字符
 	info.FileName = utils.SanitizeFileName(info.FileName)
 
-	pf := kubectl.PodFileInfo{
-		Namespace:     info.Namespace,
-		PodName:       info.PodName,
-		ContainerName: info.ContainerName,
-	}
+	poder := poder.Instance().
+		WithContext(c.Request.Context()).
+		Namespace(info.Namespace).
+		Name(info.PodName).
+		ContainerName(info.ContainerName)
 
 	// 获取上传的文件
 	file, _, err := c.Request.FormFile("file")
@@ -202,7 +202,7 @@ func UploadFile(c *gin.Context) {
 	savePath := fmt.Sprintf("%s/%s", info.Path, info.FileName)
 	// klog.V(2).Infof("存储文件路径%s", savePath)
 	// 上传文件
-	if err := pf.UploadFile(savePath, file); err != nil {
+	if err := poder.UploadFile(savePath, file); err != nil {
 		klog.V(2).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
