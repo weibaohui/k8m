@@ -4,16 +4,16 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
+	"github.com/weibaohui/kom/kom/doc"
 )
 
 func Doc(c *gin.Context) {
 	kind := c.Param("kind")
 	apiVersion := c.Param("api_version")
-	docs := kubectl.NewDocs()
+	docs := doc.Instance()
 
 	// apiVersion 有可能包含xxx.com/v1 类似，所以需要处理
 	// 前端使用了base64Encode，这里需要反向解析处理

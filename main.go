@@ -40,9 +40,6 @@ func Init() {
 	// 初始化kubectl 连接
 	kubectl.InitConnection(cfg.KubeConfig)
 
-	// 初始化文档
-	_ = kubectl.NewDocs()
-
 	// 初始化回调
 	callback.RegisterCallback()
 
