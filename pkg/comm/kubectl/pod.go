@@ -9,23 +9,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (k8s *Kubectl) ListPod(ctx context.Context, ns string) ([]v1.Pod, error) {
-	list, err := k8s.client.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
-	if err == nil && list != nil && list.Items != nil && len(list.Items) > 0 {
-		// 按创建时间倒序排序 Pods 列表
-		sort.Slice(list.Items, func(i, j int) bool {
-			return list.Items[i].CreationTimestamp.Time.After(list.Items[j].CreationTimestamp.Time)
-		})
-		return list.Items, nil
-	}
-	return nil, err
-}
-
-func (k8s *Kubectl) GetPod(ctx context.Context, ns, name string) (*v1.Pod, error) {
-	pod, err := k8s.client.CoreV1().Pods(ns).Get(ctx, name, metav1.GetOptions{})
-	return pod, err
-}
-
 func (k8s *Kubectl) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
 
 	// 检查logOptions

@@ -60,8 +60,7 @@ func Remove(c *gin.Context) {
 
 }
 func removeSingle(ctx context.Context, kind, group, ns, name string) error {
-	var obj unstructured.Unstructured
-	return kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Delete(&obj).Error
+	return kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Delete().Error
 }
 
 // NamesPayload 定义结构体以匹配批量删除 JSON 结构

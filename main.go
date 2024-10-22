@@ -124,9 +124,6 @@ func main() {
 		api.POST("/file/download", pod.DownloadFile)
 		api.POST("/file/upload", pod.UploadFile)
 
-		// Example
-		api.GET("/example", dynamic.Example)
-
 	}
 
 	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))

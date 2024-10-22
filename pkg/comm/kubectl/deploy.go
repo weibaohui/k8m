@@ -5,40 +5,34 @@ import (
 	"strings"
 	"time"
 
+	"github.com/weibaohui/kom/kom"
 	"k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (k8s *Kubectl) GetDeploy(ctx context.Context, ns, name string) (*v1.Deployment, error) {
-	deployment, err := k8s.client.AppsV1().Deployments(ns).Get(ctx, name, metav1.GetOptions{})
-	return deployment, err
-}
-
-func (k8s *Kubectl) CreateDeploy(ctx context.Context, deploy *v1.Deployment) (*v1.Deployment, error) {
-	deployment, err := k8s.client.AppsV1().Deployments(deploy.Namespace).Create(ctx, deploy, metav1.CreateOptions{})
-	return deployment, err
-}
-
 func (k8s *Kubectl) RestartDeploy(ctx context.Context, ns string, name string) (*v1.Deployment, error) {
-	deployment, err := k8s.GetDeploy(ctx, ns, name)
+	var deploy v1.Deployment
+	err := kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
+
 	if err != nil {
 		return nil, err
 	}
 	// 更新 Annotations，触发重启
-	if deployment.Spec.Template.Annotations == nil {
-		deployment.Spec.Template.Annotations = map[string]string{}
+	if deploy.Spec.Template.Annotations == nil {
+		deploy.Spec.Template.Annotations = map[string]string{}
 	}
-	deployment.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+	deploy.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 
 	// 更新 Deployment
-	updatedDeployment, err := k8s.client.AppsV1().Deployments(deployment.Namespace).Update(ctx, deployment, metav1.UpdateOptions{})
+	err = kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
 	if err != nil {
 		return nil, err
 	}
-	return updatedDeployment, nil
+	return &deploy, nil
 }
 func (k8s *Kubectl) UpdateDeployImageTag(ctx context.Context, ns string, name string, containerName string, tag string) (*v1.Deployment, error) {
-	deploy, err := k8s.GetDeploy(ctx, ns, name)
+	var deploy v1.Deployment
+	err := kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
+
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +44,8 @@ func (k8s *Kubectl) UpdateDeployImageTag(ctx context.Context, ns string, name st
 			c.Image = replaceImageTag(c.Image, tag)
 		}
 	}
-	deployment, err := k8s.client.AppsV1().Deployments(deploy.Namespace).Update(ctx, deploy, metav1.UpdateOptions{})
-	return deployment, err
+	err = kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
+	return &deploy, err
 }
 
 // replaceImageTag 替换镜像的 tag

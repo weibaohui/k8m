@@ -8,6 +8,9 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
+	"github.com/weibaohui/kom/kom"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func StreamLogs(c *gin.Context) {
@@ -16,12 +19,13 @@ func StreamLogs(c *gin.Context) {
 	var podName = c.Param("pod_name")
 	var containerName = c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
-	StreamPodLogsBySelector(c, ns, containerName, kubectl.WithFieldSelector(selector))
+	StreamPodLogsBySelector(c, ns, containerName, metav1.ListOptions{LabelSelector: selector})
 }
-func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, opts ...kubectl.ListOption) {
+func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := c.Request.Context()
 
-	pods, err := kubectl.Init().ListResources(ctx, "Pod", ns, opts...)
+	var pods []v1.Pod
+	err := kom.Init().Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -51,12 +55,12 @@ func DownloadLogs(c *gin.Context) {
 	var podName = c.Param("pod_name")
 	var containerName = c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
-	DownloadPodLogsBySelector(c, ns, containerName, kubectl.WithFieldSelector(selector))
+	DownloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{LabelSelector: selector})
 }
-func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, opts ...kubectl.ListOption) {
+func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := c.Request.Context()
-
-	pods, err := kubectl.Init().ListResources(ctx, "Pod", ns, opts...)
+	var pods []v1.Pod
+	err := kom.Init().Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

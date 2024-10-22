@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/weibaohui/kom/kom"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -13,9 +14,11 @@ func (k8s *Kubectl) CreateImagePullSecret(ctx context.Context, ns string, servic
 	secretName := "pull-secret"
 
 	// 先查查Secrets 有没有
-	_, err := k8s.GetSecret(ctx, ns, secretName)
+	secret := corev1.Secret{}
+	err := kom.Init().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Get(&secret).Error
 	if err != nil && strings.Contains(err.Error(), "not found") {
-		secret := &corev1.Secret{
+		// 创建 secret
+		secret = corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      secretName,
 				Namespace: ns,
@@ -25,15 +28,15 @@ func (k8s *Kubectl) CreateImagePullSecret(ctx context.Context, ns string, servic
 				corev1.DockerConfigJsonKey: []byte(pullSecret),
 			},
 		}
-		// 创建 secret
-		_, err := k8s.CreateSecret(ctx, secret)
+		err = kom.Init().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Create(&secret).Error
 		if err != nil {
 			return err
 		}
 	}
 
+	var sa corev1.ServiceAccount
 	// 将 secret 绑定到 ServiceAccount
-	sa, err := k8s.GetServiceAccount(ctx, ns, serviceAccount)
+	err = kom.Init().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Get(&sa).Error
 	if err != nil {
 		return err
 	}
@@ -47,6 +50,7 @@ func (k8s *Kubectl) CreateImagePullSecret(ctx context.Context, ns string, servic
 
 	// 绑定 imagePullSecret
 	sa.ImagePullSecrets = append(sa.ImagePullSecrets, corev1.LocalObjectReference{Name: secretName})
-	_, err = k8s.UpdateServiceAccount(ctx, sa)
+	err = kom.Init().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Update(&sa).Error
+
 	return err
 }
