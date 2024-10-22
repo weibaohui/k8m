@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/pkg/comm/kubectl"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,7 +43,8 @@ func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, op
 		amis.WriteJsonError(c, err)
 		return
 	}
-	stream, err := kubectl.Init().StreamPodLogs(ctx, ns, podName, logOpt)
+	podService := &service.PodService{}
+	stream, err := podService.StreamPodLogs(ctx, ns, podName, logOpt)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -80,7 +81,8 @@ func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, 
 	}
 	logOpt.Follow = false
 
-	stream, err := kubectl.Init().StreamPodLogs(ctx, ns, podName, logOpt)
+	podService := &service.PodService{}
+	stream, err := podService.StreamPodLogs(ctx, ns, podName, logOpt)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)

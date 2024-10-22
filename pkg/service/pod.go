@@ -1,4 +1,4 @@
-package kubectl
+package service
 
 import (
 	"context"
@@ -8,7 +8,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func (k8s *Kubectl) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
+type PodService struct {
+}
+
+func (p *PodService) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
 
 	// 检查logOptions
 	//  at most one of `sinceTime` or `sinceSeconds` may be specified
