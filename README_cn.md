@@ -180,6 +180,24 @@ make help
   chmod +x bin/k8m
   ```
 
+## **运行界面**
+### 负载
+![workload](images/workload.png)
+### Pod内文件编辑
+![file-edit](images/file-edit.png)
+### 上传文件到Pod内
+![upload](images/upload.png)
+### Pod内文件下载
+![download](images/download.png)
+### yaml编辑
+![yaml-editor](images/yaml.png)
+### yaml文档对照（开启了大模型翻译）
+![doc-view](images/doc.png)
+### Tag更新
+![tag-update](images/tag-update.png)
+### 查看日志
+![log-view](images/log-view.png)
 
 
+### HELP & SUPPORT
 如果你有任何进一步的问题或需要额外的帮助，请随时与我联系！

@@ -178,4 +178,25 @@ make help
   chmod +x bin/k8m
   ```
 
+
+
+## **Show**
+### Load
+![workload](images/workload.png)
+### File Editing Inside Pod
+![file-edit](images/file-edit.png)
+### Upload File to Pod
+![upload](images/upload.png)
+### Download File from Pod
+![download](images/download.png)
+### YAML Editing
+![yaml-editor](images/yaml.png)
+### YAML Document Comparison (Large Model Translation Enabled)
+![doc-view](images/doc.png)
+### Tag Update
+![tag-update](images/tag-update.png)
+### View Logs
+![log-view](images/log-view.png)
+
+### HELP & SUPPORT
 If you have any further questions or need additional assistance, feel free to reach out!
