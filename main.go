@@ -72,7 +72,11 @@ func main() {
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
 	})
-
+	// 设置根路径路由
+	r.GET("/", func(c *gin.Context) {
+		// 使用 HTTP 302 重定向
+		c.Redirect(http.StatusFound, "/index.html")
+	})
 	api := r.Group("/k8s")
 	{
 		// dynamic
