@@ -22,7 +22,9 @@
         }
       ],
       "data": {
-        "kind": "StorageClass"
+        "kind": "StorageClass",
+        "group": "storage.k8s.io",
+        "version": "v1"
       },
       "loadDataOnce": true,
       "syncLocation": false,
@@ -33,7 +35,7 @@
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
           "api": {
-            "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
+            "url": "/k8s/$kind/group/$group/version/$version/remove/ns/${ns}/names",
             "method": "post",
             "data": {
               "names": "${selectedItems | pick:metadata.name }"
@@ -54,7 +56,7 @@
               "actionType": "ajax",
               "tooltip": "删除",
               "confirmText": "您确认要删除$metadata.name?",
-              "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
+              "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
             },
             {
               "type": "button",
@@ -75,11 +77,11 @@
                         "body": [
                           {
                             "type": "service",
-                            "api": "get:/k8s/$kind/group/$group/ns/$metadata.namespace/name/$metadata.name",
+                            "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
                             "body": [
                               {
                                 "type": "form",
-                                "api": "post:/k8s/$kind/group/$group/update/ns/$metadata.namespace/name/$metadata.name",
+                                "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
                                 "wrapWithPanel": false,
                                 "body": [
                                   {

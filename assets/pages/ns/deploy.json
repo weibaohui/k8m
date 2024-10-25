@@ -56,7 +56,9 @@
       ],
       "data": {
         "ns": "${ls:selectedNs||'default'}",
-        "kind": "Deployment"
+        "kind": "Deployment",
+        "group": "apps",
+        "version": "v1"
       },
       "loadDataOnce": true,
       "syncLocation": false,
@@ -68,7 +70,7 @@
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
           "api": {
-            "url": "/k8s/$kind/group/$group/remove/ns/${ns}/names",
+            "url": "/k8s/$kind/group/$group/version/$version/remove/ns/${ns}/names",
             "method": "post",
             "data": {
               "names": "${selectedItems | pick:metadata.name }"
@@ -166,11 +168,11 @@
                         "body": [
                           {
                             "type": "service",
-                            "api": "get:/k8s/$kind/group/$group/ns/$metadata.namespace/name/$metadata.name",
+                            "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
                             "body": [
                               {
                                 "type": "form",
-                                "api": "post:/k8s/$kind/group/$group/update/ns/$metadata.namespace/name/$metadata.name",
+                                "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
                                 "wrapWithPanel": false,
                                 "body": [
                                   {
@@ -269,7 +271,7 @@
               "actionType": "ajax",
               "tooltip": "停止",
               "confirmText": "您确认删除?",
-              "api": "post:/k8s/$kind/remove/ns/$metadata.namespace/name/$metadata.name"
+              "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
             }
           ],
           "toggled": true
