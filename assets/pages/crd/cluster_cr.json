@@ -23,7 +23,8 @@
       ],
       "data": {
         "kind": "${kind}",
-        "group": "${group}"
+        "group": "${group}",
+        "version": "${version}"
       },
       "loadDataOnce": true,
       "syncLocation": false,
@@ -56,7 +57,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/k8s/$kind/group/$group/list",
+      "api": "get:/k8s/$kind/group/$group/version/$version/list",
       "columns": [
         {
           "type": "operation",

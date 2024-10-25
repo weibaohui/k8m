@@ -57,7 +57,8 @@
       "data": {
         "ns": "${ls:selectedNs||'default'}",
         "kind": "${kind}",
-        "group": "${group}"
+        "group": "${group}",
+        "version": "${version}"
       },
       "loadDataOnce": true,
       "syncLocation": false,
@@ -91,7 +92,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/k8s/$kind/group/$group/list/ns/${ns}",
+      "api": "get:/k8s/$kind/group/$group/version/$version/list/ns/${ns}",
       "columns": [
         {
           "type": "operation",

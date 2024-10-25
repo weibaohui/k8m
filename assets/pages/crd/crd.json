@@ -179,7 +179,7 @@
               "icon": "fas fa-list text-success",
               "actionType": "link",
               "tooltip": "查看实例",
-              "link": "/crd/${spec.scope=='Namespaced'?'namespaced_cr':'cluster_cr'}?kind=${spec.names.kind}&group=${spec.group}"
+              "link": "/crd/${spec.scope=='Namespaced'?'namespaced_cr':'cluster_cr'}?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}"
             }
           ],
           "toggled": true
@@ -198,6 +198,15 @@
           "name": "spec.group",
           "label": "group",
           "type": "text"
+        },
+        {
+          "name": "spec.versions",
+          "label": "version",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong><a href=\"#/crd/${spec.scope=='Namespaced'?'namespaced_cr':'cluster_cr'}?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}\">${name}</a></strong></div>"
+          }
         },
         {
           "name": "metadata.creationTimestamp",
