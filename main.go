@@ -89,12 +89,12 @@ func main() {
 		api.POST("/:kind/update/ns/:ns/name/:name", dynamic.Save)
 		api.GET("/:kind/ns/:ns/name/:name", dynamic.Fetch)
 		// CRD
-		api.GET("/:kind/group/:group/ns/:ns/name/:name", dynamic.Fetch)          // CRD
-		api.POST("/:kind/group/:group/remove/ns/:ns/name/:name", dynamic.Remove) // CRD
-		api.POST("/:kind/group/:group/remove/ns/:ns/names", dynamic.BatchRemove) // CRD
-		api.POST("/:kind/group/:group/update/ns/:ns/name/:name", dynamic.Save)   // CRD
-		api.GET("/:kind/group/:group/list/ns/:ns", dynamic.List)                 // CRD
-		api.GET("/:kind/group/:group/list", dynamic.List)                        // CRD
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)          // CRD
+		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove) // CRD
+		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/names", dynamic.BatchRemove) // CRD
+		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)   // CRD
+		api.GET("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                 // CRD
+		api.GET("/:kind/group/:group/version/:version/list", dynamic.List)                        // CRD
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
 		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)

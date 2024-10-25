@@ -15,9 +15,10 @@ func List(c *gin.Context) {
 	ns := c.Param("ns")
 	group := c.Param("group")
 	kind := c.Param("kind")
+	version := c.Param("version")
 	ctx := c.Request.Context()
 	var list []unstructured.Unstructured
-	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).CRD(group, "v1", kind).List(&list).Error
+	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).CRD(group, version, kind).List(&list).Error
 	amis.WriteJsonListWithError(c, list, err)
 }
 func Fetch(c *gin.Context) {
@@ -25,11 +26,13 @@ func Fetch(c *gin.Context) {
 	var name = c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	version := c.Param("version")
+
 	ctx := c.Request.Context()
 
 	var obj *unstructured.Unstructured
 
-	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Get(&obj).Error
+	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -49,9 +52,11 @@ func Remove(c *gin.Context) {
 	var name = c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	version := c.Param("version")
+
 	ctx := c.Request.Context()
 
-	err := removeSingle(ctx, kind, group, ns, name)
+	err := removeSingle(ctx, kind, group, version, ns, name)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -59,8 +64,8 @@ func Remove(c *gin.Context) {
 	amis.WriteJsonOK(c)
 
 }
-func removeSingle(ctx context.Context, kind, group, ns, name string) error {
-	return kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Delete().Error
+func removeSingle(ctx context.Context, kind, group, version, ns, name string) error {
+	return kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Delete().Error
 }
 
 // NamesPayload 定义结构体以匹配批量删除 JSON 结构
@@ -72,6 +77,8 @@ func BatchRemove(c *gin.Context) {
 	var ns = c.Param("ns")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	version := c.Param("version")
+
 	ctx := c.Request.Context()
 
 	// 初始化结构体实例
@@ -84,7 +91,7 @@ func BatchRemove(c *gin.Context) {
 	}
 
 	for _, name := range payload.Names {
-		_ = removeSingle(ctx, kind, group, ns, name)
+		_ = removeSingle(ctx, kind, group, version, ns, name)
 	}
 	amis.WriteJsonOK(c)
 }
@@ -98,6 +105,8 @@ func Save(c *gin.Context) {
 	var name = c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
+	version := c.Param("version")
+
 	ctx := c.Request.Context()
 
 	var req ApplyYAMLRequest
@@ -116,7 +125,7 @@ func Save(c *gin.Context) {
 	}
 	obj.SetName(name)
 	obj.SetNamespace(ns)
-	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Update(&obj).Error
+	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Update(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
