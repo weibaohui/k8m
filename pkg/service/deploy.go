@@ -16,7 +16,7 @@ type DeployService struct {
 
 func (d *DeployService) RestartDeploy(ctx context.Context, ns string, name string) (*v1.Deployment, error) {
 	var deploy v1.Deployment
-	err := kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
 
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (d *DeployService) RestartDeploy(ctx context.Context, ns string, name strin
 	deploy.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 
 	// 更新 Deployment
-	err = kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
+	err = kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (d *DeployService) RestartDeploy(ctx context.Context, ns string, name strin
 }
 func (d *DeployService) UpdateDeployImageTag(ctx context.Context, ns string, name string, containerName string, tag string) (*v1.Deployment, error) {
 	var deploy v1.Deployment
-	err := kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
 
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (d *DeployService) UpdateDeployImageTag(ctx context.Context, ns string, nam
 			c.Image = replaceImageTag(c.Image, tag)
 		}
 	}
-	err = kom.Init().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
+	err = kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
 	return &deploy, err
 }
 
@@ -72,7 +72,7 @@ func (d *DeployService) CreateImagePullSecret(ctx context.Context, ns string, se
 
 	// 先查查Secrets 有没有
 	secret := corev1.Secret{}
-	err := kom.Init().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Get(&secret).Error
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Get(&secret).Error
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		// 创建 secret
 		secret = corev1.Secret{
@@ -85,7 +85,7 @@ func (d *DeployService) CreateImagePullSecret(ctx context.Context, ns string, se
 				corev1.DockerConfigJsonKey: []byte(pullSecret),
 			},
 		}
-		err = kom.Init().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Create(&secret).Error
+		err = kom.DefaultCluster().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Create(&secret).Error
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func (d *DeployService) CreateImagePullSecret(ctx context.Context, ns string, se
 
 	var sa corev1.ServiceAccount
 	// 将 secret 绑定到 ServiceAccount
-	err = kom.Init().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Get(&sa).Error
+	err = kom.DefaultCluster().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Get(&sa).Error
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func (d *DeployService) CreateImagePullSecret(ctx context.Context, ns string, se
 
 	// 绑定 imagePullSecret
 	sa.ImagePullSecrets = append(sa.ImagePullSecrets, corev1.LocalObjectReference{Name: secretName})
-	err = kom.Init().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Update(&sa).Error
+	err = kom.DefaultCluster().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Update(&sa).Error
 
 	return err
 }

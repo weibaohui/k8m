@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/kom/kom/poder"
+	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
 
@@ -32,9 +32,8 @@ func FileList(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
-	poder := poder.Instance().
-		WithContext(c.Request.Context()).
+	ctx := c.Request.Context()
+	poder := kom.DefaultCluster().WithContext(ctx).Poder().
 		Namespace(info.Namespace).
 		Name(info.PodName).
 		ContainerName(info.ContainerName)
@@ -60,8 +59,8 @@ func ShowFile(c *gin.Context) {
 		return
 	}
 
-	poder := poder.Instance().
-		WithContext(c.Request.Context()).
+	ctx := c.Request.Context()
+	poder := kom.DefaultCluster().WithContext(ctx).Poder().
 		Namespace(info.Namespace).
 		Name(info.PodName).
 		ContainerName(info.ContainerName)
@@ -106,8 +105,8 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 
-	poder := poder.Instance().
-		WithContext(c.Request.Context()).
+	ctx := c.Request.Context()
+	poder := kom.DefaultCluster().WithContext(ctx).Poder().
 		Namespace(info.Namespace).
 		Name(info.PodName).
 		ContainerName(info.ContainerName)
@@ -145,8 +144,8 @@ func DownloadFile(c *gin.Context) {
 		return
 	}
 
-	poder := poder.Instance().
-		WithContext(c.Request.Context()).
+	ctx := c.Request.Context()
+	poder := kom.DefaultCluster().WithContext(ctx).Poder().
 		Namespace(info.Namespace).
 		Name(info.PodName).
 		ContainerName(info.ContainerName)
@@ -184,8 +183,8 @@ func UploadFile(c *gin.Context) {
 	// 替换FileName中非法字符
 	info.FileName = utils.SanitizeFileName(info.FileName)
 
-	poder := poder.Instance().
-		WithContext(c.Request.Context()).
+	ctx := c.Request.Context()
+	poder := kom.DefaultCluster().WithContext(ctx).Poder().
 		Namespace(info.Namespace).
 		Name(info.PodName).
 		ContainerName(info.ContainerName)

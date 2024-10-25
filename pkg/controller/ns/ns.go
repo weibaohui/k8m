@@ -10,7 +10,7 @@ import (
 func OptionList(c *gin.Context) {
 	ctx := c.Request.Context()
 	var ns []v1.Namespace
-	err := kom.Init().WithContext(ctx).Resource(&v1.Namespace{}).List(&ns).Error
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.Namespace{}).List(&ns).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

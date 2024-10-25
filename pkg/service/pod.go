@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/weibaohui/kom/kom/poder"
+	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -23,7 +23,7 @@ func (p *PodService) StreamPodLogs(ctx context.Context, ns, name string, logOpti
 		logOptions.SinceSeconds = nil
 	}
 
-	podLogs := poder.Instance().WithContext(ctx).Namespace(ns).Name(name).GetLogs(name, logOptions)
+	podLogs := kom.DefaultCluster().WithContext(ctx).Poder().Namespace(ns).Name(name).GetLogs(name, logOptions)
 	logStream, err := podLogs.Stream(ctx)
 
 	return logStream, err

@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
-	"github.com/weibaohui/kom/kom/applier"
 	"github.com/weibaohui/kom/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
@@ -18,7 +17,7 @@ func List(c *gin.Context) {
 	kind := c.Param("kind")
 	ctx := c.Request.Context()
 	var list []unstructured.Unstructured
-	err := kom.Init().WithContext(ctx).Namespace(ns).CRD(group, "v1", kind).List(&list).Error
+	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).CRD(group, "v1", kind).List(&list).Error
 	amis.WriteJsonListWithError(c, list, err)
 }
 func Fetch(c *gin.Context) {
@@ -30,7 +29,7 @@ func Fetch(c *gin.Context) {
 
 	var obj *unstructured.Unstructured
 
-	err := kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Get(&obj).Error
+	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Get(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -61,7 +60,7 @@ func Remove(c *gin.Context) {
 
 }
 func removeSingle(ctx context.Context, kind, group, ns, name string) error {
-	return kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Delete().Error
+	return kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Delete().Error
 }
 
 // NamesPayload 定义结构体以匹配批量删除 JSON 结构
@@ -117,7 +116,7 @@ func Save(c *gin.Context) {
 	}
 	obj.SetName(name)
 	obj.SetNamespace(ns)
-	err := kom.Init().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Update(&obj).Error
+	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, "v1", kind).Update(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -134,7 +133,7 @@ func Apply(c *gin.Context) {
 		return
 	}
 	yamlStr := req.YAML
-	result := applier.Instance().WithContext(ctx).Apply(yamlStr)
+	result := kom.DefaultCluster().WithContext(ctx).Applier().Apply(yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
@@ -150,7 +149,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 	yamlStr := req.YAML
-	result := applier.Instance().WithContext(ctx).Delete(yamlStr)
+	result := kom.DefaultCluster().WithContext(ctx).Applier().Delete(yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
