@@ -138,6 +138,12 @@
                 "url": "/cluster/runtime_class/list",
                 "icon": "fas fa-ruler",
                 "schemaApi": "get:/pages/cluster/runtime_class.json"
+              },
+              {
+                "label": "APIService",
+                "url": "/cluster/api_service/list",
+                "icon": "fas fa-ruler",
+                "schemaApi": "get:/pages/cluster/api_service.json"
               }
             ]
           },
