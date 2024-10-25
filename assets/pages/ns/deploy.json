@@ -290,7 +290,7 @@
           "name": "ready",
           "label": "ready",
           "type": "tpl",
-          "tpl": "${status.readyReplicas}/${status.replicas}"
+          "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
         },
         {
           "name": "metadata.labels",
