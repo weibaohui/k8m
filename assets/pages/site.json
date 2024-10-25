@@ -144,6 +144,12 @@
                 "url": "/cluster/api_service/list",
                 "icon": "fas fa-ruler",
                 "schemaApi": "get:/pages/cluster/api_service.json"
+              },
+              {
+                "label": "ComponentStatus",
+                "url": "/cluster/component_status/list",
+                "icon": "fas fa-ruler",
+                "schemaApi": "get:/pages/cluster/component_status.json"
               }
             ]
           },
