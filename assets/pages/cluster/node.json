@@ -43,7 +43,7 @@
           }
         }
       ],
-      "api": "get:/k8s/$kind/list",
+      "api": "get:/k8s/$kind/group/$group/version/$version/list",
       "columns": [
         {
           "type": "operation",

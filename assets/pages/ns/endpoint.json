@@ -93,7 +93,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/k8s/$kind/list/ns/${ns}",
+      "api": "get:/k8s/$kind/group/$group/version/$version/list/ns/${ns}",
       "columns": [
         {
           "type": "operation",
