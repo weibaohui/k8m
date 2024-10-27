@@ -234,7 +234,8 @@
         {
           "name": "spec.type",
           "label": "type",
-          "type": "text"
+          "type": "tpl",
+          "tpl": "<% if (data.spec && data.spec.type === 'ClusterIP' && data.spec.clusterIP === 'None') { %>Headless<% } else { %><%= data.spec.type %><% } %>"
         },
         {
           "name": "spec.clusterIP",
