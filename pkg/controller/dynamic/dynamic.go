@@ -18,7 +18,7 @@ func List(c *gin.Context) {
 	version := c.Param("version")
 	ctx := c.Request.Context()
 	var list []unstructured.Unstructured
-	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).CRD(group, version, kind).List(&list).Error
+	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).GVK(group, version, kind).List(&list).Error
 	amis.WriteJsonListWithError(c, list, err)
 }
 func Fetch(c *gin.Context) {
