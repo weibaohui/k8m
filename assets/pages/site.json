@@ -24,6 +24,12 @@
             "schemaApi": "get:/pages/cluster/node.json"
           },
           {
+            "label": "Event",
+            "url": "/cluster/event/list",
+            "icon": "fas fa-server",
+            "schemaApi": "get:/pages/cluster/event.json"
+          },
+          {
             "label": "Workload",
             "url": "/workload",
             "icon": "fa fa-cube",
