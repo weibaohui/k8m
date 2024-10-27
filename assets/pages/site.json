@@ -25,9 +25,9 @@
           },
           {
             "label": "Event",
-            "url": "/cluster/event/list",
+            "url": "/event/list",
             "icon": "fas fa-server",
-            "schemaApi": "get:/pages/cluster/event.json"
+            "schemaApi": "get:/pages/ns/event.json"
           },
           {
             "label": "Workload",

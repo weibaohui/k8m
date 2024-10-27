@@ -1,6 +1,40 @@
+
 {
   "type": "page",
   "body": [
+    {
+      "type": "form",
+      "mode": "horizontal",
+      "wrapWithPanel": false,
+      "body": [
+        {
+          "label": "Namespace",
+          "type": "select",
+          "name": "ns",
+          "id": "ns",
+          "searchable": true,
+          "source": "/k8s/ns/option_list",
+          "value": "${ls:selectedNs||'default'}",
+          "onEvent": {
+            "change": {
+              "actions": [
+                {
+                  "actionType": "reload",
+                  "componentId": "detailCRUD",
+                  "data": {
+                    "ns": "${ns}"
+                  }
+                },
+                {
+                  "actionType": "custom",
+                  "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
     {
       "type": "crud",
       "id": "detailCRUD",
@@ -22,12 +56,15 @@
         }
       ],
       "data": {
+        "ns": "${ls:selectedNs||'default'}",
         "kind": "Event",
         "group": "events.k8s.io",
-        "version": "v1"
+        "version": "v1",
+        "sort_by": "lastTimestamp"
       },
       "loadDataOnce": true,
       "syncLocation": false,
+      "autoGenerateFilter": true,
       "perPage": 10,
       "bulkActions": [
         {
@@ -43,7 +80,7 @@
           }
         }
       ],
-      "api": "get:/k8s/$kind/group/$group/version/$version/list",
+      "api": "get:/k8s/$kind/group/$group/version/$version/list/ns/${ns}?sort_by=$sort_by",
       "columns": [
         {
           "type": "operation",
@@ -178,29 +215,60 @@
           "toggled": true
         },
         {
+          "name": "type",
+          "label": "type",
+          "type": "text",
+          "filterable": {
+            "options": [
+              "Normal",
+              "Warning"
+            ]
+          }
+        },
+        {
+          "name": "reason",
+          "label": "reason",
+          "type": "text"
+        },
+        {
+          "name": "object",
+          "label": "object",
+          "type": "tpl",
+          "tpl": "${regarding.kind}/${regarding.name}"
+        },
+        {
+          "name": "field",
+          "label": "sub",
+          "type": "tpl",
+          "tpl": "${regarding.fieldPath}"
+        },
+        {
+          "name": "source",
+          "label": "source",
+          "type": "tpl",
+          "tpl": "${reportingController} ${reportingInstance}"
+        },
+        {
+          "name": "note",
+          "label": "note",
+          "type": "text",
+          "searchable": true
+        },
+
+        {
           "name": "metadata.name",
           "label": "name",
           "type": "text"
         },
         {
-          "name": "metadata.labels",
-          "label": "labels",
-          "type": "k8sLabels"
+          "name": "metadata.namespace",
+          "label": "namespace",
+          "type": "text"
         },
         {
           "name": "metadata.creationTimestamp",
           "label": "age",
           "type": "k8sAge"
-        },
-        {
-          "name": "status.phase",
-          "label": "status",
-          "type": "mapping",
-          "map": {
-            "Active": "<span class='label label-success'>Active</span>",
-            "Terminating": "<span class='label label-danger'>Terminating</span>",
-            "*": "<span class='label label-default'>Unknown</span>"
-          }
         }
       ]
     }
