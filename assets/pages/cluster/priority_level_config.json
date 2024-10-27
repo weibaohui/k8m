@@ -216,11 +216,6 @@
           "name": "metadata.creationTimestamp",
           "label": "age",
           "type": "k8sAge"
-        },
-        {
-          "name": "status.conditions",
-          "label": "conditions",
-          "type": "k8sConditions"
         }
       ]
     }
