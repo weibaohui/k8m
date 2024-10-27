@@ -183,6 +183,11 @@
           "type": "text"
         },
         {
+          "name": "metadata.annotations",
+          "label": "default",
+          "tpl": "${metadata.annotations['storageclass.kubernetes.io/is-default-class']}"
+        },
+        {
           "name": "provisioner",
           "label": "provisioner",
           "type": "text"
