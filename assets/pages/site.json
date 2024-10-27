@@ -136,6 +136,18 @@
                 "url": "/cluster/runtime_class/list",
                 "icon": "fas fa-ruler",
                 "schemaApi": "get:/pages/cluster/runtime_class.json"
+              },
+              {
+                "label": "ValidationHook",
+                "url": "/cluster/validation_webhook/list",
+                "icon": "fas fa-cog",
+                "schemaApi": "get:/pages/cluster/validation_webhook.json"
+              },
+              {
+                "label": "MutatingHook",
+                "url": "/cluster/mutating_webhook/list",
+                "icon": "fas fa-cog",
+                "schemaApi": "get:/pages/cluster/mutating_webhook.json"
               }
             ]
           },
@@ -287,6 +299,18 @@
                 "url": "/cluster/api_service/list",
                 "icon": "fas fa-screwdriver",
                 "schemaApi": "get:/pages/cluster/api_service.json"
+              },
+              {
+                "label": "FlowSchema",
+                "url": "/cluster/flow_schema/list",
+                "icon": "fas fa-cog",
+                "schemaApi": "get:/pages/cluster/flow_schema.json"
+              },
+              {
+                "label": "PriorityLevelConfig",
+                "url": "/cluster/priority_level_config/list",
+                "icon": "fas fa-cog",
+                "schemaApi": "get:/pages/cluster/priority_level_config.json"
               },
               {
                 "label": "ComponentStatus",
