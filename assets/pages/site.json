@@ -125,8 +125,6 @@
                 "icon": "fas fa-traffic-light",
                 "schemaApi": "get:/pages/ns/lease.json"
               },
-
-
               {
                 "label": "PriorityClass",
                 "url": "/cluster/priority_class/list",
@@ -138,18 +136,6 @@
                 "url": "/cluster/runtime_class/list",
                 "icon": "fas fa-ruler",
                 "schemaApi": "get:/pages/cluster/runtime_class.json"
-              },
-              {
-                "label": "APIService",
-                "url": "/cluster/api_service/list",
-                "icon": "fas fa-ruler",
-                "schemaApi": "get:/pages/cluster/api_service.json"
-              },
-              {
-                "label": "ComponentStatus",
-                "url": "/cluster/component_status/list",
-                "icon": "fas fa-ruler",
-                "schemaApi": "get:/pages/cluster/component_status.json"
               }
             ]
           },
@@ -288,6 +274,25 @@
                 "icon": "fas fa-business-time",
                 "visibleOn": "1==2",
                 "schemaApi": "get:/pages/crd/cluster_cr.json"
+              }
+            ]
+          },
+          {
+            "label": "Status",
+            "url": "/status",
+            "icon": "fas fa-info-circle",
+            "children": [
+              {
+                "label": "APIService",
+                "url": "/cluster/api_service/list",
+                "icon": "fas fa-screwdriver",
+                "schemaApi": "get:/pages/cluster/api_service.json"
+              },
+              {
+                "label": "ComponentStatus",
+                "url": "/cluster/component_status/list",
+                "icon": "fas fa-tools",
+                "schemaApi": "get:/pages/cluster/component_status.json"
               }
             ]
           }
