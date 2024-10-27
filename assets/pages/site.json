@@ -213,9 +213,15 @@
               },
               {
                 "label": "StorageClass",
-                "url": "/storage_class/list",
+                "url": "/cluster/storage_class/list",
                 "icon": "fas fa-coins",
                 "schemaApi": "get:/pages/cluster/storage_class.json"
+              },
+              {
+                "label": "CSINode",
+                "url": "/cluster/csi_node/list",
+                "icon": "fas fa-cog",
+                "schemaApi": "get:/pages/cluster/csi_node.json"
               }
             ]
           },
