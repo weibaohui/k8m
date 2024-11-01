@@ -33,10 +33,10 @@ func FileList(c *gin.Context) {
 		return
 	}
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).Poder().
+	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).
-		ContainerName(info.ContainerName)
+		ContainerName(info.ContainerName).Poder()
 
 	if info.Path == "" {
 		info.Path = "/"
@@ -60,10 +60,10 @@ func ShowFile(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).Poder().
+	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).
-		ContainerName(info.ContainerName)
+		ContainerName(info.ContainerName).Poder()
 	if info.FileType != "" && info.FileType != "file" && info.FileType != "directory" {
 		amis.WriteJsonError(c, fmt.Errorf("无法查看%s类型文件", info.FileType))
 		return
@@ -106,10 +106,10 @@ func SaveFile(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).Poder().
+	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).
-		ContainerName(info.ContainerName)
+		ContainerName(info.ContainerName).Poder()
 
 	if info.Path == "" {
 		amis.WriteJsonOK(c)
@@ -145,10 +145,10 @@ func DownloadFile(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).Poder().
+	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).
-		ContainerName(info.ContainerName)
+		ContainerName(info.ContainerName).Poder()
 	// 从容器中下载文件
 	fileContent, err := poder.DownloadFile(info.Path)
 	if err != nil {
@@ -184,10 +184,10 @@ func UploadFile(c *gin.Context) {
 	info.FileName = utils.SanitizeFileName(info.FileName)
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).Poder().
+	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).
-		ContainerName(info.ContainerName)
+		ContainerName(info.ContainerName).Poder()
 
 	// 获取上传的文件
 	file, _, err := c.Request.FormFile("file")

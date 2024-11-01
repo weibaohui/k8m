@@ -22,9 +22,8 @@ func (p *PodService) StreamPodLogs(ctx context.Context, ns, name string, logOpti
 	if logOptions.SinceSeconds != nil && *logOptions.SinceSeconds == 0 {
 		logOptions.SinceSeconds = nil
 	}
+	var stream io.ReadCloser
+	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).Name(name).ContainerName(logOptions.Container).GetLogs(&stream, logOptions).Error
 
-	podLogs := kom.DefaultCluster().WithContext(ctx).Poder().Namespace(ns).Name(name).GetLogs(name, logOptions)
-	logStream, err := podLogs.Stream(ctx)
-
-	return logStream, err
+	return stream, err
 }
