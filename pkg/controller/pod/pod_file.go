@@ -2,7 +2,9 @@ package pod
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +44,7 @@ func FileList(c *gin.Context) {
 		info.Path = "/"
 	}
 	// 获取文件列表
-	nodes, err := poder.GetFileList(info.Path)
+	nodes, err := poder.ListFiles(info.Path)
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("获取文件列表失败,容器内没有shell或者没有ls命令"))
 		return
@@ -190,18 +192,29 @@ func UploadFile(c *gin.Context) {
 		ContainerName(info.ContainerName).Poder()
 
 	// 获取上传的文件
-	file, _, err := c.Request.FormFile("file")
+	file, err := c.FormFile("file")
 	if err != nil {
 		klog.V(2).Infof("Error retrieving file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
-	defer file.Close()
+	// 指定文件保存路径
+	dst := "./uploads/" + file.Filename
+	// 保存文件
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		c.JSON(500, gin.H{"error": "could not save file"})
+		return
+	}
 
 	savePath := fmt.Sprintf("%s/%s", info.Path, info.FileName)
-	// klog.V(2).Infof("存储文件路径%s", savePath)
+	klog.V(2).Infof("存储文件路径%s", savePath)
 	// 上传文件
-	if err := poder.UploadFile(savePath, file); err != nil {
+	op, err := os.Open(dst)
+	if err != nil {
+		log.Fatalf("Failed to open file: %v", err)
+	}
+	defer op.Close()
+	if err := poder.UploadFile(info.Path, op); err != nil {
 		klog.V(2).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
