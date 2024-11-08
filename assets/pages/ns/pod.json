@@ -451,6 +451,8 @@
                                       "size": "${event.data.item.size}",
                                       "type": "${event.data.item.type}",
                                       "modTime": "${event.data.item.modTime}",
+                                      "owner": "${event.data.item.owner}",
+                                      "group": "${event.data.item.group}",
                                       "permissions": "${event.data.item.permissions}"
                                     }
                                   }
@@ -602,7 +604,7 @@
                                       },
                                       {
                                         "type": "tpl",
-                                        "tpl": " &nbsp;<span class='text-primary '>${path}</span> &nbsp;<span class='text-primary '>${size|formatBytes}</span> &nbsp;<span class='text-primary '>${modTime|formatLsShortDate}</span>  &nbsp;<span class='text-primary '>${permissions}</span>",
+                                        "tpl": " &nbsp;<span class='text-primary '>${path}</span> &nbsp;<span class='text-primary '>${size|formatBytes}</span> &nbsp;<span class='text-primary '>${modTime|formatLsShortDate}</span>  &nbsp;<span class='text-primary '>${permissions}</span>&nbsp;<span class='text-primary '>${owner}:${group}</span>",
                                         "visibleOn": "${path}"
                                       }
                                     ]
