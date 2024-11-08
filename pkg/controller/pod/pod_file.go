@@ -1,8 +1,10 @@
 package pod
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -186,36 +188,23 @@ func UploadFile(c *gin.Context) {
 	info.FileName = utils.SanitizeFileName(info.FileName)
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).
-		Namespace(info.Namespace).
-		Name(info.PodName).
-		ContainerName(info.ContainerName).Poder()
-
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
-		klog.V(2).Infof("Error retrieving file: %v", err)
-		amis.WriteJsonError(c, err)
-		return
-	}
-	// 指定文件保存路径
-	dst := "./uploads/" + file.Filename
-	// 保存文件
-	if err := c.SaveUploadedFile(file, dst); err != nil {
-		c.JSON(500, gin.H{"error": "could not save file"})
+		amis.WriteJsonError(c, fmt.Errorf("Error retrieving file: %v", err))
 		return
 	}
 
-	savePath := fmt.Sprintf("%s/%s", info.Path, info.FileName)
-	klog.V(2).Infof("存储文件路径%s", savePath)
-	// 上传文件
-	op, err := os.Open(dst)
+	// 保存上传文件
+	tempFilePath, err := saveUploadedFile(file)
 	if err != nil {
-		log.Fatalf("Failed to open file: %v", err)
+		amis.WriteJsonError(c, err)
+		return
 	}
-	defer op.Close()
-	if err := poder.UploadFile(info.Path, op); err != nil {
-		klog.V(2).Infof("Error uploading file: %v", err)
+	defer os.Remove(tempFilePath) // 请求结束时删除临时文件
+
+	// 上传文件到 Pod 中
+	if err := uploadToPod(ctx, info, tempFilePath); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -223,4 +212,56 @@ func UploadFile(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"value": "/#",
 	})
+}
+
+// saveUploadedFile 保存上传文件并返回临时文件路径
+func saveUploadedFile(file *multipart.FileHeader) (string, error) {
+	// 创建临时目录
+	tempDir, err := os.MkdirTemp("", "upload-dir-*")
+	if err != nil {
+		return "", fmt.Errorf("error creating temp directory: %v", err)
+	}
+
+	// 使用原始文件名生成临时文件路径
+	tempFilePath := filepath.Join(tempDir, file.Filename)
+
+	// 创建并保存文件
+	tempFile, err := os.Create(tempFilePath)
+	if err != nil {
+		return "", fmt.Errorf("error creating temp file: %v", err)
+	}
+	defer tempFile.Close()
+
+	src, err := file.Open()
+	if err != nil {
+		return "", fmt.Errorf("无法打开上传文件: %v", err)
+	}
+	defer src.Close()
+
+	if _, err := io.Copy(tempFile, src); err != nil {
+		return "", fmt.Errorf("无法写入临时文件: %v", err)
+	}
+
+	return tempFilePath, nil
+}
+
+// uploadToPod 上传文件到 Pod
+func uploadToPod(ctx context.Context, info *info, tempFilePath string) error {
+	poder := kom.DefaultCluster().WithContext(ctx).
+		Namespace(info.Namespace).
+		Name(info.PodName).
+		ContainerName(info.ContainerName).Poder()
+
+	openTmpFile, err := os.Open(tempFilePath)
+	if err != nil {
+		return fmt.Errorf("无法打开上传临时文件: %v", err)
+	}
+	defer openTmpFile.Close()
+
+	// 上传文件到 Pod 中
+	if err := poder.UploadFile(info.Path, openTmpFile); err != nil {
+		return fmt.Errorf("error uploading file: %v", err)
+	}
+
+	return nil
 }
