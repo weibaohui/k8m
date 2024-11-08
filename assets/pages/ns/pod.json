@@ -449,7 +449,9 @@
                                       "path": "${event.data.item.path}",
                                       "isDir": "${event.data.item.isDir}",
                                       "size": "${event.data.item.size}",
-                                      "type": "${event.data.item.type}"
+                                      "type": "${event.data.item.type}",
+                                      "modTime": "${event.data.item.modTime}",
+                                      "permissions": "${event.data.item.permissions}"
                                     }
                                   }
                                 ]
@@ -499,113 +501,109 @@
                                     "className": "b",
                                     "body": [
                                       {
-                                        "type": "grid",
-                                        "columns": [
-                                          {
-                                            "body": [
-                                              {
-                                                "type": "tpl",
-                                                "label": "当前选中",
-                                                "tpl": "<span class='text-primary bg-yellow-100 p-2 rounded'>${isDir?'Folder':'File'}</span>&nbsp;<span class='text-primary bg-indigo-100 p-2 rounded'>${path}</span>",
-                                                "visibleOn": "${path}"
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "body": [
-                                              {
-                                                "type": "button",
-                                                "label": "Download File",
-                                                "actionType": "ajax",
-                                                "api": {
-                                                  "method": "post",
-                                                  "url": "/k8s/file/download",
-                                                  "data": {
-                                                    "path": "${path}",
-                                                    "containerName": "${containerName}",
-                                                    "podName": "${metadata.name}",
-                                                    "namespace": "${metadata.namespace}",
-                                                    "isDir": false
+                                        "type": "tpl",
+                                        "tpl": "<span class='text-primary bg-yellow-100 p-2 rounded'>${isDir?'Folder':'File'}</span>",
+                                        "visibleOn": "${path}"
+                                      },
+                                      {
+                                        "type": "button",
+                                        "tooltip": "点击上传文件到当前目录",
+                                        "visibleOn": "${isDir===true}",
+                                        "icon": "fa fa-upload",
+                                        "actionType": "dialog",
+                                        "dialog": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "title": "上传文件",
+                                          "body": [
+                                            {
+                                              "type": "page",
+                                              "body": {
+                                                "type": "form",
+                                                "body": [
+                                                  {
+                                                    "type": "input-file",
+                                                    "name": "file",
+                                                    "label": "File",
+                                                    "accept": "*",
+                                                    "asBlob": true
                                                   },
-                                                  "responseType": "blob"
-                                                },
-                                                "onEvent": {
-                                                  "submit": {
-                                                    "actions": [
-                                                      {
-                                                        "actionType": "custom",
-                                                        "script": "downloadFile(event.data)"
-                                                      }
-                                                    ]
+                                                  {
+                                                    "type": "input-text",
+                                                    "name": "fileName",
+                                                    "label": "文件名",
+                                                    "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
                                                   }
-                                                },
-                                                "visibleOn": "${isDir===false}"
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "body": [
-                                              {
-                                                "type": "button",
-                                                "label": "上传文件",
-                                                "visibleOn": "${isDir===true}",
-                                                "icon": "fa fa-list",
-                                                "actionType": "dialog",
-                                                "dialog": {
-                                                  "closeOnEsc": true,
-                                                  "closeOnOutside": true,
-                                                  "title": "上传文件",
-                                                  "body": [
-                                                    {
-                                                      "type": "page",
-                                                      "body": {
-                                                        "type": "form",
-                                                        "body": [
-                                                          {
-                                                            "type": "input-file",
-                                                            "name": "file",
-                                                            "label": "File",
-                                                            "accept": "*",
-                                                            "asBlob": true
-                                                          },
-                                                          {
-                                                            "type": "input-text",
-                                                            "name": "fileName",
-                                                            "label": "文件名",
-                                                            "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
-                                                          }
-                                                        ],
-                                                        "actions": [
-                                                          {
-                                                            "type": "button",
-                                                            "label": "上传",
-                                                            "level": "primary",
-                                                            "actionType": "ajax",
-                                                            "close": true,
-                                                            "api": {
-                                                              "method": "post",
-                                                              "url": "/k8s/file/upload",
-                                                              "data": {
-                                                                "containerName": "${containerName}",
-                                                                "podName": "${metadata.name}",
-                                                                "namespace": "${metadata.namespace}",
-                                                                "isDir": "${isDir?isDir:false}",
-                                                                "path": "${path}",
-                                                                "file": "${file}",
-                                                                "fileName": "${fileName}"
-                                                              }
-                                                            }
-                                                          }
-                                                        ]
+                                                ],
+                                                "actions": [
+                                                  {
+                                                    "type": "button",
+                                                    "label": "上传",
+                                                    "level": "primary",
+                                                    "actionType": "ajax",
+                                                    "close": true,
+                                                    "api": {
+                                                      "method": "post",
+                                                      "url": "/k8s/file/upload",
+                                                      "data": {
+                                                        "containerName": "${containerName}",
+                                                        "podName": "${metadata.name}",
+                                                        "namespace": "${metadata.namespace}",
+                                                        "isDir": "${isDir?isDir:false}",
+                                                        "path": "${path}",
+                                                        "file": "${file}",
+                                                        "fileName": "${fileName}"
                                                       }
                                                     }
-                                                  ],
-                                                  "actions": []
-                                                }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ],
+                                          "actions": []
+                                        }
+                                      },
+                                      {
+                                        "type": "button",
+                                        "icon": "fa fa-download",
+                                        "tooltip": "点击下载文件",
+                                        "actionType": "ajax",
+                                        "api": {
+                                          "method": "post",
+                                          "url": "/k8s/file/download",
+                                          "data": {
+                                            "path": "${path}",
+                                            "containerName": "${containerName}",
+                                            "podName": "${metadata.name}",
+                                            "namespace": "${metadata.namespace}",
+                                            "isDir": false
+                                          },
+                                          "responseType": "blob"
+                                        },
+                                        "onEvent": {
+                                          "submit": {
+                                            "actions": [
+                                              {
+                                                "actionType": "custom",
+                                                "script": "downloadFile(event.data)"
                                               }
                                             ]
                                           }
-                                        ]
+                                        },
+                                        "visibleOn": "${isDir===false}"
+                                      },
+                                      {
+                                        "type": "button",
+                                        "icon": "fa fa-refresh",
+                                        "actionType": "reload",
+                                        "tooltip": "点击刷新当前文件",
+                                        "target": "detail",
+                                        "visibleOn": "${isDir===false}"
+                                      },
+                                      {
+                                        "type": "tpl",
+                                        "tpl": " &nbsp;<span class='text-primary '>${path}</span> &nbsp;<span class='text-primary '>${size|formatBytes}</span> &nbsp;<span class='text-primary '>${modTime|formatLsShortDate}</span>  &nbsp;<span class='text-primary '>${permissions}</span>",
+                                        "visibleOn": "${path}"
                                       }
                                     ]
                                   },

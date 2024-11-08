@@ -535,4 +535,57 @@
         // 返回基本的名称和 tag，tag 默认为 "latest"
         return `${name}:${tag || 'latest'}`;
     });
+    // 格式化ls -l 文件大小 格式
+    amisLib.registerFilter('formatBytes', function (input) {
+        // 如果输入不是数字，直接返回原始输入
+        if (typeof input !== 'number') {
+            return input;
+        }
+
+        // 转换函数，将字节转换为合适的单位
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            const size = sizes[i];
+            const value = (bytes / Math.pow(1024, i)).toFixed(2);
+            return `${value} ${size}`;
+        }
+
+        // 返回转换后的结果
+        return formatBytes(input);
+    });
+    // 格式化 ls -l 的短日期格式
+    amisLib.registerFilter('formatLsShortDate', function (input) {
+        // 如果输入不是字符串，直接返回原始输入
+        if (typeof input !== 'string') {
+            return input;
+        }
+
+        // 获取当前年份
+        const year = new Date().getFullYear();
+
+        // 月份缩写映射
+        const months = {
+            Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+            Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'
+        };
+
+        // 正则解析输入格式 "Mon 7 17:12"
+        const regex = /^(\w{3})\s+(\d{1,2})\s+(\d{2}):(\d{2})$/;
+        const match = input.match(regex);
+
+        // 若输入格式不符合，返回原始输入
+        if (!match) return input;
+
+        // 提取月份、日期、小时和分钟
+        const month = months[match[1]];
+        const day = match[2].padStart(2, '0');
+        const hours = match[3].padStart(2, '0');
+        const minutes = match[4].padStart(2, '0');
+
+        // 返回格式化的日期字符串：YYYY-MM-DD HH:MM
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+    });
+
 })();
