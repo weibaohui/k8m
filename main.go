@@ -51,7 +51,7 @@ func main() {
 
 	r.Use(cors.Default())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
-
+	r.MaxMultipartMemory = 100 << 20 // 100 MiB
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
