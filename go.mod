@@ -8,7 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sashabaranov/go-openai v1.32.2
 	github.com/spf13/pflag v1.0.5
-	github.com/weibaohui/kom v0.0.15
+	github.com/weibaohui/kom v0.0.20
 	k8s.io/api v0.31.1
 	k8s.io/apimachinery v0.31.1
 	k8s.io/client-go v0.31.1
