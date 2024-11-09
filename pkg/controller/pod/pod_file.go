@@ -217,7 +217,7 @@ func UploadFile(c *gin.Context) {
 // saveUploadedFile 保存上传文件并返回临时文件路径
 func saveUploadedFile(file *multipart.FileHeader) (string, error) {
 	// 创建临时目录
-	tempDir, err := os.MkdirTemp("", "upload-dir-*")
+	tempDir, err := os.MkdirTemp("", "upload-*")
 	if err != nil {
 		return "", fmt.Errorf("error creating temp directory: %v", err)
 	}
