@@ -143,7 +143,7 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-redo-alt text-warning",
+              "icon": "fas fa-power-off text-danger",
               "actionType": "ajax",
               "tooltip": "重启",
               "confirmText": "您确认要重启?",
