@@ -43,6 +43,7 @@
             {
               "type": "button",
               "icon": "fas fa-file-code text-success",
+              "tooltip": "Yaml编辑",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
