@@ -1,5 +1,5 @@
 ### **k8m**
-[English](Readme.md) | [中文](Readme_cn.md)
+[English](README.md) | [中文](README_cn.md)
 
 **k8m** 是一个轻量级的 Kubernetes 仪表板，旨在提供简洁高效的集群管理体验。
 基于[AMIS](https://github.com/baidu/amis)构建，并使用[kom](https://github.com/weibaohui/kom)作为 Kubernetes API 客户端。
