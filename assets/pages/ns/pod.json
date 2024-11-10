@@ -97,7 +97,7 @@
         {
           "type": "operation",
           "label": "action",
-          "width": 140,
+          "width": 100,
           "buttons": [
             {
               "type": "button",
@@ -110,6 +110,7 @@
             {
               "type": "button",
               "icon": "fas fa-file-code text-success",
+              "tooltip": "Yaml编辑",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
@@ -226,6 +227,7 @@
             {
               "type": "button",
               "icon": "fa fa-list",
+              "tooltip": "日志",
               "actionType": "dialog",
               "dialog": {
                 "closeOnEsc": true,
@@ -334,11 +336,11 @@
             {
               "type": "button",
               "icon": "fas fa-folder",
+              "tooltip": "文件管理",
               "actionType": "drawer",
               "drawer": {
                 "closeOnOutside": true,
                 "closeOnEsc": true,
-                "position": "left",
                 "size": "xl",
                 "body": [
                   {
@@ -658,7 +660,112 @@
             },
             {
               "type": "button",
-              "icon": "fab fa-elementor text-warning-dker",
+              "icon": "fas  fa-terminal text-primary",
+              "tooltip": "Shell",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnOutside": true,
+                "closeOnEsc": true,
+                "size": "xl",
+                "body": [
+                  {
+                    "type": "wrapper",
+                    "size": "lg",
+                    "className": "b",
+                    "body": [
+                      {
+                        "type": "select",
+                        "label": "容器",
+                        "name": "containerName",
+                        "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                        "value": "${spec.containers[0].name}",
+                        "onEvent": {
+                          "change": {
+                            "actions": [
+                              {
+                                "actionType": "custom",
+                                "script": "localStorage.removeItem('commandHistory');"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "type": "form",
+                        "title": "命令行输入",
+                        "name": "shellForm",
+                        "wrapWithPanel": false,
+                        "submitText": "",
+                        "api": {
+                          "method": "post",
+                          "url": "/k8s/pod/exec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                          "data": {
+                            "cmd": "${command}"
+                          }
+                        },
+                        "controls": [
+                          {
+                            "type": "text",
+                            "name": "command",
+                            "label": "命令",
+                            "placeholder": "请输入命令...",
+                            "clearable": true,
+                            "autoFocus": true
+                          }
+                        ],
+                        "onEvent": {
+                          "submitSucc": {
+                            "actions": [
+                              {
+                                "actionType": "custom",
+                                "script": "let history = JSON.parse(localStorage.getItem('commandHistory') || '[]'); history.unshift(event.data.result.data); localStorage.setItem('commandHistory', JSON.stringify(history));"
+                              },
+                              {
+                                "actionType": "clear",
+                                "target": "shellForm.command"
+                              }
+                            ]
+                          }
+                        },
+                        "messages": {
+                          "saveSuccess": ""
+                        },
+                        "actions": []
+                      },
+                      {
+                        "type": "each",
+                        "name": "commands",
+                        "id": "commandHistory",
+                        "value": "${ls:commandHistory||[]}",
+                        "items": {
+                          "type": "tpl",
+                          "tpl": "<strong>${last_command}</strong> <br><pre>${result}</pre>",
+                          "style": {
+                            "padding": "5px",
+                            "borderBottom": "1px solid #ddd"
+                          }
+                        }
+
+                      }
+                    ]
+                  }
+                ],
+                "actions": []
+              },
+              "onEvent": {
+                "click": {
+                  "actions": [
+                    {
+                      "actionType": "custom",
+                      "script": "localStorage.removeItem('commandHistory');"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-calendar-alt text-primary",
               "tooltip": "Event",
               "actionType": "drawer",
               "drawer": {
