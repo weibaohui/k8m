@@ -674,6 +674,11 @@
                     "className": "b",
                     "body": [
                       {
+                        "type": "alert",
+                        "level": "success",
+                        "body": "温馨提示：暂不支持top、tail -f 等流式返回的命令以及交互式命令"
+                      },
+                      {
                         "type": "select",
                         "label": "容器",
                         "name": "containerName",
