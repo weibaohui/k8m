@@ -183,7 +183,7 @@ make help
   ```bash
   chmod +x bin/k8m
   ```
-
+- **File Browsing Permission Issue**:Depends on the ls command within the container. Please install commands such as shell, tar, and cat within the container.
 
 
 ## **Show**
