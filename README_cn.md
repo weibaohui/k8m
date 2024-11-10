@@ -184,6 +184,7 @@ make help
   ```bash
   chmod +x bin/k8m
   ```
+- **文件浏览权限问题**：依赖容器内的ls命令，请在容器内安装shell、tar、cat等命令 。  
 
 ## **运行界面**
 ### 负载
