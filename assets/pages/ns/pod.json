@@ -607,6 +607,7 @@
                                         "icon": "fas fa-trash text-danger",
                                         "actionType": "ajax",
                                         "tooltip": "删除文件",
+                                        "visibleOn": "${path}",
                                         "confirmText": "您确认要删除$path?",
                                         "api": {
                                           "method": "post",
