@@ -7,7 +7,7 @@ Its main features include:
 - **Miniature Design**: All functionalities are integrated into a single executable file, making deployment and usage convenient.
 - **Easy to Use**: A user-friendly interface and intuitive workflows make Kubernetes management effortless.
 - **High Performance**: Utilizing Baidu AMIS for the frontend and built with Golang for the backend, ensuring efficient resource utilization and fast response times.
-- **Pod File Management**: Supports directory browsing within Pods, file browsing, file editing, file downloading, and file uploading, simplifying Kubernetes management.
+- **Pod File Management**: Supports directory browsing within Pods, file browsing, file editing, file downloading, file uploading, and file deleting, simplifying Kubernetes management.
 - **CRD Management**: Supports automatic discovery and management of CRD resources.
 - **ChatGPT**: Enables ChatGPT translation on the resource editing page, automatically translating English documents into Chinese.
 - **Multi-Platform Support**: Compatible with Linux, macOS, and Windows, ensuring smooth operation across various platforms.
