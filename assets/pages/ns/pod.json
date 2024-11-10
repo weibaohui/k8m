@@ -603,6 +603,24 @@
                                         "visibleOn": "${isDir===false}"
                                       },
                                       {
+                                        "type": "button",
+                                        "icon": "fas fa-trash text-danger",
+                                        "actionType": "ajax",
+                                        "tooltip": "删除文件",
+                                        "confirmText": "您确认要删除$path?",
+                                        "api": {
+                                          "method": "post",
+                                          "url": "/k8s/file/delete",
+                                          "data": {
+                                            "path": "${path}",
+                                            "containerName": "${containerName}",
+                                            "podName": "${metadata.name}",
+                                            "namespace": "${metadata.namespace}",
+                                            "isDir": false
+                                          }
+                                        }
+                                      },
+                                      {
                                         "type": "tpl",
                                         "tpl": " &nbsp;<span class='text-primary '>${path}</span> &nbsp;<span class='text-primary '>${size|formatBytes}</span> &nbsp;<span class='text-primary '>${modTime|formatLsShortDate}</span>  &nbsp;<span class='text-primary '>${permissions}</span>&nbsp;<span class='text-primary '>${owner}:${group}</span>",
                                         "visibleOn": "${path}"
