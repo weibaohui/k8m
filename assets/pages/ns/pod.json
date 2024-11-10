@@ -658,7 +658,7 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-exclamation-circle text-warning-dker",
+              "icon": "fab fa-elementor text-warning-dker",
               "tooltip": "Event",
               "actionType": "drawer",
               "drawer": {
