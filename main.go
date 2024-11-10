@@ -120,6 +120,7 @@ func main() {
 		api.POST("/file/save", pod.SaveFile)
 		api.POST("/file/download", pod.DownloadFile)
 		api.POST("/file/upload", pod.UploadFile)
+		api.POST("/file/delete", pod.DeleteFile)
 
 	}
 
