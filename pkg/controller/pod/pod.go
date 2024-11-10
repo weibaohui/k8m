@@ -15,7 +15,7 @@ import (
 
 func StreamLogs(c *gin.Context) {
 
-	var ns = c.Param("ns")
+	ns := c.Param("ns")
 	var podName = c.Param("pod_name")
 	var containerName = c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
@@ -54,7 +54,7 @@ func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, op
 }
 func DownloadLogs(c *gin.Context) {
 
-	var ns = c.Param("ns")
+	ns := c.Param("ns")
 	var podName = c.Param("pod_name")
 	var containerName = c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
