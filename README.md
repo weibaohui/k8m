@@ -1,4 +1,5 @@
 # k8m
+[English](Readme.md) | [中文](Readme_cn.md)
 
 **k8m** is a lightweight Kubernetes dashboard designed to provide a clean and efficient cluster management experience.
 Built on [AMIS](https://github.com/baidu/amis) and using [kom](https://github.com/weibaohui/kom) as the Kubernetes API client.
