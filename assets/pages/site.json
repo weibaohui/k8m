@@ -8,7 +8,7 @@
           {
             "label": "Apply",
             "url": "/apply",
-            "icon": "fas fa-dharmachakra",
+            "icon": "fas fa-dharmachakra text-primary",
             "schemaApi": "get:/pages/apply/apply.json"
           },
           {
@@ -26,7 +26,7 @@
           {
             "label": "Event",
             "url": "/event/list",
-            "icon": "fas fa-server",
+            "icon": "fab fa-elementor text-warning-dker",
             "schemaApi": "get:/pages/ns/event.json"
           },
           {
