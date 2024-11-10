@@ -157,7 +157,7 @@ func DownloadFile(c *gin.Context) {
 	fileContent, err := poder.DownloadFile(info.Path)
 	if err != nil {
 		klog.V(2).Infof("Error downloading file: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		amis.WriteJsonError(c, err)
 		return
 	}
 
@@ -212,6 +212,29 @@ func UploadFile(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"value": "/#",
 	})
+}
+func DeleteFile(c *gin.Context) {
+	info := &info{}
+	err := c.ShouldBindBodyWithJSON(info)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	ctx := c.Request.Context()
+	poder := kom.DefaultCluster().WithContext(ctx).
+		Namespace(info.Namespace).
+		Name(info.PodName).
+		ContainerName(info.ContainerName).Poder()
+	// 从容器中下载文件
+	result, err := poder.DeleteFile(info.Path)
+	if err != nil {
+		klog.V(2).Infof("Error delete file: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOKMsg(c, "删除成功"+string(result))
 }
 
 // saveUploadedFile 保存上传文件并返回临时文件路径
