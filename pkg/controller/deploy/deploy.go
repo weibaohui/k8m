@@ -7,8 +7,8 @@ import (
 )
 
 func UpdateImageTag(c *gin.Context) {
-	var ns = c.Param("ns")
-	var name = c.Param("name")
+	ns := c.Param("ns")
+	name := c.Param("name")
 	var tag = c.Param("tag")
 	var containerName = c.Param("container_name")
 	ctx := c.Request.Context()
@@ -18,8 +18,8 @@ func UpdateImageTag(c *gin.Context) {
 
 }
 func Restart(c *gin.Context) {
-	var ns = c.Param("ns")
-	var name = c.Param("name")
+	ns := c.Param("ns")
+	name := c.Param("name")
 	ctx := c.Request.Context()
 	deployService := service.DeployService{}
 	deploy, _ := deployService.RestartDeploy(ctx, ns, name)
