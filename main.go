@@ -82,14 +82,9 @@ func main() {
 		// dynamic
 		api.POST("/yaml/apply", dynamic.Apply)
 		api.POST("/yaml/delete", dynamic.Delete)
-		// api.GET("/:kind/list", dynamic.List)
-		// api.GET("/:kind/list/ns/:ns", dynamic.List)
-		// api.POST("/:kind/remove/ns/:ns/name/:name", dynamic.Remove)
-		// api.POST("/:kind/remove/ns/:ns/names", dynamic.BatchRemove)
-		// api.POST("/:kind/update/ns/:ns/name/:name", dynamic.Save)
-		// api.GET("/:kind/ns/:ns/name/:name", dynamic.Fetch)
 		// CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)          // CRD
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", dynamic.Event)    // CRD
 		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove) // CRD
 		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/names", dynamic.BatchRemove) // CRD
 		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)   // CRD
