@@ -2,11 +2,13 @@ package dynamic
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 )
@@ -21,13 +23,39 @@ func List(c *gin.Context) {
 	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).GVK(group, version, kind).List(&list).Error
 	amis.WriteJsonListWithError(c, list, err)
 }
-func Fetch(c *gin.Context) {
-	var ns = c.Param("ns")
-	var name = c.Param("name")
+func Event(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
+	ctx := c.Request.Context()
 
+	apiVersion := fmt.Sprintf("%s", version)
+	if group != "" {
+		apiVersion = fmt.Sprintf("%s/%s", group, version)
+	}
+
+	fieldSelector := fmt.Sprintf("regarding.apiVersion=%s,regarding.kind=%s,regarding.name=%s,regarding.namespace=%s", apiVersion, kind, name, ns)
+
+	var eventList []unstructured.Unstructured
+	err := kom.DefaultCluster().
+		WithContext(ctx).
+		Namespace(ns).
+		GVK("events.k8s.io", "v1", "Event").
+		List(&eventList, metav1.ListOptions{
+			FieldSelector: fieldSelector,
+		}).Error
+
+	amis.WriteJsonListWithError(c, eventList, err)
+
+}
+func Fetch(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
 	ctx := c.Request.Context()
 
 	var obj *unstructured.Unstructured
@@ -48,12 +76,11 @@ func Fetch(c *gin.Context) {
 	})
 }
 func Remove(c *gin.Context) {
-	var ns = c.Param("ns")
-	var name = c.Param("name")
+	ns := c.Param("ns")
+	name := c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-
 	ctx := c.Request.Context()
 
 	err := removeSingle(ctx, kind, group, version, ns, name)
@@ -74,11 +101,10 @@ type NamesPayload struct {
 }
 
 func BatchRemove(c *gin.Context) {
-	var ns = c.Param("ns")
+	ns := c.Param("ns")
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-
 	ctx := c.Request.Context()
 
 	// 初始化结构体实例
@@ -101,12 +127,11 @@ type ApplyYAMLRequest struct {
 }
 
 func Save(c *gin.Context) {
-	var ns = c.Param("ns")
-	var name = c.Param("name")
+	ns := c.Param("ns")
+	name := c.Param("name")
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-
 	ctx := c.Request.Context()
 
 	var req ApplyYAMLRequest
@@ -146,7 +171,6 @@ func Apply(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
-	// todo 校验是否有权限创建ns，ns名称必须为本人名字开头
 
 }
 func Delete(c *gin.Context) {
@@ -162,5 +186,4 @@ func Delete(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
-	// todo 校验是否有权限删除，label中owner是否为本人名字开头
 }
