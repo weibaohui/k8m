@@ -60,6 +60,39 @@ func DownloadLogs(c *gin.Context) {
 	selector := fmt.Sprintf("metadata.name=%s", podName)
 	DownloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{FieldSelector: selector})
 }
+func Exec(c *gin.Context) {
+
+	ns := c.Param("ns")
+	podName := c.Param("pod_name")
+	containerName := c.Param("container_name")
+
+	// 初始化结构体实例
+	var payload struct {
+		Command string `json:"cmd"`
+	}
+
+	// 反序列化 JSON 数据到结构体
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	ctx := c.Request.Context()
+	var result []byte
+	err := kom.DefaultCluster().WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(podName).
+		ContainerName(containerName).Command("sh", "-c", payload.Command).Execute(&result).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{
+		"result":       string(result),
+		"last_command": payload.Command,
+	})
+}
 func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := c.Request.Context()
 	var pods []v1.Pod
