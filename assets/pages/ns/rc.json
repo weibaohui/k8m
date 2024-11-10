@@ -261,12 +261,16 @@
                       {
                         "name": "type",
                         "label": "type",
-                        "type": "text",
                         "filterable": {
                           "options": [
                             "Normal",
                             "Warning"
                           ]
+                        },
+                        "type": "mapping",
+                        "map": {
+                          "Normal": "<span class='label label-success'>Normal</span>",
+                          "Warning": "<span class='label label-danger'>Warning</span>"
                         }
                       },
                       {
