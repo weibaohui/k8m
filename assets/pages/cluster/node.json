@@ -165,7 +165,93 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-exclamation-circle text-warning-dker",
+              "tooltip": "Event",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "Event",
+                "body": [
+                  {
+                    "type": "crud",
+                    "id": "detailEvent",
+                    "name": "detailEvent",
+                    "headerToolbar": [
+                      "reload",
+                      {
+                        "type": "pagination",
+                        "align": "right"
+                      },
+                      {
+                        "type": "statistics",
+                        "align": "right"
+                      },
+                      {
+                        "type": "switch-per-page",
+                        "align": "right"
+                      }
+                    ],
+                    "loadDataOnce": true,
+                    "syncLocation": false,
+                    "perPage": 10,
+                    "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
+                    "columns": [
+                      {
+                        "name": "type",
+                        "label": "type",
+                        "filterable": {
+                          "options": [
+                            "Normal",
+                            "Warning"
+                          ]
+                        },
+                        "type": "mapping",
+                        "map": {
+                          "Normal": "<span class='label label-success'>Normal</span>",
+                          "Warning": "<span class='label label-danger'>Warning</span>"
+                        }
+                      },
+                      {
+                        "name": "reason",
+                        "label": "reason",
+                        "type": "text"
+                      },
+                      {
+                        "name": "field",
+                        "label": "fieldPath",
+                        "type": "tpl",
+                        "tpl": "${regarding.fieldPath}"
+                      },
+                      {
+                        "name": "source",
+                        "label": "source",
+                        "type": "tpl",
+                        "tpl": "${reportingController} ${reportingInstance}"
+                      },
+                      {
+                        "name": "note",
+                        "label": "note",
+                        "type": "text",
+                        "searchable": true
+                      },
+
+
+                      {
+                        "name": "metadata.creationTimestamp",
+                        "label": "age",
+                        "type": "k8sAge"
+                      }
+                    ]
+                  }
+                ]
+              }
             }
+
           ],
           "toggled": true
         },
