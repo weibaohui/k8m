@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 	"k8s.io/klog/v2"
@@ -105,4 +107,25 @@ func getChatGPTAuth() (apiKey string, apiURL string, enable bool) {
 		enable = true
 	}
 	return
+}
+func (c *ChatService) IsEnabled() bool {
+	_, _, enable := getChatGPTAuth()
+	return enable
+}
+
+// CleanCmd 提取Markdown包裹的命令正文
+func (c *ChatService) CleanCmd(cmd string) string {
+	// 去除首尾空白字符
+	cmd = strings.TrimSpace(cmd)
+
+	// 正则表达式匹配三个反引号包裹的命令，忽略语言标记
+	reCommand := regexp.MustCompile("(?s)```(?:bash|sh|zsh|cmd|powershell)?\\s+(.*?)\\s+```")
+	match := reCommand.FindStringSubmatch(cmd)
+
+	// 如果找到匹配的命令正文，返回去除前后空格的结果
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+
+	return ""
 }
