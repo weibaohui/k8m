@@ -115,7 +115,7 @@
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "size": "lg",
+                "size": "xl",
                 "title": "SmartEdit",
                 "body": [
                   {
@@ -162,8 +162,8 @@
                             "type": "page",
                             "asideResizor": true,
                             "asideSticky": false,
-                            "asideMinWidth": 150,
-                            "asideMaxWidth": 400,
+                            "asideMinWidth": 300,
+                            "asideMaxWidth": 600,
                             "aside": [
                               {
                                 "type": "input-tree",
@@ -298,7 +298,6 @@
                     "drawer": {
                       "closeOnOutside": true,
                       "closeOnEsc": true,
-                      "position": "left",
                       "size": "xl",
                       "body": [
                         {
