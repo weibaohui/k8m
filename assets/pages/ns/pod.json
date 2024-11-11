@@ -744,7 +744,7 @@
                         "value": "${ls:commandHistory||[]}",
                         "items": {
                           "type": "tpl",
-                          "tpl": "<strong>${last_command}</strong> <br><pre>${result}</pre>",
+                          "tpl": "<strong>${last_command}</strong> <strong class='text-blue-400'>${human_command}</strong> <br><pre>${result}</pre>",
                           "style": {
                             "padding": "5px",
                             "borderBottom": "1px solid #ddd"
