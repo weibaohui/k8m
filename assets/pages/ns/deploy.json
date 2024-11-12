@@ -310,6 +310,48 @@
                     "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
                     "columns": [
                       {
+                        "type": "operation",
+                        "label": "action",
+                        "buttons": [
+                          {
+                            "type": "button",
+                            "icon": "fas fa-brain text-primary",
+                            "tooltip": "AI问诊",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "AI 查询",
+                              "body": [
+                                {
+                                  "type": "service",
+                                  "api": "post:/k8s/chat/event",
+                                  "data": {
+                                    "note": "${note}",
+                                    "source": "${source}",
+                                    "reason": "${reason}",
+                                    "reportingController": "${reportingController}",
+                                    "type": "${type}",
+                                    "regardingKind": "${kind}"
+                                  },
+                                  "body": [
+                                    {
+                                      "type": "html",
+                                      "html": "${result|raw}",
+                                      "wrapperComponent": "",
+                                      "inline": false
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "visibleOn": "type === 'Warning'"
+                          }
+                        ],
+                        "toggled": true
+                      },
+                      {
                         "name": "type",
                         "label": "type",
                         "filterable": {
