@@ -1,5 +1,7 @@
 (function () {
     let amisLib = amisRequire('amis');
+    let amisEmbed = amisRequire('amis/embed');
+
     let React = amisRequire('react');
 
     function replacePlaceholders(url, data) {
@@ -85,6 +87,109 @@
             }
         }, errorMessage && React.createElement('div', {style: {color: 'red'}}, errorMessage));
     }
+
+    function SSEComponent(props) {
+        let url = replacePlaceholders(props.url, props.data);
+        const params = {
+            tailLines: props.data.tailLines,
+            sinceTime: props.data.sinceTime,
+            follow: props.data.follow,
+            previous: props.data.previous,
+            timestamps: props.data.timestamps,
+            sinceSeconds: props.data.sinceSeconds || ""
+        };
+        const finalUrl = appendQueryParam(url, params);
+        let dom = React.useRef(null);
+        let eventSourceRef = React.useRef(null);
+        const [errorMessage, setErrorMessage] = React.useState('');
+        const [lines, setLines] = React.useState([]);  // 用于保存每一行的数据
+        const [selectedLines, setSelectedLines] = React.useState([]); // 保存选中的行
+
+
+
+
+        // 更新 localStorage 的选中行
+        const updateLocalStorage = (lines) => {
+            localStorage.setItem('selectedLogLines', JSON.stringify(lines));
+        };
+
+        const handleSelectLine = (line, isChecked) => {
+            setSelectedLines((prevSelected) => {
+                const updatedLines = isChecked
+                    ? [...prevSelected, line] // 添加选中的行
+                    : prevSelected.filter((item) => item !== line); // 移除取消选中的行
+                updateLocalStorage(updatedLines); // 更新 localStorage
+                return updatedLines;
+            });
+        };
+
+        React.useEffect(function () {
+            // 处理 SSE 数据
+            eventSourceRef.current = new EventSource(finalUrl);
+
+            const handleMessage = (event) => {
+                if (dom.current != null) {
+                    const newLine = event.data;  // 获取新的日志行
+                    setLines((prevLines) => [...prevLines, newLine]);  // 将新行添加到状态中
+                }
+            };
+
+            const handleError = (event) => {
+                if (eventSourceRef.current.readyState === EventSource.CLOSED) {
+                    setErrorMessage('无日志 连接已关闭');
+                } else if (eventSourceRef.current.readyState === EventSource.CONNECTING) {
+                    setErrorMessage('无日志 正在尝试重新连接...');
+                } else {
+                    setErrorMessage('发生未知错误...');
+                }
+                eventSourceRef.current.close();
+            };
+
+            eventSourceRef.current.addEventListener('message', handleMessage);
+            eventSourceRef.current.addEventListener('error', handleError);
+
+            return () => {
+                if (eventSourceRef.current) {
+                    eventSourceRef.current.removeEventListener('message', handleMessage);
+                    eventSourceRef.current.removeEventListener('error', handleError);
+                    eventSourceRef.current.close();
+                }
+            };
+        }, [url]);
+
+        return React.createElement(
+            'div',
+            { ref: dom, style: { whiteSpace: 'pre-wrap' } },
+            errorMessage && React.createElement(
+                'div',
+                { style: { color: 'red' } },
+                errorMessage
+            ),
+
+            ...lines.map((line, index) =>
+                React.createElement(
+                    'div',
+                    { key: index, style: { display: 'flex', alignItems: 'center' } },
+                    React.createElement(
+                        'input',
+                        {
+                            type: 'checkbox',
+                            onChange: (e) => handleSelectLine(line, e.target.checked),
+                            checked: selectedLines.includes(line)  // 如果当前行被选中，设置复选框为勾选状态
+                        }
+                    ),
+                    React.createElement(
+                        'span',
+                        null,
+                        line
+                    )
+                )
+            ),
+
+        );
+
+    }
+
 
     //注册自定义组件，请参考后续对工作原理的介绍
     amisLib.Renderer({
