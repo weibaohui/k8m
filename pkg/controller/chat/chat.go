@@ -56,6 +56,31 @@ func Event(c *gin.Context) {
 		"result": result,
 	})
 }
+func Log(c *gin.Context) {
+	chatService := service.ChatService{}
+	if !chatService.IsEnabled() {
+		amis.WriteJsonData(c, gin.H{
+			"result": "请先配置开启ChatGPT功能",
+		})
+		return
+	}
+	var data struct {
+		Data []string `json:"data"`
+	}
+
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+	}
+
+	prompt := fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(data))
+
+	result := chatService.Chat(prompt)
+	result = markdownToHTML(result)
+	amis.WriteJsonData(c, gin.H{
+		"result": result,
+	})
+}
 func Sse(c *gin.Context) {
 	q := c.Query("q")
 	chatService := service.ChatService{}
