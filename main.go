@@ -110,6 +110,7 @@ func main() {
 		api.POST("/chat", chat.Chat)
 		api.GET("/chat/sse", chat.Sse)
 		api.POST("/chat/event", chat.Event)
+		api.POST("/chat/log", chat.Log)
 
 		// pod 文件浏览上传下载
 		api.POST("/file/list", pod.FileList)
