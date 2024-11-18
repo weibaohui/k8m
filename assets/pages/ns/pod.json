@@ -301,31 +301,116 @@
                       "size": "xl",
                       "body": [
                         {
-                          "type": "log-download",
-                          "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                          "data": {
-                            "containerName": "${containerName}",
-                            "tailLines": "${tailLines}",
-                            "sinceTime": "${sinceTime}",
-                            "previous": "${previous}",
-                            "timestamps": "${timestamps}",
-                            "sinceSeconds": "${sinceSeconds}"
-                          }
-                        },
-                        {
-                          "type": "sse",
-                          "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                          "data": {
-                            "containerName": "${containerName}",
-                            "tailLines": "${tailLines}",
-                            "sinceTime": "${sinceTime}",
-                            "follow": "${follow}",
-                            "previous": "${previous}",
-                            "timestamps": "${timestamps}",
-                            "sinceSeconds": "${sinceSeconds}"
-                          }
+                          "type": "flex",
+                          "justify": "space-between",
+                          "items": [
+                            {
+                              "type": "container",
+                              "body": [
+                                {
+                                  "type": "log-download",
+                                  "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                  "data": {
+                                    "containerName": "${containerName}",
+                                    "tailLines": "${tailLines}",
+                                    "sinceTime": "${sinceTime}",
+                                    "previous": "${previous}",
+                                    "timestamps": "${timestamps}",
+                                    "sinceSeconds": "${sinceSeconds}"
+                                  }
+                                },
+                                {
+                                  "type": "sse",
+                                  "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                  "data": {
+                                    "containerName": "${containerName}",
+                                    "tailLines": "${tailLines}",
+                                    "sinceTime": "${sinceTime}",
+                                    "follow": "${follow}",
+                                    "previous": "${previous}",
+                                    "timestamps": "${timestamps}",
+                                    "sinceSeconds": "${sinceSeconds}"
+                                  }
+                                }
+                              ],
+                              "style": {
+                                "flexGrow": 1,
+                                "backgroundColor": "#f5f5f5",
+                                "padding": "10px",
+                                "border": "1px solid #ddd"
+                              }
+                            },
+                            {
+                              "type": "container",
+                              "body": [
+                                {
+                                  "type": "form",
+                                  "title": "AI问诊",
+                                  "wrapWithPanel": false,
+                                  "api": {
+                                    "url": "/k8s/chat/log",
+                                    "method": "post",
+                                    "data": {
+                                      "data": "${ls:selectedLogLines}"
+                                    },
+                                    "headers": {
+                                      "Content-Type": "application/json"
+                                    }
+                                  },
+                                  "body": [
+                                    {
+                                      "type": "button",
+                                      "label": "AI问诊",
+                                      "actionType": "submit"
+                                    }
+                                  ],
+                                  "onEvent": {
+                                    "submitSucc": {
+                                      "actions": [
+                                        {
+                                          "actionType": "reload",
+                                          "componentId": "aiResult",
+                                          "data": {
+                                            "result": "${event.data.result.data.result}"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "service",
+                                  "body": [
+                                    {
+                                      "type": "html",
+                                      "html": "${result|raw}",
+                                      "wrapperComponent": "",
+                                      "inline": false
+                                    }
+                                  ],
+                                  "id": "aiResult"
+                                }
+                              ],
+                              "style": {
+                                "width": "400px",
+                                "backgroundColor": "#e3e3e3",
+                                "padding": "10px",
+                                "border": "1px solid #ddd"
+                              }
+                            }
+                          ]
                         }
                       ]
+                    },
+                    "onEvent": {
+                      "click": {
+                        "actions": [
+                          {
+                            "actionType": "custom",
+                            "script": "localStorage.removeItem('selectedLogLines');"
+                          }
+                        ]
+                      }
                     }
                   }
                 ],
@@ -749,7 +834,6 @@
                             "borderBottom": "1px solid #ddd"
                           }
                         }
-
                       }
                     ]
                   }
@@ -882,8 +966,6 @@
                         "type": "text",
                         "searchable": true
                       },
-
-
                       {
                         "name": "metadata.creationTimestamp",
                         "label": "age",
