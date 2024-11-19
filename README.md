@@ -1,7 +1,7 @@
 # k8m
 [English](README.md) | [中文](README_cn.md)
 
-**k8m** is a lightweight console tool that integrates AI and Kubernetes, designed to simplify cluster management. Built on AMIS and using `kom` as the Kubernetes API client, **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
+**k8m** is a lightweight console tool that integrates AI and Kubernetes, designed to simplify cluster management. Built on AMIS and using [`kom`](https://github.com/weibaohui/kom)  as the Kubernetes API client, **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
 
 ### Key Features
 - **Compact Design**: All functionalities are packed into a single executable file for easy deployment and use.

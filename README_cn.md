@@ -1,7 +1,7 @@
 ## **k8m**
 [English](README.md) | [中文](README_cn.md)
 
-**k8m** 是一款集 AI 与 Kubernetes 于一体的轻量级控制台工具，专为简化集群管理设计。基于 AMIS 构建，并通过 kom 作为 Kubernetes API 客户端，**k8m** 内置了 Qwen2.5-Coder-7B 模型交互能力，同时支持接入您自己的私有化大模型。
+**k8m** 是一款集 AI 与 Kubernetes 于一体的轻量级控制台工具，专为简化集群管理设计。基于 AMIS 构建，并通过  [`kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了 Qwen2.5-Coder-7B 模型交互能力，同时支持接入您自己的私有化大模型。
 
 ### 主要特点
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
