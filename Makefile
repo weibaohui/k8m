@@ -7,6 +7,9 @@ OUTPUT_DIR=bin
 # 定义版本信息，默认值为 v1.0.0，可以通过命令行覆盖
 # 例如 make build-all VERSION=v0.0.1
 VERSION ?= v1.0.0
+API_KEY ?= "xyz"
+API_URL ?= "http://127.0.0.1:8980/v1"
+MODEL ?= "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 # 获取当前 Git commit 的简短哈希
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD)
@@ -35,7 +38,7 @@ build:
 	@echo "构建当前平台可执行文件..."
 	@mkdir -p $(OUTPUT_DIR)
 	@GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) \
-	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)" \
+	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" \
 	    -o "$(OUTPUT_DIR)/$(BINARY_NAME)" .
 
 # 为所有指定的平台和架构构建可执行文件
@@ -53,8 +56,8 @@ build-all:
 		fi; \
 		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$(VERSION)-$$GOOS-$$GOARCH$$EXT"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
-		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)\" -o $$OUTPUT_FILE ."; \
-		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)" -o "$$OUTPUT_FILE" .; \
+		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
 	done
 
 # 清理生成的可执行文件
