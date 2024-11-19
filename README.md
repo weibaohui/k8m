@@ -1,21 +1,19 @@
 # k8m
 [English](README.md) | [中文](README_cn.md)
 
-**k8m** is a lightweight Kubernetes dashboard designed to provide a clean and efficient cluster management experience.
-Built on [AMIS](https://github.com/baidu/amis) and using [kom](https://github.com/weibaohui/kom) as the Kubernetes API client.
-Its main features include:
-### Main Features:
-- **Miniature Design**: All functionalities are integrated into a single executable file, making deployment and usage convenient.
-- **Easy to Use**: A user-friendly interface and intuitive workflows make Kubernetes management effortless.
-- **High Performance**: Utilizing Baidu AMIS for the frontend and built with Golang for the backend, ensuring efficient resource utilization and fast response times.
-- **Pod File Management**: Supports directory browsing within Pods, file browsing, file editing, file downloading, file uploading, and file deleting, simplifying Kubernetes management.
-- **Pod Operation Management**: Supports viewing and downloading Pod runtime logs, and executing shell commands within the Pod.
-- **CRD Management**: Supports automatic discovery and management of CRD resources.
-- **ChatGPT**: Enables ChatGPT translation on the resource editing page, automatically translating English documents into Chinese.
-- **Multi-Platform Support**: Compatible with Linux, macOS, and Windows, ensuring smooth operation across various platforms.
-- **Cross-Platform Compatibility**: Supports multiple architectures, including **x86**, **ARM**, **PPC64LE**, **MIPS**, and **x390s**, ensuring seamless operation on all major platforms.
+**k8m** is a lightweight console tool that integrates AI and Kubernetes, designed to simplify cluster management. Built on AMIS and using `kom` as the Kubernetes API client, **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
 
-**k8m** allows you to manage Kubernetes clusters effortlessly without cumbersome configurations, making it an ideal choice for developers and operations personnel.
+### Key Features
+- **Compact Design**: All functionalities are packed into a single executable file for easy deployment and use.
+- **User-Friendly**: An intuitive user interface and straightforward workflows make Kubernetes management effortless.
+- **High Performance**: Backend built with Golang and frontend based on Baidu AMIS ensure high resource efficiency and fast responsiveness.
+- **Pod File Management**: Enables browsing, editing, uploading, downloading, and deleting files within Pods, simplifying daily operations.
+- **Pod Operations Management**: Supports real-time Pod log viewing, log downloads, and direct Shell command execution within Pods.
+- **CRD Management**: Automatically discovers and manages CRD resources to improve productivity.
+- **Intelligent Translation and Diagnostics**: Offers YAML property translation, event anomaly diagnosis, and log analysis to provide smart troubleshooting support.
+- **Cross-Platform Support**: Compatible with Linux, macOS, and Windows, and supports various architectures like x86 and ARM for seamless multi-platform operation.
+
+The design philosophy of **k8m** is "lightweight and efficient, simplifying complexity." It helps developers and operators quickly get started and effortlessly manage Kubernetes clusters.
 
 ## **Run**
 1. **Download**: Download the latest version from [GitHub](https://github.com/weibaohui/k8m).
