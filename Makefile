@@ -8,7 +8,7 @@ OUTPUT_DIR=bin
 # 例如 make build-all VERSION=v0.0.1
 VERSION ?= v1.0.0
 API_KEY ?= "xyz"
-API_URL ?= "http://127.0.0.1:8980/v1"
+API_URL ?= "https://public.chatgpt.k8m.site/v1"
 MODEL ?= "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 # 获取当前 Git commit 的简短哈希
