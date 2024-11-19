@@ -14,15 +14,22 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var Model = "Qwen/Qwen2.5-Coder-7B-Instruct"
-var ApiKey string
-var ApiUrl string
+var localChatService = &chatService{}
 
-type ChatService struct {
+type chatService struct {
+	model  string
+	apiKey string
+	apiUrl string
 }
 
-func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
-	key, apiURL, enable := getChatGPTAuth()
+func (c *chatService) SetVars(apikey, apiUrl, model string) {
+	c.model = model
+	c.apiUrl = apiUrl
+	c.apiKey = apikey
+}
+
+func (c *chatService) GetChatStream(chat string) (*http.Response, error) {
+	key, apiURL, enable := c.getChatGPTAuth()
 	if !enable {
 		return nil, fmt.Errorf("chatGPT not enable")
 	}
@@ -32,7 +39,7 @@ func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
 
 	// 构建请求体
 	payload := map[string]interface{}{
-		"Model": Model,
+		"model": c.model,
 		"messages": []map[string]string{
 			{
 				"role":    "user",
@@ -69,8 +76,8 @@ func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
 	}
 	return resp, err
 }
-func (c *ChatService) Chat(chat string) string {
-	apiKey, apiURL, enable := getChatGPTAuth()
+func (c *chatService) Chat(chat string) string {
+	apiKey, apiURL, enable := c.getChatGPTAuth()
 	if !enable {
 		return ""
 	}
@@ -82,7 +89,7 @@ func (c *ChatService) Chat(chat string) string {
 	resp, err := openaiClient.CreateChatCompletion(
 		context.TODO(),
 		openai.ChatCompletionRequest{
-			Model: Model,
+			Model: c.model,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -101,26 +108,32 @@ func (c *ChatService) Chat(chat string) string {
 	return result
 }
 
-func getChatGPTAuth() (apiKey string, apiURL string, enable bool) {
+func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable bool) {
 	// 从环境变量读取OpenAI API Key和API URL
+	// 环境变量优先
 	apiKey = os.Getenv("OPENAI_API_KEY")
 	apiURL = os.Getenv("OPENAI_API_URL")
+	klog.V(6).Infof("apiKey=%s,apiURL=%s", apiKey, apiURL)
 	if apiKey == "" && apiURL == "" {
-		apiKey = ApiKey
-		apiURL = ApiUrl
+		apiKey = c.apiKey
+		apiURL = c.apiUrl
+		klog.V(6).Infof("in app apiKey=%s,apiURL=%s", apiKey, apiURL)
 	}
 	if apiKey != "" && apiURL != "" {
 		enable = true
 	}
+
+	c.apiKey = apiKey
+	c.apiUrl = apiURL
 	return
 }
-func (c *ChatService) IsEnabled() bool {
-	_, _, enable := getChatGPTAuth()
+func (c *chatService) IsEnabled() bool {
+	_, _, enable := c.getChatGPTAuth()
 	return enable
 }
 
 // CleanCmd 提取Markdown包裹的命令正文
-func (c *ChatService) CleanCmd(cmd string) string {
+func (c *chatService) CleanCmd(cmd string) string {
 	// 去除首尾空白字符
 	cmd = strings.TrimSpace(cmd)
 
