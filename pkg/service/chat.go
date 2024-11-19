@@ -14,7 +14,9 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var model = "Qwen/Qwen2.5-Coder-7B-Instruct"
+var Model = "Qwen/Qwen2.5-Coder-7B-Instruct"
+var ApiKey string
+var ApiUrl string
 
 type ChatService struct {
 }
@@ -30,7 +32,7 @@ func (c *ChatService) GetChatStream(chat string) (*http.Response, error) {
 
 	// 构建请求体
 	payload := map[string]interface{}{
-		"model": model,
+		"Model": Model,
 		"messages": []map[string]string{
 			{
 				"role":    "user",
@@ -80,7 +82,7 @@ func (c *ChatService) Chat(chat string) string {
 	resp, err := openaiClient.CreateChatCompletion(
 		context.TODO(),
 		openai.ChatCompletionRequest{
-			Model: model,
+			Model: Model,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -103,6 +105,10 @@ func getChatGPTAuth() (apiKey string, apiURL string, enable bool) {
 	// 从环境变量读取OpenAI API Key和API URL
 	apiKey = os.Getenv("OPENAI_API_KEY")
 	apiURL = os.Getenv("OPENAI_API_URL")
+	if apiKey == "" && apiURL == "" {
+		apiKey = ApiKey
+		apiURL = ApiUrl
+	}
 	if apiKey != "" && apiURL != "" {
 		enable = true
 	}
