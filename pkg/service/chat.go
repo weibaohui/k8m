@@ -113,11 +113,9 @@ func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable boo
 	// 环境变量优先
 	apiKey = os.Getenv("OPENAI_API_KEY")
 	apiURL = os.Getenv("OPENAI_API_URL")
-	klog.V(6).Infof("apiKey=%s,apiURL=%s", apiKey, apiURL)
 	if apiKey == "" && apiURL == "" {
 		apiKey = c.apiKey
 		apiURL = c.apiUrl
-		klog.V(6).Infof("in app apiKey=%s,apiURL=%s", apiKey, apiURL)
 	}
 	if apiKey != "" && apiURL != "" {
 		enable = true
