@@ -197,15 +197,23 @@ make help
 ![upload](images/upload.png)
 ### Pod内文件下载
 ![download](images/download.png)
-### yaml编辑
-![yaml-editor](images/yaml.png)
-### yaml文档对照（开启了大模型翻译）
-![doc-view](images/doc.png)
 ### Tag更新
 ![tag-update](images/tag-update.png)
 ### 查看日志
 ![log-view](images/log-view.png)
-
+### YAML 属性自动翻译
+k8m 提供集成的 YAML 浏览、编辑和文档查看功能，支持自动翻译 YAML 属性。无论是查找字段含义还是确认配置细节，您都无需再费时费力地搜索，极大提高了工作效率。  
+![yaml-editor](images/yaml.png)
+![YAML 属性翻译](images/yaml-ai-1.png)
+### Event 信息 AI 问诊
+在 Event 页面，k8m 内置了 AI 问诊功能，可智能分析异常事件，并提供详细的解释。点击事件前的“AI大脑”按钮，稍等片刻即可查看诊断结果，快速定位问题原因。  
+![异常事件诊断](images/event-3.png)
+### 错误日志 AI 问诊
+日志分析是定位问题的重要环节，但面对大量报错信息，如何高效排查？k8m 支持 AI 日志诊断，帮助快速识别关键错误并生成解决建议。只需选中相关日志，点击 AI 问诊按钮，即可获得诊断报告。  
+![日志诊断](images/log-ai-4.png)
+### 运行命令自动生成
+日常运维中，Pod 内命令操作不可避免。借助 AI，您只需输入需求描述，k8m 即可自动生成合适的命令供参考，减少查找时间，提高效率。  
+![命令自动生成](images/AI-command-3.png)
 
 ### HELP & SUPPORT
 如果你有任何进一步的问题或需要额外的帮助，请随时与我联系！

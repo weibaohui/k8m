@@ -192,22 +192,41 @@ make help
 
 
 ## **Show**
-### Load
+
+### Workloads
 ![workload](images/workload.png)
-### File Editing Inside Pod
+
+### File Editing Within Pods
 ![file-edit](images/file-edit.png)
-### Upload File to Pod
+
+### Uploading Files to Pods
 ![upload](images/upload.png)
-### Download File from Pod
+
+### Downloading Files from Pods
 ![download](images/download.png)
-### YAML Editing
-![yaml-editor](images/yaml.png)
-### YAML Document Comparison (Large Model Translation Enabled)
-![doc-view](images/doc.png)
-### Tag Update
+
+### Tag Updates
 ![tag-update](images/tag-update.png)
-### View Logs
+
+### Log Viewing
 ![log-view](images/log-view.png)
+
+### Automatic YAML Attribute Translation
+k8m offers integrated YAML browsing, editing, and documentation features with automatic YAML attribute translation. Whether you're looking up field definitions or verifying configuration details, you can skip the tedious searches, significantly boosting your efficiency.  
+![yaml-editor](images/yaml.png)  
+![YAML Attribute Translation](images/yaml-ai-1.png)
+
+### Event AI Diagnostics
+In the Event page, k8m comes with built-in AI diagnostic capabilities to intelligently analyze abnormal events and provide detailed explanations. By clicking the "AI Brain" button next to an event, you can view the diagnostic results within moments and quickly pinpoint the root cause of issues.  
+![Event Diagnostics](images/event-3.png)
+
+### Error Log AI Diagnostics
+Log analysis is a crucial step in troubleshooting, but large volumes of error messages can make it challenging to identify issues efficiently. k8m supports AI-powered log diagnostics to quickly detect critical errors and generate actionable suggestions. Simply select the relevant log entries, click the AI diagnostic button, and receive a comprehensive report.  
+![Log Diagnostics](images/log-ai-4.png)
+
+### Automatic Command Generation
+Command operations within Pods are an inevitable part of daily maintenance. With AI assistance, you only need to describe your requirements, and k8m will automatically generate suitable commands for your reference, saving time and improving efficiency.  
+![Command Auto-Generation](images/AI-command-3.png)
 
 ### HELP & SUPPORT
 If you have any further questions or need additional assistance, feel free to reach out!
