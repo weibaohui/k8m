@@ -17,6 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom_starter"
 	"k8s.io/klog/v2"
 )
@@ -25,6 +26,10 @@ import (
 var embeddedFiles embed.FS
 var Version string
 var GitCommit string
+
+var Model = "Qwen/Qwen2.5-Coder-7B-Instruct"
+var ApiKey string
+var ApiUrl string
 
 func Init() {
 	// 初始化配置
@@ -42,6 +47,9 @@ func Init() {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	// 初始化ChatService
+	service.ChatServiceInstance().SetVars(ApiKey, ApiUrl, Model)
 }
 
 func main() {
