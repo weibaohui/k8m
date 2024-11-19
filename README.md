@@ -45,6 +45,11 @@ Its main features include:
 
 ## **ChatGPT Configuration Guide**
 
+
+### Built-in GPT
+Starting from version v0.0.8, GPT is built-in and does not require configuration.
+If you need to use your own GPT, please refer to the steps below.
+
 ### **Environment Variable Configuration**
 Set the environment variables to enable ChatGPT.
 ```bash
