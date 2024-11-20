@@ -23,12 +23,12 @@ func markdownToHTML(md string) string {
 }
 func Chat(c *gin.Context) {
 	q := c.Query("q")
-	chatService := service.ChatServiceInstance()
+	chatService := service.ChatService()
 	result := chatService.Chat(q)
 	amis.WriteJsonData(c, result)
 }
 func Event(c *gin.Context) {
-	chatService := service.ChatServiceInstance()
+	chatService := service.ChatService()
 	if !chatService.IsEnabled() {
 		amis.WriteJsonData(c, gin.H{
 			"result": "请先配置开启ChatGPT功能",
@@ -57,7 +57,7 @@ func Event(c *gin.Context) {
 	})
 }
 func Log(c *gin.Context) {
-	chatService := service.ChatServiceInstance()
+	chatService := service.ChatService()
 	if !chatService.IsEnabled() {
 		amis.WriteJsonData(c, gin.H{
 			"result": "请先配置开启ChatGPT功能",
@@ -83,7 +83,7 @@ func Log(c *gin.Context) {
 }
 func Sse(c *gin.Context) {
 	q := c.Query("q")
-	chatService := service.ChatServiceInstance()
+	chatService := service.ChatService()
 	resp, err := chatService.GetChatStream(q)
 	if err != nil {
 		klog.V(2).Infof("Error Ssemaking request:%v\n\n", err)

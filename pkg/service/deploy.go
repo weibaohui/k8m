@@ -11,10 +11,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type DeployService struct {
+type deployService struct {
 }
 
-func (d *DeployService) RestartDeploy(ctx context.Context, ns string, name string) (*v1.Deployment, error) {
+func (d *deployService) RestartDeploy(ctx context.Context, ns string, name string) (*v1.Deployment, error) {
 	var deploy v1.Deployment
 	err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
 
@@ -34,7 +34,7 @@ func (d *DeployService) RestartDeploy(ctx context.Context, ns string, name strin
 	}
 	return &deploy, nil
 }
-func (d *DeployService) UpdateDeployImageTag(ctx context.Context, ns string, name string, containerName string, tag string) (*v1.Deployment, error) {
+func (d *deployService) UpdateDeployImageTag(ctx context.Context, ns string, name string, containerName string, tag string) (*v1.Deployment, error) {
 	var deploy v1.Deployment
 	err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
 
@@ -66,7 +66,7 @@ func replaceImageTag(imageName, newTag string) string {
 		return imageName + ":" + newTag
 	}
 }
-func (d *DeployService) CreateImagePullSecret(ctx context.Context, ns string, serviceAccount string, pullSecret string) error {
+func (d *deployService) CreateImagePullSecret(ctx context.Context, ns string, serviceAccount string, pullSecret string) error {
 
 	secretName := "pull-secret"
 

@@ -12,7 +12,7 @@ func UpdateImageTag(c *gin.Context) {
 	var tag = c.Param("tag")
 	var containerName = c.Param("container_name")
 	ctx := c.Request.Context()
-	deployService := service.DeployService{}
+	deployService := service.DeploymentService()
 	deploy, _ := deployService.UpdateDeployImageTag(ctx, ns, name, containerName, tag)
 	amis.WriteJsonData(c, deploy)
 
@@ -21,7 +21,7 @@ func Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	deployService := service.DeployService{}
+	deployService := service.DeploymentService()
 	deploy, _ := deployService.RestartDeploy(ctx, ns, name)
 	amis.WriteJsonData(c, deploy)
 }

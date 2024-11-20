@@ -14,8 +14,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var localChatService = &chatService{}
-
 type chatService struct {
 	model  string
 	apiKey string

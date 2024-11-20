@@ -8,10 +8,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-type PodService struct {
+type podService struct {
 }
 
-func (p *PodService) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
+func (p *podService) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
 
 	// 检查logOptions
 	//  at most one of `sinceTime` or `sinceSeconds` may be specified

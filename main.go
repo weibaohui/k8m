@@ -49,7 +49,7 @@ func Init() {
 	}
 
 	// 初始化ChatService
-	service.ChatServiceInstance().SetVars(ApiKey, ApiUrl, Model)
+	service.ChatService().SetVars(ApiKey, ApiUrl, Model)
 }
 
 func main() {
