@@ -23,7 +23,7 @@
       ],
       "data": {
         "kind": "CustomResourceDefinition",
-        "group": "",
+        "group": "apiextensions.k8s.io",
         "version": "v1"
       },
       "loadDataOnce": true,
@@ -186,10 +186,11 @@
           "toggled": true
         },
         {
-          "name": "metadata.name",
-          "label": "name",
+          "name": "spec.names.kind",
+          "label": "kind",
           "type": "text"
         },
+
         {
           "name": "spec.scope",
           "label": "scope",
@@ -208,6 +209,11 @@
             "type": "tpl",
             "tpl": "<div style='margin-bottom: 10px;'><strong><a href=\"#/crd/${spec.scope=='Namespaced'?'namespaced_cr':'cluster_cr'}?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}\">${name}</a></strong></div>"
           }
+        },
+        {
+          "name": "metadata.name",
+          "label": "name",
+          "type": "text"
         },
         {
           "name": "metadata.creationTimestamp",
