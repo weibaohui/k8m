@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/api/apps/v1"
@@ -16,19 +15,10 @@ type deployService struct {
 
 func (d *deployService) RestartDeploy(ctx context.Context, ns string, name string) (*v1.Deployment, error) {
 	var deploy v1.Deployment
-	err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
-
-	if err != nil {
-		return nil, err
-	}
-	// 更新 Annotations，触发重启
-	if deploy.Spec.Template.Annotations == nil {
-		deploy.Spec.Template.Annotations = map[string]string{}
-	}
-	deploy.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
-
-	// 更新 Deployment
-	err = kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
+	err := kom.DefaultCluster().WithContext(ctx).
+		Resource(&deploy).
+		Namespace(ns).Name(name).
+		Ctl().Deployment().Restart()
 	if err != nil {
 		return nil, err
 	}
