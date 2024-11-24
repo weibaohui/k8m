@@ -39,8 +39,8 @@ func FileList(c *gin.Context) {
 	ctx := c.Request.Context()
 	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
-		Name(info.PodName).
-		ContainerName(info.ContainerName).Poder()
+		Name(info.PodName).Ctl().Pod().
+		ContainerName(info.ContainerName)
 
 	if info.Path == "" {
 		info.Path = "/"
@@ -66,8 +66,8 @@ func ShowFile(c *gin.Context) {
 	ctx := c.Request.Context()
 	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
-		Name(info.PodName).
-		ContainerName(info.ContainerName).Poder()
+		Name(info.PodName).Ctl().Pod().
+		ContainerName(info.ContainerName)
 	if info.FileType != "" && info.FileType != "file" && info.FileType != "directory" {
 		amis.WriteJsonError(c, fmt.Errorf("无法查看%s类型文件", info.FileType))
 		return
@@ -112,8 +112,8 @@ func SaveFile(c *gin.Context) {
 	ctx := c.Request.Context()
 	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
-		Name(info.PodName).
-		ContainerName(info.ContainerName).Poder()
+		Name(info.PodName).Ctl().Pod().
+		ContainerName(info.ContainerName)
 
 	if info.Path == "" {
 		amis.WriteJsonOK(c)
@@ -124,13 +124,13 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 
-	context, err := utils.DecodeBase64(info.FileContext)
+	str, err := utils.DecodeBase64(info.FileContext)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	// 上传文件
-	if err := poder.SaveFile(info.Path, context); err != nil {
+	if err := poder.SaveFile(info.Path, str); err != nil {
 		klog.V(2).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
@@ -151,8 +151,8 @@ func DownloadFile(c *gin.Context) {
 	ctx := c.Request.Context()
 	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
-		Name(info.PodName).
-		ContainerName(info.ContainerName).Poder()
+		Name(info.PodName).Ctl().Pod().
+		ContainerName(info.ContainerName)
 	// 从容器中下载文件
 	fileContent, err := poder.DownloadFile(info.Path)
 	if err != nil {
@@ -224,8 +224,8 @@ func DeleteFile(c *gin.Context) {
 	ctx := c.Request.Context()
 	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
-		Name(info.PodName).
-		ContainerName(info.ContainerName).Poder()
+		Name(info.PodName).Ctl().Pod().
+		ContainerName(info.ContainerName)
 	// 从容器中下载文件
 	result, err := poder.DeleteFile(info.Path)
 	if err != nil {
@@ -272,8 +272,8 @@ func saveUploadedFile(file *multipart.FileHeader) (string, error) {
 func uploadToPod(ctx context.Context, info *info, tempFilePath string) error {
 	poder := kom.DefaultCluster().WithContext(ctx).
 		Namespace(info.Namespace).
-		Name(info.PodName).
-		ContainerName(info.ContainerName).Poder()
+		Name(info.PodName).Ctl().Pod().
+		ContainerName(info.ContainerName)
 
 	openTmpFile, err := os.Open(tempFilePath)
 	if err != nil {

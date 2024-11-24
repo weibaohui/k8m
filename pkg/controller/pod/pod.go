@@ -99,7 +99,7 @@ func Exec(c *gin.Context) {
 	err := kom.DefaultCluster().WithContext(ctx).
 		Resource(&v1.Pod{}).
 		Namespace(ns).
-		Name(podName).
+		Name(podName).Ctl().Pod().
 		ContainerName(containerName).Command("sh", "-c", payload.Command).Execute(&result).Error
 
 	if err != nil {
