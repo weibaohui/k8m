@@ -26,21 +26,12 @@ func (d *deployService) RestartDeploy(ctx context.Context, ns string, name strin
 }
 func (d *deployService) UpdateDeployImageTag(ctx context.Context, ns string, name string, containerName string, tag string) (*v1.Deployment, error) {
 	var deploy v1.Deployment
-	err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Get(&deploy).Error
-
+	result, err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).
+		Ctl().Deployment().ReplaceImageTag(containerName, tag)
 	if err != nil {
 		return nil, err
 	}
-
-	for i := range deploy.Spec.Template.Spec.Containers {
-		c := &deploy.Spec.Template.Spec.Containers[i]
-		if c.Name == containerName {
-			// 调用 replaceImageTag 方法替换 tag
-			c.Image = replaceImageTag(c.Image, tag)
-		}
-	}
-	err = kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).Update(&deploy).Error
-	return &deploy, err
+	return result, err
 }
 
 // replaceImageTag 替换镜像的 tag
