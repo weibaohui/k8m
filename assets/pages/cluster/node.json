@@ -323,7 +323,6 @@
           "name": "spec.unschedulable",
           "label": "cordon",
           "type": "mapping",
-          "visibleOn": "status.unschedulable",
           "map": {
             "true": "<span class='label label-danger'>SchedulingDisabled</span>",
             "*": "<span class='label label-success'>Normal</span>"
