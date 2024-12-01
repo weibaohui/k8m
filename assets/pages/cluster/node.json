@@ -320,6 +320,16 @@
           "tpl": "${status.capacity.cpu}C/${status.capacity.memory|autoConvertMemory}"
         },
         {
+          "name": "spec.unschedulable",
+          "label": "cordon",
+          "type": "mapping",
+          "visibleOn": "status.unschedulable",
+          "map": {
+            "true": "<span class='label label-danger'>SchedulingDisabled</span>",
+            "*": "<span class='label label-success'>Normal</span>"
+          }
+        },
+        {
           "name": "status.nodeInfo.architecture",
           "label": "arch",
           "type": "text"
