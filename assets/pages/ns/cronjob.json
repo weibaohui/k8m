@@ -361,6 +361,30 @@
           "type": "text"
         },
         {
+          "name": "spec.schedule",
+          "label": "schedule",
+          "type": "text"
+        },
+        {
+          "name": "spec.suspend",
+          "label": "suspend",
+          "type": "text"
+        },
+        {
+          "name": "spec.concurrencyPolicy",
+          "label": "concurrency",
+          "type": "text"
+        },
+        {
+          "name": "spec.jobTemplate.spec.template.spec.containers",
+          "label": "containers",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "labels",
           "type": "k8sLabels"
