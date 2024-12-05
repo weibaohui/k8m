@@ -5,33 +5,11 @@ import (
 	"strings"
 
 	"github.com/weibaohui/kom/kom"
-	"k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type deployService struct {
-}
-
-func (d *deployService) RestartDeploy(ctx context.Context, ns string, name string) (*v1.Deployment, error) {
-	var deploy v1.Deployment
-	err := kom.DefaultCluster().WithContext(ctx).
-		Resource(&deploy).
-		Namespace(ns).Name(name).
-		Ctl().Rollout().Restart()
-	if err != nil {
-		return nil, err
-	}
-	return &deploy, nil
-}
-func (d *deployService) UpdateDeployImageTag(ctx context.Context, ns string, name string, containerName string, tag string) (*v1.Deployment, error) {
-	var deploy v1.Deployment
-	result, err := kom.DefaultCluster().WithContext(ctx).Resource(&deploy).Namespace(ns).Name(name).
-		Ctl().Deployment().ReplaceImageTag(containerName, tag)
-	if err != nil {
-		return nil, err
-	}
-	return result, err
 }
 
 func (d *deployService) CreateImagePullSecret(ctx context.Context, ns string, serviceAccount string, pullSecret string) error {
