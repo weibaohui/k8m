@@ -361,9 +361,24 @@
           "type": "text"
         },
         {
+          "name": "ready",
+          "label": "ready",
+          "type": "tpl",
+          "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
+        },
+        {
           "name": "metadata.labels",
           "label": "labels",
           "type": "k8sLabels"
+        },
+        {
+          "name": "spec.template.spec.containers",
+          "label": "containers",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+          }
         },
         {
           "name": "metadata.creationTimestamp",
