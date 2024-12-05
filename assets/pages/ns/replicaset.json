@@ -109,6 +109,14 @@
             },
             {
               "type": "button",
+              "icon": "fas fa-power-off text-danger",
+              "actionType": "ajax",
+              "tooltip": "重启",
+              "confirmText": "您确认要重启?",
+              "api": "post:/k8s/replicaset/restart/ns/$metadata.namespace/name/$metadata.name"
+            },
+            {
+              "type": "button",
               "icon": "fas fa-file-code text-success",
               "tooltip": "Yaml编辑",
               "actionType": "drawer",

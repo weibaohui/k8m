@@ -18,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
+	"github.com/weibaohui/k8m/pkg/controller/rs"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -123,10 +124,15 @@ func main() {
 		// k8s sts
 		api.POST("/statefulset/rollout/undo/ns/:ns/name/:name/revision/:revision", sts.Undo)
 		api.GET("/statefulset/rollout/history/ns/:ns/name/:name", sts.History)
+		api.POST("/statefulset/restart/ns/:ns/name/:name", sts.Restart)
 
 		// k8s ds
 		api.POST("/daemonset/rollout/undo/ns/:ns/name/:name/revision/:revision", ds.Undo)
 		api.GET("/daemonset/rollout/history/ns/:ns/name/:name", ds.History)
+		api.POST("/daemonset/restart/ns/:ns/name/:name", ds.Restart)
+
+		// k8s rs
+		api.POST("/replicaset/restart/ns/:ns/name/:name", rs.Restart)
 
 		// doc
 		api.GET("/doc/:kind", doc.Doc)

@@ -20,7 +20,15 @@ func History(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, list)
 }
+func Restart(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	ctx := c.Request.Context()
 
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
+		Ctl().Rollout().Restart()
+	amis.WriteJsonErrorOrOK(c, err)
+}
 func Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
