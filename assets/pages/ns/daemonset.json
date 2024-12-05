@@ -97,7 +97,7 @@
         {
           "type": "operation",
           "label": "action",
-          "width": 110,
+          "width": 100,
           "buttons": [
             {
               "type": "button",
