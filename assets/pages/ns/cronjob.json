@@ -350,8 +350,25 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-pause",
+              "actionType": "ajax",
+              "tooltip": "暂停",
+              "confirmText": "您确认暂停?",
+              "visibleOn": "spec.suspend !== true",
+              "api": "post:/k8s/cronjob/pause/ns/$metadata.namespace/name/$metadata.name"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-play",
+              "actionType": "ajax",
+              "tooltip": "继续",
+              "confirmText": "您确认继续?",
+              "visibleOn": "spec.suspend === true",
+              "api": "post:/k8s/cronjob/resume/ns/$metadata.namespace/name/$metadata.name"
             }
-
           ],
           "toggled": true
         },
