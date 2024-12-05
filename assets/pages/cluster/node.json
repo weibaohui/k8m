@@ -329,6 +329,15 @@
           }
         },
         {
+          "name": "spec.taints",
+          "label": "taints",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "${key}${value?'='+value:''}:${effect}<br>"
+          }
+        },
+        {
           "name": "status.nodeInfo.architecture",
           "label": "arch",
           "type": "text"
