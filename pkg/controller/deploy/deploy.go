@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
@@ -23,9 +24,7 @@ func Restart(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
 
-	err := kom.DefaultCluster().WithContext(ctx).
-		Resource(&v1.Deployment{}).
-		Namespace(ns).Name(name).
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Restart()
 	amis.WriteJsonErrorOrOK(c, err)
 }
@@ -33,9 +32,41 @@ func History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	list, _ := kom.DefaultCluster().WithContext(ctx).
-		Resource(&v1.Deployment{}).
-		Namespace(ns).Name(name).
+	list, err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Rollout().History()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	amis.WriteJsonData(c, list)
+}
+func Pause(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	ctx := c.Request.Context()
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
+		Ctl().Rollout().Pause()
+	amis.WriteJsonErrorOrOK(c, err)
+}
+func Resume(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	ctx := c.Request.Context()
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
+		Ctl().Rollout().Resume()
+	amis.WriteJsonErrorOrOK(c, err)
+}
+func Undo(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	revision := c.Param("revision")
+	ctx := c.Request.Context()
+	r := utils.ToInt(revision)
+	result, err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
+		Ctl().Rollout().Undo(r)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOKMsg(c, result)
 }
