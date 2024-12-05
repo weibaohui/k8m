@@ -20,7 +20,7 @@ func List(c *gin.Context) {
 	version := c.Param("version")
 	ctx := c.Request.Context()
 	var list []unstructured.Unstructured
-	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).GVK(group, version, kind).List(&list).Error
+	err := kom.DefaultCluster().WithContext(ctx).RemoveManagedFields().Namespace(ns).GVK(group, version, kind).List(&list).Error
 	amis.WriteJsonListWithError(c, list, err)
 }
 func Event(c *gin.Context) {
@@ -41,6 +41,7 @@ func Event(c *gin.Context) {
 	var eventList []unstructured.Unstructured
 	err := kom.DefaultCluster().
 		WithContext(ctx).
+		RemoveManagedFields().
 		Namespace(ns).
 		GVK("events.k8s.io", "v1", "Event").
 		List(&eventList, metav1.ListOptions{
@@ -60,7 +61,7 @@ func Fetch(c *gin.Context) {
 
 	var obj *unstructured.Unstructured
 
-	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
+	err := kom.DefaultCluster().WithContext(ctx).RemoveManagedFields().Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
