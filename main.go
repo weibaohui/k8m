@@ -106,6 +106,7 @@ func main() {
 		// k8s deploy
 		api.POST("/deploy/restart/ns/:ns/name/:name", deploy.Restart)
 		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
+		api.GET("/deploy/history/ns/:ns/name/:name", deploy.History)
 		// k8s node
 		api.POST("/node/drain/name/:name", node.Drain)
 		api.POST("/node/cordon/name/:name", node.Cordon)
