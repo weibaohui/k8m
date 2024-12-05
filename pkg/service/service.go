@@ -2,6 +2,7 @@ package service
 
 var localPodService = &podService{}
 var localChatService = &chatService{}
+var localNodeService = &nodeService{}
 var localDeploymentService = &deployService{}
 
 func ChatService() *chatService {
@@ -12,4 +13,7 @@ func DeploymentService() *deployService {
 }
 func PodService() *podService {
 	return localPodService
+}
+func NodeService() *nodeService {
+	return localNodeService
 }

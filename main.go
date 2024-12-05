@@ -14,6 +14,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
+	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/flag"
@@ -105,6 +106,10 @@ func main() {
 		// k8s deploy
 		api.POST("/deploy/restart/ns/:ns/name/:name", deploy.Restart)
 		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
+		// k8s node
+		api.POST("/node/drain/name/:name", node.Drain)
+		api.POST("/node/cordon/name/:name", node.Cordon)
+		api.POST("/node/uncordon/name/:name", node.UnCordon)
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)

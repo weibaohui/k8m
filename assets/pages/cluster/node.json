@@ -48,8 +48,32 @@
         {
           "type": "operation",
           "label": "action",
-          "width": 110,
+          "width": 100,
           "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-lock text-info",
+              "actionType": "ajax",
+              "tooltip": "隔离",
+              "confirmText": "您确认要隔离(cordon) $metadata.name?",
+              "api": "post:/k8s/node/cordon/name/$metadata.name"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-unlock text-success",
+              "actionType": "ajax",
+              "tooltip": "恢复",
+              "confirmText": "您确认要恢复(uncordon) $metadata.name?",
+              "api": "post:/k8s/node/uncordon/name/$metadata.name"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-wind text-danger",
+              "actionType": "ajax",
+              "tooltip": "驱逐",
+              "confirmText": "您确认要驱逐Drain$metadata.name?",
+              "api": "post:/k8s/node/drain/name/$metadata.name"
+            },
             {
               "type": "button",
               "icon": "fas fa-file-code text-success",
@@ -293,8 +317,15 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-trash text-danger",
+              "actionType": "ajax",
+              "tooltip": "删除",
+              "confirmText": "您确认要删除$metadata.name?",
+              "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
             }
-
           ],
           "toggled": true
         },
