@@ -13,10 +13,12 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
+	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
+	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom_starter"
@@ -106,7 +108,7 @@ func main() {
 		// k8s deploy
 		api.POST("/deploy/restart/ns/:ns/name/:name", deploy.Restart)
 		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
-		api.POST("deploy/rollout/undo/ns/:ns/name/:name/revision/:revision", deploy.Undo)
+		api.POST("/deploy/rollout/undo/ns/:ns/name/:name/revision/:revision", deploy.Undo)
 		api.GET("/deploy/rollout/history/ns/:ns/name/:name", deploy.History)
 		api.POST("/deploy/rollout/pause/ns/:ns/name/:name", deploy.Pause)
 		api.POST("/deploy/rollout/resume/ns/:ns/name/:name", deploy.Resume)
@@ -117,6 +119,14 @@ func main() {
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
+
+		// k8s sts
+		api.POST("/statefulset/rollout/undo/ns/:ns/name/:name/revision/:revision", sts.Undo)
+		api.GET("/statefulset/rollout/history/ns/:ns/name/:name", sts.History)
+
+		// k8s ds
+		api.POST("/daemonset/rollout/undo/ns/:ns/name/:name/revision/:revision", ds.Undo)
+		api.GET("/daemonset/rollout/history/ns/:ns/name/:name", ds.History)
 
 		// doc
 		api.GET("/doc/:kind", doc.Doc)
