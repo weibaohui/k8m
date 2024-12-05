@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/callback"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
+	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/ds"
@@ -134,6 +135,9 @@ func main() {
 		// k8s rs
 		api.POST("/replicaset/restart/ns/:ns/name/:name", rs.Restart)
 
+		// k8s cronjob
+		api.POST("/cronjob/pause/ns/:ns/name/:name", cronjob.Pause)
+		api.POST("/cronjob/resume/ns/:ns/name/:name", cronjob.Resume)
 		// doc
 		api.GET("/doc/:kind", doc.Doc)
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
