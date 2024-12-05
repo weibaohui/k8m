@@ -18,7 +18,7 @@ func (d *deployService) RestartDeploy(ctx context.Context, ns string, name strin
 	err := kom.DefaultCluster().WithContext(ctx).
 		Resource(&deploy).
 		Namespace(ns).Name(name).
-		Ctl().Deployment().Restart()
+		Ctl().Rollout().Restart()
 	if err != nil {
 		return nil, err
 	}
@@ -34,19 +34,6 @@ func (d *deployService) UpdateDeployImageTag(ctx context.Context, ns string, nam
 	return result, err
 }
 
-// replaceImageTag 替换镜像的 tag
-func replaceImageTag(imageName, newTag string) string {
-	// 检查镜像名称是否包含 tag
-	if strings.Contains(imageName, ":") {
-		// 按照 ":" 分割镜像名称和 tag
-		parts := strings.Split(imageName, ":")
-		// 使用新的 tag 替换旧的 tag
-		return parts[0] + ":" + newTag
-	} else {
-		// 如果镜像名称中没有 tag，直接添加新的 tag
-		return imageName + ":" + newTag
-	}
-}
 func (d *deployService) CreateImagePullSecret(ctx context.Context, ns string, serviceAccount string, pullSecret string) error {
 
 	secretName := "pull-secret"
