@@ -22,6 +22,14 @@ func WriteJsonError(c *gin.Context, err error) {
 		"msg":    err.Error(),
 	})
 }
+func WriteJsonErrorOrOK(c *gin.Context, err error) {
+	if err == nil {
+		WriteJsonOK(c)
+		return
+	}
+
+	WriteJsonError(c, err)
+}
 
 func WriteJsonData[T any](c *gin.Context, data T) {
 	c.JSON(200, gin.H{
