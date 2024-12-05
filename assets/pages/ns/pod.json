@@ -115,7 +115,7 @@
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "size": "xl",
+                "size": "lg",
                 "title": "SmartEdit",
                 "body": [
                   {
