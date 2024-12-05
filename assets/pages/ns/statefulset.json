@@ -350,8 +350,126 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-history text-primary",
+              "tooltip": "History",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "History",
+                "body": [
+                  {
+                    "type": "crud",
+                    "id": "detailEvent",
+                    "name": "detailEvent",
+                    "headerToolbar": [
+                      "reload",
+                      {
+                        "type": "pagination",
+                        "align": "right"
+                      },
+                      {
+                        "type": "statistics",
+                        "align": "right"
+                      },
+                      {
+                        "type": "switch-per-page",
+                        "align": "right"
+                      }
+                    ],
+                    "loadDataOnce": true,
+                    "syncLocation": false,
+                    "perPage": 10,
+                    "api": "get:/k8s/statefulset/rollout/history/ns/$metadata.namespace/name/$metadata.name",
+                    "columns": [
+                      {
+                        "type": "operation",
+                        "label": "action",
+                        "buttons": [
+                          {
+                            "type": "button",
+                            "icon": "fas fa-undo-alt text-danger",
+                            "actionType": "ajax",
+                            "tooltip": "恢复",
+                            "confirmText": "您确认要恢复到 $revision ?",
+                            "api": "post:/k8s/statefulset/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
+                            "onEvent": {
+                              "click": {
+                                "actions": [
+                                  {
+                                    "actionType": "closeDrawer"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "button",
+                            "icon": "fas fa-file-code text-success",
+                            "tooltip": "查看",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "查看版本",
+                              "body": [
+                                {
+                                  "type": "service",
+                                  "api": "get:/k8s/${gvk.Kind}/group/${gvk.Group}/version/${gvk.Version}/ns/$namespace/name/$name",
+                                  "body": [
+                                    {
+                                      "type": "editor",
+                                      "name": "yaml",
+                                      "size": "xxl",
+                                      "allowFullscreen": true,
+                                      "placeholder": "loading",
+                                      "language": "yaml",
+                                      "value": "${yaml}",
+                                      "options": {
+                                        "wordWrap": "on",
+                                        "scrollbar": {
+                                          "vertical": "auto"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "toggled": true
+                      },
+                      {
+                        "name": "revision",
+                        "label": "revision",
+                        "type": "text"
+                      },
+                      {
+                        "name": "namespace",
+                        "label": "namespace",
+                        "type": "text"
+                      },
+                      {
+                        "name": "name",
+                        "label": "name",
+                        "type": "text"
+                      },
+                      {
+                        "name": "creationTimestamp",
+                        "label": "age",
+                        "type": "k8sAge"
+                      }
+                    ]
+                  }
+                ]
+              }
             }
-
           ],
           "toggled": true
         },
@@ -361,9 +479,24 @@
           "type": "text"
         },
         {
+          "name": "ready",
+          "label": "ready",
+          "type": "tpl",
+          "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
+        },
+        {
           "name": "metadata.labels",
           "label": "labels",
           "type": "k8sLabels"
+        },
+        {
+          "name": "spec.template.spec.containers",
+          "label": "containers",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+          }
         },
         {
           "name": "metadata.creationTimestamp",
