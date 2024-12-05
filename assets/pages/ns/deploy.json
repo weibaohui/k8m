@@ -389,8 +389,6 @@
                         "type": "text",
                         "searchable": true
                       },
-
-
                       {
                         "name": "metadata.creationTimestamp",
                         "label": "age",
@@ -409,7 +407,7 @@
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "size": "xl",
+                "size": "lg",
                 "title": "History",
                 "body": [
                   {
@@ -434,7 +432,7 @@
                     "loadDataOnce": true,
                     "syncLocation": false,
                     "perPage": 10,
-                    "api": "get:/k8s/deploy/history/ns/$metadata.namespace/name/$metadata.name",
+                    "api": "get:/k8s/deploy/rollout/history/ns/$metadata.namespace/name/$metadata.name",
                     "columns": [
                       {
                         "type": "operation",
@@ -442,84 +440,76 @@
                         "buttons": [
                           {
                             "type": "button",
-                            "icon": "fas fa-brain text-primary",
-                            "tooltip": "AI问诊",
+                            "icon": "fas fa-undo-alt text-danger",
+                            "actionType": "ajax",
+                            "tooltip": "恢复",
+                            "confirmText": "您确认要恢复到 $revision ?",
+                            "api": "post:/k8s/deploy/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
+                            "onEvent": {
+                              "click": {
+                                "actions": [
+                                  {
+                                    "actionType": "closeDrawer"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "button",
+                            "icon": "fas fa-file-code text-success",
+                            "tooltip": "查看",
                             "actionType": "drawer",
                             "drawer": {
                               "closeOnEsc": true,
                               "closeOnOutside": true,
                               "size": "lg",
-                              "title": "AI 查询",
+                              "title": "查看版本",
                               "body": [
                                 {
                                   "type": "service",
-                                  "api": "post:/k8s/chat/event",
-                                  "data": {
-                                    "note": "${note}",
-                                    "source": "${source}",
-                                    "reason": "${reason}",
-                                    "reportingController": "${reportingController}",
-                                    "type": "${type}",
-                                    "regardingKind": "${kind}"
-                                  },
+                                  "api": "get:/k8s/${gvk.Kind}/group/${gvk.Group}/version/${gvk.Version}/ns/$namespace/name/$name",
                                   "body": [
                                     {
-                                      "type": "html",
-                                      "html": "${result|raw}",
-                                      "wrapperComponent": "",
-                                      "inline": false
+                                      "type": "editor",
+                                      "name": "yaml",
+                                      "size": "xxl",
+                                      "allowFullscreen": true,
+                                      "placeholder": "loading",
+                                      "language": "yaml",
+                                      "value": "${yaml}",
+                                      "options": {
+                                        "wordWrap": "on",
+                                        "scrollbar": {
+                                          "vertical": "auto"
+                                        }
+                                      }
                                     }
                                   ]
                                 }
                               ]
-                            },
-                            "visibleOn": "type === 'Warning'"
+                            }
                           }
                         ],
                         "toggled": true
                       },
                       {
-                        "name": "type",
-                        "label": "type",
-                        "filterable": {
-                          "options": [
-                            "Normal",
-                            "Warning"
-                          ]
-                        },
-                        "type": "mapping",
-                        "map": {
-                          "Normal": "<span class='label label-success'>Normal</span>",
-                          "Warning": "<span class='label label-danger'>Warning</span>"
-                        }
-                      },
-                      {
-                        "name": "reason",
-                        "label": "reason",
+                        "name": "revision",
+                        "label": "revision",
                         "type": "text"
                       },
                       {
-                        "name": "field",
-                        "label": "fieldPath",
-                        "type": "tpl",
-                        "tpl": "${regarding.fieldPath}"
+                        "name": "namespace",
+                        "label": "namespace",
+                        "type": "text"
                       },
                       {
-                        "name": "source",
-                        "label": "source",
-                        "type": "tpl",
-                        "tpl": "${reportingController} ${reportingInstance}"
+                        "name": "name",
+                        "label": "name",
+                        "type": "text"
                       },
                       {
-                        "name": "note",
-                        "label": "note",
-                        "type": "text",
-                        "searchable": true
-                      },
-
-
-                      {
-                        "name": "metadata.creationTimestamp",
+                        "name": "creationTimestamp",
                         "label": "age",
                         "type": "k8sAge"
                       }
@@ -527,11 +517,29 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-pause",
+              "actionType": "ajax",
+              "tooltip": "暂停",
+              "confirmText": "您确认暂停?",
+              "visibleOn": "spec.paused !== true",
+              "api": "post:/k8s/deploy/rollout/pause/ns/$metadata.namespace/name/$metadata.name"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-play",
+              "actionType": "ajax",
+              "tooltip": "继续",
+              "confirmText": "您确认继续?",
+              "visibleOn": "spec.paused === true",
+              "api": "post:/k8s/deploy/rollout/resume/ns/$metadata.namespace/name/$metadata.name"
             }
-
           ],
           "toggled": true
         },
+
         {
           "name": "metadata.name",
           "label": "name",
