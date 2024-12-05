@@ -366,6 +366,21 @@
           "type": "k8sLabels"
         },
         {
+          "name": "spec.template.spec.containers",
+          "label": "containers",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+          }
+        },
+
+        {
+          "name": "status.conditions",
+          "label": "conditions",
+          "type": "k8sConditions"
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "age",
           "type": "k8sAge"
