@@ -22,6 +22,10 @@ func OptionList(c *gin.Context) {
 			"value": n.Name,
 		})
 	}
+	list = append(list, map[string]string{
+		"label": "All",
+		"value": "*",
+	})
 	amis.WriteJsonData(c, gin.H{
 		"options": list,
 	})
