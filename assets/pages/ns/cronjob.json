@@ -380,16 +380,15 @@
         {
           "name": "spec.schedule",
           "label": "schedule",
-          "type": "text"
-        },
-        {
-          "type": "operation",
-          "label": "ai",
-          "buttons": [
+          "type": "control",
+          "body": [{
+            "type": "tpl",
+            "tpl": "${spec.schedule}"
+          },
             {
               "type": "button",
-              "icon": "fas fa-brain text-primary",
-              "tooltip": "AI释义",
+              "label": "查",
+              "level": "link",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
@@ -414,10 +413,9 @@
                   }
                 ]
               }
-            }
-          ],
-          "toggled": true
+            }]
         },
+
         {
           "name": "status.lastScheduleTime",
           "label": "last",
