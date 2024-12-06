@@ -9,7 +9,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/sashabaranov/go-openai v1.32.2
 	github.com/spf13/pflag v1.0.5
-	github.com/weibaohui/kom v0.0.35
+	github.com/weibaohui/kom v0.0.36
 	k8s.io/api v0.31.1
 	k8s.io/apimachinery v0.31.1
 	k8s.io/client-go v0.31.1
