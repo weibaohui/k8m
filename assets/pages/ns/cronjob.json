@@ -390,7 +390,11 @@
         {
           "name": "spec.suspend",
           "label": "suspend",
-          "type": "text"
+          "type": "mapping",
+          "map": {
+            "false": "<span class='label label-success'>normal</span>",
+            "true": "<span class='label label-danger'>suspend</span>"
+          }
         },
         {
           "name": "spec.concurrencyPolicy",
