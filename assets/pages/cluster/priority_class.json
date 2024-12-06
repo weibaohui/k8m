@@ -184,6 +184,19 @@
           "type": "text"
         },
         {
+          "name": "value",
+          "label": "value",
+          "type": "text"
+        },{
+          "name": "preemptionPolicy",
+          "label": "policy",
+          "type": "mapping",
+          "map": {
+            "Never": "<span class='label label-success'>Never</span>",
+            "PreemptLowerPriority": "<span class='label label-danger'>PreemptLowerPriority</span>"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "labels",
           "type": "k8sLabels"
