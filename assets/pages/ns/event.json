@@ -253,6 +253,13 @@
         {
           "name": "type",
           "label": "type",
+          "searchable": {
+            "type": "select",
+            "options": [
+              "Normal",
+              "Warning"
+            ]
+          },
           "filterable": {
             "options": [
               "Normal",
