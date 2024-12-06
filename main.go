@@ -114,6 +114,8 @@ func main() {
 		api.GET("/deploy/rollout/history/ns/:ns/name/:name", deploy.History)
 		api.POST("/deploy/rollout/pause/ns/:ns/name/:name", deploy.Pause)
 		api.POST("/deploy/rollout/resume/ns/:ns/name/:name", deploy.Resume)
+		api.POST("/deploy/scale/ns/:ns/name/:name/replica/:replica", deploy.Scale)
+
 		// k8s node
 		api.POST("/node/drain/name/:name", node.Drain)
 		api.POST("/node/cordon/name/:name", node.Cordon)
