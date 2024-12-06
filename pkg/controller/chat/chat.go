@@ -56,6 +56,32 @@ func Event(c *gin.Context) {
 		"result": result,
 	})
 }
+
+func Cron(c *gin.Context) {
+	chatService := service.ChatService()
+	if !chatService.IsEnabled() {
+		amis.WriteJsonData(c, gin.H{
+			"result": "请先配置开启ChatGPT功能",
+		})
+		return
+	}
+	var data struct {
+		Cron string `json:"cron"`
+	}
+
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+	}
+
+	prompt := fmt.Sprintf("请你作为Cron表达式专家，对下面的Cron表达式进行分析:\n%s", data.Cron)
+
+	result := chatService.Chat(prompt)
+	result = markdownToHTML(result)
+	amis.WriteJsonData(c, gin.H{
+		"result": result,
+	})
+}
 func Log(c *gin.Context) {
 	chatService := service.ChatService()
 	if !chatService.IsEnabled() {

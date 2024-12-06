@@ -383,6 +383,42 @@
           "type": "text"
         },
         {
+          "type": "operation",
+          "label": "ai",
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-brain text-primary",
+              "tooltip": "AI释义",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "AI释义: ${spec.schedule}",
+                "body": [
+                  {
+                    "type": "service",
+                    "api": "post:/k8s/chat/cron",
+                    "data": {
+                      "cron": "${spec.schedule}"
+                    },
+                    "body": [
+                      {
+                        "type": "html",
+                        "html": "${result|raw}",
+                        "wrapperComponent": "",
+                        "inline": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "toggled": true
+        },
+        {
           "name": "status.lastScheduleTime",
           "label": "last",
           "type": "k8sAge"
