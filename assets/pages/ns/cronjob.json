@@ -433,7 +433,12 @@
         {
           "name": "spec.concurrencyPolicy",
           "label": "concurrency",
-          "type": "text"
+          "type": "mapping",
+          "map": {
+            "Allow": "<span class='label label-success'>Allow</span>",
+            "Replace": "<span class='label label-success'>Replace</span>",
+            "Forbid": "<span class='label label-danger'>Forbid</span>"
+          }
         },
         {
           "name": "spec.jobTemplate.spec.template.spec.containers",
