@@ -115,7 +115,30 @@
               "confirmText": "您确认要重启?",
               "api": "post:/k8s/statefulset/restart/ns/$metadata.namespace/name/$metadata.name"
             },
-
+            {
+              "type": "button",
+              "icon": "fas fa-plus-circle text-primary",
+              "level": "link",
+              "actionType": "dialog",
+              "dialog": {
+                "title": "扩缩容",
+                "body": {
+                  "type": "form",
+                  "api": {
+                    "url": "/k8s/statefulset/scale/ns/$metadata.namespace/name/$metadata.name/replica/${spec.replicas}",
+                    "method": "post",
+                    "data": {}
+                  },
+                  "body": [
+                    {
+                      "type": "input-number",
+                      "name": "spec.replicas",
+                      "label": "副本"
+                    }
+                  ]
+                }
+              }
+            },
             {
               "type": "button",
               "icon": "fas fa-file-code text-success",
