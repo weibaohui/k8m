@@ -23,7 +23,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
-	"github.com/weibaohui/kom/kom_starter"
+	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
 
@@ -45,7 +45,19 @@ func Init() {
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 
 	// 初始化kom
-	kom_starter.InitWithConfig(cfg.KubeConfig)
+	// 首先尝试读取 in-cluster 配置
+	_, err := kom.Clusters().RegisterInCluster()
+	if err != nil {
+		klog.Errorf("InCluster集群初始化失败%v", err)
+		// 初始化kubectl 连接
+		_, err = kom.Clusters().RegisterByPathWithID(cfg.KubeConfig, "default")
+		if err != nil {
+			klog.Fatalf("外部集群初始化失败%v", err)
+		}
+	}
+
+	kom.Clusters().Show()
+
 	// 初始化回调
 	callback.RegisterCallback()
 
