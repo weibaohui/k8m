@@ -1,4 +1,4 @@
-package callback
+package cb
 
 import (
 	"github.com/weibaohui/kom/kom"
