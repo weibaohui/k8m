@@ -9,7 +9,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/pkg/callback"
+	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
@@ -23,7 +23,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
-	"github.com/weibaohui/kom/kom_starter"
+	"github.com/weibaohui/kom/callbacks"
+	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
 
@@ -44,10 +45,24 @@ func Init() {
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 
-	kom_starter.InitWithConfig(cfg.KubeConfig)
+	// 初始化kom
+	// 先注册回调，后面集群连接后，需要执行回调
+	callbacks.RegisterInit()
+	// 首先尝试读取 in-cluster 配置
+	_, err := kom.Clusters().RegisterInCluster()
+	if err != nil {
+		klog.Errorf("InCluster集群初始化失败%v", err)
+		// 初始化kubectl 连接
+		_, err = kom.Clusters().RegisterByPathWithID(cfg.KubeConfig, "default")
+		if err != nil {
+			klog.Fatalf("外部集群初始化失败%v", err)
+		}
+	}
 
-	// 初始化回调
-	callback.RegisterCallback()
+	kom.Clusters().Show()
+
+	// 初始化本项目中的回调
+	cb.RegisterCallback()
 
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
