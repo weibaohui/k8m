@@ -29,6 +29,18 @@ func Restart(c *gin.Context) {
 		Ctl().Rollout().Restart()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+func Scale(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	replica := c.Param("replica")
+	r := utils.ToInt32(replica)
+
+	ctx := c.Request.Context()
+	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
+		Ctl().Scale(r)
+	amis.WriteJsonErrorOrOK(c, err)
+}
 func Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
