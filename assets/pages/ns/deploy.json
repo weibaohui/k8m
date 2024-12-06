@@ -290,8 +290,6 @@
                 ]
               }
             },
-
-
             {
               "type": "button",
               "icon": "fas fa-history text-primary",
