@@ -25,7 +25,13 @@ func ToInt(s string) int {
 	}
 	return id
 }
-
+func ToInt32(s string) int32 {
+	id, err := strconv.Atoi(s)
+	if err != nil {
+		return 0
+	}
+	return int32(id)
+}
 func ToIntDefault(s string, i int) int {
 	id, err := strconv.Atoi(s)
 	if err != nil {
