@@ -982,7 +982,8 @@
         {
           "name": "metadata.name",
           "label": "name",
-          "type": "text"
+          "type": "text",
+          "copyable": true
         },
         {
           "name": "ready",
