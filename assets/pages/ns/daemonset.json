@@ -477,8 +477,33 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-eye",
+              "actionType": "drawer",
+              "tooltip": "Describe",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "service",
+                    "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                    "body": [
+                      {
+                        "type": "html",
+                        "html": "<pre>${result}</pre>",
+                        "wrapperComponent": "",
+                        "inline": false
+                      }
+                    ]
+                  }
+                ]
+              }
             }
-
           ],
           "toggled": true
         },
