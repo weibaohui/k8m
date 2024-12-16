@@ -232,7 +232,7 @@
               "dialog": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "title": "选择容器",
+                "title": "选择容器 (ESC 关闭)",
                 "body": [
                   {
                     "type": "select",
@@ -299,6 +299,7 @@
                       "closeOnOutside": true,
                       "closeOnEsc": true,
                       "size": "xl",
+                      "title": "日志管理 (ESC 关闭)",
                       "body": [
                         {
                           "type": "flex",
@@ -426,6 +427,7 @@
                 "closeOnOutside": true,
                 "closeOnEsc": true,
                 "size": "xl",
+                "title": "文件管理 (ESC 关闭)",
                 "body": [
                   {
                     "type": "wrapper",
@@ -751,6 +753,7 @@
                 "closeOnOutside": true,
                 "closeOnEsc": true,
                 "size": "xl",
+                "title": "Shell (ESC 关闭)",
                 "body": [
                   {
                     "type": "wrapper",
