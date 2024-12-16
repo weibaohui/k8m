@@ -233,7 +233,7 @@
                 "closeOnEsc": true,
                 "closeOnOutside": true,
                 "size": "xl",
-                "title": "Event",
+                "title": "Event  (ESC 关闭)",
                 "body": [
                   {
                     "type": "crud",
