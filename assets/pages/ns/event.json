@@ -353,6 +353,11 @@
           "searchable": true
         },
 
+         {
+          "name": "metadata.namespace",
+          "label": "namespace",
+          "type": "text"
+        },
         {
           "name": "metadata.name",
           "label": "name",

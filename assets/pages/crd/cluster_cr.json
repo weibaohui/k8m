@@ -225,6 +225,16 @@
           "type": "text"
         },
         {
+          "name": "kind",
+          "label": "kind",
+          "type": "text"
+        },
+        {
+          "name": "apiVersion",
+          "label": "apiVersion",
+          "type": "text"
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "age",
           "type": "k8sAge"
