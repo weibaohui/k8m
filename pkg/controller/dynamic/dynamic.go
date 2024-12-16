@@ -159,6 +159,23 @@ func Save(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+func Describe(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := c.Request.Context()
+	var result []byte
+
+	err := kom.DefaultCluster().WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Describe(&result).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, string(result))
+}
+
 func Apply(c *gin.Context) {
 	ctx := c.Request.Context()
 
