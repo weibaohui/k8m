@@ -441,6 +441,53 @@
         test: /(^|\/)k8sConditions/
     })(K8sConditionsComponent);
 
+    // 自定义 HTML 内容渲染组件
+    //{
+    //                         "type": "highlightHtml",
+    //                         "keywords": ["Error", "Warning"],
+    //                         "html": "<pre>${result}</pre>",
+    //                         "backgroundColor": {
+    //                           "highlight": "#ffe6e6",
+    //                           "normal": "#f0faf0"
+    //                         }
+    //                       }
+    function HighlightHtmlComponent(props) {
+        const content= replacePlaceholders(props.html,props.data) // 获取传入的内容
+        if (!content) return null;
+
+        const keywords = props.keywords || []; // 获取高亮关键词列表
+
+        // 判断内容中是否包含任何关键词
+        const hasKeyword = keywords.some((keyword) => content.includes(keyword));
+
+
+        const customBackgroundColor = props.backgroundColor || {}; // 自定义背景颜色对象
+
+
+        // 根据用户设置的背景色和默认背景色
+        const backgroundColor = hasKeyword
+            ? customBackgroundColor.highlight || '#ffe6e6' // 自定义高亮背景色（默认浅红色）
+            : customBackgroundColor.normal || '#f0faf0';   // 自定义正常背景色（默认浅绿色）
+        const textColor = hasKeyword ? '#900' : '#090'; // 深红色或深绿色
+        return React.createElement('div', {
+            style: {
+                backgroundColor,
+                // color: textColor,
+                padding: '10px',
+                borderRadius: '4px',
+                marginTop: '5px',
+                whiteSpace: 'pre-wrap', // 自动换行
+                wordBreak: 'break-all'  // 单词换行
+            },
+            dangerouslySetInnerHTML: {__html: content} // 渲染 HTML 内容
+        });
+
+    }
+
+// 注册自定义组件为 AMIS 渲染器
+    amisLib.Renderer({
+        test: /(^|\/)highlightHtml/ // 使用 type: "highlightHtml" 进行匹配
+    })(HighlightHtmlComponent);
 
     function CIExecutionAgeDisplayComponent(props) {
         // 定义一个状态来存储当前时间，用于计算持续时间
