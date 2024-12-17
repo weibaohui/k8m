@@ -549,10 +549,9 @@
                         }
                       },
                       {
-                        "type": "html",
-                        "html": "<pre>${result}</pre>",
-                        "wrapperComponent": "",
-                        "inline": false
+                        "type": "highlightHtml",
+                        "keywords": ["Error", "Warning"],
+                        "html": "<pre>${result}</pre>"
                       }
                     ]
                   }
