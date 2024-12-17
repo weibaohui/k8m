@@ -177,7 +177,7 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-exclamation-circle text-warning-dker",
+              "icon": "fas fa-calendar-alt text-primary",
               "tooltip": "Event",
               "actionType": "drawer",
               "drawer": {
@@ -350,7 +350,7 @@
                       },
                       {
                         "type": "highlightHtml",
-                        "keywords": ["Error", "Warning"],
+                        "keywords": ["Error", "Warning","failed"],
                         "html": "<pre>${result}</pre>"
                       }
                     ]
