@@ -223,7 +223,7 @@
                       },
                       {
                         "type": "highlightHtml",
-                        "keywords": ["Error", "Warning","failed"],
+                        "keywords": ["Error", "Warning"],
                         "html": "<pre>${result}</pre>"
                       }
                     ]

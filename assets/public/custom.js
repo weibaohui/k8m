@@ -444,7 +444,7 @@
     // 自定义 HTML 内容渲染组件
     //{
     //                         "type": "highlightHtml",
-    //                         "keywords": ["Error", "Warning","failed"], 
+    //                         "keywords": ["Error", "Warning"],  
     //                         "html": "<pre>${result}</pre>",
     //                         "backgroundColor": {
     //                           "highlight": "#ffe6e6",
