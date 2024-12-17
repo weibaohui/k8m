@@ -458,8 +458,7 @@
         const keywords = props.keywords || []; // 获取高亮关键词列表
 
         // 判断内容中是否包含任何关键词
-        const hasKeyword = keywords.some((keyword) => content.includes(keyword));
-
+        const hasKeyword = keywords.some((keyword) => content.toLowerCase().includes(keyword.toLowerCase()));
 
         const customBackgroundColor = props.backgroundColor || {}; // 自定义背景颜色对象
 
