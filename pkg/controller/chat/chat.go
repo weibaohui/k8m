@@ -57,6 +57,33 @@ func Event(c *gin.Context) {
 	})
 }
 
+func Describe(c *gin.Context) {
+	chatService := service.ChatService()
+	if !chatService.IsEnabled() {
+		amis.WriteJsonData(c, gin.H{
+			"result": "请先配置开启ChatGPT功能",
+		})
+		return
+	}
+	var data struct {
+		Describe string `json:"describe"`
+		Kind     string `json:"kind"`
+		Group    string `json:"group"`
+	}
+
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+	}
+
+	prompt := fmt.Sprintf("请你作为kubernetes k8s 运维专家，对下面 %s %s 资源的Describe 信息 分析。请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案:\n%s", data.Group, data.Kind, data.Describe)
+
+	result := chatService.Chat(prompt)
+	result = markdownToHTML(result)
+	amis.WriteJsonData(c, gin.H{
+		"result": result,
+	})
+}
 func Cron(c *gin.Context) {
 	chatService := service.ChatService()
 	if !chatService.IsEnabled() {
