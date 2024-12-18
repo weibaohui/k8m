@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
+	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
@@ -153,6 +154,8 @@ func main() {
 
 		// k8s rs
 		api.POST("/replicaset/restart/ns/:ns/name/:name", rs.Restart)
+		// k8s configmap
+		api.POST("/configmap/ns/:ns/name/:name/import", cm.Import)
 
 		// k8s cronjob
 		api.POST("/cronjob/pause/ns/:ns/name/:name", cronjob.Pause)
