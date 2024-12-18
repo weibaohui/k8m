@@ -279,6 +279,57 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "button",
+              "tooltip": "导入configmap",
+              "icon": "fa fa-upload",
+              "actionType": "dialog",
+              "dialog": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "上传文件 (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "page",
+                    "body": {
+                      "type": "form",
+                      "body": [
+                        {
+                          "type": "input-file",
+                          "name": "file",
+                          "accept": "*",
+                          "asBlob": true
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "fileName",
+                          "label": "文件名",
+                          "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
+                        }
+                      ],
+                      "actions": [
+                        {
+                          "type": "button",
+                          "label": "上传",
+                          "level": "primary",
+                          "actionType": "ajax",
+                          "close": true,
+                          "api": {
+                            "method": "post",
+                            "url": "/k8s/configmap/ns/${metadata.namespace}/name/${metadata.name}/import",
+                            "data": {
+                              "file": "${file}",
+                              "fileName": "${fileName}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "actions": []
+              }
             }
           ],
           "toggled": true
