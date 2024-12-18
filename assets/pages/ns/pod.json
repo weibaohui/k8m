@@ -604,7 +604,7 @@
                                         "dialog": {
                                           "closeOnEsc": true,
                                           "closeOnOutside": true,
-                                          "title": "上传文件",
+                                          "title": "上传文件 (ESC 关闭)",
                                           "body": [
                                             {
                                               "type": "page",
@@ -614,7 +614,6 @@
                                                   {
                                                     "type": "input-file",
                                                     "name": "file",
-                                                    "label": "File",
                                                     "accept": "*",
                                                     "asBlob": true
                                                   },
