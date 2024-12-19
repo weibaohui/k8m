@@ -1,31 +1,31 @@
-# k8m
-[English](README.md) | [中文](README_cn.md)
+## **k8m**
+[English](README_en.md) | [中文](README.md)
 
-**k8m** is a lightweight console tool that integrates AI and Kubernetes, designed to simplify cluster management. Built on AMIS and using [`kom`](https://github.com/weibaohui/kom)  as the Kubernetes API client, **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
+**k8m** 是一款集 AI 与 Kubernetes 于一体的轻量级控制台工具，专为简化集群管理设计。基于 AMIS 构建，并通过  [`kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了 Qwen2.5-Coder-7B 模型交互能力，同时支持接入您自己的私有化大模型。
 
-### Key Features
-- **Compact Design**: All functionalities are packed into a single executable file for easy deployment and use.
-- **User-Friendly**: An intuitive user interface and straightforward workflows make Kubernetes management effortless.
-- **High Performance**: Backend built with Golang and frontend based on Baidu AMIS ensure high resource efficiency and fast responsiveness.
-- **Pod File Management**: Enables browsing, editing, uploading, downloading, and deleting files within Pods, simplifying daily operations.
-- **Pod Operations Management**: Supports real-time Pod log viewing, log downloads, and direct Shell command execution within Pods.
-- **CRD Management**: Automatically discovers and manages CRD resources to improve productivity.
-- **Intelligent Translation and Diagnostics**: Offers YAML property translation, event anomaly diagnosis, and log analysis to provide smart troubleshooting support.
-- **Cross-Platform Support**: Compatible with Linux, macOS, and Windows, and supports various architectures like x86 and ARM for seamless multi-platform operation.
+### 主要特点
+- **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
+- **简便易用**：友好的用户界面和直观的操作流程，让 Kubernetes 管理更加轻松。
+- **高效性能**：后端采用 Golang 构建，前端基于百度 AMIS，保证资源利用率高、响应速度快。
+- **Pod 文件管理**：支持 Pod 内文件的浏览、编辑、上传、下载、删除，简化日常操作。
+- **Pod 运行管理**：支持实时查看 Pod 日志，下载日志，并在 Pod 内直接执行 Shell 命令。
+- **CRD 管理**：可自动发现并管理 CRD 资源，提高工作效率。
+- **智能翻译与问诊**：支持 YAML 属性自动翻译、异常事件诊断以及日志分析，为排查问题提供智能化支持。
+- **跨平台支持**：兼容 Linux、macOS 和 Windows，并支持 x86、ARM 等多种架构，确保多平台无缝运行。
 
-The design philosophy of **k8m** is "lightweight and efficient, simplifying complexity." It helps developers and operators quickly get started and effortlessly manage Kubernetes clusters.
+**k8m** 的设计理念是“轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
 
-## **Run**
-1. **Download**: Download the latest version from [GitHub](https://github.com/weibaohui/k8m).
-2. **Run**: Start with the `./k8m` command and visit [http://127.0.0.1:3618](http://127.0.0.1:3618).
-3. **Parameters**:
+## **运行**
+1. **下载**：从 [GitHub](https://github.com/weibaohui/k8m) 下载最新版本。
+2. **运行**：使用 `./k8m` 命令启动,访问[http://127.0.0.1:3618](http://127.0.0.1:3618)。
+3. **参数**：
 ```shell
   ./k8m -h
       --add_dir_header                   If true, adds the file directory to the header of the log messages
       --alsologtostderr                  log to standard error as well as files (no effect when -logtostderr=true)
   -k, --chatgpt-key string               API Key for ChatGPT (default "sk-XXXX")
   -u, --chatgpt-url string               API URL for ChatGPT (default "https://api.siliconflow.cn/v1")
-  -d, --debug                            Debug mode, same as GIN_MODE
+  -d, --debug                            Debug mode,same as GIN_MODE
   -c, --kubeconfig string                Absolute path to the kubeConfig file (default "/Users/xxx/.kube/config")
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory (no effect when -logtostderr=true)
@@ -41,192 +41,179 @@ The design philosophy of **k8m** is "lightweight and efficient, simplifying comp
       --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
 ```
 
-## **ChatGPT Configuration Guide**
+## **ChatGPT 配置指南**
 
-
-### Built-in GPT
-Starting from version v0.0.8, GPT is built-in and does not require configuration.
-If you need to use your own GPT, please refer to the steps below.
-
-### **Environment Variable Configuration**
-Set the environment variables to enable ChatGPT.
+### 内置GPT
+从v0.0.8版本开始，将内置GPT，无需配置。
+如果您需要使用自己的GPT，请参考以下步骤。
+### **环境变量配置**
+需要设置环境变量，以启用ChatGPT。
 ```bash
 export OPENAI_API_KEY="sk-XXXXX"
 export OPENAI_API_URL="https://api.siliconflow.cn/v1"
 ```
-### **ChatGPT Account**
-This project integrates the [github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai) SDK. For users in China, it's recommended to use the [Silicon Flow](https://cloud.siliconflow.cn/) service. After logging in, create an API_KEY at [https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak).
+### **ChatGPT 账户**
+本项目集成了[github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai)SDK。
+国内访问推荐使用[硅基流动](https://cloud.siliconflow.cn/)的服务。 登录后，在[https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak)创建API_KEY
 
-## **Makefile Usage Guide**
 
-The **Makefile** in this project is used to automate common tasks such as building, testing, and cleaning the project. Below is a detailed usage guide to help you understand how to use the targets defined in the Makefile.
+## **Makefile 使用指南**
 
-### **Prerequisites**
+本项目中的 **Makefile** 用于自动化常见任务，如构建、测试和清理项目。以下是详细的使用说明，帮助你了解如何使用 Makefile 中定义的各个目标。
 
-Before using the Makefile, ensure that the following tools are installed on your system:
+### **先决条件**
 
-- **Go (Golang)** - [Download and install Go](https://golang.org/dl/)
-- **Make** - Usually pre-installed on Linux and macOS. For Windows users, consider using [GNU Make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm) or [WSL (Windows Subsystem for Linux)](https://docs.microsoft.com/en-us/windows/wsl/install)
-- **Git** - For retrieving the current commit hash
+在使用 Makefile 之前，请确保你的系统上已安装以下工具：
 
-### **Available Targets**
+- **Go（Golang）** - [下载并安装 Go](https://golang.org/dl/)
+- **Make** - 通常预装在 Linux 和 macOS 系统中。对于 Windows 用户，可以考虑使用 [GNU Make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm) 或 [WSL（Windows Subsystem for Linux）](https://docs.microsoft.com/zh-cn/windows/wsl/install)
+- **Git** - 用于获取当前提交哈希
+
+### **可用目标**
 
 #### 1. **make**
-- **Description**: The default target, builds the executable for the current platform.
-- **Usage**:
+- **描述**：默认目标，构建当前平台的可执行文件。
+- **使用方法**：
   ```bash
   make
   ```
-
 #### 2. **build**
-- **Description**: Builds the executable for the current platform based on the OS and architecture.
-- **Usage**:
-  ```bash
-  make build
-  ```
-- **Output**: The compiled binary will be located in the `bin/` directory with the filename `k8m` (or `k8m.exe` for Windows).
-
-#### 3. **build-all**
-- **Description**: Cross-compiles the executable for all specified platforms and architectures.
-- **Usage**:
-  ```bash
-  make build-all
-  ```
-- **Output**: Executables for different platforms will be located in the `bin/` directory, named as `k8m-<GOOS>-<GOARCH>` (e.g., `k8m-linux-amd64`, `k8m-windows-amd64.exe`).
-
-#### 4. **clean**
-- **Description**: Removes the `bin/` directory and all compiled executables.
-- **Usage**:
-  ```bash
-  make clean
-  ```
-- **Output**: The `bin/` directory and its contents will be deleted.
-
-#### 5. **run**
-- **Description**: Builds and runs the executable for the current platform. **Note**: This target is Unix-only (Linux and macOS).
-- **Usage**:
-  ```bash
-  make run
-  ```
-- **Output**: The application will start running locally.
-
-#### 6. **help**
-- **Description**: Displays all available Makefile targets and their descriptions.
-- **Usage**:
-  ```bash
-  make help
-  ```
-
-### **Cross-Platform Compilation Support**
-
-The **build-all** target supports cross-compiling for the following OS and architecture combinations:
-
-- **Linux**:
-    - `amd64`
-    - `arm64`
-    - `ppc64le`
-    - `s390x`
-    - `mips64le`
-    - `riscv64`
-- **Darwin (macOS)**:
-    - `amd64`
-    - `arm64`
-- **Windows**:
-    - `amd64`
-    - `arm64`
-
-### **Usage Examples**
-
-#### **1. Build for the current platform**
-
-Build the `k8m` executable for the current OS and architecture:
+- **描述**：根据当前系统的操作系统和架构，为当前平台构建可执行文件。
+- **使用方法**：
 ```bash
 make build
 ```
 
-#### **2. Build for all supported platforms**
+#### 3. **build-all**
+- **描述**：为所有指定的平台和架构进行交叉编译，生成相应的可执行文件。
+- **使用方法**：
+  ```bash
+  make build-all
+  ```
+- **输出**：不同平台的可执行文件将位于 `bin/` 目录中，命名格式为 `k8m-<GOOS>-<GOARCH>`（例如 `k8m-linux-amd64`、`k8m-windows-amd64.exe`）。
 
-Cross-compile `k8m` for all specified platforms and architectures:
+#### 4. **clean**
+- **描述**：删除 `bin/` 目录及其中的所有编译生成的可执行文件。
+- **使用方法**：
+  ```bash
+  make clean
+  ```
+- **输出**：`bin/` 目录及其内容将被删除。
+
+#### 5. **run**
+- **描述**：构建并运行当前平台的可执行文件。**注意**：此目标仅适用于 Unix 系统（Linux 和 macOS）。
+- **使用方法**：
+  ```bash
+  make run
+  ```
+- **输出**：应用程序将在本地启动运行。
+
+#### 6. **help**
+- **描述**：显示所有可用的 Makefile 目标及其简要描述。
+- **使用方法**：
+  ```bash
+  make help
+  ```
+
+### **跨平台编译支持**
+
+**build-all** 目标支持以下操作系统和架构组合的交叉编译：
+
+- **Linux**:
+  - `amd64`
+  - `arm64`
+  - `ppc64le`
+  - `s390x`
+  - `mips64le`
+  - `riscv64`
+- **Darwin（macOS）**:
+  - `amd64`
+  - `arm64`
+- **Windows**:
+  - `amd64`
+  - `arm64`
+
+### **使用示例**
+
+#### **1. 为当前平台构建**
+
+构建适用于当前操作系统和架构的 `k8m` 可执行文件：
+```bash
+make build
+```
+
+#### **2. 为所有支持的平台构建**
+
+交叉编译 `k8m` 为所有指定的平台和架构：
 ```bash
 make build-all
 ```
 
-#### **3. Run the executable**
+#### **3. 运行可执行文件**
 
-On Unix systems, build and run `k8m`:
+在 Unix 系统上构建并运行 `k8m`：
 ```bash
 make run
 ```
 
-#### **4. Clean build artifacts**
+#### **4. 清理构建产物**
 
-Remove all compiled executables and the `bin/` directory:
+删除所有编译生成的可执行文件和 `bin/` 目录：
 ```bash
 make clean
 ```
 
-#### **5. View help information**
+#### **5. 查看帮助信息**
 
-Display all available Makefile targets and their descriptions:
+显示所有可用的 Makefile 目标及其描述：
 ```bash
 make help
 ```
 
-### **Additional Notes**
+### **附加说明**
 
-- **Version Control**: You can specify a custom version during the build by passing the `VERSION` variable:
+- **版本控制**：你可以在构建时通过传递 `VERSION` 变量来指定自定义版本：
   ```bash
   make build VERSION=v2.0.0
   ```
-- **Executable File Extensions**: For Windows builds, the Makefile will automatically append the `.exe` extension to the executable.
-- **Dependencies**: Ensure that Git is installed and the project is initialized as a Git repository to correctly retrieve the `GIT_COMMIT` hash.
+- **可执行文件扩展名**：对于 Windows 构建，Makefile 会自动为可执行文件添加 `.exe` 扩展名。
+- **依赖性**：确保 Git 已安装并且项目已初始化为 Git 仓库，以便正确获取 `GIT_COMMIT` 哈希值。
 
-### **Troubleshooting**
+### **故障排除**
 
-- **Missing Dependencies**: If you encounter errors related to missing commands (e.g., `make`, `go`), ensure that all prerequisites are installed and correctly configured in your system's `PATH`.
-- **Permission Issues**: If you receive permission denied errors when running `make run`, ensure that the `bin/` directory and the compiled binary have the necessary execution permissions:
+- **缺少依赖**：如果遇到与缺少命令相关的错误（如 `make`、`go` 等），请确保所有先决条件已安装并正确配置在系统的 `PATH` 中。
+- **权限问题**：如果在运行 `make run` 时收到权限被拒绝的错误，请确保 `bin/` 目录和编译后的二进制文件具有必要的执行权限：
   ```bash
   chmod +x bin/k8m
   ```
-- **File Browsing Permission Issue**:Depends on the ls command within the container. Please install commands such as shell, tar, and cat within the container.
+- **文件浏览权限问题**：依赖容器内的ls命令，请在容器内安装shell、tar、cat等命令 。  
 
-
-## **Show**
-
-### Workloads
+## **运行界面**
+### 负载
 ![workload](images/workload.png)
-
-### File Editing Within Pods
+### Pod内文件编辑
 ![file-edit](images/file-edit.png)
-
-### Uploading Files to Pods
+### 上传文件到Pod内
 ![upload](images/upload.png)
-
-### Downloading Files from Pods
+### Pod内文件下载
 ![download](images/download.png)
-
-### Tag Updates
+### Tag更新
 ![tag-update](images/tag-update.png)
-
-### Log Viewing
+### 查看日志
 ![log-view](images/log-view.png)
-
-### Automatic YAML Attribute Translation
-k8m offers integrated YAML browsing, editing, and documentation features with automatic YAML attribute translation. Whether you're looking up field definitions or verifying configuration details, you can skip the tedious searches, significantly boosting your efficiency.  
-![yaml-editor](images/yaml.png)  
-![YAML Attribute Translation](images/yaml-ai-1.png)
-
-### Event AI Diagnostics
-In the Event page, k8m comes with built-in AI diagnostic capabilities to intelligently analyze abnormal events and provide detailed explanations. By clicking the "AI Brain" button next to an event, you can view the diagnostic results within moments and quickly pinpoint the root cause of issues.  
-![Event Diagnostics](images/event-3.png)
-
-### Error Log AI Diagnostics
-Log analysis is a crucial step in troubleshooting, but large volumes of error messages can make it challenging to identify issues efficiently. k8m supports AI-powered log diagnostics to quickly detect critical errors and generate actionable suggestions. Simply select the relevant log entries, click the AI diagnostic button, and receive a comprehensive report.  
-![Log Diagnostics](images/log-ai-4.png)
-
-### Automatic Command Generation
-Command operations within Pods are an inevitable part of daily maintenance. With AI assistance, you only need to describe your requirements, and k8m will automatically generate suitable commands for your reference, saving time and improving efficiency.  
-![Command Auto-Generation](images/AI-command-3.png)
+### YAML 属性自动翻译
+k8m 提供集成的 YAML 浏览、编辑和文档查看功能，支持自动翻译 YAML 属性。无论是查找字段含义还是确认配置细节，您都无需再费时费力地搜索，极大提高了工作效率。  
+![yaml-editor](images/yaml.png)
+![YAML 属性翻译](images/yaml-ai-1.png)
+### Event 信息 AI 问诊
+在 Event 页面，k8m 内置了 AI 问诊功能，可智能分析异常事件，并提供详细的解释。点击事件前的“AI大脑”按钮，稍等片刻即可查看诊断结果，快速定位问题原因。  
+![异常事件诊断](images/event-3.png)
+### 错误日志 AI 问诊
+日志分析是定位问题的重要环节，但面对大量报错信息，如何高效排查？k8m 支持 AI 日志诊断，帮助快速识别关键错误并生成解决建议。只需选中相关日志，点击 AI 问诊按钮，即可获得诊断报告。  
+![日志诊断](images/log-ai-4.png)
+### 运行命令自动生成
+日常运维中，Pod 内命令操作不可避免。借助 AI，您只需输入需求描述，k8m 即可自动生成合适的命令供参考，减少查找时间，提高效率。  
+![命令自动生成](images/AI-command-3.png)
 
 ### HELP & SUPPORT
-If you have any further questions or need additional assistance, feel free to reach out!
+如果你有任何进一步的问题或需要额外的帮助，请随时与我联系！
