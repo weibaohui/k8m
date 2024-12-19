@@ -32,6 +32,22 @@ PLATFORMS := \
 .PHONY: all
 all: build
 
+
+# 为当前平台构建可执行文件
+.PHONY: docker
+docker:
+	@echo "构建docker镜像..."
+	@docker buildx build \
+           --build-arg VERSION=$(VERSION) \
+           --build-arg GIT_COMMIT=$(GIT_COMMIT) \
+           --build-arg MODEL=$(MODEL) \
+     	   --build-arg API_KEY=$(API_KEY) \
+     	   --build-arg API_URL=$(API_URL) \
+     	   --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x,linux/riscv64 \
+     	   -t weibh/k8m:$(VERSION) -f Dockerfile . --push
+
+
+
 # 为当前平台构建可执行文件
 .PHONY: build
 build:
@@ -76,6 +92,7 @@ run: build
 .PHONY: help
 help:
 	@echo "可用的目标:"
+	@echo "  docker      构建docker镜像"
 	@echo "  build       为当前平台构建可执行文件"
 	@echo "  build-all   为所有平台构建可执行文件"
 	@echo "  clean       清理生成的可执行文件"
