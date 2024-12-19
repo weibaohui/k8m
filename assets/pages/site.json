@@ -4,6 +4,11 @@
   "data": {
     "pages": [
       {
+        "label":"Home",
+        "url": "/",
+        "redirect": "/cluster/node/list"
+      },
+      {
         "children": [
           {
             "label": "Apply",
