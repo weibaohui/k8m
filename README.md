@@ -1,6 +1,8 @@
 ## **k8m**
 [English](README_en.md) | [中文](README.md)
 
+[![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
+
 **k8m** 是一款集 AI 与 Kubernetes 于一体的轻量级控制台工具，专为简化集群管理设计。基于 AMIS 构建，并通过  [`kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了 Qwen2.5-Coder-7B 模型交互能力，同时支持接入您自己的私有化大模型。
 
 ### 主要特点
@@ -55,6 +57,42 @@ export OPENAI_API_URL="https://api.siliconflow.cn/v1"
 ### **ChatGPT 账户**
 本项目集成了[github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai)SDK。
 国内访问推荐使用[硅基流动](https://cloud.siliconflow.cn/)的服务。 登录后，在[https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak)创建API_KEY
+
+
+
+
+## 容器化k8s集群方式运行
+
+使用[KinD](https://kind.sigs.k8s.io/docs/user/quick-start/)、[MiniKube](https://minikube.sigs.k8s.io/docs/start/)
+安装一个小型k8s集群
+
+## KinD方式
+
+* 创建 KinD Kubernetes 集群
+
+```
+brew install kind
+```
+
+* 创建新的 Kubernetes 集群：
+
+```
+kind create cluster --name k8sgpt-demo
+```
+
+# 将k8m部署到集群中体验
+
+## 安装脚本
+
+```docker
+kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main/deploy/k8m.yaml
+```
+
+* 访问：
+  默认使用了nodePort开放，请访问31999端口。或自行配置Ingress
+  http://NodePortIP:31999 
+
+
 
 
 ## **Makefile 使用指南**
