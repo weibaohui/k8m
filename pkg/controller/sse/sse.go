@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sashabaranov/go-openai"
 	"k8s.io/klog/v2"
 )
 
@@ -65,4 +66,34 @@ func WriteSSEWithChannel(c *gin.Context, logCh <-chan string, done chan struct{}
 			return
 		}
 	}
+}
+
+func WriteSSEChatCompletionStream(c *gin.Context, stream *openai.ChatCompletionStream) {
+	defer func() {
+		if err := stream.Close(); err != nil {
+			// 处理关闭流时的错误
+			klog.V(6).Infof("stream close error:%v", err)
+		}
+	}()
+
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.WriteHeader(http.StatusOK)
+
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			// 处理其他错误
+			continue
+		}
+		// 发送 SSE 消息
+		c.SSEvent("message", response.Choices[0].Delta.Content)
+		// 刷新输出缓冲区
+		c.Writer.Flush()
+	}
+
 }
