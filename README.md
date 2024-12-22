@@ -54,6 +54,13 @@
 export OPENAI_API_KEY="sk-XXXXX"
 export OPENAI_API_URL="https://api.siliconflow.cn/v1"
 ```
+### **ChatGPT 状态调试**
+如果设置参数后，依然没有效果，请尝试使用`./k8m -d 6`获取更多的调试信息。
+会输出以下信息，通过查看日志，确认是否启用ChatGPT。
+```go
+ChatGPT 开启状态:true
+ChatGPT 启用 key:sk-hl**********************************************,url:https://api.siliconflow.cn/v1
+```
 ### **ChatGPT 账户**
 本项目集成了[github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai)SDK。
 国内访问推荐使用[硅基流动](https://cloud.siliconflow.cn/)的服务。 登录后，在[https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak)创建API_KEY
