@@ -8,6 +8,19 @@ import (
 	"unicode/utf8"
 )
 
+// MaskString 用于将字符串的前n个字符显示出来，后面的部分用 * 替代
+func MaskString(input string, visibleLength int) string {
+	if visibleLength <= 0 {
+		// 如果指定的可见长度小于等于0，全部用 * 替代
+		return strings.Repeat("*", len(input))
+	}
+	if len(input) <= visibleLength {
+		// 如果字符串长度小于等于可见长度，全部用 * 替代
+		return strings.Repeat("*", len(input))
+	}
+	// 前 n 个字符 + 剩余字符用 * 替代
+	return input[:visibleLength] + strings.Repeat("*", len(input)-visibleLength)
+}
 func TruncateString(s string, length int) string {
 	if utf8.RuneCountInString(s) <= length {
 		return s
