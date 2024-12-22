@@ -158,7 +158,7 @@ func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable boo
 }
 func (c *chatService) IsEnabled() bool {
 	_, _, enable := c.getChatGPTAuth()
-	klog.V(2).Infof("ChatGPT 开启状态:%v\n", enable)
+	klog.V(4).Infof("ChatGPT 开启状态:%v\n", enable)
 	return enable
 }
 
