@@ -146,6 +146,8 @@ func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable boo
 		apiKey = c.apiKey
 		apiURL = c.apiUrl
 		klog.V(4).Infof("ChatGPT 环境变量没有设置 , 尝试使用默认配置 key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
+	} else {
+		klog.V(4).Infof("ChatGPT 环境变量已设置, key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
 	}
 	if apiKey != "" && apiURL != "" {
 		enable = true
