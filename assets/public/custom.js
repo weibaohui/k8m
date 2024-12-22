@@ -32,7 +32,7 @@
 
 
     // 自定义组件，props 中可以拿到配置中的所有参数，比如 props.label 是 'Name'
-    function SSEComponent(props) {
+    function Component(props) {
         // props.url="/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}?a=b&c=d"
         let url = replacePlaceholders(props.url, props.data);
         const params = {
@@ -576,55 +576,112 @@
     })(CIExecutionAgeDisplayComponent);
 
     // 自定义组件，props 中可以拿到配置中的所有参数，比如 props.label 是 'Name'
+    //{
+    //                               "type": "chatgpt",
+    //                               "url": "/k8s/chat/sse/describe",
+    //                               "data": {
+    //                                 "describe": "${data.result}",
+    //                                 "kind": "${kind}",
+    //                                 "group": "${group}"
+    //                               }
+    //                             }
+
     function ChatGPTComponent(props) {
         // props.url="/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}?a=b&c=d"
         let url = replacePlaceholders(props.url, props.data);
         const params = {
-            q: props.data.q,
+            describe: props.data.result,
+            kind: props.data.kind,
+            group: props.data.group,
         };
-        finalUrl = appendQueryParam(url, params);
+
         let dom = React.useRef(null);
         let eventSourceRef = React.useRef(null);
         const [errorMessage, setErrorMessage] = React.useState('');
         React.useEffect(function () {
-            // 处理 SSE 数据
-            eventSourceRef.current = new EventSource(finalUrl);
+            const handleSSEWithPost = async (url, payload, dom) => {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
 
-            const handleMessage = (event) => {
-                if (dom.current != null) {
-                    dom.current.textContent += event.data;
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let done = false;
+                    let buffer = ''; // 用于拼接不完整的块
+
+                    while (!done) {
+                        const { value, done: readerDone } = await reader.read();
+                        done = readerDone;
+
+                        if (value) {
+                            // 解码当前块数据
+                            buffer += decoder.decode(value, { stream: !done });
+
+                            // 按行分割数据
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop(); // 将最后一个不完整的行保留到下一次处理
+
+                            for (const line of lines) {
+                                // 检查是否是 `data:` 行
+                                if (line.startsWith('data:')) {
+                                    const dataContent = line.replace('data:', ''); // 提取 `data:` 后的内容
+                                    if (dom.current != null) {
+                                        // dom.current.textContent += dataContent; // 更新到 DOM
+                                        dom.current.textContent += `${dataContent}\n`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    console.log('流结束');
+                } catch (error) {
+                    console.error('发生错误:', error);
                 }
             };
 
-            const handleError = (event) => {
-                if (eventSourceRef.current.readyState === EventSource.CLOSED) {
-                    console.log('连接已关闭');
-                } else if (eventSourceRef.current.readyState === EventSource.CONNECTING) {
-                    console.log('正在尝试重新连接...');
-                } else {
-                    console.log('发生未知错误...');
-                }
-                eventSourceRef.current.close();
-            };
+            handleSSEWithPost(url, params, dom);
 
-
-            eventSourceRef.current.addEventListener('message', handleMessage);
-            eventSourceRef.current.addEventListener('error', handleError);
-
-            return () => {
-                if (eventSourceRef.current) {
-                    eventSourceRef.current.removeEventListener('message', handleMessage);
-                    eventSourceRef.current.removeEventListener('error', handleError);
-                    eventSourceRef.current.close();
-                }
-            };
         }, [url]);
-        return React.createElement('div', {
-            ref: dom,
-            style: {
-                whiteSpace: 'pre-wrap'
-            }
-        }, errorMessage && React.createElement('div', {style: {color: 'red'}}, errorMessage));
+
+        return React.createElement(
+            'div', // 外层容器
+            {},
+            React.createElement(
+                'pre', // 内层 <pre> 标签
+                {
+                    style: {
+                        whiteSpace: 'pre-wrap', // 保留换行和空白
+                        wordWrap: 'break-word', // 防止超长文本溢出
+                    },
+                },
+                React.createElement(
+                    'div', // 内容容器
+                    {
+                        ref: dom, // 绑定 ref，用于动态更新内容
+                        style: {
+                            whiteSpace: 'inherit', // 从 <pre> 继承格式
+                        },
+                    }
+                )
+            ),
+            errorMessage &&
+            React.createElement(
+                'div', // 错误信息部分
+                { style: { color: 'red' } },
+                errorMessage
+            )
+        );
+
     }
 
     //注册自定义组件，请参考后续对工作原理的介绍
