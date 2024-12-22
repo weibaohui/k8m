@@ -266,7 +266,7 @@
                 "schemaApi": "get:/pages/cluster/cluster_role.json"
               },
               {
-                "label": "ClusterRoleBinding",
+                "label": "CluRoleBind",
                 "url": "/cluster/cluster_role_binding/list",
                 "icon": "fas fa-vector-square",
                 "schemaApi": "get:/pages/cluster/cluster_role_binding.json"
@@ -324,13 +324,13 @@
                 "schemaApi": "get:/pages/cluster/flow_schema.json"
               },
               {
-                "label": "PriorityLevelConfig",
+                "label": "PriorityLevelCfg",
                 "url": "/cluster/priority_level_config/list",
                 "icon": "fas fa-cog",
                 "schemaApi": "get:/pages/cluster/priority_level_config.json"
               },
               {
-                "label": "ComponentStatus",
+                "label": "CompStatus",
                 "url": "/cluster/component_status/list",
                 "icon": "fas fa-tools",
                 "schemaApi": "get:/pages/cluster/component_status.json"
