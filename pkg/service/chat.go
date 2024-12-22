@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"k8s.io/klog/v2"
 )
 
@@ -144,9 +145,11 @@ func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable boo
 	if apiKey == "" && apiURL == "" {
 		apiKey = c.apiKey
 		apiURL = c.apiUrl
+		klog.V(4).Infof("ChatGPT 环境变量没有设置 , 尝试使用默认配置 key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
 	}
 	if apiKey != "" && apiURL != "" {
 		enable = true
+		klog.V(4).Infof("ChatGPT 启用 key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
 	}
 
 	c.apiKey = apiKey
@@ -155,6 +158,7 @@ func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable boo
 }
 func (c *chatService) IsEnabled() bool {
 	_, _, enable := c.getChatGPTAuth()
+	klog.V(2).Infof("ChatGPT 开启状态:%v\n", enable)
 	return enable
 }
 
