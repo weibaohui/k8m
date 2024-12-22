@@ -26,7 +26,8 @@ func (c *chatService) SetVars(apikey, apiUrl, model string) {
 	c.apiKey = apikey
 }
 
-func (c *chatService) GetChatStream(chat string) (*http.Response, error) {
+// Deprecated 获取stream
+func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
 	key, apiURL, enable := c.getChatGPTAuth()
 	if !enable {
 		return nil, fmt.Errorf("chatGPT not enable")
@@ -73,6 +74,35 @@ func (c *chatService) GetChatStream(chat string) (*http.Response, error) {
 		return nil, err
 	}
 	return resp, err
+}
+func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, error) {
+	apiKey, apiURL, enable := c.getChatGPTAuth()
+	if !enable {
+		return nil, fmt.Errorf("chatGPT not enable")
+	}
+	// 初始化OpenAI客户端
+	cfg := openai.DefaultConfig(apiKey)
+	cfg.BaseURL = apiURL
+	openaiClient := openai.NewClientWithConfig(cfg)
+
+	stream, err := openaiClient.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+		Model: c.model,
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: chat,
+			},
+		},
+		Stream: true,
+	})
+
+	if err != nil {
+		klog.V(2).Infof("ChatCompletion error: %v\n", err)
+		return nil, err
+	}
+
+	return stream, nil
+
 }
 func (c *chatService) Chat(chat string) string {
 	apiKey, apiURL, enable := c.getChatGPTAuth()
