@@ -3,7 +3,7 @@
 
 [![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
 
-**k8m** 是一款集 AI 与 Kubernetes 于一体的轻量级控制台工具，专为简化集群管理设计。基于 AMIS 构建，并通过  [`kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了 Qwen2.5-Coder-7B 模型交互能力，同时支持接入您自己的私有化大模型。
+**k8m** 是一款AI驱动的 Mini Kubernetes AI Dashboard 轻量级控制台工具，专为简化集群管理设计。它基于 AMIS 构建，并通过  [`kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了 Qwen2.5-Coder-7B 模型交互能力，同时支持接入您自己的私有化大模型。
 
 ### 主要特点
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
@@ -12,10 +12,10 @@
 - **Pod 文件管理**：支持 Pod 内文件的浏览、编辑、上传、下载、删除，简化日常操作。
 - **Pod 运行管理**：支持实时查看 Pod 日志，下载日志，并在 Pod 内直接执行 Shell 命令。
 - **CRD 管理**：可自动发现并管理 CRD 资源，提高工作效率。
-- **智能翻译与问诊**：支持 YAML 属性自动翻译、异常事件诊断以及日志分析，为排查问题提供智能化支持。
+- **智能翻译与问诊**：基于ChatGPT实现YAML属性自动翻译、Describe信息解读、日志AI问诊、运行命令推荐等，为管理k8s提供智能化支持。
 - **跨平台支持**：兼容 Linux、macOS 和 Windows，并支持 x86、ARM 等多种架构，确保多平台无缝运行。
 
-**k8m** 的设计理念是“轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
+**k8m** 的设计理念是“AI驱动，轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
 
 ## **运行**
 1. **下载**：从 [GitHub](https://github.com/weibaohui/k8m) 下载最新版本。
