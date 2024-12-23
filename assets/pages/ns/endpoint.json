@@ -297,11 +297,20 @@
         },
         {
           "name": "subsets",
-          "label": "endpoints",
+          "label": "readyIP",
           "type": "each",
           "items": {
             "type": "tpl",
             "tpl": "${addresses|pick:ip}"
+          }
+        },
+        {
+          "name": "subsets",
+          "label": "notReadyIP",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<span class='text-red-500 font-black'>${notReadyAddresses|pick:ip}</span>"
           }
         },
         {
