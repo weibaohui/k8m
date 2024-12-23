@@ -300,7 +300,7 @@
           "name": "roleRef.name",
           "label": "roleRef",
           "type": "tpl",
-          "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500'>[${roleRef.kind}]</strong>${roleRef.name}</div>"
+          "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>[${roleRef.kind}]</strong>${roleRef.name}</div>"
         },
         {
           "name": "subjects",
@@ -308,7 +308,7 @@
           "type": "each",
           "items": {
             "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500'>[${kind}]</strong>${name}</div>"
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>[${kind}]</strong>${name}</div>"
           }
         },
         {
