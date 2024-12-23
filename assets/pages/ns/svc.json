@@ -425,7 +425,7 @@
           "name": "spec.type",
           "label": "type",
           "type": "tpl",
-          "tpl": "<% if (data.spec && data.spec.type === 'ClusterIP' && data.spec.clusterIP === 'None') { %>Headless<% } else { %><%= data.spec.type %><% } %>"
+          "tpl": "<% if (data.spec && data.spec.type === 'ClusterIP' && data.spec.clusterIP === 'None') { %><span class='label label-warning'>Headless</span><% } else { %><span class='label label-success'><%= data.spec.type %></span><% } %>"
         },
         {
           "name": "spec.clusterIP",
@@ -438,18 +438,50 @@
           "type": "each",
           "items": {
             "type": "tpl",
-            "tpl": "<div>${port}${nodePort?':<span class=\"text text-danger\">'+nodePort+'</span>':''}/${protocol}  <span class=\"text text-success\">=>${targetPort}</span></div>"
+            "tpl": "<div>${port}${nodePort?':<span class=\"text text-danger font-black\">'+nodePort+'</span>':''}/${protocol}  <span class=\"text text-success font-black\">=>${targetPort}</span></div>"
           }
         },
         {
           "name": "spec.ipFamilyPolicy",
           "label": "ipFamily",
-          "type": "text"
+          "type": "map",
+          "map": {
+            "SingleStack": "<span class='label label-success'>SingleStack</span>",
+            "PreferDualStack": "<span class='label label-primary'>PreferDualStack</span>",
+            "RequireDualStack": "<span class='label label-default'>RequireDualStack</span>"
+          }
+        },
+        {
+          "name": "spec.ipFamilies",
+          "label": "ipFamilies",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<strong class='text-green-500 font-black'>${item}</strong>"
+          }
         },
         {
           "name": "spec.sessionAffinity",
           "label": "session",
-          "type": "text"
+          "type": "mapping",
+          "map": {
+            "ClientIP": "<span class='label label-danger'>ClientIP</span>",
+            "None": "<span class='label label-success'>None</span>"
+          }
+        },
+        {
+          "name": "spec.selector",
+          "label": "selector",
+          "type": "k8sLabels"
+        },
+        {
+          "name": "spec.clusterIPs",
+          "label": "clusterIPs",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "${item}"
+          }
         },
         {
           "name": "metadata.labels",
