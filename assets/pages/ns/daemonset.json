@@ -566,7 +566,18 @@
         {
           "name": "metadata.labels",
           "label": "labels",
-          "type": "k8sLabels"
+          "type": "tpl",
+          "tpl": "<i class='fa fa-tags text-primary'></i>",
+          "popOver": {
+            "trigger": "hover",
+            "showIcon": false,
+            "title": "labels",
+            "body": {
+              "type": "json",
+              "source": "${metadata.labels}",
+              "levelExpand": 1
+            }
+          }
         },
         {
           "name": "spec.template.spec.containers",
