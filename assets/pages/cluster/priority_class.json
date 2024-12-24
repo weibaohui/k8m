@@ -279,6 +279,10 @@
               "type": "json",
               "source": "${metadata.labels}",
               "levelExpand": 1
+            },
+            "style": {
+              "maxWidth": "500px",
+              "width": "500px"
             }
           }
         },

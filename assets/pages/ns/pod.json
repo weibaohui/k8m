@@ -1138,8 +1138,17 @@
               "type": "json",
               "source": "${metadata.labels}",
               "levelExpand": 1
+            },
+            "style": {
+              "maxWidth": "500px",
+              "width": "500px"
             }
           }
+        },
+        {
+          "name": "status.conditions",
+          "label": "conditions",
+          "type": "k8sConditions"
         },
         {
           "name": "spec.containers",
@@ -1150,11 +1159,7 @@
             "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
           }
         },
-        {
-          "name": "metadata.creationTimestamp",
-          "label": "age",
-          "type": "k8sAge"
-        },
+
         {
           "name": "status.podIP",
           "label": "ip",
@@ -1166,10 +1171,11 @@
           "label": "node",
           "type": "text"
         },
+
         {
-          "name": "status.conditions",
-          "label": "conditions",
-          "type": "k8sConditions"
+          "name": "metadata.creationTimestamp",
+          "label": "age",
+          "type": "k8sAge"
         }
       ]
     }

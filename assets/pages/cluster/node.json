@@ -409,11 +409,6 @@
           "type": "nodeRoles"
         },
         {
-          "name": "metadata.creationTimestamp",
-          "label": "age",
-          "type": "k8sAge"
-        },
-        {
           "name": "status",
           "label": "资源信息",
           "type": "tpl",
@@ -436,6 +431,31 @@
             "type": "tpl",
             "tpl": "${key}${value?'='+value:''}:${effect}<br>"
           }
+        },
+        {
+          "name": "metadata.labels",
+          "label": "labels",
+          "type": "tpl",
+          "tpl": "<i class='fa fa-tags text-primary'></i>",
+          "popOver": {
+            "trigger": "hover",
+            "showIcon": false,
+            "title": "${metadata.name} labels",
+            "body": {
+              "type": "json",
+              "source": "${metadata.labels}",
+              "levelExpand": 1
+            },
+            "style": {
+              "maxWidth": "500px",
+              "width": "500px"
+            }
+          }
+        },
+        {
+          "name": "status.conditions",
+          "label": "conditions",
+          "type": "k8sConditions"
         },
         {
           "name": "status.nodeInfo.architecture",
@@ -471,16 +491,19 @@
             "tpl": "${type}:${address}<br>"
           }
         },
-        {
-          "name": "status.conditions",
-          "label": "conditions",
-          "type": "k8sConditions"
-        },
+
+
+
         {
           "name": "status.images",
           "label": "images",
           "type": "tpl",
           "tpl": "${count(status.images)}"
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "age",
+          "type": "k8sAge"
         }
       ]
     }
