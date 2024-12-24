@@ -594,132 +594,6 @@
                 },
                 {
                   "type": "button",
-                  "icon": "fas fa-calendar-alt text-primary",
-                  "label": "查看事件",
-                  "tooltip": "Event",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "size": "xl",
-                    "title": "Event   (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "crud",
-                        "id": "detailEvent",
-                        "name": "detailEvent",
-                        "headerToolbar": [
-                          "reload",
-                          {
-                            "type": "pagination",
-                            "align": "right"
-                          },
-                          {
-                            "type": "statistics",
-                            "align": "right"
-                          },
-                          {
-                            "type": "switch-per-page",
-                            "align": "right"
-                          }
-                        ],
-                        "loadDataOnce": true,
-                        "syncLocation": false,
-                        "perPage": 10,
-                        "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
-                        "columns": [
-                          {
-                            "type": "operation",
-                            "label": "action",
-                            "buttons": [
-                              {
-                                "type": "button",
-                                "icon": "fas fa-brain text-primary",
-                                "tooltip": "AI问诊",
-                                "actionType": "drawer",
-                                "drawer": {
-                                  "closeOnEsc": true,
-                                  "closeOnOutside": true,
-                                  "size": "lg",
-                                  "title": "AI 查询",
-                                  "body": [
-                                    {
-                                      "type": "service",
-                                      "api": "post:/k8s/chat/event",
-                                      "data": {
-                                        "note": "${note}",
-                                        "source": "${source}",
-                                        "reason": "${reason}",
-                                        "reportingController": "${reportingController}",
-                                        "type": "${type}",
-                                        "regardingKind": "${kind}"
-                                      },
-                                      "body": [
-                                        {
-                                          "type": "html",
-                                          "html": "${result|raw}",
-                                          "wrapperComponent": "",
-                                          "inline": false
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                },
-                                "visibleOn": "type === 'Warning'"
-                              }
-                            ],
-                            "toggled": true
-                          },
-                          {
-                            "name": "type",
-                            "label": "type",
-                            "filterable": {
-                              "options": [
-                                "Normal",
-                                "Warning"
-                              ]
-                            },
-                            "type": "mapping",
-                            "map": {
-                              "Normal": "<span class='label label-success'>Normal</span>",
-                              "Warning": "<span class='label label-danger'>Warning</span>"
-                            }
-                          },
-                          {
-                            "name": "reason",
-                            "label": "reason",
-                            "type": "text"
-                          },
-                          {
-                            "name": "field",
-                            "label": "fieldPath",
-                            "type": "tpl",
-                            "tpl": "${regarding.fieldPath}"
-                          },
-                          {
-                            "name": "source",
-                            "label": "source",
-                            "type": "tpl",
-                            "tpl": "${reportingController} ${reportingInstance}"
-                          },
-                          {
-                            "name": "note",
-                            "label": "note",
-                            "type": "text",
-                            "searchable": true
-                          },
-                          {
-                            "name": "metadata.creationTimestamp",
-                            "label": "age",
-                            "type": "k8sAge"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "button",
                   "icon": "fas fa-folder text-primary",
                   "label": "文件管理",
                   "actionType": "drawer",
@@ -1037,6 +911,132 @@
                                 "id": "detail"
                               }
                             ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-calendar-alt text-primary",
+                  "label": "查看事件",
+                  "tooltip": "Event",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "xl",
+                    "title": "Event   (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "crud",
+                        "id": "detailEvent",
+                        "name": "detailEvent",
+                        "headerToolbar": [
+                          "reload",
+                          {
+                            "type": "pagination",
+                            "align": "right"
+                          },
+                          {
+                            "type": "statistics",
+                            "align": "right"
+                          },
+                          {
+                            "type": "switch-per-page",
+                            "align": "right"
+                          }
+                        ],
+                        "loadDataOnce": true,
+                        "syncLocation": false,
+                        "perPage": 10,
+                        "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
+                        "columns": [
+                          {
+                            "type": "operation",
+                            "label": "action",
+                            "buttons": [
+                              {
+                                "type": "button",
+                                "icon": "fas fa-brain text-primary",
+                                "tooltip": "AI问诊",
+                                "actionType": "drawer",
+                                "drawer": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "AI 查询",
+                                  "body": [
+                                    {
+                                      "type": "service",
+                                      "api": "post:/k8s/chat/event",
+                                      "data": {
+                                        "note": "${note}",
+                                        "source": "${source}",
+                                        "reason": "${reason}",
+                                        "reportingController": "${reportingController}",
+                                        "type": "${type}",
+                                        "regardingKind": "${kind}"
+                                      },
+                                      "body": [
+                                        {
+                                          "type": "html",
+                                          "html": "${result|raw}",
+                                          "wrapperComponent": "",
+                                          "inline": false
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "visibleOn": "type === 'Warning'"
+                              }
+                            ],
+                            "toggled": true
+                          },
+                          {
+                            "name": "type",
+                            "label": "type",
+                            "filterable": {
+                              "options": [
+                                "Normal",
+                                "Warning"
+                              ]
+                            },
+                            "type": "mapping",
+                            "map": {
+                              "Normal": "<span class='label label-success'>Normal</span>",
+                              "Warning": "<span class='label label-danger'>Warning</span>"
+                            }
+                          },
+                          {
+                            "name": "reason",
+                            "label": "reason",
+                            "type": "text"
+                          },
+                          {
+                            "name": "field",
+                            "label": "fieldPath",
+                            "type": "tpl",
+                            "tpl": "${regarding.fieldPath}"
+                          },
+                          {
+                            "name": "source",
+                            "label": "source",
+                            "type": "tpl",
+                            "tpl": "${reportingController} ${reportingInstance}"
+                          },
+                          {
+                            "name": "note",
+                            "label": "note",
+                            "type": "text",
+                            "searchable": true
+                          },
+                          {
+                            "name": "metadata.creationTimestamp",
+                            "label": "age",
+                            "type": "k8sAge"
                           }
                         ]
                       }
