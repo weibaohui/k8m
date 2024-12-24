@@ -39,6 +39,10 @@
       "type": "crud",
       "id": "detailCRUD",
       "name": "detailCRUD",
+      "autoGenerateFilter": {
+        "columnsNum": 3,
+        "showBtnToolbar": false
+      },
       "headerToolbar": [
         "bulkActions",
         "reload",
