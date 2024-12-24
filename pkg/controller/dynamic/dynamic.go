@@ -3,6 +3,8 @@ package dynamic
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -123,8 +125,8 @@ func BatchRemove(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-type ApplyYAMLRequest struct {
-	YAML string `json:"yaml" binding:"required"`
+type yamlRequest struct {
+	Yaml string `json:"yaml" binding:"required"`
 }
 
 func Save(c *gin.Context) {
@@ -135,15 +137,15 @@ func Save(c *gin.Context) {
 	version := c.Param("version")
 	ctx := c.Request.Context()
 
-	var req ApplyYAMLRequest
+	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	yamlStr := req.YAML
+	yamlStr := req.Yaml
 
-	// 解析 YAML 到 Unstructured 对象
+	// 解析 Yaml 到 Unstructured 对象
 	var obj unstructured.Unstructured
 	if err := yaml.Unmarshal([]byte(yamlStr), &obj.Object); err != nil {
 		amis.WriteJsonError(c, err)
@@ -176,15 +178,36 @@ func Describe(c *gin.Context) {
 	amis.WriteJsonData(c, string(result))
 }
 
+func UploadFile(c *gin.Context) {
+
+	ctx := c.Request.Context()
+	// 获取上传的文件
+	file, err := c.FormFile("file")
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("error retrieving file: %v", err))
+		return
+	}
+	src, err := file.Open()
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("error openning file: %v", err))
+		return
+	}
+	defer src.Close()
+	yamlBytes, err := io.ReadAll(src)
+	yamlStr := string(yamlBytes)
+	result := kom.DefaultCluster().WithContext(ctx).Applier().Apply(yamlStr)
+	amis.WriteJsonOKMsg(c, strings.Join(result, "\n"))
+}
+
 func Apply(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	var req ApplyYAMLRequest
+	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		amis.WriteJsonError(c, err)
+		amis.WriteJsonError(c, fmt.Errorf("提取yaml错误。\n %v", err))
 		return
 	}
-	yamlStr := req.YAML
+	yamlStr := req.Yaml
 	result := kom.DefaultCluster().WithContext(ctx).Applier().Apply(yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
@@ -194,12 +217,12 @@ func Apply(c *gin.Context) {
 func Delete(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	var req ApplyYAMLRequest
+	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	yamlStr := req.YAML
+	yamlStr := req.Yaml
 	result := kom.DefaultCluster().WithContext(ctx).Applier().Delete(yamlStr)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
