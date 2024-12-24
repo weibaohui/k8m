@@ -249,7 +249,13 @@
         {
           "name": "spec.names.kind",
           "label": "kind",
-          "type": "text"
+          "type": "text",
+          "searchable": {
+            "type": "input-text",
+            "name": "spec.names.kind",
+            "label": "类型",
+            "placeholder": "输入Kind类型名称"
+          }
         },
 
         {
@@ -260,7 +266,13 @@
         {
           "name": "spec.group",
           "label": "group",
-          "type": "text"
+          "type": "text",
+          "searchable": {
+            "type": "input-text",
+            "name": "spec.group",
+            "label": "分组",
+            "placeholder": "输入分组名称"
+          }
         },
         {
           "name": "spec.versions",
