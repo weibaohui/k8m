@@ -55,7 +55,7 @@ export OPENAI_API_KEY="sk-XXXXX"
 export OPENAI_API_URL="https://api.siliconflow.cn/v1"
 ```
 ### **ChatGPT 状态调试**
-如果设置参数后，依然没有效果，请尝试使用`./k8m -d 6`获取更多的调试信息。
+如果设置参数后，依然没有效果，请尝试使用`./k8m -v 6`获取更多的调试信息。
 会输出以下信息，通过查看日志，确认是否启用ChatGPT。
 ```go
 ChatGPT 开启状态:true
