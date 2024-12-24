@@ -1030,7 +1030,10 @@
                       },
                       {
                         "type": "highlightHtml",
-                        "keywords": ["Error", "Warning"],
+                        "keywords": [
+                          "Error",
+                          "Warning"
+                        ],
                         "html": "<pre>${result}</pre>"
                       }
                     ]
@@ -1051,7 +1054,12 @@
           "label": "name",
           "type": "text",
           "copyable": true,
-          "searchable": true
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.name",
+            "label": "名称",
+            "placeholder": "输入名称"
+          }
         },
         {
           "name": "ready",

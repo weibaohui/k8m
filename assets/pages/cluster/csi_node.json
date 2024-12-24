@@ -242,7 +242,14 @@
         {
           "name": "metadata.name",
           "label": "name",
-          "type": "text"
+          "type": "text",
+          "copyable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.name",
+            "label": "名称",
+            "placeholder": "输入名称"
+          }
         },
         {
           "name": "spec.drivers",

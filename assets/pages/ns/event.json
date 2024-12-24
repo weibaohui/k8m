@@ -68,7 +68,6 @@
       },
       "loadDataOnce": true,
       "syncLocation": false,
-      "autoGenerateFilter": true,
       "perPage": 10,
       "bulkActions": [
         {
@@ -395,7 +394,14 @@
         {
           "name": "metadata.name",
           "label": "name",
-          "type": "text"
+          "type": "text",
+          "copyable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.name",
+            "label": "名称",
+            "placeholder": "输入名称"
+          }
         },
         {
           "name": "metadata.namespace",
