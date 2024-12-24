@@ -42,6 +42,7 @@
       "type": "crud",
       "id": "detailCRUD",
       "name": "detailCRUD",
+      "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 3,
         "showBtnToolbar": false
