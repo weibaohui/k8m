@@ -420,21 +420,34 @@
         const conditions = props.data.status?.conditions || [];
 
         const conditionElements = conditions.map((condition, index) => {
-            const tagClass = condition.status === 'True' || (condition.status === 'False' &&( condition.type.includes('Pressure')||condition.type.includes("Unavailable")))
-                ? 'label label-success'  // 正常情况
-                : 'label label-danger';   // 问题情况
+            // 判断状态类型
+            const isNormal =
+                condition.status === 'True' ||
+                (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable")));
 
-            return React.createElement('div', {key: index, style: {marginTop: '5px'}},
-                React.createElement('span', {
-                    key: index,
-                    className: tagClass,
-                }, condition.type)
-            );
+            // 定义圆点的颜色
+            const dotColor = isNormal ? 'green' : 'red';
+
+            // 返回圆点
+            return React.createElement('span', {
+                key: index,
+                style: {
+                    display: 'inline-block',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: dotColor,
+                    marginRight: '1px',
+                    cursor: 'pointer'
+                },
+                'data-tooltip': `${condition.type}: ${condition.status}` // 鼠标悬停提示
+            });
         });
 
-        return React.createElement('div', null, conditionElements);
+        return React.createElement('div', {
+            style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } // 圆点排列在一行中
+        }, conditionElements);
     }
-
 
 // 注册自定义组件
     amisLib.Renderer({
