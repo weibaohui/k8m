@@ -477,7 +477,7 @@
           "type": "each",
           "items": {
             "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
           }
         },
         {
