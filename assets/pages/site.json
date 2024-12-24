@@ -36,7 +36,6 @@
           },
           {
             "label": "Workload",
-            "url": "/workload",
             "icon": "fa fa-cube",
             "children": [
               {
@@ -91,7 +90,6 @@
           },
           {
             "label": "Config",
-            "url": "/config",
             "icon": "fas fa-sliders-h",
             "children": [
               {
@@ -164,7 +162,6 @@
           },
           {
             "label": "Network",
-            "url": "/network",
             "icon": "fas fa-network-wired",
             "children": [
               {
@@ -207,7 +204,6 @@
           },
           {
             "label": "Storage",
-            "url": "/storage",
             "icon": "fas fa-memory",
             "children": [
               {
@@ -238,7 +234,6 @@
           },
           {
             "label": "AccessControl",
-            "url": "/access_control",
             "icon": "fas fa-diagnoses",
             "children": [
               {
@@ -275,7 +270,6 @@
           },
           {
             "label": "CRD",
-            "url": "/crd",
             "icon": "fas fa-tape",
             "children": [
               {
@@ -308,7 +302,6 @@
           },
           {
             "label": "Status",
-            "url": "/status",
             "icon": "fas fa-info-circle",
             "children": [
               {
