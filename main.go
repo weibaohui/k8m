@@ -110,6 +110,7 @@ func main() {
 	{
 		// dynamic
 		api.POST("/yaml/apply", dynamic.Apply)
+		api.POST("/yaml/upload", dynamic.UploadFile)
 		api.POST("/yaml/delete", dynamic.Delete)
 		// CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)              // CRD
