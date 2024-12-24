@@ -1,6 +1,28 @@
 {
   "type": "page",
   "body": [
+      {
+        "type": "flex",
+        "justify": "flex-start",
+        "items": [
+          {
+            "type": "button",
+            "label": "回退",
+            "level": "link",
+            "className": "ml-2",
+            "onEvent": {
+              "click": {
+                "actions": [
+                  {
+                    "actionType": "goBack"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+
     {
       "type": "crud",
       "id": "detailCRUD",
