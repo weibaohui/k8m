@@ -1159,7 +1159,6 @@
             "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong>: ${image|simpleImageName}</div>"
           }
         },
-
         {
           "name": "status.podIP",
           "label": "ip",
@@ -1171,7 +1170,6 @@
           "label": "node",
           "type": "text"
         },
-
         {
           "name": "metadata.creationTimestamp",
           "label": "age",
