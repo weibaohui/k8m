@@ -38,6 +38,10 @@
       "type": "crud",
       "id": "detailCRUD",
       "name": "detailCRUD",
+      "autoGenerateFilter": {
+        "columnsNum": 3,
+        "showBtnToolbar": false
+      },
       "headerToolbar": [
         "bulkActions",
         "reload",
@@ -1046,7 +1050,8 @@
           "name": "metadata.name",
           "label": "name",
           "type": "text",
-          "copyable": true
+          "copyable": true,
+          "searchable": true
         },
         {
           "name": "ready",
@@ -1063,6 +1068,34 @@
             "Succeeded": "<span class='label label-success'>Succeeded</span>",
             "Failed": "<span class='label label-danger'>Failed</span>",
             "Unknown": "<span class='label label-default'>Unknown</span>"
+          },
+          "searchable": {
+            "type": "select",
+            "name": "status.phase",
+            "label": "状态",
+            "placeholder": "选择状态",
+            "options": [
+              {
+                "label": "Running",
+                "value": "Running"
+              },
+              {
+                "label": "Pending",
+                "value": "Pending"
+              },
+              {
+                "label": "Succeeded",
+                "value": "Succeeded"
+              },
+              {
+                "label": "Failed",
+                "value": "Failed"
+              },
+              {
+                "label": "Unknown",
+                "value": "Unknown"
+              }
+            ]
           }
         },
         {
@@ -1093,7 +1126,8 @@
         {
           "name": "status.podIP",
           "label": "ip",
-          "type": "text"
+          "type": "text",
+          "searchable": true
         },
         {
           "name": "spec.nodeName",
