@@ -335,7 +335,7 @@
           "popOver": {
             "trigger": "hover",
             "showIcon": false,
-            "title": "labels",
+            "title": "${metadata.name} labels",
             "body": {
               "type": "json",
               "source": "${metadata.labels}",
