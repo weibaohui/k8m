@@ -496,7 +496,7 @@
         },
         {
           "name": "subsets",
-          "label": "readyIP",
+          "label": "就绪IP",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -505,7 +505,7 @@
         },
         {
           "name": "subsets",
-          "label": "notReadyIP",
+          "label": "未就绪IP",
           "type": "each",
           "items": {
             "type": "tpl",
