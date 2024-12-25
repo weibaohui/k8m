@@ -31,7 +31,12 @@
             "body": [
               {
                 "type": "markdown",
-                "value": "${result}"
+                "value": "${result}",
+                "options": {
+                  "linkify": true,
+                  "html": true,
+                  "breaks": true
+                }
               }
             ]
           }
