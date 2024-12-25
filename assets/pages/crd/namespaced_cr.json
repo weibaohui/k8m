@@ -517,12 +517,12 @@
         },
         {
           "name": "kind",
-          "label": "kind",
+          "label": "资源类型(kind)",
           "type": "text"
         },
         {
           "name": "apiVersion",
-          "label": "apiVersion",
+          "label": "API版本",
           "type": "text"
         },
         {
