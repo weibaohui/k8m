@@ -131,10 +131,13 @@
                               },
                               "body": [
                                 {
-                                  "type": "html",
-                                  "html": "${result|raw}",
-                                  "wrapperComponent": "",
-                                  "inline": false
+                                  "type": "markdown",
+                                  "value": "${result}",
+                                  "options": {
+                                    "linkify": true,
+                                    "html": true,
+                                    "breaks": true
+                                  }
                                 }
                               ]
                             }
@@ -471,10 +474,13 @@
                               },
                               "body": [
                                 {
-                                  "type": "html",
-                                  "html": "${result|raw}",
-                                  "wrapperComponent": "",
-                                  "inline": false
+                                  "type": "markdown",
+                                  "value": "${result}",
+                                  "options": {
+                                    "linkify": true,
+                                    "html": true,
+                                    "breaks": true
+                                  }
                                 }
                               ]
                             }
