@@ -436,7 +436,7 @@
         },
         {
           "name": "metadata.annotations",
-          "label": "default",
+          "label": "是否默认",
           "tpl": "${metadata.annotations['ingressclass.kubernetes.io/is-default-class']}"
         },
         {
