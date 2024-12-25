@@ -109,7 +109,7 @@ func Resource(c *gin.Context) {
 
 	prompt := fmt.Sprintf(
 		`当前我的客户正在访问的k8s资源信息为Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 运维专家、markdown文档专家，给客户一份关于这个k8s资源的使用指南。
+		\n请你作为kubernetes k8s 运维专家，给客户一份关于这个k8s资源的使用指南。
 		要求包括资源说明、用途、最佳实践、常见问题等你认为对客户有帮助的信息。
 		\n注意：
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
