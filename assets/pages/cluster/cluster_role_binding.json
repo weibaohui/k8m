@@ -453,7 +453,7 @@
         },
         {
           "name": "metadata.labels",
-          "label": "labels",
+          "label": "标签",
           "type": "tpl",
           "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : ''}",
           "popOver": {
