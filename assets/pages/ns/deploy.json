@@ -840,7 +840,7 @@
           "name": "ready",
           "label": "就绪",
           "type": "tpl",
-          "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
+          "tpl": "${status.readyReplicas||'0'}/${spec.replicas}"
         },
         {
           "name": "metadata.labels",
