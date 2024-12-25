@@ -23,7 +23,7 @@ func OptionList(c *gin.Context) {
 		})
 	}
 	list = append(list, map[string]string{
-		"label": "All",
+		"label": "全部",
 		"value": "*",
 	})
 	amis.WriteJsonData(c, gin.H{
