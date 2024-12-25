@@ -1,5 +1,49 @@
 {
   "type": "page",
+  "data": {
+    "ns": "${ls:selectedNs||'default'}",
+    "kind": "Ingress",
+    "group": "networking.k8s.io",
+    "version": "v1"
+  },
+  "toolbar": [
+    {
+      "type": "button",
+      "label": "指南",
+      "icon": "fas fa-compass text-primary",
+      "className": "floating-left-1",
+      "actionType": "drawer",
+      "drawer": {
+        "overlay": false,
+        "closeOnEsc": true,
+        "closeOnOutside": true,
+        "size": "lg",
+        "title": "${kind}指南（ESC 关闭）",
+        "body": [
+          {
+            "type": "service",
+            "api": "post:/k8s/chat/resource",
+            "data": {
+              "kind": "${kind}",
+              "group": "${group}",
+              "version": "${version}"
+            },
+            "body": [
+              {
+                "type": "markdown",
+                "value": "${result}",
+                "options": {
+                  "linkify": true,
+                  "html": true,
+                  "breaks": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
   "body": [
     {
       "type": "form",
@@ -63,12 +107,6 @@
           "align": "right"
         }
       ],
-      "data": {
-        "ns": "${ls:selectedNs||'default'}",
-        "kind": "Ingress",
-        "group": "networking.k8s.io",
-        "version": "v1"
-      },
       "loadDataOnce": true,
       "syncLocation": false,
       "initFetch": true,
