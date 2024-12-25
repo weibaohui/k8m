@@ -488,10 +488,13 @@
                                       "type": "service",
                                       "body": [
                                         {
-                                          "type": "html",
-                                          "html": "${result|raw}",
-                                          "wrapperComponent": "",
-                                          "inline": false
+                                          "type": "markdown",
+                                          "value": "${result|raw}",
+                                          "options": {
+                                            "linkify": true,
+                                            "html": true,
+                                            "breaks": true
+                                          }
                                         }
                                       ],
                                       "id": "aiResult"
@@ -1021,10 +1024,13 @@
                                       },
                                       "body": [
                                         {
-                                          "type": "html",
-                                          "html": "${result|raw}",
-                                          "wrapperComponent": "",
-                                          "inline": false
+                                          "type": "markdown",
+                                          "value": "${result|raw}",
+                                          "options": {
+                                            "linkify": true,
+                                            "html": true,
+                                            "breaks": true
+                                          }
                                         }
                                       ]
                                     }
