@@ -71,10 +71,19 @@ func Describe(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 	}
 
-	prompt := fmt.Sprintf("请你作为kubernetes k8s 运维专家，对下面 %s %s 资源的Describe 信息 分析。请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案。\n\nDescribe信息如下：%s", data.Group, data.Kind, data.Describe)
+	prompt := fmt.Sprintf(
+		`请你作为kubernetes k8s 运维专家，
+		对下面 %s %s 资源的Describe 信息分析。
+		请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案。
+		\n注意：
+		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
+		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确
+		\n4、我会将你的回答直接返回给客户，所以不要将你我之间的沟通信息暴露给客户
+		\n\nDescribe信息如下：%s`,
+		data.Group, data.Kind, data.Describe)
 
 	result := chatService.Chat(prompt)
-	result = markdownToHTML(result)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
@@ -103,8 +112,8 @@ func Resource(c *gin.Context) {
 		\n请你作为kubernetes k8s 运维专家、markdown文档专家，给客户一份关于这个k8s资源的使用指南。
 		要求包括资源说明、用途、最佳实践、常见问题等你认为对客户有帮助的信息。
 		\n注意：
-		\n1、请务必使用markdown格式回答
-		\n2、请你在给出答案前检查markdown格式，如有格式错误请先修正，再返回
+		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
+		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确
 		\n4、我会将你的回答直接返回给客户，所以不要将你我之间的沟通信息暴露给客户`,
 		data.Group, data.Kind, data.Version)
