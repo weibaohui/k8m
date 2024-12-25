@@ -431,7 +431,7 @@
         },
         {
           "name": "spec.names.kind",
-          "label": "kind",
+          "label": "资源类型(kind)",
           "type": "text",
           "searchable": {
             "type": "input-text",
@@ -443,12 +443,12 @@
 
         {
           "name": "spec.scope",
-          "label": "scope",
+          "label": "作用域",
           "type": "text"
         },
         {
           "name": "spec.group",
-          "label": "group",
+          "label": "组(group)",
           "type": "text",
           "searchable": {
             "type": "input-text",
@@ -459,7 +459,7 @@
         },
         {
           "name": "spec.versions",
-          "label": "version",
+          "label": "版本",
           "type": "each",
           "items": {
             "type": "tpl",
