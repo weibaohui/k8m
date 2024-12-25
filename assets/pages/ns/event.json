@@ -575,7 +575,7 @@
 
          {
           "name": "metadata.namespace",
-          "label": "namespace",
+           "label": "命名空间",
           "type": "text"
         },
         {
@@ -589,11 +589,6 @@
             "label": "名称",
             "placeholder": "输入名称"
           }
-        },
-        {
-          "name": "metadata.namespace",
-          "label": "namespace",
-          "type": "text"
         },
         {
           "name": "metadata.creationTimestamp",

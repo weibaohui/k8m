@@ -612,7 +612,7 @@
         },
         {
           "name": "metadata.namespace",
-          "label": "namespace",
+          "label": "命名空间",
           "type": "text"
         },
         {
@@ -629,7 +629,7 @@
         },
         {
           "name": "ready",
-          "label": "ready",
+          "label": "就绪",
           "type": "tpl",
           "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
         },

@@ -620,7 +620,7 @@
         },
          {
           "name": "metadata.namespace",
-          "label": "namespace",
+           "label": "命名空间",
           "type": "text"
         },
         {

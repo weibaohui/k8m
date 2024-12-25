@@ -1057,7 +1057,7 @@
         },
         {
           "name": "metadata.namespace",
-          "label": "namespace",
+          "label": "命名空间",
           "type": "text"
         },
         {
@@ -1074,7 +1074,7 @@
         },
         {
           "name": "ready",
-          "label": "ready",
+          "label": "就绪",
           "type": "k8sPodReady"
         },
         {
