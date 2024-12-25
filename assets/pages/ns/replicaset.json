@@ -655,7 +655,7 @@
         },
         {
           "name": "spec.template.spec.containers",
-          "label": "containers",
+          "label": "容器",
           "type": "each",
           "items": {
             "type": "tpl",
