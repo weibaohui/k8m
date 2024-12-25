@@ -541,7 +541,7 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-pause",
+              "icon": "fas fa-pause text-primary",
               "actionType": "ajax",
               "label": "暂停",
               "confirmText": "您确认暂停?",
@@ -680,6 +680,12 @@
           "name": "status.lastScheduleTime",
           "label": "最后调度",
           "type": "k8sAge"
+        },
+        {
+          "name": "status.active",
+          "label": "运行中",
+          "type": "tpl",
+          "tpl": "${count(status.active)}"
         },
         {
           "name": "spec.suspend",
