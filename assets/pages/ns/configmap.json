@@ -9,7 +9,7 @@
   "toolbar": [
     {
       "type": "button",
-      "label": "AI解读${kind}",
+      "label": "指引",
       "icon": "fas fa-rocket text-primary",
       "className": "floating-left-1",
       "actionType": "drawer",
