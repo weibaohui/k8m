@@ -651,30 +651,30 @@
         },
         {
           "name": "request",
-          "label": "request",
+          "label": "申请容量",
           "type": "tpl",
           "tpl": "${spec.resources.requests.storage}"
         },
         {
           "name": "capacity",
-          "label": "capacity",
+          "label": "存储容积",
           "type": "tpl",
           "tpl": "${status.capacity.storage}"
         },
         {
           "name": "spec.accessModes",
-          "label": "mode",
+          "label": "访问模式",
           "type": "tpl",
           "tpl": "${spec.accessModes| map  }"
         },
         {
           "name": "spec.storageClassName",
-          "label": "StorageClass",
+          "label": "存储类名称",
           "type": "text"
         },
         {
           "name": "spec.volumeMode",
-          "label": "volumeMode",
+          "label": "卷模式",
           "type": "text"
         },
 
