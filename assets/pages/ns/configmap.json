@@ -11,26 +11,25 @@
       "type": "button",
       "label": "AI解读${kind}",
       "icon": "fas fa-rocket text-primary",
-      "className": "floating-icon",
+      "className": "floating-left-1",
       "actionType": "drawer",
       "drawer": {
         "closeOnEsc": true,
         "closeOnOutside": true,
         "size": "lg",
-        "title": "AI释义: ${kind}",
         "body": [
           {
             "type": "service",
-            "api": "post:/k8s/chat/cron",
+            "api": "post:/k8s/chat/resource",
             "data": {
-              "cron": "${kind}"
+              "kind": "${kind}",
+              "group": "${group}",
+              "version": "${version}"
             },
             "body": [
               {
-                "type": "html",
-                "html": "${result|raw}",
-                "wrapperComponent": "",
-                "inline": false
+                "type": "markdown",
+                "value": "${result}"
               }
             ]
           }
