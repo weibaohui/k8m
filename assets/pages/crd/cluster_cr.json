@@ -88,7 +88,7 @@
       "columns": [
         {
           "type": "operation",
-          "label": "action",
+          "label": "操作",
           "width": 120,
           "buttons": [
             {
