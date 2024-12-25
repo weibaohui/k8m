@@ -66,7 +66,7 @@
       "data": {
         "ns": "${ls:selectedNs||'default'}",
         "kind": "LimitRange",
-        "apiVersion": "v1",
+        "version": "v1",
         "group": ""
       },
       "loadDataOnce": true,
@@ -112,7 +112,7 @@
               "type": "button",
               "icon": "fas fa-eye text-primary",
               "actionType": "drawer",
-              "tooltip": "Describe",
+              "tooltip": "资源描述",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
@@ -417,7 +417,7 @@
               "type": "button",
               "icon": "fas fa-eye text-primary",
               "actionType": "drawer",
-              "label": "Describe",
+              "label": "资源描述",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
