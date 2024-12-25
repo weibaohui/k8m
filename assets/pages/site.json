@@ -11,7 +11,7 @@
       {
         "children": [
           {
-            "label": "Apply",
+            "label": "创建",
             "url": "/apply",
             "icon": "fas fa-dharmachakra text-primary",
             "schemaApi": "get:/pages/apply/apply.json"
