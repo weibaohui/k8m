@@ -493,18 +493,18 @@
         },
         {
           "name": "addressType",
-          "label": "addressType",
+          "label": "类型",
           "type": "text"
         },
         {
           "name": "endpoints",
-          "label": "endpoints",
+          "label": "端点",
           "type": "tpl",
           "tpl": "${endpoints|pick:addresses }"
         },
         {
           "name": "ports",
-          "label": "ports",
+          "label": "端口",
           "type": "each",
           "items": {
             "type": "tpl",
