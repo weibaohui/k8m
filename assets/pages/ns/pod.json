@@ -19,6 +19,7 @@
         {
           "type": "button",
           "label": "指南",
+          "level": "link",
           "icon": "fas fa-compass text-primary",
           "actionType": "drawer",
           "drawer": {
