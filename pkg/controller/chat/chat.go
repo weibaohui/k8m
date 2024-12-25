@@ -99,12 +99,14 @@ func Resource(c *gin.Context) {
 	}
 
 	prompt := fmt.Sprintf(
-		`k8s资源信息为Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 运维专家，给用户做出使用讲解。
-		包括资源说明、用途、最佳实践、常见问题等你认为对用户有帮助的信息。
+		`当前我的客户正在访问的k8s资源信息为Kind=%s,Gropu=%s,version=%s。
+		\n请你作为kubernetes k8s 运维专家、markdown文档专家，给客户一份关于这个k8s资源的使用指南。
+		要求包括资源说明、用途、最佳实践、常见问题等你认为对客户有帮助的信息。
 		\n注意：
 		\n1、请务必使用markdown格式回答
-		\n2、返回前请检查markdown格式，如有格式错误请先修正，再返回`,
+		\n2、请你在给出答案前检查markdown格式，如有格式错误请先修正，再返回
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确
+		\n4、我会将你的回答直接返回给客户，所以不要将你我之间的沟通信息暴露给客户`,
 		data.Group, data.Kind, data.Version)
 
 	result := chatService.Chat(prompt)
