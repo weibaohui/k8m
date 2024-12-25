@@ -436,7 +436,7 @@
         },
         {
           "name": "spec.drivers",
-          "label": "drivers",
+          "label": "驱动",
           "type": "tpl",
           "tpl": "${spec.drivers|count}"
         },
