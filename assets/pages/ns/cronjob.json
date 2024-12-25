@@ -678,12 +678,12 @@
         },
         {
           "name": "status.lastScheduleTime",
-          "label": "last",
+          "label": "最后调度",
           "type": "k8sAge"
         },
         {
           "name": "spec.suspend",
-          "label": "suspend",
+          "label": "暂停",
           "type": "mapping",
           "map": {
             "false": "<span class='label label-success'>normal</span>",
@@ -692,7 +692,7 @@
         },
         {
           "name": "spec.concurrencyPolicy",
-          "label": "concurrency",
+          "label": "并发策略",
           "type": "mapping",
           "map": {
             "Allow": "<span class='label label-success'>Allow</span>",
