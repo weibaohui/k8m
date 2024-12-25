@@ -12,7 +12,7 @@
             "width": 500,
             "margin": 5
           },
-          "label": "Namespace",
+          "label": "命名空间",
           "type": "select",
           "name": "ns",
           "id": "ns",
