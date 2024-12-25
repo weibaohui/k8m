@@ -1,10 +1,5 @@
 {
   "type": "page",
-  "data": {
-    "kind": "${kind}",
-    "group": "${group}",
-    "version": "${version}"
-  },
   "body": [
     {
       "type": "container",
@@ -130,6 +125,11 @@
           "align": "right"
         }
       ],
+      "data": {
+        "kind": "${kind}",
+        "group": "${group}",
+        "version": "${version}"
+      },
       "api": "get:/k8s/$kind/group/$group/version/$version/list",
       "columns": [
         {
