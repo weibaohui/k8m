@@ -637,7 +637,7 @@
         },
         {
           "name": "spec.schedule",
-          "label": "schedule",
+          "label": "调度计划",
           "type": "control",
           "body": [
             {
