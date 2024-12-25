@@ -436,17 +436,17 @@
         },
         {
           "name": "spec.priorityLevelConfiguration.name",
-          "label": "priorityLevel",
+          "label": "优先级",
           "type": "text"
         },
         {
           "name": "spec.matchingPrecedence",
-          "label": "Precedence",
+          "label": "匹配优先级",
           "type": "text"
         },
         {
           "name": "spec.distinguisherMethod.type",
-          "label": "distinguisherMethod",
+          "label": "区分方法",
           "type": "text"
         },
         {
