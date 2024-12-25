@@ -169,196 +169,119 @@
             },
             {
               "type": "button",
-              "icon": "fa fa-list",
-              "tooltip": "日志",
-              "actionType": "dialog",
-              "dialog": {
+              "icon": "fas fa-file-code text-success",
+              "tooltip": "Yaml编辑",
+              "actionType": "drawer",
+              "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "title": "选择容器 (ESC 关闭)",
+                "size": "lg",
+                "title": "SmartEdit",
                 "body": [
                   {
-                    "type": "select",
-                    "name": "containerName",
-                    "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                    "value": "${spec.containers[0].name}",
-                    "required": true
-                  },
-                  {
-                    "type": "input-number",
-                    "name": "tailLines",
-                    "label": "读取最近行数",
-                    "value": 100,
-                    "description": "设置为0将读取全部日志",
-                    "min": 0
-                  },
-                  {
-                    "type": "input-number",
-                    "name": "sinceSeconds",
-                    "label": "过去几秒开始读取",
-                    "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
-                    "min": 0
-                  },
-                  {
-                    "type": "input-datetime",
-                    "name": "sinceTime",
-                    "label": "开始时间",
-                    "format": "YYYY-MM-DD HH:mm:ss",
-                    "description": "与上面的秒数互斥。该时间为服务器时间，注意时区时差",
-                    "placeholder": "选择开始时间",
-                    "value": "${_|now|dateModify:subtract:10:minutes|dateModify:subtract:8:hours}"
-                  },
-                  {
-                    "type": "switch",
-                    "name": "timestamps",
-                    "label": "显示时间戳",
-                    "description": "选择时间无日志时，请开启本选项确认时间范围",
-                    "value": false,
-                    "onText": "是",
-                    "offText": "否"
-                  },
-                  {
-                    "type": "switch",
-                    "name": "follow",
-                    "label": "实时跟踪",
-                    "value": true,
-                    "onText": "开启",
-                    "offText": "关闭"
-                  },
-                  {
-                    "type": "switch",
-                    "name": "previous",
-                    "label": "读取上一个实例日志",
-                    "value": false,
-                    "onText": "是",
-                    "offText": "否"
-                  },
-                  {
-                    "type": "button",
-                    "label": "查看日志",
-                    "level": "primary",
-                    "actionType": "drawer",
-                    "drawer": {
-                      "closeOnOutside": true,
-                      "closeOnEsc": true,
-                      "size": "xl",
-                      "title": "日志管理 (ESC 关闭)",
-                      "body": [
-                        {
-                          "type": "flex",
-                          "justify": "space-between",
-                          "items": [
-                            {
-                              "type": "container",
-                              "body": [
-                                {
-                                  "type": "log-download",
-                                  "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                  "data": {
-                                    "containerName": "${containerName}",
-                                    "tailLines": "${tailLines}",
-                                    "sinceTime": "${sinceTime}",
-                                    "previous": "${previous}",
-                                    "timestamps": "${timestamps}",
-                                    "sinceSeconds": "${sinceSeconds}"
-                                  }
-                                },
-                                {
-                                  "type": "sse",
-                                  "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                  "data": {
-                                    "containerName": "${containerName}",
-                                    "tailLines": "${tailLines}",
-                                    "sinceTime": "${sinceTime}",
-                                    "follow": "${follow}",
-                                    "previous": "${previous}",
-                                    "timestamps": "${timestamps}",
-                                    "sinceSeconds": "${sinceSeconds}"
-                                  }
-                                }
-                              ],
-                              "style": {
-                                "flexGrow": 1,
-                                "backgroundColor": "#f5f5f5",
-                                "padding": "10px",
-                                "border": "1px solid #ddd"
-                              }
-                            },
-                            {
-                              "type": "container",
-                              "body": [
-                                {
-                                  "type": "form",
-                                  "title": "AI问诊",
-                                  "wrapWithPanel": false,
-                                  "api": {
-                                    "url": "/k8s/chat/log",
-                                    "method": "post",
-                                    "data": {
-                                      "data": "${ls:selectedLogLines}"
-                                    },
-                                    "headers": {
-                                      "Content-Type": "application/json"
-                                    }
-                                  },
-                                  "body": [
-                                    {
-                                      "type": "button",
-                                      "label": "AI问诊",
-                                      "actionType": "submit"
-                                    }
-                                  ],
-                                  "onEvent": {
-                                    "submitSucc": {
-                                      "actions": [
-                                        {
-                                          "actionType": "reload",
-                                          "componentId": "aiResult",
-                                          "data": {
-                                            "result": "${event.data.result.data.result}"
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                },
-                                {
-                                  "type": "service",
-                                  "body": [
-                                    {
-                                      "type": "html",
-                                      "html": "${result|raw}",
-                                      "wrapperComponent": "",
-                                      "inline": false
-                                    }
-                                  ],
-                                  "id": "aiResult"
-                                }
-                              ],
-                              "style": {
-                                "width": "400px",
-                                "backgroundColor": "#e3e3e3",
-                                "padding": "10px",
-                                "border": "1px solid #ddd"
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    "onEvent": {
-                      "click": {
-                        "actions": [
+                    "type": "tabs",
+                    "tabsMode": "tiled",
+                    "tabs": [
+                      {
+                        "title": "View",
+                        "body": [
                           {
-                            "actionType": "custom",
-                            "script": "localStorage.removeItem('selectedLogLines');"
+                            "type": "service",
+                            "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                            "body": [
+                              {
+                                "type": "form",
+                                "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                "wrapWithPanel": false,
+                                "body": [
+                                  {
+                                    "type": "editor",
+                                    "name": "yaml",
+                                    "size": "xxl",
+                                    "allowFullscreen": true,
+                                    "placeholder": "loading",
+                                    "language": "yaml",
+                                    "value": "${yaml}",
+                                    "options": {
+                                      "wordWrap": "on",
+                                      "scrollbar": {
+                                        "vertical": "auto"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "title": "Doc",
+                        "body": [
+                          {
+                            "type": "page",
+                            "asideResizor": true,
+                            "asideSticky": false,
+                            "asideMinWidth": 300,
+                            "asideMaxWidth": 600,
+                            "aside": [
+                              {
+                                "type": "input-tree",
+                                "name": "tree",
+                                "initiallyOpen": false,
+                                "unfoldedLevel": 1,
+                                "searchable": true,
+                                "showOutline": true,
+                                "showIcon": true,
+                                "searchConfig": {
+                                  "sticky": true
+                                },
+                                "selectFirst": true,
+                                "heightAuto": true,
+                                "inputClassName": "no-border no-padder mt-1",
+                                "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                "onEvent": {
+                                  "change": {
+                                    "actions": [
+                                      {
+                                        "componentId": "detail",
+                                        "actionType": "reload",
+                                        "data": {
+                                          "description": "${event.data.item.description}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ],
+                            "toolbar": [
+                              {
+                                "type": "tpl",
+                                "tpl": ""
+                              }
+                            ],
+                            "body": [
+                              {
+                                "type": "service",
+                                "api": "post:/k8s/doc/detail",
+                                "body": [
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "${description}</br></br></br>${translate?translate:''}",
+                                    "wrapperComponent": "",
+                                    "inline": false
+                                  }
+                                ],
+                                "id": "detail"
+                              }
+                            ]
                           }
                         ]
                       }
-                    }
+                    ]
                   }
-                ],
-                "actions": []
+                ]
               }
             },
             {
@@ -367,119 +290,196 @@
               "buttons": [
                 {
                   "type": "button",
-                  "icon": "fas fa-file-code text-success",
-                  "label": "Yaml编辑",
-                  "actionType": "drawer",
-                  "drawer": {
+                  "icon": "fa fa-list",
+                  "label": "查看日志",
+                  "actionType": "dialog",
+                  "dialog": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
-                    "size": "lg",
-                    "title": "SmartEdit",
+                    "title": "选择容器 (ESC 关闭)",
                     "body": [
                       {
-                        "type": "tabs",
-                        "tabsMode": "tiled",
-                        "tabs": [
-                          {
-                            "title": "View",
-                            "body": [
-                              {
-                                "type": "service",
-                                "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
-                                "body": [
-                                  {
-                                    "type": "form",
-                                    "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
-                                    "wrapWithPanel": false,
-                                    "body": [
-                                      {
-                                        "type": "editor",
-                                        "name": "yaml",
-                                        "size": "xxl",
-                                        "allowFullscreen": true,
-                                        "placeholder": "loading",
-                                        "language": "yaml",
-                                        "value": "${yaml}",
-                                        "options": {
-                                          "wordWrap": "on",
-                                          "scrollbar": {
-                                            "vertical": "auto"
-                                          }
-                                        }
+                        "type": "select",
+                        "name": "containerName",
+                        "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                        "value": "${spec.containers[0].name}",
+                        "required": true
+                      },
+                      {
+                        "type": "input-number",
+                        "name": "tailLines",
+                        "label": "读取最近行数",
+                        "value": 100,
+                        "description": "设置为0将读取全部日志",
+                        "min": 0
+                      },
+                      {
+                        "type": "input-number",
+                        "name": "sinceSeconds",
+                        "label": "过去几秒开始读取",
+                        "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
+                        "min": 0
+                      },
+                      {
+                        "type": "input-datetime",
+                        "name": "sinceTime",
+                        "label": "开始时间",
+                        "format": "YYYY-MM-DD HH:mm:ss",
+                        "description": "与上面的秒数互斥。该时间为服务器时间，注意时区时差",
+                        "placeholder": "选择开始时间",
+                        "value": "${_|now|dateModify:subtract:10:minutes|dateModify:subtract:8:hours}"
+                      },
+                      {
+                        "type": "switch",
+                        "name": "timestamps",
+                        "label": "显示时间戳",
+                        "description": "选择时间无日志时，请开启本选项确认时间范围",
+                        "value": false,
+                        "onText": "是",
+                        "offText": "否"
+                      },
+                      {
+                        "type": "switch",
+                        "name": "follow",
+                        "label": "实时跟踪",
+                        "value": true,
+                        "onText": "开启",
+                        "offText": "关闭"
+                      },
+                      {
+                        "type": "switch",
+                        "name": "previous",
+                        "label": "读取上一个实例日志",
+                        "value": false,
+                        "onText": "是",
+                        "offText": "否"
+                      },
+                      {
+                        "type": "button",
+                        "label": "查看日志",
+                        "level": "primary",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "closeOnOutside": true,
+                          "closeOnEsc": true,
+                          "size": "xl",
+                          "title": "日志管理 (ESC 关闭)",
+                          "body": [
+                            {
+                              "type": "flex",
+                              "justify": "space-between",
+                              "items": [
+                                {
+                                  "type": "container",
+                                  "body": [
+                                    {
+                                      "type": "log-download",
+                                      "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                      "data": {
+                                        "containerName": "${containerName}",
+                                        "tailLines": "${tailLines}",
+                                        "sinceTime": "${sinceTime}",
+                                        "previous": "${previous}",
+                                        "timestamps": "${timestamps}",
+                                        "sinceSeconds": "${sinceSeconds}"
                                       }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "title": "Doc",
-                            "body": [
-                              {
-                                "type": "page",
-                                "asideResizor": true,
-                                "asideSticky": false,
-                                "asideMinWidth": 300,
-                                "asideMaxWidth": 600,
-                                "aside": [
-                                  {
-                                    "type": "input-tree",
-                                    "name": "tree",
-                                    "initiallyOpen": false,
-                                    "unfoldedLevel": 1,
-                                    "searchable": true,
-                                    "showOutline": true,
-                                    "showIcon": true,
-                                    "searchConfig": {
-                                      "sticky": true
                                     },
-                                    "selectFirst": true,
-                                    "heightAuto": true,
-                                    "inputClassName": "no-border no-padder mt-1",
-                                    "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
-                                    "onEvent": {
-                                      "change": {
-                                        "actions": [
-                                          {
-                                            "componentId": "detail",
-                                            "actionType": "reload",
-                                            "data": {
-                                              "description": "${event.data.item.description}"
-                                            }
-                                          }
-                                        ]
+                                    {
+                                      "type": "sse",
+                                      "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                      "data": {
+                                        "containerName": "${containerName}",
+                                        "tailLines": "${tailLines}",
+                                        "sinceTime": "${sinceTime}",
+                                        "follow": "${follow}",
+                                        "previous": "${previous}",
+                                        "timestamps": "${timestamps}",
+                                        "sinceSeconds": "${sinceSeconds}"
                                       }
                                     }
+                                  ],
+                                  "style": {
+                                    "flexGrow": 1,
+                                    "backgroundColor": "#f5f5f5",
+                                    "padding": "10px",
+                                    "border": "1px solid #ddd"
                                   }
-                                ],
-                                "toolbar": [
-                                  {
-                                    "type": "tpl",
-                                    "tpl": ""
-                                  }
-                                ],
-                                "body": [
-                                  {
-                                    "type": "service",
-                                    "api": "post:/k8s/doc/detail",
-                                    "body": [
-                                      {
-                                        "type": "tpl",
-                                        "tpl": "${description}</br></br></br>${translate?translate:''}",
-                                        "wrapperComponent": "",
-                                        "inline": false
+                                },
+                                {
+                                  "type": "container",
+                                  "body": [
+                                    {
+                                      "type": "form",
+                                      "title": "AI问诊",
+                                      "wrapWithPanel": false,
+                                      "api": {
+                                        "url": "/k8s/chat/log",
+                                        "method": "post",
+                                        "data": {
+                                          "data": "${ls:selectedLogLines}"
+                                        },
+                                        "headers": {
+                                          "Content-Type": "application/json"
+                                        }
+                                      },
+                                      "body": [
+                                        {
+                                          "type": "button",
+                                          "label": "AI问诊",
+                                          "actionType": "submit"
+                                        }
+                                      ],
+                                      "onEvent": {
+                                        "submitSucc": {
+                                          "actions": [
+                                            {
+                                              "actionType": "reload",
+                                              "componentId": "aiResult",
+                                              "data": {
+                                                "result": "${event.data.result.data.result}"
+                                              }
+                                            }
+                                          ]
+                                        }
                                       }
-                                    ],
-                                    "id": "detail"
+                                    },
+                                    {
+                                      "type": "service",
+                                      "body": [
+                                        {
+                                          "type": "html",
+                                          "html": "${result|raw}",
+                                          "wrapperComponent": "",
+                                          "inline": false
+                                        }
+                                      ],
+                                      "id": "aiResult"
+                                    }
+                                  ],
+                                  "style": {
+                                    "width": "400px",
+                                    "backgroundColor": "#e3e3e3",
+                                    "padding": "10px",
+                                    "border": "1px solid #ddd"
                                   }
-                                ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "onEvent": {
+                          "click": {
+                            "actions": [
+                              {
+                                "actionType": "custom",
+                                "script": "localStorage.removeItem('selectedLogLines');"
                               }
                             ]
                           }
-                        ]
+                        }
                       }
-                    ]
+                    ],
+                    "actions": []
                   }
                 },
                 {
@@ -1170,6 +1170,8 @@
           "label": "node",
           "type": "text"
         },
+
+
         {
           "name": "metadata.creationTimestamp",
           "label": "age",
