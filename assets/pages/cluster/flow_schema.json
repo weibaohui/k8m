@@ -436,7 +436,7 @@
         },
         {
           "name": "spec.priorityLevelConfiguration.name",
-          "label": "优先级",
+          "label": "优先级名称",
           "type": "text"
         },
         {
@@ -446,7 +446,7 @@
         },
         {
           "name": "spec.distinguisherMethod.type",
-          "label": "区分方法",
+          "label": "区分器类型",
           "type": "text"
         },
         {
@@ -469,15 +469,16 @@
             }
           }
         },
-        {
-          "name": "metadata.creationTimestamp",
-          "label": "存活",
-          "type": "k8sAge"
-        },
+
         {
           "name": "status.conditions",
           "label": "条件",
           "type": "k8sConditions"
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "存活",
+          "type": "k8sAge"
         }
       ]
     }
