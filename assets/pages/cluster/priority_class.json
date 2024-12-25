@@ -436,12 +436,12 @@
         },
         {
           "name": "value",
-          "label": "value",
+          "label": "值",
           "type": "text"
         },
         {
           "name": "preemptionPolicy",
-          "label": "policy",
+          "label": "抢占策略",
           "type": "mapping",
           "map": {
             "Never": "<span class='label label-success'>Never</span>",
