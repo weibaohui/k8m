@@ -71,10 +71,43 @@ func Describe(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 	}
 
-	prompt := fmt.Sprintf("请你作为kubernetes k8s 运维专家，对下面 %s %s 资源的Describe 信息 分析。请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案:\n%s", data.Group, data.Kind, data.Describe)
+	prompt := fmt.Sprintf("请你作为kubernetes k8s 运维专家，对下面 %s %s 资源的Describe 信息 分析。请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案。\n\nDescribe信息如下：%s", data.Group, data.Kind, data.Describe)
 
 	result := chatService.Chat(prompt)
 	result = markdownToHTML(result)
+	amis.WriteJsonData(c, gin.H{
+		"result": result,
+	})
+}
+func Resource(c *gin.Context) {
+	chatService := service.ChatService()
+	if !chatService.IsEnabled() {
+		amis.WriteJsonData(c, gin.H{
+			"result": "请先配置开启ChatGPT功能",
+		})
+		return
+	}
+	var data struct {
+		Version string `json:"version"`
+		Kind    string `json:"kind"`
+		Group   string `json:"group"`
+	}
+
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+	}
+
+	prompt := fmt.Sprintf(
+		`k8s资源信息为Kind=%s,Gropu=%s,version=%s。
+		\n请你作为kubernetes k8s 运维专家，给用户做出使用讲解。
+		包括资源说明、用途、最佳实践、常见问题等你认为对用户有帮助的信息。
+		\n注意：
+		\n1、请务必使用markdown格式回答
+		\n2、返回前请检查markdown格式，如有格式错误请先修正，再返回`,
+		data.Group, data.Kind, data.Version)
+
+	result := chatService.Chat(prompt)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
