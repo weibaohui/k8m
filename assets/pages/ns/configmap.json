@@ -1,5 +1,43 @@
 {
   "type": "page",
+  "data": {
+    "ns": "${ls:selectedNs||'default'}",
+    "kind": "ConfigMap",
+    "version": "v1",
+    "group": ""
+  },
+  "toolbar": [
+    {
+      "type": "button",
+      "label": "AI解读${kind}",
+      "icon": "fas fa-rocket text-primary",
+      "className": "floating-icon",
+      "actionType": "drawer",
+      "drawer": {
+        "closeOnEsc": true,
+        "closeOnOutside": true,
+        "size": "lg",
+        "title": "AI释义: ${kind}",
+        "body": [
+          {
+            "type": "service",
+            "api": "post:/k8s/chat/cron",
+            "data": {
+              "cron": "${kind}"
+            },
+            "body": [
+              {
+                "type": "html",
+                "html": "${result|raw}",
+                "wrapperComponent": "",
+                "inline": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
   "body": [
     {
       "type": "form",
@@ -51,6 +89,11 @@
         "bulkActions",
         "reload",
         {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right"
+        },
+        {
           "type": "pagination",
           "align": "right"
         },
@@ -63,12 +106,6 @@
           "align": "right"
         }
       ],
-      "data": {
-        "ns": "${ls:selectedNs||'default'}",
-        "kind": "ConfigMap",
-        "version": "v1",
-        "group": ""
-      },
       "loadDataOnce": true,
       "syncLocation": false,
       "initFetch": true,
