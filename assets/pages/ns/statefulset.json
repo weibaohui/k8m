@@ -112,7 +112,7 @@
               "type": "button",
               "icon": "fas fa-eye text-primary",
               "actionType": "drawer",
-              "tooltip": "Describe",
+              "tooltip": "资源描述",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
@@ -449,7 +449,7 @@
                 {
                   "type": "button",
                   "icon": "fas fa-calendar-alt text-primary",
-                  "label": "Event",
+                  "label": "查看事件",
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnEsc": true,
@@ -574,13 +574,13 @@
                 {
                   "type": "button",
                   "icon": "fas fa-history text-primary",
-                  "label": "History",
+                  "label": "变更历史",
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "size": "lg",
-                    "title": "History",
+                    "title": "变更历史",
                     "body": [
                       {
                         "type": "crud",
@@ -694,7 +694,7 @@
                   "type": "button",
                   "icon": "fas fa-eye text-primary",
                   "actionType": "drawer",
-                  "label": "Describe",
+                  "label": "资源描述",
                   "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,

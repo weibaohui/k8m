@@ -29,7 +29,7 @@
             "schemaApi": "get:/pages/cluster/node.json"
           },
           {
-            "label": "Event",
+            "label": "查看事件",
             "url": "/event/list",
             "icon": "fas fa-calendar-alt text-primary",
             "schemaApi": "get:/pages/ns/event.json"
