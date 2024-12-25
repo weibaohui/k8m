@@ -551,7 +551,7 @@
         },
         {
           "name": "metadata.name",
-          "label": "name",
+          "label": "名称",
           "type": "text",
           "copyable": true,
           "searchable": {
