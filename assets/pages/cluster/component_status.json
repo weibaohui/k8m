@@ -237,7 +237,7 @@
         },
         {
           "name": "conditions",
-          "label": "status",
+          "label": "状态",
           "type": "each",
           "items": {
             "type": "tpl",
