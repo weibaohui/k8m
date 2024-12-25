@@ -561,20 +561,21 @@
             "placeholder": "输入名称"
           }
         },
-        {
-          "name": "spec.capacity.storage",
-          "label": "capacity",
-          "type": "text"
-        },
+
         {
           "name": "spec.accessModes",
-          "label": "mode",
+          "label": "访问模式",
           "type": "tpl",
           "tpl": "${spec.accessModes| map  }"
         },
         {
+          "name": "spec.capacity.storage",
+          "label": "存储容积",
+          "type": "text"
+        },
+        {
           "name": "spec.persistentVolumeReclaimPolicy",
-          "label": "reclaimPolicy",
+          "label": "回收策略",
           "type": "text"
         },
         {
@@ -584,13 +585,13 @@
         },
         {
           "name": "claim",
-          "label": "claim",
+          "label": "PVC声明",
           "type": "tpl",
           "tpl": "${spec.claimRef.namespace}/${spec.claimRef.name}"
         },
         {
           "name": "spec.storageClassName",
-          "label": "storageClass",
+          "label": "存储类名称",
           "type": "text"
         },
         {
@@ -615,7 +616,7 @@
         },
         {
           "name": "spec.volumeMode",
-          "label": "volumeMode",
+          "label": "卷模式",
           "type": "text"
         },
         {
