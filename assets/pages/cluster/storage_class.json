@@ -436,22 +436,22 @@
         },
         {
           "name": "metadata.annotations",
-          "label": "default",
+          "label": "是否默认",
           "tpl": "${metadata.annotations['storageclass.kubernetes.io/is-default-class']}"
         },
         {
           "name": "provisioner",
-          "label": "provisioner",
+          "label": "供应者",
           "type": "text"
         },
         {
           "name": "reclaimPolicy",
-          "label": "policy",
+          "label": "回收策略",
           "type": "text"
         },
         {
           "name": "volumeBindingMode",
-          "label": "mode",
+          "label": "卷绑定模式",
           "type": "text"
         },
         {
