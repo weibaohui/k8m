@@ -458,7 +458,7 @@
           "name": "metadata.labels",
           "label": "labels",
           "type": "tpl",
-          "tpl": "<i class='fa fa-tags text-primary'></i>",
+          "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : ''}",
           "popOver": {
             "trigger": "hover",
             "showIcon": false,
