@@ -438,13 +438,13 @@
         },
         {
           "name": "roleRef.name",
-          "label": "roleRef",
+          "label": "角色",
           "type": "tpl",
           "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500'>[${roleRef.kind}]</strong>${roleRef.name}</div>"
         },
         {
           "name": "subjects",
-          "label": "subjects",
+          "label": "主体",
           "type": "each",
           "items": {
             "type": "tpl",
