@@ -6,6 +6,21 @@
       "className": "floating-toolbar",
       "body": [
         {
+          "type": "button",
+          "label": "回退",
+          "level": "link",
+          "className": "mr-2",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "goBack"
+                }
+              ]
+            }
+          }
+        },
+        {
           "type": "tpl",
           "tpl": "${kind}",
           "className": "mr-2"
@@ -54,55 +69,30 @@
       "wrapWithPanel": false,
       "body": [
         {
-          "type": "flex",
-          "justify": "flex-start",
-          "items": [
-            {
-              "type": "button",
-              "label": "回退",
-              "level": "link",
-              "className": "ml-2",
-              "onEvent": {
-                "click": {
-                  "actions": [
-                    {
-                      "actionType": "goBack"
-                    }
-                  ]
+          "label": "命名空间",
+          "type": "select",
+          "name": "ns",
+          "id": "ns",
+          "searchable": true,
+          "source": "/k8s/ns/option_list",
+          "value": "${ls:selectedNs||'default'}",
+          "onEvent": {
+            "change": {
+              "actions": [
+                {
+                  "actionType": "reload",
+                  "componentId": "detailCRUD",
+                  "data": {
+                    "ns": "${ns}"
+                  }
+                },
+                {
+                  "actionType": "custom",
+                  "script": "localStorage.setItem('selectedNs', event.data.ns)"
                 }
-              }
-            },
-            {
-              "style": {
-                "width": 500,
-                "margin": 5
-              },
-              "label": "Namespace",
-              "type": "select",
-              "name": "ns",
-              "id": "ns",
-              "searchable": true,
-              "source": "/k8s/ns/option_list",
-              "value": "${ls:selectedNs||'default'}",
-              "onEvent": {
-                "change": {
-                  "actions": [
-                    {
-                      "actionType": "reload",
-                      "componentId": "detailCRUD",
-                      "data": {
-                        "ns": "${ns}"
-                      }
-                    },
-                    {
-                      "actionType": "custom",
-                      "script": "localStorage.setItem('selectedNs', event.data.ns)"
-                    }
-                  ]
-                }
-              }
+              ]
             }
-          ]
+          }
         }
       ]
     },
