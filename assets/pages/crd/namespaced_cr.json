@@ -6,21 +6,6 @@
       "className": "floating-toolbar",
       "body": [
         {
-          "type": "button",
-          "label": "回退",
-          "level": "link",
-          "className": "mr-2",
-          "onEvent": {
-            "click": {
-              "actions": [
-                {
-                  "actionType": "goBack"
-                }
-              ]
-            }
-          }
-        },
-        {
           "type": "tpl",
           "tpl": "${kind}",
           "className": "mr-2"
