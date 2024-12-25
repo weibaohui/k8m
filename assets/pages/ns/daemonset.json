@@ -106,23 +106,66 @@
         {
           "type": "operation",
           "label": "action",
-          "width": 100,
+          "width": 120,
           "buttons": [
             {
               "type": "button",
-              "icon": "fas fa-trash text-danger",
-              "actionType": "ajax",
-              "tooltip": "删除",
-              "confirmText": "您确认要删除$metadata.name?",
-              "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
-            },
-            {
-              "type": "button",
-              "icon": "fas fa-power-off text-danger",
-              "actionType": "ajax",
-              "tooltip": "重启",
-              "confirmText": "您确认要重启?",
-              "api": "post:/k8s/daemonset/restart/ns/$metadata.namespace/name/$metadata.name"
+              "icon": "fas fa-eye text-primary",
+              "actionType": "drawer",
+              "tooltip": "Describe",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "service",
+                    "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                    "body": [
+                      {
+                        "type": "button",
+                        "label": "AI解读",
+                        "icon": "fas fa-brain text-primary",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "closeOnEsc": true,
+                          "closeOnOutside": true,
+                          "size": "xl",
+                          "title": "AI解读  (ESC 关闭)",
+                          "body": [
+                            {
+                              "type": "service",
+                              "api": "post:/k8s/chat/describe",
+                              "data": {
+                                "describe": "${result}",
+                                "kind": "${kind}",
+                                "group": "${group}"
+                              },
+                              "body": [
+                                {
+                                  "type": "html",
+                                  "html": "${result|raw}",
+                                  "wrapperComponent": "",
+                                  "inline": false
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "highlightHtml",
+                        "keywords": [
+                          "Error",
+                          "Warning"
+                        ],
+                        "html": "<pre>${result}</pre>"
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
               "type": "button",
@@ -179,8 +222,8 @@
                             "type": "page",
                             "asideResizor": true,
                             "asideSticky": false,
-                            "asideMinWidth": 150,
-                            "asideMaxWidth": 400,
+                            "asideMinWidth": 300,
+                            "asideMaxWidth": 600,
                             "aside": [
                               {
                                 "type": "input-tree",
@@ -242,65 +285,419 @@
               }
             },
             {
-              "type": "button",
-              "icon": "fas fa-calendar-alt text-primary",
-              "tooltip": "Event",
-              "actionType": "drawer",
-              "drawer": {
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "size": "xl",
-                 "title": "Event   (ESC 关闭)",
-                "body": [
-                  {
-                    "type": "crud",
-                    "id": "detailEvent",
-                    "name": "detailEvent",
-                    "headerToolbar": [
-                      "reload",
+              "type": "dropdown-button",
+              "icon": "fa fa-ellipsis-h",
+              "buttons": [
+                {
+                  "type": "button",
+                  "icon": "fas fa-trash text-danger",
+                  "actionType": "ajax",
+                  "label": "删除",
+                  "confirmText": "您确认要删除$metadata.name?",
+                  "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-power-off text-danger",
+                  "actionType": "ajax",
+                  "label": "重启",
+                  "confirmText": "您确认要重启?",
+                  "api": "post:/k8s/daemonset/restart/ns/$metadata.namespace/name/$metadata.name"
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-file-code text-success",
+                  "label": "Yaml编辑",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "SmartEdit",
+                    "body": [
                       {
-                        "type": "pagination",
-                        "align": "right"
-                      },
-                      {
-                        "type": "statistics",
-                        "align": "right"
-                      },
-                      {
-                        "type": "switch-per-page",
-                        "align": "right"
+                        "type": "tabs",
+                        "tabsMode": "tiled",
+                        "tabs": [
+                          {
+                            "title": "View",
+                            "body": [
+                              {
+                                "type": "service",
+                                "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                "body": [
+                                  {
+                                    "type": "form",
+                                    "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                    "wrapWithPanel": false,
+                                    "body": [
+                                      {
+                                        "type": "editor",
+                                        "name": "yaml",
+                                        "size": "xxl",
+                                        "allowFullscreen": true,
+                                        "placeholder": "loading",
+                                        "language": "yaml",
+                                        "value": "${yaml}",
+                                        "options": {
+                                          "wordWrap": "on",
+                                          "scrollbar": {
+                                            "vertical": "auto"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "title": "Doc",
+                            "body": [
+                              {
+                                "type": "page",
+                                "asideResizor": true,
+                                "asideSticky": false,
+                                "asideMinWidth": 150,
+                                "asideMaxWidth": 400,
+                                "aside": [
+                                  {
+                                    "type": "input-tree",
+                                    "name": "tree",
+                                    "initiallyOpen": false,
+                                    "unfoldedLevel": 1,
+                                    "searchable": true,
+                                    "showOutline": true,
+                                    "showIcon": true,
+                                    "searchConfig": {
+                                      "sticky": true
+                                    },
+                                    "selectFirst": true,
+                                    "heightAuto": true,
+                                    "inputClassName": "no-border no-padder mt-1",
+                                    "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                    "onEvent": {
+                                      "change": {
+                                        "actions": [
+                                          {
+                                            "componentId": "detail",
+                                            "actionType": "reload",
+                                            "data": {
+                                              "description": "${event.data.item.description}"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ],
+                                "toolbar": [
+                                  {
+                                    "type": "tpl",
+                                    "tpl": ""
+                                  }
+                                ],
+                                "body": [
+                                  {
+                                    "type": "service",
+                                    "api": "post:/k8s/doc/detail",
+                                    "body": [
+                                      {
+                                        "type": "tpl",
+                                        "tpl": "${description}</br></br></br>${translate?translate:''}",
+                                        "wrapperComponent": "",
+                                        "inline": false
+                                      }
+                                    ],
+                                    "id": "detail"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
                       }
-                    ],
-                    "loadDataOnce": true,
-                    "syncLocation": false,
-                    "perPage": 10,
-                    "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
-                    "columns": [
+                    ]
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-calendar-alt text-primary",
+                  "label": "Event",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "xl",
+                    "title": "Event   (ESC 关闭)",
+                    "body": [
                       {
-                        "type": "operation",
-                        "label": "action",
-                        "buttons": [
+                        "type": "crud",
+                        "id": "detailEvent",
+                        "name": "detailEvent",
+                        "headerToolbar": [
+                          "reload",
+                          {
+                            "type": "pagination",
+                            "align": "right"
+                          },
+                          {
+                            "type": "statistics",
+                            "align": "right"
+                          },
+                          {
+                            "type": "switch-per-page",
+                            "align": "right"
+                          }
+                        ],
+                        "loadDataOnce": true,
+                        "syncLocation": false,
+                        "perPage": 10,
+                        "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
+                        "columns": [
+                          {
+                            "type": "operation",
+                            "label": "action",
+                            "buttons": [
+                              {
+                                "type": "button",
+                                "icon": "fas fa-brain text-primary",
+                                "label": "AI问诊",
+                                "actionType": "drawer",
+                                "drawer": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "AI 查询",
+                                  "body": [
+                                    {
+                                      "type": "service",
+                                      "api": "post:/k8s/chat/event",
+                                      "data": {
+                                        "note": "${note}",
+                                        "source": "${source}",
+                                        "reason": "${reason}",
+                                        "reportingController": "${reportingController}",
+                                        "type": "${type}",
+                                        "regardingKind": "${kind}"
+                                      },
+                                      "body": [
+                                        {
+                                          "type": "html",
+                                          "html": "${result|raw}",
+                                          "wrapperComponent": "",
+                                          "inline": false
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "visibleOn": "type === 'Warning'"
+                              }
+                            ],
+                            "toggled": true
+                          },
+                          {
+                            "name": "type",
+                            "label": "type",
+                            "filterable": {
+                              "options": [
+                                "Normal",
+                                "Warning"
+                              ]
+                            },
+                            "type": "mapping",
+                            "map": {
+                              "Normal": "<span class='label label-success'>Normal</span>",
+                              "Warning": "<span class='label label-danger'>Warning</span>"
+                            }
+                          },
+                          {
+                            "name": "reason",
+                            "label": "reason",
+                            "type": "text"
+                          },
+                          {
+                            "name": "field",
+                            "label": "fieldPath",
+                            "type": "tpl",
+                            "tpl": "${regarding.fieldPath}"
+                          },
+                          {
+                            "name": "source",
+                            "label": "source",
+                            "type": "tpl",
+                            "tpl": "${reportingController} ${reportingInstance}"
+                          },
+                          {
+                            "name": "note",
+                            "label": "note",
+                            "type": "text",
+                            "searchable": true
+                          },
+                          {
+                            "name": "metadata.creationTimestamp",
+                            "label": "age",
+                            "type": "k8sAge"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-history text-primary",
+                  "label": "History",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "History",
+                    "body": [
+                      {
+                        "type": "crud",
+                        "id": "detailEvent",
+                        "name": "detailEvent",
+                        "headerToolbar": [
+                          "reload",
+                          {
+                            "type": "pagination",
+                            "align": "right"
+                          },
+                          {
+                            "type": "statistics",
+                            "align": "right"
+                          },
+                          {
+                            "type": "switch-per-page",
+                            "align": "right"
+                          }
+                        ],
+                        "loadDataOnce": true,
+                        "syncLocation": false,
+                        "perPage": 10,
+                        "api": "get:/k8s/daemonset/rollout/history/ns/$metadata.namespace/name/$metadata.name",
+                        "columns": [
+                          {
+                            "type": "operation",
+                            "label": "action",
+                            "buttons": [
+                              {
+                                "type": "button",
+                                "icon": "fas fa-undo-alt text-danger",
+                                "actionType": "ajax",
+                                "label": "恢复",
+                                "confirmText": "您确认要恢复到 $revision ?",
+                                "api": "post:/k8s/daemonset/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
+                                "onEvent": {
+                                  "click": {
+                                    "actions": [
+                                      {
+                                        "actionType": "closeDrawer"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "button",
+                                "icon": "fas fa-file-code text-success",
+                                "label": "查看",
+                                "actionType": "drawer",
+                                "drawer": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "查看版本",
+                                  "body": [
+                                    {
+                                      "type": "service",
+                                      "api": "get:/k8s/${gvk.Kind}/group/${gvk.Group}/version/${gvk.Version}/ns/$namespace/name/$name",
+                                      "body": [
+                                        {
+                                          "type": "editor",
+                                          "name": "yaml",
+                                          "size": "xxl",
+                                          "allowFullscreen": true,
+                                          "placeholder": "loading",
+                                          "language": "yaml",
+                                          "value": "${yaml}",
+                                          "options": {
+                                            "wordWrap": "on",
+                                            "scrollbar": {
+                                              "vertical": "auto"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "toggled": true
+                          },
+                          {
+                            "name": "revision",
+                            "label": "revision",
+                            "type": "text"
+                          },
+                          {
+                            "name": "namespace",
+                            "label": "namespace",
+                            "type": "text"
+                          },
+                          {
+                            "name": "name",
+                            "label": "name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "creationTimestamp",
+                            "label": "age",
+                            "type": "k8sAge"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-eye text-primary",
+                  "actionType": "drawer",
+                  "label": "Describe",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "xl",
+                    "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "service",
+                        "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                        "body": [
                           {
                             "type": "button",
+                            "label": "AI解读",
                             "icon": "fas fa-brain text-primary",
-                            "tooltip": "AI问诊",
                             "actionType": "drawer",
                             "drawer": {
                               "closeOnEsc": true,
                               "closeOnOutside": true,
-                              "size": "lg",
-                              "title": "AI 查询",
+                              "size": "xl",
+                              "title": "AI解读  (ESC 关闭)",
                               "body": [
                                 {
                                   "type": "service",
-                                  "api": "post:/k8s/chat/event",
+                                  "api": "post:/k8s/chat/describe",
                                   "data": {
-                                    "note": "${note}",
-                                    "source": "${source}",
-                                    "reason": "${reason}",
-                                    "reportingController": "${reportingController}",
-                                    "type": "${type}",
-                                    "regardingKind": "${kind}"
+                                    "describe": "${result}",
+                                    "kind": "${kind}",
+                                    "group": "${group}"
                                   },
                                   "body": [
                                     {
@@ -312,241 +709,27 @@
                                   ]
                                 }
                               ]
-                            },
-                            "visibleOn": "type === 'Warning'"
-                          }
-                        ],
-                        "toggled": true
-                      },
-                      {
-                        "name": "type",
-                        "label": "type",
-                        "filterable": {
-                          "options": [
-                            "Normal",
-                            "Warning"
-                          ]
-                        },
-                        "type": "mapping",
-                        "map": {
-                          "Normal": "<span class='label label-success'>Normal</span>",
-                          "Warning": "<span class='label label-danger'>Warning</span>"
-                        }
-                      },
-                      {
-                        "name": "reason",
-                        "label": "reason",
-                        "type": "text"
-                      },
-                      {
-                        "name": "field",
-                        "label": "fieldPath",
-                        "type": "tpl",
-                        "tpl": "${regarding.fieldPath}"
-                      },
-                      {
-                        "name": "source",
-                        "label": "source",
-                        "type": "tpl",
-                        "tpl": "${reportingController} ${reportingInstance}"
-                      },
-                      {
-                        "name": "note",
-                        "label": "note",
-                        "type": "text",
-                        "searchable": true
-                      },
-
-
-                      {
-                        "name": "metadata.creationTimestamp",
-                        "label": "age",
-                        "type": "k8sAge"
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "type": "button",
-              "icon": "fas fa-history text-primary",
-              "tooltip": "History",
-              "actionType": "drawer",
-              "drawer": {
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "size": "lg",
-                "title": "History",
-                "body": [
-                  {
-                    "type": "crud",
-                    "id": "detailEvent",
-                    "name": "detailEvent",
-                    "headerToolbar": [
-                      "reload",
-                      {
-                        "type": "pagination",
-                        "align": "right"
-                      },
-                      {
-                        "type": "statistics",
-                        "align": "right"
-                      },
-                      {
-                        "type": "switch-per-page",
-                        "align": "right"
-                      }
-                    ],
-                    "loadDataOnce": true,
-                    "syncLocation": false,
-                    "perPage": 10,
-                    "api": "get:/k8s/daemonset/rollout/history/ns/$metadata.namespace/name/$metadata.name",
-                    "columns": [
-                      {
-                        "type": "operation",
-                        "label": "action",
-                        "buttons": [
-                          {
-                            "type": "button",
-                            "icon": "fas fa-undo-alt text-danger",
-                            "actionType": "ajax",
-                            "tooltip": "恢复",
-                            "confirmText": "您确认要恢复到 $revision ?",
-                            "api": "post:/k8s/daemonset/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
-                            "onEvent": {
-                              "click": {
-                                "actions": [
-                                  {
-                                    "actionType": "closeDrawer"
-                                  }
-                                ]
-                              }
                             }
                           },
                           {
-                            "type": "button",
-                            "icon": "fas fa-file-code text-success",
-                            "tooltip": "查看",
-                            "actionType": "drawer",
-                            "drawer": {
-                              "closeOnEsc": true,
-                              "closeOnOutside": true,
-                              "size": "lg",
-                              "title": "查看版本",
-                              "body": [
-                                {
-                                  "type": "service",
-                                  "api": "get:/k8s/${gvk.Kind}/group/${gvk.Group}/version/${gvk.Version}/ns/$namespace/name/$name",
-                                  "body": [
-                                    {
-                                      "type": "editor",
-                                      "name": "yaml",
-                                      "size": "xxl",
-                                      "allowFullscreen": true,
-                                      "placeholder": "loading",
-                                      "language": "yaml",
-                                      "value": "${yaml}",
-                                      "options": {
-                                        "wordWrap": "on",
-                                        "scrollbar": {
-                                          "vertical": "auto"
-                                        }
-                                      }
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
+                            "type": "highlightHtml",
+                            "keywords": [
+                              "Error",
+                              "Warning"
+                            ],
+                            "html": "<pre>${result}</pre>"
                           }
-                        ],
-                        "toggled": true
-                      },
-                      {
-                        "name": "revision",
-                        "label": "revision",
-                        "type": "text"
-                      },
-                      {
-                        "name": "namespace",
-                        "label": "namespace",
-                        "type": "text"
-                      },
-                      {
-                        "name": "name",
-                        "label": "name",
-                        "type": "text"
-                      },
-                      {
-                        "name": "creationTimestamp",
-                        "label": "age",
-                        "type": "k8sAge"
+                        ]
                       }
                     ]
                   }
-                ]
-              }
-            },
-            {
-              "type": "button",
-              "icon": "fas fa-eye",
-              "actionType": "drawer",
-              "tooltip": "Describe",
-              "drawer": {
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "size": "xl",
-                "title": "Describe: ${metadata.name}  (ESC 关闭)",
-                "body": [
-                  {
-                    "type": "service",
-                    "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
-                    "body": [
-                       {
-                        "type": "button",
-                        "label": "AI解读",
-                        "icon": "fas fa-brain text-primary",
-                        "actionType": "drawer",
-                        "drawer": {
-                          "closeOnEsc": true,
-                          "closeOnOutside": true,
-                          "size": "xl",
-                          "title": "AI解读  (ESC 关闭)",
-                          "body": [
-                            {
-                              "type": "service",
-                              "api": "post:/k8s/chat/describe",
-                              "data": {
-                                "describe": "${result}",
-                                "kind": "${kind}",
-                                "group": "${group}"
-                              },
-                              "body": [
-                                {
-                                  "type": "html",
-                                  "html": "${result|raw}",
-                                  "wrapperComponent": "",
-                                  "inline": false
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "type": "highlightHtml",
-                        "keywords": ["Error", "Warning"],
-                        "html": "<pre>${result}</pre>"
-                      }
-                    ]
-                  }
-                ]
-              }
+                }
+              ]
             }
           ],
           "toggled": true
         },
-         {
+        {
           "name": "metadata.namespace",
           "label": "namespace",
           "type": "text"

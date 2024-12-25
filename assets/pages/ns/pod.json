@@ -110,7 +110,7 @@
           "buttons": [
             {
               "type": "button",
-              "icon": "fas fa-eye",
+              "icon": "fas fa-eye text-primary",
               "actionType": "drawer",
               "tooltip": "Describe",
               "drawer": {
@@ -290,7 +290,7 @@
               "buttons": [
                 {
                   "type": "button",
-                  "icon": "fa fa-list",
+                  "icon": "fa fa-list text-primary",
                   "label": "查看日志",
                   "actionType": "dialog",
                   "dialog": {
@@ -771,7 +771,7 @@
                                           },
                                           {
                                             "type": "button",
-                                            "tooltip": "点击上传文件到当前目录",
+                                            "label": "点击上传文件到当前目录",
                                             "visibleOn": "${isDir===true}",
                                             "icon": "fa fa-upload",
                                             "actionType": "dialog",
@@ -829,7 +829,7 @@
                                           {
                                             "type": "button",
                                             "icon": "fa fa-download",
-                                            "tooltip": "点击下载文件",
+                                            "label": "点击下载文件",
                                             "actionType": "ajax",
                                             "api": {
                                               "method": "post",
@@ -859,7 +859,7 @@
                                             "type": "button",
                                             "icon": "fa fa-refresh",
                                             "actionType": "reload",
-                                            "tooltip": "点击刷新当前文件",
+                                            "label": "点击刷新当前文件",
                                             "target": "detail",
                                             "visibleOn": "${isDir===false}"
                                           },
@@ -867,7 +867,7 @@
                                             "type": "button",
                                             "icon": "fas fa-trash text-danger",
                                             "actionType": "ajax",
-                                            "tooltip": "删除文件",
+                                            "label": "删除文件",
                                             "visibleOn": "${path}",
                                             "confirmText": "您确认要删除$path?",
                                             "api": {
@@ -921,7 +921,6 @@
                   "type": "button",
                   "icon": "fas fa-calendar-alt text-primary",
                   "label": "查看事件",
-                  "tooltip": "Event",
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnEsc": true,
@@ -960,7 +959,7 @@
                               {
                                 "type": "button",
                                 "icon": "fas fa-brain text-primary",
-                                "tooltip": "AI问诊",
+                                "label": "AI问诊",
                                 "actionType": "drawer",
                                 "drawer": {
                                   "closeOnEsc": true,
@@ -1048,7 +1047,6 @@
                   "icon": "fas fa-trash text-danger",
                   "label": "删除",
                   "actionType": "ajax",
-                  "tooltip": "删除",
                   "confirmText": "您确认要删除$metadata.name?",
                   "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
                 }
@@ -1170,8 +1168,6 @@
           "label": "node",
           "type": "text"
         },
-
-
         {
           "name": "metadata.creationTimestamp",
           "label": "age",

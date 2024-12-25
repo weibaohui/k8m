@@ -114,14 +114,14 @@
               "type": "button",
               "icon": "fas fa-trash text-danger",
               "actionType": "ajax",
-              "tooltip": "删除",
+              "label": "删除",
               "confirmText": "您确认要删除$metadata.name?",
               "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
             },
             {
               "type": "button",
               "icon": "fas fa-file-code text-success",
-              "tooltip": "Yaml编辑",
+              "label": "Yaml编辑",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
@@ -237,9 +237,9 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-eye",
+              "icon": "fas fa-eye text-primary",
               "actionType": "drawer",
-              "tooltip": "Describe",
+              "label": "Describe",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
@@ -290,6 +290,8 @@
                   }
                 ]
               }
+            }
+           ]
             }
           ],
           "toggled": true

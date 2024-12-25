@@ -11,7 +11,7 @@
           "buttons": [
             {
               "type": "button",
-              "tooltip": "导入yaml",
+              "label": "导入yaml",
               "label": "导入yaml文件",
               "actionType": "dialog",
               "dialog": {
