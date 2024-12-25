@@ -1079,7 +1079,7 @@
         },
         {
           "name": "status.phase",
-          "label": "status",
+          "label": "状态",
           "type": "mapping",
           "map": {
             "Running": "<span class='label label-info'>Running</span>",
@@ -1119,7 +1119,7 @@
         },
         {
           "name": "status.containerStatuses",
-          "label": "restarts",
+          "label": "重启",
           "type": "tpl",
           "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
         },
@@ -1145,12 +1145,12 @@
         },
         {
           "name": "status.conditions",
-          "label": "conditions",
+          "label": "条件",
           "type": "k8sConditions"
         },
         {
           "name": "spec.containers",
-          "label": "containers",
+          "label": "容器",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -1165,12 +1165,12 @@
         },
         {
           "name": "spec.nodeName",
-          "label": "node",
+          "label": "节点",
           "type": "text"
         },
         {
           "name": "metadata.creationTimestamp",
-          "label": "age",
+          "label": "存活",
           "type": "k8sAge"
         }
       ]

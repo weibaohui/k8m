@@ -579,7 +579,7 @@
         },
         {
           "name": "status.phase",
-          "label": "status",
+          "label": "状态",
           "type": "text"
         },
         {
@@ -620,7 +620,7 @@
         },
         {
           "name": "metadata.creationTimestamp",
-          "label": "age",
+          "label": "存活",
           "type": "k8sAge"
         }
       ]

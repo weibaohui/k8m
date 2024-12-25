@@ -786,7 +786,7 @@
         },
         {
           "name": "metadata.creationTimestamp",
-          "label": "age",
+          "label": "存活",
           "type": "k8sAge"
         }
       ]

@@ -651,7 +651,7 @@
 
         {
           "name": "status.conditions",
-          "label": "conditions",
+          "label": "条件",
           "type": "k8sConditions"
         },
         {
@@ -665,7 +665,7 @@
         },
         {
           "name": "metadata.creationTimestamp",
-          "label": "age",
+          "label": "存活",
           "type": "k8sAge"
         }
       ]
