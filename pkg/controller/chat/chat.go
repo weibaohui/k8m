@@ -46,7 +46,6 @@ func Event(c *gin.Context) {
 	prompt := fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(event))
 
 	result := chatService.Chat(prompt)
-	result = markdownToHTML(result)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
