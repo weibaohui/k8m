@@ -17,71 +17,71 @@
             "schemaApi": "get:/pages/apply/apply.json"
           },
           {
-            "label": "Namespace",
+            "label": "命名空间",
             "url": "/cluster/ns/list",
             "icon": "fas fa-border-style",
             "schemaApi": "get:/pages/cluster/ns.json"
           },
           {
-            "label": "Node",
+            "label": "节点",
             "url": "/cluster/node/list",
             "icon": "fas fa-server",
             "schemaApi": "get:/pages/cluster/node.json"
           },
           {
-            "label": "查看事件",
+            "label": "事件",
             "url": "/event/list",
             "icon": "fas fa-calendar-alt text-primary",
             "schemaApi": "get:/pages/ns/event.json"
           },
           {
-            "label": "Workload",
+            "label": "工作负载",
             "icon": "fa fa-cube",
             "children": [
               {
-                "label": "Deployment",
+                "label": "部署",
                 "url": "/deploy/list",
                 "icon": "fas fa-layer-group",
                 "schemaApi": "get:/pages/ns/deploy.json"
               },
               {
-                "label": "Pod",
+                "label": "容器组",
                 "url": "/pod/list",
                 "icon": "fas fa-cubes",
                 "schemaApi": "get:/pages/ns/pod.json"
               },
               {
-                "label": "DaemonSet",
+                "label": "守护进程集",
                 "url": "/daemonset/list",
                 "icon": "fas fa-table",
                 "schemaApi": "get:/pages/ns/daemonset.json"
               },
               {
-                "label": "StatefulSet",
+                "label": "有状态集",
                 "url": "/statefulset/list",
                 "icon": "fas fa-poll-h",
                 "schemaApi": "get:/pages/ns/statefulset.json"
               },
               {
-                "label": "RC",
+                "label": "副本控制器",
                 "url": "/rc/list",
                 "icon": "fas fa-bacteria",
                 "schemaApi": "get:/pages/ns/rc.json"
               },
               {
-                "label": "ReplicaSet",
+                "label": "副本集",
                 "url": "/replicaset/list",
                 "icon": "fas fa-clone",
                 "schemaApi": "get:/pages/ns/replicaset.json"
               },
               {
-                "label": "Job",
+                "label": "任务",
                 "url": "/job/list",
                 "icon": "fas fa-calculator",
                 "schemaApi": "get:/pages/ns/job.json"
               },
               {
-                "label": "CronJob",
+                "label": "定时任务",
                 "url": "/cronjob/list",
                 "icon": "fas fa-clock",
                 "schemaApi": "get:/pages/ns/cronjob.json"
@@ -89,71 +89,71 @@
             ]
           },
           {
-            "label": "Config",
+            "label": "配置",
             "icon": "fas fa-sliders-h",
             "children": [
               {
-                "label": "ConfigMap",
+                "label": "配置映射",
                 "url": "/configmap/list",
                 "icon": "fas fa-file-code",
                 "schemaApi": "get:/pages/ns/configmap.json"
               },
               {
-                "label": "Secret",
+                "label": "密钥",
                 "url": "/secret/list",
                 "icon": "fas fa-file-signature",
                 "schemaApi": "get:/pages/ns/secret.json"
               },
               {
-                "label": "ResourceQuota",
+                "label": "资源配额",
                 "url": "/resource_quota/list",
                 "icon": "fas fa-dungeon",
                 "schemaApi": "get:/pages/ns/resource_quota.json"
               },
               {
-                "label": "LimitsRange",
+                "label": "限制范围",
                 "url": "/limit_range/list",
                 "icon": "fas fa-compress",
                 "schemaApi": "get:/pages/ns/limit_range.json"
               },
               {
-                "label": "HPA",
+                "label": "水平自动扩缩",
                 "url": "/hpa/list",
                 "icon": "fas fa-cogs",
                 "schemaApi": "get:/pages/ns/hpa.json"
               },
               {
-                "label": "PDB",
+                "label": "Pod中断配置",
                 "url": "/pdb/list",
                 "icon": "fas fa-receipt",
                 "schemaApi": "get:/pages/ns/pdb.json"
               },
               {
-                "label": "Lease",
+                "label": "租约",
                 "url": "/lease/list",
                 "icon": "fas fa-traffic-light",
                 "schemaApi": "get:/pages/ns/lease.json"
               },
               {
-                "label": "PriorityClass",
+                "label": "优先级类",
                 "url": "/cluster/priority_class/list",
                 "icon": "fas fa-user-shield",
                 "schemaApi": "get:/pages/cluster/priority_class.json"
               },
               {
-                "label": "RuntimeClass",
+                "label": "运行时类",
                 "url": "/cluster/runtime_class/list",
                 "icon": "fas fa-ruler",
                 "schemaApi": "get:/pages/cluster/runtime_class.json"
               },
               {
-                "label": "ValidationHook",
+                "label": "验证钩子",
                 "url": "/cluster/validation_webhook/list",
                 "icon": "fas fa-cog",
                 "schemaApi": "get:/pages/cluster/validation_webhook.json"
               },
               {
-                "label": "MutatingHook",
+                "label": "变更钩子",
                 "url": "/cluster/mutating_webhook/list",
                 "icon": "fas fa-cog",
                 "schemaApi": "get:/pages/cluster/mutating_webhook.json"
@@ -161,41 +161,41 @@
             ]
           },
           {
-            "label": "Network",
+            "label": "网络",
             "icon": "fas fa-network-wired",
             "children": [
               {
-                "label": "Service",
+                "label": "SVC服务",
                 "url": "/svc/list",
                 "icon": "fas fa-project-diagram",
                 "schemaApi": "get:/pages/ns/svc.json"
               },
               {
-                "label": "Endpoint",
+                "label": "端点",
                 "url": "/endpoint/list",
                 "icon": "fas fa-ethernet",
                 "schemaApi": "get:/pages/ns/endpoint.json"
               },
               {
-                "label": "EndpointSlice",
+                "label": "端点切片",
                 "url": "/endpointslice/list",
                 "icon": "fas fa-newspaper",
                 "schemaApi": "get:/pages/ns/endpointslice.json"
               },
               {
-                "label": "Ingress",
+                "label": "Ingress入口",
                 "url": "/ingress/list",
                 "icon": "fas fa-wifi",
                 "schemaApi": "get:/pages/ns/ing.json"
               },
               {
-                "label": "IngressClass",
+                "label": "Ingress入口类",
                 "url": "/cluster/ingress_class/list",
                 "icon": "fas fa-sitemap",
                 "schemaApi": "get:/pages/cluster/ingress_class.json"
               },
               {
-                "label": "NetworkPolicy",
+                "label": "网络策略",
                 "url": "/network_policy/list",
                 "icon": "fas fa-boxes",
                 "schemaApi": "get:/pages/ns/network_policy.json"
@@ -203,29 +203,29 @@
             ]
           },
           {
-            "label": "Storage",
+            "label": "存储",
             "icon": "fas fa-memory",
             "children": [
               {
-                "label": "PVC",
+                "label": "持久卷声明",
                 "url": "/pvc/list",
                 "icon": "fas fa-microchip",
                 "schemaApi": "get:/pages/ns/pvc.json"
               },
               {
-                "label": "PV",
+                "label": "持久卷",
                 "url": "/cluster/pv/list",
                 "icon": "fas fa-hdd",
                 "schemaApi": "get:/pages/cluster/pv.json"
               },
               {
-                "label": "StorageClass",
+                "label": "存储类",
                 "url": "/cluster/storage_class/list",
                 "icon": "fas fa-coins",
                 "schemaApi": "get:/pages/cluster/storage_class.json"
               },
               {
-                "label": "CSINode",
+                "label": "CSI节点",
                 "url": "/cluster/csi_node/list",
                 "icon": "fas fa-cog",
                 "schemaApi": "get:/pages/cluster/csi_node.json"
@@ -233,35 +233,35 @@
             ]
           },
           {
-            "label": "AccessControl",
+            "label": "访问控制",
             "icon": "fas fa-diagnoses",
             "children": [
               {
-                "label": "ServiceAccount",
+                "label": "服务账户",
                 "url": "/service_account/list",
                 "icon": "fas fa-id-card",
                 "schemaApi": "get:/pages/ns/service_account.json"
               },
               {
-                "label": "Role",
+                "label": "角色",
                 "url": "/role/list",
                 "icon": "fas fa-people-arrows",
                 "schemaApi": "get:/pages/ns/role.json"
               },
               {
-                "label": "RoleBinding",
+                "label": "角色绑定",
                 "url": "/role_binding/list",
                 "icon": "fas fa-wave-square",
                 "schemaApi": "get:/pages/ns/role_binding.json"
               },
               {
-                "label": "ClusterRole",
+                "label": "集群角色",
                 "url": "/cluster/cluster_role/list",
                 "icon": "fas fa-dice",
                 "schemaApi": "get:/pages/cluster/cluster_role.json"
               },
               {
-                "label": "CluRoleBind",
+                "label": "集群角色绑定",
                 "url": "/cluster/cluster_role_binding/list",
                 "icon": "fas fa-vector-square",
                 "schemaApi": "get:/pages/cluster/cluster_role_binding.json"
@@ -273,7 +273,7 @@
             "icon": "fas fa-tape",
             "children": [
               {
-                "label": "CRD",
+                "label": "自定义资源",
                 "url": "/crd/crd/list",
                 "icon": "fas fa-registered",
                 "schemaApi": "get:/pages/crd/crd.json"
@@ -301,29 +301,29 @@
             ]
           },
           {
-            "label": "Status",
+            "label": "集群配置",
             "icon": "fas fa-info-circle",
             "children": [
               {
-                "label": "APIService",
+                "label": "API 服务",
                 "url": "/cluster/api_service/list",
                 "icon": "fas fa-screwdriver",
                 "schemaApi": "get:/pages/cluster/api_service.json"
               },
               {
-                "label": "FlowSchema",
+                "label": "流量规则",
                 "url": "/cluster/flow_schema/list",
                 "icon": "fas fa-cog",
                 "schemaApi": "get:/pages/cluster/flow_schema.json"
               },
               {
-                "label": "PriorityLevelCfg",
+                "label": "优先级配置",
                 "url": "/cluster/priority_level_config/list",
                 "icon": "fas fa-cog",
                 "schemaApi": "get:/pages/cluster/priority_level_config.json"
               },
               {
-                "label": "CompStatus",
+                "label": "组件状态",
                 "url": "/cluster/component_status/list",
                 "icon": "fas fa-tools",
                 "schemaApi": "get:/pages/cluster/component_status.json"
