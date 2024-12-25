@@ -473,6 +473,15 @@
           "type": "k8sConditions"
         },
         {
+          "type": "progress",
+          "mode": "line",
+          "value": "${status.succeeded > 0 ? (status.succeeded / spec.completions) * 100 : 0}",
+          "striped": true,
+          "label": "当前状态",
+          "animate": true,
+          "width": "150px"
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "age",
           "type": "k8sAge"

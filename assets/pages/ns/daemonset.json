@@ -593,6 +593,15 @@
           }
         },
         {
+          "type": "progress",
+          "mode": "line",
+          "value": "${(status.numberReady / status.desiredNumberScheduled) * 100}",
+          "striped": true,
+          "label": "当前状态",
+          "animate": true,
+          "width": "150px"
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "age",
           "type": "k8sAge"

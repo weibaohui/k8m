@@ -481,6 +481,15 @@
           }
         },
         {
+          "type": "progress",
+          "mode": "line",
+          "value": "${status.replicas > 0 ? (status.fullyLabeledReplicas / status.replicas) * 100 : 0}",
+          "striped": true,
+          "label": "当前状态",
+          "animate": true,
+          "width": "150px"
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "age",
           "type": "k8sAge"
