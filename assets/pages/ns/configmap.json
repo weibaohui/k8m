@@ -9,14 +9,16 @@
   "toolbar": [
     {
       "type": "button",
-      "label": "指引",
-      "icon": "fas fa-rocket text-primary",
+      "label": "指南",
+      "icon": "fas fa-compass text-primary",
       "className": "floating-left-1",
       "actionType": "drawer",
       "drawer": {
+        "overlay": false,
         "closeOnEsc": true,
         "closeOnOutside": true,
         "size": "lg",
+        "title": "${kind}指南（ESC 关闭）",
         "body": [
           {
             "type": "service",
