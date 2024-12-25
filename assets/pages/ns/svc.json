@@ -621,18 +621,18 @@
         },
         {
           "name": "spec.type",
-          "label": "type",
+          "label": "类型",
           "type": "tpl",
           "tpl": "<% if (data.spec && data.spec.type === 'ClusterIP' && data.spec.clusterIP === 'None') { %><span class='label label-warning'>Headless</span><% } else { %><span class='label label-success'><%= data.spec.type %></span><% } %>"
         },
         {
           "name": "spec.clusterIP",
-          "label": "clusterIP",
+          "label": "集群IP",
           "type": "text"
         },
         {
           "name": "spec.ports",
-          "label": "ports",
+          "label": "端口",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -641,7 +641,7 @@
         },
         {
           "name": "spec.ipFamilyPolicy",
-          "label": "ipFamily",
+          "label": "IP协议栈",
           "type": "map",
           "map": {
             "SingleStack": "<span class='label label-success'>SingleStack</span>",
@@ -651,7 +651,7 @@
         },
         {
           "name": "spec.ipFamilies",
-          "label": "ipFamilies",
+          "label": "IP协议栈集",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -680,7 +680,7 @@
         },
         {
           "name": "spec.selector",
-          "label": "selector",
+          "label": "POD选择器",
           "type": "tpl",
           "tpl": "<i class='fa fa-sitemap text-primary'></i>",
           "popOver": {
@@ -700,7 +700,7 @@
         },
         {
           "name": "spec.clusterIPs",
-          "label": "clusterIPs",
+          "label": "集群IP集",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -709,7 +709,7 @@
         },
         {
           "name": "spec.sessionAffinity",
-          "label": "session",
+          "label": "会话亲和性",
           "type": "mapping",
           "map": {
             "ClientIP": "<span class='label label-danger'>ClientIP</span>",
