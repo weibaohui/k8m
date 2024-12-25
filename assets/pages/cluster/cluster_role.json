@@ -438,7 +438,7 @@
         },
         {
           "name": "rules",
-          "label": "rules",
+          "label": "规则",
           "type": "tpl",
           "tpl": "<strong class='text-green-500'>${rules.length}</strong> "
         },
