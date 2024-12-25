@@ -5,45 +5,53 @@
     "group": "scheduling.k8s.io",
     "version": "v1"
   },
-  "toolbar": [
+  "body": [
     {
-      "type": "button",
-      "label": "指南",
-      "icon": "fas fa-compass text-primary",
-      "className": "floating-left-1",
-      "actionType": "drawer",
-      "drawer": {
-        "overlay": false,
-        "closeOnEsc": true,
-        "closeOnOutside": true,
-        "size": "lg",
-        "title": "${kind}指南（ESC 关闭）",
-        "body": [
-          {
-            "type": "service",
-            "api": "post:/k8s/chat/resource",
-            "data": {
-              "kind": "${kind}",
-              "group": "${group}",
-              "version": "${version}"
-            },
+      "type": "container",
+      "className": "floating-toolbar",
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "${kind}",
+          "className": "mr-2"
+        },
+        {
+          "type": "button",
+          "label": "指南",
+          "icon": "fas fa-compass text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind}指南（ESC 关闭）",
             "body": [
               {
-                "type": "markdown",
-                "value": "${result|raw}",
-                "options": {
-                  "linkify": true,
-                  "html": true,
-                  "breaks": true
-                }
+                "type": "service",
+                "api": "post:/k8s/chat/resource",
+                "data": {
+                  "kind": "${kind}",
+                  "group": "${group}",
+                  "version": "${version}"
+                },
+                "body": [
+                  {
+                    "type": "markdown",
+                    "value": "${result|raw}",
+                    "options": {
+                      "linkify": true,
+                      "html": true,
+                      "breaks": true
+                    }
+                  }
+                ]
               }
             ]
           }
-        ]
-      }
-    }
-  ],
-  "body": [
+        }
+      ]
+    },
     {
       "type": "crud",
       "id": "detailCRUD",

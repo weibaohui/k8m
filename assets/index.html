@@ -29,8 +29,9 @@
             margin: 0;
             padding: 0;
         }
+
         /*让下拉菜单的图标好看一些*/
-        .cxd-DropDown-menu .cxd-Button-icon{
+        .cxd-DropDown-menu .cxd-Button-icon {
             margin-right: 10px;
         }
 
@@ -39,17 +40,18 @@
             display: none;
         }
 
-        .floating-left-1 {
+        .floating-toolbar {
             position: fixed;
-            left: 220px; /* 距离左边220px */
-            top: 8px; /* 距离上边8px */
-            z-index: 1400; /* 在浮动条上，在弹出窗口下 */
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            left: 220px; /* 距离左边 */
+            top: 0; /* 距离顶部 */
+            z-index: 1400; /* 确保显示在上层 */
+            display: flex;
+            align-items: center;
+            background: #f7f8fa;
             padding: 10px;
-            cursor: pointer;
+            height: 50px;
         }
+
 
     </style>
 </head>
