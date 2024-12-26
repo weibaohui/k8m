@@ -181,8 +181,7 @@ func Cron(c *gin.Context) {
 	prompt := fmt.Sprintf(
 		`我们一起合作了k8m这个k8s AI dashboard,我们要一起面对用户，解决用户的问题。
 		\n当前用户正在浏览k8s cronjob 中的schedule 表达式：%s。
-		\n请你作为k8s技术专家，对 %s 这个表达式进行分析。
-		要求包括表达式说明、使用场景、常见问题等你认为对用户有帮助的信息。
+		\n请你作为k8s技术专家，对 %s 这个表达式进行分析，给出详细的解释。
 		\n注意：
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
@@ -194,7 +193,6 @@ func Cron(c *gin.Context) {
 		data.Cron, data.Cron)
 
 	result := chatService.Chat(prompt)
-	result = markdownToHTML(result)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
@@ -219,7 +217,6 @@ func Log(c *gin.Context) {
 	prompt := fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(data))
 
 	result := chatService.Chat(prompt)
-	result = markdownToHTML(result)
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
