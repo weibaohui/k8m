@@ -602,7 +602,7 @@
                 },
                 {
                   "type": "button",
-                  "icon": "fas fa-play",
+                  "icon": "fas fa-play text-primary",
                   "actionType": "ajax",
                   "label": "继续",
                   "confirmText": "您确认继续?",
@@ -752,8 +752,8 @@
           "label": "暂停",
           "type": "mapping",
           "map": {
-            "false": "<span class='label label-success'>normal</span>",
-            "true": "<span class='label label-danger'>suspend</span>"
+            "false": "<span class='label label-success'>正常调度</span>",
+            "true": "<span class='label label-danger'>暂停调度</span>"
           }
         },
         {
