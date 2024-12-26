@@ -517,7 +517,7 @@
         },
         {
           "name": "metadata.creationTimestamp",
-          "label": "存活",
+          "label": "存在时长",
           "type": "k8sAge"
         }
       ]
