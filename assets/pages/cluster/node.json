@@ -634,6 +634,7 @@
           "label": "名称",
           "type": "text",
           "copyable": true,
+          "width": "200px",
           "searchable": {
             "type": "input-text",
             "name": "metadata.name",
@@ -693,6 +694,7 @@
         {
           "name": "status.conditions",
           "label": "条件",
+          "width": "100px",
           "type": "k8sConditions"
         },
         {
@@ -708,6 +710,7 @@
         {
           "name": "status.nodeInfo.osImage",
           "label": "镜像",
+          "width": "200px",
           "type": "text"
         },
         {
