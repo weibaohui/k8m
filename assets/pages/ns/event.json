@@ -102,6 +102,14 @@
         "showBtnToolbar": false
       },
       "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
         "bulkActions",
         "reload",
         {
