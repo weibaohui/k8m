@@ -530,7 +530,7 @@
                 {
                   "type": "button",
                   "label": "导入configmap",
-                  "icon": "fa fa-upload",
+                  "icon": "fa fa-upload text-primary",
                   "actionType": "dialog",
                   "dialog": {
                     "closeOnEsc": true,
