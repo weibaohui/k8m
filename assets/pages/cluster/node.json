@@ -435,7 +435,7 @@
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "size": "xl",
-                    "title": "Event   (ESC 关闭)",
+                    "title": "查看事件   (ESC 关闭)",
                     "body": [
                       {
                         "type": "crud",
@@ -463,7 +463,7 @@
                         "columns": [
                           {
                             "type": "operation",
-                            "label": "action",
+                            "label": "操作",
                             "buttons": [
                               {
                                 "type": "button",
@@ -508,7 +508,7 @@
                           },
                           {
                             "name": "type",
-                            "label": "type",
+                            "label": "类型",
                             "filterable": {
                               "options": [
                                 "Normal",
@@ -523,30 +523,30 @@
                           },
                           {
                             "name": "reason",
-                            "label": "reason",
+                            "label": "原因",
                             "type": "text"
                           },
                           {
                             "name": "field",
-                            "label": "fieldPath",
+                            "label": "关联字段",
                             "type": "tpl",
                             "tpl": "${regarding.fieldPath}"
                           },
                           {
                             "name": "source",
-                            "label": "source",
+                            "label": "事件来源",
                             "type": "tpl",
                             "tpl": "${reportingController} ${reportingInstance}"
                           },
                           {
                             "name": "note",
-                            "label": "note",
+                            "label": "说明",
                             "type": "text",
                             "searchable": true
                           },
                           {
                             "name": "metadata.creationTimestamp",
-                            "label": "age",
+                            "label": "存活",
                             "type": "k8sAge"
                           }
                         ]
