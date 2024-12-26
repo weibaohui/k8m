@@ -575,7 +575,7 @@
                                   "body": [
                                     {
                                       "type": "markdown",
-                                      "value": "${result}",
+                                      "value": "${result|raw}",
                                       "options": {
                                         "linkify": true,
                                         "html": true,
