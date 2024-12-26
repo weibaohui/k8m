@@ -289,16 +289,16 @@
                   "type": "button",
                   "icon": "fas fa-lock text-info",
                   "actionType": "ajax",
-                  "label": "隔离",
-                  "confirmText": "您确认要隔离(cordon) $metadata.name?",
+                  "label": "隔离节点",
+                  "confirmText": "您确认要 隔离(cordon) $metadata.name?",
                   "api": "post:/k8s/node/cordon/name/$metadata.name"
                 },
                 {
                   "type": "button",
                   "icon": "fas fa-unlock text-success",
                   "actionType": "ajax",
-                  "label": "恢复",
-                  "confirmText": "您确认要恢复(uncordon) $metadata.name?",
+                  "label": "解除隔离",
+                  "confirmText": "您确认要 解除隔离(uncordon) $metadata.name?",
                   "api": "post:/k8s/node/uncordon/name/$metadata.name"
                 },
                 {
@@ -655,12 +655,9 @@
         },
         {
           "name": "spec.unschedulable",
-          "label": "隔离状态",
-          "type": "mapping",
-          "map": {
-            "true": "<span class='label label-danger'>SchedulingDisabled</span>",
-            "*": "<span class='label label-success'>Normal</span>"
-          }
+          "label": "不可调度",
+          "type": "tpl",
+          "tpl": "<span class='label label-${spec.unschedulable === true ? 'danger' : 'success'}'>${spec.unschedulable === true ? '关闭调度' : '调度正常'}</span>"
         },
         {
           "name": "spec.taints",
