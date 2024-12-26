@@ -161,14 +161,14 @@
                 "closeOnEsc": true,
                 "closeOnOutside": true,
                 "size": "lg",
-                "title": "SmartEdit",
+                "title": "Yaml管理",
                 "body": [
                   {
                     "type": "tabs",
                     "tabsMode": "tiled",
                     "tabs": [
                       {
-                        "title": "View",
+                        "title": "查看编辑",
                         "body": [
                           {
                             "type": "service",
@@ -201,7 +201,7 @@
                         ]
                       },
                       {
-                        "title": "Doc",
+                        "title": "文档",
                         "body": [
                           {
                             "type": "page",
