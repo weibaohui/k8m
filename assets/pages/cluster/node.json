@@ -306,7 +306,7 @@
                   "icon": "fas fa-wind text-danger",
                   "actionType": "ajax",
                   "label": "驱逐",
-                  "confirmText": "您确认要驱逐Drain$metadata.name?",
+                  "confirmText": "您确认要驱逐(drain)$metadata.name?",
                   "api": "post:/k8s/node/drain/name/$metadata.name"
                 },
                 {
@@ -654,7 +654,7 @@
         },
         {
           "name": "spec.unschedulable",
-          "label": "cordon",
+          "label": "隔离状态",
           "type": "mapping",
           "map": {
             "true": "<span class='label label-danger'>SchedulingDisabled</span>",
@@ -663,7 +663,7 @@
         },
         {
           "name": "spec.taints",
-          "label": "taints",
+          "label": "污点",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -697,32 +697,32 @@
         },
         {
           "name": "status.nodeInfo.architecture",
-          "label": "arch",
+          "label": "节点架构",
           "type": "text"
         },
         {
           "name": "status.nodeInfo.kubeletVersion",
-          "label": "version",
+          "label": "kubelet版本",
           "type": "text"
         },
         {
           "name": "status.nodeInfo.osImage",
-          "label": "osImage",
+          "label": "镜像",
           "type": "text"
         },
         {
           "name": "status.nodeInfo.kernelVersion",
-          "label": "kernelVersion",
+          "label": "内核版本",
           "type": "text"
         },
         {
           "name": "status.nodeInfo.containerRuntimeVersion",
-          "label": "cri",
+          "label": "CRI版本",
           "type": "text"
         },
         {
           "name": "status.addresses",
-          "label": "addresses",
+          "label": "IP",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -731,7 +731,7 @@
         },
         {
           "name": "status.images",
-          "label": "images",
+          "label": "容器镜像",
           "type": "tpl",
           "tpl": "${count(status.images)}"
         },
