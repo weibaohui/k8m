@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/russross/blackfriday/v2"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
@@ -12,10 +11,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func markdownToHTML(md string) string {
-	html := blackfriday.Run([]byte(md))
-	return string(html)
-}
 func Chat(c *gin.Context) {
 	q := c.Query("q")
 	chatService := service.ChatService()
