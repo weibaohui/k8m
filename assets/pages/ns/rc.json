@@ -3,7 +3,7 @@
   "data": {
     "ns": "${ls:selectedNs||'default'}",
     "kind": "ReplicationController",
-    "group": "apps",
+    "group": "",
     "version": "v1"
   },
   "body": [
