@@ -564,7 +564,7 @@
         },
         {
           "name": "type",
-          "label": "type",
+          "label": "类型",
           "searchable": {
             "type": "select",
             "options": [
@@ -586,7 +586,7 @@
         },
         {
           "name": "reason",
-          "label": "reason",
+          "label": "原因",
           "type": "mapping",
           "map": {
             "Pulled": "<span class='label label-primary'>Pulled</span>",
@@ -616,25 +616,25 @@
         },
         {
           "name": "object",
-          "label": "object",
+          "label": "关联对象",
           "type": "tpl",
           "tpl": "${regarding.kind}/${regarding.name}"
         },
         {
           "name": "field",
-          "label": "sub",
+          "label": "关联字段",
           "type": "tpl",
           "tpl": "${regarding.fieldPath}"
         },
         {
           "name": "source",
-          "label": "source",
+          "label": "事件来源",
           "type": "tpl",
           "tpl": "${reportingController} ${reportingInstance}"
         },
         {
           "name": "note",
-          "label": "note",
+          "label": "说明",
           "type": "text",
           "searchable": true
         },
