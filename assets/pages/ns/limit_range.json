@@ -576,6 +576,43 @@
           }
         },
         {
+          "name": "spec.limits",
+          "label": "限制范围",
+          "type": "tpl",
+          "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><span class='label label-primary'><%= data.spec.limits[i].type || '-' %></span><% } %>",
+          "popOver": {
+            "title": "${metadata.name}",
+            "body": {
+              "type": "tpl",
+              "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><b>类型:</b> <%= data.spec.limits[i].type || '-' %><br><% if (data.spec.limits[i].min) { %><b>最小值:</b> <strong class='text-blue-500 font-black'>CPU: <%= (data.spec.limits[i].min.cpu || '-') %></strong>, <strong class='text-green-500 font-black'>内存: <%= (data.spec.limits[i].min.memory || '-') %></strong>, <strong class='text-purple-500 font-black'>存储: <%= (data.spec.limits[i].min.storage || '-') %></strong><br><% } %><% if (data.spec.limits[i].max) { %><b>最大值:</b> <strong class='text-blue-500 font-black'>CPU: <%= (data.spec.limits[i].max.cpu || '-') %></strong>, <strong class='text-green-500 font-black'>内存: <%= (data.spec.limits[i].max.memory || '-') %></strong>, <strong class='text-purple-500 font-black'>存储: <%= (data.spec.limits[i].max.storage || '-') %></strong><br><% } %><% if (data.spec.limits[i].defaultRequest) { %><b>默认请求:</b> <strong class='text-blue-500 font-black'>CPU: <%= (data.spec.limits[i].defaultRequest.cpu || '-') %></strong>, <strong class='text-green-500 font-black'>内存: <%= (data.spec.limits[i].defaultRequest.memory || '-') %></strong>, <strong class='text-purple-500 font-black'>存储: <%= (data.spec.limits[i].defaultRequest.storage || '-') %></strong><br><% } %><% if (data.spec.limits[i].default) { %><b>默认值:</b> <strong class='text-blue-500 font-black'>CPU: <%= (data.spec.limits[i].default.cpu || '-') %></strong>, <strong class='text-green-500 font-black'>内存: <%= (data.spec.limits[i].default.memory || '-') %></strong>, <strong class='text-purple-500 font-black'>存储: <%= (data.spec.limits[i].default.storage || '-') %></strong><br><% } %><% if (data.spec.limits[i].maxLimitRequestRatio) { %><b>最大限制/请求比:</b> <strong class='text-blue-500 font-black'>CPU: <%= (data.spec.limits[i].maxLimitRequestRatio.cpu || '-') %></strong>, <strong class='text-green-500 font-black'>内存: <%= (data.spec.limits[i].maxLimitRequestRatio.memory || '-') %></strong>, <strong class='text-purple-500 font-black'>存储: <%= (data.spec.limits[i].maxLimitRequestRatio.storage || '-') %></strong><br><% } %><% if (i < data.spec.limits.length - 1) { %><br><% } %><% } %>"
+            }
+          }
+        },
+        {
+          "label": "区间",
+          "name": "区间",
+          "type": "tpl",
+          "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><% var minCpu = data.spec.limits[i]?.min?.cpu || null; var maxCpu = data.spec.limits[i]?.max?.cpu || null; var minMemory = data.spec.limits[i]?.min?.memory || null; var maxMemory = data.spec.limits[i]?.max?.memory || null; var minStorage = data.spec.limits[i]?.min?.storage || null; var maxStorage = data.spec.limits[i]?.max?.storage || null; %><% if (minCpu || maxCpu) { %><strong class='text-blue-500 font-black'><%= minCpu || '0' %> <处理器< <%= maxCpu || '♾️' %></strong><br><% } %><% if (minMemory || maxMemory) { %><strong class='text-green-500 font-black'><%= minMemory || '0' %> <内存< <%= maxMemory || '♾️' %></strong><br><% } %><% if (minStorage || maxStorage) { %><strong class='text-purple-500 font-black'><%= minStorage || '0' %> <存储< <%= maxStorage || '♾️' %></strong><br><% } %><% if (i < data.spec.limits.length - 1) { %><br><% } %><% } %>"
+        },
+        {
+          "label": "默认值<br>limit=request",
+          "name": "limits",
+          "type": "tpl",
+          "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><% var defaultCpu = data.spec.limits[i]?.default?.cpu || null; var defaultMemory = data.spec.limits[i]?.default?.memory || null; var defaultStorage = data.spec.limits[i]?.default?.storage || null; %><% if (defaultCpu) { %><strong class='text-blue-500 font-black'>CPU: <%= defaultCpu %></strong><br><% } %><% if (defaultMemory) { %><strong class='text-green-500 font-black'>内存: <%= defaultMemory %></strong><br><% } %><% if (defaultStorage) { %><strong class='text-purple-500 font-black'>存储: <%= defaultStorage %></strong><br><% } %><% if (i < data.spec.limits.length - 1) { %><br><% } %><% } %>"
+        },
+        {
+          "label": "默认请求值<br>request",
+          "name": "defaultRequest",
+          "type": "tpl",
+          "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><% var defaultRequestCpu = data.spec.limits[i]?.defaultRequest?.cpu || null; var defaultRequestMemory = data.spec.limits[i]?.defaultRequest?.memory || null; var defaultRequestStorage = data.spec.limits[i]?.defaultRequest?.storage || null; %><% if (defaultRequestCpu || defaultRequestMemory || defaultRequestStorage) { %><% if (defaultRequestCpu) { %><strong class='text-blue-500 font-black'>CPU: <%= defaultRequestCpu %></strong><br><% } %><% if (defaultRequestMemory) { %><strong class='text-green-500 font-black'>内存: <%= defaultRequestMemory %></strong><br><% } %><% if (defaultRequestStorage) { %><strong class='text-purple-500 font-black'>存储: <%= defaultRequestStorage %></strong><br><% } %><% if (i < data.spec.limits.length - 1) { %><br><% } %><% } %><% } %>"
+        },
+        {
+          "label": "请求限制<br>最大倍率",
+          "name": "maxLimitRequestRatio",
+          "type": "tpl",
+          "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><% var maxLimitRequestRatioCpu = data.spec.limits[i]?.maxLimitRequestRatio?.cpu || null; var maxLimitRequestRatioMemory = data.spec.limits[i]?.maxLimitRequestRatio?.memory || null; var maxLimitRequestRatioStorage = data.spec.limits[i]?.maxLimitRequestRatio?.storage || null; %><% if (maxLimitRequestRatioCpu || maxLimitRequestRatioMemory || maxLimitRequestRatioStorage) { %><% if (maxLimitRequestRatioCpu) { %><strong class='text-blue-500 font-black'>CPU: <%= maxLimitRequestRatioCpu %></strong><br><% } %><% if (maxLimitRequestRatioMemory) { %><strong class='text-green-500 font-black'>内存: <%= maxLimitRequestRatioMemory %></strong><br><% } %><% if (maxLimitRequestRatioStorage) { %><strong class='text-purple-500 font-black'>存储: <%= maxLimitRequestRatioStorage %></strong><br><% } %><% if (i < data.spec.limits.length - 1) { %><br><% } %><% } %><% } %>"
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
