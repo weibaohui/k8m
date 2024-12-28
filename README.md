@@ -260,6 +260,41 @@ k8m 提供集成的 YAML 浏览、编辑和文档查看功能，支持自动翻�
 日常运维中，Pod 内命令操作不可避免。借助 AI，您只需输入需求描述，k8m 即可自动生成合适的命令供参考，减少查找时间，提高效率。  
 ![命令自动生成](images/AI-command-3.png)
 
+ ** v0.0.15重磅更新 ** 
+
+1. 所有页面增加资源使用指南。启用AI信息聚合。包括资源说明、使用场景（举例说明）、最佳实践、典型示例（配合前面的场景举例，编写带有中文注释的yaml示例）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等信息，帮助用户理解k8s
+![输入图片说明](https://foruda.gitee.com/images/1735400167081694530/e45b55ef_77493.png "屏幕截图")
+1. 所有资源页面增加搜索功能。部分页面增高频过滤字段搜索。
+![输入图片说明](https://foruda.gitee.com/images/1735399974060039020/11bce030_77493.png "屏幕截图")
+1. 改进LimitRange信息展示模式
+![LimitRange](https://foruda.gitee.com/images/1735399148267940416/b4faafbd_77493.png "屏幕截图")
+1. 改进状态显示样式
+![Deployment](https://foruda.gitee.com/images/1735399222088964660/131eda03_77493.png "屏幕截图")
+1. 统一操作菜单
+![操作菜单](https://foruda.gitee.com/images/1735399278081665887/b01c506c_77493.png "屏幕截图")
+1. Ingress页面增加域名转发规则信息
+![输入图片说明](https://foruda.gitee.com/images/1735399689648549556/3d4f8d78_77493.png "屏幕截图")
+1. 改进标签显示样式，鼠标悬停展示
+![输入图片说明](https://foruda.gitee.com/images/1735399387990917764/d06822cb_77493.png "屏幕截图")
+1. 优化资源状态样式更小更紧致
+![输入图片说明](https://foruda.gitee.com/images/1735399419170194492/268b25c8_77493.png "屏幕截图")
+1. 丰富Service展示信息
+![输入图片说明](https://foruda.gitee.com/images/1735399493417833664/fa968343_77493.png "屏幕截图")
+1.  突出显示未就绪endpoints
+![输入图片说明](https://foruda.gitee.com/images/1735399531801079962/9a13cd50_77493.png "屏幕截图")
+1.  endpoints鼠标悬停展开未就绪IP列表
+![输入图片说明](https://foruda.gitee.com/images/1735399560648695064/8079b5cf_77493.png "屏幕截图")
+1.  endpointslice 突出显示未ready的IP及其对应的POD，
+![输入图片说明](https://foruda.gitee.com/images/1735399614582278222/c1f40aa0_77493.png "屏幕截图")
+1.  角色增加延展信息
+![输入图片说明](https://foruda.gitee.com/images/1735399896080683883/3e9a7359_77493.png "屏幕截图")
+1.  角色与主体对应关系
+![输入图片说明](https://foruda.gitee.com/images/1735399923738735980/c5730152_77493.png "屏幕截图")
+1.  界面全量中文化，k8s资源翻译为中文，方便广大用户使用。
+![输入图片说明](https://foruda.gitee.com/images/1735400283406692980/c778158c_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1735400313832429462/279018dc_77493.png "屏幕截图")
+
+
 ### HELP & SUPPORT
 如果你有任何进一步的问题或需要额外的帮助，请随时与我联系！
 
