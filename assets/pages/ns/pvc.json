@@ -690,7 +690,7 @@
         },
         {
           "name": "spec.volumeName",
-          "label": "volume",
+          "label": "存储卷",
           "type": "text"
         },
         {
@@ -750,4 +750,3 @@
     }
   ]
 }
-
