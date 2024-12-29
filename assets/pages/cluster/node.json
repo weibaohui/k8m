@@ -294,6 +294,12 @@
               "icon": "fa fa-ellipsis-h",
               "buttons": [
                 {
+                  "type": "link",
+                  "icon": "fas fa-cube text-primary",
+                  "body": "实例列表",
+                  "href": "/index.html#/pod/list?spec[nodeName]=${metadata.name}"
+                },
+                {
                   "type": "button",
                   "icon": "fas fa-lock text-info",
                   "actionType": "ajax",
@@ -631,12 +637,6 @@
                       }
                     ]
                   }
-                },
-                {
-                  "type": "link",
-                  "icon": "fas fa-cube text-primary",
-                  "body": "容器组实例",
-                  "href": "/index.html#/pod/list?spec[nodeName]=${metadata.name}"
                 }
               ]
             }
