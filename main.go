@@ -56,7 +56,7 @@ func Init() {
 		// 初始化kubectl 连接
 		_, err = kom.Clusters().RegisterByPathWithID(cfg.KubeConfig, "default")
 		if err != nil {
-			klog.Fatalf("外部集群初始化失败%v", err)
+			klog.Fatalf("InCluster集群初始化失败、外部集群初始化失败%v", err)
 		}
 	}
 
