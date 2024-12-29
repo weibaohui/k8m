@@ -44,7 +44,7 @@ docker:
      	   --build-arg API_KEY=$(API_KEY) \
      	   --build-arg API_URL=$(API_URL) \
      	   --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x,linux/riscv64 \
-     	   -t weibh/k8m:$(VERSION) -f Dockerfile . --push
+     	   -t weibh/k8m:$(VERSION) -f Dockerfile . --load
 
 
 
