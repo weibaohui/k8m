@@ -185,7 +185,7 @@ func main() {
 
 	}
 
-	klog.Infof("listen and serve on 0.0.0.0:%d", flag.Init().Port)
+	klog.Infof("启动成功，k8m服务监听0.0.0.0:%d", flag.Init().Port)
 	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))
 	if err != nil {
 		klog.Fatalf("Error %v", err)
