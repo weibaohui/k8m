@@ -589,8 +589,14 @@
                             "label": "类型",
                             "filterable": {
                               "options": [
-                                "Normal",
-                                "Warning"
+                                {
+                                  "label": "正常 ",
+                                  "value": "Normal"
+                                },
+                                {
+                                  "label": "告警 ",
+                                  "value": "Warning"
+                                }
                               ]
                             },
                             "type": "mapping",
