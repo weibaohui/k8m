@@ -784,8 +784,7 @@
                                 }
                               }
                             ],
-                            "toolbar": [
-                            ],
+                            "toolbar": [],
                             "body": [
                               {
                                 "type": "service",
@@ -1223,14 +1222,15 @@
         },
         {
           "name": "status.podIP",
-          "label": "ip",
+          "label": "容器组IP",
           "type": "text",
           "searchable": true
         },
         {
           "name": "spec.nodeName",
-          "label": "节点",
-          "type": "text"
+          "label": "节点名称",
+          "type": "text",
+          "searchable": true
         },
         {
           "name": "metadata.creationTimestamp",
@@ -1241,4 +1241,3 @@
     }
   ]
 }
-
