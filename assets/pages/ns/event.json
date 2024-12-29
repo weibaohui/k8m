@@ -568,20 +568,32 @@
           "searchable": {
             "type": "select",
             "options": [
-              "Normal",
-              "Warning"
+              {
+                "label": "正常 ",
+                "value": "Normal"
+              },
+              {
+                "label": "告警 ",
+                "value": "Warning"
+              }
             ]
           },
           "filterable": {
             "options": [
-              "Normal",
-              "Warning"
+              {
+                "label": "正常 ",
+                "value": "Normal"
+              },
+              {
+                "label": "告警 ",
+                "value": "Warning"
+              }
             ]
           },
           "type": "mapping",
           "map": {
-            "Normal": "<span class='label label-info'>Normal</span>",
-            "Warning": "<span class='label label-danger'>Warning</span>"
+            "Normal": "<span class='label label-info'>正常</span>",
+            "Warning": "<span class='label label-danger'>告警</span>"
           }
         },
         {
