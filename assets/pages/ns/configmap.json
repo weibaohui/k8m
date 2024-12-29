@@ -621,6 +621,40 @@
           }
         },
         {
+          "label": "文件列表",
+          "type": "each",
+          "name": "data",
+          "items": {
+            "type": "button",
+            "level": "link",
+            "label": "${key}",
+            "actionType": "drawer",
+            "drawer": {
+              "size": "lg",
+              "closeOnEsc": true,
+              "closeOnOutside": true,
+              "title": "查看 ${metadata.name}-${key} 文件内容 (ESC 关闭)",
+              "body": [
+                {
+                  "type": "editor",
+                  "name": "yaml",
+                  "size": "xxl",
+                  "allowFullscreen": true,
+                  "placeholder": "loading",
+                  "language": "yaml",
+                  "value": "${value}",
+                  "options": {
+                    "wordWrap": "on",
+                    "scrollbar": {
+                      "vertical": "auto"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
@@ -629,4 +663,3 @@
     }
   ]
 }
-
