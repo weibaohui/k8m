@@ -696,7 +696,7 @@
         },
         {
           "name": "spec.ports",
-          "label": "端口",
+          "label": "端口<br>访问端口[:节点端口]/协议 => 容器端口",
           "type": "each",
           "items": {
             "type": "tpl",
