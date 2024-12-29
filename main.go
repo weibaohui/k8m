@@ -52,7 +52,7 @@ func Init() {
 	// 首先尝试读取 in-cluster 配置
 	_, err := kom.Clusters().RegisterInCluster()
 	if err != nil {
-		klog.Errorf("InCluster集群初始化失败%v", err)
+		klog.Errorf("InCluster集群初始化失败%v，尝试使用kubeconfig文件初始化", err)
 		// 初始化kubectl 连接
 		_, err = kom.Clusters().RegisterByPathWithID(cfg.KubeConfig, "default")
 		if err != nil {
