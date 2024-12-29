@@ -685,18 +685,18 @@
         },
         {
           "name": "spec.type",
-          "label": "类型",
+          "label": "访问类型",
           "type": "tpl",
           "tpl": "<% if (data.spec && data.spec.type === 'ClusterIP' && data.spec.clusterIP === 'None') { %><span class='label label-warning'>Headless</span><% } else { %><span class='label label-success'><%= data.spec.type %></span><% } %>"
         },
         {
           "name": "spec.clusterIP",
-          "label": "集群IP",
+          "label": "访问地址",
           "type": "text"
         },
         {
           "name": "spec.ports",
-          "label": "端口<br>访问端口[:节点端口]/协议 => 容器端口",
+          "label": "访问端口<br>访问端口[:节点端口]/协议 => 容器端口",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -763,21 +763,21 @@
           }
         },
         {
-          "name": "spec.clusterIPs",
-          "label": "集群IP集",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "${item}"
-          }
-        },
-        {
           "name": "spec.sessionAffinity",
           "label": "会话亲和性",
           "type": "mapping",
           "map": {
             "ClientIP": "<span class='label label-danger'>ClientIP</span>",
             "None": "<span class='label label-success'>None</span>"
+          }
+        },
+        {
+          "name": "spec.clusterIPs",
+          "label": "访问IP集",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "${item}"
           }
         },
         {
