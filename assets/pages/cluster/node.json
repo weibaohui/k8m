@@ -631,6 +631,12 @@
                       }
                     ]
                   }
+                },
+                {
+                  "type": "link",
+                  "icon": "fas fa-cube text-primary",
+                  "body": "容器组实例",
+                  "href": "/index.html#/pod/list?spec[nodeName]=${metadata.name}"
                 }
               ]
             }

@@ -125,7 +125,7 @@
         }
       ],
       "loadDataOnce": true,
-      "syncLocation": false,
+      "syncLocation": true,
       "initFetch": true,
       "perPage": 10,
       "bulkActions": [
