@@ -620,8 +620,9 @@
         {
           "label": "区间",
           "name": "区间",
+          "width": "150px",
           "type": "tpl",
-          "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><% var minCpu = data.spec.limits[i]?.min?.cpu || null; var maxCpu = data.spec.limits[i]?.max?.cpu || null; var minMemory = data.spec.limits[i]?.min?.memory || null; var maxMemory = data.spec.limits[i]?.max?.memory || null; var minStorage = data.spec.limits[i]?.min?.storage || null; var maxStorage = data.spec.limits[i]?.max?.storage || null; %><% if (minCpu || maxCpu) { %><strong class='text-blue-500 font-black'><%= minCpu || '0' %> <处理器< <%= maxCpu || '♾️' %></strong><br><% } %><% if (minMemory || maxMemory) { %><strong class='text-green-500 font-black'><%= minMemory || '0' %> <内存< <%= maxMemory || '♾️' %></strong><br><% } %><% if (minStorage || maxStorage) { %><strong class='text-purple-500 font-black'><%= minStorage || '0' %> <存储< <%= maxStorage || '♾️' %></strong><br><% } %><% if (i < data.spec.limits.length - 1) { %><br><% } %><% } %>"
+          "tpl": "<% for (var i = 0; i < data.spec.limits.length; i++) { %><% var minCpu = data.spec.limits[i]?.min?.cpu || null; var maxCpu = data.spec.limits[i]?.max?.cpu || null; var minMemory = data.spec.limits[i]?.min?.memory || null; var maxMemory = data.spec.limits[i]?.max?.memory || null; var minStorage = data.spec.limits[i]?.min?.storage || null; var maxStorage = data.spec.limits[i]?.max?.storage || null; %><% if (minCpu || maxCpu) { %><strong class='text-blue-500 font-black'><%= minCpu || '0' %> ≦处理器≦ <%= maxCpu || '♾️' %></strong><br><% } %><% if (minMemory || maxMemory) { %><strong class='text-green-500 font-black'><%= minMemory || '0' %> ≦内存≦ <%= maxMemory || '♾️' %></strong><br><% } %><% if (minStorage || maxStorage) { %><strong class='text-purple-500 font-black'><%= minStorage || '0' %> ≦存储≦ <%= maxStorage || '♾️' %></strong><br><% } %><% if (i < data.spec.limits.length - 1) { %><br><% } %><% } %>"
         },
         {
           "label": "默认值<br>limit=request",
