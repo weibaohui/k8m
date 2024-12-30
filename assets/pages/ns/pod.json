@@ -1181,6 +1181,7 @@
         {
           "name": "metadata.name",
           "label": "名称",
+          "width": "180px",
           "type": "text",
           "copyable": true,
           "searchable": {
@@ -1347,6 +1348,13 @@
           "label": "容器组IP",
           "type": "text",
           "searchable": true
+        },
+        {
+          "name": "网络",
+          "label": "网络",
+          "width": "150px",
+          "type": "tpl",
+          "tpl": "<% if (data.spec.hostNetwork) { %><span class='label label-danger'>主机网络</span><% } else { %><span class='label label-success'>容器网络</span><% } %>"
         },
         {
           "name": "spec.nodeName",
