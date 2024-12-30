@@ -1226,6 +1226,23 @@
           }
         },
         {
+          "name": "spec.containers",
+          "label": "容器镜像",
+          "width": "150px",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
+          }
+        },
+        {
+          "label": "资源设定",
+          "name": "资源设定",
+          "width": "150px",
+          "type": "tpl",
+          "tpl": "<% for (var i = 0; i < data.spec.containers.length; i++) { %><% var container = data.spec.containers[i]; var requests = container?.resources?.requests || {}; var limits = container?.resources?.limits || {}; var cpuRequest = requests.cpu || null; var cpuLimit = limits.cpu || null; var memoryRequest = requests.memory || null; var memoryLimit = limits.memory || null; %><% if (cpuRequest || cpuLimit || memoryRequest || memoryLimit) { %><strong>容器：<%= container.name || '未知' %></strong><br><% if (cpuRequest || cpuLimit) { %><strong class='text-blue-500 font-black'><%= cpuRequest || '0' %> ≦处理器≦ <%= cpuLimit || '♾️' %></strong><br><% } %><% if (memoryRequest || memoryLimit) { %><strong class='text-green-500 font-black'><%= memoryRequest || '0' %> ≦内存≦ <%= memoryLimit || '♾️' %></strong><br><% } %><% if (i < data.spec.containers.length - 1) { %><br><% } %><% } %><% } %>"
+        },
+        {
           "name": "status.phase",
           "label": "状态",
           "type": "mapping",
@@ -1267,7 +1284,7 @@
         },
         {
           "name": "status.containerStatuses",
-          "label": "重启",
+          "label": "重启次数",
           "type": "tpl",
           "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
         },
@@ -1324,15 +1341,6 @@
           "name": "status.conditions",
           "label": "条件",
           "type": "k8sConditions"
-        },
-        {
-          "name": "spec.containers",
-          "label": "容器",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
-          }
         },
         {
           "name": "status.podIP",
