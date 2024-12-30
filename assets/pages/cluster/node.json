@@ -300,6 +300,48 @@
                   "href": "/index.html#/pod/list?spec[nodeName]=${metadata.name}"
                 },
                 {
+                  "label": "查看 Usage",
+                  "type": "button",
+                  "icon": "fas fa-percentage text-primary",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "资源使用详情",
+                    "body": {
+                      "type": "service",
+                      "api": "get:/k8s/node/usage/name/${metadata.name}",
+                      "body": {
+                        "type": "table",
+                        "columns": [
+                          {
+                            "label": "资源类型",
+                            "name": "resourceType"
+                          },
+                          {
+                            "label": "总量",
+                            "name": "total"
+                          },
+                          {
+                            "label": "请求量",
+                            "name": "request"
+                          },
+                          {
+                            "label": "请求占比 (%)",
+                            "name": "requestFraction"
+                          },
+                          {
+                            "label": "限制量",
+                            "name": "limit"
+                          },
+                          {
+                            "label": "限制占比 (%)",
+                            "name": "limitFraction"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
                   "type": "button",
                   "icon": "fas fa-lock text-info",
                   "actionType": "ajax",
