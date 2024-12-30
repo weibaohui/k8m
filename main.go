@@ -138,6 +138,7 @@ func main() {
 		api.POST("/node/drain/name/:name", node.Drain)
 		api.POST("/node/cordon/name/:name", node.Cordon)
 		api.POST("/node/uncordon/name/:name", node.UnCordon)
+		api.GET("/node/usage/name/:name", node.Usage)
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
