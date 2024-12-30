@@ -731,10 +731,60 @@
         {
           "name": "spec.taints",
           "label": "污点",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "${key}${value?'='+value:''}:${effect}<br>"
+          "type": "tpl",
+          "tpl": "${spec.taints ? '<i class=\"fa fa-exclamation-triangle text-danger\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} Taints (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "panel",
+                        "title": "提示",
+                        "body": {
+                          "type": "tpl",
+                          "tpl": "<div><div><strong>禁止调度：</strong>NoSchedule - Pod 不会调度到此节点</div><div><strong>优先不调度：</strong>PreferNoSchedule - 尽量避免调度，但不强制</div><div><strong>不可执行：</strong> NoExecute - 驱逐现有 Pod，并禁止新 Pod 调度</div></div>"
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "source": "${spec.taints}",
+                        "columns": [
+                          {
+                            "name": "key",
+                            "label": "键"
+                          },
+                          {
+                            "name": "value",
+                            "label": "值",
+                            "placeholder": "-"
+                          },
+                          {
+                            "name": "effect",
+                            "label": "效果",
+                            "type": "mapping",
+                            "map": {
+                              "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
+                              "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
+                              "NoExecute": "<span class='label label-danger'>不可执行</span>"
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
           }
         },
         {
