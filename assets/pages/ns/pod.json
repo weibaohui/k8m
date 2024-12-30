@@ -1126,7 +1126,6 @@
                       "api": "get:/k8s/pod/usage/ns/${metadata.namespace}/name/${metadata.name}",
                       "body": {
                         "type": "table",
-                        "placeholder": "无数据",
                         "columns": [
                           {
                             "label": "资源类型",
