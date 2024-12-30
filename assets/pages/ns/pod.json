@@ -1147,6 +1147,36 @@
           "type": "k8sPodReady"
         },
         {
+          "name": "status.qosClass",
+          "label": "保障等级",
+          "type": "mapping",
+          "map": {
+            "Guaranteed": "<span class='label label-success'>保证型</span>",
+            "Burstable": "<span class='label label-warning'>突发型</span>",
+            "BestEffort": "<span class='label label-danger'>尽力型</span>"
+          },
+          "searchable": {
+            "type": "select",
+            "name": "status.qosClass",
+            "label": "保障等级",
+            "placeholder": "选择保障等级",
+            "options": [
+              {
+                "label": "保证型",
+                "value": "Guaranteed"
+              },
+              {
+                "label": "突发型",
+                "value": "Burstable"
+              },
+              {
+                "label": "尽力型",
+                "value": "BestEffort"
+              }
+            ]
+          }
+        },
+        {
           "name": "status.phase",
           "label": "状态",
           "type": "mapping",
