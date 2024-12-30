@@ -305,7 +305,10 @@
                   "icon": "fas fa-percentage text-primary",
                   "actionType": "dialog",
                   "dialog": {
-                    "title": "资源使用详情",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "title": "资源使用详情 (ESC关闭)",
+                    "size": "lg",
                     "body": {
                       "type": "service",
                       "api": "get:/k8s/node/usage/name/${metadata.name}",
@@ -326,7 +329,9 @@
                           },
                           {
                             "label": "请求占比 (%)",
-                            "name": "requestFraction"
+                            "name": "requestFraction",
+                            "type": "tpl",
+                            "tpl": "<span class='label <% if (data.requestFraction > 80) { %>label-danger<% } else if (data.requestFraction > 50) { %>label-warning<% } else { %>label-success<% } %>'> <%= data.requestFraction %> % </span>"
                           },
                           {
                             "label": "限制量",
@@ -334,7 +339,9 @@
                           },
                           {
                             "label": "限制占比 (%)",
-                            "name": "limitFraction"
+                            "name": "limitFraction",
+                            "type": "tpl",
+                            "tpl": "<span class='label <% if (data.limitFraction > 80) { %>label-danger<% } else if (data.limitFraction > 50) { %>label-warning<% } else { %>label-success<% } %>'> <%= data.limitFraction %> % </span>"
                           }
                         ]
                       }
