@@ -300,7 +300,7 @@
                   "href": "/index.html#/pod/list?spec[nodeName]=${metadata.name}"
                 },
                 {
-                  "label": "查看 Usage",
+                  "label": "资源用量",
                   "type": "button",
                   "icon": "fas fa-percentage text-primary",
                   "actionType": "dialog",
