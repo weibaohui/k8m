@@ -183,6 +183,8 @@ func main() {
 		api.POST("/file/download", pod.DownloadFile)
 		api.POST("/file/upload", pod.UploadFile)
 		api.POST("/file/delete", pod.DeleteFile)
+		// Pod 资源使用情况
+		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 
 	}
 
