@@ -147,3 +147,14 @@ func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, 
 	}
 	sse.DownloadLog(c, logOpt, stream)
 }
+func Usage(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	usage := kom.DefaultCluster().WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		Ctl().Pod().ResourceUsageTable()
+	amis.WriteJsonData(c, usage)
+}
