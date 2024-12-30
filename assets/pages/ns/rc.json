@@ -568,8 +568,8 @@
                             },
                             "type": "mapping",
                             "map": {
-                              "Normal": "<span class='label label-success'>Normal</span>",
-                              "Warning": "<span class='label label-danger'>Warning</span>"
+                              "Normal": "<span class='label label-success'>正常</span>",
+                              "Warning": "<span class='label label-danger'>告警</span>"
                             }
                           },
                           {
