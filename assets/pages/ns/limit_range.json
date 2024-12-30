@@ -576,6 +576,35 @@
           }
         },
         {
+          "name": "metadata.annotations",
+          "label": "注解",
+          "type": "tpl",
+          "tpl": "${metadata.annotations ? '<i class=\"fa fa-note-sticky text-primary\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} annotations (ESC 关闭)",
+                    "body": {
+                      "type": "json",
+                      "source": "${metadata.annotations}",
+                      "levelExpand": 1
+                    },
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
           "name": "spec.limits",
           "label": "限制范围",
           "type": "tpl",

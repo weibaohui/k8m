@@ -562,14 +562,63 @@
           "type": "text"
         },
         {
-          "name": "metadata.creationTimestamp",
-          "label": "存在时长",
-          "type": "k8sAge"
+          "name": "metadata.labels",
+          "label": "标签",
+          "type": "tpl",
+          "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : ''}",
+          "popOver": {
+            "trigger": "hover",
+            "showIcon": false,
+            "title": "${metadata.name} labels",
+            "body": {
+              "type": "json",
+              "source": "${metadata.labels}",
+              "levelExpand": 1
+            },
+            "style": {
+              "maxWidth": "500px",
+              "width": "500px"
+            }
+          }
+        },
+        {
+          "name": "metadata.annotations",
+          "label": "注解",
+          "type": "tpl",
+          "tpl": "${metadata.annotations ? '<i class=\"fa fa-note-sticky text-primary\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} annotations (ESC 关闭)",
+                    "body": {
+                      "type": "json",
+                      "source": "${metadata.annotations}",
+                      "levelExpand": 1
+                    },
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
         },
         {
           "name": "status.conditions",
           "label": "条件",
           "type": "k8sConditions"
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "存在时长",
+          "type": "k8sAge"
         }
       ]
     }
