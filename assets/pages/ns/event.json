@@ -607,6 +607,7 @@
             "BackOff": "<span class='label label-danger'>退避中</span>",
             "CrashLoopBackOff": "<span class='label label-danger'>崩溃循环退避</span>",
             "Created": "<span class='label label-primary'>已创建</span>",
+            "Completed": "<span class='label label-primary'>已完成</span>",
             "Evicted": "<span class='label label-danger'>已驱逐</span>",
             "ErrImagePull": "<span class='label label-danger'>镜像拉取错误</span>",
             "ExceededGracePeriod": "<span class='label label-danger'>超过宽限期</span>",
