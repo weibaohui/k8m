@@ -667,6 +667,7 @@
             "Starting": "<span class='label label-primary'>启动中</span>",
             "SuccessfulCreate": "<span class='label label-success'>创建成功</span>",
             "SuccessfulDelete": "<span class='label label-success'>删除成功</span>",
+            "TaintManagerEviction": "<span class='label label-warning'>污点驱逐</span>",
             "Unhealthy": "<span class='label label-danger'>不健康</span>",
             "VolumeBindConflict": "<span class='label label-danger'>卷绑定冲突</span>",
             "VolumeInUseByPod": "<span class='label label-danger'>卷被Pod使用中</span>",
