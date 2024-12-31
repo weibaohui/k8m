@@ -83,6 +83,42 @@ func Describe(c *gin.Context) {
 		"result": result,
 	})
 }
+func Example(c *gin.Context) {
+	chatService := service.ChatService()
+	if !chatService.IsEnabled() {
+		amis.WriteJsonData(c, gin.H{
+			"result": "请先配置开启ChatGPT功能",
+		})
+		return
+	}
+	var data struct {
+		Version string `json:"version"`
+		Kind    string `json:"kind"`
+		Group   string `json:"group"`
+	}
+
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+	}
+
+	prompt := fmt.Sprintf(
+		`
+		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
+		\n请你作为kubernetes k8s 技术专家，给出一份关于这个资源的yaml样例。
+		要求假设一个简单场景、一个复杂场景，分别为这两个场景书写yaml文件，每一行yaml都增加简体中文注释。
+		\n注意：
+		\n0、使用中文进行回答。
+		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
+		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+		data.Group, data.Kind, data.Version)
+
+	result := chatService.Chat(prompt)
+	amis.WriteJsonData(c, gin.H{
+		"result": result,
+	})
+}
 func Resource(c *gin.Context) {
 	chatService := service.ChatService()
 	if !chatService.IsEnabled() {
