@@ -120,6 +120,42 @@
               }
             ]
           }
+        },
+        {
+          "type": "button",
+          "label": "样例",
+          "level": "link",
+          "icon": "fas fa-lightbulb text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind}指南（ESC 关闭）",
+            "body": [
+              {
+                "type": "service",
+                "api": "post:/k8s/chat/example",
+                "data": {
+                  "kind": "${kind}",
+                  "group": "${group}",
+                  "version": "${version}"
+                },
+                "body": [
+                  {
+                    "type": "markdown",
+                    "value": "${result|raw}",
+                    "options": {
+                      "linkify": true,
+                      "html": true,
+                      "breaks": true
+                    }
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
