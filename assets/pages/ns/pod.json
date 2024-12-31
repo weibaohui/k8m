@@ -710,7 +710,10 @@
                                       "body": [
                                         {
                                           "type": "websocketViewer",
-                                          "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}?cmd=${command}"
+                                          "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                          "params": {
+                                            "cmd": "${command}"
+                                          }
                                         }
                                       ]
                                     }
