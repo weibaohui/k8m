@@ -106,8 +106,6 @@
         const [selectedLines, setSelectedLines] = React.useState([]); // 保存选中的行
 
 
-
-
         // 更新 localStorage 的选中行
         const updateLocalStorage = (lines) => {
             localStorage.setItem('selectedLogLines', JSON.stringify(lines));
@@ -159,17 +157,17 @@
 
         return React.createElement(
             'div',
-            { ref: dom, style: { whiteSpace: 'pre-wrap' } },
+            {ref: dom, style: {whiteSpace: 'pre-wrap'}},
             errorMessage && React.createElement(
                 'div',
-                { style: { color: 'red' } },
+                {style: {color: 'red'}},
                 errorMessage
             ),
 
             ...lines.map((line, index) =>
                 React.createElement(
                     'div',
-                    { key: index, style: { display: 'flex', alignItems: 'center' } },
+                    {key: index, style: {display: 'flex', alignItems: 'center'}},
                     React.createElement(
                         'input',
                         {
@@ -185,7 +183,6 @@
                     )
                 )
             ),
-
         );
 
     }
@@ -331,6 +328,7 @@
         // 显示格式化的时间
         return React.createElement('span', null, formattedTime);
     }
+
     // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)k8sAge/
@@ -415,6 +413,72 @@
         test: /(^|\/)k8sLabels/
     })(K8sLabelsComponent);
 
+    function WebSocketViewerComponent(props) {
+        let url = replacePlaceholders(props.url, props.data);
+
+
+        const [messages, setMessages] = React.useState([]); // 用于存储接收到的所有 WebSocket 消息
+        const [status, setStatus] = React.useState('Disconnected'); // WebSocket 状态
+
+        React.useEffect(() => {
+            const ws = new WebSocket(url);
+
+            // 连接成功
+            ws.onopen = () => {
+                setStatus('Connected');
+            };
+
+            // 接收消息
+            ws.onmessage = (event) => {
+                try {
+                    const parsedData = JSON.parse(event.data); // 解析 WebSocket 消息
+                    const message = parsedData.data || event.data; // 提取 `data` 字段，如果没有则使用原始消息
+                    setMessages((prevMessages) => [...prevMessages, message]); // 累加消息
+                } catch (error) {
+                    console.error("Failed to parse WebSocket message:", error);
+                    setMessages((prevMessages) => [...prevMessages, event.data]); // 如果解析失败，显示原始消息
+                }
+            };
+
+            // 连接关闭
+            ws.onclose = () => {
+                setStatus('Disconnected');
+            };
+
+            // 连接错误
+            ws.onerror = () => {
+                setStatus('Error');
+            };
+
+            // 清理 WebSocket 连接
+            return () => {
+                ws.close();
+            };
+        }, [url]); // 当 URL 变化时重新建立连接
+
+        // 渲染消息列表
+        const messageElements = messages.map((message, index) =>
+            React.createElement('pre', {key: index, style: {marginTop: '5px', whiteSpace: 'pre-wrap'}}, message)
+        );
+
+        return React.createElement('div', null,
+            React.createElement('p', {style: {fontWeight: 'bold'}}, `WebSocket Status: ${status}`),
+            React.createElement('div', {
+                style: {
+                    backgroundColor: '#f5f5f5',
+                    padding: '4px',
+                    borderRadius: '5px',
+                    overflowX: 'auto'
+                }
+            }, messageElements)
+        );
+    }
+
+// 注册自定义组件
+    amisLib.Renderer({
+        test: /(^|\/)websocketViewer/, // 用于在 AMIS 中匹配此组件
+    })(WebSocketViewerComponent);
+
 
     function K8sConditionsComponent(props) {
         const conditions = props.data.status?.conditions || [];
@@ -445,7 +509,7 @@
         });
 
         return React.createElement('div', {
-            style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } // 圆点排列在一行中
+            style: {display: 'flex', flexWrap: 'wrap', gap: '8px'} // 圆点排列在一行中
         }, conditionElements);
     }
 
@@ -465,7 +529,7 @@
     //                         }
     //                       }
     function HighlightHtmlComponent(props) {
-        const content= replacePlaceholders(props.html,props.data) // 获取传入的内容
+        const content = replacePlaceholders(props.html, props.data) // 获取传入的内容
         if (!content) return null;
 
         const keywords = props.keywords || []; // 获取高亮关键词列表
@@ -569,9 +633,9 @@
 
         let formattedTime = "-"; // 默认显示为 0s
 
-        if (buildDuration !== undefined && buildDuration !== null && buildDuration!=='0') {
+        if (buildDuration !== undefined && buildDuration !== null && buildDuration !== '0') {
             // 如果 build_duration 有值，直接显示秒数
-            formattedTime = formatHumanDuration(buildDuration*1000);
+            formattedTime = formatHumanDuration(buildDuration * 1000);
         } else if (buildStartTime) {
             // 如果没有 build_duration，但有 build_start_time
             const startTime = new Date(buildStartTime).getTime();
@@ -583,6 +647,7 @@
         // 显示格式化的时间
         return React.createElement('span', null, formattedTime);
     }
+
 // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)ciExecutionAge/
@@ -632,12 +697,12 @@
                     let buffer = ''; // 用于拼接不完整的块
 
                     while (!done) {
-                        const { value, done: readerDone } = await reader.read();
+                        const {value, done: readerDone} = await reader.read();
                         done = readerDone;
 
                         if (value) {
                             // 解码当前块数据
-                            buffer += decoder.decode(value, { stream: !done });
+                            buffer += decoder.decode(value, {stream: !done});
 
                             // 按行分割数据
                             const lines = buffer.split('\n');
@@ -690,7 +755,7 @@
             errorMessage &&
             React.createElement(
                 'div', // 错误信息部分
-                { style: { color: 'red' } },
+                {style: {color: 'red'}},
                 errorMessage
             )
         );
@@ -701,8 +766,6 @@
     amisLib.Renderer({
         test: /(^|\/)chatgpt/
     })(ChatGPTComponent);
-
-
 
 
     // 定义自动转换内存单位的过滤器
