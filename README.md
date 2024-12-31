@@ -74,6 +74,7 @@ export OPENAI_MODEL="Qwen/Qwen2.5-Coder-7B-Instruct"
 ```go
 ChatGPT 开启状态:true
 ChatGPT 启用 key:sk-hl**********************************************, url:https: // api.siliconflow.cn/v1
+ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 ```
 
 ### **ChatGPT 账户**
