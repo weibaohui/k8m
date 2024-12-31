@@ -88,10 +88,10 @@ func WsExec(c *gin.Context) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
-	name := c.Query("name")
+	cmd := c.Query("cmd")
 	ctx := c.Request.Context()
 
-	klog.V(6).Infof("cmd=%s\n", name)
+	klog.V(6).Infof("cmd=%s\n", cmd)
 
 	cb := func(data []byte) error {
 		// 发送数据给客户端
@@ -105,7 +105,7 @@ func WsExec(c *gin.Context) {
 		Namespace(ns).
 		Name(podName).Ctl().Pod().
 		ContainerName(containerName).
-		Command("sh", "-c", name).
+		Command("sh", "-c", cmd).
 		StreamExecute(cb, cb).Error
 
 	if err != nil {
