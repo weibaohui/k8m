@@ -137,7 +137,7 @@
             "closeOnEsc": true,
             "closeOnOutside": true,
             "size": "lg",
-            "title": "${kind}指南（ESC 关闭）",
+            "title": "${kind} 参考样例（ESC 关闭）",
             "body": [
               {
                 "type": "service",
