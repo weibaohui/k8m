@@ -169,14 +169,12 @@ func main() {
 		api.POST("/doc/detail", doc.Detail)
 
 		// chatgpt
-		api.POST("/chat", chat.Chat)
-		api.POST("/chat/event", chat.Event)
-		api.POST("/chat/log", chat.Log)
-		api.POST("/chat/cron", chat.Cron)
-		api.POST("/chat/describe", chat.Describe)
-		api.POST("/chat/resource", chat.Resource)
-		api.POST("/chat/example", chat.Example)
-		api.GET("/chat/ws/describe", chat.SSEDescribe)
+		api.GET("/chat/event", chat.Event)
+		api.GET("/chat/log", chat.Log)
+		api.GET("/chat/cron", chat.Cron)
+		api.GET("/chat/describe", chat.Describe)
+		api.GET("/chat/resource", chat.Resource)
+		api.GET("/chat/example", chat.Example)
 
 		// pod 文件浏览上传下载
 		api.POST("/file/list", pod.FileList)
