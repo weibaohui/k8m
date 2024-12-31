@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -63,6 +65,54 @@ func DownloadLogs(c *gin.Context) {
 	containerName := c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
 	DownloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{FieldSelector: selector})
+}
+
+func WsExec(c *gin.Context) {
+	// 定义 WebSocket 升级器
+	var upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			// 允许所有来源
+			return true
+		},
+	}
+
+	// 将 HTTP 连接升级为 WebSocket 连接
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		klog.Errorf("WebSocket Upgrade Error:%v", err)
+		return
+	}
+	defer conn.Close()
+	klog.V(6).Infof("ws Client connected")
+
+	ns := c.Param("ns")
+	podName := c.Param("pod_name")
+	containerName := c.Param("container_name")
+	name := c.Query("name")
+	ctx := c.Request.Context()
+
+	klog.V(6).Infof("cmd=%s\n", name)
+
+	cb := func(data []byte) error {
+		// 发送数据给客户端
+		conn.WriteJSON(gin.H{
+			"data": string(data),
+		})
+		return nil
+	}
+	err = kom.DefaultCluster().WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(podName).Ctl().Pod().
+		ContainerName(containerName).
+		Command("sh", "-c", name).
+		StreamExecute(cb, cb).Error
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	select {}
 }
 func Exec(c *gin.Context) {
 	ns := c.Param("ns")
