@@ -176,7 +176,7 @@ func main() {
 		api.POST("/chat/describe", chat.Describe)
 		api.POST("/chat/resource", chat.Resource)
 		api.POST("/chat/example", chat.Example)
-		api.POST("/chat/sse/describe", chat.SSEDescribe)
+		api.GET("/chat/ws/describe", chat.SSEDescribe)
 
 		// pod 文件浏览上传下载
 		api.POST("/file/list", pod.FileList)
