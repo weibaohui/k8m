@@ -817,22 +817,11 @@
                 "title": "AI释义: ${spec.schedule}",
                 "body": [
                   {
-                    "type": "service",
-                    "api": "post:/k8s/chat/cron",
-                    "data": {
+                    "type": "websocketMarkdownViewer",
+                    "url": "/k8s/chat/cron",
+                    "params": {
                       "cron": "${spec.schedule}"
-                    },
-                    "body": [
-                      {
-                        "type": "markdown",
-                        "value": "${result|raw}",
-                        "options": {
-                          "linkify": true,
-                          "html": true,
-                          "breaks": true
-                        }
-                      }
-                    ]
+                    }
                   }
                 ]
               }
