@@ -1,7 +1,5 @@
 (function () {
     let amisLib = amisRequire('amis');
-    let amisEmbed = amisRequire('amis/embed');
-
     let React = amisRequire('react');
 
 
@@ -41,12 +39,30 @@
         let url = replacePlaceholders(props.url, props.data);
         let params = props.params;
         params = Object.keys(params).reduce((acc, key) => {
-            acc[key] = replacePlaceholders(params[key], props.data);
+
+            //读取localStorage的情况
+            //data:'${ls:selectedLogLines}'
+            //key=data
+            //params[key]=${ls:selectedLogLines}
+            if (params[key].startsWith("${ls:")) {
+                acc[key] = parseLocalStorageExpression(params[key]);
+            } else {
+                acc[key] = replacePlaceholders(params[key], props.data);
+            }
             return acc;
         }, {});
         return appendQueryParam(url, params);
     }
 
+    function parseLocalStorageExpression(expression) {
+        // 处理表达式，比如 `${ls:key}`，提取 `ls` 和 `key`
+        const match = expression.match(/^\${ls:(.+)}$/);
+        if (match) {
+            const key = match[1];
+            return localStorage.getItem(key);
+        }
+        return null;
+    }
 
     // 自定义组件，props 中可以拿到配置中的所有参数，比如 props.label 是 'Name'
     function Component(props) {
