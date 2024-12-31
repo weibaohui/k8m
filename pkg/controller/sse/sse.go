@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/sashabaranov/go-openai"
 	"k8s.io/klog/v2"
 )
@@ -66,6 +67,49 @@ func WriteSSEWithChannel(c *gin.Context, logCh <-chan string, done chan struct{}
 			return
 		}
 	}
+}
+
+func WriteWebSocketChatCompletionStream(c *gin.Context, stream *openai.ChatCompletionStream) {
+	// 定义 WebSocket 升级器
+	var upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			// 允许所有来源
+			return true
+		},
+	}
+
+	// 将 HTTP 连接升级为 WebSocket 连接
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		klog.Errorf("WebSocket Upgrade Error:%v", err)
+		return
+	}
+	defer conn.Close()
+	klog.V(6).Infof("ws Client connected")
+
+	defer func() {
+		if err := stream.Close(); err != nil {
+			// 处理关闭流时的错误
+			klog.V(6).Infof("stream close error:%v", err)
+		}
+	}()
+
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			// 处理其他错误
+			continue
+		}
+
+		// 发送数据给客户端
+		conn.WriteJSON(gin.H{
+			"data": string(response.Choices[0].Delta.Content),
+		})
+	}
+
 }
 
 func WriteSSEChatCompletionStream(c *gin.Context, stream *openai.ChatCompletionStream) {
