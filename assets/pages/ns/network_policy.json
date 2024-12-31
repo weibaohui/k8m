@@ -279,24 +279,13 @@
                           "title": "AI解读  (ESC 关闭)",
                           "body": [
                             {
-                              "type": "service",
-                              "api": "post:/k8s/chat/describe",
-                              "data": {
+                              "type": "websocketMarkdownViewer",
+                              "url": "/k8s/chat/describe",
+                              "params": {
                                 "describe": "${result}",
                                 "kind": "${kind}",
                                 "group": "${group}"
-                              },
-                              "body": [
-                                {
-                                  "type": "markdown",
-                                  "value": "${result|raw}",
-                                  "options": {
-                                    "linkify": true,
-                                    "html": true,
-                                    "breaks": true
-                                  }
-                                }
-                              ]
+                              }
                             }
                           ]
                         }
