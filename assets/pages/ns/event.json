@@ -433,27 +433,16 @@
                     "title": "AI 查询",
                     "body": [
                       {
-                        "type": "service",
-                        "api": "post:/k8s/chat/event",
-                        "data": {
+                        "type": "websocketMarkdownViewer",
+                        "url": "/k8s/chat/event",
+                        "params": {
                           "note": "${note}",
                           "source": "${source}",
                           "reason": "${reason}",
                           "reportingController": "${reportingController}",
                           "type": "${type}",
                           "regardingKind": "${kind}"
-                        },
-                        "body": [
-                          {
-                            "type": "markdown",
-                            "value": "${result|raw}",
-                            "options": {
-                              "linkify": true,
-                              "html": true,
-                              "breaks": true
-                            }
-                          }
-                        ]
+                        }
                       }
                     ]
                   },
