@@ -724,9 +724,9 @@
         },
         {
           "name": "spec.unschedulable",
-          "label": "不可调度",
+          "label": "调度状态",
           "type": "tpl",
-          "tpl": "<span class='label label-${spec.unschedulable === true ? 'danger' : 'success'}'>${spec.unschedulable === true ? '关闭调度' : '调度正常'}</span>"
+          "tpl": "<span class='label label-${spec.unschedulable === true ? 'danger' : 'success'}'>${spec.unschedulable === true ? '停止调度' : '调度正常'}</span>"
         },
         {
           "name": "spec.taints",
