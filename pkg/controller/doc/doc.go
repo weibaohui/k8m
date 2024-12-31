@@ -13,11 +13,25 @@ import (
 func Doc(c *gin.Context) {
 	kind := c.Param("kind")
 	apiVersion := c.Param("api_version")
-	docs := kom.DefaultCluster().Status().Docs()
+	group := c.Param("group")
+	version := c.Param("version")
 
 	// apiVersion 有可能包含xxx.com/v1 类似，所以需要处理
 	// 前端使用了base64Encode，这里需要反向解析处理
-	apiVersion, _ = utils.DecodeBase64(apiVersion)
+	var err error
+	if apiVersion != "" {
+		apiVersion, err = utils.DecodeBase64(apiVersion)
+		if err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+	}
+	if apiVersion == "" {
+		// 没有传递apiVersion
+		apiVersion = fmt.Sprintf("%s/%s", group, version)
+	}
+
+	docs := kom.DefaultCluster().Status().Docs()
 	node := docs.FetchByGVK(apiVersion, kind)
 
 	amis.WriteJsonData(c, gin.H{

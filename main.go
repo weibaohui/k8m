@@ -163,8 +163,8 @@ func main() {
 		api.POST("/cronjob/pause/ns/:ns/name/:name", cronjob.Pause)
 		api.POST("/cronjob/resume/ns/:ns/name/:name", cronjob.Resume)
 		// doc
-		api.GET("/doc/:kind", doc.Doc)
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
+		api.GET("/doc/kind/:kind/group/:group/version/:version", doc.Doc)
 		api.POST("/doc/detail", doc.Detail)
 
 		// chatgpt
