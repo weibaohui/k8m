@@ -463,7 +463,10 @@
 
         // 渲染消息列表
         const messageElements = messages.map((message, index) =>
-            React.createElement('pre', {key: index, style: {marginTop: '5px', whiteSpace: 'pre-wrap'}}, message)
+            React.createElement('pre', {
+                key: index,
+                style: {whiteSpace: 'pre-wrap', marginBottom: '1px', marginTop: '1px'}
+            }, message)
         );
 
         return React.createElement('div', null,
@@ -483,6 +486,79 @@
     amisLib.Renderer({
         test: /(^|\/)websocketViewer/, // 用于在 AMIS 中匹配此组件
     })(WebSocketViewerComponent);
+
+
+    function WebSocketMarkdownViewerComponent(props) {
+        const url = props.url; // 从 props 中获取 WebSocket URL
+        const [messages, setMessages] = React.useState([]); // 用于存储接收到的所有 WebSocket 消息
+        const [status, setStatus] = React.useState('Disconnected'); // WebSocket 状态
+        const wsRef = React.useRef(null); // 使用 ref 保存 WebSocket 实例，方便管理生命周期
+
+        React.useEffect(() => {
+            const ws = new WebSocket(url);
+            wsRef.current = ws; // 保存 WebSocket 实例
+
+            // 连接成功
+            ws.onopen = () => {
+                setStatus('Connected');
+            };
+
+            // 接收消息
+            ws.onmessage = (event) => {
+                try {
+                    const parsedData = JSON.parse(event.data); // 解析 WebSocket 消息
+                    const rawMessage = parsedData.data || event.data; // 提取 `data` 字段内容
+                    setMessages((prevMessages) => [...prevMessages, rawMessage]); // 累加消息
+                } catch (error) {
+                    console.error("Failed to parse WebSocket message:", error);
+                    setMessages((prevMessages) => [...prevMessages, event.data]); // 如果解析失败，显示原始消息
+                }
+            };
+
+            // 连接关闭
+            ws.onclose = () => {
+                setStatus('Disconnected');
+            };
+
+            // 连接错误
+            ws.onerror = () => {
+                setStatus('Error');
+            };
+
+            // 在组件卸载时关闭 WebSocket
+            return () => {
+                if (wsRef.current) {
+                    wsRef.current.close(); // 关闭 WebSocket 连接
+                    wsRef.current = null; // 清空引用
+                }
+            };
+        }, [url]); // 当 URL 变化时重新建立连接
+
+        // 将所有消息合并成一段完整的 Markdown 文本
+        const markdownContent = messages.join('\n');
+
+        return React.createElement('div', null,
+            React.createElement('p', {style: {fontWeight: 'bold'}}, `WebSocket Status: ${status}`),
+            React.createElement('div', {
+                    style: {
+                        backgroundColor: '#f5f5f5',
+                        padding: '10px',
+                        borderRadius: '5px',
+                        overflowX: 'auto'
+                    }
+                },
+                amisLib.Renderer({
+                    type: 'markdown',
+                    value: markdownContent // 渲染合并后的 Markdown 文本
+                })
+            )
+        );
+    }
+
+// 注册自定义组件
+    amisLib.Renderer({
+        test: /(^|\/)websocketMarkdownViewer/, // 用于在 AMIS 中匹配此组件
+    })(WebSocketMarkdownViewerComponent);
 
 
     function K8sConditionsComponent(props) {
