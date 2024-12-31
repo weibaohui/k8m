@@ -11,12 +11,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Chat(c *gin.Context) {
-	q := c.Query("q")
-	chatService := service.ChatService()
-	result := chatService.Chat(q)
-	amis.WriteJsonData(c, result)
-}
 func Event(c *gin.Context) {
 	chatService := service.ChatService()
 	if !chatService.IsEnabled() {
@@ -25,25 +19,27 @@ func Event(c *gin.Context) {
 		})
 		return
 	}
-	var event struct {
-		Note                string `json:"note"`
-		Source              string `json:"source"`
-		Reason              string `json:"reason"`
-		ReportingController string `json:"reportingController"`
-		Type                string `json:"type"`
-		RegardingKind       string `json:"kind"`
+	var data struct {
+		Note                string `form:"note"`
+		Source              string `form:"source"`
+		Reason              string `form:"reason"`
+		ReportingController string `form:"reportingController"`
+		Type                string `form:"type"`
+		RegardingKind       string `form:"kind"`
 	}
-	err := c.ShouldBindJSON(&event)
+	err := c.ShouldBindQuery(&data)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
 
-	prompt := fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(event))
+	prompt := fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(data))
 
-	result := chatService.Chat(prompt)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
+	stream, err := chatService.GetChatStream(prompt)
+	if err != nil {
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
+		return
+	}
+	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
 
 func Describe(c *gin.Context) {
@@ -55,12 +51,12 @@ func Describe(c *gin.Context) {
 		return
 	}
 	var data struct {
-		Describe string `json:"describe"`
-		Kind     string `json:"kind"`
-		Group    string `json:"group"`
+		Describe string `form:"describe"`
+		Kind     string `form:"kind"`
+		Group    string `form:"group"`
 	}
 
-	err := c.ShouldBindJSON(&data)
+	err := c.ShouldBindQuery(&data)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
@@ -78,10 +74,12 @@ func Describe(c *gin.Context) {
 		\n\nDescribe信息如下：%s`,
 		data.Group, data.Kind, data.Describe)
 
-	result := chatService.Chat(prompt)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
+	stream, err := chatService.GetChatStream(prompt)
+	if err != nil {
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
+		return
+	}
+	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
 func Example(c *gin.Context) {
 	chatService := service.ChatService()
@@ -92,12 +90,12 @@ func Example(c *gin.Context) {
 		return
 	}
 	var data struct {
-		Version string `json:"version"`
-		Kind    string `json:"kind"`
-		Group   string `json:"group"`
+		Version string `form:"version" `
+		Kind    string `form:"kind"`
+		Group   string `form:"group"`
 	}
 
-	err := c.ShouldBindJSON(&data)
+	err := c.ShouldBindQuery(&data)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
@@ -114,10 +112,12 @@ func Example(c *gin.Context) {
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
 		data.Group, data.Kind, data.Version)
 
-	result := chatService.Chat(prompt)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
+	stream, err := chatService.GetChatStream(prompt)
+	if err != nil {
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
+		return
+	}
+	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
 func Resource(c *gin.Context) {
 	chatService := service.ChatService()
@@ -128,12 +128,12 @@ func Resource(c *gin.Context) {
 		return
 	}
 	var data struct {
-		Version string `json:"version"`
-		Kind    string `json:"kind"`
-		Group   string `json:"group"`
+		Version string `form:"version" `
+		Kind    string `form:"kind"`
+		Group   string `form:"group"`
 	}
 
-	err := c.ShouldBindJSON(&data)
+	err := c.ShouldBindQuery(&data)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
@@ -150,10 +150,12 @@ func Resource(c *gin.Context) {
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
 		data.Group, data.Kind, data.Version)
 
-	result := chatService.Chat(prompt)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
+	stream, err := chatService.GetChatStream(prompt)
+	if err != nil {
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
+		return
+	}
+	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
 func SSEDescribe(c *gin.Context) {
 
@@ -164,25 +166,15 @@ func SSEDescribe(c *gin.Context) {
 		})
 		return
 	}
-	var data struct {
-		Describe string `json:"describe"`
-		Kind     string `json:"kind"`
-		Group    string `json:"group"`
-	}
-
-	err := c.ShouldBindJSON(&data)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-	}
-
-	prompt := fmt.Sprintf("请你作为kubernetes k8s 技术专家，对下面 %s %s 资源的Describe 信息 分析。请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案:\n%s\n。格式要求：请使用文本格式，不要使用markdown格式。请保留换行符等保证基本的格式", data.Group, data.Kind, data.Describe)
+	txt := c.Query("txt")
+	prompt := fmt.Sprintf("请你作为kubernetes k8s 技术专家，回答下面的问题%s\n。请先复述问题，再列出提纲，再写出思路，最后给出样例", txt)
 
 	stream, err := chatService.GetChatStream(prompt)
 	if err != nil {
-		klog.V(2).Infof("Error Ssemaking request:%v\n\n", err)
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
 		return
 	}
-	sse.WriteSSEChatCompletionStream(c, stream)
+	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
 
 func Cron(c *gin.Context) {
@@ -194,10 +186,9 @@ func Cron(c *gin.Context) {
 		return
 	}
 	var data struct {
-		Cron string `json:"cron"`
+		Cron string `form:"cron"`
 	}
-
-	err := c.ShouldBindJSON(&data)
+	err := c.ShouldBindQuery(&data)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
@@ -212,10 +203,12 @@ func Cron(c *gin.Context) {
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
 		data.Cron, data.Cron)
 
-	result := chatService.Chat(prompt)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
+	stream, err := chatService.GetChatStream(prompt)
+	if err != nil {
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
+		return
+	}
+	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
 func Log(c *gin.Context) {
 	chatService := service.ChatService()
@@ -226,18 +219,20 @@ func Log(c *gin.Context) {
 		return
 	}
 	var data struct {
-		Data []string `json:"data"`
+		Data []string `form:"data"`
 	}
 
-	err := c.ShouldBindJSON(&data)
+	err := c.ShouldBindQuery(&data)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}
 
 	prompt := fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(data))
 
-	result := chatService.Chat(prompt)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
+	stream, err := chatService.GetChatStream(prompt)
+	if err != nil {
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
+		return
+	}
+	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
