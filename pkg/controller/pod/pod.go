@@ -1,9 +1,11 @@
 package pod
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -68,6 +70,8 @@ func Exec(c *gin.Context) {
 	containerName := c.Param("container_name")
 	ctx := c.Request.Context()
 
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*5))
+	defer cancel()
 	// 初始化结构体实例
 	var payload struct {
 		Command string `json:"cmd"`
