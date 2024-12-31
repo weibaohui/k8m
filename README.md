@@ -63,6 +63,7 @@
 ```bash
 export OPENAI_API_KEY="sk-XXXXX"
 export OPENAI_API_URL="https://api.siliconflow.cn/v1"
+export OPENAI_MODEL="Qwen/Qwen2.5-Coder-7B-Instruct"
 ```
 
 ### **ChatGPT 状态调试**

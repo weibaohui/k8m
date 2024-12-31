@@ -29,7 +29,7 @@ func (c *chatService) SetVars(apikey, apiUrl, model string) {
 
 // Deprecated 获取stream
 func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
-	key, apiURL, enable := c.getChatGPTAuth()
+	key, apiURL, model, enable := c.getChatGPTAuth()
 	if !enable {
 		return nil, fmt.Errorf("chatGPT not enable")
 	}
@@ -39,7 +39,7 @@ func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
 
 	// 构建请求体
 	payload := map[string]interface{}{
-		"model": c.model,
+		"model": model,
 		"messages": []map[string]string{
 			{
 				"role":    "user",
@@ -77,7 +77,7 @@ func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
 	return resp, err
 }
 func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, error) {
-	apiKey, apiURL, enable := c.getChatGPTAuth()
+	apiKey, apiURL, model, enable := c.getChatGPTAuth()
 	if !enable {
 		return nil, fmt.Errorf("chatGPT not enable")
 	}
@@ -87,7 +87,7 @@ func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, 
 	openaiClient := openai.NewClientWithConfig(cfg)
 
 	stream, err := openaiClient.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		Model: c.model,
+		Model: model,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
@@ -106,7 +106,7 @@ func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, 
 
 }
 func (c *chatService) Chat(chat string) string {
-	apiKey, apiURL, enable := c.getChatGPTAuth()
+	apiKey, apiURL, model, enable := c.getChatGPTAuth()
 	if !enable {
 		return ""
 	}
@@ -118,7 +118,7 @@ func (c *chatService) Chat(chat string) string {
 	resp, err := openaiClient.CreateChatCompletion(
 		context.TODO(),
 		openai.ChatCompletionRequest{
-			Model: c.model,
+			Model: model,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -137,11 +137,12 @@ func (c *chatService) Chat(chat string) string {
 	return result
 }
 
-func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable bool) {
+func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, model string, enable bool) {
 	// 从环境变量读取OpenAI API Key和API URL
 	// 环境变量优先
 	apiKey = os.Getenv("OPENAI_API_KEY")
 	apiURL = os.Getenv("OPENAI_API_URL")
+	model = os.Getenv("OPENAI_MODEL")
 	if apiKey == "" && apiURL == "" {
 		apiKey = c.apiKey
 		apiURL = c.apiUrl
@@ -153,13 +154,24 @@ func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, enable boo
 		enable = true
 		klog.V(4).Infof("ChatGPT 启用 key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
 	}
+	if model == "" {
+		// 如果环境变量没设置，保底使用内置的
+		model = c.model
+		klog.V(4).Infof("ChatGPT 默认模型:%s\n", model)
+	}
 
+	if model != "" {
+		// model 确实有值，且到这里应该为ENV环境变量的值
+		// 那么model优先使用环境变量的值
+		klog.V(4).Infof("ChatGPT 使用环境变量中设置的模型:%s\n", model)
+		c.model = model
+	}
 	c.apiKey = apiKey
 	c.apiUrl = apiURL
 	return
 }
 func (c *chatService) IsEnabled() bool {
-	_, _, enable := c.getChatGPTAuth()
+	_, _, _, enable := c.getChatGPTAuth()
 	klog.V(4).Infof("ChatGPT 开启状态:%v\n", enable)
 	return enable
 }
