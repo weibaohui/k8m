@@ -4,6 +4,7 @@
 
     let React = amisRequire('react');
 
+
     function replacePlaceholders(url, data) {
         // 使用正则表达式匹配 ${} 包裹的变量
         return url.replace(/\$\{([^}]+)\}/g, function (match, key) {
@@ -28,6 +29,22 @@
             .join('&');
         // 如果 URL 已经有查询参数，使用 '&' 拼接；否则用 '?' 拼接
         return url.includes('?') ? `${url}&${queryString}` : `${url}?${queryString}`;
+    }
+
+    // 格式化为最终url,Get请求，url、参数中的模板将会被替换
+    // "url": "/k8s/chat/ws/${describe}",
+    //                 "params": {
+    //                   "txt": "请写一个万字长文",
+    //                   "q": "${kind}"
+    //                 }
+    function formatFinalGetUrl(props) {
+        let url = replacePlaceholders(props.url, props.data);
+        let params = props.params;
+        params = Object.keys(params).reduce((acc, key) => {
+            acc[key] = replacePlaceholders(params[key], props.data);
+            return acc;
+        }, {});
+        return appendQueryParam(url, params);
     }
 
 
@@ -414,8 +431,7 @@
     })(K8sLabelsComponent);
 
     function WebSocketViewerComponent(props) {
-        let url = replacePlaceholders(props.url, props.data);
-
+        let url = formatFinalGetUrl(props);
 
         const [messages, setMessages] = React.useState([]); // 用于存储接收到的所有 WebSocket 消息
         const [status, setStatus] = React.useState('Disconnected'); // WebSocket 状态
@@ -470,7 +486,7 @@
         );
 
         return React.createElement('div', null,
-            React.createElement('p', {style: {fontWeight: 'bold'}}, `WebSocket Status: ${status}`),
+            React.createElement('p', {style: {fontWeight: 'bold', display: 'none'}}, `WebSocket Status: ${status}`),
             React.createElement('div', {
                 style: {
                     backgroundColor: '#f5f5f5',
@@ -489,7 +505,8 @@
 
 
     function WebSocketMarkdownViewerComponent(props) {
-        const url = props.url; // 从 props 中获取 WebSocket URL
+        let url = formatFinalGetUrl(props);
+
         const [messages, setMessages] = React.useState([]); // 用于存储接收到的所有 WebSocket 消息
         const [status, setStatus] = React.useState('Disconnected'); // WebSocket 状态
         const wsRef = React.useRef(null); // 使用 ref 保存 WebSocket 实例，方便管理生命周期
@@ -507,8 +524,10 @@
             ws.onmessage = (event) => {
                 try {
                     const parsedData = JSON.parse(event.data); // 解析 WebSocket 消息
-                    const rawMessage = parsedData.data || event.data; // 提取 `data` 字段内容
-                    setMessages((prevMessages) => [...prevMessages, rawMessage]); // 累加消息
+                    const rawMessage = parsedData.data || ""; // 提取 `data` 字段内容
+                    if (rawMessage !== "") { // 跳过空的 `data`
+                        setMessages((prevMessages) => [...prevMessages, rawMessage]); // 累加消息
+                    }
                 } catch (error) {
                     console.error("Failed to parse WebSocket message:", error);
                     setMessages((prevMessages) => [...prevMessages, event.data]); // 如果解析失败，显示原始消息
@@ -535,10 +554,10 @@
         }, [url]); // 当 URL 变化时重新建立连接
 
         // 将所有消息合并成一段完整的 Markdown 文本
-        const markdownContent = messages.join('\n');
+        const markdownContent = messages.join('');
 
         return React.createElement('div', null,
-            React.createElement('p', {style: {fontWeight: 'bold'}}, `WebSocket Status: ${status}`),
+            React.createElement('p', {style: {display: 'none'}}, `WebSocket Status: ${status}`),
             React.createElement('div', {
                     style: {
                         backgroundColor: '#f5f5f5',
@@ -547,7 +566,7 @@
                         overflowX: 'auto'
                     }
                 },
-                amisLib.Renderer({
+                amisLib.render({
                     type: 'markdown',
                     value: markdownContent // 渲染合并后的 Markdown 文本
                 })
