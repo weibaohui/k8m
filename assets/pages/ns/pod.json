@@ -502,37 +502,44 @@
                           "title": "日志管理 (ESC 关闭)",
                           "body": [
                             {
-                              "type": "button",
-                              "label": "AI问诊",
-                              "actionType": "drawer",
-                              "drawer": {
-                                "actions": [],
-                                "closeOnEsc": true,
-                                "closeOnOutside": true,
-                                "size": "xl",
-                                "title": "解读日志 （ESC 关闭）",
-                                "body": [
-                                  {
-                                    "type": "websocketMarkdownViewer",
-                                    "url": "/k8s/chat/log",
-                                    "params": {
-                                      "data": "${ls:selectedLogLines}"
-                                    }
+                              "type": "flex",
+                              "justify": "flex-start",
+                              "items": [
+                                {
+                                  "type": "button",
+                                  "label": "AI问诊",
+                                  "icon": "fas fa-brain text-primary",
+                                  "actionType": "drawer",
+                                  "drawer": {
+                                    "actions": [],
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "xl",
+                                    "title": "解读日志 （ESC 关闭）",
+                                    "body": [
+                                      {
+                                        "type": "websocketMarkdownViewer",
+                                        "url": "/k8s/chat/log",
+                                        "params": {
+                                          "data": "${ls:selectedLogLines}"
+                                        }
+                                      }
+                                    ]
                                   }
-                                ]
-                              }
-                            },
-                            {
-                              "type": "log-download",
-                              "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                              "data": {
-                                "containerName": "${containerName}",
-                                "tailLines": "${tailLines}",
-                                "sinceTime": "${sinceTime}",
-                                "previous": "${previous}",
-                                "timestamps": "${timestamps}",
-                                "sinceSeconds": "${sinceSeconds}"
-                              }
+                                },
+                                {
+                                  "type": "log-download",
+                                  "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                  "data": {
+                                    "containerName": "${containerName}",
+                                    "tailLines": "${tailLines}",
+                                    "sinceTime": "${sinceTime}",
+                                    "previous": "${previous}",
+                                    "timestamps": "${timestamps}",
+                                    "sinceSeconds": "${sinceSeconds}"
+                                  }
+                                }
+                              ]
                             },
                             {
                               "type": "sse",
