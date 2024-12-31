@@ -502,107 +502,50 @@
                           "title": "日志管理 (ESC 关闭)",
                           "body": [
                             {
-                              "type": "flex",
-                              "justify": "space-between",
-                              "items": [
-                                {
-                                  "type": "container",
-                                  "body": [
-                                    {
-                                      "type": "log-download",
-                                      "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                      "data": {
-                                        "containerName": "${containerName}",
-                                        "tailLines": "${tailLines}",
-                                        "sinceTime": "${sinceTime}",
-                                        "previous": "${previous}",
-                                        "timestamps": "${timestamps}",
-                                        "sinceSeconds": "${sinceSeconds}"
-                                      }
-                                    },
-                                    {
-                                      "type": "sse",
-                                      "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                      "data": {
-                                        "containerName": "${containerName}",
-                                        "tailLines": "${tailLines}",
-                                        "sinceTime": "${sinceTime}",
-                                        "follow": "${follow}",
-                                        "previous": "${previous}",
-                                        "timestamps": "${timestamps}",
-                                        "sinceSeconds": "${sinceSeconds}"
-                                      }
+                              "type": "button",
+                              "label": "AI问诊",
+                              "actionType": "drawer",
+                              "drawer": {
+                                "actions": [],
+                                "closeOnEsc": true,
+                                "closeOnOutside": true,
+                                "size": "xl",
+                                "title": "解读日志 （ESC 关闭）",
+                                "body": [
+                                  {
+                                    "type": "websocketMarkdownViewer",
+                                    "url": "/k8s/chat/log",
+                                    "params": {
+                                      "data": "${ls:selectedLogLines}"
                                     }
-                                  ],
-                                  "style": {
-                                    "flexGrow": 1,
-                                    "backgroundColor": "#f5f5f5",
-                                    "padding": "10px",
-                                    "border": "1px solid #ddd"
                                   }
-                                },
-                                {
-                                  "type": "container",
-                                  "body": [
-                                    {
-                                      "type": "form",
-                                      "title": "AI问诊",
-                                      "wrapWithPanel": false,
-                                      "api": {
-                                        "url": "/k8s/chat/log",
-                                        "method": "post",
-                                        "data": {
-                                          "data": "${ls:selectedLogLines}"
-                                        },
-                                        "headers": {
-                                          "Content-Type": "application/json"
-                                        }
-                                      },
-                                      "body": [
-                                        {
-                                          "type": "button",
-                                          "label": "AI问诊",
-                                          "actionType": "submit"
-                                        }
-                                      ],
-                                      "onEvent": {
-                                        "submitSucc": {
-                                          "actions": [
-                                            {
-                                              "actionType": "reload",
-                                              "componentId": "aiResult",
-                                              "data": {
-                                                "result": "${event.data.result.data.result}"
-                                              }
-                                            }
-                                          ]
-                                        }
-                                      }
-                                    },
-                                    {
-                                      "type": "service",
-                                      "body": [
-                                        {
-                                          "type": "markdown",
-                                          "value": "${result|raw}",
-                                          "options": {
-                                            "linkify": true,
-                                            "html": true,
-                                            "breaks": true
-                                          }
-                                        }
-                                      ],
-                                      "id": "aiResult"
-                                    }
-                                  ],
-                                  "style": {
-                                    "width": "400px",
-                                    "backgroundColor": "#e3e3e3",
-                                    "padding": "10px",
-                                    "border": "1px solid #ddd"
-                                  }
-                                }
-                              ]
+                                ]
+                              }
+                            },
+                            {
+                              "type": "log-download",
+                              "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                              "data": {
+                                "containerName": "${containerName}",
+                                "tailLines": "${tailLines}",
+                                "sinceTime": "${sinceTime}",
+                                "previous": "${previous}",
+                                "timestamps": "${timestamps}",
+                                "sinceSeconds": "${sinceSeconds}"
+                              }
+                            },
+                            {
+                              "type": "sse",
+                              "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                              "data": {
+                                "containerName": "${containerName}",
+                                "tailLines": "${tailLines}",
+                                "sinceTime": "${sinceTime}",
+                                "follow": "${follow}",
+                                "previous": "${previous}",
+                                "timestamps": "${timestamps}",
+                                "sinceSeconds": "${sinceSeconds}"
+                              }
                             }
                           ]
                         },
@@ -638,7 +581,7 @@
                           {
                             "type": "alert",
                             "level": "success",
-                            "body": "温馨提示：支持输入中文指令（需开启GPT）。暂不支持top、tail -f 等流式返回的命令以及交互式命令。默认5秒执行超时"
+                            "body": "温馨提示：支持输入中文指令（需开启GPT）。"
                           },
                           {
                             "type": "select",
