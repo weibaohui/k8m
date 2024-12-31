@@ -666,9 +666,7 @@
                     "title": "Shell (ESC 关闭)",
                     "body": [
                       {
-                        "type": "wrapper",
-                        "size": "lg",
-                        "className": "b",
+                        "type": "page",
                         "body": [
                           {
                             "type": "alert",
@@ -680,17 +678,7 @@
                             "label": "容器",
                             "name": "containerName",
                             "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                            "value": "${spec.containers[0].name}",
-                            "onEvent": {
-                              "change": {
-                                "actions": [
-                                  {
-                                    "actionType": "custom",
-                                    "script": "localStorage.removeItem('commandHistory');"
-                                  }
-                                ]
-                              }
-                            }
+                            "value": "${spec.containers[0].name}"
                           },
                           {
                             "type": "form",
@@ -698,13 +686,6 @@
                             "name": "shellForm",
                             "wrapWithPanel": false,
                             "submitText": "",
-                            "api": {
-                              "method": "post",
-                              "url": "/k8s/pod/exec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                              "data": {
-                                "cmd": "${command}"
-                              }
-                            },
                             "controls": [
                               {
                                 "type": "text",
@@ -713,37 +694,26 @@
                                 "placeholder": "请输入命令...",
                                 "clearable": true,
                                 "autoFocus": true
-                              },
-                              {
-                                "type": "button",
-                                "label": "流式执行",
-                                "level": "danger",
-                                "actionType": "drawer",
-                                "drawer": {
-                                  "overlay": false,
-                                  "closeOnEsc": true,
-                                  "closeOnOutside": true,
-                                  "size": "lg",
-                                  "title": "执行 ${command} （ESC 关闭）",
-                                  "body": [
-                                    {
-                                      "type": "websocketViewer",
-                                      "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}?cmd=${command}"
-                                    }
-                                  ]
-                                }
                               }
                             ],
                             "onEvent": {
                               "submitSucc": {
                                 "actions": [
                                   {
-                                    "actionType": "custom",
-                                    "script": "let history = JSON.parse(localStorage.getItem('commandHistory') || '[]'); history.unshift(event.data.result.data); localStorage.setItem('commandHistory', JSON.stringify(history));"
-                                  },
-                                  {
-                                    "actionType": "clear",
-                                    "target": "shellForm.command"
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "actions": [],
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "xl",
+                                      "title": "执行 ${command} （ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketViewer",
+                                          "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}?cmd=${command}"
+                                        }
+                                      ]
+                                    }
                                   }
                                 ]
                               }
@@ -752,35 +722,11 @@
                               "saveSuccess": ""
                             },
                             "actions": []
-                          },
-                          {
-                            "type": "each",
-                            "name": "commands",
-                            "id": "commandHistory",
-                            "value": "${ls:commandHistory||[]}",
-                            "items": {
-                              "type": "tpl",
-                              "tpl": "<strong>${last_command}</strong> <strong class='text-blue-400'>${human_command}</strong> <br><pre>${result}</pre>",
-                              "style": {
-                                "padding": "5px",
-                                "borderBottom": "1px solid #ddd"
-                              }
-                            }
                           }
                         ]
                       }
                     ],
                     "actions": []
-                  },
-                  "onEvent": {
-                    "click": {
-                      "actions": [
-                        {
-                          "actionType": "custom",
-                          "script": "localStorage.removeItem('commandHistory');"
-                        }
-                      ]
-                    }
                   }
                 },
                 {
