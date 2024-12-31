@@ -1248,11 +1248,11 @@
           "label": "状态",
           "type": "mapping",
           "map": {
-            "Running": "<span class='label label-info'>Running</span>",
-            "Pending": "<span class='label label-warning'>Pending</span>",
-            "Succeeded": "<span class='label label-success'>Succeeded</span>",
-            "Failed": "<span class='label label-danger'>Failed</span>",
-            "Unknown": "<span class='label label-default'>Unknown</span>"
+            "Running": "<span class='label label-info'>运行中</span>",
+            "Pending": "<span class='label label-warning'>调度中</span>",
+            "Succeeded": "<span class='label label-success'>成功完成</span>",
+            "Failed": "<span class='label label-danger'>失败</span>",
+            "Unknown": "<span class='label label-default'>未知</span>"
           },
           "searchable": {
             "type": "select",
@@ -1261,23 +1261,23 @@
             "placeholder": "选择状态",
             "options": [
               {
-                "label": "Running",
+                "label": "运行中",
                 "value": "Running"
               },
               {
-                "label": "Pending",
+                "label": "调度中",
                 "value": "Pending"
               },
               {
-                "label": "Succeeded",
+                "label": "成功完成",
                 "value": "Succeeded"
               },
               {
-                "label": "Failed",
+                "label": "失败",
                 "value": "Failed"
               },
               {
-                "label": "Unknown",
+                "label": "未知",
                 "value": "Unknown"
               }
             ]
@@ -1358,7 +1358,7 @@
         },
         {
           "name": "spec.nodeName",
-          "label": "节点名称",
+          "label": "所在节点",
           "type": "text",
           "searchable": true
         },
