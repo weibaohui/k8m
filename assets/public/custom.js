@@ -268,7 +268,7 @@
                 {
                     onClick: handleDownload,
                     style: {
-                        margin: '10px',
+                        marginLeft: '10px',
                         padding: '8px 16px',
                         backgroundColor: '#4CAF50',
                         color: 'white',
