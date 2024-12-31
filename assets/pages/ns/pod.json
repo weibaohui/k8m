@@ -713,6 +713,39 @@
                                 "placeholder": "请输入命令...",
                                 "clearable": true,
                                 "autoFocus": true
+                              },
+                              {
+                                "type": "button",
+                                "label": "流式执行",
+                                "level": "danger",
+                                "actionType": "drawer",
+                                "drawer": {
+                                  "overlay": false,
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "执行 ${command} （ESC 关闭）",
+                                  "body": [
+                                    {
+                                      "type": "service",
+                                      "ws": {
+                                        "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                                        "data": {
+                                          "name": "${command}"
+                                        }
+                                      },
+                                      "body": {
+                                        "type": "panel",
+                                        "body": [
+                                          {
+                                            "type": "html",
+                                            "html": "<pre>${data}</pre>"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
                               }
                             ],
                             "onEvent": {
