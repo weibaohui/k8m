@@ -68,6 +68,18 @@ func DownloadLogs(c *gin.Context) {
 }
 
 func WsExec(c *gin.Context) {
+
+	ns := c.Param("ns")
+	podName := c.Param("pod_name")
+	containerName := c.Param("container_name")
+	cmd := c.Query("cmd")
+	ctx := c.Request.Context()
+
+	if cmd == "" {
+		amis.WriteJsonError(c, fmt.Errorf("执行命令为空"))
+		return
+	}
+
 	// 定义 WebSocket 升级器
 	var upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -84,12 +96,6 @@ func WsExec(c *gin.Context) {
 	}
 	defer conn.Close()
 	klog.V(6).Infof("ws Client connected")
-
-	ns := c.Param("ns")
-	podName := c.Param("pod_name")
-	containerName := c.Param("container_name")
-	cmd := c.Query("cmd")
-	ctx := c.Request.Context()
 
 	klog.V(6).Infof("cmd=%s\n", cmd)
 
