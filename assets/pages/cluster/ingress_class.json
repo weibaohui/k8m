@@ -609,6 +609,11 @@
           }
         },
         {
+          "name": "spec.controller",
+          "label": "控制器名称",
+          "type": "text"
+        },
+        {
           "name": "metadata.annotations",
           "label": "是否默认",
           "tpl": "${metadata.annotations['ingressclass.kubernetes.io/is-default-class']}"
