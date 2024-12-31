@@ -727,22 +727,8 @@
                                   "title": "执行 ${command} （ESC 关闭）",
                                   "body": [
                                     {
-                                      "type": "service",
-                                      "ws": {
-                                        "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                        "data": {
-                                          "name": "${command}"
-                                        }
-                                      },
-                                      "body": {
-                                        "type": "panel",
-                                        "body": [
-                                          {
-                                            "type": "html",
-                                            "html": "<pre>${data}</pre>"
-                                          }
-                                        ]
-                                      }
+                                      "type": "websocketViewer",
+                                      "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}?cmd=${command}"
                                     }
                                   ]
                                 }
