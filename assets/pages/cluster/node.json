@@ -29,24 +29,13 @@
             "title": "${kind}指南（ESC 关闭）",
             "body": [
               {
-                "type": "service",
-                "api": "post:/k8s/chat/resource",
-                "data": {
+                "type": "websocketMarkdownViewer",
+                "url": "/k8s/chat/resource",
+                "params": {
                   "kind": "${kind}",
                   "group": "${group}",
                   "version": "${version}"
-                },
-                "body": [
-                  {
-                    "type": "markdown",
-                    "value": "${result|raw}",
-                    "options": {
-                      "linkify": true,
-                      "html": true,
-                      "breaks": true
-                    }
-                  }
-                ]
+                }
               }
             ]
           }
@@ -140,24 +129,13 @@
             "title": "${kind} 参考样例（ESC 关闭）",
             "body": [
               {
-                "type": "service",
-                "api": "post:/k8s/chat/example",
-                "data": {
+                "type": "websocketMarkdownViewer",
+                "url": "/k8s/chat/example",
+                "params": {
                   "kind": "${kind}",
                   "group": "${group}",
                   "version": "${version}"
-                },
-                "body": [
-                  {
-                    "type": "markdown",
-                    "value": "${result|raw}",
-                    "options": {
-                      "linkify": true,
-                      "html": true,
-                      "breaks": true
-                    }
-                  }
-                ]
+                }
               }
             ]
           }
