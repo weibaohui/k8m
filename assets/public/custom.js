@@ -419,9 +419,11 @@
 
         const [messages, setMessages] = React.useState([]); // 用于存储接收到的所有 WebSocket 消息
         const [status, setStatus] = React.useState('Disconnected'); // WebSocket 状态
+        const wsRef = React.useRef(null); // 使用 ref 保存 WebSocket 实例，方便管理生命周期
 
         React.useEffect(() => {
             const ws = new WebSocket(url);
+            wsRef.current = ws; // 保存 WebSocket 实例
 
             // 连接成功
             ws.onopen = () => {
@@ -450,9 +452,12 @@
                 setStatus('Error');
             };
 
-            // 清理 WebSocket 连接
+            // 在组件卸载时关闭 WebSocket
             return () => {
-                ws.close();
+                if (wsRef.current) {
+                    wsRef.current.close(); // 关闭 WebSocket 连接
+                    wsRef.current = null; // 清空引用
+                }
             };
         }, [url]); // 当 URL 变化时重新建立连接
 
