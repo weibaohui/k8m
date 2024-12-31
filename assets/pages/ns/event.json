@@ -52,6 +52,81 @@
               }
             ]
           }
+        },
+        {
+          "type": "button",
+          "label": "属性文档",
+          "level": "link",
+          "icon": "fas fa-book-open text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind} 属性文档（ESC 关闭）",
+            "body": [
+              {
+                "type": "page",
+                "asideResizor": true,
+                "asideSticky": false,
+                "asideMinWidth": 300,
+                "asideMaxWidth": 600,
+                "aside": [
+                  {
+                    "type": "input-tree",
+                    "name": "tree",
+                    "initiallyOpen": false,
+                    "unfoldedLevel": 1,
+                    "searchable": true,
+                    "showOutline": true,
+                    "showIcon": true,
+                    "searchConfig": {
+                      "sticky": true
+                    },
+                    "selectFirst": true,
+                    "heightAuto": true,
+                    "inputClassName": "no-border no-padder mt-1",
+                    "source": "get:/k8s/doc/kind/${kind}/group/${group}/version/${version}",
+                    "onEvent": {
+                      "change": {
+                        "actions": [
+                          {
+                            "componentId": "detail",
+                            "actionType": "reload",
+                            "data": {
+                              "description": "${event.data.item.description}"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "toolbar": [
+                  {
+                    "type": "tpl",
+                    "tpl": ""
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "service",
+                    "api": "post:/k8s/doc/detail",
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "${description}</br></br></br>${translate?translate:''}",
+                        "wrapperComponent": "",
+                        "inline": false
+                      }
+                    ],
+                    "id": "detail"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
