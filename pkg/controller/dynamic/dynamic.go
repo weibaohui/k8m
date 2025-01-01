@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,7 +24,20 @@ func List(c *gin.Context) {
 	ctx := c.Request.Context()
 	var list []unstructured.Unstructured
 	err := kom.DefaultCluster().WithContext(ctx).RemoveManagedFields().Namespace(ns).GVK(group, version, kind).List(&list).Error
+	list = FillList(kind, list)
 	amis.WriteJsonListWithError(c, list, err)
+}
+
+// FillList 定制填充list []unstructured.Unstructured列表
+func FillList(kind string, list []unstructured.Unstructured) []unstructured.Unstructured {
+	switch kind {
+	case "Node":
+		for i, _ := range list {
+			item := list[i]
+			item = service.NodeService().SetIPUsage(item)
+		}
+	}
+	return list
 }
 func Event(c *gin.Context) {
 	ns := c.Param("ns")
