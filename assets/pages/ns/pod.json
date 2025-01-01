@@ -1211,7 +1211,7 @@
           "type": "mapping",
           "map": {
             "Guaranteed": "<span class='label label-success'>保证型</span>",
-            "Burstable": "<span class='label label-warning'>突增型</span>",
+            "Burstable": "<span class='label label-warning'>可突增型</span>",
             "BestEffort": "<span class='label label-danger'>尽力型</span>"
           },
           "searchable": {
@@ -1225,7 +1225,7 @@
                 "value": "Guaranteed"
               },
               {
-                "label": "突增型",
+                "label": "可突增型",
                 "value": "Burstable"
               },
               {
