@@ -37,20 +37,20 @@ func (p *podService) SetAllocatedStatus(item unstructured.Unstructured) unstruct
 	table := kom.DefaultCluster().Name(podName).Namespace(item.GetNamespace()).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 	for _, row := range table {
 		if row.ResourceType == "cpu" {
-			// 设置或追加 annotations
 			utils.AddOrUpdateAnnotations(&item, map[string]string{
 				"cpu.request":         fmt.Sprintf("%s", row.Request),
 				"cpu.requestFraction": fmt.Sprintf("%s", row.RequestFraction),
 				"cpu.limit":           fmt.Sprintf("%s", row.Limit),
 				"cpu.limitFraction":   fmt.Sprintf("%s", row.LimitFraction),
+				"cpu.total":           fmt.Sprintf("%s", row.Total),
 			})
 		} else if row.ResourceType == "memory" {
-			// 设置或追加 annotations
 			utils.AddOrUpdateAnnotations(&item, map[string]string{
 				"memory.request":         fmt.Sprintf("%s", row.Request),
 				"memory.requestFraction": fmt.Sprintf("%s", row.RequestFraction),
 				"memory.limit":           fmt.Sprintf("%s", row.Limit),
 				"memory.limitFraction":   fmt.Sprintf("%s", row.LimitFraction),
+				"memory.total":           fmt.Sprintf("%s", row.Total),
 			})
 		}
 	}
