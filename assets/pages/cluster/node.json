@@ -790,6 +790,82 @@
           "tpl": "${status.capacity.cpu}C/${status.capacity.memory|autoConvertMemory}"
         },
         {
+          "name": "resource",
+          "label": "CPU资源<br>请求用量/上限用量",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "type": "progress",
+              "label": "request",
+              "value": "<%= data.metadata.annotations['cpu.requestFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            },
+            {
+              "type": "progress",
+              "label": "limit",
+              "value": "<%= data.metadata.annotations['cpu.limitFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "resource",
+          "label": "内存资源<br>请求用量/上限用量",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "type": "progress",
+              "label": "request",
+              "value": "<%= data.metadata.annotations['memory.requestFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            },
+            {
+              "type": "progress",
+              "label": "limit",
+              "value": "<%= data.metadata.annotations['memory.limitFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
           "name": "ip",
           "label": "IP资源",
           "type": "container",
