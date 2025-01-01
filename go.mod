@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/sashabaranov/go-openai v1.36.1
 	github.com/spf13/pflag v1.0.5
-	github.com/weibaohui/kom v0.1.18
+	github.com/weibaohui/kom v0.1.19
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
 	k8s.io/client-go v0.32.0
