@@ -579,7 +579,27 @@
           "name": "webhooks",
           "label": "回调定义",
           "type": "tpl",
-          "tpl": "${webhooks|count}"
+          "tpl": "<span class='text-blue-500 font-black cursor-pointer'>${webhooks|count}</span>",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "title": "定义详情 (ESC 关闭)",
+                    "body": {
+                      "type": "json",
+                      "source": "${webhooks}",
+                      "levelExpand": 2
+                    },
+                    "size": "lg"
+                  }
+                }
+              ]
+            }
+          }
         },
         {
           "name": "metadata.labels",
