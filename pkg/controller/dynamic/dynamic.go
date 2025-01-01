@@ -37,6 +37,11 @@ func FillList(kind string, list []unstructured.Unstructured) []unstructured.Unst
 			item = service.NodeService().SetIPUsage(item)
 			item = service.NodeService().SetAllocatedStatus(item)
 		}
+		// case "Pod":
+		// 	for i, _ := range list {
+		// 		item := list[i]
+		// 		item = service.PodService().SetAllocatedStatus(item)
+		// 	}
 	}
 	return list
 }
