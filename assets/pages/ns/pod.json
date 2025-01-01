@@ -1200,6 +1200,12 @@
           }
         },
         {
+          "name": "status.podIP",
+          "label": "容器组IP",
+          "type": "text",
+          "searchable": true
+        },
+        {
           "name": "status.qosClass",
           "label": "保障等级",
           "type": "mapping",
@@ -1240,6 +1246,12 @@
           }
         },
         {
+          "name": "status.containerStatuses",
+          "label": "重启次数",
+          "type": "tpl",
+          "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
+        },
+        {
           "label": "资源设定",
           "name": "资源设定",
           "width": "150px",
@@ -1247,10 +1259,80 @@
           "tpl": "<% for (var i = 0; i < data.spec.containers.length; i++) { %><% var container = data.spec.containers[i]; var requests = container?.resources?.requests || {}; var limits = container?.resources?.limits || {}; var cpuRequest = requests.cpu || null; var cpuLimit = limits.cpu || null; var memoryRequest = requests.memory || null; var memoryLimit = limits.memory || null; %><% if (cpuRequest || cpuLimit || memoryRequest || memoryLimit) { %><strong>容器：<%= container.name || '未知' %></strong><br><% if (cpuRequest || cpuLimit) { %><strong class='text-blue-500 font-black'><%= cpuRequest || '0' %> ≦处理器≦ <%= cpuLimit || '♾️' %></strong><br><% } %><% if (memoryRequest || memoryLimit) { %><strong class='text-green-500 font-black'><%= memoryRequest || '0' %> ≦内存≦ <%= memoryLimit || '♾️' %></strong><br><% } %><% if (i < data.spec.containers.length - 1) { %><br><% } %><% } %><% } %>"
         },
         {
-          "name": "status.containerStatuses",
-          "label": "重启次数",
-          "type": "tpl",
-          "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
+          "name": "resource",
+          "label": "CPU资源<br>请求用量/上限用量",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "type": "progress",
+              "label": "request",
+              "value": "<%= data.metadata.annotations['cpu.requestFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            },
+            {
+              "type": "progress",
+              "label": "limit",
+              "value": "<%= data.metadata.annotations['cpu.limitFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "resource",
+          "label": "内存资源<br>请求用量/上限用量",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "type": "progress",
+              "label": "request",
+              "value": "<%= data.metadata.annotations['memory.requestFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            },
+            {
+              "type": "progress",
+              "label": "limit",
+              "value": "<%= data.metadata.annotations['memory.limitFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
         },
         {
           "name": "metadata.labels",
@@ -1314,12 +1396,6 @@
           "name": "status.conditions",
           "label": "条件",
           "type": "k8sConditions"
-        },
-        {
-          "name": "status.podIP",
-          "label": "容器组IP",
-          "type": "text",
-          "searchable": true
         },
         {
           "name": "spec.hostNetwork",
