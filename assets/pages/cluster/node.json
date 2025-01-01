@@ -785,9 +785,38 @@
         },
         {
           "name": "status",
-          "label": "资源信息",
+          "label": "硬件配置",
           "type": "tpl",
           "tpl": "${status.capacity.cpu}C/${status.capacity.memory|autoConvertMemory}"
+        },
+        {
+          "name": "ip",
+          "label": "IP资源",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "name": "metadata.annotations['ip.usage.total']",
+              "label": "IP资源",
+              "type": "tpl",
+              "tpl": "${metadata.annotations['ip.usage.used']}/${metadata.annotations['ip.usage.available']}/${metadata.annotations['ip.usage.total']}"
+            },
+            {
+              "type": "progress",
+              "label": "IP Usage Progress",
+              "value": "<%= Math.round((data.metadata.annotations['ip.usage.used'] / data.metadata.annotations['ip.usage.total']) * 100) %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
         },
         {
           "name": "spec.unschedulable",
