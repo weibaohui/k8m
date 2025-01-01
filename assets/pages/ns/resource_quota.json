@@ -634,6 +634,32 @@
           }
         },
         {
+          "name": "spec.hard",
+          "label": "规则",
+          "type": "tpl",
+          "tpl": "<span class='text-blue-500 font-black cursor-pointer' onClick='showDialog()'><%= Object.keys(data.spec.hard).length %></span>",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "title": "规则详情 (ESC 关闭)",
+                    "body": {
+                      "type": "json",
+                      "source": "${spec.hard}",
+                      "levelExpand": 1
+                    },
+                    "size": "lg"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
