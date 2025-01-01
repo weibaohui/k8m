@@ -3,13 +3,14 @@ module github.com/weibaohui/k8m
 go 1.23.0
 
 require (
+	github.com/dgraph-io/ristretto/v2 v2.0.1
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/sashabaranov/go-openai v1.36.1
 	github.com/spf13/pflag v1.0.5
-	github.com/weibaohui/kom v0.1.20
+	github.com/weibaohui/kom v0.1.21
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
 	k8s.io/client-go v0.32.0
@@ -17,7 +18,8 @@ require (
 	sigs.k8s.io/yaml v1.4.0
 )
 
-//replace github.com/weibaohui/kom v0.1.19 => github.com/weibaohui/kom v0.1.20-0.20250101125325-79a21e466792
+//replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
+//replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
@@ -29,7 +31,6 @@ require (
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dgraph-io/ristretto/v2 v2.0.1 // indirect
 	github.com/duke-git/lancet/v2 v2.3.3 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
