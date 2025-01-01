@@ -62,7 +62,7 @@ func (p *podService) SetAllocatedStatus(item unstructured.Unstructured) unstruct
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s", ns, podName, version)
-	table, err := utils.GetOrSetCache(p.Cache, cacheKey, 10*time.Minute, func() ([]*kom.ResourceUsageRow, error) {
+	table, err := utils.GetOrSetCache(p.Cache, cacheKey, 24*time.Hour, func() ([]*kom.ResourceUsageRow, error) {
 		tb := kom.DefaultCluster().Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
