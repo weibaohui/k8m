@@ -15,13 +15,12 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var podOnce sync.Once
-
 type podService struct {
 	Cache *ristretto.Cache[string, any]
 }
 
 func newPodService() *podService {
+	var podOnce sync.Once
 	podOnce.Do(func() {
 		klog.V(6).Infof("init localPodService")
 		cache, err := ristretto.NewCache(&ristretto.Config[string, any]{

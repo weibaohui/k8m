@@ -11,13 +11,13 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var nodeOnce sync.Once
-
 type nodeService struct {
 	Cache *ristretto.Cache[string, any]
 }
 
 func newNodeService() *nodeService {
+	var nodeOnce sync.Once
+
 	nodeOnce.Do(func() {
 		klog.V(6).Infof("init localNodeService")
 		cache, err := ristretto.NewCache(&ristretto.Config[string, any]{
