@@ -580,19 +580,28 @@
           "label": "标签",
           "type": "tpl",
           "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : ''}",
-          "popOver": {
-            "trigger": "hover",
-            "showIcon": false,
-            "title": "${metadata.name} labels",
-            "body": {
-              "type": "json",
-              "source": "${metadata.labels}",
-              "levelExpand": 1
-            },
-            "style": {
-              "maxWidth": "500px",
-              "width": "500px"
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 标签 (ESC 关闭)",
+                    "body": {
+                      "type": "json",
+                      "source": "${metadata.labels}",
+                      "levelExpand": 1
+                    },
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
             }
+          },
+          "style": {
+            "cursor": "pointer"
           }
         },
         {
