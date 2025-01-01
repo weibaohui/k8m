@@ -769,7 +769,7 @@
         },
         {
           "name": "spec.ports",
-          "label": "访问端口<br>访问端口[:节点端口]/协议 => 容器端口",
+          "label": "访问端口<br><span class='text-gray-500 text-xs'>访问端口[:节点端口]/协议 => 容器端口</span>",
           "type": "each",
           "items": {
             "type": "tpl",

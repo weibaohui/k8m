@@ -1211,7 +1211,7 @@
           "type": "mapping",
           "map": {
             "Guaranteed": "<span class='label label-success'>保证型</span>",
-            "Burstable": "<span class='label label-warning'>突发型</span>",
+            "Burstable": "<span class='label label-warning'>突增型</span>",
             "BestEffort": "<span class='label label-danger'>尽力型</span>"
           },
           "searchable": {
@@ -1225,7 +1225,7 @@
                 "value": "Guaranteed"
               },
               {
-                "label": "突发型",
+                "label": "突增型",
                 "value": "Burstable"
               },
               {
@@ -1237,12 +1237,12 @@
         },
         {
           "name": "spec.containers",
-          "label": "容器镜像",
+          "label": "容器镜像<br><span class='text-gray-500 text-xs'>容器名称=>镜像:版本</span>",
           "width": "150px",
           "type": "each",
           "items": {
             "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>=>${image|simpleImageName}</div>"
           }
         },
         {
@@ -1254,13 +1254,13 @@
         {
           "label": "资源设定",
           "name": "资源设定",
-          "width": "150px",
+          "width": "180px",
           "type": "tpl",
           "tpl": "<% for (var i = 0; i < data.spec.containers.length; i++) { %><% var container = data.spec.containers[i]; var requests = container?.resources?.requests || {}; var limits = container?.resources?.limits || {}; var cpuRequest = requests.cpu || null; var cpuLimit = limits.cpu || null; var memoryRequest = requests.memory || null; var memoryLimit = limits.memory || null; %><% if (cpuRequest || cpuLimit || memoryRequest || memoryLimit) { %><strong>容器：<%= container.name || '未知' %></strong><br><% if (cpuRequest || cpuLimit) { %><strong class='text-blue-500 font-black'><%= cpuRequest || '0' %> ≦处理器≦ <%= cpuLimit || '♾️' %></strong><br><% } %><% if (memoryRequest || memoryLimit) { %><strong class='text-green-500 font-black'><%= memoryRequest || '0' %> ≦内存≦ <%= memoryLimit || '♾️' %></strong><br><% } %><% if (i < data.spec.containers.length - 1) { %><br><% } %><% } %><% } %>"
         },
         {
           "name": "resource",
-          "label": "CPU资源<br>请求用量/上限用量",
+          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -1298,7 +1298,7 @@
         },
         {
           "name": "resource",
-          "label": "内存资源<br>请求用量/上限用量",
+          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -1408,7 +1408,8 @@
           "name": "spec.nodeName",
           "label": "所在节点",
           "type": "text",
-          "searchable": true
+          "searchable": true,
+          "width": "150px"
         },
         {
           "name": "metadata.creationTimestamp",
