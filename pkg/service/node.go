@@ -11,19 +11,20 @@ import (
 	"k8s.io/klog/v2"
 )
 
+var nodeOnce sync.Once
+
 type nodeService struct {
 	Cache *ristretto.Cache[string, any]
 }
 
 func newNodeService() *nodeService {
-	var nodeOnce sync.Once
 
 	nodeOnce.Do(func() {
 		klog.V(6).Infof("init localNodeService")
 		cache, err := ristretto.NewCache(&ristretto.Config[string, any]{
 			NumCounters: 1e7,     // number of keys to track frequency of (10M).
 			MaxCost:     1 << 30, // maximum cost of cache (1GB).
-			BufferItems: 256,     // number of keys per Get buffer.
+			BufferItems: 64,      // number of keys per Get buffer.
 		})
 		if err != nil {
 			klog.Errorf("Failed to create cache: %v", err)
