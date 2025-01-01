@@ -9,13 +9,15 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/sashabaranov/go-openai v1.36.1
 	github.com/spf13/pflag v1.0.5
-	github.com/weibaohui/kom v0.1.19
+	github.com/weibaohui/kom v0.1.20
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
 	k8s.io/client-go v0.32.0
 	k8s.io/klog/v2 v2.130.1
 	sigs.k8s.io/yaml v1.4.0
 )
+
+//replace github.com/weibaohui/kom v0.1.19 => github.com/weibaohui/kom v0.1.20-0.20250101125325-79a21e466792
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
