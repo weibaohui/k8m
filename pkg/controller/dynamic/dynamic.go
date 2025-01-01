@@ -35,6 +35,7 @@ func FillList(kind string, list []unstructured.Unstructured) []unstructured.Unst
 		for i, _ := range list {
 			item := list[i]
 			item = service.NodeService().SetIPUsage(item)
+			item = service.NodeService().SetAllocatedStatus(item)
 		}
 	}
 	return list
