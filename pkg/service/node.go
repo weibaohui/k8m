@@ -2,13 +2,36 @@ package service
 
 import (
 	"fmt"
+	"sync"
 
+	"github.com/dgraph-io/ristretto/v2"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/klog/v2"
 )
 
+var nodeOnce sync.Once
+
 type nodeService struct {
+	Cache *ristretto.Cache[string, any]
+}
+
+func newNodeService() *nodeService {
+	nodeOnce.Do(func() {
+		klog.V(6).Infof("init localNodeService")
+		cache, err := ristretto.NewCache(&ristretto.Config[string, any]{
+			NumCounters: 1e7,     // number of keys to track frequency of (10M).
+			MaxCost:     1 << 30, // maximum cost of cache (1GB).
+			BufferItems: 64,      // number of keys per Get buffer.
+		})
+		if err != nil {
+			klog.Errorf("Failed to create cache: %v", err)
+		}
+		localNodeService = &nodeService{Cache: cache}
+	})
+
+	return localNodeService
 }
 
 func (n *nodeService) SetIPUsage(item unstructured.Unstructured) unstructured.Unstructured {

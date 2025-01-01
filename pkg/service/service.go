@@ -15,5 +15,5 @@ func PodService() *podService {
 	return newPodService()
 }
 func NodeService() *nodeService {
-	return localNodeService
+	return newNodeService()
 }

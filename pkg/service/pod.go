@@ -15,14 +15,14 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var once sync.Once
+var podOnce sync.Once
 
 type podService struct {
 	Cache *ristretto.Cache[string, any]
 }
 
 func newPodService() *podService {
-	once.Do(func() {
+	podOnce.Do(func() {
 		klog.V(6).Infof("init localPodService")
 		cache, err := ristretto.NewCache(&ristretto.Config[string, any]{
 			NumCounters: 1e7,     // number of keys to track frequency of (10M).
