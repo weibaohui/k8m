@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -13,6 +14,7 @@ import (
 	"github.com/weibaohui/kom/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/yaml"
 )
 
@@ -22,10 +24,51 @@ func List(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := c.Request.Context()
+
+	// 用于存储 JSON 数据的 map
+	var jsonData map[string]interface{}
+	if err := c.ShouldBindJSON(&jsonData); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var total int64
 	var list []unstructured.Unstructured
-	err := kom.DefaultCluster().WithContext(ctx).RemoveManagedFields().Namespace(ns).GVK(group, version, kind).List(&list).Error
+	sql := kom.DefaultCluster().WithContext(ctx).
+		RemoveManagedFields().
+		Namespace(ns).
+		GVK(group, version, kind)
+
+	// 处理查询条件
+	queryConditions := parseNestedJSON("", jsonData)
+	queryConditions = slice.Filter(queryConditions, func(index int, item string) bool {
+		return !strings.HasSuffix(item, "=")
+	})
+
+	if len(queryConditions) > 0 {
+		queryString := strings.Join(queryConditions, " and ")
+		klog.V(6).Infof("sql string =%s", queryString)
+		sql = sql.Where(queryString)
+	}
+
+	// 取出 page 和 perPage
+	// 取出 page 和 perPage
+	page, pageOK := jsonData["page"].(float64) // JSON 数字会解析为 float64
+	perPage, perPageOK := jsonData["perPage"].(float64)
+	if pageOK {
+		sql = sql.Limit(int(perPage))
+	}
+	if perPageOK {
+		sql = sql.Offset((int(page) - 1) * int(perPage))
+	}
+
+	// 执行SQL
+	err := sql.
+		FillTotalCount(&total).
+		List(&list).Error
+
 	list = FillList(kind, list)
-	amis.WriteJsonListWithError(c, list, err)
+	amis.WriteJsonListTotalWithError(c, total, list, err)
 }
 
 // FillList 定制填充list []unstructured.Unstructured列表
@@ -247,4 +290,54 @@ func Delete(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"result": result,
 	})
+}
+
+// 递归解析 JSON 数据
+//
+//	queryConditions := parseNestedJSON("", jsonData)
+//
+// // 示例 JSON 数据
+//
+//	jsonData := map[string]interface{}{
+//		"page":    1,
+//		"metadata": map[string]interface{}{
+//			"name": "nginx",
+//		},
+//		"status": map[string]interface{}{
+//			"phase": "Running",
+//		},
+//		"perPage": 10,
+//	}
+// 	queryString := strings.Join(queryConditions, "&")
+// 输出: page=1&metadata.name=nginx&status.phase=Running&perPage=10
+
+func parseNestedJSON(prefix string, data map[string]interface{}) []string {
+	var result []string
+
+	for key, value := range data {
+		// 分页参数跳过
+		if key == "page" || key == "perPage" || key == "pageDir" || key == "orderDir" || key == "orderBy" || key == "keywords" {
+			continue
+		}
+		// 拼接当前路径
+		currentKey := key
+		if prefix != "" {
+			currentKey = prefix + "." + key
+		}
+
+		switch v := value.(type) {
+		case map[string]interface{}:
+			// 递归解析嵌套对象
+			result = append(result, parseNestedJSON(currentKey, v)...)
+		default:
+			// 添加键值对
+			if v == "" {
+				// 没有值跳过
+				continue
+			}
+			result = append(result, fmt.Sprintf("%s like '%%%v%%'", currentKey, v))
+		}
+	}
+
+	return result
 }
