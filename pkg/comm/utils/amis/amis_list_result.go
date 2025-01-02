@@ -69,3 +69,18 @@ func WriteJsonListWithError[T any](c *gin.Context, data []T, err error) {
 	}
 	WriteJsonList(c, data)
 }
+func WriteJsonListTotalWithError[T any](c *gin.Context, total int64, data []T, err error) {
+	if err != nil {
+
+		c.JSON(200, gin.H{
+			"status": 0,
+			"msg":    "无数据",
+			"data": ListResponse[T]{
+				Count: 0,
+				Rows:  []T{},
+			},
+		})
+		return
+	}
+	WriteJsonListWithTotal(c, total, data)
+}
