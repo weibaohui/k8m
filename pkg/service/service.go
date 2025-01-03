@@ -12,8 +12,8 @@ func DeploymentService() *deployService {
 	return localDeploymentService
 }
 func PodService() *podService {
-	return newPodService()
+	return localPodService
 }
 func NodeService() *nodeService {
-	return newNodeService()
+	return localNodeService
 }
