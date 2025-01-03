@@ -18,6 +18,7 @@ import (
 
 var podOnce sync.Once
 var podWatchOnce sync.Once
+var ttl = 24 * time.Hour
 
 type podService struct {
 	Cache *ristretto.Cache[string, any]
@@ -64,8 +65,8 @@ func (p *podService) SetAllocatedStatus(item unstructured.Unstructured) unstruct
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s", ns, podName, version)
-	table, err := utils.GetOrSetCache(p.Cache, cacheKey, 24*time.Hour, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.DefaultCluster().Name(podName).Namespace(ns).WithCache(time.Hour * 24).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+	table, err := utils.GetOrSetCache(p.Cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+		tb := kom.DefaultCluster().Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
 	if err != nil {
@@ -93,13 +94,30 @@ func (p *podService) SetAllocatedStatus(item unstructured.Unstructured) unstruct
 	}
 	return item
 }
+func (p *podService) CacheAllocatedStatus(item *v1.Pod) {
+	podName := item.GetName()
+	version := item.GetResourceVersion()
+	ns := item.GetNamespace()
+	cacheKey := fmt.Sprintf("%s/%s/%s", ns, podName, version)
+	_, _ = utils.GetOrSetCache(p.Cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+		tb := kom.DefaultCluster().Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		return tb, nil
+	})
 
-func (p *podService) WatchPod() error {
+}
+func (p *podService) RemoveCacheAllocatedStatus(item *v1.Pod) {
+	name := item.GetName()
+	version := item.GetResourceVersion()
+	ns := item.GetNamespace()
+	cacheKey := fmt.Sprintf("%s/%s/%s", ns, name, version)
+	p.Cache.Del(cacheKey)
+}
+func (p *podService) Watch() error {
 	podWatchOnce.Do(func() {
 		// watch default 命名空间下 Pod资源 的变更
 		var watcher watch.Interface
 		var pod v1.Pod
-		err := kom.DefaultCluster().Resource(&pod).Namespace("default").Watch(&watcher).Error
+		err := kom.DefaultCluster().Resource(&pod).Namespace(v1.NamespaceAll).Watch(&watcher).Error
 		if err != nil {
 			klog.Errorf("PodService Create Watcher Error %v", err)
 			return
@@ -116,10 +134,13 @@ func (p *podService) WatchPod() error {
 				// 处理事件
 				switch event.Type {
 				case watch.Added:
+					p.CacheAllocatedStatus(&pod)
 					fmt.Printf("Added Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 				case watch.Modified:
+					p.CacheAllocatedStatus(&pod)
 					fmt.Printf("Modified Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 				case watch.Deleted:
+					p.RemoveCacheAllocatedStatus(&pod)
 					fmt.Printf("Deleted Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 				}
 			}
