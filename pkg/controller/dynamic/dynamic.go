@@ -51,7 +51,7 @@ func List(c *gin.Context) {
 		sql = sql.Where(queryString)
 	}
 
-	// 处理OrderBy
+	// 处理OrderBy,默认asc
 	//  orderBy = 字段
 	// orderDir = asc/desc/空
 	orderBy, orderByOK := jsonData["orderBy"].(string)
