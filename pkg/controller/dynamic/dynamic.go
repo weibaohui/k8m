@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/dgraph-io/ristretto/v2"
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -80,23 +81,23 @@ func List(c *gin.Context) {
 		FillTotalCount(&total).
 		List(&list).Error
 
-	list = FillList(kind, list)
+	list = FillList(kom.DefaultCluster().ClusterCache(), kind, list)
 	amis.WriteJsonListTotalWithError(c, total, list, err)
 }
 
 // FillList 定制填充list []unstructured.Unstructured列表
-func FillList(kind string, list []unstructured.Unstructured) []unstructured.Unstructured {
+func FillList(cache *ristretto.Cache[string, any], kind string, list []unstructured.Unstructured) []unstructured.Unstructured {
 	switch kind {
 	case "Node":
 		for i, _ := range list {
 			item := list[i]
-			item = service.NodeService().SetIPUsage(item)
-			item = service.NodeService().SetAllocatedStatus(item)
+			item = service.NodeService().SetIPUsage(cache, item)
+			item = service.NodeService().SetAllocatedStatus(cache, item)
 		}
 	case "Pod":
 		for i, _ := range list {
 			item := list[i]
-			item = service.PodService().SetAllocatedStatus(item)
+			item = service.PodService().SetAllocatedStatus(cache, item)
 		}
 	}
 	return list
