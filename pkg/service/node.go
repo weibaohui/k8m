@@ -67,6 +67,8 @@ func (n *nodeService) SetIPUsage(item unstructured.Unstructured) unstructured.Un
 
 // SetAllocatedStatus 设置节点的分配状态
 func (n *nodeService) SetAllocatedStatus(item unstructured.Unstructured) unstructured.Unstructured {
+	// todo改为后台周期性获取统计数据
+	// todo 按集群进行处理，从kom里面获取cache使用。而不是自建，因为kom的cache是绑定集群的。
 	nodeName := item.GetName()
 	cacheKey := fmt.Sprintf("%s/%s", "AllocatedStatus", nodeName)
 	table, _ := utils.GetOrSetCache(n.Cache, cacheKey, 10*time.Minute, func() ([]*kom.ResourceUsageRow, error) {
