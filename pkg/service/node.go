@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/dgraph-io/ristretto/v2"
 	"github.com/weibaohui/kom/kom"
@@ -37,13 +38,26 @@ func newNodeService() *nodeService {
 
 func (n *nodeService) SetIPUsage(item unstructured.Unstructured) unstructured.Unstructured {
 	nodeName := item.GetName()
-	total, used, available := kom.DefaultCluster().Name(nodeName).Ctl().Node().IPUsage()
+	cacheKey := fmt.Sprintf("%s/%s", "IPUsage", nodeName)
+	type usage struct {
+		Total     int `json:"total"`
+		Used      int `json:"used"`
+		Available int `json:"available"`
+	}
+	u, _ := utils.GetOrSetCache(n.Cache, cacheKey, 10*time.Minute, func() (usage, error) {
+		total, used, available := kom.DefaultCluster().Name(nodeName).Ctl().Node().IPUsage()
 
+		return usage{
+			Total:     total,
+			Used:      used,
+			Available: available,
+		}, nil
+	})
 	// 设置或追加 annotations
 	utils.AddOrUpdateAnnotations(&item, map[string]string{
-		"ip.usage.total":     fmt.Sprintf("%d", total),
-		"ip.usage.used":      fmt.Sprintf("%d", used),
-		"ip.usage.available": fmt.Sprintf("%d", available),
+		"ip.usage.total":     fmt.Sprintf("%d", u.Total),
+		"ip.usage.used":      fmt.Sprintf("%d", u.Used),
+		"ip.usage.available": fmt.Sprintf("%d", u.Available),
 	})
 
 	return item
@@ -52,7 +66,12 @@ func (n *nodeService) SetIPUsage(item unstructured.Unstructured) unstructured.Un
 // SetAllocatedStatus 设置节点的分配状态
 func (n *nodeService) SetAllocatedStatus(item unstructured.Unstructured) unstructured.Unstructured {
 	nodeName := item.GetName()
-	table := kom.DefaultCluster().Name(nodeName).Ctl().Node().ResourceUsageTable()
+	cacheKey := fmt.Sprintf("%s/%s", "AllocatedStatus", nodeName)
+	table, _ := utils.GetOrSetCache(n.Cache, cacheKey, 10*time.Minute, func() ([]*kom.ResourceUsageRow, error) {
+		tb := kom.DefaultCluster().Name(nodeName).Ctl().Node().ResourceUsageTable()
+		return tb, nil
+	})
+
 	for _, row := range table {
 		if row.ResourceType == "cpu" {
 			// 设置或追加 annotations
