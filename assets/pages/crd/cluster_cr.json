@@ -170,7 +170,7 @@
           "align": "right"
         }
       ],
-      "loadDataOnce": true,
+      "loadDataOnce": false,
       "syncLocation": false,
       "perPage": 10,
       "bulkActions": [
@@ -206,7 +206,7 @@
         "group": "${group}",
         "version": "${version}"
       },
-      "api": "get:/k8s/$kind/group/$group/version/$version/list",
+      "api": "post:/k8s/$kind/group/$group/version/$version/list",
       "columns": [
         {
           "type": "operation",

@@ -214,7 +214,7 @@
           "align": "right"
         }
       ],
-      "loadDataOnce": true,
+      "loadDataOnce": false,
       "syncLocation": false,
       "perPage": 10,
       "bulkActions": [

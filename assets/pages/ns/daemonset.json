@@ -213,7 +213,7 @@
           "align": "right"
         }
       ],
-      "loadDataOnce": true,
+      "loadDataOnce": false,
       "syncLocation": false,
       "initFetch": true,
       "perPage": 10,
@@ -245,7 +245,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/k8s/$kind/group/$group/version/$version/list/ns/${ns}",
+      "api": "post:/k8s/$kind/group/$group/version/$version/list/ns/${ns}",
       "columns": [
         {
           "type": "operation",
@@ -710,7 +710,7 @@
                             "align": "right"
                           }
                         ],
-                        "loadDataOnce": true,
+                        "loadDataOnce": false,
                         "syncLocation": false,
                         "perPage": 10,
                         "api": "get:/k8s/daemonset/rollout/history/ns/$metadata.namespace/name/$metadata.name",
