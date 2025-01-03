@@ -71,6 +71,13 @@ func Init() {
 
 	// 初始化ChatService
 	service.ChatService().SetVars(ApiKey, ApiUrl, Model)
+
+	// 启动watch
+	go func() {
+		_ = service.PodService().Watch()
+		_ = service.NodeService().Watch()
+	}()
+
 }
 
 func main() {
