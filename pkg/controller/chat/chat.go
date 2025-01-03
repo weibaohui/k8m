@@ -12,12 +12,25 @@ import (
 )
 
 type ResourceData struct {
-	Version  string `form:"version"`
-	Kind     string `form:"kind"`
-	Group    string `form:"group"`
+	// 资源版本
+	Version string `form:"version"`
+	// 资源类型
+	Kind string `form:"kind"`
+	// 资源组
+	Group string `form:"group"`
+	// 资源描述
 	Describe string `form:"describe"`
-	Cron     string `form:"cron"`
-	Data     string `form:"data"`
+	// 定时任务
+	Cron string `form:"cron"`
+	// 日志
+	Data string `form:"data"`
+	// 事件
+	Note                string `form:"note"`
+	Source              string `form:"source"`
+	Reason              string `form:"reason"`
+	ReportingController string `form:"reportingController"`
+	Type                string `form:"type"`
+	RegardingKind       string `form:"regardingKind"`
 }
 
 func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
@@ -47,12 +60,20 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 
 func Event(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
-		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(data))
+		d := data.(ResourceData)
+		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
+			"note":   d.Note,
+			"source": d.Source,
+			"reason": d.Reason,
+			"type":   d.Type,
+			"kind":   d.RegardingKind,
+		}))
 	})
 }
 
 func Describe(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
+		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
 		我正在查看关于k8s %s %s 资源的Describe (kubectl describe )信息。
@@ -64,12 +85,13 @@ func Describe(c *gin.Context) {
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
 		\n\nDescribe信息如下：%s`,
-			data.(ResourceData).Group, data.(ResourceData).Kind, data.(ResourceData))
+			d.Group, d.Kind, d.Describe)
 	})
 }
 
 func Example(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
+		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
 		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
@@ -80,12 +102,13 @@ func Example(c *gin.Context) {
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			data.(ResourceData).Group, data.(ResourceData).Kind, data.(ResourceData).Version)
+			d.Group, d.Kind, d.Version)
 	})
 }
 
 func Resource(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
+		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
 		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
@@ -96,12 +119,13 @@ func Resource(c *gin.Context) {
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			data.(ResourceData).Group, data.(ResourceData).Kind, data.(ResourceData).Version)
+			d.Group, d.Kind, d.Version)
 	})
 }
 
 func Cron(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
+		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`我正在查看k8s cronjob 中的schedule 表达式：%s。
 		\n请你作为k8s技术专家，对 %s 这个表达式进行分析，给出详细的解释。
@@ -110,12 +134,13 @@ func Cron(c *gin.Context) {
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			data.(ResourceData).Cron, data.(ResourceData).Cron)
+			d.Cron, d.Cron)
 	})
 }
 
 func Log(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
-		return fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(data.(ResourceData).Data))
+		d := data.(ResourceData)
+		return fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(d.Data))
 	})
 }
