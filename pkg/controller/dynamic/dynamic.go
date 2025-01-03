@@ -328,17 +328,18 @@ func parseNestedJSON(prefix string, data map[string]interface{}) []string {
 	var result []string
 
 	for key, value := range data {
-		// 分页参数跳过
-		// ns name 已经单独在kom调用链中单独设定，不需要设置到where条件中
-		if key == "page" || key == "perPage" || key == "pageDir" || key == "orderDir" || key == "orderBy" || key == "keywords" || key == "ns" || key == "name" {
-			continue
-		}
+
 		// 拼接当前路径
 		currentKey := key
 		if prefix != "" {
 			currentKey = prefix + "." + key
 		}
-
+		// 分页参数跳过
+		// ns name 已经单独在kom调用链中单独设定，不需要设置到where条件中
+		ignoreKeys := []string{"page", "perPage", "pageDir", "orderDir", "orderBy", "keywords", "ns", "name"}
+		if slice.Contain(ignoreKeys, currentKey) {
+			continue
+		}
 		switch v := value.(type) {
 		case map[string]interface{}:
 			// 递归解析嵌套对象
