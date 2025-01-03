@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/sashabaranov/go-openai v1.36.1
 	github.com/spf13/pflag v1.0.5
-	github.com/weibaohui/kom v0.1.25
+	github.com/weibaohui/kom v0.1.27
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
 	k8s.io/client-go v0.32.0
@@ -21,6 +21,7 @@ require (
 
 //replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
 //replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
+//replace github.com/weibaohui/kom v0.1.25 => github.com/weibaohui/kom v0.1.25
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
