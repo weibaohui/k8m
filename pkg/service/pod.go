@@ -16,29 +16,10 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var podOnce sync.Once
 var podWatchOnce sync.Once
 var ttl = 24 * time.Hour
 
 type podService struct {
-	Cache *ristretto.Cache[string, any]
-}
-
-func newPodService() *podService {
-	podOnce.Do(func() {
-		klog.V(6).Infof("init localPodService")
-		cache, err := ristretto.NewCache(&ristretto.Config[string, any]{
-			NumCounters: 1e7,     // number of keys to track frequency of (10M).
-			MaxCost:     1 << 30, // maximum cost of cache (1GB).
-			BufferItems: 64,      // number of keys per Get buffer.
-		})
-		if err != nil {
-			klog.Errorf("Failed to create cache: %v", err)
-		}
-		localPodService = &podService{Cache: cache}
-	})
-
-	return localPodService
 }
 
 func (p *podService) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
@@ -60,12 +41,12 @@ func (p *podService) StreamPodLogs(ctx context.Context, ns, name string, logOpti
 
 // SetAllocatedStatus 设置节点的分配状态
 // pod 资源状态一般不会变化，变化了version也会变
-func (p *podService) SetAllocatedStatus(item unstructured.Unstructured) unstructured.Unstructured {
+func (p *podService) SetAllocatedStatus(cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
-	cacheKey := fmt.Sprintf("%s/%s/%s", ns, podName, version)
-	table, err := utils.GetOrSetCache(p.Cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
+	table, err := utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
 		tb := kom.DefaultCluster().Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
@@ -94,23 +75,23 @@ func (p *podService) SetAllocatedStatus(item unstructured.Unstructured) unstruct
 	}
 	return item
 }
-func (p *podService) CacheAllocatedStatus(item *v1.Pod) {
+func (p *podService) CacheAllocatedStatus(cache *ristretto.Cache[string, any], item *v1.Pod) {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
-	cacheKey := fmt.Sprintf("%s/%s/%s", ns, podName, version)
-	_, _ = utils.GetOrSetCache(p.Cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
+	_, _ = utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
 		tb := kom.DefaultCluster().Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
 
 }
-func (p *podService) RemoveCacheAllocatedStatus(item *v1.Pod) {
-	name := item.GetName()
+func (p *podService) RemoveCacheAllocatedStatus(cache *ristretto.Cache[string, any], item *v1.Pod) {
+	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
-	cacheKey := fmt.Sprintf("%s/%s/%s", ns, name, version)
-	p.Cache.Del(cacheKey)
+	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
+	cache.Del(cacheKey)
 }
 func (p *podService) Watch() error {
 	podWatchOnce.Do(func() {
@@ -122,6 +103,7 @@ func (p *podService) Watch() error {
 			klog.Errorf("PodService Create Watcher Error %v", err)
 			return
 		}
+		cache := kom.DefaultCluster().ClusterCache()
 		go func() {
 			klog.V(6).Infof("start watch pod")
 			defer watcher.Stop()
@@ -134,13 +116,13 @@ func (p *podService) Watch() error {
 				// 处理事件
 				switch event.Type {
 				case watch.Added:
-					p.CacheAllocatedStatus(&pod)
+					p.CacheAllocatedStatus(cache, &pod)
 					fmt.Printf("Added Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 				case watch.Modified:
-					p.CacheAllocatedStatus(&pod)
+					p.CacheAllocatedStatus(cache, &pod)
 					fmt.Printf("Modified Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 				case watch.Deleted:
-					p.RemoveCacheAllocatedStatus(&pod)
+					p.RemoveCacheAllocatedStatus(cache, &pod)
 					fmt.Printf("Deleted Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 				}
 			}
