@@ -14,19 +14,18 @@ import (
 
 type nodeService struct {
 }
+type ipUsage struct {
+	Total     int `json:"total"`
+	Used      int `json:"used"`
+	Available int `json:"available"`
+}
 
 func (n *nodeService) SetIPUsage(cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
 	nodeName := item.GetName()
 	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
-	type usage struct {
-		Total     int `json:"total"`
-		Used      int `json:"used"`
-		Available int `json:"available"`
-	}
-	u, _ := utils.GetOrSetCache(cache, cacheKey, ttl, func() (usage, error) {
-		total, used, available := kom.DefaultCluster().Name(nodeName).Ctl().Node().IPUsage()
-
-		return usage{
+	u, _ := utils.GetOrSetCache(cache, cacheKey, ttl, func() (ipUsage, error) {
+		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(ttl).Ctl().Node().IPUsage()
+		return ipUsage{
 			Total:     total,
 			Used:      used,
 			Available: available,
@@ -102,12 +101,15 @@ func (n *nodeService) Watch() error {
 				switch event.Type {
 				case watch.Added:
 					n.CacheAllocatedStatus(cache, &node)
+					n.CacheIPUsage(cache, &node)
 					klog.V(6).Infof("Added Node [ %s/%s ]\n", node.Namespace, node.Name)
 				case watch.Modified:
 					n.CacheAllocatedStatus(cache, &node)
+					n.CacheIPUsage(cache, &node)
 					klog.V(6).Infof("Modified Node [ %s/%s ]\n", node.Namespace, node.Name)
 				case watch.Deleted:
 					n.RemoveCacheAllocatedStatus(cache, &node)
+					n.RemoveCacheIPUsage(cache, &node)
 					klog.V(6).Infof("Deleted Node [ %s/%s ]\n", node.Namespace, node.Name)
 				}
 			}
@@ -117,7 +119,23 @@ func (n *nodeService) Watch() error {
 
 	return nil
 }
-
+func (n *nodeService) CacheIPUsage(cache *ristretto.Cache[string, any], item *v1.Node) {
+	nodeName := item.GetName()
+	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
+	_, _ = utils.GetOrSetCache(cache, cacheKey, ttl, func() (ipUsage, error) {
+		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(ttl).Ctl().Node().IPUsage()
+		return ipUsage{
+			Total:     total,
+			Used:      used,
+			Available: available,
+		}, nil
+	})
+}
+func (n *nodeService) RemoveCacheIPUsage(cache *ristretto.Cache[string, any], item *v1.Node) {
+	nodeName := item.GetName()
+	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
+	cache.Del(cacheKey)
+}
 func (n *nodeService) CacheAllocatedStatus(cache *ristretto.Cache[string, any], item *v1.Node) {
 	name := item.GetName()
 	version := item.GetResourceVersion()
