@@ -8,7 +8,9 @@ import (
 	"github.com/dgraph-io/ristretto/v2"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/klog/v2"
 )
 
@@ -93,4 +95,61 @@ func (n *nodeService) SetAllocatedStatus(item unstructured.Unstructured) unstruc
 	}
 
 	return item
+}
+func (n *nodeService) Watch() error {
+	podWatchOnce.Do(func() {
+		// watch default 命名空间下 Pod资源 的变更
+		var watcher watch.Interface
+		var node v1.Node
+		err := kom.DefaultCluster().Resource(&node).Watch(&watcher).Error
+		if err != nil {
+			klog.Errorf("PodService Create Watcher Error %v", err)
+			return
+		}
+		go func() {
+			klog.V(6).Infof("start watch pod")
+			defer watcher.Stop()
+			for event := range watcher.ResultChan() {
+				err := kom.DefaultCluster().Tools().ConvertRuntimeObjectToTypedObject(event.Object, &node)
+				if err != nil {
+					klog.V(6).Infof("无法将对象转换为 *v1.Pod 类型: %v", err)
+					return
+				}
+				// 处理事件
+				switch event.Type {
+				case watch.Added:
+					n.CacheAllocatedStatus(&node)
+					klog.V(6).Infof("Added Node [ %s/%s ]\n", node.Namespace, node.Name)
+				case watch.Modified:
+					n.CacheAllocatedStatus(&node)
+					klog.V(6).Infof("Modified Node [ %s/%s ]\n", node.Namespace, node.Name)
+				case watch.Deleted:
+					n.RemoveCacheAllocatedStatus(&node)
+					klog.V(6).Infof("Deleted Node [ %s/%s ]\n", node.Namespace, node.Name)
+				}
+			}
+		}()
+
+	})
+
+	return nil
+}
+
+func (n *nodeService) CacheAllocatedStatus(item *v1.Node) {
+	name := item.GetName()
+	version := item.GetResourceVersion()
+	ns := item.GetNamespace()
+	cacheKey := fmt.Sprintf("%s/%s/%s", ns, name, version)
+	_, _ = utils.GetOrSetCache(n.Cache, cacheKey, 24*time.Hour, func() ([]*kom.ResourceUsageRow, error) {
+		tb := kom.DefaultCluster().Name(name).Namespace(ns).WithCache(time.Hour * 24).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
+		return tb, nil
+	})
+
+}
+func (n *nodeService) RemoveCacheAllocatedStatus(item *v1.Node) {
+	name := item.GetName()
+	version := item.GetResourceVersion()
+	ns := item.GetNamespace()
+	cacheKey := fmt.Sprintf("%s/%s/%s", ns, name, version)
+	n.Cache.Del(cacheKey)
 }
