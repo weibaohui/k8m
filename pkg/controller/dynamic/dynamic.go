@@ -316,7 +316,8 @@ func parseNestedJSON(prefix string, data map[string]interface{}) []string {
 
 	for key, value := range data {
 		// 分页参数跳过
-		if key == "page" || key == "perPage" || key == "pageDir" || key == "orderDir" || key == "orderBy" || key == "keywords" {
+		// ns name 已经单独在kom调用链中单独设定，不需要设置到where条件中
+		if key == "page" || key == "perPage" || key == "pageDir" || key == "orderDir" || key == "orderBy" || key == "keywords" || key == "ns" || key == "name" {
 			continue
 		}
 		// 拼接当前路径
@@ -335,6 +336,7 @@ func parseNestedJSON(prefix string, data map[string]interface{}) []string {
 				// 没有值跳过
 				continue
 			}
+
 			result = append(result, fmt.Sprintf("%s like '%%%v%%'", currentKey, v))
 		}
 	}
