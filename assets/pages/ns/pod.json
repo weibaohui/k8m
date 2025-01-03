@@ -1139,14 +1139,16 @@
         {
           "name": "metadata.namespace",
           "label": "命名空间",
-          "type": "text"
+          "type": "text",
+          "sortable": true
         },
         {
           "name": "metadata.name",
           "label": "名称",
-          "width": "180px",
           "type": "text",
+          "width": "180px",
           "copyable": true,
+          "sortable": true,
           "searchable": {
             "type": "input-text",
             "name": "metadata.name",
