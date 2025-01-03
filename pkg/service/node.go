@@ -2,15 +2,20 @@ package service
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/dgraph-io/ristretto/v2"
+	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/klog/v2"
 )
+
+// nodeStatusTTL 节点状态缓存时间
+// 要跟watch中的定时处理器保持一致
+var nodeStatusTTL = 5 * time.Minute
 
 type nodeService struct {
 }
@@ -23,8 +28,8 @@ type ipUsage struct {
 func (n *nodeService) SetIPUsage(cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
 	nodeName := item.GetName()
 	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
-	u, _ := utils.GetOrSetCache(cache, cacheKey, ttl, func() (ipUsage, error) {
-		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(ttl).Ctl().Node().IPUsage()
+	u, _ := utils.GetOrSetCache(cache, cacheKey, nodeStatusTTL, func() (ipUsage, error) {
+		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().IPUsage()
 		return ipUsage{
 			Total:     total,
 			Used:      used,
@@ -49,8 +54,8 @@ func (n *nodeService) SetAllocatedStatus(cache *ristretto.Cache[string, any], it
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "NodeAllocatedStatus", ns, name, version)
-	table, _ := utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.DefaultCluster().Name(name).WithCache(ttl).Ctl().Node().ResourceUsageTable()
+	table, _ := utils.GetOrSetCache(cache, cacheKey, nodeStatusTTL, func() ([]*kom.ResourceUsageRow, error) {
+		tb := kom.DefaultCluster().Name(name).WithCache(nodeStatusTTL).Ctl().Node().ResourceUsageTable()
 		return tb, nil
 	})
 
@@ -76,54 +81,40 @@ func (n *nodeService) SetAllocatedStatus(cache *ristretto.Cache[string, any], it
 
 	return item
 }
+func (n *nodeService) SyncNodeStatus() {
+	klog.V(6).Infof("Sync Node Status")
+	var nodes []v1.Node
+	cache := kom.DefaultCluster().ClusterCache()
+	err := kom.DefaultCluster().Resource(&v1.Node{}).List(&nodes)
+	if err != nil {
+		klog.Errorf("Error watch node:%v", err)
+	}
+	for _, node := range nodes {
+		n.CacheIPUsage(cache, &node)
+		n.CacheAllocatedStatus(cache, &node)
+	}
+}
 func (n *nodeService) Watch() error {
-	podWatchOnce.Do(func() {
-		// watch default 命名空间下 Pod资源 的变更
-		var watcher watch.Interface
-		var node v1.Node
-		cache := kom.DefaultCluster().ClusterCache()
-
-		err := kom.DefaultCluster().Resource(&node).Watch(&watcher).Error
-		if err != nil {
-			klog.Errorf("PodService Create Watcher Error %v", err)
-			return
-		}
-		go func() {
-			klog.V(6).Infof("start watch pod")
-			defer watcher.Stop()
-			for event := range watcher.ResultChan() {
-				err = kom.DefaultCluster().Tools().ConvertRuntimeObjectToTypedObject(event.Object, &node)
-				if err != nil {
-					klog.V(6).Infof("无法将对象转换为 *v1.Pod 类型: %v", err)
-					return
-				}
-				// 处理事件
-				switch event.Type {
-				case watch.Added:
-					n.CacheAllocatedStatus(cache, &node)
-					n.CacheIPUsage(cache, &node)
-					klog.V(6).Infof("Added Node [ %s/%s ]\n", node.Namespace, node.Name)
-				case watch.Modified:
-					n.CacheAllocatedStatus(cache, &node)
-					n.CacheIPUsage(cache, &node)
-					klog.V(6).Infof("Modified Node [ %s/%s ]\n", node.Namespace, node.Name)
-				case watch.Deleted:
-					n.RemoveCacheAllocatedStatus(cache, &node)
-					n.RemoveCacheIPUsage(cache, &node)
-					klog.V(6).Infof("Deleted Node [ %s/%s ]\n", node.Namespace, node.Name)
-				}
-			}
-		}()
-
+	go func() {
+		// 先执行一次
+		n.SyncNodeStatus()
+	}()
+	// 设置一个定时器，后台不断更新node状态
+	_, err := cron.New().AddFunc("@every 5m", func() {
+		n.SyncNodeStatus()
 	})
 
+	if err != nil {
+		return err
+	}
+	klog.V(6).Infof("新增节点状态定时更新任务【@every 5m】")
 	return nil
 }
 func (n *nodeService) CacheIPUsage(cache *ristretto.Cache[string, any], item *v1.Node) {
 	nodeName := item.GetName()
 	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
-	_, _ = utils.GetOrSetCache(cache, cacheKey, ttl, func() (ipUsage, error) {
-		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(ttl).Ctl().Node().IPUsage()
+	_, _ = utils.GetOrSetCache(cache, cacheKey, nodeStatusTTL, func() (ipUsage, error) {
+		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().IPUsage()
 		return ipUsage{
 			Total:     total,
 			Used:      used,
@@ -142,8 +133,8 @@ func (n *nodeService) CacheAllocatedStatus(cache *ristretto.Cache[string, any], 
 	ns := item.GetNamespace()
 
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "NodeAllocatedStatus", ns, name, version)
-	_, _ = utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.DefaultCluster().Name(name).Namespace(ns).WithCache(ttl).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
+	_, _ = utils.GetOrSetCache(cache, cacheKey, nodeStatusTTL, func() ([]*kom.ResourceUsageRow, error) {
+		tb := kom.DefaultCluster().Name(name).Namespace(ns).WithCache(nodeStatusTTL).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
 		return tb, nil
 	})
 
