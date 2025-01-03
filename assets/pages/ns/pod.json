@@ -1203,7 +1203,8 @@
           "name": "status.podIP",
           "label": "容器组IP",
           "type": "text",
-          "searchable": true
+          "searchable": true,
+          "sortable": true
         },
         {
           "name": "status.qosClass",
@@ -1401,6 +1402,7 @@
           "name": "spec.hostNetwork",
           "label": "网络类型",
           "width": "150px",
+          "sortable": true,
           "type": "tpl",
           "tpl": "<% if (data.spec.hostNetwork) { %><span class='label label-danger'>主机网络</span><% } else { %><span class='label label-success'>容器网络</span><% } %>"
         },
@@ -1409,7 +1411,8 @@
           "label": "所在节点",
           "type": "text",
           "searchable": true,
-          "width": "150px"
+          "width": "150px",
+          "sortable": true
         },
         {
           "name": "metadata.creationTimestamp",
