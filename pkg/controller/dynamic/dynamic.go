@@ -51,6 +51,19 @@ func List(c *gin.Context) {
 		sql = sql.Where(queryString)
 	}
 
+	// 处理OrderBy
+	//  orderBy = 字段
+	// orderDir = asc/desc/空
+	orderBy, orderByOK := jsonData["orderBy"].(string)
+	orderDir, orderDirOK := jsonData["orderDir"].(string)
+
+	if orderByOK {
+		if orderDirOK {
+			sql = sql.Order(fmt.Sprintf("%s %s", orderBy, orderDir))
+		} else {
+			sql = sql.Order(fmt.Sprintf("%s asc", orderBy))
+		}
+	}
 	// 取出 page 和 perPage
 	// 取出 page 和 perPage
 	page, pageOK := jsonData["page"].(float64) // JSON 数字会解析为 float64
