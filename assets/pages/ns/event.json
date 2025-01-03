@@ -231,7 +231,7 @@
           }
         }
       ],
-      "api": "get:/k8s/$kind/group/$group/version/$version/list/ns/${ns}?sort_by=$sort_by",
+      "api": "post:/k8s/$kind/group/$group/version/$version/list/ns/${ns}?sort_by=$sort_by",
       "columns": [
         {
           "type": "operation",
