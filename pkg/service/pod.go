@@ -12,10 +12,12 @@ import (
 	"github.com/weibaohui/kom/utils"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/klog/v2"
 )
 
 var podOnce sync.Once
+var podWatchOnce sync.Once
 
 type podService struct {
 	Cache *ristretto.Cache[string, any]
@@ -90,4 +92,40 @@ func (p *podService) SetAllocatedStatus(item unstructured.Unstructured) unstruct
 		}
 	}
 	return item
+}
+
+func (p *podService) WatchPod() error {
+	podWatchOnce.Do(func() {
+		// watch default 命名空间下 Pod资源 的变更
+		var watcher watch.Interface
+		var pod v1.Pod
+		err := kom.DefaultCluster().Resource(&pod).Namespace("default").Watch(&watcher).Error
+		if err != nil {
+			klog.Errorf("PodService Create Watcher Error %v", err)
+			return
+		}
+		go func() {
+			klog.V(6).Infof("start watch pod")
+			defer watcher.Stop()
+			for event := range watcher.ResultChan() {
+				err := kom.DefaultCluster().Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
+				if err != nil {
+					klog.V(6).Infof("无法将对象转换为 *v1.Pod 类型: %v", err)
+					return
+				}
+				// 处理事件
+				switch event.Type {
+				case watch.Added:
+					fmt.Printf("Added Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+				case watch.Modified:
+					fmt.Printf("Modified Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+				case watch.Deleted:
+					fmt.Printf("Deleted Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+				}
+			}
+		}()
+
+	})
+
+	return nil
 }
