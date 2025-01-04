@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"net/http"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -56,8 +57,11 @@ func Init() {
 		klog.Errorf("InCluster集群初始化失败%v，下面尝试使用kubeconfig文件初始化", err)
 		// 初始化kubectl 连接
 		service.ClusterService().ListClustersInPath(cfg.KubeConfig)
-		klog.V(6).Infof("已初始化%d个集群", len(service.ClusterService().AllClusters()))
-		service.ClusterService().AllClusters()
+		klog.Infof("已初始化%d个集群", len(service.ClusterService().AllClusters()))
+		connected := slice.Filter(service.ClusterService().AllClusters(), func(index int, item *service.ClusterConfig) bool {
+			return item.ServerVersion != ""
+		})
+		klog.Infof("已连接%d个集群", len(connected))
 	}
 
 	kom.Clusters().Show()
