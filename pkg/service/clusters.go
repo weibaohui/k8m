@@ -101,9 +101,11 @@ func (c *clusterService) RegisterCluster(fileName string, contextName string) {
 	for _, clusterConfig := range c.ClusterConfigs {
 		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
 
+			// 定义集群ID
+			clusterID := fileName + "/" + contextName
 			// 先检查连接是否可以直连，如果可以直连，则直接注册
 			if c.CheckCluster(fileName, contextName) {
-				_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, "xxx")
+				_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
 				if err != nil {
 					klog.V(6).Infof("Error registering cluster: %s/%s: %v", fileName, contextName, err)
 					continue
