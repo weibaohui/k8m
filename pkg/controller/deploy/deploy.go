@@ -13,7 +13,7 @@ func UpdateImageTag(c *gin.Context) {
 	name := c.Param("name")
 	var tag = c.Param("tag")
 	var containerName = c.Param("container_name")
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	ctx := c.Request.Context()
 
@@ -25,7 +25,7 @@ func Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Restart()
@@ -35,7 +35,7 @@ func History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	list, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Rollout().History()
@@ -49,7 +49,7 @@ func Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Pause()
@@ -59,7 +59,7 @@ func Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Resume()
@@ -72,7 +72,7 @@ func Scale(c *gin.Context) {
 	r := utils.ToInt32(replica)
 
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Scale(r)
@@ -84,7 +84,7 @@ func Undo(c *gin.Context) {
 	revision := c.Param("revision")
 	ctx := c.Request.Context()
 	r := utils.ToInt(revision)
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	result, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Undo(r)

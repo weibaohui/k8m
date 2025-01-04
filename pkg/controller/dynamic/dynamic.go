@@ -25,7 +25,7 @@ func List(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	// 用于存储 JSON 数据的 map
 	var jsonData map[string]interface{}
@@ -111,7 +111,7 @@ func Event(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	apiVersion := fmt.Sprintf("%s", version)
 	if group != "" {
@@ -140,7 +140,7 @@ func Fetch(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	var obj *unstructured.Unstructured
 
@@ -166,7 +166,7 @@ func Remove(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := removeSingle(ctx, selectedCluster, kind, group, version, ns, name)
 	if err != nil {
@@ -191,7 +191,7 @@ func BatchRemove(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	// 初始化结构体实例
 	var payload NamesPayload
@@ -219,7 +219,7 @@ func Save(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -252,7 +252,7 @@ func Describe(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	var result []byte
 
@@ -265,7 +265,7 @@ func Describe(c *gin.Context) {
 }
 
 func UploadFile(c *gin.Context) {
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	ctx := c.Request.Context()
 	// 获取上传的文件
@@ -288,7 +288,7 @@ func UploadFile(c *gin.Context) {
 
 func Apply(c *gin.Context) {
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -304,7 +304,7 @@ func Apply(c *gin.Context) {
 }
 func Delete(c *gin.Context) {
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

@@ -12,7 +12,7 @@ func History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	list, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.DaemonSet{}).Namespace(ns).Name(name).
 		Ctl().Rollout().History()
@@ -26,7 +26,7 @@ func Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.DaemonSet{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Restart()
@@ -38,7 +38,7 @@ func Undo(c *gin.Context) {
 	revision := c.Param("revision")
 	ctx := c.Request.Context()
 	r := utils.ToInt(revision)
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	result, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.DaemonSet{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Undo(r)

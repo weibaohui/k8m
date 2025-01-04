@@ -15,7 +15,7 @@ func Doc(c *gin.Context) {
 	apiVersion := c.Param("api_version")
 	group := c.Param("group")
 	version := c.Param("version")
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	// apiVersion 有可能包含xxx.com/v1 类似，所以需要处理
 	// 前端使用了base64Encode，这里需要反向解析处理

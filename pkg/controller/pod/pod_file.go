@@ -30,7 +30,7 @@ type info struct {
 
 // FileList  处理获取文件列表的 HTTP 请求
 func FileList(c *gin.Context) {
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
@@ -58,7 +58,7 @@ func FileList(c *gin.Context) {
 
 // ShowFile 处理下载文件的 HTTP 请求
 func ShowFile(c *gin.Context) {
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
@@ -106,7 +106,7 @@ func ShowFile(c *gin.Context) {
 	})
 }
 func SaveFile(c *gin.Context) {
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
@@ -147,7 +147,7 @@ func SaveFile(c *gin.Context) {
 
 // DownloadFile 处理下载文件的 HTTP 请求
 func DownloadFile(c *gin.Context) {
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
@@ -176,7 +176,7 @@ func DownloadFile(c *gin.Context) {
 
 // UploadFile 处理上传文件的 HTTP 请求
 func UploadFile(c *gin.Context) {
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	info := &info{}
 
@@ -224,7 +224,7 @@ func UploadFile(c *gin.Context) {
 	})
 }
 func DeleteFile(c *gin.Context) {
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)

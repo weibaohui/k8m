@@ -9,7 +9,7 @@ import (
 
 func OptionList(c *gin.Context) {
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	var ns []v1.Namespace
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Namespace{}).List(&ns).Error

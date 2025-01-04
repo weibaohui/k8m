@@ -23,7 +23,7 @@ func Import(c *gin.Context) {
 	info := &info{}
 	ns := c.Param("ns")
 	name := c.Param("name")
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	info.FileName = c.PostForm("fileName")
 

@@ -10,7 +10,7 @@ import (
 func Drain(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().Drain()
@@ -19,7 +19,7 @@ func Drain(c *gin.Context) {
 func Cordon(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().Cordon()
@@ -28,7 +28,7 @@ func Cordon(c *gin.Context) {
 func Usage(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	usage := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().ResourceUsageTable()
@@ -37,7 +37,7 @@ func Usage(c *gin.Context) {
 func UnCordon(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().UnCordon()

@@ -11,7 +11,7 @@ func Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
 		Ctl().CronJob().Pause()
@@ -21,7 +21,7 @@ func Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetselectedCluster(c)
+	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
 		Ctl().CronJob().Resume()
