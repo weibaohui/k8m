@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
+	"github.com/weibaohui/k8m/pkg/controller/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
@@ -61,6 +62,8 @@ func Init() {
 	}
 
 	kom.Clusters().Show()
+
+	service.ClusterService().ListClustersInPath(cfg.KubeConfig)
 
 	// 初始化本项目中的回调
 	cb.RegisterCallback()
@@ -152,6 +155,11 @@ func main() {
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
 
+		// k8s cluster
+		api.GET("/cluster/all", cluster.List)
+		api.POST("/cluster/scan", cluster.Scan)
+		api.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
+		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
 		// k8s sts
 		api.POST("/statefulset/rollout/undo/ns/:ns/name/:name/revision/:revision", sts.Undo)
 		api.GET("/statefulset/rollout/history/ns/:ns/name/:name", sts.History)
