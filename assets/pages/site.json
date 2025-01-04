@@ -6,7 +6,7 @@
       {
         "label": "Home",
         "url": "/",
-        "redirect": "/cluster/node/list"
+        "redirect": "/cluster/all"
       },
       {
         "children": [

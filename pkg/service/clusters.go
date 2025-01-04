@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,6 +37,15 @@ func (c *clusterService) ConnectedClusters() []*ClusterConfig {
 		return item.ServerVersion != ""
 	})
 	return connected
+}
+func (c *clusterService) FirstClusterID() string {
+	clusters := ClusterService().ConnectedClusters()
+	var selectedCluster string
+	if len(clusters) > 0 {
+		c := clusters[0]
+		selectedCluster = fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
+	}
+	return selectedCluster
 }
 
 type ClusterConfig struct {
