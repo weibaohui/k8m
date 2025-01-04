@@ -14,7 +14,7 @@ import (
 )
 
 type clusterService struct {
-	ClusterConfigs []*ClusterConfig // 文件名+context名称 -> 集群配置
+	clusterConfigs []*clusterConfig // 文件名+context名称 -> 集群配置
 }
 
 func (c *clusterService) Reconnect(fileName string, contextName string) {
@@ -22,16 +22,16 @@ func (c *clusterService) Reconnect(fileName string, contextName string) {
 }
 
 func (c *clusterService) Scan() {
-	c.ClusterConfigs = []*ClusterConfig{}
+	c.clusterConfigs = []*clusterConfig{}
 	cfg := flag.Init()
 	c.ListClustersInPath(cfg.KubeConfig)
 }
 
-func (c *clusterService) AllClusters() []*ClusterConfig {
-	return c.ClusterConfigs
+func (c *clusterService) AllClusters() []*clusterConfig {
+	return c.clusterConfigs
 }
 
-type ClusterConfig struct {
+type clusterConfig struct {
 	FileName      string       `json:"fileName,omitempty"`      // kubeconfig 文件名称
 	ContextName   string       `json:"contextName,omitempty"`   // context名称
 	ClusterName   string       `json:"clusterName,omitempty"`   // 集群名称
@@ -73,7 +73,7 @@ func (c *clusterService) ListClustersInPath(path string) {
 			continue // 解析失败，跳过该文件
 		}
 		for contextName, _ := range config.Contexts {
-			clusterConfig := &ClusterConfig{
+			clusterConfig := &clusterConfig{
 				FileName:    file.Name(),
 				ContextName: contextName,
 				UserName:    config.Contexts[contextName].AuthInfo,
@@ -81,16 +81,16 @@ func (c *clusterService) ListClustersInPath(path string) {
 				kubeConfig:  content,
 			}
 			clusterConfig.Server = config.Clusters[contextName].Server
-			c.ClusterConfigs = append(c.ClusterConfigs, clusterConfig)
+			c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
 		}
 	}
 
 	// 注册
-	for _, clusterConfig := range c.ClusterConfigs {
+	for _, clusterConfig := range c.clusterConfigs {
 		c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
 	}
 	// 打印serverVersion
-	for _, clusterConfig := range c.ClusterConfigs {
+	for _, clusterConfig := range c.clusterConfigs {
 		klog.V(6).Infof("ServerVersion: %s/%s: %s[%s] using user: %s", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.ServerVersion, clusterConfig.Server, clusterConfig.UserName)
 	}
 }
@@ -98,7 +98,7 @@ func (c *clusterService) ListClustersInPath(path string) {
 // RegisterCluster 注册集群
 func (c *clusterService) RegisterCluster(fileName string, contextName string) {
 
-	for _, clusterConfig := range c.ClusterConfigs {
+	for _, clusterConfig := range c.clusterConfigs {
 		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
 
 			// 定义集群ID
@@ -118,8 +118,8 @@ func (c *clusterService) RegisterCluster(fileName string, contextName string) {
 
 // CheckCluster 校验集群是否可连接，并更新状态
 func (c *clusterService) CheckCluster(fileName string, contextName string) bool {
-	for i := range c.ClusterConfigs {
-		config := c.ClusterConfigs[i]
+	for i := range c.clusterConfigs {
+		config := c.clusterConfigs[i]
 		if config.FileName == fileName && config.ContextName == contextName {
 			lines := strings.Split(string(config.kubeConfig), "\n")
 			for i, line := range lines {

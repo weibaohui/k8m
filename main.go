@@ -56,7 +56,8 @@ func Init() {
 		klog.Errorf("InCluster集群初始化失败%v，下面尝试使用kubeconfig文件初始化", err)
 		// 初始化kubectl 连接
 		service.ClusterService().ListClustersInPath(cfg.KubeConfig)
-		klog.V(6).Infof("已初始化%d个集群", len(service.ClusterService().ClusterConfigs))
+		klog.V(6).Infof("已初始化%d个集群", len(service.ClusterService().AllClusters()))
+		service.ClusterService().AllClusters()
 	}
 
 	kom.Clusters().Show()
