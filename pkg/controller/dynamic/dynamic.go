@@ -92,6 +92,7 @@ func FillList(cache *ristretto.Cache[string, any], kind string, list []unstructu
 		for i, _ := range list {
 			item := list[i]
 			item = service.NodeService().SetIPUsage(cache, item)
+			item = service.NodeService().SetPodCount(cache, item)
 			item = service.NodeService().SetAllocatedStatus(cache, item)
 		}
 	case "Pod":
