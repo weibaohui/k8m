@@ -24,6 +24,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/rs"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/middleware"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/callbacks"
 	"github.com/weibaohui/kom/kom"
@@ -87,6 +88,8 @@ func main() {
 
 	r.Use(cors.Default())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(middleware.EnsureSelectedClusterMiddleware())
+
 	r.MaxMultipartMemory = 100 << 20 // 100 MiB
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
