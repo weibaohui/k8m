@@ -4,6 +4,9 @@ var localPodService = &podService{}
 var localChatService = &chatService{}
 var localNodeService = &nodeService{}
 var localDeploymentService = &deployService{}
+var localClusterService = &clusterService{
+	ClusterConfigs: []*ClusterConfig{},
+}
 
 func ChatService() *chatService {
 	return localChatService
@@ -16,4 +19,7 @@ func PodService() *podService {
 }
 func NodeService() *nodeService {
 	return localNodeService
+}
+func ClusterService() *clusterService {
+	return localClusterService
 }
