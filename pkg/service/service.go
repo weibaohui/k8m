@@ -5,7 +5,7 @@ var localChatService = &chatService{}
 var localNodeService = &nodeService{}
 var localDeploymentService = &deployService{}
 var localClusterService = &clusterService{
-	clusterConfigs: []*clusterConfig{},
+	clusterConfigs: []*ClusterConfig{},
 }
 
 func ChatService() *chatService {
