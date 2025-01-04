@@ -1,6 +1,8 @@
 package cluster
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -30,7 +32,7 @@ func SetDefault(c *gin.Context) {
 	c.SetCookie(
 		"selectedCluster",
 		cookieValue,
-		3600,
+		int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天,
 		"/",
 		"",
 		false,
