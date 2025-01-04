@@ -1,0 +1,154 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": false,
+      "autoGenerateFilter": {
+        "columnsNum": 3,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "label": "重新扫描",
+          "level": "primary",
+          "actionType": "ajax",
+          "api": "post:/k8s/cluster/scan"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        "bulkActions",
+        "reload",
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "loadDataOnce": true,
+      "syncLocation": false,
+      "perPage": 10,
+      "api": "get:/k8s/cluster/all",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 240,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-redo",
+              "label": "重连",
+              "actionType": "ajax",
+              "api": "post:/k8s/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-check",
+              "level": "success",
+              "label": "选择",
+              "actionType": "ajax",
+              "api": "post:/k8s/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
+              "onEvent": {
+                "click": {
+                  "actions": [
+                    {
+                      "actionType": "custom",
+                      "script": "window.location.reload();"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "fileName",
+          "label": "文件名",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "fileName",
+            "label": "文件名",
+            "placeholder": "输入文件名"
+          }
+        },
+        {
+          "name": "userName",
+          "label": "用户名",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "userName",
+            "label": "用户名",
+            "placeholder": "输入用户名"
+          }
+        },
+        {
+          "name": "clusterName",
+          "label": "集群名称",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "clusterName",
+            "label": "集群名称",
+            "placeholder": "输入集群名称"
+          }
+        },
+        {
+          "name": "connectStatus",
+          "label": "操作集群",
+          "type": "tpl",
+          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('defaultCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>已选择</span><% } %>"
+        },
+        {
+          "name": "connectStatus",
+          "label": "可访问性",
+          "type": "tpl",
+          "tpl": "<span class='label <% if (data.serverVersion && data.serverVersion.trim() !== '') { %>label-success<% } else { %>label-danger cursor-pointer <% } %>'> <% if (data.serverVersion && data.serverVersion.trim() !== '') { %>已链接<% } else { %>失联<% } %> </span>",
+          "popOver": {
+            "showIcon": false,
+            "body": {
+              "mode": "dialog",
+              "type": "tpl",
+              "tpl": "<span class='text-gray-500 text-sm'>${err} </span>"
+            }
+          }
+        },
+        {
+          "name": "server",
+          "label": "集群地址",
+          "type": "text",
+          "width": "180px",
+          "sortable": true
+        },
+        {
+          "name": "serverVersion",
+          "label": "集群版本",
+          "type": "text",
+          "sortable": true
+        }
+      ]
+    }
+  ]
+}
