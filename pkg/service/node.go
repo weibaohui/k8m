@@ -100,6 +100,9 @@ func (n *nodeService) SyncNodeStatus() {
 	}
 }
 func (n *nodeService) Watch() error {
+	// TODO 改为多集群
+	// clusters := kom.Clusters().AllClusters()
+
 	go func() {
 		// 先执行一次
 		n.SyncNodeStatus()
