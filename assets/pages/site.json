@@ -11,6 +11,12 @@
       {
         "children": [
           {
+            "label": "多集群",
+            "url": "/cluster/all",
+            "icon": "fas fa-dharmachakra text-primary",
+            "schemaApi": "get:/pages/cluster/cluster_all.json"
+          },
+          {
             "label": "创建",
             "url": "/apply",
             "icon": "fas fa-dharmachakra text-primary",
