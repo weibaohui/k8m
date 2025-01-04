@@ -30,6 +30,8 @@ type info struct {
 
 // FileList  处理获取文件列表的 HTTP 请求
 func FileList(c *gin.Context) {
+	selectedCluster := amis.GetselectedCluster(c)
+
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -37,7 +39,7 @@ func FileList(c *gin.Context) {
 		return
 	}
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).
+	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
 		ContainerName(info.ContainerName)
@@ -56,6 +58,8 @@ func FileList(c *gin.Context) {
 
 // ShowFile 处理下载文件的 HTTP 请求
 func ShowFile(c *gin.Context) {
+	selectedCluster := amis.GetselectedCluster(c)
+
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -64,7 +68,7 @@ func ShowFile(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).
+	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
 		ContainerName(info.ContainerName)
@@ -102,6 +106,8 @@ func ShowFile(c *gin.Context) {
 	})
 }
 func SaveFile(c *gin.Context) {
+	selectedCluster := amis.GetselectedCluster(c)
+
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -110,7 +116,7 @@ func SaveFile(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).
+	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
 		ContainerName(info.ContainerName)
@@ -141,6 +147,8 @@ func SaveFile(c *gin.Context) {
 
 // DownloadFile 处理下载文件的 HTTP 请求
 func DownloadFile(c *gin.Context) {
+	selectedCluster := amis.GetselectedCluster(c)
+
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -149,7 +157,7 @@ func DownloadFile(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).
+	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
 		ContainerName(info.ContainerName)
@@ -168,6 +176,8 @@ func DownloadFile(c *gin.Context) {
 
 // UploadFile 处理上传文件的 HTTP 请求
 func UploadFile(c *gin.Context) {
+	selectedCluster := amis.GetselectedCluster(c)
+
 	info := &info{}
 
 	info.ContainerName = c.PostForm("containerName")
@@ -204,7 +214,7 @@ func UploadFile(c *gin.Context) {
 	defer os.Remove(tempFilePath) // 请求结束时删除临时文件
 
 	// 上传文件到 Pod 中
-	if err := uploadToPod(ctx, info, tempFilePath); err != nil {
+	if err := uploadToPod(ctx, selectedCluster, info, tempFilePath); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -214,6 +224,8 @@ func UploadFile(c *gin.Context) {
 	})
 }
 func DeleteFile(c *gin.Context) {
+	selectedCluster := amis.GetselectedCluster(c)
+
 	info := &info{}
 	err := c.ShouldBindBodyWithJSON(info)
 	if err != nil {
@@ -222,7 +234,7 @@ func DeleteFile(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	poder := kom.DefaultCluster().WithContext(ctx).
+	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
 		ContainerName(info.ContainerName)
@@ -269,8 +281,9 @@ func saveUploadedFile(file *multipart.FileHeader) (string, error) {
 }
 
 // uploadToPod 上传文件到 Pod
-func uploadToPod(ctx context.Context, info *info, tempFilePath string) error {
-	poder := kom.DefaultCluster().WithContext(ctx).
+func uploadToPod(ctx context.Context, selectedCluster string, info *info, tempFilePath string) error {
+
+	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
 		ContainerName(info.ContainerName)

@@ -4,10 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetDefaultCluster(c *gin.Context) string {
-	defaultCluster, err := c.Cookie("defaultCluster")
+func GetselectedCluster(c *gin.Context) string {
+	selectedCluster, err := c.Cookie("selectedCluster")
 	if err != nil {
 		return "InCluster"
 	}
-	return defaultCluster
+	return selectedCluster
 }

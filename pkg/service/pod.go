@@ -22,7 +22,7 @@ var ttl = 24 * time.Hour
 type podService struct {
 }
 
-func (p *podService) StreamPodLogs(ctx context.Context, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
+func (p *podService) StreamPodLogs(ctx context.Context, selectedCluster string, ns, name string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
 
 	// 检查logOptions
 	//  at most one of `sinceTime` or `sinceSeconds` may be specified
@@ -34,20 +34,20 @@ func (p *podService) StreamPodLogs(ctx context.Context, ns, name string, logOpti
 		logOptions.SinceSeconds = nil
 	}
 	var stream io.ReadCloser
-	err := kom.DefaultCluster().WithContext(ctx).Namespace(ns).Name(name).ContainerName(logOptions.Container).GetLogs(&stream, logOptions).Error
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Namespace(ns).Name(name).ContainerName(logOptions.Container).GetLogs(&stream, logOptions).Error
 
 	return stream, err
 }
 
 // SetAllocatedStatus 设置节点的分配状态
 // pod 资源状态一般不会变化，变化了version也会变
-func (p *podService) SetAllocatedStatus(cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
+func (p *podService) SetAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	table, err := utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.DefaultCluster().Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
 	if err != nil {
@@ -75,18 +75,18 @@ func (p *podService) SetAllocatedStatus(cache *ristretto.Cache[string, any], ite
 	}
 	return item
 }
-func (p *podService) CacheAllocatedStatus(cache *ristretto.Cache[string, any], item *v1.Pod) {
+func (p *podService) CacheAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], item *v1.Pod) {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	_, _ = utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.DefaultCluster().Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
 
 }
-func (p *podService) RemoveCacheAllocatedStatus(cache *ristretto.Cache[string, any], item *v1.Pod) {
+func (p *podService) RemoveCacheAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], item *v1.Pod) {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
@@ -95,40 +95,47 @@ func (p *podService) RemoveCacheAllocatedStatus(cache *ristretto.Cache[string, a
 }
 func (p *podService) Watch() error {
 	podWatchOnce.Do(func() {
-		// watch default 命名空间下 Pod资源 的变更
-		var watcher watch.Interface
-		var pod v1.Pod
-		err := kom.DefaultCluster().Resource(&pod).Namespace(v1.NamespaceAll).Watch(&watcher).Error
-		if err != nil {
-			klog.Errorf("PodService Create Watcher Error %v", err)
-			return
+		clusters := ClusterService().ConnectedClusters()
+		for _, cluster := range clusters {
+			selectedCluster := fmt.Sprintf("%s/%s", cluster.FileName, cluster.ContextName)
+			p.watchSingleCluster(selectedCluster)
 		}
-		cache := kom.DefaultCluster().ClusterCache()
-		go func() {
-			klog.V(6).Infof("start watch pod")
-			defer watcher.Stop()
-			for event := range watcher.ResultChan() {
-				err := kom.DefaultCluster().Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
-				if err != nil {
-					klog.V(6).Infof("无法将对象转换为 *v1.Pod 类型: %v", err)
-					return
-				}
-				// 处理事件
-				switch event.Type {
-				case watch.Added:
-					p.CacheAllocatedStatus(cache, &pod)
-					fmt.Printf("Added Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
-				case watch.Modified:
-					p.CacheAllocatedStatus(cache, &pod)
-					fmt.Printf("Modified Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
-				case watch.Deleted:
-					p.RemoveCacheAllocatedStatus(cache, &pod)
-					fmt.Printf("Deleted Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
-				}
-			}
-		}()
-
 	})
 
 	return nil
+}
+
+func (p *podService) watchSingleCluster(selectedCluster string) {
+	// watch default 命名空间下 Pod资源 的变更
+	var watcher watch.Interface
+	var pod v1.Pod
+	err := kom.Cluster(selectedCluster).Resource(&pod).Namespace(v1.NamespaceAll).Watch(&watcher).Error
+	if err != nil {
+		klog.Errorf("PodService Create Watcher Error %v", err)
+		return
+	}
+	cache := kom.Cluster(selectedCluster).ClusterCache()
+	go func() {
+		klog.V(6).Infof("start watch pod")
+		defer watcher.Stop()
+		for event := range watcher.ResultChan() {
+			err := kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
+			if err != nil {
+				klog.V(6).Infof("无法将对象转换为 *v1.Pod 类型: %v", err)
+				return
+			}
+			// 处理事件
+			switch event.Type {
+			case watch.Added:
+				p.CacheAllocatedStatus(selectedCluster, cache, &pod)
+				fmt.Printf("Added Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+			case watch.Modified:
+				p.CacheAllocatedStatus(selectedCluster, cache, &pod)
+				fmt.Printf("Modified Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+			case watch.Deleted:
+				p.RemoveCacheAllocatedStatus(selectedCluster, cache, &pod)
+				fmt.Printf("Deleted Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+			}
+		}
+	}()
 }

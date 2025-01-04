@@ -28,7 +28,7 @@ func SetDefault(c *gin.Context) {
 	contextName := c.Param("contextName")
 	cookieValue := fileName + "/" + contextName
 	c.SetCookie(
-		"defaultCluster",
+		"selectedCluster",
 		cookieValue,
 		3600,
 		"/",

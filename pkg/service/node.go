@@ -25,9 +25,9 @@ type ipUsage struct {
 	Available int `json:"available"`
 }
 
-func (n *nodeService) SetIPUsage(cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
+func (n *nodeService) SetIPUsage(selectedCluster string, cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
 	nodeName := item.GetName()
-	u, err := n.CacheIPUsage(cache, nodeName)
+	u, err := n.CacheIPUsage(selectedCluster, cache, nodeName)
 	if err != nil {
 		return item
 	}
@@ -40,9 +40,9 @@ func (n *nodeService) SetIPUsage(cache *ristretto.Cache[string, any], item unstr
 
 	return item
 }
-func (n *nodeService) SetPodCount(cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
+func (n *nodeService) SetPodCount(selectedCluster string, cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
 	nodeName := item.GetName()
-	u, err := n.CachePodCount(cache, nodeName)
+	u, err := n.CachePodCount(selectedCluster, cache, nodeName)
 	if err != nil {
 		return item
 	}
@@ -57,9 +57,9 @@ func (n *nodeService) SetPodCount(cache *ristretto.Cache[string, any], item unst
 }
 
 // SetAllocatedStatus 设置节点的分配状态
-func (n *nodeService) SetAllocatedStatus(cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
+func (n *nodeService) SetAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
 	name := item.GetName()
-	table, err := n.CacheAllocatedStatus(cache, name)
+	table, err := n.CacheAllocatedStatus(selectedCluster, cache, name)
 	if err != nil {
 		return item
 	}
@@ -85,43 +85,46 @@ func (n *nodeService) SetAllocatedStatus(cache *ristretto.Cache[string, any], it
 
 	return item
 }
-func (n *nodeService) SyncNodeStatus() {
+func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 	klog.V(6).Infof("Sync Node Status")
 	var nodes []v1.Node
-	cache := kom.DefaultCluster().ClusterCache()
-	err := kom.DefaultCluster().Resource(&v1.Node{}).WithCache(nodeStatusTTL).List(&nodes)
+	cache := kom.Cluster(selectedCluster).ClusterCache()
+	err := kom.Cluster(selectedCluster).Resource(&v1.Node{}).WithCache(nodeStatusTTL).List(&nodes)
 	if err != nil {
 		klog.Errorf("Error watch node:%v", err)
 	}
 	for _, node := range nodes {
-		_, _ = n.CacheIPUsage(cache, node.Name)
-		_, _ = n.CachePodCount(cache, node.Name)
-		_, _ = n.CacheAllocatedStatus(cache, node.Name)
+		_, _ = n.CacheIPUsage(selectedCluster, cache, node.Name)
+		_, _ = n.CachePodCount(selectedCluster, cache, node.Name)
+		_, _ = n.CacheAllocatedStatus(selectedCluster, cache, node.Name)
 	}
 }
 func (n *nodeService) Watch() error {
-	// TODO 改为多集群
-	// clusters := kom.Clusters().AllClusters()
+	clusters := ClusterService().ConnectedClusters()
+	for _, cluster := range clusters {
+		selectedCluster := fmt.Sprintf("%s/%s", cluster.FileName, cluster.ContextName)
+		go func() {
+			// 先执行一次
+			n.SyncNodeStatus(selectedCluster)
+		}()
+		// 设置一个定时器，后台不断更新node状态
+		_, err := cron.New().AddFunc("@every 5m", func() {
+			n.SyncNodeStatus(selectedCluster)
+		})
 
-	go func() {
-		// 先执行一次
-		n.SyncNodeStatus()
-	}()
-	// 设置一个定时器，后台不断更新node状态
-	_, err := cron.New().AddFunc("@every 5m", func() {
-		n.SyncNodeStatus()
-	})
+		if err != nil {
+			return err
+		}
+		klog.V(6).Infof("%s 新增节点状态定时更新任务【@every 5m】", selectedCluster)
 
-	if err != nil {
-		return err
 	}
-	klog.V(6).Infof("新增节点状态定时更新任务【@every 5m】")
+
 	return nil
 }
-func (n *nodeService) CacheIPUsage(cache *ristretto.Cache[string, any], nodeName string) (ipUsage, error) {
+func (n *nodeService) CacheIPUsage(selectedCluster string, cache *ristretto.Cache[string, any], nodeName string) (ipUsage, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
 	return utils.GetOrSetCache(cache, cacheKey, nodeStatusTTL, func() (ipUsage, error) {
-		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().IPUsage()
+		total, used, available := kom.Cluster(selectedCluster).Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().IPUsage()
 		return ipUsage{
 			Total:     total,
 			Used:      used,
@@ -129,10 +132,10 @@ func (n *nodeService) CacheIPUsage(cache *ristretto.Cache[string, any], nodeName
 		}, nil
 	})
 }
-func (n *nodeService) CachePodCount(cache *ristretto.Cache[string, any], nodeName string) (ipUsage, error) {
+func (n *nodeService) CachePodCount(selectedCluster string, cache *ristretto.Cache[string, any], nodeName string) (ipUsage, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodePodCount", nodeName)
 	return utils.GetOrSetCache(cache, cacheKey, nodeStatusTTL, func() (ipUsage, error) {
-		total, used, available := kom.DefaultCluster().Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().PodCount()
+		total, used, available := kom.Cluster(selectedCluster).Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().PodCount()
 		return ipUsage{
 			Total:     total,
 			Used:      used,
@@ -141,10 +144,10 @@ func (n *nodeService) CachePodCount(cache *ristretto.Cache[string, any], nodeNam
 	})
 }
 
-func (n *nodeService) CacheAllocatedStatus(cache *ristretto.Cache[string, any], nodeName string) ([]*kom.ResourceUsageRow, error) {
+func (n *nodeService) CacheAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], nodeName string) ([]*kom.ResourceUsageRow, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodeAllocatedStatus", nodeName)
 	return utils.GetOrSetCache(cache, cacheKey, nodeStatusTTL, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.DefaultCluster().Name(nodeName).WithCache(nodeStatusTTL).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
+		tb := kom.Cluster(selectedCluster).Name(nodeName).WithCache(nodeStatusTTL).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
 		return tb, nil
 	})
 }

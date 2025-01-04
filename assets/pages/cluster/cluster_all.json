@@ -119,7 +119,7 @@
           "name": "connectStatus",
           "label": "操作集群",
           "type": "tpl",
-          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('defaultCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>已选择</span><% } %>"
+          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>已选择</span><% } %>"
         },
         {
           "name": "connectStatus",

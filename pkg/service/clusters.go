@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/client-go/kubernetes"
@@ -29,6 +30,12 @@ func (c *clusterService) Scan() {
 
 func (c *clusterService) AllClusters() []*ClusterConfig {
 	return c.clusterConfigs
+}
+func (c *clusterService) ConnectedClusters() []*ClusterConfig {
+	connected := slice.Filter(c.AllClusters(), func(index int, item *ClusterConfig) bool {
+		return item.ServerVersion != ""
+	})
+	return connected
 }
 
 type ClusterConfig struct {

@@ -11,7 +11,9 @@ func Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
+	selectedCluster := amis.GetselectedCluster(c)
+
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
 		Ctl().CronJob().Pause()
 	amis.WriteJsonErrorOrOK(c, err)
 }
@@ -19,7 +21,9 @@ func Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	err := kom.DefaultCluster().WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
+	selectedCluster := amis.GetselectedCluster(c)
+
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
 		Ctl().CronJob().Resume()
 	amis.WriteJsonErrorOrOK(c, err)
 }

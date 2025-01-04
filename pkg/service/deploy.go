@@ -12,13 +12,13 @@ import (
 type deployService struct {
 }
 
-func (d *deployService) CreateImagePullSecret(ctx context.Context, ns string, serviceAccount string, pullSecret string) error {
+func (d *deployService) CreateImagePullSecret(ctx context.Context, selectedCluster string, ns string, serviceAccount string, pullSecret string) error {
 
 	secretName := "pull-secret"
 
 	// 先查查Secrets 有没有
 	secret := corev1.Secret{}
-	err := kom.DefaultCluster().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Get(&secret).Error
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Get(&secret).Error
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		// 创建 secret
 		secret = corev1.Secret{
@@ -31,7 +31,7 @@ func (d *deployService) CreateImagePullSecret(ctx context.Context, ns string, se
 				corev1.DockerConfigJsonKey: []byte(pullSecret),
 			},
 		}
-		err = kom.DefaultCluster().WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Create(&secret).Error
+		err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&secret).Namespace(ns).Name(secretName).Create(&secret).Error
 		if err != nil {
 			return err
 		}
@@ -39,7 +39,7 @@ func (d *deployService) CreateImagePullSecret(ctx context.Context, ns string, se
 
 	var sa corev1.ServiceAccount
 	// 将 secret 绑定到 ServiceAccount
-	err = kom.DefaultCluster().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Get(&sa).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Get(&sa).Error
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (d *deployService) CreateImagePullSecret(ctx context.Context, ns string, se
 
 	// 绑定 imagePullSecret
 	sa.ImagePullSecrets = append(sa.ImagePullSecrets, corev1.LocalObjectReference{Name: secretName})
-	err = kom.DefaultCluster().WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Update(&sa).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&sa).Namespace(ns).Name(serviceAccount).Update(&sa).Error
 
 	return err
 }

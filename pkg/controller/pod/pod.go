@@ -31,9 +31,10 @@ func StreamLogs(c *gin.Context) {
 }
 func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := c.Request.Context()
+	selectedCluster := amis.GetselectedCluster(c)
 
 	var pods []v1.Pod
-	err := kom.DefaultCluster().Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
+	err := kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -50,7 +51,7 @@ func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, op
 		return
 	}
 	podService := service.PodService()
-	stream, err := podService.StreamPodLogs(ctx, ns, podName, logOpt)
+	stream, err := podService.StreamPodLogs(ctx, selectedCluster, ns, podName, logOpt)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -74,6 +75,7 @@ func WsExec(c *gin.Context) {
 	containerName := c.Param("container_name")
 	cmd := c.Query("cmd")
 	ctx := c.Request.Context()
+	selectedCluster := amis.GetselectedCluster(c)
 
 	if cmd == "" {
 		amis.WriteJsonError(c, fmt.Errorf("执行命令为空"))
@@ -106,7 +108,7 @@ func WsExec(c *gin.Context) {
 		})
 		return nil
 	}
-	err = kom.DefaultCluster().WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(podName).Ctl().Pod().
@@ -125,6 +127,7 @@ func Exec(c *gin.Context) {
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
 	ctx := c.Request.Context()
+	selectedCluster := amis.GetselectedCluster(c)
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*5))
 	defer cancel()
@@ -156,7 +159,7 @@ func Exec(c *gin.Context) {
 	}
 
 	var result []byte
-	err := kom.DefaultCluster().WithContext(ctx).
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(podName).Ctl().Pod().
@@ -178,9 +181,11 @@ func Exec(c *gin.Context) {
 
 }
 func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
+	selectedCluster := amis.GetselectedCluster(c)
+
 	ctx := c.Request.Context()
 	var pods []v1.Pod
-	err := kom.DefaultCluster().Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
+	err := kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -199,7 +204,7 @@ func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, 
 	logOpt.Follow = false
 
 	podService := service.PodService()
-	stream, err := podService.StreamPodLogs(ctx, ns, podName, logOpt)
+	stream, err := podService.StreamPodLogs(ctx, selectedCluster, ns, podName, logOpt)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -211,7 +216,9 @@ func Usage(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := c.Request.Context()
-	usage := kom.DefaultCluster().WithContext(ctx).
+	selectedCluster := amis.GetselectedCluster(c)
+
+	usage := kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(name).
