@@ -896,6 +896,35 @@
           ]
         },
         {
+          "name": "pod",
+          "label": "Pod数量",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "name": "metadata.annotations['pod.count.total']",
+              "label": "IP资源",
+              "type": "tpl",
+              "tpl": "${metadata.annotations['pod.count.used']}/${metadata.annotations['pod.count.available']}/${metadata.annotations['pod.count.total']}"
+            },
+            {
+              "type": "progress",
+              "label": "Pod Count Progress",
+              "value": "<%= Math.round((data.metadata.annotations['pod.count.used'] / data.metadata.annotations['pod.count.total']) * 100) %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
           "name": "spec.unschedulable",
           "label": "调度状态",
           "type": "tpl",
@@ -1030,24 +1059,15 @@
           "type": "text"
         },
         {
-          "name": "status.nodeInfo.kubeletVersion",
-          "label": "kubelet版本",
-          "type": "text"
+          "name": "version",
+          "label": "k8s版本",
+          "type": "tpl",
+          "tpl": "${status.nodeInfo.kubeletVersion ? 'kubelet:'+status.nodeInfo.kubeletVersion : ''}<br>${status.nodeInfo.kernelVersion ? 'kernel:'+status.nodeInfo.kernelVersion : ''}<br>${status.nodeInfo.containerRuntimeVersion ? 'cri:'+status.nodeInfo.containerRuntimeVersion : ''}"
         },
         {
           "name": "status.nodeInfo.osImage",
-          "label": "镜像",
+          "label": "操作系统",
           "width": "200px",
-          "type": "text"
-        },
-        {
-          "name": "status.nodeInfo.kernelVersion",
-          "label": "内核版本",
-          "type": "text"
-        },
-        {
-          "name": "status.nodeInfo.containerRuntimeVersion",
-          "label": "CRI版本",
           "type": "text"
         },
         {
