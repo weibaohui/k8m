@@ -55,15 +55,11 @@ func Init() {
 	if err != nil {
 		klog.Errorf("InCluster集群初始化失败%v，下面尝试使用kubeconfig文件初始化", err)
 		// 初始化kubectl 连接
-		_, err = kom.Clusters().RegisterByPathWithID(cfg.KubeConfig, "default")
-		if err != nil {
-			klog.Fatalf("InCluster集群初始化失败、外部集群初始化失败%v", err)
-		}
+		service.ClusterService().ListClustersInPath(cfg.KubeConfig)
+		klog.V(6).Infof("已初始化%d个集群", len(service.ClusterService().ClusterConfigs))
 	}
 
 	kom.Clusters().Show()
-
-	service.ClusterService().ListClustersInPath(cfg.KubeConfig)
 
 	// 初始化本项目中的回调
 	cb.RegisterCallback()
