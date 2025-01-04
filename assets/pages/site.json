@@ -13,13 +13,13 @@
           {
             "label": "多集群",
             "url": "/cluster/all",
-            "icon": "fas fa-dharmachakra text-primary",
+            "icon": "fas fa-server",
             "schemaApi": "get:/pages/cluster/cluster_all.json"
           },
           {
             "label": "创建",
             "url": "/apply",
-            "icon": "fas fa-dharmachakra text-primary",
+            "icon": "fas fa-dharmachakra",
             "schemaApi": "get:/pages/apply/apply.json"
           },
           {
@@ -37,7 +37,7 @@
           {
             "label": "事件",
             "url": "/event/list",
-            "icon": "fas fa-calendar-alt text-primary",
+            "icon": "fas fa-calendar-alt",
             "schemaApi": "get:/pages/ns/event.json"
           },
           {
