@@ -14,7 +14,7 @@ import (
 )
 
 type clusterService struct {
-	clusterConfigs []*clusterConfig // 文件名+context名称 -> 集群配置
+	clusterConfigs []*ClusterConfig // 文件名+context名称 -> 集群配置
 }
 
 func (c *clusterService) Reconnect(fileName string, contextName string) {
@@ -22,16 +22,16 @@ func (c *clusterService) Reconnect(fileName string, contextName string) {
 }
 
 func (c *clusterService) Scan() {
-	c.clusterConfigs = []*clusterConfig{}
+	c.clusterConfigs = []*ClusterConfig{}
 	cfg := flag.Init()
 	c.ListClustersInPath(cfg.KubeConfig)
 }
 
-func (c *clusterService) AllClusters() []*clusterConfig {
+func (c *clusterService) AllClusters() []*ClusterConfig {
 	return c.clusterConfigs
 }
 
-type clusterConfig struct {
+type ClusterConfig struct {
 	FileName      string       `json:"fileName,omitempty"`      // kubeconfig 文件名称
 	ContextName   string       `json:"contextName,omitempty"`   // context名称
 	ClusterName   string       `json:"clusterName,omitempty"`   // 集群名称
@@ -73,7 +73,7 @@ func (c *clusterService) ListClustersInPath(path string) {
 			continue // 解析失败，跳过该文件
 		}
 		for contextName, _ := range config.Contexts {
-			clusterConfig := &clusterConfig{
+			clusterConfig := &ClusterConfig{
 				FileName:    file.Name(),
 				ContextName: contextName,
 				UserName:    config.Contexts[contextName].AuthInfo,
