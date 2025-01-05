@@ -100,7 +100,7 @@ func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 func (n *nodeService) Watch() error {
 	clusters := ClusterService().ConnectedClusters()
 	for _, cluster := range clusters {
-		selectedCluster := fmt.Sprintf("%s/%s", cluster.FileName, cluster.ContextName)
+		selectedCluster := ClusterService().ClusterID(cluster)
 		go func() {
 			// 先执行一次
 			n.SyncNodeStatus(selectedCluster)
