@@ -868,7 +868,7 @@
         },
         {
           "name": "ip",
-          "label": "IP资源",
+          "label": "IP资源<br><span class='text-gray-500 text-xs'>当前/可用/总数</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -897,7 +897,7 @@
         },
         {
           "name": "pod",
-          "label": "Pod数量",
+          "label": "Pod数量<br><span class='text-gray-500 text-xs'>当前/可用/总数</span>",
           "type": "container",
           "width": "150px",
           "body": [

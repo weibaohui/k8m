@@ -1255,8 +1255,8 @@
           "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
         },
         {
-          "label": "资源设定",
           "name": "资源设定",
+          "label": "资源设定<br><span class='text-gray-500 text-xs'>请求<设定<上限</span>",
           "width": "180px",
           "type": "tpl",
           "tpl": "<% for (var i = 0; i < data.spec.containers.length; i++) { %><% var container = data.spec.containers[i]; var requests = container?.resources?.requests || {}; var limits = container?.resources?.limits || {}; var cpuRequest = requests.cpu || null; var cpuLimit = limits.cpu || null; var memoryRequest = requests.memory || null; var memoryLimit = limits.memory || null; %><% if (cpuRequest || cpuLimit || memoryRequest || memoryLimit) { %><strong>容器：<%= container.name || '未知' %></strong><br><% if (cpuRequest || cpuLimit) { %><strong class='text-blue-500 font-black'><%= cpuRequest || '0' %> ≦处理器≦ <%= cpuLimit || '♾️' %></strong><br><% } %><% if (memoryRequest || memoryLimit) { %><strong class='text-green-500 font-black'><%= memoryRequest || '0' %> ≦内存≦ <%= memoryLimit || '♾️' %></strong><br><% } %><% if (i < data.spec.containers.length - 1) { %><br><% } %><% } %><% } %>"
