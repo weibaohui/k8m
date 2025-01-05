@@ -64,6 +64,7 @@
               "level": "success",
               "label": "选择",
               "actionType": "ajax",
+              "visibleOn": "serverVersion != '' ",
               "api": "post:/k8s/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
               "onEvent": {
                 "click": {
