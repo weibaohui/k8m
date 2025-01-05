@@ -96,7 +96,7 @@ func (p *podService) Watch() error {
 	podWatchOnce.Do(func() {
 		clusters := ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
-			selectedCluster := fmt.Sprintf("%s/%s", cluster.FileName, cluster.ContextName)
+			selectedCluster := ClusterService().ClusterID(cluster)
 			p.watchSingleCluster(selectedCluster)
 		}
 	})
@@ -110,29 +110,29 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 	var pod v1.Pod
 	err := kom.Cluster(selectedCluster).Resource(&pod).Namespace(v1.NamespaceAll).Watch(&watcher).Error
 	if err != nil {
-		klog.Errorf("PodService Create Watcher Error %v", err)
+		klog.Errorf("%s PodService Create Watcher Error %v", selectedCluster, err)
 		return
 	}
 	go func() {
-		klog.V(6).Infof("start watch pod")
+		klog.V(6).Infof("%s start watch pod", selectedCluster)
 		defer watcher.Stop()
 		for event := range watcher.ResultChan() {
 			err := kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
 			if err != nil {
-				klog.V(6).Infof("无法将对象转换为 *v1.Pod 类型: %v", err)
+				klog.V(6).Infof("%s 无法将对象转换为 *v1.Pod 类型: %v", selectedCluster, err)
 				return
 			}
 			// 处理事件
 			switch event.Type {
 			case watch.Added:
 				p.CacheAllocatedStatus(selectedCluster, &pod)
-				fmt.Printf("Added Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+				fmt.Printf("%s Added Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
 			case watch.Modified:
 				p.CacheAllocatedStatus(selectedCluster, &pod)
-				fmt.Printf("Modified Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+				fmt.Printf("%s Modified Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
 			case watch.Deleted:
 				p.RemoveCacheAllocatedStatus(selectedCluster, &pod)
-				fmt.Printf("Deleted Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
+				fmt.Printf("%s Deleted Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
 			}
 		}
 	}()
