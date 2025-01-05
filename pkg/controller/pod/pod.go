@@ -231,6 +231,29 @@ func LinksServices(c *gin.Context) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
+	var pod v1.Pod
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(24 * time.Hour).
+		Get(&pod).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	services, err := getServicesByPodLabels(ctx, selectedCluster, &pod)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonList(c, services)
+}
+
+// getServicesByPodLabels 获取与Pod关联的Service
+func getServicesByPodLabels(ctx context.Context, selectedCluster string, pod *v1.Pod) ([]v1.Service, error) {
 	// 	查询流程
 	// 获取目标 Pod 的详细信息：
 
@@ -249,28 +272,16 @@ func LinksServices(c *gin.Context) {
 
 	// 将所有匹配的 Service 名称及相关信息返回。
 
-	var pod v1.Pod
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
-		Resource(&v1.Pod{}).
-		Namespace(ns).
-		Name(name).
-		WithCache(24 * time.Hour).
-		Get(&pod).Error
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
 	podLabels := pod.GetLabels()
 
 	var services []v1.Service
-	err = kom.Cluster(selectedCluster).WithContext(ctx).
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Service{}).
-		Namespace(ns).
+		Namespace(pod.Namespace).
 		WithCache(3 * time.Minute). //3分钟缓存，不宜过久
 		List(&services).Error
 	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
+		return nil, err
 	}
 
 	var result []v1.Service
@@ -287,6 +298,57 @@ func LinksServices(c *gin.Context) {
 		}
 
 	}
+	return result, nil
+}
+func LinksEndpoints(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
 
-	amis.WriteJsonList(c, result)
+	var pod v1.Pod
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(24 * time.Hour).
+		Get(&pod).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	services, err := getServicesByPodLabels(ctx, selectedCluster, &pod)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	//endpoints 与 svc 同名
+	//1.获取service 名称
+	//2.获取endpoints
+	//3.返回endpoints
+
+	var names []string
+	for _, service := range services {
+		names = append(names, service.Name)
+	}
+
+	var endpoints []v1.Endpoints
+
+	for _, name := range names {
+		var endpoint v1.Endpoints
+		err = kom.Cluster(selectedCluster).WithContext(ctx).
+			Resource(&v1.Endpoints{}).
+			Namespace(ns).
+			Name(name).
+			Get(&endpoint).Error
+		if err != nil {
+			continue
+		}
+		endpoints = append(endpoints, endpoint)
+	}
+
+	amis.WriteJsonList(c, endpoints)
+
 }
