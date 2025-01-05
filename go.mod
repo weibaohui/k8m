@@ -3,7 +3,6 @@ module github.com/weibaohui/k8m
 go 1.23.0
 
 require (
-	github.com/dgraph-io/ristretto/v2 v2.0.1
 	github.com/duke-git/lancet/v2 v2.3.4
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-contrib/gzip v1.1.0
@@ -34,6 +33,7 @@ require (
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/dgraph-io/ristretto/v2 v2.0.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fatih/camelcase v1.0.0 // indirect
