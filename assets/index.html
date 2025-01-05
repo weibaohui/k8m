@@ -2,17 +2,17 @@
 <html>
 
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <title>K8M</title>
     <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-    <link rel="stylesheet" href="/public/cxd.css"/>
-    <link rel="stylesheet" href="/public/sdk.css"/>
-    <link rel="stylesheet" href="/public/helper.css"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="stylesheet" href="/public/cxd.css" />
+    <link rel="stylesheet" href="/public/sdk.css" />
+    <link rel="stylesheet" href="/public/helper.css" />
 
     <style>
         html,
@@ -59,177 +59,179 @@
 </head>
 
 <body>
-<div id="root" class="app-wrapper"></div>
-<script src="/public/sdk.js"></script>
-<script src="/public/custom.js"></script>
-<script src="/public/history.js"></script>
-<script>
-    (function () {
-        let amis = amisRequire('amis/embed');
+    <div id="root" class="app-wrapper"></div>
+    <script src="/public/sdk.js"></script>
+    <script src="/public/custom.js"></script>
+    <script src="/public/history.js"></script>
+    <script>
+        (function () {
+            let amis = amisRequire('amis/embed');
 
-        const match = amisRequire('path-to-regexp').match;
 
-        // 如果想用 browserHistory 请切换下这处代码, 其他不用变
-        // const history = History.createBrowserHistory();
-        const history = History.createHashHistory();
+            const match = amisRequire('path-to-regexp').match;
 
-        const app = {
-            type: 'app',
-            brandName: '',
-            logo: '/public/logo.png',
-            header: {
-                type: 'tpl',
-                inline: false,
-                className: 'w-full',
-                tpl: "<div class='flex justify-end'><div>当前集群：<a href='/index.html#/cluster/all'><%= decodeURIComponent(document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1])   %></a ></div></div>"
-            },
-            // footer: '<div class="p-2 text-center bg-light">底部区域</div>',
-            // asideBefore: '<div class="p-2 text-center">菜单前面区域</div>',
-            // asideAfter: '<div class="p-2 text-center">菜单后面区域</div>',
-            api: '/pages/site.json',
-        };
+            // 如果想用 browserHistory 请切换下这处代码, 其他不用变
+            // const history = History.createBrowserHistory();
+            const history = History.createHashHistory();
 
-        function normalizeLink(to, location = history.location) {
-            to = to || '';
+            const app = {
+                type: 'app',
+                brandName: '',
+                logo: '/public/logo.png',
+                header: {
+                    type: 'tpl',
+                    inline: false,
+                    className: 'w-full',
+                    tpl: "<div class='flex justify-end'><div>当前集群：<a href='/index.html#/cluster/all'><%= decodeURIComponent(document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1])   %></a ></div></div>"
+                },
+                // footer: '<div class="p-2 text-center bg-light">底部区域</div>',
+                // asideBefore: '<div class="p-2 text-center">菜单前面区域</div>',
+                // asideAfter: '<div class="p-2 text-center">菜单后面区域</div>',
+                api: '/pages/site.json',
+            };
 
-            // 处理以 '#' 或 '?' 开头的链接
-            if (to && to[0] === '#') {
-                to = location.pathname + location.search + to; // 将 # 开头的链接拼接在当前路径和查询参数之后
-            } else if (to && to[0] === '?') {
-                to = location.pathname + to; // 将 ? 开头的链接拼接在当前路径之后
-            }
+            function normalizeLink(to, location = history.location) {
+                to = to || '';
 
-            // 查找 '?' 和 '#' 的位置
-            const idx = to.indexOf('?');
-            const idx2 = to.indexOf('#');
-            let pathname = ~idx
-                ? to.substring(0, idx) // 如果有 '?', 则 pathname 是 '?' 之前的部分
-                : ~idx2
-                    ? to.substring(0, idx2) // 如果没有 '?', 但有 '#', 则 pathname 是 '#' 之前的部分
-                    : to; // 否则 pathname 是整个链接
-            let search = ~idx ? to.substring(idx, ~idx2 ? idx2 : undefined) : ''; // 获取查询参数部分
-            let hash = ~idx2 ? to.substring(idx2) : location.hash; // 获取哈希部分
-
-            // 如果没有 pathname，则使用当前 location 的 pathname
-            if (!pathname) {
-                pathname = location.pathname;
-            } else if (pathname[0] !== '/' && !/^https?\:\/\//.test(pathname)) {
-                // 如果 pathname 不是以 '/' 开头且不是完整的 URL（http/https）
-                let relativeBase = location.pathname;
-                const paths = relativeBase.split('/');
-                paths.pop(); // 去掉最后一个部分，表示当前目录
-                let m;
-                // 处理 '../' 或 './' 相对路径
-                while ((m = /^\.\.?\//.exec(pathname))) {
-                    if (m[0] === '../') {
-                        paths.pop(); // '..' 表示上一级目录，所以需要 pop 掉一层路径
-                    }
-                    pathname = pathname.substring(m[0].length); // 去掉处理过的部分
+                // 处理以 '#' 或 '?' 开头的链接
+                if (to && to[0] === '#') {
+                    to = location.pathname + location.search + to; // 将 # 开头的链接拼接在当前路径和查询参数之后
+                } else if (to && to[0] === '?') {
+                    to = location.pathname + to; // 将 ? 开头的链接拼接在当前路径之后
                 }
-                pathname = paths.concat(pathname).join('/'); // 将剩余的 pathname 拼接到 paths 中，形成完整路径
+
+                // 查找 '?' 和 '#' 的位置
+                const idx = to.indexOf('?');
+                const idx2 = to.indexOf('#');
+                let pathname = ~idx
+                    ? to.substring(0, idx) // 如果有 '?', 则 pathname 是 '?' 之前的部分
+                    : ~idx2
+                        ? to.substring(0, idx2) // 如果没有 '?', 但有 '#', 则 pathname 是 '#' 之前的部分
+                        : to; // 否则 pathname 是整个链接
+                let search = ~idx ? to.substring(idx, ~idx2 ? idx2 : undefined) : ''; // 获取查询参数部分
+                let hash = ~idx2 ? to.substring(idx2) : location.hash; // 获取哈希部分
+
+                // 如果没有 pathname，则使用当前 location 的 pathname
+                if (!pathname) {
+                    pathname = location.pathname;
+                } else if (pathname[0] !== '/' && !/^https?\:\/\//.test(pathname)) {
+                    // 如果 pathname 不是以 '/' 开头且不是完整的 URL（http/https）
+                    let relativeBase = location.pathname;
+                    const paths = relativeBase.split('/');
+                    paths.pop(); // 去掉最后一个部分，表示当前目录
+                    let m;
+                    // 处理 '../' 或 './' 相对路径
+                    while ((m = /^\.\.?\//.exec(pathname))) {
+                        if (m[0] === '../') {
+                            paths.pop(); // '..' 表示上一级目录，所以需要 pop 掉一层路径
+                        }
+                        pathname = pathname.substring(m[0].length); // 去掉处理过的部分
+                    }
+                    pathname = paths.concat(pathname).join('/'); // 将剩余的 pathname 拼接到 paths 中，形成完整路径
+                }
+
+                // 返回规范化后的链接
+                return pathname + search + hash;
             }
 
-            // 返回规范化后的链接
-            return pathname + search + hash;
-        }
+            function isCurrentUrl(to, ctx) {
+                if (!to) {
+                    return false;
+                }
+                const pathname = history.location.pathname;
+                const link = normalizeLink(to, {
+                    ...location,
+                    pathname,
+                    hash: ''
+                });
 
-        function isCurrentUrl(to, ctx) {
-            if (!to) {
-                return false;
+                if (!~link.indexOf('http') && ~link.indexOf(':')) {
+                    let strict = ctx && ctx.strict;
+                    return match(link, {
+                        decode: decodeURIComponent,
+                        strict: typeof strict !== 'undefined' ? strict : true
+                    })(pathname);
+                }
+
+                return decodeURI(pathname) === link;
             }
-            const pathname = history.location.pathname;
-            const link = normalizeLink(to, {
-                ...location,
-                pathname,
-                hash: ''
+
+            let amisInstance = amis.embed(
+                '#root',
+                app,
+                {
+                    location: history.location
+                },
+                {
+
+                    // watchRouteChange: fn => {
+                    //   return history.listen(fn);
+                    // },
+                    updateLocation: (location, replace) => {
+                        location = normalizeLink(location);
+                        if (location === 'goBack') {
+                            return history.goBack();
+                        } else if (
+                            (!/^https?\:\/\//.test(location) &&
+                                location ===
+                                history.location.pathname + history.location.search) ||
+                            location === history.location.href
+                        ) {
+                            // 目标地址和当前地址一样，不处理，免得重复刷新
+                            return;
+                        } else if (/^https?\:\/\//.test(location) || !history) {
+                            return (window.location.href = location);
+                        }
+
+                        history[replace ? 'replace' : 'push'](location);
+                    },
+                    jumpTo: (to, action) => {
+                        if (to === 'goBack') {
+                            return history.goBack();
+                        }
+
+                        to = normalizeLink(to);
+
+                        if (isCurrentUrl(to)) {
+                            return;
+                        }
+
+                        if (action && action.actionType === 'url') {
+                            action.blank === false
+                                ? (window.location.href = to)
+                                : window.open(to, '_blank');
+                            return;
+                        } else if (action && action.blank) {
+                            window.open(to, '_blank');
+                            return;
+                        }
+
+                        if (/^https?:\/\//.test(to)) {
+                            window.location.href = to;
+                        } else if (
+                            (!/^https?\:\/\//.test(to) &&
+                                to === history.pathname + history.location.search) ||
+                            to === history.location.href
+                        ) {
+                            // do nothing
+                        } else {
+                            history.push(to);
+                        }
+                    },
+                    isCurrentUrl: isCurrentUrl,
+                    theme: 'cxd'
+                }
+            );
+
+            history.listen(state => {
+                amisInstance.updateProps({
+                    location: state.location || state
+                });
             });
 
-            if (!~link.indexOf('http') && ~link.indexOf(':')) {
-                let strict = ctx && ctx.strict;
-                return match(link, {
-                    decode: decodeURIComponent,
-                    strict: typeof strict !== 'undefined' ? strict : true
-                })(pathname);
-            }
 
-            return decodeURI(pathname) === link;
-        }
-
-        let amisInstance = amis.embed(
-            '#root',
-            app,
-            {
-                location: history.location
-            },
-            {
-                // watchRouteChange: fn => {
-                //   return history.listen(fn);
-                // },
-                updateLocation: (location, replace) => {
-                    location = normalizeLink(location);
-                    if (location === 'goBack') {
-                        return history.goBack();
-                    } else if (
-                        (!/^https?\:\/\//.test(location) &&
-                            location ===
-                            history.location.pathname + history.location.search) ||
-                        location === history.location.href
-                    ) {
-                        // 目标地址和当前地址一样，不处理，免得重复刷新
-                        return;
-                    } else if (/^https?\:\/\//.test(location) || !history) {
-                        return (window.location.href = location);
-                    }
-
-                    history[replace ? 'replace' : 'push'](location);
-                },
-                jumpTo: (to, action) => {
-                    if (to === 'goBack') {
-                        return history.goBack();
-                    }
-
-                    to = normalizeLink(to);
-
-                    if (isCurrentUrl(to)) {
-                        return;
-                    }
-
-                    if (action && action.actionType === 'url') {
-                        action.blank === false
-                            ? (window.location.href = to)
-                            : window.open(to, '_blank');
-                        return;
-                    } else if (action && action.blank) {
-                        window.open(to, '_blank');
-                        return;
-                    }
-
-                    if (/^https?:\/\//.test(to)) {
-                        window.location.href = to;
-                    } else if (
-                        (!/^https?\:\/\//.test(to) &&
-                            to === history.pathname + history.location.search) ||
-                        to === history.location.href
-                    ) {
-                        // do nothing
-                    } else {
-                        history.push(to);
-                    }
-                },
-                isCurrentUrl: isCurrentUrl,
-                theme: 'cxd'
-            }
-        );
-
-        history.listen(state => {
-            amisInstance.updateProps({
-                location: state.location || state
-            });
-        });
-
-
-    })();
-</script>
+        })();
+    </script>
 </body>
 
 </html>
