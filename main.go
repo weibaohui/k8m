@@ -203,7 +203,7 @@ func main() {
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 		// Pod 关联资源
 		api.GET("/pod/ns/:ns/name/:name/links/services", pod.LinksServices)
-
+		api.GET("/pod/ns/:ns/name/:name/links/endpoints", pod.LinksEndpoints)
 	}
 
 	klog.Infof("启动成功，k8m服务监听0.0.0.0:%d", flag.Init().Port)
