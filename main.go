@@ -59,6 +59,9 @@ func Init() {
 		service.ClusterService().ListClustersInPath(cfg.KubeConfig)
 		klog.Infof("处理%d个集群", len(service.ClusterService().AllClusters()))
 		klog.Infof("已连接%d个集群", len(service.ClusterService().ConnectedClusters()))
+	} else {
+		cfg.InCluster = true
+		klog.Infof("启用InCluster 模式。k8m当前运行在宿主集群内部")
 	}
 
 	kom.Clusters().Show()
