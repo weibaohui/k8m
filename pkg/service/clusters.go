@@ -39,7 +39,7 @@ func (c *clusterService) ConnectedClusters() []*ClusterConfig {
 	return connected
 }
 
-// 根据ClusterConfig，按照 文件名+context名称 获取clusterID
+// ClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
 func (c *clusterService) ClusterID(clusterConfig *ClusterConfig) string {
 	return fmt.Sprintf("%s/%s", clusterConfig.FileName, clusterConfig.ContextName)
 }
