@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dgraph-io/ristretto/v2"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	v1 "k8s.io/api/core/v1"
@@ -41,12 +40,12 @@ func (p *podService) StreamPodLogs(ctx context.Context, selectedCluster string, 
 
 // SetAllocatedStatus 设置节点的分配状态
 // pod 资源状态一般不会变化，变化了version也会变
-func (p *podService) SetAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], item unstructured.Unstructured) unstructured.Unstructured {
+func (p *podService) SetAllocatedStatus(selectedCluster string, item unstructured.Unstructured) unstructured.Unstructured {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
-	table, err := utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
 		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
@@ -75,23 +74,23 @@ func (p *podService) SetAllocatedStatus(selectedCluster string, cache *ristretto
 	}
 	return item
 }
-func (p *podService) CacheAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], item *v1.Pod) {
+func (p *podService) CacheAllocatedStatus(selectedCluster string, item *v1.Pod) {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
-	_, _ = utils.GetOrSetCache(cache, cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+	_, _ = utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
 		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
 
 }
-func (p *podService) RemoveCacheAllocatedStatus(selectedCluster string, cache *ristretto.Cache[string, any], item *v1.Pod) {
+func (p *podService) RemoveCacheAllocatedStatus(selectedCluster string, item *v1.Pod) {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
-	cache.Del(cacheKey)
+	kom.Cluster(selectedCluster).ClusterCache().Del(cacheKey)
 }
 func (p *podService) Watch() error {
 	podWatchOnce.Do(func() {
@@ -114,7 +113,6 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 		klog.Errorf("PodService Create Watcher Error %v", err)
 		return
 	}
-	cache := kom.Cluster(selectedCluster).ClusterCache()
 	go func() {
 		klog.V(6).Infof("start watch pod")
 		defer watcher.Stop()
@@ -127,13 +125,13 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 			// 处理事件
 			switch event.Type {
 			case watch.Added:
-				p.CacheAllocatedStatus(selectedCluster, cache, &pod)
+				p.CacheAllocatedStatus(selectedCluster, &pod)
 				fmt.Printf("Added Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 			case watch.Modified:
-				p.CacheAllocatedStatus(selectedCluster, cache, &pod)
+				p.CacheAllocatedStatus(selectedCluster, &pod)
 				fmt.Printf("Modified Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 			case watch.Deleted:
-				p.RemoveCacheAllocatedStatus(selectedCluster, cache, &pod)
+				p.RemoveCacheAllocatedStatus(selectedCluster, &pod)
 				fmt.Printf("Deleted Pod [ %s/%s ]\n", pod.Namespace, pod.Name)
 			}
 		}
