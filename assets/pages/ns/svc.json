@@ -766,6 +766,15 @@
           "tpl": "<% if (data.spec && data.spec.type === 'ClusterIP' && data.spec.clusterIP === 'None') { %><span class='label label-warning'>Headless</span><% } else { %><span class='label label-success'><%= data.spec.type %></span><% } %>"
         },
         {
+          "name": "spec.internalTrafficPolicy",
+          "label": "内部流量策略",
+          "type": "mapping",
+          "map": {
+            "Local": "<span class='label label-success'>本地模式</span>",
+            "Cluster": "<span class='label label-primary'>全局模式</span>"
+          }
+        },
+        {
           "name": "spec.clusterIP",
           "label": "访问地址",
           "type": "text"
@@ -784,9 +793,9 @@
           "label": "IP协议栈",
           "type": "map",
           "map": {
-            "SingleStack": "<span class='label label-success'>SingleStack</span>",
-            "PreferDualStack": "<span class='label label-primary'>PreferDualStack</span>",
-            "RequireDualStack": "<span class='label label-default'>RequireDualStack</span>"
+            "SingleStack": "<span class='label label-success'>单栈模式</span>",
+            "PreferDualStack": "<span class='label label-primary'>双栈优先</span>",
+            "RequireDualStack": "<span class='label label-default'>强制双栈</span>"
           }
         },
         {
@@ -881,8 +890,8 @@
           "label": "会话亲和性",
           "type": "mapping",
           "map": {
-            "ClientIP": "<span class='label label-danger'>ClientIP</span>",
-            "None": "<span class='label label-success'>None</span>"
+            "ClientIP": "<span class='label label-danger'>客户端IP</span>",
+            "None": "<span class='label label-success'>无</span>"
           }
         },
         {
