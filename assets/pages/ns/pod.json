@@ -1124,6 +1124,154 @@
                   }
                 },
                 {
+                  "label": "关联资源",
+                  "type": "button",
+                  "icon": "fas fa-chain text-primary",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "title": "容器组 ${metadata.namespace}/${metadata.name} 关联资源 （ESC 关闭）",
+                    "size": "xl",
+                    "body": {
+                      "type": "tabs",
+                      "tabs": [
+                        {
+                          "title": "Service 网络信息",
+                          "body": {
+                            "type": "crud",
+                            "loadDataOnce": true,
+                            "headerToolbar": [
+                              "reload"
+                            ],
+                            "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/services",
+                            "columns": [
+                              {
+                                "name": "metadata.name",
+                                "label": "Service 名称",
+                                "type": "text"
+                              },
+                              {
+                                "name": "spec.type",
+                                "label": "访问类型",
+                                "type": "tpl",
+                                "tpl": "<% if (data.spec && data.spec.type === 'ClusterIP' && data.spec.clusterIP === 'None') { %><span class='label label-warning'>Headless</span><% } else { %><span class='label label-success'><%= data.spec.type %></span><% } %>"
+                              },
+                              {
+                                "name": "spec.clusterIP",
+                                "label": "访问地址",
+                                "type": "text"
+                              },
+                              {
+                                "name": "spec.ports",
+                                "label": "访问端口<br><span class='text-gray-500 text-xs'>访问端口[:节点端口]/协议 => 容器端口</span>",
+                                "type": "each",
+                                "items": {
+                                  "type": "tpl",
+                                  "tpl": "<div>${port}${nodePort?':<span class=\"text text-danger font-black\">'+nodePort+'</span>':''}/${protocol}  <span class=\"text text-success font-black\">=>${targetPort}</span></div>"
+                                }
+                              },
+                              {
+                                "name": "spec.sessionAffinity",
+                                "label": "会话亲和性",
+                                "type": "mapping",
+                                "map": {
+                                  "ClientIP": "<span class='label label-danger'>ClientIP</span>",
+                                  "None": "<span class='label label-success'>None</span>"
+                                }
+                              },
+                              {
+                                "name": "metadata.creationTimestamp",
+                                "label": "存在时长",
+                                "type": "k8sAge"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "title": "PVC 关联信息",
+                          "body": {
+                            "type": "crud",
+                            "loadDataOnce": true,
+                            "headerToolbar": [
+                              "reload"
+                            ],
+                            "api": "/api/pod/${name}/pvcs",
+                            "columns": [
+                              {
+                                "name": "name",
+                                "label": "PVC 名称",
+                                "type": "text"
+                              },
+                              {
+                                "name": "capacity",
+                                "label": "容量",
+                                "type": "text"
+                              },
+                              {
+                                "name": "accessModes",
+                                "label": "访问模式",
+                                "type": "text"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "title": "环境变量",
+                          "body": {
+                            "type": "crud",
+                            "loadDataOnce": true,
+                            "headerToolbar": [
+                              "reload"
+                            ],
+                            "api": "/api/pod/${name}/envs",
+                            "columns": [
+                              {
+                                "name": "name",
+                                "label": "环境变量名",
+                                "type": "text"
+                              },
+                              {
+                                "name": "value",
+                                "label": "值",
+                                "type": "text"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "title": "Ingress 信息",
+                          "body": {
+                            "type": "crud",
+                            "loadDataOnce": true,
+                            "headerToolbar": [
+                              "reload"
+                            ],
+                            "api": "/api/pod/${name}/ingresses",
+                            "columns": [
+                              {
+                                "name": "name",
+                                "label": "Ingress 名称",
+                                "type": "text"
+                              },
+                              {
+                                "name": "host",
+                                "label": "Host",
+                                "type": "text"
+                              },
+                              {
+                                "name": "path",
+                                "label": "路径",
+                                "type": "text"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
                   "type": "button",
                   "icon": "fas fa-trash text-danger",
                   "label": "删除",
