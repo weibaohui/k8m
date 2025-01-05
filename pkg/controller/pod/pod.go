@@ -225,3 +225,67 @@ func Usage(c *gin.Context) {
 		Ctl().Pod().ResourceUsageTable()
 	amis.WriteJsonData(c, usage)
 }
+func LinksServices(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	// 	查询流程
+	// 获取目标 Pod 的详细信息：
+
+	// 使用 Pod 的 API 获取其 metadata.labels。
+	// 确定 Pod 所在的 Namespace。
+	// 获取 Namespace 内的所有 Services：
+
+	// 使用 kubectl get services -n {namespace} 或调用 API /api/v1/namespaces/{namespace}/services。
+	// 逐个匹配 Service 的 selector：
+
+	// 对每个 Service：
+	// 提取其 spec.selector。
+	// 遍历 selector 的所有键值对，检查 Pod 是否包含这些标签且值相等。
+	// 如果所有标签条件都满足，将此 Service 记录为与该 Pod 关联。
+	// 返回结果：
+
+	// 将所有匹配的 Service 名称及相关信息返回。
+
+	var pod v1.Pod
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(24 * time.Hour).
+		Get(&pod).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	podLabels := pod.GetLabels()
+
+	var services []v1.Service
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Service{}).
+		Namespace(ns).
+		List(&services).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var result []v1.Service
+	for _, service := range services {
+		serviceLabels := service.Spec.Selector
+		// 遍历selector
+		// serviceLabels中所有的kv,都必须在podLabels中存在,且值相等
+		// 如果有一个不满足,则跳过
+		for k, v := range serviceLabels {
+			if podLabels[k] != v {
+				continue
+			}
+			result = append(result, service)
+		}
+
+	}
+
+	amis.WriteJsonList(c, result)
+}
