@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"github.com/spf13/pflag"
 	"k8s.io/client-go/util/homedir"
@@ -12,6 +13,7 @@ import (
 )
 
 var config *Config
+var once sync.Once
 
 type Config struct {
 	Port       int
@@ -19,13 +21,14 @@ type Config struct {
 	ApiKey     string
 	ApiURL     string
 	Debug      bool
+	InCluster  bool
 }
 
 func Init() *Config {
-	if config == nil {
+	once.Do(func() {
 		config = &Config{}
 		config.InitFlags()
-	}
+	})
 	return config
 }
 
