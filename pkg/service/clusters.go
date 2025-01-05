@@ -20,6 +20,15 @@ type clusterService struct {
 }
 
 func (c *clusterService) Reconnect(fileName string, contextName string) {
+	// 先清除原来的状态
+
+	for _, clusterConfig := range c.clusterConfigs {
+		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
+			clusterConfig.ServerVersion = ""
+			clusterConfig.restConfig = nil
+			clusterConfig.Err = ""
+		}
+	}
 	c.RegisterCluster(fileName, contextName)
 }
 
