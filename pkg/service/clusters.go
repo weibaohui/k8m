@@ -45,11 +45,11 @@ func (c *clusterService) ClusterID(clusterConfig *ClusterConfig) string {
 }
 
 func (c *clusterService) FirstClusterID() string {
-	clusters := ClusterService().ConnectedClusters()
+	clusters := c.ConnectedClusters()
 	var selectedCluster string
 	if len(clusters) > 0 {
-		c := clusters[0]
-		selectedCluster = ClusterService().ClusterID(c)
+		cluster := clusters[0]
+		selectedCluster = c.ClusterID(cluster)
 	}
 	return selectedCluster
 }
