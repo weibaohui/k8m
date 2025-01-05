@@ -266,6 +266,7 @@ func LinksServices(c *gin.Context) {
 	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Service{}).
 		Namespace(ns).
+		WithCache(3 * time.Minute). //3分钟缓存，不宜过久
 		List(&services).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
