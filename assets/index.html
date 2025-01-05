@@ -81,7 +81,7 @@
                 type: 'tpl',
                 inline: false,
                 className: 'w-full',
-                tpl: "<div class='flex justify-end'><div>当前集群：<%= decodeURIComponent(document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1])   %></div></div>"
+                tpl: "<div class='flex justify-end'><div>当前集群：<a href='/index.html#/cluster/all'><%= decodeURIComponent(document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1])   %></a ></div></div>"
             },
             // footer: '<div class="p-2 text-center bg-light">底部区域</div>',
             // asideBefore: '<div class="p-2 text-center">菜单前面区域</div>',
