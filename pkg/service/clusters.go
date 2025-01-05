@@ -38,12 +38,18 @@ func (c *clusterService) ConnectedClusters() []*ClusterConfig {
 	})
 	return connected
 }
+
+// 根据ClusterConfig，按照 文件名+context名称 获取clusterID
+func (c *clusterService) ClusterID(clusterConfig *ClusterConfig) string {
+	return fmt.Sprintf("%s/%s", clusterConfig.FileName, clusterConfig.ContextName)
+}
+
 func (c *clusterService) FirstClusterID() string {
 	clusters := ClusterService().ConnectedClusters()
 	var selectedCluster string
 	if len(clusters) > 0 {
 		c := clusters[0]
-		selectedCluster = fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
+		selectedCluster = ClusterService().ClusterID(c)
 	}
 	return selectedCluster
 }
