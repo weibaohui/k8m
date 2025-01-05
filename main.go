@@ -86,6 +86,7 @@ func main() {
 
 	r := gin.Default()
 
+	r.Use(middleware.CustomRecovery())
 	r.Use(cors.Default())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
