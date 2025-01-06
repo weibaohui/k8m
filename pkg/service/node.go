@@ -104,7 +104,8 @@ func (n *nodeService) Watch() {
 	for _, cluster := range clusters {
 		selectedCluster := ClusterService().ClusterID(cluster)
 		// 设置一个定时器，后台不断更新node状态
-		_, err := cron.New().AddFunc("@every 5m", func() {
+		inst := cron.New()
+		_, err := inst.AddFunc("@every 5m", func() {
 			n.SyncNodeStatus(selectedCluster)
 		})
 
@@ -112,6 +113,7 @@ func (n *nodeService) Watch() {
 			klog.Errorf("%s Error add cron job: %v", selectedCluster, err)
 			continue
 		}
+		inst.Start()
 		klog.V(6).Infof("%s 新增节点状态定时更新任务【@every 5m】", selectedCluster)
 	}
 }
