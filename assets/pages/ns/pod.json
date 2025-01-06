@@ -1126,7 +1126,7 @@
                 {
                   "label": "关联资源",
                   "type": "button",
-                  "icon": "fas fa-chain text-primary",
+                  "icon": "fas fa-code-branch text-primary",
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnEsc": true,
@@ -1260,80 +1260,93 @@
                           }
                         },
                         {
-                          "title": "PVC 关联信息",
+                          "title": "存储卷声明 关联信息",
                           "body": {
                             "type": "crud",
                             "loadDataOnce": true,
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/api/pod/${name}/pvcs",
+                            "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/pvc",
                             "columns": [
                               {
-                                "name": "name",
-                                "label": "PVC 名称",
-                                "type": "text"
+                                "name": "metadata.name",
+                                "label": "名称",
+                                "type": "text",
+                                "width": "180px",
+                                "copyable": true,
+                                "sortable": true
+                              },
+                              {
+                                "name": "status.phase",
+                                "label": "状态",
+                                "type": "mapping",
+                                "map": {
+                                  "Bound": "<span class='label label-success'>已绑定</span>",
+                                  "Lost": "<span class='label label-danger'>丢失</span>",
+                                  "Pending": "<span class='label label-warning'>未绑定</span>"
+                                }
+                              },
+                              {
+                                "name": "request",
+                                "label": "申请容量",
+                                "type": "tpl",
+                                "tpl": "${spec.resources.requests.storage}"
                               },
                               {
                                 "name": "capacity",
-                                "label": "容量",
-                                "type": "text"
+                                "label": "存储容积",
+                                "type": "tpl",
+                                "tpl": "${status.capacity.storage}"
                               },
                               {
-                                "name": "accessModes",
+                                "name": "spec.accessModes",
                                 "label": "访问模式",
-                                "type": "text"
+                                "type": "tpl",
+                                "tpl": "<%= data.spec.accessModes.map(item => item === 'ReadWriteOnce' ? '<span class=\\'label label-success\\'>单路读写</span>' : item === 'ReadOnlyMany' ? '<span class=\\'label label-warning\\'>多路只读</span>' : item === 'ReadWriteMany' ? '<span class=\\'label label-info\\'>多路读写</span>' : '').join(' ') %>"
+                              },
+                              {
+                                "name": "spec.volumeMode",
+                                "label": "卷模式",
+                                "type": "mapping",
+                                "map": {
+                                  "Filesystem": "<span class='label label-success'>文件系统</span>",
+                                  "Block": "<span class='label label-warning'>块设备</span>"
+                                }
+                              },
+                              {
+                                "name": "metadata.creationTimestamp",
+                                "label": "存在时长",
+                                "type": "k8sAge"
                               }
                             ]
                           }
                         },
                         {
-                          "title": "环境变量",
+                          "title": "Ingress入口信息",
                           "body": {
                             "type": "crud",
                             "loadDataOnce": true,
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/api/pod/${name}/envs",
+                            "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/ingress",
                             "columns": [
                               {
-                                "name": "name",
-                                "label": "环境变量名",
+                                "name": "metadata.name",
+                                "label": "名称",
                                 "type": "text"
                               },
                               {
-                                "name": "value",
-                                "label": "值",
-                                "type": "text"
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "title": "Ingress 信息",
-                          "body": {
-                            "type": "crud",
-                            "loadDataOnce": true,
-                            "headerToolbar": [
-                              "reload"
-                            ],
-                            "api": "/api/pod/${name}/ingresses",
-                            "columns": [
-                              {
-                                "name": "name",
-                                "label": "Ingress 名称",
-                                "type": "text"
+                                "name": "spec.rules",
+                                "label": "访问规则",
+                                "type": "tpl",
+                                "tpl": "<% if (data.spec.rules && data.spec.rules.length) { %><% data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'>域名: <%- rule.host || '*' %><br><% if (rule.http && rule.http.paths && rule.http.paths.length) { %><% rule.http.paths.forEach(function(path) { %><% if (path.backend && path.backend.service) { %>路径: <%- path.path %> → 服务: <%- path.backend.service.name %><br><% } %><% }); %><% } %></div><% }); %><% } %>"
                               },
                               {
-                                "name": "host",
-                                "label": "Host",
-                                "type": "text"
-                              },
-                              {
-                                "name": "path",
-                                "label": "路径",
-                                "type": "text"
+                                "name": "metadata.creationTimestamp",
+                                "label": "存在时长",
+                                "type": "k8sAge"
                               }
                             ]
                           }
