@@ -644,7 +644,7 @@
         {
           "label": "端点",
           "type": "tpl",
-          "tpl": "<% data.endpoints.forEach(function(endpoint) { endpoint.addresses.forEach(function(ip) { %><span class='text-<%= endpoint.conditions.ready ? 'green' : 'red' %>-500 font-black'><%= ip %><%= endpoint.conditions.ready ? '' : ' ['+endpoint.targetRef.namespace+'/'+endpoint.targetRef.name+']' %></span><br/><% }); }); %>"
+          "tpl": "<%   if (!data.endpoints || data.endpoints.length === 0) { %> <% } else { data.endpoints.forEach(function(endpoint) { endpoint.addresses.forEach(function(ip) { %><span class='text-<%= endpoint.conditions.ready ? 'green' : 'red' %>-500 font-black'><%= ip %><%= endpoint.conditions.ready ? '' : ' ['+endpoint.targetRef.namespace+'/'+endpoint.targetRef.name+']' %></span><br/><% }); }); } %>"
         },
         {
           "name": "ports",
