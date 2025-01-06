@@ -762,12 +762,29 @@
         {
           "name": "status.phase",
           "label": "状态",
-          "type": "text"
-        },
-        {
-          "name": "spec.volumeName",
-          "label": "存储卷",
-          "type": "text"
+          "searchable": {
+            "type": "select",
+            "options": [
+              {
+                "label": "已绑定 ",
+                "value": "Bound"
+              },
+              {
+                "label": "丢失 ",
+                "value": "Lost"
+              },
+              {
+                "label": "未绑定 ",
+                "value": "Pending"
+              }
+            ]
+          },
+          "type": "mapping",
+          "map": {
+            "Bound": "<span class='label label-success'>已绑定</span>",
+            "Lost": "<span class='label label-danger'>丢失</span>",
+            "Pending": "<span class='label label-warning'>未绑定</span>"
+          }
         },
         {
           "name": "metadata.labels",
@@ -843,7 +860,7 @@
           "name": "spec.accessModes",
           "label": "访问模式",
           "type": "tpl",
-          "tpl": "${spec.accessModes| map  }"
+          "tpl": "<%= data.spec.accessModes.map(item => item === 'ReadWriteOnce' ? '<span class=\\'label label-success\\'>单路读写</span>' : item === 'ReadOnlyMany' ? '<span class=\\'label label-warning\\'>多路只读</span>' : item === 'ReadWriteMany' ? '<span class=\\'label label-info\\'>多路读写</span>' : '').join(' ') %>"
         },
         {
           "name": "spec.storageClassName",
@@ -853,7 +870,31 @@
         {
           "name": "spec.volumeMode",
           "label": "卷模式",
-          "type": "text"
+          "type": "mapping",
+          "searchable": {
+            "type": "select",
+            "options": [
+              {
+                "label": "文件系统",
+                "value": "Filesystem"
+              },
+              {
+                "label": "块设备",
+                "value": "Block"
+              }
+            ]
+          },
+          "map": {
+            "Filesystem": "<span class='label label-success'>文件系统</span>",
+            "Block": "<span class='label label-warning'>块设备</span>"
+          }
+        },
+        {
+          "name": "spec.volumeName",
+          "label": "持久卷",
+          "type": "text",
+          "width": "150px",
+          "copyable": true
         },
         {
           "name": "metadata.creationTimestamp",
