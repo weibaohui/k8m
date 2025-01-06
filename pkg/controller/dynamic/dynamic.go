@@ -89,16 +89,22 @@ func List(c *gin.Context) {
 func FillList(selectedCluster string, kind string, list []unstructured.Unstructured) []unstructured.Unstructured {
 	switch kind {
 	case "Node":
-		for i, _ := range list {
-			item := list[i]
-			item = service.NodeService().SetIPUsage(selectedCluster, item)
-			item = service.NodeService().SetPodCount(selectedCluster, item)
-			item = service.NodeService().SetAllocatedStatus(selectedCluster, item)
+		if service.ClusterService().GetNodeStatusAggregated(selectedCluster) {
+			// 已缓存聚合状态，可以填充
+			for i, _ := range list {
+				item := list[i]
+				item = service.NodeService().SetIPUsage(selectedCluster, item)
+				item = service.NodeService().SetPodCount(selectedCluster, item)
+				item = service.NodeService().SetAllocatedStatus(selectedCluster, item)
+			}
 		}
 	case "Pod":
-		for i, _ := range list {
-			item := list[i]
-			item = service.PodService().SetAllocatedStatus(selectedCluster, item)
+		if service.ClusterService().GetPodStatusAggregated(selectedCluster) {
+			// 已缓存聚合状态，可以填充
+			for i, _ := range list {
+				item := list[i]
+				item = service.PodService().SetAllocatedStatus(selectedCluster, item)
+			}
 		}
 	}
 	return list
