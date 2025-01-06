@@ -15,8 +15,10 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/strings/slices"
 )
 
 func StreamLogs(c *gin.Context) {
@@ -278,15 +280,15 @@ func getServicesByPodLabels(ctx context.Context, selectedCluster string, pod *v1
 	err := kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Service{}).
 		Namespace(pod.Namespace).
-		WithCache(3 * time.Minute). //3分钟缓存，不宜过久
+		WithCache(3 * time.Minute). // 3分钟缓存，不宜过久
 		List(&services).Error
 	if err != nil {
 		return nil, err
 	}
 
 	var result []v1.Service
-	for _, service := range services {
-		serviceLabels := service.Spec.Selector
+	for _, svc := range services {
+		serviceLabels := svc.Spec.Selector
 		// 遍历selector
 		// serviceLabels中所有的kv,都必须在podLabels中存在,且值相等
 		// 如果有一个不满足,则跳过
@@ -294,7 +296,7 @@ func getServicesByPodLabels(ctx context.Context, selectedCluster string, pod *v1
 			if podLabels[k] != v {
 				continue
 			}
-			result = append(result, service)
+			result = append(result, svc)
 		}
 
 	}
@@ -324,14 +326,14 @@ func LinksEndpoints(c *gin.Context) {
 		return
 	}
 
-	//endpoints 与 svc 同名
-	//1.获取service 名称
-	//2.获取endpoints
-	//3.返回endpoints
+	// endpoints 与 svc 同名
+	// 1.获取service 名称
+	// 2.获取endpoints
+	// 3.返回endpoints
 
 	var names []string
-	for _, service := range services {
-		names = append(names, service.Name)
+	for _, svc := range services {
+		names = append(names, svc.Name)
 	}
 
 	var endpoints []v1.Endpoints
@@ -350,5 +352,133 @@ func LinksEndpoints(c *gin.Context) {
 	}
 
 	amis.WriteJsonList(c, endpoints)
+
+}
+
+func LinksPVC(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var pod v1.Pod
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(24 * time.Hour).
+		Get(&pod).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 找打pvc 名称列表
+	var pvcNames []string
+	for _, volume := range pod.Spec.Volumes {
+		if volume.PersistentVolumeClaim != nil {
+			pvcNames = append(pvcNames, volume.PersistentVolumeClaim.ClaimName)
+		}
+	}
+
+	// 找出同ns下pvc的列表，过滤pvcNames
+	var pvcList []v1.PersistentVolumeClaim
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.PersistentVolumeClaim{}).
+		Namespace(ns).
+		WithCache(24 * time.Hour).
+		List(&pvcList).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 过滤pvcList，只保留pvcNames
+	var result []v1.PersistentVolumeClaim
+	for _, pvc := range pvcList {
+		if slices.Contains(pvcNames, pvc.Name) {
+			result = append(result, pvc)
+		}
+	}
+
+	amis.WriteJsonList(c, result)
+}
+
+func LinksIngress(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var pod v1.Pod
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(24 * time.Hour).
+		Get(&pod).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	services, err := getServicesByPodLabels(ctx, selectedCluster, &pod)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var servicesName []string
+	for _, svc := range services {
+		servicesName = append(servicesName, svc.Name)
+	}
+
+	// 获取ingress
+	// Ingress 通过 spec.rules 或 spec.defaultBackend 中的 service.name 指定关联的 Service。
+	// 遍历services，获取ingress
+	var ingressList []networkingv1.Ingress
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&networkingv1.Ingress{}).
+		Namespace(ns).
+		WithCache(24 * time.Hour).
+		List(&ingressList).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 过滤ingressList，只保留与services关联的ingress
+	var result []networkingv1.Ingress
+	for _, ingress := range ingressList {
+		if slices.Contains(servicesName, ingress.Spec.Rules[0].Host) {
+			result = append(result, ingress)
+		}
+	}
+	// 遍历 Ingress 检查关联
+	for _, ingress := range ingressList {
+		if ingress.Spec.DefaultBackend != nil {
+			if ingress.Spec.DefaultBackend.Service != nil && ingress.Spec.DefaultBackend.Service.Name != "" {
+				if slices.Contains(servicesName, ingress.Spec.DefaultBackend.Service.Name) {
+					result = append(result, ingress)
+				}
+			}
+		}
+
+		for _, rule := range ingress.Spec.Rules {
+			if rule.HTTP != nil {
+				for _, path := range rule.HTTP.Paths {
+					if path.Backend.Service != nil && path.Backend.Service.Name != "" {
+
+						backName := path.Backend.Service.Name
+						if slices.Contains(servicesName, backName) {
+							result = append(result, ingress)
+						}
+					}
+				}
+
+			}
+
+		}
+	}
+
+	amis.WriteJsonList(c, result)
 
 }
