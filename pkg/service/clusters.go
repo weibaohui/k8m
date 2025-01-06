@@ -138,6 +138,7 @@ type ClusterConfig struct {
 	Server               string       `json:"server,omitempty"`               // 集群地址
 	ServerVersion        string       `json:"serverVersion,omitempty"`        // 通过这个值来判断集群是否可用
 	UserName             string       `json:"userName,omitempty"`             // 用户名
+	Namespace            string       `json:"namespace,omitempty"`            // kubeconfig 限制Namespace
 	Err                  string       `json:"err,omitempty"`                  // 连接错误信息
 	NodeStatusAggregated bool         `json:"nodeStatusAggregated,omitempty"` // 是否已聚合节点状态
 	PodStatusAggregated  bool         `json:"podStatusAggregated,omitempty"`  // 是否已聚合容器组状态
@@ -175,14 +176,18 @@ func (c *clusterService) RegisterClustersInPath(path string) {
 			continue // 解析失败，跳过该文件
 		}
 		for contextName, _ := range config.Contexts {
+			context := config.Contexts[contextName]
+			cluster := config.Clusters[context.Cluster]
+
 			clusterConfig := &ClusterConfig{
 				FileName:    file.Name(),
 				ContextName: contextName,
-				UserName:    config.Contexts[contextName].AuthInfo,
-				ClusterName: config.Contexts[contextName].Cluster,
+				UserName:    context.AuthInfo,
+				ClusterName: context.Cluster,
+				Namespace:   context.Namespace,
 				kubeConfig:  content,
 			}
-			clusterConfig.Server = config.Clusters[contextName].Server
+			clusterConfig.Server = cluster.Server
 			c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
 		}
 	}
