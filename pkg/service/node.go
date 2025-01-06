@@ -96,28 +96,24 @@ func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 		_, _ = n.CachePodCount(selectedCluster, node.Name)
 		_, _ = n.CacheAllocatedStatus(selectedCluster, node.Name)
 	}
+	ClusterService().SetNodeStatusAggregated(selectedCluster, true)
 }
-func (n *nodeService) Watch() error {
+func (n *nodeService) Watch() {
+	// 延迟启动cron
 	clusters := ClusterService().ConnectedClusters()
 	for _, cluster := range clusters {
 		selectedCluster := ClusterService().ClusterID(cluster)
-		go func() {
-			// 先执行一次
-			n.SyncNodeStatus(selectedCluster)
-		}()
 		// 设置一个定时器，后台不断更新node状态
 		_, err := cron.New().AddFunc("@every 5m", func() {
 			n.SyncNodeStatus(selectedCluster)
 		})
 
 		if err != nil {
-			return err
+			klog.Errorf("%s Error add cron job: %v", selectedCluster, err)
+			continue
 		}
 		klog.V(6).Infof("%s 新增节点状态定时更新任务【@every 5m】", selectedCluster)
-
 	}
-
-	return nil
 }
 func (n *nodeService) CacheIPUsage(selectedCluster string, nodeName string) (ipUsage, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
