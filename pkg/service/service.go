@@ -6,7 +6,7 @@ var localNodeService = &nodeService{}
 var localDeploymentService = &deployService{}
 var localClusterService = &clusterService{
 	clusterConfigs:        []*ClusterConfig{},
-	AggregateDelaySeconds: 120, // 延迟120s
+	AggregateDelaySeconds: 61, // 没有秒级支持，所以大于1分钟
 }
 
 func ChatService() *chatService {
