@@ -94,7 +94,6 @@ func (p *podService) RemoveCacheAllocatedStatus(selectedCluster string, item *v1
 }
 func (p *podService) Watch() {
 	podWatchOnce.Do(func() {
-		// 延迟启动cron
 		clusters := ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
 			selectedCluster := ClusterService().ClusterID(cluster)
