@@ -227,6 +227,9 @@ func Usage(c *gin.Context) {
 		Ctl().Pod().ResourceUsageTable()
 	amis.WriteJsonData(c, usage)
 }
+
+var linkCacheTTL = 5 * time.Minute
+
 func LinksServices(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -238,7 +241,7 @@ func LinksServices(c *gin.Context) {
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(name).
-		WithCache(24 * time.Hour).
+		WithCache(linkCacheTTL).
 		Get(&pod).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -313,7 +316,7 @@ func LinksEndpoints(c *gin.Context) {
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(name).
-		WithCache(24 * time.Hour).
+		WithCache(linkCacheTTL).
 		Get(&pod).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -366,7 +369,7 @@ func LinksPVC(c *gin.Context) {
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(name).
-		WithCache(24 * time.Hour).
+		WithCache(linkCacheTTL).
 		Get(&pod).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -385,7 +388,7 @@ func LinksPVC(c *gin.Context) {
 	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.PersistentVolumeClaim{}).
 		Namespace(ns).
-		WithCache(24 * time.Hour).
+		WithCache(linkCacheTTL).
 		List(&pvcList).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -414,7 +417,7 @@ func LinksIngress(c *gin.Context) {
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(name).
-		WithCache(24 * time.Hour).
+		WithCache(linkCacheTTL).
 		Get(&pod).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -438,7 +441,7 @@ func LinksIngress(c *gin.Context) {
 	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&networkingv1.Ingress{}).
 		Namespace(ns).
-		WithCache(24 * time.Hour).
+		WithCache(linkCacheTTL).
 		List(&ingressList).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
