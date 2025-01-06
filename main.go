@@ -56,7 +56,7 @@ func Init() {
 	if err != nil {
 		klog.Errorf("InCluster集群初始化失败%v，下面尝试使用kubeconfig文件初始化，并扫描同文件夹下其他配置文件", err)
 		// 初始化kubectl 连接
-		service.ClusterService().ListClustersInPath(cfg.KubeConfig)
+		service.ClusterService().RegisterClustersInPath(cfg.KubeConfig)
 		klog.Infof("处理%d个集群", len(service.ClusterService().AllClusters()))
 		klog.Infof("已连接%d个集群", len(service.ClusterService().ConnectedClusters()))
 	} else {
@@ -78,8 +78,10 @@ func Init() {
 
 	// 启动watch
 	go func() {
-		_ = service.PodService().Watch()
-		_ = service.NodeService().Watch()
+		service.ClusterService().DelayStartFunc(func() {
+			service.PodService().Watch()
+			service.NodeService().Watch()
+		})
 	}()
 
 }
