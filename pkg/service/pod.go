@@ -92,8 +92,9 @@ func (p *podService) RemoveCacheAllocatedStatus(selectedCluster string, item *v1
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	kom.Cluster(selectedCluster).ClusterCache().Del(cacheKey)
 }
-func (p *podService) Watch() error {
+func (p *podService) Watch() {
 	podWatchOnce.Do(func() {
+		// 延迟启动cron
 		clusters := ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
 			selectedCluster := ClusterService().ClusterID(cluster)
@@ -101,7 +102,6 @@ func (p *podService) Watch() error {
 		}
 	})
 
-	return nil
 }
 
 func (p *podService) watchSingleCluster(selectedCluster string) {
@@ -136,4 +136,9 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 			}
 		}
 	}()
+
+	// 延迟设置完成状态，等待Pod ListWatch完成
+	ClusterService().DelayStartFunc(func() {
+		ClusterService().SetPodStatusAggregated(selectedCluster, true)
+	})
 }
