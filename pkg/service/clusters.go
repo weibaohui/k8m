@@ -78,7 +78,13 @@ func (c *clusterService) DelayStartFunc(f func()) {
 	// 延迟启动cron
 	// 设置一次性任务的执行时间，例如 5 秒后执行
 	schedule := utils.DelayStartSchedule(c.AggregateDelaySeconds)
-	_, _ = cron.New().AddFunc(schedule, f)
+	cronInstance := cron.New()
+	_, err := cronInstance.AddFunc(schedule, f)
+	if err != nil {
+		klog.Errorf("延迟方法注册失败%v", err)
+		return
+	}
+	cronInstance.Start()
 	klog.V(6).Infof("延迟启动cron %ds: %s", c.AggregateDelaySeconds, schedule)
 }
 func (c *clusterService) Reconnect(fileName string, contextName string) {
