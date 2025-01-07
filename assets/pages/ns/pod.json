@@ -1423,6 +1423,12 @@
                                 "type": "text"
                               },
                               {
+                                "name": "metadata.annotations.configMapMounts",
+                                "label": "挂载信息",
+                                "type": "tpl",
+                                "tpl": "<% const mounts = JSON.parse(data.metadata.annotations.configMapMounts || '[]'); %><ul><% mounts.forEach((item) => { %><li>挂载路径: <%= item.mountPath + (item.subPath ? '/' + item.subPath : '') %>, 模式: <%= '0' + (item.mode || 0).toString(8) %>, 只读: <%= item.readOnly ? '是' : '否' %></li><% }); %></ul>"
+                              },
+                              {
                                 "label": "文件列表",
                                 "type": "each",
                                 "name": "data",
@@ -1499,7 +1505,7 @@
                                 "name": "metadata.annotations.secretMounts",
                                 "label": "挂载信息",
                                 "type": "tpl",
-                                "tpl": "<% const mounts = JSON.parse(data.metadata.annotations.secretMounts || '[]'); %><ul><% mounts.forEach((item) => { %><li>挂载路径: <%= item.mountPath %>, 模式: <%= '0' + (item.mode || 0).toString(8) %>, 只读: <%= item.readOnly ? '是' : '否' %></li><% }); %></ul>"
+                                "tpl": "<% const mounts = JSON.parse(data.metadata.annotations.secretMounts || '[]'); %><ul><% mounts.forEach((item) => { %><li>挂载路径: <%= item.mountPath + (item.subPath ? '/' + item.subPath : '') %>, 模式: <%= '0' + (item.mode || 0).toString(8) %>, 只读: <%= item.readOnly ? '是' : '否' %></li><% }); %></ul>"
                               },
                               {
                                 "label": "文件列表",
