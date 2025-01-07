@@ -1406,6 +1406,136 @@
                               }
                             ]
                           }
+                        },
+                        {
+                          "title": "配置映射",
+                          "body": {
+                            "type": "crud",
+                            "loadDataOnce": true,
+                            "headerToolbar": [
+                              "reload"
+                            ],
+                            "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/configmap",
+                            "columns": [
+                              {
+                                "name": "metadata.name",
+                                "label": "名称",
+                                "type": "text"
+                              },
+                              {
+                                "label": "文件列表",
+                                "type": "each",
+                                "name": "data",
+                                "items": {
+                                  "type": "button",
+                                  "level": "link",
+                                  "label": "${key}",
+                                  "actionType": "drawer",
+                                  "drawer": {
+                                    "size": "lg",
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "title": "查看 ${metadata.name}-${key} 文件内容 (ESC 关闭)",
+                                    "body": [
+                                      {
+                                        "type": "editor",
+                                        "name": "yaml",
+                                        "size": "xxl",
+                                        "allowFullscreen": true,
+                                        "placeholder": "loading",
+                                        "language": "yaml",
+                                        "value": "${value}",
+                                        "options": {
+                                          "wordWrap": "on",
+                                          "scrollbar": {
+                                            "vertical": "auto"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "name": "metadata.creationTimestamp",
+                                "label": "存在时长",
+                                "type": "k8sAge"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "title": "密钥",
+                          "body": {
+                            "loadDataOnce": true,
+                            "headerToolbar": [
+                              "reload"
+                            ],
+                            "type": "crud",
+                            "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/secret",
+                            "columns": [
+                              {
+                                "name": "metadata.name",
+                                "label": "名称",
+                                "type": "text"
+                              },
+                              {
+                                "name": "type",
+                                "label": "类型",
+                                "type": "mapping",
+                                "map": {
+                                  "Opaque": "<span class='label label-primary'>自定义数据</span>",
+                                  "kubernetes.io/service-account-token": "<span class='label label-primary'>服务账户令牌</span>",
+                                  "kubernetes.io/dockercfg": "<span class='label label-info'>旧版镜像凭证</span>",
+                                  "kubernetes.io/dockerconfigjson": "<span class='label label-success'>镜像凭证</span>",
+                                  "kubernetes.io/basic-auth": "<span class='label label-warning'>Basic Auth 凭证</span>",
+                                  "kubernetes.io/ssh-auth": "<span class='label label-warning'>SSH 凭证</span>",
+                                  "kubernetes.io/tls": "<span class='label label-danger'>TLS 凭证</span>",
+                                  "bootstrap.kubernetes.io/token": "<span class='label label-default'>引导令牌</span>",
+                                  "*": "<span class='label label-primary'>${type}</span>"
+                                }
+                              },
+                              {
+                                "label": "文件列表",
+                                "type": "each",
+                                "name": "data",
+                                "items": {
+                                  "type": "button",
+                                  "level": "link",
+                                  "label": "${key}",
+                                  "actionType": "drawer",
+                                  "drawer": {
+                                    "size": "lg",
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "title": "查看 ${metadata.name}-${key} 文件内容 (ESC 关闭)",
+                                    "body": [
+                                      {
+                                        "type": "editor",
+                                        "name": "yaml",
+                                        "size": "xxl",
+                                        "allowFullscreen": true,
+                                        "placeholder": "loading",
+                                        "language": "yaml",
+                                        "value": "${value| base64Decode}",
+                                        "options": {
+                                          "wordWrap": "on",
+                                          "scrollbar": {
+                                            "vertical": "auto"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "name": "metadata.creationTimestamp",
+                                "label": "存在时长",
+                                "type": "k8sAge"
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
