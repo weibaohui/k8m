@@ -318,3 +318,39 @@ func LinksEnv(c *gin.Context) {
 	}
 	amis.WriteJsonList(c, env)
 }
+
+func LinksConfigMap(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	configMap, err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(linkCacheTTL).Ctl().Pod().LinkedConfigMap()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonList(c, configMap)
+}
+
+func LinksSecret(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	secret, err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(linkCacheTTL).Ctl().Pod().LinkedSecret()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonList(c, secret)
+}
