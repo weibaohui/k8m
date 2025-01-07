@@ -213,6 +213,8 @@ func main() {
 		api.GET("/pod/ns/:ns/name/:name/links/pvc", pod.LinksPVC)
 		api.GET("/pod/ns/:ns/name/:name/links/ingress", pod.LinksIngress)
 		api.GET("/pod/ns/:ns/name/:name/links/env", pod.LinksEnv)
+		api.GET("/pod/ns/:ns/name/:name/links/configmap", pod.LinksConfigMap)
+		api.GET("/pod/ns/:ns/name/:name/links/secret", pod.LinksSecret)
 	}
 
 	klog.Infof("启动成功，k8m服务监听0.0.0.0:%d", flag.Init().Port)
