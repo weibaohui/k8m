@@ -1350,6 +1350,62 @@
                               }
                             ]
                           }
+                        },
+                        {
+                          "title": "环境变量",
+                          "body": {
+                            "type": "crud",
+                            "autoGenerateFilter": {
+                              "columnsNum": 3,
+                              "showBtnToolbar": false
+                            },
+                            "headerToolbar": [
+                              {
+                                "type": "columns-toggler",
+                                "align": "right",
+                                "draggable": true,
+                                "icon": "fas fa-cog",
+                                "overlay": true,
+                                "footerBtnSize": "sm"
+                              },
+                              "reload",
+                              {
+                                "type": "pagination",
+                                "align": "right"
+                              },
+                              {
+                                "type": "statistics",
+                                "align": "right"
+                              },
+                              {
+                                "type": "switch-per-page",
+                                "align": "right"
+                              }
+                            ],
+                            "loadDataOnce": true,
+                            "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/env",
+                            "columns": [
+                              {
+                                "name": "containerName",
+                                "label": "容器",
+                                "type": "text"
+                              },
+                              {
+                                "name": "envName",
+                                "label": "环境变量名称",
+                                "type": "text",
+                                "sortable": true,
+                                "searchable": true
+                              },
+                              {
+                                "name": "envValue",
+                                "label": "环境变量值",
+                                "type": "text",
+                                "sortable": true,
+                                "searchable": true
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
