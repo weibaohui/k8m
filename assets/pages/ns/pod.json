@@ -1137,7 +1137,7 @@
                       "type": "tabs",
                       "tabs": [
                         {
-                          "title": "Service 网络信息",
+                          "title": "Service网络",
                           "body": {
                             "type": "crud",
                             "loadDataOnce": true,
@@ -1189,7 +1189,7 @@
                           }
                         },
                         {
-                          "title": "端点 信息",
+                          "title": "端点",
                           "body": {
                             "type": "crud",
                             "loadDataOnce": true,
@@ -1260,7 +1260,7 @@
                           }
                         },
                         {
-                          "title": "存储卷声明 关联信息",
+                          "title": "存储卷声明",
                           "body": {
                             "type": "crud",
                             "loadDataOnce": true,
@@ -1323,7 +1323,7 @@
                           }
                         },
                         {
-                          "title": "Ingress入口信息",
+                          "title": "Ingress入口",
                           "body": {
                             "type": "crud",
                             "loadDataOnce": true,
