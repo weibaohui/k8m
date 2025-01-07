@@ -46,7 +46,7 @@ func (p *podService) SetAllocatedStatus(selectedCluster string, item unstructure
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
 	if err != nil {
@@ -80,7 +80,7 @@ func (p *podService) CacheAllocatedStatus(selectedCluster string, item *v1.Pod) 
 	ns := item.GetNamespace()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	_, _ = utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).WithCache(ttl).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		tb := kom.Cluster(selectedCluster).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, nil
 	})
 
@@ -116,7 +116,7 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 		klog.V(6).Infof("%s start watch pod", selectedCluster)
 		defer watcher.Stop()
 		for event := range watcher.ResultChan() {
-			err := kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
+			err = kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
 			if err != nil {
 				klog.V(6).Infof("%s 无法将对象转换为 *v1.Pod 类型: %v", selectedCluster, err)
 				return
