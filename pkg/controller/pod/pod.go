@@ -313,7 +313,14 @@ func LinksEnv(c *gin.Context) {
 		Name(name).
 		WithCache(linkCacheTTL).Ctl().Pod().LinkedEnv()
 	if err != nil {
-		amis.WriteJsonError(c, err)
+		// error executing command: Internal error occurred: Internal error occurred: error executing command in container: failed to exec in container: failed to start exec \"915a4933acbb460d0b1859831d8f392dc96ca1f91447a94dbc41962900b91281\": OCI runtime exec failed: exec failed: unable to start container process: exec: \"env\": executable file not found in $PATH: unknown
+		// 提取executable file not found in $PATH
+		// 展示为简短通用的错误
+		if strings.Contains(err.Error(), "executable file not found in $PATH") {
+			amis.WriteJsonError(c, fmt.Errorf("容器中无env命令"))
+		} else {
+			amis.WriteJsonError(c, err)
+		}
 		return
 	}
 	amis.WriteJsonList(c, env)
