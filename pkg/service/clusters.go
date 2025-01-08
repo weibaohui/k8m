@@ -45,6 +45,7 @@ func (c *clusterService) GetPodStatusAggregated(selectedCluster string) bool {
 	if clusterConfig == nil {
 		return false
 	}
+	klog.V(6).Infof("GetPodStatusAggregated: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.PodStatusAggregated)
 	return clusterConfig.PodStatusAggregated
 }
 
@@ -54,6 +55,7 @@ func (c *clusterService) GetNodeStatusAggregated(selectedCluster string) bool {
 	if clusterConfig == nil {
 		return false
 	}
+	klog.V(6).Infof("GetNodeStatusAggregated: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.NodeStatusAggregated)
 	return clusterConfig.NodeStatusAggregated
 }
 
