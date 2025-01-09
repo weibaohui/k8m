@@ -1482,7 +1482,7 @@
                                 "name": "metadata.annotations.configMapMounts",
                                 "label": "挂载信息",
                                 "type": "tpl",
-                                "tpl": "<% const mounts = JSON.parse(data.metadata.annotations.configMapMounts || '[]'); %><% mounts.forEach((item) => { %>挂载文件夹: <%= item.mountPath + (item.subPath ? '/' + item.subPath : '') %>, 模式: <%= '0' + (item.mode || 0).toString(8) %>, 只读: <%= item.readOnly ? '是' : '否' %><br><% }); %>"
+                                "tpl": "<% const mounts = (data.metadata.annotations && data.metadata.annotations.configMapMounts) ? JSON.parse(data.metadata.annotations.configMapMounts) : []; %><% if (mounts.length > 0) { %><% mounts.forEach((item) => { %>挂载文件夹: <%= item.mountPath + (item.subPath ? '/' + item.subPath : '') %>, 模式: <%= '0' + (item.mode || 0).toString(8) %>, 只读: <%= item.readOnly ? '是' : '否' %><br><% }); %><% } else { %>没有挂载信息<% } %>"
                               },
                               {
                                 "label": "文件列表",
@@ -1561,7 +1561,7 @@
                                 "name": "metadata.annotations.secretMounts",
                                 "label": "挂载信息",
                                 "type": "tpl",
-                                "tpl": "<% const mounts = JSON.parse(data.metadata.annotations.secretMounts || '[]'); %><% mounts.forEach((item) => { %>挂载文件夹: <%= item.mountPath + (item.subPath ? '/' + item.subPath : '') %>, 模式: <%= '0' + (item.mode || 0).toString(8) %>, 只读: <%= item.readOnly ? '是' : '否' %><br><% }); %>"
+                                "tpl": "<% const mounts = (data.metadata.annotations && data.metadata.annotations.secretMounts) ? JSON.parse(data.metadata.annotations.secretMounts) : []; %><% if (mounts.length > 0) { %><% mounts.forEach((item) => { %>挂载文件夹: <%= item.mountPath + (item.subPath ? '/' + item.subPath : '') %>, 模式: <%= '0' + (item.mode || 0).toString(8) %>, 只读: <%= item.readOnly ? '是' : '否' %><br><% }); %><% } else { %>没有挂载信息<% } %>"
                               },
                               {
                                 "label": "文件列表",
