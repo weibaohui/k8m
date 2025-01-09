@@ -12,6 +12,7 @@
             {
               "type": "button",
               "label": "导入yaml文件",
+              "icon": "fas fa-file-code text-success",
               "actionType": "dialog",
               "dialog": {
                 "closeOnEsc": true,
@@ -31,7 +32,7 @@
                           "drag": true
                         },
                         {
-                          "type": "input-text",
+                          "type": "hidden",
                           "name": "fileName",
                           "label": "文件名",
                           "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
@@ -40,9 +41,40 @@
                       "actions": [
                         {
                           "type": "button",
-                          "label": "上传",
+                          "label": "导入编辑器",
                           "level": "primary",
+                          "close": true,
+                          "onEvent": {
+                            "click": {
+                              "actions": [
+                                {
+                                  "actionType": "custom",
+                                  "script": "var fileInput = document.querySelector('input[type=file]').files[0];\nif (fileInput) {\n  var reader = new FileReader();\n  reader.onload = function(e) {\n    var content = e.target.result;\n   localStorage.setItem('yaml',   content);\n  };\n  reader.readAsText(fileInput);\n}"
+                                },
+                                {
+                                  "actionType": "wait",
+                                  "args": {
+                                    "time": 1000
+                                  }
+                                },
+                                {
+                                  "type": "action",
+                                  "actionType": "setValue",
+                                  "componentId": "yaml",
+                                  "args": {
+                                    "value": "${ls:yaml}"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "type": "button",
+                          "label": "直接执行",
+                          "level": "danger",
                           "actionType": "ajax",
+                          "confirmText": "确定要执行?",
                           "close": true,
                           "api": {
                             "method": "post",
@@ -63,7 +95,7 @@
             {
               "type": "button",
               "label": "Apply",
-              "level": "primary",
+              "icon": "fas fa-play text-success",
               "actionType": "ajax",
               "api": "post:/k8s/yaml/apply",
               "validate": true,
@@ -79,7 +111,8 @@
             {
               "type": "button",
               "label": "Delete",
-              "level": "danger",
+              "icon": "fas fa-trash text-danger",
+              "confirmText": "确定要删除?",
               "actionType": "ajax",
               "api": "post:/k8s/yaml/delete",
               "validate": true,
@@ -97,6 +130,7 @@
         {
           "type": "editor",
           "name": "yaml",
+          "id": "yaml",
           "size": "xxl",
           "allowFullscreen": true,
           "language": "yaml",
