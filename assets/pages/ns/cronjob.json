@@ -907,6 +907,75 @@
           }
         },
         {
+          "name": "spec.jobTemplate.spec.template.spec.tolerations",
+          "label": "容忍",
+          "type": "tpl",
+          "tpl": "${spec.jobTemplate.spec.template.spec.tolerations ? '<i class=\"fa fa-exclamation-triangle text-danger\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 容忍度 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "panel",
+                        "title": "操作符（Operator）代表了对污点（键、值、效果）的容忍程度",
+                        "body": {
+                          "type": "tpl",
+                          "tpl": "<div><div><strong>等于:</strong>Equal - 键等于值</div><div><strong>存在:</strong>Exists - 键存在,值可以为任意值</div></div>"
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "source": "${spec.jobTemplate.spec.template.spec.tolerations}",
+                        "columns": [
+                          {
+                            "name": "operator",
+                            "label": "操作符",
+                            "placeholder": "-",
+                            "type": "mapping",
+                            "map": {
+                              "Equal": "<span class='label label-success'>等于</span>",
+                              "Exists": "<span class='label label-success'>存在</span>"
+                            }
+                          },
+                          {
+                            "name": "key",
+                            "label": "键"
+                          },
+                          {
+                            "name": "value",
+                            "label": "值",
+                            "placeholder": "-"
+                          },
+                          {
+                            "name": "effect",
+                            "label": "效果",
+                            "type": "mapping",
+                            "map": {
+                              "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
+                              "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
+                              "NoExecute": "<span class='label label-danger'>不可执行</span>"
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
@@ -915,5 +984,3 @@
     }
   ]
 }
-
-
