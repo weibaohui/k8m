@@ -821,7 +821,8 @@
                                                     "type": "input-file",
                                                     "name": "file",
                                                     "accept": "*",
-                                                    "asBlob": true
+                                                    "asBlob": true,
+                                                    "drag": true
                                                   },
                                                   {
                                                     "type": "input-text",
