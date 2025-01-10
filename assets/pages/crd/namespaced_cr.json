@@ -118,7 +118,7 @@
                                 "kind": "${kind}",
                                 "group": "${group}",
                                 "version": "${version}",
-                                "id": "${id}"
+                                "field": "${id}"
                               }
                             }
                           ]
@@ -448,7 +448,7 @@
                                             "kind": "${kind}",
                                             "group": "${group}",
                                             "version": "${version}",
-                                            "id": "${id}"
+                                            "field": "${id}"
                                           }
                                         }
                                       ]
