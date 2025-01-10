@@ -99,6 +99,32 @@
                     "api": "post:/k8s/doc/detail",
                     "body": [
                       {
+                        "type": "button",
+                        "label": "${id}-属性用法举例",
+                        "level": "link",
+                        "icon": "fas fa-lightbulb text-warning",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "overlay": false,
+                          "closeOnEsc": true,
+                          "closeOnOutside": true,
+                          "size": "lg",
+                          "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                          "body": [
+                            {
+                              "type": "websocketMarkdownViewer",
+                              "url": "/k8s/chat/example/field",
+                              "params": {
+                                "kind": "${kind}",
+                                "group": "${group}",
+                                "version": "${version}",
+                                "id": "${id}"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
                         "type": "tpl",
                         "tpl": "属性：${id}[${type}]<br><br>描述：${description}</br><br>翻译：${translate?translate:''}",
                         "wrapperComponent": "",
@@ -368,6 +394,32 @@
                                 "api": "post:/k8s/doc/detail",
                                 "body": [
                                   {
+                                    "type": "button",
+                                    "label": "${id}-属性用法举例",
+                                    "level": "link",
+                                    "icon": "fas fa-lightbulb text-warning",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/k8s/chat/example/field",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "id": "${id}"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
                                     "type": "tpl",
                                     "tpl": "属性：${id}[${type}]<br><br>描述：${description}</br><br>翻译：${translate?translate:''}",
                                     "wrapperComponent": "",
@@ -496,6 +548,32 @@
                                     "type": "service",
                                     "api": "post:/k8s/doc/detail",
                                     "body": [
+                                      {
+                                        "type": "button",
+                                        "label": "${id}-属性用法举例",
+                                        "level": "link",
+                                        "icon": "fas fa-lightbulb text-warning",
+                                        "actionType": "drawer",
+                                        "drawer": {
+                                          "overlay": false,
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "size": "lg",
+                                          "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                          "body": [
+                                            {
+                                              "type": "websocketMarkdownViewer",
+                                              "url": "/k8s/chat/example/field",
+                                              "params": {
+                                                "kind": "${kind}",
+                                                "group": "${group}",
+                                                "version": "${version}",
+                                                "id": "${id}"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
                                       {
                                         "type": "tpl",
                                         "tpl": "属性：${id}[${type}]<br><br>描述：${description}</br><br>翻译：${translate?translate:''}",
