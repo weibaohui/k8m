@@ -100,7 +100,7 @@
                     "body": [
                       {
                         "type": "tpl",
-                        "tpl": "${id}[${type}]<br>${description}</br></br></br>${translate?translate:''}",
+                        "tpl": "属性：${id}[${type}]<br><br>描述：${description}</br><br>翻译：${translate?translate:''}",
                         "wrapperComponent": "",
                         "inline": false
                       }
@@ -404,7 +404,7 @@
                                 "body": [
                                   {
                                     "type": "tpl",
-                                    "tpl": "${id}[${type}]<br>${description}</br></br></br>${translate?translate:''}",
+                                    "tpl": "属性：${id}[${type}]<br><br>描述：${description}</br><br>翻译：${translate?translate:''}",
                                     "wrapperComponent": "",
                                     "inline": false
                                   }
@@ -533,7 +533,7 @@
                                     "body": [
                                       {
                                         "type": "tpl",
-                                        "tpl": "${id}[${type}]<br>${description}</br></br></br>${translate?translate:''}",
+                                        "tpl": "属性：${id}[${type}]<br><br>描述：${description}</br><br>翻译：${translate?translate:''}",
                                         "wrapperComponent": "",
                                         "inline": false
                                       }
