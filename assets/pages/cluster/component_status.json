@@ -320,7 +320,9 @@
                                         "componentId": "detail",
                                         "actionType": "reload",
                                         "data": {
-                                          "description": "${event.data.item.description}"
+                                          "description": "${event.data.item.description}",
+                                          "id": "${event.data.item.id}",
+                                          "type": "${event.data.item.type}"
                                         }
                                       }
                                     ]
