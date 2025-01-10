@@ -103,7 +103,7 @@
                     "body": [
                       {
                         "type": "tpl",
-                        "tpl": "${description}</br></br></br>${translate?translate:''}",
+                        "tpl": "${id}[${type}]<br>${description}</br></br></br>${translate?translate:''}",
                         "wrapperComponent": "",
                         "inline": false
                       }
@@ -351,7 +351,7 @@
                                 "body": [
                                   {
                                     "type": "tpl",
-                                    "tpl": "${description}</br></br></br>${translate?translate:''}",
+                                    "tpl": "${id}[${type}]<br>${description}</br></br></br>${translate?translate:''}",
                                     "wrapperComponent": "",
                                     "inline": false
                                   }
@@ -551,7 +551,7 @@
                                     "body": [
                                       {
                                         "type": "tpl",
-                                        "tpl": "${description}</br></br></br>${translate?translate:''}",
+                                        "tpl": "${id}[${type}]<br>${description}</br></br></br>${translate?translate:''}",
                                         "wrapperComponent": "",
                                         "inline": false
                                       }
