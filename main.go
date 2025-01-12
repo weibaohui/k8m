@@ -213,6 +213,7 @@ func main() {
 		api.GET("/pod/ns/:ns/name/:name/links/services", pod.LinksServices)
 		api.GET("/pod/ns/:ns/name/:name/links/endpoints", pod.LinksEndpoints)
 		api.GET("/pod/ns/:ns/name/:name/links/pvc", pod.LinksPVC)
+		api.GET("/pod/ns/:ns/name/:name/links/pv", pod.LinksPV)
 		api.GET("/pod/ns/:ns/name/:name/links/ingress", pod.LinksIngress)
 		api.GET("/pod/ns/:ns/name/:name/links/env", pod.LinksEnv)
 		api.GET("/pod/ns/:ns/name/:name/links/envFromPod", pod.LinksEnvFromPod)
