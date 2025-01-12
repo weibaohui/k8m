@@ -198,6 +198,7 @@ func main() {
 		api.GET("/chat/resource", chat.Resource)
 		api.GET("/chat/example", chat.Example)
 		api.GET("/chat/example/field", chat.FieldExample)
+		api.GET("/chat/ask", chat.Ask)
 
 		// pod 文件浏览上传下载
 		api.POST("/file/list", pod.FileList)
