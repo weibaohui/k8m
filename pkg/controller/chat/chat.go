@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
 	"github.com/weibaohui/k8m/pkg/service"
+	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
 
@@ -23,8 +24,10 @@ type ResourceData struct {
 	// 定时任务
 	Cron string `form:"cron"`
 	// 日志
-	Data  string `form:"data"`
-	Field string `form:"field"`
+	Data      string `form:"data"`
+	Field     string `form:"field"`
+	Name      string `form:"name"`
+	Namespace string `form:"namespace"`
 	// 事件
 	Note                string `form:"note"`
 	Source              string `form:"source"`
@@ -58,7 +61,41 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 	}
 	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
+func Ask(c *gin.Context) {
+	// 获取对应资源的描述信息，
+	// 融入用户问题，进行回答
 
+	var data ResourceData
+	err := c.ShouldBindQuery(&data)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var describe []byte
+	kom.Cluster(amis.GetSelectedCluster(c)).GVK(data.Group, data.Version, data.Kind).
+		Name(data.Name).
+		Namespace(data.Namespace).
+		Describe(&describe)
+
+	handleRequest(c, func(data interface{}) string {
+		d := data.(ResourceData)
+		return fmt.Sprintf(
+			`
+		我正在查看关于k8s %s %s %s 资源的Describe (kubectl describe )信息。
+		我有一个问题需要你回答:%s
+		请你作为kubernetes k8s 技术专家，结合Describe信息，对问题进行分析解答。
+		\n 1、请分析用户问题的核心本质，并解释问题点的相关关键信息。
+		\n 2、通过关键信息，推断可能得解决思路。
+		\n 3、结合Describe信息，以及解决思路，给出具体的解决方案。
+		\n注意：
+		\n0、使用中文进行回答。
+		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
+		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n\nDescribe信息如下:%s`,
+			d.Group, d.Kind, d.Version, d.Data, string(describe))
+	})
+}
 func Event(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
