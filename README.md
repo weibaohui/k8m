@@ -245,41 +245,41 @@ AI 问诊按钮，即可获得诊断报告。
 日常运维中，Pod 内命令操作不可避免。借助 AI，您只需输入需求描述，k8m 即可自动生成合适的命令供参考，减少查找时间，提高效率。  
 ![命令自动生成](images/AI-command-3.png)
 
-** v0.0.15重磅更新 **
+**v0.0.15更新**
 
 1. 所有页面增加资源使用指南。启用AI信息聚合。包括资源说明、使用场景（举例说明）、最佳实践、典型示例（配合前面的场景举例，编写带有中文注释的yaml示例）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等信息，帮助用户理解k8s
    ![输入图片说明](https://foruda.gitee.com/images/1735400167081694530/e45b55ef_77493.png "屏幕截图")
-1. 所有资源页面增加搜索功能。部分页面增高频过滤字段搜索。
+2. 所有资源页面增加搜索功能。部分页面增高频过滤字段搜索。
    ![输入图片说明](https://foruda.gitee.com/images/1735399974060039020/11bce030_77493.png "屏幕截图")
-1. 改进LimitRange信息展示模式
+3. 改进LimitRange信息展示模式
    ![LimitRange](https://foruda.gitee.com/images/1735399148267940416/b4faafbd_77493.png "屏幕截图")
-1. 改进状态显示样式
+4. 改进状态显示样式
    ![Deployment](https://foruda.gitee.com/images/1735399222088964660/131eda03_77493.png "屏幕截图")
-1. 统一操作菜单
+5. 统一操作菜单
    ![操作菜单](https://foruda.gitee.com/images/1735399278081665887/b01c506c_77493.png "屏幕截图")
-1. Ingress页面增加域名转发规则信息
+6. Ingress页面增加域名转发规则信息
    ![输入图片说明](https://foruda.gitee.com/images/1735399689648549556/3d4f8d78_77493.png "屏幕截图")
-1. 改进标签显示样式，鼠标悬停展示
+7. 改进标签显示样式，鼠标悬停展示
    ![输入图片说明](https://foruda.gitee.com/images/1735399387990917764/d06822cb_77493.png "屏幕截图")
-1. 优化资源状态样式更小更紧致
+8. 优化资源状态样式更小更紧致
    ![输入图片说明](https://foruda.gitee.com/images/1735399419170194492/268b25c8_77493.png "屏幕截图")
-1. 丰富Service展示信息
+9. 丰富Service展示信息
    ![输入图片说明](https://foruda.gitee.com/images/1735399493417833664/fa968343_77493.png "屏幕截图")
-1. 突出显示未就绪endpoints
-   ![输入图片说明](https://foruda.gitee.com/images/1735399531801079962/9a13cd50_77493.png "屏幕截图")
-1. endpoints鼠标悬停展开未就绪IP列表
-   ![输入图片说明](https://foruda.gitee.com/images/1735399560648695064/8079b5cf_77493.png "屏幕截图")
-1. endpointslice 突出显示未ready的IP及其对应的POD，
-   ![输入图片说明](https://foruda.gitee.com/images/1735399614582278222/c1f40aa0_77493.png "屏幕截图")
-1. 角色增加延展信息
-   ![输入图片说明](https://foruda.gitee.com/images/1735399896080683883/3e9a7359_77493.png "屏幕截图")
-1. 角色与主体对应关系
-   ![输入图片说明](https://foruda.gitee.com/images/1735399923738735980/c5730152_77493.png "屏幕截图")
-1. 界面全量中文化，k8s资源翻译为中文，方便广大用户使用。
-   ![输入图片说明](https://foruda.gitee.com/images/1735400283406692980/c778158c_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1735400313832429462/279018dc_77493.png "屏幕截图")
+10. 突出显示未就绪endpoints
+    ![输入图片说明](https://foruda.gitee.com/images/1735399531801079962/9a13cd50_77493.png "屏幕截图")
+11. endpoints鼠标悬停展开未就绪IP列表
+    ![输入图片说明](https://foruda.gitee.com/images/1735399560648695064/8079b5cf_77493.png "屏幕截图")
+12. endpointslice 突出显示未ready的IP及其对应的POD，
+    ![输入图片说明](https://foruda.gitee.com/images/1735399614582278222/c1f40aa0_77493.png "屏幕截图")
+13. 角色增加延展信息
+    ![输入图片说明](https://foruda.gitee.com/images/1735399896080683883/3e9a7359_77493.png "屏幕截图")
+14. 角色与主体对应关系
+    ![输入图片说明](https://foruda.gitee.com/images/1735399923738735980/c5730152_77493.png "屏幕截图")
+15. 界面全量中文化，k8s资源翻译为中文，方便广大用户使用。
+    ![输入图片说明](https://foruda.gitee.com/images/1735400283406692980/c778158c_77493.png "屏幕截图")
+    ![输入图片说明](https://foruda.gitee.com/images/1735400313832429462/279018dc_77493.png "屏幕截图")
 
-** v0.0.19重磅更新 **
+**v0.0.19更新**
 
 1. 多集群管理功能
    按需选择多集群，可随时切换集群
@@ -295,6 +295,34 @@ AI 问诊按钮，即可获得诊断报告。
 5. AI页面功能升级为打字机效果
    响应速度大大提升，实时输出AI返回内容，体验升级
    ![输入图片说明](https://foruda.gitee.com/images/1736037522633946187/71955026_77493.png "屏幕截图")
+
+**v0.0.21更新**
+
+1. 新增问AI功能：
+   有什么问题，都可以直接询问AI，让AI解答你的疑惑
+   ![输入图片说明](https://foruda.gitee.com/images/1736655942078335649/be66c2b5_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736655968296155521/d47d247e_77493.png "屏幕截图")
+2. 文档界面优化：
+   优化AI翻译效果，降低等待时间
+   ![AI文档](https://foruda.gitee.com/images/1736656055530922469/df155262_77493.png "屏幕截图")
+3. 文档字段级AI示例：
+   针对具体的字段，给出解释，给出使用Demo样例。
+   ![输入图片说明](https://foruda.gitee.com/images/1736656231132357556/b41109e6_77493.png "屏幕截图")
+4. 增加容忍度详情：
+   ![输入图片说明](https://foruda.gitee.com/images/1736656289098443083/ce1f5615_77493.png "屏幕截图")
+5. 增加Pod关联资源
+   一个页面，展示相关的svc、endpoint、pvc、env、cm、secret，甚至集成了pod内的env列表，方便查看
+   ![输入图片说明](https://foruda.gitee.com/images/1736656365325777082/410d24c5_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656376791203135/64cc4737_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656390371435096/5d93c74a_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656418411787086/2c8510af_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656445050779433/843f56aa_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656457940557219/c1372abd_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656468351816442/aba6f649_77493.png "屏幕截图")
+6. yaml创建增加导入功能：
+   增加导入功能，可以直接执行，也可导入到编辑器。导入编辑器后可以二次编辑后，再执行。
+   ![输入图片说明](https://foruda.gitee.com/images/1736656627742328659/6c4e745e_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656647758880134/ca92dcc2_77493.png "屏幕截图")
 
 ### HELP & SUPPORT
 
