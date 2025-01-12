@@ -73,13 +73,21 @@
                     "searchConfig": {
                       "sticky": true
                     },
-                    "selectFirst": true,
                     "heightAuto": true,
                     "inputClassName": "no-border no-padder mt-1",
                     "source": "get:/k8s/doc/kind/${kind}/group/${group}/version/${version}",
                     "onEvent": {
                       "change": {
                         "actions": [
+                          {
+                            "componentId": "basic",
+                            "actionType": "reload",
+                            "data": {
+                              "description": "${event.data.item.description}",
+                              "id": "${event.data.item.id}",
+                              "type": "${event.data.item.type}"
+                            }
+                          },
                           {
                             "componentId": "detail",
                             "actionType": "reload",
@@ -103,11 +111,16 @@
                 "body": [
                   {
                     "type": "service",
-                    "api": "post:/k8s/doc/detail",
+                    "id": "basic",
                     "body": [
                       {
+                        "type": "tpl",
+                        "tpl": "<br><strong>属性：</strong> ${id}",
+                        "visibleOn": "${id}"
+                      },
+                      {
                         "type": "button",
-                        "label": "${id}-属性用法举例",
+                        "label": "示例",
                         "level": "link",
                         "icon": "fas fa-lightbulb text-warning",
                         "actionType": "drawer",
@@ -129,16 +142,43 @@
                               }
                             }
                           ]
-                        }
+                        },
+                        "visibleOn": "${id}"
                       },
                       {
                         "type": "tpl",
-                        "tpl": "属性：${id}[${type}]<br><br>描述：${description}</br><br>翻译：${translate?translate:''}",
-                        "wrapperComponent": "",
-                        "inline": false
+                        "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                        "visibleOn": "${type}"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<br><strong>描述：</strong> ${description}",
+                        "visibleOn": "${description}"
                       }
-                    ],
-                    "id": "detail"
+                    ]
+                  },
+                  {
+                    "type": "service",
+                    "id": "detail",
+                    "api": "post:/k8s/doc/detail",
+                    "body": [
+                      {
+                        "type": "divider",
+                        "title": "描述翻译",
+                        "titlePosition": "center",
+                        "visibleOn": "${translate}"
+                      },
+                      {
+                        "type": "markdown",
+                        "value": "${translate|raw}",
+                        "options": {
+                          "linkify": true,
+                          "html": true,
+                          "breaks": true
+                        },
+                        "visibleOn": "${translate}"
+                      }
+                    ]
                   }
                 ]
               }
