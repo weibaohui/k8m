@@ -379,3 +379,21 @@ func LinksSecret(c *gin.Context) {
 	}
 	amis.WriteJsonList(c, secret)
 }
+
+func LinksNode(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	nodes, err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(linkCacheTTL).Ctl().Pod().LinkedNode()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonList(c, nodes)
+}
