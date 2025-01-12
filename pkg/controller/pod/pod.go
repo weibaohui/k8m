@@ -283,6 +283,24 @@ func LinksPVC(c *gin.Context) {
 	amis.WriteJsonList(c, pvc)
 }
 
+func LinksPV(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	pv, err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(linkCacheTTL).Ctl().Pod().LinkedPV()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonList(c, pv)
+}
+
 func LinksIngress(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
