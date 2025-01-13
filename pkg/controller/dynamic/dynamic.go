@@ -375,3 +375,85 @@ func parseNestedJSON(prefix string, data map[string]interface{}) []string {
 
 	return result
 }
+
+func UpdateLabels(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Labels map[string]string `json:"labels"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var obj *unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Name(name).Namespace(ns).
+		CRD(group, version, kind).
+		Get(&obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	obj.SetLabels(req.Labels)
+
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		Name(name).Namespace(ns).
+		CRD(group, version, kind).
+		Update(obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOK(c)
+}
+
+func UpdateAnnotations(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Annotations map[string]string `json:"annotations"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var obj *unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Name(name).Namespace(ns).
+		CRD(group, version, kind).
+		Get(&obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	obj.SetAnnotations(req.Annotations)
+
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		Name(name).Namespace(ns).
+		CRD(group, version, kind).
+		Update(obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOK(c)
+}
