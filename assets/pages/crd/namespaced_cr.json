@@ -259,19 +259,7 @@
           "footerBtnSize": "sm"
         },
         "bulkActions",
-        "reload",
-        {
-          "type": "pagination",
-          "align": "right"
-        },
-        {
-          "type": "statistics",
-          "align": "right"
-        },
-        {
-          "type": "switch-per-page",
-          "align": "right"
-        }
+        "reload"
       ],
       "loadDataOnce": false,
       "syncLocation": false,

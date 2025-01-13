@@ -260,25 +260,16 @@
         "showBtnToolbar": false
       },
       "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
         "bulkActions",
-        "reload",
-        {
-          "type": "tpl",
-          "tpl": "共${count}条",
-          "align": "right"
-        },
-        {
-          "type": "pagination",
-          "align": "right"
-        },
-        {
-          "type": "statistics",
-          "align": "right"
-        },
-        {
-          "type": "switch-per-page",
-          "align": "right"
-        }
+        "reload"
       ],
       "loadDataOnce": false,
       "syncLocation": false,
