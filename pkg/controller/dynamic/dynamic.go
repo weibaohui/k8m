@@ -427,7 +427,7 @@ func UpdateAnnotations(c *gin.Context) {
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
-		Annotations map[string]string `json:"annotations"`
+		Annotations map[string]interface{} `json:"annotations"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
@@ -450,6 +450,7 @@ func UpdateAnnotations(c *gin.Context) {
 		"pod.count.total",
 		"pod.count.used",
 		"pod.count.available",
+		"kubectl.kubernetes.io/last-applied-configuration",
 	}
 
 	// 判断下前台传来的annotations是否是immutableKeys中的key，如果是则不允许修改
@@ -458,9 +459,10 @@ func UpdateAnnotations(c *gin.Context) {
 
 	for k, v := range req.Annotations {
 		if !slice.Contain(immutableKeys, k) {
-			filteredAnnotations[k] = v
+			filteredAnnotations[k] = fmt.Sprintf("%s", v)
 		}
 	}
+
 	// 判断是否还有值，有值再更新
 	if len(filteredAnnotations) == 0 {
 		amis.WriteJsonOK(c)
@@ -476,6 +478,11 @@ func UpdateAnnotations(c *gin.Context) {
 		return
 	}
 
+	// 单独处理kubectl.kubernetes.io/last-applied-configuration
+	// 这个要用原来的覆盖
+	if obj.GetAnnotations()["kubectl.kubernetes.io/last-applied-configuration"] != "" {
+		filteredAnnotations["kubectl.kubernetes.io/last-applied-configuration"] = obj.GetAnnotations()["kubectl.kubernetes.io/last-applied-configuration"]
+	}
 	obj.SetAnnotations(filteredAnnotations)
 
 	err = kom.Cluster(selectedCluster).WithContext(ctx).
