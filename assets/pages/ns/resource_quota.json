@@ -933,6 +933,77 @@
           }
         },
         {
+          "name": "spec.scopeSelector",
+          "label": "生效范围",
+          "type": "tpl",
+          "tpl": "${spec.scopeSelector ? '<i class=\"fa fa-search text-info\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 范围选择器 生效条件 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "panel",
+                        "title": "说明",
+                        "body": {
+                          "type": "tpl",
+                          "tpl": "<ul><li><b>PriorityClass</b> - 优先级类：<span>限定某些优先级类的资源（如高优先级的 Pod）。</span></li><li><b>Terminating</b> - 终止中的资源：<span>限定正在终止状态的 Pod。</span></li><li><b>NotTerminating</b> - 非终止中的资源：<span>限定非终止状态的 Pod。</span></li><li><b>BestEffort</b> - 尽力而为的资源：<span>限定 QoS 等级为 BestEffort 的 Pod。</span></li><li><b>NotBestEffort</b> - 非尽力而为的资源：<span>限定 QoS 等级不为 BestEffort 的 Pod。</span></li><li><b>CrossNamespacePodAffinity</b> - 跨命名空间亲和性资源：<span>限定具有跨命名空间亲和性的资源。</span></li></ul>"
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "source": "${spec.scopeSelector.matchExpressions}",
+                        "columns": [
+                          {
+                            "name": "scopeName",
+                            "label": "名称",
+                            "type": "mapping",
+                            "map": {
+                              "NotTerminating": "<span class='label label-warning'>非终止</span>",
+                              "Terminating": "<span class='label label-danger'>终止</span>",
+                              "BestEffort": "<span class='label label-info'>尽力而为</span>",
+                              "NotBestEffort": "<span class='label label-warning'>非尽力而为</span>",
+                              "PriorityClass": "<span class='label label-success'>优先级类</span>",
+                              "CrossNamespacePodAffinity": "<span class='label label-info'>跨命名空间亲和性</span>",
+                              "*": "<span class='label label-default'>${spec.scopes}</span>"
+                            }
+                          },
+                          {
+                            "name": "operator",
+                            "label": "操作符",
+                            "placeholder": "-",
+                            "type": "mapping",
+                            "map": {
+                              "In": "<span class='label label-success'>包含</span>",
+                              "NotIn": "<span class='label label-warning'>不包含</span>",
+                              "Exists": "<span class='label label-primary'>存在</span>",
+                              "DoesNotExist": "<span class='label label-danger'>不存在</span>"
+                            }
+                          },
+                          {
+                            "name": "values",
+                            "label": "值",
+                            "placeholder": "-"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
