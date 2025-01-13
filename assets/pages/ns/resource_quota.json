@@ -896,7 +896,7 @@
           "name": "spec.hard",
           "label": "规则",
           "type": "tpl",
-          "tpl": "<span class='text-blue-500 font-black cursor-pointer' onClick='showDialog()'><%= Object.keys(data.spec.hard).length %></span>",
+          "tpl": "<span class='text-blue-500 font-black cursor-pointer' onClick='showDialog()'><%= Object.keys(data.spec?.hard|| {}).length %></span>",
           "onEvent": {
             "click": {
               "actions": [
@@ -916,6 +916,20 @@
                 }
               ]
             }
+          }
+        },
+        {
+          "name": "spec.scopes",
+          "label": "配额范围",
+          "type": "mapping",
+          "map": {
+            "NotTerminating": "<span class='label label-warning'>非终止</span>",
+            "Terminating": "<span class='label label-danger'>终止</span>",
+            "BestEffort": "<span class='label label-info'>尽力而为</span>",
+            "NotBestEffort": "<span class='label label-warning'>非尽力而为</span>",
+            "PriorityClass": "<span class='label label-success'>优先级类</span>",
+            "CrossNamespacePodAffinity": "<span class='label label-info'>跨命名空间亲和性</span>",
+            "*": "<span class='label label-default'>${spec.scopes}</span>"
           }
         },
         {
