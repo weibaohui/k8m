@@ -1025,11 +1025,56 @@
                   "actionType": "dialog",
                   "dialog": {
                     "title": "${metadata.name} annotations (ESC 关闭)",
-                    "body": {
-                      "type": "json",
-                      "source": "${metadata.annotations}",
-                      "levelExpand": 1
-                    },
+                    "name": "dialog_annotations",
+                    "body": [
+                      {
+                        "type": "json",
+                        "source": "${metadata.annotations}",
+                        "levelExpand": 1
+                      },
+                      {
+                        "label": "编辑",
+                        "type": "button",
+                        "icon": "fas fa-edit text-primary",
+                        "actionType": "dialog",
+                        "dialog": {
+                          "closeOnEsc": true,
+                          "closeOnOutside": true,
+                          "title": "编辑注解  (ESC关闭)",
+                          "size": "lg",
+                          "body": [
+                            {
+                              "type": "form",
+                              "mode": "horizontal",
+                              "labelWidth": 0,
+                              "api": "post:/k8s/$kind/group/$group/version/$version/update_annotations/ns/$metadata.namespace/name/$metadata.name",
+                              "body": [
+                                {
+                                  "type": "input-kv",
+                                  "name": "annotations",
+                                  "draggable": false,
+                                  "value": "${metadata.annotations}"
+                                }
+                              ]
+                            }
+                          ],
+                          "actions": [
+                            {
+                              "type": "button",
+                              "label": "取消",
+                              "close": "dialog_annotations"
+                            },
+                            {
+                              "label": "确认",
+                              "actionType": "submit",
+                              "primary": true,
+                              "type": "button",
+                              "close": "dialog_annotations"
+                            }
+                          ]
+                        }
+                      }
+                    ],
                     "size": "lg",
                     "closeOnEsc": true,
                     "closeOnOutside": true
