@@ -881,6 +881,21 @@
           }
         },
         {
+          "name": "spec.leaseDurationSeconds",
+          "label": "持续秒数",
+          "type": "text"
+        },
+        {
+          "name": "spec.leaseTransitions",
+          "label": "转换次数",
+          "type": "text"
+        },
+        {
+          "name": "spec.strategy",
+          "label": "策略",
+          "type": "text"
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
