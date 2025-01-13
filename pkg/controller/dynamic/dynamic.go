@@ -433,7 +433,39 @@ func UpdateAnnotations(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	var immutableKeys = []string{
+		"cpu.request",
+		"cpu.requestFraction",
+		"cpu.limit",
+		"cpu.limitFraction",
+		"cpu.total",
+		"memory.request",
+		"memory.requestFraction",
+		"memory.limit",
+		"memory.limitFraction",
+		"memory.total",
+		"ip.usage.total",
+		"ip.usage.used",
+		"ip.usage.available",
+		"pod.count.total",
+		"pod.count.used",
+		"pod.count.available",
+	}
 
+	// 判断下前台传来的annotations是否是immutableKeys中的key，如果是则不允许修改
+	// 创建一个新的map，用于存储过滤后的annotations
+	filteredAnnotations := make(map[string]string)
+
+	for k, v := range req.Annotations {
+		if !slice.Contain(immutableKeys, k) {
+			filteredAnnotations[k] = v
+		}
+	}
+	// 判断是否还有值，有值再更新
+	if len(filteredAnnotations) == 0 {
+		amis.WriteJsonOK(c)
+		return
+	}
 	var obj *unstructured.Unstructured
 	err := kom.Cluster(selectedCluster).WithContext(ctx).
 		Name(name).Namespace(ns).
@@ -444,7 +476,7 @@ func UpdateAnnotations(c *gin.Context) {
 		return
 	}
 
-	obj.SetAnnotations(req.Annotations)
+	obj.SetAnnotations(filteredAnnotations)
 
 	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Name(name).Namespace(ns).
