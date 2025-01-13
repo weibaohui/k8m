@@ -831,8 +831,8 @@
           "label": "抢占策略",
           "type": "mapping",
           "map": {
-            "Never": "<span class='label label-success'>Never</span>",
-            "PreemptLowerPriority": "<span class='label label-danger'>PreemptLowerPriority</span>"
+            "Never": "<span class='label label-success'>不抢占</span>",
+            "PreemptLowerPriority": "<span class='label label-danger'>抢占</span>"
           }
         },
         {
