@@ -433,6 +433,9 @@ func UpdateAnnotations(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	// 部分key为k8m增加的指标数据，不是资源自身的注解，因此过滤掉。
+	// last-applied-configuration是k8s管理的，不允许修改。
 	var immutableKeys = []string{
 		"cpu.request",
 		"cpu.requestFraction",
