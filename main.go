@@ -137,7 +137,10 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", dynamic.Describe) // CRD
 		api.POST("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                    // CRD
 		api.POST("/:kind/group/:group/version/:version/list/ns/", dynamic.List)                       // CRD
-		api.POST("/:kind/group/:group/version/:version/list", dynamic.List)                           // CRD
+		api.POST("/:kind/group/:group/version/:version/list", dynamic.List)
+		api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", dynamic.UpdateLabels)           // CRD
+		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
+
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
 		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
