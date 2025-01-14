@@ -1412,6 +1412,12 @@
           "items": {
             "type": "tpl",
             "tpl": "${type}:${address}<br>"
+          },
+          "searchable": {
+            "type": "input-text",
+            "name": "status.addresses.address",
+            "label": "IP",
+            "placeholder": "输入IP"
           }
         },
         {
