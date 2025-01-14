@@ -994,7 +994,7 @@
                 {
                   "type": "button",
                   "icon": "fas  fa-terminal text-primary",
-                  "label": "执行命令",
+                  "label": "进入容器",
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnOutside": true,
