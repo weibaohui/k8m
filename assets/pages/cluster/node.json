@@ -1041,6 +1041,21 @@
           "tpl": "${status.capacity.cpu}C/${status.capacity.memory|autoConvertMemory}"
         },
         {
+          "name": "status.addresses",
+          "label": "IP",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "${type}:${address}<br>"
+          },
+          "searchable": {
+            "type": "input-text",
+            "name": "status.addresses.address",
+            "label": "IP",
+            "placeholder": "输入IP"
+          }
+        },
+        {
           "name": "resource",
           "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
           "type": "container",
@@ -1125,13 +1140,14 @@
             {
               "name": "metadata.annotations['ip.usage.total']",
               "label": "IP资源",
+              "visibleOn": "${metadata.annotations['ip.usage.total']}",
               "type": "tpl",
               "tpl": "${metadata.annotations['ip.usage.used']}/${metadata.annotations['ip.usage.available']}/${metadata.annotations['ip.usage.total']}"
             },
             {
               "type": "progress",
               "label": "IP Usage Progress",
-              "value": "<%= Math.round((data.metadata.annotations['ip.usage.used'] / data.metadata.annotations['ip.usage.total']) * 100) %>",
+              "value": "<%= (data.metadata.annotations['ip.usage.used'] / data.metadata.annotations['ip.usage.total'] * 100).toFixed(2) %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -1153,14 +1169,15 @@
           "body": [
             {
               "name": "metadata.annotations['pod.count.total']",
-              "label": "IP资源",
+              "label": "Pod数量",
+              "visibleOn": "${metadata.annotations['pod.count.total']}",
               "type": "tpl",
               "tpl": "${metadata.annotations['pod.count.used']}/${metadata.annotations['pod.count.available']}/${metadata.annotations['pod.count.total']}"
             },
             {
               "type": "progress",
               "label": "Pod Count Progress",
-              "value": "<%= Math.round((data.metadata.annotations['pod.count.used'] / data.metadata.annotations['pod.count.total']) * 100) %>",
+              "value": "<%= (data.metadata.annotations['pod.count.used'] / data.metadata.annotations['pod.count.total'] * 100).toFixed(2) %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -1410,21 +1427,6 @@
           "label": "操作系统",
           "width": "200px",
           "type": "text"
-        },
-        {
-          "name": "status.addresses",
-          "label": "IP",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "${type}:${address}<br>"
-          },
-          "searchable": {
-            "type": "input-text",
-            "name": "status.addresses.address",
-            "label": "IP",
-            "placeholder": "输入IP"
-          }
         },
         {
           "name": "status.images",
