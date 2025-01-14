@@ -1374,7 +1374,7 @@
         {
           "type": "progress",
           "mode": "line",
-          "value": "${(status.numberReady / status.desiredNumberScheduled) * 100}",
+          "value": "<%= (data.status.numberReady / data.status.desiredNumberScheduled * 100).toFixed(2) %>",
           "striped": true,
           "label": "当前状态",
           "animate": true,
