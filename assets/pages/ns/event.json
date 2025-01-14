@@ -280,6 +280,12 @@
           "overlay": true,
           "footerBtnSize": "sm"
         },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
         "bulkActions",
         "reload"
       ],
