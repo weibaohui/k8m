@@ -64,8 +64,15 @@ func (c *clusterService) GetClusterByID(selectedCluster string) *ClusterConfig {
 	if selectedCluster == "" {
 		return nil
 	}
+	if selectedCluster == "InCluster" {
+		// InCluster 并没有使用ClusterConfig
+		return nil
+	}
 	// 解析selectedCluster
 	clusterID := strings.Split(selectedCluster, "/")
+	if len(clusterID) != 2 {
+		return nil
+	}
 	fileName := clusterID[0]
 	contextName := clusterID[1]
 	for _, clusterConfig := range c.clusterConfigs {
