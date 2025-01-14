@@ -286,6 +286,10 @@
           "align": "right",
           "visibleOn": "${count}"
         },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
         "bulkActions",
         "reload"
       ],
