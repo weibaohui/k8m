@@ -204,43 +204,54 @@
               }
             ]
           }
-        }
-      ]
-    },
-    {
-      "type": "form",
-      "mode": "horizontal",
-      "wrapWithPanel": false,
-      "body": [
+        },
         {
+          "type": "wrapper",
           "style": {
-            "width": 500,
-            "margin": 5
+            "display": "inline-flex"
           },
-          "label": "命名空间",
-          "type": "select",
-          "name": "ns",
-          "id": "ns",
-          "searchable": true,
-          "source": "/k8s/ns/option_list",
-          "value": "${ls:selectedNs||'default'}",
-          "onEvent": {
-            "change": {
-              "actions": [
+          "body": [
+            {
+              "type": "form",
+              "mode": "horizontal",
+              "style": {
+                "display": "inline-flex"
+              },
+              "wrapWithPanel": false,
+              "body": [
                 {
-                  "actionType": "reload",
-                  "componentId": "detailCRUD",
-                  "data": {
-                    "ns": "${ns}"
+                  "style": {
+                    "width": 400,
+                    "margin": 5
+                  },
+                  "label": "命名空间",
+                  "type": "select",
+                  "name": "ns",
+                  "id": "ns",
+                  "searchable": true,
+                  "source": "/k8s/ns/option_list",
+                  "value": "${ls:selectedNs||'default'}",
+                  "onEvent": {
+                    "change": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD",
+                          "data": {
+                            "ns": "${ns}"
+                          }
+                        },
+                        {
+                          "actionType": "custom",
+                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                        }
+                      ]
+                    }
                   }
-                },
-                {
-                  "actionType": "custom",
-                  "script": "localStorage.setItem('selectedNs', event.data.ns)"
                 }
               ]
             }
-          }
+          ]
         }
       ]
     },
