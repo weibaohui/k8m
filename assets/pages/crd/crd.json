@@ -839,8 +839,24 @@
         {
           "name": "spec.scope",
           "label": "作用域",
-          "type": "text",
-          "copyable": true
+          "type": "mapping",
+          "map": {
+            "Cluster": "<span class='label label-success'>集群</span>",
+            "Namespaced": "<span class='label label-primary'>命名空间</span>"
+          },
+          "searchable": {
+            "type": "select",
+            "options": [
+              {
+                "label": "集群",
+                "value": "Cluster"
+              },
+              {
+                "label": "命名空间",
+                "value": "Namespaced"
+              }
+            ]
+          }
         },
         {
           "name": "spec.group",
