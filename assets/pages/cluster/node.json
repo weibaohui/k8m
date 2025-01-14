@@ -1036,7 +1036,8 @@
         {
           "name": "roles",
           "label": "节点角色",
-          "type": "nodeRoles"
+          "type": "nodeRoles",
+          "width": "150px"
         },
         {
           "name": "status",
