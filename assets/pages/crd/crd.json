@@ -829,12 +829,14 @@
         {
           "name": "spec.scope",
           "label": "作用域",
-          "type": "text"
+          "type": "text",
+          "copyable": true
         },
         {
           "name": "spec.group",
           "label": "组(group)",
           "type": "text",
+          "copyable": true,
           "searchable": {
             "type": "input-text",
             "name": "spec.group",
