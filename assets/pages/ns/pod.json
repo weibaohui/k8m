@@ -267,7 +267,7 @@
       "name": "detailCRUD",
       "autoFillHeight": true,
       "autoGenerateFilter": {
-        "columnsNum": 3,
+        "columnsNum": 4,
         "showBtnToolbar": false
       },
       "headerToolbar": [
@@ -1877,7 +1877,7 @@
                           "body": {
                             "type": "crud",
                             "autoGenerateFilter": {
-                              "columnsNum": 3,
+                              "columnsNum": 4,
                               "showBtnToolbar": false
                             },
                             "headerToolbar": [
@@ -1933,7 +1933,7 @@
                           "body": {
                             "type": "crud",
                             "autoGenerateFilter": {
-                              "columnsNum": 3,
+                              "columnsNum": 4,
                               "showBtnToolbar": false
                             },
                             "headerToolbar": [
