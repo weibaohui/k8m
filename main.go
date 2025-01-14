@@ -91,7 +91,11 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(middleware.CustomRecovery())
+	cfg := flag.Init()
+	if !cfg.Debug {
+		// debug 模式可以崩溃
+		r.Use(middleware.CustomRecovery())
+	}
 	r.Use(cors.Default())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
