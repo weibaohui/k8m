@@ -179,6 +179,7 @@ func main() {
 		api.POST("/statefulset/rollout/undo/ns/:ns/name/:name/revision/:revision", sts.Undo)
 		api.GET("/statefulset/rollout/history/ns/:ns/name/:name", sts.History)
 		api.POST("/statefulset/restart/ns/:ns/name/:name", sts.Restart)
+		api.POST("/statefulset/batch/restart", sts.BatchRestart)
 		api.POST("/statefulset/scale/ns/:ns/name/:name/replica/:replica", sts.Scale)
 
 		// k8s ds
