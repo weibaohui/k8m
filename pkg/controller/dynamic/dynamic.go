@@ -26,6 +26,13 @@ func List(c *gin.Context) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
+	nsList := []string{}
+	if strings.Contains(ns, ",") {
+		nsList = strings.Split(ns, ",")
+	} else {
+		nsList = []string{ns}
+	}
+
 	// 用于存储 JSON 数据的 map
 	var jsonData map[string]interface{}
 	if err := c.ShouldBindJSON(&jsonData); err != nil {
@@ -37,7 +44,7 @@ func List(c *gin.Context) {
 	var list []unstructured.Unstructured
 	sql := kom.Cluster(selectedCluster).WithContext(ctx).
 		RemoveManagedFields().
-		Namespace(ns).
+		Namespace(nsList...).
 		GVK(group, version, kind)
 
 	// 处理查询条件
