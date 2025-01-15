@@ -31,6 +31,33 @@ func Restart(c *gin.Context) {
 		Ctl().Rollout().Restart()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+func BatchRestart(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Names      []string `json:"name_list"`
+		Namespaces []string `json:"ns_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		ns := req.Namespaces[i]
+		err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
+			Ctl().Rollout().Restart()
+
+	}
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
 func History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
