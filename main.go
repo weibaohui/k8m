@@ -154,6 +154,8 @@ func main() {
 		// k8s deploy
 		api.POST("/deploy/restart/ns/:ns/name/:name", deploy.Restart)
 		api.POST("/deploy/batch/restart", deploy.BatchRestart)
+		api.POST("/deploy/batch/stop", deploy.BatchStop)
+		api.POST("/deploy/batch/restore", deploy.BatchRestore)
 		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
 		api.POST("/deploy/rollout/undo/ns/:ns/name/:name/revision/:revision", deploy.Undo)
 		api.GET("/deploy/rollout/history/ns/:ns/name/:name", deploy.History)
@@ -180,6 +182,8 @@ func main() {
 		api.GET("/statefulset/rollout/history/ns/:ns/name/:name", sts.History)
 		api.POST("/statefulset/restart/ns/:ns/name/:name", sts.Restart)
 		api.POST("/statefulset/batch/restart", sts.BatchRestart)
+		api.POST("/statefulset/batch/stop", sts.BatchStop)
+		api.POST("/statefulset/batch/restore", sts.BatchRestore)
 		api.POST("/statefulset/scale/ns/:ns/name/:name/replica/:replica", sts.Scale)
 
 		// k8s ds
@@ -190,6 +194,9 @@ func main() {
 
 		// k8s rs
 		api.POST("/replicaset/restart/ns/:ns/name/:name", rs.Restart)
+		api.POST("/replicaset/batch/restart", rs.BatchRestart)
+		api.POST("/replicaset/batch/stop", rs.BatchStop)
+		api.POST("/replicaset/batch/restore", rs.BatchRestore)
 		// k8s configmap
 		api.POST("/configmap/ns/:ns/name/:name/import", cm.Import)
 
