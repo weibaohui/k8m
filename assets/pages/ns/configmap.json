@@ -304,10 +304,11 @@
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
           "api": {
-            "url": "/k8s/$kind/group/$group/version/$version/remove/ns/${ns}/names",
+            "url": "/k8s/$kind/group/$group/version/$version/batch/remove",
             "method": "post",
             "data": {
-              "names": "${selectedItems | pick:metadata.name }"
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
             }
           }
         },
