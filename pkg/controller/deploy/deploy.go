@@ -48,10 +48,13 @@ func BatchRestart(c *gin.Context) {
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
-		err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
+		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 			Ctl().Rollout().Restart()
-
+		if x != nil {
+			err = x
+		}
 	}
+
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
