@@ -308,6 +308,19 @@
               "names": "${selectedItems | pick:metadata.name }"
             }
           }
+        },
+        {
+          "label": "强制删除",
+          "actionType": "ajax",
+          "level": "danger",
+          "confirmText": "确定要批量强制删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/version/$version/force_remove/ns/${ns}/names",
+            "method": "post",
+            "data": {
+              "names": "${selectedItems | pick:metadata.name }"
+            }
+          }
         }
       ],
       "api": "post:/k8s/$kind/group/$group/version/$version/list/ns/${ns}?sort_by=$sort_by",
