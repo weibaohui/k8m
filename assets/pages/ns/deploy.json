@@ -323,6 +323,20 @@
               "names": "${selectedItems | pick:metadata.name }"
             }
           }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "重启",
+          "confirmText": "确定要批量重启?",
+          "api": {
+            "url": "/k8s/deploy/batch/restart",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
         }
       ],
       "footerToolbar": [
