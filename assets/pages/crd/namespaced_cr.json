@@ -226,6 +226,8 @@
                   },
                   "label": "命名空间",
                   "type": "select",
+                  "multiple": true,
+                  "maxTagCount": 1,
                   "name": "ns",
                   "id": "ns",
                   "searchable": true,
