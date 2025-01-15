@@ -133,15 +133,15 @@ func main() {
 		api.POST("/yaml/upload", dynamic.UploadFile)
 		api.POST("/yaml/delete", dynamic.Delete)
 		// CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)                     // CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", dynamic.Event)               // CRD
-		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove)            // CRD
-		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/names", dynamic.BatchRemove)            // CRD
-		api.POST("/:kind/group/:group/version/:version/force_remove/ns/:ns/names", dynamic.BatchForceRemove) // CRD
-		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)              // CRD
-		api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", dynamic.Describe)        // CRD
-		api.POST("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                           // CRD
-		api.POST("/:kind/group/:group/version/:version/list/ns/", dynamic.List)                              // CRD
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)              // CRD
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", dynamic.Event)        // CRD
+		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove)     // CRD
+		api.POST("/:kind/group/:group/version/:version/remove", dynamic.BatchRemove)                  // CRD
+		api.POST("/:kind/group/:group/version/:version/force_remove", dynamic.BatchForceRemove)       // CRD
+		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)       // CRD
+		api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", dynamic.Describe) // CRD
+		api.POST("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                    // CRD
+		api.POST("/:kind/group/:group/version/:version/list/ns/", dynamic.List)                       // CRD
 		api.POST("/:kind/group/:group/version/:version/list", dynamic.List)
 		api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", dynamic.UpdateLabels)           // CRD
 		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
