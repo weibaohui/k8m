@@ -153,6 +153,7 @@ func main() {
 		api.GET("/pod/wsexec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.WsExec)
 		// k8s deploy
 		api.POST("/deploy/restart/ns/:ns/name/:name", deploy.Restart)
+		api.POST("/deploy/batch/restart", deploy.BatchRestart)
 		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
 		api.POST("/deploy/rollout/undo/ns/:ns/name/:name/revision/:revision", deploy.Undo)
 		api.GET("/deploy/rollout/history/ns/:ns/name/:name", deploy.History)
