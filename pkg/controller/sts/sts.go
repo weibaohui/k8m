@@ -6,6 +6,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
+	"k8s.io/klog/v2"
 )
 
 func History(c *gin.Context) {
@@ -54,6 +55,7 @@ func BatchRestart(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
 			Ctl().Rollout().Restart()
 		if x != nil {
+			klog.V(6).Infof("batch restart sts error %s/%s %v", ns, name, x)
 			err = x
 		}
 	}

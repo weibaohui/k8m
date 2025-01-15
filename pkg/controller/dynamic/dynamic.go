@@ -221,6 +221,7 @@ func BatchRemove(c *gin.Context) {
 		ns := req.Namespaces[i]
 		x := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
 		if x != nil {
+			klog.V(6).Infof("batch remove %s error %s/%s %v", kind, ns, name, x)
 			err = x
 		}
 	}
@@ -253,6 +254,7 @@ func BatchForceRemove(c *gin.Context) {
 		ns := req.Namespaces[i]
 		x := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, true)
 		if x != nil {
+			klog.V(6).Infof("batch force remove %s error %s/%s %v", kind, ns, name, x)
 			err = x
 		}
 	}
