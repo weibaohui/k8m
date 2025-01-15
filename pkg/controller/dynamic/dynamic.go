@@ -173,7 +173,7 @@ func Remove(c *gin.Context) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	err := removeSingle(ctx, selectedCluster, kind, group, version, ns, name)
+	err := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -181,7 +181,10 @@ func Remove(c *gin.Context) {
 	amis.WriteJsonOK(c)
 
 }
-func removeSingle(ctx context.Context, selectedCluster, kind, group, version, ns, name string) error {
+func removeSingle(ctx context.Context, selectedCluster, kind, group, version, ns, name string, force bool) error {
+	if force {
+		return kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).ForceDelete().Error
+	}
 	return kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Delete().Error
 }
 
@@ -208,7 +211,29 @@ func BatchRemove(c *gin.Context) {
 	}
 
 	for _, name := range payload.Names {
-		_ = removeSingle(ctx, selectedCluster, kind, group, version, ns, name)
+		_ = removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
+	}
+	amis.WriteJsonOK(c)
+}
+func BatchForceRemove(c *gin.Context) {
+	ns := c.Param("ns")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	// 初始化结构体实例
+	var payload NamesPayload
+
+	// 反序列化 JSON 数据到结构体
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	for _, name := range payload.Names {
+		_ = removeSingle(ctx, selectedCluster, kind, group, version, ns, name, true)
 	}
 	amis.WriteJsonOK(c)
 }
