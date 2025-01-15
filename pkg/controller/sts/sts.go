@@ -67,6 +67,71 @@ func BatchRestart(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+func BatchStop(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Names      []string `json:"name_list"`
+		Namespaces []string `json:"ns_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		ns := req.Namespaces[i]
+
+		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
+			Ctl().Scaler().Stop()
+		if x != nil {
+			klog.V(6).Infof("batch stop sts error %s/%s %v", ns, name, x)
+			err = x
+		}
+	}
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+func BatchRestore(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Names      []string `json:"name_list"`
+		Namespaces []string `json:"ns_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		ns := req.Namespaces[i]
+
+		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
+			Ctl().Scaler().Restore()
+		if x != nil {
+			klog.V(6).Infof("batch restore sts error %s/%s %v", ns, name, x)
+			err = x
+		}
+	}
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
 func Scale(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
