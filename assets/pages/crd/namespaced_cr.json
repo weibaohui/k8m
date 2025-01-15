@@ -311,10 +311,11 @@
           "level": "danger",
           "confirmText": "确定要批量强制删除?",
           "api": {
-            "url": "/k8s/$kind/group/$group/version/$version/force_remove/ns/${ns}/names",
+            "url": "/k8s/$kind/group/$group/version/$version/force_remove",
             "method": "post",
             "data": {
-              "names": "${selectedItems | pick:metadata.name }"
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
             }
           }
         }
