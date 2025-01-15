@@ -186,6 +186,7 @@ func main() {
 		api.POST("/daemonset/rollout/undo/ns/:ns/name/:name/revision/:revision", ds.Undo)
 		api.GET("/daemonset/rollout/history/ns/:ns/name/:name", ds.History)
 		api.POST("/daemonset/restart/ns/:ns/name/:name", ds.Restart)
+		api.POST("/daemonset/batch/restart", ds.BatchRestart)
 
 		// k8s rs
 		api.POST("/replicaset/restart/ns/:ns/name/:name", rs.Restart)
