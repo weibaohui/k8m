@@ -201,47 +201,67 @@ type NamesPayload struct {
 }
 
 func BatchRemove(c *gin.Context) {
-	ns := c.Param("ns")
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	// 初始化结构体实例
-	var payload NamesPayload
+	var req struct {
+		Names      []string `json:"name_list"`
+		Namespaces []string `json:"ns_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		ns := req.Namespaces[i]
+		x := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
+		if x != nil {
+			err = x
+		}
+	}
 
-	// 反序列化 JSON 数据到结构体
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	for _, name := range payload.Names {
-		_ = removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
-	}
 	amis.WriteJsonOK(c)
 }
 func BatchForceRemove(c *gin.Context) {
-	ns := c.Param("ns")
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	// 初始化结构体实例
-	var payload NamesPayload
+	var req struct {
+		Names      []string `json:"name_list"`
+		Namespaces []string `json:"ns_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		ns := req.Namespaces[i]
+		x := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, true)
+		if x != nil {
+			err = x
+		}
+	}
 
-	// 反序列化 JSON 数据到结构体
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	for _, name := range payload.Names {
-		_ = removeSingle(ctx, selectedCluster, kind, group, version, ns, name, true)
-	}
 	amis.WriteJsonOK(c)
 }
 
