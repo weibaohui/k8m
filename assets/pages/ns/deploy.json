@@ -315,7 +315,6 @@
         {
           "label": "强制删除",
           "actionType": "ajax",
-          "level": "danger",
           "confirmText": "确定要批量强制删除?",
           "api": {
             "url": "/k8s/$kind/group/$group/version/$version/force_remove",
@@ -333,6 +332,34 @@
           "confirmText": "确定要批量重启?",
           "api": {
             "url": "/k8s/deploy/batch/restart",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "停止",
+          "confirmText": "确定要批量停止?",
+          "api": {
+            "url": "/k8s/deploy/batch/stop",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "恢复",
+          "confirmText": "确定要批量恢复?",
+          "api": {
+            "url": "/k8s/deploy/batch/restore",
             "method": "post",
             "data": {
               "name_list": "${selectedItems | pick:metadata.name }",
