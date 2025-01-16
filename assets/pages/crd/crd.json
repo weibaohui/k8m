@@ -620,7 +620,9 @@
           "copyable": true,
           "searchable": {
             "type": "select",
+            "name": "spec.group",
             "searchable": true,
+            "clearable": true,
             "source": "/k8s/crd/group/option_list"
           }
         },
@@ -629,10 +631,10 @@
           "label": "资源类型(kind)",
           "type": "text",
           "searchable": {
-            "type": "input-text",
-            "name": "spec.names.kind",
-            "label": "类型",
-            "placeholder": "输入Kind类型名称"
+            "type": "select",
+            "searchable": true,
+            "clearable": true,
+            "source": "/k8s/crd/kind/option_list?spec.group=${spec.group}"
           }
         },
         {

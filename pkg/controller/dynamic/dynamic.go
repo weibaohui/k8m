@@ -593,3 +593,51 @@ func GroupOptionList(c *gin.Context) {
 		"options": options,
 	})
 }
+
+func KindOptionList(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+	g := c.Query("spec[group]")
+	if g == "" {
+		// 还没选group
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
+	klog.V(2).Infof("spec[group]=%s", g)
+	var list []unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).GVK(
+		"apiextensions.k8s.io",
+		"v1",
+		"CustomResourceDefinition").
+		Where("`spec.group`=?", g).
+		WithCache(time.Second * 30).
+		List(&list).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var kinds []string
+	for _, item := range list {
+		kind, found, err := unstructured.NestedString(item.Object, "spec", "names", "kind")
+		if err != nil || !found {
+			continue
+		}
+
+		kinds = append(kinds, kind)
+	}
+	kinds = slice.Unique(kinds)
+	var options []map[string]string
+	for _, n := range kinds {
+		options = append(options, map[string]string{
+			"label": n,
+			"value": n,
+		})
+	}
+
+	amis.WriteJsonData(c, gin.H{
+		"options": options,
+	})
+}
