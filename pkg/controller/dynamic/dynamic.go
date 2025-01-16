@@ -423,7 +423,7 @@ func parseNestedJSON(prefix string, data map[string]interface{}) []string {
 				continue
 			}
 
-			result = append(result, fmt.Sprintf("'%s' like '%%%v%%'", currentKey, v))
+			result = append(result, fmt.Sprintf("`%s` like '%%%v%%'", currentKey, v))
 		}
 	}
 
