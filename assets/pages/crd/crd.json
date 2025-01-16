@@ -849,17 +849,6 @@
           "toggled": true
         },
         {
-          "name": "spec.names.kind",
-          "label": "资源类型(kind)",
-          "type": "text",
-          "searchable": {
-            "type": "input-text",
-            "name": "spec.names.kind",
-            "label": "类型",
-            "placeholder": "输入Kind类型名称"
-          }
-        },
-        {
           "name": "spec.scope",
           "label": "作用域",
           "type": "mapping",
@@ -894,12 +883,14 @@
           }
         },
         {
-          "name": "spec.versions",
-          "label": "版本",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong></div>"
+          "name": "spec.names.kind",
+          "label": "资源类型(kind)",
+          "type": "text",
+          "searchable": {
+            "type": "input-text",
+            "name": "spec.names.kind",
+            "label": "类型",
+            "placeholder": "输入Kind类型名称"
           }
         },
         {
@@ -914,6 +905,15 @@
             "name": "metadata.name",
             "label": "名称",
             "placeholder": "输入名称"
+          }
+        },
+        {
+          "name": "spec.versions",
+          "label": "版本",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong></div>"
           }
         },
         {
