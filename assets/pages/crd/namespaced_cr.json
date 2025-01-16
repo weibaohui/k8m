@@ -231,6 +231,7 @@
                   "name": "ns",
                   "id": "ns",
                   "searchable": true,
+                  "checkAll": true,
                   "source": "/k8s/ns/option_list",
                   "value": "${ls:selectedNs||'default'}",
                   "onEvent": {
