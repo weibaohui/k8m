@@ -876,10 +876,9 @@
           "type": "text",
           "copyable": true,
           "searchable": {
-            "type": "input-text",
-            "name": "spec.group",
-            "label": "分组",
-            "placeholder": "输入分组名称"
+            "type": "select",
+            "searchable": true,
+            "source": "/k8s/crd/group/option_list"
           }
         },
         {
