@@ -1041,15 +1041,16 @@
           }
         },
         {
-          "name": "spec.ingressClassName",
-          "label": "入口控制器",
-          "type": "text"
-        },
-        {
           "name": "spec.rules",
           "label": "访问规则",
           "type": "tpl",
-          "tpl": "<% if (data.spec.rules && data.spec.rules.length) { %><% data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'>域名: <%- rule.host || '*' %><br><% if (rule.http && rule.http.paths && rule.http.paths.length) { %><% rule.http.paths.forEach(function(path) { %><% if (path.backend && path.backend.service) { %>路径: <%- path.path %> → 服务: <%- path.backend.service.name %><br><% } %><% }); %><% } %></div><% }); %><% } %>"
+          "tpl": "<% if (data.spec.rules && data.spec.rules.length) { %><% data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'>域名: <%- rule.host || '*' %><br><% if (rule.http && rule.http.paths && rule.http.paths.length) { %><% rule.http.paths.forEach(function(path) { %><% if (path.backend && path.backend.service) { %>路径: <%- path.path %> → 服务: <%- path.backend.service.name %><br><% } %><% }); %><% } %></div><% }); %><% } %>",
+          "searchable": {
+            "type": "input-text",
+            "name": "spec.rules.host",
+            "label": "域名",
+            "placeholder": "域名"
+          }
         },
         {
           "name": "metadata.labels",
@@ -1199,6 +1200,11 @@
           "style": {
             "cursor": "pointer"
           }
+        },
+        {
+          "name": "spec.ingressClassName",
+          "label": "入口控制器",
+          "type": "text"
         },
         {
           "name": "metadata.creationTimestamp",
