@@ -147,7 +147,9 @@ func NameOptionList(c *gin.Context) {
 		WithCache(time.Second * 30).
 		List(&list).Error
 	if err != nil {
-		amis.WriteJsonError(c, err)
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
 		return
 	}
 
