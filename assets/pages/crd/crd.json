@@ -623,19 +623,47 @@
             "name": "spec.group",
             "searchable": true,
             "clearable": true,
-            "source": "/k8s/crd/group/option_list"
+            "source": "/k8s/crd/group/option_list",
+            "onEvent": {
+              "change": {
+                "actions": [
+                  {
+                    "actionType": "reload",
+                    "componentId": "detailCRUD",
+                    "data": {
+                      "spec.group": "${event.data['spec.group']}"
+                    }
+                  }
+                ]
+              }
+            }
           }
         },
         {
           "name": "spec.names.kind",
-          "label": "资源类型",
+          "label": "类型",
           "type": "text",
           "searchable": {
             "type": "select",
+            "name": "snk",
             "searchable": true,
             "clearable": true,
             "placeholder": "请先选择组",
-            "source": "/k8s/crd/kind/option_list?spec.group=${spec.group}"
+            "source": "/k8s/crd/kind/option_list?spec.group=${spec.group}",
+            "onEvent": {
+              "change": {
+                "actions": [
+                  {
+                    "actionType": "reload",
+                    "componentId": "detailCRUD",
+                    "data": {
+                      "spec.group": "${spec.group}",
+                      "spec.names.kind": "${event.data.snk}"
+                    }
+                  }
+                ]
+              }
+            }
           }
         },
         {
