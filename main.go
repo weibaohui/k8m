@@ -194,6 +194,8 @@ func main() {
 		api.GET("/daemonset/rollout/history/ns/:ns/name/:name", ds.History)
 		api.POST("/daemonset/restart/ns/:ns/name/:name", ds.Restart)
 		api.POST("/daemonset/batch/restart", ds.BatchRestart)
+		api.POST("/daemonset/batch/stop", ds.BatchStop)
+		api.POST("/daemonset/batch/restore", ds.BatchRestore)
 
 		// k8s rs
 		api.POST("/replicaset/restart/ns/:ns/name/:name", rs.Restart)
