@@ -663,30 +663,6 @@
                 },
                 {
                   "type": "button",
-                  "icon": "fas fa-lock text-info",
-                  "actionType": "ajax",
-                  "label": "隔离节点",
-                  "confirmText": "您确认要 隔离(cordon) $metadata.name?",
-                  "api": "post:/k8s/node/cordon/name/$metadata.name"
-                },
-                {
-                  "type": "button",
-                  "icon": "fas fa-unlock text-success",
-                  "actionType": "ajax",
-                  "label": "解除隔离",
-                  "confirmText": "您确认要 解除隔离(uncordon) $metadata.name?",
-                  "api": "post:/k8s/node/uncordon/name/$metadata.name"
-                },
-                {
-                  "type": "button",
-                  "icon": "fas fa-wind text-danger",
-                  "actionType": "ajax",
-                  "label": "驱逐",
-                  "confirmText": "您确认要驱逐(drain)$metadata.name?",
-                  "api": "post:/k8s/node/drain/name/$metadata.name"
-                },
-                {
-                  "type": "button",
                   "icon": "fas fa-calendar-alt text-primary",
                   "label": "查看事件",
                   "actionType": "drawer",
