@@ -219,7 +219,8 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false
+        "showBtnToolbar": false,
+        "defaultCollapsed": false
       },
       "headerToolbar": [
         {
@@ -570,6 +571,22 @@
                   }
                 },
                 {
+                  "type": "link",
+                  "icon": "fas fa-list text-primary",
+                  "body": "实例列表",
+                  "blank": true,
+                  "href": "/index.html#/crd/namespaced_cr/list?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "visibleOn": "spec.scope=='Namespaced'"
+                },
+                {
+                  "type": "link",
+                  "icon": "fas fa-list text-primary",
+                  "body": "实例列表",
+                  "blank": true,
+                  "href": "/index.html#/crd/cluster_cr/list?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "visibleOn": "spec.scope=='Cluster'"
+                },
+                {
                   "type": "button",
                   "icon": "fas fa-trash text-danger",
                   "actionType": "ajax",
@@ -763,14 +780,6 @@
                       }
                     ]
                   }
-                },
-                {
-                  "type": "button",
-                  "icon": "fas fa-list text-success",
-                  "level": "link",
-                  "actionType": "url",
-                  "label": "查看实例",
-                  "link": "/index.html#/crd/${spec.scope=='Namespaced'?'namespaced_cr':'cluster_cr'}?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}"
                 },
                 {
                   "type": "button",
