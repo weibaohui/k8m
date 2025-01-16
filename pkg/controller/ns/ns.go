@@ -32,13 +32,15 @@ func OptionList(c *gin.Context) {
 	var ns []v1.Namespace
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Namespace{}).List(&ns).Error
 	if err != nil {
-		amis.WriteJsonError(c, err)
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
 		return
 	}
-	list = append(list, map[string]string{
-		"label": "全部",
-		"value": "*",
-	})
+	// list = append(list, map[string]string{
+	// 	"label": "全部",
+	// 	"value": "*",
+	// })
 	for _, n := range ns {
 		list = append(list, map[string]string{
 			"label": n.Name,
