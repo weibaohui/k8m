@@ -1004,9 +1004,26 @@
           "label": "状态",
           "type": "mapping",
           "map": {
-            "Active": "<span class='label label-success'>Active</span>",
-            "Terminating": "<span class='label label-danger'>Terminating</span>",
-            "*": "<span class='label label-default'>Unknown</span>"
+            "Active": "<span class='label label-success'>活跃</span>",
+            "Terminating": "<span class='label label-danger'>正在删除</span>",
+            "Unknown": "<span class='label label-warning'>未知</span>"
+          },
+          "searchable": {
+            "type": "select",
+            "options": [
+              {
+                "label": "活跃",
+                "value": "Active"
+              },
+              {
+                "label": "正在删除",
+                "value": "Terminating"
+              },
+              {
+                "label": "未知",
+                "value": "Unknown"
+              }
+            ]
           }
         }
       ]
