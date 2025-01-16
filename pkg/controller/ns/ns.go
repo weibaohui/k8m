@@ -35,17 +35,17 @@ func OptionList(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
+	list = append(list, map[string]string{
+		"label": "全部",
+		"value": "*",
+	})
 	for _, n := range ns {
 		list = append(list, map[string]string{
 			"label": n.Name,
 			"value": n.Name,
 		})
 	}
-	list = append(list, map[string]string{
-		"label": "全部",
-		"value": "*",
-	})
+
 	amis.WriteJsonData(c, gin.H{
 		"options": list,
 	})
