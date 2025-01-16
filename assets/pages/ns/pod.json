@@ -295,7 +295,7 @@
         "reload"
       ],
       "loadDataOnce": false,
-      "syncLocation": true,
+      "syncLocation": false,
       "initFetch": true,
       "perPage": 10,
       "bulkActions": [
