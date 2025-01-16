@@ -270,7 +270,8 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false
+        "showBtnToolbar": false,
+        "defaultCollapsed": false
       },
       "headerToolbar": [
         {
@@ -2633,6 +2634,13 @@
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
+        },
+        {
+          "name": "metadata.ownerReferences.name",
+          "label": "所有者",
+          "type": "text",
+          "searchable": true,
+          "visibleOn": "1==2"
         }
       ]
     }

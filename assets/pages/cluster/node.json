@@ -607,8 +607,8 @@
                 },
                 {
                   "type": "link",
-                  "icon": "fas fa-cube text-primary",
-                  "body": "实例列表",
+                  "icon": "fa-brands fa-docker text-primary",
+                  "body": "容器列表",
                   "href": "/index.html#/pod/list?spec[nodeName]=${metadata.name}"
                 },
                 {

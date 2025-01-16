@@ -650,6 +650,12 @@
                   }
                 },
                 {
+                  "type": "link",
+                  "icon": "fa-brands fa-docker text-primary",
+                  "body": "容器列表",
+                  "href": "/index.html#/pod/list?metadata[ownerReferences][name]=${metadata.name}"
+                },
+                {
                   "type": "button",
                   "icon": "fas fa-trash text-danger",
                   "actionType": "ajax",
