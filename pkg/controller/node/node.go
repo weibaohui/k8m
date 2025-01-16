@@ -5,6 +5,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
 )
 
 func Drain(c *gin.Context) {
@@ -42,4 +43,94 @@ func UnCordon(c *gin.Context) {
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().UnCordon()
 	amis.WriteJsonErrorOrOK(c, err)
+}
+
+func BatchDrain(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Names []string `json:"name_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
+			Ctl().Node().Drain()
+		if x != nil {
+			klog.V(6).Infof("批量驱逐节点错误 %s %v", name, x)
+			err = x
+		}
+	}
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+func BatchCordon(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Names []string `json:"name_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
+			Ctl().Node().Cordon()
+		if x != nil {
+			klog.V(6).Infof("批量隔离节点错误 %s %v", name, x)
+			err = x
+		}
+	}
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+func BatchUnCordon(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Names []string `json:"name_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
+			Ctl().Node().UnCordon()
+		if x != nil {
+			klog.V(6).Infof("批量解除节点隔离错误 %s %v", name, x)
+			err = x
+		}
+	}
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
 }

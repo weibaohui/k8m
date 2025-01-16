@@ -261,15 +261,38 @@
           }
         },
         {
-          "label": "强制删除",
+          "label": "节点隔离",
           "actionType": "ajax",
-          "confirmText": "确定要批量强制删除?",
+          "confirmText": "确定要批量隔离?",
           "api": {
-            "url": "/k8s/$kind/group/$group/version/$version/force_remove",
+            "url": "/k8s/node/batch/cordon",
             "method": "post",
             "data": {
-              "name_list": "${selectedItems | pick:metadata.name }",
-              "ns_list": "${selectedItems | pick:metadata.namespace }"
+              "name_list": "${selectedItems | pick:metadata.name }"
+            }
+          }
+        },
+        {
+          "label": "解除隔离",
+          "actionType": "ajax",
+          "confirmText": "确定要批量解除隔离?",
+          "api": {
+            "url": "/k8s/node/batch/uncordon",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }"
+            }
+          }
+        },
+        {
+          "label": "驱逐",
+          "actionType": "ajax",
+          "confirmText": "确定要批量驱逐?",
+          "api": {
+            "url": "/k8s/node/batch/drain",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }"
             }
           }
         }
