@@ -637,14 +637,6 @@
                 },
                 {
                   "type": "button",
-                  "icon": "fas fa-trash text-danger",
-                  "actionType": "ajax",
-                  "label": "删除",
-                  "confirmText": "您确认要删除$metadata.name?",
-                  "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
-                },
-                {
-                  "type": "button",
                   "label": "导入configmap",
                   "icon": "fa fa-upload text-primary",
                   "actionType": "dialog",

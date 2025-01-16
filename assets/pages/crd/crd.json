@@ -585,14 +585,6 @@
                   "blank": true,
                   "href": "/index.html#/crd/cluster_cr/list?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
                   "visibleOn": "spec.scope=='Cluster'"
-                },
-                {
-                  "type": "button",
-                  "icon": "fas fa-trash text-danger",
-                  "actionType": "ajax",
-                  "label": "删除",
-                  "confirmText": "您确认要删除$metadata.name?",
-                  "api": "post:/k8s/$kind/group/$group/version/$version/remove/ns/$metadata.namespace/name/$metadata.name"
                 }
               ]
             }
