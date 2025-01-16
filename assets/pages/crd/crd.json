@@ -615,7 +615,7 @@
         },
         {
           "name": "spec.group",
-          "label": "组(group)",
+          "label": "组",
           "type": "text",
           "copyable": true,
           "searchable": {
@@ -628,12 +628,13 @@
         },
         {
           "name": "spec.names.kind",
-          "label": "资源类型(kind)",
+          "label": "资源类型",
           "type": "text",
           "searchable": {
             "type": "select",
             "searchable": true,
             "clearable": true,
+            "placeholder": "请先选择组",
             "source": "/k8s/crd/kind/option_list?spec.group=${spec.group}"
           }
         },
