@@ -1,10 +1,13 @@
 package node
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 )
 
@@ -133,4 +136,30 @@ func BatchUnCordon(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonOK(c)
+}
+
+func NameOptionList(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var list []unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+		WithCache(time.Second * 30).
+		List(&list).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var options []map[string]string
+	for _, n := range list {
+		options = append(options, map[string]string{
+			"label": n.GetName(),
+			"value": n.GetName(),
+		})
+	}
+
+	amis.WriteJsonData(c, gin.H{
+		"options": options,
+	})
 }

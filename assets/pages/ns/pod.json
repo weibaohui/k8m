@@ -2372,7 +2372,11 @@
           "name": "spec.nodeName",
           "label": "所在节点",
           "type": "text",
-          "searchable": true,
+          "searchable": {
+            "type": "select",
+            "searchable": true,
+            "source": "/k8s/node/name/option_list"
+          },
           "width": "150px",
           "sortable": true
         },
