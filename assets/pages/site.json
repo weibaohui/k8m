@@ -114,14 +114,14 @@
               },
               {
                 "label": "NamespacedCR",
-                "url": "/crd/namespaced_cr",
+                "url": "/crd/namespaced_cr/list",
                 "icon": "fas fa-business-time",
                 "visibleOn": "1==2",
                 "schemaApi": "get:/pages/crd/namespaced_cr.json"
               },
               {
                 "label": "ClusterCR",
-                "url": "/crd/cluster_cr",
+                "url": "/crd/cluster_cr/list",
                 "icon": "fas fa-business-time",
                 "visibleOn": "1==2",
                 "schemaApi": "get:/pages/crd/cluster_cr.json"
