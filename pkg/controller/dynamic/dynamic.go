@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
@@ -552,4 +553,43 @@ func UpdateAnnotations(c *gin.Context) {
 	}
 
 	amis.WriteJsonOK(c)
+}
+
+func GroupOptionList(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var list []unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).GVK(
+		"apiextensions.k8s.io",
+		"v1",
+		"CustomResourceDefinition").
+		WithCache(time.Second * 30).
+		List(&list).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var groups []string
+	for _, item := range list {
+		group, found, err := unstructured.NestedString(item.Object, "spec", "group")
+		if err != nil || !found {
+			continue
+		}
+
+		groups = append(groups, group)
+	}
+	groups = slice.Unique(groups)
+	var options []map[string]string
+	for _, n := range groups {
+		options = append(options, map[string]string{
+			"label": n,
+			"value": n,
+		})
+	}
+
+	amis.WriteJsonData(c, gin.H{
+		"options": options,
+	})
 }
