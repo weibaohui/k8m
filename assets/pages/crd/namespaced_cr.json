@@ -264,7 +264,8 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false
+        "showBtnToolbar": false,
+        "defaultCollapsed": false
       },
       "headerToolbar": [
         {
