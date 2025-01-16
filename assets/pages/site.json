@@ -51,22 +51,16 @@
                 "schemaApi": "get:/pages/ns/deploy.json"
               },
               {
-                "label": "容器组",
-                "url": "/pod/list",
-                "icon": "fas fa-cubes",
-                "schemaApi": "get:/pages/ns/pod.json"
-              },
-              {
                 "label": "有状态集",
                 "url": "/statefulset/list",
                 "icon": "fas fa-poll-h",
                 "schemaApi": "get:/pages/ns/statefulset.json"
               },
               {
-                "label": "定时任务",
-                "url": "/cronjob/list",
-                "icon": "fas fa-clock",
-                "schemaApi": "get:/pages/ns/cronjob.json"
+                "label": "守护进程集",
+                "url": "/daemonset/list",
+                "icon": "fas fa-table",
+                "schemaApi": "get:/pages/ns/daemonset.json"
               },
               {
                 "label": "任务",
@@ -75,10 +69,16 @@
                 "schemaApi": "get:/pages/ns/job.json"
               },
               {
-                "label": "守护进程集",
-                "url": "/daemonset/list",
-                "icon": "fas fa-table",
-                "schemaApi": "get:/pages/ns/daemonset.json"
+                "label": "定时任务",
+                "url": "/cronjob/list",
+                "icon": "fas fa-clock",
+                "schemaApi": "get:/pages/ns/cronjob.json"
+              },
+              {
+                "label": "容器组",
+                "url": "/pod/list",
+                "icon": "fas fa-cubes",
+                "schemaApi": "get:/pages/ns/pod.json"
               },
               {
                 "label": "副本集",
@@ -161,30 +161,6 @@
                 "url": "/ingress/list",
                 "icon": "fas fa-wifi",
                 "schemaApi": "get:/pages/ns/ing.json"
-              },
-              {
-                "label": "Ingress入口类",
-                "url": "/cluster/ingress_class/list",
-                "icon": "fas fa-sitemap",
-                "schemaApi": "get:/pages/cluster/ingress_class.json"
-              },
-              {
-                "label": "网络策略",
-                "url": "/network_policy/list",
-                "icon": "fas fa-boxes",
-                "schemaApi": "get:/pages/ns/network_policy.json"
-              },
-              {
-                "label": "端点",
-                "url": "/endpoint/list",
-                "icon": "fas fa-ethernet",
-                "schemaApi": "get:/pages/ns/endpoint.json"
-              },
-              {
-                "label": "端点切片",
-                "url": "/endpointslice/list",
-                "icon": "fas fa-newspaper",
-                "schemaApi": "get:/pages/ns/endpointslice.json"
               }
             ]
           },
@@ -275,6 +251,30 @@
                 "url": "/cluster/component_status/list",
                 "icon": "fas fa-tools",
                 "schemaApi": "get:/pages/cluster/component_status.json"
+              },
+              {
+                "label": "Ingress入口类",
+                "url": "/cluster/ingress_class/list",
+                "icon": "fas fa-sitemap",
+                "schemaApi": "get:/pages/cluster/ingress_class.json"
+              },
+              {
+                "label": "网络策略",
+                "url": "/network_policy/list",
+                "icon": "fas fa-boxes",
+                "schemaApi": "get:/pages/ns/network_policy.json"
+              },
+              {
+                "label": "端点",
+                "url": "/endpoint/list",
+                "icon": "fas fa-ethernet",
+                "schemaApi": "get:/pages/ns/endpoint.json"
+              },
+              {
+                "label": "端点切片",
+                "url": "/endpointslice/list",
+                "icon": "fas fa-newspaper",
+                "schemaApi": "get:/pages/ns/endpointslice.json"
               },
               {
                 "label": "资源配额",
