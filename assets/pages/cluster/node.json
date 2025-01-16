@@ -1385,6 +1385,12 @@
           },
           "style": {
             "cursor": "pointer"
+          },
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.labels",
+            "label": "标签",
+            "placeholder": "标签"
           }
         },
         {
