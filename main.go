@@ -208,6 +208,9 @@ func main() {
 		// k8s cronjob
 		api.POST("/cronjob/pause/ns/:ns/name/:name", cronjob.Pause)
 		api.POST("/cronjob/resume/ns/:ns/name/:name", cronjob.Resume)
+		api.POST("/cronjob/batch/resume", cronjob.BatchResume)
+		api.POST("/cronjob/batch/pause", cronjob.BatchPause)
+
 		// doc
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
 		api.GET("/doc/kind/:kind/group/:group/version/:version", doc.Doc)

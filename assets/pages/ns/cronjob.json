@@ -324,6 +324,34 @@
               "ns_list": "${selectedItems | pick:metadata.namespace }"
             }
           }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "暂停",
+          "confirmText": "确定要批量暂停?",
+          "api": {
+            "url": "/k8s/cronjob/batch/pause",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "恢复",
+          "confirmText": "确定要批量恢复?",
+          "api": {
+            "url": "/k8s/cronjob/batch/resume",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
         }
       ],
       "footerToolbar": [
