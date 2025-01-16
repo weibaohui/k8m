@@ -583,6 +583,7 @@ func GroupOptionList(c *gin.Context) {
 		groups = append(groups, group)
 	}
 	groups = slice.Unique(groups)
+	slice.Sort(groups, "asc")
 	var options []map[string]string
 	for _, n := range groups {
 		options = append(options, map[string]string{
@@ -607,7 +608,6 @@ func KindOptionList(c *gin.Context) {
 		})
 		return
 	}
-	klog.V(2).Infof("spec[group]=%s", g)
 	var list []unstructured.Unstructured
 	err := kom.Cluster(selectedCluster).WithContext(ctx).GVK(
 		"apiextensions.k8s.io",
@@ -631,6 +631,8 @@ func KindOptionList(c *gin.Context) {
 		kinds = append(kinds, kind)
 	}
 	kinds = slice.Unique(kinds)
+	slice.Sort(kinds, "asc")
+
 	var options []map[string]string
 	for _, n := range kinds {
 		options = append(options, map[string]string{
