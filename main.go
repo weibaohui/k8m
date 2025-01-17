@@ -148,7 +148,6 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
 		api.GET("/crd/group/option_list", dynamic.GroupOptionList)
 		api.GET("/crd/kind/option_list", dynamic.KindOptionList)
-		api.GET("/crd/group/kind/option_tree", dynamic.CrdGuidTree)
 
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
