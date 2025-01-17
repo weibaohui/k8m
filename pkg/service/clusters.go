@@ -162,7 +162,7 @@ func (c *clusterService) RegisterClustersInPath(path string) {
 	// 2. 通过所在目录，找到同目录下的所有文件
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		klog.V(6).Infof("Error reading directory: %v", err)
+		klog.V(6).Infof("读取文件夹[%s]失败: %v", dir, err)
 		return
 	}
 
