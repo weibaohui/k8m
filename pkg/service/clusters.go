@@ -45,7 +45,7 @@ func (c *clusterService) GetPodStatusAggregated(selectedCluster string) bool {
 	if clusterConfig == nil {
 		return false
 	}
-	klog.V(6).Infof("GetPodStatusAggregated: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.PodStatusAggregated)
+	klog.V(6).Infof("获取Pod聚合状态: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.PodStatusAggregated)
 	return clusterConfig.PodStatusAggregated
 }
 
@@ -55,7 +55,7 @@ func (c *clusterService) GetNodeStatusAggregated(selectedCluster string) bool {
 	if clusterConfig == nil {
 		return false
 	}
-	klog.V(6).Infof("GetNodeStatusAggregated: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.NodeStatusAggregated)
+	klog.V(6).Infof("获取节点聚合状态: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.NodeStatusAggregated)
 	return clusterConfig.NodeStatusAggregated
 }
 
@@ -176,12 +176,13 @@ func (c *clusterService) RegisterClustersInPath(path string) {
 		filePath := filepath.Join(dir, file.Name())
 		content, err := os.ReadFile(filePath)
 		if err != nil {
-			klog.V(6).Infof("Error reading file: %v", err)
+			klog.V(6).Infof("读取文件[%s]失败: %v", filePath, err)
 			continue
 		}
 
 		config, err := clientcmd.Load(content)
 		if err != nil {
+			klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
 			continue // 解析失败，跳过该文件
 		}
 		for contextName, _ := range config.Contexts {
@@ -223,10 +224,10 @@ func (c *clusterService) RegisterCluster(fileName string, contextName string) {
 			if c.CheckCluster(fileName, contextName) {
 				_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
 				if err != nil {
-					klog.V(6).Infof("Error registering cluster: %s/%s: %v", fileName, contextName, err)
+					klog.V(6).Infof("注册集群[%s/%s]失败: %v", fileName, contextName, err)
 					continue
 				}
-				klog.V(6).Infof("Successfully registered cluster: %s/%s", fileName, contextName)
+				klog.V(6).Infof("成功注册集群: %s/%s", fileName, contextName)
 			}
 		}
 	}
@@ -247,7 +248,7 @@ func (c *clusterService) CheckCluster(fileName string, contextName string) bool 
 
 			restConfig, err := clientcmd.RESTConfigFromKubeConfig(bytes)
 			if err != nil {
-				klog.V(6).Infof("Error creating rest.Config for context %s/%s: %v", fileName, contextName, err)
+				klog.V(6).Infof("解析rest.Config错误 %s/%s: %v", fileName, contextName, err)
 				config.Err = err.Error()
 				return false
 			}
@@ -255,7 +256,7 @@ func (c *clusterService) CheckCluster(fileName string, contextName string) bool 
 			// 校验集群是否可连接
 			clientset, err := kubernetes.NewForConfig(restConfig)
 			if err != nil {
-				klog.V(6).Infof("Error creating clientset for context %s/%s: %v", fileName, contextName, err)
+				klog.V(6).Infof("创建clientset失败 %s/%s: %v", fileName, contextName, err)
 				config.Err = err.Error()
 				return false
 			}
@@ -263,11 +264,11 @@ func (c *clusterService) CheckCluster(fileName string, contextName string) bool 
 			// 尝试获取集群版本以验证连接
 			info, err := clientset.ServerVersion()
 			if err != nil {
-				klog.V(6).Infof("Error connecting to cluster for context %s/%s: %v", fileName, contextName, err)
+				klog.V(6).Infof("连接集群失败 %s/%s: %v", fileName, contextName, err)
 				config.Err = err.Error()
 				return false
 			}
-			klog.V(6).Infof("Successfully connected to cluster for context %s/%s", fileName, contextName)
+			klog.V(6).Infof("成功连接集群 %s/%s", fileName, contextName)
 			// 可以连接的放到数组中记录
 			config.ServerVersion = info.GitVersion
 			config.restConfig = restConfig
