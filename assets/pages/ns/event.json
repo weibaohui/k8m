@@ -765,6 +765,7 @@
             "SuccessfulCreate": "<span class='label label-success'>创建成功</span>",
             "SuccessfulDelete": "<span class='label label-success'>删除成功</span>",
             "Synced": "<span class='label label-success'>同步成功</span>",
+            "SawCompletedJob": "<span class='label label-success'>任务已完成</span>",
             "TaintManagerEviction": "<span class='label label-warning'>污点驱逐</span>",
             "UpdatedLoadBalancer": "<span class='label label-primary'>负载均衡器更新</span>",
             "Unhealthy": "<span class='label label-danger'>不健康</span>",
