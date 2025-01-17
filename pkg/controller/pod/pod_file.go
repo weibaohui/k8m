@@ -164,7 +164,7 @@ func DownloadFile(c *gin.Context) {
 	// 从容器中下载文件
 	fileContent, err := poder.DownloadFile(info.Path)
 	if err != nil {
-		klog.V(2).Infof("Error downloading file: %v", err)
+		klog.V(2).Infof("下载文件错误: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -201,7 +201,7 @@ func UploadFile(c *gin.Context) {
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("Error retrieving file: %v", err))
+		amis.WriteJsonError(c, fmt.Errorf("获取上传的文件错误: %v", err))
 		return
 	}
 
@@ -241,7 +241,7 @@ func DeleteFile(c *gin.Context) {
 	// 从容器中下载文件
 	result, err := poder.DeleteFile(info.Path)
 	if err != nil {
-		klog.V(2).Infof("Error delete file: %v", err)
+		klog.V(2).Infof("删除文件错误: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -254,7 +254,7 @@ func saveUploadedFile(file *multipart.FileHeader) (string, error) {
 	// 创建临时目录
 	tempDir, err := os.MkdirTemp("", "upload-*")
 	if err != nil {
-		return "", fmt.Errorf("error creating temp directory: %v", err)
+		return "", fmt.Errorf("创建临时目录错误: %v", err)
 	}
 
 	// 使用原始文件名生成临时文件路径
@@ -263,13 +263,13 @@ func saveUploadedFile(file *multipart.FileHeader) (string, error) {
 	// 创建并保存文件
 	tempFile, err := os.Create(tempFilePath)
 	if err != nil {
-		return "", fmt.Errorf("error creating temp file: %v", err)
+		return "", fmt.Errorf("创建临时文件错误: %v", err)
 	}
 	defer tempFile.Close()
 
 	src, err := file.Open()
 	if err != nil {
-		return "", fmt.Errorf("无法打开上传文件: %v", err)
+		return "", fmt.Errorf("打开上传文件错误: %v", err)
 	}
 	defer src.Close()
 
@@ -290,13 +290,13 @@ func uploadToPod(ctx context.Context, selectedCluster string, info *info, tempFi
 
 	openTmpFile, err := os.Open(tempFilePath)
 	if err != nil {
-		return fmt.Errorf("无法打开上传临时文件: %v", err)
+		return fmt.Errorf("打开上传临时文件错误: %v", err)
 	}
 	defer openTmpFile.Close()
 
 	// 上传文件到 Pod 中
 	if err := poder.UploadFile(info.Path, openTmpFile); err != nil {
-		return fmt.Errorf("error uploading file: %v", err)
+		return fmt.Errorf("上传文件到Pod中错误: %v", err)
 	}
 
 	return nil
