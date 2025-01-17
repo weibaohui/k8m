@@ -33,7 +33,9 @@ func (p *podService) StreamPodLogs(ctx context.Context, selectedCluster string, 
 		logOptions.SinceSeconds = nil
 	}
 	var stream io.ReadCloser
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Namespace(ns).Name(name).ContainerName(logOptions.Container).GetLogs(&stream, logOptions).Error
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Namespace(ns).Name(name).Ctl().Pod().
+		ContainerName(logOptions.Container).GetLogs(&stream, logOptions).Error
 
 	return stream, err
 }
@@ -109,7 +111,7 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 	var pod v1.Pod
 	err := kom.Cluster(selectedCluster).Resource(&pod).Namespace(v1.NamespaceAll).Watch(&watcher).Error
 	if err != nil {
-		klog.Errorf("%s PodService Create Watcher Error %v", selectedCluster, err)
+		klog.Errorf("%s 创建Pod监听器失败 %v", selectedCluster, err)
 		return
 	}
 	go func() {
@@ -125,13 +127,13 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 			switch event.Type {
 			case watch.Added:
 				p.CacheAllocatedStatus(selectedCluster, &pod)
-				fmt.Printf("%s Added Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
+				klog.V(6).Infof("%s 添加Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
 			case watch.Modified:
 				p.CacheAllocatedStatus(selectedCluster, &pod)
-				fmt.Printf("%s Modified Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
+				klog.V(6).Infof("%s 修改Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
 			case watch.Deleted:
 				p.RemoveCacheAllocatedStatus(selectedCluster, &pod)
-				fmt.Printf("%s Deleted Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
+				klog.V(6).Infof("%s 删除Pod [ %s/%s ]\n", selectedCluster, pod.Namespace, pod.Name)
 			}
 		}
 	}()
