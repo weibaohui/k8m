@@ -3,6 +3,7 @@ package node
 import (
 	"time"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
@@ -153,11 +154,17 @@ func NameOptionList(c *gin.Context) {
 		return
 	}
 
-	var options []map[string]string
+	var names []string
 	for _, n := range list {
+		names = append(names, n.GetName())
+	}
+	slice.Sort(names, "asc")
+
+	var options []map[string]string
+	for _, n := range names {
 		options = append(options, map[string]string{
-			"label": n.GetName(),
-			"value": n.GetName(),
+			"label": n,
+			"value": n,
 		})
 	}
 
