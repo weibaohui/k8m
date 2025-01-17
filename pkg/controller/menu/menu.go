@@ -294,12 +294,7 @@ func List(c *gin.Context) {
 				Icon:      "fas fa-registered",
 				SchemaAPI: "get:/pages/crd/crd.json",
 			},
-			{
-				Label:     "tree",
-				URL:       "/crd/tree",
-				Icon:      "fas fa-registered",
-				SchemaAPI: "get:/pages/crd/crd_tree.json",
-			},
+
 			{
 				Label:     "CronTab",
 				URL:       "/crd/crontab/list",
