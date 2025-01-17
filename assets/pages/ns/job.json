@@ -1010,6 +1010,12 @@
           }
         },
         {
+          "name": "metadata.ownerReferences",
+          "label": "所有者",
+          "type": "tpl",
+          "tpl": "${metadata.ownerReferences ? metadata.ownerReferences[0].name : ''}"
+        },
+        {
           "name": "spec.template.spec.containers",
           "label": "容器",
           "type": "each",
