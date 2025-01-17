@@ -31,7 +31,7 @@ func (c *chatService) SetVars(apikey, apiUrl, model string) {
 func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
 	key, apiURL, model, enable := c.getChatGPTAuth()
 	if !enable {
-		return nil, fmt.Errorf("chatGPT not enable")
+		return nil, fmt.Errorf("ChatGPT功能未开启")
 	}
 
 	// url := "https://api.siliconflow.cn/v1/chat/completions"
@@ -52,14 +52,14 @@ func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
 	// 将请求体编码为JSON
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		klog.V(2).Infof("Error marshaling JSON:%v\n", err)
+		klog.V(2).Infof("JSON编码失败:%v\n", err)
 		return nil, err
 	}
 
 	// 设置请求头
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		klog.V(2).Infof("Error creating request:%v\n", err)
+		klog.V(2).Infof("创建请求失败:%v\n", err)
 		return nil, err
 	}
 
@@ -71,7 +71,7 @@ func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		klog.V(2).Infof("Error making request:%v\n\n", err)
+		klog.V(2).Infof("请求失败:%v\n\n", err)
 		return nil, err
 	}
 	return resp, err
@@ -79,7 +79,7 @@ func (c *chatService) GetChatStream1(chat string) (*http.Response, error) {
 func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, error) {
 	apiKey, apiURL, model, enable := c.getChatGPTAuth()
 	if !enable {
-		return nil, fmt.Errorf("chatGPT not enable")
+		return nil, fmt.Errorf("ChatGPT功能未开启")
 	}
 	// 初始化OpenAI客户端
 	cfg := openai.DefaultConfig(apiKey)
@@ -172,7 +172,7 @@ func (c *chatService) getChatGPTAuth() (apiKey string, apiURL string, model stri
 }
 func (c *chatService) IsEnabled() bool {
 	_, _, _, enable := c.getChatGPTAuth()
-	klog.V(4).Infof("ChatGPT 开启状态:%v\n", enable)
+	klog.V(4).Infof("ChatGPT 状态:%v\n", enable)
 	return enable
 }
 
