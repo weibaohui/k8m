@@ -55,7 +55,7 @@ func BatchRestart(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
 			Ctl().Rollout().Restart()
 		if x != nil {
-			klog.V(6).Infof("batch restart sts error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量重启 sts 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -88,7 +88,7 @@ func BatchStop(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
 			Ctl().Scaler().Stop()
 		if x != nil {
-			klog.V(6).Infof("batch stop sts error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量停止 sts 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -121,7 +121,7 @@ func BatchRestore(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
 			Ctl().Scaler().Restore()
 		if x != nil {
-			klog.V(6).Infof("batch restore sts error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量恢复 sts 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -140,8 +140,10 @@ func Scale(c *gin.Context) {
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	ctx := c.Request.Context()
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
-		Ctl().Scale(r)
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.StatefulSet{}).
+		Namespace(ns).Name(name).
+		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
 func Undo(c *gin.Context) {
