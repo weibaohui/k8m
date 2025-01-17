@@ -18,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
+	"github.com/weibaohui/k8m/pkg/controller/menu"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
@@ -147,6 +148,7 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
 		api.GET("/crd/group/option_list", dynamic.GroupOptionList)
 		api.GET("/crd/kind/option_list", dynamic.KindOptionList)
+		api.GET("/crd/group/kind/option_tree", dynamic.CrdGuidTree)
 
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
@@ -249,6 +251,9 @@ func main() {
 		api.GET("/pod/ns/:ns/name/:name/links/configmap", pod.LinksConfigMap)
 		api.GET("/pod/ns/:ns/name/:name/links/secret", pod.LinksSecret)
 		api.GET("/pod/ns/:ns/name/:name/links/node", pod.LinksNode)
+
+		// 菜单
+		api.GET("/menu/list", menu.List)
 	}
 
 	klog.Infof("启动成功，k8m服务监听0.0.0.0:%d", flag.Init().Port)
