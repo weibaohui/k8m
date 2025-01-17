@@ -89,7 +89,7 @@ func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 	var nodes []v1.Node
 	err := kom.Cluster(selectedCluster).Resource(&v1.Node{}).WithCache(nodeStatusTTL).List(&nodes).Error
 	if err != nil {
-		klog.Errorf("Error watch node:%v", err)
+		klog.Errorf("监听Node失败:%v", err)
 	}
 	for _, node := range nodes {
 		_, _ = n.CacheIPUsage(selectedCluster, node.Name)
