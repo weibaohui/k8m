@@ -55,7 +55,7 @@ func BatchRestart(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.DaemonSet{}).Namespace(ns).Name(name).
 			Ctl().Rollout().Restart()
 		if x != nil {
-			klog.V(6).Infof("batch restart ds error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量重启 ds 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -104,7 +104,7 @@ func BatchStop(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.DaemonSet{}).Namespace(ns).Name(name).
 			Ctl().DaemonSet().Stop()
 		if x != nil {
-			klog.V(6).Infof("batch stop ds error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量停止 ds 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -136,7 +136,7 @@ func BatchRestore(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.DaemonSet{}).Namespace(ns).Name(name).
 			Ctl().DaemonSet().Restore()
 		if x != nil {
-			klog.V(6).Infof("batch restore ds error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量恢复 ds 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
