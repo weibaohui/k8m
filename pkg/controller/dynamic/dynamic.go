@@ -330,16 +330,20 @@ func UploadFile(c *gin.Context) {
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("error retrieving file: %v", err))
+		amis.WriteJsonError(c, fmt.Errorf("获取上传的文件错误。\n %v", err))
 		return
 	}
 	src, err := file.Open()
 	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("error openning file: %v", err))
+		amis.WriteJsonError(c, fmt.Errorf("打开上传的文件错误。\n %v", err))
 		return
 	}
 	defer src.Close()
 	yamlBytes, err := io.ReadAll(src)
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("读取上传的文件内容错误。\n %v", err))
+		return
+	}
 	yamlStr := string(yamlBytes)
 	result := kom.Cluster(selectedCluster).WithContext(ctx).Applier().Apply(yamlStr)
 	amis.WriteJsonOKMsg(c, strings.Join(result, "\n"))
