@@ -42,7 +42,7 @@ func BatchStop(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 			Ctl().Scaler().Stop()
 		if x != nil {
-			klog.V(6).Infof("batch stop deploy  error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量停止 deploy 错误 %s/%s %v", ns, name, x)
 
 			err = x
 		}
@@ -74,7 +74,7 @@ func BatchRestore(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 			Ctl().Scaler().Restore()
 		if x != nil {
-			klog.V(6).Infof("batch restore deploy  error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量恢复 deploy 错误 %s/%s %v", ns, name, x)
 
 			err = x
 		}
@@ -116,7 +116,7 @@ func BatchRestart(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
 			Ctl().Rollout().Restart()
 		if x != nil {
-			klog.V(6).Infof("batch restart deploy  error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量重启 deploy 错误 %s/%s %v", ns, name, x)
 
 			err = x
 		}
@@ -172,7 +172,7 @@ func Scale(c *gin.Context) {
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
-		Ctl().Scale(r)
+		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
 func Undo(c *gin.Context) {
