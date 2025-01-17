@@ -50,7 +50,7 @@ func BatchResume(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
 			Ctl().CronJob().Resume()
 		if x != nil {
-			klog.V(6).Infof("batch resume cronjob error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量恢复 cronjob 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -83,7 +83,7 @@ func BatchPause(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
 			Ctl().CronJob().Pause()
 		if x != nil {
-			klog.V(6).Infof("batch pause cronjob error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量暂停 cronjob 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
