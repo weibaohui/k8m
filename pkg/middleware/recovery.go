@@ -14,7 +14,7 @@ func CustomRecovery() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				// 打印错误日志（可选）
-				klog.Errorf("Panic caught: %v\n", err)
+				klog.Errorf("捕获到 panic: %v\n", err)
 				// 返回友好的错误信息
 				amis.WriteJsonError(c, fmt.Errorf("服务器内部错误，请稍后再试。"))
 				c.Abort()
