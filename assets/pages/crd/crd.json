@@ -241,8 +241,8 @@
           "type": "columns-toggler",
           "align": "left"
         },
-        "bulkActions",
-        "reload"
+        "reload",
+        "bulkActions"
       ],
       "loadDataOnce": false,
       "syncLocation": false,

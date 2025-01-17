@@ -36,8 +36,8 @@
           "type": "columns-toggler",
           "align": "left"
         },
-        "bulkActions",
-        "reload"
+        "reload",
+        "bulkActions"
       ],
       "loadDataOnce": true,
       "syncLocation": false,

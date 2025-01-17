@@ -287,7 +287,6 @@
           "type": "columns-toggler",
           "align": "left"
         },
-        "bulkActions",
         "reload"
       ],
       "loadDataOnce": false,
