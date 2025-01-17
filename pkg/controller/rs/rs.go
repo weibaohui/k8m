@@ -40,7 +40,7 @@ func BatchRestart(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).Namespace(ns).Name(name).
 			Ctl().Rollout().Restart()
 		if x != nil {
-			klog.V(6).Infof("batch restart rs error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量重启 rs 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -73,7 +73,7 @@ func BatchStop(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).Namespace(ns).Name(name).
 			Ctl().Scaler().Stop()
 		if x != nil {
-			klog.V(6).Infof("batch stop rs error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量停止 rs 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
@@ -106,7 +106,7 @@ func BatchRestore(c *gin.Context) {
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).Namespace(ns).Name(name).
 			Ctl().Scaler().Restore()
 		if x != nil {
-			klog.V(6).Infof("batch restore rs error %s/%s %v", ns, name, x)
+			klog.V(6).Infof("批量恢复 rs 错误 %s/%s %v", ns, name, x)
 			err = x
 		}
 	}
