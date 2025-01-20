@@ -118,7 +118,7 @@
             style: {
                 whiteSpace: 'pre-wrap'
             }
-        }, errorMessage && React.createElement('div', {style: {color: 'red'}}, errorMessage));
+        }, errorMessage && React.createElement('div', { style: { color: 'red' } }, errorMessage));
     }
 
     function SSEComponent(props) {
@@ -190,17 +190,17 @@
 
         return React.createElement(
             'div',
-            {ref: dom, style: {whiteSpace: 'pre-wrap'}},
+            { ref: dom, style: { whiteSpace: 'pre-wrap' } },
             errorMessage && React.createElement(
                 'div',
-                {style: {color: 'red'}},
+                { style: { color: 'red' } },
                 errorMessage
             ),
 
             ...lines.map((line, index) =>
                 React.createElement(
                     'div',
-                    {key: index, style: {display: 'flex', alignItems: 'center'}},
+                    { key: index, style: { display: 'flex', alignItems: 'center' } },
                     React.createElement(
                         'input',
                         {
@@ -387,7 +387,7 @@
         return React.createElement('span', null, readyStatus);
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)k8sPodReady/
     })(K8sPodReadyComponent);
@@ -418,7 +418,7 @@
         );
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)nodeRoles/
     })(NodeRolesComponent);
@@ -429,7 +429,7 @@
 
         // 将 labels 对象转换为数组并生成每个标签的元素
         const labelElements = Object.keys(labels).map((key, index) => {
-            return React.createElement('div', {key: index, style: {marginTop: '5px'}},
+            return React.createElement('div', { key: index, style: { marginTop: '5px' } },
                 React.createElement('span', {
                     key: index,
                     className: 'label bg-gray-100 text-black',
@@ -441,7 +441,7 @@
         return React.createElement('div', null, labelElements.length > 0 ? labelElements : '');
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)k8sLabels/
     })(K8sLabelsComponent);
@@ -497,12 +497,12 @@
         const messageElements = messages.map((message, index) =>
             React.createElement('pre', {
                 key: index,
-                style: {whiteSpace: 'pre-wrap', marginBottom: '1px', marginTop: '1px'}
+                style: { whiteSpace: 'pre-wrap', marginBottom: '1px', marginTop: '1px' }
             }, message)
         );
 
         return React.createElement('div', null,
-            React.createElement('p', {style: {fontWeight: 'bold', display: 'none'}}, `WebSocket Status: ${status}`),
+            React.createElement('p', { style: { fontWeight: 'bold', display: 'none' } }, `WebSocket Status: ${status}`),
             React.createElement('div', {
                 style: {
                     backgroundColor: '#f5f5f5',
@@ -514,7 +514,7 @@
         );
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)websocketViewer/, // 用于在 AMIS 中匹配此组件
     })(WebSocketViewerComponent);
@@ -573,15 +573,15 @@
         const markdownContent = messages.join('');
 
         return React.createElement('div', null,
-            React.createElement('p', {style: {display: 'none'}}, `WebSocket Status: ${status}`),
+            React.createElement('p', { style: { display: 'none' } }, `WebSocket Status: ${status}`),
             React.createElement('div', {
-                    style: {
-                        backgroundColor: '#f5f5f5',
-                        padding: '10px',
-                        borderRadius: '5px',
-                        overflowX: 'auto'
-                    }
-                },
+                style: {
+                    backgroundColor: '#f5f5f5',
+                    padding: '10px',
+                    borderRadius: '5px',
+                    overflowX: 'auto'
+                }
+            },
                 amisLib.render({
                     type: 'markdown',
                     value: markdownContent // 渲染合并后的 Markdown 文本
@@ -590,7 +590,7 @@
         );
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)websocketMarkdownViewer/, // 用于在 AMIS 中匹配此组件
     })(WebSocketMarkdownViewerComponent);
@@ -625,11 +625,11 @@
         });
 
         return React.createElement('div', {
-            style: {display: 'flex', flexWrap: 'wrap', gap: '8px'} // 圆点排列在一行中
+            style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } // 圆点排列在一行中
         }, conditionElements);
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)k8sConditions/
     })(K8sConditionsComponent);
@@ -642,7 +642,7 @@
                 ? 'label label-success'  // 正常情况
                 : 'label label-danger';   // 问题情况
 
-            return React.createElement('div', {key: index, style: {marginTop: '5px'}},
+            return React.createElement('div', { key: index, style: { marginTop: '5px' } },
                 React.createElement('span', {
                     key: index,
                     className: tagClass,
@@ -655,7 +655,9 @@
 
     function K8sConditionsTextComponent(props) {
         const conditions = props.data.status?.conditions || [];
-
+        if (conditions.length === 0) {
+            return React.createElement('span', null, '');
+        }
         // 检查是否有任何条件不正常
         const allNormal = conditions.every(condition => {
             return condition.status === 'True' ||
@@ -669,33 +671,33 @@
 
         // 创建每个 condition 的详情模板
         const conditionDetails = conditions.map(condition => (
-            `<p><strong>${condition.type}</strong>: ${condition.status === 'True' ||
-            (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable"))) ? '正常' : '异常'}</p>`
+            `<p>${condition.type}: <strong>${condition.status === 'True' ||
+                (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable"))) ? '<span class="text-green-500 text-xs" >正常</span>' : '<span class="text-red-500 text-xs" >异常</span>'}</strong></p>`
         )).join('');
 
 
         return React.createElement('div', null,
             React.createElement('div', null,
                 amisLib.render({
-                        "type": "button",
-                        "size": "xs",
-                        "label": statusText,
-                        "level": level,
-                        "actionType": "dialog",
-                        "dialog": {
-                            "closeOnEsc": true,
-                            "closeOnOutside": true,
-                            "title": "条件状态 (ESC 关闭)",
-                            "size": "md",
-                            "body": conditionDetails
-                        }
-                    },
+                    "type": "button",
+                    "size": "xs",
+                    "label": statusText,
+                    "level": level,
+                    "actionType": "dialog",
+                    "dialog": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "title": "条件状态 (ESC 关闭)",
+                        "size": "md",
+                        "body": conditionDetails
+                    }
+                },
                 )
             )
         );
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)k8sTextConditions/
     })(K8sConditionsTextComponent);
@@ -737,12 +739,12 @@
                 whiteSpace: 'pre-wrap', // 自动换行
                 wordBreak: 'break-all'  // 单词换行
             },
-            dangerouslySetInnerHTML: {__html: content} // 渲染 HTML 内容
+            dangerouslySetInnerHTML: { __html: content } // 渲染 HTML 内容
         });
 
     }
 
-// 注册自定义组件为 AMIS 渲染器
+    // 注册自定义组件为 AMIS 渲染器
     amisLib.Renderer({
         test: /(^|\/)highlightHtml/ // 使用 type: "highlightHtml" 进行匹配
     })(HighlightHtmlComponent);
@@ -830,7 +832,7 @@
         return React.createElement('span', null, formattedTime);
     }
 
-// 注册自定义组件
+    // 注册自定义组件
     amisLib.Renderer({
         test: /(^|\/)ciExecutionAge/
     })(CIExecutionAgeDisplayComponent);
@@ -879,12 +881,12 @@
                     let buffer = ''; // 用于拼接不完整的块
 
                     while (!done) {
-                        const {value, done: readerDone} = await reader.read();
+                        const { value, done: readerDone } = await reader.read();
                         done = readerDone;
 
                         if (value) {
                             // 解码当前块数据
-                            buffer += decoder.decode(value, {stream: !done});
+                            buffer += decoder.decode(value, { stream: !done });
 
                             // 按行分割数据
                             const lines = buffer.split('\n');
@@ -937,7 +939,7 @@
             errorMessage &&
             React.createElement(
                 'div', // 错误信息部分
-                {style: {color: 'red'}},
+                { style: { color: 'red' } },
                 errorMessage
             )
         );
