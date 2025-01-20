@@ -634,6 +634,70 @@
         test: /(^|\/)k8sConditions/
     })(K8sConditionsComponent);
 
+    function K8sConditionsTextComponentAllText(props) {
+        const conditions = props.data.status?.conditions || [];
+
+        const conditionElements = conditions.map((condition, index) => {
+            const tagClass = condition.status === 'True' || (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable")))
+                ? 'label label-success'  // 正常情况
+                : 'label label-danger';   // 问题情况
+
+            return React.createElement('div', {key: index, style: {marginTop: '5px'}},
+                React.createElement('span', {
+                    key: index,
+                    className: tagClass,
+                }, condition.type)
+            );
+        });
+
+        return React.createElement('div', null, conditionElements);
+    }
+
+    function K8sConditionsTextComponent(props) {
+        const conditions = props.data.status?.conditions || [];
+
+        // 检查是否有任何条件不正常
+        const allNormal = conditions.every(condition => {
+            return condition.status === 'True' ||
+                (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable")));
+        });
+
+        // 根据检查结果显示不同的状态
+        const statusText = allNormal ? '就绪' : '未就绪';
+        const level = allNormal ? 'primary' : 'danger';
+
+
+        // 创建每个 condition 的详情模板
+        const conditionDetails = conditions.map(condition => (
+            `<p><strong>${condition.type}</strong>: ${condition.status === 'True' ||
+            (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable"))) ? '正常' : '异常'}</p>`
+        )).join('');
+
+
+        return React.createElement('div', null,
+            React.createElement('div', null,
+                amisLib.render({
+                        "type": "button",
+                        "size": "xs",
+                        "label": statusText,
+                        "level": level,
+                        "actionType": "dialog",
+                        "dialog": {
+                            "size": "md",
+                            "title": "提示",
+                            "body": conditionDetails
+                        }
+                    },
+                )
+            )
+        );
+    }
+
+// 注册自定义组件
+    amisLib.Renderer({
+        test: /(^|\/)k8sTextConditions/
+    })(K8sConditionsTextComponent);
+
     // 自定义 HTML 内容渲染组件
     //{
     //                         "type": "highlightHtml",
@@ -1021,8 +1085,6 @@
         const filteredAnnotations = Object.fromEntries(
             Object.entries(input).filter(([key]) => !immutableKeys.includes(key))
         );
-        console.log(JSON.stringify(filteredAnnotations))
-
         return filteredAnnotations;
     });
 
