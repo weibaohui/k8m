@@ -174,40 +174,22 @@ func List(c *gin.Context) {
 		Icon:  "fas fa-info-circle",
 		Children: []Page{
 			{
-				Label:     "API 服务",
-				URL:       "/cluster/api_service/list",
-				Icon:      "fas fa-screwdriver",
-				SchemaAPI: "get:/pages/cluster/api_service.json",
-			},
-			{
-				Label:     "流量规则",
-				URL:       "/cluster/flow_schema/list",
-				Icon:      "fas fa-cog",
-				SchemaAPI: "get:/pages/cluster/flow_schema.json",
-			},
-			{
-				Label:     "优先级配置",
-				URL:       "/cluster/priority_level_config/list",
-				Icon:      "fas fa-cog",
-				SchemaAPI: "get:/pages/cluster/priority_level_config.json",
-			},
-			{
-				Label:     "组件状态",
-				URL:       "/cluster/component_status/list",
-				Icon:      "fas fa-tools",
-				SchemaAPI: "get:/pages/cluster/component_status.json",
-			},
-			{
 				Label:     "Ingress入口类",
 				URL:       "/cluster/ingress_class/list",
 				Icon:      "fas fa-sitemap",
 				SchemaAPI: "get:/pages/cluster/ingress_class.json",
 			},
 			{
-				Label:     "网络策略",
-				URL:       "/network_policy/list",
-				Icon:      "fas fa-boxes",
-				SchemaAPI: "get:/pages/ns/network_policy.json",
+				Label:     "验证钩子",
+				URL:       "/cluster/validation_webhook/list",
+				Icon:      "fas fa-cog",
+				SchemaAPI: "get:/pages/cluster/validation_webhook.json",
+			},
+			{
+				Label:     "变更钩子",
+				URL:       "/cluster/mutating_webhook/list",
+				Icon:      "fas fa-cog",
+				SchemaAPI: "get:/pages/cluster/mutating_webhook.json",
 			},
 			{
 				Label:     "端点",
@@ -222,6 +204,18 @@ func List(c *gin.Context) {
 				SchemaAPI: "get:/pages/ns/endpointslice.json",
 			},
 			{
+				Label:     "水平自动扩缩",
+				URL:       "/hpa/list",
+				Icon:      "fas fa-cogs",
+				SchemaAPI: "get:/pages/ns/hpa.json",
+			},
+			{
+				Label:     "网络策略",
+				URL:       "/network_policy/list",
+				Icon:      "fas fa-boxes",
+				SchemaAPI: "get:/pages/ns/network_policy.json",
+			},
+			{
 				Label:     "资源配额",
 				URL:       "/resource_quota/list",
 				Icon:      "fas fa-dungeon",
@@ -233,12 +227,7 @@ func List(c *gin.Context) {
 				Icon:      "fas fa-compress",
 				SchemaAPI: "get:/pages/ns/limit_range.json",
 			},
-			{
-				Label:     "水平自动扩缩",
-				URL:       "/hpa/list",
-				Icon:      "fas fa-cogs",
-				SchemaAPI: "get:/pages/ns/hpa.json",
-			},
+
 			{
 				Label:     "Pod中断配置",
 				URL:       "/pdb/list",
@@ -263,23 +252,36 @@ func List(c *gin.Context) {
 				Icon:      "fas fa-ruler",
 				SchemaAPI: "get:/pages/cluster/runtime_class.json",
 			},
-			{
-				Label:     "验证钩子",
-				URL:       "/cluster/validation_webhook/list",
-				Icon:      "fas fa-cog",
-				SchemaAPI: "get:/pages/cluster/validation_webhook.json",
-			},
-			{
-				Label:     "变更钩子",
-				URL:       "/cluster/mutating_webhook/list",
-				Icon:      "fas fa-cog",
-				SchemaAPI: "get:/pages/cluster/mutating_webhook.json",
-			},
+
 			{
 				Label:     "CSI节点",
 				URL:       "/cluster/csi_node/list",
 				Icon:      "fas fa-cog",
 				SchemaAPI: "get:/pages/cluster/csi_node.json",
+			},
+			{
+				Label:     "API 服务",
+				URL:       "/cluster/api_service/list",
+				Icon:      "fas fa-screwdriver",
+				SchemaAPI: "get:/pages/cluster/api_service.json",
+			},
+			{
+				Label:     "流量规则",
+				URL:       "/cluster/flow_schema/list",
+				Icon:      "fas fa-cog",
+				SchemaAPI: "get:/pages/cluster/flow_schema.json",
+			},
+			{
+				Label:     "优先级配置",
+				URL:       "/cluster/priority_level_config/list",
+				Icon:      "fas fa-cog",
+				SchemaAPI: "get:/pages/cluster/priority_level_config.json",
+			},
+			{
+				Label:     "组件状态",
+				URL:       "/cluster/component_status/list",
+				Icon:      "fas fa-tools",
+				SchemaAPI: "get:/pages/cluster/component_status.json",
 			},
 		},
 	}
