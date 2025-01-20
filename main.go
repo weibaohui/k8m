@@ -23,6 +23,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/controller/rs"
+	"github.com/weibaohui/k8m/pkg/controller/storage"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/middleware"
@@ -179,6 +180,9 @@ func main() {
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
+
+		// k8s storageclass
+		api.GET("/storageclass/option_list", storage.OptionList)
 
 		// k8s cluster
 		api.GET("/cluster/all", cluster.List)
