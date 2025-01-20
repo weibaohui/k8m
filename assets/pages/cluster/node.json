@@ -791,11 +791,11 @@
         },
         {
           "name": "status.addresses",
-          "label": "IP",
+          "label": "节点",
           "type": "each",
           "items": {
             "type": "tpl",
-            "tpl": "${type}:${address}<br>"
+            "tpl": "${address}<br>"
           },
           "searchable": {
             "type": "input-text",
