@@ -672,14 +672,14 @@
           }
         },
         {
+          "name": "status.conditions",
+          "label": "条件",
+          "type": "k8sTextConditions"
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
-        },
-        {
-          "name": "status.conditions",
-          "label": "条件",
-          "type": "k8sConditions"
         }
       ]
     }
