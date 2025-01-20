@@ -271,7 +271,8 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false
+        "showBtnToolbar": false,
+        "defaultCollapsed": false
       },
       "headerToolbar": [
         {
@@ -981,7 +982,13 @@
         {
           "name": "spec.storageClassName",
           "label": "存储类名称",
-          "type": "text"
+          "type": "text",
+          "searchable": {
+            "type": "input-text",
+            "name": "spec.storageClassName",
+            "label": "存储类名称",
+            "placeholder": "输入存储类名称"
+          }
         },
         {
           "name": "spec.volumeMode",
