@@ -687,14 +687,6 @@
                 },
                 {
                   "type": "button",
-                  "icon": "fas fa-power-off text-danger",
-                  "actionType": "ajax",
-                  "label": "重启",
-                  "confirmText": "您确认要重启?",
-                  "api": "post:/k8s/daemonset/restart/ns/$metadata.namespace/name/$metadata.name"
-                },
-                {
-                  "type": "button",
                   "icon": "fas fa-calendar-alt text-primary",
                   "label": "查看事件",
                   "actionType": "drawer",
