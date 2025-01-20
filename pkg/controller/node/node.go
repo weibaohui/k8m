@@ -37,6 +37,7 @@ func Usage(c *gin.Context) {
 
 	usage := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().ResourceUsageTable()
+	//todo 增加其他资源用量
 	amis.WriteJsonData(c, usage)
 }
 func UnCordon(c *gin.Context) {
