@@ -219,7 +219,8 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false
+        "showBtnToolbar": false,
+        "defaultCollapsed": false
       },
       "headerToolbar": [
         {
@@ -790,7 +791,13 @@
           "name": "claim",
           "label": "PVC声明",
           "type": "tpl",
-          "tpl": "${spec.claimRef.namespace}/${spec.claimRef.name}"
+          "tpl": "${spec.claimRef.namespace}/${spec.claimRef.name}",
+          "searchable": {
+            "type": "input-text",
+            "name": "spec.claimRef.name",
+            "label": "PVC声明",
+            "placeholder": "输入PVC声明名称"
+          }
         },
         {
           "name": "spec.storageClassName",
