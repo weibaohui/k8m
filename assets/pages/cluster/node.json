@@ -790,6 +790,21 @@
           "toggled": true
         },
         {
+          "name": "status.addresses",
+          "label": "IP",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "${type}:${address}<br>"
+          },
+          "searchable": {
+            "type": "input-text",
+            "name": "status.addresses.address",
+            "label": "IP",
+            "placeholder": "输入IP"
+          }
+        },
+        {
           "name": "metadata.name",
           "label": "名称",
           "type": "text",
@@ -814,21 +829,6 @@
           "label": "硬件配置",
           "type": "tpl",
           "tpl": "${status.capacity.cpu}C/${status.capacity.memory|autoConvertMemory}"
-        },
-        {
-          "name": "status.addresses",
-          "label": "IP",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "${type}:${address}<br>"
-          },
-          "searchable": {
-            "type": "input-text",
-            "name": "status.addresses.address",
-            "label": "IP",
-            "placeholder": "输入IP"
-          }
         },
         {
           "name": "resource",
