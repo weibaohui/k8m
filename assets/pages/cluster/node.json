@@ -826,7 +826,7 @@
           "name": "status.conditions",
           "label": "条件",
           "width": "100px",
-          "type": "k8sConditions"
+          "type": "k8sTextConditions"
         },
         {
           "name": "metadata.labels",
