@@ -601,6 +601,7 @@
           },
           "searchable": {
             "type": "select",
+            "clearable": true,
             "options": [
               {
                 "label": "集群",
@@ -620,9 +621,9 @@
           "copyable": true,
           "searchable": {
             "type": "select",
+            "clearable": true,
             "name": "spec.group",
             "searchable": true,
-            "clearable": true,
             "source": "/k8s/crd/group/option_list",
             "onEvent": {
               "change": {
@@ -645,9 +646,9 @@
           "type": "text",
           "searchable": {
             "type": "select",
+            "clearable": true,
             "name": "snk",
             "searchable": true,
-            "clearable": true,
             "placeholder": "请先选择组",
             "source": "/k8s/crd/kind/option_list?spec.group=${spec.group}",
             "onEvent": {

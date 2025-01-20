@@ -659,6 +659,7 @@
           "label": "类型",
           "searchable": {
             "type": "select",
+            "clearable": true,
             "options": [
               {
                 "label": "正常 ",

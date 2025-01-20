@@ -729,6 +729,7 @@
           "type": "mapping",
           "searchable": {
             "type": "select",
+            "clearable": true,
             "options": [
               {
                 "label": "保留 ",
@@ -755,6 +756,7 @@
           "label": "状态",
           "searchable": {
             "type": "select",
+            "clearable": true,
             "options": [
               {
                 "label": "待绑定 ",
@@ -959,6 +961,7 @@
           "type": "mapping",
           "searchable": {
             "type": "select",
+            "clearable": true,
             "options": [
               {
                 "label": "文件系统",

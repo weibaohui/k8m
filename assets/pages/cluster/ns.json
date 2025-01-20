@@ -748,6 +748,7 @@
           },
           "searchable": {
             "type": "select",
+            "clearable": true,
             "options": [
               {
                 "label": "活跃",
