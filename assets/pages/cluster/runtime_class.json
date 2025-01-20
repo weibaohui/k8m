@@ -606,52 +606,18 @@
                     "closeOnOutside": true,
                     "body": [
                       {
-                        "type": "json",
-                        "source": "${metadata.labels}",
-                        "levelExpand": 1
-                      },
-                      {
-                        "label": "编辑",
-                        "type": "button",
-                        "icon": "fas fa-edit text-primary",
-                        "actionType": "dialog",
-                        "dialog": {
-                          "closeOnEsc": true,
-                          "closeOnOutside": true,
-                          "title": "编辑标签  (ESC关闭)",
-                          "size": "lg",
-                          "body": [
-                            {
-                              "type": "form",
-                              "id": "myform",
-                              "mode": "horizontal",
-                              "labelWidth": 0,
-                              "api": "post:/k8s/$kind/group/$group/version/$version/update_labels/ns/$metadata.namespace/name/$metadata.name",
-                              "body": [
-                                {
-                                  "type": "input-kv",
-                                  "name": "labels",
-                                  "draggable": false,
-                                  "value": "${metadata.labels}"
-                                }
-                              ]
-                            }
-                          ],
-                          "actions": [
-                            {
-                              "type": "button",
-                              "label": "取消",
-                              "close": "dialog_labels"
-                            },
-                            {
-                              "label": "确认",
-                              "actionType": "submit",
-                              "primary": true,
-                              "type": "button",
-                              "close": "dialog_labels"
-                            }
-                          ]
-                        }
+                        "type": "form",
+                        "mode": "horizontal",
+                        "labelWidth": 0,
+                        "api": "post:/k8s/$kind/group/$group/version/$version/update_labels/ns/$metadata.namespace/name/$metadata.name",
+                        "body": [
+                          {
+                            "type": "input-kv",
+                            "name": "labels",
+                            "draggable": false,
+                            "value": "${metadata.labels}"
+                          }
+                        ]
                       }
                     ]
                   }
