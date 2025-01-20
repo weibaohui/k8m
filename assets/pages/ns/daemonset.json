@@ -1012,7 +1012,7 @@
                 {
                   "actionType": "dialog",
                   "dialog": {
-                    "title": "${metadata.name} annotations (ESC 关闭)",
+                    "title": "${metadata.name} 注解 (ESC 关闭)",
                     "name": "dialog_annotations",
                     "body": [
                       {
