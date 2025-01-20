@@ -738,11 +738,6 @@
           }
         },
         {
-          "name": "metadata.creationTimestamp",
-          "label": "存在时长",
-          "type": "k8sAge"
-        },
-        {
           "name": "status.phase",
           "label": "状态",
           "type": "mapping",
@@ -768,6 +763,11 @@
               }
             ]
           }
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "存在时长",
+          "type": "k8sAge"
         }
       ]
     }
