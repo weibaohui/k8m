@@ -639,7 +639,7 @@
           "name": "metadata.annotations",
           "label": "注解",
           "type": "tpl",
-          "tpl": "${metadata.annotations ? '<i class=\"fa fa-note-sticky text-primary\"></i>' : ''}",
+          "tpl": "${metadata.annotations|filterAnnotations|showAnnotationIcon}",
           "onEvent": {
             "click": {
               "actions": [
@@ -650,51 +650,19 @@
                     "name": "dialog_annotations",
                     "body": [
                       {
-                        "type": "json",
-                        "source": "${metadata.annotations}",
-                        "levelExpand": 1
-                      },
-                      {
-                        "label": "编辑",
-                        "type": "button",
-                        "icon": "fas fa-edit text-primary",
-                        "actionType": "dialog",
-                        "dialog": {
-                          "closeOnEsc": true,
-                          "closeOnOutside": true,
-                          "title": "编辑注解  (ESC关闭)",
-                          "size": "lg",
-                          "body": [
-                            {
-                              "type": "form",
-                              "mode": "horizontal",
-                              "labelWidth": 0,
-                              "api": "post:/k8s/$kind/group/$group/version/$version/update_annotations/ns/$metadata.namespace/name/$metadata.name",
-                              "body": [
-                                {
-                                  "type": "input-kv",
-                                  "name": "annotations",
-                                  "draggable": false,
-                                  "value": "${metadata.annotations}"
-                                }
-                              ]
-                            }
-                          ],
-                          "actions": [
-                            {
-                              "type": "button",
-                              "label": "取消",
-                              "close": "dialog_annotations"
-                            },
-                            {
-                              "label": "确认",
-                              "actionType": "submit",
-                              "primary": true,
-                              "type": "button",
-                              "close": "dialog_annotations"
-                            }
-                          ]
-                        }
+                        "type": "form",
+                        "mode": "horizontal",
+                        "labelWidth": 0,
+                        "api": "post:/k8s/$kind/group/$group/version/$version/update_annotations/ns/$metadata.namespace/name/$metadata.name",
+                        "initApi": "get:/k8s/$kind/group/$group/version/$version/annotations/ns/$metadata.namespace/name/$metadata.name",
+                        "body": [
+                          {
+                            "type": "input-kv",
+                            "name": "annotations",
+                            "draggable": false,
+                            "value": "${annotations}"
+                          }
+                        ]
                       }
                     ],
                     "size": "lg",
