@@ -805,20 +805,6 @@
           }
         },
         {
-          "name": "metadata.name",
-          "label": "名称",
-          "type": "text",
-          "width": "180px",
-          "copyable": true,
-          "sortable": true,
-          "searchable": {
-            "type": "input-text",
-            "name": "metadata.name",
-            "label": "名称",
-            "placeholder": "输入名称"
-          }
-        },
-        {
           "name": "roles",
           "label": "节点角色",
           "type": "nodeRoles",
@@ -831,205 +817,16 @@
           "tpl": "${status.capacity.cpu}C/${status.capacity.memory|autoConvertMemory}"
         },
         {
-          "name": "resource",
-          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
-          "type": "container",
-          "width": "150px",
-          "body": [
-            {
-              "type": "progress",
-              "label": "request",
-              "value": "<%= data.metadata.annotations['cpu.requestFraction'] %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ]
-            },
-            {
-              "type": "progress",
-              "label": "limit",
-              "value": "<%= data.metadata.annotations['cpu.limitFraction'] %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "resource",
-          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
-          "type": "container",
-          "width": "150px",
-          "body": [
-            {
-              "type": "progress",
-              "label": "request",
-              "value": "<%= data.metadata.annotations['memory.requestFraction'] %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ]
-            },
-            {
-              "type": "progress",
-              "label": "limit",
-              "value": "<%= data.metadata.annotations['memory.limitFraction'] %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "ip",
-          "label": "IP资源<br><span class='text-gray-500 text-xs'>当前/可用/总数</span>",
-          "type": "container",
-          "width": "150px",
-          "body": [
-            {
-              "name": "metadata.annotations['ip.usage.total']",
-              "label": "IP资源",
-              "visibleOn": "${metadata.annotations['ip.usage.total']}",
-              "type": "tpl",
-              "tpl": "${metadata.annotations['ip.usage.used']}/${metadata.annotations['ip.usage.available']}/${metadata.annotations['ip.usage.total']}"
-            },
-            {
-              "type": "progress",
-              "label": "IP Usage Progress",
-              "value": "<%= (data.metadata.annotations['ip.usage.used'] / data.metadata.annotations['ip.usage.total'] * 100).toFixed(2) %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "pod",
-          "label": "Pod数量<br><span class='text-gray-500 text-xs'>当前/可用/总数</span>",
-          "type": "container",
-          "width": "150px",
-          "body": [
-            {
-              "name": "metadata.annotations['pod.count.total']",
-              "label": "Pod数量",
-              "visibleOn": "${metadata.annotations['pod.count.total']}",
-              "type": "tpl",
-              "tpl": "${metadata.annotations['pod.count.used']}/${metadata.annotations['pod.count.available']}/${metadata.annotations['pod.count.total']}"
-            },
-            {
-              "type": "progress",
-              "label": "Pod Count Progress",
-              "value": "<%= (data.metadata.annotations['pod.count.used'] / data.metadata.annotations['pod.count.total'] * 100).toFixed(2) %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ]
-            }
-          ]
-        },
-        {
           "name": "spec.unschedulable",
           "label": "调度状态",
           "type": "tpl",
           "tpl": "<span class='label label-${spec.unschedulable === true ? 'danger' : 'success'}'>${spec.unschedulable === true ? '停止调度' : '调度正常'}</span>"
         },
         {
-          "name": "spec.taints",
-          "label": "污点",
-          "type": "tpl",
-          "tpl": "${spec.taints ? '<i class=\"fa fa-exclamation-triangle text-danger\"></i>' : ''}",
-          "onEvent": {
-            "click": {
-              "actions": [
-                {
-                  "actionType": "dialog",
-                  "dialog": {
-                    "title": "${metadata.name} Taints (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "panel",
-                        "title": "提示",
-                        "body": {
-                          "type": "tpl",
-                          "tpl": "<div><div><strong>禁止调度：</strong>NoSchedule - Pod 不会调度到此节点</div><div><strong>优先不调度：</strong>PreferNoSchedule - 尽量避免调度，但不强制</div><div><strong>不可执行：</strong> NoExecute - 驱逐现有 Pod，并禁止新 Pod 调度</div></div>"
-                        }
-                      },
-                      {
-                        "type": "table",
-                        "source": "${spec.taints}",
-                        "columns": [
-                          {
-                            "name": "key",
-                            "label": "键"
-                          },
-                          {
-                            "name": "value",
-                            "label": "值",
-                            "placeholder": "-"
-                          },
-                          {
-                            "name": "effect",
-                            "label": "效果",
-                            "type": "mapping",
-                            "map": {
-                              "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
-                              "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
-                              "NoExecute": "<span class='label label-danger'>不可执行</span>"
-                            }
-                          }
-                        ]
-                      }
-                    ],
-                    "size": "lg",
-                    "closeOnEsc": true,
-                    "closeOnOutside": true
-                  }
-                }
-              ]
-            }
-          },
-          "style": {
-            "cursor": "pointer"
-          }
+          "name": "status.conditions",
+          "label": "条件",
+          "width": "100px",
+          "type": "k8sConditions"
         },
         {
           "name": "metadata.labels",
@@ -1187,10 +984,205 @@
           }
         },
         {
-          "name": "status.conditions",
-          "label": "条件",
-          "width": "100px",
-          "type": "k8sConditions"
+          "name": "spec.taints",
+          "label": "污点",
+          "type": "tpl",
+          "tpl": "${spec.taints ? '<i class=\"fa fa-exclamation-triangle text-danger\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} Taints (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "panel",
+                        "title": "提示",
+                        "body": {
+                          "type": "tpl",
+                          "tpl": "<div><div><strong>禁止调度：</strong>NoSchedule - Pod 不会调度到此节点</div><div><strong>优先不调度：</strong>PreferNoSchedule - 尽量避免调度，但不强制</div><div><strong>不可执行：</strong> NoExecute - 驱逐现有 Pod，并禁止新 Pod 调度</div></div>"
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "source": "${spec.taints}",
+                        "columns": [
+                          {
+                            "name": "key",
+                            "label": "键"
+                          },
+                          {
+                            "name": "value",
+                            "label": "值",
+                            "placeholder": "-"
+                          },
+                          {
+                            "name": "effect",
+                            "label": "效果",
+                            "type": "mapping",
+                            "map": {
+                              "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
+                              "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
+                              "NoExecute": "<span class='label label-danger'>不可执行</span>"
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "resource",
+          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "type": "progress",
+              "label": "request",
+              "value": "<%= data.metadata.annotations['cpu.requestFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            },
+            {
+              "type": "progress",
+              "label": "limit",
+              "value": "<%= data.metadata.annotations['cpu.limitFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "resource",
+          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "type": "progress",
+              "label": "request",
+              "value": "<%= data.metadata.annotations['memory.requestFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            },
+            {
+              "type": "progress",
+              "label": "limit",
+              "value": "<%= data.metadata.annotations['memory.limitFraction'] %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ip",
+          "label": "IP资源<br><span class='text-gray-500 text-xs'>当前/可用/总数</span>",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "name": "metadata.annotations['ip.usage.total']",
+              "label": "IP资源",
+              "visibleOn": "${metadata.annotations['ip.usage.total']}",
+              "type": "tpl",
+              "tpl": "${metadata.annotations['ip.usage.used']}/${metadata.annotations['ip.usage.available']}/${metadata.annotations['ip.usage.total']}"
+            },
+            {
+              "type": "progress",
+              "label": "IP Usage Progress",
+              "value": "<%= (data.metadata.annotations['ip.usage.used'] / data.metadata.annotations['ip.usage.total'] * 100).toFixed(2) %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "pod",
+          "label": "Pod数量<br><span class='text-gray-500 text-xs'>当前/可用/总数</span>",
+          "type": "container",
+          "width": "150px",
+          "body": [
+            {
+              "name": "metadata.annotations['pod.count.total']",
+              "label": "Pod数量",
+              "visibleOn": "${metadata.annotations['pod.count.total']}",
+              "type": "tpl",
+              "tpl": "${metadata.annotations['pod.count.used']}/${metadata.annotations['pod.count.available']}/${metadata.annotations['pod.count.total']}"
+            },
+            {
+              "type": "progress",
+              "label": "Pod Count Progress",
+              "value": "<%= (data.metadata.annotations['pod.count.used'] / data.metadata.annotations['pod.count.total'] * 100).toFixed(2) %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "status.images",
+          "label": "容器镜像",
+          "type": "tpl",
+          "tpl": "${count(status.images)}"
         },
         {
           "name": "status.nodeInfo.architecture",
@@ -1210,10 +1202,18 @@
           "type": "text"
         },
         {
-          "name": "status.images",
-          "label": "容器镜像",
-          "type": "tpl",
-          "tpl": "${count(status.images)}"
+          "name": "metadata.name",
+          "label": "名称",
+          "type": "text",
+          "width": "180px",
+          "copyable": true,
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.name",
+            "label": "名称",
+            "placeholder": "输入名称"
+          }
         },
         {
           "name": "metadata.creationTimestamp",
