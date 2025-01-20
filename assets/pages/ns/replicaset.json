@@ -848,6 +848,21 @@
           "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
         },
         {
+          "name": "metadata.ownerReferences",
+          "label": "所有者",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>[${kind}]</strong>${name}</div>"
+          },
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.ownerReferences.name",
+            "label": "所有者名称",
+            "placeholder": "输入所有者名称"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
