@@ -825,7 +825,6 @@
         {
           "name": "status.conditions",
           "label": "条件",
-          "width": "100px",
           "type": "k8sTextConditions"
         },
         {
