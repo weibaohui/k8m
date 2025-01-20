@@ -1289,55 +1289,6 @@
                   }
                 },
                 {
-                  "label": "资源用量",
-                  "type": "button",
-                  "icon": "fas fa-percentage text-primary",
-                  "actionType": "dialog",
-                  "dialog": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "title": "资源使用详情 (ESC关闭)",
-                    "size": "lg",
-                    "body": {
-                      "type": "service",
-                      "api": "get:/k8s/pod/usage/ns/${metadata.namespace}/name/${metadata.name}",
-                      "body": {
-                        "type": "table",
-                        "columns": [
-                          {
-                            "label": "资源类型",
-                            "name": "resourceType"
-                          },
-                          {
-                            "label": "总量",
-                            "name": "total"
-                          },
-                          {
-                            "label": "请求量",
-                            "name": "request"
-                          },
-                          {
-                            "label": "请求占比 (%)",
-                            "name": "requestFraction",
-                            "type": "tpl",
-                            "tpl": "<span class='label <% if (data.requestFraction > 80) { %>label-danger<% } else if (data.requestFraction > 50) { %>label-warning<% } else { %>label-success<% } %>'> <%= data.requestFraction %> % </span>"
-                          },
-                          {
-                            "label": "限制量",
-                            "name": "limit"
-                          },
-                          {
-                            "label": "限制占比 (%)",
-                            "name": "limitFraction",
-                            "type": "tpl",
-                            "tpl": "<span class='label <% if (data.limitFraction > 80) { %>label-danger<% } else if (data.limitFraction > 50) { %>label-warning<% } else { %>label-success<% } %>'> <%= data.limitFraction %> % </span>"
-                          }
-                        ]
-                      }
-                    }
-                  }
-                },
-                {
                   "label": "关联资源",
                   "type": "button",
                   "icon": "fas fa-code-branch text-primary",
