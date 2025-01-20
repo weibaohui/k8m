@@ -10,6 +10,29 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// 部分key为k8m增加的指标数据，不是资源自身的注解，因此过滤掉。
+// last-applied-configuration是k8s管理的，不允许修改。
+// 注意同步修改前端的assets/public/custom.js里面的filterAnnotations方法
+var immutableKeys = []string{
+	"cpu.request",
+	"cpu.requestFraction",
+	"cpu.limit",
+	"cpu.limitFraction",
+	"cpu.total",
+	"memory.request",
+	"memory.requestFraction",
+	"memory.limit",
+	"memory.limitFraction",
+	"memory.total",
+	"ip.usage.total",
+	"ip.usage.used",
+	"ip.usage.available",
+	"pod.count.total",
+	"pod.count.used",
+	"pod.count.available",
+	"kubectl.kubernetes.io/last-applied-configuration",
+}
+
 func UpdateAnnotations(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -25,28 +48,6 @@ func UpdateAnnotations(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
-	}
-
-	// 部分key为k8m增加的指标数据，不是资源自身的注解，因此过滤掉。
-	// last-applied-configuration是k8s管理的，不允许修改。
-	var immutableKeys = []string{
-		"cpu.request",
-		"cpu.requestFraction",
-		"cpu.limit",
-		"cpu.limitFraction",
-		"cpu.total",
-		"memory.request",
-		"memory.requestFraction",
-		"memory.limit",
-		"memory.limitFraction",
-		"memory.total",
-		"ip.usage.total",
-		"ip.usage.used",
-		"ip.usage.available",
-		"pod.count.total",
-		"pod.count.used",
-		"pod.count.available",
-		"kubectl.kubernetes.io/last-applied-configuration",
 	}
 
 	// 判断下前台传来的annotations是否是immutableKeys中的key，如果是则不允许修改
@@ -91,4 +92,32 @@ func UpdateAnnotations(c *gin.Context) {
 	}
 
 	amis.WriteJsonOK(c)
+}
+func ListAnnotations(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var obj *unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Name(name).Namespace(ns).
+		CRD(group, version, kind).
+		Get(&obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	annotations := obj.GetAnnotations()
+	// 排除immutableKeys
+	for _, key := range immutableKeys {
+		delete(annotations, key)
+	}
+
+	amis.WriteJsonData(c, gin.H{
+		"annotations": annotations,
+	})
 }
