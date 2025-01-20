@@ -683,8 +683,10 @@
                         "level": level,
                         "actionType": "dialog",
                         "dialog": {
+                            "closeOnEsc": true,
+                            "closeOnOutside": true,
+                            "title": "条件状态 (ESC 关闭)",
                             "size": "md",
-                            "title": "提示",
                             "body": conditionDetails
                         }
                     },
