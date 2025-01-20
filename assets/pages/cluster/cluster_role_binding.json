@@ -592,7 +592,13 @@
           "name": "roleRef.name",
           "label": "角色",
           "type": "tpl",
-          "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500'>[${roleRef.kind}]</strong>${roleRef.name}</div>"
+          "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500'>[${roleRef.kind}]</strong>${roleRef.name}</div>",
+          "searchable": {
+            "type": "input-text",
+            "name": "roleRef.name",
+            "label": "角色",
+            "placeholder": "输入角色名称"
+          }
         },
         {
           "name": "subjects",
@@ -601,6 +607,12 @@
           "items": {
             "type": "tpl",
             "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500'>[${kind}]</strong>${name}</div>"
+          },
+          "searchable": {
+            "type": "input-text",
+            "name": "subjects",
+            "label": "主体",
+            "placeholder": "输入主体名称"
           }
         },
         {
