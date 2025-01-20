@@ -988,4 +988,50 @@
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     });
 
+
+    amisLib.registerFilter('filterAnnotations', function (input) {
+
+        // 如果输入不是对象，直接返回原始输入
+        if (typeof input !== 'object' || input === null || input === undefined) {
+            return input;
+        }
+
+        // 定义需要过滤的 key 列表
+        const immutableKeys = [
+            "cpu.request",
+            "cpu.requestFraction",
+            "cpu.limit",
+            "cpu.limitFraction",
+            "cpu.total",
+            "memory.request",
+            "memory.requestFraction",
+            "memory.limit",
+            "memory.limitFraction",
+            "memory.total",
+            "ip.usage.total",
+            "ip.usage.used",
+            "ip.usage.available",
+            "pod.count.total",
+            "pod.count.used",
+            "pod.count.available",
+            "kubectl.kubernetes.io/last-applied-configuration"
+        ];
+
+        // 过滤掉 immutableKeys 中的 key
+        const filteredAnnotations = Object.fromEntries(
+            Object.entries(input).filter(([key]) => !immutableKeys.includes(key))
+        );
+        console.log(JSON.stringify(filteredAnnotations))
+
+        return filteredAnnotations;
+    });
+
+    amisLib.registerFilter('showAnnotationIcon', function (annotations) {
+        // 如果 annotations 存在且不是空对象，则返回图标
+        if (annotations && Object.keys(annotations).length > 0) {
+            return '<i class="fa fa-note-sticky text-primary"></i>';
+        }
+        // 否则返回空字符串
+        return '';
+    });
 })();
