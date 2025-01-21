@@ -851,8 +851,8 @@
                                 "type": "button",
                                 "icon": "fas fa-undo-alt text-danger",
                                 "actionType": "ajax",
-                                "label": "恢复",
-                                "confirmText": "您确认要恢复到 $revision ?",
+                                "label": "回滚",
+                                "confirmText": "您确认要回滚到 $revision ?",
                                 "api": "post:/k8s/daemonset/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
                                 "onEvent": {
                                   "click": {
@@ -913,9 +913,18 @@
                             "type": "text"
                           },
                           {
-                            "name": "namespace",
+                            "name": "name",
                             "label": "名称",
                             "type": "text"
+                          },
+                          {
+                            "name": "containers",
+                            "label": "容器",
+                            "type": "each",
+                            "items": {
+                              "type": "tpl",
+                              "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
+                            }
                           },
                           {
                             "name": "creationTimestamp",
