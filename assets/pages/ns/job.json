@@ -898,6 +898,268 @@
           }
         },
         {
+          "name": "spec.template.spec.affinity",
+          "label": "亲和性",
+          "type": "tpl",
+          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa fa-heartbeat text-danger\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 亲和性 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "tabs",
+                        "swipeable": true,
+                        "tabs": [
+                          {
+                            "title": "节点亲和性",
+                            "tab": [
+                              {
+                                "type": "divider",
+                                "title": "节点标签 必须满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}"
+                              },
+                              {
+                                "name": "spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}",
+                                "type": "each",
+                                "items": {
+                                  "type": "table",
+                                  "source": "${item.matchExpressions}",
+                                  "columns": [
+                                    {
+                                      "name": "key",
+                                      "label": "键",
+                                      "width": "250px"
+                                    },
+                                    {
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "type": "mapping",
+                                      "map": {
+                                        "In": "<span class='label label-success'>包含</span>",
+                                        "NotIn": "<span class='label label-warning'>不包含</span>",
+                                        "Exists": "<span class='label label-info'>存在</span>"
+                                      },
+                                      "placeholder": "-",
+                                      "width": "50px"
+                                    },
+                                    {
+                                      "name": "values",
+                                      "label": "值",
+                                      "type": "each",
+                                      "items": {
+                                        "type": "tpl",
+                                        "tpl": "${item}<br>"
+                                      },
+                                      "placeholder": "-"
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "wrapper",
+                                "className": "h-10",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "divider",
+                                "title": "节点标签 优先满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "name": "spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "type": "each",
+                                "items": {
+                                  "type": "table",
+                                  "source": "${item.preference.matchExpressions}",
+                                  "columns": [
+                                    {
+                                      "name": "key",
+                                      "label": "键",
+                                      "width": "250px"
+                                    },
+                                    {
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "type": "mapping",
+                                      "map": {
+                                        "In": "<span class='label label-success'>包含</span>",
+                                        "NotIn": "<span class='label label-warning'>不包含</span>",
+                                        "Exists": "<span class='label label-info'>存在</span>"
+                                      },
+                                      "placeholder": "-",
+                                      "width": "50px"
+                                    },
+                                    {
+                                      "name": "values",
+                                      "label": "值",
+                                      "type": "each",
+                                      "items": {
+                                        "type": "tpl",
+                                        "tpl": "${item}<br>"
+                                      },
+                                      "placeholder": "-"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "title": "Pod亲和性",
+                            "tab": [
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 必须满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "table",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
+                                "source": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text",
+                                    "value": "${topologyKey|raw}"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "wrapper",
+                                "className": "h-10",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 优先满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "table",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "source": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${podAffinityTerm.labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text",
+                                    "value": "${podAffinityTerm.topologyKey|raw}"
+                                  },
+                                  {
+                                    "name": "weight",
+                                    "label": "权重",
+                                    "type": "text",
+                                    "value": "${weight}"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "title": "Pod反亲和性",
+                            "tab": [
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 必须满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "table",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
+                                "source": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text",
+                                    "value": "${topologyKey|raw}"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "wrapper",
+                                "className": "h-10",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 优先满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "table",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "source": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${podAffinityTerm.labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text",
+                                    "value": "${podAffinityTerm.topologyKey|raw}"
+                                  },
+                                  {
+                                    "name": "weight",
+                                    "label": "权重",
+                                    "type": "text",
+                                    "value": "${weight}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
           "name": "metadata.ownerReferences",
           "label": "所有者",
           "type": "tpl",

@@ -844,6 +844,69 @@
           }
         },
         {
+          "name": "spec.nodeAffinity.required.nodeSelectorTerms",
+          "label": "亲和性",
+          "type": "tpl",
+          "tpl": "${spec.nodeAffinity.required.nodeSelectorTerms ? '<i class=\"fa fa-heartbeat text-danger\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 亲和性 (ESC 关闭)",
+                    "body": [
+                      {
+                        "name": "spec.nodeAffinity.required.nodeSelectorTerms",
+                        "type": "each",
+                        "items": {
+                          "type": "table",
+                          "source": "${item.matchExpressions}",
+                          "columns": [
+                            {
+                              "name": "key",
+                              "label": "键",
+                              "width": "250px"
+                            },
+                            {
+                              "name": "operator",
+                              "label": "操作符",
+                              "type": "mapping",
+                              "map": {
+                                "In": "<span class='label label-success'>包含</span>",
+                                "NotIn": "<span class='label label-warning'>不包含</span>",
+                                "Exists": "<span class='label label-info'>存在</span>"
+                              },
+                              "placeholder": "-",
+                              "width": "50px"
+                            },
+                            {
+                              "name": "values",
+                              "label": "值",
+                              "type": "each",
+                              "items": {
+                                "type": "tpl",
+                                "tpl": "${item}<br>"
+                              },
+                              "placeholder": "-"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
           "name": "spec.volumeMode",
           "label": "卷模式",
           "type": "mapping",
