@@ -1397,6 +1397,12 @@
                                 "sortable": true
                               },
                               {
+                                "name": "metadata.annotations.pvcMounts",
+                                "label": "挂载信息",
+                                "type": "tpl",
+                                "tpl": "<% const mounts = (data.metadata.annotations && data.metadata.annotations.pvcMounts) ? JSON.parse(data.metadata.annotations.pvcMounts) : []; %><% if (mounts.length > 0) { %><% mounts.forEach((item) => { %>挂载文件夹: <%= item.mountPath + (item.subPath ? '/' + item.subPath : '') %>,  只读: <%= item.readOnly ? '是' : '否' %><br><% }); %><% } else { %>没有挂载信息<% } %>"
+                              },
+                              {
                                 "name": "status.phase",
                                 "label": "状态",
                                 "type": "mapping",
@@ -1671,36 +1677,7 @@
                             "type": "crud",
                             "loadDataOnce": true,
                             "headerToolbar": [
-                              "reload",
-                              "bulkActions"
-                            ],
-                            "bulkActions": [
-                              {
-                                "label": "批量删除",
-                                "actionType": "ajax",
-                                "confirmText": "确定要批量删除?",
-                                "api": {
-                                  "url": "/k8s/$kind/group/$group/version/$version/batch/remove",
-                                  "method": "post",
-                                  "data": {
-                                    "name_list": "${selectedItems | pick:metadata.name }",
-                                    "ns_list": "${selectedItems | pick:metadata.namespace }"
-                                  }
-                                }
-                              },
-                              {
-                                "label": "强制删除",
-                                "actionType": "ajax",
-                                "confirmText": "确定要批量强制删除?",
-                                "api": {
-                                  "url": "/k8s/$kind/group/$group/version/$version/force_remove",
-                                  "method": "post",
-                                  "data": {
-                                    "name_list": "${selectedItems | pick:metadata.name }",
-                                    "ns_list": "${selectedItems | pick:metadata.namespace }"
-                                  }
-                                }
-                              }
+                              "reload"
                             ],
                             "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/configmap",
                             "columns": [
