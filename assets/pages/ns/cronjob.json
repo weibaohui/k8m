@@ -620,52 +620,6 @@
               "buttons": [
                 {
                   "type": "button",
-                  "icon": "fa fa-question-circle text-primary",
-                  "label": "问AI",
-                  "actionType": "dialog",
-                  "dialog": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "title": "请输入问题 (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "textarea",
-                        "name": "question",
-                        "label": "问题",
-                        "required": true
-                      },
-                      {
-                        "type": "button",
-                        "label": "问AI",
-                        "level": "primary",
-                        "actionType": "drawer",
-                        "drawer": {
-                          "closeOnOutside": true,
-                          "closeOnEsc": true,
-                          "size": "xl",
-                          "title": "AI回答 (ESC 关闭)",
-                          "body": [
-                            {
-                              "type": "websocketMarkdownViewer",
-                              "url": "/k8s/chat/ask",
-                              "params": {
-                                "kind": "${kind}",
-                                "group": "${group}",
-                                "version": "${version}",
-                                "namespace": "${metadata.namespace}",
-                                "name": "${metadata.name}",
-                                "data": "${question}"
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    ],
-                    "actions": []
-                  }
-                },
-                {
-                  "type": "button",
                   "icon": "fas fa-calendar-alt text-primary",
                   "label": "查看事件",
                   "actionType": "drawer",
