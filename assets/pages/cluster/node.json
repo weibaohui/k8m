@@ -559,7 +559,6 @@
               "type": "dropdown-button",
               "icon": "fa fa-ellipsis-h",
               "buttons": [
-                ,
                 {
                   "type": "link",
                   "icon": "fa-brands fa-docker text-primary",
