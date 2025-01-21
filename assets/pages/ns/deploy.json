@@ -1177,6 +1177,131 @@
           }
         },
         {
+          "name": "spec.template.spec.affinity",
+          "label": "亲和性",
+          "type": "tpl",
+          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa fa-heart text-danger\"></i>' : ''}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 亲和性 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "tabs",
+                        "swipeable": true,
+                        "tabs": [
+                          {
+                            "title": "节点亲和性",
+                            "tab": [
+                              {
+                                "type": "divider",
+                                "title": "必须满足",
+                                "titlePosition": "center",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}"
+                              },
+                              {
+                                "name": "spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}",
+                                "type": "each",
+                                "items": {
+                                  "type": "table",
+                                  "source": "${item.matchExpressions}",
+                                  "columns": [
+                                    {
+                                      "name": "key",
+                                      "label": "键"
+                                    },
+                                    {
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "type": "mapping",
+                                      "map": {
+                                        "In": "<span class='label label-success'>包含</span>",
+                                        "NotIn": "<span class='label label-warning'>不包含</span>",
+                                        "Exists": "<span class='label label-info'>存在</span>"
+                                      },
+                                      "placeholder": "-"
+                                    },
+                                    {
+                                      "name": "values",
+                                      "label": "值",
+                                      "type": "each",
+                                      "items": {
+                                        "type": "tpl",
+                                        "tpl": "${item}<br>"
+                                      },
+                                      "placeholder": "-"
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "divider",
+                                "title": "优先满足",
+                                "titlePosition": "center",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "name": "spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "type": "each",
+                                "items": {
+                                  "type": "table",
+                                  "source": "${item.preference.matchExpressions}",
+                                  "columns": [
+                                    {
+                                      "name": "key",
+                                      "label": "键"
+                                    },
+                                    {
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "type": "mapping",
+                                      "map": {
+                                        "In": "<span class='label label-success'>包含</span>",
+                                        "NotIn": "<span class='label label-warning'>不包含</span>",
+                                        "Exists": "<span class='label label-info'>存在</span>"
+                                      },
+                                      "placeholder": "-"
+                                    },
+                                    {
+                                      "name": "values",
+                                      "label": "值",
+                                      "type": "each",
+                                      "items": {
+                                        "type": "tpl",
+                                        "tpl": "${item}<br>"
+                                      },
+                                      "placeholder": "-"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "title": "Pod亲和性",
+                            "tab": "Content 2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
           "name": "spec.template.spec.containers",
           "label": "容器",
           "type": "each",
