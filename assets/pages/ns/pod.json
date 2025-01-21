@@ -1848,38 +1848,16 @@
                               "showBtnToolbar": false
                             },
                             "type": "crud",
+                            "name": "node_crud",
                             "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/node",
                             "columns": [
                               {
-                                "name": "current",
-                                "label": "当前节点",
-                                "type": "mapping",
-                                "map": {
-                                  "true": "<span class='label label-success'>当前节点</span>",
-                                  "*": ""
-                                },
-                                "sortable": true,
-                                "searchable": {
-                                  "type": "select",
-                                  "clearable": true,
-                                  "options": [
-                                    {
-                                      "label": "当前节点",
-                                      "value": "true"
-                                    },
-                                    {
-                                      "label": "非当前节点",
-                                      "value": "false"
-                                    }
-                                  ]
-                                }
-                              },
-                              {
                                 "name": "node_name",
                                 "label": "节点名称",
-                                "type": "text",
+                                "type": "tpl",
                                 "sortable": true,
-                                "searchable": true
+                                "searchable": true,
+                                "tpl": "<%=data.node_name %> <% if (data.current) { %> <span class='label label-success'>当前节点</span><% } %>"
                               },
                               {
                                 "name": "reason",
