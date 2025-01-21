@@ -643,42 +643,60 @@
                   "type": "button",
                   "icon": "fas fa-wrench text-primary",
                   "label": "更新tag",
-                  "actionType": "drawer",
-                  "drawer": {
+                  "actionType": "dialog",
+                  "dialog": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "position": "left",
                     "title": "编辑",
-                    "body": {
-                      "type": "form",
-                      "name": "sample-edit-form",
-                      "data": {
-                        "env": ""
-                      },
-                      "api": {
-                        "method": "post",
-                        "url": "/k8s/deploy/update/ns/$metadata.namespace/name/$metadata.name/container/$container_name/tag/$tag"
-                      },
-                      "body": [
-                        {
-                          "type": "select",
-                          "name": "container_name",
-                          "label": "容器",
-                          "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
-                          "value": "${spec.template.spec.containers[0].name}",
-                          "required": true
-                        },
-                        {
-                          "type": "input-text",
-                          "name": "tag",
-                          "label": "tag",
-                          "required": true
-                        },
-                        {
-                          "type": "divider"
-                        }
-                      ]
-                    }
+                    "body": [
+                      {
+                        "type": "page",
+                        "body": [
+                          {
+                            "type": "panel",
+                            "title": "当前运行镜像",
+                            "body": {
+                              "name": "spec.template.spec.containers",
+                              "type": "each",
+                              "items": {
+                                "type": "tpl",
+                                "tpl": "<div style='margin-bottom: 10px;'>容器：<strong class='text-green-500 font-black'>${name}</strong><br>镜像： ${image|simpleImageName}</div>"
+                              }
+                            }
+                          },
+                          {
+                            "type": "form",
+                            "title": "更新镜像Tag",
+                            "name": "sample-edit-form",
+                            "data": {
+                              "env": ""
+                            },
+                            "api": {
+                              "method": "post",
+                              "url": "/k8s/deploy/update/ns/$metadata.namespace/name/$metadata.name/container/$container_name/tag/$tag"
+                            },
+                            "actions": [],
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "container_name",
+                                "label": "容器",
+                                "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.template.spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "tag",
+                                "label": "tag",
+                                "required": true
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   }
                 },
                 {
