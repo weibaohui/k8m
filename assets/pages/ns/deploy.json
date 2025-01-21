@@ -1202,7 +1202,7 @@
                               {
                                 "type": "divider",
                                 "title": "必须满足",
-                                "titlePosition": "center",
+                                "titlePosition": "left",
                                 "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}"
                               },
                               {
@@ -1244,7 +1244,7 @@
                               {
                                 "type": "divider",
                                 "title": "优先满足",
-                                "titlePosition": "center",
+                                "titlePosition": "left",
                                 "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
