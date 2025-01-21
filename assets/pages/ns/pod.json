@@ -2257,6 +2257,46 @@
                                 "items": {
                                   "type": "table",
                                   "source": "${item.matchExpressions}",
+                                  "visibleOn": "${item.matchExpressions}",
+                                  "columns": [
+                                    {
+                                      "name": "key",
+                                      "label": "键",
+                                      "width": "250px"
+                                    },
+                                    {
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "type": "mapping",
+                                      "map": {
+                                        "In": "<span class='label label-success'>包含</span>",
+                                        "NotIn": "<span class='label label-warning'>不包含</span>",
+                                        "Exists": "<span class='label label-info'>存在</span>"
+                                      },
+                                      "placeholder": "-",
+                                      "width": "50px"
+                                    },
+                                    {
+                                      "name": "values",
+                                      "label": "值",
+                                      "type": "each",
+                                      "items": {
+                                        "type": "tpl",
+                                        "tpl": "${item}<br>"
+                                      },
+                                      "placeholder": "-"
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms",
+                                "visibleOn": "${spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}",
+                                "type": "each",
+                                "items": {
+                                  "type": "table",
+                                  "source": "${item.matchFields}",
+                                  "visibleOn": "${item.matchFields}",
                                   "columns": [
                                     {
                                       "name": "key",
