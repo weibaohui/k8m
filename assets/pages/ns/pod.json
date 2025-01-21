@@ -1843,13 +1843,43 @@
                             "headerToolbar": [
                               "reload"
                             ],
+                            "autoGenerateFilter": {
+                              "columnsNum": 4,
+                              "showBtnToolbar": false
+                            },
                             "type": "crud",
                             "api": "/k8s/pod/ns/${metadata.namespace}/name/${metadata.name}/links/node",
                             "columns": [
                               {
+                                "name": "current",
+                                "label": "当前节点",
+                                "type": "mapping",
+                                "map": {
+                                  "true": "<span class='label label-success'>当前节点</span>",
+                                  "*": ""
+                                },
+                                "sortable": true,
+                                "searchable": {
+                                  "type": "select",
+                                  "clearable": true,
+                                  "options": [
+                                    {
+                                      "label": "当前节点",
+                                      "value": "true"
+                                    },
+                                    {
+                                      "label": "非当前节点",
+                                      "value": "false"
+                                    }
+                                  ]
+                                }
+                              },
+                              {
                                 "name": "node_name",
                                 "label": "节点名称",
-                                "type": "text"
+                                "type": "text",
+                                "sortable": true,
+                                "searchable": true
                               },
                               {
                                 "name": "reason",
