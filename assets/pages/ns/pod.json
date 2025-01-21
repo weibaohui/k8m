@@ -3759,7 +3759,9 @@
                               {
                                 "name": "containerName",
                                 "label": "容器",
-                                "type": "text"
+                                "type": "text",
+                                "sortable": true,
+                                "searchable": true
                               },
                               {
                                 "name": "envName",
@@ -3815,7 +3817,9 @@
                               {
                                 "name": "containerName",
                                 "label": "容器",
-                                "type": "text"
+                                "type": "text",
+                                "sortable": true,
+                                "searchable": true
                               },
                               {
                                 "name": "envName",
