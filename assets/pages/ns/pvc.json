@@ -735,6 +735,7 @@
           "searchable": {
             "type": "input-text",
             "name": "metadata.name",
+            "clearable": true,
             "label": "名称",
             "placeholder": "输入名称"
           }
