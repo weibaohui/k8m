@@ -1072,7 +1072,7 @@
           "name": "spec.template.spec.affinity",
           "label": "亲和性",
           "type": "tpl",
-          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa fa-heartbeat text-primary\"></i>' : ''}",
+          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa-solid fa-sitemap text-primary\"></i>' : ''}",
           "onEvent": {
             "click": {
               "actions": [
