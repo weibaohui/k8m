@@ -662,7 +662,7 @@
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
-          "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : ''}",
+          "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : '<i class=\"fa fa-tags text-secondary\"></i>'}",
           "onEvent": {
             "click": {
               "actions": [
