@@ -11,6 +11,47 @@
           "buttons": [
             {
               "type": "button",
+              "label": "应用到集群",
+              "icon": "fas fa-play text-success",
+              "actionType": "ajax",
+              "tooltip": "kubectl apply",
+              "confirmText": "确定要执行?",
+              "api": "post:/k8s/yaml/apply",
+              "validate": true,
+              "onSuccess": [
+                {
+                  "actionType": "setValue",
+                  "args": {
+                    "result": "${msg}"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "label": "清空编辑器",
+              "icon": "fas fa-eraser text-success",
+              "onEvent": {
+                "click": {
+                  "actions": [
+                    {
+                      "actionType": "custom",
+                      "script": "localStorage.setItem('yaml','');"
+                    },
+                    {
+                      "type": "action",
+                      "actionType": "setValue",
+                      "componentId": "yaml",
+                      "args": {
+                        "value": ""
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "button",
               "label": "导入yaml文件",
               "icon": "fas fa-file-code text-success",
               "actionType": "dialog",
@@ -91,47 +132,6 @@
                 ],
                 "actions": []
               }
-            },
-            {
-              "type": "button",
-              "label": "清空编辑器",
-              "icon": "fas fa-eraser text-success",
-              "onEvent": {
-                "click": {
-                  "actions": [
-                    {
-                      "actionType": "custom",
-                      "script": "localStorage.setItem('yaml','');"
-                    },
-                    {
-                      "type": "action",
-                      "actionType": "setValue",
-                      "componentId": "yaml",
-                      "args": {
-                        "value": ""
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "type": "button",
-              "label": "应用到集群",
-              "icon": "fas fa-play text-success",
-              "actionType": "ajax",
-              "tooltip": "kubectl apply",
-              "confirmText": "确定要执行?",
-              "api": "post:/k8s/yaml/apply",
-              "validate": true,
-              "onSuccess": [
-                {
-                  "actionType": "setValue",
-                  "args": {
-                    "result": "${msg}"
-                  }
-                }
-              ]
             },
             {
               "type": "button",
