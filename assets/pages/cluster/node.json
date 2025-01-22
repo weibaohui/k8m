@@ -868,7 +868,7 @@
           "name": "spec.taints",
           "label": "污点",
           "type": "tpl",
-          "tpl": "${spec.taints ? '<i class=\"fa fa-exclamation-triangle text-danger\"></i>' : ''}",
+          "tpl": "${spec.taints ? '<i class=\"fa fa-exclamation-triangle text-primary\"></i>' : ''}",
           "onEvent": {
             "click": {
               "actions": [

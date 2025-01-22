@@ -1034,7 +1034,7 @@
           "name": "spec.template.spec.tolerations",
           "label": "容忍",
           "type": "tpl",
-          "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa fa-exclamation-triangle text-danger\"></i>' : ''}",
+          "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa fa-exclamation-triangle text-primary\"></i>' : ''}",
           "onEvent": {
             "click": {
               "actions": [
@@ -1103,7 +1103,7 @@
           "name": "spec.template.spec.affinity",
           "label": "亲和性",
           "type": "tpl",
-          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa fa-heartbeat text-danger\"></i>' : ''}",
+          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa fa-heartbeat text-primary\"></i>' : ''}",
           "onEvent": {
             "click": {
               "actions": [

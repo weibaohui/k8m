@@ -848,7 +848,7 @@
           "name": "spec.nodeAffinity.required.nodeSelectorTerms",
           "label": "亲和性",
           "type": "tpl",
-          "tpl": "${spec.nodeAffinity.required.nodeSelectorTerms ? '<i class=\"fa fa-heartbeat text-danger\"></i>' : ''}",
+          "tpl": "${spec.nodeAffinity.required.nodeSelectorTerms ? '<i class=\"fa fa-heartbeat text-primary\"></i>' : ''}",
           "onEvent": {
             "click": {
               "actions": [

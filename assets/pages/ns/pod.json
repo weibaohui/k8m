@@ -2156,7 +2156,7 @@
           "name": "spec.tolerations",
           "label": "容忍",
           "type": "tpl",
-          "tpl": "${spec.tolerations ? '<i class=\"fa fa-exclamation-triangle text-danger\"></i>' : ''}",
+          "tpl": "${spec.tolerations ? '<i class=\"fa fa-exclamation-triangle text-primary\"></i>' : ''}",
           "onEvent": {
             "click": {
               "actions": [
@@ -2225,7 +2225,7 @@
           "name": "spec.affinity",
           "label": "亲和性",
           "type": "tpl",
-          "tpl": "${spec.affinity ? '<i class=\"fa fa-heartbeat text-danger\"></i>' : ''}",
+          "tpl": "${spec.affinity ? '<i class=\"fa fa-heartbeat text-primary\"></i>' : ''}",
           "onEvent": {
             "click": {
               "actions": [
