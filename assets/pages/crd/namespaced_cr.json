@@ -12,31 +12,6 @@
         },
         {
           "type": "button",
-          "label": "指南",
-          "level": "link",
-          "icon": "fas fa-compass text-primary",
-          "actionType": "drawer",
-          "drawer": {
-            "overlay": false,
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "size": "lg",
-            "title": "${kind}指南（ESC 关闭）",
-            "body": [
-              {
-                "type": "websocketMarkdownViewer",
-                "url": "/k8s/chat/resource",
-                "params": {
-                  "kind": "${kind}",
-                  "group": "${group}",
-                  "version": "${version}"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "button",
           "label": "属性文档",
           "level": "link",
           "icon": "fas fa-book-open text-primary",
@@ -176,6 +151,31 @@
                     ]
                   }
                 ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "button",
+          "label": "指南",
+          "level": "link",
+          "icon": "fas fa-compass text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind}指南（ESC 关闭）",
+            "body": [
+              {
+                "type": "websocketMarkdownViewer",
+                "url": "/k8s/chat/resource",
+                "params": {
+                  "kind": "${kind}",
+                  "group": "${group}",
+                  "version": "${version}"
+                }
               }
             ]
           }
