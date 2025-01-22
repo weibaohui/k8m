@@ -820,7 +820,8 @@
           },
           "style": {
             "cursor": "pointer"
-          }
+          },
+          "searchable": true
         },
         {
           "name": "metadata.annotations",
