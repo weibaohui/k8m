@@ -1594,7 +1594,12 @@
                                 "label": "容器",
                                 "type": "text",
                                 "sortable": true,
-                                "searchable": true
+                                "searchable": {
+                                  "type": "select",
+                                  "name": "containerName",
+                                  "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                                  "clearable": true
+                                }
                               },
                               {
                                 "name": "envName",
@@ -1652,7 +1657,12 @@
                                 "label": "容器",
                                 "type": "text",
                                 "sortable": true,
-                                "searchable": true
+                                "searchable": {
+                                  "type": "select",
+                                  "name": "containerName",
+                                  "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                                  "clearable": true
+                                }
                               },
                               {
                                 "name": "envName",
