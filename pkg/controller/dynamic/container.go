@@ -294,7 +294,7 @@ func getResourcePaths(kind string) ([]string, error) {
 
 func getContainersPathByKind(kind string) ([]string, error) {
 	switch kind {
-	case "Deployment", "DaemonSet", "StatefulSet":
+	case "Deployment", "DaemonSet", "StatefulSet", "ReplicaSet", "Job":
 		return []string{"spec", "template", "spec", "containers"}, nil
 	case "CronJob":
 		return []string{"spec", "jobTemplate", "spec", "template", "spec", "containers"}, nil
