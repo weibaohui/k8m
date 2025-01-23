@@ -13,6 +13,24 @@ func List(c *gin.Context) {
 	amis.WriteJsonData(c, clusters)
 }
 
+func OptionList(c *gin.Context) {
+	clusters := service.ClusterService().AllClusters()
+
+	var options []map[string]interface{}
+	for _, cluster := range clusters {
+		name := cluster.FileName + "/" + cluster.ContextName
+		options = append(options, map[string]interface{}{
+			"label":    name,
+			"value":    name,
+			"disabled": cluster.ServerVersion == "",
+		})
+	}
+
+	amis.WriteJsonData(c, gin.H{
+		"options": options,
+	})
+}
+
 func Scan(c *gin.Context) {
 	service.ClusterService().Scan()
 	amis.WriteJsonData(c, "ok")
@@ -29,6 +47,9 @@ func SetDefault(c *gin.Context) {
 	fileName := c.Param("fileName")
 	contextName := c.Param("contextName")
 	cookieValue := fileName + "/" + contextName
+	if cookieValue == "/" {
+		return
+	}
 	c.SetCookie(
 		"selectedCluster",
 		cookieValue,
