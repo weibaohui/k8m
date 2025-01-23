@@ -1,26 +1,81 @@
 package deploy
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 )
 
 func UpdateImageTag(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	var tag = c.Param("tag")
-	var containerName = c.Param("container_name")
 	selectedCluster := amis.GetSelectedCluster(c)
-
 	ctx := c.Request.Context()
 
-	_, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
-		Ctl().Deployment().ReplaceImageTag(containerName, tag)
+	// json
+	// {"container_name":"my-container","image":"my-image","name":"my-container","tag":"sss1","image_pull_secrets":"myregistrykey"}
+	type req struct {
+		ContainerName    string `json:"container_name"`
+		Image            string `json:"image"`
+		Tag              string `json:"tag"`
+		ImagePullSecrets string `json:"image_pull_secrets"`
+	}
+	var info req
+
+	if err := c.ShouldBindJSON(&info); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	patchData := `{
+  "spec": {
+    "template": {
+      "spec": {
+        "imagePullSecrets": %s,
+        "containers": [
+          {
+            "name": "%s",
+            "image": "%s"
+          }
+        ]
+      }
+    }
+  }
+}`
+	var json string
+	if info.ImagePullSecrets == "" {
+		json = "null" // 删除
+	} else {
+		imagePullSecrets, _ := convertToImagePullSecrets(strings.Split(info.ImagePullSecrets, ","))
+		json = utils.ToJSON(imagePullSecrets)
+	}
+
+	patchData = fmt.Sprintf(patchData, json, info.ContainerName, info.Image+":"+info.Tag)
+	fmt.Println(patchData)
+	var item interface{}
+	err := kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		Resource(&v1.Deployment{}).
+		Namespace(ns).Name(name).
+		Patch(&item, types.MergePatchType, patchData).Error
 	amis.WriteJsonErrorOrOK(c, err)
+}
+
+// convertToImagePullSecrets converts a []string to JSON format for imagePullSecrets
+func convertToImagePullSecrets(secretNames []string) ([]map[string]string, error) {
+	// Create a slice of maps
+	var result []map[string]string
+	for _, name := range secretNames {
+		result = append(result, map[string]string{"name": name})
+	}
+	return result, nil
 }
 func BatchStop(c *gin.Context) {
 	ctx := c.Request.Context()
