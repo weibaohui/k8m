@@ -16,6 +16,13 @@ func List(c *gin.Context) {
 func OptionList(c *gin.Context) {
 	clusters := service.ClusterService().AllClusters()
 
+	if len(clusters) == 0 {
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
+
 	var options []map[string]interface{}
 	for _, cluster := range clusters {
 		name := cluster.FileName + "/" + cluster.ContextName
