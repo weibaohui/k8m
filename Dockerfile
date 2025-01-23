@@ -12,5 +12,12 @@ RUN CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$VERSION -X main.Git
     -o /app/k8m
 
 FROM alpine:latest
+
+WORKDIR /app
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN apk add --no-cache curl bash inotify-tools
+ADD reload.sh /app/reload.sh
+RUN chmod +x /app/reload.sh
+
 COPY --from=builder /app/k8m /usr/local/bin/
-CMD ["k8m"]
+ENTRYPOINT ["/app/reload.sh","k8m","/app"]
