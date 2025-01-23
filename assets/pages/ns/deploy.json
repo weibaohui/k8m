@@ -642,7 +642,7 @@
                 {
                   "type": "button",
                   "icon": "fas fa-wrench text-primary",
-                  "label": "更新tag",
+                  "label": "更新镜像",
                   "actionType": "dialog",
                   "dialog": {
                     "closeOnEsc": true,
@@ -667,17 +667,24 @@
                           },
                           {
                             "type": "form",
-                            "title": "更新镜像Tag",
+                            "title": "更新镜像",
                             "name": "sample-edit-form",
-                            "data": {
-                              "env": ""
-                            },
-                            "api": {
-                              "method": "post",
-                              "url": "/k8s/deploy/update/ns/$metadata.namespace/name/$metadata.name/container/$container_name/tag/$tag"
-                            },
+                            "api": "post:/k8s/deploy/update/ns/$metadata.namespace/name/$metadata.name/container/$container_name/tag/$tag",
                             "actions": [],
                             "body": [
+                              {
+                                "label": "镜像拉取密钥",
+                                "type": "select",
+                                "multiple": true,
+                                "maxTagCount": 1,
+                                "name": "image_pull_secrets",
+                                "id": "image_pull_secrets",
+                                "searchable": true,
+                                "clearable": true,
+                                "noResultsText": "未设置密钥",
+                                "checkAll": true,
+                                "source": "/k8s/$kind/group/$group/version/$version/image_pull_secrets/ns/$metadata.namespace/name/$metadata.name"
+                              },
                               {
                                 "type": "select",
                                 "name": "container_name",
@@ -687,10 +694,22 @@
                                 "required": true
                               },
                               {
-                                "type": "input-text",
-                                "name": "tag",
-                                "label": "tag",
-                                "required": true
+                                "type": "service",
+                                "api": "/k8s/$kind/group/$group/version/$version/container_info/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                                "body": [
+                                  {
+                                    "type": "input-text",
+                                    "name": "image",
+                                    "label": "image",
+                                    "required": true
+                                  },
+                                  {
+                                    "type": "input-text",
+                                    "name": "tag",
+                                    "label": "tag",
+                                    "required": true
+                                  }
+                                ]
                               }
                             ]
                           }
