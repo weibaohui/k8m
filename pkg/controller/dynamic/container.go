@@ -99,20 +99,6 @@ func ContainerInfo(c *gin.Context) {
 
 }
 
-// 根据资源类型获取 imagePullSecrets 的路径
-func getImagePullSecretsPathByKind(kind string) ([]string, error) {
-	switch kind {
-	case "Deployment", "DaemonSet", "StatefulSet", "ReplicaSet", "Job":
-		return []string{"spec", "template", "spec", "imagePullSecrets"}, nil
-	case "CronJob":
-		return []string{"spec", "jobTemplate", "spec", "template", "spec", "imagePullSecrets"}, nil
-	case "Pod":
-		return []string{"spec", "imagePullSecrets"}, nil
-	default:
-		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
-	}
-}
-
 // 获取 imagePullSecrets 列表
 func getImagePullSecrets(item *unstructured.Unstructured) ([]string, error) {
 	// 获取资源类型
@@ -151,16 +137,6 @@ func getImagePullSecrets(item *unstructured.Unstructured) ([]string, error) {
 	}
 
 	return secretNames, nil
-}
-func getContainersPathByKind(kind string) ([]string, error) {
-	switch kind {
-	case "Deployment", "DaemonSet", "StatefulSet":
-		return []string{"spec", "template", "spec", "containers"}, nil
-	case "CronJob":
-		return []string{"spec", "jobTemplate", "spec", "template", "spec", "containers"}, nil
-	default:
-		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
-	}
 }
 func getContainerImageByName(item *unstructured.Unstructured, containerName string) (string, error) {
 	// 获取资源类型
@@ -311,6 +287,31 @@ func getResourcePaths(kind string) ([]string, error) {
 		return []string{"spec", "template", "spec"}, nil
 	case "CronJob":
 		return []string{"spec", "jobTemplate", "spec", "template", "spec"}, nil
+	default:
+		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
+	}
+}
+
+func getContainersPathByKind(kind string) ([]string, error) {
+	switch kind {
+	case "Deployment", "DaemonSet", "StatefulSet":
+		return []string{"spec", "template", "spec", "containers"}, nil
+	case "CronJob":
+		return []string{"spec", "jobTemplate", "spec", "template", "spec", "containers"}, nil
+	default:
+		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
+	}
+}
+
+// 根据资源类型获取 imagePullSecrets 的路径
+func getImagePullSecretsPathByKind(kind string) ([]string, error) {
+	switch kind {
+	case "Deployment", "DaemonSet", "StatefulSet", "ReplicaSet", "Job":
+		return []string{"spec", "template", "spec", "imagePullSecrets"}, nil
+	case "CronJob":
+		return []string{"spec", "jobTemplate", "spec", "template", "spec", "imagePullSecrets"}, nil
+	case "Pod":
+		return []string{"spec", "imagePullSecrets"}, nil
 	default:
 		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
 	}
