@@ -19,5 +19,5 @@ RUN apk add --no-cache curl bash inotify-tools
 ADD reload.sh /app/reload.sh
 RUN chmod +x /app/reload.sh
 
-COPY --from=builder /app/k8m /usr/local/bin/
+COPY --from=builder /app/k8m /app/k8m
 ENTRYPOINT ["/app/reload.sh","k8m","/app"]
