@@ -1082,7 +1082,8 @@
             "pod.count.total",
             "pod.count.used",
             "pod.count.available",
-            "kubectl.kubernetes.io/last-applied-configuration"
+            "kubectl.kubernetes.io/last-applied-configuration",
+            "kom.kubernetes.io/restartedAt"
         ];
 
         // 过滤掉 immutableKeys 中的 key
