@@ -330,7 +330,7 @@ AI 问诊按钮，即可获得诊断报告。
 
 ### 特别鸣谢
 
-@zhaomingcheng01：提出了诸多非常高质量的建议，为k8m的易用好用做出了卓越贡献~
+[zhaomingcheng01](https://github.com/zhaomingcheng01)：提出了诸多非常高质量的建议，为k8m的易用好用做出了卓越贡献~
 
 ## 联系我
 
