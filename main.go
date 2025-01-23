@@ -190,8 +190,10 @@ func main() {
 		// k8s cluster
 		api.GET("/cluster/all", cluster.List)
 		api.POST("/cluster/scan", cluster.Scan)
+		api.GET("/cluster/option_list", cluster.OptionList)
 		api.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
 		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
+		api.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
 		// k8s sts
 		api.POST("/statefulset/rollout/undo/ns/:ns/name/:name/revision/:revision", sts.Undo)
 		api.GET("/statefulset/rollout/history/ns/:ns/name/:name", sts.History)
