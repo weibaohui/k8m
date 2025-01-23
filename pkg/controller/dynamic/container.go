@@ -42,7 +42,7 @@ func ImagePullSecretOptionList(c *gin.Context) {
 	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Secret{}).
 		Namespace(ns).
-		Where(fmt.Sprintf("type = '%s'", v1.SecretTypeDockerConfigJson)).
+		Where(fmt.Sprintf("type = '%s' or type = '%s' ", v1.SecretTypeDockerConfigJson, v1.SecretTypeDockercfg)).
 		List(&secretsList).Error
 	if err != nil {
 		amis.WriteJsonData(c, gin.H{
