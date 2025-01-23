@@ -153,6 +153,7 @@ func main() {
 		// Container 信息
 		api.GET("/:kind/group/:group/version/:version/container_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerInfo)
 		api.GET("/:kind/group/:group/version/:version/image_pull_secrets/ns/:ns/name/:name", dynamic.ImagePullSecretOptionList)
+		api.POST("/:kind/group/:group/version/:version/update_image/ns/:ns/name/:name", dynamic.UpdateImageTag)
 
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
@@ -164,7 +165,6 @@ func main() {
 		api.POST("/deploy/batch/restart", deploy.BatchRestart)
 		api.POST("/deploy/batch/stop", deploy.BatchStop)
 		api.POST("/deploy/batch/restore", deploy.BatchRestore)
-		api.POST("/deploy/update/ns/:ns/name/:name/container/:container_name/tag/:tag", deploy.UpdateImageTag)
 		api.POST("/deploy/rollout/undo/ns/:ns/name/:name/revision/:revision", deploy.Undo)
 		api.GET("/deploy/rollout/history/ns/:ns/name/:name", deploy.History)
 		api.POST("/deploy/rollout/pause/ns/:ns/name/:name", deploy.Pause)

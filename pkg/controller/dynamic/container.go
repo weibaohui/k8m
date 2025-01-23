@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func ImagePullSecretOptionList(c *gin.Context) {
@@ -206,4 +207,111 @@ func getContainerImageByName(item *unstructured.Unstructured, containerName stri
 
 	// 如果未找到匹配的容器名
 	return "", fmt.Errorf("container with name %q not found", containerName)
+}
+
+// json
+// {"container_name":"my-container","image":"my-image","name":"my-container","tag":"sss1","image_pull_secrets":"myregistrykey"}
+type req struct {
+	ContainerName    string `json:"container_name"`
+	Image            string `json:"image"`
+	Tag              string `json:"tag"`
+	ImagePullSecrets string `json:"image_pull_secrets"`
+}
+
+func UpdateImageTag(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	group := c.Param("group")
+	kind := c.Param("kind")
+	version := c.Param("version")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var info req
+
+	if err := c.ShouldBindJSON(&info); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	patchData, err := generateDynamicPatch(kind, info)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	patchJSON := utils.ToJSON(patchData)
+
+	fmt.Println(patchJSON)
+	var item interface{}
+	err = kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).Name(name).
+		Patch(&item, types.MergePatchType, patchJSON).Error
+	amis.WriteJsonErrorOrOK(c, err)
+}
+
+// convertToImagePullSecrets converts a []string to JSON format for imagePullSecrets
+func convertToImagePullSecrets(secretNames []string) ([]map[string]string, error) {
+	// Create a slice of maps
+	var result []map[string]string
+	for _, name := range secretNames {
+		result = append(result, map[string]string{"name": name})
+	}
+	return result, nil
+}
+
+// 生成动态的 patch 数据
+func generateDynamicPatch(kind string, info req) (map[string]interface{}, error) {
+	// 获取资源路径
+	paths, err := getResourcePaths(kind)
+	if err != nil {
+		return nil, err
+	}
+
+	// 动态构造 patch 数据
+	patch := make(map[string]interface{})
+	current := patch
+
+	// 按层级动态生成嵌套结构
+	for _, path := range paths {
+		if _, exists := current[path]; !exists {
+			current[path] = make(map[string]interface{})
+		}
+		current = current[path].(map[string]interface{})
+	}
+
+	// 构造 `imagePullSecrets`
+	if info.ImagePullSecrets == "" {
+		current["imagePullSecrets"] = nil // 删除字段
+	} else {
+		secretNames := strings.Split(info.ImagePullSecrets, ",")
+		imagePullSecrets := make([]map[string]string, 0, len(secretNames))
+		for _, name := range secretNames {
+			imagePullSecrets = append(imagePullSecrets, map[string]string{"name": name})
+		}
+		current["imagePullSecrets"] = imagePullSecrets
+	}
+
+	// 构造 `containers`
+	current["containers"] = []map[string]string{
+		{
+			"name":  info.ContainerName,
+			"image": fmt.Sprintf("%s:%s", info.Image, info.Tag),
+		},
+	}
+
+	return patch, nil
+}
+
+// 返回资源类型对应的路径
+func getResourcePaths(kind string) ([]string, error) {
+	switch kind {
+	case "Deployment", "DaemonSet", "StatefulSet", "ReplicaSet", "Job":
+		return []string{"spec", "template", "spec"}, nil
+	case "CronJob":
+		return []string{"spec", "jobTemplate", "spec", "template", "spec"}, nil
+	default:
+		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
+	}
 }
