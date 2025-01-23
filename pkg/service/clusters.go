@@ -82,6 +82,11 @@ func (c *clusterService) GetClusterByID(selectedCluster string) *ClusterConfig {
 	}
 	return nil
 }
+func (c *clusterService) IsConnected(selectedCluster string) bool {
+	cluster := c.GetClusterByID(selectedCluster)
+	connected := cluster.ServerVersion != ""
+	return connected
+}
 
 func (c *clusterService) DelayStartFunc(f func()) {
 	// 延迟启动cron
@@ -155,6 +160,80 @@ type ClusterConfig struct {
 	kubeConfig           []byte       // 集群配置.kubeconfig原始文件内容
 }
 
+func (c *clusterService) RegisterClustersByPath(filePath string) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		klog.V(6).Infof("读取文件[%s]失败: %v", filePath, err)
+		return
+	}
+
+	config, err := clientcmd.Load(content)
+	if err != nil {
+		klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
+	}
+	contextName := config.CurrentContext
+	context := config.Contexts[contextName]
+	cluster := config.Clusters[context.Cluster]
+
+	clusterConfig := &ClusterConfig{
+		FileName:    filepath.Base(filePath),
+		ContextName: contextName,
+		UserName:    context.AuthInfo,
+		ClusterName: context.Cluster,
+		Namespace:   context.Namespace,
+		kubeConfig:  content,
+	}
+	clusterConfig.Server = cluster.Server
+	c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
+}
+func (c *clusterService) ScanClustersInPath(path string) {
+	// 1. 通过kubeconfig文件，找到所在目录
+	dir := filepath.Dir(path)
+
+	// 2. 通过所在目录，找到同目录下的所有文件
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		klog.V(6).Infof("读取文件夹[%s]失败: %v", dir, err)
+		return
+	}
+
+	// 3. 检查每个文件是否为有效的kubeconfig文件
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		filePath := filepath.Join(dir, file.Name())
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			klog.V(6).Infof("读取文件[%s]失败: %v", filePath, err)
+			continue
+		}
+
+		config, err := clientcmd.Load(content)
+		if err != nil {
+			klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
+			continue // 解析失败，跳过该文件
+		}
+		for contextName, _ := range config.Contexts {
+			context := config.Contexts[contextName]
+			cluster := config.Clusters[context.Cluster]
+
+			clusterConfig := &ClusterConfig{
+				FileName:    file.Name(),
+				ContextName: contextName,
+				UserName:    context.AuthInfo,
+				ClusterName: context.Cluster,
+				Namespace:   context.Namespace,
+				kubeConfig:  content,
+			}
+			clusterConfig.Server = cluster.Server
+			c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
+		}
+	}
+
+}
 func (c *clusterService) RegisterClustersInPath(path string) {
 	// 1. 通过kubeconfig文件，找到所在目录
 	dir := filepath.Dir(path)
@@ -204,6 +283,7 @@ func (c *clusterService) RegisterClustersInPath(path string) {
 
 	// 注册
 	for _, clusterConfig := range c.clusterConfigs {
+		// 改为只注册CurrentContext的这个
 		c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
 	}
 	// 打印serverVersion
