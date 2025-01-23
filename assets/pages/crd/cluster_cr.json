@@ -256,6 +256,15 @@
               ]
             }
           ]
+        },
+        {
+          "type": "button",
+          "icon": "fas fa-cog",
+          "tooltip": "管理集群",
+          "actionType": "url",
+          "size": "xs",
+          "url": "/index.html#/cluster/all",
+          "blank": false
         }
       ]
     },
