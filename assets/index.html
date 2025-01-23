@@ -56,6 +56,19 @@
             height: 50px;
         }
 
+        .floating-toolbar-right {
+            position: fixed;
+            right: 40px; /* 距离右边 */
+            top: 0; /* 距离顶部 */
+            z-index: 1400; /* 确保显示在上层 */
+            display: flex;
+            align-items: center;
+            background: #f7f8fa;
+            padding: 10px;
+            height: 50px;
+        }
+
+
         .gh-icon {
             margin-right: 16px;
             margin-left: 16px;
@@ -109,7 +122,7 @@
                 type: 'tpl',
                 inline: false,
                 className: 'w-full',
-                tpl: "<div class='flex justify-end'><div>当前集群：<a href='/index.html#/cluster/all'><%= decodeURIComponent(document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1])   %></a ></div><div><a class='gh-icon' href='https://github.com/weibaohui/k8m' target='_blank'><i class='fa fa-github'></i></a></div></div>"
+                tpl: "<div class='flex justify-end'><div><a class='gh-icon' href='https://github.com/weibaohui/k8m' target='_blank'><i class='fa fa-github'></i></a></div></div>"
             },
             // footer: '<div class="p-2 text-center bg-light">底部区域</div>',
             // asideBefore: '<div class="p-2 text-center">菜单前面区域</div>',
