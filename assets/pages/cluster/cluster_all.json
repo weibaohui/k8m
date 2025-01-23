@@ -52,15 +52,14 @@
             {
               "type": "button",
               "icon": "fas fa-redo",
-              "label": "重连",
+              "label": "连接",
               "actionType": "ajax",
               "api": "post:/k8s/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
             },
             {
               "type": "button",
               "icon": "fas fa-check",
-              "level": "success",
-              "label": "选择",
+              "label": "切换",
               "actionType": "ajax",
               "visibleOn": "serverVersion != '' ",
               "api": "post:/k8s/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
@@ -116,15 +115,15 @@
         },
         {
           "name": "connectStatus",
-          "label": "操作集群",
+          "label": "当前集群",
           "type": "tpl",
-          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>已选择</span><% } %>"
+          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>当前集群</span><% } %>"
         },
         {
           "name": "connectStatus",
           "label": "可访问性",
           "type": "tpl",
-          "tpl": "<span class='label <% if (data.serverVersion && data.serverVersion.trim() !== '') { %>label-success<% } else { %>label-danger cursor-pointer <% } %>'> <% if (data.serverVersion && data.serverVersion.trim() !== '') { %>已链接<% } else { %>失联<% } %> </span>",
+          "tpl": "<span class='label <% if (data.serverVersion && data.serverVersion.trim() !== '') { %>label-success<% } else { %>label-danger cursor-pointer <% } %>'> <% if (data.serverVersion && data.serverVersion.trim() !== '') { %>已连接<% } else { %>未连接<% } %> </span>",
           "popOver": {
             "showIcon": false,
             "body": {
