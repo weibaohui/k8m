@@ -49,35 +49,36 @@ func Init() {
 	// 打印版本和 Git commit 信息
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
-
-	// 初始化kom
-	// 先注册回调，后面集群连接后，需要执行回调
-	callbacks.RegisterInit()
-	// 首先尝试读取 in-cluster 配置
-	_, err := kom.Clusters().RegisterInCluster()
-	if err != nil {
-		klog.Errorf("InCluster集群初始化失败%v，下面尝试使用kubeconfig文件初始化，并扫描同文件夹下其他配置文件", err)
-		// 初始化kubectl 连接
-		service.ClusterService().ScanClustersInPath(cfg.KubeConfig)
-		service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
-		klog.Infof("处理%d个集群", len(service.ClusterService().AllClusters()))
-		klog.Infof("已连接%d个集群", len(service.ClusterService().ConnectedClusters()))
-	} else {
-		cfg.InCluster = true
-		klog.Infof("启用InCluster 模式。k8m当前运行在宿主集群内部")
-	}
-
-	kom.Clusters().Show()
-
-	// 初始化本项目中的回调
-	cb.RegisterCallback()
-
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	// 初始化ChatService
 	service.ChatService().SetVars(ApiKey, ApiUrl, Model)
+
+	go func() {
+		// 初始化kom
+		// 先注册回调，后面集群连接后，需要执行回调
+		callbacks.RegisterInit()
+		// 首先尝试读取 in-cluster 配置
+		_, err := kom.Clusters().RegisterInCluster()
+		if err != nil {
+			klog.Errorf("InCluster集群初始化失败%v，下面尝试使用kubeconfig文件初始化，并扫描同文件夹下其他配置文件", err)
+			// 初始化kubectl 连接
+			service.ClusterService().ScanClustersInPath(cfg.KubeConfig)
+			service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
+			klog.Infof("处理%d个集群", len(service.ClusterService().AllClusters()))
+			klog.Infof("已连接%d个集群", len(service.ClusterService().ConnectedClusters()))
+		} else {
+			cfg.InCluster = true
+			klog.Infof("启用InCluster 模式。k8m当前运行在宿主集群内部")
+		}
+
+		kom.Clusters().Show()
+
+		// 初始化本项目中的回调
+		cb.RegisterCallback()
+	}()
 
 	// 启动watch
 	go func() {
