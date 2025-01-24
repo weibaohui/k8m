@@ -117,7 +117,7 @@ func (c *clusterService) Reconnect(fileName string, contextName string) {
 func (c *clusterService) Scan() {
 	c.clusterConfigs = []*ClusterConfig{}
 	cfg := flag.Init()
-	c.RegisterClustersInPath(cfg.KubeConfig)
+	c.ScanClustersInPath(cfg.KubeConfig)
 }
 
 func (c *clusterService) AllClusters() []*ClusterConfig {
