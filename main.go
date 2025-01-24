@@ -182,6 +182,7 @@ func main() {
 		api.POST("/node/batch/cordon", node.BatchCordon)
 		api.POST("/node/batch/uncordon", node.BatchUnCordon)
 		api.GET("/node/name/option_list", node.NameOptionList)
+		api.GET("/node/labels/list", node.LabelList)
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
