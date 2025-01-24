@@ -1311,13 +1311,175 @@
                                 "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}",
                                 "type": "each",
                                 "items": {
-                                  "type": "table",
+                                  "type": "crud",
                                   "source": "${item.matchExpressions}",
+                                  "headerToolbar": [
+                                    {
+                                      "type": "button",
+                                      "label": "新增",
+                                      "icon": "fas fa-plus",
+                                      "actionType": "dialog",
+                                      "dialog": {
+                                        "closeOnEsc": true,
+                                        "closeOnOutside": true,
+                                        "size": "lg",
+                                        "title": "新增",
+                                        "body": [
+                                          {
+                                            "type": "form",
+                                            "mode": "horizontal",
+                                            "api": "post:/k8s/$kind/group/$group/version/$version/update_affinity_node_selector_terms/ns/$metadata.namespace/name/$metadata.name",
+                                            "body": [
+                                              {
+                                                "type": "input-text",
+                                                "name": "key",
+                                                "label": "键",
+                                                "required": true,
+                                                "addOn": {
+                                                  "type": "button",
+                                                  "icon": "fa fa-filter",
+                                                  "label": "筛选",
+                                                  "actionType": "dialog",
+                                                  "dialog": {
+                                                    "closeOnEsc": true,
+                                                    "closeOnOutside": true,
+                                                    "size": "xl",
+                                                    "title": "筛选",
+                                                    "body": [
+                                                      {
+                                                        "type": "crud",
+                                                        "api": "get:/k8s/node/labels/list",
+                                                        "autoFillHeight": true,
+                                                        "autoGenerateFilter": {
+                                                          "columnsNum": 4,
+                                                          "showBtnToolbar": false
+                                                        },
+                                                        "keepItemSelectionOnPageChange": true,
+                                                        "checkOnItemClick": true,
+                                                        "primaryField": "key",
+                                                        "loadDataOnce": true,
+                                                        "initFetch": true,
+                                                        "perPage": 5,
+                                                        "headerToolbar": [
+                                                          {
+                                                            "type": "columns-toggler",
+                                                            "align": "right",
+                                                            "draggable": true,
+                                                            "icon": "fas fa-cog",
+                                                            "overlay": true,
+                                                            "footerBtnSize": "sm"
+                                                          },
+                                                          {
+                                                            "type": "tpl",
+                                                            "tpl": "共${count}条",
+                                                            "align": "right",
+                                                            "visibleOn": "${count}"
+                                                          },
+                                                          {
+                                                            "type": "columns-toggler",
+                                                            "align": "left"
+                                                          },
+                                                          "reload",
+                                                          "bulkActions"
+                                                        ],
+                                                        "footerToolbar": [
+                                                          {
+                                                            "type": "pagination",
+                                                            "align": "right"
+                                                          },
+                                                          {
+                                                            "type": "statistics",
+                                                            "align": "right"
+                                                          },
+                                                          {
+                                                            "type": "switch-per-page",
+                                                            "align": "right"
+                                                          }
+                                                        ],
+                                                        "bulkActions": [
+                                                          {
+                                                            "label": "选择",
+                                                            "type": "button"
+                                                          }
+                                                        ],
+                                                        "columns": [
+                                                          {
+                                                            "name": "key",
+                                                            "label": "键",
+                                                            "searchable": true,
+                                                            "width": "100px"
+                                                          },
+                                                          {
+                                                            "name": "value",
+                                                            "label": "值",
+                                                            "searchable": true,
+                                                            "width": "100px"
+                                                          },
+                                                          {
+                                                            "name": "names",
+                                                            "label": "节点名称",
+                                                            "type": "tpl",
+                                                            "tpl": "${names|join:','},",
+                                                            "width": "200px",
+                                                            "searchable": true
+                                                          },
+                                                          {
+                                                            "name": "ips",
+                                                            "label": "节点IP",
+                                                            "type": "tpl",
+                                                            "tpl": "${ips|join:','},",
+                                                            "width": "200px",
+                                                            "searchable": true
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "select",
+                                                "name": "operator",
+                                                "label": "操作符",
+                                                "required": true,
+                                                "options": [
+                                                  {
+                                                    "label": "包含",
+                                                    "value": "In"
+                                                  },
+                                                  {
+                                                    "label": "不包含",
+                                                    "value": "NotIn"
+                                                  },
+                                                  {
+                                                    "label": "存在",
+                                                    "value": "Exists"
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "name": "values",
+                                                "type": "input-array",
+                                                "label": "值",
+                                                "required": true,
+                                                "inline": true,
+                                                "items": {
+                                                  "type": "input-text",
+                                                  "clearable": false
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
                                   "columns": [
                                     {
                                       "name": "key",
                                       "label": "键",
-                                      "width": "250px"
+                                      "width": "250px",
+                                      "quickEdit": true
                                     },
                                     {
                                       "name": "operator",
@@ -1329,7 +1491,24 @@
                                         "Exists": "<span class='label label-info'>存在</span>"
                                       },
                                       "placeholder": "-",
-                                      "width": "50px"
+                                      "width": "100px",
+                                      "quickEdit": {
+                                        "type": "select",
+                                        "options": [
+                                          {
+                                            "label": "包含",
+                                            "value": "In"
+                                          },
+                                          {
+                                            "label": "不包含",
+                                            "value": "NotIn"
+                                          },
+                                          {
+                                            "label": "存在",
+                                            "value": "Exists"
+                                          }
+                                        ]
+                                      }
                                     },
                                     {
                                       "name": "values",
@@ -1339,7 +1518,15 @@
                                         "type": "tpl",
                                         "tpl": "${item}<br>"
                                       },
-                                      "placeholder": "-"
+                                      "placeholder": "-",
+                                      "quickEdit": {
+                                        "type": "input-array",
+                                        "inline": true,
+                                        "items": {
+                                          "type": "input-text",
+                                          "clearable": false
+                                        }
+                                      }
                                     }
                                   ]
                                 }
