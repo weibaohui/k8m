@@ -835,7 +835,17 @@
           "name": "spec.unschedulable",
           "label": "调度状态",
           "type": "tpl",
-          "tpl": "<span class='label label-${spec.unschedulable === true ? 'danger' : 'success'}'>${spec.unschedulable === true ? '停止调度' : '调度正常'}</span>"
+          "tpl": "<span class='label label-${spec.unschedulable === true ? 'danger' : 'success'}'>${spec.unschedulable === true ? '停止调度' : '调度正常'}</span>",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "options": [
+              {
+                "label": "停止调度",
+                "value": "true"
+              }
+            ]
+          }
         },
         {
           "name": "status.conditions",
