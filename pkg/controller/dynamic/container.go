@@ -225,7 +225,6 @@ func UpdateImageTag(c *gin.Context) {
 	}
 	patchJSON := utils.ToJSON(patchData)
 
-	fmt.Println(patchJSON)
 	var item interface{}
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
