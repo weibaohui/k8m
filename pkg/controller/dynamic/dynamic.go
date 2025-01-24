@@ -98,7 +98,7 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 	case "Node":
 		if service.ClusterService().GetNodeStatusAggregated(selectedCluster) {
 			// 已缓存聚合状态，可以填充
-			for i, _ := range list {
+			for i := range list {
 				item := list[i]
 				item = service.NodeService().SetIPUsage(selectedCluster, item)
 				item = service.NodeService().SetPodCount(selectedCluster, item)
@@ -108,7 +108,7 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 	case "Pod":
 		if service.ClusterService().GetPodStatusAggregated(selectedCluster) {
 			// 已缓存聚合状态，可以填充
-			for i, _ := range list {
+			for i := range list {
 				item := list[i]
 				item = service.PodService().SetAllocatedStatus(selectedCluster, item)
 			}
