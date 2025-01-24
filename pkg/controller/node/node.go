@@ -37,7 +37,7 @@ func Usage(c *gin.Context) {
 
 	usage := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().ResourceUsageTable()
-	//todo 增加其他资源用量
+	// todo 增加其他资源用量
 	amis.WriteJsonData(c, usage)
 }
 func UnCordon(c *gin.Context) {
@@ -172,4 +172,55 @@ func NameOptionList(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"options": options,
 	})
+}
+
+func LabelList(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+	// 先拿到所有的lable列表
+	// 通过lable的kv去匹配node，将node name放入到label 结构体中，方便选择时做出判断
+	labels, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+		WithCache(time.Second * 30).Ctl().Node().AllNodeLabels()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var nodeList []*v1.Node
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+		WithCache(time.Second * 30).
+		List(&nodeList).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	type table struct {
+		Names []string `json:"names"`
+		IPs   []string `json:"ips"`
+		Key   string   `json:"key"`
+		Value string   `json:"value"`
+	}
+
+	var labelList []*table
+
+	for k, v := range labels {
+		labelList = append(labelList, &table{
+			Key:   k,
+			Value: v,
+			Names: make([]string, 0),
+			IPs:   make([]string, 0),
+		})
+	}
+
+	// 循环labelList，循环node，如果node的label和labelList的key相同，则将node name放入到labelList的node字段中
+	for _, v := range labelList {
+		for _, node := range nodeList {
+			if node.Labels[v.Key] == v.Value {
+				v.Names = append(v.Names, node.Name)
+				v.IPs = append(v.IPs, node.Status.Addresses[0].Address)
+			}
+		}
+	}
+
+	amis.WriteJsonData(c, labelList)
 }
