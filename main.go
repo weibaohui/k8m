@@ -193,6 +193,7 @@ func main() {
 		api.GET("/cluster/all", cluster.List)
 		api.POST("/cluster/scan", cluster.Scan)
 		api.GET("/cluster/option_list", cluster.OptionList)
+		api.GET("/cluster/file/option_list", cluster.FileOptionList)
 		api.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
 		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
 		api.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
