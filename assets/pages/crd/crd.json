@@ -702,11 +702,11 @@
         },
         {
           "name": "spec.versions",
-          "label": "版本",
+          "label": "版本<br><span class='text-green-500 text-xs'>已激活</span>/<span class='text-gray-500 text-xs'>未激活</span>",
           "type": "each",
           "items": {
             "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong></div>"
+            "tpl": "<div style='margin-bottom: 10px;'><span class='${storage ? \"text-green-500\" : \"text-gray-500\"} text-xs'><strong>${name}</strong></span></div>"
           }
         },
         {
