@@ -1053,7 +1053,7 @@
                                                     "drag": true
                                                   },
                                                   {
-                                                    "type": "input-text",
+                                                    "type": "hidden",
                                                     "name": "fileName",
                                                     "label": "文件名",
                                                     "value": "${file.name ||file[0].name ||file[0].path ||file.path ||''}"
