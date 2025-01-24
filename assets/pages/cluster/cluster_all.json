@@ -83,10 +83,9 @@
           "type": "text",
           "sortable": true,
           "searchable": {
-            "type": "input-text",
-            "name": "fileName",
-            "label": "文件名",
-            "placeholder": "输入文件名"
+            "type": "select",
+            "searchable": true,
+            "source": "/k8s/cluster/file/option_list"
           }
         },
         {
