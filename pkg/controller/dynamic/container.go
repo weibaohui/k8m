@@ -85,16 +85,17 @@ func ContainerInfo(c *gin.Context) {
 		return
 	}
 
-	imageFullName, err := getContainerImageByName(item, containerName)
+	imageFullName, imagePullPolicy, err := getContainerImageByName(item, containerName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	image, tag := utils.GetImageNameAndTag(imageFullName)
 	amis.WriteJsonData(c, gin.H{
-		"name":  containerName,
-		"image": image,
-		"tag":   tag,
+		"name":              containerName,
+		"image":             image,
+		"tag":               tag,
+		"image_pull_policy": imagePullPolicy,
 	})
 
 }
@@ -139,24 +140,24 @@ func getImagePullSecrets(item *unstructured.Unstructured) ([]string, error) {
 
 	return secretNames, nil
 }
-func getContainerImageByName(item *unstructured.Unstructured, containerName string) (string, error) {
+func getContainerImageByName(item *unstructured.Unstructured, containerName string) (string, string, error) {
 	// 获取资源类型
 	kind := item.GetKind()
 
 	// 根据资源类型获取 containers 的路径
 	resourcePaths, err := getResourcePaths(kind)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	containersPath := append(resourcePaths, "containers")
 
 	// 获取嵌套字段
 	containers, found, err := unstructured.NestedSlice(item.Object, containersPath...)
 	if err != nil {
-		return "", fmt.Errorf("error getting containers: %w", err)
+		return "", "", fmt.Errorf("error getting containers: %w", err)
 	}
 	if !found {
-		return "", fmt.Errorf("containers field not found")
+		return "", "", fmt.Errorf("containers field not found")
 	}
 
 	// 遍历 containers 列表
@@ -164,27 +165,31 @@ func getContainerImageByName(item *unstructured.Unstructured, containerName stri
 		// 断言 container 类型为 map[string]interface{}
 		containerMap, ok := container.(map[string]interface{})
 		if !ok {
-			return "", fmt.Errorf("unexpected container format")
+			return "", "", fmt.Errorf("unexpected container format")
 		}
 
 		// 获取容器的 name
 		name, _, err := unstructured.NestedString(containerMap, "name")
 		if err != nil {
-			return "", fmt.Errorf("error getting container name: %w", err)
+			return "", "", fmt.Errorf("error getting container name: %w", err)
 		}
 
 		// 如果 name 匹配目标容器名，则获取其 image
 		if name == containerName {
 			image, _, err := unstructured.NestedString(containerMap, "image")
 			if err != nil {
-				return "", fmt.Errorf("error getting container image: %w", err)
+				return "", "", fmt.Errorf("error getting container image: %w", err)
 			}
-			return image, nil
+			imagePullPolicy, _, err := unstructured.NestedString(containerMap, "imagePullPolicy")
+			if err != nil {
+				return "", "", fmt.Errorf("error getting container imagePullPolicy: %w", err)
+			}
+			return image, imagePullPolicy, nil
 		}
 	}
 
 	// 如果未找到匹配的容器名
-	return "", fmt.Errorf("container with name %q not found", containerName)
+	return "", "", fmt.Errorf("container with name %q not found", containerName)
 }
 
 // json
@@ -194,6 +199,7 @@ type req struct {
 	Image            string `json:"image"`
 	Tag              string `json:"tag"`
 	ImagePullSecrets string `json:"image_pull_secrets"`
+	ImagePullPolicy  string `json:"image_pull_policy"`
 }
 
 func UpdateImageTag(c *gin.Context) {
@@ -264,8 +270,9 @@ func generateDynamicPatch(kind string, info req) (map[string]interface{}, error)
 	// 构造 `containers`
 	current["containers"] = []map[string]string{
 		{
-			"name":  info.ContainerName,
-			"image": fmt.Sprintf("%s:%s", info.Image, info.Tag),
+			"name":            info.ContainerName,
+			"image":           fmt.Sprintf("%s:%s", info.Image, info.Tag),
+			"imagePullPolicy": info.ImagePullPolicy,
 		},
 	}
 
