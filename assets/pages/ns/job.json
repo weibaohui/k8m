@@ -719,13 +719,13 @@
                                   {
                                     "type": "input-text",
                                     "name": "image",
-                                    "label": "image",
+                                    "label": "镜像名称",
                                     "required": true
                                   },
                                   {
                                     "type": "input-text",
                                     "name": "tag",
-                                    "label": "tag",
+                                    "label": "版本标签",
                                     "required": true
                                   }
                                 ]

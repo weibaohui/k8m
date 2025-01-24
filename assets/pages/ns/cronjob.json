@@ -740,14 +740,34 @@
                                   {
                                     "type": "input-text",
                                     "name": "image",
-                                    "label": "image",
+                                    "label": "镜像名称",
                                     "required": true
                                   },
                                   {
                                     "type": "input-text",
                                     "name": "tag",
-                                    "label": "tag",
+                                    "label": "版本标签",
                                     "required": true
+                                  },
+                                  {
+                                    "type": "select",
+                                    "name": "image_pull_policy",
+                                    "label": "镜像拉取策略",
+                                    "required": true,
+                                    "options": [
+                                      {
+                                        "label": "始终拉取",
+                                        "value": "Always"
+                                      },
+                                      {
+                                        "label": "从不拉取",
+                                        "value": "Never"
+                                      },
+                                      {
+                                        "label": "不存在时拉取",
+                                        "value": "IfNotPresent"
+                                      }
+                                    ]
                                   }
                                 ]
                               }
