@@ -222,5 +222,5 @@ func LabelList(c *gin.Context) {
 		}
 	}
 
-	amis.WriteJsonData(c, labelList)
+	amis.WriteJsonList(c, labelList)
 }
