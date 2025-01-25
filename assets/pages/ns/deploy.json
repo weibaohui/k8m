@@ -1328,6 +1328,7 @@
                                           {
                                             "type": "form",
                                             "mode": "horizontal",
+                                            "id": "affinity_add_form",
                                             "api": "post:/k8s/$kind/group/$group/version/$version/update_affinity_node_selector_terms/ns/$metadata.namespace/name/$metadata.name",
                                             "body": [
                                               {
@@ -1349,13 +1350,31 @@
                                                       {
                                                         "type": "crud",
                                                         "api": "get:/k8s/node/labels/list",
+                                                        "onEvent": {
+                                                          "rowClick": {
+                                                            "actions": [
+                                                              {
+                                                                "actionType": "setValue",
+                                                                "componentId": "affinity_add_form",
+                                                                "args": {
+                                                                  "value": {
+                                                                    "key": "${event.data.item.key}",
+                                                                    "values": "${event.data.item.value|asArray}"
+                                                                  }
+                                                                }
+                                                              },
+                                                              {
+                                                                "actionType": "closeDialog"
+                                                              }
+                                                            ]
+                                                          }
+                                                        },
                                                         "autoFillHeight": true,
                                                         "autoGenerateFilter": {
                                                           "columnsNum": 4,
                                                           "showBtnToolbar": false
                                                         },
-                                                        "keepItemSelectionOnPageChange": true,
-                                                        "checkOnItemClick": true,
+                                                        "selectable": true,
                                                         "primaryField": "key",
                                                         "loadDataOnce": true,
                                                         "initFetch": true,
@@ -1379,8 +1398,7 @@
                                                             "type": "columns-toggler",
                                                             "align": "left"
                                                           },
-                                                          "reload",
-                                                          "bulkActions"
+                                                          "reload"
                                                         ],
                                                         "footerToolbar": [
                                                           {
@@ -1396,23 +1414,29 @@
                                                             "align": "right"
                                                           }
                                                         ],
-                                                        "bulkActions": [
-                                                          {
-                                                            "label": "选择",
-                                                            "type": "button"
-                                                          }
-                                                        ],
                                                         "columns": [
                                                           {
                                                             "name": "key",
                                                             "label": "键",
-                                                            "searchable": true,
+                                                            "searchable": {
+                                                              "type": "input-text",
+                                                              "name": "key",
+                                                              "clearable": true,
+                                                              "label": "键",
+                                                              "placeholder": "输入键名称"
+                                                            },
                                                             "width": "100px"
                                                           },
                                                           {
                                                             "name": "value",
                                                             "label": "值",
-                                                            "searchable": true,
+                                                            "searchable": {
+                                                              "type": "input-text",
+                                                              "name": "value",
+                                                              "clearable": true,
+                                                              "label": "值",
+                                                              "placeholder": "输入值名称"
+                                                            },
                                                             "width": "100px"
                                                           },
                                                           {
@@ -1442,6 +1466,7 @@
                                                 "name": "operator",
                                                 "label": "操作符",
                                                 "required": true,
+                                                "value": "In",
                                                 "options": [
                                                   {
                                                     "label": "包含",
