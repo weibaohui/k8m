@@ -194,7 +194,7 @@ func getContainerImageByName(item *unstructured.Unstructured, containerName stri
 
 // json
 // {"container_name":"my-container","image":"my-image","name":"my-container","tag":"sss1","image_pull_secrets":"myregistrykey"}
-type req struct {
+type imageInfo struct {
 	ContainerName    string `json:"container_name"`
 	Image            string `json:"image"`
 	Tag              string `json:"tag"`
@@ -211,7 +211,7 @@ func UpdateImageTag(c *gin.Context) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	var info req
+	var info imageInfo
 
 	if err := c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
@@ -235,7 +235,7 @@ func UpdateImageTag(c *gin.Context) {
 }
 
 // 生成动态的 patch 数据
-func generateDynamicPatch(kind string, info req) (map[string]interface{}, error) {
+func generateDynamicPatch(kind string, info imageInfo) (map[string]interface{}, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
