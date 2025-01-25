@@ -137,7 +137,10 @@ func processNodeAffinity(c *gin.Context, action string) {
 	}
 
 	originalNodeAffinity, err := getNodeSelectorTerms(kind, &item, action, info)
-
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	patchData, err := generateRequiredNodeAffinityDynamicPatch(kind, originalNodeAffinity)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -171,13 +174,33 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 		return nil, err
 	}
 	if !found {
-		return nil, fmt.Errorf("nodeSelectorTerms not found")
+		// 如果没有，那么如果是 add 操作，那么创建一个空的 NodeSelectorTerms
+		affinity = make([]interface{}, 0)
 	}
 
 	// 强制转换为数组
 	nodeSelectorTerms, ok := affinity.([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("nodeSelectorTerms is not an array")
+	}
+	x := utils.ToJSON(affinity)
+	// 如果nodeSelectorTerms被设置为-{},那么json输出为
+	// [
+	//  {}
+	// ]
+	// 其长度为8
+	if (len(nodeSelectorTerms) == 0 || len(x) == 8) && action == "add" {
+		nodeSelectorTerms = []interface{}{
+			map[string]interface{}{
+				"matchExpressions": []map[string]interface{}{{
+					"key":      rule.Key,
+					"operator": rule.Operator,
+					"values":   rule.Values,
+				},
+				},
+			},
+		}
+		return nodeSelectorTerms, nil
 	}
 
 	// 进行操作：删除或新增
@@ -236,13 +259,10 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 
 		// 如果是新增操作，增加新的 matchExpression
 		if action == "add" {
-			// 深拷贝 values 数组，避免直接引用
-			newValues := make([]string, len(rule.Values))
-			copy(newValues, rule.Values)
 			newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
 				"key":      rule.Key,
 				"operator": rule.Operator,
-				"values":   newValues,
+				"values":   rule.Values,
 			})
 		}
 
