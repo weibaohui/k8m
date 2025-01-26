@@ -35,6 +35,8 @@ type ResourceData struct {
 	ReportingController string `form:"reportingController"`
 	Type                string `form:"type"`
 	RegardingKind       string `form:"regardingKind"`
+	//AnyQuestion 任意提问
+	Question string `form:"question"`
 }
 
 func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
@@ -172,6 +174,22 @@ func Resource(c *gin.Context) {
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
 			d.Group, d.Kind, d.Version)
+	})
+}
+func AnyQuestion(c *gin.Context) {
+	handleRequest(c, func(data interface{}) string {
+		d := data.(ResourceData)
+		return fmt.Sprintf(
+			`
+		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
+		\n请你作为kubernetes k8s 技术专家，请你详细解释下我的疑问： %s 。
+		要求包括关键名词解释、作用、典型示例（以场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
+		\n注意：
+		\n0、使用中文进行回答。
+		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
+		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+			d.Group, d.Kind, d.Version, d.Question)
 	})
 }
 
