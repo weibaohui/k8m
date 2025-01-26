@@ -1303,7 +1303,8 @@
                               {
                                 "type": "divider",
                                 "title": "节点标签 必须满足",
-                                "titlePosition": "left"
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
                                 "type": "crud",
@@ -1334,13 +1335,13 @@
                                               "addOn": {
                                                 "type": "button",
                                                 "icon": "fa fa-filter",
-                                                "label": "筛选",
+                                                "label": "速选",
                                                 "actionType": "dialog",
                                                 "dialog": {
                                                   "closeOnEsc": true,
                                                   "closeOnOutside": true,
                                                   "size": "xl",
-                                                  "title": "筛选",
+                                                  "title": "从已有节点上选择标签（ESC 关闭）",
                                                   "body": [
                                                     {
                                                       "type": "crud",
@@ -1367,7 +1368,8 @@
                                                       "autoFillHeight": true,
                                                       "autoGenerateFilter": {
                                                         "columnsNum": 4,
-                                                        "showBtnToolbar": false
+                                                        "showBtnToolbar": false,
+                                                        "defaultCollapsed": false
                                                       },
                                                       "selectable": true,
                                                       "primaryField": "key",
@@ -1417,7 +1419,7 @@
                                                             "type": "input-text",
                                                             "name": "key",
                                                             "clearable": true,
-                                                            "label": "键",
+                                                            "label": "标签键",
                                                             "placeholder": "输入键名称"
                                                           },
                                                           "width": "100px"
@@ -1429,7 +1431,7 @@
                                                             "type": "input-text",
                                                             "name": "value",
                                                             "clearable": true,
-                                                            "label": "值",
+                                                            "label": "标签值",
                                                             "placeholder": "输入值名称"
                                                           },
                                                           "width": "100px"
@@ -1578,7 +1580,7 @@
                               {
                                 "type": "wrapper",
                                 "className": "h-10",
-                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
                                 "type": "divider",
