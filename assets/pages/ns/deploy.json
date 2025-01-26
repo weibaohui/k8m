@@ -1710,15 +1710,48 @@
                                 "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
-                                "type": "table",
-                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
-                                "source": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
+                                "type": "crud",
+                                "api": "/k8s/$kind/group/$group/version/$version/list_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "showIndex": true,
                                 "columns": [
                                   {
-                                    "type": "input-kv",
-                                    "name": "labels",
-                                    "draggable": false,
-                                    "value": "${labelSelector.matchLabels}"
+                                    "type": "operation",
+                                    "label": "操作",
+                                    "width": 120,
+                                    "buttons": [
+                                      {
+                                        "type": "button",
+                                        "icon": "fas fa-trash text-primary",
+                                        "actionType": "ajax",
+                                        "tooltip": "删除",
+                                        "api": "/k8s/$kind/group/$group/version/$version/delete_pod_affinity/ns/$metadata.namespace/name/$metadata.name"
+                                      },
+                                      {
+                                        "icon": "fa fa-edit text-primary",
+                                        "type": "button",
+                                        "actionType": "dialog",
+                                        "dialog": {
+                                          "title": "修改",
+                                          "body": {
+                                            "type": "form",
+                                            "api": "post:/k8s/$kind/group/$group/version/$version/update_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                            "body": [
+                                              {
+                                                "name": "labelSelector.matchLabels",
+                                                "label": "标签选择器",
+                                                "type": "input-kv"
+                                              },
+                                              {
+                                                "name": "topologyKey",
+                                                "label": "拓扑键",
+                                                "type": "input-text"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "toggled": true
                                   },
                                   {
                                     "type": "json",
@@ -1729,8 +1762,7 @@
                                   {
                                     "name": "topologyKey",
                                     "label": "拓扑键",
-                                    "type": "text",
-                                    "value": "${topologyKey|raw}"
+                                    "type": "text"
                                   }
                                 ]
                               },
