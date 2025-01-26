@@ -88,18 +88,11 @@ func processPodAffinity(c *gin.Context, action string) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	var info nodeAffinity
+	var info podAffinity
 
 	if err := c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
-	}
-
-	// 强制性规则处理。
-	// operator: In 时，values必须有值。
-	// operator: Exists DoesNotExist 时，values必须没有值。
-	if info.Operator == "Exists" || info.Operator == "DoesNotExist" {
-		info.Values = make([]string, 0)
 	}
 
 	// 先获取资源中的定义
@@ -114,18 +107,18 @@ func processPodAffinity(c *gin.Context, action string) {
 		return
 	}
 
-	originalNodeAffinity, err := getNodeSelectorTerms(kind, &item, action, info)
+	originalPodAffinity, err := getPodAffinityTerms(kind, &item, action, info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	patchData, err := generateRequiredNodeAffinityDynamicPatch(kind, originalNodeAffinity)
+	patchData, err := generateRequiredPodAffinityDynamicPatch(kind, originalPodAffinity)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	patchJSON := utils.ToJSON(patchData)
-	klog.V(6).Infof("UpdateNodeAffinity Patch JSON :\n%s\n", patchJSON)
+	klog.V(6).Infof("UpdatePodAffinity Patch JSON :\n%s\n", patchJSON)
 	var obj interface{}
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
@@ -135,16 +128,16 @@ func processPodAffinity(c *gin.Context, action string) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-// getNodeSelectorTerms 获取 NodeAffinity 的 NodeSelectorTerms
+// getPodAffinityTerms 获取 PodAffinity 的 Affinity Terms
 // action : modify\update\add
-func getPodSelectorTerms(kind string, item *unstructured.Unstructured, action string, rule nodeAffinity) ([]interface{}, error) {
+func getPodAffinityTerms(kind string, item *unstructured.Unstructured, action string, rule podAffinity) ([]interface{}, error) {
 
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
 		return nil, err
 	}
-	requiredAffinityPath := append(paths, "affinity", "nodeAffinity", "requiredDuringSchedulingIgnoredDuringExecution", "nodeSelectorTerms")
+	requiredAffinityPath := append(paths, "affinity", "podAffinity", "requiredDuringSchedulingIgnoredDuringExecution")
 
 	// 获取 Affinity 配置并解析
 	affinity, found, err := unstructured.NestedFieldNoCopy(item.Object, requiredAffinityPath...)
@@ -152,45 +145,44 @@ func getPodSelectorTerms(kind string, item *unstructured.Unstructured, action st
 		return nil, err
 	}
 	if !found {
-		// 如果没有，那么如果是 add 操作，那么创建一个空的 NodeSelectorTerms
+		// 如果没有，那么如果是 add 操作，那么创建一个空的 podAffinityTerms
 		affinity = make([]interface{}, 0)
 	}
 
 	// 强制转换为数组
-	nodeSelectorTerms, ok := affinity.([]interface{})
+	podAffinityTerms, ok := affinity.([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("nodeSelectorTerms is not an array")
+		return nil, fmt.Errorf("podAffinityTerms is not an array")
 	}
+
 	x := utils.ToJSON(affinity)
 	// 如果nodeSelectorTerms被设置为-{},那么json输出为
 	// [
 	//  {}
 	// ]
 	// 其长度为8
-	if (len(nodeSelectorTerms) == 0 || len(x) == 8) && action == "add" {
-		nodeSelectorTerms = []interface{}{
+	if (len(podAffinityTerms) == 0 || len(x) == 8) && action == "add" {
+		podAffinityTerms = []interface{}{
 			map[string]interface{}{
-				"matchExpressions": []map[string]interface{}{{
-					"key":      rule.Key,
-					"operator": rule.Operator,
-					"values":   rule.Values,
+				"labelSelector": map[string]interface{}{
+					"matchLabels": rule.LabelSelector.MatchLabels,
 				},
-				},
+				"topologyKey": rule.TopologyKey,
 			},
 		}
-		return nodeSelectorTerms, nil
+		return podAffinityTerms, nil
 	}
 
 	// 进行操作：删除或新增
-	var newNodeSelectorTerms []interface{}
-	for _, term := range nodeSelectorTerms {
+	var newPodAffinityTerms []interface{}
+	for _, term := range podAffinityTerms {
 		termMap, ok := term.(map[string]interface{})
 		if !ok {
 			continue
 		}
 
-		// 获取 matchExpressions
-		matchExpressions, found, err := unstructured.NestedFieldNoCopy(termMap, "matchExpressions")
+		// 获取 topologyKey
+		topologyKey, found, err := unstructured.NestedFieldNoCopy(termMap, "topologyKey")
 		if err != nil {
 			return nil, err
 		}
@@ -198,71 +190,51 @@ func getPodSelectorTerms(kind string, item *unstructured.Unstructured, action st
 			continue
 		}
 
-		// 强制转换为数组
-		matchExpressionsArray, ok := matchExpressions.([]interface{})
-		if !ok {
+		// 处理每一个 matchLabels
+		if action == "delete" {
+			if topologyKey == rule.TopologyKey {
+				// 如果是删除，并且 matchLabels 和 topologyKey 匹配，跳过这个 term
+				continue
+			}
+		}
+
+		// 如果是修改操作，并且 matchLabels 和 topologyKey 匹配，修改该 term 的 matchLabels
+		if action == "modify" && topologyKey == rule.TopologyKey {
+			// 修改新值，不修改原值，直接添加到新列表
+			newPodAffinityTerms = append(newPodAffinityTerms, map[string]interface{}{
+				"labelSelector": map[string]interface{}{
+					"matchLabels": rule.LabelSelector.MatchLabels,
+				},
+				"topologyKey": rule.TopologyKey,
+			})
 			continue
 		}
 
-		// 处理每一个 matchExpression
-		var newMatchExpressions []interface{}
-		for _, expr := range matchExpressionsArray {
-			exprMap, ok := expr.(map[string]interface{})
-			if !ok {
-				continue
-			}
-
-			// 比对删除的 key
-			if action == "delete" && exprMap["key"] == rule.Key {
-				// 如果是删除，并且 key 匹配，跳过这个 matchExpression
-				continue
-			}
-			// 如果是修改操作，并且 key 匹配，修改该 matchExpression 的 values
-			if action == "modify" && exprMap["key"] == rule.Key {
-				// 修改新值，不修改原值，直接添加到新列表
-				newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
-					"key":      rule.Key,
-					"operator": rule.Operator,
-					"values":   rule.Values,
-				})
-				continue
-			}
-			// 否则，保留原有的 matchExpression
-			newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
-				"key":      exprMap["key"],
-				"operator": exprMap["operator"],
-				"values":   exprMap["values"],
-			})
-		}
-
-		// 如果是新增操作，增加新的 matchExpression
-		if action == "add" {
-			newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
-				"key":      rule.Key,
-				"operator": rule.Operator,
-				"values":   rule.Values,
-			})
-		}
-
-		// 将修改后的 matchExpressions 赋值回 termMap
-		// 这里直接将新的 matchExpressions 更新到 termMap 中，不使用 SetNestedField
-		termMap["matchExpressions"] = newMatchExpressions
-
-		// 将修改后的 termMap 添加到新的 nodeSelectorTerms 列表中
-		newNodeSelectorTerms = append(newNodeSelectorTerms, termMap)
+		// 否则，保留原有的 term
+		newPodAffinityTerms = append(newPodAffinityTerms, termMap)
 	}
 
-	return newNodeSelectorTerms, nil
+	// 如果是新增操作，增加新的 podAffinityTerm
+	if action == "add" {
+		newPodAffinityTerms = append(newPodAffinityTerms, map[string]interface{}{
+			"labelSelector": map[string]interface{}{
+				"matchLabels": rule.LabelSelector.MatchLabels,
+			},
+			"topologyKey": rule.TopologyKey,
+		})
+	}
+
+	return newPodAffinityTerms, nil
 }
 
 // 生成动态的 patch 数据
-func generateRequiredPodAffinityDynamicPatch(kind string, rules []interface{}) (map[string]interface{}, error) {
+func generateRequiredPodAffinityDynamicPatch(kind string, terms []interface{}) (map[string]interface{}, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
 		return nil, err
 	}
-	requiredAffinityPath := append(paths, "affinity", "nodeAffinity", "requiredDuringSchedulingIgnoredDuringExecution")
+	requiredAffinityPath := append(paths, "affinity", "podAffinity")
 
 	// 动态构造 patch 数据
 	patch := make(map[string]interface{})
@@ -276,7 +248,7 @@ func generateRequiredPodAffinityDynamicPatch(kind string, rules []interface{}) (
 		current = current[path].(map[string]interface{})
 	}
 
-	current["nodeSelectorTerms"] = rules
+	current["requiredDuringSchedulingIgnoredDuringExecution"] = terms
 
 	return patch, nil
 }
