@@ -1713,6 +1713,162 @@
                                 "type": "crud",
                                 "api": "/k8s/$kind/group/$group/version/$version/list_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "showIndex": true,
+                                "headerToolbar": [
+                                  {
+                                    "type": "button",
+                                    "label": "新增规则",
+                                    "actionType": "dialog",
+                                    "dialog": {
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "新增",
+                                      "body": {
+                                        "type": "form",
+                                        "id": "pod_affinity_form_add",
+                                        "api": "post:/k8s/$kind/group/$group/version/$version/add_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                        "body": [
+                                          {
+                                            "name": "labelSelector.matchLabels",
+                                            "label": "Pod标签",
+                                            "type": "input-kv",
+                                            "draggable": false
+                                          },
+                                          {
+                                            "name": "topologyKey",
+                                            "label": "节点拓扑键",
+                                            "type": "input-text",
+                                            "required": true,
+                                            "addOn": {
+                                              "type": "button",
+                                              "icon": "fa fa-filter",
+                                              "label": "速选",
+                                              "actionType": "dialog",
+                                              "dialog": {
+                                                "closeOnEsc": true,
+                                                "closeOnOutside": true,
+                                                "size": "xl",
+                                                "title": "从已有节点上选择标签（ESC 关闭）",
+                                                "body": [
+                                                  {
+                                                    "type": "crud",
+                                                    "api": "get:/k8s/node/labels/list",
+                                                    "onEvent": {
+                                                      "rowClick": {
+                                                        "actions": [
+                                                          {
+                                                            "actionType": "setValue",
+                                                            "componentId": "pod_affinity_form_add",
+                                                            "args": {
+                                                              "value": {
+                                                                "topologyKey": "${event.data.item.key}"
+                                                              }
+                                                            }
+                                                          },
+                                                          {
+                                                            "actionType": "closeDialog"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "autoFillHeight": true,
+                                                    "autoGenerateFilter": {
+                                                      "columnsNum": 4,
+                                                      "showBtnToolbar": false,
+                                                      "defaultCollapsed": false
+                                                    },
+                                                    "selectable": true,
+                                                    "primaryField": "key",
+                                                    "loadDataOnce": true,
+                                                    "initFetch": true,
+                                                    "perPage": 5,
+                                                    "headerToolbar": [
+                                                      {
+                                                        "type": "columns-toggler",
+                                                        "align": "right",
+                                                        "draggable": true,
+                                                        "icon": "fas fa-cog",
+                                                        "overlay": true,
+                                                        "footerBtnSize": "sm"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "共${count}条",
+                                                        "align": "right",
+                                                        "visibleOn": "${count}"
+                                                      },
+                                                      {
+                                                        "type": "columns-toggler",
+                                                        "align": "left"
+                                                      },
+                                                      "reload"
+                                                    ],
+                                                    "footerToolbar": [
+                                                      {
+                                                        "type": "pagination",
+                                                        "align": "right"
+                                                      },
+                                                      {
+                                                        "type": "statistics",
+                                                        "align": "right"
+                                                      },
+                                                      {
+                                                        "type": "switch-per-page",
+                                                        "align": "right"
+                                                      }
+                                                    ],
+                                                    "columns": [
+                                                      {
+                                                        "name": "key",
+                                                        "label": "键",
+                                                        "searchable": {
+                                                          "type": "input-text",
+                                                          "name": "key",
+                                                          "clearable": true,
+                                                          "label": "标签键",
+                                                          "placeholder": "输入键名称"
+                                                        },
+                                                        "width": "100px"
+                                                      },
+                                                      {
+                                                        "name": "value",
+                                                        "label": "值",
+                                                        "searchable": {
+                                                          "type": "input-text",
+                                                          "name": "value",
+                                                          "clearable": true,
+                                                          "label": "标签值",
+                                                          "placeholder": "输入值名称"
+                                                        },
+                                                        "width": "100px"
+                                                      },
+                                                      {
+                                                        "name": "names",
+                                                        "label": "节点名称",
+                                                        "type": "tpl",
+                                                        "tpl": "${names|join:','},",
+                                                        "width": "200px",
+                                                        "searchable": true
+                                                      },
+                                                      {
+                                                        "name": "ips",
+                                                        "label": "节点IP",
+                                                        "type": "tpl",
+                                                        "tpl": "${ips|join:','},",
+                                                        "width": "200px",
+                                                        "searchable": true
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ],
                                 "columns": [
                                   {
                                     "type": "operation",
@@ -1731,6 +1887,8 @@
                                         "type": "button",
                                         "actionType": "dialog",
                                         "dialog": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
                                           "title": "修改",
                                           "body": {
                                             "type": "form",
@@ -1738,13 +1896,16 @@
                                             "body": [
                                               {
                                                 "name": "labelSelector.matchLabels",
-                                                "label": "标签选择器",
-                                                "type": "input-kv"
+                                                "label": "Pod标签选择器",
+                                                "type": "input-kv",
+                                                "draggable": false,
+                                                "required": true
                                               },
                                               {
                                                 "name": "topologyKey",
-                                                "label": "拓扑键",
-                                                "type": "input-text"
+                                                "label": "节点拓扑键",
+                                                "type": "input-text",
+                                                "required": true
                                               }
                                             ]
                                           }
