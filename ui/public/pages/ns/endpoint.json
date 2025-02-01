@@ -676,17 +676,33 @@
           "label": "就绪IP",
           "type": "tpl",
           "tpl": "<% if (!data.subsets || !data.subsets[0].addresses || data.subsets[0].addresses.length === 0) { %> <% } else if (data.subsets[0].addresses.length === 1) { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %></span><% } else { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %>...</span><% } %>",
-          "popOver": {
-            "trigger": "hover",
-            "showIcon": false,
-            "body": {
-              "type": "each",
-              "source": "${subsets}",
-              "items": {
-                "type": "tpl",
-                "tpl": "<span class='text-green-500 font-black'>${addresses|pick:ip|join:'<br>'}</span>"
-              }
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 就绪IP (ESC 关闭)",
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "body": [
+                      {
+                        "type": "each",
+                        "source": "${subsets}",
+                        "items": {
+                          "type": "tpl",
+                          "tpl": "<span class='text-green-500 font-black'>${addresses|pick:ip|join:'<br>'}</span>"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             }
+          },
+          "style": {
+            "cursor": "pointer"
           },
           "badge": {
             "visibleOn": "this.subsets[0].addresses.length > 1",
@@ -700,17 +716,33 @@
           "label": "未就绪IP",
           "type": "tpl",
           "tpl": "<% if (!data.subsets || !data.subsets[0].notReadyAddresses || data.subsets[0].notReadyAddresses.length === 0) { %> <% } else if (data.subsets[0].notReadyAddresses.length === 1) { %><span class='text-red-500 font-black'><%= data.subsets[0].notReadyAddresses[0].ip %></span><% } else { %><span class='text-red-500 font-black'><%= data.subsets[0].notReadyAddresses[0].ip %>...</span><% } %>",
-          "popOver": {
-            "trigger": "hover",
-            "showIcon": false,
-            "body": {
-              "type": "each",
-              "source": "${subsets}",
-              "items": {
-                "type": "tpl",
-                "tpl": "<span class='text-red-500 font-black'>${notReadyAddresses|pick:ip|join:'<br>'}</span>"
-              }
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 未就绪IP (ESC 关闭)",
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "body": [
+                      {
+                        "type": "each",
+                        "source": "${subsets}",
+                        "items": {
+                          "type": "tpl",
+                          "tpl": "<span class='text-red-500 font-black'>${notReadyAddresses|pick:ip|join:'<br>'}</span>"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             }
+          },
+          "style": {
+            "cursor": "pointer"
           },
           "badge": {
             "visibleOn": "this.subsets[0].notReadyAddresses.length > 1",
