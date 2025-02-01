@@ -14,7 +14,7 @@ main = "yellow"
 
 # 监听配置
 [watch]
-include = ["*.go", "assets/**/*"]  # 监听 .go 文件和 assets 目录下的所有文件
+include = ["*.go"]  # 监听 .go 文件和 assets  "ui/dist/**/*" 目录下的所有文件
 exclude = ["bin/*", "vendor/*"]
 
 # 事件钩子（可选）
