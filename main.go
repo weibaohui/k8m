@@ -33,7 +33,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-//go:embed assets
+//go:embed ui/dist/*
 var embeddedFiles embed.FS
 var Version string
 var GitCommit string
@@ -105,26 +105,35 @@ func main() {
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
 
 	r.MaxMultipartMemory = 100 << 20 // 100 MiB
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	// 获取嵌入的静态文件的子文件系统
-	publicFS, _ := fs.Sub(embeddedFiles, "assets/public")
-	pagesFS, _ := fs.Sub(embeddedFiles, "assets/pages")
-	r.StaticFS("/public", http.FS(publicFS))
-	r.StaticFS("/pages", http.FS(pagesFS))
-	// 可选：提供根路由的 HTML 文件
-	// 假设有一个 index.html 文件在 static 目录下
+
+	// // 创建静态文件的子文件系统
+	// distFS, _ := fs.Sub(embeddedFiles, "ui/dist")
+	//
+	// // 挂载整个 dist 目录到根路径
+	// r.StaticFS("/", http.FS(distFS))
+
+	// 挂载子目录
+	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
+	r.StaticFS("/public/pages", http.FS(pagesFS))
+	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
+	r.StaticFS("/assets", http.FS(assetsFS))
+
+	// 直接返回 index.html
 	r.GET("/index.html", func(c *gin.Context) {
-		index, err := embeddedFiles.ReadFile("assets/index.html")
+		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Internal Server Error")
 			return
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
 	})
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+
 	// 设置根路径路由
 	r.GET("/", func(c *gin.Context) {
 		// 使用 HTTP 302 重定向
