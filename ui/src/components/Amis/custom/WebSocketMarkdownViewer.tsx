@@ -1,4 +1,4 @@
-import React, {ForwardedRef, useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {render as amisRender} from "amis";
 import {formatFinalGetUrl} from "@/utils/utils";
 
@@ -10,7 +10,7 @@ interface WebSocketMarkdownViewerProps {
 }
 
 const WebSocketMarkdownViewer = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({url, data, params}, ref: ForwardedRef<HTMLDivElement>) => {
+    ({url, data, params}, _) => {
         url = formatFinalGetUrl({url, data, params});
 
         const [messages, setMessages] = useState<string[]>([]);
@@ -48,22 +48,24 @@ const WebSocketMarkdownViewer = React.forwardRef<HTMLDivElement, WebSocketMarkdo
         const markdownContent = messages.join("");
 
         return (
-            <div ref={ref}>
-                <p style={{display: "none"}}>WebSocket Status: {status}</p>
-                <div
-                    style={{
-                        backgroundColor: "#f5f5f5",
-                        padding: "10px",
-                        borderRadius: "5px",
-                        overflowX: "auto",
-                    }}
-                >
-                    {amisRender({
-                        type: "markdown",
-                        value: markdownContent,
-                    })}
+            <>
+                <div>
+                    <p style={{display: "none"}}>WebSocket Status: {status}</p>
+                    <div
+                        style={{
+                            backgroundColor: "#f5f5f5",
+                            padding: "10px",
+                            borderRadius: "5px",
+                            overflowX: "auto",
+                        }}
+                    >
+                        {amisRender({
+                            type: "markdown",
+                            value: markdownContent,
+                        })}
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 );
