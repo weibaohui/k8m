@@ -770,7 +770,7 @@
                               ]
                             },
                             {
-                              "type": "sse",
+                              "type": "log-display",
                               "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
                               "data": {
                                 "containerName": "${containerName}",
