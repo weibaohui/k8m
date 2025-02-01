@@ -16,7 +16,7 @@ const Router = () => {
         <Routes>
             <Route path='/login' element={<Login/>}></Route>
             <Route path='/' element={<Layout/>}>
-                <Route path='/' element={<Navigate to="/dashboard"/>}></Route>
+                <Route path='/' element={<Navigate to="/cluster/node"/>}></Route>
                 <Route path='/*' element={
                     lazyLoad(
                         lazy(

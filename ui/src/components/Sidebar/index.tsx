@@ -53,7 +53,7 @@ const Sidebar = ({config}: Props) => {
                         {
                             item.children.map(sub => {
                                 return <MenuItem  key={sub.key}
-                                                 onClick={() => onMenuClick(sub)}>{sub.label}</MenuItem>
+                                                 onClick={() => onMenuClick(sub)}>{renderIcon(sub.icon)}{sub.label}</MenuItem>
                             })
                         }
                     </SubMenu>

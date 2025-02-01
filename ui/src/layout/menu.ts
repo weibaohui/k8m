@@ -2,7 +2,7 @@ export default [
     {
         label: "首页",
         icon: "fa-solid fa-house",
-        path: "/ns/",
+        path: "/",
         key: "home",
     },
     {
@@ -13,13 +13,13 @@ export default [
     },
     {
         label: "创建",
-        icon: "fa-solid fa-plus",
+        icon: "fa-solid fa-dharmachakra",
         path: "/apply/apply",
         key: "apply",
     },
     {
         label: "命名空间",
-        icon: "fa-solid fa-boxes-stacked",
+        icon: "fa-solid fa-border-style",
         path: "/cluster/ns",
         key: "cluster_ns",
     },
@@ -37,12 +37,12 @@ export default [
     },
     {
         label: "工作负载",
-        icon: "fa-solid fa-box",
+        icon: "fa-solid fa-cube",
         key: "workload",
         children: [
             {
                 label: "部署",
-                icon: "fa-solid fa-box-open",
+                icon: "fa-solid fa-layer-group",
                 path: "/ns/deploy",
                 key: "deploy",
             },
@@ -94,12 +94,12 @@ export default [
                 icon: "fa-solid fa-gears",
                 path: "/crd/crd",
                 key: "custom_resource",
-            } 
+            }
         ],
     },
     {
         label: "配置",
-        icon: "fa-solid fa-wrench",
+        icon: "fa-solid fa-sliders-h",
         key: "config",
         children: [
             {
@@ -123,13 +123,13 @@ export default [
         children: [
             {
                 label: "SVC服务",
-                icon: "fa-solid fa-server",
+                icon: "fa-solid fa-project-diagram",
                 path: "/ns/svc",
                 key: "svc",
             },
             {
                 label: "Ingress入口",
-                icon: "fa-solid fa-sign-in",
+                icon: "fa-solid  fa-wifi",
                 path: "/ns/ing",
                 key: "ingress",
             },
@@ -137,7 +137,7 @@ export default [
     },
     {
         label: "存储",
-        icon: "fa-solid fa-database",
+        icon: "fa-solid fa-memory",
         key: "storage",
         children: [
             {
@@ -154,7 +154,7 @@ export default [
             },
             {
                 label: "存储类",
-                icon: "fa-solid fa-layer-group",
+                icon: "fa-solid fa-coins",
                 path: "/cluster/storage_class",
                 key: "storage_class",
             },
@@ -204,7 +204,7 @@ export default [
         children: [
             {
                 label: "Ingress入口类",
-                icon: "fa-solid fa-signs-post",
+                icon: "fa-solid fa-sitemap",
                 path: "/cluster/ingress_class",
                 key: "ingress_class",
             },
@@ -222,19 +222,19 @@ export default [
             },
             {
                 label: "端点",
-                icon: "fa-solid fa-map-marker-alt",
+                icon: "fa-solid fa-ethernet",
                 path: "/ns/endpoint",
                 key: "endpoint",
             },
             {
                 label: "端点切片",
-                icon: "fa-solid fa-th-large",
+                icon: "fa-solid fa-newspaper",
                 path: "/ns/endpointslice",
                 key: "endpointslice",
             },
             {
                 label: "水平自动扩缩",
-                icon: "fa-solid fa-arrows-up-down",
+                icon: "fa-solid fa-arrows-left-right",
                 path: "/ns/hpa",
                 key: "hpa",
             },
@@ -258,7 +258,7 @@ export default [
             },
             {
                 label: "Pod中断配置",
-                icon: "fa-solid fa-pause",
+                icon: "fa-solid fa-receipt",
                 path: "/ns/pdb",
                 key: "pdb",
             },
