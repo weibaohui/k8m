@@ -1,0 +1,27 @@
+.logo {
+  padding: 10px;
+  :global {
+    img {
+      height: 40px;
+    }
+    h1 {
+      display: flex;
+      align-items: center;
+      margin: 0 0 10px 0;
+      padding: 0;
+      color: #007bff;
+      font-size: 24px;
+      text-indent: 8px;
+    }
+    .collapse {
+      img {
+        height: 24px;
+        display: block;
+        margin: auto;
+      }
+      span {
+        display: none;
+      }
+    }
+  }
+}

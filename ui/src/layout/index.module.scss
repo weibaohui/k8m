@@ -1,0 +1,64 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  .navbar {
+    min-width: 100vw;
+    height: 60px;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg-2);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+  }
+  .logo {
+    padding: 10px 15px;
+    cursor: pointer;
+    :local {
+      h1 {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        color: #007bff;
+        font-size: 24px;
+        text-indent: 5px;
+      }
+      img {
+        height: 36px;
+      }
+    }
+  }
+ 
+  .collapse {
+    align-items: center;
+    background-color: var(--color-fill-1);
+    border-radius: 2px;
+    bottom: 12px;
+    color: var(--color-text-3);
+    cursor: pointer;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    position: absolute;
+    right: 12px;
+    width: 24px;
+  }
+  .content {
+    padding: 16px;
+    height: calc(100vh - 60px);
+    background: var(--color-fill-2);
+    box-sizing: border-box;
+  }
+  :global {
+    .arco-layout-sider-has-trigger {
+      padding-bottom: unset !important;
+    }
+    .arco-layout-sider-trigger {
+      justify-content: end;
+      border-top: 1px solid #f1f1f1;
+    }
+    .arco-layout-sider-children {
+      height: calc(100vh - 108px);
+    }
+  }
+}

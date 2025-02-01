@@ -1,0 +1,17 @@
+.toolbar {
+  padding: 14px 15px;
+  display: flex;
+  .search {
+    width: 240px;
+    height: 32px;
+    border-radius: 32px;
+  }
+  :local {
+    li {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      list-style-type: none;
+    }
+  }
+}

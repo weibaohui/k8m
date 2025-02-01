@@ -1,0 +1,24 @@
+.login {
+  display: flex;
+  height: 100vh;
+  background: url(@/assets/login.bg.png) no-repeat bottom center;
+  background-size:cover;
+  .content {
+    width: 420px;
+    height: 320px;
+    box-sizing: border-box;
+    padding-left: 70px;
+    background: #ffffff;
+    border-radius: 6px;
+    margin: auto;
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 1px solid #fff;
+    box-shadow: inset 1px 5px 15px rgba($color: #fff, $alpha: 1.0);
+    .form {
+      width: 420px;
+    }
+  }
+}
