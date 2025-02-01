@@ -65,8 +65,8 @@ const WebSocketViewerComponent = React.forwardRef<HTMLDivElement, WebSocketViewe
                 <div
                     style={{
                         backgroundColor: '#f5f5f5',
-                        padding: '4px',
-                        borderRadius: '5px',
+                        padding: '2px',
+                        borderRadius: '1px',
                         overflowX: 'auto',
                     }}
                 >
