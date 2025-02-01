@@ -15,11 +15,14 @@ interface HighlightHtmlProps {
 const HighlightHtmlComponent = React.forwardRef<HTMLDivElement, HighlightHtmlProps>(
     ({html, data, keywords = [], backgroundColor = {}}, ref) => {
         // 替换内容中的占位符
+        console.log("HighlightHtmlComponent-html",html)
+        console.log("HighlightHtmlComponent-data",data)
+        console.log("HighlightHtmlComponent-keywords",keywords)
 
 
         // 获取渲染内容
         const content = replacePlaceholders(html, data);
-        if (!content) return null;
+        console.log("HighlightHtmlComponent",content)
 
         // 检查是否包含关键词
         const hasKeyword = keywords.some((keyword) => content.toLowerCase().includes(keyword.toLowerCase()));

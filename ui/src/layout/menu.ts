@@ -94,7 +94,7 @@ export default [
                 icon: "fa-solid fa-gears",
                 path: "/crd/crd",
                 key: "custom_resource",
-            },
+            } 
         ],
     },
     {

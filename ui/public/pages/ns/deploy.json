@@ -490,12 +490,8 @@
                         }
                       },
                       {
-                        "type": "highlightHtml",
-                        "keywords": [
-                          "Error",
-                          "Warning"
-                        ],
-                        "html": "<pre>${result}</pre>"
+                        "type": "tpl",
+                        "tpl": "<pre>${result}</pre>"
                       }
                     ]
                   }

@@ -52,13 +52,13 @@ const Sidebar = ({config}: Props) => {
                     >
                         {
                             item.children.map(sub => {
-                                return <MenuItem key={sub.key} style={{fontSize: 12}}
+                                return <MenuItem  key={sub.key}
                                                  onClick={() => onMenuClick(sub)}>{sub.label}</MenuItem>
                             })
                         }
                     </SubMenu>
                 } else {
-                    return <MenuItem key={item.key} onClick={() => onMenuClick(item)}>
+                    return <MenuItem key={item.key}   onClick={() => onMenuClick(item)}>
                         {renderIcon(item.icon)} {item.label}
                     </MenuItem>
                 }
