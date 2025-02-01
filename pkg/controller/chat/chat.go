@@ -35,7 +35,7 @@ type ResourceData struct {
 	ReportingController string `form:"reportingController"`
 	Type                string `form:"type"`
 	RegardingKind       string `form:"regardingKind"`
-	//AnyQuestion 任意提问
+	// AnyQuestion 任意提问
 	Question string `form:"question"`
 }
 
@@ -110,6 +110,7 @@ func Event(c *gin.Context) {
 	})
 }
 
+// Describe TODO 改为不要传Describe内容，比较大，传个名称过来，从后台Describe一下即可
 func Describe(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
