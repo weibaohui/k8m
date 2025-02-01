@@ -9,7 +9,7 @@ interface WebSocketMarkdownViewerProps {
 
 }
 
-const WebSocketMarkdownViewer = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
+const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
     ({url, data, params}, _) => {
         url = formatFinalGetUrl({url, data, params});
 
@@ -70,4 +70,4 @@ const WebSocketMarkdownViewer = React.forwardRef<HTMLDivElement, WebSocketMarkdo
     }
 );
 
-export default WebSocketMarkdownViewer;
+export default WebSocketMarkdownViewerComponent;
