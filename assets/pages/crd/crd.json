@@ -268,7 +268,7 @@
           "tooltip": "管理集群",
           "actionType": "url",
           "size": "xs",
-          "url": "/index.html#/cluster/all",
+          "url": "/#/cluster/cluster_all",
           "blank": false
         }
       ]
@@ -590,7 +590,7 @@
                   "icon": "fas fa-list text-primary",
                   "body": "实例列表",
                   "blank": true,
-                  "href": "/index.html#/crd/namespaced_cr/list?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "href": "/#/crd/namespaced_cr/list?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
                   "visibleOn": "spec.scope=='Namespaced'"
                 },
                 {
@@ -598,7 +598,7 @@
                   "icon": "fas fa-list text-primary",
                   "body": "实例列表",
                   "blank": true,
-                  "href": "/index.html#/crd/cluster_cr/list?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "href": "/#/crd/cluster_cr/list?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
                   "visibleOn": "spec.scope=='Cluster'"
                 }
               ]

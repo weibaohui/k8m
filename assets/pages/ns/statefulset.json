@@ -320,7 +320,7 @@
           "tooltip": "管理集群",
           "actionType": "url",
           "size": "xs",
-          "url": "/index.html#/cluster/all",
+          "url": "/#/cluster/cluster_all",
           "blank": false
         }
       ]
@@ -698,7 +698,7 @@
                   "icon": "fa-brands fa-docker text-primary",
                   "body": "容器列表",
                   "blank": false,
-                  "href": "/index.html#/pod/list?metadata[ownerReferences][name]=${metadata.name}"
+                  "href": "/#/ns/pod?metadata[ownerReferences][name]=${metadata.name}"
                 },
                 {
                   "type": "button",

@@ -117,9 +117,11 @@ func main() {
 	r.StaticFS("/public/pages", http.FS(pagesFS))
 	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
 	r.StaticFS("/assets", http.FS(assetsFS))
+	monacoeditorworkFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
+	r.StaticFS("/monacoeditorwork", http.FS(monacoeditorworkFS))
 
 	// 直接返回 index.html
-	r.GET("/index.html", func(c *gin.Context) {
+	r.GET("/", func(c *gin.Context) {
 		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Internal Server Error")
@@ -134,11 +136,6 @@ func main() {
 		})
 	})
 
-	// 设置根路径路由
-	r.GET("/", func(c *gin.Context) {
-		// 使用 HTTP 302 重定向
-		c.Redirect(http.StatusFound, "/index.html")
-	})
 	api := r.Group("/k8s")
 	{
 		// dynamic

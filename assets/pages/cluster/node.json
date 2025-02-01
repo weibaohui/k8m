@@ -268,7 +268,7 @@
           "tooltip": "管理集群",
           "actionType": "url",
           "size": "xs",
-          "url": "/index.html#/cluster/all",
+          "url": "/#/cluster/cluster_all",
           "blank": false
         }
       ]
@@ -625,7 +625,7 @@
                   "icon": "fa-brands fa-docker text-primary",
                   "body": "容器列表",
                   "blank": false,
-                  "href": "/index.html#/pod/list?spec[nodeName]=${metadata.name}"
+                  "href": "/#/ns/pod?spec[nodeName]=${metadata.name}"
                 },
                 {
                   "label": "资源用量",

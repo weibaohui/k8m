@@ -263,7 +263,7 @@
           "tooltip": "管理集群",
           "actionType": "url",
           "size": "xs",
-          "url": "/index.html#/cluster/all",
+          "url": "/#/cluster/cluster_all",
           "blank": false
         }
       ]
