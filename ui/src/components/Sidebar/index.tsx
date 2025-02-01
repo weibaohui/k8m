@@ -1,4 +1,4 @@
-import {Menu} from '@arco-design/web-react'
+import {Menu, Tooltip} from '@arco-design/web-react'
 import {useNavigate} from 'react-router-dom'
 import {useCallback} from 'react';
 import useStore from '@/store/layout'
@@ -22,6 +22,7 @@ const Sidebar = ({config}: Props) => {
     const navigate = useNavigate()
     const {collapse} = useStore(state => state)
     const renderIcon = useCallback((icon?: string) => {
+        icon = icon + " mr-0.5 "
         return (
             <>
                 <i className={icon}></i>
@@ -38,6 +39,7 @@ const Sidebar = ({config}: Props) => {
         collapse={collapse}
         defaultOpenKeys={['home']}
         defaultSelectedKeys={[]}
+
     >
         {
             config.map((item: MenuItemType) => {
@@ -52,13 +54,19 @@ const Sidebar = ({config}: Props) => {
                     >
                         {
                             item.children.map(sub => {
-                                return <MenuItem  key={sub.key}
-                                                 onClick={() => onMenuClick(sub)}>{renderIcon(sub.icon)}{sub.label}</MenuItem>
+                                return (
+                                    <MenuItem key={sub.key}
+                                              onClick={() => onMenuClick(sub)}>
+                                        <Tooltip position='right' trigger='hover' content={sub.label}>
+                                            {renderIcon(sub.icon)}{sub.label}
+                                        </Tooltip>
+
+                                    </MenuItem>)
                             })
                         }
                     </SubMenu>
                 } else {
-                    return <MenuItem key={item.key}   onClick={() => onMenuClick(item)}>
+                    return <MenuItem key={item.key} onClick={() => onMenuClick(item)}>
                         {renderIcon(item.icon)} {item.label}
                     </MenuItem>
                 }
