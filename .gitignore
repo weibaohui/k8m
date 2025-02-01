@@ -21,3 +21,5 @@ bin/
 /def.json
 /example.json
 /uploads/
+/ui/node_modules/
+/ui/dist/
