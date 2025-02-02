@@ -3,6 +3,7 @@ package dynamic
 import (
 	"fmt"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -259,11 +260,16 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 
 		// 如果是新增操作，增加新的 matchExpression
 		if action == "add" {
-			newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
-				"key":      rule.Key,
-				"operator": rule.Operator,
-				"values":   rule.Values,
-			})
+			if !slice.ContainBy(newMatchExpressions, func(item interface{}) bool {
+				m := item.(map[string]interface{})
+				return m["key"] == rule.Key
+			}) {
+				newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
+					"key":      rule.Key,
+					"operator": rule.Operator,
+					"values":   rule.Values,
+				})
+			}
 		}
 
 		// 将修改后的 matchExpressions 赋值回 termMap

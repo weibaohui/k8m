@@ -3,6 +3,7 @@ package dynamic
 import (
 	"fmt"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -208,12 +209,18 @@ func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, actio
 
 	// 如果是新增操作，增加新的 podAffinityTerm
 	if action == "add" {
-		newPodAffinityTerms = append(newPodAffinityTerms, map[string]interface{}{
-			"labelSelector": map[string]interface{}{
-				"matchLabels": rule.LabelSelector.MatchLabels,
-			},
-			"topologyKey": rule.TopologyKey,
-		})
+		if !slice.ContainBy(newPodAffinityTerms, func(item interface{}) bool {
+			m := item.(map[string]interface{})
+			return m["topologyKey"] == rule.TopologyKey
+		}) {
+			newPodAffinityTerms = append(newPodAffinityTerms, map[string]interface{}{
+				"labelSelector": map[string]interface{}{
+					"matchLabels": rule.LabelSelector.MatchLabels,
+				},
+				"topologyKey": rule.TopologyKey,
+			})
+		}
+
 	}
 
 	return newPodAffinityTerms, nil
