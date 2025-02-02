@@ -1252,7 +1252,7 @@
                           },
                           {
                             "type": "tpl",
-                            "tpl": "<div><div><strong>容忍度规则:</strong> Pod 必须容忍节点上的污点（taints），才能调度到该节点。容忍度由 `key`、`operator`、`value` 和 `effect` 组成，其中 `key` 代表污点键，`operator` 决定匹配方式，`effect` 代表污点的影响类型。</div><div><strong>匹配规则:</strong><br>1. `key` 和 `effect` 必须与节点上的污点完全一致，否则 `tolerations` 无效。<br>2. `operator` 决定 `value` 是否必须匹配：当 `operator` 为 `Equal` 时，`value` 也必须与节点污点的 `value` 一致；当 `operator` 为 `Exists` 时，只要 `key` 存在即可，不关心 `value`。</div><div><strong>调度行为:</strong> 仅当 Pod 的 `tolerations` 与节点污点的 `key` 和 `effect` 匹配，并且 `value` 符合 `operator` 规则时，Pod 才能调度到该节点，否则调度将被阻止。</div></div>"
+                            "tpl": "<div><div><strong>容忍度规则:</strong> Pod 必须容忍节点上的污点（Taints），才能调度到该节点。容忍度由 key、operator、value 和 effect 组成，其中 key 代表污点键，operator 决定匹配方式，effect 代表污点的影响类型。</div><div><strong>匹配规则:</strong><br>1. key 和 effect 必须与节点上的污点完全一致，否则容忍度无效。<br>2. operator 决定 value 是否必须匹配：当 operator 为 Equal 时，value 也必须与节点污点的 value 一致；当 operator 为 Exists 时，只要 key 存在即可，不关心 value。</div><div><strong>调度行为:</strong> 仅当 Pod 的容忍度与节点污点的 key 和 effect 匹配，并且 value 符合 operator 规则时，Pod 才能调度到该节点，否则调度将被阻止。</div></div>"
                           }
                         ]
                       },
