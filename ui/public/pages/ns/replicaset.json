@@ -913,29 +913,68 @@
         },
         {
           "name": "spec.template.spec.tolerations",
-          "label": "容忍",
+          "label": "容忍度",
           "type": "tpl",
-          "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa fa-exclamation-triangle text-primary\"></i>' : ''}",
+          "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa-solid fa-exclamation-triangle text-primary\"></i>' : '<i class=\"fa-solid fa-exclamation-triangle text-secondary\"></i>'}",
           "onEvent": {
             "click": {
               "actions": [
                 {
                   "actionType": "dialog",
                   "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
                     "title": "${metadata.name} 容忍度 (ESC 关闭)",
                     "body": [
                       {
                         "type": "panel",
-                        "title": "操作符（Operator）代表了对污点（键、值、效果）的容忍程度",
-                        "body": {
-                          "type": "tpl",
-                          "tpl": "<div><div><strong>等于:</strong>Equal - 键等于值</div><div><strong>存在:</strong>Exists - 键存在,值可以为任意值</div></div>"
-                        }
+                        "title": "调度规则：如何使用 容忍度",
+                        "body": [
+                          {
+                            "type": "button",
+                            "label": "什么是容忍度",
+                            "level": "link",
+                            "icon": "fas fa-question-circle text-primary",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "overlay": false,
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "什么是容忍度（ESC 关闭）",
+                              "body": [
+                                {
+                                  "type": "websocketMarkdownViewer",
+                                  "url": "/k8s/chat/any_question",
+                                  "params": {
+                                    "kind": "${kind}",
+                                    "group": "${group}",
+                                    "version": "${version}",
+                                    "question": "什么是容忍度"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "tpl",
+                            "tpl": "<div><div><strong>容忍度规则:</strong> Pod 必须容忍节点上的污点（Taints），才能调度到该节点。容忍度由 key、operator、value 和 effect 组成，其中 key 代表污点键，operator 决定匹配方式，effect 代表污点的影响类型。</div><div><strong>匹配规则:</strong><br>1. key 和 effect 必须与节点上的污点完全一致，否则容忍度无效。<br>2. operator 决定 value 是否必须匹配：当 operator 为 Equal 时，value 也必须与节点污点的 value 一致；当 operator 为 Exists 时，只要 key 存在即可，不关心 value。</div><div><strong>调度行为:</strong> 仅当 Pod 的容忍度与节点污点的 key 和 effect 匹配，并且 value 符合 operator 规则时，Pod 才能调度到该节点，否则调度将被阻止。</div></div>"
+                          }
+                        ]
                       },
                       {
-                        "type": "table",
-                        "source": "${spec.template.spec.tolerations}",
+                        "type": "crud",
+                        "api": "/k8s/$kind/group/$group/version/$version/list_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                        "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                        "headerToolbar": [
+                        ],
+                        "showIndex": true,
                         "columns": [
+                          {
+                            "name": "key",
+                            "label": "键"
+                          },
                           {
                             "name": "operator",
                             "label": "操作符",
@@ -945,10 +984,6 @@
                               "Equal": "<span class='label label-success'>等于</span>",
                               "Exists": "<span class='label label-success'>存在</span>"
                             }
-                          },
-                          {
-                            "name": "key",
-                            "label": "键"
                           },
                           {
                             "name": "value",
@@ -967,10 +1002,7 @@
                           }
                         ]
                       }
-                    ],
-                    "size": "lg",
-                    "closeOnEsc": true,
-                    "closeOnOutside": true
+                    ]
                   }
                 }
               ]
