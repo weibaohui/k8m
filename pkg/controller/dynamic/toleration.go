@@ -3,6 +3,7 @@ package dynamic
 import (
 	"fmt"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -183,7 +184,6 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 		if !ok {
 			continue
 		}
-
 		// 比对删除的 key
 		if action == "delete" && termMap["key"] == rule.Key {
 			// 如果是删除，并且 key 匹配，跳过这个 matchExpression
@@ -191,7 +191,6 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 		}
 		// 如果是修改操作，并且 key 匹配， 那么修改，如果不是，那么直接添加
 		if action == "modify" && termMap["key"] == rule.Key {
-
 			newTolerationsList = append(newTolerationsList, map[string]interface{}{
 				"key":               rule.Key,
 				"operator":          rule.Operator,
@@ -199,21 +198,26 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 				"effect":            rule.Effect,
 				"tolerationSeconds": rule.TolerationSeconds,
 			})
-
 		} else {
 			newTolerationsList = append(newTolerationsList, term)
 		}
-
 	}
-	// 如果是新增操作，增加新的 matchExpression
+	// 如果是新增操作，增加
 	if action == "add" {
-		newTolerationsList = append(tolerationsList, map[string]interface{}{
-			"key":               rule.Key,
-			"operator":          rule.Operator,
-			"value":             rule.Value,
-			"effect":            rule.Effect,
-			"tolerationSeconds": rule.TolerationSeconds,
-		})
+		// 需要判断下是否已经存在
+		if !slice.ContainBy(tolerationsList, func(item interface{}) bool {
+			m := item.(map[string]interface{})
+			return m["key"] == rule.Key && m["value"] == rule.Value && m["effect"] == rule.Effect
+		}) {
+			newTolerationsList = append(tolerationsList, map[string]interface{}{
+				"key":               rule.Key,
+				"operator":          rule.Operator,
+				"value":             rule.Value,
+				"effect":            rule.Effect,
+				"tolerationSeconds": rule.TolerationSeconds,
+			})
+		}
+
 	}
 	return newTolerationsList, nil
 }
