@@ -1042,7 +1042,7 @@
           "name": "spec.template.spec.affinity",
           "label": "亲和性",
           "type": "tpl",
-          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa-solid fa-sitemap text-primary\"></i>' : ''}",
+          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa-solid fa-sitemap text-primary\"></i>' : '<i class=\"fa-solid fa-sitemap text-secondary\"></i>'}",
           "onEvent": {
             "click": {
               "actions": [
@@ -1062,53 +1062,92 @@
                             "title": "节点亲和性",
                             "tab": [
                               {
+                                "type": "panel",
+                                "title": "调度规则：如何使用 NodeAffinity",
+                                "body": [
+                                  {
+                                    "type": "button",
+                                    "label": "什么是节点亲和性",
+                                    "level": "link",
+                                    "icon": "fas fa-question-circle text-primary",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "什么是节点亲和性（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/k8s/chat/any_question",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "question": "什么是节点亲和性"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<div><div><strong>节点规则:</strong> 节点必须匹配 `nodeAffinity` 中定义的规则，如节点上必须有标签（例如 `kubernetes.io/hostname`）。</div><div><strong>标签筛选:</strong>当操作符为存在、不存在时，不能填写筛选值。当为其他类型时，按定义过滤。</div></div>"
+                                  }
+                                ]
+                              },
+                              {
                                 "type": "divider",
                                 "title": "节点标签 必须满足",
                                 "titlePosition": "left",
-                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}"
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
-                                "name": "spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms",
-                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms}",
-                                "type": "each",
-                                "items": {
-                                  "type": "table",
-                                  "source": "${item.matchExpressions}",
-                                  "columns": [
-                                    {
-                                      "name": "key",
-                                      "label": "键",
-                                      "width": "250px"
+                                "type": "crud",
+                                "api": "/k8s/$kind/group/$group/version/$version/list_node_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_node_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "headerToolbar": [
+
+                                ],
+                                "showIndex": true,
+                                "columns": [
+                                  {
+                                    "name": "key",
+                                    "label": "键",
+                                    "width": "250px"
+                                  },
+                                  {
+                                    "name": "operator",
+                                    "label": "操作符",
+                                    "type": "mapping",
+                                    "map": {
+                                      "In": "<span class='label label-success'>包含</span>",
+                                      "NotIn": "<span class='label label-warning'>不包含</span>",
+                                      "Exists": "<span class='label label-info'>存在</span>",
+                                      "DoesNotExist": "<span class='label label-info'>不存在</span>"
                                     },
-                                    {
-                                      "name": "operator",
-                                      "label": "操作符",
-                                      "type": "mapping",
-                                      "map": {
-                                        "In": "<span class='label label-success'>包含</span>",
-                                        "NotIn": "<span class='label label-warning'>不包含</span>",
-                                        "Exists": "<span class='label label-info'>存在</span>"
-                                      },
-                                      "placeholder": "-",
-                                      "width": "50px"
+                                    "placeholder": "-",
+                                    "width": "100px"
+
+                                  },
+                                  {
+                                    "name": "values",
+                                    "label": "值",
+                                    "type": "each",
+                                    "items": {
+                                      "type": "tpl",
+                                      "tpl": "${item}<br>"
                                     },
-                                    {
-                                      "name": "values",
-                                      "label": "值",
-                                      "type": "each",
-                                      "items": {
-                                        "type": "tpl",
-                                        "tpl": "${item}<br>"
-                                      },
-                                      "placeholder": "-"
-                                    }
-                                  ]
-                                }
+                                    "placeholder": "-"
+
+                                  }
+                                ]
                               },
                               {
                                 "type": "wrapper",
                                 "className": "h-10",
-                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
                                 "type": "divider",
@@ -1160,16 +1199,56 @@
                             "title": "Pod亲和性",
                             "tab": [
                               {
+                                "type": "panel",
+                                "title": "调度规则：如何使用 PodAffinity 和 TopologyKey",
+                                "body": [
+                                  {
+                                    "type": "button",
+                                    "label": "什么是Pod亲和性",
+                                    "level": "link",
+                                    "icon": "fas fa-question-circle text-primary",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "什么是Pod亲和性（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/k8s/chat/any_question",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "question": "什么是Pod亲和性"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<div><div><strong>1、节点规则:</strong> 节点必须要有拓扑键同名的（如 topology.kubernetes.io/zone）标签。</div><div><strong>2、Pod标签:</strong> 节点上的 Pod 必须带有满足 labelSelector 中定义的标签（如 app=myapp）。</div><div>筛选出满足以上两条规则的节点，k8s将Pod调度到该节点上。</div></div>"
+                                  }
+                                ]
+                              },
+                              {
                                 "type": "divider",
                                 "title": "Pod标签 必须满足",
                                 "titlePosition": "left",
-                                "visibleOn": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
-                                "type": "table",
-                                "visibleOn": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
-                                "source": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
+                                "type": "crud",
+                                "api": "/k8s/$kind/group/$group/version/$version/list_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "showIndex": true,
+                                "headerToolbar": [
+
+                                ],
                                 "columns": [
+
                                   {
                                     "type": "json",
                                     "label": "标签",
@@ -1179,15 +1258,14 @@
                                   {
                                     "name": "topologyKey",
                                     "label": "拓扑键",
-                                    "type": "text",
-                                    "value": "${topologyKey|raw}"
+                                    "type": "text"
                                   }
                                 ]
                               },
                               {
                                 "type": "wrapper",
                                 "className": "h-10",
-                                "visibleOn": "${spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
                                 "type": "divider",
@@ -1226,16 +1304,56 @@
                             "title": "Pod反亲和性",
                             "tab": [
                               {
+                                "type": "panel",
+                                "title": "调度规则：如何使用 PodAntiAffinity 和 TopologyKey",
+                                "body": [
+                                  {
+                                    "type": "button",
+                                    "label": "什么是Pod反亲和性",
+                                    "level": "link",
+                                    "icon": "fas fa-question-circle text-primary",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "什么是Pod反亲和性（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/k8s/chat/any_question",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "question": "什么是Pod反亲和性"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<div><div><strong>1、节点规则:</strong> 节点必须要有拓扑键同名的（如 topology.kubernetes.io/zone）标签。</div><div><strong>2、Pod标签:</strong> 节点上的 Pod 标签满足 labelSelector 中定义的标签（如 app=myapp），那么该节点排除。</div><div><strong></strong> 从带有拓扑键的主机列表中，但是排除运行某些pod的节点。例如，若一个节点已经有了某个特定标签的 Pod，新的 Pod 将避免调度到该节点。</div></div>"
+                                  }
+                                ]
+                              },
+                              {
                                 "type": "divider",
                                 "title": "Pod标签 必须满足",
                                 "titlePosition": "left",
-                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
-                                "type": "table",
-                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
-                                "source": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}",
+                                "type": "crud",
+                                "api": "/k8s/$kind/group/$group/version/$version/list_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "showIndex": true,
+                                "headerToolbar": [
+
+                                ],
                                 "columns": [
+
                                   {
                                     "type": "json",
                                     "label": "标签",
@@ -1245,15 +1363,14 @@
                                   {
                                     "name": "topologyKey",
                                     "label": "拓扑键",
-                                    "type": "text",
-                                    "value": "${topologyKey|raw}"
+                                    "type": "text"
                                   }
                                 ]
                               },
                               {
                                 "type": "wrapper",
                                 "className": "h-10",
-                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution}"
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
                               },
                               {
                                 "type": "divider",
@@ -1299,8 +1416,7 @@
           "style": {
             "cursor": "pointer"
           }
-        },
-        {
+        },        {
           "name": "metadata.ownerReferences",
           "label": "所有者",
           "type": "tpl",

@@ -922,6 +922,43 @@
                     "title": "${metadata.name} 亲和性 (ESC 关闭)",
                     "body": [
                       {
+                        "type": "panel",
+                        "title": "调度规则：如何使用 NodeAffinity",
+                        "body": [
+                          {
+                            "type": "button",
+                            "label": "什么是节点亲和性",
+                            "level": "link",
+                            "icon": "fas fa-question-circle text-primary",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "overlay": false,
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "什么是节点亲和性（ESC 关闭）",
+                              "body": [
+                                {
+                                  "type": "websocketMarkdownViewer",
+                                  "url": "/k8s/chat/any_question",
+                                  "params": {
+                                    "kind": "${kind}",
+                                    "group": "${group}",
+                                    "version": "${version}",
+                                    "question": "什么是节点亲和性"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "tpl",
+                            "tpl": "<div><div><strong>节点规则:</strong> 节点必须匹配 `nodeAffinity` 中定义的规则，如节点上必须有标签（例如 `kubernetes.io/hostname`）。</div><div><strong>标签筛选:</strong>当操作符为存在、不存在时，不能填写筛选值。当为其他类型时，按定义过滤。</div></div>"
+                          }
+                        ]
+                      },
+
+                      {
                         "name": "spec.nodeAffinity.required.nodeSelectorTerms",
                         "type": "each",
                         "items": {
