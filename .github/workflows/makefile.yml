@@ -12,17 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.23.0'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.0'
 
-    - name: Build
-      run: go build -v ./...
- 
-    - name: Make 
-      run: make build-all
+      # todo 增加Nodejs pnpm build 问题
+      # 否则 会构建出现找不到dist文件夹的问题
+      - name: Build
+        run: go build -v ./...
+
+      - name: Make
+        run: make build-all
+
 
 
