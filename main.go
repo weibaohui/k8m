@@ -106,19 +106,13 @@ func main() {
 
 	r.MaxMultipartMemory = 100 << 20 // 100 MiB
 
-	// // 创建静态文件的子文件系统
-	// distFS, _ := fs.Sub(embeddedFiles, "ui/dist")
-	//
-	// // 挂载整个 dist 目录到根路径
-	// r.StaticFS("/", http.FS(distFS))
-
 	// 挂载子目录
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
 	r.StaticFS("/public/pages", http.FS(pagesFS))
 	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
 	r.StaticFS("/assets", http.FS(assetsFS))
-	monacoeditorworkFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
-	r.StaticFS("/monacoeditorwork", http.FS(monacoeditorworkFS))
+	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
+	r.StaticFS("/monacoeditorwork", http.FS(monacoFS))
 
 	// 直接返回 index.html
 	r.GET("/", func(c *gin.Context) {
