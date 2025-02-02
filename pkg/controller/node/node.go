@@ -224,3 +224,61 @@ func LabelList(c *gin.Context) {
 
 	amis.WriteJsonList(c, labelList)
 }
+func TaintList(c *gin.Context) {
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var nodeList []*v1.Node
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+		WithCache(time.Second * 30).
+		List(&nodeList).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var taintsList []*v1.Taint
+
+	for _, node := range nodeList {
+		for _, taint := range node.Spec.Taints {
+			taintsList = append(taintsList, &taint)
+		}
+	}
+
+	type table struct {
+		Names  []string       `json:"names"`
+		IPs    []string       `json:"ips"`
+		Key    string         `json:"key"`
+		Value  string         `json:"value"`
+		Effect v1.TaintEffect `json:"effect"`
+	}
+
+	var resultList []*table
+
+	for _, v := range taintsList {
+		resultList = append(resultList, &table{
+			Key:    v.Key,
+			Value:  v.Value,
+			Effect: v.Effect,
+			Names:  make([]string, 0),
+			IPs:    make([]string, 0),
+		})
+	}
+	// 排重
+	resultList = slice.UniqueByComparator(resultList, func(i, j *table) bool {
+		return i.Key == j.Key && i.Value == j.Value && i.Effect == j.Effect
+	})
+
+	// 循环labelList，循环node，如果node的label和labelList的key相同，则将node name放入到labelList的node字段中
+	for _, v := range resultList {
+		for _, node := range nodeList {
+			for _, taint := range node.Spec.Taints {
+				if taint.Key == v.Key && taint.Value == v.Value && taint.Effect == v.Effect {
+					v.Names = append(v.Names, node.Name)
+					v.IPs = append(v.IPs, node.Status.Addresses[0].Address)
+				}
+			}
+		}
+	}
+
+	amis.WriteJsonList(c, resultList)
+}
