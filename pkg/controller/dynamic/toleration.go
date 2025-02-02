@@ -13,11 +13,11 @@ import (
 )
 
 type Tolerations struct {
-	Operator          string   `json:"operator"`
-	Key               string   `json:"key"`
-	Values            []string `json:"values"`
-	Effect            string   `json:"effect"`
-	TolerationSeconds int64    `json:"tolerationSeconds"`
+	Operator          string `json:"operator"`
+	Key               string `json:"key"`
+	Value             string `json:"value"`
+	Effect            string `json:"effect"`
+	TolerationSeconds *int64 `json:"tolerationSeconds"`
 }
 
 func ListTolerations(c *gin.Context) {
@@ -94,6 +94,11 @@ func processTolerations(c *gin.Context, action string) {
 		return
 	}
 
+	// 如果operator 是存在，则不需要设置value值
+	if info.Operator == "Exists" {
+		info.Value = ""
+	}
+
 	// 先获取资源中的定义
 	var item unstructured.Unstructured
 	err := kom.Cluster(selectedCluster).
@@ -163,7 +168,7 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 			map[string]interface{}{
 				"key":               rule.Key,
 				"operator":          rule.Operator,
-				"values":            rule.Values,
+				"value":             rule.Value,
 				"effect":            rule.Effect,
 				"tolerationSeconds": rule.TolerationSeconds,
 			},
@@ -184,32 +189,32 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 			// 如果是删除，并且 key 匹配，跳过这个 matchExpression
 			continue
 		}
-		// 如果是修改操作，并且 key 匹配，修改该 matchExpression 的 values
+		// 如果是修改操作，并且 key 匹配， 那么修改，如果不是，那么直接添加
 		if action == "modify" && termMap["key"] == rule.Key {
-			// 修改新值，不修改原值，直接添加到新列表
-			newTolerationsList = append(newTolerationsList, map[string]interface{}{
-				"key":               rule.Key,
-				"operator":          rule.Operator,
-				"values":            rule.Values,
-				"effect":            rule.Effect,
-				"tolerationSeconds": rule.TolerationSeconds,
-			})
-			continue
-		}
 
-		// 如果是新增操作，增加新的 matchExpression
-		if action == "add" {
 			newTolerationsList = append(newTolerationsList, map[string]interface{}{
 				"key":               rule.Key,
 				"operator":          rule.Operator,
-				"values":            rule.Values,
+				"value":             rule.Value,
 				"effect":            rule.Effect,
 				"tolerationSeconds": rule.TolerationSeconds,
 			})
+
+		} else {
+			newTolerationsList = append(newTolerationsList, term)
 		}
 
 	}
-
+	// 如果是新增操作，增加新的 matchExpression
+	if action == "add" {
+		newTolerationsList = append(tolerationsList, map[string]interface{}{
+			"key":               rule.Key,
+			"operator":          rule.Operator,
+			"value":             rule.Value,
+			"effect":            rule.Effect,
+			"tolerationSeconds": rule.TolerationSeconds,
+		})
+	}
 	return newTolerationsList, nil
 }
 
