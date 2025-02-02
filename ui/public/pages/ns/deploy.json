@@ -1206,6 +1206,362 @@
         },
         {
           "name": "spec.template.spec.tolerations",
+          "label": "容忍度1",
+          "type": "tpl",
+          "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa-solid fa-exclamation-triangle text-primary\"></i>' : '<i class=\"fa-solid fa-exclamation-triangle text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 容忍度 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "panel",
+                        "title": "调度规则：如何使用 容忍度",
+                        "body": [
+                          {
+                            "type": "button",
+                            "label": "什么是容忍度",
+                            "level": "link",
+                            "icon": "fas fa-question-circle text-primary",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "overlay": false,
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "什么是容忍度（ESC 关闭）",
+                              "body": [
+                                {
+                                  "type": "websocketMarkdownViewer",
+                                  "url": "/k8s/chat/any_question",
+                                  "params": {
+                                    "kind": "${kind}",
+                                    "group": "${group}",
+                                    "version": "${version}",
+                                    "question": "什么是容忍度"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "tpl",
+                            "tpl": "<div><div><strong>容忍度规则:</strong> Pod 必须容忍节点上的污点（taints），才能调度到该节点。容忍度由 `key`、`operator`、`value` 和 `effect` 组成，其中 `key` 代表污点键，`operator` 决定匹配方式，`effect` 代表污点的影响类型。</div><div><strong>匹配规则:</strong><br>1. `key` 和 `effect` 必须与节点上的污点完全一致，否则 `tolerations` 无效。<br>2. `operator` 决定 `value` 是否必须匹配：当 `operator` 为 `Equal` 时，`value` 也必须与节点污点的 `value` 一致；当 `operator` 为 `Exists` 时，只要 `key` 存在即可，不关心 `value`。</div><div><strong>调度行为:</strong> 仅当 Pod 的 `tolerations` 与节点污点的 `key` 和 `effect` 匹配，并且 `value` 符合 `operator` 规则时，Pod 才能调度到该节点，否则调度将被阻止。</div></div>"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "crud",
+                        "api": "/k8s/$kind/group/$group/version/$version/list_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                        "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                        "headerToolbar": [
+                          {
+                            "type": "button",
+                            "label": "新增规则",
+                            "actionType": "dialog",
+                            "dialog": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "新增",
+                              "body": [
+                                {
+                                  "type": "form",
+                                  "mode": "horizontal",
+                                  "id": "toleration_add_form",
+                                  "api": "/k8s/$kind/group/$group/version/$version/add_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                                  "body": [
+                                    {
+                                      "type": "input-text",
+                                      "name": "key",
+                                      "label": "键",
+                                      "required": true,
+                                      "addOn": {
+                                        "type": "button",
+                                        "icon": "fa fa-filter",
+                                        "label": "污点速选",
+                                        "actionType": "dialog",
+                                        "dialog": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "size": "xl",
+                                          "title": "从已有节点上选择污点（ESC 关闭）",
+                                          "body": [
+                                            {
+                                              "type": "crud",
+                                              "api": "get:/k8s/node/taints/list",
+                                              "onEvent": {
+                                                "rowClick": {
+                                                  "actions": [
+                                                    {
+                                                      "actionType": "setValue",
+                                                      "componentId": "toleration_add_form",
+                                                      "args": {
+                                                        "value": {
+                                                          "key": "${event.data.item.key}",
+                                                          "value": "${event.data.item.value}",
+                                                          "effect": "${event.data.item.effect}"
+                                                        }
+                                                      }
+                                                    },
+                                                    {
+                                                      "actionType": "closeDialog"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "autoFillHeight": true,
+                                              "autoGenerateFilter": {
+                                                "columnsNum": 4,
+                                                "showBtnToolbar": false,
+                                                "defaultCollapsed": false
+                                              },
+                                              "selectable": true,
+                                              "primaryField": "key",
+                                              "loadDataOnce": true,
+                                              "initFetch": true,
+                                              "perPage": 5,
+                                              "headerToolbar": [
+                                                {
+                                                  "type": "columns-toggler",
+                                                  "align": "right",
+                                                  "draggable": true,
+                                                  "icon": "fas fa-cog",
+                                                  "overlay": true,
+                                                  "footerBtnSize": "sm"
+                                                },
+                                                {
+                                                  "type": "tpl",
+                                                  "tpl": "共${count}条",
+                                                  "align": "right",
+                                                  "visibleOn": "${count}"
+                                                },
+                                                {
+                                                  "type": "columns-toggler",
+                                                  "align": "left"
+                                                },
+                                                "reload"
+                                              ],
+                                              "footerToolbar": [
+                                                {
+                                                  "type": "pagination",
+                                                  "align": "right"
+                                                },
+                                                {
+                                                  "type": "statistics",
+                                                  "align": "right"
+                                                },
+                                                {
+                                                  "type": "switch-per-page",
+                                                  "align": "right"
+                                                }
+                                              ],
+                                              "columns": [
+                                                {
+                                                  "name": "key",
+                                                  "label": "键",
+                                                  "searchable": {
+                                                    "type": "input-text",
+                                                    "name": "key",
+                                                    "clearable": true,
+                                                    "label": "标签键",
+                                                    "placeholder": "输入键名称"
+                                                  },
+                                                  "width": "100px"
+                                                },
+                                                {
+                                                  "name": "value",
+                                                  "label": "值",
+                                                  "searchable": {
+                                                    "type": "input-text",
+                                                    "name": "value",
+                                                    "clearable": true,
+                                                    "label": "标签值",
+                                                    "placeholder": "输入值名称"
+                                                  },
+                                                  "width": "100px"
+                                                },
+                                                {
+                                                  "name": "effect",
+                                                  "label": "效果",
+                                                  "searchable": {
+                                                    "type": "select",
+                                                    "options": [
+                                                      {
+                                                        "label": "禁止调度",
+                                                        "value": "NoSchedule"
+                                                      },
+                                                      {
+                                                        "label": "优先不调度",
+                                                        "value": "PreferNoSchedule"
+                                                      },
+                                                      {
+                                                        "label": "不可执行",
+                                                        "value": "NoExecute"
+                                                      }
+                                                    ],
+                                                    "name": "effect",
+                                                    "clearable": true,
+                                                    "placeholder": "输选择效果"
+                                                  },
+                                                  "width": "100px"
+                                                },
+                                                {
+                                                  "name": "names",
+                                                  "label": "节点名称",
+                                                  "type": "tpl",
+                                                  "tpl": "${names|join:','},",
+                                                  "width": "200px",
+                                                  "searchable": true
+                                                },
+                                                {
+                                                  "name": "ips",
+                                                  "label": "节点IP",
+                                                  "type": "tpl",
+                                                  "tpl": "${ips|join:','},",
+                                                  "width": "200px",
+                                                  "searchable": true
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "type": "select",
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "required": true,
+                                      "value": "Equal",
+                                      "options": [
+                                        {
+                                          "label": "等于",
+                                          "value": "Equal"
+                                        },
+                                        {
+                                          "label": "存在",
+                                          "value": "Exists"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "value",
+                                      "type": "input-text",
+                                      "label": "值",
+                                      "visibleOn": "${operator === 'Equal'}"
+                                    },
+                                    {
+                                      "name": "effect",
+                                      "label": "效果",
+                                      "required": true,
+                                      "value": "NoSchedule",
+                                      "type": "select",
+                                      "options": [
+                                        {
+                                          "label": "禁止调度",
+                                          "value": "NoSchedule"
+                                        },
+                                        {
+                                          "label": "优先不调度",
+                                          "value": "PreferNoSchedule"
+                                        },
+                                        {
+                                          "label": "不可执行",
+                                          "value": "NoExecute"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "showIndex": true,
+                        "columns": [
+                          {
+                            "type": "operation",
+                            "label": "操作",
+                            "width": 120,
+                            "buttons": [
+                              {
+                                "type": "button",
+                                "icon": "fas fa-trash text-primary",
+                                "actionType": "ajax",
+                                "tooltip": "删除",
+                                "api": "/k8s/$kind/group/$group/version/$version/delete_tolerations/ns/$metadata.namespace/name/$metadata.name"
+                              }
+                            ],
+                            "toggled": true
+                          },
+                          {
+                            "name": "key",
+                            "label": "键"
+                          },
+                          {
+                            "name": "operator",
+                            "label": "操作符",
+                            "placeholder": "-",
+                            "type": "mapping",
+                            "map": {
+                              "Equal": "<span class='label label-success'>等于</span>",
+                              "Exists": "<span class='label label-success'>存在</span>"
+                            },
+                            "quickEdit": {
+                              "type": "select",
+                              "options": [
+                                {
+                                  "label": "等于",
+                                  "value": "Equal"
+                                },
+                                {
+                                  "label": "存在",
+                                  "value": "Exists"
+                                }
+                              ],
+                              "saveImmediately": true
+                            }
+                          },
+                          {
+                            "name": "value",
+                            "label": "值",
+                            "placeholder": "-",
+                            "quickEdit": {
+                              "type": "input-text",
+                              "saveImmediately": true
+                            }
+                          },
+                          {
+                            "name": "effect",
+                            "label": "效果",
+                            "type": "mapping",
+                            "map": {
+                              "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
+                              "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
+                              "NoExecute": "<span class='label label-danger'>不可执行</span>"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "spec.template.spec.tolerations",
           "label": "容忍",
           "type": "tpl",
           "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa fa-exclamation-triangle text-primary\"></i>' : ''}",
