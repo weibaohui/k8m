@@ -7,6 +7,7 @@ require (
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-contrib/gzip v1.2.0
 	github.com/gin-gonic/gin v1.10.0
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.36.1
