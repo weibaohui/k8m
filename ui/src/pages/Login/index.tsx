@@ -19,7 +19,7 @@ const Login = () => {
         if (savedData) {
             const parsedData = JSON.parse(savedData);
             form.setFieldsValue(parsedData);
-            form.setFieldValue('remember', true);  // 确保 remember 的值为 boolean
+            form.setFieldValue('remember', parsedData.remember === true);
 
         }
     }, [form]);
