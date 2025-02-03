@@ -8,7 +8,7 @@ const Toolbar = () => {
     const handleClick = (key: string) => {
         switch (key) {
             case 'logout':
-                localStorage.clear()
+                localStorage.removeItem("token")
                 navigate('/login')
                 break
         }
