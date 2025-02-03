@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {appendQueryParam, replacePlaceholders} from "@/utils/utils.ts";
+import React, { useEffect, useRef, useState } from 'react';
+import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -26,7 +26,11 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         sinceSeconds: props.data.sinceSeconds || ""
     };
     // @ts-ignore
-    const finalUrl = appendQueryParam(url, params);
+    let finalUrl = appendQueryParam(url, params);
+    const token = localStorage.getItem('token');
+    //拼接url token
+    finalUrl = finalUrl + (finalUrl.includes('?') ? '&' : '?') + `token=${token}`;
+
 
     const dom = useRef<HTMLDivElement | null>(null);
     const eventSourceRef = useRef<EventSource | null>(null);
@@ -92,11 +96,11 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
 
     return (
-        <div ref={dom} style={{whiteSpace: 'pre-wrap'}}>
-            {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
+        <div ref={dom} style={{ whiteSpace: 'pre-wrap' }}>
+            {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
 
             {lines.map((line, index) => (
-                <div key={index} style={{display: 'flex', alignItems: 'center'}}>
+                <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                         type="checkbox"
                         onChange={(e) => handleSelectLine(line, e.target.checked)}
