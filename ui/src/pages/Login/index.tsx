@@ -17,7 +17,10 @@ const Login = () => {
     useEffect(() => {
         const savedData = localStorage.getItem('remember');
         if (savedData) {
-            form.setFieldsValue(JSON.parse(savedData));
+            const parsedData = JSON.parse(savedData);
+            form.setFieldsValue(parsedData);
+            form.setFieldValue('remember', true);  // 确保 remember 的值为 boolean
+
         }
     }, [form]);
     const onSubmit = useCallback(() => {
@@ -70,8 +73,8 @@ const Login = () => {
                         placeholder='请输入密码'
                     />
                 </FormItem>
-                <FormItem field={'remember'}>
-                    <Checkbox >记住密码</Checkbox>
+                <FormItem field={'remember'} triggerPropName='checked' >
+                    <Checkbox >记住</Checkbox>
                 </FormItem>
                 <FormItem>
                     <Button type='primary' long onClick={onSubmit}>登 录</Button>
