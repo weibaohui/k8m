@@ -201,8 +201,14 @@ func main() {
 		api.POST("/node/batch/cordon", node.BatchCordon)
 		api.POST("/node/batch/uncordon", node.BatchUnCordon)
 		api.GET("/node/name/option_list", node.NameOptionList)
-		api.GET("/node/labels/list", node.LabelList)
-		api.GET("/node/taints/list", node.TaintList)
+		api.GET("/node/labels/list", node.AllLabelList)
+		api.GET("/node/taints/list", node.AllTaintList)
+
+		// 节点污点
+		api.POST("/node/update_taints/name/:name", node.UpdateTaint)
+		api.POST("/node/delete_taints/name/:name", node.DeleteTaint)
+		api.POST("/node/add_taints/name/:name", node.AddTaint)
+		api.GET("/node/list_taints/name/:name", node.ListTaint)
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)

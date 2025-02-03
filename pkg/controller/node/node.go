@@ -174,7 +174,8 @@ func NameOptionList(c *gin.Context) {
 	})
 }
 
-func LabelList(c *gin.Context) {
+// AllLabelList 获取所有节点上的标签
+func AllLabelList(c *gin.Context) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 	// 先拿到所有的lable列表
@@ -224,7 +225,9 @@ func LabelList(c *gin.Context) {
 
 	amis.WriteJsonList(c, labelList)
 }
-func TaintList(c *gin.Context) {
+
+// AllTaintList 获取所有节点上的污点
+func AllTaintList(c *gin.Context) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 
