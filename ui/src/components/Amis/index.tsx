@@ -1,5 +1,5 @@
-import {registerFilter, registerRenderer, render as renderAmis, Schema} from 'amis'
-import {AlertComponent, ToastComponent} from 'amis-ui'
+import { registerFilter, registerRenderer, render as renderAmis, Schema } from 'amis'
+import { AlertComponent, ToastComponent } from 'amis-ui'
 import axios from 'axios'
 import k8sTextConditionsComponent from "@/components/Amis/custom/K8sTextConditions.tsx";
 import NodeRolesComponent from '@/components/Amis/custom/NodeRoles.tsx';
@@ -17,21 +17,21 @@ import SSELogDownloadComponent from "@/components/Amis/custom/SSELogDownload.tsx
 import SSELogDisplayComponent from "@/components/Amis/custom/SSELogDisplay.tsx";
 import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.tsx";
 // 注册自定义组件
-registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
-registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
+registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
+registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
 // @ts-ignore
-registerRenderer({type: 'k8sAge', component: K8sAgeComponent})
-registerRenderer({type: 'k8sPodReady', component: K8sPodReadyComponent})
+registerRenderer({ type: 'k8sAge', component: K8sAgeComponent })
+registerRenderer({ type: 'k8sPodReady', component: K8sPodReadyComponent })
 // @ts-ignore
-registerRenderer({type: 'highlightHtml', component: HighlightHtmlComponent})
+registerRenderer({ type: 'highlightHtml', component: HighlightHtmlComponent })
 // @ts-ignore
-registerRenderer({type: 'webSocketMarkdownViewer', component: WebSocketMarkdownViewerComponent})
+registerRenderer({ type: 'webSocketMarkdownViewer', component: WebSocketMarkdownViewerComponent })
 // @ts-ignore
-registerRenderer({type: 'log-download', component: SSELogDownloadComponent})
+registerRenderer({ type: 'log-download', component: SSELogDownloadComponent })
 // @ts-ignore
-registerRenderer({type: 'log-display', component: SSELogDisplayComponent})
+registerRenderer({ type: 'log-display', component: SSELogDisplayComponent })
 // @ts-ignore
-registerRenderer({type: 'websocketViewer', component: WebSocketViewerComponent})
+registerRenderer({ type: 'websocketViewer', component: WebSocketViewerComponent })
 
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
@@ -45,7 +45,7 @@ interface Props {
     schema: Schema
 }
 
-const Amis = ({schema}: Props) => {
+const Amis = ({ schema }: Props) => {
     const theme = 'cxd';
     const locale = 'zh-CN';
 
@@ -56,7 +56,7 @@ const Amis = ({schema}: Props) => {
             position={'top-center'}
             locale={locale}
         />
-        <AlertComponent theme={theme} key="alert" locale={locale}/>
+        <AlertComponent theme={theme} key="alert" locale={locale} />
         {
 
             renderAmis(schema,
@@ -68,14 +68,20 @@ const Amis = ({schema}: Props) => {
                         console.log(replace)
                     },
                     fetcher: ({
-                                  url, // 接口地址
-                                  method, // 请求方法 get、post、put、delete
-                                  data, // 请求数据
-                                  config, // 其他配置
-                              }) => {
+                        url, // 接口地址
+                        method, // 请求方法 get、post、put、delete
+                        data, // 请求数据
+                        config, // 其他配置
+                    }) => {
+                        const token = localStorage.getItem('token') || '';
+
                         const ajax = axios.create({
-                            baseURL: '/'
-                        })
+                            baseURL: '/',
+                            headers: {
+                                ...config?.headers,
+                                Authorization: token ? `Bearer ${token}` : ''
+                            }
+                        });
                         switch (method) {
                             case 'get':
                                 return ajax.get(url, config)
