@@ -18,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
+	"github.com/weibaohui/k8m/pkg/controller/login"
 	"github.com/weibaohui/k8m/pkg/controller/menu"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
@@ -130,7 +131,12 @@ func main() {
 		})
 	})
 
-	api := r.Group("/k8s")
+	auth := r.Group("/auth")
+	{
+		auth.POST("/login", login.LoginByPassword)
+	}
+
+	api := r.Group("/k8s", middleware.AuthMiddleware())
 	{
 		// dynamic
 		api.POST("/yaml/apply", dynamic.Apply)
