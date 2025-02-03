@@ -18,10 +18,15 @@ var once sync.Once
 type Config struct {
 	Port       int
 	KubeConfig string
-	ApiKey     string
-	ApiURL     string
+	ApiKey     string // OPENAI_API_KEY
+	ApiURL     string // OPENAI_API_URL
+	ApiModel   string // OPENAI_MODEL
 	Debug      bool
 	InCluster  bool
+	LoginType  string // password,oauth,token,..
+	// 登录方式，默认为password
+	AdminUserName string // 管理员用户名
+	AdminPassword string // 管理员密码
 }
 
 func Init() *Config {
@@ -40,17 +45,23 @@ func (c *Config) InitFlags() {
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
 	// 环境变量绑定
-	defaultPort := 3618
-	if envPort := os.Getenv("PORT"); envPort != "" {
-		defaultPort, _ = strconv.Atoi(envPort)
-	}
-	defaultKubeConfig := os.Getenv("KUBECONFIG")
-	if defaultKubeConfig == "" {
-		defaultKubeConfig = filepath.Join(homedir.HomeDir(), ".kube", "config")
-	}
+	// 默认端口为3618
+	defaultPort := getEnvAsInt("PORT", 3618)
 
-	defaultApiKey := os.Getenv("OPENAI_API_KEY")
-	defaultApiURL := os.Getenv("OPENAI_API_URL")
+	// 默认kubeconfig为~/.kube/config
+	defaultKubeConfig := getEnv("KUBECONFIG", filepath.Join(homedir.HomeDir(), ".kube", "config"))
+
+	// 默认apiKey为环境变量OPENAI_API_KEY/OPENAI_API_URL/
+	defaultApiKey := getEnv("OPENAI_API_KEY", "")
+	defaultApiURL := getEnv("OPENAI_API_URL", "")
+	defaultModel := getEnv("OPENAI_MODEL", "Qwen/Qwen2.5-Coder-7B-Instruct")
+
+	// 默认登录方式为password
+	defaultLoginType := getEnv("LOGIN_TYPE", "password")
+	defaultAdminUserName := getEnv("ADMIN_USERNAME", "admin")
+	defaultAdminPassword := getEnv("ADMIN_PASSWORD", "123456")
+
+	// 默认debug为false
 	defaultDebug := false
 	if debug := os.Getenv("GIN_MODE"); debug == "release" {
 		// GIN_MODE=release
@@ -62,8 +73,11 @@ func (c *Config) InitFlags() {
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "Port for the server to listen on")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "API Key for ChatGPT")
 	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "API URL for ChatGPT")
+	pflag.StringVarP(&c.ApiModel, "chatgpt-model", "m", defaultModel, "API Model for ChatGPT")
 	pflag.StringVarP(&c.KubeConfig, "kubeconfig", "c", defaultKubeConfig, "Absolute path to the kubeConfig file")
-
+	pflag.StringVar(&c.LoginType, "login-type", defaultLoginType, "Login type, password, oauth, token, ...")
+	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "Admin username")
+	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "Admin password")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 2
@@ -71,4 +85,22 @@ func (c *Config) InitFlags() {
 	}
 	pflag.Parse()
 
+}
+
+// getEnv 读取环境变量，如果不存在则返回默认值
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
+}
+
+// getEnvAsInt 读取环境变量，如果不存在则返回默认值
+func getEnvAsInt(key string, defaultValue int) int {
+	if value, exists := os.LookupEnv(key); exists {
+		if intValue, err := strconv.Atoi(value); err == nil {
+			return intValue
+		}
+	}
+	return defaultValue
 }
