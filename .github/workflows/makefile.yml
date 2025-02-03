@@ -17,6 +17,8 @@ jobs:
       # 否则 会构建出现找不到dist文件夹的问题
       - name: Set up Node.js
         uses: actions/setup-node@v4
+      - name: Install pnpm
+        run: npm install -g pnpm
       - name: Install dependencies
         run: cd ui && pnpm install
       - name: Build
