@@ -2559,7 +2559,7 @@
         {
           "type": "progress",
           "mode": "line",
-          "value": "${(status.readyReplicas / spec.replicas) * 100}",
+          "value": "${ROUND((status.readyReplicas / spec.replicas),2) * 100}",
           "striped": true,
           "label": "当前状态",
           "animate": true,

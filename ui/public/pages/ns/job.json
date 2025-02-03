@@ -1471,7 +1471,7 @@
         {
           "type": "progress",
           "mode": "line",
-          "value": "${status.succeeded > 0 ? (status.succeeded / spec.completions) * 100 : 0}",
+          "value": "${status.succeeded > 0 ? ROUND((status.succeeded / spec.completions),2) * 100 : 0}",
           "striped": true,
           "label": "当前状态",
           "animate": true,
