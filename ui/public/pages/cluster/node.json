@@ -940,27 +940,130 @@
           "name": "spec.taints",
           "label": "污点",
           "type": "tpl",
-          "tpl": "${spec.taints ? '<i class=\"fa fa-exclamation-triangle text-primary\"></i>' : ''}",
+          "tpl": "${spec.taints ? '<i class=\"fa-solid fa-exclamation-triangle text-primary\"></i>' : '<i class=\"fa-solid fa-exclamation-triangle text-secondary\"></i>'}",
           "onEvent": {
             "click": {
               "actions": [
                 {
                   "actionType": "dialog",
                   "dialog": {
-                    "title": "${metadata.name} Taints (ESC 关闭)",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 污点 (ESC 关闭)",
                     "body": [
                       {
                         "type": "panel",
-                        "title": "提示",
-                        "body": {
-                          "type": "tpl",
-                          "tpl": "<div><div><strong>禁止调度：</strong>NoSchedule - Pod 不会调度到此节点</div><div><strong>优先不调度：</strong>PreferNoSchedule - 尽量避免调度，但不强制</div><div><strong>不可执行：</strong> NoExecute - 驱逐现有 Pod，并禁止新 Pod 调度</div></div>"
-                        }
+                        "title": "调度规则：如何使用 污点",
+                        "body": [
+                          {
+                            "type": "button",
+                            "label": "什么是污点",
+                            "level": "link",
+                            "icon": "fas fa-question-circle text-primary",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "overlay": false,
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "什么是污点（ESC 关闭）",
+                              "body": [
+                                {
+                                  "type": "websocketMarkdownViewer",
+                                  "url": "/k8s/chat/any_question",
+                                  "params": {
+                                    "kind": "${kind}",
+                                    "group": "${group}",
+                                    "version": "${version}",
+                                    "question": "什么是污点"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "tpl",
+  "tpl": "<div><div><strong>污点规则:</strong> Pod 必须容忍节点上的污点（Taints），才能被调度到该节点。污点由 key、value 和 effect 三部分组成，其中 key 是污点的键，value 是污点的值，effect 表示污点的影响。</div><div><strong>匹配规则:</strong><br>1. Pod 必须具有与节点上的污点匹配的容忍规则，才能允许调度。<br>2. 容忍规则中，key 和 effect 必须与节点上的污点完全一致，value 匹配时由容忍规则中的 operator 决定。</div><div><strong>调度行为:</strong> 只有当 Pod 的容忍规则与节点污点的 key 和 effect 匹配，并且 value 满足容忍规则中的 operator 时，Pod 才会被调度到该节点，否则调度会被阻止。</div></div>"
+                          }
+                        ]
                       },
                       {
-                        "type": "table",
-                        "source": "${spec.taints}",
+                        "type": "crud",
+                        "api": "/k8s/node/list_taints/name/$metadata.name",
+                        "quickSaveItemApi": "/k8s/node/update_taints/name/$metadata.name",
+                        "headerToolbar": [
+                          {
+                            "type": "button",
+                            "label": "新增污点",
+                            "actionType": "dialog",
+                            "dialog": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "新增",
+                              "body": [
+                                {
+                                  "type": "form",
+                                  "mode": "horizontal",
+                                  "id": "taint_add_form",
+                                  "api": "/k8s/node/add_taints/name/$metadata.name",
+                                  "body": [
+                                    {
+                                      "type": "input-text",
+                                      "name": "key",
+                                      "label": "键",
+                                      "required": true
+                                    },
+                                    {
+                                      "name": "value",
+                                      "type": "input-text",
+                                      "label": "值"
+                                    },
+                                    {
+                                      "name": "effect",
+                                      "label": "效果",
+                                      "required": true,
+                                      "value": "NoSchedule",
+                                      "type": "select",
+                                      "options": [
+                                        {
+                                          "label": "禁止调度",
+                                          "value": "NoSchedule"
+                                        },
+                                        {
+                                          "label": "优先不调度",
+                                          "value": "PreferNoSchedule"
+                                        },
+                                        {
+                                          "label": "不可执行",
+                                          "value": "NoExecute"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "showIndex": true,
                         "columns": [
+                          {
+                            "type": "operation",
+                            "label": "操作",
+                            "width": 120,
+                            "buttons": [
+                              {
+                                "type": "button",
+                                "icon": "fas fa-trash text-primary",
+                                "actionType": "ajax",
+                                "tooltip": "删除",
+                                "api": "/k8s/node/delete_taints/name/$metadata.name"
+                              }
+                            ],
+                            "toggled": true
+                          },
                           {
                             "name": "key",
                             "label": "键"
@@ -968,7 +1071,11 @@
                           {
                             "name": "value",
                             "label": "值",
-                            "placeholder": "-"
+                            "placeholder": "-",
+                            "quickEdit": {
+                              "type": "input-text",
+                              "saveImmediately": true
+                            }
                           },
                           {
                             "name": "effect",
@@ -978,14 +1085,29 @@
                               "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
                               "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
                               "NoExecute": "<span class='label label-danger'>不可执行</span>"
+                            },
+                            "quickEdit": {
+                              "type": "select",
+                              "saveImmediately": true,
+                              "options": [
+                                {
+                                  "label": "禁止调度",
+                                  "value": "NoSchedule"
+                                },
+                                {
+                                  "label": "优先不调度",
+                                  "value": "PreferNoSchedule"
+                                },
+                                {
+                                  "label": "不可执行",
+                                  "value": "NoExecute"
+                                }
+                              ]
                             }
                           }
                         ]
                       }
-                    ],
-                    "size": "lg",
-                    "closeOnEsc": true,
-                    "closeOnOutside": true
+                    ]
                   }
                 }
               ]
