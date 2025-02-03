@@ -1,4 +1,4 @@
-import {appendQueryParam, replacePlaceholders} from "@/utils/utils.ts";
+import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
 import React from "react";
 
 // 定义组件的 props 类型
@@ -27,6 +27,9 @@ const SSELogDownloadComponent = React.forwardRef((props: SSEDownloadProps, _) =>
     };
     // @ts-ignore
     finalUrl = appendQueryParam(finalUrl, params);
+    const token = localStorage.getItem('token');
+    //拼接url token
+    finalUrl = finalUrl + (finalUrl.includes('?') ? '&' : '?') + `token=${token}`;
 
     const handleDownload = () => {
         setDownloading(true); // 设置下载状态为 true，显示提示信息
@@ -47,7 +50,7 @@ const SSELogDownloadComponent = React.forwardRef((props: SSEDownloadProps, _) =>
     return (
         <div>
             {downloading && (
-                <p style={{color: 'red', marginBottom: '10px'}}>正在下载，请稍后...</p>
+                <p style={{ color: 'red', marginBottom: '10px' }}>正在下载，请稍后...</p>
             )}
             <button
                 onClick={handleDownload}
