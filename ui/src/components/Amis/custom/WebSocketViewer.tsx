@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {formatFinalGetUrl} from "@/utils/utils";
+import React, { useEffect, useRef, useState } from 'react';
+import { formatFinalGetUrl } from "@/utils/utils";
 
 
 // 定义组件的 Props 接口
@@ -11,8 +11,8 @@ interface WebSocketViewerProps {
 
 // WebSocket 组件，支持外部控制
 const WebSocketViewerComponent = React.forwardRef<HTMLDivElement, WebSocketViewerProps>(
-    ({url, data, params}, _) => {
-        url = formatFinalGetUrl({url, data, params});
+    ({ url, data, params }, _) => {
+        url = formatFinalGetUrl({ url, data, params });
 
         const [messages, setMessages] = useState<string[]>([]); // 存储接收到的消息
         const [status, setStatus] = useState('Disconnected'); // 连接状态
@@ -23,6 +23,9 @@ const WebSocketViewerComponent = React.forwardRef<HTMLDivElement, WebSocketViewe
                 wsRef.current.close();
             }
 
+            const token = localStorage.getItem('token');
+            //拼接url token
+            url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
             const ws = new WebSocket(url);
             wsRef.current = ws;
 
@@ -61,7 +64,7 @@ const WebSocketViewerComponent = React.forwardRef<HTMLDivElement, WebSocketViewe
 
         return (
             <div>
-                <p style={{fontWeight: 'bold', display: 'none'}}>WebSocket Status: {status}</p>
+                <p style={{ fontWeight: 'bold', display: 'none' }}>WebSocket Status: {status}</p>
                 <div
                     style={{
                         backgroundColor: '#f5f5f5',
@@ -71,9 +74,9 @@ const WebSocketViewerComponent = React.forwardRef<HTMLDivElement, WebSocketViewe
                     }}
                 >
                     {messages.map((message, index) => (
-                        <pre key={index} style={{whiteSpace: 'pre-wrap', marginBottom: '1px'}}>
-                        {message}
-                    </pre>
+                        <pre key={index} style={{ whiteSpace: 'pre-wrap', marginBottom: '1px' }}>
+                            {message}
+                        </pre>
                     ))}
                 </div>
             </div>
