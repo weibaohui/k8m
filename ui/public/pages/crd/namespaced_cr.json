@@ -221,7 +221,7 @@
               "body": [
                 {
                   "style": {
-                    "width": 300,
+                    "width": 350,
                     "margin": 5
                   },
                   "label": "命名空间",
