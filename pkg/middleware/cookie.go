@@ -9,13 +9,15 @@ import (
 )
 
 func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
+
 	return func(c *gin.Context) {
+		cfg := flag.Init()
+		var clusterID string
 
 		// 检查是否存在名为 "selectedCluster" 的 Cookie
-		_, err := c.Cookie("selectedCluster")
+		sc, err := c.Cookie("selectedCluster")
 		if err != nil {
-			var clusterID string
-			cfg := flag.Init()
+			// 不存在cookie
 			if cfg.InCluster {
 				clusterID = "InCluster"
 			} else {
@@ -35,7 +37,19 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			)
 
 		}
-
+		if cfg.InCluster && sc != "InCluster" {
+			// 集群内模式,但是当前cookie不是InCluster,那么给他纠正过来
+			clusterID = "InCluster"
+			c.SetCookie(
+				"selectedCluster",           // Cookie 名称
+				clusterID,                   // Cookie 默认值
+				int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天
+				"/",                         // Cookie 路径
+				"",                          // 域名，默认当前域
+				false,                       // 是否仅 HTTPS
+				false,                       // 是否 HttpOnly
+			)
+		}
 		// 继续处理下一个中间件或最终路由
 		c.Next()
 	}
