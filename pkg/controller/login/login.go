@@ -15,9 +15,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/flag"
 )
 
-// 定义 JWT 密钥
-// todo 作为参数项
-var jwtSecret = []byte("your-secret-key")
 var secretKey = "secret-key-16-ok"
 
 // LoginRequest 用户结构体
@@ -32,6 +29,9 @@ func generateToken(username string) (string, error) {
 		"username": username,
 		"exp":      time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
 	})
+
+	cfg := flag.Init()
+	var jwtSecret = []byte(cfg.JwtTokenSecret)
 	return token.SignedString(jwtSecret)
 }
 
