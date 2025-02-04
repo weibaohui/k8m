@@ -13,7 +13,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
-	"k8s.io/klog/v2"
 )
 
 // 定义 JWT 密钥
@@ -51,7 +50,6 @@ func LoginByPassword(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	klog.V(6).Infof("decrypt Password = %v", decrypt)
 
 	if string(decrypt) != cfg.AdminPassword {
 		// 前端处理登录状态码，不要修改
