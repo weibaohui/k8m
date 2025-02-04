@@ -7,6 +7,7 @@ import {
 import styles from './index.module.scss'
 import {useCallback, useEffect} from 'react'
 
+// @ts-ignore
 import CryptoJS from "crypto-js";
 
 const FormItem = Form.Item
