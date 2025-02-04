@@ -54,7 +54,7 @@ func LoginByPassword(c *gin.Context) {
 	klog.V(6).Infof("decrypt Password = %v", decrypt)
 
 	if string(decrypt) != cfg.AdminPassword {
-		amis.WriteJsonError(c, err)
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
 		return
 	}
 	if req.Username == cfg.AdminUserName {
