@@ -29,20 +29,25 @@
 3. **参数**：
 
 ```shell
-  ./k8m -h
+Usage of ./k8m:
       --add_dir_header                   If true, adds the file directory to the header of the log messages
+      --admin-password string            管理员密码 (default "123456")
+      --admin-username string            管理员用户名 (default "admin")
       --alsologtostderr                  log to standard error as well as files (no effect when -logtostderr=true)
-  -k, --chatgpt-key string               API Key for ChatGPT (default "sk-XXXX")
-  -u, --chatgpt-url string               API URL for ChatGPT (default "https://api.siliconflow.cn/v1")
-  -d, --debug                            Debug mode,same as GIN_MODE
-  -c, --kubeconfig string                Absolute path to the kubeConfig file (default "/Users/xxx/.kube/config")
+  -k, --chatgpt-key string               大模型的自定义API Key (default "sk-hlfmptmmtppdqxsqvuxwlbgrobrzodojjultkxkrwymnfcjz")
+  -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-Coder-7B-Instruct")
+  -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
+  -d, --debug                            调试模式，使用GIN_MODE变量相同的值进行判断
+      --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
+  -c, --kubeconfig string                kubeconfig文件路径 (default "/Users/weibh/.kube/config")
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory (no effect when -logtostderr=true)
       --log_file string                  If non-empty, use this log file (no effect when -logtostderr=true)
       --log_file_max_size uint           Defines the maximum size a log file can grow to (no effect when -logtostderr=true). Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
+      --login-type string                登录方式，password, oauth, token等,default is password (default "password")
       --logtostderr                      log to standard error instead of files (default true)
       --one_output                       If true, only write logs to their native severity level (vs also writing to each lower severity level; no effect when -logtostderr=true)
-  -p, --port int                         Port for the server to listen on (default 3618)
+  -p, --port int                         监听端口 (default 3618)
       --skip_headers                     If true, avoid header prefixes in the log messages
       --skip_log_headers                 If true, avoid headers when opening log files (no effect when -logtostderr=true)
       --stderrthreshold severity         logs at or above this threshold go to stderr when writing to files and stderr (no effect when -logtostderr=true or -alsologtostderr=true) (default 2)
@@ -83,6 +88,34 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 本项目集成了[github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai)SDK。
 国内访问推荐使用[硅基流动](https://cloud.siliconflow.cn/)的服务。
 登录后，在[https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak)创建API_KEY
+
+## **k8m 支持环境变量设置**
+
+以下是k8m支持的环境变量设置参数及其作用的表格：
+
+| 环境变量               | 默认值                              | 说明                                   |
+|--------------------|----------------------------------|--------------------------------------|
+| `PORT`             | `3618`                           | 监听的端口号                               |
+| `KUBECONFIG`       | `~/.kube/config`                 | `kubeconfig` 文件路径                    |
+| `OPENAI_API_KEY`   | `""`                             | 大模型的 API Key                         |
+| `OPENAI_API_URL`   | `""`                             | 大模型的 API URL                         |
+| `OPENAI_MODEL`     | `Qwen/Qwen2.5-Coder-7B-Instruct` | 大模型的默认模型名称                           |
+| `LOGIN_TYPE`       | `"password"`                     | 登录方式（如 `password`, `oauth`, `token`） |
+| `ADMIN_USERNAME`   | `"admin"`                        | 管理员用户名                               |
+| `ADMIN_PASSWORD`   | `"123456"`                       | 管理员密码                                |
+| `GIN_MODE`         | `""`（默认开发模式）                     | 设置 `GIN_MODE=release` 可关闭 `debug` 模式 |
+| `JWT_TOKEN_SECRET` | `"your-secret-key"`              | 用于 JWT Token 生成的密钥                   |
+
+这些环境变量可以通过在运行应用程序时设置，例如：
+
+```sh
+export PORT=8080
+export OPENAI_API_KEY="your-api-key"
+export GIN_MODE="release"
+./k8m
+```
+
+**注意：环境变量会被启动参数覆盖。**
 
 ## 容器化k8s集群方式运行
 
