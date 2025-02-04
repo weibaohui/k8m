@@ -148,6 +148,10 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
   默认使用了nodePort开放，请访问31999端口。或自行配置Ingress
   http://NodePortIP:31999
 
+## 修改配置
+
+首选建议通过修改环境变量方式进行修改。 例如增加deploy.yaml中的env参数
+
 ### **跨平台编译支持**
 
 **build-all** 目标支持以下操作系统和架构组合的交叉编译：
