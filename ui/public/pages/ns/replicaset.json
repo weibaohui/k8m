@@ -227,7 +227,7 @@
               "body": [
                 {
                   "style": {
-                    "width": 400,
+                    "width": 300,
                     "margin": 5
                   },
                   "label": "命名空间",
@@ -1082,7 +1082,6 @@
                                 "api": "/k8s/$kind/group/$group/version/$version/list_node_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_node_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "headerToolbar": [
-
                                 ],
                                 "showIndex": true,
                                 "columns": [
@@ -1103,7 +1102,6 @@
                                     },
                                     "placeholder": "-",
                                     "width": "100px"
-
                                   },
                                   {
                                     "name": "values",
@@ -1114,7 +1112,6 @@
                                       "tpl": "${item}<br>"
                                     },
                                     "placeholder": "-"
-
                                   }
                                 ]
                               },
@@ -1219,10 +1216,8 @@
                                 "api": "/k8s/$kind/group/$group/version/$version/list_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "showIndex": true,
                                 "headerToolbar": [
-
                                 ],
                                 "columns": [
-
                                   {
                                     "type": "json",
                                     "label": "标签",
@@ -1324,10 +1319,8 @@
                                 "api": "/k8s/$kind/group/$group/version/$version/list_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "showIndex": true,
                                 "headerToolbar": [
-
                                 ],
                                 "columns": [
-
                                   {
                                     "type": "json",
                                     "label": "标签",
