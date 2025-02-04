@@ -13,6 +13,7 @@
     "amis-formula": "^6.10.0",
     "amis-ui": "^6.10.0",
     "axios": "^1.7.9",
+    "crypto-js": "^4.2.0",
     "nanoid": "^5.0.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
