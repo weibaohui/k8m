@@ -6,14 +6,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"k8s.io/klog/v2"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 
 	// 定义 JWT 密钥
-	// todo 作为参数项
-	var jwtSecret = []byte("your-secret-key")
+	cfg := flag.Init()
+	var jwtSecret = []byte(cfg.JwtTokenSecret)
 
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")

@@ -25,8 +25,9 @@ type Config struct {
 	InCluster  bool
 	LoginType  string // password,oauth,token,..
 	// 登录方式，默认为password
-	AdminUserName string // 管理员用户名
-	AdminPassword string // 管理员密码
+	AdminUserName  string // 管理员用户名
+	AdminPassword  string // 管理员密码
+	JwtTokenSecret string // JWT token secret
 }
 
 func Init() *Config {
@@ -69,15 +70,19 @@ func (c *Config) InitFlags() {
 		defaultDebug = false
 	}
 
-	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "Debug mode,same as GIN_MODE")
-	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "Port for the server to listen on")
-	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "API Key for ChatGPT")
-	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "API URL for ChatGPT")
-	pflag.StringVarP(&c.ApiModel, "chatgpt-model", "m", defaultModel, "API Model for ChatGPT")
-	pflag.StringVarP(&c.KubeConfig, "kubeconfig", "c", defaultKubeConfig, "Absolute path to the kubeConfig file")
-	pflag.StringVar(&c.LoginType, "login-type", defaultLoginType, "Login type, password, oauth, token, ...")
-	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "Admin username")
-	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "Admin password")
+	// jwt token secret
+	defaultJwtTokenSecret := getEnv("JWT_TOKEN_SECRET", "your-secret-key")
+
+	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式，使用GIN_MODE变量相同的值进行判断")
+	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口")
+	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
+	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "大模型的自定义API URL")
+	pflag.StringVarP(&c.ApiModel, "chatgpt-model", "m", defaultModel, "大模型的自定义模型名称")
+	pflag.StringVarP(&c.KubeConfig, "kubeconfig", "c", defaultKubeConfig, "kubeconfig文件路径")
+	pflag.StringVar(&c.LoginType, "login-type", defaultLoginType, "登录方式，password, oauth, token等,default is password")
+	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "管理员用户名")
+	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "管理员密码")
+	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "登录后生成JWT token 使用的Secret")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 2
