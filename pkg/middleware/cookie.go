@@ -50,6 +50,19 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				false,                       // 是否 HttpOnly
 			)
 		}
+		if !cfg.InCluster && sc == "InCluster" {
+			// 非集群内模式,但是当前cookie是InCluster,那么给他纠正过来
+			clusterID = service.ClusterService().FirstClusterID()
+			c.SetCookie(
+				"selectedCluster",           // Cookie 名称
+				clusterID,                   // Cookie 默认值
+				int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天
+				"/",                         // Cookie 路径
+				"",                          // 域名，默认当前域
+				false,                       // 是否仅 HTTPS
+				false,                       // 是否 HttpOnly
+			)
+		}
 		// 继续处理下一个中间件或最终路由
 		c.Next()
 	}
