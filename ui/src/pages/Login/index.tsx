@@ -1,13 +1,46 @@
-import { Form, Input, Button, Checkbox, Message } from '@arco-design/web-react'
-import { useNavigate } from 'react-router-dom'
+import {Form, Input, Button, Checkbox, Message} from '@arco-design/web-react'
+import {useNavigate} from 'react-router-dom'
 import {
     IconUser,
     IconLock
 } from '@arco-design/web-react/icon'
 import styles from './index.module.scss'
-import { useCallback, useEffect } from 'react'
+import {useCallback, useEffect} from 'react'
+
+import CryptoJS from "crypto-js";
 
 const FormItem = Form.Item
+
+const secretKey = 'secret-key-16-ok';
+
+// 加密函数
+function encrypt(message: string) {
+    // key 和 iv 使用同一个值
+    const sKey = CryptoJS.enc.Utf8.parse(secretKey);
+    const encrypted = CryptoJS.AES.encrypt(message, sKey, {
+        iv: sKey,
+        mode: CryptoJS.mode.CBC, // CBC算法
+        padding: CryptoJS.pad.Pkcs7, //使用pkcs7 进行padding 后端需要注意
+    });
+
+    return encrypted.toString();
+
+}
+
+// 解密函数
+function decrypt(base64CipherText: string) {
+
+    // key 和 iv 使用同一个值
+    const sKey = CryptoJS.enc.Utf8.parse(secretKey);
+    const decrypted = CryptoJS.AES.decrypt(base64CipherText, sKey, {
+        iv: sKey,
+        mode: CryptoJS.mode.CBC, // CBC算法
+        padding: CryptoJS.pad.Pkcs7, //使用pkcs7 进行padding 后端需要注意
+    });
+
+    return decrypted.toString(CryptoJS.enc.Utf8);
+}
+
 
 const Login = () => {
     const navigate = useNavigate()
@@ -18,7 +51,16 @@ const Login = () => {
         const savedData = localStorage.getItem('remember');
         if (savedData) {
             const parsedData = JSON.parse(savedData);
-            form.setFieldsValue(parsedData);
+            form.setFieldsValue({
+                username: parsedData.username,
+            });
+
+            // 解密密码
+            if (parsedData.password) {
+                const decryptedPassword = decrypt(parsedData.password);
+                form.setFieldValue('password', decryptedPassword);
+            }
+
             form.setFieldValue('remember', parsedData.remember === true);
 
         }
@@ -26,22 +68,35 @@ const Login = () => {
     const onSubmit = useCallback(() => {
         form.validate().then(async (values) => {
             try {
+                const encryptedPassword = encrypt(values.password);
                 const res = await fetch('/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(values)
+                    body: JSON.stringify({
+                        username: values.username,
+                        password: encryptedPassword,  // 发送加密后的密码
+                    }),
                 });
                 const data = await res.json();
                 if (res.ok) {
                     Message.success('登录成功');
                     localStorage.setItem('token', data.token);
+                    // 记住密码逻辑
+                    const rememberData = {
+                        username: values.username,
+                        password: encryptedPassword,  // 存储加密后的密码
+                        remember: values.remember,
+                    };
+
                     if (values.remember) {
-                        localStorage.setItem('remember', JSON.stringify(values));
+                        localStorage.setItem('remember', JSON.stringify(rememberData));  // 存储加密后的密码
                     } else {
                         localStorage.removeItem('remember');
                     }
+
+
                     navigate('/');
                 } else {
                     Message.error(data.message || '登录失败');
@@ -61,20 +116,20 @@ const Login = () => {
                 // }}
                 className={styles.form} autoComplete='off'>
                 <div>
-                    <h2 style={{ color: '#666', fontSize: '24px', marginBottom: 20 }}>欢迎登录</h2>
+                    <h2 style={{color: '#666', fontSize: '24px', marginBottom: 20}}>欢迎登录</h2>
                 </div>
-                <FormItem field={'username'} rules={[{ required: true }]}>
-                    <Input placeholder='请输入用户名' prefix={<IconUser />} />
+                <FormItem field={'username'} rules={[{required: true}]}>
+                    <Input placeholder='请输入用户名' prefix={<IconUser/>}/>
                 </FormItem>
-                <FormItem field={'password'} rules={[{ required: true }]}>
+                <FormItem field={'password'} rules={[{required: true}]}>
                     <Input.Password
-                        prefix={<IconLock />}
+                        prefix={<IconLock/>}
                         defaultVisibility={false}
                         placeholder='请输入密码'
                     />
                 </FormItem>
-                <FormItem field={'remember'} triggerPropName='checked' >
-                    <Checkbox >记住</Checkbox>
+                <FormItem field={'remember'} triggerPropName='checked'>
+                    <Checkbox>记住</Checkbox>
                 </FormItem>
                 <FormItem>
                     <Button type='primary' long onClick={onSubmit}>登 录</Button>
