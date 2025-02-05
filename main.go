@@ -184,16 +184,16 @@ func main() {
 		api.GET("/:kind/group/:group/version/:version/list_tolerations/ns/:ns/name/:name", dynamic.ListTolerations)
 
 		// Pod关联资源
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", pod.LinksServices)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", pod.LinksEndpoints)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", pod.LinksPVC)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", pod.LinksPV)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", pod.LinksIngress)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", pod.LinksEnv)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", pod.LinksEnvFromPod)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", pod.LinksConfigMap)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", pod.LinksSecret)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", pod.LinksNode)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", dynamic.LinksServices)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", dynamic.LinksEndpoints)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", dynamic.LinksPVC)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", dynamic.LinksPV)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", dynamic.LinksIngress)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", dynamic.LinksEnv)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", dynamic.LinksEnvFromPod)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", dynamic.LinksConfigMap)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", dynamic.LinksSecret)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", dynamic.LinksNode)
 
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
@@ -299,17 +299,6 @@ func main() {
 		api.POST("/file/delete", pod.DeleteFile)
 		// Pod 资源使用情况
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
-		// Pod 关联资源
-		api.GET("/pod/ns/:ns/name/:name/links/services", pod.LinksServices)
-		api.GET("/pod/ns/:ns/name/:name/links/endpoints", pod.LinksEndpoints)
-		api.GET("/pod/ns/:ns/name/:name/links/pvc", pod.LinksPVC)
-		api.GET("/pod/ns/:ns/name/:name/links/pv", pod.LinksPV)
-		api.GET("/pod/ns/:ns/name/:name/links/ingress", pod.LinksIngress)
-		api.GET("/pod/ns/:ns/name/:name/links/env", pod.LinksEnv)
-		api.GET("/pod/ns/:ns/name/:name/links/envFromPod", pod.LinksEnvFromPod)
-		api.GET("/pod/ns/:ns/name/:name/links/configmap", pod.LinksConfigMap)
-		api.GET("/pod/ns/:ns/name/:name/links/secret", pod.LinksSecret)
-		api.GET("/pod/ns/:ns/name/:name/links/node", pod.LinksNode)
 
 		// 菜单
 		api.GET("/menu/list", menu.List)
