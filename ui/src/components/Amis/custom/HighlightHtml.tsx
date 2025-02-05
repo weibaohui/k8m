@@ -24,7 +24,7 @@ const HighlightHtmlComponent = React.forwardRef<HTMLDivElement, HighlightHtmlPro
 
 
         return (
-            <div
+            <pre
                 style={{
                     backgroundColor: finalBackgroundColor,
                     padding: '10px',
