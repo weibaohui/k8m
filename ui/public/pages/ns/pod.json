@@ -1311,7 +1311,7 @@
                   "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
-                    "title": "容器组 ${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
+                    "title": "${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
                     "size": "xl",
                     "body": {
                       "type": "tabs",
