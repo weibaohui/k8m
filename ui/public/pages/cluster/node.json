@@ -422,7 +422,7 @@
                           "Error",
                           "Warning"
                         ],
-                        "html": "<pre>${result}</pre>"
+                        "html": "${result}"
                       }
                     ]
                   }
@@ -984,7 +984,7 @@
                           },
                           {
                             "type": "tpl",
-  "tpl": "<div><div><strong>污点规则:</strong> Pod 必须容忍节点上的污点（Taints），才能被调度到该节点。污点由 key、value 和 effect 三部分组成，其中 key 是污点的键，value 是污点的值，effect 表示污点的影响。</div><div><strong>匹配规则:</strong><br>1. Pod 必须具有与节点上的污点匹配的容忍规则，才能允许调度。<br>2. 容忍规则中，key 和 effect 必须与节点上的污点完全一致，value 匹配时由容忍规则中的 operator 决定。</div><div><strong>调度行为:</strong> 只有当 Pod 的容忍规则与节点污点的 key 和 effect 匹配，并且 value 满足容忍规则中的 operator 时，Pod 才会被调度到该节点，否则调度会被阻止。</div></div>"
+                            "tpl": "<div><div><strong>污点规则:</strong> Pod 必须容忍节点上的污点（Taints），才能被调度到该节点。污点由 key、value 和 effect 三部分组成，其中 key 是污点的键，value 是污点的值，effect 表示污点的影响。</div><div><strong>匹配规则:</strong><br>1. Pod 必须具有与节点上的污点匹配的容忍规则，才能允许调度。<br>2. 容忍规则中，key 和 effect 必须与节点上的污点完全一致，value 匹配时由容忍规则中的 operator 决定。</div><div><strong>调度行为:</strong> 只有当 Pod 的容忍规则与节点污点的 key 和 effect 匹配，并且 value 满足容忍规则中的 operator 时，Pod 才会被调度到该节点，否则调度会被阻止。</div></div>"
                           }
                         ]
                       },

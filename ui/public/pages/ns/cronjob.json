@@ -481,7 +481,7 @@
                           "Error",
                           "Warning"
                         ],
-                        "html": "<pre>${result}</pre>"
+                        "html": "${result}"
                       }
                     ]
                   }

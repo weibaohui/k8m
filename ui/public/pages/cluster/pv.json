@@ -387,7 +387,7 @@
                           "Error",
                           "Warning"
                         ],
-                        "html": "<pre>${result}</pre>"
+                        "html": "${result}"
                       }
                     ]
                   }
@@ -957,7 +957,6 @@
                           }
                         ]
                       },
-
                       {
                         "name": "spec.nodeAffinity.required.nodeSelectorTerms",
                         "type": "each",
