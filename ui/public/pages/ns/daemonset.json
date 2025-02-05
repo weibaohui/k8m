@@ -1058,7 +1058,7 @@
                   "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
-                    "title": "${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
+                    "title": "${kind}/${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
                     "size": "xl",
                     "body": {
                       "type": "tabs",
@@ -1071,7 +1071,7 @@
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/services",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/services",
                             "columns": [
                               {
                                 "type": "operation",
@@ -1091,7 +1091,7 @@
                                       "body": [
                                         {
                                           "type": "service",
-                                          "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                                          "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
                                           "body": [
                                             {
                                               "type": "button",
@@ -1149,11 +1149,11 @@
                                               "body": [
                                                 {
                                                   "type": "service",
-                                                  "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                                  "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
                                                       "type": "form",
-                                                      "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
                                                       "wrapWithPanel": false,
                                                       "body": [
                                                         {
@@ -1369,7 +1369,7 @@
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/endpoints",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/endpoints",
                             "columns": [
                               {
                                 "type": "operation",
@@ -1389,7 +1389,7 @@
                                       "body": [
                                         {
                                           "type": "service",
-                                          "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                                          "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
                                           "body": [
                                             {
                                               "type": "button",
@@ -1447,11 +1447,11 @@
                                               "body": [
                                                 {
                                                   "type": "service",
-                                                  "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                                  "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
                                                       "type": "form",
-                                                      "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
                                                       "wrapWithPanel": false,
                                                       "body": [
                                                         {
@@ -1718,7 +1718,7 @@
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pvc",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pvc",
                             "columns": [
                               {
                                 "type": "operation",
@@ -1738,7 +1738,7 @@
                                       "body": [
                                         {
                                           "type": "service",
-                                          "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                                          "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
                                           "body": [
                                             {
                                               "type": "button",
@@ -1796,11 +1796,11 @@
                                               "body": [
                                                 {
                                                   "type": "service",
-                                                  "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                                  "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
                                                       "type": "form",
-                                                      "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
                                                       "wrapWithPanel": false,
                                                       "body": [
                                                         {
@@ -2033,7 +2033,7 @@
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pv",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pv",
                             "columns": [
                               {
                                 "type": "operation",
@@ -2053,7 +2053,7 @@
                                       "body": [
                                         {
                                           "type": "service",
-                                          "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                                          "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
                                           "body": [
                                             {
                                               "type": "button",
@@ -2111,11 +2111,11 @@
                                               "body": [
                                                 {
                                                   "type": "service",
-                                                  "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                                  "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
                                                       "type": "form",
-                                                      "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
                                                       "wrapWithPanel": false,
                                                       "body": [
                                                         {
@@ -2358,7 +2358,7 @@
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/ingress",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/ingress",
                             "columns": [
                               {
                                 "type": "operation",
@@ -2378,7 +2378,7 @@
                                       "body": [
                                         {
                                           "type": "service",
-                                          "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                                          "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
                                           "body": [
                                             {
                                               "type": "button",
@@ -2436,11 +2436,11 @@
                                               "body": [
                                                 {
                                                   "type": "service",
-                                                  "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                                  "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
                                                       "type": "form",
-                                                      "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
                                                       "wrapWithPanel": false,
                                                       "body": [
                                                         {
@@ -2657,7 +2657,7 @@
                               }
                             ],
                             "loadDataOnce": true,
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/envFromPod",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/envFromPod",
                             "columns": [
                               {
                                 "name": "containerName",
@@ -2720,7 +2720,7 @@
                               }
                             ],
                             "loadDataOnce": true,
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/env",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/env",
                             "columns": [
                               {
                                 "name": "containerName",
@@ -2759,7 +2759,7 @@
                             "headerToolbar": [
                               "reload"
                             ],
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/configmap",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/configmap",
                             "columns": [
                               {
                                 "type": "operation",
@@ -2779,7 +2779,7 @@
                                       "body": [
                                         {
                                           "type": "service",
-                                          "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                                          "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
                                           "body": [
                                             {
                                               "type": "button",
@@ -2837,11 +2837,11 @@
                                               "body": [
                                                 {
                                                   "type": "service",
-                                                  "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                                  "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
                                                       "type": "form",
-                                                      "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
                                                       "wrapWithPanel": false,
                                                       "body": [
                                                         {
@@ -3068,7 +3068,7 @@
                               "reload"
                             ],
                             "type": "crud",
-                            "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/secret",
+                            "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/secret",
                             "columns": [
                               {
                                 "type": "operation",
@@ -3088,7 +3088,7 @@
                                       "body": [
                                         {
                                           "type": "service",
-                                          "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                                          "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
                                           "body": [
                                             {
                                               "type": "button",
@@ -3146,11 +3146,11 @@
                                               "body": [
                                                 {
                                                   "type": "service",
-                                                  "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                                                  "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
                                                       "type": "form",
-                                                      "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
+                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
                                                       "wrapWithPanel": false,
                                                       "body": [
                                                         {
@@ -3403,7 +3403,7 @@
                               },
                               "type": "crud",
                               "name": "node_crud",
-                              "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/node",
+                              "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/node",
                               "columns": [
                                 {
                                   "name": "node_name",
