@@ -182,14 +182,27 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/delete_tolerations/ns/:ns/name/:name", dynamic.DeleteTolerations)
 		api.POST("/:kind/group/:group/version/:version/add_tolerations/ns/:ns/name/:name", dynamic.AddTolerations)
 		api.GET("/:kind/group/:group/version/:version/list_tolerations/ns/:ns/name/:name", dynamic.ListTolerations)
+
+		// Pod关联资源
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", pod.LinksServices)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", pod.LinksEndpoints)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", pod.LinksPVC)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", pod.LinksPV)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", pod.LinksIngress)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", pod.LinksEnv)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", pod.LinksEnvFromPod)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", pod.LinksConfigMap)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", pod.LinksSecret)
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", pod.LinksNode)
+
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
 		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
 		api.POST("/pod/exec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.Exec)
 		api.GET("/pod/wsexec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.WsExec)
 		// k8s deploy
-		api.POST("/deploy/restart/ns/:ns/name/:name", deploy.Restart)
-		api.POST("/deploy/batch/restart", deploy.BatchRestart)
+		api.POST("/:kind/group/:group/version/:version/restart/ns/:ns/name/:name", deploy.Restart)
+		api.POST("/:kind/group/:group/version/:version/batch/restart", deploy.BatchRestart)
 		api.POST("/deploy/batch/stop", deploy.BatchStop)
 		api.POST("/deploy/batch/restore", deploy.BatchRestore)
 		api.POST("/deploy/rollout/undo/ns/:ns/name/:name/revision/:revision", deploy.Undo)
