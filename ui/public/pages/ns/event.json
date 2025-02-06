@@ -314,15 +314,6 @@
               ]
             }
           ]
-        },
-        {
-          "type": "button",
-          "icon": "fas fa-cog",
-          "tooltip": "管理集群",
-          "actionType": "url",
-          "size": "xs",
-          "url": "/#/cluster/cluster_all",
-          "blank": false
         }
       ]
     },
@@ -360,8 +351,7 @@
       "loadDataOnce": false,
       "syncLocation": false,
       "perPage": 10,
-      "bulkActions": [
-      ],
+      "bulkActions": [],
       "api": "post:/k8s/$kind/group/$group/version/$version/list/ns/${ns}?sort_by=$sort_by",
       "columns": [
         {

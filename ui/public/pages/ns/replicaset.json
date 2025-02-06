@@ -313,15 +313,6 @@
               ]
             }
           ]
-        },
-        {
-          "type": "button",
-          "icon": "fas fa-cog",
-          "tooltip": "管理集群",
-          "actionType": "url",
-          "size": "xs",
-          "url": "/#/cluster/cluster_all",
-          "blank": false
         }
       ]
     },
@@ -967,8 +958,7 @@
                         "type": "crud",
                         "api": "/k8s/$kind/group/$group/version/$version/list_tolerations/ns/$metadata.namespace/name/$metadata.name",
                         "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_tolerations/ns/$metadata.namespace/name/$metadata.name",
-                        "headerToolbar": [
-                        ],
+                        "headerToolbar": [],
                         "showIndex": true,
                         "columns": [
                           {
@@ -1081,8 +1071,7 @@
                                 "type": "crud",
                                 "api": "/k8s/$kind/group/$group/version/$version/list_node_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_node_affinity/ns/$metadata.namespace/name/$metadata.name",
-                                "headerToolbar": [
-                                ],
+                                "headerToolbar": [],
                                 "showIndex": true,
                                 "columns": [
                                   {
@@ -1215,8 +1204,7 @@
                                 "type": "crud",
                                 "api": "/k8s/$kind/group/$group/version/$version/list_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "showIndex": true,
-                                "headerToolbar": [
-                                ],
+                                "headerToolbar": [],
                                 "columns": [
                                   {
                                     "type": "json",
@@ -1318,8 +1306,7 @@
                                 "type": "crud",
                                 "api": "/k8s/$kind/group/$group/version/$version/list_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "showIndex": true,
-                                "headerToolbar": [
-                                ],
+                                "headerToolbar": [],
                                 "columns": [
                                   {
                                     "type": "json",
