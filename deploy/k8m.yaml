@@ -128,7 +128,7 @@ spec:
     spec:
       containers:
         - name: k8m
-          image: weibh/k8m:0.0.28
+          image: weibh/k8m:0.0.29
           ports:
             - containerPort: 3618
               protocol: TCP
