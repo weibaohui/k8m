@@ -8,6 +8,7 @@ var localClusterService = &clusterService{
 	clusterConfigs:        []*ClusterConfig{},
 	AggregateDelaySeconds: 61, // 没有秒级支持，所以大于1分钟
 }
+var localStorageClassService = &storageClassService{}
 
 func ChatService() *chatService {
 	return localChatService
@@ -23,4 +24,7 @@ func NodeService() *nodeService {
 }
 func ClusterService() *clusterService {
 	return localClusterService
+}
+func StorageClassService() *storageClassService {
+	return localStorageClassService
 }
