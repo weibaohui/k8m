@@ -17,7 +17,8 @@ const immutableKeys = [
     "pod.count.used",
     "pod.count.available",
     "kubectl.kubernetes.io/last-applied-configuration",
-    "kom.kubernetes.io/restartedAt"
+    "kom.kubernetes.io/restartedAt",
+    "pvc.count"
 ];
 const FilterAnnotations = (input: Record<string, string>) => {
     // 如果 input 不存在，则返回空对象
@@ -28,7 +29,7 @@ const FilterAnnotations = (input: Record<string, string>) => {
     if (Object.keys(input).length === 0) return {};
     // 如果 input 不是 Record<string, string> 类型，则返回空对象
     if (typeof input !== "object") return {};
-    
+
     // 过滤掉 immutableKeys 中的 key
     return Object.fromEntries(
         Object.entries(input).filter(([key]) => !immutableKeys.includes(key))
