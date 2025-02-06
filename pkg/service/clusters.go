@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
@@ -22,41 +23,47 @@ type clusterService struct {
 	AggregateDelaySeconds int              // 聚合延迟时间
 }
 
-func (c *clusterService) SetNodeStatusAggregated(selectedCluster string, true bool) {
-	clusterConfig := c.GetClusterByID(selectedCluster)
-	if clusterConfig == nil {
-		return
-	}
-	clusterConfig.NodeStatusAggregated = true
+type ClusterConfig struct {
+	FileName                     string                         `json:"fileName,omitempty"`                     // kubeconfig 文件名称
+	ContextName                  string                         `json:"contextName,omitempty"`                  // context名称
+	ClusterName                  string                         `json:"clusterName,omitempty"`                  // 集群名称
+	Server                       string                         `json:"server,omitempty"`                       // 集群地址
+	ServerVersion                string                         `json:"serverVersion,omitempty"`                // 通过这个值来判断集群是否可用
+	UserName                     string                         `json:"userName,omitempty"`                     // 用户名
+	Namespace                    string                         `json:"namespace,omitempty"`                    // kubeconfig 限制Namespace
+	Err                          string                         `json:"err,omitempty"`                          // 连接错误信息
+	NodeStatusAggregated         bool                           `json:"nodeStatusAggregated,omitempty"`         // 是否已聚合节点状态
+	PodStatusAggregated          bool                           `json:"podStatusAggregated,omitempty"`          // 是否已聚合容器组状态
+	StorageClassStatusAggregated bool                           `json:"storageClassStatusAggregated,omitempty"` // 是否已聚合容器组状态
+	restConfig                   *rest.Config                   // 直连rest.Config
+	kubeConfig                   []byte                         // 集群配置.kubeconfig原始文件内容
+	watchStatus                  map[string]*clusterWatchStatus // watch 类型为key，比如pod,deploy,node,pvc,sc
 }
 
-// SetPodStatusAggregated 设置Pod状态聚合
-func (c *clusterService) SetPodStatusAggregated(selectedCluster string, true bool) {
-	clusterConfig := c.GetClusterByID(selectedCluster)
-	if clusterConfig == nil {
-		return
-	}
-	clusterConfig.PodStatusAggregated = true
+// 记录每个集群的watch 启动情况
+// watch 有多种类型，需要记录
+type clusterWatchStatus struct {
+	WatchType   string    `json:"watchType,omitempty"`
+	Started     bool      `json:"started,omitempty"`
+	StartedTime time.Time `json:"startedTime,omitempty"`
 }
 
-// GetPodStatusAggregated 获取指定集群的Pod聚合状态
-func (c *clusterService) GetPodStatusAggregated(selectedCluster string) bool {
-	clusterConfig := c.GetClusterByID(selectedCluster)
-	if clusterConfig == nil {
+// 设置集群Watch启动
+func (c *ClusterConfig) SetClusterWatchStarted(watchType string) {
+	c.watchStatus[watchType] = &clusterWatchStatus{
+		WatchType:   watchType,
+		Started:     true,
+		StartedTime: time.Now(),
+	}
+}
+
+// 获取集群Watch状态
+func (c *ClusterConfig) GetClusterWatchStatus(watchType string) bool {
+	watch := c.watchStatus[watchType]
+	if watch == nil {
 		return false
 	}
-	klog.V(6).Infof("获取Pod聚合状态: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.PodStatusAggregated)
-	return clusterConfig.PodStatusAggregated
-}
-
-// GetNodeStatusAggregated 获取指定集群的Node聚合状态
-func (c *clusterService) GetNodeStatusAggregated(selectedCluster string) bool {
-	clusterConfig := c.GetClusterByID(selectedCluster)
-	if clusterConfig == nil {
-		return false
-	}
-	klog.V(6).Infof("获取节点聚合状态: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, clusterConfig.NodeStatusAggregated)
-	return clusterConfig.NodeStatusAggregated
+	return watch.Started
 }
 
 // GetClusterByID 获取ClusterConfig
@@ -145,21 +152,6 @@ func (c *clusterService) FirstClusterID() string {
 	return selectedCluster
 }
 
-type ClusterConfig struct {
-	FileName             string       `json:"fileName,omitempty"`             // kubeconfig 文件名称
-	ContextName          string       `json:"contextName,omitempty"`          // context名称
-	ClusterName          string       `json:"clusterName,omitempty"`          // 集群名称
-	Server               string       `json:"server,omitempty"`               // 集群地址
-	ServerVersion        string       `json:"serverVersion,omitempty"`        // 通过这个值来判断集群是否可用
-	UserName             string       `json:"userName,omitempty"`             // 用户名
-	Namespace            string       `json:"namespace,omitempty"`            // kubeconfig 限制Namespace
-	Err                  string       `json:"err,omitempty"`                  // 连接错误信息
-	NodeStatusAggregated bool         `json:"nodeStatusAggregated,omitempty"` // 是否已聚合节点状态
-	PodStatusAggregated  bool         `json:"podStatusAggregated,omitempty"`  // 是否已聚合容器组状态
-	restConfig           *rest.Config // 直连rest.Config
-	kubeConfig           []byte       // 集群配置.kubeconfig原始文件内容
-}
-
 func (c *clusterService) RegisterClustersByPath(filePath string) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -182,6 +174,7 @@ func (c *clusterService) RegisterClustersByPath(filePath string) {
 		ClusterName: context.Cluster,
 		Namespace:   context.Namespace,
 		kubeConfig:  content,
+		watchStatus: make(map[string]*clusterWatchStatus),
 	}
 	clusterConfig.Server = cluster.Server
 	c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
@@ -227,6 +220,7 @@ func (c *clusterService) ScanClustersInPath(path string) {
 				ClusterName: context.Cluster,
 				Namespace:   context.Namespace,
 				kubeConfig:  content,
+				watchStatus: make(map[string]*clusterWatchStatus),
 			}
 			clusterConfig.Server = cluster.Server
 			c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
@@ -275,6 +269,7 @@ func (c *clusterService) RegisterClustersInPath(path string) {
 				ClusterName: context.Cluster,
 				Namespace:   context.Namespace,
 				kubeConfig:  content,
+				watchStatus: make(map[string]*clusterWatchStatus),
 			}
 			clusterConfig.Server = cluster.Server
 			c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
