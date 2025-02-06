@@ -98,25 +98,26 @@ func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 	}
 	ClusterService().SetNodeStatusAggregated(selectedCluster, true)
 }
-func (n *nodeService) Watch() {
-	// 延迟启动cron
-	clusters := ClusterService().ConnectedClusters()
-	for _, cluster := range clusters {
-		selectedCluster := ClusterService().ClusterID(cluster)
-		// 设置一个定时器，后台不断更新node状态
-		inst := cron.New()
-		_, err := inst.AddFunc("@every 5m", func() {
-			n.SyncNodeStatus(selectedCluster)
-		})
 
-		if err != nil {
-			klog.Errorf("%s Error add cron job: %v", selectedCluster, err)
-			continue
+func (n *nodeService) Watch() {
+	// 设置一个定时器，后台不断更新storageClass状态
+	inst := cron.New()
+	_, err := inst.AddFunc("@every 5m", func() {
+		// 延迟启动cron
+		clusters := ClusterService().ConnectedClusters()
+		for _, cluster := range clusters {
+			selectedCluster := ClusterService().ClusterID(cluster)
+			n.SyncNodeStatus(selectedCluster)
+			klog.V(6).Infof("执行定时更新Node状态%s", selectedCluster)
 		}
-		inst.Start()
-		klog.V(6).Infof("%s 新增节点状态定时更新任务【@every 5m】", selectedCluster)
+	})
+	if err != nil {
+		klog.Errorf("Error add cron job for Node: %v\n", err)
 	}
+	inst.Start()
+	klog.V(6).Infof("新增 Node  状态定时更新任务【@every 5m】\n")
 }
+
 func (n *nodeService) CacheIPUsage(selectedCluster string, nodeName string) (ipUsage, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
 	return utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, nodeStatusTTL, func() (ipUsage, error) {
