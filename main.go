@@ -87,6 +87,7 @@ func Init() {
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
+			service.StorageClassService().Watch()
 		})
 	}()
 
