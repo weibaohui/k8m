@@ -799,14 +799,34 @@
         {
           "name": "claim",
           "label": "PVC声明",
-          "type": "tpl",
-          "tpl": "${spec.claimRef ? spec.claimRef.namespace + '/' + spec.claimRef.name : ''}",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "${spec.claimRef ? spec.claimRef.namespace + '/' + spec.claimRef.name : ''}",
+              "blank": false,
+              "href": "/#/ns/pvc?metadata.name=${spec.claimRef.name}"
+            }
+          ],
           "searchable": {
             "type": "input-text",
             "name": "spec.claimRef.name",
             "label": "PVC声明",
             "placeholder": "输入PVC声明名称"
           }
+        },
+        {
+          "name": "pvc_count",
+          "label": "存储卷声明数量",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "${metadata.annotations['pvc.count']}",
+              "blank": false,
+              "href": "/#/ns/pvc?spec[storageClassName]=${metadata.name}"
+            }
+          ]
         },
         {
           "name": "spec.storageClassName",
