@@ -800,7 +800,7 @@
           "name": "claim",
           "label": "PVC声明",
           "type": "tpl",
-          "tpl": "${spec.claimRef.namespace}/${spec.claimRef.name}",
+          "tpl": "${spec.claimRef ? spec.claimRef.namespace + '/' + spec.claimRef.name : ''}",
           "searchable": {
             "type": "input-text",
             "name": "spec.claimRef.name",
@@ -811,7 +811,13 @@
         {
           "name": "spec.storageClassName",
           "label": "存储类名称",
-          "type": "text"
+          "type": "text",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "searchable": true,
+            "source": "/k8s/storageclass/option_list"
+          }
         },
         {
           "name": "metadata.labels",
