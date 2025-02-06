@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	v1 "k8s.io/api/core/v1"
@@ -94,15 +95,26 @@ func (p *podService) RemoveCacheAllocatedStatus(selectedCluster string, item *v1
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	kom.Cluster(selectedCluster).ClusterCache().Del(cacheKey)
 }
+
 func (p *podService) Watch() {
-	podWatchOnce.Do(func() {
+	// 设置一个定时器，不断查看是否有集群未开启watch，未开启的话，开启watch
+	inst := cron.New()
+	_, err := inst.AddFunc("@every 5m", func() {
+		// 延迟启动cron
 		clusters := ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
-			selectedCluster := ClusterService().ClusterID(cluster)
-			p.watchSingleCluster(selectedCluster)
+			if !cluster.GetClusterWatchStatus("pod") {
+				selectedCluster := ClusterService().ClusterID(cluster)
+				p.watchSingleCluster(selectedCluster)
+				cluster.SetClusterWatchStarted("pod")
+			}
 		}
 	})
-
+	if err != nil {
+		klog.Errorf("Error add cron job for Pod: %v\n", err)
+	}
+	inst.Start()
+	klog.V(6).Infof("新增Pod状态定时更新任务【@every 5m】\n")
 }
 
 func (p *podService) watchSingleCluster(selectedCluster string) {
