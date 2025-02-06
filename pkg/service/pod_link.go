@@ -11,7 +11,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 )
 
-var linkCacheTTL = 5 * time.Minute
+var linkCacheTTL = 1 * time.Minute
 
 func (p *podService) LinksServices(ctx context.Context, selectedCluster string, item *v1.Pod) ([]*v1.Service, error) {
 
