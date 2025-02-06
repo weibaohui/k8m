@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/cb"
+	"github.com/weibaohui/k8m/pkg/comm/ansi"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
@@ -304,10 +305,9 @@ func main() {
 		api.GET("/menu/list", menu.List)
 	}
 
-	klog.Infof("启动成功，开始监听0.0.0.0:%d", flag.Init().Port)
+	ansi.ShowBootInfo(Version, flag.Init().Port)
 	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))
 	if err != nil {
 		klog.Fatalf("Error %v", err)
 	}
-	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
