@@ -113,6 +113,7 @@ func (p *podService) LinksSecret(ctx context.Context, selectedCluster string, it
 func (p *podService) LinksNode(ctx context.Context, selectedCluster string, item *v1.Pod) ([]*kom.SelectedNode, error) {
 	return kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Pod{}).
+		Namespace(item.Namespace).
 		Name(item.Name).
 		WithCache(linkCacheTTL).Ctl().Pod().LinkedNode()
 }
