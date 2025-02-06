@@ -271,7 +271,8 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false
+        "showBtnToolbar": false,
+        "defaultCollapsed": false
       },
       "headerToolbar": [
         {
@@ -588,6 +589,19 @@
             "label": "名称",
             "placeholder": "输入名称"
           }
+        },
+        {
+          "name": "pvc_count",
+          "label": "存储卷声明数量",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "${metadata.annotations['pvc.count']}",
+              "blank": false,
+              "href": "/#/ns/pvc?spec[storageClassName]=${metadata.name}"
+            }
+          ]
         },
         {
           "name": "metadata.annotations",
