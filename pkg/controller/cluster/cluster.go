@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -27,10 +28,14 @@ func OptionList(c *gin.Context) {
 	var options []map[string]interface{}
 	for _, cluster := range clusters {
 		name := cluster.FileName + "/" + cluster.ContextName
+		flag := "✅"
+		if cluster.ServerVersion == "" {
+			flag = "⚠️"
+		}
 		options = append(options, map[string]interface{}{
-			"label":    name,
-			"value":    name,
-			"disabled": cluster.ServerVersion == "",
+			"label": fmt.Sprintf("%s %s", flag, name),
+			"value": name,
+			// "disabled": cluster.ServerVersion == "",
 		})
 	}
 
@@ -95,4 +100,12 @@ func SetDefault(c *gin.Context) {
 		false,
 		false,
 	)
+
+	go func() {
+		// 如果没有连接，那么进行一次连接。
+		if !service.ClusterService().IsConnected(cookieValue) {
+			service.ClusterService().Reconnect(fileName, contextName)
+		}
+	}()
+
 }
