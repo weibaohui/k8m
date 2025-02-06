@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
@@ -26,7 +27,9 @@ func OptionList(c *gin.Context) {
 			"value": n.Name,
 		})
 	}
-
+	slice.SortBy(names, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
 	amis.WriteJsonData(c, gin.H{
 		"options": names,
 	})
