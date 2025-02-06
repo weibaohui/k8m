@@ -26,7 +26,7 @@ func (n *storageClassService) SetPVCCount(selectedCluster string, item unstructu
 	if err != nil {
 		return item
 	}
-	klog.V(4).Infof("SetPVCCount: %s/%s, count: %d", selectedCluster, name, count)
+	klog.V(6).Infof("SetPVCCount: %s/%s, count: %d", selectedCluster, name, count)
 	utils.AddOrUpdateAnnotations(&item, map[string]string{
 		"pvc.count": fmt.Sprintf("%d", count),
 	})
@@ -48,7 +48,7 @@ func (n *storageClassService) SyncStorageClassStatus(selectedCluster string) {
 func (n *storageClassService) Watch() {
 	// 设置一个定时器，后台不断更新storageClass状态
 	inst := cron.New()
-	_, err := inst.AddFunc("@every 1m", func() {
+	_, err := inst.AddFunc("@every 5m", func() {
 		// 延迟启动cron
 		clusters := ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
