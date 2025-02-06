@@ -20,6 +20,15 @@ const immutableKeys = [
     "kom.kubernetes.io/restartedAt"
 ];
 const FilterAnnotations = (input: Record<string, string>) => {
+    // 如果 input 不存在，则返回空对象
+    if (!input) return {};
+    // 如果是undefinded，则返回空对象
+    if (input === undefined) return {};
+    // 如果 input 是空对象，则返回空对象
+    if (Object.keys(input).length === 0) return {};
+    // 如果 input 不是 Record<string, string> 类型，则返回空对象
+    if (typeof input !== "object") return {};
+    
     // 过滤掉 immutableKeys 中的 key
     return Object.fromEntries(
         Object.entries(input).filter(([key]) => !immutableKeys.includes(key))
