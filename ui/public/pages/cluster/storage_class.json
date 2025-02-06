@@ -602,12 +602,53 @@
         {
           "name": "reclaimPolicy",
           "label": "回收策略",
-          "type": "text"
+          "type": "mapping",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "options": [
+              {
+                "label": "保留 ",
+                "value": "Retain"
+              },
+              {
+                "label": "回收 ",
+                "value": "Recycle"
+              },
+              {
+                "label": "删除 ",
+                "value": "Delete"
+              }
+            ]
+          },
+          "map": {
+            "Retain": "<span class='label label-success'>保留</span>",
+            "Recycle": "<span class='label label-info'>回收</span>",
+            "Delete": "<span class='label label-danger'>删除</span>"
+          }
         },
         {
           "name": "volumeBindingMode",
           "label": "卷绑定模式",
-          "type": "text"
+          "type": "mapping",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "options": [
+              {
+                "label": "立即绑定 ",
+                "value": "Immediate"
+              },
+              {
+                "label": "延迟绑定 ",
+                "value": "WaitForFirstConsumer"
+              }
+            ]
+          },
+          "map": {
+            "Immediate": "<span class='label label-success'>立即绑定</span>",
+            "WaitForFirstConsumer": "<span class='label label-info'>延迟绑定</span>"
+          }
         },
         {
           "name": "metadata.labels",
