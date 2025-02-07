@@ -99,7 +99,7 @@ func (p *podService) RemoveCacheAllocatedStatus(selectedCluster string, item *v1
 func (p *podService) Watch() {
 	// 设置一个定时器，不断查看是否有集群未开启watch，未开启的话，开启watch
 	inst := cron.New()
-	_, err := inst.AddFunc("@every 5m", func() {
+	_, err := inst.AddFunc("@every 1m", func() {
 		// 延迟启动cron
 		clusters := ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
@@ -114,7 +114,7 @@ func (p *podService) Watch() {
 		klog.Errorf("Error add cron job for Pod: %v\n", err)
 	}
 	inst.Start()
-	klog.V(6).Infof("新增Pod状态定时更新任务【@every 5m】\n")
+	klog.V(6).Infof("新增Pod状态定时更新任务【@every 1m】\n")
 }
 
 func (p *podService) watchSingleCluster(selectedCluster string) {
