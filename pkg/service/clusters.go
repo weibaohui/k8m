@@ -124,7 +124,7 @@ func (c *clusterService) Reconnect(fileName string, contextName string) {
 func (c *clusterService) Scan() {
 	c.clusterConfigs = []*ClusterConfig{}
 	cfg := flag.Init()
-	c.ScanClustersInPath(cfg.KubeConfig)
+	c.ScanClustersInDir(cfg.KubeConfig)
 }
 
 func (c *clusterService) AllClusters() []*ClusterConfig {
@@ -179,7 +179,7 @@ func (c *clusterService) RegisterClustersByPath(filePath string) {
 	clusterConfig.Server = cluster.Server
 	c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
 }
-func (c *clusterService) ScanClustersInPath(path string) {
+func (c *clusterService) ScanClustersInDir(path string) {
 	// 1. 通过kubeconfig文件，找到所在目录
 	dir := filepath.Dir(path)
 
@@ -228,7 +228,7 @@ func (c *clusterService) ScanClustersInPath(path string) {
 	}
 
 }
-func (c *clusterService) RegisterClustersInPath(path string) {
+func (c *clusterService) RegisterClustersInDir(path string) {
 	// 1. 通过kubeconfig文件，找到所在目录
 	dir := filepath.Dir(path)
 
