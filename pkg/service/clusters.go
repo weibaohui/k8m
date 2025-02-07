@@ -48,7 +48,7 @@ type clusterWatchStatus struct {
 	StartedTime time.Time `json:"startedTime,omitempty"`
 }
 
-// 设置集群Watch启动
+// SetClusterWatchStarted 设置集群Watch启动状态
 func (c *ClusterConfig) SetClusterWatchStarted(watchType string) {
 	c.watchStatus[watchType] = &clusterWatchStatus{
 		WatchType:   watchType,
@@ -57,7 +57,7 @@ func (c *ClusterConfig) SetClusterWatchStarted(watchType string) {
 	}
 }
 
-// 获取集群Watch状态
+// GetClusterWatchStatus 获取集群Watch状态
 func (c *ClusterConfig) GetClusterWatchStatus(watchType string) bool {
 	watch := c.watchStatus[watchType]
 	if watch == nil {
@@ -89,6 +89,8 @@ func (c *clusterService) GetClusterByID(selectedCluster string) *ClusterConfig {
 	}
 	return nil
 }
+
+// IsConnected 判断集群是否连接
 func (c *clusterService) IsConnected(selectedCluster string) bool {
 	cluster := c.GetClusterByID(selectedCluster)
 	connected := cluster.ServerVersion != ""
@@ -108,6 +110,8 @@ func (c *clusterService) DelayStartFunc(f func()) {
 	cronInstance.Start()
 	klog.V(6).Infof("延迟启动cron %ds: %s", c.AggregateDelaySeconds, schedule)
 }
+
+// Reconnect 重新连接集群
 func (c *clusterService) Reconnect(fileName string, contextName string) {
 	// 先清除原来的状态
 
@@ -121,15 +125,19 @@ func (c *clusterService) Reconnect(fileName string, contextName string) {
 	c.RegisterCluster(fileName, contextName)
 }
 
+// Scan 扫描集群
 func (c *clusterService) Scan() {
 	c.clusterConfigs = []*ClusterConfig{}
 	cfg := flag.Init()
 	c.ScanClustersInDir(cfg.KubeConfig)
 }
 
+// AllClusters 获取所有集群
 func (c *clusterService) AllClusters() []*ClusterConfig {
 	return c.clusterConfigs
 }
+
+// ConnectedClusters 获取已连接的集群
 func (c *clusterService) ConnectedClusters() []*ClusterConfig {
 	connected := slice.Filter(c.AllClusters(), func(index int, item *ClusterConfig) bool {
 		return item.ServerVersion != ""
@@ -142,6 +150,7 @@ func (c *clusterService) ClusterID(clusterConfig *ClusterConfig) string {
 	return fmt.Sprintf("%s/%s", clusterConfig.FileName, clusterConfig.ContextName)
 }
 
+// FirstClusterID 获取第一个集群ID
 func (c *clusterService) FirstClusterID() string {
 	clusters := c.ConnectedClusters()
 	var selectedCluster string
@@ -152,6 +161,7 @@ func (c *clusterService) FirstClusterID() string {
 	return selectedCluster
 }
 
+// RegisterClustersByPath 根据kubeconfig地址注册集群
 func (c *clusterService) RegisterClustersByPath(filePath string) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -179,6 +189,8 @@ func (c *clusterService) RegisterClustersByPath(filePath string) {
 	clusterConfig.Server = cluster.Server
 	c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
 }
+
+// ScanClustersInDir 扫描文件夹下的kubeconfig文件，仅扫描形成列表但是不注册集群
 func (c *clusterService) ScanClustersInDir(path string) {
 	// 1. 通过kubeconfig文件，找到所在目录
 	dir := filepath.Dir(path)
@@ -228,6 +240,8 @@ func (c *clusterService) ScanClustersInDir(path string) {
 	}
 
 }
+
+// RegisterCluster 注册集群,扫描文件夹下的kubeconfig文件，注册集群
 func (c *clusterService) RegisterClustersInDir(path string) {
 	// 1. 通过kubeconfig文件，找到所在目录
 	dir := filepath.Dir(path)
@@ -287,7 +301,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 	}
 }
 
-// RegisterCluster 注册集群
+// RegisterCluster 从已扫描的集群列表中注册指定的某个集群
 func (c *clusterService) RegisterCluster(fileName string, contextName string) {
 
 	for _, clusterConfig := range c.clusterConfigs {
