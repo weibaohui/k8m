@@ -21,7 +21,8 @@ type Config struct {
 	ApiKey     string // OPENAI_API_KEY
 	ApiURL     string // OPENAI_API_URL
 	ApiModel   string // OPENAI_MODEL
-	Debug      bool
+	Debug      bool   // 调试模式，同步修改所有的debug模式
+	LogV       int    // klog的日志级别klog.V(this)
 	InCluster  bool
 	LoginType  string // password,oauth,token,..
 	// 登录方式，默认为password
@@ -63,17 +64,15 @@ func (c *Config) InitFlags() {
 	defaultAdminPassword := getEnv("ADMIN_PASSWORD", "123456")
 
 	// 默认debug为false
-	defaultDebug := false
-	if debug := os.Getenv("GIN_MODE"); debug == "release" {
-		// GIN_MODE=release
-		// 关闭debug模式
-		defaultDebug = false
-	}
+	defaultDebug := getEnvAsBool("DEBUG", false)
 
 	// jwt token secret
 	defaultJwtTokenSecret := getEnv("JWT_TOKEN_SECRET", "your-secret-key")
 
-	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式，使用GIN_MODE变量相同的值进行判断")
+	// 输出日志的级别
+	defaultLogV := getEnv("LOG_V", "2")
+
+	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
 	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "大模型的自定义API URL")
@@ -83,10 +82,11 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "管理员用户名")
 	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "管理员密码")
 	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "登录后生成JWT token 使用的Secret")
+	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
-		// 如果没有设置，手动将 --v 设置为 2
-		_ = flag.Set("v", "2")
+		// 如果没有设置，手动将 --v 设置为 环境变量值
+		_ = flag.Set("v", defaultLogV)
 	}
 	pflag.Parse()
 
@@ -105,6 +105,16 @@ func getEnvAsInt(key string, defaultValue int) int {
 	if value, exists := os.LookupEnv(key); exists {
 		if intValue, err := strconv.Atoi(value); err == nil {
 			return intValue
+		}
+	}
+	return defaultValue
+}
+
+// getEnvAsBool 获取环境变量的布尔值，支持 "true"/"false"（大小写不敏感）和 "1"/"0"，否则返回默认值
+func getEnvAsBool(key string, defaultValue bool) bool {
+	if value, exists := os.LookupEnv(key); exists {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
 		}
 	}
 	return defaultValue
