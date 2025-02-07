@@ -28,6 +28,9 @@ func OptionList(c *gin.Context) {
 	var options []map[string]interface{}
 	for _, cluster := range clusters {
 		name := cluster.FileName + "/" + cluster.ContextName
+		if cluster.IsInCluster {
+			name = "InCluster"
+		}
 		flag := "✅"
 		if cluster.ServerVersion == "" {
 			flag = "⚠️"
