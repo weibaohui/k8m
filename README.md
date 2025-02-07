@@ -29,7 +29,7 @@
 3. **参数**：
 
 ```shell
-Usage of ./k8m:
+Usage of ./bin/k8m:
       --add_dir_header                   If true, adds the file directory to the header of the log messages
       --admin-password string            管理员密码 (default "123456")
       --admin-username string            管理员用户名 (default "admin")
@@ -37,9 +37,10 @@ Usage of ./k8m:
   -k, --chatgpt-key string               大模型的自定义API Key (default "sk-hlfmptmmtppdqxsqvuxwlbgrobrzodojjultkxkrwymnfcjz")
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-Coder-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
-  -d, --debug                            调试模式，使用GIN_MODE变量相同的值进行判断
+  -d, --debug                            调试模式
       --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
   -c, --kubeconfig string                kubeconfig文件路径 (default "/Users/weibh/.kube/config")
+      --log-v int                        klog的日志级别klog.V(2) (default 2)
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory (no effect when -logtostderr=true)
       --log_file string                  If non-empty, use this log file (no effect when -logtostderr=true)
@@ -103,7 +104,8 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 | `LOGIN_TYPE`       | `"password"`                     | 登录方式（如 `password`, `oauth`, `token`） |
 | `ADMIN_USERNAME`   | `"admin"`                        | 管理员用户名                               |
 | `ADMIN_PASSWORD`   | `"123456"`                       | 管理员密码                                |
-| `GIN_MODE`         | `""`（默认开发模式）                     | 设置 `GIN_MODE=release` 可关闭 `debug` 模式 |
+| `DEBUG`            | `"false"`                        | 是否开启 `debug` 模式                      |
+| `LOG_V`            | `"2"`                            | log输出日志，同klog用法                      |
 | `JWT_TOKEN_SECRET` | `"your-secret-key"`              | 用于 JWT Token 生成的密钥                   |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
