@@ -241,7 +241,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 
 }
 
-// RegisterCluster 注册集群,扫描文件夹下的kubeconfig文件，注册集群
+// RegisterClustersInDir 注册集群,扫描文件夹下的kubeconfig文件，注册集群
 func (c *clusterService) RegisterClustersInDir(path string) {
 	// 1. 通过kubeconfig文件，找到所在目录
 	dir := filepath.Dir(path)
