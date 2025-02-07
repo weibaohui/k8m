@@ -92,8 +92,8 @@ func (p *pvcService) Watch() {
 		for _, cluster := range clusters {
 			if !cluster.GetClusterWatchStatus("pvc") {
 				selectedCluster := ClusterService().ClusterID(cluster)
-				p.watchSingleCluster(selectedCluster)
-				cluster.SetClusterWatchStarted("pvc")
+				watcher := p.watchSingleCluster(selectedCluster)
+				cluster.SetClusterWatchStarted("pvc", watcher)
 			}
 		}
 	})
@@ -104,14 +104,14 @@ func (p *pvcService) Watch() {
 	klog.V(6).Infof("新增PVC状态定时更新任务【@every 1m】\n")
 }
 
-func (p *pvcService) watchSingleCluster(selectedCluster string) {
+func (p *pvcService) watchSingleCluster(selectedCluster string) watch.Interface {
 	// watch  命名空间下 pvc 的变更
 	var watcher watch.Interface
 	var pvc corev1.PersistentVolumeClaim
 	err := kom.Cluster(selectedCluster).Resource(&pvc).AllNamespace().Watch(&watcher).Error
 	if err != nil {
 		klog.Errorf("%s 创建pvc监听器失败 %v", selectedCluster, err)
-		return
+		return nil
 	}
 	go func() {
 		klog.V(6).Infof("%s start watch pvc", selectedCluster)
@@ -141,4 +141,5 @@ func (p *pvcService) watchSingleCluster(selectedCluster string) {
 	ClusterService().DelayStartFunc(func() {
 		ClusterService().SetStorageClassStatusAggregated(selectedCluster, true)
 	})
+	return watcher
 }
