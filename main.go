@@ -31,7 +31,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/middleware"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/callbacks"
-	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
 
@@ -62,21 +61,16 @@ func Init() {
 		// 初始化kom
 		// 先注册回调，后面集群连接后，需要执行回调
 		callbacks.RegisterInit()
-		// 首先尝试读取 in-cluster 配置
-		_, err := kom.Clusters().RegisterInCluster()
-		if err != nil {
-			klog.Errorf("InCluster集群初始化失败%v，下面尝试使用kubeconfig文件初始化，并扫描同文件夹下其他配置文件", err)
-			// 初始化kubectl 连接
+		// 先注册InCluster集群
+		service.ClusterService().RegisterInCluster()
+		if !cfg.InCluster {
+			// 再注册其他集群
 			service.ClusterService().ScanClustersInDir(cfg.KubeConfig)
 			service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
-			klog.Infof("处理%d个集群", len(service.ClusterService().AllClusters()))
-			klog.Infof("已连接%d个集群", len(service.ClusterService().ConnectedClusters()))
-		} else {
-			cfg.InCluster = true
-			klog.Infof("启用InCluster 模式。k8m当前运行在宿主集群内部")
 		}
 
-		kom.Clusters().Show()
+		// 打印集群连接信息
+		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
 
 		// 初始化本项目中的回调
 		cb.RegisterCallback()
@@ -126,7 +120,10 @@ func main() {
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
 	})
-
+	// 处理 favicon.ico 请求
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
