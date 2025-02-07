@@ -129,10 +129,15 @@ spec:
       containers:
         - name: k8m
           image: weibh/k8m:0.0.29
+          env:
+            - name: DEBUG
+              value: "false"
+            - name: LOG_V
+              value: "2"
           ports:
             - containerPort: 3618
               protocol: TCP
               name: http-k8m
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
       restartPolicy: Always
       serviceAccountName: k8m
