@@ -105,8 +105,8 @@ func (p *podService) Watch() {
 		for _, cluster := range clusters {
 			if !cluster.GetClusterWatchStatus("pod") {
 				selectedCluster := ClusterService().ClusterID(cluster)
-				p.watchSingleCluster(selectedCluster)
-				cluster.SetClusterWatchStarted("pod")
+				watcher := p.watchSingleCluster(selectedCluster)
+				cluster.SetClusterWatchStarted("pod", watcher)
 			}
 		}
 	})
@@ -117,14 +117,14 @@ func (p *podService) Watch() {
 	klog.V(6).Infof("新增Pod状态定时更新任务【@every 1m】\n")
 }
 
-func (p *podService) watchSingleCluster(selectedCluster string) {
+func (p *podService) watchSingleCluster(selectedCluster string) watch.Interface {
 	// watch default 命名空间下 Pod资源 的变更
 	var watcher watch.Interface
 	var pod v1.Pod
 	err := kom.Cluster(selectedCluster).Resource(&pod).Namespace(v1.NamespaceAll).Watch(&watcher).Error
 	if err != nil {
 		klog.Errorf("%s 创建Pod监听器失败 %v", selectedCluster, err)
-		return
+		return nil
 	}
 	go func() {
 		klog.V(6).Infof("%s start watch pod", selectedCluster)
@@ -154,4 +154,5 @@ func (p *podService) watchSingleCluster(selectedCluster string) {
 	ClusterService().DelayStartFunc(func() {
 		ClusterService().SetPodStatusAggregated(selectedCluster, true)
 	})
+	return watcher
 }
