@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -12,6 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/kom/kom"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -35,48 +37,72 @@ type ClusterConfig struct {
 	NodeStatusAggregated         bool                           `json:"nodeStatusAggregated,omitempty"`         // 是否已聚合节点状态
 	PodStatusAggregated          bool                           `json:"podStatusAggregated,omitempty"`          // 是否已聚合容器组状态
 	StorageClassStatusAggregated bool                           `json:"storageClassStatusAggregated,omitempty"` // 是否已聚合容器组状态
+	IsInCluster                  bool                           `json:"isInCluster,omitempty"`                  // 是否为集群内运行获取到的配置
+	watchStatus                  map[string]*clusterWatchStatus // watch 类型为key，比如pod,deploy,node,pvc,sc
 	restConfig                   *rest.Config                   // 直连rest.Config
 	kubeConfig                   []byte                         // 集群配置.kubeconfig原始文件内容
-	watchStatus                  map[string]*clusterWatchStatus // watch 类型为key，比如pod,deploy,node,pvc,sc
+	watchStatusLock              sync.RWMutex                   // watch状态读写锁
 }
 
 // 记录每个集群的watch 启动情况
 // watch 有多种类型，需要记录
 type clusterWatchStatus struct {
-	WatchType   string    `json:"watchType,omitempty"`
-	Started     bool      `json:"started,omitempty"`
-	StartedTime time.Time `json:"startedTime,omitempty"`
+	WatchType   string          `json:"watchType,omitempty"`
+	Started     bool            `json:"started,omitempty"`
+	StartedTime time.Time       `json:"startedTime,omitempty"`
+	Watcher     watch.Interface `json:"-"`
 }
 
 // SetClusterWatchStarted 设置集群Watch启动状态
-func (c *ClusterConfig) SetClusterWatchStarted(watchType string) {
+func (c *ClusterConfig) SetClusterWatchStarted(watchType string, watcher watch.Interface) {
+	c.watchStatusLock.Lock()
+	defer c.watchStatusLock.Unlock()
 	c.watchStatus[watchType] = &clusterWatchStatus{
 		WatchType:   watchType,
 		Started:     true,
 		StartedTime: time.Now(),
+		Watcher:     watcher,
 	}
 }
 
 // GetClusterWatchStatus 获取集群Watch状态
 func (c *ClusterConfig) GetClusterWatchStatus(watchType string) bool {
-	watch := c.watchStatus[watchType]
-	if watch == nil {
+	watcher := c.watchStatus[watchType]
+	if watcher == nil {
 		return false
 	}
-	return watch.Started
+	return watcher.Started
+}
+
+// GetClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
+func (c *ClusterConfig) GetClusterID() string {
+	if c.IsInCluster {
+		return "InCluster"
+	}
+	return fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
+}
+
+// ClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
+func (c *clusterService) ClusterID(clusterConfig *ClusterConfig) string {
+	return clusterConfig.GetClusterID()
 }
 
 // GetClusterByID 获取ClusterConfig
-func (c *clusterService) GetClusterByID(selectedCluster string) *ClusterConfig {
-	if selectedCluster == "" {
+func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
+	if id == "" {
 		return nil
 	}
-	if selectedCluster == "InCluster" {
+	if id == "InCluster" {
 		// InCluster 并没有使用ClusterConfig
-		return nil
+		predicate := func(index int, item *ClusterConfig) bool {
+			return item.IsInCluster
+		}
+		if v, ok := slice.FindBy(c.clusterConfigs, predicate); ok {
+			return v
+		}
 	}
 	// 解析selectedCluster
-	clusterID := strings.Split(selectedCluster, "/")
+	clusterID := strings.Split(id, "/")
 	if len(clusterID) != 2 {
 		return nil
 	}
@@ -114,20 +140,28 @@ func (c *clusterService) DelayStartFunc(f func()) {
 // Reconnect 重新连接集群
 func (c *clusterService) Reconnect(fileName string, contextName string) {
 	// 先清除原来的状态
-
 	for _, clusterConfig := range c.clusterConfigs {
 		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
 			clusterConfig.ServerVersion = ""
 			clusterConfig.restConfig = nil
 			clusterConfig.Err = ""
+			c.RegisterCluster(clusterConfig)
 		}
 	}
-	c.RegisterCluster(fileName, contextName)
 }
 
 // Scan 扫描集群
 func (c *clusterService) Scan() {
-	c.clusterConfigs = []*ClusterConfig{}
+	// 清空了集群列表
+	for _, cc := range c.clusterConfigs {
+		for _, v := range cc.watchStatus {
+			if v.Watcher != nil {
+				v.Watcher.Stop()
+				klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
+			}
+		}
+	}
+	c.clusterConfigs = make([]*ClusterConfig, 0)
 	cfg := flag.Init()
 	c.ScanClustersInDir(cfg.KubeConfig)
 }
@@ -145,11 +179,6 @@ func (c *clusterService) ConnectedClusters() []*ClusterConfig {
 	return connected
 }
 
-// ClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
-func (c *clusterService) ClusterID(clusterConfig *ClusterConfig) string {
-	return fmt.Sprintf("%s/%s", clusterConfig.FileName, clusterConfig.ContextName)
-}
-
 // FirstClusterID 获取第一个集群ID
 func (c *clusterService) FirstClusterID() string {
 	clusters := c.ConnectedClusters()
@@ -163,6 +192,12 @@ func (c *clusterService) FirstClusterID() string {
 
 // RegisterClustersByPath 根据kubeconfig地址注册集群
 func (c *clusterService) RegisterClustersByPath(filePath string) {
+	// 如果c.clusterConfigs为空，则返回
+	if len(c.clusterConfigs) == 0 {
+		klog.V(6).Infof("clusterConfigs为空，不进行注册")
+		return
+	}
+
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		klog.V(6).Infof("读取文件[%s]失败: %v", filePath, err)
@@ -174,20 +209,9 @@ func (c *clusterService) RegisterClustersByPath(filePath string) {
 		klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
 	}
 	contextName := config.CurrentContext
-	context := config.Contexts[contextName]
-	cluster := config.Clusters[context.Cluster]
 
-	clusterConfig := &ClusterConfig{
-		FileName:    filepath.Base(filePath),
-		ContextName: contextName,
-		UserName:    context.AuthInfo,
-		ClusterName: context.Cluster,
-		Namespace:   context.Namespace,
-		kubeConfig:  content,
-		watchStatus: make(map[string]*clusterWatchStatus),
-	}
-	clusterConfig.Server = cluster.Server
-	c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
+	fileName := filepath.Base(filePath)
+	c.Reconnect(fileName, contextName)
 }
 
 // ScanClustersInDir 扫描文件夹下的kubeconfig文件，仅扫描形成列表但是不注册集群
@@ -241,6 +265,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 
 }
 
+// Deprecated
 // RegisterClustersInDir 注册集群,扫描文件夹下的kubeconfig文件，注册集群
 func (c *clusterService) RegisterClustersInDir(path string) {
 	// 1. 通过kubeconfig文件，找到所在目录
@@ -293,7 +318,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 	// 注册
 	for _, clusterConfig := range c.clusterConfigs {
 		// 改为只注册CurrentContext的这个
-		c.RegisterCluster(clusterConfig.FileName, clusterConfig.ContextName)
+		c.RegisterCluster(clusterConfig)
 	}
 	// 打印serverVersion
 	for _, clusterConfig := range c.clusterConfigs {
@@ -302,67 +327,108 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 }
 
 // RegisterCluster 从已扫描的集群列表中注册指定的某个集群
-func (c *clusterService) RegisterCluster(fileName string, contextName string) {
-
-	for _, clusterConfig := range c.clusterConfigs {
-		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
-
-			// 定义集群ID
-			clusterID := fileName + "/" + contextName
-			// 先检查连接是否可以直连，如果可以直连，则直接注册
-			if c.CheckCluster(fileName, contextName) {
-				_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
-				if err != nil {
-					klog.V(6).Infof("注册集群[%s/%s]失败: %v", fileName, contextName, err)
-					continue
-				}
-				klog.V(6).Infof("成功注册集群: %s/%s", fileName, contextName)
+func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) {
+	clusterID := clusterConfig.GetClusterID()
+	// 先检查连接是否可以直连，如果可以直连，则直接注册
+	if c.CheckCluster(clusterConfig) {
+		if clusterConfig.IsInCluster {
+			// InCluster模式
+			_, err := kom.Clusters().RegisterInCluster()
+			if err != nil {
+				klog.V(6).Infof("注册集群[%s]失败: %v", clusterID, err)
+				return
+			}
+		} else {
+			// 集群外模式
+			_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
+			if err != nil {
+				klog.V(6).Infof("注册集群[%s]失败: %v", clusterID, err)
+				return
 			}
 		}
+		klog.V(6).Infof("成功注册集群: %s", clusterID)
+
 	}
+
 }
 
 // CheckCluster 校验集群是否可连接，并更新状态
-func (c *clusterService) CheckCluster(fileName string, contextName string) bool {
-	for i := range c.clusterConfigs {
-		config := c.clusterConfigs[i]
-		if config.FileName == fileName && config.ContextName == contextName {
-			lines := strings.Split(string(config.kubeConfig), "\n")
-			for i, line := range lines {
-				if strings.HasPrefix(line, "current-context:") {
-					lines[i] = "current-context: " + contextName
-				}
-			}
-			bytes := []byte(strings.Join(lines, "\n"))
+func (c *clusterService) CheckCluster(config *ClusterConfig) bool {
+	var restConfig *rest.Config
+	var err error
 
-			restConfig, err := clientcmd.RESTConfigFromKubeConfig(bytes)
-			if err != nil {
-				klog.V(6).Infof("解析rest.Config错误 %s/%s: %v", fileName, contextName, err)
-				config.Err = err.Error()
-				return false
+	if config.IsInCluster {
+		// 集群内模式
+		restConfig, err = rest.InClusterConfig()
+		if err != nil {
+			klog.V(6).Infof("获取InCluster的配置失败: %v", err)
+			config.Err = err.Error()
+			return false
+		}
+	} else {
+		// 集群外模式
+		lines := strings.Split(string(config.kubeConfig), "\n")
+		for i, line := range lines {
+			if strings.HasPrefix(line, "current-context:") {
+				lines[i] = "current-context: " + config.ContextName
 			}
+		}
+		bytes := []byte(strings.Join(lines, "\n"))
 
-			// 校验集群是否可连接
-			clientset, err := kubernetes.NewForConfig(restConfig)
-			if err != nil {
-				klog.V(6).Infof("创建clientset失败 %s/%s: %v", fileName, contextName, err)
-				config.Err = err.Error()
-				return false
-			}
-
-			// 尝试获取集群版本以验证连接
-			info, err := clientset.ServerVersion()
-			if err != nil {
-				klog.V(6).Infof("连接集群失败 %s/%s: %v", fileName, contextName, err)
-				config.Err = err.Error()
-				return false
-			}
-			klog.V(6).Infof("成功连接集群 %s/%s", fileName, contextName)
-			// 可以连接的放到数组中记录
-			config.ServerVersion = info.GitVersion
-			config.restConfig = restConfig
-			return true
+		restConfig, err = clientcmd.RESTConfigFromKubeConfig(bytes)
+		if err != nil {
+			klog.V(6).Infof("解析rest.Config错误 %s: %v", config.GetClusterID(), err)
+			config.Err = err.Error()
+			return false
 		}
 	}
-	return false
+
+	// 校验集群是否可连接
+	clientset, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		klog.V(6).Infof("创建clientset失败 %s: %v", config.GetClusterID(), err)
+		config.Err = err.Error()
+		return false
+	}
+
+	// 尝试获取集群版本以验证连接
+	info, err := clientset.ServerVersion()
+	if err != nil {
+		klog.V(6).Infof("连接集群失败 %s: %v", config.GetClusterID(), err)
+		config.Err = err.Error()
+		return false
+	}
+	klog.V(6).Infof("成功连接集群 %s", config.GetClusterID())
+	// 可以连接的放到数组中记录
+	config.ServerVersion = info.GitVersion
+	config.restConfig = restConfig
+	return true
+}
+
+// RegisterInCluster 将InCluster的配置注册到集群列表中
+func (c *clusterService) RegisterInCluster() {
+	cfg := flag.Init()
+
+	// 获取InCluster的配置
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		klog.V(6).Infof("获取InCluster的配置失败: %v", err)
+		cfg.InCluster = false
+		return
+	}
+	cfg.InCluster = true
+
+	// 3. 生成 ClusterConfig
+	clusterConfig := &ClusterConfig{
+		ClusterName: "kubernetes", // InCluster 模式没有 context, 设定默认名称
+		FileName:    "InCluster",
+		ContextName: "InCluster",
+		Server:      config.Host,
+		IsInCluster: true,
+		restConfig:  config,
+		watchStatus: make(map[string]*clusterWatchStatus),
+	}
+
+	c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
+	c.RegisterCluster(clusterConfig)
 }
