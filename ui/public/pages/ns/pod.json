@@ -793,6 +793,45 @@
                 {
                   "type": "button",
                   "icon": "fas  fa-terminal text-primary",
+                  "label": "xterm",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "closeOnOutside": true,
+                    "closeOnEsc": true,
+                    "size": "xl",
+                    "title": "Shell (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "page",
+                        "body": [
+                          {
+                            "type": "alert",
+                            "level": "success",
+                            "body": "温馨提示：支持输入中文指令（需开启GPT）。"
+                          },
+                          {
+                            "type": "select",
+                            "label": "容器",
+                            "name": "containerName",
+                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                            "value": "${spec.containers[0].name}"
+                          },
+                          {
+                            "type": "xterm",
+                            "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                            "params": {
+                              "cmd": "${command}"
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "actions": []
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas  fa-terminal text-primary",
                   "label": "进入容器",
                   "actionType": "drawer",
                   "drawer": {
