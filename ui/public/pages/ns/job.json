@@ -1450,13 +1450,24 @@
           "type": "k8sTextConditions"
         },
         {
+          "label": "状态",
+          "type": "tpl",
+          "tpl": "<span class='label ${status.failed > 0 ? \"label-danger\" : (status.succeeded === spec.completions ? \"label-success\" : \"label-warning\") }'>${status.failed > 0 ? \"失败\" : (status.succeeded === spec.completions ? \"已完成\" : \"进行中\")}</span>"
+        },
+        {
+          "label": "进度",
           "type": "progress",
           "mode": "line",
-          "value": "${status.succeeded > 0 ? ROUND((status.succeeded / spec.completions),2) * 100 : 0}",
+          "value": "${spec.completions && spec.completions > 0 ? ROUND((status.succeeded / spec.completions), 2) * 100 : 0}",
           "striped": true,
-          "label": "当前状态",
           "animate": true,
           "width": "150px"
+        },
+        {
+          "name": "status.startTime",
+          "label": "启动时间",
+          "type": "tpl",
+          "tpl": "${status.startTime|k8sDate}"
         },
         {
           "name": "metadata.creationTimestamp",
