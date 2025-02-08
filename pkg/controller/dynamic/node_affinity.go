@@ -2,6 +2,7 @@ package dynamic
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
@@ -148,6 +149,8 @@ func processNodeAffinity(c *gin.Context, action string) {
 		return
 	}
 	patchJSON := utils.ToJSON(patchData)
+	// 将{}替换为null，为null才会删除
+	patchJSON = strings.ReplaceAll(patchJSON, "{}", "null")
 	klog.V(6).Infof("UpdateNodeAffinity Patch JSON :\n%s\n", patchJSON)
 	var obj interface{}
 	err = kom.Cluster(selectedCluster).
@@ -285,6 +288,19 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 
 // 生成动态的 patch 数据
 func generateRequiredNodeAffinityDynamicPatch(kind string, rules []interface{}) (map[string]interface{}, error) {
+	// 打印rules
+	klog.V(6).Infof("generateRequiredNodeAffinityDynamicPatch rules:\n%+v len=%d\n", rules, len(rules))
+
+	// 删除时[map[matchExpressions:[]]] len=1
+	// 先判断是不是要删除,删除层级不一样，单独处理
+	if utils.ToJSON(rules) == `[
+  {
+    "matchExpressions": null
+  }
+]` {
+		return makeDeleteNodeAffinityDynamicPatch(kind, rules)
+	}
+
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -306,5 +322,28 @@ func generateRequiredNodeAffinityDynamicPatch(kind string, rules []interface{}) 
 
 	current["nodeSelectorTerms"] = rules
 
+	return patch, nil
+}
+func makeDeleteNodeAffinityDynamicPatch(kind string, rules []interface{}) (map[string]interface{}, error) {
+	// 获取资源路径
+	paths, err := getResourcePaths(kind)
+	if err != nil {
+		return nil, err
+	}
+	requiredAffinityPath := append(paths, "affinity", "nodeAffinity")
+
+	// 动态构造 patch 数据
+	patch := make(map[string]interface{})
+	current := patch
+
+	// 按层级动态生成嵌套结构
+	for _, path := range requiredAffinityPath {
+		if _, exists := current[path]; !exists {
+			current[path] = make(map[string]interface{})
+		}
+		current = current[path].(map[string]interface{})
+	}
+
+	current = nil
 	return patch, nil
 }

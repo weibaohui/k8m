@@ -2,6 +2,7 @@ package dynamic
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
@@ -119,6 +120,8 @@ func processPodAffinity(c *gin.Context, action string) {
 		return
 	}
 	patchJSON := utils.ToJSON(patchData)
+	// 将{}替换为null，为null才会删除
+	patchJSON = strings.ReplaceAll(patchJSON, "{}", "null")
 	klog.V(6).Infof("UpdatePodAffinity Patch JSON :\n%s\n", patchJSON)
 	var obj interface{}
 	err = kom.Cluster(selectedCluster).
@@ -235,6 +238,9 @@ func getPodAffinityTerms(kind string, item *unstructured.Unstructured, action st
 
 // 生成动态的 patch 数据
 func generateRequiredPodAffinityDynamicPatch(kind string, terms []interface{}) (map[string]interface{}, error) {
+	// 打印rules
+	klog.V(7).Infof("generateRequiredPodAffinityDynamicPatch rules:\n%+v len=%d\n", terms, len(terms))
+	// [] len=0
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -252,6 +258,28 @@ func generateRequiredPodAffinityDynamicPatch(kind string, terms []interface{}) (
 			current[path] = make(map[string]interface{})
 		}
 		current = current[path].(map[string]interface{})
+	}
+
+	// 单独处理删除时，terms为空的情况，要赋值为nil
+	// 生成json 如下，那么需要将{}替换为null，为null才会删除
+	// {
+	//   "spec": {
+	//     "jobTemplate": {
+	//       "spec": {
+	//         "template": {
+	//           "spec": {
+	//             "affinity": {
+	//               "podAffinity": {}
+	//             }
+	//           }
+	//         }
+	//       }
+	//     }
+	//   }
+	// }
+	if len(terms) == 0 {
+		current = nil
+		return patch, nil
 	}
 
 	current["requiredDuringSchedulingIgnoredDuringExecution"] = terms
