@@ -793,45 +793,6 @@
                 {
                   "type": "button",
                   "icon": "fas  fa-terminal text-primary",
-                  "label": "xterm",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnOutside": true,
-                    "closeOnEsc": true,
-                    "size": "xl",
-                    "title": "Shell (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "page",
-                        "body": [
-                          {
-                            "type": "alert",
-                            "level": "success",
-                            "body": "温馨提示：支持输入中文指令（需开启GPT）。"
-                          },
-                          {
-                            "type": "select",
-                            "label": "容器",
-                            "name": "containerName",
-                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                            "value": "${spec.containers[0].name}"
-                          },
-                          {
-                            "type": "xterm",
-                            "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                            "params": {
-                              "cmd": "${command}"
-                            }
-                          }
-                        ]
-                      }
-                    ],
-                    "actions": []
-                  }
-                },
-                {
-                  "type": "button",
-                  "icon": "fas  fa-terminal text-primary",
                   "label": "进入容器",
                   "actionType": "drawer",
                   "drawer": {
@@ -852,54 +813,17 @@
                             "type": "select",
                             "label": "容器",
                             "name": "containerName",
-                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                            "value": "${spec.containers[0].name}"
+                            "id": "containerName",
+                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}"
                           },
                           {
-                            "type": "form",
-                            "title": "命令行输入",
-                            "name": "shellForm",
-                            "wrapWithPanel": false,
-                            "submitText": "",
-                            "controls": [
-                              {
-                                "type": "text",
-                                "name": "command",
-                                "label": "命令",
-                                "placeholder": "请输入命令...",
-                                "clearable": true,
-                                "autoFocus": true
-                              }
-                            ],
-                            "onEvent": {
-                              "submitSucc": {
-                                "actions": [
-                                  {
-                                    "actionType": "drawer",
-                                    "drawer": {
-                                      "actions": [],
-                                      "closeOnEsc": true,
-                                      "closeOnOutside": true,
-                                      "size": "xl",
-                                      "title": "执行 ${command} （ESC 关闭）",
-                                      "body": [
-                                        {
-                                          "type": "websocketViewer",
-                                          "url": "/k8s/pod/wsexec/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                          "params": {
-                                            "cmd": "${command}"
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                ]
-                              }
+                            "type": "xterm",
+                            "id": "xterm",
+                            "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}",
+                            "params": {
+                              "container_name": "${containerName}"
                             },
-                            "messages": {
-                              "saveSuccess": ""
-                            },
-                            "actions": []
+                            "visibleOn": "${containerName}"
                           }
                         ]
                       }
