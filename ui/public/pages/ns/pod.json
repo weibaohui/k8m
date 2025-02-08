@@ -841,42 +841,6 @@
                 },
                 {
                   "type": "button",
-                  "icon": "fas  fa-terminal text-primary",
-                  "label": "进入容器",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnOutside": true,
-                    "closeOnEsc": true,
-                    "size": "xl",
-                    "title": "Shell (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "page",
-                        "body": [
-                          {
-                            "type": "select",
-                            "label": "容器",
-                            "name": "containerName",
-                            "id": "containerName",
-                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}"
-                          },
-                          {
-                            "type": "xterm",
-                            "id": "xterm",
-                            "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}",
-                            "params": {
-                              "container_name": "${containerName}"
-                            },
-                            "visibleOn": "${containerName}"
-                          }
-                        ]
-                      }
-                    ],
-                    "actions": []
-                  }
-                },
-                {
-                  "type": "button",
                   "icon": "fas fa-folder text-primary",
                   "label": "文件管理",
                   "actionType": "drawer",
