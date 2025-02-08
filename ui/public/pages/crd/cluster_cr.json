@@ -230,7 +230,7 @@
                     "width": 400,
                     "margin": 5
                   },
-                  "label": "切换集群",
+                  "label": "集群",
                   "type": "select",
                   "multiple": false,
                   "name": "cluster",
