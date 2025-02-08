@@ -18,14 +18,15 @@ interface WebSocketMarkdownViewerProps {
 const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
     ({url, data, params}, _) => {
         url = formatFinalGetUrl({url, data, params});
+        const token = localStorage.getItem('token');
+        //拼接url token
+        url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
         const wsRef = useRef<WebSocket | null>(null);
         const terminalRef = useRef<HTMLDivElement | null>(null);
         const fitAddonRef = useRef<FitAddon | null>(null);
 
-        const token = localStorage.getItem('token');
-        //拼接url token
-        url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
+
         // const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 
         useEffect(() => {
@@ -68,7 +69,7 @@ const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerP
             ws.onopen = () => {
                 term.focus();
                 setTimeout(() => fitAddon.fit(), 100);
-                term.write("\x1b[32mConnected to server\x1b[0m\r\n");
+                // term.write("\x1b[32mConnected to server\x1b[0m\r\n");
             };
             ws.onmessage = (event) => term.write(event.data);
             ws.onclose = () => term.write("\x1b[31mDisconnected\x1b[0m\r\n");
