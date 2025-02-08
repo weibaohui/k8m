@@ -792,6 +792,55 @@
                 },
                 {
                   "type": "button",
+                  "icon": "fa fa-terminal text-primary",
+                  "label": "进入容器",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "title": "选择容器 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "select",
+                        "name": "containerName",
+                        "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                        "value": "${spec.containers[0].name}",
+                        "required": true
+                      },
+                      {
+                        "type": "button",
+                        "label": "确定",
+                        "level": "primary",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "closeOnOutside": true,
+                          "closeOnEsc": true,
+                          "size": "xl",
+                          "title": "${metadata.namespace}/${metadata.name} 容器 ${containerName}   (ESC 关闭)",
+                          "body": [
+                            {
+                              "type": "page",
+                              "body": [
+                                {
+                                  "type": "xterm",
+                                  "id": "xterm",
+                                  "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}",
+                                  "params": {
+                                    "container_name": "${containerName}"
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "actions": []
+                        }
+                      }
+                    ],
+                    "actions": []
+                  }
+                },
+                {
+                  "type": "button",
                   "icon": "fas  fa-terminal text-primary",
                   "label": "进入容器",
                   "actionType": "drawer",
@@ -804,11 +853,6 @@
                       {
                         "type": "page",
                         "body": [
-                          {
-                            "type": "alert",
-                            "level": "success",
-                            "body": "温馨提示：支持输入中文指令（需开启GPT）。"
-                          },
                           {
                             "type": "select",
                             "label": "容器",
