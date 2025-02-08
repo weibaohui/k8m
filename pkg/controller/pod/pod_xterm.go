@@ -3,16 +3,21 @@ package pod
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
-	"os"
-	"os/exec"
+	"net/url"
 	"sync"
 	"time"
 
-	"github.com/creack/pty"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/kom/kom"
+	"k8s.io/apimachinery/pkg/util/httpstream"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/klog/v2"
 )
 
@@ -31,17 +36,44 @@ type TTYSize struct {
 	Y    uint16 `json:"y"`
 }
 
+// TerminalSizeQueue 维护 TTY 终端大小
+type TerminalSizeQueue struct {
+	sync.Mutex
+	sizes []remotecommand.TerminalSize
+}
+
+func (t *TerminalSizeQueue) Next() *remotecommand.TerminalSize {
+	t.Lock()
+	defer t.Unlock()
+	if len(t.sizes) == 0 {
+		return nil
+	}
+	size := t.sizes[len(t.sizes)-1]
+	t.sizes = t.sizes[:len(t.sizes)-1]
+	return &size
+}
+
+func (t *TerminalSizeQueue) Push(cols, rows uint16) {
+	t.Lock()
+	defer t.Unlock()
+	t.sizes = append(t.sizes, remotecommand.TerminalSize{Width: cols, Height: rows})
+}
+
 func Xterm(c *gin.Context) {
 
-	// ns := c.Param("ns")
-	// podName := c.Param("pod_name")
-	// containerName := c.Param("container_name")
-	// ctx := c.Request.Context()
-	// selectedCluster := amis.GetSelectedCluster(c)
+	ns := c.Param("ns")
+	podName := c.Param("pod_name")
+	containerName := c.Query("container_name")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	if containerName == "" {
+		amis.WriteJsonError(c, errors.New("container_name is required"))
+		return
+	}
 
 	connectionErrorLimit := 10
 
-	maxBufferSizeBytes := 512
 	keepalivePingTimeout := 20 * time.Second
 
 	// 定义 WebSocket 升级器
@@ -61,29 +93,41 @@ func Xterm(c *gin.Context) {
 	defer conn.Close()
 	klog.V(6).Infof("ws Client connected")
 
-	cmd := exec.Command("/bin/bash")
-	cmd.Env = os.Environ()
-	tty, err := pty.Start(cmd)
+	cluster := kom.Cluster(selectedCluster)
+
+	// 创建 TTY 终端大小管理队列
+	sizeQueue := &TerminalSizeQueue{}
+	// 定义 Kubernetes Exec 请求
+	req := cluster.Client().CoreV1().RESTClient().
+		Post().
+		Resource("pods").
+		Namespace(ns).
+		Name(podName).
+		SubResource("exec").
+		Param("container", containerName).
+		Param("command", "/bin/sh").
+		Param("tty", "true").
+		Param("stdin", "true").
+		Param("stdout", "true").
+		Param("stderr", "true")
+
+	// 创建 WebSocket -> Pod 交互的 Executor
+	exec, err := createExecutor(req.URL(), cluster.RestConfig())
 	if err != nil {
-		message := fmt.Sprintf("failed to start tty: %s", err)
-		klog.Errorf(message)
-		conn.WriteMessage(websocket.TextMessage, []byte(message))
+		klog.Errorf("Failed to create SPDYExecutor: %v", err)
+		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Error creating executor: %v", err)))
 		return
 	}
 
+	// 用于传输数据
+	// var inBuffer SafeBuffer
+	var outBuffer SafeBuffer
+	var errBuffer SafeBuffer
+	inReader, inWriter := io.Pipe()
+	defer inReader.Close()
 	defer func() {
-		klog.Info("gracefully stopping spawned tty...")
-		if err := cmd.Process.Kill(); err != nil {
-			klog.Infof("failed to kill process: %s", err)
-		}
-		if _, err := cmd.Process.Wait(); err != nil {
-			klog.Infof("failed to wait for process to exit: %s", err)
-		}
-		if err := tty.Close(); err != nil {
-			klog.Infof("failed to close spawned tty gracefully: %s", err)
-		}
 		if err := conn.Close(); err != nil {
-			klog.Infof("failed to close webscoket connection: %s", err)
+			klog.V(6).Infof("failed to close webscoket connection: %s", err)
 		}
 	}()
 
@@ -100,16 +144,16 @@ func Xterm(c *gin.Context) {
 	go func() {
 		for {
 			if err := conn.WriteMessage(websocket.PingMessage, []byte("keepalive")); err != nil {
-				klog.Infof("failed to write ping message")
+				klog.V(6).Infof("failed to write ping message")
 				return
 			}
 			time.Sleep(keepalivePingTimeout / 2)
 			if time.Now().Sub(lastPongTime) > keepalivePingTimeout {
-				klog.Infof("failed to get response from ping, triggering disconnect now...")
+				klog.V(6).Infof("failed to get response from ping, triggering disconnect now...")
 				waiter.Done()
 				return
 			}
-			klog.Infof("received response from ping successfully")
+			klog.V(6).Infof("received response from ping successfully")
 		}
 	}()
 
@@ -121,25 +165,37 @@ func Xterm(c *gin.Context) {
 			// can be terminated - this frees up memory so the service doesn't get
 			// overloaded
 			if errorCounter > connectionErrorLimit {
+				klog.V(6).Infof("connection error limit reached, closing connection")
 				waiter.Done()
 				break
 			}
-			buffer := make([]byte, maxBufferSizeBytes)
-			readLength, err := tty.Read(buffer)
-			if err != nil {
-				klog.Infof("failed to read from tty: %s", err)
-				if err := conn.WriteMessage(websocket.TextMessage, []byte("bye!")); err != nil {
-					klog.Infof("failed to send termination message from tty to xterm.js: %s", err)
+
+			if outBuffer.Len() > 0 {
+				data := outBuffer.Bytes()
+				outBuffer.Reset()
+				klog.V(6).Infof("Received stdout (%d bytes): %q", len(data), string(data))
+
+				if err := conn.WriteMessage(websocket.BinaryMessage, data); err != nil {
+					klog.V(6).Infof("Failed to send stderr message   to xterm.js: %v", err)
+					errorCounter++
+					return
+				} else {
+					klog.V(6).Infof("Sent stdout (%d bytes) to xterm.js : %s", len(data), string(data))
+					errorCounter = 0
 				}
-				waiter.Done()
-				return
+
 			}
-			if err := conn.WriteMessage(websocket.BinaryMessage, buffer[:readLength]); err != nil {
-				klog.Infof("failed to send %v bytes from tty to xterm.js", readLength)
-				errorCounter++
-				continue
+			if errBuffer.Len() > 0 {
+				data := errBuffer.Bytes()
+				errBuffer.Reset()
+				klog.V(6).Infof("Received stderr (%d bytes): %q", len(data), string(data))
+				if err := conn.WriteMessage(websocket.BinaryMessage, data); err != nil {
+					klog.V(6).Infof("Failed to send stderr message   to xterm.js: %v", err)
+					errorCounter++
+					return
+				}
 			}
-			klog.Infof("sent message of size %v bytes from tty to xterm.js", readLength)
+			time.Sleep(100 * time.Millisecond)
 			errorCounter = 0
 		}
 	}()
@@ -151,7 +207,7 @@ func Xterm(c *gin.Context) {
 			messageType, data, err := conn.ReadMessage()
 			if err != nil {
 				if !connectionClosed {
-					klog.Infof("failed to get next reader: %s", err)
+					klog.V(6).Infof("failed to get next reader: %s", err)
 				}
 				return
 			}
@@ -161,11 +217,11 @@ func Xterm(c *gin.Context) {
 			if !ok {
 				dataType = "unknown"
 			}
-			klog.Infof("received %s (type: %v) message of size %v byte(s) from xterm.js with key sequence: %v", dataType, messageType, dataLength, dataBuffer)
+			klog.V(6).Infof("received %s (type: %v) message of size %v byte(s) from xterm.js with key sequence: %v  [%s]", dataType, messageType, dataLength, dataBuffer, string(dataBuffer))
 
 			// process
 			if dataLength == -1 { // invalid
-				klog.Infof("failed to get the correct number of bytes read, ignoring message")
+				klog.V(6).Infof("failed to get the correct number of bytes read, ignoring message")
 				continue
 			}
 
@@ -175,31 +231,62 @@ func Xterm(c *gin.Context) {
 					ttySize := &TTYSize{}
 					resizeMessage := bytes.Trim(dataBuffer[1:], " \n\r\t\x00\x01")
 					if err := json.Unmarshal(resizeMessage, ttySize); err != nil {
-						klog.Infof("failed to unmarshal received resize message '%s': %s", string(resizeMessage), err)
+						klog.V(6).Infof("failed to unmarshal received resize message '%s': %s", string(resizeMessage), err)
 						continue
 					}
-					klog.Infof("resizing tty to use %v rows and %v columns...", ttySize.Rows, ttySize.Cols)
-					if err := pty.Setsize(tty, &pty.Winsize{
-						Rows: ttySize.Rows,
-						Cols: ttySize.Cols,
-					}); err != nil {
-						klog.Infof("failed to resize tty, error: %s", err)
-					}
+					klog.V(6).Infof("resizing tty to use %v rows and %v columns...", ttySize.Rows, ttySize.Cols)
+
+					sizeQueue.Push(ttySize.Cols, ttySize.Rows)
 					continue
 				}
 			}
 
 			// write to tty
-			bytesWritten, err := tty.Write(dataBuffer)
+			// 普通输入
+			bytesWritten, err := inWriter.Write(data)
 			if err != nil {
-				klog.Infof(fmt.Sprintf("failed to write %v bytes to tty: %s", len(dataBuffer), err))
+				klog.V(6).Infof(fmt.Sprintf("failed to write %v bytes to tty: %s", len(dataBuffer), err))
 				continue
 			}
-			klog.Infof("%v bytes written to tty...", bytesWritten)
+			klog.V(6).Infof("Wrote %d bytes to inBuffer: %q", bytesWritten, string(data))
 		}
 	}()
 
+	// 执行命令
+	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
+		Stdin:             inReader,
+		Stdout:            &outBuffer,
+		Stderr:            &errBuffer,
+		Tty:               true,
+		TerminalSizeQueue: sizeQueue, // 传递 TTY 尺寸管理队列
+	})
+	if err != nil {
+		klog.Errorf("Failed to execute command in pod: %v", err)
+		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Execution error: %v", err)))
+		return
+	}
 	waiter.Wait()
-	klog.Infof("closing conn...")
+	klog.V(6).Infof("closing conn...")
 	connectionClosed = true
+}
+
+func createExecutor(url *url.URL, config *rest.Config) (remotecommand.Executor, error) {
+
+	exec, err := remotecommand.NewSPDYExecutor(config, "POST", url)
+	if err != nil {
+		return nil, err
+	}
+	// Fallback executor is default, unless feature flag is explicitly disabled.
+	// WebSocketExecutor must be "GET" method as described in RFC 6455 Sec. 4.1 (page 17).
+	websocketExec, err := remotecommand.NewWebSocketExecutor(config, "GET", url.String())
+	if err != nil {
+		return nil, err
+	}
+	exec, err = remotecommand.NewFallbackExecutor(websocketExec, exec, func(err error) bool {
+		return httpstream.IsUpgradeFailure(err) || httpstream.IsHTTPSProxyError(err)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return exec, nil
 }
