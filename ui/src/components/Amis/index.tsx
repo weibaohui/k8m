@@ -9,6 +9,8 @@ import ShowAnnotationIcon from "@/components/Amis/custom/ShowAnnotationIcon.ts";
 import simpleImageName from "@/components/Amis/custom/SimpleImageName.ts";
 import FormatBytes from "@/components/Amis/custom/FormatBytes.ts";
 import FormatLsShortDate from "@/components/Amis/custom/FormatLsShortDate.ts";
+import K8sDate from '@/components/Amis/custom/K8sDate.ts';
+import XTermComponent from "@/components/Amis/custom/XTerm.tsx";
 import K8sAgeComponent from "@/components/Amis/custom/K8sAge.tsx";
 import K8sPodReadyComponent from "@/components/Amis/custom/K8sPodReady.tsx";
 import HighlightHtmlComponent from "@/components/Amis/custom/HighlightHtml.tsx";
@@ -16,7 +18,6 @@ import WebSocketMarkdownViewerComponent from "@/components/Amis/custom/WebSocket
 import SSELogDownloadComponent from "@/components/Amis/custom/SSELogDownload.tsx";
 import SSELogDisplayComponent from "@/components/Amis/custom/SSELogDisplay.tsx";
 import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.tsx";
-import K8sDate from '@/components/Amis/custom/K8sDate.ts';
 // 注册自定义组件
 registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
 registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
@@ -33,6 +34,8 @@ registerRenderer({type: 'log-download', component: SSELogDownloadComponent})
 registerRenderer({type: 'log-display', component: SSELogDisplayComponent})
 // @ts-ignore
 registerRenderer({type: 'websocketViewer', component: WebSocketViewerComponent})
+// @ts-ignore
+registerRenderer({type: 'xterm', component: XTermComponent})
 
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)

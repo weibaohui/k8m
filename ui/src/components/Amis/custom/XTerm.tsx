@@ -1,0 +1,107 @@
+import React, {useEffect, useRef} from 'react';
+import {Terminal} from '@xterm/xterm'
+import "@xterm/xterm/css/xterm.css";
+import {formatFinalGetUrl} from "@/utils/utils.ts";
+import {AttachAddon} from "@xterm/addon-attach";
+import {FitAddon} from "@xterm/addon-fit";
+import {WebLinksAddon} from "@xterm/addon-web-links";
+import {Unicode11Addon} from "@xterm/addon-unicode11";
+import {SerializeAddon} from "@xterm/addon-serialize";
+
+interface WebSocketMarkdownViewerProps {
+    url: string;
+    params: Record<string, string>;
+    data: Record<string, any>
+
+}
+
+const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
+    ({url, data, params}, _) => {
+        url = formatFinalGetUrl({url, data, params});
+
+        const wsRef = useRef<WebSocket | null>(null);
+        const terminalRef = useRef<HTMLDivElement | null>(null);
+        const fitAddonRef = useRef<FitAddon | null>(null);
+
+        const token = localStorage.getItem('token');
+        //拼接url token
+        url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
+        // const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+
+        useEffect(() => {
+
+            const term = new Terminal({
+                screenReaderMode: true,
+                cursorBlink: true,
+                cols: 128,
+                rows: 30,
+                allowProposedApi: true,  // 启用提议的 API
+
+            });
+
+            if (terminalRef.current) {
+                term.open(terminalRef.current);
+            } else {
+                console.error("terminalRef.current is undefined");
+                return;
+            }
+
+            const ws = new WebSocket(url);
+            wsRef.current = ws;
+
+            // 添加插件
+            const attachAddon = new AttachAddon(ws);
+            const fitAddon = new FitAddon();
+            const webLinksAddon = new WebLinksAddon();
+            const unicode11Addon = new Unicode11Addon();
+            const serializeAddon = new SerializeAddon();
+
+            term.loadAddon(attachAddon);
+            term.loadAddon(fitAddon);
+            term.loadAddon(webLinksAddon);
+            term.loadAddon(unicode11Addon);
+            term.loadAddon(serializeAddon);
+
+            fitAddonRef.current = fitAddon;
+
+            // 连接事件
+            ws.onopen = () => {
+                term.focus();
+                setTimeout(() => fitAddon.fit(), 100);
+                term.write("\x1b[32mConnected to server\x1b[0m\r\n");
+            };
+            ws.onmessage = (event) => term.write(event.data);
+            ws.onclose = () => term.write("\x1b[31mDisconnected\x1b[0m\r\n");
+            ws.onerror = () => term.write("\x1b[31mError\x1b[0m\r\n");
+            // 监听终端大小调整
+            term.onResize(({cols, rows}) => {
+                const size = JSON.stringify({cols, rows: rows + 1});
+                const send = new TextEncoder().encode("\x01" + size);
+                console.log("Resizing to:", size);
+                ws.send(send);
+            });
+
+            // 窗口大小变更时适配终端
+            const handleResize = () => {
+                fitAddon.fit();
+            };
+            window.addEventListener("resize", handleResize);
+            return () => {
+                if (wsRef.current) {
+                    wsRef.current.close();
+                    wsRef.current = null;
+                }
+                term.dispose();
+            };
+        }, [url]);
+
+
+        return (
+            <div ref={terminalRef} style={{width: "100%", height: "100%"}}></div>
+        );
+    }
+);
+
+export default XTermComponent;
+
+
