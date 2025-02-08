@@ -16,6 +16,7 @@ import WebSocketMarkdownViewerComponent from "@/components/Amis/custom/WebSocket
 import SSELogDownloadComponent from "@/components/Amis/custom/SSELogDownload.tsx";
 import SSELogDisplayComponent from "@/components/Amis/custom/SSELogDisplay.tsx";
 import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.tsx";
+import K8sDate from '@/components/Amis/custom/K8sDate.ts';
 // 注册自定义组件
 registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
 registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
@@ -40,6 +41,7 @@ registerFilter("showAnnotationIcon", ShowAnnotationIcon)
 registerFilter("simpleImageName", simpleImageName)
 registerFilter("formatBytes", FormatBytes)
 registerFilter("formatLsShortDate", FormatLsShortDate)
+registerFilter("k8sDate", K8sDate)
 
 interface Props {
     schema: Schema
