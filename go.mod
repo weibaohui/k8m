@@ -3,6 +3,7 @@ module github.com/weibaohui/k8m
 go 1.23.0
 
 require (
+	github.com/creack/pty v1.1.18
 	github.com/duke-git/lancet/v2 v2.3.4
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-contrib/gzip v1.2.2
