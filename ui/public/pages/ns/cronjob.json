@@ -981,6 +981,11 @@
           }
         },
         {
+          "label": "保留策略",
+          "type": "tpl",
+          "tpl": "成功保留: ${spec.successfulJobsHistoryLimit || 0} <br/> 失败保留: ${spec.failedJobsHistoryLimit || 0}"
+        },
+        {
           "name": "spec.jobTemplate.spec.template.spec.containers",
           "label": "容器",
           "type": "each",
