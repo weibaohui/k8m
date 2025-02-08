@@ -199,6 +199,7 @@ func main() {
 		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
 		api.POST("/pod/exec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.Exec)
 		api.GET("/pod/wsexec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.WsExec)
+		api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name/container/:container_name", pod.Xterm)
 		// k8s deploy
 		api.POST("/:kind/group/:group/version/:version/restart/ns/:ns/name/:name", deploy.Restart)
 		api.POST("/:kind/group/:group/version/:version/batch/restart", deploy.BatchRestart)
