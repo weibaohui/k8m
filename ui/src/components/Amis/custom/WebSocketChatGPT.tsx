@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from "react";
 import {render as amisRender} from "amis";
 import {formatFinalGetUrl} from "@/utils/utils";
-import {Input, Button, Card, Space} from "@arco-design/web-react";
+import {Input, Button, Space} from "@arco-design/web-react";
+import {IconSend} from "@arco-design/web-react/icon";
 
 interface WebSocketChatGPTProps {
     url: string;
@@ -94,53 +95,86 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         };
         console.log(status)
         return (
-            <Card bordered style={{width: "100%", margin: "auto"}}>
-                <div
-                    ref={messageContainerRef}
-                    style={{
-                        padding: "10px",
-                        borderRadius: "5px",
-                        overflowY: "auto",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "10px",
-                    }}
-                >
-                    {messages.map((msg, index) => (
-                        <div key={index}
-                             style={{
-                                 backgroundColor: msg.role === "user" ? "#BFD8FF" : "#EAEAEA", // 用户消息蓝色，AI 消息灰色
-                                 color: "#333333", // 文字颜色
-                                 padding: "12px",
-                                 borderRadius: "8px",
-                                 marginBottom: "10px", // 增加间距
-                                 maxWidth: "80%", // 限制最大宽度
-                                 alignSelf: msg.role === "user" ? "flex-end" : "flex-start", // 用户消息靠右，AI 消息靠左
-                                 display: "flex",
-                                 flexDirection: "column",
-                             }}
-                        >
-                            {amisRender({
-                                type: "markdown",
-                                value: msg.content,
-                            })}
-                        </div>
-                    ))}
-                </div>
+            <>
+                <div style={{width: "100%", height: "calc(80vh)", minHeight: "600px"}}>
+                    <div
+                        ref={messageContainerRef}
+                        style={{
+                            padding: "10px",
+                            borderRadius: "5px",
+                            overflowY: "auto",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                        }}
+                    >
+                        {messages.map((msg, index) => (
+                            <div key={index}
+                                 style={{
+                                     backgroundColor: msg.role === "user" ? "#BFD8FF" : "#EAEAEA", // 用户消息蓝色，AI 消息灰色
+                                     color: "#333333", // 文字颜色
+                                     padding: "12px",
+                                     borderRadius: "8px",
+                                     marginBottom: "10px", // 增加间距
+                                     maxWidth: "80%", // 限制最大宽度
+                                     alignSelf: msg.role === "user" ? "flex-end" : "flex-start", // 用户消息靠右，AI 消息靠左
+                                     display: "flex",
+                                     flexDirection: "column",
+                                 }}
+                            >
+                                {amisRender({
+                                    type: "markdown",
+                                    value: msg.content,
+                                })}
+                            </div>
+                        ))}
+                    </div>
 
-                <Space style={{marginTop: "10px", width: "100%"}} direction="vertical">
+
+                </div>
+                <div style={{
+                    position: "absolute",
+                    bottom: "20",
+                    width: "90%",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "8px 12px",
+                    borderRadius: "24px",
+                    background: "#F5F5F5",
+                    border: "1px solid #E0E0E0",
+                }}>
+                    {/* 左侧图标 */}
+                    <Space style={{marginRight: '8px'}}>
+                    </Space>
+
+                    {/* 输入框 */}
                     <Input.TextArea
+                        style={{
+                            flex: 1,
+                            border: 'none',
+                            outline: 'none',
+                            background: 'transparent',
+                            resize: 'none',
+                        }}
                         value={inputMessage}
                         onChange={setInputMessage}
-                        placeholder="输入消息..."
+                        placeholder="请输入消息... Shift+Enter换行，Enter发送"
                         autoSize={{minRows: 2, maxRows: 5}}
                         onKeyDown={handleKeyDown} // 监听回车键
                     />
-                    <Button type="primary" onClick={handleSendMessage} style={{width: "100%"}}>
-                        发送
-                    </Button>
-                </Space>
-            </Card>
+
+                    {/* 右侧按钮 */}
+                    <Space style={{marginLeft: '8px'}}>
+                        <Button
+                            type="primary"
+                            shape="circle"
+                            icon={<IconSend/>}
+                            onClick={handleSendMessage}
+                            style={{background: 'black', borderColor: 'black'}}
+                        />
+                    </Space>
+                </div>
+            </>
         );
     }
 );
