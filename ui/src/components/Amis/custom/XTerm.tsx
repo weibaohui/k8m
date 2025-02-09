@@ -22,7 +22,6 @@ const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerP
     ({url, data, params}, _) => {
         url = formatFinalGetUrl({url, data, params});
         const token = localStorage.getItem('token');
-        //拼接url token
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
         const wsRef = useRef<WebSocket | null>(null);
