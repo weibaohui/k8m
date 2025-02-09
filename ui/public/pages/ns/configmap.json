@@ -212,31 +212,6 @@
           }
         },
         {
-          "type": "button",
-          "label": "chatgpt",
-          "level": "link",
-          "icon": "fas fa-lightbulb text-primary",
-          "actionType": "drawer",
-          "drawer": {
-            "overlay": false,
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "size": "xl",
-            "title": "${kind} 参考样例（ESC 关闭）",
-            "body": [
-              {
-                "type": "chatgpt",
-                "url": "/k8s/chat/ws_chatgpt",
-                "params": {
-                  "kind": "${kind}",
-                  "group": "${group}",
-                  "version": "${version}"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "wrapper",
           "style": {
             "display": "inline-flex"
