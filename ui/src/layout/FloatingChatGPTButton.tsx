@@ -4,7 +4,7 @@ import {Button, Drawer} from "@arco-design/web-react";
 import {IconMessage} from "@arco-design/web-react/icon";
 import {render as amisRender} from "amis";
 
-const FloatingActionButton = () => {
+const FloatingChatGPTButton = () => {
     const [visible, setVisible] = useState(false);
     const [position, setPosition] = useState({x: 3000, y: 3000});
 
@@ -77,4 +77,4 @@ const FloatingActionButton = () => {
     );
 };
 
-export default FloatingActionButton;
+export default FloatingChatGPTButton;
