@@ -13,6 +13,8 @@ interface WebSocketChatGPTProps {
 const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>(
     ({url, data, params}, _) => {
         url = formatFinalGetUrl({url, data, params});
+        const token = localStorage.getItem('token');
+        url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
         const [messages, setMessages] = useState<{ role: "user" | "ai"; content: string }[]>([]);
         const [status, setStatus] = useState<string>("Disconnected");
@@ -21,10 +23,9 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         const messageContainerRef = useRef<HTMLDivElement | null>(null); // 滚动到底部
 
         useEffect(() => {
-            const token = localStorage.getItem("token");
-            // 拼接 URL token
-            url = url + (url.includes("?") ? "&" : "?") + `token=${token}`;
-
+            if (wsRef.current) {
+                wsRef.current.close();
+            }
             const ws = new WebSocket(url);
             wsRef.current = ws;
 
