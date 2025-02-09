@@ -44,7 +44,14 @@ export function formatFinalGetUrl(props: {
     params: Record<string, string>;
     data: Record<string, any>
 }): string {
-    const url = replacePlaceholders(props.url, props.data);
+    let url = props.url;
+    if (props.data != null && props.data.length === 0) {
+        url = replacePlaceholders(props.url, props.data);
+    }
+    //如果param 为空，则直接返回url
+    if (props.params == null || Object.keys(props.params).length === 0) {
+        return url;
+    }
     const params = Object.keys(props.params).reduce<Record<string, string>>((acc, key) => {
         const value = props.params[key];
 
