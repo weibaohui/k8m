@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/comm/xterm"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/client-go/rest"
@@ -121,8 +122,8 @@ func Xterm(c *gin.Context) {
 
 	// 用于传输数据
 	// var inBuffer SafeBuffer
-	var outBuffer SafeBuffer
-	var errBuffer SafeBuffer
+	var outBuffer xterm.SafeBuffer
+	var errBuffer xterm.SafeBuffer
 	inReader, inWriter := io.Pipe()
 	defer inReader.Close()
 	defer func() {
