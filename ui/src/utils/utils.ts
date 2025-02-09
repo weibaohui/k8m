@@ -45,7 +45,7 @@ export function formatFinalGetUrl(props: {
     data: Record<string, any>
 }): string {
     let url = props.url;
-    if (props.data != null && props.data.length === 0) {
+    if (props.data != null && props.data.length != 0) {
         url = replacePlaceholders(props.url, props.data);
     }
     //如果param 为空，则直接返回url

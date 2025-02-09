@@ -86,7 +86,6 @@ const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerP
             term.onResize(({cols, rows}) => {
                 const size = JSON.stringify({cols, rows: rows + 1});
                 const send = new TextEncoder().encode("\x01" + size);
-                console.log("Resizing to:", size);
                 ws.send(send);
             });
 
