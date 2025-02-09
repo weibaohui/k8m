@@ -96,7 +96,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         console.log(status)
         return (
             <>
-                <div style={{width: "100%", height: "calc(80vh)", minHeight: "600px"}}>
+                <div style={{width: "100%", height: "100%", minHeight: "600px"}}>
                     <div
                         ref={messageContainerRef}
                         style={{
@@ -129,51 +129,50 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                             </div>
                         ))}
                     </div>
+                    <div style={{
+                        position: "absolute",
+                        bottom: "20",
+                        width: "90%",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "8px 12px",
+                        borderRadius: "24px",
+                        background: "#F5F5F5",
+                        border: "1px solid #E0E0E0",
+                    }}>
 
 
-                </div>
-                <div style={{
-                    position: "absolute",
-                    bottom: "20",
-                    width: "90%",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "8px 12px",
-                    borderRadius: "24px",
-                    background: "#F5F5F5",
-                    border: "1px solid #E0E0E0",
-                }}>
-                    {/* 左侧图标 */}
-                    <Space style={{marginRight: '8px'}}>
-                    </Space>
-
-                    {/* 输入框 */}
-                    <Input.TextArea
-                        style={{
-                            flex: 1,
-                            border: 'none',
-                            outline: 'none',
-                            background: 'transparent',
-                            resize: 'none',
-                        }}
-                        value={inputMessage}
-                        onChange={setInputMessage}
-                        placeholder="请输入消息... Shift+Enter换行，Enter发送"
-                        autoSize={{minRows: 2, maxRows: 5}}
-                        onKeyDown={handleKeyDown} // 监听回车键
-                    />
-
-                    {/* 右侧按钮 */}
-                    <Space style={{marginLeft: '8px'}}>
-                        <Button
-                            type="primary"
-                            shape="circle"
-                            icon={<IconSend/>}
-                            onClick={handleSendMessage}
-                            style={{background: 'black', borderColor: 'black'}}
+                        {/* 输入框 */}
+                        <Input.TextArea
+                            style={{
+                                flex: 1,
+                                border: 'none',
+                                outline: 'none',
+                                background: 'transparent',
+                                resize: 'none',
+                            }}
+                            value={inputMessage}
+                            onChange={setInputMessage}
+                            placeholder="请输入消息... Shift+Enter换行，Enter发送"
+                            autoSize={{minRows: 2, maxRows: 5}}
+                            onKeyDown={handleKeyDown} // 监听回车键
                         />
-                    </Space>
+
+                        {/* 右侧按钮 */}
+                        <Space style={{marginLeft: '8px'}}>
+                            <Button
+                                type="primary"
+                                shape="circle"
+                                icon={<IconSend/>}
+                                onClick={handleSendMessage}
+                                style={{background: 'black', borderColor: 'black'}}
+                            />
+                        </Space>
+                    </div>
+
                 </div>
+
+
             </>
         );
     }
