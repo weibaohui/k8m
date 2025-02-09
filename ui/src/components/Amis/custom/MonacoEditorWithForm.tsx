@@ -59,7 +59,8 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({text, saveUr
     return (
         <div style={{width: '100%', height: '100vh', display: 'flex', flexDirection: 'column'}}>
             <div style={{padding: '10px', display: 'flex', justifyContent: 'space-between', background: '#222'}}>
-                <Input.TextArea value={editorValue} readOnly style={{flexGrow: 1, marginRight: '10px'}}/>
+                <Input.TextArea value={editorValue} readOnly
+                                hidden={true} style={{flexGrow: 1, marginRight: '10px'}}/>
                 <Button type="primary" onClick={handleSave} loading={loading}>保存</Button>
             </div>
             <div style={{flexGrow: 1}} ref={editorRef}/>
