@@ -1,6 +1,7 @@
 import {registerFilter, registerRenderer, render as renderAmis, Schema} from 'amis'
 import {AlertComponent, ToastComponent} from 'amis-ui'
 import axios from 'axios'
+import {fetcher} from "@/components/Amis/fetcher";
 import k8sTextConditionsComponent from "@/components/Amis/custom/K8sTextConditions.tsx";
 import NodeRolesComponent from '@/components/Amis/custom/NodeRoles.tsx';
 import AutoConvertMemory from "@/components/Amis/custom/AutoConvertMemory.ts";
@@ -19,6 +20,9 @@ import SSELogDownloadComponent from "@/components/Amis/custom/SSELogDownload.tsx
 import SSELogDisplayComponent from "@/components/Amis/custom/SSELogDisplay.tsx";
 import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.tsx";
 import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
+import MonacoEditorComponent from "@/components/Amis/custom/MonacoEditor.tsx";
+import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.tsx";
+
 // 注册自定义组件
 registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
 registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
@@ -39,7 +43,10 @@ registerRenderer({type: 'websocketViewer', component: WebSocketViewerComponent})
 registerRenderer({type: 'xterm', component: XTermComponent})
 // @ts-ignore
 registerRenderer({type: 'chatgpt', component: WebSocketChatGPT})
-
+// @ts-ignore
+registerRenderer({type: 'meditor', component: MonacoEditorComponent})
+// @ts-ignore
+registerRenderer({type: 'mEditorForm', component: MonacoEditorWithForm})
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
 registerFilter("filterAnnotations", FilterAnnotations)
@@ -53,9 +60,11 @@ interface Props {
     schema: Schema
 }
 
+
 const Amis = ({schema}: Props) => {
     const theme = 'cxd';
     const locale = 'zh-CN';
+
 
     return <>
         <ToastComponent
@@ -75,41 +84,7 @@ const Amis = ({schema}: Props) => {
                         console.log(to)
                         console.log(replace)
                     },
-                    fetcher: ({
-                                  url, // 接口地址
-                                  method, // 请求方法 get、post、put、delete
-                                  data, // 请求数据
-                                  config, // 其他配置
-                              }) => {
-                        const token = localStorage.getItem('token') || '';
-
-                        const ajax = axios.create({
-                            baseURL: '/',
-                            headers: {
-                                ...config?.headers,
-                                Authorization: token ? `Bearer ${token}` : ''
-                            }
-                        });
-                        // 请求发送之前的拦截
-                        ajax.interceptors.response.use(
-                            response => response, // 请求成功
-                            error => {
-                                if (error.response && error.response.status === 401) {
-                                    // 如果是401，跳转到登录页面
-                                    window.location.href = '/#/login';
-                                }
-                                return Promise.reject(error); // 继续处理其他错误
-                            }
-                        );
-                        switch (method) {
-                            case 'get':
-                                return ajax.get(url, config)
-                            case 'post':
-                                return ajax.post(url, data || null, config)
-                            default:
-                                return ajax.post(url, data || null, config)
-                        }
-                    },
+                    fetcher,
                     isCancel: value => axios.isCancel(value),
                 })
         }
