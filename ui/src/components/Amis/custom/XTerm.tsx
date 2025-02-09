@@ -7,6 +7,9 @@ import {FitAddon} from "@xterm/addon-fit";
 import {WebLinksAddon} from "@xterm/addon-web-links";
 import {Unicode11Addon} from "@xterm/addon-unicode11";
 import {SerializeAddon} from "@xterm/addon-serialize";
+import {WebglAddon} from '@xterm/addon-webgl';
+import {SearchAddon} from "@xterm/addon-search";
+import {ClipboardAddon} from '@xterm/addon-clipboard';
 
 interface WebSocketMarkdownViewerProps {
     url: string;
@@ -49,27 +52,32 @@ const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerP
 
             const ws = new WebSocket(url);
             wsRef.current = ws;
-
             // 添加插件
             const attachAddon = new AttachAddon(ws);
             const fitAddon = new FitAddon();
             const webLinksAddon = new WebLinksAddon();
             const unicode11Addon = new Unicode11Addon();
             const serializeAddon = new SerializeAddon();
-
+            const webglAddon = new WebglAddon();
+            const searchAddon = new SearchAddon();
+            const clipboardAddon = new ClipboardAddon();
             term.loadAddon(attachAddon);
             term.loadAddon(fitAddon);
             term.loadAddon(webLinksAddon);
             term.loadAddon(unicode11Addon);
             term.loadAddon(serializeAddon);
+            term.loadAddon(webglAddon);
+            term.loadAddon(searchAddon);
+            term.loadAddon(clipboardAddon);
 
             fitAddonRef.current = fitAddon;
+
 
             // 连接事件
             ws.onopen = () => {
                 term.focus();
                 setTimeout(() => fitAddon.fit(), 100);
-                // term.write("\x1b[32mConnected to server\x1b[0m\r\n");
+                term.write("\x1b[32mConnected\x1b[0m\r\n");
             };
             ws.onmessage = (event) => term.write(event.data);
             ws.onclose = () => term.write("\x1b[31mDisconnected\x1b[0m\r\n");
