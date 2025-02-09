@@ -36,7 +36,7 @@ const FloatingChatGPTButton = () => {
         <>
             {/* 可拖动按钮 */}
                 <Draggable
-                    bounds="parent" // 限制在视口内拖动
+                    bounds="#root" // 限制在视口内拖动
                     position={position}
                     onDrag={handleDrag}
 
