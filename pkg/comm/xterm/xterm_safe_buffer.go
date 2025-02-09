@@ -1,4 +1,4 @@
-package pod
+package xterm
 
 import (
 	"bytes"
