@@ -492,7 +492,7 @@
                     "tabsMode": "tiled",
                     "tabs": [
                       {
-                        "title": "查看编辑",
+                        "title": "meditor",
                         "body": [
                           {
                             "type": "service",
@@ -504,13 +504,10 @@
                                 "wrapWithPanel": false,
                                 "body": [
                                   {
-                                    "type": "editor",
+                                    "type": "meditor",
                                     "name": "yaml",
-                                    "size": "xxl",
-                                    "allowFullscreen": true,
-                                    "placeholder": "loading",
-                                    "language": "yaml",
-                                    "value": "${yaml}",
+                                    "id": "yaml",
+                                    "text": "${yaml}",
                                     "options": {
                                       "wordWrap": "on",
                                       "scrollbar": {
@@ -519,6 +516,29 @@
                                     }
                                   }
                                 ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "title": "mEditorForm",
+                        "body": [
+                          {
+                            "type": "service",
+                            "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                            "body": [
+                              {
+                                "type": "mEditorForm",
+                                "text": "${yaml}",
+                                "componentId": "yaml",
+                                "saveUrl": "/api/v1/configmaps/${metadata.namespace}/${metadata.name}/yaml",
+                                "options": {
+                                  "wordWrap": "on",
+                                  "scrollbar": {
+                                    "vertical": "auto"
+                                  }
+                                }
                               }
                             ]
                           }
@@ -660,7 +680,8 @@
                       }
                     ]
                   }
-                ]
+                ],
+                "actions": []
               }
             },
             {
