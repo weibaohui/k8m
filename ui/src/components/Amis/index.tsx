@@ -18,6 +18,7 @@ import WebSocketMarkdownViewerComponent from "@/components/Amis/custom/WebSocket
 import SSELogDownloadComponent from "@/components/Amis/custom/SSELogDownload.tsx";
 import SSELogDisplayComponent from "@/components/Amis/custom/SSELogDisplay.tsx";
 import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.tsx";
+import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
 // 注册自定义组件
 registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
 registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
@@ -36,6 +37,8 @@ registerRenderer({type: 'log-display', component: SSELogDisplayComponent})
 registerRenderer({type: 'websocketViewer', component: WebSocketViewerComponent})
 // @ts-ignore
 registerRenderer({type: 'xterm', component: XTermComponent})
+// @ts-ignore
+registerRenderer({type: 'chatgpt', component: WebSocketChatGPT})
 
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
