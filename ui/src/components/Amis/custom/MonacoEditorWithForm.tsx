@@ -31,8 +31,11 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
         if (editorRef.current) {
             monacoInstance.current = monaco.editor.create(editorRef.current, {
                 value: text,
-                theme: 'vs-dark',
+                theme: 'vs',
                 automaticLayout: true,
+                minimap: {
+                    enabled: false // 关闭小地图
+                },
                 ...options,
             });
 
@@ -68,7 +71,7 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
 
     return (
         <div style={{width: '100%', height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column'}}>
-            <div style={{padding: '10px', display: 'flex', justifyContent: 'space-between', background: '#222'}}>
+            <div style={{padding: '10px', display: 'flex', justifyContent: 'flex-end'}}>
                 <Input.TextArea value={editorValue} readOnly
                                 hidden={true} style={{flexGrow: 1, marginRight: '10px'}}/>
                 {saveApi && <Button type="primary" onClick={handleSave} loading={loading}>保存</Button>}
