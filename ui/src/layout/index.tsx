@@ -1,18 +1,18 @@
-import {Outlet, useLocation, useNavigate} from 'react-router-dom'
-import {Layout} from '@arco-design/web-react'
-import {IconGithub, IconMenuFold, IconMenuUnfold,} from '@arco-design/web-react/icon'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Layout } from '@arco-design/web-react'
+import { IconGithub, IconMenuFold, IconMenuUnfold, } from '@arco-design/web-react/icon'
 import Sidebar from '@/components/Sidebar'
 import Toolbar from '@/components/ToolBar'
 import useStore from '@/store/layout'
-import {useCallback, useEffect} from 'react'
+import { useCallback, useEffect } from 'react'
 import menuConfig from './menu'
 import styles from './index.module.scss'
 import FloatingChatGPTButton from "@/layout/FloatingChatGPTButton.tsx";
 
 const App = () => {
-    const {pathname} = useLocation()
+    const { pathname } = useLocation()
     const navigate = useNavigate()
-    const {collapse, updateField} = useStore(state => state)
+    const { collapse, updateField } = useStore(state => state)
     const onCollapse = useCallback((collapsed: boolean) => {
         updateField('collapse', collapsed)
     }, [updateField])
@@ -32,13 +32,13 @@ const App = () => {
                     <h1>
                         <span>k8m</span>
                         <IconGithub
-                            className='pointer' style={{marginLeft: '10px'}}
+                            className='pointer' style={{ marginLeft: '10px' }}
                             fontSize={18}
                             onClick={
-                                () => window.open('https://github.com/weibaohui/k8m', '_blank')}/></h1>
+                                () => window.open('https://github.com/weibaohui/k8m', '_blank')} /></h1>
 
                 </div>
-                <Toolbar/>
+                <Toolbar />
             </div>
         </Layout.Header>
         <Layout>
@@ -48,15 +48,14 @@ const App = () => {
                 collapsible={true}
                 onCollapse={onCollapse}
                 trigger={<div className={styles.collapse}>
-                    {collapse ? <IconMenuUnfold/> : <IconMenuFold/>}
+                    {collapse ? <IconMenuUnfold /> : <IconMenuFold />}
                 </div>}
             >
-                <Sidebar config={menuConfig}/>
+                <Sidebar config={menuConfig} />
             </Layout.Sider>
             <Layout.Content className={styles.content}>
                 <FloatingChatGPTButton></FloatingChatGPTButton>
-                <Outlet/>
-
+                <Outlet />
             </Layout.Content>
         </Layout>
     </Layout>

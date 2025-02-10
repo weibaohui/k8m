@@ -287,6 +287,7 @@ func main() {
 		api.GET("/chat/describe", chat.Describe)
 		api.GET("/chat/resource", chat.Resource)
 		api.GET("/chat/any_question", chat.AnyQuestion)
+		api.GET("/chat/any_selection", chat.AnySelection)
 		api.GET("/chat/example", chat.Example)
 		api.GET("/chat/example/field", chat.FieldExample)
 		api.GET("/chat/ask", chat.Ask)
