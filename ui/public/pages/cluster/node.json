@@ -224,17 +224,10 @@
           "body": [
             {
               "type": "form",
-              "mode": "horizontal",
-              "style": {
-                "display": "inline-flex"
-              },
+              "mode": "inline",
               "wrapWithPanel": false,
               "body": [
                 {
-                  "style": {
-                    "width": 400,
-                    "margin": 5
-                  },
                   "label": "集群",
                   "type": "select",
                   "multiple": false,
