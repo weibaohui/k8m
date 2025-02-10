@@ -150,6 +150,26 @@ func (c *clusterService) Reconnect(fileName string, contextName string) {
 	}
 }
 
+// Disconnect 断开连接
+func (c *clusterService) Disconnect(fileName string, contextName string) {
+	// 先清除原来的状态
+	for _, clusterConfig := range c.clusterConfigs {
+		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
+			clusterConfig.ServerVersion = ""
+			clusterConfig.restConfig = nil
+			clusterConfig.Err = ""
+			for _, v := range clusterConfig.watchStatus {
+				if v.Watcher != nil {
+					v.Watcher.Stop()
+					klog.V(6).Infof("%s 停止 Watch  %s", clusterConfig.ClusterName, v.WatchType)
+				}
+			}
+			//todo kom 断开链接
+			// kom.Cluster(clusterConfig.ClusterName).Disconnect()
+		}
+	}
+}
+
 // Scan 扫描集群
 func (c *clusterService) Scan() {
 	// 清空了集群列表

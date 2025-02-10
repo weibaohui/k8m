@@ -86,6 +86,12 @@ func Reconnect(c *gin.Context) {
 	service.ClusterService().Reconnect(fileName, contextName)
 	amis.WriteJsonOKMsg(c, "已执行，请查看最新状态")
 }
+func Disconnect(c *gin.Context) {
+	fileName := c.Param("fileName")
+	contextName := c.Param("contextName")
+	service.ClusterService().Disconnect(fileName, contextName)
+	amis.WriteJsonOKMsg(c, "已执行，请查看最新状态")
+}
 
 func SetDefault(c *gin.Context) {
 	fileName := c.Param("fileName")

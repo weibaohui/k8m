@@ -241,6 +241,7 @@ func main() {
 		api.GET("/cluster/option_list", cluster.OptionList)
 		api.GET("/cluster/file/option_list", cluster.FileOptionList)
 		api.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
+		api.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
 		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
 		api.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
 		// k8s sts
