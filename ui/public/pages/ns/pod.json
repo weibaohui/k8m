@@ -3529,7 +3529,14 @@
           "name": "metadata.namespace",
           "label": "命名空间",
           "type": "text",
-          "sortable": true
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.namespace",
+            "clearable": true,
+            "label": "命名空间",
+            "placeholder": "输入名称"
+          }
         },
         {
           "name": "metadata.name",

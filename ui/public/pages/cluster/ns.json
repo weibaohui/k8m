@@ -582,6 +582,69 @@
           }
         },
         {
+          "name": "status.phase",
+          "label": "状态",
+          "type": "mapping",
+          "map": {
+            "Active": "<span class='label label-success'>活跃</span>",
+            "Terminating": "<span class='label label-danger'>正在删除</span>",
+            "Unknown": "<span class='label label-warning'>未知</span>"
+          },
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "options": [
+              {
+                "label": "活跃",
+                "value": "Active"
+              },
+              {
+                "label": "正在删除",
+                "value": "Terminating"
+              },
+              {
+                "label": "未知",
+                "value": "Unknown"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pod_count",
+          "label": "容器组数量",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "${metadata.annotations['pod.count']||'-'}",
+              "blank": false,
+              "href": "/#/ns/pod?metadata[namespace]=${metadata.name}"
+            }
+          ]
+        },
+        {
+          "name": "cpu_count",
+          "label": "CPU用量",
+          "type": "container",
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "${metadata.annotations['cpu.total']||'-'}"
+            }
+          ]
+        },
+        {
+          "name": "memory_count",
+          "label": "内存用量",
+          "type": "container",
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "${metadata.annotations['memory.total']||'-'}"
+            }
+          ]
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
@@ -662,34 +725,6 @@
           },
           "style": {
             "cursor": "pointer"
-          }
-        },
-        {
-          "name": "status.phase",
-          "label": "状态",
-          "type": "mapping",
-          "map": {
-            "Active": "<span class='label label-success'>活跃</span>",
-            "Terminating": "<span class='label label-danger'>正在删除</span>",
-            "Unknown": "<span class='label label-warning'>未知</span>"
-          },
-          "searchable": {
-            "type": "select",
-            "clearable": true,
-            "options": [
-              {
-                "label": "活跃",
-                "value": "Active"
-              },
-              {
-                "label": "正在删除",
-                "value": "Terminating"
-              },
-              {
-                "label": "未知",
-                "value": "Unknown"
-              }
-            ]
           }
         },
         {
