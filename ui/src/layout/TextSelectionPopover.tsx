@@ -68,7 +68,7 @@ const GlobalTextSelector: React.FC = () => {
             }}
         >
             <Card style={{width: '50hv', maxWidth: '500px'}}
-                  title={selection.text}
+                  title={selection.text.length > 80 ? selection.text.slice(0, 80) + "..." : selection.text}
             >
                 <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                     {
