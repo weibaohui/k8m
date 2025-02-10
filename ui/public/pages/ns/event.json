@@ -219,26 +219,22 @@
           "icon": "fas fa-dharmachakra text-primary",
           "actionType": "link",
           "link": "/#/apply/apply"
-        },
+        }
+      ]
+    },
+    {
+      "type": "container",
+      "className": "floating-toolbar-right",
+      "body": [
         {
           "type": "wrapper",
-          "style": {
-            "display": "inline-flex"
-          },
           "body": [
             {
               "type": "form",
-              "mode": "horizontal",
-              "style": {
-                "display": "inline-flex"
-              },
+              "mode": "inline",
               "wrapWithPanel": false,
               "body": [
                 {
-                  "style": {
-                    "width": 350,
-                    "margin": 5
-                  },
                   "label": "命名空间",
                   "type": "select",
                   "multiple": true,
@@ -266,36 +262,8 @@
                       ]
                     }
                   }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "container",
-      "className": "floating-toolbar-right",
-      "body": [
-        {
-          "type": "wrapper",
-          "style": {
-            "display": "inline-flex"
-          },
-          "body": [
-            {
-              "type": "form",
-              "mode": "horizontal",
-              "style": {
-                "display": "inline-flex"
-              },
-              "wrapWithPanel": false,
-              "body": [
+                },
                 {
-                  "style": {
-                    "width": 400,
-                    "margin": 5
-                  },
                   "label": "集群",
                   "type": "select",
                   "multiple": false,
