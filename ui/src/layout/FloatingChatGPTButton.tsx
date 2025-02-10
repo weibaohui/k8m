@@ -10,17 +10,24 @@ const FloatingChatGPTButton = () => {
 
 
     useEffect(() => {
+        // 如果有保存的位置，解析并设置
+        const buttonWidth = 30; // 按钮宽度
+        const buttonHeight = 30; // 按钮高度
+        const maxX = window.innerWidth - buttonWidth - 200; // 右下角的x位置
+        const maxY = window.innerHeight - buttonHeight - 100; // 右下角的y位置
+
         // 从 localStorage 获取上次保存的位置
         const savedPosition = localStorage.getItem("buttonPosition");
         if (savedPosition) {
-            // 如果有保存的位置，解析并设置
-            setPosition(JSON.parse(savedPosition));
+            const parsedPosition = JSON.parse(savedPosition);
+            // 检查位置是否超出范围
+            const validX = Math.min(Math.max(parsedPosition.x, 0), maxX);
+            const validY = Math.min(Math.max(parsedPosition.y, 0), maxY);
+            setPosition({x: validX, y: validY});
         } else {
             // 如果没有保存位置，计算并设置右下角的位置
-            const buttonWidth = 30; // 按钮宽度
-            const buttonHeight = 30; // 按钮高度
-            const x = window.innerWidth - buttonWidth - 200; // 右下角的x位置
-            const y = window.innerHeight - buttonHeight - 100; // 右下角的y位置
+            const x = maxX;
+            const y = maxY;
             setPosition({x, y});
         }
     }, []);
