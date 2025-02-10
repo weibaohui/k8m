@@ -20,7 +20,6 @@ import SSELogDownloadComponent from "@/components/Amis/custom/SSELogDownload.tsx
 import SSELogDisplayComponent from "@/components/Amis/custom/SSELogDisplay.tsx";
 import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.tsx";
 import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
-import MonacoEditorComponent from "@/components/Amis/custom/MonacoEditor.tsx";
 import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.tsx";
 
 // 注册自定义组件
@@ -44,9 +43,7 @@ registerRenderer({type: 'xterm', component: XTermComponent})
 // @ts-ignore
 registerRenderer({type: 'chatgpt', component: WebSocketChatGPT})
 // @ts-ignore
-registerRenderer({type: 'meditor', component: MonacoEditorComponent})
-// @ts-ignore
-registerRenderer({type: 'mEditorForm', component: MonacoEditorWithForm})
+registerRenderer({type: 'mEditor', component: MonacoEditorWithForm})
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
 registerFilter("filterAnnotations", FilterAnnotations)

@@ -6,19 +6,27 @@ import {fetcher} from "@/components/Amis/fetcher.ts";
 
 interface MonacoEditorWithFormProps {
     text: string;
-    saveUrl: string;
+    saveApi: string;
     componentId: string;
     data: Record<string, any>
     options?: monaco.editor.IStandaloneEditorConstructionOptions;
 }
 
-const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({text, saveUrl, data, options, componentId}) => {
+const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
+                                                                       text,
+                                                                       saveApi,
+                                                                       data,
+                                                                       options,
+                                                                       componentId
+                                                                   }) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const monacoInstance = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [editorValue, setEditorValue] = useState(text);
     const [loading, setLoading] = useState(false);
     text = replacePlaceholders(text, data)
-    saveUrl = replacePlaceholders(saveUrl, data)
+    if (saveApi) {
+        saveApi = replacePlaceholders(saveApi, data)
+    }
     useEffect(() => {
         if (editorRef.current) {
             monacoInstance.current = monaco.editor.create(editorRef.current, {
@@ -43,13 +51,12 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({text, saveUr
     }, [text]);
 
     const handleSave = async () => {
+        if (!saveApi) return;
         setLoading(true);
         try {
-
-            await fetcher({url: saveUrl, method: 'post', data: {[componentId]: editorValue}});
+            await fetcher({url: saveApi, method: 'post', data: {[componentId]: editorValue}});
             alert('保存成功！');
         } catch (error) {
-            console.error('保存失败:', error);
             alert('保存失败，请检查日志');
         } finally {
             setLoading(false);
@@ -57,11 +64,12 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({text, saveUr
     };
 
     return (
-        <div style={{width: '100%', height: '100vh', display: 'flex', flexDirection: 'column'}}>
+        <div style={{width: '100%', height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column'}}>
+
             <div style={{padding: '10px', display: 'flex', justifyContent: 'space-between', background: '#222'}}>
                 <Input.TextArea value={editorValue} readOnly
                                 hidden={true} style={{flexGrow: 1, marginRight: '10px'}}/>
-                <Button type="primary" onClick={handleSave} loading={loading}>保存</Button>
+                {saveApi && <Button type="primary" onClick={handleSave} loading={loading}>保存</Button>}
             </div>
             <div style={{flexGrow: 1}} ref={editorRef}/>
         </div>
