@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import ReactDOM from "react-dom";
-import { Popover } from "@arco-design/web-react";
-import { render as amisRender } from "amis";
+import {render as amisRender} from "amis";
+import {Card} from "amis-ui";
 
 // 检测选区是否在 Monaco Editor
 const isInMonacoEditor = (node: Node | null): boolean => {
@@ -47,7 +47,7 @@ const GlobalTextSelector: React.FC = () => {
                 y = rect.bottom + window.scrollY;
             }
 
-            setSelection({ text: selectedText, x, y });
+            setSelection({text: selectedText, x, y});
         };
 
         document.addEventListener("mouseup", handleMouseUp);
@@ -67,31 +67,23 @@ const GlobalTextSelector: React.FC = () => {
                 zIndex: 100000000,
             }}
         >
-            <Popover
-                defaultPopupVisible
-                trigger="manual"
-                position="bottom"
-                style={{
-                    zIndex: 100000000,
-                    width: "100%",
-                }}
-                content={
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        <div><strong>{selection.text}</strong></div>
-                        {
-                            amisRender({
-                                "type": "websocketMarkdownViewer",
-                                "url": "/k8s/chat/any_selection",
-                                "params": {
-                                    "question": selection.text
-                                }
-                            })
-                        }
-                    </div>
-                }
+            <Card style={{width: '50hv', maxWidth: '500px'}}
+                  title={selection.text}
             >
-                <span style={{ width: 1, height: 1, display: "inline-block" }} />
-            </Popover>
+                <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                    {
+                        amisRender({
+                            "type": "websocketMarkdownViewer",
+                            "url": "/k8s/chat/any_selection",
+                            "params": {
+                                "question": selection.text
+                            }
+                        })
+                    }
+                </div>
+            </Card>
+
+
         </div>,
         document.body
     );
