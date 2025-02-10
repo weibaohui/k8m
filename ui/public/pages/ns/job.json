@@ -870,6 +870,46 @@
           }
         },
         {
+          "name": "status.conditions",
+          "label": "条件",
+          "type": "k8sTextConditions"
+        },
+        {
+          "label": "状态",
+          "type": "tpl",
+          "tpl": "<span class='label ${status.failed > 0 ? \"label-danger\" : (status.succeeded === spec.completions ? \"label-success\" : \"label-warning\") }'>${status.failed > 0 ? \"失败\" : (status.succeeded === spec.completions ? \"已完成\" : \"进行中\")}</span>"
+        },
+        {
+          "label": "进度",
+          "type": "progress",
+          "mode": "line",
+          "value": "${spec.completions && spec.completions > 0 ? ROUND((status.succeeded / spec.completions), 2) * 100 : 0}",
+          "striped": true,
+          "animate": true,
+          "width": "150px"
+        },
+        {
+          "name": "status.startTime",
+          "label": "启动时间",
+          "type": "tpl",
+          "tpl": "${status.startTime|k8sDate}"
+        },
+        {
+          "name": "metadata.ownerReferences",
+          "label": "所有者",
+          "type": "tpl",
+          "tpl": "${metadata.ownerReferences ? metadata.ownerReferences[0].name : ''}"
+        },
+        {
+          "name": "spec.template.spec.containers",
+          "label": "容器",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
@@ -1420,46 +1460,6 @@
           "style": {
             "cursor": "pointer"
           }
-        },
-        {
-          "name": "metadata.ownerReferences",
-          "label": "所有者",
-          "type": "tpl",
-          "tpl": "${metadata.ownerReferences ? metadata.ownerReferences[0].name : ''}"
-        },
-        {
-          "name": "spec.template.spec.containers",
-          "label": "容器",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
-          }
-        },
-        {
-          "name": "status.conditions",
-          "label": "条件",
-          "type": "k8sTextConditions"
-        },
-        {
-          "label": "状态",
-          "type": "tpl",
-          "tpl": "<span class='label ${status.failed > 0 ? \"label-danger\" : (status.succeeded === spec.completions ? \"label-success\" : \"label-warning\") }'>${status.failed > 0 ? \"失败\" : (status.succeeded === spec.completions ? \"已完成\" : \"进行中\")}</span>"
-        },
-        {
-          "label": "进度",
-          "type": "progress",
-          "mode": "line",
-          "value": "${spec.completions && spec.completions > 0 ? ROUND((status.succeeded / spec.completions), 2) * 100 : 0}",
-          "striped": true,
-          "animate": true,
-          "width": "150px"
-        },
-        {
-          "name": "status.startTime",
-          "label": "启动时间",
-          "type": "tpl",
-          "tpl": "${status.startTime|k8sDate}"
         },
         {
           "name": "metadata.creationTimestamp",
