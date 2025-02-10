@@ -467,7 +467,7 @@
                     "tabsMode": "tiled",
                     "tabs": [
                       {
-                        "title": "mEditor",
+                        "title": "查看编辑",
                         "body": [
                           {
                             "type": "service",
