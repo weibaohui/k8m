@@ -467,47 +467,17 @@
                     "tabsMode": "tiled",
                     "tabs": [
                       {
-                        "title": "meditor",
+                        "title": "mEditor",
                         "body": [
                           {
                             "type": "service",
                             "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
                             "body": [
                               {
-                                "type": "form",
-                                "api": "post:/k8s/$kind/group/$group/version/$version/update/ns/$metadata.namespace/name/$metadata.name",
-                                "wrapWithPanel": false,
-                                "body": [
-                                  {
-                                    "type": "meditor",
-                                    "name": "yaml",
-                                    "id": "yaml",
-                                    "text": "${yaml}",
-                                    "options": {
-                                      "wordWrap": "on",
-                                      "scrollbar": {
-                                        "vertical": "auto"
-                                      }
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "title": "mEditorForm",
-                        "body": [
-                          {
-                            "type": "service",
-                            "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
-                            "body": [
-                              {
-                                "type": "mEditorForm",
+                                "type": "mEditor",
                                 "text": "${yaml}",
                                 "componentId": "yaml",
-                                "saveUrl": "/api/v1/configmaps/${metadata.namespace}/${metadata.name}/yaml",
+                                "saveUrl": "/k8s/${kind}/group/${group}/version/${version}/update/ns/${metadata.namespace}/name/${metadata.name}",
                                 "options": {
                                   "wordWrap": "on",
                                   "scrollbar": {
