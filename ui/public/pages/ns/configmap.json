@@ -477,8 +477,9 @@
                                 "type": "mEditor",
                                 "text": "${yaml}",
                                 "componentId": "yaml",
-                                "saveUrl": "/k8s/${kind}/group/${group}/version/${version}/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                "saveApi": "/k8s/${kind}/group/${group}/version/${version}/update/ns/${metadata.namespace}/name/${metadata.name}",
                                 "options": {
+                                  "language": "yaml",
                                   "wordWrap": "on",
                                   "scrollbar": {
                                     "vertical": "auto"
