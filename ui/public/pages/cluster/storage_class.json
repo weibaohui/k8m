@@ -596,6 +596,19 @@
           ]
         },
         {
+          "name": "pv_count",
+          "label": "存储卷数量",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "${metadata.annotations['pv.count']||'-'}",
+              "blank": false,
+              "href": "/#/cluster/pv?spec[storageClassName]=${metadata.name}"
+            }
+          ]
+        },
+        {
           "name": "metadata.annotations",
           "label": "是否默认",
           "tpl": "${metadata.annotations['storageclass.kubernetes.io/is-default-class']}"
