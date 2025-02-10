@@ -128,7 +128,7 @@ spec:
     spec:
       containers:
         - name: k8m
-          image: weibh/k8m:0.0.34
+          image: weibh/k8m:0.0.35
           env:
             - name: DEBUG
               value: "false"
