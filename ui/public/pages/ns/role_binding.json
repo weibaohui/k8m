@@ -633,8 +633,15 @@
         {
           "name": "roleRef.name",
           "label": "角色",
-          "type": "tpl",
-          "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>[${roleRef.kind}]</strong>${roleRef.name}</div>",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "<strong class='text-green-500 font-black'>[${roleRef.kind}]</strong>${roleRef.name}",
+              "blank": false,
+              "href": "/#/ns/role?metadata[name]=${roleRef.name}"
+            }
+          ],
           "searchable": {
             "type": "input-text",
             "name": "roleRef.name",
@@ -647,8 +654,15 @@
           "label": "主体",
           "type": "each",
           "items": {
-            "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>[${kind}]</strong>${name}</div>"
+            "type": "container",
+            "body": [
+              {
+                "type": "link",
+                "body": "<strong class='text-green-500 font-black'>[${kind}]</strong>${name}",
+                "blank": false,
+                "href": "${kind == 'ServiceAccount' ? '/#/ns/service_account?metadata[name]=' + name : ''}"
+              }
+            ]
           },
           "searchable": {
             "type": "input-text",
