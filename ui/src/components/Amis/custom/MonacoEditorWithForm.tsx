@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import * as monaco from 'monaco-editor';
-import {Button, Input} from "@arco-design/web-react";
+import {Button, Input, Message} from "@arco-design/web-react";
 import {replacePlaceholders} from "@/utils/utils.ts";
 import {fetcher} from "@/components/Amis/fetcher.ts";
 
@@ -31,7 +31,6 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
         if (editorRef.current) {
             monacoInstance.current = monaco.editor.create(editorRef.current, {
                 value: text,
-                language: 'yaml',
                 theme: 'vs-dark',
                 automaticLayout: true,
                 ...options,
@@ -50,17 +49,22 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
         }
     }, [text]);
 
+
     const handleSave = async () => {
         if (!saveApi) return;
         setLoading(true);
-        try {
-            await fetcher({url: saveApi, method: 'post', data: {[componentId]: editorValue}});
-            alert('保存成功！');
-        } catch (error) {
-            alert('保存失败，请检查日志');
-        } finally {
-            setLoading(false);
+        const response = await fetcher({url: saveApi, method: 'post', data: {[componentId]: editorValue}});
+        if (response.data?.status !== 0) {
+            if (response.data?.msg.includes("please apply your changes to the latest version and try again")) {
+                Message.error("保存失败: 资源已被更新，请刷新后再试。");
+            } else {
+                Message.error(`保存失败:请尝试刷新后重试。 ${response.data?.msg}`);
+            }
+
+        } else {
+            Message.info('保存成功！');
         }
+        setLoading(false);
     };
 
     return (
