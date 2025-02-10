@@ -1177,26 +1177,17 @@
                                                   "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
-                                                      "type": "form",
-                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
-                                                      "wrapWithPanel": false,
-                                                      "body": [
-                                                        {
-                                                          "type": "editor",
-                                                          "name": "yaml",
-                                                          "size": "xxl",
-                                                          "allowFullscreen": true,
-                                                          "placeholder": "loading",
-                                                          "language": "yaml",
-                                                          "value": "${yaml}",
-                                                          "options": {
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
+                                                      "type": "mEditor",
+                                                      "text": "${yaml}",
+                                                      "componentId": "yaml",
+                                                      "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                      "options": {
+                                                        "language": "yaml",
+                                                        "wordWrap": "on",
+                                                        "scrollbar": {
+                                                          "vertical": "auto"
                                                         }
-                                                      ]
+                                                      }
                                                     }
                                                   ]
                                                 }
@@ -1475,26 +1466,17 @@
                                                   "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
-                                                      "type": "form",
-                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
-                                                      "wrapWithPanel": false,
-                                                      "body": [
-                                                        {
-                                                          "type": "editor",
-                                                          "name": "yaml",
-                                                          "size": "xxl",
-                                                          "allowFullscreen": true,
-                                                          "placeholder": "loading",
-                                                          "language": "yaml",
-                                                          "value": "${yaml}",
-                                                          "options": {
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
+                                                      "type": "mEditor",
+                                                      "text": "${yaml}",
+                                                      "componentId": "yaml",
+                                                      "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                      "options": {
+                                                        "language": "yaml",
+                                                        "wordWrap": "on",
+                                                        "scrollbar": {
+                                                          "vertical": "auto"
                                                         }
-                                                      ]
+                                                      }
                                                     }
                                                   ]
                                                 }
@@ -1824,26 +1806,17 @@
                                                   "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
-                                                      "type": "form",
-                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
-                                                      "wrapWithPanel": false,
-                                                      "body": [
-                                                        {
-                                                          "type": "editor",
-                                                          "name": "yaml",
-                                                          "size": "xxl",
-                                                          "allowFullscreen": true,
-                                                          "placeholder": "loading",
-                                                          "language": "yaml",
-                                                          "value": "${yaml}",
-                                                          "options": {
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
+                                                      "type": "mEditor",
+                                                      "text": "${yaml}",
+                                                      "componentId": "yaml",
+                                                      "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                      "options": {
+                                                        "language": "yaml",
+                                                        "wordWrap": "on",
+                                                        "scrollbar": {
+                                                          "vertical": "auto"
                                                         }
-                                                      ]
+                                                      }
                                                     }
                                                   ]
                                                 }
@@ -2139,26 +2112,17 @@
                                                   "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
-                                                      "type": "form",
-                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
-                                                      "wrapWithPanel": false,
-                                                      "body": [
-                                                        {
-                                                          "type": "editor",
-                                                          "name": "yaml",
-                                                          "size": "xxl",
-                                                          "allowFullscreen": true,
-                                                          "placeholder": "loading",
-                                                          "language": "yaml",
-                                                          "value": "${yaml}",
-                                                          "options": {
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
+                                                      "type": "mEditor",
+                                                      "text": "${yaml}",
+                                                      "componentId": "yaml",
+                                                      "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                      "options": {
+                                                        "language": "yaml",
+                                                        "wordWrap": "on",
+                                                        "scrollbar": {
+                                                          "vertical": "auto"
                                                         }
-                                                      ]
+                                                      }
                                                     }
                                                   ]
                                                 }
@@ -2464,26 +2428,17 @@
                                                   "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
-                                                      "type": "form",
-                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
-                                                      "wrapWithPanel": false,
-                                                      "body": [
-                                                        {
-                                                          "type": "editor",
-                                                          "name": "yaml",
-                                                          "size": "xxl",
-                                                          "allowFullscreen": true,
-                                                          "placeholder": "loading",
-                                                          "language": "yaml",
-                                                          "value": "${yaml}",
-                                                          "options": {
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
+                                                      "type": "mEditor",
+                                                      "text": "${yaml}",
+                                                      "componentId": "yaml",
+                                                      "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                      "options": {
+                                                        "language": "yaml",
+                                                        "wordWrap": "on",
+                                                        "scrollbar": {
+                                                          "vertical": "auto"
                                                         }
-                                                      ]
+                                                      }
                                                     }
                                                   ]
                                                 }
@@ -2802,26 +2757,17 @@
                                                   "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
-                                                      "type": "form",
-                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
-                                                      "wrapWithPanel": false,
-                                                      "body": [
-                                                        {
-                                                          "type": "editor",
-                                                          "name": "yaml",
-                                                          "size": "xxl",
-                                                          "allowFullscreen": true,
-                                                          "placeholder": "loading",
-                                                          "language": "yaml",
-                                                          "value": "${yaml}",
-                                                          "options": {
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
+                                                      "type": "mEditor",
+                                                      "text": "${yaml}",
+                                                      "componentId": "yaml",
+                                                      "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                      "options": {
+                                                        "language": "yaml",
+                                                        "wordWrap": "on",
+                                                        "scrollbar": {
+                                                          "vertical": "auto"
                                                         }
-                                                      ]
+                                                      }
                                                     }
                                                   ]
                                                 }
@@ -3111,26 +3057,17 @@
                                                   "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
                                                   "body": [
                                                     {
-                                                      "type": "form",
-                                                      "api": "post:/k8s/${kind}/group//version/v1/update/ns/$metadata.namespace/name/$metadata.name",
-                                                      "wrapWithPanel": false,
-                                                      "body": [
-                                                        {
-                                                          "type": "editor",
-                                                          "name": "yaml",
-                                                          "size": "xxl",
-                                                          "allowFullscreen": true,
-                                                          "placeholder": "loading",
-                                                          "language": "yaml",
-                                                          "value": "${yaml}",
-                                                          "options": {
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
+                                                      "type": "mEditor",
+                                                      "text": "${yaml}",
+                                                      "componentId": "yaml",
+                                                      "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                      "options": {
+                                                        "language": "yaml",
+                                                        "wordWrap": "on",
+                                                        "scrollbar": {
+                                                          "vertical": "auto"
                                                         }
-                                                      ]
+                                                      }
                                                     }
                                                   ]
                                                 }
