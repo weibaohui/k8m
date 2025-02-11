@@ -19,6 +19,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
+	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/login"
 	"github.com/weibaohui/k8m/pkg/controller/menu"
 	"github.com/weibaohui/k8m/pkg/controller/node"
@@ -26,6 +27,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/controller/rs"
 	"github.com/weibaohui/k8m/pkg/controller/storage"
+	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/middleware"
@@ -275,6 +277,11 @@ func main() {
 		api.POST("/cronjob/resume/ns/:ns/name/:name", cronjob.Resume)
 		api.POST("/cronjob/batch/resume", cronjob.BatchResume)
 		api.POST("/cronjob/batch/pause", cronjob.BatchPause)
+
+		// k8s storage_class
+		api.POST("/storage_class/set_default/name/:name", storageclass.SetDefault)
+		// k8s ingress_class
+		api.POST("/ingress_class/set_default/name/:name", ingressclass.SetDefault)
 
 		// doc
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)

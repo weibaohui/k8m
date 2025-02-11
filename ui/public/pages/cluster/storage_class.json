@@ -566,6 +566,19 @@
                 ],
                 "actions": []
               }
+            },
+            {
+              "type": "dropdown-button",
+              "icon": "fa fa-ellipsis-h",
+              "buttons": [
+                {
+                  "label": "设为默认",
+                  "actionType": "ajax",
+                  "icon": "fas fa-star text-primary",
+                  "confirmText": "确定要设为默认?",
+                  "api": "post:/k8s/storage_class/set_default/name/${metadata.name}"
+                }
+              ]
             }
           ],
           "toggled": true
