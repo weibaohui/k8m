@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import {render as amisRender} from "amis";
 import {Card} from "amis-ui";
 
-// 检测选区是否在 Monaco Editor
+// 判断选区是否在 Monaco Editor
 const isInMonacoEditor = (node: Node | null): boolean => {
     while (node) {
         if (node instanceof HTMLElement && node.classList.contains("monaco-editor")) {
@@ -12,6 +12,16 @@ const isInMonacoEditor = (node: Node | null): boolean => {
         node = node.parentNode;
     }
     return false;
+};
+
+// 获取 Input / Textarea 的光标位置
+const getInputCaretCoords = (input: HTMLInputElement | HTMLTextAreaElement, selectionStart: number) => {
+    const rect = input.getBoundingClientRect();
+    const offset = selectionStart * 7; // 估算字符宽度（可根据实际情况调整）
+    return {
+        x: rect.left + offset + window.scrollX,
+        y: rect.top + rect.height + window.scrollY
+    };
 };
 
 const GlobalTextSelector: React.FC = () => {
@@ -27,24 +37,36 @@ const GlobalTextSelector: React.FC = () => {
                 return;
             }
 
-            const selectionObj = window.getSelection();
-            const range = selectionObj?.rangeCount ? selectionObj.getRangeAt(0) : null;
             let x = 0, y = 0;
+            const activeElement = document.activeElement as HTMLElement;
 
-            // 🛠️ 处理 Monaco Editor 选中文字的情况
-            if (range && isInMonacoEditor(range.commonAncestorContainer)) {
-                console.log("选中了 Monaco Editor 内的文本");
-                const editorElement = document.querySelector(".monaco-editor") as HTMLElement;
-                if (editorElement) {
-                    const rect = editorElement.getBoundingClientRect();
-                    x = rect.left + window.scrollX + 100; // 手动调整 X 偏移
-                    y = rect.top + window.scrollY + 40; // 手动调整 Y 偏移
+            if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")) {
+                // 🛠️ 处理 Input / Textarea 选区
+                console.log("选中了 Input / Textarea");
+                const input = activeElement as HTMLInputElement | HTMLTextAreaElement;
+                const selectionStart = input.selectionStart || 0;
+                const coords = getInputCaretCoords(input, selectionStart);
+                x = coords.x;
+                y = coords.y;
+            } else {
+                // 🛠️ 处理 Monaco Editor 选区
+                const selectionObj = window.getSelection();
+                const range = selectionObj?.rangeCount ? selectionObj.getRangeAt(0) : null;
+
+                if (range && isInMonacoEditor(range.commonAncestorContainer)) {
+                    console.log("选中了 Monaco Editor");
+                    const editorElement = document.querySelector(".monaco-editor") as HTMLElement;
+                    if (editorElement) {
+                        const rect = editorElement.getBoundingClientRect();
+                        x = rect.left + window.scrollX + 100; // 偏移以适应 Editor
+                        y = rect.top + window.scrollY + 40;
+                    }
+                } else if (range) {
+                    // 🛠️ 普通文本选区
+                    const rect = range.getBoundingClientRect();
+                    x = rect.left + window.scrollX;
+                    y = rect.bottom + window.scrollY;
                 }
-            } else if (range) {
-                // 普通文本选区
-                const rect = range.getBoundingClientRect();
-                x = rect.left + window.scrollX;
-                y = rect.bottom + window.scrollY;
             }
 
             setSelection({text: selectedText, x, y});
@@ -68,7 +90,7 @@ const GlobalTextSelector: React.FC = () => {
             }}
         >
             <Card style={{width: '50hv', maxWidth: '500px'}}
-                  title={selection.text.length > 80 ? selection.text.slice(0, 80) + "..." : selection.text}
+                  title={selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
             >
                 <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                     {
