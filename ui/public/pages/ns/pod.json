@@ -1792,7 +1792,7 @@
                                 "name": "subsets",
                                 "label": "就绪IP",
                                 "type": "tpl",
-                                "tpl": "<% if (!data.subsets || !data.subsets[0].addresses || data.subsets[0].addresses.length === 0) { %> <% } else if (data.subsets[0].addresses.length === 1) { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %></span><% } else { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %>...</span><% } %>",
+                                "tpl": "<% if (!data.subsets || !data.subsets[0].addresses || data.subsets[0].addresses.length === 0) { %> <% } else if (data.subsets[0].addresses.length === 1) { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %></span><% } else { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %></span><% } %>",
                                 "onEvent": {
                                   "click": {
                                     "actions": [
@@ -1806,10 +1806,19 @@
                                           "body": [
                                             {
                                               "type": "each",
-                                              "source": "${subsets}",
+                                              "name": "subsets",
                                               "items": {
-                                                "type": "tpl",
-                                                "tpl": "<span class='text-green-500 font-black'>${addresses|pick:ip|join:'<br>'}</span>"
+                                                "type": "each",
+                                                "name": "addresses",
+                                                "items": {
+                                                  "type": "container",
+                                                  "body": [
+                                                    {
+                                                      "type": "tpl",
+                                                      "tpl": "<span class='text-green-500 font-black'><%= data.ip %><% if (data.targetRef) { %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】<% } %></span>"
+                                                    }
+                                                  ]
+                                                }
                                               }
                                             }
                                           ]
@@ -1846,10 +1855,19 @@
                                           "body": [
                                             {
                                               "type": "each",
-                                              "source": "${subsets}",
+                                              "name": "subsets",
                                               "items": {
-                                                "type": "tpl",
-                                                "tpl": "<span class='text-red-500 font-black'>${notReadyAddresses|pick:ip|join:'<br>'}</span>"
+                                                "type": "each",
+                                                "name": "notReadyAddresses",
+                                                "items": {
+                                                  "type": "container",
+                                                  "body": [
+                                                    {
+                                                      "type": "tpl",
+                                                      "tpl": "<span class='text-red-500 font-black'><%= data.ip %><% if (data.targetRef) { %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】<% } %></span>"
+                                                    }
+                                                  ]
+                                                }
                                               }
                                             }
                                           ]
