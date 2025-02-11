@@ -27,7 +27,7 @@ func BindPodLogOptions(c *gin.Context, containerName string) (*v1.PodLogOptions,
 
 	// 解析 sinceTime 字符串为 metav1.Time
 	var sinceTime *metav1.Time
-	if params.SinceTime != "" {
+	if params.SinceTime != "" && params.SinceTime != "undefined" {
 		parsedTime, err := time.Parse("2006-01-02 15:04:05", params.SinceTime)
 		if err != nil {
 			return nil, err
