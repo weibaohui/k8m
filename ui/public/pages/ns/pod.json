@@ -620,63 +620,77 @@
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "title": "选择容器 (ESC 关闭)",
+                    "width": "75vh",
                     "body": [
                       {
-                        "type": "select",
-                        "name": "containerName",
-                        "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                        "value": "${spec.containers[0].name}",
-                        "required": true
-                      },
-                      {
-                        "type": "input-number",
-                        "name": "tailLines",
-                        "label": "读取最近行数",
-                        "value": 100,
-                        "description": "设置为0将读取全部日志",
-                        "min": 0
-                      },
-                      {
-                        "type": "input-number",
-                        "name": "sinceSeconds",
-                        "label": "过去几秒开始读取",
-                        "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
-                        "min": 0
-                      },
-                      {
-                        "type": "input-datetime",
-                        "name": "sinceTime",
-                        "label": "开始时间",
-                        "format": "YYYY-MM-DD HH:mm:ss",
-                        "description": "与上面的秒数互斥。该时间为服务器时间，注意时区时差",
-                        "placeholder": "选择开始时间",
-                        "value": "${_|now|dateModify:subtract:10:minutes|dateModify:subtract:8:hours}"
-                      },
-                      {
-                        "type": "switch",
-                        "name": "timestamps",
-                        "label": "显示时间戳",
-                        "description": "选择时间无日志时，请开启本选项确认时间范围",
-                        "value": false,
-                        "onText": "是",
-                        "offText": "否"
-                      },
-                      {
-                        "type": "switch",
-                        "name": "follow",
-                        "label": "实时跟踪",
-                        "value": true,
-                        "onText": "开启",
-                        "offText": "关闭"
-                      },
-                      {
-                        "type": "switch",
-                        "name": "previous",
-                        "label": "读取上一个实例日志",
-                        "value": false,
-                        "onText": "是",
-                        "offText": "否"
-                      },
+                        "type": "grid",
+                        "columns": [
+                          {
+                            "body": [
+                              {
+                                "type": "select",
+                                "label": "容器",
+                                "name": "containerName",
+                                "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "input-number",
+                                "name": "tailLines",
+                                "label": "读取最近行数",
+                                "value": 100,
+                                "description": "设置为0将读取全部日志",
+                                "min": 0
+                              },
+                              {
+                                "type": "switch",
+                                "name": "timestamps",
+                                "label": "显示时间戳",
+                                "value": false,
+                                "onText": "是",
+                                "offText": "否"
+                              },
+                              {
+                                "type": "switch",
+                                "name": "previous",
+                                "label": "读取上一个实例日志",
+                                "value": false,
+                                "onText": "是",
+                                "offText": "否"
+                              }
+                            ]
+                          },
+                          {
+                            "body": [
+                              {
+                                "type": "input-datetime",
+                                "name": "sinceTime",
+                                "label": "开始时间",
+                                "format": "YYYY-MM-DD HH:mm:ss",
+                                "placeholder": "选择开始时间"
+                              },
+                              {
+                                "type": "input-number",
+                                "name": "sinceSeconds",
+                                "label": "过去几秒开始读取",
+                                "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
+                                "min": 0
+                              },
+                              {
+                                "type": "switch",
+                                "name": "follow",
+                                "label": "实时跟踪",
+                                "value": true,
+                                "onText": "开启",
+                                "offText": "关闭"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "actions": [
                       {
                         "type": "button",
                         "label": "查看日志",
@@ -692,28 +706,6 @@
                               "type": "flex",
                               "justify": "flex-start",
                               "items": [
-                                {
-                                  "type": "button",
-                                  "label": "AI问诊",
-                                  "icon": "fas fa-brain text-primary",
-                                  "actionType": "drawer",
-                                  "drawer": {
-                                    "actions": [],
-                                    "closeOnEsc": true,
-                                    "closeOnOutside": true,
-                                    "size": "xl",
-                                    "title": "解读日志 （ESC 关闭）",
-                                    "body": [
-                                      {
-                                        "type": "websocketMarkdownViewer",
-                                        "url": "/k8s/chat/log",
-                                        "params": {
-                                          "data": "${ls:selectedLogLines}"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                },
                                 {
                                   "type": "log-download",
                                   "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
@@ -754,8 +746,7 @@
                           }
                         }
                       }
-                    ],
-                    "actions": []
+                    ]
                   }
                 },
                 {
