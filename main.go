@@ -291,7 +291,6 @@ func main() {
 		api.GET("/chat/any_selection", chat.AnySelection)
 		api.GET("/chat/example", chat.Example)
 		api.GET("/chat/example/field", chat.FieldExample)
-		api.GET("/chat/ask", chat.Ask)
 		api.GET("/chat/ws_chatgpt", chat.GPTShell)
 
 		// pod 文件浏览上传下载

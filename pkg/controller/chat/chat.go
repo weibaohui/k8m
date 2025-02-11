@@ -63,10 +63,21 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 	}
 	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
-func Ask(c *gin.Context) {
-	// 获取对应资源的描述信息，
-	// 融入用户问题，进行回答
+func Event(c *gin.Context) {
+	handleRequest(c, func(data interface{}) string {
+		d := data.(ResourceData)
+		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
+			"note":   d.Note,
+			"source": d.Source,
+			"reason": d.Reason,
+			"type":   d.Type,
+			"kind":   d.RegardingKind,
+		}))
+	})
+}
 
+// Describe TODO 改为不要传Describe内容，比较大，传个名称过来，从后台Describe一下即可
+func Describe(c *gin.Context) {
 	var data ResourceData
 	err := c.ShouldBindQuery(&data)
 	if err != nil {
@@ -83,39 +94,6 @@ func Ask(c *gin.Context) {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
-		我有一个问题需要你回答:%s
-		请你作为kubernetes k8s 技术专家，请参考关于k8s %s %s %s 资源的Describe (kubectl describe )信息，对该问题进行分析解答。
-		\n 1、请分析用户问题的核心本质，并解释问题点的相关关键信息。
-		\n 2、通过关键信息，推断可能得解决思路。
-		\n 3、结合Describe信息，以及解决思路，给出具体的解决方案。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
-		\n\nDescribe信息如下:%s`,
-			d.Data, d.Group, d.Kind, d.Version, string(describe))
-	})
-}
-func Event(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
-			"note":   d.Note,
-			"source": d.Source,
-			"reason": d.Reason,
-			"type":   d.Type,
-			"kind":   d.RegardingKind,
-		}))
-	})
-}
-
-// Describe TODO 改为不要传Describe内容，比较大，传个名称过来，从后台Describe一下即可
-func Describe(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
 		我正在查看关于k8s %s %s 资源的Describe (kubectl describe )信息。
 		请你作为kubernetes k8s 技术专家，对这个describe的文本进行分析。
 		\n 请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案。
@@ -125,7 +103,7 @@ func Describe(c *gin.Context) {
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
 		\n\nDescribe信息如下：%s`,
-			d.Group, d.Kind, d.Describe)
+			d.Group, d.Kind, string(describe))
 	})
 }
 

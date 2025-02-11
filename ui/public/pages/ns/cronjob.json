@@ -434,9 +434,11 @@
                               "type": "websocketMarkdownViewer",
                               "url": "/k8s/chat/describe",
                               "params": {
-                                "describe": "${result}",
                                 "kind": "${kind}",
-                                "group": "${group}"
+                                "group": "${group}",
+                                "version": "${version}",
+                                "name": "${metadata.name}",
+                                "namespace": "${metadata.namespace}"
                               }
                             }
                           ]
