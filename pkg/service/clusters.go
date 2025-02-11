@@ -140,6 +140,7 @@ func (c *clusterService) DelayStartFunc(f func()) {
 
 // Reconnect 重新连接集群
 func (c *clusterService) Reconnect(fileName string, contextName string) {
+	klog.V(4).Infof("重新连接集群 %s %s 开始", fileName, contextName)
 	// 先清除原来的状态
 	for _, clusterConfig := range c.clusterConfigs {
 		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
@@ -149,6 +150,7 @@ func (c *clusterService) Reconnect(fileName string, contextName string) {
 			c.RegisterCluster(clusterConfig)
 		}
 	}
+	klog.V(4).Infof("重新连接集群 %s %s 完毕", fileName, contextName)
 }
 
 // Disconnect 断开连接
@@ -349,18 +351,18 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) {
 			// InCluster模式
 			_, err := kom.Clusters().RegisterInCluster()
 			if err != nil {
-				klog.V(6).Infof("注册集群[%s]失败: %v", clusterID, err)
+				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
 				return
 			}
 		} else {
 			// 集群外模式
 			_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
 			if err != nil {
-				klog.V(6).Infof("注册集群[%s]失败: %v", clusterID, err)
+				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
 				return
 			}
 		}
-		klog.V(6).Infof("成功注册集群: %s", clusterID)
+		klog.V(4).Infof("成功注册集群: %s", clusterID)
 
 	}
 
