@@ -648,10 +648,26 @@
                     "body": [
                       {
                         "type": "each",
-                        "source": "${subsets}",
+                        "name": "subsets",
                         "items": {
-                          "type": "tpl",
-                          "tpl": "<span class='text-green-500 font-black'>${addresses|pick:ip|join:'<br>'}</span>"
+                          "type": "each",
+                          "name": "addresses",
+                          "items": {
+                            "type": "container",
+                            "body": [
+                              {
+                                "type": "tpl",
+                                "tpl": "<span class='text-green-500 font-black'><%= data.ip %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】</span>"
+                              },
+                              {
+                                "type": "link",
+                                "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
+                                "body": "查看",
+                                "href": "/#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
+                                "blank": false
+                              }
+                            ]
+                          }
                         }
                       }
                     ]
@@ -688,10 +704,26 @@
                     "body": [
                       {
                         "type": "each",
-                        "source": "${subsets}",
+                        "name": "subsets",
                         "items": {
-                          "type": "tpl",
-                          "tpl": "<span class='text-red-500 font-black'>${notReadyAddresses|pick:ip|join:'<br>'}</span>"
+                          "type": "each",
+                          "name": "notReadyAddresses",
+                          "items": {
+                            "type": "container",
+                            "body": [
+                              {
+                                "type": "tpl",
+                                "tpl": "<span class='text-red-500 font-black'><%= data.ip %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】</span>"
+                              },
+                              {
+                                "type": "link",
+                                "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
+                                "body": "查看",
+                                "href": "/#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
+                                "blank": false
+                              }
+                            ]
+                          }
                         }
                       }
                     ]
