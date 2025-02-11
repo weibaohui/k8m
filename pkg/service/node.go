@@ -112,7 +112,7 @@ func (n *nodeService) Watch() {
 		}
 	})
 	if err != nil {
-		klog.Errorf("Error add cron job for Node: %v\n", err)
+		klog.Errorf("新增Node定时任务报错: %v\n", err)
 	}
 	inst.Start()
 	klog.V(6).Infof("新增 Node  状态定时更新任务【@every 5m】\n")
