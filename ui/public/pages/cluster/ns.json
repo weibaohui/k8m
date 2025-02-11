@@ -563,6 +563,26 @@
                 ],
                 "actions": []
               }
+            },
+            {
+              "type": "dropdown-button",
+              "icon": "fa fa-ellipsis-h",
+              "buttons": [
+                {
+                  "type": "link",
+                  "icon": "fa-solid fa-chart-pie text-primary",
+                  "body": "资源配额",
+                  "blank": false,
+                  "href": "/#/ns/resource_quota?metadata[namespace]=${metadata.name}"
+                },
+                {
+                  "type": "link",
+                  "icon": "fa-solid fa-compress text-primary",
+                  "body": "限制范围",
+                  "blank": false,
+                  "href": "/#/ns/limit_range?metadata[namespace]=${metadata.name}"
+                }
+              ]
             }
           ],
           "toggled": true
