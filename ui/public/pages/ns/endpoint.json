@@ -657,14 +657,15 @@
                             "body": [
                               {
                                 "type": "tpl",
-                                "tpl": "<span class='text-green-500 font-black'><%= data.ip %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】</span>"
+                                "tpl": "<span class='text-green-500 font-black'><%= data.ip %><% if (data.targetRef) { %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】<% } %></span>"
                               },
                               {
                                 "type": "link",
                                 "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
                                 "body": "查看",
                                 "href": "/#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
-                                "blank": false
+                                "blank": false,
+                                "visibleOn": "targetRef"
                               }
                             ]
                           }
@@ -713,14 +714,15 @@
                             "body": [
                               {
                                 "type": "tpl",
-                                "tpl": "<span class='text-red-500 font-black'><%= data.ip %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】</span>"
+                                "tpl": "<span class='text-red-500 font-black'><%= data.ip %><% if (data.targetRef) { %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】<% } %></span>"
                               },
                               {
                                 "type": "link",
                                 "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
                                 "body": "查看",
                                 "href": "/#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
-                                "blank": false
+                                "blank": false,
+                                "visibleOn": "targetRef"
                               }
                             ]
                           }
