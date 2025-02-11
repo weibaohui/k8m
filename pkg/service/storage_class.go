@@ -23,3 +23,16 @@ func (n *storageClassService) SetPVCCount(selectedCluster string, item unstructu
 
 	return item
 }
+
+// SetPVCount 设置 PV 数量
+func (n *storageClassService) SetPVCount(selectedCluster string, item unstructured.Unstructured) unstructured.Unstructured {
+	name := item.GetName()
+	// 从PVService中获取PV数量
+	count := PVService().GetPVCount(selectedCluster, name)
+	klog.V(6).Infof("SetPVCount: %s/%s, count: %d", selectedCluster, name, count)
+	utils.AddOrUpdateAnnotations(&item, map[string]string{
+		"pv.count": fmt.Sprintf("%d", count),
+	})
+
+	return item
+}

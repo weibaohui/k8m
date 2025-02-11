@@ -12,6 +12,9 @@ var localStorageClassService = &storageClassService{}
 var localPVCService = &pvcService{
 	CountList: []*pvcCount{},
 }
+var localPVService = &pvService{
+	CountList: []*pvCount{},
+}
 
 func ChatService() *chatService {
 	return localChatService
@@ -34,4 +37,7 @@ func StorageClassService() *storageClassService {
 
 func PVCService() *pvcService {
 	return localPVCService
+}
+func PVService() *pvService {
+	return localPVService
 }

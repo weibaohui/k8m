@@ -18,7 +18,8 @@ const immutableKeys = [
     "pod.count.available",
     "kubectl.kubernetes.io/last-applied-configuration",
     "kom.kubernetes.io/restartedAt",
-    "pvc.count"
+    "pvc.count",
+    "pv.count"
 ];
 const FilterAnnotations = (input: Record<string, string>) => {
     // 如果 input 不存在，则返回空对象

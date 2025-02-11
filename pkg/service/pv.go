@@ -11,33 +11,33 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type pvcService struct {
-	CountList []*pvcCount
+type pvService struct {
+	CountList []*pvCount
 	lock      sync.RWMutex
 }
 
 // 定义结构体，为按spec.storageclass.name统计数量，包括集群、name、数量
-type pvcCount struct {
+type pvCount struct {
 	ClusterName string // 集群名称
 	Name        string // storageClassName
 	Count       int    // 数量
 }
 
-// IncreasePVCCount 增加pvc统计数据
-func (p *pvcService) IncreasePVCCount(selectedCluster string, pvc *corev1.PersistentVolumeClaim) {
+// IncreasePVCount 增加pvc统计数据
+func (p *pvService) IncreasePVCount(selectedCluster string, pv *corev1.PersistentVolume) {
 	// 从CountList中看是否有该集群、该storageClassName的项，有则加1，无则创建为1
 	// 为避免并发操作统计错误，加一个锁
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	h := slice.Filter(p.CountList, func(index int, item *pvcCount) bool {
-		return item.ClusterName == selectedCluster && item.Name == *pvc.Spec.StorageClassName
+	h := slice.Filter(p.CountList, func(index int, item *pvCount) bool {
+		return item.ClusterName == selectedCluster && item.Name == pv.Spec.StorageClassName
 	})
 	if len(h) == 0 {
 		// 还没有该集群、该storageClassName的项，创建
-		p.CountList = append(p.CountList, &pvcCount{
+		p.CountList = append(p.CountList, &pvCount{
 			ClusterName: selectedCluster,
-			Name:        *pvc.Spec.StorageClassName,
+			Name:        pv.Spec.StorageClassName,
 			Count:       1,
 		})
 		return
@@ -49,14 +49,14 @@ func (p *pvcService) IncreasePVCCount(selectedCluster string, pvc *corev1.Persis
 
 }
 
-// ReducePVCCount 减少pvc统计数据
-func (p *pvcService) ReducePVCCount(selectedCluster string, pvc *corev1.PersistentVolumeClaim) {
+// ReducePVCount 减少pv统计数据
+func (p *pvService) ReducePVCount(selectedCluster string, pv *corev1.PersistentVolume) {
 	// 从CountList中看是否有该集群、该storageClassName的项，有则减1，无则不操作
 	// 为避免并发操作统计错误，加一个锁
 	p.lock.Lock()
 	defer p.lock.Unlock()
-	h := slice.Filter(p.CountList, func(index int, item *pvcCount) bool {
-		return item.ClusterName == selectedCluster && item.Name == *pvc.Spec.StorageClassName
+	h := slice.Filter(p.CountList, func(index int, item *pvCount) bool {
+		return item.ClusterName == selectedCluster && item.Name == pv.Spec.StorageClassName
 	})
 	if len(h) == 0 {
 		return
@@ -69,8 +69,8 @@ func (p *pvcService) ReducePVCCount(selectedCluster string, pvc *corev1.Persiste
 	}
 }
 
-// GetPVCCount 按StorageClassName获取pvc统计数据
-func (p *pvcService) GetPVCCount(selectedCluster string, name string) int {
+// GetPVCount 按StorageClassName获取pv统计数据
+func (p *pvService) GetPVCount(selectedCluster string, name string) int {
 	// 从CountList中看是否有该集群的项，有则返回，无则返回0
 	// 为避免并发操作统计错误，加一个锁
 	p.lock.RLock()
@@ -83,63 +83,63 @@ func (p *pvcService) GetPVCCount(selectedCluster string, name string) int {
 	return 0
 }
 
-func (p *pvcService) Watch() {
+func (p *pvService) Watch() {
 	// 设置一个定时器，不断查看是否有集群未开启watch，未开启的话，开启watch
 	inst := cron.New()
 	_, err := inst.AddFunc("@every 1m", func() {
 		// 延迟启动cron
 		clusters := ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
-			if !cluster.GetClusterWatchStatus("pvc") {
+			if !cluster.GetClusterWatchStatus("pv") {
 				selectedCluster := ClusterService().ClusterID(cluster)
 				watcher := p.watchSingleCluster(selectedCluster)
-				cluster.SetClusterWatchStarted("pvc", watcher)
+				cluster.SetClusterWatchStarted("pv", watcher)
 			}
 		}
 	})
 	if err != nil {
-		klog.Errorf("新增PVC状态定时更新任务报错: %v\n", err)
+		klog.Errorf("新增PV状态定时更新任务报错: %v\n", err)
 	}
 	inst.Start()
-	klog.V(6).Infof("新增PVC状态定时更新任务【@every 1m】\n")
+	klog.V(6).Infof("新增PV状态定时更新任务【@every 1m】\n")
 }
 
-func (p *pvcService) watchSingleCluster(selectedCluster string) watch.Interface {
-	// watch  命名空间下 pvc 的变更
+func (p *pvService) watchSingleCluster(selectedCluster string) watch.Interface {
+	// watch  命名空间下 pv 的变更
 	var watcher watch.Interface
-	var pvc corev1.PersistentVolumeClaim
-	err := kom.Cluster(selectedCluster).Resource(&pvc).AllNamespace().Watch(&watcher).Error
+	var pv corev1.PersistentVolume
+	err := kom.Cluster(selectedCluster).Resource(&pv).AllNamespace().Watch(&watcher).Error
 	if err != nil {
-		klog.Errorf("%s 创建pvc监听器失败 %v", selectedCluster, err)
+		klog.Errorf("%s 创建pv监听器失败 %v", selectedCluster, err)
 		return nil
 	}
 	go func() {
-		klog.V(6).Infof("%s start watch pvc", selectedCluster)
+		klog.V(6).Infof("%s start watch pv", selectedCluster)
 		defer watcher.Stop()
 		for event := range watcher.ResultChan() {
-			err = kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pvc)
+			err = kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pv)
 			if err != nil {
-				klog.V(6).Infof("%s 无法将对象转换为 *v1.PersistentVolumeClaim 类型: %v", selectedCluster, err)
+				klog.V(6).Infof("%s 无法将对象转换为 *v1.PersistentVolume 类型: %v", selectedCluster, err)
 				return
 			}
 			// 处理事件
 			switch event.Type {
 			case watch.Added:
-				p.IncreasePVCCount(selectedCluster, &pvc)
-				klog.V(6).Infof("%s 添加PVC [ %s/%s ]\n", selectedCluster, pvc.Namespace, pvc.Name)
+				p.IncreasePVCount(selectedCluster, &pv)
+				klog.V(6).Infof("%s 添加PV [ %s/%s ]\n", selectedCluster, pv.Namespace, pv.Name)
 			case watch.Modified:
 				// 统计数量，修改跳过
-				klog.V(6).Infof("%s 修改PVC [ %s/%s ]\n", selectedCluster, pvc.Namespace, pvc.Name)
+				klog.V(6).Infof("%s 修改PV [ %s/%s ]\n", selectedCluster, pv.Namespace, pv.Name)
 			case watch.Deleted:
-				p.ReducePVCCount(selectedCluster, &pvc)
-				klog.V(6).Infof("%s 删除PVC [ %s/%s ]\n", selectedCluster, pvc.Namespace, pvc.Name)
+				p.ReducePVCount(selectedCluster, &pv)
+				klog.V(6).Infof("%s 删除PV [ %s/%s ]\n", selectedCluster, pv.Namespace, pv.Name)
 			}
 		}
 	}()
 
 	// 延迟设置完成状态，等待 ListWatch完成
 	ClusterService().DelayStartFunc(func() {
-		ClusterService().SetPVCStatusAggregated(selectedCluster, true)
+		ClusterService().SetPVStatusAggregated(selectedCluster, true)
 	})
 	return watcher
 }

@@ -114,11 +114,18 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 			}
 		}
 	case "StorageClass":
-		if service.ClusterService().GetStorageClassStatusAggregated(selectedCluster) {
+		if service.ClusterService().GetPVCStatusAggregated(selectedCluster) {
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
 				item = service.StorageClassService().SetPVCCount(selectedCluster, item)
+			}
+		}
+		if service.ClusterService().GetPVStatusAggregated(selectedCluster) {
+			// 已缓存聚合状态，可以填充
+			for i := range list {
+				item := list[i]
+				item = service.StorageClassService().SetPVCount(selectedCluster, item)
 			}
 		}
 	}

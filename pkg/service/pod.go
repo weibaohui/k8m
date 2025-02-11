@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sync"
 	"time"
 
 	"github.com/robfig/cron/v3"
@@ -16,7 +15,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var podWatchOnce sync.Once
 var ttl = 24 * time.Hour
 
 type podService struct {
@@ -111,7 +109,7 @@ func (p *podService) Watch() {
 		}
 	})
 	if err != nil {
-		klog.Errorf("Error add cron job for Pod: %v\n", err)
+		klog.Errorf("新增Pod状态定时更新任务报错: %v\n", err)
 	}
 	inst.Start()
 	klog.V(6).Infof("新增Pod状态定时更新任务【@every 1m】\n")

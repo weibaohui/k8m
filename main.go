@@ -82,6 +82,7 @@ func Init() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
 			service.PVCService().Watch()
+			service.PVService().Watch()
 		})
 	}()
 

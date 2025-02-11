@@ -39,19 +39,36 @@ func (c *clusterService) GetNodeStatusAggregated(selectedCluster string) bool {
 	return clusterConfig.NodeStatusAggregated
 }
 
-// SetStorageClassStatusAggregated 设置指定集群的StorageClass聚合状态
-func (c *clusterService) SetStorageClassStatusAggregated(selectedCluster string, true bool) {
+// SetPVCStatusAggregated 设置指定集群的StorageClass聚合状态
+func (c *clusterService) SetPVCStatusAggregated(selectedCluster string, true bool) {
 	clusterConfig := c.GetClusterByID(selectedCluster)
 	if clusterConfig == nil {
 		return
 	}
-	klog.V(6).Infof("设置存储类聚合状态: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, true)
-	clusterConfig.StorageClassStatusAggregated = true
+	klog.V(6).Infof("设置PVC存储类聚合状态: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, true)
+	clusterConfig.PVCStatusAggregated = true
 }
-func (c *clusterService) GetStorageClassStatusAggregated(selectedCluster string) bool {
+func (c *clusterService) GetPVCStatusAggregated(selectedCluster string) bool {
 	clusterConfig := c.GetClusterByID(selectedCluster)
 	if clusterConfig == nil {
 		return false
 	}
-	return clusterConfig.StorageClassStatusAggregated
+	return clusterConfig.PVCStatusAggregated
+}
+
+// SetPVStatusAggregated 设置指定集群的StorageClass聚合状态
+func (c *clusterService) SetPVStatusAggregated(selectedCluster string, true bool) {
+	clusterConfig := c.GetClusterByID(selectedCluster)
+	if clusterConfig == nil {
+		return
+	}
+	klog.V(6).Infof("设置PV存储类聚合状态: %s/%s: %v", clusterConfig.FileName, clusterConfig.ContextName, true)
+	clusterConfig.PVStatusAggregated = true
+}
+func (c *clusterService) GetPVStatusAggregated(selectedCluster string) bool {
+	clusterConfig := c.GetClusterByID(selectedCluster)
+	if clusterConfig == nil {
+		return false
+	}
+	return clusterConfig.PVStatusAggregated
 }

@@ -33,6 +33,7 @@ var immutableKeys = []string{
 	"kubectl.kubernetes.io/last-applied-configuration",
 	"kom.kubernetes.io/restartedAt",
 	"pvc.count",
+	"pv.count",
 }
 
 func UpdateAnnotations(c *gin.Context) {
