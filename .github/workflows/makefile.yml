@@ -2,9 +2,9 @@ name: Makefile CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -13,8 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # todo 增加Nodejs pnpm build 问题
-      # 否则 会构建出现找不到dist文件夹的问题
       - name: Set up Node.js
         uses: actions/setup-node@v4
       - name: Install pnpm
