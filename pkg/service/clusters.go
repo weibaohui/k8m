@@ -164,7 +164,7 @@ func (c *clusterService) Disconnect(fileName string, contextName string) {
 					klog.V(6).Infof("%s 停止 Watch  %s", clusterConfig.ClusterName, v.WatchType)
 				}
 			}
-			//todo kom 断开链接
+			// todo kom 断开链接
 			// kom.Cluster(clusterConfig.ClusterName).Disconnect()
 		}
 	}
@@ -172,16 +172,7 @@ func (c *clusterService) Disconnect(fileName string, contextName string) {
 
 // Scan 扫描集群
 func (c *clusterService) Scan() {
-	// 清空了集群列表
-	for _, cc := range c.clusterConfigs {
-		for _, v := range cc.watchStatus {
-			if v.Watcher != nil {
-				v.Watcher.Stop()
-				klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
-			}
-		}
-	}
-	c.clusterConfigs = make([]*ClusterConfig, 0)
+
 	cfg := flag.Init()
 	c.ScanClustersInDir(cfg.KubeConfig)
 }
@@ -279,10 +270,18 @@ func (c *clusterService) ScanClustersInDir(path string) {
 				watchStatus: make(map[string]*clusterWatchStatus),
 			}
 			clusterConfig.Server = cluster.Server
-			c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
+			c.AddToClusterList(clusterConfig)
 		}
 	}
 
+}
+
+func (c *clusterService) AddToClusterList(clusterConfig *ClusterConfig) {
+	// 判断是否已经存在
+	if c.GetClusterByID(clusterConfig.GetClusterID()) != nil {
+		return
+	}
+	c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
 }
 
 // Deprecated
@@ -331,7 +330,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 				watchStatus: make(map[string]*clusterWatchStatus),
 			}
 			clusterConfig.Server = cluster.Server
-			c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
+			c.AddToClusterList(clusterConfig)
 		}
 	}
 
@@ -449,6 +448,6 @@ func (c *clusterService) RegisterInCluster() {
 		watchStatus: make(map[string]*clusterWatchStatus),
 	}
 
-	c.clusterConfigs = append(c.clusterConfigs, clusterConfig)
+	c.AddToClusterList(clusterConfig)
 	c.RegisterCluster(clusterConfig)
 }
