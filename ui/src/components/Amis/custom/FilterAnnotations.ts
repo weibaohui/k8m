@@ -5,11 +5,13 @@ const immutableKeys = [
     "cpu.limit",
     "cpu.limitFraction",
     "cpu.total",
+    "cpu.realtime",
     "memory.request",
     "memory.requestFraction",
     "memory.limit",
     "memory.limitFraction",
     "memory.total",
+    "memory.realtime",
     "ip.usage.total",
     "ip.usage.used",
     "ip.usage.available",
@@ -19,7 +21,7 @@ const immutableKeys = [
     "kubectl.kubernetes.io/last-applied-configuration",
     "kom.kubernetes.io/restartedAt",
     "pvc.count",
-    "pv.count"
+    "pv.count",
 ];
 const FilterAnnotations = (input: Record<string, string>) => {
     // 如果 input 不存在，则返回空对象

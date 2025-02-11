@@ -637,31 +637,33 @@
           "body": [
             {
               "type": "link",
-              "body": "${metadata.annotations['pod.count']||'-'}",
+              "body": "${metadata.annotations['pod.total.count']||'-'}",
               "blank": false,
               "href": "/#/ns/pod?metadata[namespace]=${metadata.name}"
             }
           ]
         },
         {
-          "name": "cpu_count",
-          "label": "CPU用量",
+          "name": "resource",
+          "label": "CPU用量<br><span class='text-gray-500 text-xs'>请求用量/上限用量/实时用量</span>",
           "type": "container",
+          "width": "150px",
           "body": [
             {
               "type": "tpl",
-              "tpl": "${metadata.annotations['cpu.total']||'-'}"
+              "tpl": "<% if (data.metadata.annotations && data.metadata.annotations['cpu.request']) { %><%= data.metadata.annotations['cpu.request'] %>/<%= data.metadata.annotations['cpu.limit'] %>/<%= data.metadata.annotations['cpu.realtime'] %><% } %>"
             }
           ]
         },
         {
-          "name": "memory_count",
-          "label": "内存用量",
+          "name": "resource",
+          "label": "内存用量<br><span class='text-gray-500 text-xs'>请求用量/上限用量/实时用量</span>",
           "type": "container",
+          "width": "150px",
           "body": [
             {
               "type": "tpl",
-              "tpl": "${metadata.annotations['memory.total']||'-'}"
+              "tpl": "<% if (data.metadata.annotations && data.metadata.annotations['memory.request']) { %><%= data.metadata.annotations['memory.request'] %>/<%= data.metadata.annotations['memory.limit'] %>/<%= data.metadata.annotations['memory.realtime'] %><% } %>"
             }
           ]
         },

@@ -110,7 +110,15 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
-				item = service.PodService().SetAllocatedStatus(selectedCluster, item)
+				item = service.PodService().SetAllocatedStatusOnPod(selectedCluster, item)
+			}
+		}
+	case "Namespace":
+		if service.ClusterService().GetPodStatusAggregated(selectedCluster) {
+			// 已缓存聚合状态，可以填充
+			for i := range list {
+				item := list[i]
+				item = service.PodService().SetStatusCountOnNamespace(selectedCluster, item)
 			}
 		}
 	case "StorageClass":
