@@ -657,7 +657,7 @@
                         "body": [
                           {
                             "type": "tpl",
-                            "tpl": "<span class='text-<%= data.conditions.ready ? \"green\" : \"red\" %>-500 font-black'><%= data.addresses.join(', ') %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】</span>"
+                            "tpl": "<span class='text-<%= data.conditions.ready ? \"green\" : \"red\" %>-500 font-black'><%= data.addresses.join(', ') %><% if (data.targetRef) { %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】<% } %></span>"
                           },
                           {
                             "type": "link",
