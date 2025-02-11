@@ -132,7 +132,9 @@ func (p *podService) ReducePodCount(selectedCluster string, pod *corev1.Pod) {
 		if sc.PodCount < 0 {
 			sc.PodCount = 0
 		}
-
+		if table == nil {
+			return
+		}
 		for name, quantity := range table.Requests {
 			switch name {
 			case "cpu":
