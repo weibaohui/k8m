@@ -172,7 +172,6 @@ func (c *clusterService) Disconnect(fileName string, contextName string) {
 
 // Scan 扫描集群
 func (c *clusterService) Scan() {
-
 	cfg := flag.Init()
 	c.ScanClustersInDir(cfg.KubeConfig)
 }
