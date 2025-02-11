@@ -615,7 +615,7 @@
                   "icon": "fa-brands fa-docker text-primary",
                   "body": "容器列表",
                   "blank": false,
-                  "href": "/#/ns/pod?metadata[ownerReferences][name]=${metadata.name}"
+                  "href": "/#/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
                 },
                 {
                   "type": "button",
