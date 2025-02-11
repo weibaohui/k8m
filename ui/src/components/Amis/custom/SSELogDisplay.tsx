@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
+import React, {useEffect, useRef, useState} from 'react';
+import {appendQueryParam, replacePlaceholders} from "@/utils/utils.ts";
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -36,22 +36,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const eventSourceRef = useRef<EventSource | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [lines, setLines] = useState<string[]>([]);
-    const [selectedLines, setSelectedLines] = useState<string[]>([]);
 
-    // 更新 localStorage
-    const updateLocalStorage = (lines: string[]) => {
-        localStorage.setItem('selectedLogLines', JSON.stringify(lines));
-    };
-
-    const handleSelectLine = (line: string, isChecked: boolean) => {
-        setSelectedLines((prevSelected) => {
-            const updatedLines = isChecked
-                ? [...prevSelected, line]
-                : prevSelected.filter((item) => item !== line);
-            updateLocalStorage(updatedLines);
-            return updatedLines;
-        });
-    };
 
     // 连接 SSE 服务器
     const connectSSE = () => {
@@ -96,16 +81,12 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
 
     return (
-        <div ref={dom} style={{ whiteSpace: 'pre-wrap' }}>
-            {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
+        <div ref={dom} style={{whiteSpace: 'pre-wrap'}}>
+            {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
 
             {lines.map((line, index) => (
-                <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-                    <input
-                        type="checkbox"
-                        onChange={(e) => handleSelectLine(line, e.target.checked)}
-                        checked={selectedLines.includes(line)}
-                    />
+                <div key={index} style={{display: 'flex', alignItems: 'center'}}>
+
                     <span>{line}</span>
                 </div>
             ))}
