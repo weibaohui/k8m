@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from "react";
-import {render as amisRender} from "amis";
-import {formatFinalGetUrl} from "@/utils/utils";
+import React, { useEffect, useRef, useState } from "react";
+import { render as amisRender } from "amis";
+import { formatFinalGetUrl } from "@/utils/utils";
 
 interface WebSocketMarkdownViewerProps {
     url: string;
@@ -10,13 +10,15 @@ interface WebSocketMarkdownViewerProps {
 }
 
 const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({url, data, params}, _) => {
-        url = formatFinalGetUrl({url, data, params});
+    ({ url, data, params }, _) => {
+        url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
         const [messages, setMessages] = useState<string[]>([]);
         const [status, setStatus] = useState<string>("Disconnected");
+        const [loading, setLoading] = useState<boolean>(true);
+
         const wsRef = useRef<WebSocket | null>(null);
 
         useEffect(() => {
@@ -34,10 +36,12 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
                     const rawMessage = parsedData.data || "";
                     if (rawMessage) {
                         setMessages((prev) => [...prev, rawMessage]);
+                        setLoading(false); // 有数据后取消 loading
                     }
                 } catch (error) {
                     console.error("Failed to parse WebSocket message:", error);
                     setMessages((prev) => [...prev, event.data]);
+                    setLoading(false); // 有数据后取消 loading
                 }
             };
 
@@ -55,7 +59,7 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
         return (
             <>
                 <div>
-                    <p style={{display: "none"}}>WebSocket Status: {status}</p>
+                    <p style={{ display: "none" }}>WebSocket Status: {status}</p>
                     <div
                         style={{
                             backgroundColor: "#f5f5f5",
@@ -64,10 +68,14 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
                             overflowX: "auto",
                         }}
                     >
-                        {amisRender({
-                            type: "markdown",
-                            value: markdownContent,
-                        })}
+                        {loading ? (
+                            <span>Loading...</span>
+                        ) : (
+                            amisRender({
+                                type: "markdown",
+                                value: markdownContent,
+                            })
+                        )}
                     </div>
                 </div>
             </>
