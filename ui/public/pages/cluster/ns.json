@@ -653,7 +653,7 @@
           "body": [
             {
               "type": "tpl",
-              "tpl": "<% if (data.metadata.annotations && data.metadata.annotations['cpu.request']) { %><%= data.metadata.annotations['cpu.request'] %>/<%= data.metadata.annotations['cpu.limit'] %>/<%= data.metadata.annotations['cpu.realtime'] %><% } %>"
+              "tpl": "<% if (data.metadata.annotations && data.metadata.annotations['cpu.request']) { %><%= data.metadata.annotations['cpu.request'] %>/<%= data.metadata.annotations['cpu.limit'] %>/<%= data.metadata.annotations['cpu.realtime'] %><% } else { %><span class='text-gray-300 text-xs'>N/A</span><% } %>"
             }
           ]
         },
@@ -665,7 +665,7 @@
           "body": [
             {
               "type": "tpl",
-              "tpl": "<% if (data.metadata.annotations && data.metadata.annotations['memory.request']) { %><%= data.metadata.annotations['memory.request'] %>/<%= data.metadata.annotations['memory.limit'] %>/<%= data.metadata.annotations['memory.realtime'] %><% } %>"
+              "tpl": "<% if (data.metadata.annotations && data.metadata.annotations['memory.request']) { %><%= data.metadata.annotations['memory.request'] %>/<%= data.metadata.annotations['memory.limit'] %>/<%= data.metadata.annotations['memory.realtime'] %><% } else { %><span class='text-gray-300 text-xs'>N/A</span><% } %>"
             }
           ]
         },
