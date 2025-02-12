@@ -121,7 +121,7 @@
           "name": "current",
           "label": "当前集群",
           "type": "tpl",
-          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>当前集群</span><% } %>"
+          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>当前集群</span><% if (data.clusterConnectStatus !== 'connected') { %> ⚠️ <% } %><% } %>"
         },
         {
           "name": "clusterConnectStatus",
