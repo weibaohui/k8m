@@ -104,7 +104,7 @@ const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerP
 
 
         return (
-            <div ref={terminalRef} style={{width: "100%", height: "100%"}}></div>
+            <div ref={terminalRef} style={{width: "100%", height: "80vh"}}></div>
         );
     }
 );
