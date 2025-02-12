@@ -109,7 +109,10 @@ const HistoryRecords = () => {
                     />
                 ) : (
                     <div
-                        onClick={() => handleNameEdit(record, index)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleNameEdit(record, index);
+                        }}
                         style={{
                             maxWidth: '200px',
                             overflow: 'hidden',
@@ -128,7 +131,7 @@ const HistoryRecords = () => {
                         <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
                     )}
                 </div>
-                <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px', backgroundColor: '#FFFFFF' }}>
+                <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 3, padding: '0 5px', backgroundColor: '#FFFFFF' }} onClick={(e) => e.stopPropagation()}>
                     <Button.Group>
                         <Button
                             type="text"
