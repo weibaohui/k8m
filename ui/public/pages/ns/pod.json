@@ -619,135 +619,91 @@
                   "type": "button",
                   "icon": "fa fa-list text-primary",
                   "label": "查看日志",
-                  "actionType": "dialog",
-                  "dialog": {
+                  "actionType": "drawer",
+                  "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "title": "选择容器 (ESC 关闭)",
-                    "width": "75vh",
+                    "width": "100%",
                     "body": [
                       {
-                        "type": "grid",
-                        "columns": [
+                        "type": "wrapper",
+                        "className": "flex space-x-2",
+                        "body": [
                           {
-                            "body": [
-                              {
-                                "type": "select",
-                                "label": "容器",
-                                "name": "containerName",
-                                "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                                "value": "${spec.containers[0].name}",
-                                "required": true
-                              },
-                              {
-                                "type": "input-number",
-                                "name": "tailLines",
-                                "label": "读取最近行数",
-                                "value": 100,
-                                "description": "设置为0将读取全部日志",
-                                "min": 0
-                              },
-                              {
-                                "type": "switch",
-                                "name": "timestamps",
-                                "label": "显示时间戳",
-                                "value": false,
-                                "onText": "是",
-                                "offText": "否"
-                              },
-                              {
-                                "type": "switch",
-                                "name": "previous",
-                                "label": "读取上一个实例日志",
-                                "value": false,
-                                "onText": "是",
-                                "offText": "否"
-                              }
-                            ]
+                            "type": "select",
+                            "label": "容器",
+                            "name": "containerName",
+                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                            "value": "${spec.containers[0].name}",
+                            "required": true
                           },
                           {
-                            "body": [
-                              {
-                                "type": "input-datetime",
-                                "name": "sinceTime",
-                                "label": "开始时间",
-                                "format": "YYYY-MM-DD HH:mm:ss",
-                                "placeholder": "选择开始时间"
-                              },
-                              {
-                                "type": "input-number",
-                                "name": "sinceSeconds",
-                                "label": "过去几秒开始读取",
-                                "description": "设置读取日志的秒数，与开始时间互斥，同时设置本项优先启用",
-                                "min": 0
-                              },
-                              {
-                                "type": "switch",
-                                "name": "follow",
-                                "label": "实时跟踪",
-                                "value": true,
-                                "onText": "开启",
-                                "offText": "关闭"
-                              }
-                            ]
+                            "type": "input-number",
+                            "name": "tailLines",
+                            "label": "展示行数",
+                            "value": 100,
+                            "min": 0
+                          },
+                          {
+                            "type": "switch",
+                            "name": "follow",
+                            "label": "实时跟踪",
+                            "value": true,
+                            "style": {
+                              "width": "100px"
+                            }
+                          },
+                          {
+                            "type": "switch",
+                            "name": "timestamps",
+                            "label": "时间戳",
+                            "value": false,
+                            "style": {
+                              "width": "100px"
+                            }
+                          },
+                          {
+                            "type": "switch",
+                            "name": "previous",
+                            "label": "上一个",
+                            "value": false,
+                            "style": {
+                              "width": "100px"
+                            }
+                          },
+                          {
+                            "type": "input-datetime",
+                            "name": "sinceTime",
+                            "label": "开始时间",
+                            "format": "YYYY-MM-DD HH:mm:ss",
+                            "placeholder": "选择开始时间"
+                          },
+                          {
+                            "type": "log-download",
+                            "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                            "data": {
+                              "containerName": "${containerName}",
+                              "tailLines": "${tailLines}",
+                              "sinceTime": "${sinceTime}",
+                              "previous": "${previous}",
+                              "timestamps": "${timestamps}",
+                              "sinceSeconds": "${sinceSeconds}"
+                            }
                           }
                         ]
-                      }
-                    ],
-                    "actions": [
+                      },
                       {
-                        "type": "button",
-                        "label": "查看日志",
-                        "level": "primary",
-                        "actionType": "drawer",
-                        "drawer": {
-                          "closeOnOutside": true,
-                          "closeOnEsc": true,
-                          "size": "xl",
-                          "title": "日志管理 (ESC 关闭)",
-                          "body": [
-                            {
-                              "type": "flex",
-                              "justify": "flex-start",
-                              "items": [
-                                {
-                                  "type": "log-download",
-                                  "url": "/k8s/pod/logs/download/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                                  "data": {
-                                    "containerName": "${containerName}",
-                                    "tailLines": "${tailLines}",
-                                    "sinceTime": "${sinceTime}",
-                                    "previous": "${previous}",
-                                    "timestamps": "${timestamps}",
-                                    "sinceSeconds": "${sinceSeconds}"
-                                  }
-                                }
-                              ]
-                            },
-                            {
-                              "type": "log-display",
-                              "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                              "data": {
-                                "containerName": "${containerName}",
-                                "tailLines": "${tailLines}",
-                                "sinceTime": "${sinceTime}",
-                                "follow": "${follow}",
-                                "previous": "${previous}",
-                                "timestamps": "${timestamps}",
-                                "sinceSeconds": "${sinceSeconds}"
-                              }
-                            }
-                          ]
-                        },
-                        "onEvent": {
-                          "click": {
-                            "actions": [
-                              {
-                                "actionType": "custom",
-                                "script": "localStorage.removeItem('selectedLogLines');"
-                              }
-                            ]
-                          }
+                        "type": "log-display",
+                        "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
+                        "data": {
+                          "containerName": "${containerName}",
+                          "tailLines": "${tailLines}",
+                          "sinceTime": "${sinceTime}",
+                          "follow": "${follow}",
+                          "previous": "${previous}",
+                          "timestamps": "${timestamps}",
+                          "sinceSeconds": "${sinceSeconds}"
                         }
                       }
                     ]
@@ -789,8 +745,7 @@
                           }
                         ]
                       }
-                    ],
-                    "actions": []
+                    ]
                   }
                 },
                 {
