@@ -42,17 +42,17 @@ importers:
         specifier: ^5.5.0
         version: 5.5.0
       amis:
-        specifier: ^6.10.0
-        version: 6.10.0(@types/react@18.2.56)(amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-ui@6.10.0(@types/react@18.2.56)(amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(office-viewer@0.2.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^6.11.0
+        version: 6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-ui@6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(office-viewer@0.2.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       amis-core:
-        specifier: ^6.10.0
-        version: 6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)
+        specifier: ^6.11.0
+        version: 6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)
       amis-formula:
-        specifier: ^6.10.0
-        version: 6.10.0
+        specifier: ^6.11.0
+        version: 6.11.0
       amis-ui:
-        specifier: ^6.10.0
-        version: 6.10.0(@types/react@18.2.56)(amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^6.11.0
+        version: 6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       axios:
         specifier: ^1.7.9
         version: 1.7.9
@@ -827,27 +827,27 @@ packages:
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
-  amis-core@6.10.0:
-    resolution: {integrity: sha512-Py75LLmoy/8Tmr0z+SSoOYxfyCt9mkKYdSwdFCLXmOE+8kG+EYcrTvbOHeInTeoraxL8wO6IMB929ltx8dsTsw==}
+  amis-core@6.11.0:
+    resolution: {integrity: sha512-zgPOC3uMy3B4ZN3tjQONKnJbwWFcrT8+VqWXlPUTcxPhCoYyBcbBkMNFye1pxSMaqKigZfOfiEQp9QmIxY+GQA==}
     peerDependencies:
       amis-formula: '*'
       react: '>=16.8.6'
       react-dom: '>=16.8.6'
       react-is: '>=16.8.6'
 
-  amis-formula@6.10.0:
-    resolution: {integrity: sha512-U74jzc4+rbYlCvQlaBhbdmHHJlPXX3XwRtUn5JUmp6W79QeAXgd1jwNnrvxSw9Y3ms71pNikAH33BPyu4+46/A==}
+  amis-formula@6.11.0:
+    resolution: {integrity: sha512-tMYV0DB7ROeqb1fEQbTH+6fa8gP4jOxbJIh9aEISrVaiKua7Em/ArwxZS8YXWaFgT7ikB8V9bOoxigF5LORNLg==}
 
-  amis-ui@6.10.0:
-    resolution: {integrity: sha512-X5xidQEz7Dye+tWUNKzORGLKiwtHLlIQ2TTp5nYaTEZX4G/4rzWRLwT55IPkSoJ3T3qk9bHYYMmx7p6672BhOQ==}
+  amis-ui@6.11.0:
+    resolution: {integrity: sha512-deH53Pvl5/yOAtvXNMy/78g6nWSPLz0A9Tj17GJB0RltoRrdVCYFC27qTNuD8GZo4AOKhjsYf03Tvel4+JSlVg==}
     peerDependencies:
       amis-core: '*'
       amis-formula: '*'
       react: '>=16.8.6'
       react-dom: '>=16.8.6'
 
-  amis@6.10.0:
-    resolution: {integrity: sha512-yhX3E8Qgzxiqp7EqItp+GeYsM2MyAQqFvk3BHAA4yUnKeBRgQkAAkxk8325Ch2i3U3ON5sDbtu44Y57zJ7PscA==}
+  amis@6.11.0:
+    resolution: {integrity: sha512-XQYB/UWYZmn5s7qEb6UX+nVd4vfPGx5RnN+B8QYIvqNZ85wtFOZyab5cKZ1r3Fm8S+F3rstUPoFuuKsim7GKVA==}
     peerDependencies:
       amis-core: '*'
       amis-ui: '*'
@@ -2172,9 +2172,6 @@ packages:
   simple-swizzle@0.2.2:
     resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}
 
-  smooth-signature@1.0.15:
-    resolution: {integrity: sha512-YmoDJxUHo22ITgavyw1LEld8kpACzNS3uZuXey6D73rSSWq5S3oAAt3wJ7K60s9CdmUhrPG1myHE0i/N9LI31Q==}
-
   sortablejs@1.15.0:
     resolution: {integrity: sha512-bv9qgVMjUMf89wAvM6AxVvS/4MX3sPeN0+agqShejLU5z5GX4C75ow1O2e5k4L6XItUyAK3gH6AxSbXrOM5e8w==}
 
@@ -3157,10 +3154,10 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0):
+  amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0):
     dependencies:
       '@rc-component/mini-decimal': 1.1.0
-      amis-formula: 6.10.0
+      amis-formula: 6.11.0
       classnames: 2.3.2
       cross-env: 7.0.3
       file-saver: 2.0.5
@@ -3187,17 +3184,17 @@ snapshots:
       - encoding
       - react-native
 
-  amis-formula@6.10.0:
+  amis-formula@6.11.0:
     dependencies:
       lodash: 4.17.21
       moment: 2.30.1
       tslib: 2.6.2
 
-  amis-ui@6.10.0(@types/react@18.2.56)(amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  amis-ui@6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@rc-component/mini-decimal': 1.1.0
-      amis-core: 6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)
-      amis-formula: 6.10.0
+      amis-core: 6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)
+      amis-formula: 6.11.0
       animate.css: 4.1.1
       classnames: 2.3.2
       codemirror: 5.65.16
@@ -3232,21 +3229,21 @@ snapshots:
       react-textarea-autosize: 8.3.3(@types/react@18.2.56)(react@18.2.0)
       react-transition-group: 4.4.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-visibility-sensor: 5.1.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      smooth-signature: 1.0.15
       sortablejs: 1.15.0
       tinymce: 6.8.3
       tslib: 2.6.2
       uncontrollable: 7.2.1(react@18.2.0)
+      video-react: 0.15.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
       - encoding
       - react-native
       - supports-color
 
-  amis@6.10.0(@types/react@18.2.56)(amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-ui@6.10.0(@types/react@18.2.56)(amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(office-viewer@0.2.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  amis@6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-ui@6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(office-viewer@0.2.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
-      amis-core: 6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)
-      amis-ui: 6.10.0(@types/react@18.2.56)(amis-core@6.10.0(@types/react@18.2.56)(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.10.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      amis-core: 6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)
+      amis-ui: 6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       attr-accept: 2.2.2
       blueimp-canvastoblob: 2.1.0
       classnames: 2.3.2
@@ -4688,8 +4685,6 @@ snapshots:
   simple-swizzle@0.2.2:
     dependencies:
       is-arrayish: 0.3.2
-
-  smooth-signature@1.0.15: {}
 
   sortablejs@1.15.0: {}
 
