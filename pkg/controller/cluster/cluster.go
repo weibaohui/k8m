@@ -83,7 +83,7 @@ func Scan(c *gin.Context) {
 func Reconnect(c *gin.Context) {
 	fileName := c.Param("fileName")
 	contextName := c.Param("contextName")
-	service.ClusterService().Reconnect(fileName, contextName)
+	service.ClusterService().Connect(fileName, contextName)
 	amis.WriteJsonOKMsg(c, "已执行，请查看最新状态")
 }
 func Disconnect(c *gin.Context) {
@@ -113,7 +113,7 @@ func SetDefault(c *gin.Context) {
 	go func() {
 		// 如果没有连接，那么进行一次连接。
 		if !service.ClusterService().IsConnected(cookieValue) {
-			service.ClusterService().Reconnect(fileName, contextName)
+			service.ClusterService().Connect(fileName, contextName)
 		}
 	}()
 

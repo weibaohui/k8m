@@ -118,16 +118,22 @@
           }
         },
         {
-          "name": "connectStatus",
+          "name": "current",
           "label": "当前集群",
           "type": "tpl",
           "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>当前集群</span><% } %>"
         },
         {
-          "name": "connectStatus",
+          "name": "clusterConnectStatus",
           "label": "可访问性",
-          "type": "tpl",
-          "tpl": "<span> <% if (data.serverVersion && data.serverVersion.trim() !== '') { %>✅已连接<% } else { %>⚠️未连接<% } %> </span>",
+          "type": "mapping",
+          "map": {
+            "connected": "<span class='label label-success'>已连接</span>",
+            "disconnected": "<span class='label label-danger'>未连接</span>",
+            "failed": "<span class='label label-danger'>连接失败</span>",
+            "connecting": "<span class='label label-warning'>连接中</span>",
+            "*": "<span class='label label-default'>${clusterConnectStatus}</span>"
+          },
           "popOver": {
             "showIcon": false,
             "body": {
