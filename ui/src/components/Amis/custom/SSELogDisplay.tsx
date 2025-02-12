@@ -72,6 +72,9 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     };
 
     useEffect(() => {
+        setLines([]); // 清空日志
+        setErrorMessage('');
+
         connectSSE();
 
         return () => {
@@ -81,15 +84,15 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
 
     return (
-        <div ref={dom} style={{whiteSpace: 'pre-wrap'}}>
+        <div ref={dom} style={{whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px',}}>
             {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
+            {lines && <div>当前展示共计：{lines.length}行</div>}
 
             {lines.map((line, index) => (
-                <div key={index} style={{display: 'flex', alignItems: 'center'}}>
-
-                    <span>{line}</span>
-                </div>
-            ))}
+                <pre key={index} style={{whiteSpace: 'pre-wrap'}}>
+                    <div>{line}</div>
+                </pre>))
+            }
         </div>
     );
 });
