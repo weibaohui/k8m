@@ -439,12 +439,6 @@
                                 }
                               }
                             ],
-                            "toolbar": [
-                              {
-                                "type": "tpl",
-                                "tpl": ""
-                              }
-                            ],
                             "body": [
                               {
                                 "type": "service",
@@ -514,6 +508,15 @@
                                       "breaks": true
                                     },
                                     "visibleOn": "${translate}"
+                                  },
+                                  {
+                                    "type": "container",
+                                    "body": [
+                                      {
+                                        "type": "tpl",
+                                        "tpl": "<div style='height:80vh'>&nbsp</div>"
+                                      }
+                                    ]
                                   }
                                 ]
                               }
