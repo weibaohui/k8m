@@ -7,6 +7,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -32,7 +33,7 @@ func OptionList(c *gin.Context) {
 			name = "InCluster"
 		}
 		flag := "✅"
-		if cluster.ServerVersion == "" {
+		if cluster.ClusterConnectStatus != constants.ClusterConnectStatusConnected {
 			flag = "⚠️"
 		}
 		options = append(options, map[string]interface{}{

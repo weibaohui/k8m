@@ -11,6 +11,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/watch"
@@ -25,16 +26,6 @@ type clusterService struct {
 	AggregateDelaySeconds int              // 聚合延迟时间
 }
 
-// ClusterConnectStatus 集群连接状态
-type ClusterConnectStatus string
-
-const (
-	ClusterConnectStatusConnected    ClusterConnectStatus = "connected"    // 已连接
-	ClusterConnectStatusDisconnected ClusterConnectStatus = "disconnected" // 未连接
-	ClusterConnectStatusFailed       ClusterConnectStatus = "failed"       // 连接失败
-	ClusterConnectStatusConnecting   ClusterConnectStatus = "connecting"   // 连接中
-)
-
 type ClusterConfig struct {
 	FileName             string                         `json:"fileName,omitempty"`             // kubeconfig 文件名称
 	ContextName          string                         `json:"contextName,omitempty"`          // context名称
@@ -48,7 +39,7 @@ type ClusterConfig struct {
 	PodStatusAggregated  bool                           `json:"podStatusAggregated,omitempty"`  // 是否已聚合容器组状态
 	PVCStatusAggregated  bool                           `json:"pvcStatusAggregated,omitempty"`  // 是否已聚合pcv状态
 	PVStatusAggregated   bool                           `json:"pvStatusAggregated,omitempty"`   // 是否已聚合pv状态
-	ClusterConnectStatus ClusterConnectStatus           `json:"clusterConnectStatus,omitempty"` // 集群连接状态
+	ClusterConnectStatus constants.ClusterConnectStatus `json:"clusterConnectStatus,omitempty"` // 集群连接状态
 	IsInCluster          bool                           `json:"isInCluster,omitempty"`          // 是否为集群内运行获取到的配置
 	watchStatus          map[string]*clusterWatchStatus // watch 类型为key，比如pod,deploy,node,pvc,sc
 	restConfig           *rest.Config                   // 直连rest.Config
@@ -131,7 +122,7 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 // IsConnected 判断集群是否连接
 func (c *clusterService) IsConnected(selectedCluster string) bool {
 	cluster := c.GetClusterByID(selectedCluster)
-	connected := cluster.ServerVersion != ""
+	connected := cluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected
 	return connected
 }
 
@@ -155,10 +146,11 @@ func (c *clusterService) Connect(fileName string, contextName string) {
 	// 先清除原来的状态
 	for _, clusterConfig := range c.clusterConfigs {
 		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
+			klog.V(4).Infof("Connect 发现原集群，清理集群 %s %s 原始信息", fileName, contextName)
 			clusterConfig.ServerVersion = ""
 			clusterConfig.restConfig = nil
 			clusterConfig.Err = ""
-			clusterConfig.ClusterConnectStatus = ClusterConnectStatusDisconnected
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
 			c.RegisterCluster(clusterConfig)
 		}
 	}
@@ -167,11 +159,14 @@ func (c *clusterService) Connect(fileName string, contextName string) {
 
 // Disconnect 断开连接
 func (c *clusterService) Disconnect(fileName string, contextName string) {
+	klog.V(4).Infof("Disconnect 清理集群 %s %s 原始信息", fileName, contextName)
+
 	// 先清除原来的状态
 	cc := c.GetClusterByID(fmt.Sprintf("%s/%s", fileName, contextName))
 	cc.ServerVersion = ""
 	cc.restConfig = nil
 	cc.Err = ""
+	cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
 	for _, v := range cc.watchStatus {
 		if v.Watcher != nil {
 			v.Watcher.Stop()
@@ -194,7 +189,7 @@ func (c *clusterService) AllClusters() []*ClusterConfig {
 // ConnectedClusters 获取已连接的集群
 func (c *clusterService) ConnectedClusters() []*ClusterConfig {
 	connected := slice.Filter(c.AllClusters(), func(index int, item *ClusterConfig) bool {
-		return item.ClusterConnectStatus == ClusterConnectStatusConnected
+		return item.ClusterConnectStatus == constants.ClusterConnectStatusConnected
 	})
 	return connected
 }
@@ -277,7 +272,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 				Namespace:            context.Namespace,
 				kubeConfig:           content,
 				watchStatus:          make(map[string]*clusterWatchStatus),
-				ClusterConnectStatus: ClusterConnectStatusDisconnected,
+				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
@@ -331,13 +326,14 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 			cluster := config.Clusters[context.Cluster]
 
 			clusterConfig := &ClusterConfig{
-				FileName:    file.Name(),
-				ContextName: contextName,
-				UserName:    context.AuthInfo,
-				ClusterName: context.Cluster,
-				Namespace:   context.Namespace,
-				kubeConfig:  content,
-				watchStatus: make(map[string]*clusterWatchStatus), ClusterConnectStatus: ClusterConnectStatusDisconnected,
+				FileName:             file.Name(),
+				ContextName:          contextName,
+				UserName:             context.AuthInfo,
+				ClusterName:          context.Cluster,
+				Namespace:            context.Namespace,
+				kubeConfig:           content,
+				watchStatus:          make(map[string]*clusterWatchStatus),
+				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
@@ -357,11 +353,11 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 
 // RegisterCluster 从已扫描的集群列表中注册指定的某个集群
 func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, error) {
-	clusterConfig.ClusterConnectStatus = ClusterConnectStatusConnecting
+	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
 	clusterID := clusterConfig.GetClusterID()
 	err := c.LoadRestConfig(clusterConfig)
 	if err != nil {
-		clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
+		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 		clusterConfig.Err = err.Error()
 		return false, err
 	}
@@ -370,7 +366,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 		_, err := kom.Clusters().RegisterInCluster()
 		if err != nil {
 			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
-			clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
@@ -379,13 +375,13 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
 		if err != nil {
 			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
-			clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
 	}
 	klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
-	clusterConfig.ClusterConnectStatus = ClusterConnectStatusConnected
+	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 	return true, nil
 }
 
@@ -412,7 +408,7 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	if err != nil {
 		klog.V(6).Infof("创建clientset失败 %s: %v", config.GetClusterID(), err)
 		config.Err = err.Error()
-		config.ClusterConnectStatus = ClusterConnectStatusFailed
+		config.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 		return err
 	}
 
@@ -421,11 +417,10 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	if err != nil {
 		klog.V(6).Infof("连接集群失败 %s: %v", config.GetClusterID(), err)
 		config.Err = err.Error()
-		config.ClusterConnectStatus = ClusterConnectStatusFailed
+		config.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 		return err
 	}
 	klog.V(6).Infof("LoadRestConfig 获取集群 版本成功 %s", config.GetClusterID())
-	// 可以连接的放到数组中记录
 	config.ServerVersion = info.GitVersion
 	config.restConfig = restConfig
 	return err
@@ -453,7 +448,7 @@ func (c *clusterService) RegisterInCluster() {
 		IsInCluster:          true,
 		restConfig:           config,
 		watchStatus:          make(map[string]*clusterWatchStatus),
-		ClusterConnectStatus: ClusterConnectStatusDisconnected,
+		ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 	}
 
 	c.AddToClusterList(clusterConfig)
