@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
+	"k8s.io/klog/v2"
 )
 
 func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
@@ -62,6 +64,23 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				false,                       // 是否仅 HTTPS
 				false,                       // 是否 HttpOnly
 			)
+		}
+
+		// 如果设置了sc，但是不能用
+		if !service.ClusterService().IsConnected(sc) {
+			// 前端跳转到集群选择页面
+			// 所以要排除集群页面的路径
+			klog.V(6).Infof("c.Request.URL.Path=%s", c.Request.URL.Path)
+			if !(c.Request.URL.Path == "/k8s/cluster/file/option_list" ||
+				c.Request.URL.Path == "/k8s/cluster/all" ||
+				strings.Contains(c.Request.URL.Path, "/k8s/cluster/reconnect") ||
+				strings.Contains(c.Request.URL.Path, "/k8s/cluster/setDefault")) {
+				c.JSON(512, gin.H{
+					"msg": sc,
+				})
+				c.Abort()
+			}
+
 		}
 		// 继续处理下一个中间件或最终路由
 		c.Next()
