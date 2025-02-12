@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Tabs, Button, Tooltip, List, Input, Modal } from '@arco-design/web-react';
-import { IconEye, IconStar, IconDelete } from '@arco-design/web-react/icon';
+import { IconEye, IconStar, IconDelete, IconExport } from '@arco-design/web-react/icon';
 import axios from 'axios';
 
 const HistoryRecords = () => {
@@ -111,7 +111,7 @@ const HistoryRecords = () => {
                     <div
                         onClick={() => handleNameEdit(record, index)}
                         style={{
-                            maxWidth: '120px',
+                            maxWidth: '200px',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -169,6 +169,11 @@ const HistoryRecords = () => {
                                 updateLocalStorage();
                             }}
                         />
+                        <Button
+                            type="text"
+                            icon={<IconExport style={{ fontSize: '14px' }} />}
+                            onClick={() => setSelectedRecord(record)}
+                        />
                     </Button.Group>
                 </div>
             </div>
@@ -177,7 +182,7 @@ const HistoryRecords = () => {
 
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: '#FFFFFF' }}>
-            <div style={{ width: '250px', padding: '10px', backgroundColor: '#FFFFFF' }}>
+            <div style={{ width: '350px', padding: '10px', backgroundColor: '#FFFFFF' }}>
                 <style>
                     {`
                     .highlight-animation {
