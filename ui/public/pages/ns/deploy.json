@@ -3280,10 +3280,6 @@
                           "title": "可调度主机",
                           "body": [
                             {
-                              "type": "tpl",
-                              "tpl": "当前主机：${spec.nodeName}"
-                            },
-                            {
                               "loadDataOnce": true,
                               "headerToolbar": [
                                 "reload"
