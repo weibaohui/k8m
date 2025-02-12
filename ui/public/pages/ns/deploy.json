@@ -33,8 +33,6 @@
                 "type": "page",
                 "asideResizor": true,
                 "asideSticky": false,
-                "asideMinWidth": 300,
-                "asideMaxWidth": 600,
                 "aside": [
                   {
                     "type": "input-tree",
@@ -517,8 +515,6 @@
                             "type": "page",
                             "asideResizor": true,
                             "asideSticky": false,
-                            "asideMinWidth": 300,
-                            "asideMaxWidth": 600,
                             "aside": [
                               {
                                 "type": "input-tree",
@@ -1179,8 +1175,6 @@
                                                   "type": "page",
                                                   "asideResizor": true,
                                                   "asideSticky": false,
-                                                  "asideMinWidth": 300,
-                                                  "asideMaxWidth": 600,
                                                   "aside": [
                                                     {
                                                       "type": "input-tree",
@@ -1469,8 +1463,6 @@
                                                   "type": "page",
                                                   "asideResizor": true,
                                                   "asideSticky": false,
-                                                  "asideMinWidth": 300,
-                                                  "asideMaxWidth": 600,
                                                   "aside": [
                                                     {
                                                       "type": "input-tree",
@@ -1828,8 +1820,6 @@
                                                   "type": "page",
                                                   "asideResizor": true,
                                                   "asideSticky": false,
-                                                  "asideMinWidth": 300,
-                                                  "asideMaxWidth": 600,
                                                   "aside": [
                                                     {
                                                       "type": "input-tree",
@@ -2135,8 +2125,6 @@
                                                   "type": "page",
                                                   "asideResizor": true,
                                                   "asideSticky": false,
-                                                  "asideMinWidth": 300,
-                                                  "asideMaxWidth": 600,
                                                   "aside": [
                                                     {
                                                       "type": "input-tree",
@@ -2452,8 +2440,6 @@
                                                   "type": "page",
                                                   "asideResizor": true,
                                                   "asideSticky": false,
-                                                  "asideMinWidth": 300,
-                                                  "asideMaxWidth": 600,
                                                   "aside": [
                                                     {
                                                       "type": "input-tree",
@@ -2782,8 +2768,6 @@
                                                   "type": "page",
                                                   "asideResizor": true,
                                                   "asideSticky": false,
-                                                  "asideMinWidth": 300,
-                                                  "asideMaxWidth": 600,
                                                   "aside": [
                                                     {
                                                       "type": "input-tree",
@@ -3083,8 +3067,6 @@
                                                   "type": "page",
                                                   "asideResizor": true,
                                                   "asideSticky": false,
-                                                  "asideMinWidth": 300,
-                                                  "asideMaxWidth": 600,
                                                   "aside": [
                                                     {
                                                       "type": "input-tree",
