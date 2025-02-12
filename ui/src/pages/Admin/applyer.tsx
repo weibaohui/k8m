@@ -111,7 +111,7 @@ const HistoryRecords = () => {
                     <div
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleNameEdit(record, index);
+                            handleNameEdit(record, isFavorites ? index + (currentFavoritePage - 1) * pageSize : index);
                         }}
                         style={{
                             maxWidth: '200px',
