@@ -46,7 +46,7 @@
                     },
                     "heightAuto": true,
                     "inputClassName": "no-border no-padder mt-1",
-                    "source": "get:/k8s/doc/kind/${kind}/group/${group}/version/${version}",
+                    "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
                     "onEvent": {
                       "change": {
                         "actions": [
@@ -73,12 +73,6 @@
                         ]
                       }
                     }
-                  }
-                ],
-                "toolbar": [
-                  {
-                    "type": "tpl",
-                    "tpl": ""
                   }
                 ],
                 "body": [
@@ -150,6 +144,15 @@
                           "breaks": true
                         },
                         "visibleOn": "${translate}"
+                      },
+                      {
+                        "type": "container",
+                        "body": [
+                          {
+                            "type": "tpl",
+                            "tpl": "<div style='height:80vh'>&nbsp</div>"
+                          }
+                        ]
                       }
                     ]
                   }
