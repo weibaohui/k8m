@@ -80,8 +80,15 @@ const HistoryRecords = () => {
 
     const handleNameEdit = (recordId: string) => {
         const record = records.find(r => r.id === recordId);
-        setEditingId(recordId);
-        setEditingName(record?.customName || '');
+        if (record) {
+            console.log('edit', record);
+            setEditingId(record.id);
+            setEditingName(record.customName || '');
+        } else {
+            console.log('edit null', recordId);
+            setEditingId(null); // 如果记录不存在，设置为 null
+            setEditingName(''); // 清空编辑名称
+        }
     };
 
     const handleNameSubmit = (recordId: string) => {
@@ -102,6 +109,11 @@ const HistoryRecords = () => {
     const renderRecord = (record: RecordItem) => (
         <List.Item key={record.id} data-record-id={record.id} className="list-item">
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
+                {
+                    <>
+                        <div>{(record.id === editingId) ? "true" : 'false'} xxxx </div>
+                    </>
+                }
                 {editingId === record.id ? (
                     <Input
                         autoFocus
