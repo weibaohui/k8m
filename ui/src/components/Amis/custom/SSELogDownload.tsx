@@ -1,5 +1,6 @@
 import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
 import React from "react";
+import { Button } from '@arco-design/web-react';
 
 // 定义组件的 props 类型
 interface SSEDownloadProps {
@@ -28,7 +29,7 @@ const SSELogDownloadComponent = React.forwardRef((props: SSEDownloadProps, _) =>
     // @ts-ignore
     finalUrl = appendQueryParam(finalUrl, params);
     const token = localStorage.getItem('token');
-    //拼接url token
+    // 拼接 url token
     finalUrl = finalUrl + (finalUrl.includes('?') ? '&' : '?') + `token=${token}`;
 
     const handleDownload = () => {
@@ -44,29 +45,22 @@ const SSELogDownloadComponent = React.forwardRef((props: SSEDownloadProps, _) =>
         // 监听下载结束后取消提示
         setTimeout(() => {
             setDownloading(false);
-        }, 1000); // 1秒后关闭提示
+        }, 1000); // 1 秒后关闭提示
     };
 
     return (
-        <div>
-            {downloading && (
-                <p style={{ color: 'red', marginBottom: '10px' }}>正在下载，请稍后...</p>
-            )}
-            <button
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+        }}>
+            <Button
                 onClick={handleDownload}
-                style={{
-                    marginLeft: '10px',
-                    padding: '8px 16px',
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                    borderRadius: '4px'
-                }}
+                type="primary"
+                loading={downloading}
             >
                 下载日志
-            </button>
-        </div>
+            </Button>
+        </div >
     );
 });
 

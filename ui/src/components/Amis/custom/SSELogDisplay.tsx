@@ -50,7 +50,9 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
             const newLine = event.data;
             setLines((prevLines) => [...prevLines, newLine]);
         });
-
+        eventSourceRef.current.addEventListener('open', (_) => {
+            setErrorMessage('Connected');
+        });
         eventSourceRef.current.addEventListener('error', (_) => {
             if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
                 setErrorMessage('无日志 连接已关闭');
@@ -74,9 +76,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     useEffect(() => {
         setLines([]); // 清空日志
         setErrorMessage('');
-
         connectSSE();
-
         return () => {
             disconnectSSE();
         };
@@ -84,17 +84,15 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
 
     return (
-        <div ref={dom} style={{ whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px', }}>
-            {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
-            {lines && <div>当前展示共计：{lines.length}行</div>}
+        <div ref={dom} style={{ whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px' }}>
+            {errorMessage && <div style={{ color: errorMessage == "Connected" ? '#00FF00' : 'red' }}>{errorMessage} 共计：{lines.length}行</div>}
 
             <pre style={{ whiteSpace: 'pre-wrap' }}>
-
+                {lines.map((line, index) => (
+                    <div key={index}>{line}</div>
+                ))
+                }
             </pre>
-            {lines.map((line, index) => (
-                <div key={index}>{line}</div>
-            ))
-            }
         </div>
     );
 });
