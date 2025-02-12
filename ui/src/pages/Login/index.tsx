@@ -1,11 +1,11 @@
-import {Form, Input, Button, Checkbox, Message} from '@arco-design/web-react'
-import {useNavigate} from 'react-router-dom'
+import { Form, Input, Button, Checkbox, Message } from '@arco-design/web-react'
+import { useNavigate } from 'react-router-dom'
 import {
     IconUser,
     IconLock
 } from '@arco-design/web-react/icon'
 import styles from './index.module.scss'
-import {useCallback, useEffect} from 'react'
+import { useCallback, useEffect } from 'react'
 
 // @ts-ignore
 import CryptoJS from "crypto-js";
@@ -107,24 +107,31 @@ const Login = () => {
             }
         });
     }, [navigate, form]);
-    return <section className={styles.login}>
+    return <section className={styles.login}  >
         <div className={styles.content}>
             <Form
                 form={form}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        onSubmit();
+                    }
+                }}
+
                 // initialValues={{
                 //     username: 'admin',
                 //     password: '123456'
                 // }}
                 className={styles.form} autoComplete='off'>
                 <div>
-                    <h2 style={{color: '#666', fontSize: '24px', marginBottom: 20}}>欢迎登录</h2>
+                    <h2 style={{ color: '#666', fontSize: '24px', marginBottom: 20 }}>欢迎登录</h2>
                 </div>
-                <FormItem field={'username'} rules={[{required: true}]}>
-                    <Input placeholder='请输入用户名' prefix={<IconUser/>}/>
+                <FormItem field={'username'} rules={[{ required: true }]}>
+                    <Input placeholder='请输入用户名' prefix={<IconUser />} />
                 </FormItem>
-                <FormItem field={'password'} rules={[{required: true}]}>
+                <FormItem field={'password'} rules={[{ required: true }]}>
                     <Input.Password
-                        prefix={<IconLock/>}
+                        prefix={<IconLock />}
                         defaultVisibility={false}
                         placeholder='请输入密码'
                     />
