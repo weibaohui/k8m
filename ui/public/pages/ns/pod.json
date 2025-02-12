@@ -757,45 +757,37 @@
                   "type": "button",
                   "icon": "fa fa-terminal text-primary",
                   "label": "进入容器",
-                  "actionType": "dialog",
-                  "dialog": {
+                  "actionType": "drawer",
+                  "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
+                    "width": "100%",
                     "title": "选择容器 (ESC 关闭)",
                     "body": [
                       {
-                        "type": "select",
-                        "name": "containerName",
-                        "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                        "value": "${spec.containers[0].name}",
-                        "required": true
-                      },
-                      {
-                        "type": "button",
-                        "label": "确定",
-                        "level": "primary",
-                        "actionType": "drawer",
-                        "drawer": {
-                          "closeOnOutside": true,
-                          "closeOnEsc": true,
-                          "size": "xl",
-                          "title": "${metadata.namespace}/${metadata.name} 容器 ${containerName}   (ESC 关闭)",
-                          "body": [
-                            {
-                              "type": "page",
-                              "body": [
-                                {
-                                  "type": "xterm",
-                                  "id": "xterm",
-                                  "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}",
-                                  "params": {
-                                    "container_name": "${containerName}"
-                                  }
-                                }
-                              ]
+                        "type": "container",
+                        "body": [
+                          {
+                            "type": "select",
+                            "label": "容器",
+                            "name": "containerName",
+                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                            "value": "${spec.containers[0].name}",
+                            "required": true,
+                            "style": {
+                              "width": "300px"
                             }
-                          ]
-                        }
+                          },
+                          {
+                            "type": "xterm",
+                            "id": "xterm",
+                            "name": "xterm",
+                            "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}",
+                            "params": {
+                              "container_name": "${containerName}"
+                            }
+                          }
+                        ]
                       }
                     ],
                     "actions": []
