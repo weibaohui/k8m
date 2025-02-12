@@ -96,9 +96,9 @@ const HistoryRecords = () => {
     };
 
     const renderRecord = (record: string, index: number, isFavorites: boolean = false) => (
-        <List.Item key={index} data-record-index={index} className="list-item">
+        <List.Item key={index} data-record-index={isFavorites ? `fav-${index}` : index} className="list-item">
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
-                {editingIndex === index ? (
+                {editingIndex === (isFavorites ? `fav-${index}` : index) ? (
                     <Input
                         autoFocus
                         value={editingName}
@@ -111,7 +111,7 @@ const HistoryRecords = () => {
                     <div
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleNameEdit(record, isFavorites ? index + (currentFavoritePage - 1) * pageSize : index);
+                            handleNameEdit(record, index);
                         }}
                         style={{
                             maxWidth: '200px',
