@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {appendQueryParam, replacePlaceholders} from "@/utils/utils.ts";
+import React, { useEffect, useRef, useState } from 'react';
+import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -84,14 +84,16 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
 
     return (
-        <div ref={dom} style={{whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px',}}>
-            {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
+        <div ref={dom} style={{ whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px', }}>
+            {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
             {lines && <div>当前展示共计：{lines.length}行</div>}
 
+            <pre style={{ whiteSpace: 'pre-wrap' }}>
+
+            </pre>
             {lines.map((line, index) => (
-                <pre key={index} style={{whiteSpace: 'pre-wrap'}}>
-                    <div>{line}</div>
-                </pre>))
+                <div key={index}>{line}</div>
+            ))
             }
         </div>
     );
