@@ -135,6 +135,7 @@
             "*": "<span class='label label-default'>${clusterConnectStatus}</span>"
           },
           "popOver": {
+            "trigger": "hover",
             "showIcon": false,
             "body": {
               "mode": "dialog",
