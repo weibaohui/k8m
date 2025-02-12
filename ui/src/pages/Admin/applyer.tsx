@@ -12,14 +12,19 @@ const HistoryRecords = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
+    const [customNames, setCustomNames] = useState<Record<string, string>>({});
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingName, setEditingName] = useState('');
     const pageSize = 10;
 
     // 从 localStorage 获取历史记录和收藏记录
     useEffect(() => {
         const all = localStorage.getItem('allRecords');
         const favorites = localStorage.getItem('favoriteRecords');
+        const names = localStorage.getItem('customNames');
         setAllRecords(all ? JSON.parse(all) : []);
         setFavoriteRecords(favorites ? JSON.parse(favorites) : []);
+        setCustomNames(names ? JSON.parse(names) : {});
     }, []);
 
     // 更新 localStorage 中的数据
@@ -27,8 +32,9 @@ const HistoryRecords = () => {
         return () => {
             localStorage.setItem('allRecords', JSON.stringify(allRecords));
             localStorage.setItem('favoriteRecords', JSON.stringify(favoriteRecords));
+            localStorage.setItem('customNames', JSON.stringify(customNames));
         };
-    }, [allRecords, favoriteRecords]);
+    }, [allRecords, favoriteRecords, customNames]);
 
     // 收藏某条记录
     const toggleFavorite = (record: string) => {
@@ -72,9 +78,105 @@ const HistoryRecords = () => {
         updateLocalStorage();
     };
 
+    const handleNameEdit = (record: string, index: number) => {
+        setEditingIndex(index);
+        setEditingName(customNames[record] || '');
+    };
+
+    const handleNameSubmit = (record: string) => {
+        if (editingName.trim()) {
+            setCustomNames(prev => ({
+                ...prev,
+                [record]: editingName.trim()
+            }));
+        }
+        setEditingIndex(null);
+        setEditingName('');
+        updateLocalStorage();
+    };
+
+    const renderRecord = (record: string, index: number, isFavorites: boolean = false) => (
+        <List.Item key={index} data-record-index={index} className="list-item">
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
+                {editingIndex === index ? (
+                    <Input
+                        autoFocus
+                        value={editingName}
+                        onChange={setEditingName}
+                        onBlur={() => handleNameSubmit(record)}
+                        onPressEnter={() => handleNameSubmit(record)}
+                        style={{ maxWidth: '120px' }}
+                    />
+                ) : (
+                    <div
+                        onClick={() => handleNameEdit(record, index)}
+                        style={{
+                            maxWidth: '120px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            cursor: 'pointer',
+                            flex: 1,
+                            zIndex: 2
+                        }}
+                    >
+                        {customNames[record] || record}
+                    </div>
+                )}
+                <div style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                    {favoriteRecords.includes(record) && (
+                        <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
+                    )}
+                </div>
+                <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px', backgroundColor: '#FFFFFF' }}>
+                    <Button.Group>
+                        <Button
+                            type="text"
+                            icon={<IconEye style={{ fontSize: '14px' }} />}
+                            onClick={() => {
+                                setViewRecord(record);
+                                setIsModalVisible(true);
+                            }}
+                        />
+                        <Button
+                            type="text"
+                            icon={<IconStar style={{ color: favoriteRecords.includes(record) ? '#FFB400' : '#86909C', fill: favoriteRecords.includes(record) ? '#FFB400' : 'none', fontSize: '14px' }} />}
+                            onClick={() => {
+                                if (favoriteRecords.includes(record)) {
+                                    Modal.confirm({
+                                        title: '确认取消收藏',
+                                        content: '确定要取消收藏这条记录吗？',
+                                        onOk: () => toggleFavorite(record)
+                                    });
+                                } else {
+                                    toggleFavorite(record);
+                                }
+                            }}
+                        />
+                        <Button
+                            type="text"
+                            icon={<IconDelete style={{ fontSize: '14px' }} />}
+                            onClick={() => {
+                                const updatedAllRecords = allRecords.filter(item => item !== record);
+                                setAllRecords(updatedAllRecords);
+                                if (favoriteRecords.includes(record)) {
+                                    const updatedFavoriteRecords = favoriteRecords.filter(item => item !== record);
+                                    setFavoriteRecords(updatedFavoriteRecords);
+                                }
+                                const newCustomNames = { ...customNames };
+                                delete newCustomNames[record];
+                                setCustomNames(newCustomNames);
+                                updateLocalStorage();
+                            }}
+                        />
+                    </Button.Group>
+                </div>
+            </div>
+        </List.Item>
+    );
+
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: '#FFFFFF' }}>
-            {/* 左侧历史记录部分 */}
             <div style={{ width: '250px', padding: '10px', backgroundColor: '#FFFFFF' }}>
                 <style>
                     {`
@@ -99,64 +201,7 @@ const HistoryRecords = () => {
                     <Tabs.TabPane title="所有" key="all">
                         <List
                             dataSource={allRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
-                            render={(record, index) => (
-                                <List.Item key={index} data-record-index={index} className="list-item">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
-                                        <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
-                                            {record}
-                                        </span>
-                                        <div style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
-                                            {favoriteRecords.includes(record) && (
-                                                <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
-                                            )}
-                                        </div>
-                                        <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px', backgroundColor: '#FFFFFF' }}>
-                                            <Button.Group >
-                                                <Button
-
-                                                    type="text"
-                                                    icon={<IconEye style={{ fontSize: '14px' }} />}
-
-                                                    onClick={() => {
-                                                        setViewRecord(record);
-                                                        setIsModalVisible(true);
-                                                    }}
-                                                />
-                                                <Button
-                                                    type="text"
-                                                    icon={<IconStar style={{ color: favoriteRecords.includes(record) ? '#FFB400' : '#86909C', fill: favoriteRecords.includes(record) ? '#FFB400' : 'none', fontSize: '14px' }} />}
-
-                                                    onClick={() => {
-                                                        if (favoriteRecords.includes(record)) {
-                                                            Modal.confirm({
-                                                                title: '确认取消收藏',
-                                                                content: '确定要取消收藏这条记录吗？',
-                                                                onOk: () => toggleFavorite(record)
-                                                            });
-                                                        } else {
-                                                            toggleFavorite(record);
-                                                        }
-                                                    }}
-                                                />
-                                                <Button
-                                                    type="text"
-                                                    icon={<IconDelete style={{ fontSize: '14px' }} />}
-
-                                                    onClick={() => {
-                                                        const updatedAllRecords = allRecords.filter(item => item !== record);
-                                                        setAllRecords(updatedAllRecords);
-                                                        if (favoriteRecords.includes(record)) {
-                                                            const updatedFavoriteRecords = favoriteRecords.filter(item => item !== record);
-                                                            setFavoriteRecords(updatedFavoriteRecords);
-                                                        }
-                                                        updateLocalStorage();
-                                                    }}
-                                                />
-                                            </Button.Group>
-                                        </div>
-                                    </div>
-                                </List.Item>
-                            )}
+                            render={(record, index) => renderRecord(record, index)}
                         />
                         <div style={{ marginTop: '16px', textAlign: 'right' }}>
                             <Button.Group>
@@ -183,53 +228,7 @@ const HistoryRecords = () => {
                     <Tabs.TabPane title="收藏" key="favorites">
                         <List
                             dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
-                            render={(record, index) => (
-                                <List.Item key={index} className="list-item">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
-                                        <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
-                                            {record}
-                                        </span>
-                                        <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px', backgroundColor: '#FFFFFF' }}>
-                                            <Button.Group>
-                                                <Button
-                                                    type="text"
-                                                    icon={<IconEye />}
-                                                    onClick={() => {
-                                                        setViewRecord(record);
-                                                        setIsModalVisible(true);
-                                                    }}
-                                                />
-                                                <Button
-                                                    type="text"
-                                                    icon={<IconStar style={{ color: favoriteRecords.includes(record) ? '#FFB400' : '#86909C', fill: favoriteRecords.includes(record) ? '#FFB400' : 'none' }} />}
-                                                    onClick={() => {
-                                                        if (favoriteRecords.includes(record)) {
-                                                            Modal.confirm({
-                                                                title: '确认取消收藏',
-                                                                content: '确定要取消收藏这条记录吗？',
-                                                                onOk: () => toggleFavorite(record)
-                                                            });
-                                                        } else {
-                                                            toggleFavorite(record);
-                                                        }
-                                                    }}
-                                                />
-                                                <Button
-                                                    type="text"
-                                                    icon={<IconDelete />}
-                                                    onClick={() => {
-                                                        const updatedAllRecords = allRecords.filter(item => item !== record);
-                                                        setAllRecords(updatedAllRecords);
-                                                        const updatedFavoriteRecords = favoriteRecords.filter(item => item !== record);
-                                                        setFavoriteRecords(updatedFavoriteRecords);
-                                                        updateLocalStorage();
-                                                    }}
-                                                />
-                                            </Button.Group>
-                                        </div>
-                                    </div>
-                                </List.Item>
-                            )}
+                            render={(record, index) => renderRecord(record, index, true)}
                         />
                         <div style={{ marginTop: '16px', textAlign: 'right' }}>
                             <Button.Group>
@@ -256,7 +255,6 @@ const HistoryRecords = () => {
                 </Tabs>
             </div>
 
-            {/* 右侧编辑区域 */}
             <div style={{ flex: 1, padding: '10px', backgroundColor: '#FFFFFF' }}>
                 <Input.TextArea
                     value={selectedRecord}
@@ -272,7 +270,6 @@ const HistoryRecords = () => {
                 </Button>
             </div>
 
-            {/* 查看记录的弹窗 */}
             <Modal
                 title="查看记录"
                 visible={isModalVisible}
