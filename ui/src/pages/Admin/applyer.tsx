@@ -113,10 +113,7 @@ const HistoryRecords = () => {
                     />
                 ) : (
                     <div
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleNameEdit(record.id);
-                        }}
+                        onClick={() => handleNameEdit(record.id)}
                         style={{
                             maxWidth: '200px',
                             overflow: 'hidden',
@@ -130,7 +127,7 @@ const HistoryRecords = () => {
                         {record.customName || record.content}
                     </div>
                 )}
-                <div style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                <div style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', zIndex: 1, pointerEvents: 'none', backgroundColor: '#FFFFFF' }}>
                     {record.isFavorite && (
                         <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
                     )}
