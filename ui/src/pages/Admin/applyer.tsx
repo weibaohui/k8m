@@ -10,6 +10,9 @@ const HistoryRecords = () => {
     const [selectedRecord, setSelectedRecord] = useState<string>('');
     const [viewRecord, setViewRecord] = useState<string>('');
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
+    const pageSize = 10;
 
     // 从 localStorage 获取历史记录和收藏记录
     useEffect(() => {
@@ -95,7 +98,7 @@ const HistoryRecords = () => {
                 <Tabs defaultActiveTab="all">
                     <Tabs.TabPane title="所有" key="all">
                         <List
-                            dataSource={allRecords}
+                            dataSource={allRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
                             render={(record, index) => (
                                 <List.Item key={index} data-record-index={index} className="list-item">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
@@ -146,10 +149,31 @@ const HistoryRecords = () => {
                                 </List.Item>
                             )}
                         />
+                        <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                            <Button.Group>
+                                <Button
+                                    type="secondary"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                >
+                                    上一页
+                                </Button>
+                                <Button type="secondary" disabled>
+                                    {currentPage}/{Math.ceil(allRecords.length / pageSize)}
+                                </Button>
+                                <Button
+                                    type="secondary"
+                                    disabled={currentPage >= Math.ceil(allRecords.length / pageSize)}
+                                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allRecords.length / pageSize), prev + 1))}
+                                >
+                                    下一页
+                                </Button>
+                            </Button.Group>
+                        </div>
                     </Tabs.TabPane>
                     <Tabs.TabPane title="收藏" key="favorites">
                         <List
-                            dataSource={favoriteRecords}
+                            dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
                             render={(record, index) => (
                                 <List.Item key={index} className="list-item">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
@@ -198,6 +222,27 @@ const HistoryRecords = () => {
                                 </List.Item>
                             )}
                         />
+                        <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                            <Button.Group>
+                                <Button
+                                    type="secondary"
+                                    disabled={currentFavoritePage === 1}
+                                    onClick={() => setCurrentFavoritePage(prev => Math.max(1, prev - 1))}
+                                >
+                                    上一页
+                                </Button>
+                                <Button type="secondary" disabled>
+                                    {currentFavoritePage}/{Math.ceil(favoriteRecords.length / pageSize)}
+                                </Button>
+                                <Button
+                                    type="secondary"
+                                    disabled={currentFavoritePage >= Math.ceil(favoriteRecords.length / pageSize)}
+                                    onClick={() => setCurrentFavoritePage(prev => Math.min(Math.ceil(favoriteRecords.length / pageSize), prev + 1))}
+                                >
+                                    下一页
+                                </Button>
+                            </Button.Group>
+                        </div>
                     </Tabs.TabPane>
                 </Tabs>
             </div>
