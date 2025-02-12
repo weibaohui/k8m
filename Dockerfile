@@ -1,4 +1,4 @@
-FROM golang:1.24-rc-alpine AS builder
+FROM golang:alpine AS builder
 ARG VERSION
 ARG GIT_COMMIT
 ARG MODEL
