@@ -70,11 +70,12 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		if !service.ClusterService().IsConnected(sc) {
 			// 前端跳转到集群选择页面
 			// 所以要排除集群页面的路径
-			klog.V(6).Infof("c.Request.URL.Path=%s", c.Request.URL.Path)
-			if !(c.Request.URL.Path == "/k8s/cluster/file/option_list" ||
-				c.Request.URL.Path == "/k8s/cluster/all" ||
-				strings.Contains(c.Request.URL.Path, "/k8s/cluster/reconnect") ||
-				strings.Contains(c.Request.URL.Path, "/k8s/cluster/setDefault")) {
+			path := c.Request.URL.Path
+			klog.V(6).Infof("c.Request.URL.Path=%s", path)
+			if !(strings.Contains(path, "/cluster/file/option_list") ||
+				strings.Contains(path, "/cluster/all") ||
+				strings.Contains(path, "/cluster/reconnect") ||
+				strings.Contains(path, "/cluster/setDefault")) {
 				c.JSON(512, gin.H{
 					"msg": sc,
 				})
