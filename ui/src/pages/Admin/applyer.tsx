@@ -110,11 +110,13 @@ const HistoryRecords = () => {
                                                 <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
                                             )}
                                         </div>
-                                        <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px' }}>
-                                            <Button.Group>
+                                        <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px', backgroundColor: '#FFFFFF' }}>
+                                            <Button.Group >
                                                 <Button
+
                                                     type="text"
-                                                    icon={<IconEye />}
+                                                    icon={<IconEye style={{ fontSize: '14px' }} />}
+
                                                     onClick={() => {
                                                         setViewRecord(record);
                                                         setIsModalVisible(true);
@@ -122,7 +124,8 @@ const HistoryRecords = () => {
                                                 />
                                                 <Button
                                                     type="text"
-                                                    icon={<IconStar style={{ color: favoriteRecords.includes(record) ? '#FFB400' : '#86909C', fill: favoriteRecords.includes(record) ? '#FFB400' : 'none' }} />}
+                                                    icon={<IconStar style={{ color: favoriteRecords.includes(record) ? '#FFB400' : '#86909C', fill: favoriteRecords.includes(record) ? '#FFB400' : 'none', fontSize: '14px' }} />}
+
                                                     onClick={() => {
                                                         if (favoriteRecords.includes(record)) {
                                                             Modal.confirm({
@@ -137,7 +140,8 @@ const HistoryRecords = () => {
                                                 />
                                                 <Button
                                                     type="text"
-                                                    icon={<IconDelete />}
+                                                    icon={<IconDelete style={{ fontSize: '14px' }} />}
+
                                                     onClick={() => {
                                                         const updatedAllRecords = allRecords.filter(item => item !== record);
                                                         setAllRecords(updatedAllRecords);
@@ -185,7 +189,7 @@ const HistoryRecords = () => {
                                         <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                                             {record}
                                         </span>
-                                        <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px' }}>
+                                        <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px', backgroundColor: '#FFFFFF' }}>
                                             <Button.Group>
                                                 <Button
                                                     type="text"
