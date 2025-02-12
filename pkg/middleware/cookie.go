@@ -60,7 +60,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				clusterID,                   // Cookie 默认值
 				int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天
 				"/",                         // Cookie 路径
-				"",                          // 域名，默认当前域
+				"",                          // 域名默认当前域
 				false,                       // 是否仅 HTTPS
 				false,                       // 是否 HttpOnly
 			)
@@ -72,7 +72,11 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			// 所以要排除集群页面的路径
 			path := c.Request.URL.Path
 			klog.V(6).Infof("c.Request.URL.Path=%s", path)
-			if !(strings.Contains(path, "/cluster/file/option_list") ||
+			if !(path == "/" ||
+				path == "/favicon.ico" ||
+				strings.HasPrefix(path, "/assets/") ||
+				strings.HasPrefix(path, "/public/") ||
+				strings.Contains(path, "/cluster/file/option_list") ||
 				strings.Contains(path, "/cluster/all") ||
 				strings.Contains(path, "/cluster/reconnect") ||
 				strings.Contains(path, "/cluster/setDefault")) {
