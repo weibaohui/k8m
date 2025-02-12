@@ -359,59 +359,43 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, error) {
 	clusterConfig.ClusterConnectStatus = ClusterConnectStatusConnecting
 	clusterID := clusterConfig.GetClusterID()
-
-	ok, err := c.CheckCluster(clusterConfig)
+	err := c.LoadRestConfig(clusterConfig)
 	if err != nil {
 		clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
 		clusterConfig.Err = err.Error()
 		return false, err
 	}
-	// 先检查连接是否可以直连，如果可以直连，则直接注册
-	if ok {
-		if clusterConfig.IsInCluster {
-			// InCluster模式
-			_, err := kom.Clusters().RegisterInCluster()
-			if err != nil {
-				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
-				clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
-				clusterConfig.Err = err.Error()
-				return false, err
-			}
-		} else {
-			// 集群外模式
-			_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
-			if err != nil {
-				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
-				clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
-				clusterConfig.Err = err.Error()
-				return false, err
-			}
+	if clusterConfig.IsInCluster {
+		// InCluster模式
+		_, err := kom.Clusters().RegisterInCluster()
+		if err != nil {
+			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
+			clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
+			return false, err
 		}
-		klog.V(4).Infof("成功注册集群: %s", clusterID)
-		clusterConfig.ClusterConnectStatus = ClusterConnectStatusConnected
-		return true, nil
+	} else {
+		// 集群外模式
+		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
+		if err != nil {
+			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
+			clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
+			return false, err
+		}
 	}
-	clusterConfig.ClusterConnectStatus = ClusterConnectStatusFailed
-	clusterConfig.Err = fmt.Sprintf("集群[%s]连接失败", clusterID)
-	return false, fmt.Errorf("集群[%s]连接失败", clusterID)
+	klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
+	clusterConfig.ClusterConnectStatus = ClusterConnectStatusConnected
+	return true, nil
 }
 
-// CheckCluster 校验集群是否可连接，并更新状态
-func (c *clusterService) CheckCluster(config *ClusterConfig) (bool, error) {
-	config.ClusterConnectStatus = ClusterConnectStatusConnecting
-
+// LoadRestConfig 校验集群是否可连接，并更新状态
+func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	var restConfig *rest.Config
 	var err error
-
 	if config.IsInCluster {
 		// 集群内模式
 		restConfig, err = rest.InClusterConfig()
-		if err != nil {
-			klog.V(6).Infof("获取InCluster的配置失败: %v", err)
-			config.Err = err.Error()
-			config.ClusterConnectStatus = ClusterConnectStatusFailed
-			return false, err
-		}
 	} else {
 		// 集群外模式
 		lines := strings.Split(string(config.kubeConfig), "\n")
@@ -421,23 +405,15 @@ func (c *clusterService) CheckCluster(config *ClusterConfig) (bool, error) {
 			}
 		}
 		bytes := []byte(strings.Join(lines, "\n"))
-
 		restConfig, err = clientcmd.RESTConfigFromKubeConfig(bytes)
-		if err != nil {
-			klog.V(6).Infof("解析rest.Config错误 %s: %v", config.GetClusterID(), err)
-			config.Err = err.Error()
-			config.ClusterConnectStatus = ClusterConnectStatusFailed
-			return false, err
-		}
 	}
-
 	// 校验集群是否可连接
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		klog.V(6).Infof("创建clientset失败 %s: %v", config.GetClusterID(), err)
 		config.Err = err.Error()
 		config.ClusterConnectStatus = ClusterConnectStatusFailed
-		return false, err
+		return err
 	}
 
 	// 尝试获取集群版本以验证连接
@@ -446,15 +422,13 @@ func (c *clusterService) CheckCluster(config *ClusterConfig) (bool, error) {
 		klog.V(6).Infof("连接集群失败 %s: %v", config.GetClusterID(), err)
 		config.Err = err.Error()
 		config.ClusterConnectStatus = ClusterConnectStatusFailed
-		return false, err
+		return err
 	}
-	klog.V(6).Infof("成功连接集群 %s", config.GetClusterID())
+	klog.V(6).Infof("LoadRestConfig 获取集群 版本成功 %s", config.GetClusterID())
 	// 可以连接的放到数组中记录
 	config.ServerVersion = info.GitVersion
 	config.restConfig = restConfig
-	config.Err = ""
-	config.ClusterConnectStatus = ClusterConnectStatusConnected
-	return true, nil
+	return err
 }
 
 // RegisterInCluster 将InCluster的配置注册到集群列表中
