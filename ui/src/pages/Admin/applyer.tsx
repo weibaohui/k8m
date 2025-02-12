@@ -83,6 +83,13 @@ const HistoryRecords = () => {
                         50% { box-shadow: inset 0 0 20px rgba(24, 144, 255, 0.9); }
                         100% { box-shadow: inset 0 0 10px rgba(24, 144, 255, 0.7); }
                     }
+                    .button-group {
+                        opacity: 0;
+                        transition: opacity 0.3s ease;
+                    }
+                    .list-item:hover .button-group {
+                        opacity: 1;
+                    }
                     `}
                 </style>
                 <Tabs defaultActiveTab="all">
@@ -90,12 +97,12 @@ const HistoryRecords = () => {
                         <List
                             dataSource={allRecords}
                             render={(record, index) => (
-                                <List.Item key={index} data-record-index={index}>
+                                <List.Item key={index} data-record-index={index} className="list-item">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
                                         <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                                             {record}
                                         </span>
-                                        <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px' }}>
+                                        <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px' }}>
                                             <Button.Group>
                                                 <Button
                                                     type="text"
@@ -134,10 +141,11 @@ const HistoryRecords = () => {
                         <List
                             dataSource={favoriteRecords}
                             render={(record, index) => (
-                                <List.Item key={index}>
+                                <List.Item key={index} className="list-item">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                                         <span>{record}</span>
                                         <Button
+                                            className="button-group"
                                             type="text"
                                             icon={<IconEye />}
                                             onClick={() => {
