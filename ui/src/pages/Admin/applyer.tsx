@@ -73,9 +73,9 @@ const HistoryRecords = () => {
     };
 
     return (
-        <div style={{ display: 'flex', height: '100vh' }}>
+        <div style={{ display: 'flex', height: '100vh', backgroundColor: '#FFFFFF' }}>
             {/* 左侧历史记录部分 */}
-            <div style={{ width: '250px', padding: '10px' }}>
+            <div style={{ width: '250px', padding: '10px', backgroundColor: '#FFFFFF' }}>
                 <style>
                     {`
                     .highlight-animation {
@@ -101,10 +101,15 @@ const HistoryRecords = () => {
                             dataSource={allRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
                             render={(record, index) => (
                                 <List.Item key={index} data-record-index={index} className="list-item">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
                                         <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                                             {record}
                                         </span>
+                                        <div style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                                            {favoriteRecords.includes(record) && (
+                                                <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
+                                            )}
+                                        </div>
                                         <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1, padding: '0 5px' }}>
                                             <Button.Group>
                                                 <Button
@@ -176,7 +181,7 @@ const HistoryRecords = () => {
                             dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
                             render={(record, index) => (
                                 <List.Item key={index} className="list-item">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
                                         <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                                             {record}
                                         </span>
@@ -248,7 +253,7 @@ const HistoryRecords = () => {
             </div>
 
             {/* 右侧编辑区域 */}
-            <div style={{ flex: 1, padding: '10px' }}>
+            <div style={{ flex: 1, padding: '10px', backgroundColor: '#FFFFFF' }}>
                 <Input.TextArea
                     value={selectedRecord}
                     onChange={(value) => setSelectedRecord(value)}
@@ -269,9 +274,9 @@ const HistoryRecords = () => {
                 visible={isModalVisible}
                 onOk={() => setIsModalVisible(false)}
                 onCancel={() => setIsModalVisible(false)}
-                style={{ width: '600px' }}
+                style={{ width: '600px', backgroundColor: '#FFFFFF' }}
             >
-                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: '400px', overflowY: 'auto', backgroundColor: '#FFFFFF' }}>
                     <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
                         {viewRecord}
                     </pre>
