@@ -3,65 +3,61 @@ import { Tabs, Button, Tooltip, List, Input, Modal } from '@arco-design/web-reac
 import { IconEye, IconStar, IconDelete, IconExport } from '@arco-design/web-react/icon';
 import axios from 'axios';
 
+interface RecordItem {
+    id: string;
+    content: string;
+    isFavorite: boolean;
+    customName?: string;
+}
+
 const HistoryRecords = () => {
-    // 初始化历史记录和收藏记录
-    const [allRecords, setAllRecords] = useState<string[]>([]);
-    const [favoriteRecords, setFavoriteRecords] = useState<string[]>([]);
+    // 初始化记录数据
+    const [records, setRecords] = useState<RecordItem[]>([]);
     const [selectedRecord, setSelectedRecord] = useState<string>('');
     const [viewRecord, setViewRecord] = useState<string>('');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
-    const [customNames, setCustomNames] = useState<Record<string, string>>({});
-    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState('');
     const pageSize = 10;
 
-    // 从 localStorage 获取历史记录和收藏记录
+    // 从 localStorage 获取记录数据
     useEffect(() => {
-        const all = localStorage.getItem('allRecords');
-        const favorites = localStorage.getItem('favoriteRecords');
-        const names = localStorage.getItem('customNames');
-        setAllRecords(all ? JSON.parse(all) : []);
-        setFavoriteRecords(favorites ? JSON.parse(favorites) : []);
-        setCustomNames(names ? JSON.parse(names) : {});
+        const savedRecords = localStorage.getItem('records');
+        if (savedRecords) {
+            setRecords(JSON.parse(savedRecords));
+        }
     }, []);
 
     // 更新 localStorage 中的数据
     const updateLocalStorage = useMemo(() => {
         return () => {
-            localStorage.setItem('allRecords', JSON.stringify(allRecords));
-            localStorage.setItem('favoriteRecords', JSON.stringify(favoriteRecords));
-            localStorage.setItem('customNames', JSON.stringify(customNames));
+            localStorage.setItem('records', JSON.stringify(records));
         };
-    }, [allRecords, favoriteRecords, customNames]);
+    }, [records]);
 
     // 收藏某条记录
-    const toggleFavorite = (record: string) => {
-        const updatedFavoriteRecords = [...favoriteRecords];
-        const index = updatedFavoriteRecords.findIndex(item => item === record);
-
-        if (index !== -1) {
-            // 如果已经在收藏中，移除收藏
-            updatedFavoriteRecords.splice(index, 1);
-        } else {
-            // 否则添加到收藏
-            updatedFavoriteRecords.push(record);
-        }
-
-        setFavoriteRecords(updatedFavoriteRecords);
+    const toggleFavorite = (recordId: string) => {
+        setRecords(prevRecords =>
+            prevRecords.map(record =>
+                record.id === recordId
+                    ? { ...record, isFavorite: !record.isFavorite }
+                    : record
+            )
+        );
         updateLocalStorage();
     };
 
-    // 发送记录的API请求并保存到 localStorage
+    // 保存记录到 localStorage
     const handleSave = () => {
         if (!selectedRecord) return;
 
         // 检查记录是否已存在
-        const existingIndex = allRecords.findIndex(record => record === selectedRecord);
-        if (existingIndex !== -1) {
+        const existingRecord = records.find(record => record.content === selectedRecord);
+        if (existingRecord) {
             // 如果记录已存在，为对应元素添加闪亮动画
-            const element = document.querySelector(`[data-record-index="${existingIndex}"]`);
+            const element = document.querySelector(`[data-record-id="${existingRecord.id}"]`);
             if (element) {
                 element.classList.add('highlight-animation');
                 // 动画结束后移除类名
@@ -72,46 +68,54 @@ const HistoryRecords = () => {
             return;
         }
 
-        // 如果记录不存在，则添加到历史记录中
-        const updatedAllRecords = [...allRecords, selectedRecord];
-        setAllRecords(updatedAllRecords);
+        // 如果记录不存在，则添加到记录中
+        const newRecord: RecordItem = {
+            id: Date.now().toString(),
+            content: selectedRecord,
+            isFavorite: false
+        };
+        setRecords(prevRecords => [...prevRecords, newRecord]);
         updateLocalStorage();
     };
 
-    const handleNameEdit = (record: string, index: number) => {
-        setEditingIndex(index);
-        setEditingName(customNames[record] || '');
+    const handleNameEdit = (recordId: string) => {
+        const record = records.find(r => r.id === recordId);
+        setEditingId(recordId);
+        setEditingName(record?.customName || '');
     };
 
-    const handleNameSubmit = (record: string) => {
+    const handleNameSubmit = (recordId: string) => {
         if (editingName.trim()) {
-            setCustomNames(prev => ({
-                ...prev,
-                [record]: editingName.trim()
-            }));
+            setRecords(prevRecords =>
+                prevRecords.map(record =>
+                    record.id === recordId
+                        ? { ...record, customName: editingName.trim() }
+                        : record
+                )
+            );
         }
-        setEditingIndex(null);
+        setEditingId(null);
         setEditingName('');
         updateLocalStorage();
     };
 
-    const renderRecord = (record: string, index: number, isFavorites: boolean = false) => (
-        <List.Item key={index} data-record-index={isFavorites ? `fav-${index}` : index} className="list-item">
+    const renderRecord = (record: RecordItem) => (
+        <List.Item key={record.id} data-record-id={record.id} className="list-item">
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
-                {editingIndex === (isFavorites ? `fav-${index}` : index) ? (
+                {editingId === record.id ? (
                     <Input
                         autoFocus
                         value={editingName}
                         onChange={setEditingName}
-                        onBlur={() => handleNameSubmit(record)}
-                        onPressEnter={() => handleNameSubmit(record)}
+                        onBlur={() => handleNameSubmit(record.id)}
+                        onPressEnter={() => handleNameSubmit(record.id)}
                         style={{ maxWidth: '120px' }}
                     />
                 ) : (
                     <div
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleNameEdit(record, index);
+                            handleNameEdit(record.id);
                         }}
                         style={{
                             maxWidth: '200px',
@@ -123,11 +127,11 @@ const HistoryRecords = () => {
                             zIndex: 2
                         }}
                     >
-                        {customNames[record] || record}
+                        {record.customName || record.content}
                     </div>
                 )}
                 <div style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
-                    {favoriteRecords.includes(record) && (
+                    {record.isFavorite && (
                         <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
                     )}
                 </div>
@@ -137,22 +141,22 @@ const HistoryRecords = () => {
                             type="text"
                             icon={<IconEye style={{ fontSize: '14px' }} />}
                             onClick={() => {
-                                setViewRecord(record);
+                                setViewRecord(record.content);
                                 setIsModalVisible(true);
                             }}
                         />
                         <Button
                             type="text"
-                            icon={<IconStar style={{ color: favoriteRecords.includes(record) ? '#FFB400' : '#86909C', fill: favoriteRecords.includes(record) ? '#FFB400' : 'none', fontSize: '14px' }} />}
+                            icon={<IconStar style={{ color: record.isFavorite ? '#FFB400' : '#86909C', fill: record.isFavorite ? '#FFB400' : 'none', fontSize: '14px' }} />}
                             onClick={() => {
-                                if (favoriteRecords.includes(record)) {
+                                if (record.isFavorite) {
                                     Modal.confirm({
                                         title: '确认取消收藏',
                                         content: '确定要取消收藏这条记录吗？',
-                                        onOk: () => toggleFavorite(record)
+                                        onOk: () => toggleFavorite(record.id)
                                     });
                                 } else {
-                                    toggleFavorite(record);
+                                    toggleFavorite(record.id);
                                 }
                             }}
                         />
@@ -160,22 +164,14 @@ const HistoryRecords = () => {
                             type="text"
                             icon={<IconDelete style={{ fontSize: '14px' }} />}
                             onClick={() => {
-                                const updatedAllRecords = allRecords.filter(item => item !== record);
-                                setAllRecords(updatedAllRecords);
-                                if (favoriteRecords.includes(record)) {
-                                    const updatedFavoriteRecords = favoriteRecords.filter(item => item !== record);
-                                    setFavoriteRecords(updatedFavoriteRecords);
-                                }
-                                const newCustomNames = { ...customNames };
-                                delete newCustomNames[record];
-                                setCustomNames(newCustomNames);
+                                setRecords(prevRecords => prevRecords.filter(item => item.id !== record.id));
                                 updateLocalStorage();
                             }}
                         />
                         <Button
                             type="text"
                             icon={<IconExport style={{ fontSize: '14px' }} />}
-                            onClick={() => setSelectedRecord(record)}
+                            onClick={() => setSelectedRecord(record.content)}
                         />
                     </Button.Group>
                 </div>
@@ -208,8 +204,8 @@ const HistoryRecords = () => {
                 <Tabs defaultActiveTab="all">
                     <Tabs.TabPane title="所有" key="all">
                         <List
-                            dataSource={allRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
-                            render={(record, index) => renderRecord(record, index)}
+                            dataSource={records.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+                            render={renderRecord}
                         />
                         <div style={{ marginTop: '16px', textAlign: 'right' }}>
                             <Button.Group>
@@ -221,12 +217,12 @@ const HistoryRecords = () => {
                                     上一页
                                 </Button>
                                 <Button type="secondary" disabled>
-                                    {currentPage}/{Math.ceil(allRecords.length / pageSize)}
+                                    {currentPage}/{Math.ceil(records.length / pageSize)}
                                 </Button>
                                 <Button
                                     type="secondary"
-                                    disabled={currentPage >= Math.ceil(allRecords.length / pageSize)}
-                                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allRecords.length / pageSize), prev + 1))}
+                                    disabled={currentPage >= Math.ceil(records.length / pageSize)}
+                                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(records.length / pageSize), prev + 1))}
                                 >
                                     下一页
                                 </Button>
@@ -235,8 +231,8 @@ const HistoryRecords = () => {
                     </Tabs.TabPane>
                     <Tabs.TabPane title="收藏" key="favorites">
                         <List
-                            dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
-                            render={(record, index) => renderRecord(record, index, true)}
+                            dataSource={records.filter(record => record.isFavorite).slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
+                            render={renderRecord}
                         />
                         <div style={{ marginTop: '16px', textAlign: 'right' }}>
                             <Button.Group>
@@ -248,12 +244,12 @@ const HistoryRecords = () => {
                                     上一页
                                 </Button>
                                 <Button type="secondary" disabled>
-                                    {currentFavoritePage}/{Math.ceil(favoriteRecords.length / pageSize)}
+                                    {currentFavoritePage}/{Math.ceil(records.filter(record => record.isFavorite).length / pageSize)}
                                 </Button>
                                 <Button
                                     type="secondary"
-                                    disabled={currentFavoritePage >= Math.ceil(favoriteRecords.length / pageSize)}
-                                    onClick={() => setCurrentFavoritePage(prev => Math.min(Math.ceil(favoriteRecords.length / pageSize), prev + 1))}
+                                    disabled={currentFavoritePage >= Math.ceil(records.filter(record => record.isFavorite).length / pageSize)}
+                                    onClick={() => setCurrentFavoritePage(prev => Math.min(Math.ceil(records.filter(record => record.isFavorite).length / pageSize), prev + 1))}
                                 >
                                     下一页
                                 </Button>
