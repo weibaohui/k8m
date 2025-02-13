@@ -756,7 +756,7 @@
                   "drawer": {
                     "closeOnOutside": true,
                     "closeOnEsc": true,
-                    "size": "xl",
+                    "width": "100%",
                     "actions": [],
                     "title": "文件管理 ${metadata.namespace}/${metadata.name} (ESC 关闭)",
                     "body": [
@@ -766,6 +766,9 @@
                         "label": "容器",
                         "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
                         "value": "${spec.containers[0].name}",
+                        "style": {
+                          "width": "300px"
+                        },
                         "onEvent": {
                           "change": {
                             "actions": [
@@ -857,6 +860,7 @@
                           {
                             "type": "service",
                             "api": {
+                              "sendOn": "this.path !== '0'",
                               "method": "post",
                               "url": "/k8s/file/show",
                               "data": {
@@ -1030,7 +1034,6 @@
                                     "id": "fileContext",
                                     "size": "xxl",
                                     "allowFullscreen": true,
-                                    "visibleOn": "${isDir===false}",
                                     "value": "${content|base64Decode}",
                                     "language": "shell",
                                     "options": {
