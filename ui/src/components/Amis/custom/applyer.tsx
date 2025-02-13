@@ -87,8 +87,8 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
         if (record) {
             // 从历史记录中移除
             setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-            // 添加到收藏记录
-            setFavoriteRecords(prevRecords => [...prevRecords, { ...record, isFavorite: true }]);
+            // 添加到收藏记录的最前面
+            setFavoriteRecords(prevRecords => [{ ...record, isFavorite: true }, ...prevRecords]);
         } else {
             // 从收藏记录中移除
             const favoriteRecord = favoriteRecords.find(r => r.id === recordId);
