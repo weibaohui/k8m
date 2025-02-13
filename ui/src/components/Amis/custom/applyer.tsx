@@ -509,6 +509,9 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         </div>
                     </Tabs.TabPane>
                 </Tabs>
+                <div className="bg-blue-50	" style={{ padding: '5px', margin: '5px', fontSize: '12px' }}>
+                    历史记录存储在浏览器本地，清空浏览器缓存后会删除所有历史记录
+                </div>
             </div>
 
             <div style={{ padding: '10px', backgroundColor: '#FFFFFF', width: '100%' }}>
