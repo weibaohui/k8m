@@ -88,7 +88,10 @@ const HistoryRecords = () => {
     };
 
     const handleNameEdit = (recordId: string) => {
-        const record = allRecords.find(r => r.id === recordId);
+        const record = activeTab === 'all'
+            ? allRecords.find(r => r.id === recordId)
+            : favoriteRecords.find(r => r.id === recordId);
+
         if (record) {
             setEditingId(record.id);
             setEditingName(record.customName || '');
@@ -124,12 +127,6 @@ const HistoryRecords = () => {
     const renderRecord = (record: RecordItem) => (
         <List.Item key={record.id} data-record-id={record.id} className="list-item">
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
-                {/* {
-                    <>
-                        <div>[{record.id.length}={editingId?.length}] </div>
-                        <div>{(record.id === editingId) ? 'true' : 'false'} </div>
-                    </>
-                } */}
                 {editingId === record.id ? (
                     <Input
                         autoFocus
@@ -137,19 +134,19 @@ const HistoryRecords = () => {
                         onChange={setEditingName}
                         onBlur={() => handleNameSubmit(record.id)}
                         onPressEnter={() => handleNameSubmit(record.id)}
-                        style={{ maxWidth: '50px' }}
+                        style={{ maxWidth: '150px' }}
                     />
                 ) : (
                     <div
                         onClick={() => handleNameEdit(record.id)}
                         style={{
-                            maxWidth: '200px',
+                            maxWidth: '150px',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                             cursor: 'pointer',
                             flex: 1,
-                            zIndex: 999999,
+                            zIndex: 2,
                         }}
                     >
                         {record.customName || record.content}
