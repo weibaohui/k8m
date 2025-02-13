@@ -28,7 +28,7 @@ func OptionList(c *gin.Context) {
 
 	var options []map[string]interface{}
 	for _, cluster := range clusters {
-		name := cluster.FileName + "/" + cluster.ContextName
+		name := cluster.GetClusterID()
 		if cluster.IsInCluster {
 			name = "InCluster"
 		}
@@ -101,6 +101,11 @@ func SetDefault(c *gin.Context) {
 	if cookieValue == "/" {
 		return
 	}
+	//单独处理下InCluster
+	if contextName == "InCluster" || fileName == "InCluster" {
+		cookieValue = "InCluster"
+	}
+
 	c.SetCookie(
 		"selectedCluster",
 		cookieValue,
