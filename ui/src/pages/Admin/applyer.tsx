@@ -15,7 +15,7 @@ const HistoryRecords = () => {
     const [allRecords, setAllRecords] = useState<RecordItem[]>([]);
     const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
     const [selectedRecord, setSelectedRecord] = useState<string>('');
-    const [viewRecord, setViewRecord] = useState<string>('');
+    const [viewRecord, setViewRecord] = useState<RecordItem>();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
@@ -163,7 +163,7 @@ const HistoryRecords = () => {
                             type="text"
                             icon={<IconEye style={{ fontSize: '14px' }} />}
                             onClick={() => {
-                                setViewRecord(record.content);
+                                setViewRecord(record);
                                 setIsModalVisible(true);
                             }}
                         />
@@ -297,7 +297,7 @@ const HistoryRecords = () => {
             </div>
 
             <Modal
-                title="查看记录"
+                title={`查看记录${viewRecord?.customName || ''}`}
                 visible={isModalVisible}
                 onOk={() => setIsModalVisible(false)}
                 onCancel={() => setIsModalVisible(false)}
@@ -305,11 +305,11 @@ const HistoryRecords = () => {
             >
                 <div style={{ maxHeight: '400px', overflowY: 'auto', backgroundColor: '#FFFFFF' }}>
                     <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-                        {viewRecord}
+                        {viewRecord?.content}
                     </pre>
                 </div>
             </Modal>
-        </div>
+        </div >
     );
 };
 
