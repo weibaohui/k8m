@@ -124,8 +124,8 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                     yaml: editorValue
                 }
             });
-
-            if (response.data?.status !== 0) {
+            const responseData = response.data;
+            if (responseData?.status !== 0) {
                 if (response.data?.msg.includes("please apply your changes to the latest version and try again")) {
                     Modal.error({
                         title: '应用失败',
@@ -141,9 +141,27 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                 }
             }
 
+            // 解析结果并展示详细信息
+            //@ts-ignore
+            const resultList = responseData.data.result || [];
             Modal.success({
-                title: '应用成功',
-                content: '已成功应用到集群'
+                title: '应用状态',
+                content: (
+                    <List
+                        style={{ maxHeight: '400px', overflow: 'auto' }}
+                        dataSource={resultList}
+                        render={(item, index) => {
+
+                            return (
+                                <List.Item key={index} style={{ padding: '8px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div>{item}</div>
+                                    </div>
+                                </List.Item>
+                            );
+                        }}
+                    />
+                )
             });
 
             // 检查记录是否已存在
