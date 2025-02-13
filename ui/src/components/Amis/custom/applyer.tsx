@@ -328,60 +328,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                     <Tabs.TabPane title="收藏" key="favorites">
                         <div style={{ marginBottom: '10px' }}>
                             <Button.Group>
-                                <Button
-                                    type="outline"
-                                    onClick={() => {
-                                        const input = document.createElement('input');
-                                        input.type = 'file';
-                                        input.accept = '.json';
-                                        input.onchange = (e) => {
-                                            const file = (e.target as HTMLInputElement).files?.[0];
-                                            if (file) {
-                                                const reader = new FileReader();
-                                                reader.onload = (e) => {
-                                                    try {
-                                                        const importedRecords = JSON.parse(e.target?.result as string);
-                                                        if (Array.isArray(importedRecords)) {
-                                                            const validRecords = importedRecords.filter(record =>
-                                                                record.id && record.content && typeof record.isFavorite === 'boolean'
-                                                            );
-                                                            const newRecords = validRecords.filter(newRecord =>
-                                                                !favoriteRecords.some(existingRecord =>
-                                                                    existingRecord.id === newRecord.id ||
-                                                                    existingRecord.content === newRecord.content
-                                                                )
-                                                            );
-                                                            if (newRecords.length > 0) {
-                                                                setFavoriteRecords(prev => [...prev, ...newRecords]);
-                                                                Modal.success({
-                                                                    title: '导入成功',
-                                                                    content: `成功导入 ${newRecords.length} 条记录`
-                                                                });
-                                                                updateLocalStorage();
-                                                            } else {
-                                                                Modal.warning({
-                                                                    title: '导入提示',
-                                                                    content: '没有新的记录需要导入'
-                                                                });
-                                                            }
-                                                        } else {
-                                                            throw new Error('Invalid data format');
-                                                        }
-                                                    } catch (error) {
-                                                        Modal.error({
-                                                            title: '导入失败',
-                                                            content: '文件格式错误或数据无效'
-                                                        });
-                                                    }
-                                                };
-                                                reader.readAsText(file);
-                                            }
-                                        };
-                                        input.click();
-                                    }}
-                                >
-                                    导入收藏
-                                </Button>
+
                                 <Button
                                     type="outline"
                                     onClick={() => {
@@ -446,22 +393,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                 >
                                     导入YAML
                                 </Button>
-                                <Button
-                                    type="outline"
-                                    onClick={() => {
-                                        const dataStr = JSON.stringify(favoriteRecords);
-                                        const blob = new Blob([dataStr], { type: 'application/json' });
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = 'favorites.json';
-                                        document.body.appendChild(a);
-                                        a.click();
-                                        document.body.removeChild(a); URL.revokeObjectURL(url);
-                                    }}
-                                >
-                                    导出JSON
-                                </Button>
+
                                 <Button
                                     type="outline"
                                     onClick={async () => {
