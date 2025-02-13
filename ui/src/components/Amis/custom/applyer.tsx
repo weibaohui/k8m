@@ -5,6 +5,7 @@ import * as monaco from 'monaco-editor';
 import React from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { fetcher } from "@/components/Amis/fetcher.ts";
 
 interface RecordItem {
     id: string;
@@ -104,31 +105,67 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
         updateLocalStorage();
     };
 
-    // 保存记录到 localStorage
-    const handleSave = () => {
+    // 保存记录到 localStorage并发送到服务器
+    const handleSave = async () => {
         if (!editorValue) return;
 
-        // 检查记录是否已存在
-        const existingRecord = historyRecords.find(record => record.content === editorValue);
-        if (existingRecord) {
-            const element = document.querySelector(`[data-record-id="${existingRecord.id}"]`);
-            if (element) {
-                element.classList.add('highlight-animation');
-                setTimeout(() => {
-                    element.classList.remove('highlight-animation');
-                }, 1000);
-            }
-            return;
-        }
+        try {
+            const response = await fetcher({
+                url: '/k8s/yaml/apply',
+                method: 'post',
+                data: {
+                    yaml: editorValue
+                }
+            });
 
-        const newRecord: RecordItem = {
-            id: Math.random().toString(36).substring(2, 15),
-            content: editorValue,
-            isFavorite: false
-        };
-        setHistoryRecords(prevRecords => [newRecord, ...prevRecords]);
-        updateLocalStorage();
-        setActiveTab('history');
+            if (response.data?.status !== 0) {
+                if (response.data?.msg.includes("please apply your changes to the latest version and try again")) {
+                    Modal.error({
+                        title: '应用失败',
+                        content: '资源已被更新，请刷新后再试。'
+                    });
+                    return;
+                } else {
+                    Modal.error({
+                        title: '应用失败',
+                        content: `请尝试刷新后重试。${response.data?.msg}`
+                    });
+                    return;
+                }
+            }
+
+            Modal.success({
+                title: '应用成功',
+                content: '已成功应用到集群'
+            });
+
+            // 检查记录是否已存在
+            const existingRecord = historyRecords.find(record => record.content === editorValue);
+            if (existingRecord) {
+                const element = document.querySelector(`[data-record-id="${existingRecord.id}"]`);
+                if (element) {
+                    element.classList.add('highlight-animation');
+                    setTimeout(() => {
+                        element.classList.remove('highlight-animation');
+                    }, 1000);
+                }
+                return;
+            }
+
+            const newRecord: RecordItem = {
+                id: Math.random().toString(36).substring(2, 15),
+                content: editorValue,
+                isFavorite: false
+            };
+            setHistoryRecords(prevRecords => [newRecord, ...prevRecords]);
+            updateLocalStorage();
+            setActiveTab('history');
+        } catch (error) {
+            Modal.error({
+                title: '应用失败',
+                content: error instanceof Error ? error.message : '未知错误'
+            });
+        }
     };
 
     const handleNameEdit = (recordId: string) => {
@@ -213,7 +250,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                     </div>
                 )}
                 {editingId !== record.id && (
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
                         <Button
                             type="text"
                             icon={<IconEdit />}
