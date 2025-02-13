@@ -385,6 +385,70 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                 <Button
                                     type="outline"
                                     onClick={() => {
+                                        const input = document.createElement('input');
+                                        input.type = 'file';
+                                        input.accept = '.zip';
+                                        input.onchange = async (e) => {
+                                            const file = (e.target as HTMLInputElement).files?.[0];
+                                            if (file) {
+                                                try {
+                                                    const zip = await JSZip.loadAsync(file);
+                                                    const yamlFiles = [];
+
+                                                    for (const [fileName, fileData] of Object.entries(zip.files)) {
+                                                        if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
+                                                            const content = await fileData.async('text');
+                                                            yamlFiles.push({
+                                                                id: Math.random().toString(36).substring(2, 15),
+                                                                content,
+                                                                isFavorite: true,
+                                                                customName: fileName
+                                                            });
+                                                        }
+                                                    }
+
+                                                    if (yamlFiles.length > 0) {
+                                                        const newRecords = yamlFiles.filter(newRecord =>
+                                                            !favoriteRecords.some(existingRecord =>
+                                                                existingRecord.content === newRecord.content
+                                                            )
+                                                        );
+
+                                                        if (newRecords.length > 0) {
+                                                            setFavoriteRecords(prev => [...prev, ...newRecords]);
+                                                            Modal.success({
+                                                                title: '导入成功',
+                                                                content: `成功导入 ${newRecords.length} 个YAML文件`
+                                                            });
+                                                            updateLocalStorage();
+                                                        } else {
+                                                            Modal.warning({
+                                                                title: '导入提示',
+                                                                content: '没有新的YAML文件需要导入'
+                                                            });
+                                                        }
+                                                    } else {
+                                                        Modal.warning({
+                                                            title: '导入提示',
+                                                            content: 'ZIP文件中没有找到YAML文件'
+                                                        });
+                                                    }
+                                                } catch (error) {
+                                                    Modal.error({
+                                                        title: '导入失败',
+                                                        content: '无法解析ZIP文件或文件格式错误'
+                                                    });
+                                                }
+                                            }
+                                        };
+                                        input.click();
+                                    }}
+                                >
+                                    导入YAML
+                                </Button>
+                                <Button
+                                    type="outline"
+                                    onClick={() => {
                                         const dataStr = JSON.stringify(favoriteRecords);
                                         const blob = new Blob([dataStr], { type: 'application/json' });
                                         const url = URL.createObjectURL(blob);
