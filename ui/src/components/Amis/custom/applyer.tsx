@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Tabs, Button, List, Input, Modal } from '@arco-design/web-react';
-import { IconEye, IconStar, IconDelete, IconEdit } from '@arco-design/web-react/icon';
+import { IconStar, IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import * as monaco from 'monaco-editor';
 import React from 'react';
 
@@ -21,8 +21,6 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
     const [historyRecords, setHistoryRecords] = useState<RecordItem[]>([]);
     const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
     const [selectedRecord, setSelectedRecord] = useState<string>('');
-    const [viewRecord, setViewRecord] = useState<RecordItem>();
-    const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
     const [editingId, setEditingId] = useState<string>();
@@ -46,8 +44,12 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
     useEffect(() => {
         if (editorRef.current) {
             monacoInstance.current = monaco.editor.create(editorRef.current, {
-                value: '',
                 theme: 'vs',
+                language: "yaml",
+                wordWrap: "on",
+                scrollbar: {
+                    vertical: "auto"
+                },
                 automaticLayout: true,
                 minimap: {
                     enabled: false // 关闭小地图
@@ -220,15 +222,6 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                         />
                         <Button
                             type="text"
-                            icon={<IconEye />}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setViewRecord(record);
-                                setIsModalVisible(true);
-                            }}
-                        />
-                        <Button
-                            type="text"
                             icon={activeTab === 'favorites' ? <IconStar style={{ color: '#FFD700' }} /> : <IconStar />}
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -336,22 +329,6 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                 <Button
                                     type="outline"
                                     onClick={() => {
-                                        const dataStr = JSON.stringify(favoriteRecords);
-                                        const blob = new Blob([dataStr], { type: 'application/json' });
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = 'favorites.json';
-                                        document.body.appendChild(a);
-                                        a.click();
-                                        document.body.removeChild(a); URL.revokeObjectURL(url);
-                                    }}
-                                >
-                                    导出收藏
-                                </Button>
-                                <Button
-                                    type="outline"
-                                    onClick={() => {
                                         const input = document.createElement('input');
                                         input.type = 'file';
                                         input.accept = '.json';
@@ -403,6 +380,23 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                 >
                                     导入收藏
                                 </Button>
+                                <Button
+                                    type="outline"
+                                    onClick={() => {
+                                        const dataStr = JSON.stringify(favoriteRecords);
+                                        const blob = new Blob([dataStr], { type: 'application/json' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'favorites.json';
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a); URL.revokeObjectURL(url);
+                                    }}
+                                >
+                                    导出收藏
+                                </Button>
+
                             </Button.Group>
                         </div>
                         <List
@@ -449,21 +443,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                     应用
                 </Button>
             </div>
-
-            <Modal
-                title={`查看记录${viewRecord?.customName || ''}`}
-                visible={isModalVisible}
-                onOk={() => setIsModalVisible(false)}
-                onCancel={() => setIsModalVisible(false)}
-                style={{ width: '600px', backgroundColor: '#FFFFFF' }}
-            >
-                <div style={{ maxHeight: '400px', overflowY: 'auto', backgroundColor: '#FFFFFF' }}>
-                    <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-                        {viewRecord?.content}
-                    </pre>
-                </div>
-            </Modal>
-        </div >
+        </div>
     );
 });
 
