@@ -15,7 +15,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cfg := flag.Init()
 		var clusterID string
-
+		allClusters := service.ClusterService().AllClusters()
 		// 检查是否存在名为 "selectedCluster" 的 Cookie
 		sc, err := c.Cookie("selectedCluster")
 		if err != nil {
@@ -39,7 +39,8 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			)
 
 		}
-		if cfg.InCluster && sc != "InCluster" {
+		//InCluster模式下，只有一个集群，那么就直接用InCluster
+		if cfg.InCluster && len(allClusters) == 1 && sc != "InCluster" {
 			// 集群内模式,但是当前cookie不是InCluster,那么给他纠正过来
 			clusterID = "InCluster"
 			c.SetCookie(
@@ -52,6 +53,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				false,                       // 是否 HttpOnly
 			)
 		}
+		//非集群内模式下，但是用了InCluster，肯定不对，需要纠正过来
 		if !cfg.InCluster && sc == "InCluster" {
 			// 非集群内模式,但是当前cookie是InCluster,那么给他纠正过来
 			clusterID = service.ClusterService().FirstClusterID()
