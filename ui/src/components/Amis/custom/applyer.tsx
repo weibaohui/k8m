@@ -231,21 +231,27 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
     };
 
     const handleDelete = (recordId: string) => {
-        if (activeTab === 'favorites') {
-            const record = favoriteRecords.find(r => r.id === recordId);
-            if (record) {
-                setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-                // 生成新的ID并添加到历史记录
-                setHistoryRecords(prevRecords => [...prevRecords, {
-                    ...record,
-                    id: Math.random().toString(36).substring(2, 15),
-                    isFavorite: false
-                }]);
+        Modal.confirm({
+            title: '确认删除',
+            content: '确定要删除这条记录吗？',
+            onOk: () => {
+                if (activeTab === 'favorites') {
+                    const record = favoriteRecords.find(r => r.id === recordId);
+                    if (record) {
+                        setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
+                        // 生成新的ID并添加到历史记录
+                        setHistoryRecords(prevRecords => [...prevRecords, {
+                            ...record,
+                            id: Math.random().toString(36).substring(2, 15),
+                            isFavorite: false
+                        }]);
+                    }
+                } else {
+                    setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
+                }
+                updateLocalStorage();
             }
-        } else {
-            setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-        }
-        updateLocalStorage();
+        });
     };
 
     const renderRecord = (record: RecordItem) => (
