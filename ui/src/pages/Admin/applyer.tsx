@@ -150,6 +150,19 @@ const HistoryRecords = () => {
         updateLocalStorage();
     };
 
+    const handleDelete = (recordId: string) => {
+        if (activeTab === 'favorites') {
+            const record = favoriteRecords.find(r => r.id === recordId);
+            if (record) {
+                setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
+                setAllRecords(prevRecords => [...prevRecords, { ...record, isFavorite: false }]);
+            }
+        } else {
+            setAllRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
+        }
+        updateLocalStorage();
+    };
+
     const renderRecord = (record: RecordItem) => (
         <List.Item key={record.id} data-record-id={record.id} className="list-item">
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
@@ -160,6 +173,7 @@ const HistoryRecords = () => {
                         onChange={setEditingName}
                         onBlur={() => handleNameSubmit(record.id)}
                         onPressEnter={() => handleNameSubmit(record.id)}
+                        placeholder="请输入新的名称"
                         style={{ maxWidth: '150px' }}
                     />
                 ) : (
@@ -211,10 +225,7 @@ const HistoryRecords = () => {
                         <Button
                             type="text"
                             icon={<IconDelete style={{ fontSize: '14px' }} />}
-                            onClick={() => {
-                                setAllRecords(prevRecords => prevRecords.filter(item => item.id !== record.id));
-                                updateLocalStorage();
-                            }}
+                            onClick={() => handleDelete(record.id)}
                         />
                         <Button
                             type="text"
@@ -312,6 +323,8 @@ const HistoryRecords = () => {
                     minWidth: '500px',
                     width: 'calc(100vh - 200px)',
                     height: '80vh',
+                    border: '1px solid #e5e6eb',
+                    borderRadius: '4px'
                 }} />
                 <Button
                     type="primary"
