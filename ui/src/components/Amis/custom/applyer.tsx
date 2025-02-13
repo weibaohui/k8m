@@ -444,6 +444,40 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
             </div>
 
             <div style={{ padding: '10px', backgroundColor: '#FFFFFF', width: '100%' }}>
+                <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
+                    <Button
+                        type="outline"
+                        onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = '.yaml,.yml';
+                            input.onchange = async (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) {
+                                    try {
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            const content = e.target?.result as string;
+                                            if (monacoInstance.current) {
+                                                monacoInstance.current.setValue(content);
+                                                setEditorValue(content);
+                                            }
+                                        };
+                                        reader.readAsText(file);
+                                    } catch (error) {
+                                        Modal.error({
+                                            title: '导入失败',
+                                            content: '无法读取YAML文件'
+                                        });
+                                    }
+                                }
+                            };
+                            input.click();
+                        }}
+                    >
+                        导入YAML
+                    </Button>
+                </div>
                 <div ref={editorRef} style={{
                     minWidth: '500px',
                     height: 'calc(100vh - 200px)',
