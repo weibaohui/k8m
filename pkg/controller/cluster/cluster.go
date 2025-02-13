@@ -115,6 +115,7 @@ func SetDefault(c *gin.Context) {
 			service.ClusterService().Connect(fileName, contextName)
 		}
 	}()
+	amis.WriteJsonOK(c)
 
 }
 
@@ -128,4 +129,6 @@ func SetDefaultInCluster(c *gin.Context) {
 		false,
 		false,
 	)
+	amis.WriteJsonOK(c)
+
 }
