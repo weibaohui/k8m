@@ -345,11 +345,12 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                                     for (const [fileName, fileData] of Object.entries(zip.files)) {
                                                         if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
                                                             const content = await fileData.async('text');
+                                                            const customName = fileName.replace(/\.(yaml|yml)$/, '');
                                                             yamlFiles.push({
                                                                 id: Math.random().toString(36).substring(2, 15),
                                                                 content,
                                                                 isFavorite: true,
-                                                                customName: fileName
+                                                                customName
                                                             });
                                                         }
                                                     }
