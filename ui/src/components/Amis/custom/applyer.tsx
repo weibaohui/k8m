@@ -252,7 +252,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
 
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: '#FFFFFF' }}>
-            <div style={{ width: '350px', padding: '10px', backgroundColor: '#FFFFFF' }}>
+            <div style={{ width: '350px', padding: '10px', backgroundColor: '#FFFFFF', flexShrink: 0 }}>
                 <style>
                     {`
                     .highlight-animation {
