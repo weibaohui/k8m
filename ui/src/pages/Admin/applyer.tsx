@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { Tabs, Button, Tooltip, List, Input, Modal } from '@arco-design/web-react';
-import { IconEye, IconStar, IconDelete, IconExport, IconEdit } from '@arco-design/web-react/icon';
-import axios from 'axios';
+import { useState, useEffect, useRef } from 'react';
+import { Tabs, Button, List, Input, Modal } from '@arco-design/web-react';
+import { IconEye, IconStar, IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import * as monaco from 'monaco-editor';
 
 interface RecordItem {
