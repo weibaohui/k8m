@@ -567,8 +567,8 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                     yaml: editorValue
                                 }
                             });
-
-                            if (response.data?.status !== 0) {
+                            const responseData = response.data;
+                            if (responseData?.status !== 0) {
                                 Modal.error({
                                     title: '删除失败',
                                     content: `请尝试刷新后重试。${response.data?.msg}`
@@ -576,10 +576,47 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                 return;
                             }
 
+                            // 解析结果并展示详细信息
+                            //@ts-ignore
+                            const resultList = responseData.data.result || [];
                             Modal.success({
-                                title: '删除成功',
-                                content: '已成功从集群中删除'
+                                title: '删除状态',
+                                content: (
+                                    <List
+                                        style={{ maxHeight: '400px', overflow: 'auto' }}
+                                        dataSource={resultList}
+                                        render={(item, index) => (
+                                            <List.Item key={index} style={{ padding: '8px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <div>{item}</div>
+                                                </div>
+                                            </List.Item>
+                                        )}
+                                    />
+                                )
                             });
+
+                            // 检查记录是否已存在
+                            const existingRecord = historyRecords.find(record => record.content === editorValue);
+                            if (existingRecord) {
+                                const element = document.querySelector(`[data-record-id="${existingRecord.id}"]`);
+                                if (element) {
+                                    element.classList.add('highlight-animation');
+                                    setTimeout(() => {
+                                        element.classList.remove('highlight-animation');
+                                    }, 1000);
+                                }
+                                return;
+                            }
+
+                            const newRecord: RecordItem = {
+                                id: Math.random().toString(36).substring(2, 15),
+                                content: editorValue,
+                                isFavorite: false
+                            };
+                            setHistoryRecords(prevRecords => [newRecord, ...prevRecords]);
+                            updateLocalStorage();
+                            setActiveTab('history');
                         } catch (error) {
                             Modal.error({
                                 title: '删除失败',
