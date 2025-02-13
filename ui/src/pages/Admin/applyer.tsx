@@ -18,8 +18,10 @@ const HistoryRecords = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<string>();
     const [editingName, setEditingName] = useState('');
+    const [activeTab, setActiveTab] = useState('all');
+
     const pageSize = 10;
 
     // 从 localStorage 获取记录数据
@@ -70,7 +72,8 @@ const HistoryRecords = () => {
 
         // 如果记录不存在，则添加到记录中
         const newRecord: RecordItem = {
-            id: Date.now().toString(),
+            //改为随机字符串
+            id: Math.random().toString(36).substring(2, 15),
             content: selectedRecord,
             isFavorite: false
         };
@@ -79,14 +82,15 @@ const HistoryRecords = () => {
     };
 
     const handleNameEdit = (recordId: string) => {
+        console.log("handleNameEdit", recordId);
         const record = records.find(r => r.id === recordId);
         if (record) {
-            console.log('edit', record);
+            console.log('edit', recordId);
             setEditingId(record.id);
             setEditingName(record.customName || '');
         } else {
             console.log('edit null', recordId);
-            setEditingId(null); // 如果记录不存在，设置为 null
+            setEditingId(''); // 如果记录不存在，设置为 null
             setEditingName(''); // 清空编辑名称
         }
     };
@@ -101,7 +105,7 @@ const HistoryRecords = () => {
                 )
             );
         }
-        setEditingId(null);
+        setEditingId('');
         setEditingName('');
         updateLocalStorage();
     };
@@ -109,11 +113,12 @@ const HistoryRecords = () => {
     const renderRecord = (record: RecordItem) => (
         <List.Item key={record.id} data-record-id={record.id} className="list-item">
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
-                {
+                {/* {
                     <>
-                        <div>{(record.id === editingId) ? "true" : 'false'} xxxx </div>
+                        <div>[{record.id.length}={editingId?.length}] </div>
+                        <div>{(record.id === editingId) ? 'true' : 'false'} </div>
                     </>
-                }
+                } */}
                 {editingId === record.id ? (
                     <Input
                         autoFocus
@@ -121,7 +126,7 @@ const HistoryRecords = () => {
                         onChange={setEditingName}
                         onBlur={() => handleNameSubmit(record.id)}
                         onPressEnter={() => handleNameSubmit(record.id)}
-                        style={{ maxWidth: '120px' }}
+                        style={{ maxWidth: '50px' }}
                     />
                 ) : (
                     <div
@@ -133,7 +138,7 @@ const HistoryRecords = () => {
                             whiteSpace: 'nowrap',
                             cursor: 'pointer',
                             flex: 1,
-                            zIndex: 2
+                            zIndex: 999999,
                         }}
                     >
                         {record.customName || record.content}
@@ -210,8 +215,8 @@ const HistoryRecords = () => {
                     }
                     `}
                 </style>
-                <Tabs defaultActiveTab="all">
-                    <Tabs.TabPane title="所有" key="all">
+                <Tabs defaultActiveTab="all" onChange={setActiveTab}>
+                    <Tabs.TabPane title="所有" key="all" >
                         <List
                             dataSource={records.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
                             render={renderRecord}
