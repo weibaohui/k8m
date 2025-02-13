@@ -22,7 +22,7 @@ import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.t
 import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
 import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.tsx";
 import GlobalTextSelector from '@/layout/TextSelectionPopover';
-
+import HistoryRecordsComponent from '@/components/Amis/custom/applyer.tsx';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
@@ -45,6 +45,8 @@ registerRenderer({ type: 'xterm', component: XTermComponent })
 registerRenderer({ type: 'chatgpt', component: WebSocketChatGPT })
 // @ts-ignore
 registerRenderer({ type: 'mEditor', component: MonacoEditorWithForm })
+// @ts-ignore
+registerRenderer({ type: 'historyRecord', component: HistoryRecordsComponent })
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
 registerFilter("filterAnnotations", FilterAnnotations)
