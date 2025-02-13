@@ -89,20 +89,27 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
             setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
             // 添加到收藏记录的最前面
             setFavoriteRecords(prevRecords => [{ ...record, isFavorite: true }, ...prevRecords]);
+            updateLocalStorage();
         } else {
             // 从收藏记录中移除
             const favoriteRecord = favoriteRecords.find(r => r.id === recordId);
             if (favoriteRecord) {
-                setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-                // 生成新的ID并添加到历史记录
-                setHistoryRecords(prevRecords => [...prevRecords, {
-                    ...favoriteRecord,
-                    id: Math.random().toString(36).substring(2, 15),
-                    isFavorite: false
-                }]);
+                Modal.confirm({
+                    title: '确认取消收藏',
+                    content: '确定要取消收藏这条记录吗？',
+                    onOk: () => {
+                        setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
+                        // 生成新的ID并添加到历史记录
+                        setHistoryRecords(prevRecords => [...prevRecords, {
+                            ...favoriteRecord,
+                            id: Math.random().toString(36).substring(2, 15),
+                            isFavorite: false
+                        }]);
+                        updateLocalStorage();
+                    }
+                });
             }
         }
-        updateLocalStorage();
     };
 
     // 保存记录到 localStorage并发送到服务器
