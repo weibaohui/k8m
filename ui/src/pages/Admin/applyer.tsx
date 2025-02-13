@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Tabs, Button, Tooltip, List, Input, Modal } from '@arco-design/web-react';
-import { IconEye, IconStar, IconDelete, IconExport } from '@arco-design/web-react/icon';
+import { IconEye, IconStar, IconDelete, IconExport, IconEdit } from '@arco-design/web-react/icon';
 import axios from 'axios';
 import * as monaco from 'monaco-editor';
 
@@ -13,7 +13,7 @@ interface RecordItem {
 
 const HistoryRecords = () => {
     // 初始化记录数据
-    const [allRecords, setAllRecords] = useState<RecordItem[]>([]);
+    const [historyRecords, setHistoryRecords] = useState<RecordItem[]>([]);
     const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
     const [selectedRecord, setSelectedRecord] = useState<string>('');
     const [viewRecord, setViewRecord] = useState<RecordItem>();
@@ -31,10 +31,10 @@ const HistoryRecords = () => {
 
     // 从 localStorage 获取记录数据
     useEffect(() => {
-        const savedAllRecords = localStorage.getItem('allRecords');
+        const savedHistoryRecords = localStorage.getItem('historyRecords');
         const savedFavoriteRecords = localStorage.getItem('favoriteRecords');
 
-        setAllRecords(savedAllRecords ? JSON.parse(savedAllRecords) : []);
+        setHistoryRecords(savedHistoryRecords ? JSON.parse(savedHistoryRecords) : []);
         setFavoriteRecords(savedFavoriteRecords ? JSON.parse(savedFavoriteRecords) : []);
 
     }, []);
@@ -61,19 +61,22 @@ const HistoryRecords = () => {
     }, [selectedRecord]);
 
     // 更新 localStorage 中的数据
-    const updateLocalStorage = useMemo(() => {
-        return () => {
-            localStorage.setItem('allRecords', JSON.stringify(allRecords));
-            localStorage.setItem('favoriteRecords', JSON.stringify(favoriteRecords));
-        };
-    }, [allRecords, favoriteRecords]);
+    const updateLocalStorage = () => {
+        localStorage.setItem('historyRecords', JSON.stringify(historyRecords));
+        localStorage.setItem('favoriteRecords', JSON.stringify(favoriteRecords));
+    };
+
+    useEffect(() => {
+        localStorage.setItem('historyRecords', JSON.stringify(historyRecords));
+        localStorage.setItem('favoriteRecords', JSON.stringify(favoriteRecords));
+    }, [historyRecords, favoriteRecords]);
 
     // 收藏某条记录
     const toggleFavorite = (recordId: string) => {
-        const record = allRecords.find(r => r.id === recordId);
+        const record = historyRecords.find(r => r.id === recordId);
         if (record) {
-            // 从所有记录中移除
-            setAllRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
+            // 从历史记录中移除
+            setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
             // 添加到收藏记录
             setFavoriteRecords(prevRecords => [...prevRecords, { ...record, isFavorite: true }]);
         } else {
@@ -81,7 +84,12 @@ const HistoryRecords = () => {
             const favoriteRecord = favoriteRecords.find(r => r.id === recordId);
             if (favoriteRecord) {
                 setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-                setAllRecords(prevRecords => [...prevRecords, { ...favoriteRecord, isFavorite: false }]);
+                // 生成新的ID并添加到历史记录
+                setHistoryRecords(prevRecords => [...prevRecords, {
+                    ...favoriteRecord,
+                    id: Math.random().toString(36).substring(2, 15),
+                    isFavorite: false
+                }]);
             }
         }
         updateLocalStorage();
@@ -92,7 +100,7 @@ const HistoryRecords = () => {
         if (!editorValue) return;
 
         // 检查记录是否已存在
-        const existingRecord = allRecords.find(record => record.content === editorValue);
+        const existingRecord = historyRecords.find(record => record.content === editorValue);
         if (existingRecord) {
             const element = document.querySelector(`[data-record-id="${existingRecord.id}"]`);
             if (element) {
@@ -109,13 +117,14 @@ const HistoryRecords = () => {
             content: editorValue,
             isFavorite: false
         };
-        setAllRecords(prevRecords => [...prevRecords, newRecord]);
+        setHistoryRecords(prevRecords => [...prevRecords, newRecord]);
         updateLocalStorage();
+        setActiveTab('history');
     };
 
     const handleNameEdit = (recordId: string) => {
-        const record = activeTab === 'all'
-            ? allRecords.find(r => r.id === recordId)
+        const record = activeTab === 'history'
+            ? historyRecords.find(r => r.id === recordId)
             : favoriteRecords.find(r => r.id === recordId);
 
         if (record) {
@@ -129,7 +138,7 @@ const HistoryRecords = () => {
 
     const handleNameSubmit = (recordId: string) => {
         if (editingName.trim()) {
-            setAllRecords(prevRecords =>
+            setHistoryRecords(prevRecords =>
                 prevRecords.map(record =>
                     record.id === recordId
                         ? { ...record, customName: editingName.trim() }
@@ -155,16 +164,21 @@ const HistoryRecords = () => {
             const record = favoriteRecords.find(r => r.id === recordId);
             if (record) {
                 setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-                setAllRecords(prevRecords => [...prevRecords, { ...record, isFavorite: false }]);
+                // 生成新的ID并添加到历史记录
+                setHistoryRecords(prevRecords => [...prevRecords, {
+                    ...record,
+                    id: Math.random().toString(36).substring(2, 15),
+                    isFavorite: false
+                }]);
             }
         } else {
-            setAllRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
+            setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
         }
         updateLocalStorage();
     };
 
     const renderRecord = (record: RecordItem) => (
-        <List.Item key={record.id} data-record-id={record.id} className="list-item">
+        <List.Item key={record.id} data-record-id={record.id} className="list-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedRecord(record.content)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
                 {editingId === record.id ? (
                     <Input
@@ -174,17 +188,15 @@ const HistoryRecords = () => {
                         onBlur={() => handleNameSubmit(record.id)}
                         onPressEnter={() => handleNameSubmit(record.id)}
                         placeholder="请输入新的名称"
-                        style={{ maxWidth: '150px' }}
+                        style={{ maxWidth: '100px' }}
                     />
                 ) : (
                     <div
-                        onClick={() => handleNameEdit(record.id)}
                         style={{
                             maxWidth: '150px',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
-                            cursor: 'pointer',
                             flex: 1,
                             zIndex: 2,
                         }}
@@ -192,13 +204,14 @@ const HistoryRecords = () => {
                         {record.customName || record.content}
                     </div>
                 )}
-                <div style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', zIndex: 1, pointerEvents: 'none', backgroundColor: '#FFFFFF' }}>
-                    {record.isFavorite && (
-                        <IconStar style={{ color: '#FFB400', fill: '#FFB400' }} />
-                    )}
-                </div>
+
                 <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 3, padding: '0 5px', backgroundColor: '#FFFFFF' }} onClick={(e) => e.stopPropagation()}>
                     <Button.Group>
+                        <Button
+                            type="text"
+                            icon={<IconEdit style={{ fontSize: '14px' }} />}
+                            onClick={() => handleNameEdit(record.id)}
+                        />
                         <Button
                             type="text"
                             icon={<IconEye style={{ fontSize: '14px' }} />}
@@ -226,11 +239,6 @@ const HistoryRecords = () => {
                             type="text"
                             icon={<IconDelete style={{ fontSize: '14px' }} />}
                             onClick={() => handleDelete(record.id)}
-                        />
-                        <Button
-                            type="text"
-                            icon={<IconExport style={{ fontSize: '14px' }} />}
-                            onClick={() => setSelectedRecord(record.content)}
                         />
                     </Button.Group>
                 </div>
@@ -260,10 +268,40 @@ const HistoryRecords = () => {
                     }
                     `}
                 </style>
-                <Tabs defaultActiveTab="all" onChange={setActiveTab}>
-                    <Tabs.TabPane title="所有" key="all" >
+                <Tabs defaultActiveTab="history" onChange={setActiveTab}>
+                    <Tabs.TabPane title="历史记录" key="history" >
+                        <div style={{ marginBottom: '10px' }}>
+                            <Button.Group>
+                                <Button
+                                    type="outline"
+                                    onClick={() => {
+                                        if (historyRecords.length === 0) {
+                                            Modal.warning({
+                                                title: '提示',
+                                                content: '暂无历史记录可删除'
+                                            });
+                                            return;
+                                        }
+                                        Modal.confirm({
+                                            title: '确认删除',
+                                            content: '确定要删除所有历史记录吗？此操作不可恢复。',
+                                            onOk: () => {
+                                                setHistoryRecords([]);
+                                                updateLocalStorage();
+                                                Modal.success({
+                                                    title: '删除成功',
+                                                    content: '已清空所有历史记录'
+                                                });
+                                            }
+                                        });
+                                    }}
+                                >
+                                    全部删除
+                                </Button>
+                            </Button.Group>
+                        </div>
                         <List
-                            dataSource={allRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+                            dataSource={historyRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
                             render={renderRecord}
                         />
                         <div style={{ marginTop: '16px', textAlign: 'right' }}>
@@ -276,12 +314,12 @@ const HistoryRecords = () => {
                                     上一页
                                 </Button>
                                 <Button type="secondary" disabled>
-                                    {currentPage}/{Math.ceil(allRecords.length / pageSize)}
+                                    {currentPage}/{Math.ceil(historyRecords.length / pageSize)}
                                 </Button>
                                 <Button
                                     type="secondary"
-                                    disabled={currentPage >= Math.ceil(allRecords.length / pageSize)}
-                                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allRecords.length / pageSize), prev + 1))}
+                                    disabled={currentPage >= Math.ceil(historyRecords.length / pageSize)}
+                                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(historyRecords.length / pageSize), prev + 1))}
                                 >
                                     下一页
                                 </Button>
@@ -289,6 +327,81 @@ const HistoryRecords = () => {
                         </div>
                     </Tabs.TabPane>
                     <Tabs.TabPane title="收藏" key="favorites">
+                        <div style={{ marginBottom: '10px' }}>
+                            <Button.Group>
+                                <Button
+                                    type="outline"
+                                    onClick={() => {
+                                        const dataStr = JSON.stringify(favoriteRecords);
+                                        const blob = new Blob([dataStr], { type: 'application/json' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'favorites.json';
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                        URL.revokeObjectURL(url);
+                                    }}
+                                >
+                                    导出收藏
+                                </Button>
+                                <Button
+                                    type="outline"
+                                    onClick={() => {
+                                        const input = document.createElement('input');
+                                        input.type = 'file';
+                                        input.accept = '.json';
+                                        input.onchange = (e) => {
+                                            const file = (e.target as HTMLInputElement).files?.[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = (e) => {
+                                                    try {
+                                                        const importedRecords = JSON.parse(e.target?.result as string);
+                                                        if (Array.isArray(importedRecords)) {
+                                                            const validRecords = importedRecords.filter(record =>
+                                                                record.id && record.content && typeof record.isFavorite === 'boolean'
+                                                            );
+                                                            const newRecords = validRecords.filter(newRecord =>
+                                                                !favoriteRecords.some(existingRecord =>
+                                                                    existingRecord.id === newRecord.id ||
+                                                                    existingRecord.content === newRecord.content
+                                                                )
+                                                            );
+                                                            if (newRecords.length > 0) {
+                                                                setFavoriteRecords(prev => [...prev, ...newRecords]);
+                                                                Modal.success({
+                                                                    title: '导入成功',
+                                                                    content: `成功导入 ${newRecords.length} 条记录`
+                                                                });
+                                                                updateLocalStorage();
+                                                            } else {
+                                                                Modal.warning({
+                                                                    title: '导入提示',
+                                                                    content: '没有新的记录需要导入'
+                                                                });
+                                                            }
+                                                        } else {
+                                                            throw new Error('Invalid data format');
+                                                        }
+                                                    } catch (error) {
+                                                        Modal.error({
+                                                            title: '导入失败',
+                                                            content: '文件格式错误或数据无效'
+                                                        });
+                                                    }
+                                                };
+                                                reader.readAsText(file);
+                                            }
+                                        };
+                                        input.click();
+                                    }}
+                                >
+                                    导入收藏
+                                </Button>
+                            </Button.Group>
+                        </div>
                         <List
                             dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
                             render={renderRecord}
