@@ -79,6 +79,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				strings.HasPrefix(path, "/assets/") ||
 				strings.HasPrefix(path, "/public/") ||
 				strings.Contains(path, "/cluster/file/option_list") ||
+				strings.Contains(path, "/cluster/scan") ||
 				strings.Contains(path, "/cluster/all") ||
 				strings.Contains(path, "/cluster/reconnect") ||
 				strings.Contains(path, "/cluster/setDefault")) {
