@@ -20,12 +20,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		sc, err := c.Cookie("selectedCluster")
 		if err != nil {
 			// 不存在cookie
-			if cfg.InCluster {
-				clusterID = "InCluster"
-			} else {
-				// 从集群中选择一个
-				clusterID = service.ClusterService().FirstClusterID()
-			}
+			clusterID = service.ClusterService().FirstClusterID()
 
 			// 如果 Cookie 不存在，写入一个默认值
 			c.SetCookie(
@@ -37,7 +32,6 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				false,                       // 是否仅 HTTPS
 				false,                       // 是否 HttpOnly
 			)
-
 		}
 		//InCluster模式下，只有一个集群，那么就直接用InCluster
 		if cfg.InCluster && len(allClusters) == 1 && sc != "InCluster" {
@@ -69,7 +63,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		}
 
 		// 如果设置了sc，但是不能用
-		if !service.ClusterService().IsConnected(sc) {
+		if sc != "" && !service.ClusterService().IsConnected(sc) {
 			// 前端跳转到集群选择页面
 			// 所以要排除集群页面的路径
 			path := c.Request.URL.Path
