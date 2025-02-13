@@ -19,7 +19,7 @@ interface HistoryRecordsProps {
 }
 
 // 用 forwardRef 让组件兼容 AMIS
-const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecordsProps>(({ data }, ref) => {
+const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsProps>(() => {
     // 初始化记录数据
     const [historyRecords, setHistoryRecords] = useState<RecordItem[]>([]);
     const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
