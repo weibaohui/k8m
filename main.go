@@ -245,6 +245,7 @@ func main() {
 		api.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
 		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
 		api.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
+		api.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
 		// k8s sts
 		api.POST("/statefulset/rollout/undo/ns/:ns/name/:name/revision/:revision", sts.Undo)
 		api.GET("/statefulset/rollout/history/ns/:ns/name/:name", sts.History)
