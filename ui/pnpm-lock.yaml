@@ -84,6 +84,9 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3(@types/react@18.2.56)(react@18.2.0)(use-sync-external-store@1.4.0(react@18.2.0))
     devDependencies:
+      '@types/file-saver':
+        specifier: ^2.0.7
+        version: 2.0.7
       '@types/react':
         specifier: ^18.2.56
         version: 18.2.56
@@ -688,6 +691,9 @@ packages:
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
+
+  '@types/file-saver@2.0.7':
+    resolution: {integrity: sha512-dNKVfHd/jk0SkR/exKGj2ggkB45MAkzvWCaqLUUgkyjITkGNzH8H+yUwr+BLJUBjZOe9w8X3wgmXhZDRg1ED6A==}
 
   '@types/node@14.18.63':
     resolution: {integrity: sha512-fAtCfv4jJg+ExtXhvCkCqUKZ+4ok/JQk01qDKhL5BDDoS3AxKXhV5/MAVUZyQnSEd2GT92fkgZl0pz0Q0AzcIQ==}
@@ -2983,6 +2989,8 @@ snapshots:
       '@babel/types': 7.24.0
 
   '@types/estree@1.0.6': {}
+
+  '@types/file-saver@2.0.7': {}
 
   '@types/node@14.18.63': {}
 
