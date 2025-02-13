@@ -391,7 +391,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                         input.click();
                                     }}
                                 >
-                                    导入YAML
+                                    导入
                                 </Button>
 
                                 <Button
@@ -408,7 +408,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                         saveAs(blob, 'favorites.zip');
                                     }}
                                 >
-                                    导出YAML
+                                    导出
                                 </Button>
 
                             </Button.Group>
