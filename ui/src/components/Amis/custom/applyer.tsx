@@ -3,6 +3,8 @@ import { Tabs, Button, List, Input, Modal } from '@arco-design/web-react';
 import { IconStar, IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import * as monaco from 'monaco-editor';
 import React from 'react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 interface RecordItem {
     id: string;
@@ -394,7 +396,23 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                         document.body.removeChild(a); URL.revokeObjectURL(url);
                                     }}
                                 >
-                                    导出收藏
+                                    导出JSON
+                                </Button>
+                                <Button
+                                    type="outline"
+                                    onClick={async () => {
+                                        const zip = new JSZip();
+
+                                        favoriteRecords.forEach((record, index) => {
+                                            const fileName = record.customName || `favorite_${index + 1}.yaml`;
+                                            zip.file(fileName.endsWith('.yaml') ? fileName : `${fileName}.yaml`, record.content);
+                                        });
+
+                                        const blob = await zip.generateAsync({ type: 'blob' });
+                                        saveAs(blob, 'favorites.zip');
+                                    }}
+                                >
+                                    导出YAML
                                 </Button>
 
                             </Button.Group>

@@ -23,6 +23,8 @@
     "amis-ui": "^6.11.0",
     "axios": "^1.7.9",
     "crypto-js": "^4.2.0",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
     "monaco-editor": "^0.52.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
