@@ -29,9 +29,6 @@ func OptionList(c *gin.Context) {
 	var options []map[string]interface{}
 	for _, cluster := range clusters {
 		name := cluster.GetClusterID()
-		if cluster.IsInCluster {
-			name = "InCluster"
-		}
 		flag := "✅"
 		if cluster.ClusterConnectStatus != constants.ClusterConnectStatusConnected {
 			flag = "⚠️"
@@ -101,10 +98,6 @@ func SetDefault(c *gin.Context) {
 	if cookieValue == "/" {
 		return
 	}
-	//单独处理下InCluster
-	if contextName == "InCluster" || fileName == "InCluster" {
-		cookieValue = "InCluster"
-	}
 
 	c.SetCookie(
 		"selectedCluster",
@@ -123,4 +116,16 @@ func SetDefault(c *gin.Context) {
 		}
 	}()
 
+}
+
+func SetDefaultInCluster(c *gin.Context) {
+	c.SetCookie(
+		"selectedCluster",
+		"InCluster",
+		int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天,
+		"/",
+		"",
+		false,
+		false,
+	)
 }
