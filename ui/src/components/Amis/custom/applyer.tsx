@@ -533,7 +533,44 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                     style={{ marginTop: '10px' }}
                     onClick={handleSave}
                 >
-                    应用
+                    应用到集群
+                </Button>
+                <Button
+                    type="primary"
+                    status="danger"
+                    style={{ marginTop: '10px', marginLeft: '10px' }}
+                    onClick={async () => {
+                        if (!editorValue) return;
+                        try {
+                            const response = await fetcher({
+                                url: '/k8s/yaml/delete',
+                                method: 'post',
+                                data: {
+                                    yaml: editorValue
+                                }
+                            });
+
+                            if (response.data?.status !== 0) {
+                                Modal.error({
+                                    title: '删除失败',
+                                    content: `请尝试刷新后重试。${response.data?.msg}`
+                                });
+                                return;
+                            }
+
+                            Modal.success({
+                                title: '删除成功',
+                                content: '已成功从集群中删除'
+                            });
+                        } catch (error) {
+                            Modal.error({
+                                title: '删除失败',
+                                content: error instanceof Error ? error.message : '未知错误'
+                            });
+                        }
+                    }}
+                >
+                    从集群删除
                 </Button>
             </div>
         </div>
