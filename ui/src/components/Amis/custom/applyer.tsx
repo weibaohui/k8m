@@ -126,7 +126,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
             content: editorValue,
             isFavorite: false
         };
-        setHistoryRecords(prevRecords => [...prevRecords, newRecord]);
+        setHistoryRecords(prevRecords => [newRecord, ...prevRecords]);
         updateLocalStorage();
         setActiveTab('history');
     };
