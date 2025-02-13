@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Tabs, Button, Tooltip, List, Input, Modal } from '@arco-design/web-react';
 import { IconEye, IconStar, IconDelete, IconExport } from '@arco-design/web-react/icon';
 import axios from 'axios';
+import * as monaco from 'monaco-editor';
 
 interface RecordItem {
     id: string;
@@ -22,6 +23,9 @@ const HistoryRecords = () => {
     const [editingId, setEditingId] = useState<string>();
     const [editingName, setEditingName] = useState('');
     const [activeTab, setActiveTab] = useState('all');
+    const monacoInstance = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const [editorValue, setEditorValue] = useState<string>();
+    const editorRef = useRef<HTMLDivElement>(null);
 
     const pageSize = 10;
 
@@ -32,7 +36,29 @@ const HistoryRecords = () => {
 
         setAllRecords(savedAllRecords ? JSON.parse(savedAllRecords) : []);
         setFavoriteRecords(savedFavoriteRecords ? JSON.parse(savedFavoriteRecords) : []);
+
     }, []);
+    useEffect(() => {
+        if (editorRef.current) {
+            monacoInstance.current = monaco.editor.create(editorRef.current, {
+                value: '',
+                theme: 'vs',
+                automaticLayout: true,
+                minimap: {
+                    enabled: false // 关闭小地图
+                },
+            });
+            monacoInstance.current.onDidChangeModelContent(() => {
+                setEditorValue(monacoInstance.current?.getValue() || '');
+            });
+        }
+        return () => monacoInstance.current?.dispose();
+    }, []);
+    useEffect(() => {
+        if (monacoInstance.current && selectedRecord !== monacoInstance.current.getValue()) {
+            monacoInstance.current.setValue(selectedRecord);
+        }
+    }, [selectedRecord]);
 
     // 更新 localStorage 中的数据
     const updateLocalStorage = useMemo(() => {
@@ -63,10 +89,10 @@ const HistoryRecords = () => {
 
     // 保存记录到 localStorage
     const handleSave = () => {
-        if (!selectedRecord) return;
+        if (!editorValue) return;
 
         // 检查记录是否已存在
-        const existingRecord = allRecords.find(record => record.content === selectedRecord);
+        const existingRecord = allRecords.find(record => record.content === editorValue);
         if (existingRecord) {
             const element = document.querySelector(`[data-record-id="${existingRecord.id}"]`);
             if (element) {
@@ -80,7 +106,7 @@ const HistoryRecords = () => {
 
         const newRecord: RecordItem = {
             id: Math.random().toString(36).substring(2, 15),
-            content: selectedRecord,
+            content: editorValue,
             isFavorite: false
         };
         setAllRecords(prevRecords => [...prevRecords, newRecord]);
@@ -281,12 +307,12 @@ const HistoryRecords = () => {
                 </Tabs>
             </div>
 
-            <div style={{ flex: 1, padding: '10px', backgroundColor: '#FFFFFF' }}>
-                <Input.TextArea
-                    value={selectedRecord}
-                    onChange={(value) => setSelectedRecord(value)}
-                    rows={10}
-                />
+            <div style={{ padding: '10px', backgroundColor: '#FFFFFF' }}>
+                <div ref={editorRef} style={{
+                    minWidth: '500px',
+                    width: 'calc(100vh - 200px)',
+                    height: '80vh',
+                }} />
                 <Button
                     type="primary"
                     style={{ marginTop: '10px' }}
