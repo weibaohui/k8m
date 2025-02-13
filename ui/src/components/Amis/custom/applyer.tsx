@@ -392,7 +392,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                         input.click();
                                     }}
                                 >
-                                    导入
+                                    导入备份
                                 </Button>
 
                                 <Button
@@ -409,7 +409,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecords
                                         saveAs(blob, 'favorites.zip');
                                     }}
                                 >
-                                    导出
+                                    导出备份
                                 </Button>
 
                             </Button.Group>
