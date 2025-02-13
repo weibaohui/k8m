@@ -82,7 +82,11 @@ func (c *ClusterConfig) GetClusterID() string {
 	if c.IsInCluster {
 		return "InCluster"
 	}
-	return fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
+	id := fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
+	if id == "InCluster/InCluster" {
+		id = "InCluster"
+	}
+	return id
 }
 
 // ClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID

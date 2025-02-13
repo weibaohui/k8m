@@ -65,11 +65,9 @@ func Init() {
 		callbacks.RegisterInit()
 		// 先注册InCluster集群
 		service.ClusterService().RegisterInCluster()
-		if !cfg.InCluster {
-			// 再注册其他集群
-			service.ClusterService().ScanClustersInDir(cfg.KubeConfig)
-			service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
-		}
+		// 再注册其他集群
+		service.ClusterService().ScanClustersInDir(cfg.KubeConfig)
+		service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
 
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
