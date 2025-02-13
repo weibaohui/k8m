@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Tabs, Button, List, Input, Modal } from '@arco-design/web-react';
 import { IconEye, IconStar, IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import * as monaco from 'monaco-editor';
+import React from 'react';
 
 interface RecordItem {
     id: string;
@@ -10,7 +11,12 @@ interface RecordItem {
     customName?: string;
 }
 
-const HistoryRecords = () => {
+interface HistoryRecordsProps {
+    data: any;
+}
+
+// 用 forwardRef 让组件兼容 AMIS
+const HistoryRecordsComponent = React.forwardRef<HTMLSpanElement, HistoryRecordsProps>(({ data }, ref) => {
     // 初始化记录数据
     const [historyRecords, setHistoryRecords] = useState<RecordItem[]>([]);
     const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
@@ -192,55 +198,54 @@ const HistoryRecords = () => {
                 ) : (
                     <div
                         style={{
-                            maxWidth: '150px',
+                            flex: 1,
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
-                            flex: 1,
-                            zIndex: 2,
+                            marginRight: '10px'
                         }}
                     >
                         {record.customName || record.content}
                     </div>
                 )}
-
-                <div className="button-group" style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 3, padding: '0 5px', backgroundColor: '#FFFFFF' }} onClick={(e) => e.stopPropagation()}>
-                    <Button.Group>
+                {editingId !== record.id && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
                         <Button
                             type="text"
-                            icon={<IconEdit style={{ fontSize: '14px' }} />}
-                            onClick={() => handleNameEdit(record.id)}
+                            icon={<IconEdit />}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleNameEdit(record.id);
+                            }}
                         />
                         <Button
                             type="text"
-                            icon={<IconEye style={{ fontSize: '14px' }} />}
-                            onClick={() => {
+                            icon={<IconEye />}
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 setViewRecord(record);
                                 setIsModalVisible(true);
                             }}
                         />
                         <Button
                             type="text"
-                            icon={<IconStar style={{ color: record.isFavorite ? '#FFB400' : '#86909C', fill: record.isFavorite ? '#FFB400' : 'none', fontSize: '14px' }} />}
-                            onClick={() => {
-                                if (record.isFavorite) {
-                                    Modal.confirm({
-                                        title: '确认取消收藏',
-                                        content: '确定要取消收藏这条记录吗？',
-                                        onOk: () => toggleFavorite(record.id)
-                                    });
-                                } else {
-                                    toggleFavorite(record.id);
-                                }
+                            icon={activeTab === 'favorites' ? <IconStar style={{ color: '#FFD700' }} /> : <IconStar />}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFavorite(record.id);
                             }}
                         />
                         <Button
                             type="text"
-                            icon={<IconDelete style={{ fontSize: '14px' }} />}
-                            onClick={() => handleDelete(record.id)}
+                            icon={<IconDelete />}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(record.id);
+                            }}
                         />
-                    </Button.Group>
-                </div>
+                    </div>
+                )}
+
             </div>
         </List.Item>
     );
@@ -339,8 +344,7 @@ const HistoryRecords = () => {
                                         a.download = 'favorites.json';
                                         document.body.appendChild(a);
                                         a.click();
-                                        document.body.removeChild(a);
-                                        URL.revokeObjectURL(url);
+                                        document.body.removeChild(a); URL.revokeObjectURL(url);
                                     }}
                                 >
                                     导出收藏
@@ -430,11 +434,10 @@ const HistoryRecords = () => {
                 </Tabs>
             </div>
 
-            <div style={{ padding: '10px', backgroundColor: '#FFFFFF' }}>
+            <div style={{ padding: '10px', backgroundColor: '#FFFFFF', width: '100%' }}>
                 <div ref={editorRef} style={{
                     minWidth: '500px',
-                    width: 'calc(100vh - 200px)',
-                    height: '80vh',
+                    height: 'calc(100vh - 200px)',
                     border: '1px solid #e5e6eb',
                     borderRadius: '4px'
                 }} />
@@ -462,6 +465,6 @@ const HistoryRecords = () => {
             </Modal>
         </div >
     );
-};
+});
 
-export default HistoryRecords;
+export default HistoryRecordsComponent;
