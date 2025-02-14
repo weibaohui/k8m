@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Tabs, Button, List, Input, Modal } from 'antd';
+import { Tabs, Button, List, Input, Modal, Space } from 'antd';
 import * as monaco from 'monaco-editor';
 import React from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { DeleteOutlined, EditOutlined, StarOutlined } from '@ant-design/icons';
+import { DeleteFilled, EditFilled, StarFilled, StarOutlined } from '@ant-design/icons';
 import type { TabsProps } from 'antd';
 
 interface RecordItem {
@@ -285,7 +285,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
                         <Button
                             type="text"
-                            icon={<EditOutlined />}
+                            icon={<EditFilled style={{ color: '#1890ff' }} />}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleNameEdit(record.id);
@@ -293,7 +293,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         />
                         <Button
                             type="text"
-                            icon={activeTab === 'favorites' ? <StarOutlined style={{ color: '#FFD700' }} /> : <StarOutlined />}
+                            icon={activeTab === 'favorites' ? <StarFilled style={{ color: '#FFD700' }} /> : <StarOutlined />}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 toggleFavorite(record.id);
@@ -301,7 +301,8 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         />
                         <Button
                             type="text"
-                            icon={<DeleteOutlined />}
+                            icon={<DeleteFilled style={{ color: '#f23034' }} />}
+
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(record.id);
@@ -321,7 +322,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             children: [
                 <div key={'history-list'}>
                     <div style={{ marginBottom: '10px' }}>
-                        <Button.Group>
+                        <Space.Compact>
                             <Button
                                 variant="outlined"
                                 onClick={() => {
@@ -348,14 +349,15 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                             >
                                 全部删除
                             </Button>
-                        </Button.Group>
+                        </Space.Compact>
                     </div>
                     <List
                         dataSource={historyRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
                         renderItem={renderRecord}
+                        bordered={true}
                     />
                     <div style={{ marginTop: '16px', textAlign: 'right' }}>
-                        <Button.Group>
+                        <Space.Compact>
                             <Button
                                 type="default"
                                 disabled={currentPage === 1}
@@ -373,7 +375,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                             >
                                 下一页
                             </Button>
-                        </Button.Group>
+                        </Space.Compact>
                     </div>
                 </div>
             ]
@@ -385,7 +387,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             children: [
                 <div key={'history-list'}>
                     <div style={{ marginBottom: '10px' }}>
-                        <Button.Group>
+                        <Space.Compact>
                             <Button
                                 variant="outlined"
                                 onClick={() => {
@@ -466,14 +468,15 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                                 导出备份
                             </Button>
 
-                        </Button.Group>
+                        </Space.Compact>
                     </div>
                     <List
                         dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
                         renderItem={renderRecord}
+                        bordered={true}
                     />
                     <div style={{ marginTop: '16px', textAlign: 'right' }}>
-                        <Button.Group>
+                        <Space.Compact>
                             <Button
                                 type="default"
                                 disabled={currentFavoritePage === 1}
@@ -491,7 +494,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                             >
                                 下一页
                             </Button>
-                        </Button.Group>
+                        </Space.Compact>
                     </div>
                 </div>
 
@@ -529,7 +532,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             <div style={{ padding: '10px', backgroundColor: '#FFFFFF', width: '100%' }}>
                 <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
                     <Button
-                        type="dashed"
+                        variant='outlined'
                         onClick={() => {
                             const input = document.createElement('input');
                             input.type = 'file';
