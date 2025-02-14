@@ -641,7 +641,7 @@
           "body": [
             {
               "type": "link",
-              "body": "<% if (data.metadata.annotations && data.metadata.annotations['pod.count.total']) { %><%= data.metadata.annotations['pod.count.total'] %> %><% } else { %><span class='text-gray-300 text-xs'>N/A</span><% } %>",
+              "body": "<% if (data.metadata.annotations && data.metadata.annotations['pod.count.total']) { %><%= data.metadata.annotations['pod.count.total'] %> <% } else { %><span class='text-gray-300 text-xs'>N/A</span><% } %>",
               "blank": false,
               "href": "/#/ns/pod?metadata[namespace]=${metadata.name}"
             }
