@@ -1,5 +1,5 @@
 // 最简化展示镜像名称及tag
-const FormatBytes = (input: string) => {
+const FormatBytes = (input: number) => {
     if (typeof input !== "number" || isNaN(input)) return String(input); // 统一转换为字符串
 
     if (input === 0) return "0 B";
