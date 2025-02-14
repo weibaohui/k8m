@@ -1,7 +1,6 @@
 import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
 import React from "react";
-import { Button } from '@arco-design/web-react';
-
+import { Button } from "antd";
 // 定义组件的 props 类型
 interface SSEDownloadProps {
     url: string; // 下载的 URL

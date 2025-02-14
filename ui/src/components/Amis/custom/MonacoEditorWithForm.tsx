@@ -1,8 +1,9 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
-import {Button, Input, Message} from "@arco-design/web-react";
-import {replacePlaceholders} from "@/utils/utils.ts";
-import {fetcher} from "@/components/Amis/fetcher.ts";
+
+import { replacePlaceholders } from "@/utils/utils.ts";
+import { fetcher } from "@/components/Amis/fetcher.ts";
+import { Button, Input, message } from 'antd';
 
 interface MonacoEditorWithFormProps {
     text: string;
@@ -13,16 +14,18 @@ interface MonacoEditorWithFormProps {
 }
 
 const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
-                                                                       text,
-                                                                       saveApi,
-                                                                       data,
-                                                                       options,
-                                                                       componentId
-                                                                   }) => {
+    text,
+    saveApi,
+    data,
+    options,
+    componentId
+}) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const monacoInstance = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [editorValue, setEditorValue] = useState(text);
     const [loading, setLoading] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
+
     text = replacePlaceholders(text, data)
     if (saveApi) {
         saveApi = replacePlaceholders(saveApi, data)
@@ -56,28 +59,31 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
     const handleSave = async () => {
         if (!saveApi) return;
         setLoading(true);
-        const response = await fetcher({url: saveApi, method: 'post', data: {[componentId]: editorValue}});
+        const response = await fetcher({ url: saveApi, method: 'post', data: { [componentId]: editorValue } });
         if (response.data?.status !== 0) {
             if (response.data?.msg.includes("please apply your changes to the latest version and try again")) {
-                Message.error("保存失败: 资源已被更新，请刷新后再试。");
+                messageApi.error("保存失败: 资源已被更新，请刷新后再试。");
             } else {
-                Message.error(`保存失败:请尝试刷新后重试。 ${response.data?.msg}`);
+                messageApi.error(`保存失败:请尝试刷新后重试。 ${response.data?.msg}`);
             }
         } else {
-            Message.info('保存成功！');
+            messageApi.info('保存成功！');
         }
         setLoading(false);
     };
 
     return (
-        <div style={{width: '100%', height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column'}}>
-            <div style={{padding: '10px', display: 'flex', justifyContent: 'flex-end'}}>
-                <Input.TextArea value={editorValue} readOnly
-                                hidden={true} style={{flexGrow: 1, marginRight: '10px'}}/>
-                {saveApi && <Button type="primary" onClick={handleSave} loading={loading}>保存</Button>}
+        <>
+            {contextHolder}
+            <div style={{ width: '100%', height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <Input.TextArea value={editorValue} readOnly
+                        hidden={true} style={{ flexGrow: 1, marginRight: '10px' }} />
+                    {saveApi && <Button type="primary" onClick={handleSave} loading={loading}>保存</Button>}
+                </div>
+                <div style={{ flexGrow: 1 }} ref={editorRef} />
             </div>
-            <div style={{flexGrow: 1}} ref={editorRef}/>
-        </div>
+        </>
     );
 };
 
