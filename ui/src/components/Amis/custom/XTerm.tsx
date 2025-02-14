@@ -1,26 +1,27 @@
-import React, {useEffect, useRef} from 'react';
-import {Terminal} from '@xterm/xterm'
+import React, { useEffect, useRef } from 'react';
+import { Terminal } from '@xterm/xterm'
 import "@xterm/xterm/css/xterm.css";
-import {formatFinalGetUrl} from "@/utils/utils.ts";
-import {AttachAddon} from "@xterm/addon-attach";
-import {FitAddon} from "@xterm/addon-fit";
-import {WebLinksAddon} from "@xterm/addon-web-links";
-import {Unicode11Addon} from "@xterm/addon-unicode11";
-import {SerializeAddon} from "@xterm/addon-serialize";
-import {WebglAddon} from '@xterm/addon-webgl';
-import {SearchAddon} from "@xterm/addon-search";
-import {ClipboardAddon} from '@xterm/addon-clipboard';
+import { formatFinalGetUrl } from "@/utils/utils.ts";
+import { AttachAddon } from "@xterm/addon-attach";
+import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { Unicode11Addon } from "@xterm/addon-unicode11";
+import { SerializeAddon } from "@xterm/addon-serialize";
+import { WebglAddon } from '@xterm/addon-webgl';
+import { SearchAddon } from "@xterm/addon-search";
+import { ClipboardAddon } from '@xterm/addon-clipboard';
 
-interface WebSocketMarkdownViewerProps {
+interface XTermProps {
     url: string;
     params: Record<string, string>;
     data: Record<string, any>
-
+    width?: string,
+    height?: string
 }
 
-const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({url, data, params}, _) => {
-        url = formatFinalGetUrl({url, data, params});
+const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
+    ({ url, data, params, width, height }, _) => {
+        url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
@@ -82,8 +83,8 @@ const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerP
             ws.onclose = () => term.write("\x1b[31mDisconnected\x1b[0m\r\n");
             ws.onerror = () => term.write("\x1b[31mError\x1b[0m\r\n");
             // 监听终端大小调整
-            term.onResize(({cols, rows}) => {
-                const size = JSON.stringify({cols, rows: rows + 1});
+            term.onResize(({ cols, rows }) => {
+                const size = JSON.stringify({ cols, rows: rows + 1 });
                 const send = new TextEncoder().encode("\x01" + size);
                 ws.send(send);
             });
@@ -104,7 +105,7 @@ const XTermComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerP
 
 
         return (
-            <div ref={terminalRef} style={{width: "100%", height: "80vh"}}></div>
+            <div ref={terminalRef} style={{ width: width ? width : "100%", height: height ? height : "80vh" }}></div>
         );
     }
 );

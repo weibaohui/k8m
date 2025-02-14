@@ -1055,6 +1055,41 @@
                 },
                 {
                   "type": "button",
+                  "icon": "fa fa-terminal text-primary",
+                  "label": "监视器",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "width": "100%",
+                    "title": "选择容器 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "container",
+                        "body": [
+                          {
+                            "type": "select",
+                            "name": "containerName",
+                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
+                            "value": "${spec.containers[0].name}",
+                            "required": true,
+                            "style": {
+                              "width": "200px"
+                            }
+                          },
+                          {
+                            "type": "fileExplorer",
+                            "containerName": "${containerName}",
+                            "podName": "${metadata.name}",
+                            "namespace": "${metadata.namespace}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "button",
                   "icon": "fas fa-calendar-alt text-primary",
                   "label": "查看事件",
                   "actionType": "drawer",
