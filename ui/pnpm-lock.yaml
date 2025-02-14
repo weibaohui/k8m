@@ -62,6 +62,9 @@ importers:
       axios:
         specifier: ^1.7.9
         version: 1.7.9
+      copy-to-clipboard:
+        specifier: ^3.3.3
+        version: 3.3.3
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0

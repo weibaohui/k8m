@@ -24,6 +24,7 @@
     "amis-ui": "^6.11.0",
     "antd": "^5.24.0",
     "axios": "^1.7.9",
+    "copy-to-clipboard": "^3.3.3",
     "crypto-js": "^4.2.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
