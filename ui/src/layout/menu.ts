@@ -14,7 +14,7 @@ export default [
     {
         label: "创建",
         icon: "fa-solid fa-dharmachakra",
-        path: "/apply/history",
+        path: "/apply/apply",
         key: "apply",
     },
     {
