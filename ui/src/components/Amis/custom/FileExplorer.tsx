@@ -1,119 +1,119 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tree } from '@arco-design/web-react';
 import { IconFolder, IconFile } from '@arco-design/web-react/icon';
-const TreeData = [
-    {
-        title: 'Trunk 1',
-        key: '0-0',
-        children: [
-            {
-                title: 'Trunk 1-0',
-                key: '0-0-0',
-                children: [
-                    {
-                        title: 'leaf',
-                        key: '0-0-0-0',
-                    },
-                    {
-                        title: 'leaf',
-                        key: '0-0-0-1',
-                        children: [
-                            {
-                                title: 'leaf',
-                                key: '0-0-0-1-0',
-                            },
-                        ],
-                    },
-                    {
-                        title: 'leaf',
-                        key: '0-0-0-2',
-                    },
-                ],
-            },
-            {
-                title: 'Trunk 1-1',
-                key: '0-0-1',
-            },
-            {
-                title: 'Trunk 1-2',
-                key: '0-0-2',
-                children: [
-                    {
-                        title: 'leaf',
-                        key: '0-0-2-0',
-                    },
-                    {
-                        title: 'leaf',
-                        key: '0-0-2-1',
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        title: 'Trunk 2',
-        key: '0-1',
-    },
-    {
-        title: 'Trunk 3',
-        key: '0-2',
-        children: [
-            {
-                title: 'Trunk 3-0',
-                key: '0-2-0',
-                children: [
-                    {
-                        title: 'leaf',
-                        key: '0-2-0-0',
-                    },
-                    {
-                        title: 'leaf',
-                        key: '0-2-0-1',
-                    },
-                ],
-            },
-        ],
-    },
-];
+import { fetcher } from "@/components/Amis/fetcher.ts";
+import { NodeProps } from '@arco-design/web-react/es/Cascader';
+
 interface FileNode {
-    key: string;
-    title: string;
-    isLeaf?: boolean;
+    name: string;
+    type: string;
+    permissions: string;
+    owner: string;
+    group: string;
+    size: number;
+    modTime: string;
+    path: string;
+    isDir: boolean;
     children?: FileNode[];
-    icon?: string;
+    isLeaf?: boolean;
+    title: string;
 }
 
 interface FileExplorerProps {
     data: FileNode[];
 }
 
-const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>(({ data }, ref) => {
-    const [treeData, setTreeData] = useState(TreeData);
+const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>(({ data }, _) => {
+    const [treeData, setTreeData] = useState<FileNode[]>([]);
 
-    const renderIcon = (node: FileNode) => {
-        // 如果节点有自定义图标，使用自定义图标
-        if (node.icon) {
-            return <i className={`${node.icon} mr-2`} style={{ color: '#666' }} />;
+    const fetchData = async (path: string = '/'): Promise<FileNode[]> => {
+        try {
+            const response = await fetcher({
+                url: `/k8s/file/list?path=${encodeURIComponent(path)}`,
+                method: 'post',
+                data: {
+                    "containerName": "k8m",
+                    "podName": "k8m-d478997d5-x4wdp",
+                    "namespace": "k8m"
+                }
+            });
+
+            // @ts-ignore
+            const rows = response.data?.data?.rows || [];
+            const result = rows.map((item: any): FileNode => ({
+                name: item.name || '',
+                type: item.type || '',
+                permissions: item.permissions || '',
+                owner: item.owner || '',
+                group: item.group || '',
+                size: item.size || 0,
+                modTime: item.modTime || '',
+                path: item.path || '',
+                isDir: item.isDir || false,
+                isLeaf: !item.isDir,
+                title: item.name,
+            }));
+            console.log(result)
+            console.log(result)
+            console.log(result)
+            console.log(result)
+            return result;
+        } catch (error) {
+            console.error('Failed to fetch file tree:', error);
+            return [];
         }
-        // 否则使用默认的文件夹或文件图标
-        if (node.isLeaf) {
+    };
+
+    useEffect(() => {
+        const initializeTree = async () => {
+            const rootData = await fetchData();
+            setTreeData(rootData);
+        };
+        initializeTree();
+    }, []);
+
+    const updateTreeData = (list: FileNode[], key: string, children: FileNode[]): FileNode[] => {
+        return list.map((node) => {
+            if (node.path === key) {
+                return { ...node, children };
+            }
+            if (node.children) {
+                return { ...node, children: updateTreeData(node.children, key, children) };
+            }
+            return node;
+        });
+    };
+
+
+    // @ts-ignore
+    const renderIcon = (node: NodeProps) => {
+        if (node.isDir) {
+            return <i className={`${node.isDir} mr-2`} style={{ color: '#666' }} />;
+        }
+        if (!node.isDir) {
             return <IconFile style={{ color: '#666', marginRight: 8 }} />;
         }
         return <IconFolder style={{ color: '#4080FF', marginRight: 8 }} />;
     };
 
+    const onLoadData = async (node: FileNode) => {
+        const children = await fetchData(node.path);
+        setTreeData((origin) => updateTreeData(origin, node.path, children));
+    };
+
     return (
-        <div ref={ref} style={{ padding: '8px' }}>
+        <div style={{ padding: '8px' }}>
             <Tree
                 treeData={treeData}
                 showLine={true}
                 size='mini'
-                style={{
-                    backgroundColor: '#1E1E1E',
-                    color: '#CCCCCC'
-                }}
+                style={{ width: '30vh', maxWidth: '200px' }}
                 blockNode
                 autoExpandParent
+                onSelect={(value, info) => {
+                    console.log(value, info);
+                }}
+                renderExtra={renderIcon}
             />
         </div>
     );
