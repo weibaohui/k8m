@@ -70,6 +70,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			klog.V(6).Infof("c.Request.URL.Path=%s", path)
 			if !(path == "/" ||
 				path == "/favicon.ico" ||
+				path == "/auth/login" ||
 				strings.HasPrefix(path, "/assets/") ||
 				strings.HasPrefix(path, "/public/") ||
 				strings.Contains(path, "/cluster/file/option_list") ||
