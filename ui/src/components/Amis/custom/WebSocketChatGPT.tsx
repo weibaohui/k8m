@@ -1,8 +1,8 @@
-import React, {useEffect, useRef, useState} from "react";
-import {render as amisRender} from "amis";
-import {formatFinalGetUrl} from "@/utils/utils";
-import {Input, Button, Space} from "@arco-design/web-react";
-import {IconSend} from "@arco-design/web-react/icon";
+import React, { useEffect, useRef, useState } from "react";
+import { render as amisRender } from "amis";
+import { formatFinalGetUrl } from "@/utils/utils";
+import { Button, Input, Space } from "antd";
+import { SendOutlined } from "@ant-design/icons";
 
 interface WebSocketChatGPTProps {
     url: string;
@@ -11,8 +11,8 @@ interface WebSocketChatGPTProps {
 }
 
 const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>(
-    ({url, data, params}, _) => {
-        url = formatFinalGetUrl({url, data, params});
+    ({ url, data, params }, _) => {
+        url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
@@ -38,11 +38,11 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                         setMessages((prev) => {
                             if (prev.length === 0 || prev[prev.length - 1].role !== "ai") {
                                 // 如果是新的 AI 回复，创建新的条目
-                                return [...prev, {role: "ai", content: rawMessage}];
+                                return [...prev, { role: "ai", content: rawMessage }];
                             } else {
                                 // 否则，继续累积在当前 AI 回复中
                                 return prev.map((msg, index) =>
-                                    index === prev.length - 1 ? {...msg, content: msg.content + rawMessage} : msg
+                                    index === prev.length - 1 ? { ...msg, content: msg.content + rawMessage } : msg
                                 );
                             }
                         });
@@ -72,7 +72,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
             }
 
             // 立即显示用户消息，并准备新的 AI 回复条目
-            setMessages((prev) => [...prev, {role: "user", content: `${inputMessage}`}]);
+            setMessages((prev) => [...prev, { role: "user", content: `${inputMessage}` }]);
 
             setInputMessage(""); // 清空输入框
         };
@@ -97,7 +97,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         console.log(status)
         return (
             <>
-                <div style={{width: "100%", height: "100%", minHeight: "600px"}}>
+                <div style={{ width: "100%", height: "100%", minHeight: "600px" }}>
                     <div
                         ref={messageContainerRef}
                         style={{
@@ -111,17 +111,17 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                     >
                         {messages.map((msg, index) => (
                             <div key={index}
-                                 style={{
-                                     backgroundColor: msg.role === "user" ? "#BFD8FF" : "#EAEAEA", // 用户消息蓝色，AI 消息灰色
-                                     color: "#333333", // 文字颜色
-                                     padding: "12px",
-                                     borderRadius: "8px",
-                                     marginBottom: "10px", // 增加间距
-                                     maxWidth: "80%", // 限制最大宽度
-                                     alignSelf: msg.role === "user" ? "flex-end" : "flex-start", // 用户消息靠右，AI 消息靠左
-                                     display: "flex",
-                                     flexDirection: "column",
-                                 }}
+                                style={{
+                                    backgroundColor: msg.role === "user" ? "#BFD8FF" : "#EAEAEA", // 用户消息蓝色，AI 消息灰色
+                                    color: "#333333", // 文字颜色
+                                    padding: "12px",
+                                    borderRadius: "8px",
+                                    marginBottom: "10px", // 增加间距
+                                    maxWidth: "80%", // 限制最大宽度
+                                    alignSelf: msg.role === "user" ? "flex-end" : "flex-start", // 用户消息靠右，AI 消息靠左
+                                    display: "flex",
+                                    flexDirection: "column",
+                                }}
                             >
                                 {amisRender({
                                     type: "markdown",
@@ -153,20 +153,20 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                 resize: 'none',
                             }}
                             value={inputMessage}
-                            onChange={setInputMessage}
+                            onChange={(e) => setInputMessage(e.target.value)}
                             placeholder="请输入消息... Shift+Enter换行，Enter发送"
-                            autoSize={{minRows: 2, maxRows: 5}}
+                            autoSize={{ minRows: 2, maxRows: 5 }}
                             onKeyDown={handleKeyDown} // 监听回车键
                         />
 
                         {/* 右侧按钮 */}
-                        <Space style={{marginLeft: '8px'}}>
+                        <Space style={{ marginLeft: '8px' }}>
                             <Button
                                 type="primary"
                                 shape="circle"
-                                icon={<IconSend/>}
+                                icon={<SendOutlined />}
                                 onClick={handleSendMessage}
-                                style={{background: 'black', borderColor: 'black'}}
+                                style={{ background: 'black', borderColor: 'black' }}
                             />
                         </Space>
                     </div>
