@@ -77,7 +77,7 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
             ws.onopen = () => {
                 term.focus();
                 setTimeout(() => fitAddon.fit(), 100);
-                term.write("\x1b[32mConnected\x1b[0m\r\n");
+                // term.write("\x1b[32mConnected\x1b[0m\r\n");
             };
             ws.onmessage = (event) => term.write(event.data);
             ws.onclose = () => term.write("\x1b[31mDisconnected\x1b[0m\r\n");

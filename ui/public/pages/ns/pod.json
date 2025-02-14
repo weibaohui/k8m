@@ -1056,7 +1056,7 @@
                 {
                   "type": "button",
                   "icon": "fa fa-terminal text-primary",
-                  "label": "监视器",
+                  "label": "文件管理",
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnEsc": true,
