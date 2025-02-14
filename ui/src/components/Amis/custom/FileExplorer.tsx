@@ -36,11 +36,9 @@ interface FileExplorerProps {
 
 const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>(
     ({ containerName, podName, namespace, data }, _) => {
-        console.log(containerName, podName, namespace, data)
         podName = replacePlaceholders(podName, data);
         namespace = replacePlaceholders(namespace, data);
         containerName = replacePlaceholders(containerName, data);
-        console.log(containerName, podName, namespace, data)
 
 
         const [treeData, setTreeData] = useState<FileNode[]>([]);
