@@ -1,7 +1,8 @@
 import {FetcherConfig} from "amis-core/lib/factory";
 import {fetcherResult} from "amis-core/lib/types";
+import { message } from "antd";
 import axios from "axios";
-import {Message} from "@arco-design/web-react";
+
 
 export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Promise<fetcherResult> => {
     const token = localStorage.getItem('token') || '';
@@ -24,7 +25,7 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
             }
             if (error.response && error.response.status === 512) {
                 var cluster = error.response.data.msg;
-                Message.error(`集群【${cluster}】当前处于非连接状态。请先连接或切换其他集群`)
+                message.error(`集群【${cluster}】当前处于非连接状态。请先连接或切换其他集群`)
                 window.location.href = '/#/cluster/cluster_all';
             }
             return Promise.reject(error); // 继续处理其他错误
