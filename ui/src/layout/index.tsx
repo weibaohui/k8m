@@ -7,6 +7,7 @@ import useStore from '@/store/layout'
 import { useCallback, useEffect } from 'react'
 import menuConfig from './menu'
 import styles from './index.module.scss'
+import FloatingChatGPTButton from './FloatingChatGPTButton'
 
 const App = () => {
     const { pathname } = useLocation()
@@ -55,7 +56,9 @@ const App = () => {
                 <Sidebar config={menuConfig} />
             </Layout.Sider>
             <Layout.Content className={styles.content}>
+                <FloatingChatGPTButton></FloatingChatGPTButton>
                 <Outlet />
+
             </Layout.Content>
         </Layout>
     </Layout>
