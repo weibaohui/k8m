@@ -1,9 +1,9 @@
-import { Form, Input, Button, Checkbox, Message } from '@arco-design/web-react'
+import { Form, Input, Button, Checkbox, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import {
-    IconUser,
-    IconLock
-} from '@arco-design/web-react/icon'
+    UserOutlined,
+    LockOutlined
+} from '@ant-design/icons'
 import styles from './index.module.scss'
 import { useCallback, useEffect } from 'react'
 
@@ -25,12 +25,10 @@ function encrypt(message: string) {
     });
 
     return encrypted.toString();
-
 }
 
 // 解密函数
 function decrypt(base64CipherText: string) {
-
     // key 和 iv 使用同一个值
     const sKey = CryptoJS.enc.Utf8.parse(secretKey);
     const decrypted = CryptoJS.AES.decrypt(base64CipherText, sKey, {
@@ -41,7 +39,6 @@ function decrypt(base64CipherText: string) {
 
     return decrypted.toString(CryptoJS.enc.Utf8);
 }
-
 
 const Login = () => {
     const navigate = useNavigate()
@@ -63,11 +60,11 @@ const Login = () => {
             }
 
             form.setFieldValue('remember', parsedData.remember === true);
-
         }
     }, [form]);
+
     const onSubmit = useCallback(() => {
-        form.validate().then(async (values) => {
+        form.validateFields().then(async (values) => {
             try {
                 const encryptedPassword = encrypt(values.password);
                 const res = await fetch('/auth/login', {
@@ -82,7 +79,7 @@ const Login = () => {
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    Message.success('登录成功');
+                    message.success('登录成功');
                     localStorage.setItem('token', data.token);
                     // 记住密码逻辑
                     const rememberData = {
@@ -97,17 +94,17 @@ const Login = () => {
                         localStorage.removeItem('remember');
                     }
 
-
                     navigate('/');
                 } else {
-                    Message.error(data.message || '登录失败');
+                    message.error(data.message || '登录失败');
                 }
             } catch (error) {
-                Message.error('网络错误');
+                message.error('网络错误');
             }
         });
     }, [navigate, form]);
-    return <section className={styles.login}  >
+
+    return <section className={styles.login}>
         <div className={styles.content}>
             <Form
                 form={form}
@@ -117,30 +114,26 @@ const Login = () => {
                         onSubmit();
                     }
                 }}
-
-                // initialValues={{
-                //     username: 'admin',
-                //     password: '123456'
-                // }}
-                className={styles.form} autoComplete='off'>
+                className={styles.form}
+                autoComplete='off'
+            >
                 <div>
                     <h2 style={{ color: '#666', fontSize: '24px', marginBottom: 20 }}>欢迎登录</h2>
                 </div>
-                <FormItem field={'username'} rules={[{ required: true }]}>
-                    <Input placeholder='请输入用户名' prefix={<IconUser />} />
+                <FormItem name='username' rules={[{ required: true, message: '请输入用户名' }]}>
+                    <Input placeholder='请输入用户名' prefix={<UserOutlined />} />
                 </FormItem>
-                <FormItem field={'password'} rules={[{ required: true }]}>
+                <FormItem name='password' rules={[{ required: true, message: '请输入密码' }]}>
                     <Input.Password
-                        prefix={<IconLock />}
-                        defaultVisibility={false}
+                        prefix={<LockOutlined />}
                         placeholder='请输入密码'
                     />
                 </FormItem>
-                <FormItem field={'remember'} triggerPropName='checked'>
+                <FormItem name='remember' valuePropName='checked'>
                     <Checkbox>记住</Checkbox>
                 </FormItem>
                 <FormItem>
-                    <Button type='primary' long onClick={onSubmit}>登 录</Button>
+                    <Button type='primary' block onClick={onSubmit}>登 录</Button>
                 </FormItem>
             </Form>
         </div>
