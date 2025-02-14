@@ -22,7 +22,9 @@ interface FileExplorerProps {
     data: FileNode[];
 }
 
-const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>(({ data }, _) => {
+const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>((data, _) => {
+    console.log(data)
+    //TODO del
     const [treeData, setTreeData] = useState<FileNode[]>([]);
 
     const fetchData = async (path: string = '/'): Promise<FileNode[]> => {
@@ -95,10 +97,10 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
         return <FolderOpenFilled style={{ color: '#4080FF', marginRight: 8 }} />;
     };
 
-    const onLoadData = async (node: FileNode) => {
-        const children = await fetchData(node.path);
-        setTreeData((origin) => updateTreeData(origin, node.path, children));
-    };
+    // const onLoadData = async (node: FileNode) => {
+    //     const children = await fetchData(node.path);
+    //     setTreeData((origin) => updateTreeData(origin, node.path, children));
+    // };
 
     return (
         <div style={{ padding: '8px' }}>
