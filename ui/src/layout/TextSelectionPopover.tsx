@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { render as amisRender } from "amis";
 import { Card } from "amis-ui";
 import Draggable from "react-draggable";
+import './TextSelectionPopover.css';
 
 
 const GlobalTextSelector: React.FC = () => {
@@ -10,6 +11,11 @@ const GlobalTextSelector: React.FC = () => {
 
     useEffect(() => {
         const handleMouseUp = (event: MouseEvent) => {
+            // 检查点击是否发生在卡片内部
+            const card = document.querySelector('.selection-card');
+            if (card && card.contains(event.target as Node)) {
+                return;
+            }
             const selectedText = window.getSelection()?.toString().trim();
 
             if (!selectedText) {
@@ -37,6 +43,7 @@ const GlobalTextSelector: React.FC = () => {
     return ReactDOM.createPortal(
         <Draggable>
             <div
+                className="selection-card"
                 style={{
                     position: "absolute",
                     top: selection.y + 5,
@@ -46,6 +53,7 @@ const GlobalTextSelector: React.FC = () => {
                 }}
             >
                 <Card style={{ width: '50hv', maxWidth: '500px' }}
+                    titleClassName="selection-title"
                     title={selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
                 >
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
