@@ -27,7 +27,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
     //TODO del
     const [treeData, setTreeData] = useState<FileNode[]>([]);
 
-    const fetchData = async (path: string = '/'): Promise<FileNode[]> => {
+    const fetchData = async (path: string = '/', isDir: boolean): Promise<FileNode[]> => {
         try {
             const response = await fetcher({
                 url: `/k8s/file/list?path=${encodeURIComponent(path)}`,
@@ -35,7 +35,9 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 data: {
                     "containerName": "k8m",
                     "podName": "k8m-d478997d5-x4wdp",
-                    "namespace": "k8m"
+                    "namespace": "k8m",
+                    "isDir": isDir,
+                    "path": path
                 }
             });
 
@@ -101,6 +103,21 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
     //     const children = await fetchData(node.path);
     //     setTreeData((origin) => updateTreeData(origin, node.path, children));
     // };
+    const onExpand = (expandedKeys, info) => {
+        console.log(info.node.path)
+        if (info.expanded) {
+            fetchData(info.node.path).then((children) => {
+                setTreeData((origin) => updateTreeData(origin, info.node.path, children));
+            });
+        }
+    }
+    const onSelect = (selectedKeys, info) => {
+        if (info.node.isDir) {
+            onExpand(selectedKeys, info);
+        } else {
+            console.log('onSelect', selectedKeys, info);
+        }
+    };
 
     return (
         <div style={{ padding: '8px' }}>
@@ -110,9 +127,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 style={{ width: '30vh', maxWidth: '200px' }}
                 blockNode
                 autoExpandParent
-                onSelect={(value, info) => {
-                    console.log(value, info);
-                }}
+                onSelect={onSelect}
+                onExpand={onExpand}
             />
         </div>
     );
