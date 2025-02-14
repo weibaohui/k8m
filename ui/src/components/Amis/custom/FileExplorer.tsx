@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { Tree } from 'antd';
+import { Button, message, Popconfirm, PopconfirmProps, Splitter, Tag, Tree } from 'antd';
 import { FileFilled, FolderOpenFilled } from '@ant-design/icons';
+import XTermComponent from './XTerm';
+import { EventDataNode } from 'antd/es/tree';
+import FormatBytes from './FormatBytes';
+import formatLsShortDate from './FormatLsShortDate';
+import { saveAs } from 'file-saver';
 
+const { DirectoryTree } = Tree;
 interface FileNode {
     name: string;
     type: string;
@@ -16,6 +22,8 @@ interface FileNode {
     children?: FileNode[];
     isLeaf?: boolean;
     title: string;
+    icon?: ReactNode | ((props: any) => ReactNode);
+    disabled?: boolean;
 }
 
 interface FileExplorerProps {
@@ -26,6 +34,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
     console.log(data)
     //TODO del
     const [treeData, setTreeData] = useState<FileNode[]>([]);
+    const [selected, setSelected] = useState<FileNode>();
 
     const fetchData = async (path: string = '/', isDir: boolean): Promise<FileNode[]> => {
         try {
@@ -56,10 +65,6 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 isLeaf: !item.isDir,
                 title: item.name,
             }));
-            console.log(result)
-            console.log(result)
-            console.log(result)
-            console.log(result)
             return result;
         } catch (error) {
             console.error('Failed to fetch file tree:', error);
@@ -69,7 +74,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
 
     useEffect(() => {
         const initializeTree = async () => {
-            const rootData = await fetchData();
+            const rootData = await fetchData("/", true);
             setTreeData(rootData);
         };
         initializeTree();
@@ -99,38 +104,154 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
         return <FolderOpenFilled style={{ color: '#4080FF', marginRight: 8 }} />;
     };
 
-    // const onLoadData = async (node: FileNode) => {
-    //     const children = await fetchData(node.path);
-    //     setTreeData((origin) => updateTreeData(origin, node.path, children));
-    // };
-    const onExpand = (expandedKeys, info) => {
-        console.log(info.node.path)
+
+
+    const onExpand: (expandedKeys: React.Key[], info: {
+        node: EventDataNode<FileNode>;
+        expanded: boolean;
+        nativeEvent: MouseEvent;
+    }) => void = (_, info) => {
         if (info.expanded) {
-            fetchData(info.node.path).then((children) => {
+            fetchData(info.node.path, true).then((children) => {
                 setTreeData((origin) => updateTreeData(origin, info.node.path, children));
             });
         }
-    }
-    const onSelect = (selectedKeys, info) => {
-        if (info.node.isDir) {
-            onExpand(selectedKeys, info);
-        } else {
-            console.log('onSelect', selectedKeys, info);
-        }
+    };
+    const onSelect: (selectedKeys: React.Key[], info: {
+        event: "select";
+        selected: boolean;
+        node: EventDataNode<FileNode>;
+        selectedNodes: FileNode[];
+        nativeEvent: MouseEvent;
+    }) => void = (_, info) => {
+        setSelected(info.node);
     };
 
+
+    const dirTree = () => {
+        return <DirectoryTree
+            treeData={treeData}
+            showLine={true}
+            style={{ width: '30vh', maxWidth: '200px' }}
+            blockNode
+            checkStrictly={true}
+            onSelect={onSelect}
+            onExpand={onExpand}
+            showIcon={true}
+
+        />
+    }
+    const confirmDeleteFile: PopconfirmProps['onConfirm'] = async (e) => {
+        const response = await fetcher({
+            url: '/k8s/file/delete',
+            method: 'post',
+            data: {
+                "containerName": "k8m",
+                "podName": "k8m-d478997d5-x4wdp",
+                "namespace": "k8m",
+                "path": selected?.path
+            }
+        });
+        message.success(response.data?.msg);
+    };
+    const downloadFile: PopconfirmProps['onConfirm'] = async (e) => {
+        try {
+            const response = await fetcher({
+                url: '/k8s/file/download',
+                method: 'post',
+                data: {
+                    "containerName": "k8m",
+                    "podName": "k8m-d478997d5-x4wdp",
+                    "namespace": "k8m",
+                    "path": selected?.path
+                },
+                responseType: 'blob' // 设置响应类型为blob
+            });
+
+            if (response && response.data) {
+                // 使用file-saver保存文件
+                //@ts-ignore
+                saveAs(new Blob([response.data]), selected?.name || 'download');
+                message.success('正在下载文件...');
+            } else {
+                message.error('下载失败，请重试');
+            }
+        } catch (e) {
+            message.error('下载失败，请重试');
+        }
+
+    };
+    const fileInfo = () => {
+        if (!selected) { return null; }
+        const size = FormatBytes(selected?.size || 0)
+        const time = formatLsShortDate(selected?.modTime)
+        return (
+            <>
+                <div style={{ marginTop: '8px', fontFamily: 'monospace', whiteSpace: 'nowrap', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <Tag color="geekblue">
+                        {selected?.path || ''}
+                    </Tag>
+                    <Tag color="blue">
+                        {selected?.permissions || '-'}
+                    </Tag>
+                    <Tag color="green">
+                        {selected?.owner || 'root'}
+                    </Tag>
+                    <Tag color="orange">
+                        {selected?.group || 'root'}
+                    </Tag>
+                    <Tag color="purple">
+                        {size}
+                    </Tag>
+                    <Tag color="red">
+                        {time}
+                    </Tag>
+
+                </div>
+                <div className='mt-2'>
+                    <Popconfirm
+                        title='请确认'
+                        description={`是否确认删除文件：${selected?.path} ？`}
+                        onConfirm={confirmDeleteFile}
+                        okText="删除"
+                        cancelText="否"
+                    >
+                        <Button color="danger" variant="solid" disabled={!(selected.type == 'file' || selected.isDir)}>删除</Button>
+                    </Popconfirm>
+                    <Button className='ml-2' color="primary" variant="solid"
+                        onClick={downloadFile} disabled={selected.type != 'file'}
+                    >下载</Button>
+
+                </div >
+            </>
+        );
+    }
     return (
-        <div style={{ padding: '8px' }}>
-            <Tree
-                treeData={treeData}
-                showLine={true}
-                style={{ width: '30vh', maxWidth: '200px' }}
-                blockNode
-                autoExpandParent
-                onSelect={onSelect}
-                onExpand={onExpand}
-            />
-        </div>
+
+        <Splitter style={{ height: '100%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
+            <Splitter.Panel collapsible defaultSize='20%'>
+                <div style={{ padding: '8px' }}>
+                    {dirTree()}
+                </div>
+            </Splitter.Panel>
+            <Splitter.Panel>
+                <Splitter layout="vertical">
+                    <Splitter.Panel defaultSize='80%'>
+                        <XTermComponent
+                            url='/k8s/pod/xterm/ns/k8m/pod_name/k8m-d478997d5-x4wdp'
+                            params={{
+                                "container_name": "k8m"
+                            }}
+                            data={{}}
+                        ></XTermComponent>
+                    </Splitter.Panel>
+                    <Splitter.Panel>
+                        {fileInfo()}
+                    </Splitter.Panel>
+                </Splitter>
+            </Splitter.Panel>
+        </Splitter>
+
     );
 });
 
