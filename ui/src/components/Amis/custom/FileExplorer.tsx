@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Tree } from '@arco-design/web-react';
-import { IconFolder, IconFile } from '@arco-design/web-react/icon';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { NodeProps } from '@arco-design/web-react/es/Cascader';
+import { Tree } from 'antd';
+import { FileFilled, FolderOpenFilled } from '@ant-design/icons';
 
 interface FileNode {
     name: string;
@@ -86,14 +85,14 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
 
 
     // @ts-ignore
-    const renderIcon = (node: NodeProps) => {
+    const renderIcon = (node: any) => {
         if (node.isDir) {
             return <i className={`${node.isDir} mr-2`} style={{ color: '#666' }} />;
         }
         if (!node.isDir) {
-            return <IconFile style={{ color: '#666', marginRight: 8 }} />;
+            return <FileFilled style={{ color: '#666', marginRight: 8 }} />;
         }
-        return <IconFolder style={{ color: '#4080FF', marginRight: 8 }} />;
+        return <FolderOpenFilled style={{ color: '#4080FF', marginRight: 8 }} />;
     };
 
     const onLoadData = async (node: FileNode) => {
@@ -106,14 +105,12 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             <Tree
                 treeData={treeData}
                 showLine={true}
-                size='mini'
                 style={{ width: '30vh', maxWidth: '200px' }}
                 blockNode
                 autoExpandParent
                 onSelect={(value, info) => {
                     console.log(value, info);
                 }}
-                renderExtra={renderIcon}
             />
         </div>
     );
