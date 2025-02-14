@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Tabs, Button, List, Input, Modal } from '@arco-design/web-react';
-import { IconStar, IconDelete, IconEdit } from '@arco-design/web-react/icon';
+import { Tabs, Button, List, Input, Modal } from 'antd';
 import * as monaco from 'monaco-editor';
 import React from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { fetcher } from "@/components/Amis/fetcher.ts";
+import { DeleteOutlined, EditOutlined, StarOutlined } from '@ant-design/icons';
+import type { TabsProps } from 'antd';
 
 interface RecordItem {
     id: string;
@@ -28,7 +29,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
     const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
     const [editingId, setEditingId] = useState<string>();
     const [editingName, setEditingName] = useState('');
-    const [activeTab, setActiveTab] = useState('all');
+    const [activeTab, setActiveTab] = useState('history');
     const monacoInstance = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [editorValue, setEditorValue] = useState<string>();
     const editorRef = useRef<HTMLDivElement>(null);
@@ -150,12 +151,12 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     <List
                         style={{ maxHeight: '400px', overflow: 'auto' }}
                         dataSource={resultList}
-                        render={(item, index) => {
-
+                        renderItem={(item, index) => {
+                            const resultItem = item as string;
                             return (
                                 <List.Item key={index} style={{ padding: '8px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <div>{item}</div>
+                                        <div>{resultItem}</div>
                                     </div>
                                 </List.Item>
                             );
@@ -261,7 +262,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     <Input
                         autoFocus
                         value={editingName}
-                        onChange={setEditingName}
+                        onChange={(e) => setEditingName(e.target.value)}
                         onBlur={() => handleNameSubmit(record.id)}
                         onPressEnter={() => handleNameSubmit(record.id)}
                         placeholder="请输入新的名称"
@@ -284,7 +285,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
                         <Button
                             type="text"
-                            icon={<IconEdit />}
+                            icon={<EditOutlined />}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleNameEdit(record.id);
@@ -292,7 +293,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         />
                         <Button
                             type="text"
-                            icon={activeTab === 'favorites' ? <IconStar style={{ color: '#FFD700' }} /> : <IconStar />}
+                            icon={activeTab === 'favorites' ? <StarOutlined style={{ color: '#FFD700' }} /> : <StarOutlined />}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 toggleFavorite(record.id);
@@ -300,7 +301,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         />
                         <Button
                             type="text"
-                            icon={<IconDelete />}
+                            icon={<DeleteOutlined />}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(record.id);
@@ -312,7 +313,191 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             </div>
         </List.Item>
     );
+    const items: TabsProps['items'] = [
+        {
+            key: 'history',
+            id: 'history',
+            label: "历史记录",
+            children: [
+                <div key={'history-list'}>
+                    <div style={{ marginBottom: '10px' }}>
+                        <Button.Group>
+                            <Button
+                                variant="outlined"
+                                onClick={() => {
+                                    if (historyRecords.length === 0) {
+                                        Modal.warning({
+                                            title: '提示',
+                                            content: '暂无历史记录可删除'
+                                        });
+                                        return;
+                                    }
+                                    Modal.confirm({
+                                        title: '确认删除',
+                                        content: '确定要删除所有历史记录吗？此操作不可恢复。',
+                                        onOk: () => {
+                                            setHistoryRecords([]);
+                                            updateLocalStorage();
+                                            Modal.success({
+                                                title: '删除成功',
+                                                content: '已清空所有历史记录'
+                                            });
+                                        }
+                                    });
+                                }}
+                            >
+                                全部删除
+                            </Button>
+                        </Button.Group>
+                    </div>
+                    <List
+                        dataSource={historyRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+                        renderItem={renderRecord}
+                    />
+                    <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                        <Button.Group>
+                            <Button
+                                type="default"
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            >
+                                上一页
+                            </Button>
+                            <Button type="default" disabled>
+                                {currentPage}/{Math.ceil(historyRecords.length / pageSize)}
+                            </Button>
+                            <Button
+                                type="default"
+                                disabled={currentPage >= Math.ceil(historyRecords.length / pageSize)}
+                                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(historyRecords.length / pageSize), prev + 1))}
+                            >
+                                下一页
+                            </Button>
+                        </Button.Group>
+                    </div>
+                </div>
+            ]
+        },
+        {
+            key: 'favorites',
+            id: 'favorites',
+            label: "收藏",
+            children: [
+                <div key={'history-list'}>
+                    <div style={{ marginBottom: '10px' }}>
+                        <Button.Group>
+                            <Button
+                                variant="outlined"
+                                onClick={() => {
+                                    const input = document.createElement('input');
+                                    input.type = 'file';
+                                    input.accept = '.zip';
+                                    input.onchange = async (e) => {
+                                        const file = (e.target as HTMLInputElement).files?.[0];
+                                        if (file) {
+                                            try {
+                                                const zip = await JSZip.loadAsync(file);
+                                                const yamlFiles = [];
 
+                                                for (const [fileName, fileData] of Object.entries(zip.files)) {
+                                                    if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
+                                                        const content = await fileData.async('text');
+                                                        const customName = fileName.replace(/\.(yaml|yml)$/, '');
+                                                        yamlFiles.push({
+                                                            id: Math.random().toString(36).substring(2, 15),
+                                                            content,
+                                                            isFavorite: true,
+                                                            customName
+                                                        });
+                                                    }
+                                                }
+
+                                                if (yamlFiles.length > 0) {
+                                                    const newRecords = yamlFiles.filter(newRecord =>
+                                                        !favoriteRecords.some(existingRecord =>
+                                                            existingRecord.content === newRecord.content
+                                                        )
+                                                    );
+
+                                                    if (newRecords.length > 0) {
+                                                        setFavoriteRecords(prev => [...prev, ...newRecords]);
+                                                        Modal.success({
+                                                            title: '导入成功',
+                                                            content: `成功导入 ${newRecords.length} 个YAML文件`
+                                                        });
+                                                        updateLocalStorage();
+                                                    } else {
+                                                        Modal.warning({
+                                                            title: '导入提示',
+                                                            content: '没有新的YAML文件需要导入'
+                                                        });
+                                                    }
+                                                } else {
+                                                    Modal.warning({
+                                                        title: '导入提示',
+                                                        content: 'ZIP文件中没有找到YAML文件'
+                                                    });
+                                                }
+                                            } catch (error) {
+                                                Modal.error({
+                                                    title: '导入失败',
+                                                    content: '无法解析ZIP文件或文件格式错误'
+                                                });
+                                            }
+                                        }
+                                    };
+                                    input.click();
+                                }}
+                            >
+                                导入备份
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                onClick={async () => {
+                                    const zip = new JSZip();
+                                    favoriteRecords.forEach((record, index) => {
+                                        const fileName = record.customName || `favorite_${index + 1}.yaml`;
+                                        zip.file(fileName.endsWith('.yaml') ? fileName : `${fileName}.yaml`, record.content);
+                                    });
+                                    const blob = await zip.generateAsync({ type: 'blob' });
+                                    saveAs(blob, 'favorites.zip');
+                                }}
+                            >
+                                导出备份
+                            </Button>
+
+                        </Button.Group>
+                    </div>
+                    <List
+                        dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
+                        renderItem={renderRecord}
+                    />
+                    <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                        <Button.Group>
+                            <Button
+                                type="default"
+                                disabled={currentFavoritePage === 1}
+                                onClick={() => setCurrentFavoritePage(prev => Math.max(1, prev - 1))}
+                            >
+                                上一页
+                            </Button>
+                            <Button type="default" disabled>
+                                {currentFavoritePage}/{Math.ceil(favoriteRecords.length / pageSize)}
+                            </Button>
+                            <Button
+                                type="default"
+                                disabled={currentFavoritePage >= Math.ceil(favoriteRecords.length / pageSize)}
+                                onClick={() => setCurrentFavoritePage(prev => Math.min(Math.ceil(favoriteRecords.length / pageSize), prev + 1))}
+                            >
+                                下一页
+                            </Button>
+                        </Button.Group>
+                    </div>
+                </div>
+
+            ]
+        }
+    ];
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: '#FFFFFF' }}>
             <div style={{ width: '350px', padding: '10px', backgroundColor: '#FFFFFF', flexShrink: 0 }}>
@@ -335,189 +520,16 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     }
                     `}
                 </style>
-                <Tabs defaultActiveTab="history" onChange={setActiveTab}>
-                    <Tabs.TabPane title="历史记录" key="history" >
-                        <div style={{ marginBottom: '10px' }}>
-                            <Button.Group>
-                                <Button
-                                    type="outline"
-                                    onClick={() => {
-                                        if (historyRecords.length === 0) {
-                                            Modal.warning({
-                                                title: '提示',
-                                                content: '暂无历史记录可删除'
-                                            });
-                                            return;
-                                        }
-                                        Modal.confirm({
-                                            title: '确认删除',
-                                            content: '确定要删除所有历史记录吗？此操作不可恢复。',
-                                            onOk: () => {
-                                                setHistoryRecords([]);
-                                                updateLocalStorage();
-                                                Modal.success({
-                                                    title: '删除成功',
-                                                    content: '已清空所有历史记录'
-                                                });
-                                            }
-                                        });
-                                    }}
-                                >
-                                    全部删除
-                                </Button>
-                            </Button.Group>
-                        </div>
-                        <List
-                            dataSource={historyRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
-                            render={renderRecord}
-                        />
-                        <div style={{ marginTop: '16px', textAlign: 'right' }}>
-                            <Button.Group>
-                                <Button
-                                    type="secondary"
-                                    disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                >
-                                    上一页
-                                </Button>
-                                <Button type="secondary" disabled>
-                                    {currentPage}/{Math.ceil(historyRecords.length / pageSize)}
-                                </Button>
-                                <Button
-                                    type="secondary"
-                                    disabled={currentPage >= Math.ceil(historyRecords.length / pageSize)}
-                                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(historyRecords.length / pageSize), prev + 1))}
-                                >
-                                    下一页
-                                </Button>
-                            </Button.Group>
-                        </div>
-                    </Tabs.TabPane>
-                    <Tabs.TabPane title="收藏" key="favorites">
-                        <div style={{ marginBottom: '10px' }}>
-                            <Button.Group>
-
-                                <Button
-                                    type="outline"
-                                    onClick={() => {
-                                        const input = document.createElement('input');
-                                        input.type = 'file';
-                                        input.accept = '.zip';
-                                        input.onchange = async (e) => {
-                                            const file = (e.target as HTMLInputElement).files?.[0];
-                                            if (file) {
-                                                try {
-                                                    const zip = await JSZip.loadAsync(file);
-                                                    const yamlFiles = [];
-
-                                                    for (const [fileName, fileData] of Object.entries(zip.files)) {
-                                                        if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
-                                                            const content = await fileData.async('text');
-                                                            const customName = fileName.replace(/\.(yaml|yml)$/, '');
-                                                            yamlFiles.push({
-                                                                id: Math.random().toString(36).substring(2, 15),
-                                                                content,
-                                                                isFavorite: true,
-                                                                customName
-                                                            });
-                                                        }
-                                                    }
-
-                                                    if (yamlFiles.length > 0) {
-                                                        const newRecords = yamlFiles.filter(newRecord =>
-                                                            !favoriteRecords.some(existingRecord =>
-                                                                existingRecord.content === newRecord.content
-                                                            )
-                                                        );
-
-                                                        if (newRecords.length > 0) {
-                                                            setFavoriteRecords(prev => [...prev, ...newRecords]);
-                                                            Modal.success({
-                                                                title: '导入成功',
-                                                                content: `成功导入 ${newRecords.length} 个YAML文件`
-                                                            });
-                                                            updateLocalStorage();
-                                                        } else {
-                                                            Modal.warning({
-                                                                title: '导入提示',
-                                                                content: '没有新的YAML文件需要导入'
-                                                            });
-                                                        }
-                                                    } else {
-                                                        Modal.warning({
-                                                            title: '导入提示',
-                                                            content: 'ZIP文件中没有找到YAML文件'
-                                                        });
-                                                    }
-                                                } catch (error) {
-                                                    Modal.error({
-                                                        title: '导入失败',
-                                                        content: '无法解析ZIP文件或文件格式错误'
-                                                    });
-                                                }
-                                            }
-                                        };
-                                        input.click();
-                                    }}
-                                >
-                                    导入备份
-                                </Button>
-
-                                <Button
-                                    type="outline"
-                                    onClick={async () => {
-                                        const zip = new JSZip();
-
-                                        favoriteRecords.forEach((record, index) => {
-                                            const fileName = record.customName || `favorite_${index + 1}.yaml`;
-                                            zip.file(fileName.endsWith('.yaml') ? fileName : `${fileName}.yaml`, record.content);
-                                        });
-
-                                        const blob = await zip.generateAsync({ type: 'blob' });
-                                        saveAs(blob, 'favorites.zip');
-                                    }}
-                                >
-                                    导出备份
-                                </Button>
-
-                            </Button.Group>
-                        </div>
-                        <List
-                            dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
-                            render={renderRecord}
-                        />
-                        <div style={{ marginTop: '16px', textAlign: 'right' }}>
-                            <Button.Group>
-                                <Button
-                                    type="secondary"
-                                    disabled={currentFavoritePage === 1}
-                                    onClick={() => setCurrentFavoritePage(prev => Math.max(1, prev - 1))}
-                                >
-                                    上一页
-                                </Button>
-                                <Button type="secondary" disabled>
-                                    {currentFavoritePage}/{Math.ceil(favoriteRecords.length / pageSize)}
-                                </Button>
-                                <Button
-                                    type="secondary"
-                                    disabled={currentFavoritePage >= Math.ceil(favoriteRecords.length / pageSize)}
-                                    onClick={() => setCurrentFavoritePage(prev => Math.min(Math.ceil(favoriteRecords.length / pageSize), prev + 1))}
-                                >
-                                    下一页
-                                </Button>
-                            </Button.Group>
-                        </div>
-                    </Tabs.TabPane>
-                </Tabs>
+                <Tabs items={items} onChange={setActiveTab} />
                 <div className="bg-blue-50	" style={{ padding: '5px', margin: '5px', fontSize: '12px' }}>
                     历史记录存储在浏览器本地，清空浏览器缓存后会删除所有历史记录
                 </div>
-            </div>
+            </div >
 
             <div style={{ padding: '10px', backgroundColor: '#FFFFFF', width: '100%' }}>
                 <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
                     <Button
-                        type="outline"
+                        type="dashed"
                         onClick={() => {
                             const input = document.createElement('input');
                             input.type = 'file';
@@ -564,7 +576,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                 </Button>
                 <Button
                     type="primary"
-                    status="danger"
+                    danger={true}
                     style={{ marginTop: '10px', marginLeft: '10px' }}
                     onClick={async () => {
                         if (!editorValue) return;
@@ -594,13 +606,16 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                                     <List
                                         style={{ maxHeight: '400px', overflow: 'auto' }}
                                         dataSource={resultList}
-                                        render={(item, index) => (
-                                            <List.Item key={index} style={{ padding: '8px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <div>{item}</div>
-                                                </div>
-                                            </List.Item>
-                                        )}
+                                        renderItem={(item, index) => {
+                                            const resultItem = item as string;
+                                            return (
+                                                <List.Item key={index} style={{ padding: '8px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div>{resultItem}</div>
+                                                    </div>
+                                                </List.Item>
+                                            );
+                                        }}
                                     />
                                 )
                             });
@@ -637,7 +652,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     从集群删除
                 </Button>
             </div>
-        </div>
+        </div >
     );
 });
 
