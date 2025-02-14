@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Layout } from '@arco-design/web-react'
-import { IconGithub, IconMenuFold, IconMenuUnfold, } from '@arco-design/web-react/icon'
+import { Layout } from 'antd'
+import { GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
 import Sidebar from '@/components/Sidebar'
 import Toolbar from '@/components/ToolBar'
 import useStore from '@/store/layout'
@@ -25,17 +25,19 @@ const App = () => {
         }
     }, [navigate, pathname])
     return <Layout className={styles.container}>
-        <Layout.Header>
+        <Layout.Header style={{
+            padding: '0 0',
+        }}>
             <div className={styles.navbar}>
                 <div className={styles.logo} onClick={goHome}>
                     <h1>
                         <span>k8m</span>
-                        <IconGithub
-                            className='pointer' style={{ marginLeft: '10px' }}
-                            fontSize={18}
-                            onClick={
-                                () => window.open('https://github.com/weibaohui/k8m', '_blank')} /></h1>
-
+                        <GithubOutlined
+                            className='pointer'
+                            style={{ marginLeft: '10px', fontSize: '18px' }}
+                            onClick={() => window.open('https://github.com/weibaohui/k8m', '_blank')}
+                        />
+                    </h1>
                 </div>
                 <Toolbar />
             </div>
@@ -43,11 +45,11 @@ const App = () => {
         <Layout>
             <Layout.Sider
                 width={160}
-                defaultCollapsed={collapse}
-                collapsible={true}
+                collapsed={collapse}
+                collapsible
                 onCollapse={onCollapse}
                 trigger={<div className={styles.collapse}>
-                    {collapse ? <IconMenuUnfold /> : <IconMenuFold />}
+                    {collapse ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                 </div>}
             >
                 <Sidebar config={menuConfig} />
@@ -56,7 +58,7 @@ const App = () => {
                 <Outlet />
             </Layout.Content>
         </Layout>
-    </Layout >
+    </Layout>
 }
 
 export default App

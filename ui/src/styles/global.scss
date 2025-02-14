@@ -1,3 +1,20 @@
+/* 在你的 CSS 文件中添加以下代码 */
+html,
+body {
+  overscroll-behavior-y: contain;
+  /* 防止滚动溢出时的反弹效果 */
+  height: 100%;
+  /* 设置高度为 100% 以覆盖整个视口 */
+  overflow: hidden;
+  /* 隐藏溢出内容 */
+}
+
+/* 如果你的内容需要滚动，可以为特定容器添加滚动样式 */
+.scrollable-container {
+  height: 100%;
+  overflow-y: auto;
+  /* 允许垂直滚动 */
+}
 *::-webkit-scrollbar {
   width: 0px;
 }

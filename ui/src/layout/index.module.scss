@@ -3,9 +3,9 @@
   height: 100vh;
   .navbar {
     min-width: 100vw;
-    height: 60px;
-    border-bottom: 1px solid var(--color-border);
-    background-color: var(--color-bg-2);
+    height: 64px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #fff;
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
@@ -31,10 +31,10 @@
  
   .collapse {
     align-items: center;
-    background-color: var(--color-fill-1);
+    background-color: #f5f5f5;
     border-radius: 2px;
     bottom: 12px;
-    color: var(--color-text-3);
+    color: rgba(0, 0, 0, 0.45);
     cursor: pointer;
     display: flex;
     height: 24px;
@@ -46,19 +46,18 @@
   .content {
     padding: 16px;
     height: calc(100vh - 60px);
-    background: var(--color-fill-2);
+    background: #f0f2f5;
     box-sizing: border-box;
   }
   :global {
-    .arco-layout-sider-has-trigger {
-      padding-bottom: unset !important;
+    .ant-layout-sider {
+      background: #fff;
     }
-    .arco-layout-sider-trigger {
-      justify-content: end;
-      border-top: 1px solid #f1f1f1;
-    }
-    .arco-layout-sider-children {
-      height: calc(100vh - 108px);
+    .ant-layout-sider-trigger {
+      background: #fff;
+      border-top: 1px solid #f0f0f0;
+      text-align: right;
+      padding-right: 12px;
     }
   }
 }
