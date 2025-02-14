@@ -165,6 +165,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     "namespace": "k8m",
                     "path": selected?.path
                 },
+                //@ts-ignore
                 responseType: 'blob' // 设置响应类型为blob
             });
 
