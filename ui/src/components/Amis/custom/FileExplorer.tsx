@@ -313,7 +313,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         {fileInfo()}
                         {selectedContainer && (
                             <XTermComponent
-                                url={`/ k8s / pod / xterm / ns / ${namespace} /pod_name/${podName}` + ''}
+                                url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
                                 params={{
                                     "container_name": selectedContainer
                                 }}
