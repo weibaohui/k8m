@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { Button, message, Popconfirm, PopconfirmProps, Splitter, Tag, Tree } from 'antd';
+import { Button, message, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree } from 'antd';
 import { FileFilled, FolderOpenFilled } from '@ant-design/icons';
 import XTermComponent from './XTerm';
 import { EventDataNode } from 'antd/es/tree';
@@ -25,32 +25,46 @@ interface FileNode {
     title: string;
     icon?: ReactNode | ((props: any) => ReactNode);
     disabled?: boolean;
+    key: string;
 }
 
 interface FileExplorerProps {
-    containerName: string,
-    podName: string,
-    namespace: string,
     data: Record<string, any>
 }
 
 const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>(
-    ({ containerName, podName, namespace, data }, _) => {
-        podName = replacePlaceholders(podName, data);
-        namespace = replacePlaceholders(namespace, data);
-        containerName = replacePlaceholders(containerName, data);
+    ({ data }, _) => {
+        const podName = data?.metadata?.name
+        const namespace = data?.metadata?.namespace
 
 
         const [treeData, setTreeData] = useState<FileNode[]>([]);
         const [selected, setSelected] = useState<FileNode>();
-
+        const [selectedContainer, setSelectedContainer] = React.useState('');
+        const containerOptions = () => {
+            const options = [];
+            for (const container of data.spec.containers) {
+                options.push({
+                    label: container.name,
+                    value: container.name
+                });
+            }
+            return options;
+        };
+        // Initialize selected container
+        useEffect(() => {
+            const options = containerOptions();
+            if (options.length > 0) {
+                setSelectedContainer(options[0].value);
+            }
+        }, [data.spec.containers]);
         const fetchData = async (path: string = '/', isDir: boolean): Promise<FileNode[]> => {
             try {
                 const response = await fetcher({
                     url: `/k8s/file/list?path=${encodeURIComponent(path)}`,
                     method: 'post',
                     data: {
-                        "containerName": containerName,
+                        "containerName": selectedContainer,
                         "podName": podName,
                         "namespace": namespace,
                         "isDir": isDir,
@@ -72,6 +86,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     isDir: item.isDir || false,
                     isLeaf: !item.isDir,
                     title: item.name,
+                    //key改成随机值
+                    key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 }));
                 return result;
             } catch (error) {
@@ -86,7 +102,9 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 setTreeData(rootData);
             };
             initializeTree();
-        }, [containerName, podName, namespace]);
+        }, [selectedContainer, podName, namespace]);
+
+
 
         const updateTreeData = (list: FileNode[], key: string, children: FileNode[]): FileNode[] => {
             return list.map((node) => {
@@ -137,15 +155,28 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
 
 
         const dirTree = () => {
+            // 当数据为空时显示骨架屏
+            if (treeData.length === 0) {
+                return (
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '20px',
+                        color: '#999',
+                        fontSize: '14px'
+                    }}>
+                        <FolderOpenFilled style={{ fontSize: '32px', marginBottom: '8px', color: '#d9d9d9' }} />
+                        <div>暂无文件数据</div>
+                    </div>
+                );
+            }
+            // 有数据时显示正常树
             return <DirectoryTree
                 treeData={treeData}
                 showLine={true}
-                style={{ width: '30vh', maxWidth: '200px' }}
                 checkStrictly={true}
                 onSelect={onSelect}
                 onExpand={onExpand}
                 showIcon={true}
-
             />
         }
         const confirmDeleteFile: PopconfirmProps['onConfirm'] = async (e) => {
@@ -153,7 +184,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 url: '/k8s/file/delete',
                 method: 'post',
                 data: {
-                    "containerName": containerName,
+                    "containerName": selectedContainer,
                     "podName": podName,
                     "namespace": namespace,
                     "path": selected?.path
@@ -167,7 +198,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     url: '/k8s/file/download',
                     method: 'post',
                     data: {
-                        "containerName": containerName,
+                        "containerName": selectedContainer,
                         "podName": podName,
                         "namespace": namespace,
                         "path": selected?.path
@@ -233,27 +264,44 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 </>
             );
         }
+        const handleContainerChange = (value: string) => {
+            setSelectedContainer(value)
+        };
+
         return (
 
-            <Splitter style={{ height: '100%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
-                <Splitter.Panel collapsible defaultSize='20%'>
-                    <div style={{ padding: '8px' }}>
-                        {dirTree()}
-                    </div>
-                </Splitter.Panel>
-                <Splitter.Panel>
-                    {fileInfo()}
-                    <XTermComponent
-                        url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}` + ''}
-                        params={{
-                            "container_name": containerName
-                        }}
-                        data={{}}
-                        height='100%'
-                    ></XTermComponent>
+            <>
 
-                </Splitter.Panel>
-            </Splitter>
+                <Splitter style={{ height: '100%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
+                    <Splitter.Panel collapsible defaultSize='20%'>
+
+                        <div style={{ padding: '8px' }}>
+                            <Select
+                                prefix='容器：'
+                                value={selectedContainer}
+                                onChange={handleContainerChange}
+                                options={containerOptions()}
+                            />
+                            {dirTree()}
+                        </div>
+                    </Splitter.Panel>
+                    <Splitter.Panel>
+                        {fileInfo()}
+                        {selectedContainer && (
+                            <XTermComponent
+                                url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}` + ''}
+                                params={{
+                                    "container_name": selectedContainer
+                                }}
+                                data={{ data }}
+                                height='100%'
+                            ></XTermComponent>
+                        )}
+
+                    </Splitter.Panel>
+                </Splitter>
+            </>
+
 
         );
     });
