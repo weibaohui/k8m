@@ -34,3 +34,9 @@ body {
 .pointer {
   cursor: pointer;
 }
+
+//调整下antd select 的下拉框层索引
+// amis 弹窗的索引是1400
+.ant-select-dropdown {
+  z-index: 1401 !important;
+}
