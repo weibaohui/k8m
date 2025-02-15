@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
+    "@ant-design/x": "^1.0.5",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@xterm/addon-attach": "^0.11.0",
     "@xterm/addon-clipboard": "^0.1.0",
