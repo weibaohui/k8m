@@ -1,12 +1,12 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { Button, message, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree, Upload } from 'antd';
+import { Button, message, Modal, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree, Upload } from 'antd';
 import { FileFilled, FolderOpenFilled } from '@ant-design/icons';
 import XTermComponent from './XTerm';
 import { EventDataNode } from 'antd/es/tree';
 import FormatBytes from './FormatBytes';
 import formatLsShortDate from './FormatLsShortDate';
-import { saveAs } from 'file-saver';
+import MonacoEditorWithForm from './MonacoEditorWithForm';
 
 const { DirectoryTree } = Tree;
 interface FileNode {
@@ -278,6 +278,49 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                             <Button color="danger" variant="solid" disabled={!(selected.type == 'file' || selected.isDir)}>删除</Button>
                         </Popconfirm>
                         <Button className='ml-2' color="primary" variant="solid"
+                            onClick={async () => {
+                                if (selected.type === 'file') {
+                                    try {
+                                        const response = await fetcher({
+                                            url: `/k8s/file/show`,
+                                            method: 'post',
+                                            data: {
+                                                "containerName": selectedContainer,
+                                                "podName": podName,
+                                                "namespace": namespace,
+                                                "path": selected?.path
+                                            }
+                                        });
+                                        //@ts-ignore
+                                        const fileContent = response.data?.data?.content || '';
+                                        const decodedString = atob(fileContent);
+
+                                        Modal.info({
+                                            title: '文件编辑',
+                                            width: '80%',
+                                            content: (
+                                                <MonacoEditorWithForm
+                                                    text={decodedString}
+                                                    componentId="fileContent"
+                                                    saveApi={`/k8s/file/edit`}
+                                                    data={{
+                                                        containerName: selectedContainer,
+                                                        podName: podName,
+                                                        namespace: namespace,
+                                                        path: selected?.path || '',
+                                                    }}
+                                                />
+                                            ),
+                                            footer: null
+                                        });
+                                    } catch (error) {
+                                        message.error('获取文件内容失败');
+                                    }
+                                }
+                            }}
+                            disabled={selected.type != 'file'}
+                        >编辑</Button>
+                        <Button className='ml-2' color="primary" variant="solid"
                             onClick={downloadFile} disabled={selected.type != 'file'}
                         >下载</Button>
                         <Button className='ml-2' color="primary" variant="solid"
@@ -309,6 +352,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         >
                             <Button className='ml-2' color="primary" variant="solid">上传</Button>
                         </Upload>
+
                     </div >
                 </>
             );
