@@ -5,7 +5,6 @@ import Sidebar from '@/components/Sidebar'
 import Toolbar from '@/components/ToolBar'
 import useStore from '@/store/layout'
 import { useCallback, useEffect } from 'react'
-import menuConfig from './menu'
 import styles from './index.module.scss'
 import FloatingChatGPTButton from './FloatingChatGPTButton'
 
@@ -53,7 +52,7 @@ const App = () => {
                     {collapse ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                 </div>}
             >
-                <Sidebar config={menuConfig} />
+                <Sidebar />
             </Layout.Sider>
             <Layout.Content className={styles.content}>
                 <FloatingChatGPTButton></FloatingChatGPTButton>
