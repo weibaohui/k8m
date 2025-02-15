@@ -71,7 +71,6 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			if !(path == "/" ||
 				path == "/favicon.ico" ||
 				path == "/auth/login" ||
-				strings.HasPrefix(path, "/assets/") ||
 				strings.HasPrefix(path, "/public/") ||
 				strings.Contains(path, "/cluster/file/option_list") ||
 				strings.Contains(path, "/cluster/scan") ||
