@@ -193,31 +193,33 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
         };
         const downloadFile: PopconfirmProps['onConfirm'] = async () => {
             try {
-                const response = await fetcher({
-                    url: '/k8s/file/download',
-                    method: 'post',
-                    data: {
-                        "containerName": selectedContainer,
-                        "podName": podName,
-                        "namespace": namespace,
-                        "path": selected?.path
-                    },
-                    //@ts-ignore
-                    responseType: 'blob' // 设置响应类型为blob
-                });
+                // 构建查询参数
+                const queryParams = new URLSearchParams({
+                    containerName: selectedContainer,
+                    podName: podName,
+                    namespace: namespace,
+                    path: selected?.path || "",
+                    token: localStorage.getItem('token') || "",
+                }).toString();
 
-                if (response && response.data) {
-                    // 使用file-saver保存文件
-                    //@ts-ignore
-                    saveAs(new Blob([response.data]), selected?.name || 'download');
-                    message.success('正在下载文件...');
-                } else {
-                    message.error('下载失败，请重试');
-                }
+                // 构建完整的 GET 请求 URL
+                const url = `/k8s/file/download?${queryParams}`;
+
+                // 输出完整的 URL
+                console.log(url);
+                // 创建一个隐形的 <a> 标签
+                const a = document.createElement('a');
+                a.href = url; // 设置文件下载的 URL
+                a.download = 'downloaded_file.tar'; // 设置文件名
+
+                // 模拟用户点击 <a> 标签来触发文件下载
+                a.click();
+
+                message.success('文件正在下载...');
             } catch (e) {
-                message.error('下载失败，请重试');
+                console.log(e)
+                message.error('2下载失败，请重试');
             }
-
         };
         const fileInfo = () => {
             if (!selected) { return null; }
