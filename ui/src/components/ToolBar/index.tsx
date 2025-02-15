@@ -5,23 +5,25 @@ import { UserOutlined } from '@ant-design/icons'
 
 const Toolbar = () => {
     const navigate = useNavigate()
-    const handleClick = (e: any) => {
-        switch (e.key) {
-            case 'logout':
-                localStorage.removeItem("token")
-                navigate('/login')
-                break
-        }
+    const handleLogout = () => {
+        localStorage.removeItem("token")
+        navigate('/login')
     }
-    const dropList = (
-        <Menu onClick={handleClick}>
-            <Menu.Item key='logout'>退出</Menu.Item>
-        </Menu>
-    );
+
+    const menuItems = [
+        {
+            key: 'logout',
+            label: (
+                <div onClick={() => handleLogout()} >
+                    退出
+                </div>
+            )
+        }
+    ];
     return <div className={styles.toolbar}>
         <Space>
             <li>
-                <Dropdown overlay={dropList} placement='bottomRight'>
+                <Dropdown menu={{ items: menuItems }} placement='bottomRight'>
                     <Avatar size="small" style={{ backgroundColor: '#1677ff', cursor: 'pointer' }}>
                         <UserOutlined style={{ fontSize: 14 }} />
                     </Avatar>
