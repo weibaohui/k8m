@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { render as amisRender } from "amis";
 import { formatFinalGetUrl } from "@/utils/utils";
-import { Button, Input, Space } from "antd";
-import { SendOutlined } from "@ant-design/icons";
+import { Button, Flex, Space, Typography } from "antd";
+import { BulbOutlined, InfoCircleOutlined, OpenAIOutlined, PlusOutlined, RocketOutlined, SmileOutlined, UserOutlined } from "@ant-design/icons";
+import { Bubble, BubbleProps, Prompts, PromptsProps, Sender, Welcome } from "@ant-design/x";
 
 interface WebSocketChatGPTProps {
     url: string;
@@ -21,7 +22,9 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         const [inputMessage, setInputMessage] = useState<string>(""); // 用户输入的消息
         const wsRef = useRef<WebSocket | null>(null);
         const messageContainerRef = useRef<HTMLDivElement | null>(null); // 滚动到底部
+        const [loading, setLoading] = useState<boolean>(false);
 
+        console.log(status)
         useEffect(() => {
             if (wsRef.current) {
                 wsRef.current.close();
@@ -65,6 +68,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         // 发送消息
         // 发送消息
         const handleSendMessage = () => {
+            setLoading(true);
             if (!inputMessage.trim()) return;
 
             if (wsRef.current) {
@@ -75,6 +79,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
             setMessages((prev) => [...prev, { role: "user", content: `${inputMessage}` }]);
 
             setInputMessage(""); // 清空输入框
+            setLoading(false);
         };
 
         // 滚动到底部
@@ -87,93 +92,134 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         useEffect(() => {
             scrollToBottom();
         }, [messages]);
-        // 监听回车发送消息
-        const handleKeyDown = (e: React.KeyboardEvent) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // 防止换行
-                handleSendMessage();
-            }
+        const renderMarkdown: BubbleProps['messageRender'] = (content) => {
+            return amisRender({
+                type: "markdown",
+                value: content
+            })
         };
-        console.log(status)
+        const items: PromptsProps['items'] = [
+            {
+                key: '1',
+                icon: <BulbOutlined style={{ color: '#FFD700' }} />,
+                label: 'yaml编写',
+                description: '请给我一个基本的nginx 部署yaml',
+            },
+            {
+                key: '2',
+                icon: <InfoCircleOutlined style={{ color: '#1890FF' }} />,
+                label: '网络',
+                description: '请解释下Deploy中的HostNetwork如何配置？',
+            },
+            {
+                key: '3',
+                icon: <RocketOutlined style={{ color: '#722ED1' }} />,
+                label: '启动',
+                description: '如何提升容器的启动速度？',
+            },
+            {
+                key: '4',
+                icon: <SmileOutlined style={{ color: '#52C41A' }} />,
+                label: '资源配额',
+                description: '如何配置容器配额及资源限制',
+            },
+
+        ];
         return (
             <>
                 <div style={{ width: "100%", height: "100%", minHeight: "600px" }}>
-                    <div
-                        ref={messageContainerRef}
-                        style={{
-                            padding: "10px",
-                            borderRadius: "5px",
-                            overflowY: "auto",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "10px",
-                        }}
-                    >
-                        {messages.map((msg, index) => (
-                            <div key={index}
+
+                    {
+                        messages.length == 0 && <>
+                            <Welcome
+                                title="ChatGPT"
+                                description="我是k8m的AI小助手，你可以问我任何关于kubernetes的问题，我尽量给你提供最准确的答案。"
                                 style={{
-                                    backgroundColor: msg.role === "user" ? "#BFD8FF" : "#EAEAEA", // 用户消息蓝色，AI 消息灰色
-                                    color: "#333333", // 文字颜色
-                                    padding: "12px",
-                                    borderRadius: "8px",
-                                    marginBottom: "10px", // 增加间距
-                                    maxWidth: "80%", // 限制最大宽度
-                                    alignSelf: msg.role === "user" ? "flex-end" : "flex-start", // 用户消息靠右，AI 消息靠左
-                                    display: "flex",
-                                    flexDirection: "column",
+                                    backgroundImage: 'linear-gradient(97deg, #f2f9fe 0%, #f7f3ff 100%)',
+                                    borderStartStartRadius: 4,
                                 }}
-                            >
-                                {amisRender({
-                                    type: "markdown",
-                                    value: msg.content,
-                                })}
-                            </div>
-                        ))}
-                    </div>
-                    <div style={{
-                        position: "absolute",
-                        bottom: "20",
-                        width: "90%",
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "8px 12px",
-                        borderRadius: "24px",
-                        background: "#F5F5F5",
-                        border: "1px solid #E0E0E0",
-                    }}>
-
-
-                        {/* 输入框 */}
-                        <Input.TextArea
-                            style={{
-                                flex: 1,
-                                border: 'none',
-                                outline: 'none',
-                                background: 'transparent',
-                                resize: 'none',
-                            }}
-                            value={inputMessage}
-                            onChange={(e) => setInputMessage(e.target.value)}
-                            placeholder="请输入消息... Shift+Enter换行，Enter发送"
-                            autoSize={{ minRows: 2, maxRows: 5 }}
-                            onKeyDown={handleKeyDown} // 监听回车键
-                        />
-
-                        {/* 右侧按钮 */}
-                        <Space style={{ marginLeft: '8px' }}>
-                            <Button
-                                type="primary"
-                                shape="circle"
-                                icon={<SendOutlined />}
-                                onClick={handleSendMessage}
-                                style={{ background: 'black', borderColor: 'black' }}
                             />
-                        </Space>
-                    </div>
+                            <Prompts
+                                title="✨ 奇思妙想和创新的火花"
+                                items={items}
+                                wrap
+                                styles={{
+                                    item: {
+                                        flex: 'none',
+                                        width: 'calc(50% - 6px)',
+                                    },
+                                }}
+                                onItemClick={(info) => {
+                                    setInputMessage(`${info.data.description}`);
 
+                                }}
+                            />
+                        </>
+                    }
+
+                    <Flex gap="middle" vertical>
+                        {messages.map((msg) => (
+                            <>
+                                <Bubble
+                                    placement={msg.role === "user" ? "end" : "start"}
+                                    content={msg.content}
+                                    avatar={{ icon: <UserOutlined /> }}
+                                    messageRender={renderMarkdown}
+                                />
+                            </>
+                        ))}
+                    </Flex>
+
+                    <Flex vertical gap="middle" className="mt-20 mb-20">
+                        {
+                            messages.length > 0 && <>
+                                <Button
+                                    onClick={() => {
+                                        setMessages([]);
+                                    }}
+                                    icon={<PlusOutlined />}
+                                    style={{
+                                        width: '100px',
+                                        backgroundImage: 'linear-gradient(97deg, #f2f9fe 0%, #f7f3ff 100%)',
+                                        borderStartStartRadius: 4,
+                                        borderStartEndRadius: 4,
+                                    }}
+                                >
+                                    新会话
+                                </Button>
+                            </>
+                        }
+
+
+                        <Sender
+                            loading={loading}
+                            value={inputMessage}
+                            onChange={(v) => {
+                                setInputMessage(v);
+                            }}
+                            onSubmit={() => {
+                                setInputMessage('');
+                                handleSendMessage();
+                            }}
+                            onCancel={() => {
+                                setLoading(false);
+                            }}
+                            actions={(_, info) => {
+                                const { SendButton, ClearButton } = info.components;
+
+                                return (
+                                    <Space size="small">
+                                        <Typography.Text type="secondary">
+                                            <small>`Shift + Enter` 换行</small>
+                                        </Typography.Text>
+                                        <ClearButton />
+                                        <SendButton type="primary" icon={<OpenAIOutlined />} disabled={false} />
+                                    </Space>
+                                );
+                            }}
+                        />
+                    </Flex>
                 </div>
-
-
             </>
         );
     }
