@@ -7,7 +7,6 @@ import { EventDataNode } from 'antd/es/tree';
 import FormatBytes from './FormatBytes';
 import formatLsShortDate from './FormatLsShortDate';
 import { saveAs } from 'file-saver';
-import { replacePlaceholders } from '@/utils/utils';
 
 const { DirectoryTree } = Tree;
 interface FileNode {
@@ -179,7 +178,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 showIcon={true}
             />
         }
-        const confirmDeleteFile: PopconfirmProps['onConfirm'] = async (e) => {
+        const confirmDeleteFile: PopconfirmProps['onConfirm'] = async () => {
             const response = await fetcher({
                 url: '/k8s/file/delete',
                 method: 'post',
@@ -192,7 +191,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             });
             message.success(response.data?.msg);
         };
-        const downloadFile: PopconfirmProps['onConfirm'] = async (e) => {
+        const downloadFile: PopconfirmProps['onConfirm'] = async () => {
             try {
                 const response = await fetcher({
                     url: '/k8s/file/download',
