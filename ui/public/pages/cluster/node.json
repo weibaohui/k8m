@@ -615,7 +615,7 @@
                   "dialog": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
-                    "title": "资源使用详情 (ESC关闭)",
+                    "title": "资源使用详情 （ESC 关闭）",
                     "size": "lg",
                     "body": {
                       "type": "service",

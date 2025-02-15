@@ -722,7 +722,7 @@
                         "dialog": {
                           "closeOnEsc": true,
                           "closeOnOutside": true,
-                          "title": "编辑注解  (ESC关闭)",
+                          "title": "编辑注解  （ESC 关闭）",
                           "size": "lg",
                           "body": [
                             {
