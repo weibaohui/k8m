@@ -205,8 +205,6 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 // 构建完整的 GET 请求 URL
                 const url = `/k8s/file/download?${queryParams}`;
 
-                // 输出完整的 URL
-                console.log(url);
                 // 创建一个隐形的 <a> 标签
                 const a = document.createElement('a');
                 a.href = url; // 设置文件下载的 URL
@@ -217,8 +215,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
 
                 message.success('文件正在下载...');
             } catch (e) {
-                console.log(e)
-                message.error('2下载失败，请重试');
+                message.error('下载失败，请重试');
             }
         };
         const fileInfo = () => {
