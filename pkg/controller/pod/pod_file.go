@@ -101,7 +101,6 @@ func ShowFile(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("%s包含非文本内容，请下载后查看", info.Path))
 		return
 	}
-
 	amis.WriteJsonData(c, gin.H{
 		"content": fileContent,
 	})
@@ -123,11 +122,11 @@ func SaveFile(c *gin.Context) {
 		ContainerName(info.ContainerName)
 
 	if info.Path == "" {
-		amis.WriteJsonOK(c)
+		amis.WriteJsonError(c, fmt.Errorf("路径不能为空"))
 		return
 	}
 	if info.IsDir {
-		amis.WriteJsonOK(c)
+		amis.WriteJsonError(c, fmt.Errorf("无法保存目录"))
 		return
 	}
 
@@ -138,7 +137,7 @@ func SaveFile(c *gin.Context) {
 	}
 	// 上传文件
 	if err := poder.SaveFile(info.Path, str); err != nil {
-		klog.V(2).Infof("Error uploading file: %v", err)
+		klog.V(6).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -176,7 +175,7 @@ func DownloadFile(c *gin.Context) {
 		finalFileName = filepath.Base(info.Path)
 	}
 	if err != nil {
-		klog.V(2).Infof("下载文件错误: %v", err)
+		klog.V(6).Infof("下载文件错误: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -300,7 +299,7 @@ func DeleteFile(c *gin.Context) {
 	// 从容器中下载文件
 	result, err := poder.DeleteFile(info.Path)
 	if err != nil {
-		klog.V(2).Infof("删除文件错误: %v", err)
+		klog.V(6).Infof("删除文件错误: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
