@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Draggable from "react-draggable";
 import { render as amisRender } from "amis";
 import { Button, Drawer } from "antd";
-import { MessageFilled } from "@ant-design/icons";
+import { OpenAIFilled } from "@ant-design/icons";
 
 const FloatingChatGPTButton = () => {
     const [visible, setVisible] = useState(false);
@@ -43,7 +43,7 @@ const FloatingChatGPTButton = () => {
             Math.pow(endPosition.x - startPositionRef.current.x, 2) +
             Math.pow(endPosition.y - startPositionRef.current.y, 2)
         );
-        if (distance < 5) { // 如果拖动距离小于5px，认为是点击
+        if (distance < 1) { // 如果拖动距离小于5px，认为是点击
             setIsDragging(false);
         } else {
             setTimeout(() => setIsDragging(false), 200); // 结束拖动，延迟一点避免误触发点击
@@ -63,7 +63,7 @@ const FloatingChatGPTButton = () => {
                 <Button
                     type="primary"
                     shape="circle"
-                    icon={<MessageFilled />}
+                    icon={<OpenAIFilled />}
                     style={{
                         position: "fixed",
                         zIndex: 180000,
