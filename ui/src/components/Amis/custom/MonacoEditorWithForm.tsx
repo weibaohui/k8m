@@ -5,6 +5,17 @@ import { replacePlaceholders } from "@/utils/utils.ts";
 import { fetcher } from "@/components/Amis/fetcher.ts";
 import { Button, Input, message } from 'antd';
 
+
+//保存如需传递更多参数，请参考MonacoEditorWithFormProps
+//saveApi={`/k8s/file/save`}
+// data = {{
+//     params: {
+//         containerName: selectedContainer,
+//         podName: podName,
+//         namespace: namespace,
+//         path: selected?.path || '',
+// }}
+//
 interface MonacoEditorWithFormProps {
     text: string;
     saveApi: string;
