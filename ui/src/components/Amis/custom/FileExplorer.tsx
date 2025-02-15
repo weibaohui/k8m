@@ -169,7 +169,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 );
             }
             // 有数据时显示正常树
-            return <DirectoryTree
+            return <DirectoryTree className='mt-4'
                 treeData={treeData}
                 showLine={true}
                 checkStrictly={true}
