@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -161,17 +161,73 @@ func DownloadFile(c *gin.Context) {
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
 		ContainerName(info.ContainerName)
+
 	// 从容器中下载文件
-	fileContent, err := poder.DownloadFile(info.Path)
+	fileContent, err := poder.DownloadTarFile(info.Path)
 	if err != nil {
 		klog.V(2).Infof("下载文件错误: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	// 设置响应头，指定文件名和类型
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(info.Path)))
-	c.Data(http.StatusOK, "application/octet-stream", fileContent)
+	// 验证文件内容
+	if len(fileContent) == 0 {
+		klog.V(2).Info("下载的文件内容为空")
+		amis.WriteJsonError(c, fmt.Errorf("下载的文件内容为空"))
+		return
+	}
+
+	// 创建临时目录
+	tempDir, err := os.MkdirTemp("", "download-*")
+	if err != nil {
+		klog.V(2).Infof("创建临时目录错误: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
+	defer os.RemoveAll(tempDir) // 请求结束时删除临时目录
+
+	// 从路径中提取文件名作为下载时的文件名，并添加.tar后缀
+	fileName := filepath.Base(info.Path)
+	fileNameWithoutExt := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	tarFileName := fileNameWithoutExt + ".tar"
+	tempFilePath := filepath.Join(tempDir, tarFileName)
+
+	// 将文件内容写入临时文件
+	if err := os.WriteFile(tempFilePath, fileContent, 0644); err != nil {
+		klog.V(2).Infof("写入临时文件错误: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 打开临时文件
+	tempFile, err := os.Open(tempFilePath)
+	if err != nil {
+		klog.V(2).Infof("打开临时文件错误: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
+	defer tempFile.Close()
+
+	// 获取文件大小
+	fileInfo, err := tempFile.Stat()
+	if err != nil {
+		klog.V(2).Infof("获取文件信息错误: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 设置响应头
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", tarFileName))
+	c.Header("Content-Type", "application/x-tar")
+	c.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Encoding", "identity")
+	// 将临时文件内容写入响应体
+	if _, err := io.Copy(c.Writer, tempFile); err != nil {
+		klog.V(2).Infof("写入响应错误: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
 }
 
 // UploadFile 处理上传文件的 HTTP 请求
