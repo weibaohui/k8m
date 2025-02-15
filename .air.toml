@@ -2,6 +2,7 @@
 
 # 构建配置
 [build]
+pre_cmd = ["rm -rf bin"]
 cmd = "make build"  # 使用 Makefile 的 build 目标
 bin = "bin/k8m -d -v 6"     # 可执行文件路径
 include_ext = ["go"]  # 根据需要添加文件扩展名
