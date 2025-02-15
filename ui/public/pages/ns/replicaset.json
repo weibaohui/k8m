@@ -217,8 +217,19 @@
           "label": "创建",
           "level": "link",
           "icon": "fas fa-dharmachakra text-primary",
-          "actionType": "link",
-          "link": "/#/apply/apply"
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "width": "100%",
+            "title": "创建 ${kind} （ESC 关闭）",
+            "actions": [],
+            "body": [
+              {
+                "type": "historyRecord"
+              }
+            ]
+          }
         }
       ]
     },

@@ -212,14 +212,6 @@
               }
             ]
           }
-        },
-        {
-          "type": "button",
-          "label": "创建",
-          "level": "link",
-          "icon": "fas fa-dharmachakra text-primary",
-          "actionType": "link",
-          "link": "/#/apply/apply"
         }
       ]
     },
