@@ -291,6 +291,11 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                                 "path": selected?.path
                                             }
                                         });
+                                        if (response.data?.status !== 0) {
+                                            //@ts-ignore
+                                            message.error(response.data?.msg || '非文本文件，不可在线编辑。请下载编辑后上传。');
+                                            return;
+                                        }
                                         //@ts-ignore
                                         const fileContent = response.data?.data?.content || '';
                                         const decodedString = atob(fileContent);
@@ -306,23 +311,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                             case 'json':
                                                 language = 'json';
                                                 break;
-                                            case 'js':
-                                                language = 'javascript';
-                                                break;
-                                            case 'ts':
-                                                language = 'typescript';
-                                                break;
                                             case 'py':
                                                 language = 'python';
-                                                break;
-                                            case 'sh':
-                                                language = 'shell';
-                                                break;
-                                            case 'go':
-                                                language = 'go';
-                                                break;
-                                            case 'java':
-                                                language = 'java';
                                                 break;
                                             default:
                                                 language = 'shell';
@@ -330,30 +320,36 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                         }
 
                                         Modal.info({
-                                            title: '文件编辑',
+                                            title: '编辑' + selected?.path + ' （ESC 关闭）',
                                             width: '80%',
                                             content: (
-                                                <MonacoEditorWithForm
-                                                    text={decodedString}
-                                                    componentId="fileContext"
-                                                    saveApi={`/k8s/file/save`}
-                                                    data={{
-                                                        params: {
-                                                            containerName: selectedContainer,
-                                                            podName: podName,
-                                                            namespace: namespace,
-                                                            path: selected?.path || '',
-                                                        }
-                                                    }}
-                                                    options={{
-                                                        language: language,
-                                                        wordWrap: "on",
-                                                        scrollbar: {
-                                                            "vertical": "auto"
-                                                        }
-                                                    }}
+                                                <div style={{
+                                                    border: '1px solid #e5e6eb',
+                                                    borderRadius: '4px'
+                                                }}>
+                                                    <MonacoEditorWithForm
+                                                        text={decodedString}
+                                                        componentId="fileContext"
+                                                        saveApi={`/k8s/file/save`}
+                                                        data={{
+                                                            params: {
+                                                                containerName: selectedContainer,
+                                                                podName: podName,
+                                                                namespace: namespace,
+                                                                path: selected?.path || '',
+                                                            }
+                                                        }}
+                                                        options={{
+                                                            language: language,
+                                                            wordWrap: "on",
+                                                            scrollbar: {
+                                                                "vertical": "auto"
+                                                            }
+                                                        }}
 
-                                                />
+                                                    />
+                                                </div>
+
                                             ),
                                             footer: null
                                         });
@@ -394,7 +390,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 }
                             }}
                         >
-                            <Button className='ml-2' color="primary" variant="solid">上传</Button>
+                            <Button className='ml-2' color="primary" variant="solid" disabled={!selected.isDir}>上传</Button>
                         </Upload>
 
                     </div >
@@ -423,7 +419,9 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         </div>
                     </Splitter.Panel>
                     <Splitter.Panel>
-                        {fileInfo()}
+                        <div style={{ padding: '8px' }}>
+                            {fileInfo()}
+                        </div>
                         {selectedContainer && (
                             <XTermComponent
                                 url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
