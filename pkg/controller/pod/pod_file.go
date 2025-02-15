@@ -78,11 +78,11 @@ func ShowFile(c *gin.Context) {
 		return
 	}
 	if info.Path == "" {
-		amis.WriteJsonOK(c)
+		amis.WriteJsonError(c, fmt.Errorf("路径不能为空"))
 		return
 	}
 	if info.IsDir {
-		amis.WriteJsonOK(c)
+		amis.WriteJsonError(c, fmt.Errorf("无法保存目录"))
 		return
 	}
 
@@ -114,6 +114,7 @@ func SaveFile(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	klog.V(6).Infof("info \n%v\n", utils.ToJSON(info))
 
 	ctx := c.Request.Context()
 	poder := kom.Cluster(selectedCluster).WithContext(ctx).
@@ -130,13 +131,8 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 
-	str, err := utils.DecodeBase64(info.FileContext)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
 	// 上传文件
-	if err := poder.SaveFile(info.Path, str); err != nil {
+	if err := poder.SaveFile(info.Path, info.FileContext); err != nil {
 		klog.V(6).Infof("Error uploading file: %v", err)
 		amis.WriteJsonError(c, err)
 		return

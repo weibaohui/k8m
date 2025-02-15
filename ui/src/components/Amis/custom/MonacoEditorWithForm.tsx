@@ -59,7 +59,18 @@ const MonacoEditorWithForm: React.FC<MonacoEditorWithFormProps> = ({
     const handleSave = async () => {
         if (!saveApi) return;
         setLoading(true);
-        const response = await fetcher({ url: saveApi, method: 'post', data: { [componentId]: editorValue } });
+        // 构造请求数据，将编辑器的值和额外参数合并
+        const requestData = {
+            [componentId]: editorValue,
+            ...(data.params || {}) // 如果存在params属性，将其展开并合并到请求数据中
+        };
+
+        const response = await fetcher({
+            url: saveApi,
+            method: 'post',
+            data: requestData
+        });
+
         if (response.data?.status !== 0) {
             if (response.data?.msg.includes("please apply your changes to the latest version and try again")) {
                 messageApi.error("保存失败: 资源已被更新，请刷新后再试。");

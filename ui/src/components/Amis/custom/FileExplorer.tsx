@@ -294,6 +294,40 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                         //@ts-ignore
                                         const fileContent = response.data?.data?.content || '';
                                         const decodedString = atob(fileContent);
+                                        let language = selected?.path?.split('.').pop() || 'plaintext';
+                                        //根据文件名后缀判断语言
+                                        switch (language) {
+                                            case 'yaml':
+                                                language = 'yaml';
+                                                break;
+                                            case 'yml':
+                                                language = 'yaml';
+                                                break;
+                                            case 'json':
+                                                language = 'json';
+                                                break;
+                                            case 'js':
+                                                language = 'javascript';
+                                                break;
+                                            case 'ts':
+                                                language = 'typescript';
+                                                break;
+                                            case 'py':
+                                                language = 'python';
+                                                break;
+                                            case 'sh':
+                                                language = 'shell';
+                                                break;
+                                            case 'go':
+                                                language = 'go';
+                                                break;
+                                            case 'java':
+                                                language = 'java';
+                                                break;
+                                            default:
+                                                language = 'shell';
+                                                break;
+                                        }
 
                                         Modal.info({
                                             title: '文件编辑',
@@ -301,14 +335,24 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                             content: (
                                                 <MonacoEditorWithForm
                                                     text={decodedString}
-                                                    componentId="fileContent"
-                                                    saveApi={`/k8s/file/edit`}
+                                                    componentId="fileContext"
+                                                    saveApi={`/k8s/file/save`}
                                                     data={{
-                                                        containerName: selectedContainer,
-                                                        podName: podName,
-                                                        namespace: namespace,
-                                                        path: selected?.path || '',
+                                                        params: {
+                                                            containerName: selectedContainer,
+                                                            podName: podName,
+                                                            namespace: namespace,
+                                                            path: selected?.path || '',
+                                                        }
                                                     }}
+                                                    options={{
+                                                        language: language,
+                                                        wordWrap: "on",
+                                                        scrollbar: {
+                                                            "vertical": "auto"
+                                                        }
+                                                    }}
+
                                                 />
                                             ),
                                             footer: null
