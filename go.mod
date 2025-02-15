@@ -13,7 +13,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.36.1
 	github.com/spf13/pflag v1.0.6
-	github.com/weibaohui/kom v0.1.63
+	github.com/weibaohui/kom v0.1.64
 	golang.org/x/net v0.34.0
 	k8s.io/api v0.32.1
 	k8s.io/apimachinery v0.32.1
