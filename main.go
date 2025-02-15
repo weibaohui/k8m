@@ -107,6 +107,8 @@ func main() {
 	// 挂载子目录
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
 	r.StaticFS("/public/pages", http.FS(pagesFS))
+	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
+	r.StaticFS("/assets", http.FS(assetsFS))
 	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
 	r.StaticFS("/monacoeditorwork", http.FS(monacoFS))
 
