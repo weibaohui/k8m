@@ -1,4 +1,4 @@
-import { Avatar, Dropdown, Menu, Space } from 'antd'
+import { Avatar, Dropdown, Space } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import styles from './index.module.scss'
 import { UserOutlined } from '@ant-design/icons'

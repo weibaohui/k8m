@@ -4,7 +4,6 @@ type MenuItem = Required<MenuProps>['items'][number];
 
 const items: () => MenuItem[] = () => {
     const navigate = useNavigate()
-
     const onMenuClick = (path: string) => {
         navigate(path)
     }
@@ -15,7 +14,6 @@ const items: () => MenuItem[] = () => {
             key: "cluster_all",
             onClick: () => onMenuClick('/cluster/cluster_all')
         },
-
         {
             label: "命名空间",
             icon: <i className="fa-solid fa-border-style"></i>,

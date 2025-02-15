@@ -11,7 +11,6 @@ const Sidebar = () => {
         defaultSelectedKeys={[]}
         items={menu()}
     >
-
     </Menu>
 }
 
