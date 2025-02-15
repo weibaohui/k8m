@@ -187,11 +187,25 @@ func UploadFile(c *gin.Context) {
 	info.FileName = c.PostForm("fileName")
 
 	if info.FileName == "" {
-		amis.WriteJsonError(c, fmt.Errorf("文件名不能为空"))
+		amis.WriteJsonData(c, gin.H{
+			"file": gin.H{
+				"uid":    -1,
+				"name":   info.FileName,
+				"status": "error",
+				"error":  "文件名不能为空",
+			},
+		})
 		return
 	}
 	if info.Path == "" {
-		amis.WriteJsonError(c, fmt.Errorf("路径不能为空"))
+		amis.WriteJsonData(c, gin.H{
+			"file": gin.H{
+				"uid":    -1,
+				"name":   info.FileName,
+				"status": "error",
+				"error":  "路径不能为空",
+			},
+		})
 		return
 	}
 	// 替换FileName中非法字符
@@ -201,27 +215,60 @@ func UploadFile(c *gin.Context) {
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("获取上传的文件错误: %v", err))
+		amis.WriteJsonData(c, gin.H{
+			"file": gin.H{
+				"uid":    -1,
+				"name":   info.FileName,
+				"status": "error",
+				"error":  "获取上传文件错误",
+			},
+		})
 		return
 	}
 
 	// 保存上传文件
 	tempFilePath, err := saveUploadedFile(file)
 	if err != nil {
-		amis.WriteJsonError(c, err)
+		amis.WriteJsonData(c, gin.H{
+			"file": gin.H{
+				"uid":    -1,
+				"name":   info.FileName,
+				"status": "error",
+				"error":  err.Error(),
+			},
+		})
 		return
 	}
 	defer os.Remove(tempFilePath) // 请求结束时删除临时文件
 
 	// 上传文件到 Pod 中
 	if err := uploadToPod(ctx, selectedCluster, info, tempFilePath); err != nil {
-		amis.WriteJsonError(c, err)
+		amis.WriteJsonData(c, gin.H{
+			"file": gin.H{
+				"uid":    -1,
+				"name":   info.FileName,
+				"status": "error",
+				"error":  err.Error(),
+			},
+		})
 		return
 	}
 
+	// 	{
+	//    uid: 'uid',      // 文件唯一标识，建议设置为负数，防止和内部产生的 id 冲突
+	//    name: 'xx.png',   // 文件名
+	//    status: 'done' | 'uploading' | 'error' | 'removed' , //  beforeUpload 拦截的文件没有 status 状态属性
+	//    response: '{"status": "success"}', // 服务端响应内容
+	//    linkProps: '{"download": "image"}', // 下载链接额外的 HTML 属性
+	// }
 	amis.WriteJsonData(c, gin.H{
-		"value": "/#",
+		"file": gin.H{
+			"uid":    -1,
+			"name":   info.FileName,
+			"status": "done",
+		},
 	})
+
 }
 func DeleteFile(c *gin.Context) {
 	selectedCluster := amis.GetSelectedCluster(c)

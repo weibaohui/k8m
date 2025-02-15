@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { Button, message, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree } from 'antd';
+import { Button, message, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree, Upload } from 'antd';
 import { FileFilled, FolderOpenFilled } from '@ant-design/icons';
 import XTermComponent from './XTerm';
 import { EventDataNode } from 'antd/es/tree';
@@ -258,7 +258,32 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         <Button className='ml-2' color="primary" variant="solid"
                             onClick={downloadFile} disabled={selected.type != 'file'}
                         >下载</Button>
+                        <Upload
+                            name='file'
+                            action={`/k8s/file/upload`}
+                            showUploadList={false}
+                            headers={{
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }}
+                            data={{
+                                containerName: selectedContainer,
+                                podName: podName,
+                                namespace: namespace,
+                                isDir: selected?.isDir || false,
+                                path: selected?.path || '',
+                                fileName: selected?.name || ''
+                            }}
+                            onChange={(info) => {
 
+                                if (info.file.response?.data?.file?.status === 'done') {
+                                    message.success('上传成功');
+                                } else if (info.file.response?.data?.file?.status === 'error') {
+                                    message.error(info.file.response?.data?.file?.error);
+                                }
+                            }}
+                        >
+                            <Button className='ml-2' color="primary" variant="solid">上传</Button>
+                        </Upload>
                     </div >
                 </>
             );
@@ -288,7 +313,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         {fileInfo()}
                         {selectedContainer && (
                             <XTermComponent
-                                url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}` + ''}
+                                url={`/ k8s / pod / xterm / ns / ${namespace} /pod_name/${podName}` + ''}
                                 params={{
                                     "container_name": selectedContainer
                                 }}
@@ -297,8 +322,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                             ></XTermComponent>
                         )}
 
-                    </Splitter.Panel>
-                </Splitter>
+                    </Splitter.Panel >
+                </Splitter >
             </>
 
 
