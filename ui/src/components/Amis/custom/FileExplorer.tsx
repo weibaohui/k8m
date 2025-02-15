@@ -208,11 +208,34 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 // 创建一个隐形的 <a> 标签
                 const a = document.createElement('a');
                 a.href = url; // 设置文件下载的 URL
-                a.download = 'downloaded_file.tar'; // 设置文件名
 
                 // 模拟用户点击 <a> 标签来触发文件下载
                 a.click();
 
+                message.success('文件正在下载...');
+            } catch (e) {
+                message.error('下载失败，请重试');
+            }
+        };
+        const downloadTarFile: PopconfirmProps['onConfirm'] = async () => {
+            try {
+                // 构建查询参数
+                const queryParams = new URLSearchParams({
+                    containerName: selectedContainer,
+                    podName: podName,
+                    namespace: namespace,
+                    path: selected?.path || "",
+                    token: localStorage.getItem('token') || "",
+                    type: 'tar'
+                }).toString();
+
+                // 构建完整的 GET 请求 URL
+                const url = `/k8s/file/download?${queryParams}`;
+                // 创建一个隐形的 <a> 标签
+                const a = document.createElement('a');
+                a.href = url; // 设置文件下载的 URL
+                // 模拟用户点击 <a> 标签来触发文件下载
+                a.click();
                 message.success('文件正在下载...');
             } catch (e) {
                 message.error('下载失败，请重试');
@@ -257,6 +280,9 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         <Button className='ml-2' color="primary" variant="solid"
                             onClick={downloadFile} disabled={selected.type != 'file'}
                         >下载</Button>
+                        <Button className='ml-2' color="primary" variant="solid"
+                            onClick={downloadTarFile} disabled={selected.type != 'file'}
+                        >压缩下载</Button>
                         <Upload
                             name='file'
                             action={`/k8s/file/upload`}

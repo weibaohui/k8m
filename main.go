@@ -303,8 +303,7 @@ func main() {
 		api.POST("/file/list", pod.FileList)
 		api.POST("/file/show", pod.ShowFile)
 		api.POST("/file/save", pod.SaveFile)
-		api.POST("/file/download", pod.DownloadFile)
-		api.GET("/file/download", pod.DownloadFileGet)
+		api.GET("/file/download", pod.DownloadFile)
 		api.POST("/file/upload", pod.UploadFile)
 		api.POST("/file/delete", pod.DeleteFile)
 		// Pod 资源使用情况
