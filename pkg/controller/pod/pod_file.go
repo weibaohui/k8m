@@ -101,8 +101,9 @@ func ShowFile(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("%s包含非文本内容，请下载后查看", info.Path))
 		return
 	}
+
 	amis.WriteJsonData(c, gin.H{
-		"content": fileContent,
+		"content": string(fileContent),
 	})
 }
 func SaveFile(c *gin.Context) {

@@ -298,7 +298,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                         }
                                         //@ts-ignore
                                         const fileContent = response.data?.data?.content || '';
-                                        const decodedString = atob(fileContent);
+                                        // const decodedString = atob(fileContent);
+                                        const decodedString = fileContent;
                                         let language = selected?.path?.split('.').pop() || 'plaintext';
                                         //根据文件名后缀判断语言
                                         switch (language) {
@@ -351,7 +352,9 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                                 </div>
 
                                             ),
-                                            footer: null
+                                            onOk() { },
+                                            okText: '取消',
+                                            okType: 'default',
                                         });
                                     } catch (error) {
                                         message.error('获取文件内容失败');
