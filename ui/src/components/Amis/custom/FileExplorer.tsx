@@ -1,12 +1,13 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { Button, message, Modal, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree, Upload } from 'antd';
-import { FileFilled, FolderOpenFilled } from '@ant-design/icons';
+import { Button, message, Modal, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree, Upload, Menu, MenuProps } from 'antd';
+import { CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, FileFilled, FileZipOutlined, FolderOpenFilled, UploadOutlined } from '@ant-design/icons';
 import XTermComponent from './XTerm';
 import { EventDataNode } from 'antd/es/tree';
 import FormatBytes from './FormatBytes';
 import formatLsShortDate from './FormatLsShortDate';
 import MonacoEditorWithForm from './MonacoEditorWithForm';
+type MenuItem = Required<MenuProps>['items'][number];
 
 const { DirectoryTree } = Tree;
 
@@ -49,6 +50,37 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             node: null,
         });
 
+
+        const items: MenuItem[] = [
+            {
+                label: '复制路径',
+                key: 'copy',
+                icon: <CopyOutlined style={{ color: '#1890ff' }} /> // 使用蓝色表示复制操作
+            },
+            {
+                label: '删除',
+                key: 'delete',
+                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} /> // 使用红色表示删除操作
+            }, {
+                label: '编辑',
+                key: 'edit',
+                icon: <EditOutlined style={{ color: '#52c41a' }} /> // 使用绿色表示编辑操作
+            }, {
+                label: '下载',
+                key: 'download',
+                icon: <DownloadOutlined style={{ color: '#722ed1' }} /> // 使用紫色表示下载操作
+            }, {
+                label: '压缩下载',
+                key: 'downloadZip',
+                icon: <FileZipOutlined style={{ color: '#faad14' }} /> // 使用金色表示压缩下载
+            },
+            {
+                label: '上传',
+                key: 'upload',
+                icon: <UploadOutlined style={{ color: '#13c2c2' }} /> // 使用青色表示上传操作
+            },
+        ];
+
         const handleRightClick = ({ event, node }: { event: React.MouseEvent; node: EventDataNode<FileNode> }) => {
             event.preventDefault();
             setContextMenu({
@@ -57,33 +89,31 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 y: event.clientY,
                 node: node,
             });
+            // 同时选中该节点
+            setSelected(node);
         };
-
+        const onClick: MenuProps['onClick'] = (e) => {
+            console.log(e.key, contextMenu.node?.path);
+            setContextMenu({ ...contextMenu, visible: false });
+        };
         const renderContextMenu = () => {
             if (!contextMenu.visible || !contextMenu.node) return null;
             return (
-                <div
+                <Menu
                     style={{
                         position: 'absolute',
                         top: contextMenu.y,
                         left: contextMenu.x,
-                        backgroundColor: 'white',
-                        border: '1px solid #ccc',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                         zIndex: 1000,
-                        padding: '8px',
+                        minWidth: '120px',
+                        backgroundColor: '#ffffff',
+                        boxShadow: '0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)',
+                        border: '1px solid #f0f0f0',
+                        borderRadius: '2px',
                     }}
-                >
-                    <div onClick={() =>
-                        //@ts-ignore
-                        console.log('Copy Path:', contextMenu.node.path)}>Copy Path</div>
-                    <div onClick={() =>
-                        //@ts-ignore
-                        console.log('Download:', contextMenu.node.path)}>Download</div>
-                    <div onClick={() =>
-                        //@ts-ignore
-                        console.log('Upload to:', contextMenu.node.path)}>Upload</div>
-                </div>
+                    onClick={onClick}
+                    items={items}
+                />
             );
         };
 
@@ -234,6 +264,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                 onExpand={onExpand}
                 showIcon={true}
                 onRightClick={handleRightClick}
+                selectedKeys={selected ? [selected.key] : []}
             />
         }
         const confirmDeleteFile: PopconfirmProps['onConfirm'] = async () => {
