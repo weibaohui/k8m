@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Select, InputNumber, Switch, DatePicker, Card } from 'antd';
-import { render as amisRender } from "amis";
 import { useSearchParams } from 'react-router-dom';
 import { fetcher } from '../Amis/fetcher';
 import SSELogDisplayComponent from '../Amis/custom/SSELogDisplay';
@@ -57,35 +56,6 @@ const PodLog: React.FC = () => {
         return <div>请在URL中提供namespace和name参数</div>;
     }
 
-
-
-
-
-    const logDownloadSchema = {
-        type: 'log-download',
-        url: `/k8s/pod/logs/download/ns/${namespace}/pod_name/${name}/container/${selectedContainer}`,
-        data: {
-            selectedContainer,
-            tailLines,
-            sinceTime,
-            previous,
-            timestamps,
-
-        }
-    };
-
-    const logDisplaySchema = {
-        type: 'log-display',
-        url: `/k8s/pod/logs/sse/ns/${namespace}/pod_name/${name}/container/${selectedContainer}`,
-        data: {
-            selectedContainer,
-            tailLines,
-            sinceTime,
-            follow,
-            previous,
-            timestamps,
-        }
-    };
 
     return (
         <div style={{ padding: '6px' }}>
