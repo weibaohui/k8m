@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Splitter } from 'antd';
-import XTermComponent from '../XTerm';
+import XTermComponent from '@/components/Amis/custom/XTerm';
 import { EventDataNode } from 'antd/es/tree';
-import MonacoEditorWithForm from '../MonacoEditorWithForm';
-import FileTree, { FileNode } from './components/FileTree';
-import ContextMenu from './components/ContextMenu';
-import ContainerSelector from './components/ContainerSelector';
-import { FileOperations } from './components/FileOperations';
+import MonacoEditorWithForm from '@/components/Amis/custom/MonacoEditorWithForm';
+import FileTree, { FileNode } from '@/components/Amis/custom/FileExplorer/components/FileTree';
+import ContextMenu from '@/components/Amis/custom/FileExplorer/components/ContextMenu';
+import ContainerSelector from '@/components/Amis/custom/FileExplorer/components/ContainerSelector';
+import { FileOperations } from '@/components/Amis/custom/FileExplorer/components/FileOperations';
 
 interface FileExplorerProps {
     data: Record<string, any>

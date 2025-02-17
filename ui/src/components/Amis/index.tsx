@@ -22,7 +22,7 @@ import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.t
 import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
 import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.tsx";
 import GlobalTextSelector from '@/layout/TextSelectionPopover';
-import HistoryRecordsComponent from '@/components/Amis/custom/applyer.tsx';
+import HistoryRecordsComponent from '@/components/Amis/custom/YamlApplyer';
 import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExplorer';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
