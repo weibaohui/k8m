@@ -1,6 +1,6 @@
-import React, { ReactNode, useEffect, useState } from 'react';
-import { fetcher } from "@/components/Amis/fetcher.ts";
-import { message, Modal, PopconfirmProps, Select, Splitter, Tree, Menu, MenuProps } from 'antd';
+import React, {ReactNode, useEffect, useState} from 'react';
+import {fetcher} from "@/components/Amis/fetcher.ts";
+import {message, Modal, Select, Splitter, Tree, Menu, MenuProps} from 'antd';
 import {
     CopyOutlined,
     DeleteOutlined,
@@ -9,15 +9,15 @@ import {
     FileZipOutlined,
     FolderOpenFilled,
     UploadOutlined,
-    ReloadOutlined
+    ReloadOutlined, DownOutlined
 } from '@ant-design/icons';
 import XTermComponent from './XTerm';
-import { EventDataNode } from 'antd/es/tree';
+import {EventDataNode} from 'antd/es/tree';
 import MonacoEditorWithForm from './MonacoEditorWithForm';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
-const { DirectoryTree } = Tree;
+const {DirectoryTree} = Tree;
 
 interface FileNode {
     name: string;
@@ -42,7 +42,7 @@ interface FileExplorerProps {
 }
 
 const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>(
-    ({ data }, _) => {
+    ({data}, _) => {
         const podName = data?.metadata?.name
         const namespace = data?.metadata?.namespace
 
@@ -68,42 +68,42 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             {
                 label: '刷新',
                 key: 'refresh',
-                icon: <ReloadOutlined style={{ color: '#1890ff' }} />
+                icon: <ReloadOutlined style={{color: '#1890ff'}}/>
             },
             {
                 label: '复制路径',
                 key: 'copy',
-                icon: <CopyOutlined style={{ color: '#1890ff' }} />
+                icon: <CopyOutlined style={{color: '#1890ff'}}/>
             },
             {
                 label: '删除',
                 key: 'delete',
-                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} /> // 使用红色表示删除操作
+                icon: <DeleteOutlined style={{color: '#ff4d4f'}}/> // 使用红色表示删除操作
             }, {
                 label: '编辑',
                 key: 'edit',
                 disabled: !(contextMenu.node?.type == 'file'),
-                icon: <EditOutlined style={{ color: '#52c41a' }} /> // 使用绿色表示编辑操作
+                icon: <EditOutlined style={{color: '#52c41a'}}/> // 使用绿色表示编辑操作
             }, {
                 label: '下载',
                 key: 'download',
                 disabled: !(contextMenu.node?.type == 'file'),
-                icon: <DownloadOutlined style={{ color: '#722ed1' }} /> // 使用紫色表示下载操作
+                icon: <DownloadOutlined style={{color: '#722ed1'}}/> // 使用紫色表示下载操作
             }, {
                 label: '压缩下载',
                 key: 'downloadZip',
                 disabled: !(contextMenu.node?.type == 'file'),
-                icon: <FileZipOutlined style={{ color: '#faad14' }} /> // 使用金色表示压缩下载
+                icon: <FileZipOutlined style={{color: '#faad14'}}/> // 使用金色表示压缩下载
             },
             {
                 label: '上传',
                 key: 'upload',
                 disabled: !contextMenu.node?.isDir,
-                icon: <UploadOutlined style={{ color: '#13c2c2' }} /> // 使用青色表示上传操作
+                icon: <UploadOutlined style={{color: '#13c2c2'}}/> // 使用青色表示上传操作
             },
         ];
 
-        const handleRightClick = ({ event, node }: { event: React.MouseEvent; node: EventDataNode<FileNode> }) => {
+        const handleRightClick = ({event, node}: { event: React.MouseEvent; node: EventDataNode<FileNode> }) => {
             event.preventDefault();
             setContextMenu({
                 visible: true,
@@ -115,11 +115,11 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             setSelected(node);
         };
 
-        const handleCopy = () => {
+        const handleCopy = async () => {
             if (!contextMenu.node) {
                 return
             }
-            navigator.clipboard.writeText(contextMenu.node.path);
+            await navigator.clipboard.writeText(contextMenu.node.path);
             message.success('路径已复制到剪贴板');
         }
 
@@ -333,7 +333,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     } else {
                         message.error(result.data?.file?.error || '上传失败');
                     }
-                    handleRefresh();
+                    await handleRefresh();
                 } catch (error) {
                     message.error('上传失败');
                 }
@@ -348,7 +348,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     await handleRefresh();
                     break;
                 case 'copy':
-                    handleCopy();
+                    await handleCopy();
                     break;
                 case 'delete':
                     await handleDelete();
@@ -366,7 +366,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     await handleUpload();
                     break;
             }
-            setContextMenu({ ...contextMenu, visible: false });
+            setContextMenu({...contextMenu, visible: false});
         };
         const renderContextMenu = () => {
             if (!contextMenu.visible || !contextMenu.node) return null;
@@ -392,7 +392,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
         useEffect(() => {
             const handleClickOutside = () => {
                 if (contextMenu.visible) {
-                    setContextMenu({ ...contextMenu, visible: false });
+                    setContextMenu({...contextMenu, visible: false});
                 }
             };
 
@@ -434,7 +434,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
 
                 // @ts-ignore
                 const rows = response.data?.data?.rows || [];
-                const result = rows.map((item: any): FileNode => ({
+                return rows.map((item: any): FileNode => ({
                     name: item.name || '',
                     type: item.type || '',
                     permissions: item.permissions || '',
@@ -449,7 +449,6 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     //key改成随机值
                     key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 }));
-                return result;
             } catch (error) {
                 console.error('Failed to fetch file tree:', error);
                 return [];
@@ -468,10 +467,10 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
         const updateTreeData = (list: FileNode[], key: string, children: FileNode[]): FileNode[] => {
             return list.map((node) => {
                 if (node.path === key) {
-                    return { ...node, children };
+                    return {...node, children};
                 }
                 if (node.children) {
-                    return { ...node, children: updateTreeData(node.children, key, children) };
+                    return {...node, children: updateTreeData(node.children, key, children)};
                 }
                 return node;
             });
@@ -510,21 +509,21 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         color: '#999',
                         fontSize: '14px'
                     }}>
-                        <FolderOpenFilled style={{ fontSize: '32px', marginBottom: '8px', color: '#d9d9d9' }} />
+                        <FolderOpenFilled style={{fontSize: '32px', marginBottom: '8px', color: '#d9d9d9'}}/>
                         <div>暂无文件数据</div>
                     </div>
                 );
             }
             // 有数据时显示正常树
             return <DirectoryTree className='mt-4'
-                treeData={treeData}
-                showLine={true}
-                checkStrictly={true}
-                onSelect={onSelect}
-                onExpand={onExpand}
-                showIcon={true}
-                onRightClick={handleRightClick}
-                selectedKeys={selected ? [selected.key] : []}
+                                  treeData={treeData}
+                                  showLine={true}
+                                  checkStrictly={true}
+                                  onSelect={onSelect}
+                                  onExpand={onExpand}
+                                  switcherIcon={<DownOutlined/>}
+                                  onRightClick={handleRightClick}
+                                  selectedKeys={selected ? [selected.key] : []}
             />
         }
 
@@ -537,10 +536,10 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
 
             <>
 
-                <Splitter style={{ height: '100%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
+                <Splitter style={{height: '100%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)'}}>
                     <Splitter.Panel collapsible defaultSize='20%'>
 
-                        <div style={{ padding: '8px' }}>
+                        <div style={{padding: '8px'}}>
                             <Select
                                 prefix='容器：'
                                 value={selectedContainer}
@@ -558,7 +557,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 params={{
                                     "container_name": selectedContainer
                                 }}
-                                data={{ data }}
+                                data={{data}}
                                 height='calc(100vh - 100px)'
                                 width='96%'
                             ></XTermComponent>
