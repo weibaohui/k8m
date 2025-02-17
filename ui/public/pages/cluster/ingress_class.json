@@ -212,23 +212,11 @@
           }
         },
         {
-          "type": "button",
-          "label": "创建",
-          "level": "link",
+          "type": "link",
           "icon": "fas fa-dharmachakra text-primary",
-          "actionType": "drawer",
-          "drawer": {
-            "overlay": false,
-            "closeOnEsc": true,
-            "width": "100%",
-            "title": "创建 ${kind} （ESC 关闭）",
-            "actions": [],
-            "body": [
-              {
-                "type": "historyRecord"
-              }
-            ]
-          }
+          "body": "创建",
+          "blank": true,
+          "href": "/#/apply/apply?kind=${kind}"
         }
       ]
     },
