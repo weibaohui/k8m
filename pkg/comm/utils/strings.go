@@ -127,6 +127,5 @@ func SanitizeFileName(filename string) string {
 	sanitizedFilename := reg.ReplaceAllString(filename, "_")
 	//去除空格
 	sanitizedFilename = strings.ReplaceAll(sanitizedFilename, " ", "_")
-	// 294 (1).jpg  294 (2).jpg  294 (2).tar  294.jpg      k8m.current  reload.sh
 	return sanitizedFilename
 }
