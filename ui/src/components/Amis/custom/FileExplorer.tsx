@@ -1,11 +1,9 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import { Button, message, Modal, Popconfirm, PopconfirmProps, Select, Splitter, Tag, Tree, Upload, Menu, MenuProps } from 'antd';
+import { message, Modal, PopconfirmProps, Select, Splitter, Tree, Menu, MenuProps } from 'antd';
 import { CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, FileFilled, FileZipOutlined, FolderOpenFilled, UploadOutlined } from '@ant-design/icons';
 import XTermComponent from './XTerm';
 import { EventDataNode } from 'antd/es/tree';
-import FormatBytes from './FormatBytes';
-import formatLsShortDate from './FormatLsShortDate';
 import MonacoEditorWithForm from './MonacoEditorWithForm';
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -64,19 +62,23 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             }, {
                 label: '编辑',
                 key: 'edit',
+                disabled: !(contextMenu.node?.type == 'file'),
                 icon: <EditOutlined style={{ color: '#52c41a' }} /> // 使用绿色表示编辑操作
             }, {
                 label: '下载',
                 key: 'download',
+                disabled: !(contextMenu.node?.type == 'file'),
                 icon: <DownloadOutlined style={{ color: '#722ed1' }} /> // 使用紫色表示下载操作
             }, {
                 label: '压缩下载',
                 key: 'downloadZip',
+                disabled: !(contextMenu.node?.type == 'file'),
                 icon: <FileZipOutlined style={{ color: '#faad14' }} /> // 使用金色表示压缩下载
             },
             {
                 label: '上传',
                 key: 'upload',
+                disabled: !contextMenu.node?.isDir,
                 icon: <UploadOutlined style={{ color: '#13c2c2' }} /> // 使用青色表示上传操作
             },
         ];
@@ -92,8 +94,177 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             // 同时选中该节点
             setSelected(node);
         };
-        const onClick: MenuProps['onClick'] = (e) => {
-            console.log(e.key, contextMenu.node?.path);
+        const onClick: MenuProps['onClick'] = async (e) => {
+            if (!contextMenu.node) return;
+            switch (e.key) {
+                case 'copy':
+                    navigator.clipboard.writeText(contextMenu.node.path);
+                    message.success('路径已复制到剪贴板');
+                    break;
+                case 'delete':
+                    Modal.confirm({
+                        title: '请确认',
+                        content: `是否确认删除文件：${contextMenu.node.path} ？`,
+                        okText: '删除',
+                        cancelText: '取消',
+                        onOk: confirmDeleteFile
+                    });
+                    break;
+                case 'edit':
+                    if (contextMenu.node.type === 'file') {
+                        try {
+                            const response = await fetcher({
+                                url: `/k8s/file/show`,
+                                method: 'post',
+                                data: {
+                                    "containerName": selectedContainer,
+                                    "podName": podName,
+                                    "namespace": namespace,
+                                    "path": contextMenu.node.path
+                                }
+                            });
+                            if (response.data?.status !== 0) {
+                                message.error(response.data?.msg || '非文本文件，不可在线编辑。请下载编辑后上传。');
+                                return;
+                            }
+                            //@ts-ignore
+                            const fileContent = response.data?.data?.content || '';
+                            let language = contextMenu.node.path?.split('.').pop() || 'plaintext';
+                            switch (language) {
+                                case 'yaml':
+                                case 'yml':
+                                    language = 'yaml';
+                                    break;
+                                case 'json':
+                                    language = 'json';
+                                    break;
+                                case 'py':
+                                    language = 'python';
+                                    break;
+                                default:
+                                    language = 'shell';
+                                    break;
+                            }
+
+                            Modal.info({
+                                title: '编辑' + contextMenu.node.path + ' （ESC 关闭）',
+                                width: '80%',
+                                content: (
+                                    <div style={{
+                                        border: '1px solid #e5e6eb',
+                                        borderRadius: '4px'
+                                    }}>
+                                        <MonacoEditorWithForm
+                                            text={fileContent}
+                                            componentId="fileContext"
+                                            saveApi={`/k8s/file/save`}
+                                            data={{
+                                                params: {
+                                                    containerName: selectedContainer,
+                                                    podName: podName,
+                                                    namespace: namespace,
+                                                    path: contextMenu.node.path || '',
+                                                }
+                                            }}
+                                            options={{
+                                                language: language,
+                                                wordWrap: "on",
+                                                scrollbar: {
+                                                    "vertical": "auto"
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                ),
+                                onOk() { },
+                                okText: '取消',
+                                okType: 'default',
+                            });
+                        } catch (error) {
+                            message.error('获取文件内容失败');
+                        }
+                    } else {
+                        message.error('只能编辑文件类型');
+                    }
+                    break;
+                case 'download':
+                    try {
+                        const queryParams = new URLSearchParams({
+                            containerName: selectedContainer,
+                            podName: podName,
+                            namespace: namespace,
+                            path: contextMenu.node.path || "",
+                            token: localStorage.getItem('token') || "",
+                        }).toString();
+                        const url = `/k8s/file/download?${queryParams}`;
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.click();
+                        message.success('文件正在下载...');
+                    } catch (e) {
+                        message.error('下载失败，请重试');
+                    }
+                    break;
+                case 'downloadZip':
+                    try {
+                        const queryParams = new URLSearchParams({
+                            containerName: selectedContainer,
+                            podName: podName,
+                            namespace: namespace,
+                            path: contextMenu.node.path || "",
+                            token: localStorage.getItem('token') || "",
+                            type: 'tar'
+                        }).toString();
+                        const url = `/k8s/file/download?${queryParams}`;
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.click();
+                        message.success('文件正在下载...');
+                    } catch (e) {
+                        message.error('下载失败，请重试');
+                    }
+                    break;
+                case 'upload':
+                    if (!contextMenu.node.isDir) {
+                        message.error('只能在目录下上传文件');
+                        return;
+                    }
+                    const uploadInput = document.createElement('input');
+                    uploadInput.type = 'file';
+                    uploadInput.onchange = async (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (!file) return;
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('containerName', selectedContainer);
+                        formData.append('podName', podName);
+                        formData.append('namespace', namespace);
+                        formData.append('isDir', String(contextMenu.node?.isDir));
+                        formData.append('path', String(contextMenu.node?.path));
+                        formData.append('fileName', file.name);
+
+                        try {
+                            const response = await fetch('/k8s/file/upload', {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: formData
+                            });
+                            const result = await response.json();
+                            if (result.data?.file?.status === 'done') {
+                                message.success('上传成功');
+                            } else {
+                                message.error(result.data?.file?.error || '上传失败');
+                            }
+                        } catch (error) {
+                            message.error('上传失败');
+                        }
+                    };
+                    uploadInput.click();
+                    break;
+            }
             setContextMenu({ ...contextMenu, visible: false });
         };
         const renderContextMenu = () => {
@@ -280,227 +451,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
             });
             message.success(response.data?.msg);
         };
-        const downloadFile: PopconfirmProps['onConfirm'] = async () => {
-            try {
-                // 构建查询参数
-                const queryParams = new URLSearchParams({
-                    containerName: selectedContainer,
-                    podName: podName,
-                    namespace: namespace,
-                    path: selected?.path || "",
-                    token: localStorage.getItem('token') || "",
-                }).toString();
-
-                // 构建完整的 GET 请求 URL
-                const url = `/k8s/file/download?${queryParams}`;
-
-                // 创建一个隐形的 <a> 标签
-                const a = document.createElement('a');
-                a.href = url; // 设置文件下载的 URL
-
-                // 模拟用户点击 <a> 标签来触发文件下载
-                a.click();
-
-                message.success('文件正在下载...');
-            } catch (e) {
-                message.error('下载失败，请重试');
-            }
-        };
-        const downloadTarFile: PopconfirmProps['onConfirm'] = async () => {
-            try {
-                // 构建查询参数
-                const queryParams = new URLSearchParams({
-                    containerName: selectedContainer,
-                    podName: podName,
-                    namespace: namespace,
-                    path: selected?.path || "",
-                    token: localStorage.getItem('token') || "",
-                    type: 'tar'
-                }).toString();
-
-                // 构建完整的 GET 请求 URL
-                const url = `/k8s/file/download?${queryParams}`;
-                // 创建一个隐形的 <a> 标签
-                const a = document.createElement('a');
-                a.href = url; // 设置文件下载的 URL
-                // 模拟用户点击 <a> 标签来触发文件下载
-                a.click();
-                message.success('文件正在下载...');
-            } catch (e) {
-                message.error('下载失败，请重试');
-            }
-        };
-        const fileInfo = () => {
-            if (!selected) {
-                return null;
-            }
-            const size = FormatBytes(selected?.size || 0)
-            const time = formatLsShortDate(selected?.modTime)
-            return (
-                <>
-                    <div className='mt-10' style={{
-                        marginTop: '8px',
-                        fontFamily: 'monospace',
-                        whiteSpace: 'nowrap',
-                        display: 'flex',
-                        gap: '8px',
-                        alignItems: 'center'
-                    }}>
-                        <Tag color="geekblue">
-                            {selected?.path || ''}
-                        </Tag>
-                        <Tag color="blue">
-                            {selected?.permissions || '-'}
-                        </Tag>
-                        <Tag color="green">
-                            {selected?.owner || 'root'}
-                        </Tag>
-                        <Tag color="orange">
-                            {selected?.group || 'root'}
-                        </Tag>
-                        <Tag color="purple">
-                            {size}
-                        </Tag>
-                        <Tag color="red">
-                            {time}
-                        </Tag>
 
 
-                        <Popconfirm
-                            title='请确认'
-                            description={`是否确认删除文件：${selected?.path} ？`}
-                            onConfirm={confirmDeleteFile}
-                            okText="删除"
-                            cancelText="否"
-                        >
-                            <Button color="danger" variant="solid"
-                                disabled={!(selected.type == 'file' || selected.isDir)}>删除</Button>
-                        </Popconfirm>
-                        <Button className='ml-2' color="primary" variant="solid"
-                            onClick={async () => {
-                                if (selected.type === 'file') {
-                                    try {
-                                        const response = await fetcher({
-                                            url: `/k8s/file/show`,
-                                            method: 'post',
-                                            data: {
-                                                "containerName": selectedContainer,
-                                                "podName": podName,
-                                                "namespace": namespace,
-                                                "path": selected?.path
-                                            }
-                                        });
-                                        if (response.data?.status !== 0) {
-                                            //@ts-ignore
-                                            message.error(response.data?.msg || '非文本文件，不可在线编辑。请下载编辑后上传。');
-                                            return;
-                                        }
-                                        //@ts-ignore
-                                        const fileContent = response.data?.data?.content || '';
-                                        // const decodedString = atob(fileContent);
-                                        const decodedString = fileContent;
-                                        let language = selected?.path?.split('.').pop() || 'plaintext';
-                                        //根据文件名后缀判断语言
-                                        switch (language) {
-                                            case 'yaml':
-                                                language = 'yaml';
-                                                break;
-                                            case 'yml':
-                                                language = 'yaml';
-                                                break;
-                                            case 'json':
-                                                language = 'json';
-                                                break;
-                                            case 'py':
-                                                language = 'python';
-                                                break;
-                                            default:
-                                                language = 'shell';
-                                                break;
-                                        }
-
-                                        Modal.info({
-                                            title: '编辑' + selected?.path + ' （ESC 关闭）',
-                                            width: '80%',
-                                            content: (
-                                                <div style={{
-                                                    border: '1px solid #e5e6eb',
-                                                    borderRadius: '4px'
-                                                }}>
-                                                    <MonacoEditorWithForm
-                                                        text={decodedString}
-                                                        componentId="fileContext"
-                                                        saveApi={`/k8s/file/save`}
-                                                        data={{
-                                                            params: {
-                                                                containerName: selectedContainer,
-                                                                podName: podName,
-                                                                namespace: namespace,
-                                                                path: selected?.path || '',
-                                                            }
-                                                        }}
-                                                        options={{
-                                                            language: language,
-                                                            wordWrap: "on",
-                                                            scrollbar: {
-                                                                "vertical": "auto"
-                                                            }
-                                                        }}
-
-                                                    />
-                                                </div>
-
-                                            ),
-                                            onOk() {
-                                            },
-                                            okText: '取消',
-                                            okType: 'default',
-                                        });
-                                    } catch (error) {
-                                        message.error('获取文件内容失败');
-                                    }
-                                }
-                            }}
-                            disabled={selected.type != 'file'}
-                        >编辑</Button>
-                        <Button className='ml-2' color="primary" variant="solid"
-                            onClick={downloadFile} disabled={selected.type != 'file'}
-                        >下载</Button>
-                        <Button className='ml-2' color="primary" variant="solid"
-                            onClick={downloadTarFile} disabled={selected.type != 'file'}
-                        >压缩下载</Button>
-                        <Upload
-                            name='file'
-                            action={`/k8s/file/upload`}
-                            showUploadList={false}
-                            headers={{
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            }}
-                            data={{
-                                containerName: selectedContainer,
-                                podName: podName,
-                                namespace: namespace,
-                                isDir: selected?.isDir || false,
-                                path: selected?.path || '',
-                                fileName: selected?.name || ''
-                            }}
-                            onChange={(info) => {
-
-                                if (info.file.response?.data?.file?.status === 'done') {
-                                    message.success('上传成功');
-                                } else if (info.file.response?.data?.file?.status === 'error') {
-                                    message.error(info.file.response?.data?.file?.error);
-                                }
-                            }}
-                        >
-                            <Button className='ml-2' color="primary" variant="solid"
-                                disabled={!selected.isDir}>上传</Button>
-                        </Upload>
-
-                    </div>
-                </>
-            );
-        }
         const handleContainerChange = (value: string) => {
             setSelectedContainer(value)
         };
@@ -524,9 +476,6 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                         </div>
                     </Splitter.Panel>
                     <Splitter.Panel>
-                        <div style={{ padding: '8px' }}>
-                            {fileInfo()}
-                        </div>
                         {selectedContainer && (
                             <XTermComponent
                                 url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
