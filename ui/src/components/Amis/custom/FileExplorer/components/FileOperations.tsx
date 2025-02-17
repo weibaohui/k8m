@@ -1,6 +1,6 @@
-import { message, Modal } from 'antd';
-import { fetcher } from '@/components/Amis/fetcher.ts';
-import { FileNode } from './FileTree';
+import {message, Modal} from 'antd';
+import {fetcher} from '@/components/Amis/fetcher.ts';
+import {FileNode} from './FileTree';
 
 interface FileOperationsProps {
     selectedContainer: string;
@@ -53,7 +53,7 @@ export class FileOperations {
         });
     }
 
-    async handleEditFile(node: FileNode, onEditSuccess: (content: string, language: string) => void) {
+    async handleEditFile(node: FileNode, onEditorLoad: (content: string, language: string) => void) {
         if (node.type !== 'file') {
             message.error('只能编辑文件类型');
             return;
@@ -96,7 +96,7 @@ export class FileOperations {
                     break;
             }
 
-            onEditSuccess(fileContent, language);
+            onEditorLoad(fileContent, language);
         } catch (error) {
             message.error('获取文件内容失败');
         }
