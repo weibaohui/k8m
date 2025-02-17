@@ -615,6 +615,13 @@
               "icon": "fa fa-ellipsis-h",
               "buttons": [
                 {
+                  "type": "link",
+                  "icon": "fas fa-terminal text-primary",
+                  "body": "终端",
+                  "blank": true,
+                  "href": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+                },
+                {
                   "type": "button",
                   "icon": "fa fa-list text-primary",
                   "label": "查看日志",
@@ -704,45 +711,6 @@
                           "timestamps": "${timestamps}",
                           "sinceSeconds": "${sinceSeconds}"
                         }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "button",
-                  "icon": "fa fa-terminal text-primary",
-                  "label": "进入容器",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "width": "100%",
-                    "title": "选择容器 (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "container",
-                        "body": [
-                          {
-                            "type": "select",
-                            "label": "容器",
-                            "name": "containerName",
-                            "source": "${spec.containers | pick:name | map: {label: item, value: item}}",
-                            "value": "${spec.containers[0].name}",
-                            "required": true,
-                            "style": {
-                              "width": "300px"
-                            }
-                          },
-                          {
-                            "type": "xterm",
-                            "id": "xterm",
-                            "name": "xterm",
-                            "url": "/k8s/pod/xterm/ns/${metadata.namespace}/pod_name/${metadata.name}",
-                            "params": {
-                              "container_name": "${containerName}"
-                            }
-                          }
-                        ]
                       }
                     ]
                   }
