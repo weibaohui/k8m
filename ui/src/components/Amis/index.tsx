@@ -23,7 +23,7 @@ import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
 import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.tsx";
 import GlobalTextSelector from '@/layout/TextSelectionPopover';
 import HistoryRecordsComponent from '@/components/Amis/custom/applyer.tsx';
-import FileExplorerComponent from '@/components/Amis/custom/FileExplorer.tsx';
+import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExplorer';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
