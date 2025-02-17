@@ -8,6 +8,14 @@ interface Container {
     name: string;
 }
 
+interface PodSpec {
+    containers: Container[];
+}
+
+interface PodData {
+    spec: PodSpec;
+}
+
 const PodExec: React.FC = () => {
     const [searchParams] = useSearchParams();
     const namespace = searchParams.get('namespace') || '';
@@ -24,7 +32,7 @@ const PodExec: React.FC = () => {
             method: 'get'
         })
             .then(response => {
-                const data = response.data?.data;
+                const data = response.data?.data as unknown as PodData;
 
                 if (data.spec?.containers) {
                     setContainers(data.spec.containers);
@@ -59,11 +67,9 @@ const PodExec: React.FC = () => {
                             }))}
                             placeholder="选择容器"
                         />
-
                     </div>
                 }
                 variant="outlined"
-
                 style={{ width: '100%', height: 'calc(100vh - 12px)' }}
             >
                 {selectedContainer && (
