@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
 import { message, Modal, PopconfirmProps, Select, Splitter, Tree, Menu, MenuProps } from 'antd';
-import { CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, FileFilled, FileZipOutlined, FolderOpenFilled, UploadOutlined } from '@ant-design/icons';
+import { CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, FileFilled, FileZipOutlined, FolderOpenFilled, UploadOutlined, ReloadOutlined } from '@ant-design/icons';
 import XTermComponent from './XTerm';
 import { EventDataNode } from 'antd/es/tree';
 import MonacoEditorWithForm from './MonacoEditorWithForm';
@@ -51,9 +51,14 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
 
         const items: MenuItem[] = [
             {
+                label: '刷新',
+                key: 'refresh',
+                icon: <ReloadOutlined style={{ color: '#1890ff' }} />
+            },
+            {
                 label: '复制路径',
                 key: 'copy',
-                icon: <CopyOutlined style={{ color: '#1890ff' }} /> // 使用蓝色表示复制操作
+                icon: <CopyOutlined style={{ color: '#1890ff' }} />
             },
             {
                 label: '删除',
@@ -97,6 +102,16 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
         const onClick: MenuProps['onClick'] = async (e) => {
             if (!contextMenu.node) return;
             switch (e.key) {
+                case 'refresh':
+                    if (contextMenu.node) {
+                        fetchData(contextMenu.node.path, contextMenu.node.isDir).then((children) => {
+                            if (contextMenu.node?.isDir) {
+                                setTreeData((origin) => updateTreeData(origin, String(contextMenu.node?.path), children));
+                            }
+                        });
+                        message.success('刷新成功');
+                    }
+                    break;
                 case 'copy':
                     navigator.clipboard.writeText(contextMenu.node.path);
                     message.success('路径已复制到剪贴板');
