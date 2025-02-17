@@ -39,11 +39,19 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                     const rawMessage = event.data || "";
                     if (rawMessage) {
                         setMessages((prev) => {
+                            // 找到最后一个 AI 占位符并替换为实际消息
+                            const aiPlaceholderIndex = prev.findIndex(
+                                (msg) => msg.role === "ai" && msg.content === "tingking"
+                            );
+                            if (aiPlaceholderIndex !== -1) {
+                                return prev.map((msg, index) =>
+                                    index === aiPlaceholderIndex ? { ...msg, content: rawMessage } : msg
+                                );
+                            }
+                            // 如果没有找到占位符，默认行为
                             if (prev.length === 0 || prev[prev.length - 1].role !== "ai") {
-                                // 如果是新的 AI 回复，创建新的条目
                                 return [...prev, { role: "ai", content: rawMessage }];
                             } else {
-                                // 否则，继续累积在当前 AI 回复中
                                 return prev.map((msg, index) =>
                                     index === prev.length - 1 ? { ...msg, content: msg.content + rawMessage } : msg
                                 );
@@ -76,7 +84,11 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
             }
 
             // 立即显示用户消息，并准备新的 AI 回复条目
-            setMessages((prev) => [...prev, { role: "user", content: `${inputMessage}` }]);
+            setMessages((prev) => [
+                ...prev,
+                { role: "user", content: `${inputMessage}` },
+                { role: "ai", content: "tingking" } // 插入AI思考中的占位符
+            ]);
 
             setInputMessage(""); // 清空输入框
             setLoading(false);
@@ -165,6 +177,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                     content={msg.content}
                                     avatar={{ icon: <UserOutlined /> }}
                                     messageRender={renderMarkdown}
+                                    loading={msg.role === 'ai' && msg.content === 'tinking'}
                                 />
                             </>
                         ))}
