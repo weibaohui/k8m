@@ -144,6 +144,7 @@ func main() {
 		api.POST("/yaml/delete", dynamic.Delete)
 		// CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)              // CRD
+		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", dynamic.FetchJson)     // CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", dynamic.Event)        // CRD
 		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove)     // CRD
 		api.POST("/:kind/group/:group/version/:version/batch/remove", dynamic.BatchRemove)            // CRD
