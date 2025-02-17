@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -49,11 +50,15 @@ func FileList(c *gin.Context) {
 		info.Path = "/"
 	}
 	// 获取文件列表
-	nodes, err := poder.ListFiles(info.Path)
+	nodes, err := poder.ListAllFiles(info.Path)
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("获取文件列表失败,容器内没有shell或者没有ls命令"))
 		return
 	}
+	// 作为文件树，应该去掉. .. 两个条目
+	nodes = slice.Filter(nodes, func(index int, item *kom.FileInfo) bool {
+		return item.Name != "." && item.Name != ".."
+	})
 	amis.WriteJsonList(c, nodes)
 }
 
