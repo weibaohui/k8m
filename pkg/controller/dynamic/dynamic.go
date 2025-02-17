@@ -194,6 +194,25 @@ func Fetch(c *gin.Context) {
 		"yaml": yamlStr,
 	})
 }
+func FetchJson(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var obj *unstructured.Unstructured
+
+	err := kom.Cluster(selectedCluster).WithContext(ctx).RemoveManagedFields().Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonData(c, obj)
+}
 func Remove(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
