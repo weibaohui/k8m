@@ -1047,6 +1047,7 @@
                     "closeOnOutside": true,
                     "title": "${kind}/${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
                     "size": "xl",
+                    "actions": [],
                     "body": {
                       "type": "tabs",
                       "tabs": [
