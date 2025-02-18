@@ -209,6 +209,7 @@ func main() {
 		api.POST("/deploy/batch/restore", deploy.BatchRestore)
 		api.POST("/deploy/rollout/undo/ns/:ns/name/:name/revision/:revision", deploy.Undo)
 		api.GET("/deploy/rollout/history/ns/:ns/name/:name", deploy.History)
+		api.GET("/deploy/rollout/history/ns/:ns/name/:name/revision/:revision", deploy.HistoryRevisionDiff)
 		api.POST("/deploy/rollout/pause/ns/:ns/name/:name", deploy.Pause)
 		api.POST("/deploy/rollout/resume/ns/:ns/name/:name", deploy.Resume)
 		api.POST("/deploy/scale/ns/:ns/name/:name/replica/:replica", deploy.Scale)
