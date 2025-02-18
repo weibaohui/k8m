@@ -4761,6 +4761,15 @@
           "width": "150px"
         },
         {
+          "name": "spec.updateStrategy.type",
+          "label": "策略",
+          "type": "mapping",
+          "map": {
+            "RollingUpdate": "<span class='label label-primary'>滚动更新</span>",
+            "OnDelete": "<span class='label label-warning'>删除时触发</span>"
+          }
+        },
+        {
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
