@@ -1156,6 +1156,12 @@
                                   "type": "text"
                                 },
                                 {
+                                  "name": "kind",
+                                  "label": "来源类型",
+                                  "type": "tpl",
+                                  "tpl": "${regarding.kind}"
+                                },
+                                {
                                   "name": "field",
                                   "label": "关联字段",
                                   "type": "tpl",

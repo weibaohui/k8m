@@ -1,12 +1,15 @@
 package deploy
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
-	eventsv1 "k8s.io/api/events/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 )
 
@@ -214,13 +217,25 @@ func Event(c *gin.Context) {
 
 	klog.V(6).Infof("meta names = %s", metas)
 
-	// 通过mates 获取事件
-	var eventList []*eventsv1.Event
-	sql := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&eventsv1.Event{})
-	sql = sql.AllNamespace()
+	var eventList []unstructured.Unstructured
+
+	sql := kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		RemoveManagedFields().
+		Namespace(ns).
+		GVK("events.k8s.io", "v1", "Event")
+	// 拼接sql 条件
+
+	// regarding.name = 'x' or regarding.name = 'y'
+	var conditions []string
 	for _, meta := range metas {
-		sql = sql.Where("regarding.name = ?", meta)
+		conditions = append(conditions, fmt.Sprintf("regarding.name = '%s'", meta))
 	}
+	cc := strings.Join(conditions, " or ")
+	if len(metas) > 0 {
+		sql = sql.Where(cc)
+	}
+
 	err = sql.List(&eventList).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
