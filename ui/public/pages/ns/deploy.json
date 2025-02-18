@@ -1093,7 +1093,7 @@
                               "loadDataOnce": true,
                               "syncLocation": false,
                               "perPage": 10,
-                              "api": "get:/k8s/$kind/group//version/v1/ns/$metadata.namespace/name/$metadata.name/event",
+                              "api": "get:/k8s/deploy/events/all/ns/$metadata.namespace/name/$metadata.name",
                               "columns": [
                                 {
                                   "type": "operation",

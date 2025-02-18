@@ -212,6 +212,7 @@ func main() {
 		api.POST("/deploy/rollout/pause/ns/:ns/name/:name", deploy.Pause)
 		api.POST("/deploy/rollout/resume/ns/:ns/name/:name", deploy.Resume)
 		api.POST("/deploy/scale/ns/:ns/name/:name/replica/:replica", deploy.Scale)
+		api.GET("/deploy/events/all/ns/:ns/name/:name", deploy.Event)
 
 		// k8s node
 		api.POST("/node/drain/name/:name", node.Drain)

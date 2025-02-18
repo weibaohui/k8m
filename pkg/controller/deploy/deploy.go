@@ -6,6 +6,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
+	eventsv1 "k8s.io/api/events/v1"
 	"k8s.io/klog/v2"
 )
 
@@ -177,4 +178,53 @@ func Undo(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonOKMsg(c, result)
+}
+
+// Event 显示deploy下所有的事件列表，包括deploy、rs、pod
+func Event(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var metas []string
+
+	metas = append(metas, name)
+	// 先取rs
+	rs, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).
+		Namespace(ns).Name(name).
+		Ctl().Deployment().ManagedLatestReplicaSet()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	metas = append(metas, rs.ObjectMeta.Name)
+	// 再取Pod
+	pods, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).
+		Namespace(ns).Name(name).
+		Ctl().Deployment().ManagedPods()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	for _, pod := range pods {
+		metas = append(metas, pod.ObjectMeta.Name)
+	}
+
+	klog.V(6).Infof("meta names = %s", metas)
+
+	// 通过mates 获取事件
+	var eventList []*eventsv1.Event
+	sql := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&eventsv1.Event{})
+	sql = sql.AllNamespace()
+	for _, meta := range metas {
+		sql = sql.Where("regarding.name = ?", meta)
+	}
+	err = sql.List(&eventList).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, eventList)
 }
