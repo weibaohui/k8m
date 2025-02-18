@@ -1139,7 +1139,8 @@
                                 {
                                   "name": "revision",
                                   "label": "版本",
-                                  "type": "text"
+                                  "type": "tpl",
+                                  "tpl": "<%= data.revision %> <% if (data.metadata.annotations['deployment.kubernetes.io/revision'] === data.revision) { %><span class='label label-success'>当前运行</span><% } %>"
                                 },
                                 {
                                   "name": "namespace",
