@@ -11,6 +11,8 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
+	"k8s.io/kubectl/pkg/util/deployment"
+	"sigs.k8s.io/yaml"
 )
 
 func BatchStop(c *gin.Context) {
@@ -132,6 +134,45 @@ func History(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, list)
+}
+func HistoryRevisionDiff(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	revision := c.Param("revision")
+	ctx := c.Request.Context()
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	// 找到最新的rs
+	rsLatest, err := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Deployment{}).Namespace(ns).Name(name).
+		Ctl().Deployment().ManagedLatestReplicaSet()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 找到指定版本的rs
+	var rsList []*v1.ReplicaSet
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.ReplicaSet{}).Namespace(ns).
+		Where(fmt.Sprintf("'metadata.ownerReferences.name'='%s' and 'metadata.ownerReferences.kind'='Deployment'", name)).List(&rsList).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var rsVersion *v1.ReplicaSet
+	for _, r := range rsList {
+		if r.ObjectMeta.Annotations != nil && r.ObjectMeta.Annotations[deployment.RevisionAnnotation] == revision {
+			rsVersion = r
+			break
+		}
+	}
+
+	current, _ := yaml.JSONToYAML([]byte(utils.ToJSON(rsVersion)))
+	latest, _ := yaml.JSONToYAML([]byte(utils.ToJSON(rsLatest)))
+	amis.WriteJsonData(c, gin.H{
+		"current": string(current),
+		"latest":  string(latest),
+	})
 }
 func Pause(c *gin.Context) {
 	ns := c.Param("ns")
