@@ -1117,27 +1117,16 @@
                                       "drawer": {
                                         "closeOnEsc": true,
                                         "closeOnOutside": true,
-                                        "size": "lg",
+                                        "size": "xl",
                                         "title": "查看版本",
                                         "body": [
                                           {
-                                            "type": "service",
-                                            "api": "get:/k8s/${gvk.Kind}/group/${gvk.Group}/version/${gvk.Version}/ns/$namespace/name/$name",
+                                            "type": "page",
                                             "body": [
                                               {
-                                                "type": "editor",
-                                                "name": "yaml",
-                                                "size": "xxl",
-                                                "allowFullscreen": true,
-                                                "placeholder": "loading",
-                                                "language": "yaml",
-                                                "value": "${yaml}",
-                                                "options": {
-                                                  "wordWrap": "on",
-                                                  "scrollbar": {
-                                                    "vertical": "auto"
-                                                  }
-                                                }
+                                                "type": "deploymentRevisionDiffEditor",
+                                                "url": "/k8s/deploy/rollout/history/ns/${metadata.namespace}/name/${metadata.name}/revision/${revision}",
+                                                "revision": "${revision}"
                                               }
                                             ]
                                           }
