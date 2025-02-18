@@ -24,6 +24,8 @@ import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.
 import GlobalTextSelector from '@/layout/TextSelectionPopover';
 import HistoryRecordsComponent from '@/components/Amis/custom/YamlApplyer';
 import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExplorer';
+import DiffEditorComponent from '@/components/Amis/custom/DiffEditor/index.tsx';
+import DeploymentRevisionDiffEditor from '@/components/Amis/custom/DiffEditor/DeploymentRevisonDiffEditor.tsx';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
@@ -50,7 +52,10 @@ registerRenderer({ type: 'mEditor', component: MonacoEditorWithForm })
 registerRenderer({ type: 'historyRecord', component: HistoryRecordsComponent })
 // @ts-ignore
 registerRenderer({ type: 'fileExplorer', component: FileExplorerComponent })
-
+// @ts-ignore
+registerRenderer({ type: 'diffEditor', component: DiffEditorComponent })
+// @ts-ignore
+registerRenderer({ type: 'deploymentRevisionDiffEditor', component: DeploymentRevisionDiffEditor })
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
 registerFilter("filterAnnotations", FilterAnnotations)
