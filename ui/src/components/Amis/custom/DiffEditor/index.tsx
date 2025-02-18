@@ -45,13 +45,15 @@ const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>(({
                     <div style={{ padding: '4px 8px', backgroundColor: '#f0f0f0', borderRadius: '4px', fontSize: '14px' }}>{modifiedLabel}</div>
                 </div>
             </div>
-            <DiffEditor
-                height="calc(100vh)"
-                language="yaml"
-                original={originalValue}
-                modified={modifiedValue}
-                options={options}
-            />
+            <div style={{ border: '1px solid #e5e6eb', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                <DiffEditor
+                    height="calc(100vh)"
+                    language="yaml"
+                    original={originalValue}
+                    modified={modifiedValue}
+                    options={options}
+                />
+            </div>
         </div>
     );
 });
