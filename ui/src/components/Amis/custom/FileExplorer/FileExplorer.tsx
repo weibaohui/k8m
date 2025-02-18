@@ -204,7 +204,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
         return (
             <>
                 <Splitter style={{ height: '100%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
-                    <Splitter.Panel collapsible defaultSize='20%'>
+                    <Splitter.Panel defaultSize='20%' collapsible={false}>
                         <div style={{ padding: '8px' }}>
                             <ContainerSelector
                                 selectedContainer={selectedContainer}
@@ -227,7 +227,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                             />
                         </div>
                     </Splitter.Panel>
-                    <Splitter.Panel>
+                    <Splitter.Panel  >
                         {selectedContainer && (
                             <XTermComponent
                                 url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
