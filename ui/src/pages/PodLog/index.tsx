@@ -29,7 +29,7 @@ const PodLog: React.FC = () => {
 
     return (
         <div style={{ padding: '6px' }}>
-            <PodLogViewer namespace={namespace} name={name} data={{}} />
+            <PodLogViewer namespace={namespace} name={name} data={{}} showTitle={true} />
         </div>
     );
 };
