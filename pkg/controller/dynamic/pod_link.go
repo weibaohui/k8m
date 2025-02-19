@@ -35,7 +35,26 @@ func getPod(selectedCluster string, ctx context.Context, ns string, name string,
 	}
 	return pod, err
 }
-
+func getPods(selectedCluster string, ctx context.Context, ns string, name string, kind string) ([]*v1.Pod, error) {
+	var pods []*v1.Pod
+	var err error
+	kk := kom.Cluster(selectedCluster).WithContext(ctx).
+		Resource(&v1.Pod{}).
+		Namespace(ns).
+		Name(name).
+		WithCache(linkCacheTTL)
+	switch kind {
+	case "Deployment":
+		pods, err = kk.Ctl().Deployment().ManagedPods()
+	case "StatefulSet":
+		pods, err = kk.Ctl().StatefulSet().ManagedPods()
+	case "DaemonSet":
+		pods, err = kk.Ctl().DaemonSet().ManagedPods()
+	case "ReplicaSet":
+		pods, err = kk.Ctl().ReplicaSet().ManagedPods()
+	}
+	return pods, err
+}
 func LinksServices(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -246,4 +265,17 @@ func LinksNode(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonList(c, nodes)
+}
+func LinksPod(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	ctx := c.Request.Context()
+	kind := c.Param("kind")
+	selectedCluster := amis.GetSelectedCluster(c)
+	pods, err := getPods(selectedCluster, ctx, ns, name, kind)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonList(c, pods)
 }

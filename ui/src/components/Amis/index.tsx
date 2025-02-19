@@ -25,6 +25,7 @@ import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExp
 import DiffEditorComponent from '@/components/Amis/custom/DiffEditor/index.tsx';
 import DeploymentRevisionDiffEditor from '@/components/Amis/custom/DiffEditor/DeploymentRevisonDiffEditor.tsx';
 import PodLogViewerComponent from '@/components/Amis/custom/LogView/PodLogViewer';
+import PodsLogViewerComponent from '@/components/Amis/custom/LogView/PodsLogViewer';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
@@ -37,6 +38,8 @@ registerRenderer({ type: 'highlightHtml', component: HighlightHtmlComponent })
 registerRenderer({ type: 'webSocketMarkdownViewer', component: WebSocketMarkdownViewerComponent })
 // @ts-ignore
 registerRenderer({ type: 'podLogViewer', component: PodLogViewerComponent })
+// @ts-ignore
+registerRenderer({ type: 'podsLogViewer', component: PodsLogViewerComponent })
 // @ts-ignore
 registerRenderer({ type: 'websocketViewer', component: WebSocketViewerComponent })
 // @ts-ignore

@@ -6,11 +6,14 @@ import SSELogDownloadComponent from '@/components/Amis/custom/LogView/SSELogDown
 import LogOptionsComponent from '@/components/Amis/custom/LogView/LogOptions';
 import { replacePlaceholders } from '@/utils/utils';
 
+
+
 interface PodSpec {
     containers: Container[];
 }
 
 interface PodData {
+    metadata: any;
     spec: PodSpec;
 }
 
@@ -19,18 +22,15 @@ interface Container {
 }
 
 interface PodLogViewerProps {
-    namespace: string;
-    name: string;
+    url: string;
     data: Record<string, any>;
-
 }
 
-const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, data }) => {
+const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
+    url = replacePlaceholders(url, data);
 
-    namespace = replacePlaceholders(namespace, data);
-    name = replacePlaceholders(name, data);
-    const url = `/k8s/Pod/group//version/v1/ns/${namespace}/name/${name}/json`;
-
+    const [pods, setPods] = useState<PodData[]>([]);
+    const [selectedPod, setSelectedPod] = useState<{ name: string; namespace: string }>();
     const [containers, setContainers] = useState<Container[]>([]);
     const [selectedContainer, setSelectedContainer] = useState<string>('');
 
@@ -40,31 +40,62 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
     const [previous, setPrevious] = React.useState(false);
     const [sinceTime, setSinceTime] = React.useState<string>();
 
+
+    // 在 useEffect 中处理 fetcher 的响应
     useEffect(() => {
-        if (!namespace || !name) return;
-
         fetcher({ url: url, method: 'get' })
-            .then(response => {
-                const data = response.data?.data as unknown as PodData;
-
-                if (data.spec?.containers) {
-                    setContainers(data.spec.containers);
-                    if (data.spec.containers.length > 0) {
-                        setSelectedContainer(data.spec.containers[0].name);
-                    }
+            .then((response) => {
+                //@ts-ignore
+                if (response?.data?.data?.rows) {
+                    //@ts-ignore
+                    const podList = response.data.data?.rows;
+                    console.log('Parsed Pod List:', podList);
+                    setPods(podList);
+                } else {
+                    console.warn('No pod data found in response:', response);
+                    setPods([]);
                 }
             })
-            .catch(error => console.error('Error fetching pod details:', error));
-    }, [namespace, name]);
+            .catch(error => {
+                console.error('Error fetching pod details:', error);
+                setPods([]);
+            });
+    }, [url]);
+
+    useEffect(() => {
+        if (selectedPod) {
+            const podData = pods.find(pod =>
+                pod.metadata.name === selectedPod.name &&
+                pod.metadata.namespace === selectedPod.namespace
+            );
+
+            if (podData?.spec?.containers) {
+                setContainers(podData.spec.containers);
+                if (podData.spec.containers.length > 0) {
+                    setSelectedContainer(podData.spec.containers[0].name);
+                }
+            }
+        }
+    }, [selectedPod, pods]);
 
     return (
         <Card
             title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span>容器日志</span>
-                    <div>
-                        {namespace}/{name}
-                    </div>
+                    <Select
+                        style={{ minWidth: 200 }}
+                        value={selectedPod ? selectedPod.name : undefined}
+                        onChange={(value) => {
+                            const namespace = pods.find(pod => pod.metadata.name === value)?.metadata.namespace || '';
+                            setSelectedPod({ namespace, name: value });
+                        }}
+                        options={pods.map(pod => ({
+                            label: pod.metadata.name,
+                            value: pod.metadata.name
+                        }))}
+                        placeholder="选择Pod"
+                    />
                     <Select
                         style={{ minWidth: 200 }}
                         value={selectedContainer}
@@ -74,6 +105,7 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
                             value: container.name
                         }))}
                         placeholder="选择容器"
+                        disabled={!selectedPod}
                     />
                 </div>
             }
@@ -93,9 +125,9 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
                     onPreviousChange={setPrevious}
                     onSinceTimeChange={setSinceTime}
                 />
-                {selectedContainer && (
+                {selectedContainer && selectedPod && (
                     <SSELogDownloadComponent
-                        url={`/k8s/pod/logs/download/ns/${namespace}/pod_name/${name}/container/${selectedContainer}`}
+                        url={`/k8s/pod/logs/download/ns/${selectedPod.namespace}/pod_name/${selectedPod.name}/container/${selectedContainer}`}
                         data={{
                             tailLines: tailLines,
                             sinceTime: sinceTime,
@@ -106,9 +138,9 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
                 )}
             </div>
             <div style={{ background: '#f5f5f5', padding: '4px', borderRadius: '4px', height: 'calc(100vh - 150px)', overflow: 'auto' }}>
-                {selectedContainer && (
+                {selectedContainer && selectedPod && (
                     <SSELogDisplayComponent
-                        url={`/k8s/pod/logs/sse/ns/${namespace}/pod_name/${name}/container/${selectedContainer}`}
+                        url={`/k8s/pod/logs/sse/ns/${selectedPod.namespace}/pod_name/${selectedPod.name}/container/${selectedContainer}`}
                         data={{
                             tailLines: tailLines,
                             sinceTime: sinceTime,

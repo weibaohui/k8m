@@ -916,7 +916,6 @@
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnEsc": true,
-                    "closeOnOutside": true,
                     "title": "${kind}/${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
                     "size": "xl",
                     "actions": [],
@@ -1040,6 +1039,15 @@
                                   "type": "k8sAge"
                                 }
                               ]
+                            }
+                          ]
+                        },
+                        {
+                          "title": "日志",
+                          "body": [
+                            {
+                              "type": "podsLogViewer",
+                              "url": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pod"
                             }
                           ]
                         },
