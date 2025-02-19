@@ -3,18 +3,8 @@ import { Select, Card } from 'antd';
 import { useSearchParams } from 'react-router-dom';
 import XTermComponent from '../../components/Amis/custom/XTerm';
 import { fetcher } from '../../components/Amis/fetcher';
+import { Container, Pod } from '@/store/pod';
 
-interface Container {
-    name: string;
-}
-
-interface PodSpec {
-    containers: Container[];
-}
-
-interface PodData {
-    spec: PodSpec;
-}
 
 const PodExec: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -32,7 +22,7 @@ const PodExec: React.FC = () => {
             method: 'get'
         })
             .then(response => {
-                const data = response.data?.data as unknown as PodData;
+                const data = response.data?.data as unknown as Pod;
 
                 if (data.spec?.containers) {
                     setContainers(data.spec.containers);
