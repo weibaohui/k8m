@@ -81,7 +81,6 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
         <Card
             title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span>容器日志</span>
                     <Select
                         style={{ minWidth: 200 }}
                         value={selectedPod ? selectedPod.name : undefined}
