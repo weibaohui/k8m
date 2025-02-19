@@ -76,6 +76,9 @@ func (c *ClusterConfig) GetClusterWatchStatus(watchType string) bool {
 	}
 	return watcher.Started
 }
+func (c *ClusterConfig) GetKubeconfig() string {
+	return string(c.kubeConfig)
+}
 
 // GetClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
 func (c *ClusterConfig) GetClusterID() string {

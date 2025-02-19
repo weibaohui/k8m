@@ -3,7 +3,6 @@ module github.com/weibaohui/k8m
 go 1.24.0
 
 require (
-	github.com/creack/pty v1.1.18
 	github.com/duke-git/lancet/v2 v2.3.4
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-contrib/gzip v1.2.2
@@ -13,7 +12,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.36.1
 	github.com/spf13/pflag v1.0.6
-	github.com/weibaohui/kom v0.1.70
+	github.com/weibaohui/kom v0.1.71
 	golang.org/x/net v0.34.0
 	k8s.io/api v0.32.1
 	k8s.io/apimachinery v0.32.1

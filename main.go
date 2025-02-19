@@ -226,6 +226,7 @@ func main() {
 		api.GET("/node/labels/list", node.AllLabelList)
 		api.GET("/node/taints/list", node.AllTaintList)
 		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
+		api.POST("/node/name/:node_name/create_kubectl_shell", node.CreateKubectlShell)
 
 		// 节点污点
 		api.POST("/node/update_taints/name/:name", node.UpdateTaint)
