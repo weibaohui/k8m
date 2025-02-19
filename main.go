@@ -226,7 +226,6 @@ func main() {
 		api.GET("/node/labels/list", node.AllLabelList)
 		api.GET("/node/taints/list", node.AllTaintList)
 		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
-		api.GET("/node/xterm/name/:node_name/pod/:pod_name", node.Xterm)
 
 		// 节点污点
 		api.POST("/node/update_taints/name/:name", node.UpdateTaint)

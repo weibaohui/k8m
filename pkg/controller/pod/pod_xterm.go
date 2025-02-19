@@ -16,6 +16,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
 	"github.com/weibaohui/kom/kom"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
@@ -60,8 +61,12 @@ func (t *TerminalSizeQueue) Push(cols, rows uint16) {
 	t.sizes = append(t.sizes, remotecommand.TerminalSize{Width: cols, Height: rows})
 }
 
+func removePod(selectedCluster string, ns string, podName string) {
+	// 删除Pod
+	kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Delete()
+}
 func Xterm(c *gin.Context) {
-
+	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Query("container_name")
@@ -72,6 +77,12 @@ func Xterm(c *gin.Context) {
 		amis.WriteJsonError(c, errors.New("container_name is required"))
 		return
 	}
+
+	defer func() {
+		if removeAfterExec != "" {
+			removePod(selectedCluster, ns, podName)
+		}
+	}()
 
 	connectionErrorLimit := 10
 
@@ -146,6 +157,9 @@ func Xterm(c *gin.Context) {
 		for {
 			if err := conn.WriteMessage(websocket.PingMessage, []byte("keepalive")); err != nil {
 				klog.V(6).Infof("failed to write ping message")
+				if removeAfterExec != "" {
+					removePod(selectedCluster, ns, podName)
+				}
 				return
 			}
 			time.Sleep(keepalivePingTimeout / 2)
@@ -167,6 +181,9 @@ func Xterm(c *gin.Context) {
 			// overloaded
 			if errorCounter > connectionErrorLimit {
 				klog.V(6).Infof("connection error limit reached, closing connection")
+				if removeAfterExec != "" {
+					removePod(selectedCluster, ns, podName)
+				}
 				waiter.Done()
 				break
 			}
@@ -208,6 +225,9 @@ func Xterm(c *gin.Context) {
 			messageType, data, err := conn.ReadMessage()
 			if err != nil {
 				if !connectionClosed {
+					if removeAfterExec != "" {
+						removePod(selectedCluster, ns, podName)
+					}
 					klog.V(6).Infof("failed to get next reader: %s", err)
 				}
 				return
@@ -264,11 +284,17 @@ func Xterm(c *gin.Context) {
 	if err != nil {
 		klog.Errorf("Failed to execute command in pod: %v", err)
 		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Execution error: %v", err)))
+		if removeAfterExec != "" {
+			removePod(selectedCluster, ns, podName)
+		}
 		return
 	}
 	waiter.Wait()
 	klog.V(6).Infof("closing conn...")
 	connectionClosed = true
+	if removeAfterExec != "" {
+		removePod(selectedCluster, ns, podName)
+	}
 }
 
 func createExecutor(url *url.URL, config *rest.Config) (remotecommand.Executor, error) {
