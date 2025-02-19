@@ -800,6 +800,293 @@
                       "type": "tabs",
                       "tabs": [
                         {
+                          "title": "容器组",
+                          "body": [
+                            {
+                              "type": "crud",
+                              "id": "detailEvent",
+                              "name": "detailEvent",
+                              "headerToolbar": [
+                                "reload",
+                                {
+                                  "type": "pagination",
+                                  "align": "right"
+                                },
+                                {
+                                  "type": "statistics",
+                                  "align": "right"
+                                },
+                                {
+                                  "type": "switch-per-page",
+                                  "align": "right"
+                                }
+                              ],
+                              "loadDataOnce": true,
+                              "syncLocation": false,
+                              "perPage": 10,
+                              "api": "get:/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pod",
+                              "columns": [
+                                {
+                                  "type": "operation",
+                                  "label": "操作",
+                                  "buttons": [
+                                    {
+                                      "label": "Yaml编辑",
+                                      "type": "button",
+                                      "actionType": "drawer",
+                                      "icon": "fas fa-file-code text-success",
+                                      "style": {
+                                        "border": "None"
+                                      },
+                                      "drawer": {
+                                        "closeOnEsc": true,
+                                        "closeOnOutside": true,
+                                        "size": "lg",
+                                        "title": "Yaml管理",
+                                        "body": [
+                                          {
+                                            "type": "tabs",
+                                            "tabsMode": "tiled",
+                                            "tabs": [
+                                              {
+                                                "title": "查看编辑",
+                                                "body": [
+                                                  {
+                                                    "type": "service",
+                                                    "api": "get:/k8s/Pod/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
+                                                    "body": [
+                                                      {
+                                                        "type": "mEditor",
+                                                        "text": "${yaml}",
+                                                        "componentId": "yaml",
+                                                        "saveApi": "/k8s/Pod/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                        "options": {
+                                                          "language": "yaml",
+                                                          "wordWrap": "on",
+                                                          "scrollbar": {
+                                                            "vertical": "auto"
+                                                          }
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "title": "文档",
+                                                "body": [
+                                                  {
+                                                    "type": "page",
+                                                    "asideResizor": true,
+                                                    "asideSticky": false,
+                                                    "aside": [
+                                                      {
+                                                        "type": "input-tree",
+                                                        "name": "tree",
+                                                        "initiallyOpen": false,
+                                                        "unfoldedLevel": 1,
+                                                        "searchable": true,
+                                                        "showOutline": true,
+                                                        "showIcon": true,
+                                                        "searchConfig": {
+                                                          "sticky": true
+                                                        },
+                                                        "heightAuto": true,
+                                                        "inputClassName": "no-border no-padder mt-1",
+                                                        "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                                        "onEvent": {
+                                                          "change": {
+                                                            "actions": [
+                                                              {
+                                                                "componentId": "basic",
+                                                                "actionType": "reload",
+                                                                "data": {
+                                                                  "description": "${event.data.item.description}",
+                                                                  "id": "${event.data.item.id}",
+                                                                  "full_id": "${event.data.item.full_id}",
+                                                                  "type": "${event.data.item.type}"
+                                                                }
+                                                              },
+                                                              {
+                                                                "componentId": "detail",
+                                                                "actionType": "reload",
+                                                                "data": {
+                                                                  "description": "${event.data.item.description}",
+                                                                  "id": "${event.data.item.id}",
+                                                                  "full_id": "${event.data.item.full_id}",
+                                                                  "type": "${event.data.item.type}"
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    ],
+                                                    "body": [
+                                                      {
+                                                        "type": "service",
+                                                        "id": "basic",
+                                                        "body": [
+                                                          {
+                                                            "type": "tpl",
+                                                            "tpl": "<br><strong>属性：</strong> ${id}",
+                                                            "visibleOn": "${id}"
+                                                          },
+                                                          {
+                                                            "type": "button",
+                                                            "label": "示例",
+                                                            "level": "link",
+                                                            "icon": "fas fa-lightbulb text-warning",
+                                                            "actionType": "drawer",
+                                                            "drawer": {
+                                                              "overlay": false,
+                                                              "closeOnEsc": true,
+                                                              "closeOnOutside": true,
+                                                              "size": "lg",
+                                                              "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                                              "body": [
+                                                                {
+                                                                  "type": "websocketMarkdownViewer",
+                                                                  "url": "/k8s/chat/example/field",
+                                                                  "params": {
+                                                                    "kind": "${kind}",
+                                                                    "group": "${group}",
+                                                                    "version": "${version}",
+                                                                    "field": "${full_id}"
+                                                                  }
+                                                                }
+                                                              ]
+                                                            },
+                                                            "visibleOn": "${id}"
+                                                          },
+                                                          {
+                                                            "type": "tpl",
+                                                            "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                                                            "visibleOn": "${type}"
+                                                          },
+                                                          {
+                                                            "type": "tpl",
+                                                            "tpl": "<br><strong>描述：</strong> ${description}",
+                                                            "visibleOn": "${description}"
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "service",
+                                                        "id": "detail",
+                                                        "api": "post:/k8s/doc/detail",
+                                                        "body": [
+                                                          {
+                                                            "type": "divider",
+                                                            "title": "描述翻译",
+                                                            "titlePosition": "center",
+                                                            "visibleOn": "${translate}"
+                                                          },
+                                                          {
+                                                            "type": "markdown",
+                                                            "value": "${translate|raw}",
+                                                            "options": {
+                                                              "linkify": true,
+                                                              "html": true,
+                                                              "breaks": true
+                                                            },
+                                                            "visibleOn": "${translate}"
+                                                          },
+                                                          {
+                                                            "type": "container",
+                                                            "body": [
+                                                              {
+                                                                "type": "tpl",
+                                                                "tpl": "<div style='height:80vh'>&nbsp</div>"
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ],
+                                        "actions": []
+                                      }
+                                    },
+                                    {
+                                      "type": "link",
+                                      "icon": "fas fa-terminal text-primary",
+                                      "body": "终端",
+                                      "blank": true,
+                                      "href": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+                                    }
+                                  ],
+                                  "toggled": true
+                                },
+                                {
+                                  "name": "metadata.namespace",
+                                  "label": "命名空间",
+                                  "type": "text"
+                                },
+                                {
+                                  "name": "metadata.name",
+                                  "label": "名称",
+                                  "type": "text",
+                                  "width": "180px"
+                                },
+                                {
+                                  "name": "ready",
+                                  "label": "就绪",
+                                  "type": "k8sPodReady"
+                                },
+                                {
+                                  "name": "status.phase",
+                                  "label": "状态",
+                                  "type": "mapping",
+                                  "map": {
+                                    "Running": "<span class='label label-success'>运行中</span>",
+                                    "Pending": "<span class='label label-warning'>调度中</span>",
+                                    "Succeeded": "<span class='label label-info'>成功完成</span>",
+                                    "Failed": "<span class='label label-danger'>失败</span>",
+                                    "Unknown": "<span class='label label-warning'>未知</span>"
+                                  }
+                                },
+                                {
+                                  "name": "status.podIP",
+                                  "label": "容器组IP",
+                                  "type": "text"
+                                },
+                                {
+                                  "name": "spec.containers",
+                                  "label": "容器镜像<br><span class='text-gray-500 text-xs'>容器名称=>镜像:版本</span>",
+                                  "width": "150px",
+                                  "type": "each",
+                                  "items": {
+                                    "type": "tpl",
+                                    "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>=>${image|simpleImageName}</div>"
+                                  }
+                                },
+                                {
+                                  "name": "status.containerStatuses",
+                                  "label": "重启次数",
+                                  "type": "tpl",
+                                  "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
+                                },
+                                {
+                                  "name": "spec.nodeName",
+                                  "label": "所在节点",
+                                  "type": "text"
+                                },
+                                {
+                                  "name": "metadata.creationTimestamp",
+                                  "label": "存在时长",
+                                  "type": "k8sAge"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
                           "title": "事件",
                           "body": [
                             {
