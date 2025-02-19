@@ -10,10 +10,11 @@ import { FileOperations } from '@/components/Amis/custom/FileExplorer/components
 
 interface FileExplorerProps {
     data: Record<string, any>
+    removePods?: string //关闭界面后是否删除Pod
 }
 
 const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps>(
-    ({ data }, _) => {
+    ({ data, removePods }, _) => {
         const podName = data?.metadata?.name;
         const namespace = data?.metadata?.namespace;
 
@@ -232,7 +233,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                             <XTermComponent
                                 url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
                                 params={{
-                                    "container_name": selectedContainer
+                                    "container_name": selectedContainer,
+                                    "removePods": removePods || "",
                                 }}
                                 data={{ data }}
                                 height='calc(100vh - 100px)'

@@ -75,7 +75,7 @@ const NodeExec: React.FC = () => {
                         )}
                     </Spin>
                     {podShell && (
-                        <FileExplorerComponent data={podShell.pod} />)
+                        <FileExplorerComponent data={podShell.pod} removePods='true' />)
                     }
                 </div>
             </Card>
