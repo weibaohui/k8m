@@ -831,10 +831,10 @@
                                   "label": "操作",
                                   "buttons": [
                                     {
-                                      "label": "Yaml编辑",
                                       "type": "button",
                                       "actionType": "drawer",
-                                      "icon": "fas fa-file-code text-success",
+                                      "icon": "fa fa-edit text-primary",
+                                      "tooltip": "编辑",
                                       "style": {
                                         "border": "None"
                                       },
@@ -1014,11 +1014,21 @@
                                       }
                                     },
                                     {
-                                      "type": "link",
-                                      "icon": "fas fa-terminal text-primary",
-                                      "body": "终端",
-                                      "blank": true,
-                                      "href": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+                                      "type": "button",
+                                      "icon": "fa fa-terminal text-primary",
+                                      "actionType": "drawer",
+                                      "tooltip": "终端",
+                                      "drawer": {
+                                        "closeOnEsc": true,
+                                        "width": "100%",
+                                        "title": "容器终端 (ESC 关闭)",
+                                        "body": [
+                                          {
+                                            "type": "fileExplorer"
+                                          }
+                                        ],
+                                        "actions": []
+                                      }
                                     }
                                   ],
                                   "toggled": true

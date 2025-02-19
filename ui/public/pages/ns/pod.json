@@ -616,13 +616,6 @@
               "buttons": [
                 {
                   "type": "link",
-                  "icon": "fas fa-terminal text-primary",
-                  "body": "终端",
-                  "blank": true,
-                  "href": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
-                },
-                {
-                  "type": "link",
                   "icon": "fa fa-list text-primary",
                   "body": "日志",
                   "blank": true,
@@ -630,21 +623,16 @@
                 },
                 {
                   "type": "button",
-                  "icon": "fa fa-folder text-primary",
-                  "label": "文件管理",
+                  "icon": "fa fa-terminal text-primary",
                   "actionType": "drawer",
+                  "label": "终端",
                   "drawer": {
                     "closeOnEsc": true,
                     "width": "100%",
-                    "title": "选择容器 (ESC 关闭)",
+                    "title": "容器终端 (ESC 关闭)",
                     "body": [
                       {
-                        "type": "container",
-                        "body": [
-                          {
-                            "type": "fileExplorer"
-                          }
-                        ]
+                        "type": "fileExplorer"
                       }
                     ],
                     "actions": []
