@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Select, Card } from 'antd';
 import { useSearchParams } from 'react-router-dom';
-import XTermComponent from '../Amis/custom/XTerm';
-import { fetcher } from '../Amis/fetcher';
+import XTermComponent from '../../components/Amis/custom/XTerm';
+import { fetcher } from '../../components/Amis/fetcher';
 
 interface Container {
     name: string;

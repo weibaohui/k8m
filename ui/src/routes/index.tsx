@@ -3,8 +3,8 @@ import Loading from '@/components/Loading'
 import { lazy, Suspense } from 'react'
 import Layout from '@/layout'
 import Login from '@/pages/Login/index.tsx'
-import PodExec from '@/components/PodExec'
-import PodLog from '@/components/PodLog'
+import PodExec from '@/pages/PodExec'
+import PodLog from '@/pages/PodLog'
 
 const lazyLoad = (Component: React.LazyExoticComponent<() => JSX.Element>) => {
     return (

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Select, InputNumber, Switch, DatePicker, Card } from 'antd';
 import { useSearchParams } from 'react-router-dom';
-import { fetcher } from '../Amis/fetcher';
-import SSELogDisplayComponent from '../Amis/custom/SSELogDisplay';
-import SSELogDownloadComponent from '../Amis/custom/SSELogDownload';
+import { fetcher } from '../../components/Amis/fetcher';
+import SSELogDisplayComponent from '../../components/Amis/custom/SSELogDisplay';
+import SSELogDownloadComponent from '../../components/Amis/custom/SSELogDownload';
 
 interface PodSpec {
     containers: Container[];
