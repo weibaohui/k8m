@@ -62,6 +62,7 @@ const NodeExec: React.FC = () => {
                         <span style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.65)' }}>
                             {nodeName}
                         </span>
+                        <span>（ESC 关闭）</span>
                     </div>
                 }
                 variant="outlined"
@@ -69,12 +70,13 @@ const NodeExec: React.FC = () => {
             >
                 <div style={{ padding: '4px', borderRadius: '4px', minHeight: '400px' }}>
                     <Spin spinning={loading} tip="正在加载节点终端...">
-                        {error ? (
+                        {error && (
                             <div style={{ color: '#ff4d4f', textAlign: 'center', padding: '6px' }}>{error}</div>
-                        ) : podShell ? (
-                            <FileExplorerComponent data={podShell.pod} />
-                        ) : null}
+                        )}
                     </Spin>
+                    {podShell && (
+                        <FileExplorerComponent data={podShell.pod} />)
+                    }
                 </div>
             </Card>
         </div>
