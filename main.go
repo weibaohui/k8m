@@ -203,8 +203,8 @@ func main() {
 		api.GET("/pod/wsexec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.WsExec)
 		api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", pod.Xterm)
 		// k8s deploy
-		api.POST("/:kind/group/:group/version/:version/restart/ns/:ns/name/:name", deploy.Restart)
-		api.POST("/:kind/group/:group/version/:version/batch/restart", deploy.BatchRestart)
+		api.POST("/deploy/ns/:ns/name/:name/restart", deploy.Restart)
+		api.POST("/deploy/batch/restart", deploy.BatchRestart)
 		api.POST("/deploy/batch/stop", deploy.BatchStop)
 		api.POST("/deploy/batch/restore", deploy.BatchRestore)
 		api.POST("/deploy/ns/:ns/name/:name/revision/:revision/rollout/undo", deploy.Undo)
@@ -261,13 +261,13 @@ func main() {
 		// k8s ds
 		api.POST("/daemonset/ns/:ns/name/:name/revision/:revision/rollout/undo", ds.Undo)
 		api.GET("/daemonset/ns/:ns/name/:name/rollout/history", ds.History)
-		api.POST("/daemonset/restart/ns/:ns/name/:name", ds.Restart)
+		api.POST("/daemonset/ns/:ns/name/:name/restart", ds.Restart)
 		api.POST("/daemonset/batch/restart", ds.BatchRestart)
 		api.POST("/daemonset/batch/stop", ds.BatchStop)
 		api.POST("/daemonset/batch/restore", ds.BatchRestore)
 
 		// k8s rs
-		api.POST("/replicaset/restart/ns/:ns/name/:name", rs.Restart)
+		api.POST("/replicaset/ns/:ns/name/:name/restart", rs.Restart)
 		api.POST("/replicaset/batch/restart", rs.BatchRestart)
 		api.POST("/replicaset/batch/stop", rs.BatchStop)
 		api.POST("/replicaset/batch/restore", rs.BatchRestore)
