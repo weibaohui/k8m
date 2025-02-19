@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-var linkCacheTTL = 5 * time.Minute
+var linkCacheTTL = 3 * time.Second
 
 func getPod(selectedCluster string, ctx context.Context, ns string, name string, kind string) (*v1.Pod, error) {
 	var pod *v1.Pod
