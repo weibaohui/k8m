@@ -772,7 +772,7 @@
                     "body": {
                       "type": "form",
                       "api": {
-                        "url": "/k8s/deploy/scale/ns/$metadata.namespace/name/$metadata.name/replica/${spec.replicas}",
+                        "url": "/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/scale/replica/${spec.replicas}",
                         "method": "post",
                         "data": {}
                       },
@@ -948,7 +948,7 @@
                               "loadDataOnce": true,
                               "syncLocation": false,
                               "perPage": 10,
-                              "api": "get:/k8s/deploy/events/all/ns/$metadata.namespace/name/$metadata.name",
+                              "api": "get:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/events/all",
                               "columns": [
                                 {
                                   "type": "operation",
@@ -1059,7 +1059,7 @@
                                   "label": "继续升级",
                                   "confirmText": "您确认继续?",
                                   "visibleOn": "spec.paused == true",
-                                  "api": "post:/k8s/deploy/rollout/resume/ns/$metadata.namespace/name/$metadata.name"
+                                  "api": "post:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/rollout/resume"
                                 },
                                 {
                                   "type": "button",
@@ -1068,7 +1068,7 @@
                                   "label": "暂停升级",
                                   "confirmText": "您确认暂停?",
                                   "visibleOn": "spec.paused !== true",
-                                  "api": "post:/k8s/deploy/rollout/pause/ns/$metadata.namespace/name/$metadata.name"
+                                  "api": "post:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/rollout/pause"
                                 },
                                 {
                                   "type": "pagination",
@@ -1086,7 +1086,7 @@
                               "loadDataOnce": false,
                               "syncLocation": false,
                               "perPage": 10,
-                              "api": "get:/k8s/deploy/rollout/history/ns/$metadata.namespace/name/$metadata.name",
+                              "api": "get:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/rollout/history",
                               "columns": [
                                 {
                                   "type": "operation",
@@ -1098,7 +1098,7 @@
                                       "actionType": "ajax",
                                       "label": "回滚",
                                       "confirmText": "您确认要回滚到 $revision ?",
-                                      "api": "post:/k8s/deploy/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
+                                      "api": "post:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/revision/$revision/rollout/undo",
                                       "onEvent": {
                                         "click": {
                                           "actions": [
@@ -1125,7 +1125,7 @@
                                             "body": [
                                               {
                                                 "type": "deploymentRevisionDiffEditor",
-                                                "url": "/k8s/deploy/rollout/history/ns/${metadata.namespace}/name/${metadata.name}/revision/${revision}",
+                                                "url": "/k8s/deploy/ns/${metadata.namespace}/name/${metadata.name}/revision/${revision}/rollout/history",
                                                 "revision": "${revision}"
                                               }
                                             ]

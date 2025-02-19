@@ -917,7 +917,7 @@
                         "loadDataOnce": false,
                         "syncLocation": false,
                         "perPage": 10,
-                        "api": "get:/k8s/daemonset/rollout/history/ns/$metadata.namespace/name/$metadata.name",
+                        "api": "get:/k8s/daemonset/ns/$metadata.namespace/name/$metadata.name/rollout/history",
                         "columns": [
                           {
                             "type": "operation",
@@ -929,7 +929,7 @@
                                 "actionType": "ajax",
                                 "label": "回滚",
                                 "confirmText": "您确认要回滚到 $revision ?",
-                                "api": "post:/k8s/daemonset/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
+                                "api": "post:/k8s/daemonset/ns/$metadata.namespace/name/$metadata.name/revision/$revision/rollout/undo",
                                 "onEvent": {
                                   "click": {
                                     "actions": [

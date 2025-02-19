@@ -772,7 +772,7 @@
                     "body": {
                       "type": "form",
                       "api": {
-                        "url": "/k8s/statefulset/scale/ns/$metadata.namespace/name/$metadata.name/replica/${spec.replicas}",
+                        "url": "/k8s/statefulset/ns/$metadata.namespace/name/$metadata.name/scale/replica/${spec.replicas}",
                         "method": "post",
                         "data": {}
                       },
@@ -819,7 +819,7 @@
                         "loadDataOnce": false,
                         "syncLocation": false,
                         "perPage": 10,
-                        "api": "get:/k8s/statefulset/rollout/history/ns/$metadata.namespace/name/$metadata.name",
+                        "api": "get:/k8s/statefulset/ns/$metadata.namespace/name/$metadata.name/rollout/history",
                         "columns": [
                           {
                             "type": "operation",
@@ -831,7 +831,7 @@
                                 "actionType": "ajax",
                                 "label": "回滚",
                                 "confirmText": "您确认要回滚到 $revision ?",
-                                "api": "post:/k8s/statefulset/rollout/undo/ns/$metadata.namespace/name/$metadata.name/revision/$revision",
+                                "api": "post:/k8s/statefulset/ns/$metadata.namespace/name/$metadata.name/revision/$revision/rollout/undo",
                                 "onEvent": {
                                   "click": {
                                     "actions": [
