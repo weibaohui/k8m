@@ -16,8 +16,6 @@ import K8sAgeComponent from "@/components/Amis/custom/K8sAge.tsx";
 import K8sPodReadyComponent from "@/components/Amis/custom/K8sPodReady.tsx";
 import HighlightHtmlComponent from "@/components/Amis/custom/HighlightHtml.tsx";
 import WebSocketMarkdownViewerComponent from "@/components/Amis/custom/WebSocketMarkdownViewer.tsx";
-import SSELogDownloadComponent from "@/components/Amis/custom/SSELogDownload.tsx";
-import SSELogDisplayComponent from "@/components/Amis/custom/SSELogDisplay.tsx";
 import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.tsx";
 import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
 import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.tsx";
@@ -26,6 +24,7 @@ import HistoryRecordsComponent from '@/components/Amis/custom/YamlApplyer';
 import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExplorer';
 import DiffEditorComponent from '@/components/Amis/custom/DiffEditor/index.tsx';
 import DeploymentRevisionDiffEditor from '@/components/Amis/custom/DiffEditor/DeploymentRevisonDiffEditor.tsx';
+import PodLogViewerComponent from '@/components/Amis/custom/LogView/PodLogViewer';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
@@ -37,9 +36,7 @@ registerRenderer({ type: 'highlightHtml', component: HighlightHtmlComponent })
 // @ts-ignore
 registerRenderer({ type: 'webSocketMarkdownViewer', component: WebSocketMarkdownViewerComponent })
 // @ts-ignore
-registerRenderer({ type: 'log-download', component: SSELogDownloadComponent })
-// @ts-ignore
-registerRenderer({ type: 'log-display', component: SSELogDisplayComponent })
+registerRenderer({ type: 'podLogViewer', component: PodLogViewerComponent })
 // @ts-ignore
 registerRenderer({ type: 'websocketViewer', component: WebSocketViewerComponent })
 // @ts-ignore
