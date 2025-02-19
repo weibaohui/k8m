@@ -1,22 +1,30 @@
-import React, {useEffect, useState} from 'react';
-import {Card} from 'antd';
-import {useSearchParams} from 'react-router-dom';
-import XTermComponent from '@/components/Amis/custom/XTerm';
-import {fetcher} from '@/components/Amis/fetcher.ts';
+import React, { useEffect, useState } from 'react';
+import { Card, Spin } from 'antd';
+import { useSearchParams } from 'react-router-dom';
+import { fetcher } from '@/components/Amis/fetcher.ts';
+import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExplorer';
+import { Pod } from '@/store/pod';
 
-interface PodData {
+
+interface PodShell {
     podName: string;
     ns: string;
     containerName: string;
+    pod: Pod
 }
 
 const NodeExec: React.FC = () => {
     const [searchParams] = useSearchParams();
     const nodeName = searchParams.get('name') || '';
-    const [podShell, setPodSell] = useState<PodData>();
+    const [podShell, setPodShell] = useState<PodShell>();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string>();
 
     useEffect(() => {
         if (!nodeName) return;
+
+        setLoading(true);
+        setError(undefined);
 
         // 获取Pod详情以获取容器列表
         fetcher({
@@ -24,12 +32,21 @@ const NodeExec: React.FC = () => {
             method: 'post'
         })
             .then(response => {
-                const data = response.data?.data as unknown as PodData;
-                console.log(response.data?.data)
-                console.log(data)
-                setPodSell(data)
+                const data = response.data?.data as unknown as PodShell;
+                if (!data) {
+                    throw new Error('未能获取节点终端信息');
+                }
+                setPodShell(data);
+                setError(undefined);
             })
-            .catch(error => console.error('Error fetching pod details:', error));
+            .catch(error => {
+                console.error('Error fetching pod details:', error);
+                setError(error.message || '获取节点终端失败');
+                setPodShell(undefined);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [nodeName]);
 
     if (!nodeName) {
@@ -37,7 +54,7 @@ const NodeExec: React.FC = () => {
     }
 
     return (
-        <div style={{padding: '6px'}}>
+        <div style={{ padding: '6px' }}>
             <Card
                 title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -48,18 +65,17 @@ const NodeExec: React.FC = () => {
                     </div>
                 }
                 variant="outlined"
-                style={{width: '100%', height: 'calc(100vh - 12px)'}}
+                style={{ width: '100%', height: 'calc(100vh - 12px)' }}
             >
-                {podShell && (
-                    <div style={{background: '#f5f5f5', padding: '4px', borderRadius: '4px'}}>
-                        <XTermComponent
-                            url={`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/k8s/node/xterm/name/${nodeName}/pod/${podShell.podName}`}
-                            params={{}}
-                            data={{}}
-                            height="calc(100vh - 120px)"
-                        />
-                    </div>
-                )}
+                <div style={{ padding: '4px', borderRadius: '4px', minHeight: '400px' }}>
+                    <Spin spinning={loading} tip="正在加载节点终端...">
+                        {error ? (
+                            <div style={{ color: '#ff4d4f', textAlign: 'center', padding: '6px' }}>{error}</div>
+                        ) : podShell ? (
+                            <FileExplorerComponent data={podShell.pod} />
+                        ) : null}
+                    </Spin>
+                </div>
             </Card>
         </div>
     );
