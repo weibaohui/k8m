@@ -200,8 +200,6 @@ func main() {
 		// k8s pod
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
 		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
-		api.POST("/pod/exec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.Exec)
-		api.GET("/pod/wsexec/ns/:ns/pod_name/:pod_name/container/:container_name", pod.WsExec)
 		api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", pod.Xterm)
 		// k8s deploy
 		api.POST("/deploy/ns/:ns/name/:name/restart", deploy.Restart)
@@ -227,6 +225,8 @@ func main() {
 		api.GET("/node/name/option_list", node.NameOptionList)
 		api.GET("/node/labels/list", node.AllLabelList)
 		api.GET("/node/taints/list", node.AllTaintList)
+		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
+		api.GET("/node/xterm/name/:node_name/pod/:pod_name", node.Xterm)
 
 		// 节点污点
 		api.POST("/node/update_taints/name/:name", node.UpdateTaint)
