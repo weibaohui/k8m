@@ -1020,6 +1020,35 @@
                                 {
                                   "type": "switch-per-page",
                                   "align": "right"
+                                },
+                                "bulkActions"
+                              ],
+                              "bulkActions": [
+                                {
+                                  "label": "批量删除",
+                                  "actionType": "ajax",
+                                  "confirmText": "确定要批量删除?",
+                                  "api": {
+                                    "url": "/k8s/Pod/group//version/v1/batch/remove",
+                                    "method": "post",
+                                    "data": {
+                                      "name_list": "${selectedItems | pick:metadata.name }",
+                                      "ns_list": "${selectedItems | pick:metadata.namespace }"
+                                    }
+                                  }
+                                },
+                                {
+                                  "label": "强制删除",
+                                  "actionType": "ajax",
+                                  "confirmText": "确定要批量强制删除?",
+                                  "api": {
+                                    "url": "/k8s/Pod/group//version/v1/force_remove",
+                                    "method": "post",
+                                    "data": {
+                                      "name_list": "${selectedItems | pick:metadata.name }",
+                                      "ns_list": "${selectedItems | pick:metadata.namespace }"
+                                    }
+                                  }
                                 }
                               ],
                               "loadDataOnce": true,
