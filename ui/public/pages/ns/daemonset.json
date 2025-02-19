@@ -1019,13 +1019,21 @@
                   "actionType": "drawer",
                   "drawer": {
                     "closeOnEsc": true,
-                    "closeOnOutside": true,
                     "title": "${kind}/${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
                     "size": "xl",
                     "actions": [],
                     "body": {
                       "type": "tabs",
                       "tabs": [
+                        {
+                          "title": "日志",
+                          "body": [
+                            {
+                              "type": "podsLogViewer",
+                              "url": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pod"
+                            }
+                          ]
+                        },
                         {
                           "title": "Service网络",
                           "body": {

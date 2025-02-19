@@ -49,7 +49,6 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                 if (response?.data?.data?.rows) {
                     //@ts-ignore
                     const podList = response.data.data?.rows;
-                    console.log('Parsed Pod List:', podList);
                     setPods(podList);
                 } else {
                     console.warn('No pod data found in response:', response);
