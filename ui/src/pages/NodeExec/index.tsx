@@ -39,6 +39,14 @@ const NodeExec: React.FC = () => {
     return (
         <div style={{padding: '6px'}}>
             <Card
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span>节点终端</span>
+                        <span style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.65)' }}>
+                            {nodeName}
+                        </span>
+                    </div>
+                }
                 variant="outlined"
                 style={{width: '100%', height: 'calc(100vh - 12px)'}}
             >
@@ -46,7 +54,6 @@ const NodeExec: React.FC = () => {
                     <div style={{background: '#f5f5f5', padding: '4px', borderRadius: '4px'}}>
                         <XTermComponent
                             url={`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/k8s/node/xterm/name/${nodeName}/pod/${podShell.podName}`}
-                            // url={`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/k8s/pod/ns/${podShell.ns}/pod_name/${podShell.podName}`}
                             params={{}}
                             data={{}}
                             height="calc(100vh - 120px)"
