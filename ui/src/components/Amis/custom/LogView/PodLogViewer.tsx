@@ -22,10 +22,10 @@ interface PodLogViewerProps {
     namespace: string;
     name: string;
     data: Record<string, any>;
-
+    showTitle?: boolean;
 }
 
-const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, data }) => {
+const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, data, showTitle }) => {
 
     namespace = replacePlaceholders(namespace, data);
     name = replacePlaceholders(name, data);
@@ -59,28 +59,22 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
 
     return (
         <Card
-            title={
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span>容器日志</span>
-                    <div>
-                        {namespace}/{name}
-                    </div>
-                    <Select
-                        style={{ minWidth: 200 }}
-                        value={selectedContainer}
-                        onChange={setSelectedContainer}
-                        options={containers.map(container => ({
-                            label: container.name,
-                            value: container.name
-                        }))}
-                        placeholder="选择容器"
-                    />
-                </div>
-            }
             variant="outlined"
             style={{ width: '100%', height: 'calc(100vh - 12px)' }}
+            title={showTitle ? `${namespace}/${name}` : undefined}
         >
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Select
+                    style={{ minWidth: 200 }}
+                    value={selectedContainer}
+                    onChange={setSelectedContainer}
+                    options={containers.map(container => ({
+                        label: container.name,
+                        value: container.name
+                    }))}
+                    placeholder="选择容器"
+                />
                 <LogOptionsComponent
                     tailLines={tailLines}
                     follow={follow}
@@ -105,7 +99,7 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
                     />
                 )}
             </div>
-            <div style={{ background: '#f5f5f5', padding: '4px', borderRadius: '4px', height: 'calc(100vh - 150px)', overflow: 'auto' }}>
+            <div style={{ padding: '4px', borderRadius: '4px', height: 'calc(100vh)', overflow: 'auto' }}>
                 {selectedContainer && (
                     <SSELogDisplayComponent
                         url={`/k8s/pod/logs/sse/ns/${namespace}/pod_name/${name}/container/${selectedContainer}`}
