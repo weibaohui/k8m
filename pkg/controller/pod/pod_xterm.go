@@ -93,7 +93,7 @@ func Xterm(c *gin.Context) {
 	defer cleanupOnce.Do(cleanup)
 
 	// 设置连接超时
-	ctx, cancel := context.WithTimeout(ctx, 4*time.Hour)
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Hour)
 	defer cancel()
 
 	// 处理信号以确保清理
