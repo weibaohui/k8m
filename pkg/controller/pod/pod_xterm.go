@@ -2,13 +2,17 @@ package pod
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -78,10 +82,27 @@ func Xterm(c *gin.Context) {
 		return
 	}
 
-	defer func() {
+	// 使用sync.Once确保清理动作只执行一次
+	var cleanupOnce sync.Once
+	cleanup := func() {
 		if removeAfterExec != "" {
 			removePod(selectedCluster, ns, podName)
 		}
+	}
+	// 确保函数退出时执行清理
+	defer cleanupOnce.Do(cleanup)
+
+	// 设置连接超时
+	ctx, cancel := context.WithTimeout(ctx, 4*time.Hour)
+	defer cancel()
+
+	// 处理信号以确保清理
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		cleanupOnce.Do(cleanup)
+		cancel()
 	}()
 
 	connectionErrorLimit := 10
@@ -139,6 +160,7 @@ func Xterm(c *gin.Context) {
 	defer inReader.Close()
 	defer func() {
 		if err := conn.Close(); err != nil {
+			cleanupOnce.Do(cleanup)
 			klog.V(6).Infof("failed to close webscoket connection: %s", err)
 		}
 	}()
@@ -154,12 +176,11 @@ func Xterm(c *gin.Context) {
 		return nil
 	})
 	go func() {
+		defer cleanupOnce.Do(cleanup)
 		for {
 			if err := conn.WriteMessage(websocket.PingMessage, []byte("keepalive")); err != nil {
 				klog.V(6).Infof("failed to write ping message")
-				if removeAfterExec != "" {
-					removePod(selectedCluster, ns, podName)
-				}
+				cleanupOnce.Do(cleanup)
 				return
 			}
 			time.Sleep(keepalivePingTimeout / 2)
@@ -174,6 +195,7 @@ func Xterm(c *gin.Context) {
 
 	// tty >> xterm.js
 	go func() {
+		defer cleanupOnce.Do(cleanup)
 		errorCounter := 0
 		for {
 			// consider the connection closed/errored out so that the socket handler
@@ -181,9 +203,7 @@ func Xterm(c *gin.Context) {
 			// overloaded
 			if errorCounter > connectionErrorLimit {
 				klog.V(6).Infof("connection error limit reached, closing connection")
-				if removeAfterExec != "" {
-					removePod(selectedCluster, ns, podName)
-				}
+				cleanupOnce.Do(cleanup)
 				waiter.Done()
 				break
 			}
@@ -220,14 +240,13 @@ func Xterm(c *gin.Context) {
 
 	// tty << xterm.js
 	go func() {
+		defer cleanupOnce.Do(cleanup)
 		for {
 			// data processing
 			messageType, data, err := conn.ReadMessage()
 			if err != nil {
 				if !connectionClosed {
-					if removeAfterExec != "" {
-						removePod(selectedCluster, ns, podName)
-					}
+					cleanupOnce.Do(cleanup)
 					klog.V(6).Infof("failed to get next reader: %s", err)
 				}
 				return
@@ -284,17 +303,20 @@ func Xterm(c *gin.Context) {
 	if err != nil {
 		klog.Errorf("Failed to execute command in pod: %v", err)
 		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Execution error: %v", err)))
-		if removeAfterExec != "" {
-			removePod(selectedCluster, ns, podName)
-		}
+		cleanupOnce.Do(cleanup)
 		return
 	}
+	// 等待连接关闭或上下文取消
+	go func() {
+		<-ctx.Done()
+		cleanupOnce.Do(cleanup)
+		conn.Close()
+	}()
+
 	waiter.Wait()
 	klog.V(6).Infof("closing conn...")
 	connectionClosed = true
-	if removeAfterExec != "" {
-		removePod(selectedCluster, ns, podName)
-	}
+	cleanupOnce.Do(cleanup)
 }
 
 func createExecutor(url *url.URL, config *rest.Config) (remotecommand.Executor, error) {
