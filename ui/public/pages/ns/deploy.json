@@ -1124,6 +1124,11 @@
                                   "align": "right"
                                 }
                               ],
+                              "autoGenerateFilter": {
+                                "columnsNum": 4,
+                                "showBtnToolbar": false,
+                                "defaultCollapsed": false
+                              },
                               "loadDataOnce": true,
                               "syncLocation": false,
                               "perPage": 10,
@@ -1164,9 +1169,37 @@
                                   "toggled": true
                                 },
                                 {
+                                  "name": "regarding.kind",
+                                  "label": "来源类型",
+                                  "type": "tpl",
+                                  "tpl": "${regarding.kind}",
+                                  "searchable": {
+                                    "type": "select",
+                                    "name": "regarding.kind",
+                                    "clearable": true,
+                                    "options": [
+                                      {
+                                        "label": "Pod",
+                                        "value": "Pod"
+                                      },
+                                      {
+                                        "label": "Deployment",
+                                        "value": "Deployment"
+                                      },
+                                      {
+                                        "label": "ReplicaSet",
+                                        "value": "ReplicaSet"
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
                                   "name": "type",
                                   "label": "类型",
-                                  "filterable": {
+                                  "searchable": {
+                                    "type": "select",
+                                    "name": "type",
+                                    "clearable": true,
                                     "options": [
                                       {
                                         "label": "正常 ",
@@ -1188,12 +1221,6 @@
                                   "name": "reason",
                                   "label": "原因",
                                   "type": "text"
-                                },
-                                {
-                                  "name": "kind",
-                                  "label": "来源类型",
-                                  "type": "tpl",
-                                  "tpl": "${regarding.kind}"
                                 },
                                 {
                                   "name": "field",
