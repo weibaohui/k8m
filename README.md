@@ -246,7 +246,7 @@ make help
 ![输入图片说明](https://foruda.gitee.com/images/1740031049224924895/c8d5357b_77493.png "屏幕截图")
 ![输入图片说明](https://foruda.gitee.com/images/1740031092919251676/61e6246c_77493.png "屏幕截图")
 
-2、新增节点终端NodeShell
+2、新增节点终端NodeShell 
 在节点上执行命令
 ![输入图片说明](https://foruda.gitee.com/images/1740031147702527911/4cef40dc_77493.png "屏幕截图")
 ![输入图片说明](https://foruda.gitee.com/images/1740031249763550505/69fddee6_77493.png "屏幕截图")
@@ -269,6 +269,14 @@ make help
 支持历史版本查看，并可diff
 ![输入图片说明](https://foruda.gitee.com/images/1740031862075460381/ebf50a7e_77493.png "屏幕截图")
 ![输入图片说明](https://foruda.gitee.com/images/1740031912370086873/dfa95a2f_77493.png "屏幕截图")
+
+5、全新AI对话窗口
+![输入图片说明](https://foruda.gitee.com/images/1740062818194113045/6ae3af0b_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1740062840392675452/a429aab8_77493.png "屏幕截图")
+
+6、全新AI搜索方式，哪里不懂选哪里
+页面所有地方都可以`划词翻译`,哪里有疑问就选中哪里。
+![输入图片说明](https://foruda.gitee.com/images/1740062958174067230/7c377b16_77493.png "屏幕截图")
 
 **v0.0.21更新**
 
