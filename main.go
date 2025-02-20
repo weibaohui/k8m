@@ -98,7 +98,7 @@ func main() {
 		r.Use(middleware.CustomRecovery())
 	}
 	r.Use(cors.Default())
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(gzip.Gzip(gzip.BestCompression))
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
 
 	r.MaxMultipartMemory = 100 << 20 // 100 MiB
