@@ -13,7 +13,7 @@ interface DiffEditorProps {
 }
 
 // 用 forwardRef 让组件兼容 AMIS
-const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>(({ 
+const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>(({
     originalValue = 'hello',
     modifiedValue = 'hello world',
     height = 'calc(100vh - 100px)',
@@ -32,7 +32,12 @@ const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>(({
         folding: true, // 启用代码折叠
         lineNumbers: 'on',
         wordWrap: 'on',
-        diffWordWrap: 'on'
+        diffWordWrap: 'on',
+        hideUnchangedRegions: {
+            enabled: true,
+            minimumLineCount: 3,    // 当未更改区域超过3行时触发折叠
+            contextLineCount: 1     // 折叠时保留1行上下文
+        }
     };
 
     return (
@@ -52,6 +57,7 @@ const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>(({
                     original={originalValue}
                     modified={modifiedValue}
                     options={options}
+
                 />
             </div>
         </div>
