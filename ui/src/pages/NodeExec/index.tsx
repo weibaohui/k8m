@@ -15,23 +15,47 @@ interface PodShell {
 
 const NodeExec: React.FC = () => {
     const [searchParams] = useSearchParams();
-    const nodeName = searchParams.get('name') || '';
+    const nodeName = searchParams.get('nodeName') || '';
+    const type = searchParams.get('type') || ''; //NodeShell or KubectlShell
+    const fileName = searchParams.get('fileName') || ''; //base64加密过的避免/等字符串
+    const contextName = searchParams.get('contextName') || ''; //base64加密过的避免/等字符串
     const [podShell, setPodShell] = useState<PodShell>();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>();
 
-    useEffect(() => {
-        if (!nodeName) return;
+    let url = ''
+    if (type == 'KubectlShell') {
+        if (!fileName || !contextName) {
+            return <div>请在URL中提供文件名和上下文名称参数</div>;
+        }
 
+        //单独处理下InCluster模式的特殊命名
+        let clusterId = fileName + "/" + contextName
+        if (fileName == "InCluster" || contextName == "InCluster") {
+            clusterId = "InCluster"
+        }
+        const base64EncodedClusterId = btoa(clusterId);
+        url = `/k8s/node/name/${nodeName}/cluster_id/${base64EncodedClusterId}/create_kubectl_shell`
+    } else {
+        if (!nodeName) {
+            return <div>请在URL中提供节点名称参数</div>;
+        }
+        url = `/k8s/node/name/${nodeName}/create_node_shell`
+    }
+
+    useEffect(() => {
         setLoading(true);
         setError(undefined);
 
         // 获取Pod详情以获取容器列表
         fetcher({
-            url: `/k8s/node/name/${nodeName}/create_node_shell`,
+            url: url,
             method: 'post'
         })
             .then(response => {
+                if (response.data?.status != 0) {
+                    throw new Error(response.data?.msg);
+                }
                 const data = response.data?.data as unknown as PodShell;
                 if (!data) {
                     throw new Error('未能获取节点终端信息');
@@ -47,18 +71,16 @@ const NodeExec: React.FC = () => {
             .finally(() => {
                 setLoading(false);
             });
-    }, [nodeName]);
+    }, [nodeName, type, fileName, contextName]);
 
-    if (!nodeName) {
-        return <div>请在URL中提供节点名称参数</div>;
-    }
+
 
     return (
         <div style={{ padding: '6px' }}>
             <Card
                 title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span>节点终端</span>
+                        <span>{type === 'NodeShell' ? '节点终端' : 'Kubectl终端'}</span>
                         <span style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.65)' }}>
                             {nodeName}
                         </span>
