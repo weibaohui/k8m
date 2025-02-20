@@ -1,6 +1,9 @@
 package node
 
 import (
+	"encoding/base64"
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -45,11 +48,28 @@ func CreateNodeShell(c *gin.Context) {
 
 func CreateKubectlShell(c *gin.Context) {
 	ctx := c.Request.Context()
-	selectedCluster := amis.GetSelectedCluster(c)
-	name := c.Param("node_name") // NodeName
+	name := c.Param("node_name")             // NodeName
+	clusterIDBase64 := c.Param("cluster_id") // 集群ID，base64编码
+	//base64 解码
+	clusterIDBytes, err := base64.StdEncoding.DecodeString(clusterIDBase64)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	clusterID := string(clusterIDBytes)
 
-	kubeconfig := service.ClusterService().GetClusterByID("kubeconfig.yaml/8o2u742o@sealos").GetKubeconfig()
-	ns, podName, containerName, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateKubectlShell(kubeconfig)
+	if clusterID == "" {
+		amis.WriteJsonError(c, fmt.Errorf("集群ID不能为空"))
+		return
+	}
+
+	//当前限制为kubectl 安装到本集群中，那么要先检查是否可连接。
+	if !service.ClusterService().IsConnected(clusterID) {
+		amis.WriteJsonError(c, fmt.Errorf("集群%s 不可用,请先连接该集群，然后重试", clusterID))
+	}
+
+	kubeconfig := service.ClusterService().GetClusterByID(string(clusterID)).GetKubeconfig()
+	ns, podName, containerName, err := kom.Cluster(clusterID).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateKubectlShell(kubeconfig)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -57,7 +77,7 @@ func CreateKubectlShell(c *gin.Context) {
 	}
 
 	var p *v1.Pod
-	err = kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Get(&p).Error
+	err = kom.Cluster(clusterID).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Get(&p).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
