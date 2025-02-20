@@ -80,7 +80,7 @@ const NodeExec: React.FC = () => {
             <Card
                 title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span>{type === 'NodeShell' ? '节点终端' : 'Kubectl终端'}</span>
+                        <span>{type === 'KubectlShell' ? 'Kubectl终端' : '节点终端'}</span>
                         <span style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.65)' }}>
                             {nodeName}
                         </span>
