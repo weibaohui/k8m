@@ -80,7 +80,7 @@
               "actionType": "url",
               "url": "/#/NodeExec?type=KubectlShell&fileName=${fileName}&contextName=${contextName}",
               "blank": true,
-              "visibleOn": "clusterConnectStatus==='connected' "
+              "visibleOn": "clusterConnectStatus==='connected' && fileName!=='InCluster' "
             }
           ],
           "toggled": true
