@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -24,7 +25,8 @@ func CreateNodeShell(c *gin.Context) {
 	ctx := c.Request.Context()
 	selectedCluster := amis.GetSelectedCluster(c)
 	name := c.Param("node_name") // NodeName
-	ns, podName, containerName, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateNodeShell()
+	cfg := flag.Init()
+	ns, podName, containerName, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateNodeShell(cfg.NodeShellImage)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -69,7 +71,8 @@ func CreateKubectlShell(c *gin.Context) {
 	}
 
 	kubeconfig := service.ClusterService().GetClusterByID(string(clusterID)).GetKubeconfig()
-	ns, podName, containerName, err := kom.Cluster(clusterID).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateKubectlShell(kubeconfig)
+	cfg := flag.Init()
+	ns, podName, containerName, err := kom.Cluster(clusterID).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateKubectlShell(kubeconfig, cfg.KubectlShellImage)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
