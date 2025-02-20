@@ -96,19 +96,21 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 
 以下是k8m支持的环境变量设置参数及其作用的表格：
 
-| 环境变量               | 默认值                              | 说明                                                                |
-|--------------------|----------------------------------|-------------------------------------------------------------------|
-| `PORT`             | `3618`                           | 监听的端口号                                                            |
-| `KUBECONFIG`       | `~/.kube/config`                 | `kubeconfig` 文件路径                                                 |
-| `OPENAI_API_KEY`   | `""`                             | 大模型的 API Key                                                      |
-| `OPENAI_API_URL`   | `""`                             | 大模型的 API URL                                                      |
-| `OPENAI_MODEL`     | `Qwen/Qwen2.5-Coder-7B-Instruct` | 大模型的默认模型名称，如需DeepSeek，请设置为deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
-| `LOGIN_TYPE`       | `"password"`                     | 登录方式（如 `password`, `oauth`, `token`）                              |
-| `ADMIN_USERNAME`   | `"admin"`                        | 管理员用户名                                                            |
-| `ADMIN_PASSWORD`   | `"123456"`                       | 管理员密码                                                             |
-| `DEBUG`            | `"false"`                        | 是否开启 `debug` 模式                                                   |
-| `LOG_V`            | `"2"`                            | log输出日志，同klog用法                                                   |
-| `JWT_TOKEN_SECRET` | `"your-secret-key"`              | 用于 JWT Token 生成的密钥                                                |
+| 环境变量                  | 默认值                              | 说明                                                                |
+|-----------------------|----------------------------------|-------------------------------------------------------------------|
+| `PORT`                | `3618`                           | 监听的端口号                                                            |
+| `KUBECONFIG`          | `~/.kube/config`                 | `kubeconfig` 文件路径                                                 |
+| `OPENAI_API_KEY`      | `""`                             | 大模型的 API Key                                                      |
+| `OPENAI_API_URL`      | `""`                             | 大模型的 API URL                                                      |
+| `OPENAI_MODEL`        | `Qwen/Qwen2.5-Coder-7B-Instruct` | 大模型的默认模型名称，如需DeepSeek，请设置为deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
+| `LOGIN_TYPE`          | `"password"`                     | 登录方式（如 `password`, `oauth`, `token`）                              |
+| `ADMIN_USERNAME`      | `"admin"`                        | 管理员用户名                                                            |
+| `ADMIN_PASSWORD`      | `"123456"`                       | 管理员密码                                                             |
+| `DEBUG`               | `"false"`                        | 是否开启 `debug` 模式                                                   |
+| `LOG_V`               | `"2"`                            | log输出日志，同klog用法                                                   |
+| `JWT_TOKEN_SECRET`    | `"your-secret-key"`              | 用于 JWT Token 生成的密钥                                                |
+| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`         | kubectl shell 镜像地址                                                |
+| `NODE_SHELL_IMAGE`    | `alpine:latest`                  | Node shell 镜像地址                                                   |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
