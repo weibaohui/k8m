@@ -2955,34 +2955,30 @@
               }
             },
             {
-              "type": "dropdown-button",
-              "icon": "fa fa-ellipsis-h",
-              "buttons": [
-                {
-                  "type": "link",
-                  "icon": "fa fa-list text-primary",
-                  "body": "日志",
-                  "blank": true,
-                  "href": "/#/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
-                },
-                {
-                  "type": "button",
-                  "icon": "fa fa-terminal text-primary",
-                  "actionType": "drawer",
-                  "label": "终端",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "width": "100%",
-                    "title": "容器终端 (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "fileExplorer"
-                      }
-                    ],
-                    "actions": []
+              "type": "button",
+              "icon": "fa fa-terminal text-primary",
+              "actionType": "drawer",
+              "tooltip": "终端",
+              "drawer": {
+                "closeOnEsc": true,
+                "width": "100%",
+                "title": "容器终端 (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "fileExplorer"
                   }
-                }
-              ]
+                ],
+                "actions": []
+              }
+            },
+            {
+              "tooltip": "日志",
+              "icon": "fa fa-list text-primary",
+              "type": "button",
+              "level": "link",
+              "actionType": "url",
+              "blank": true,
+              "url": "/#/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
             }
           ],
           "toggled": true
