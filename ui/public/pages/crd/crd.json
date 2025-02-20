@@ -597,7 +597,6 @@
           "name": "spec.group",
           "label": "组",
           "type": "text",
-          "copyable": true,
           "searchable": {
             "type": "select",
             "clearable": true,
@@ -654,7 +653,6 @@
           "label": "名称",
           "type": "text",
           "width": "180px",
-          "copyable": true,
           "sortable": true,
           "searchable": {
             "type": "input-text",
