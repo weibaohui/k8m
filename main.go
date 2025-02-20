@@ -21,7 +21,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/login"
-	"github.com/weibaohui/k8m/pkg/controller/menu"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
@@ -315,8 +314,6 @@ func main() {
 		// Pod 资源使用情况
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 
-		// 菜单
-		api.GET("/menu/list", menu.List)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
