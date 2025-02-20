@@ -134,6 +134,10 @@ spec:
               value: "false"
             - name: LOG_V
               value: "2"
+            - name: KUBECTL_SHELL_IMAGE
+              value: bitnami/kubectl:latest
+            - name: NODE_SHELL_IMAGE
+              value: alpine:latest
           ports:
             - containerPort: 3618
               protocol: TCP
