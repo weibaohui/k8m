@@ -240,55 +240,80 @@ make help
 - **无法启动**：启动时卡住，请使用 k8m -v 6
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
 
-## **运行界面**
+**v0.0.44更新 **
+1、新增kubectl shell 功能
+可以web 页面执行 kubectl 命令了
+![输入图片说明](https://foruda.gitee.com/images/1740031049224924895/c8d5357b_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1740031092919251676/61e6246c_77493.png "屏幕截图")
 
-### 负载
+2、新增节点终端NodeShell
+在节点上执行命令
+![输入图片说明](https://foruda.gitee.com/images/1740031147702527911/4cef40dc_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1740031249763550505/69fddee6_77493.png "屏幕截图")
+3、新增创建功能页面
+执行过的yaml会保存下来，下次打开页面可以直接点击，收藏的yaml可以导入导出。导出的文件为yaml，可以复用
+![输入图片说明](https://foruda.gitee.com/images/1740031367996726581/e1a357b7_77493.png "屏幕截图")
+![](https://foruda.gitee.com/images/1740031382494497806/d16b1a79_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1740031533749791121/4e64e286_77493.png "屏幕截图")
+4、deploy、ds、sts等类型新增关联资源
+4.1 容器组
+直接显示其下受控的pod容器组，并提供快捷操作
+![输入图片说明](https://foruda.gitee.com/images/1740031610441749272/cd485e87_77493.png "屏幕截图")
+4.2 关联事件
+显示deploy、rs、pod等所有相关的事件，一个页面看全相关事件
+![deploy](https://foruda.gitee.com/images/1740031712446573977/320c920b_77493.png "屏幕截图")
+4.3 日志
+显示Pod列表，可选择某个pod、Container展示日志
+![](https://foruda.gitee.com/images/1740031809856930240/fbbef393_77493.png "屏幕截图")
+4.4 历史版本
+支持历史版本查看，并可diff
+![输入图片说明](https://foruda.gitee.com/images/1740031862075460381/ebf50a7e_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1740031912370086873/dfa95a2f_77493.png "屏幕截图")
 
-![workload](images/workload.png)
+**v0.0.21更新**
 
-### Pod内文件编辑
+1. 新增问AI功能：
+   有什么问题，都可以直接询问AI，让AI解答你的疑惑
+   ![输入图片说明](https://foruda.gitee.com/images/1736655942078335649/be66c2b5_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736655968296155521/d47d247e_77493.png "屏幕截图")
+2. 文档界面优化：
+   优化AI翻译效果，降低等待时间
+   ![AI文档](https://foruda.gitee.com/images/1736656055530922469/df155262_77493.png "屏幕截图")
+3. 文档字段级AI示例：
+   针对具体的字段，给出解释，给出使用Demo样例。
+   ![输入图片说明](https://foruda.gitee.com/images/1736656231132357556/b41109e6_77493.png "屏幕截图")
+4. 增加容忍度详情：
+   ![输入图片说明](https://foruda.gitee.com/images/1736656289098443083/ce1f5615_77493.png "屏幕截图")
+5. 增加Pod关联资源
+   一个页面，展示相关的svc、endpoint、pvc、env、cm、secret，甚至集成了pod内的env列表，方便查看
+   ![输入图片说明](https://foruda.gitee.com/images/1736656365325777082/410d24c5_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656376791203135/64cc4737_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656390371435096/5d93c74a_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656418411787086/2c8510af_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656445050779433/843f56aa_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656457940557219/c1372abd_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656468351816442/aba6f649_77493.png "屏幕截图")
+6. yaml创建增加导入功能：
+   增加导入功能，可以直接执行，也可导入到编辑器。导入编辑器后可以二次编辑后，再执行。
+   ![输入图片说明](https://foruda.gitee.com/images/1736656627742328659/6c4e745e_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1736656647758880134/ca92dcc2_77493.png "屏幕截图")
 
-![file-edit](images/file-edit.png)
+**v0.0.19更新**
 
-### 上传文件到Pod内
-
-![upload](images/upload.png)
-
-### Pod内文件下载
-
-![download](images/download.png)
-
-### Tag更新
-
-![tag-update](images/tag-update.png)
-
-### 查看日志
-
-![log-view](images/log-view.png)
-
-### YAML 属性自动翻译
-
-k8m 提供集成的 YAML 浏览、编辑和文档查看功能，支持自动翻译 YAML
-属性。无论是查找字段含义还是确认配置细节，您都无需再费时费力地搜索，极大提高了工作效率。  
-![yaml-editor](images/yaml.png)
-![YAML 属性翻译](images/yaml-ai-1.png)
-
-### Event 信息 AI 问诊
-
-在 Event 页面，k8m 内置了 AI
-问诊功能，可智能分析异常事件，并提供详细的解释。点击事件前的“AI大脑”按钮，稍等片刻即可查看诊断结果，快速定位问题原因。  
-![异常事件诊断](images/event-3.png)
-
-### 错误日志 AI 问诊
-
-日志分析是定位问题的重要环节，但面对大量报错信息，如何高效排查？k8m 支持 AI 日志诊断，帮助快速识别关键错误并生成解决建议。只需选中相关日志，点击
-AI 问诊按钮，即可获得诊断报告。  
-![日志诊断](images/log-ai-4.png)
-
-### 运行命令自动生成
-
-日常运维中，Pod 内命令操作不可避免。借助 AI，您只需输入需求描述，k8m 即可自动生成合适的命令供参考，减少查找时间，提高效率。  
-![命令自动生成](images/AI-command-3.png)
+1. 多集群管理功能
+   按需选择多集群，可随时切换集群
+   ![输入图片说明](https://foruda.gitee.com/images/1736037285365941737/543965e6_77493.png "屏幕截图")
+2. 节点资源用量功能
+   直观显示已分配资源情况，包括cpu、内存、pod数量、IP数量。
+   ![输入图片说明](https://foruda.gitee.com/images/1736037259029155963/72ea1ab4_77493.png "屏幕截图")
+3. Pod 资源用量
+   ![输入图片说明](https://foruda.gitee.com/images/1736037328973160586/9d322e6d_77493.png "屏幕截图")
+4. Pod CPU内存设置
+   按范围方式显示CPU设置，内存设置，简洁明了
+   ![内存](https://foruda.gitee.com/images/1736037370125604986/7938a1f6_77493.png "屏幕截图")
+5. AI页面功能升级为打字机效果
+   响应速度大大提升，实时输出AI返回内容，体验升级
+   ![输入图片说明](https://foruda.gitee.com/images/1736037522633946187/71955026_77493.png "屏幕截图")
 
 **v0.0.15更新**
 
@@ -323,51 +348,6 @@ AI 问诊按钮，即可获得诊断报告。
 15. 界面全量中文化，k8s资源翻译为中文，方便广大用户使用。
     ![输入图片说明](https://foruda.gitee.com/images/1735400283406692980/c778158c_77493.png "屏幕截图")
     ![输入图片说明](https://foruda.gitee.com/images/1735400313832429462/279018dc_77493.png "屏幕截图")
-
-**v0.0.19更新**
-
-1. 多集群管理功能
-   按需选择多集群，可随时切换集群
-   ![输入图片说明](https://foruda.gitee.com/images/1736037285365941737/543965e6_77493.png "屏幕截图")
-2. 节点资源用量功能
-   直观显示已分配资源情况，包括cpu、内存、pod数量、IP数量。
-   ![输入图片说明](https://foruda.gitee.com/images/1736037259029155963/72ea1ab4_77493.png "屏幕截图")
-3. Pod 资源用量
-   ![输入图片说明](https://foruda.gitee.com/images/1736037328973160586/9d322e6d_77493.png "屏幕截图")
-4. Pod CPU内存设置
-   按范围方式显示CPU设置，内存设置，简洁明了
-   ![内存](https://foruda.gitee.com/images/1736037370125604986/7938a1f6_77493.png "屏幕截图")
-5. AI页面功能升级为打字机效果
-   响应速度大大提升，实时输出AI返回内容，体验升级
-   ![输入图片说明](https://foruda.gitee.com/images/1736037522633946187/71955026_77493.png "屏幕截图")
-
-**v0.0.21更新**
-
-1. 新增问AI功能：
-   有什么问题，都可以直接询问AI，让AI解答你的疑惑
-   ![输入图片说明](https://foruda.gitee.com/images/1736655942078335649/be66c2b5_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736655968296155521/d47d247e_77493.png "屏幕截图")
-2. 文档界面优化：
-   优化AI翻译效果，降低等待时间
-   ![AI文档](https://foruda.gitee.com/images/1736656055530922469/df155262_77493.png "屏幕截图")
-3. 文档字段级AI示例：
-   针对具体的字段，给出解释，给出使用Demo样例。
-   ![输入图片说明](https://foruda.gitee.com/images/1736656231132357556/b41109e6_77493.png "屏幕截图")
-4. 增加容忍度详情：
-   ![输入图片说明](https://foruda.gitee.com/images/1736656289098443083/ce1f5615_77493.png "屏幕截图")
-5. 增加Pod关联资源
-   一个页面，展示相关的svc、endpoint、pvc、env、cm、secret，甚至集成了pod内的env列表，方便查看
-   ![输入图片说明](https://foruda.gitee.com/images/1736656365325777082/410d24c5_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736656376791203135/64cc4737_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736656390371435096/5d93c74a_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736656418411787086/2c8510af_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736656445050779433/843f56aa_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736656457940557219/c1372abd_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736656468351816442/aba6f649_77493.png "屏幕截图")
-6. yaml创建增加导入功能：
-   增加导入功能，可以直接执行，也可导入到编辑器。导入编辑器后可以二次编辑后，再执行。
-   ![输入图片说明](https://foruda.gitee.com/images/1736656627742328659/6c4e745e_77493.png "屏幕截图")
-   ![输入图片说明](https://foruda.gitee.com/images/1736656647758880134/ca92dcc2_77493.png "屏幕截图")
 
 ### HELP & SUPPORT
 
