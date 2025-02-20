@@ -3568,46 +3568,6 @@
                               }
                             ]
                           }
-                        },
-                        {
-                          "title": "可调度主机",
-                          "body": [
-                            {
-                              "loadDataOnce": true,
-                              "headerToolbar": [
-                                "reload"
-                              ],
-                              "autoGenerateFilter": {
-                                "columnsNum": 4,
-                                "showBtnToolbar": false
-                              },
-                              "type": "crud",
-                              "name": "node_crud",
-                              "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/node",
-                              "columns": [
-                                {
-                                  "name": "node_name",
-                                  "label": "节点名称",
-                                  "type": "tpl",
-                                  "sortable": true,
-                                  "searchable": true,
-                                  "tpl": "<%=data.node_name %> <% if (data.current) { %> <span class='label label-success'>当前节点</span><% } %>"
-                                },
-                                {
-                                  "name": "reason",
-                                  "label": "筛选原因",
-                                  "type": "mapping",
-                                  "map": {
-                                    "NodeSelector": "<span class='label label-primary'>节点选择器</span>",
-                                    "NodeAffinity": "<span class='label label-primary'>节点亲和性</span>",
-                                    "Tolerations": "<span class='label label-info'>容忍度</span>",
-                                    "NodeName": "<span class='label label-success'>指定节点</span>",
-                                    "*": "<span class='label label-primary'>${reason}</span>"
-                                  }
-                                }
-                              ]
-                            }
-                          ]
                         }
                       ]
                     }
