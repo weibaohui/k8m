@@ -9,8 +9,6 @@ const Sidebar = () => {
             <Menu
                 mode="inline"
                 inlineCollapsed={collapse}
-                defaultOpenKeys={['home']}
-                defaultSelectedKeys={[]}
                 items={menu()}
                 style={{ height: '100%', borderRight: 0 }}
             >
