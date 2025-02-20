@@ -16,19 +16,20 @@ var config *Config
 var once sync.Once
 
 type Config struct {
-	Port       int
-	KubeConfig string
-	ApiKey     string // OPENAI_API_KEY
-	ApiURL     string // OPENAI_API_URL
-	ApiModel   string // OPENAI_MODEL
-	Debug      bool   // 调试模式，同步修改所有的debug模式
-	LogV       int    // klog的日志级别klog.V(this)
-	InCluster  bool
-	LoginType  string // password,oauth,token,..
-	// 登录方式，默认为password
-	AdminUserName  string // 管理员用户名
-	AdminPassword  string // 管理员密码
-	JwtTokenSecret string // JWT token secret
+	Port              int    //gin 监听端口
+	KubeConfig        string // KUBECONFIG文件路径
+	ApiKey            string // OPENAI_API_KEY
+	ApiURL            string // OPENAI_API_URL
+	ApiModel          string // OPENAI_MODEL
+	Debug             bool   // 调试模式，同步修改所有的debug模式
+	LogV              int    // klog的日志级别klog.V(this)
+	InCluster         bool   // 是否集群内模式
+	LoginType         string // password,oauth,token,.. 登录方式，默认为password
+	AdminUserName     string // 管理员用户名
+	AdminPassword     string // 管理员密码
+	JwtTokenSecret    string // JWT token secret
+	NodeShellImage    string // nodeShell 镜像
+	KubectlShellImage string // kubectlShell 镜像
 }
 
 func Init() *Config {
@@ -69,6 +70,12 @@ func (c *Config) InitFlags() {
 	// jwt token secret
 	defaultJwtTokenSecret := getEnv("JWT_TOKEN_SECRET", "your-secret-key")
 
+	// nodeShell 镜像
+	defaultNodeShellImage := getEnv("NODE_SHELL_IMAGE", "alpine:latest")
+
+	//kubectlShell 镜像
+	//bitnami/kubectl:latest
+	defaultKubectlShellImage := getEnv("KUBECTL_SHELL_IMAGE", "bitnami/kubectl:latest")
 	// 输出日志的级别
 	defaultLogV := getEnv("LOG_V", "2")
 
@@ -82,6 +89,8 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "管理员用户名")
 	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "管理员密码")
 	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "登录后生成JWT token 使用的Secret")
+	pflag.StringVar(&c.NodeShellImage, "node-shell-image", defaultNodeShellImage, "NodeShell 镜像。 默认为 alpine:latest，必须包含nsenter命令")
+	pflag.StringVar(&c.KubectlShellImage, "kubectl-shell-image", defaultKubectlShellImage, "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令")
 	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
