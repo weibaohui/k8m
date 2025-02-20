@@ -61,7 +61,7 @@
               "icon": "fas fa-check",
               "label": "切换",
               "actionType": "ajax",
-              "visibleOn": "serverVersion != '' ",
+              "visibleOn": "clusterConnectStatus==='connected' ",
               "api": "post:/k8s/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
               "onEvent": {
                 "click": {
@@ -73,6 +73,14 @@
                   ]
                 }
               }
+            },
+            {
+              "label": "kubectl",
+              "type": "button",
+              "actionType": "url",
+              "url": "/#/NodeExec?type=KubectlShell&fileName=${fileName}&contextName=${contextName}",
+              "blank": true,
+              "visibleOn": "clusterConnectStatus==='connected' "
             }
           ],
           "toggled": true
