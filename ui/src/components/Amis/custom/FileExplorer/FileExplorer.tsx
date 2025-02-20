@@ -212,20 +212,22 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 containers={containerOptions}
                                 onContainerChange={setSelectedContainer}
                             />
-                            <FileTree
-                                treeData={treeData}
-                                selected={selected}
-                                onSelect={onSelect}
-                                onExpand={onExpand}
-                                onRightClick={handleRightClick}
-                            />
-                            <ContextMenu
-                                visible={contextMenu.visible}
-                                x={contextMenu.x}
-                                y={contextMenu.y}
-                                node={contextMenu.node}
-                                onMenuClick={handleMenuClick}
-                            />
+                            <div style={{ height: 'calc(100vh - 150px)', overflowY: 'auto' }}>
+                                <FileTree
+                                    treeData={treeData}
+                                    selected={selected}
+                                    onSelect={onSelect}
+                                    onExpand={onExpand}
+                                    onRightClick={handleRightClick}
+                                />
+                                <ContextMenu
+                                    visible={contextMenu.visible}
+                                    x={contextMenu.x}
+                                    y={contextMenu.y}
+                                    node={contextMenu.node}
+                                    onMenuClick={handleMenuClick}
+                                />
+                            </div>
                         </div>
                     </Splitter.Panel>
                     <Splitter.Panel  >
