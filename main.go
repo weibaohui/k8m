@@ -272,6 +272,8 @@ func main() {
 		api.POST("/replicaset/batch/restart", rs.BatchRestart)
 		api.POST("/replicaset/batch/stop", rs.BatchStop)
 		api.POST("/replicaset/batch/restore", rs.BatchRestore)
+		api.GET("/replicaset/ns/:ns/name/:name/events/all", rs.Event)
+
 		// k8s configmap
 		api.POST("/configmap/ns/:ns/name/:name/import", cm.Import)
 
