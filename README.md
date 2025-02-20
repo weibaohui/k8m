@@ -31,17 +31,18 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 3. **参数**：
 
 ```shell
-Usage of ./bin/k8m:
+Usage of ./k8m:
       --add_dir_header                   If true, adds the file directory to the header of the log messages
       --admin-password string            管理员密码 (default "123456")
       --admin-username string            管理员用户名 (default "admin")
       --alsologtostderr                  log to standard error as well as files (no effect when -logtostderr=true)
-  -k, --chatgpt-key string               大模型的自定义API Key (default "sk-hlfmptmmtppdqxsqvuxwlbgrobrzodojjultkxkrwymnfcjz")
+  -k, --chatgpt-key string               大模型的自定义API Key (default "sk-xxxxxxx")
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-Coder-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
   -d, --debug                            调试模式
       --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
   -c, --kubeconfig string                kubeconfig文件路径 (default "/Users/weibh/.kube/config")
+      --kubectl-shell-image string       Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令 (default "bitnami/kubectl:latest")
       --log-v int                        klog的日志级别klog.V(2) (default 2)
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory (no effect when -logtostderr=true)
@@ -49,6 +50,7 @@ Usage of ./bin/k8m:
       --log_file_max_size uint           Defines the maximum size a log file can grow to (no effect when -logtostderr=true). Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
       --login-type string                登录方式，password, oauth, token等,default is password (default "password")
       --logtostderr                      log to standard error instead of files (default true)
+      --node-shell-image string          NodeShell 镜像。 默认为 alpine:latest，必须包含nsenter命令 (default "alpine:latest")
       --one_output                       If true, only write logs to their native severity level (vs also writing to each lower severity level; no effect when -logtostderr=true)
   -p, --port int                         监听端口 (default 3618)
       --skip_headers                     If true, avoid header prefixes in the log messages
