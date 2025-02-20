@@ -11,6 +11,8 @@ export interface Metadata {
 
 export interface Spec {
 	containers: Container[];
+	initContainers: Container[];
+	ephemeralContainers: Container[];
 }
 
 export interface Container {

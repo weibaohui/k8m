@@ -5,21 +5,8 @@ import SSELogDisplayComponent from '@/components/Amis/custom/LogView/SSELogDispl
 import SSELogDownloadComponent from '@/components/Amis/custom/LogView/SSELogDownload';
 import LogOptionsComponent from '@/components/Amis/custom/LogView/LogOptions';
 import { replacePlaceholders } from '@/utils/utils';
+import { Container, Pod } from '@/store/pod';
 
-
-
-interface PodSpec {
-    containers: Container[];
-}
-
-interface PodData {
-    metadata: any;
-    spec: PodSpec;
-}
-
-interface Container {
-    name: string;
-}
 
 interface PodLogViewerProps {
     url: string;
@@ -29,7 +16,7 @@ interface PodLogViewerProps {
 const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
     url = replacePlaceholders(url, data);
 
-    const [pods, setPods] = useState<PodData[]>([]);
+    const [pods, setPods] = useState<Pod[]>([]);
     const [selectedPod, setSelectedPod] = useState<{ name: string; namespace: string }>();
     const [containers, setContainers] = useState<Container[]>([]);
     const [selectedContainer, setSelectedContainer] = useState<string>('');
@@ -67,12 +54,20 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                 pod.metadata.name === selectedPod.name &&
                 pod.metadata.namespace === selectedPod.namespace
             );
+            // 合并 initContainers 和 containers
+            const allContainers = [
+                ...(podData?.spec?.containers || []),
+                ...(podData?.spec?.initContainers || []),
+                ...(podData?.spec?.ephemeralContainers || []),
+            ];
 
-            if (podData?.spec?.containers) {
-                setContainers(podData.spec.containers);
-                if (podData.spec.containers.length > 0) {
-                    setSelectedContainer(podData.spec.containers[0].name);
-                }
+            if (allContainers.length > 0) {
+                setContainers(allContainers);
+                // 默认选择第一个容器
+                setSelectedContainer(allContainers[0].name);
+            } else {
+                setContainers([]);
+                setSelectedContainer('');
             }
         }
     }, [selectedPod, pods]);

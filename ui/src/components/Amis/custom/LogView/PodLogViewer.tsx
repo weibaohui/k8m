@@ -5,18 +5,7 @@ import SSELogDisplayComponent from '@/components/Amis/custom/LogView/SSELogDispl
 import SSELogDownloadComponent from '@/components/Amis/custom/LogView/SSELogDownload';
 import LogOptionsComponent from '@/components/Amis/custom/LogView/LogOptions';
 import { replacePlaceholders } from '@/utils/utils';
-
-interface PodSpec {
-    containers: Container[];
-}
-
-interface PodData {
-    spec: PodSpec;
-}
-
-interface Container {
-    name: string;
-}
+import { Container, Pod } from '@/store/pod';
 
 interface PodLogViewerProps {
     namespace: string;
@@ -45,13 +34,18 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
 
         fetcher({ url: url, method: 'get' })
             .then(response => {
-                const data = response.data?.data as unknown as PodData;
+                const data = response.data?.data as unknown as Pod;
 
-                if (data.spec?.containers) {
-                    setContainers(data.spec.containers);
-                    if (data.spec.containers.length > 0) {
-                        setSelectedContainer(data.spec.containers[0].name);
-                    }
+                // 合并普通容器和初始化容器的列表
+                const allContainers = [
+                    ...(data.spec?.containers || []),
+                    ...(data.spec?.initContainers || []),
+                    ...(data.spec?.ephemeralContainers || []),
+                ];
+
+                if (allContainers.length > 0) {
+                    setContainers(allContainers);
+                    setSelectedContainer(allContainers[0].name);
                 }
             })
             .catch(error => console.error('Error fetching pod details:', error));

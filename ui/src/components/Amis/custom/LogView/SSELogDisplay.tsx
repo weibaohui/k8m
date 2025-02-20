@@ -51,15 +51,15 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
             setLines((prevLines) => [...prevLines, newLine]);
         });
         eventSourceRef.current.addEventListener('open', (_) => {
-            setErrorMessage('Connected');
+            // setErrorMessage('Connected');
         });
         eventSourceRef.current.addEventListener('error', (_) => {
             if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
-                setErrorMessage('无日志 连接已关闭');
+                // setErrorMessage('连接已关闭');
             } else if (eventSourceRef.current?.readyState === EventSource.CONNECTING) {
-                setErrorMessage('无日志 正在尝试重新连接...');
+                // setErrorMessage('正在尝试重新连接...');
             } else {
-                setErrorMessage('发生未知错误...');
+                // setErrorMessage('发生未知错误...');
             }
             eventSourceRef.current?.close();
         });
