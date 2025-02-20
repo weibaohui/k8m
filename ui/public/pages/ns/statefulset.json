@@ -393,7 +393,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 140,
+          "width": 150,
           "buttons": [
             {
               "type": "button",
@@ -450,7 +450,7 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-file-code text-success",
+              "icon": "fa fa-edit text-primary",
               "tooltip": "Yaml编辑",
               "actionType": "drawer",
               "drawer": {
@@ -1050,7 +1050,7 @@
                                       },
                                       {
                                         "type": "button",
-                                        "icon": "fas fa-file-code text-success",
+                                        "icon": "fa fa-edit text-primary",
                                         "tooltip": "Yaml编辑",
                                         "actionType": "drawer",
                                         "drawer": {
@@ -1338,7 +1338,7 @@
                                       },
                                       {
                                         "type": "button",
-                                        "icon": "fas fa-file-code text-success",
+                                        "icon": "fa fa-edit text-primary",
                                         "tooltip": "Yaml编辑",
                                         "actionType": "drawer",
                                         "drawer": {
@@ -1695,7 +1695,7 @@
                                       },
                                       {
                                         "type": "button",
-                                        "icon": "fas fa-file-code text-success",
+                                        "icon": "fa fa-edit text-primary",
                                         "tooltip": "Yaml编辑",
                                         "actionType": "drawer",
                                         "drawer": {
@@ -1970,7 +1970,7 @@
                                       },
                                       {
                                         "type": "button",
-                                        "icon": "fas fa-file-code text-success",
+                                        "icon": "fa fa-edit text-primary",
                                         "tooltip": "Yaml编辑",
                                         "actionType": "drawer",
                                         "drawer": {
@@ -2275,7 +2275,7 @@
                                       },
                                       {
                                         "type": "button",
-                                        "icon": "fas fa-file-code text-success",
+                                        "icon": "fa fa-edit text-primary",
                                         "tooltip": "Yaml编辑",
                                         "actionType": "drawer",
                                         "drawer": {
@@ -2657,7 +2657,7 @@
                               },
                               {
                                 "type": "button",
-                                "icon": "fas fa-file-code text-success",
+                                "icon": "fa fa-edit text-primary",
                                 "tooltip": "Yaml编辑",
                                 "actionType": "drawer",
                                 "drawer": {
@@ -2956,7 +2956,7 @@
                               },
                               {
                                 "type": "button",
-                                "icon": "fas fa-file-code text-success",
+                                "icon": "fa fa-edit text-primary",
                                 "tooltip": "Yaml编辑",
                                 "actionType": "drawer",
                                 "drawer": {
@@ -3393,7 +3393,7 @@
                               },
                               {
                                 "type": "button",
-                                "icon": "fas fa-file-code text-success",
+                                "icon": "fa fa-edit text-primary",
                                 "label": "查看",
                                 "actionType": "drawer",
                                 "drawer": {
