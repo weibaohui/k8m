@@ -188,11 +188,13 @@
           }
         },
         {
-          "type": "link",
+          "label": "创建",
           "icon": "fas fa-dharmachakra text-primary",
-          "body": "创建",
+          "type": "button",
+          "level": "link",
+          "actionType": "url",
           "blank": true,
-          "href": "/#/apply/apply?kind=${kind}"
+          "url": "/#/apply/apply?kind=${kind}"
         }
       ]
     },
