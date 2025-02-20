@@ -587,7 +587,7 @@
                   "icon": "fa fa-terminal text-primary",
                   "body": "节点终端",
                   "blank": true,
-                  "href": "/#/NodeExec?name=${metadata.name}"
+                  "href": "/#/NodeExec?nodeName=${metadata.name}"
                 },
                 {
                   "label": "资源用量",
