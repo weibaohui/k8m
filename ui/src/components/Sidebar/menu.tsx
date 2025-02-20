@@ -10,71 +10,83 @@ const items: () => MenuItem[] = () => {
     return [
         {
             label: "多集群",
+            title: "多集群",
             icon: <i className="fa-solid fa-server"></i>,
             key: "cluster_all",
             onClick: () => onMenuClick('/cluster/cluster_all')
         },
         {
             label: "命名空间",
+            title: "命名空间",
             icon: <i className="fa-solid fa-border-style"></i>,
             key: "cluster_ns",
             onClick: () => onMenuClick('/cluster/ns')
         },
         {
             label: "节点",
+            title: "节点",
             icon: <i className="fa-solid fa-computer"></i>,
             key: "cluster_node",
             onClick: () => onMenuClick('/cluster/node')
         },
         {
             label: "事件",
+            title: "事件",
             icon: <i className="fa-solid fa-bell"></i>,
             key: "event",
             onClick: () => onMenuClick('/ns/event')
         },
         {
             label: "工作负载",
+            title: "工作负载",
             icon: <i className="fa-solid fa-cube"></i>,
             key: "workload",
             children: [
                 {
                     label: "部署",
+                    title: "部署",
                     icon: <i className="fa-solid fa-layer-group"></i>,
                     key: "deploy",
                     onClick: () => onMenuClick('/ns/deploy')
                 },
                 {
                     label: "有状态集",
+                    title: "有状态集",
                     icon: <i className="fa-solid fa-database"></i>,
                     key: "statefulset",
                     onClick: () => onMenuClick('/ns/statefulset')
                 },
                 {
                     label: "守护进程集",
+                    title: "守护进程集",
                     icon: <i className="fa-solid fa-shield-halved"></i>,
                     key: "daemonset",
                     onClick: () => onMenuClick('/ns/daemonset')
                 },
                 {
                     label: "任务",
+                    title: "任务",
                     icon: <i className="fa-solid fa-list-check"></i>,
                     key: "job",
                     onClick: () => onMenuClick('/ns/job')
                 },
                 {
                     label: "定时任务",
+                    title: "定时任务",
                     icon: <i className="fa-solid fa-clock"></i>,
                     key: "cronjob",
                     onClick: () => onMenuClick('/ns/cronjob')
                 },
                 {
                     label: "容器组",
+                    title: "容器组",
                     icon: <i className="fa-solid fa-cubes"></i>,
                     key: "pod",
                     onClick: () => onMenuClick('/ns/pod')
                 },
                 {
                     label: "副本集",
+                    title: "副本集",
                     icon: <i className="fa-solid fa-clone"></i>,
                     key: "replicaset",
                     onClick: () => onMenuClick('/ns/replicaset')
@@ -111,6 +123,18 @@ const items: () => MenuItem[] = () => {
                     key: "secret",
                     onClick: () => onMenuClick('/ns/secret')
                 },
+                {
+                    label: "验证钩子",
+                    icon: <i className="fa-solid fa-check"></i>,
+                    key: "validation_webhook",
+                    onClick: () => onMenuClick('/cluster/validation_webhook')
+                },
+                {
+                    label: "变更钩子",
+                    icon: <i className="fa-solid fa-exchange"></i>,
+                    key: "mutating_webhook",
+                    onClick: () => onMenuClick('/cluster/mutating_webhook')
+                },
             ],
         },
         {
@@ -129,6 +153,12 @@ const items: () => MenuItem[] = () => {
                     icon: <i className="fa-solid fa-wifi"></i>,
                     key: "ingress",
                     onClick: () => onMenuClick('/ns/ing')
+                },
+                {
+                    label: "Ingress入口类",
+                    icon: <i className="fa-solid fa-sitemap"></i>,
+                    key: "ingress_class",
+                    onClick: () => onMenuClick('/cluster/ingress_class')
                 },
             ],
         },
@@ -199,24 +229,8 @@ const items: () => MenuItem[] = () => {
             icon: <i className="fa-solid fa-cog"></i>,
             key: "cluster_config",
             children: [
-                {
-                    label: "Ingress入口类",
-                    icon: <i className="fa-solid fa-sitemap"></i>,
-                    key: "ingress_class",
-                    onClick: () => onMenuClick('/cluster/ingress_class')
-                },
-                {
-                    label: "验证钩子",
-                    icon: <i className="fa-solid fa-check"></i>,
-                    key: "validation_webhook",
-                    onClick: () => onMenuClick('/cluster/validation_webhook')
-                },
-                {
-                    label: "变更钩子",
-                    icon: <i className="fa-solid fa-exchange"></i>,
-                    key: "mutating_webhook",
-                    onClick: () => onMenuClick('/cluster/mutating_webhook')
-                },
+
+
                 {
                     label: "端点",
                     icon: <i className="fa-solid fa-ethernet"></i>,
