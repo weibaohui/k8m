@@ -2064,99 +2064,13 @@
                                     "name": "subsets",
                                     "label": "就绪IP",
                                     "type": "tpl",
-                                    "tpl": "<% if (!data.subsets || !data.subsets[0].addresses || data.subsets[0].addresses.length === 0) { %> <% } else if (data.subsets[0].addresses.length === 1) { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %></span><% } else { %><span class='text-green-500 font-black'><%= data.subsets[0].addresses[0].ip %></span><% } %>",
-                                    "onEvent": {
-                                      "click": {
-                                        "actions": [
-                                          {
-                                            "actionType": "dialog",
-                                            "dialog": {
-                                              "title": "${metadata.name} 就绪IP (ESC 关闭)",
-                                              "size": "lg",
-                                              "closeOnEsc": true,
-                                              "closeOnOutside": true,
-                                              "body": [
-                                                {
-                                                  "type": "each",
-                                                  "name": "subsets",
-                                                  "items": {
-                                                    "type": "each",
-                                                    "name": "addresses",
-                                                    "items": {
-                                                      "type": "container",
-                                                      "body": [
-                                                        {
-                                                          "type": "tpl",
-                                                          "tpl": "<span class='text-green-500 font-black'><%= data.ip %><% if (data.targetRef) { %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】<% } %></span>"
-                                                        }
-                                                      ]
-                                                    }
-                                                  }
-                                                }
-                                              ]
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    "style": {
-                                      "cursor": "pointer"
-                                    },
-                                    "badge": {
-                                      "visibleOn": "this.subsets[0].addresses.length > 1",
-                                      "animation": true,
-                                      "level": "error",
-                                      "position": "top-left"
-                                    }
+                                    "tpl": "<% if (data.subsets && data.subsets[0].addresses) { %><% data.subsets[0].addresses.forEach(function(address) { %><span class='text-green-500 font-black'><%= address.ip %><% if (address.targetRef) { %> 【<%= address.targetRef.namespace %>/<%= address.targetRef.name %>】<% } %></span><br><% }); %><% } %>"
                                   },
                                   {
                                     "name": "subsets",
                                     "label": "未就绪IP",
                                     "type": "tpl",
-                                    "tpl": "<% if (!data.subsets || !data.subsets[0].notReadyAddresses || data.subsets[0].notReadyAddresses.length === 0) { %> <% } else if (data.subsets[0].notReadyAddresses.length === 1) { %><span class='text-red-500 font-black'><%= data.subsets[0].notReadyAddresses[0].ip %></span><% } else { %><span class='text-red-500 font-black'><%= data.subsets[0].notReadyAddresses[0].ip %>...</span><% } %>",
-                                    "onEvent": {
-                                      "click": {
-                                        "actions": [
-                                          {
-                                            "actionType": "dialog",
-                                            "dialog": {
-                                              "title": "${metadata.name} 未就绪IP (ESC 关闭)",
-                                              "size": "lg",
-                                              "closeOnEsc": true,
-                                              "closeOnOutside": true,
-                                              "body": [
-                                                {
-                                                  "type": "each",
-                                                  "name": "subsets",
-                                                  "items": {
-                                                    "type": "each",
-                                                    "name": "notReadyAddresses",
-                                                    "items": {
-                                                      "type": "container",
-                                                      "body": [
-                                                        {
-                                                          "type": "tpl",
-                                                          "tpl": "<span class='text-red-500 font-black'><%= data.ip %><% if (data.targetRef) { %> 【<%= data.targetRef.namespace %>/<%= data.targetRef.name %>】<% } %></span>"
-                                                        }
-                                                      ]
-                                                    }
-                                                  }
-                                                }
-                                              ]
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    "style": {
-                                      "cursor": "pointer"
-                                    },
-                                    "badge": {
-                                      "visibleOn": "this.subsets[0].notReadyAddresses.length > 1",
-                                      "animation": true,
-                                      "level": "error",
-                                      "position": "top-left"
-                                    }
+                                    "tpl": "<% if (data.subsets && data.subsets[0].notReadyAddresses) { %><% data.subsets[0].notReadyAddresses.forEach(function(address) { %><span class='text-red-500 font-black'><%= address.ip %><% if (address.targetRef) { %> 【<%= address.targetRef.namespace %>/<%= address.targetRef.name %>】<% } %></span><br><% }); %><% } %>"
                                   },
                                   {
                                     "name": "metadata.creationTimestamp",
