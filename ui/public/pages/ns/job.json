@@ -351,7 +351,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 120,
+          "width": 180,
           "buttons": [
             {
               "type": "button",
@@ -587,16 +587,141 @@
               }
             },
             {
+              "tooltip": "容器列表",
+              "icon": "fa-brands fa-docker text-primary",
+              "type": "button",
+              "level": "link",
+              "actionType": "url",
+              "blank": false,
+              "url": "/#/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-calendar-alt text-primary",
+              "tooltip": "查看事件",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "查看事件   (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "crud",
+                    "id": "detailEvent",
+                    "name": "detailEvent",
+                    "headerToolbar": [
+                      "reload",
+                      {
+                        "type": "pagination",
+                        "align": "right"
+                      },
+                      {
+                        "type": "statistics",
+                        "align": "right"
+                      },
+                      {
+                        "type": "switch-per-page",
+                        "align": "right"
+                      }
+                    ],
+                    "loadDataOnce": true,
+                    "syncLocation": false,
+                    "perPage": 10,
+                    "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
+                    "columns": [
+                      {
+                        "type": "operation",
+                        "label": "操作",
+                        "buttons": [
+                          {
+                            "type": "button",
+                            "icon": "fas fa-brain text-primary",
+                            "label": "AI问诊",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "AI 查询",
+                              "body": [
+                                {
+                                  "type": "websocketMarkdownViewer",
+                                  "url": "/k8s/chat/event",
+                                  "params": {
+                                    "note": "${note}",
+                                    "source": "${source}",
+                                    "reason": "${reason}",
+                                    "reportingController": "${reportingController}",
+                                    "type": "${type}",
+                                    "regardingKind": "${kind}"
+                                  }
+                                }
+                              ]
+                            },
+                            "visibleOn": "type === 'Warning'"
+                          }
+                        ],
+                        "toggled": true
+                      },
+                      {
+                        "name": "type",
+                        "label": "类型",
+                        "filterable": {
+                          "options": [
+                            {
+                              "label": "正常 ",
+                              "value": "Normal"
+                            },
+                            {
+                              "label": "告警 ",
+                              "value": "Warning"
+                            }
+                          ]
+                        },
+                        "type": "mapping",
+                        "map": {
+                          "Normal": "<span class='label label-success'>正常</span>",
+                          "Warning": "<span class='label label-danger'>告警</span>"
+                        }
+                      },
+                      {
+                        "name": "reason",
+                        "label": "原因",
+                        "type": "text"
+                      },
+                      {
+                        "name": "field",
+                        "label": "关联字段",
+                        "type": "tpl",
+                        "tpl": "${regarding.fieldPath}"
+                      },
+                      {
+                        "name": "source",
+                        "label": "事件来源",
+                        "type": "tpl",
+                        "tpl": "${reportingController} ${reportingInstance}"
+                      },
+                      {
+                        "name": "note",
+                        "label": "说明",
+                        "type": "text",
+                        "searchable": true
+                      },
+                      {
+                        "name": "metadata.creationTimestamp",
+                        "label": "存在时长",
+                        "type": "k8sAge"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
               "type": "dropdown-button",
               "icon": "fa fa-ellipsis-h",
               "buttons": [
-                {
-                  "type": "link",
-                  "icon": "fa-brands fa-docker text-primary",
-                  "body": "容器列表",
-                  "blank": false,
-                  "href": "/#/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
-                },
                 {
                   "type": "button",
                   "icon": "fas fa-wrench text-primary",
@@ -670,129 +795,6 @@
                                 ]
                               }
                             ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "button",
-                  "icon": "fas fa-calendar-alt text-primary",
-                  "label": "查看事件",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "size": "xl",
-                    "title": "查看事件   (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "crud",
-                        "id": "detailEvent",
-                        "name": "detailEvent",
-                        "headerToolbar": [
-                          "reload",
-                          {
-                            "type": "pagination",
-                            "align": "right"
-                          },
-                          {
-                            "type": "statistics",
-                            "align": "right"
-                          },
-                          {
-                            "type": "switch-per-page",
-                            "align": "right"
-                          }
-                        ],
-                        "loadDataOnce": true,
-                        "syncLocation": false,
-                        "perPage": 10,
-                        "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
-                        "columns": [
-                          {
-                            "type": "operation",
-                            "label": "操作",
-                            "buttons": [
-                              {
-                                "type": "button",
-                                "icon": "fas fa-brain text-primary",
-                                "label": "AI问诊",
-                                "actionType": "drawer",
-                                "drawer": {
-                                  "closeOnEsc": true,
-                                  "closeOnOutside": true,
-                                  "size": "lg",
-                                  "title": "AI 查询",
-                                  "body": [
-                                    {
-                                      "type": "websocketMarkdownViewer",
-                                      "url": "/k8s/chat/event",
-                                      "params": {
-                                        "note": "${note}",
-                                        "source": "${source}",
-                                        "reason": "${reason}",
-                                        "reportingController": "${reportingController}",
-                                        "type": "${type}",
-                                        "regardingKind": "${kind}"
-                                      }
-                                    }
-                                  ]
-                                },
-                                "visibleOn": "type === 'Warning'"
-                              }
-                            ],
-                            "toggled": true
-                          },
-                          {
-                            "name": "type",
-                            "label": "类型",
-                            "filterable": {
-                              "options": [
-                                {
-                                  "label": "正常 ",
-                                  "value": "Normal"
-                                },
-                                {
-                                  "label": "告警 ",
-                                  "value": "Warning"
-                                }
-                              ]
-                            },
-                            "type": "mapping",
-                            "map": {
-                              "Normal": "<span class='label label-success'>正常</span>",
-                              "Warning": "<span class='label label-danger'>告警</span>"
-                            }
-                          },
-                          {
-                            "name": "reason",
-                            "label": "原因",
-                            "type": "text"
-                          },
-                          {
-                            "name": "field",
-                            "label": "关联字段",
-                            "type": "tpl",
-                            "tpl": "${regarding.fieldPath}"
-                          },
-                          {
-                            "name": "source",
-                            "label": "事件来源",
-                            "type": "tpl",
-                            "tpl": "${reportingController} ${reportingInstance}"
-                          },
-                          {
-                            "name": "note",
-                            "label": "说明",
-                            "type": "text",
-                            "searchable": true
-                          },
-                          {
-                            "name": "metadata.creationTimestamp",
-                            "label": "存在时长",
-                            "type": "k8sAge"
                           }
                         ]
                       }
