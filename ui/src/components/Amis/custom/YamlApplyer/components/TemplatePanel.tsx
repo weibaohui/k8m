@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Button, List, Input, Modal, Space } from 'antd';
+import { Button, List, Input, Modal, Space, Drawer, Select } from 'antd';
 import { DeleteFilled, EditFilled } from '@ant-design/icons';
 
 interface TemplateItem {
     id: string;
     name: string;
+    kind: string;
     content: string;
 }
 
@@ -12,34 +13,156 @@ interface TemplatePanelProps {
     onSelectTemplate: (content: string) => void;
 }
 
+const defaultTemplates: TemplateItem[] = [
+    {
+        id: '1',
+        name: 'Nginx Deployment',
+        kind: 'Deployment',
+        content: `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80`
+    },
+    {
+        id: '2',
+        name: 'Redis Service',
+        kind: 'Service',
+        content: `apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379`
+    },
+    {
+        id: '3',
+        name: 'MySQL ConfigMap',
+        kind: 'ConfigMap',
+        content: `apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+  mysql.conf: |
+    [mysqld]
+    max_connections=250
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_unicode_ci`
+    },
+    {
+        id: '4',
+        name: 'MongoDB StatefulSet',
+        kind: 'StatefulSet',
+        content: `apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  serviceName: mongodb
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.4`
+    },
+    {
+        id: '5',
+        name: 'Persistent Volume Claim',
+        kind: 'PersistentVolumeClaim',
+        content: `apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi`
+    }
+];
+
 const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
-    const [templates, setTemplates] = useState<TemplateItem[]>([]);
-    const [editingId, setEditingId] = useState<string>();
-    const [editingName, setEditingName] = useState('');
+    const [templates, setTemplates] = useState<TemplateItem[]>(defaultTemplates);
     const [currentPage, setCurrentPage] = useState(1);
+    const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
+    const [drawerVisible, setDrawerVisible] = useState(false);
+    const [selectedKind, setSelectedKind] = useState<string>('');
+    const [editForm, setEditForm] = useState({
+        name: '',
+        kind: '',
+        content: ''
+    });
 
     const pageSize = 10;
+    const resourceTypes = [
+        'Deployment',
+        'Service',
+        'ConfigMap',
+        'StatefulSet',
+        'DaemonSet',
+        'Job',
+        'CronJob',
+        'PersistentVolumeClaim',
+        'Secret',
+        'Ingress',
+        'NetworkPolicy'
+    ];
 
-    const handleNameEdit = (templateId: string) => {
-        const template = templates.find(t => t.id === templateId);
-        if (template) {
-            setEditingId(template.id);
-            setEditingName(template.name);
-        }
+    const filteredTemplates = templates.filter(template => 
+        !selectedKind || template.kind === selectedKind
+    );
+    const handleNameEdit = (template: TemplateItem) => {
+        setEditingTemplate(template);
+        setEditForm({
+            name: template.name,
+            kind: template.kind,
+            content: template.content
+        });
+        setDrawerVisible(true);
     };
 
-    const handleNameSubmit = (templateId: string) => {
-        if (editingName.trim()) {
+    const handleEditSubmit = () => {
+        if (editingTemplate && editForm.name.trim()) {
             setTemplates(prevTemplates =>
                 prevTemplates.map(template =>
-                    template.id === templateId
-                        ? { ...template, name: editingName.trim() }
+                    template.id === editingTemplate.id
+                        ? { ...template, ...editForm }
                         : template
                 )
             );
+            setDrawerVisible(false);
+            setEditingTemplate(null);
         }
-        setEditingId('');
-        setEditingName('');
     };
 
     const handleDelete = (templateId: string) => {
@@ -54,7 +177,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
 
     const renderTemplate = (template: TemplateItem) => (
         <List.Item key={template.id} className="list-item" style={{ cursor: 'pointer' }}
-                   onClick={() => onSelectTemplate(template.content)}>
+            onClick={() => onSelectTemplate(template.content)}>
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -62,63 +185,49 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                 position: 'relative',
                 backgroundColor: '#FFFFFF'
             }}>
-                {editingId === template.id ? (
-                    <Input
-                        autoFocus
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        onBlur={() => handleNameSubmit(template.id)}
-                        onPressEnter={() => handleNameSubmit(template.id)}
-                        placeholder="请输入新的名称"
-                        style={{ maxWidth: '100px' }}
+                <div style={{
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    marginRight: '10px'
+                }}>
+                    {template.name}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
+                    <Button
+                        type="text"
+                        icon={<EditFilled style={{ color: '#1890ff' }} />}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleNameEdit(template);
+                        }}
                     />
-                ) : (
-                    <div style={{
-                        flex: 1,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        marginRight: '10px'
-                    }}>
-                        {template.name}
-                    </div>
-                )}
-                {editingId !== template.id && (
-                    <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
-                        <Button
-                            type="text"
-                            icon={<EditFilled style={{ color: '#1890ff' }} />}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleNameEdit(template.id);
-                            }}
-                        />
-                        <Button
-                            type="text"
-                            icon={<DeleteFilled style={{ color: '#f23034' }} />}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(template.id);
-                            }}
-                        />
-                    </div>
-                )}
+                    <Button
+                        type="text"
+                        icon={<DeleteFilled style={{ color: '#f23034' }} />}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(template.id);
+                        }}
+                    />
+                </div>
             </div>
         </List.Item>
     );
 
     return (
         <div>
-            <div style={{ marginBottom: '10px' }}>
+            <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
                 <Space.Compact>
                     <Button
                         variant="outlined"
                         onClick={() => {
-                            // 添加新模板的逻辑
                             const newTemplate: TemplateItem = {
                                 id: Math.random().toString(36).substring(2, 15),
                                 name: `模板 ${templates.length + 1}`,
-                                content: ''
+                                content: '',
+                                kind: ''
                             };
                             setTemplates(prev => [...prev, newTemplate]);
                         }}
@@ -126,9 +235,20 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                         新建模板
                     </Button>
                 </Space.Compact>
+                <Select
+                    style={{ width: 200 }}
+                    value={selectedKind}
+                    onChange={(value) => {
+                        setSelectedKind(value);
+                        setCurrentPage(1);
+                    }}
+                    placeholder="按资源类型筛选"
+                    allowClear
+                    options={resourceTypes.map(type => ({ label: type, value: type }))}
+                />
             </div>
             <List
-                dataSource={templates.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+                dataSource={filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
                 renderItem={renderTemplate}
                 bordered={true}
             />
@@ -153,6 +273,50 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                     </Button>
                 </Space.Compact>
             </div>
+
+            <Drawer
+                title="编辑模板"
+                width={600}
+                open={drawerVisible}
+                onClose={() => setDrawerVisible(false)}
+                footer={
+                    <div style={{ textAlign: 'right' }}>
+                        <Space>
+                            <Button onClick={() => setDrawerVisible(false)}>取消</Button>
+                            <Button type="primary" onClick={handleEditSubmit}>保存</Button>
+                        </Space>
+                    </div>
+                }
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
+                        <div style={{ marginBottom: '8px' }}>模板名称</div>
+                        <Input
+                            value={editForm.name}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="请输入模板名称"
+                        />
+                    </div>
+                    <div>
+                        <div style={{ marginBottom: '8px' }}>资源分类</div>
+                        <Select
+                            value={editForm.kind}
+                            onChange={(value) => setEditForm(prev => ({ ...prev, kind: value }))}
+                            placeholder="请选择资源类型"
+                            options={resourceTypes.map(type => ({ label: type, value: type }))}
+                        />
+                    </div>
+                    <div>
+                        <div style={{ marginBottom: '8px' }}>模板内容</div>
+                        <Input.TextArea
+                            value={editForm.content}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
+                            placeholder="请输入YAML内容"
+                            rows={15}
+                        />
+                    </div>
+                </div>
+            </Drawer>
         </div>
     );
 };
