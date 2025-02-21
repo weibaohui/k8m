@@ -39,7 +39,10 @@ func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 	h := slice.Filter(p.CountList, func(index int, item *StatusCount) bool {
 		return item.ClusterName == selectedCluster && item.Namespace == pod.Namespace
 	})
-
+	ns := pod.Namespace
+	if ns != "default" {
+		fmt.Println(ns)
+	}
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodResourceUsage", pod.Namespace, pod.Name, pod.ResourceVersion)
 	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() (*kom.ResourceUsageResult, error) {
 		tb := kom.Cluster(selectedCluster).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
@@ -262,7 +265,7 @@ func (p *podService) watchSingleCluster(selectedCluster string) watch.Interface 
 	// watch default 命名空间下 Pod资源 的变更
 	var watcher watch.Interface
 	var pod v1.Pod
-	err := kom.Cluster(selectedCluster).Resource(&pod).Namespace(v1.NamespaceAll).Watch(&watcher).Error
+	err := kom.Cluster(selectedCluster).Resource(&pod).AllNamespace().Watch(&watcher).Error
 	if err != nil {
 		klog.Errorf("%s 创建Pod监听器失败 %v", selectedCluster, err)
 		return nil
