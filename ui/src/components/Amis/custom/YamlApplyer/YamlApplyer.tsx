@@ -27,6 +27,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
     const [selectedRecord, setSelectedRecord] = useState<string>('');
     const [currentPage, setCurrentPage] = useState(1);
     const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
+    const [currentTemplatePage, setCurrentTemplatePage] = useState(1);
     const [editingId, setEditingId] = useState<string>();
     const [editingName, setEditingName] = useState('');
     const [activeTab, setActiveTab] = useState('history');
@@ -511,7 +512,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
     ];
     return (
         <div style={{display: 'flex', height: '100vh', backgroundColor: '#FFFFFF'}}>
-            <div style={{width: '350px', padding: '10px', backgroundColor: '#FFFFFF', flexShrink: 0}}>
+            <div style={{width: '300px', padding: '10px', backgroundColor: '#FFFFFF', flexShrink: 0}}>
                 <style>
                     {`
                     .highlight-animation {
@@ -537,7 +538,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                 </div>
             </div>
 
-            <div style={{padding: '10px', backgroundColor: '#FFFFFF', width: '100%'}}>
+            <div style={{padding: '10px', backgroundColor: '#FFFFFF', flex: 1}}>
                 <div style={{marginBottom: '10px', display: 'flex', gap: '10px'}}>
                     <Button
                         variant='outlined'
@@ -662,6 +663,51 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                 >
                     从集群删除
                 </Button>
+            </div>
+            <div style={{width: '300px', padding: '10px', backgroundColor: '#FFFFFF', flexShrink: 0, borderLeft: '1px solid #e5e6eb'}}>
+                <div style={{marginBottom: '10px'}}>
+                    <h3 style={{margin: 0}}>模板列表</h3>
+                </div>
+                <List
+                    dataSource={[
+                        { id: '1', name: 'Deployment模板', content: 'apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: nginx-deployment\n  labels:\n    app: nginx\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: nginx\n  template:\n    metadata:\n      labels:\n        app: nginx\n    spec:\n      containers:\n      - name: nginx\n        image: nginx:1.14.2\n        ports:\n        - containerPort: 80' },
+                        { id: '2', name: 'Service模板', content: 'apiVersion: v1\nkind: Service\nmetadata:\n  name: my-service\nspec:\n  selector:\n    app: nginx\n  ports:\n    - protocol: TCP\n      port: 80\n      targetPort: 9376' },
+                        { id: '3', name: 'ConfigMap模板', content: 'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: game-config\ndata:\n  game.properties: |\n    enemies=aliens\n    lives=3\n    enemies.cheat=true\n    enemies.cheat.level=noGoodRotten\n  ui.properties: |\n    color.good=purple\n    color.bad=yellow\n    allow.textmode=true' }
+                    ].slice((currentTemplatePage - 1) * pageSize, currentTemplatePage * pageSize)}
+                    renderItem={item => (
+                        <List.Item
+                            key={item.id}
+                            style={{cursor: 'pointer', padding: '8px'}}
+                            onClick={() => {
+                                if (monacoInstance.current) {
+                                    monacoInstance.current.setValue(item.content);
+                                    setEditorValue(item.content);
+                                }
+                            }}
+                        >
+                            <div style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                                {item.name}
+                            </div>
+                        </List.Item>
+                    )}
+                    bordered={true}
+                />
+                <div style={{marginTop: '10px', display: 'flex', justifyContent: 'center'}}>
+                    <Space.Compact>
+                        <Button
+                            disabled={currentTemplatePage === 1}
+                            onClick={() => setCurrentTemplatePage(prev => Math.max(1, prev - 1))}
+                        >
+                            上一页
+                        </Button>
+                        <Button
+                            disabled={currentTemplatePage >= Math.ceil(3 / pageSize)}
+                            onClick={() => setCurrentTemplatePage(prev => Math.min(Math.ceil(3 / pageSize), prev + 1))}
+                        >
+                            下一页
+                        </Button>
+                    </Space.Compact>
+                </div>
             </div>
         </div>
     );
