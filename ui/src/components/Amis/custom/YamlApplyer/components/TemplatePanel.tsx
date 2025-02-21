@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Button, List, Input, Modal, Space, Drawer, Select } from 'antd';
-import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import React, { useRef, useState } from 'react';
+import { Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider } from 'antd';
+import { DeleteFilled, EditFilled, PlusOutlined } from '@ant-design/icons';
 
 interface TemplateItem {
     id: string;
@@ -122,9 +122,8 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
         kind: '',
         content: ''
     });
-
-    const pageSize = 10;
-    const resourceTypes = [
+    const [newKind, setNewKind] = useState('');
+    const [resourceTypesList, setResourceTypesList] = useState([
         'Deployment',
         'Service',
         'ConfigMap',
@@ -136,9 +135,27 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
         'Secret',
         'Ingress',
         'NetworkPolicy'
-    ];
+    ]);
+    const inputRef = useRef<InputRef>(null);
 
-    const filteredTemplates = templates.filter(template => 
+    const pageSize = 10;
+
+    const handleAddKind = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+        e.preventDefault();
+        if (newKind && !resourceTypesList.includes(newKind)) {
+            setResourceTypesList([...resourceTypesList, newKind]);
+            setNewKind('');
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 0);
+        }
+    };
+
+    const onNewKindChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNewKind(event.target.value);
+    };
+
+    const filteredTemplates = templates.filter(template =>
         !selectedKind || template.kind === selectedKind
     );
     const handleNameEdit = (template: TemplateItem) => {
@@ -227,7 +244,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                                 id: Math.random().toString(36).substring(2, 15),
                                 name: `模板 ${templates.length + 1}`,
                                 content: '',
-                                kind: ''
+                                kind: selectedKind
                             };
                             setTemplates(prev => [...prev, newTemplate]);
                         }}
@@ -242,9 +259,27 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                         setSelectedKind(value);
                         setCurrentPage(1);
                     }}
-                    placeholder="按资源类型筛选"
+                    placeholder="按资源分类筛选"
                     allowClear
-                    options={resourceTypes.map(type => ({ label: type, value: type }))}
+                    dropdownRender={(menu) => (
+                        <>
+                            {menu}
+                            <Divider style={{ margin: '8px 0' }} />
+                            <Space style={{ padding: '0 8px 4px' }}>
+                                <Input
+                                    placeholder="请输入新的资源分类"
+                                    ref={inputRef}
+                                    value={newKind}
+                                    onChange={onNewKindChange}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                />
+                                <Button type="text" icon={<PlusOutlined />} onClick={handleAddKind}>
+                                    添加类型
+                                </Button>
+                            </Space>
+                        </>
+                    )}
+                    options={resourceTypesList.map(type => ({ label: type, value: type }))}
                 />
             </div>
             <List
@@ -302,8 +337,8 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                         <Select
                             value={editForm.kind}
                             onChange={(value) => setEditForm(prev => ({ ...prev, kind: value }))}
-                            placeholder="请选择资源类型"
-                            options={resourceTypes.map(type => ({ label: type, value: type }))}
+                            placeholder="请选择资源分类"
+                            options={resourceTypesList.map(type => ({ label: type, value: type }))}
                         />
                     </div>
                     <div>
