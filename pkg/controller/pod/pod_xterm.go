@@ -78,6 +78,7 @@ func cmdLogger(c *gin.Context, cmd string) {
 	podName := c.Param("pod_name")
 	containerName := c.Query("container_name")
 	selectedCluster := amis.GetSelectedCluster(c)
+	cmd = utils.CleanANSISequences(cmd)
 	log := gin.H{
 		"cluster":         selectedCluster,
 		"namespace":       ns,

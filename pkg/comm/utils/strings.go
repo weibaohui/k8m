@@ -129,3 +129,10 @@ func SanitizeFileName(filename string) string {
 	sanitizedFilename = strings.ReplaceAll(sanitizedFilename, " ", "_")
 	return sanitizedFilename
 }
+
+// 清理 ANSI 转义序列的正则表达式
+var ansiEscapeRegex = regexp.MustCompile(`\x1B\[[0-9;]*[A-Za-z]`)
+
+func CleanANSISequences(input string) string {
+	return ansiEscapeRegex.ReplaceAllString(input, "")
+}
