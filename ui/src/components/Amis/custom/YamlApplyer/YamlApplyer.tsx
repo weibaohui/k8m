@@ -23,6 +23,12 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
     const handleSaveSuccess = (content: string) => {
         setEditorContent(content);
 
+        // 检查是否已存在相同内容的记录
+        const existingRecord = historyRecords.find(record => record.content === content);
+        if (existingRecord) {
+            return; // 如果已存在相同内容的记录，则不添加新记录
+        }
+
         // 创建新的记录
         const newRecord = {
             id: Math.random().toString(36).substring(2, 15),
