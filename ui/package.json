@@ -27,6 +27,7 @@
     "axios": "^1.7.9",
     "copy-to-clipboard": "^3.3.3",
     "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "monaco-editor": "^0.52.2",
