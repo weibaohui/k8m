@@ -11,12 +11,14 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
 	"github.com/weibaohui/kom/kom"
@@ -69,6 +71,25 @@ func removePod(selectedCluster string, ns string, podName string) {
 	// 删除Pod
 	kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Delete()
 }
+
+func cmdLogger(c *gin.Context, cmd string) {
+	removeAfterExec := c.Query("remove")
+	ns := c.Param("ns")
+	podName := c.Param("pod_name")
+	containerName := c.Query("container_name")
+	selectedCluster := amis.GetSelectedCluster(c)
+	log := gin.H{
+		"cluster":         selectedCluster,
+		"namespace":       ns,
+		"podName":         podName,
+		"containerName":   containerName,
+		"cmd":             cmd,
+		"removeAfterExec": removeAfterExec,
+	}
+	//todo 存入数据库
+	klog.V(4).Infof("%s", utils.ToJSON(log))
+}
+
 func Xterm(c *gin.Context) {
 	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
@@ -241,6 +262,9 @@ func Xterm(c *gin.Context) {
 	// tty << xterm.js
 	go func() {
 		defer cleanupOnce.Do(cleanup)
+		// 创建一个静态缓冲区用于存储命令
+		var cmdBuffer bytes.Buffer
+		var cmdBufferMutex sync.Mutex
 		for {
 			// data processing
 			messageType, data, err := conn.ReadMessage()
@@ -285,9 +309,25 @@ func Xterm(c *gin.Context) {
 			// 普通输入
 			bytesWritten, err := inWriter.Write(data)
 			if err != nil {
-				klog.V(6).Infof(fmt.Sprintf("failed to write %v bytes to tty: %s", len(dataBuffer), err))
+				klog.V(6).Infof("failed to write %d bytes to tty: %v", len(dataBuffer), err)
 				continue
 			}
+
+			// 使用互斥锁保护 cmdBuffer 的读写操作
+			cmdBufferMutex.Lock()
+			cmdBuffer.Write(data)
+			if bytes.Contains(data, []byte("\r")) {
+				// 获取完整命令并去除回车符
+				cmd := strings.TrimSuffix(cmdBuffer.String(), "\r")
+				// 只有当命令不为空时才记录
+				if strings.TrimSpace(cmd) != "" {
+					klog.V(8).Infof("收到完整命令: %s", cmd)
+					go cmdLogger(c, cmd)
+				}
+				// 清空缓冲区,准备接收新命令
+				cmdBuffer.Reset()
+			}
+			cmdBufferMutex.Unlock()
 			klog.V(6).Infof("Wrote %d bytes to inBuffer: %q", bytesWritten, string(data))
 		}
 	}()
