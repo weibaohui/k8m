@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
-import { Tabs, Button, List, Input, Modal, Space } from 'antd';
+import {useState, useEffect, useRef} from 'react';
+import {Tabs, Button, List, Input, Modal, Space} from 'antd';
 import * as monaco from 'monaco-editor';
 import React from 'react';
 import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
-import { fetcher } from "@/components/Amis/fetcher.ts";
-import { DeleteFilled, EditFilled, StarFilled, StarOutlined } from '@ant-design/icons';
-import type { TabsProps } from 'antd';
+import {saveAs} from 'file-saver';
+import {fetcher} from "@/components/Amis/fetcher.ts";
+import {DeleteFilled, EditFilled, StarFilled, StarOutlined} from '@ant-design/icons';
+import type {TabsProps} from 'antd';
 
 interface RecordItem {
     id: string;
@@ -89,7 +89,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             // 从历史记录中移除
             setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
             // 添加到收藏记录的最前面
-            setFavoriteRecords(prevRecords => [{ ...record, isFavorite: true }, ...prevRecords]);
+            setFavoriteRecords(prevRecords => [{...record, isFavorite: true}, ...prevRecords]);
             updateLocalStorage();
         } else {
             // 从收藏记录中移除
@@ -149,13 +149,13 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                 title: '应用状态',
                 content: (
                     <List
-                        style={{ maxHeight: '400px', overflow: 'auto' }}
+                        style={{maxHeight: '400px', overflow: 'auto'}}
                         dataSource={resultList}
                         renderItem={(item, index) => {
                             const resultItem = item as string;
                             return (
-                                <List.Item key={index} style={{ padding: '8px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <List.Item key={index} style={{padding: '8px'}}>
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
                                         <div>{resultItem}</div>
                                     </div>
                                 </List.Item>
@@ -213,7 +213,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             setHistoryRecords(prevRecords =>
                 prevRecords.map(record =>
                     record.id === recordId
-                        ? { ...record, customName: editingName.trim() }
+                        ? {...record, customName: editingName.trim()}
                         : record
                 )
             );
@@ -221,7 +221,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             setFavoriteRecords(prevRecords =>
                 prevRecords.map(record =>
                     record.id === recordId
-                        ? { ...record, customName: editingName.trim() }
+                        ? {...record, customName: editingName.trim()}
                         : record
                 )
             );
@@ -256,8 +256,15 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
     };
 
     const renderRecord = (record: RecordItem) => (
-        <List.Item key={record.id} data-record-id={record.id} className="list-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedRecord(record.content)}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'relative', backgroundColor: '#FFFFFF' }}>
+        <List.Item key={record.id} data-record-id={record.id} className="list-item" style={{cursor: 'pointer'}}
+                   onClick={() => setSelectedRecord(record.content)}>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+                position: 'relative',
+                backgroundColor: '#FFFFFF'
+            }}>
                 {editingId === record.id ? (
                     <Input
                         autoFocus
@@ -266,7 +273,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         onBlur={() => handleNameSubmit(record.id)}
                         onPressEnter={() => handleNameSubmit(record.id)}
                         placeholder="请输入新的名称"
-                        style={{ maxWidth: '100px' }}
+                        style={{maxWidth: '100px'}}
                     />
                 ) : (
                     <div
@@ -282,10 +289,10 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     </div>
                 )}
                 {editingId !== record.id && (
-                    <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
+                    <div style={{display: 'flex', gap: '8px', zIndex: 10}}>
                         <Button
                             type="text"
-                            icon={<EditFilled style={{ color: '#1890ff' }} />}
+                            icon={<EditFilled style={{color: '#1890ff'}}/>}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleNameEdit(record.id);
@@ -293,7 +300,8 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         />
                         <Button
                             type="text"
-                            icon={activeTab === 'favorites' ? <StarFilled style={{ color: '#FFD700' }} /> : <StarOutlined />}
+                            icon={activeTab === 'favorites' ? <StarFilled style={{color: '#FFD700'}}/> :
+                                <StarOutlined/>}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 toggleFavorite(record.id);
@@ -301,7 +309,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         />
                         <Button
                             type="text"
-                            icon={<DeleteFilled style={{ color: '#f23034' }} />}
+                            icon={<DeleteFilled style={{color: '#f23034'}}/>}
 
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -321,7 +329,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             label: "历史记录",
             children: [
                 <div key={'history-list'}>
-                    <div style={{ marginBottom: '10px' }}>
+                    <div style={{marginBottom: '10px'}}>
                         <Space.Compact>
                             <Button
                                 variant="outlined"
@@ -356,7 +364,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         renderItem={renderRecord}
                         bordered={true}
                     />
-                    <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                    <div style={{marginTop: '16px', textAlign: 'right'}}>
                         <Space.Compact>
                             <Button
                                 type="default"
@@ -386,7 +394,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
             label: "收藏",
             children: [
                 <div key={'history-list'}>
-                    <div style={{ marginBottom: '10px' }}>
+                    <div style={{marginBottom: '10px'}}>
                         <Space.Compact>
                             <Button
                                 variant="outlined"
@@ -461,7 +469,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                                         const fileName = record.customName || `favorite_${index + 1}.yaml`;
                                         zip.file(fileName.endsWith('.yaml') ? fileName : `${fileName}.yaml`, record.content);
                                     });
-                                    const blob = await zip.generateAsync({ type: 'blob' });
+                                    const blob = await zip.generateAsync({type: 'blob'});
                                     saveAs(blob, 'favorites.zip');
                                 }}
                             >
@@ -475,7 +483,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                         renderItem={renderRecord}
                         bordered={true}
                     />
-                    <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                    <div style={{marginTop: '16px', textAlign: 'right'}}>
                         <Space.Compact>
                             <Button
                                 type="default"
@@ -502,8 +510,8 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
         }
     ];
     return (
-        <div style={{ display: 'flex', height: '100vh', backgroundColor: '#FFFFFF' }}>
-            <div style={{ width: '350px', padding: '10px', backgroundColor: '#FFFFFF', flexShrink: 0 }}>
+        <div style={{display: 'flex', height: '100vh', backgroundColor: '#FFFFFF'}}>
+            <div style={{width: '350px', padding: '10px', backgroundColor: '#FFFFFF', flexShrink: 0}}>
                 <style>
                     {`
                     .highlight-animation {
@@ -523,14 +531,14 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     }
                     `}
                 </style>
-                <Tabs items={items} onChange={setActiveTab} />
-                <div className="bg-blue-50	" style={{ padding: '5px', margin: '5px', fontSize: '12px' }}>
+                <Tabs items={items} onChange={setActiveTab}/>
+                <div className="bg-blue-50	" style={{padding: '5px', margin: '5px', fontSize: '12px'}}>
                     历史记录存储在浏览器本地，清空浏览器缓存后会删除所有历史记录
                 </div>
-            </div >
+            </div>
 
-            <div style={{ padding: '10px', backgroundColor: '#FFFFFF', width: '100%' }}>
-                <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
+            <div style={{padding: '10px', backgroundColor: '#FFFFFF', width: '100%'}}>
+                <div style={{marginBottom: '10px', display: 'flex', gap: '10px'}}>
                     <Button
                         variant='outlined'
                         onClick={() => {
@@ -569,10 +577,10 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     height: 'calc(100vh - 200px)',
                     border: '1px solid #e5e6eb',
                     borderRadius: '4px'
-                }} />
+                }}/>
                 <Button
                     type="primary"
-                    style={{ marginTop: '10px' }}
+                    style={{marginTop: '10px'}}
                     onClick={handleSave}
                 >
                     应用到集群
@@ -580,7 +588,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                 <Button
                     type="primary"
                     danger={true}
-                    style={{ marginTop: '10px', marginLeft: '10px' }}
+                    style={{marginTop: '10px', marginLeft: '10px'}}
                     onClick={async () => {
                         if (!editorValue) return;
                         try {
@@ -607,13 +615,13 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                                 title: '删除状态',
                                 content: (
                                     <List
-                                        style={{ maxHeight: '400px', overflow: 'auto' }}
+                                        style={{maxHeight: '400px', overflow: 'auto'}}
                                         dataSource={resultList}
                                         renderItem={(item, index) => {
                                             const resultItem = item as string;
                                             return (
-                                                <List.Item key={index} style={{ padding: '8px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <List.Item key={index} style={{padding: '8px'}}>
+                                                    <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
                                                         <div>{resultItem}</div>
                                                     </div>
                                                 </List.Item>
@@ -655,7 +663,7 @@ const HistoryRecordsComponent = React.forwardRef<HTMLDivElement, HistoryRecordsP
                     从集群删除
                 </Button>
             </div>
-        </div >
+        </div>
     );
 });
 
