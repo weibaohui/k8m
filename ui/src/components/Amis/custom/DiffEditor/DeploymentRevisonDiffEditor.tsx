@@ -26,9 +26,9 @@ const DeploymentRevisionDiffEditor: React.FC<DeploymentRevisionDiffEditorProps> 
                     method: 'get',
                 });
                 //@ts-ignore
-                setOriginal(response.data?.data.current);
+                setOriginal(response.data?.data.latest);
                 //@ts-ignore
-                setModified(response.data?.data.latest);
+                setModified(response.data?.data.current);
             } catch (error) {
                 console.error('Failed to fetch deployment revision data:', error);
             }
