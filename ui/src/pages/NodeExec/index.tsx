@@ -44,6 +44,10 @@ const NodeExec: React.FC = () => {
     }
 
     useEffect(() => {
+        if (url == '') {
+            return
+        }
+
         setLoading(true);
         setError(undefined);
 
