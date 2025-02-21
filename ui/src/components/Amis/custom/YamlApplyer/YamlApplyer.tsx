@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { message } from 'antd';
 import HistoryPanel from './components/HistoryPanel';
 import EditorPanel from './components/EditorPanel';
 import TemplatePanel from './components/TemplatePanel';
@@ -26,6 +27,7 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
         // 检查是否已存在相同内容的记录
         const existingRecord = historyRecords.find(record => record.content === content);
         if (existingRecord) {
+            message.success('已保存到历史记录');
             return; // 如果已存在相同内容的记录，则不添加新记录
         }
 
@@ -40,6 +42,8 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
         const updatedRecords = [newRecord, ...historyRecords];
         setHistoryRecords(updatedRecords);
         localStorage.setItem('historyRecords', JSON.stringify(updatedRecords));
+        message.success('已保存到历史记录');
+
     };
 
     return (
