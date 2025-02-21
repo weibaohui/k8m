@@ -25,7 +25,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/controller/rs"
-	"github.com/weibaohui/k8m/pkg/controller/storage"
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
@@ -82,6 +81,7 @@ func Init() {
 			service.NodeService().Watch()
 			service.PVCService().Watch()
 			service.PVService().Watch()
+			service.IngressService().Watch()
 		})
 	}()
 
@@ -236,9 +236,6 @@ func main() {
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
 
-		// k8s storageclass
-		api.GET("/storageclass/option_list", storage.OptionList)
-
 		// k8s cluster
 		api.GET("/cluster/all", cluster.List)
 		api.POST("/cluster/scan", cluster.Scan)
@@ -284,8 +281,10 @@ func main() {
 
 		// k8s storage_class
 		api.POST("/storage_class/set_default/name/:name", storageclass.SetDefault)
+		api.GET("/storage_class/option_list", storageclass.OptionList)
 		// k8s ingress_class
 		api.POST("/ingress_class/set_default/name/:name", ingressclass.SetDefault)
+		api.GET("/ingress_class/option_list", ingressclass.OptionList)
 
 		// doc
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)

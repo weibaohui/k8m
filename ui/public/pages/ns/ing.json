@@ -836,7 +836,13 @@
         {
           "name": "spec.ingressClassName",
           "label": "入口控制器",
-          "type": "text"
+          "type": "text",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "searchable": true,
+            "source": "/k8s/ingress_class/option_list"
+          }
         },
         {
           "name": "metadata.creationTimestamp",

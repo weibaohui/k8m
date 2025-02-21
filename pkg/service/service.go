@@ -9,11 +9,15 @@ var localClusterService = &clusterService{
 	AggregateDelaySeconds: 61, // 没有秒级支持，所以大于1分钟
 }
 var localStorageClassService = &storageClassService{}
+var localIngressClassService = &ingressClassService{}
 var localPVCService = &pvcService{
 	CountList: []*pvcCount{},
 }
 var localPVService = &pvService{
 	CountList: []*pvCount{},
+}
+var localIngressService = &ingressService{
+	CountList: []*ingressCount{},
 }
 
 func ChatService() *chatService {
@@ -34,10 +38,15 @@ func ClusterService() *clusterService {
 func StorageClassService() *storageClassService {
 	return localStorageClassService
 }
-
+func IngressClassService() *ingressClassService {
+	return localIngressClassService
+}
 func PVCService() *pvcService {
 	return localPVCService
 }
 func PVService() *pvService {
 	return localPVService
+}
+func IngressService() *ingressService {
+	return localIngressService
 }

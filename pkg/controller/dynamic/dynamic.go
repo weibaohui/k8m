@@ -136,6 +136,14 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 				item = service.StorageClassService().SetPVCount(selectedCluster, item)
 			}
 		}
+	case "IngressClass":
+		if service.ClusterService().GetIngressStatusAggregated(selectedCluster) {
+			// 已缓存聚合状态，可以填充
+			for i := range list {
+				item := list[i]
+				item = service.IngressClassService().SetIngressCount(selectedCluster, item)
+			}
+		}
 	}
 	return list
 }

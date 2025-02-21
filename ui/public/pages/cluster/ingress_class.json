@@ -575,6 +575,19 @@
           }
         },
         {
+          "name": "ingress_count",
+          "label": "Ingress数量",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "${metadata.annotations['ingress.count']||'-'}",
+              "blank": false,
+              "href": "/#/ns/ing?spec[ingressClassName]=${metadata.name}"
+            }
+          ]
+        },
+        {
           "name": "spec.controller",
           "label": "控制器名称",
           "type": "text"

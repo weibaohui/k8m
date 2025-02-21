@@ -22,6 +22,7 @@ const immutableKeys = [
     "kom.kubernetes.io/restartedAt",
     "pvc.count",
     "pv.count",
+    "ingress.count",
 ];
 const FilterAnnotations = (input: Record<string, string>) => {
     // 如果 input 不存在，则返回空对象

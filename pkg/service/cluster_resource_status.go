@@ -72,3 +72,19 @@ func (c *clusterService) GetPVStatusAggregated(selectedCluster string) bool {
 	}
 	return clusterConfig.PVStatusAggregated
 }
+
+// SetIngressStatusAggregated 设置Pod状态聚合
+func (c *clusterService) SetIngressStatusAggregated(selectedCluster string, true bool) {
+	clusterConfig := c.GetClusterByID(selectedCluster)
+	if clusterConfig == nil {
+		return
+	}
+	clusterConfig.IngressStatusAggregated = true
+}
+func (c *clusterService) GetIngressStatusAggregated(selectedCluster string) bool {
+	clusterConfig := c.GetClusterByID(selectedCluster)
+	if clusterConfig == nil {
+		return false
+	}
+	return clusterConfig.IngressStatusAggregated
+}

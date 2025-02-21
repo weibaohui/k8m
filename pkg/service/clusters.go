@@ -27,24 +27,25 @@ type clusterService struct {
 }
 
 type ClusterConfig struct {
-	FileName             string                         `json:"fileName,omitempty"`             // kubeconfig 文件名称
-	ContextName          string                         `json:"contextName,omitempty"`          // context名称
-	ClusterName          string                         `json:"clusterName,omitempty"`          // 集群名称
-	Server               string                         `json:"server,omitempty"`               // 集群地址
-	ServerVersion        string                         `json:"serverVersion,omitempty"`        // 通过这个值来判断集群是否可用
-	UserName             string                         `json:"userName,omitempty"`             // 用户名
-	Namespace            string                         `json:"namespace,omitempty"`            // kubeconfig 限制Namespace
-	Err                  string                         `json:"err,omitempty"`                  // 连接错误信息
-	NodeStatusAggregated bool                           `json:"nodeStatusAggregated,omitempty"` // 是否已聚合节点状态
-	PodStatusAggregated  bool                           `json:"podStatusAggregated,omitempty"`  // 是否已聚合容器组状态
-	PVCStatusAggregated  bool                           `json:"pvcStatusAggregated,omitempty"`  // 是否已聚合pcv状态
-	PVStatusAggregated   bool                           `json:"pvStatusAggregated,omitempty"`   // 是否已聚合pv状态
-	ClusterConnectStatus constants.ClusterConnectStatus `json:"clusterConnectStatus,omitempty"` // 集群连接状态
-	IsInCluster          bool                           `json:"isInCluster,omitempty"`          // 是否为集群内运行获取到的配置
-	watchStatus          map[string]*clusterWatchStatus // watch 类型为key，比如pod,deploy,node,pvc,sc
-	restConfig           *rest.Config                   // 直连rest.Config
-	kubeConfig           []byte                         // 集群配置.kubeconfig原始文件内容
-	watchStatusLock      sync.RWMutex                   // watch状态读写锁
+	FileName                string                         `json:"fileName,omitempty"`                // kubeconfig 文件名称
+	ContextName             string                         `json:"contextName,omitempty"`             // context名称
+	ClusterName             string                         `json:"clusterName,omitempty"`             // 集群名称
+	Server                  string                         `json:"server,omitempty"`                  // 集群地址
+	ServerVersion           string                         `json:"serverVersion,omitempty"`           // 通过这个值来判断集群是否可用
+	UserName                string                         `json:"userName,omitempty"`                // 用户名
+	Namespace               string                         `json:"namespace,omitempty"`               // kubeconfig 限制Namespace
+	Err                     string                         `json:"err,omitempty"`                     // 连接错误信息
+	NodeStatusAggregated    bool                           `json:"nodeStatusAggregated,omitempty"`    // 是否已聚合节点状态
+	PodStatusAggregated     bool                           `json:"podStatusAggregated,omitempty"`     // 是否已聚合容器组状态
+	PVCStatusAggregated     bool                           `json:"pvcStatusAggregated,omitempty"`     // 是否已聚合pcv状态
+	PVStatusAggregated      bool                           `json:"pvStatusAggregated,omitempty"`      // 是否已聚合pv状态
+	IngressStatusAggregated bool                           `json:"ingressStatusAggregated,omitempty"` // 是否已聚合ingress状态
+	ClusterConnectStatus    constants.ClusterConnectStatus `json:"clusterConnectStatus,omitempty"`    // 集群连接状态
+	IsInCluster             bool                           `json:"isInCluster,omitempty"`             // 是否为集群内运行获取到的配置
+	watchStatus             map[string]*clusterWatchStatus // watch 类型为key，比如pod,deploy,node,pvc,sc
+	restConfig              *rest.Config                   // 直连rest.Config
+	kubeConfig              []byte                         // 集群配置.kubeconfig原始文件内容
+	watchStatusLock         sync.RWMutex                   // watch状态读写锁
 }
 
 // 记录每个集群的watch 启动情况

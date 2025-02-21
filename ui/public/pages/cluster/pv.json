@@ -795,7 +795,7 @@
             "type": "select",
             "clearable": true,
             "searchable": true,
-            "source": "/k8s/storageclass/option_list"
+            "source": "/k8s/storage_class/option_list"
           }
         },
         {
