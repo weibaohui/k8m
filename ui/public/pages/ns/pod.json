@@ -732,6 +732,271 @@
                           "type": "tabs",
                           "tabs": [
                             {
+                              "title": "Ingress入口",
+                              "body": {
+                                "type": "crud",
+                                "loadDataOnce": true,
+                                "headerToolbar": [
+                                  "reload"
+                                ],
+                                "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/ingress",
+                                "columns": [
+                                  {
+                                    "type": "operation",
+                                    "label": "操作",
+                                    "width": 120,
+                                    "buttons": [
+                                      {
+                                        "type": "button",
+                                        "icon": "fas fa-eye text-primary",
+                                        "actionType": "drawer",
+                                        "tooltip": "资源描述",
+                                        "drawer": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "size": "xl",
+                                          "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                                          "body": [
+                                            {
+                                              "type": "service",
+                                              "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
+                                              "body": [
+                                                {
+                                                  "type": "button",
+                                                  "label": "AI解读",
+                                                  "icon": "fas fa-brain text-primary",
+                                                  "actionType": "drawer",
+                                                  "drawer": {
+                                                    "closeOnEsc": true,
+                                                    "closeOnOutside": true,
+                                                    "size": "xl",
+                                                    "title": "AI解读  (ESC 关闭)",
+                                                    "body": [
+                                                      {
+                                                        "type": "websocketMarkdownViewer",
+                                                        "url": "/k8s/chat/describe",
+                                                        "params": {
+                                                          "describe": "${result}",
+                                                          "kind": "${kind}",
+                                                          "group": "${group}"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                {
+                                                  "type": "highlightHtml",
+                                                  "keywords": [
+                                                    "Error",
+                                                    "Warning"
+                                                  ],
+                                                  "html": "${result}"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "type": "button",
+                                        "icon": "fa fa-edit text-primary",
+                                        "tooltip": "Yaml编辑",
+                                        "actionType": "drawer",
+                                        "drawer": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "size": "lg",
+                                          "title": "Yaml管理",
+                                          "body": [
+                                            {
+                                              "type": "tabs",
+                                              "tabsMode": "tiled",
+                                              "tabs": [
+                                                {
+                                                  "title": "查看编辑",
+                                                  "body": [
+                                                    {
+                                                      "type": "service",
+                                                      "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
+                                                      "body": [
+                                                        {
+                                                          "type": "mEditor",
+                                                          "text": "${yaml}",
+                                                          "componentId": "yaml",
+                                                          "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                          "options": {
+                                                            "language": "yaml",
+                                                            "wordWrap": "on",
+                                                            "scrollbar": {
+                                                              "vertical": "auto"
+                                                            }
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "title": "文档",
+                                                  "body": [
+                                                    {
+                                                      "type": "page",
+                                                      "asideResizor": true,
+                                                      "asideSticky": false,
+                                                      "aside": [
+                                                        {
+                                                          "type": "input-tree",
+                                                          "name": "tree",
+                                                          "initiallyOpen": false,
+                                                          "unfoldedLevel": 1,
+                                                          "searchable": true,
+                                                          "showOutline": true,
+                                                          "showIcon": true,
+                                                          "searchConfig": {
+                                                            "sticky": true
+                                                          },
+                                                          "heightAuto": true,
+                                                          "inputClassName": "no-border no-padder mt-1",
+                                                          "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                                          "onEvent": {
+                                                            "change": {
+                                                              "actions": [
+                                                                {
+                                                                  "componentId": "basic",
+                                                                  "actionType": "reload",
+                                                                  "data": {
+                                                                    "description": "${event.data.item.description}",
+                                                                    "id": "${event.data.item.id}",
+                                                                    "full_id": "${event.data.item.full_id}",
+                                                                    "type": "${event.data.item.type}"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "componentId": "detail",
+                                                                  "actionType": "reload",
+                                                                  "data": {
+                                                                    "description": "${event.data.item.description}",
+                                                                    "id": "${event.data.item.id}",
+                                                                    "full_id": "${event.data.item.full_id}",
+                                                                    "type": "${event.data.item.type}"
+                                                                  }
+                                                                }
+                                                              ]
+                                                            }
+                                                          }
+                                                        }
+                                                      ],
+                                                      "toolbar": [
+                                                        {
+                                                          "type": "tpl",
+                                                          "tpl": ""
+                                                        }
+                                                      ],
+                                                      "body": [
+                                                        {
+                                                          "type": "service",
+                                                          "id": "basic",
+                                                          "body": [
+                                                            {
+                                                              "type": "tpl",
+                                                              "tpl": "<br><strong>属性：</strong> ${id}",
+                                                              "visibleOn": "${id}"
+                                                            },
+                                                            {
+                                                              "type": "button",
+                                                              "label": "示例",
+                                                              "level": "link",
+                                                              "icon": "fas fa-lightbulb text-warning",
+                                                              "actionType": "drawer",
+                                                              "drawer": {
+                                                                "overlay": false,
+                                                                "closeOnEsc": true,
+                                                                "closeOnOutside": true,
+                                                                "size": "lg",
+                                                                "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                                                "body": [
+                                                                  {
+                                                                    "type": "websocketMarkdownViewer",
+                                                                    "url": "/k8s/chat/example/field",
+                                                                    "params": {
+                                                                      "kind": "${kind}",
+                                                                      "group": "${group}",
+                                                                      "version": "${version}",
+                                                                      "field": "${full_id}"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              },
+                                                              "visibleOn": "${id}"
+                                                            },
+                                                            {
+                                                              "type": "tpl",
+                                                              "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                                                              "visibleOn": "${type}"
+                                                            },
+                                                            {
+                                                              "type": "tpl",
+                                                              "tpl": "<br><strong>描述：</strong> ${description}",
+                                                              "visibleOn": "${description}"
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "type": "service",
+                                                          "id": "detail",
+                                                          "api": "post:/k8s/doc/detail",
+                                                          "body": [
+                                                            {
+                                                              "type": "divider",
+                                                              "title": "描述翻译",
+                                                              "titlePosition": "center",
+                                                              "visibleOn": "${translate}"
+                                                            },
+                                                            {
+                                                              "type": "markdown",
+                                                              "value": "${translate|raw}",
+                                                              "options": {
+                                                                "linkify": true,
+                                                                "html": true,
+                                                                "breaks": true
+                                                              },
+                                                              "visibleOn": "${translate}"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "actions": []
+                                        }
+                                      }
+                                    ],
+                                    "toggled": true
+                                  },
+                                  {
+                                    "name": "metadata.name",
+                                    "label": "名称",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "name": "spec.rules",
+                                    "label": "访问规则",
+                                    "type": "tpl",
+                                    "tpl": "<% if (data.spec.rules && data.spec.rules.length) { %><% data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'>域名: <%- rule.host || '*' %><br><% if (rule.http && rule.http.paths && rule.http.paths.length) { %><% rule.http.paths.forEach(function(path) { %><% if (path.backend && path.backend.service) { %>路径: <%- path.path %> → 服务: <%- path.backend.service.name %><br><% } %><% }); %><% } %></div><% }); %><% } %>"
+                                  },
+                                  {
+                                    "name": "metadata.creationTimestamp",
+                                    "label": "存在时长",
+                                    "type": "k8sAge"
+                                  }
+                                ]
+                              }
+                            },
+                            {
                               "title": "Service网络",
                               "body": {
                                 "type": "crud",
@@ -1367,271 +1632,6 @@
                                       "level": "error",
                                       "position": "top-left"
                                     }
-                                  },
-                                  {
-                                    "name": "metadata.creationTimestamp",
-                                    "label": "存在时长",
-                                    "type": "k8sAge"
-                                  }
-                                ]
-                              }
-                            },
-                            {
-                              "title": "Ingress入口",
-                              "body": {
-                                "type": "crud",
-                                "loadDataOnce": true,
-                                "headerToolbar": [
-                                  "reload"
-                                ],
-                                "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/ingress",
-                                "columns": [
-                                  {
-                                    "type": "operation",
-                                    "label": "操作",
-                                    "width": 120,
-                                    "buttons": [
-                                      {
-                                        "type": "button",
-                                        "icon": "fas fa-eye text-primary",
-                                        "actionType": "drawer",
-                                        "tooltip": "资源描述",
-                                        "drawer": {
-                                          "closeOnEsc": true,
-                                          "closeOnOutside": true,
-                                          "size": "xl",
-                                          "title": "Describe: ${metadata.name}  (ESC 关闭)",
-                                          "body": [
-                                            {
-                                              "type": "service",
-                                              "api": "post:/k8s/${kind}/group//version/v1/describe/ns/$metadata.namespace/name/$metadata.name",
-                                              "body": [
-                                                {
-                                                  "type": "button",
-                                                  "label": "AI解读",
-                                                  "icon": "fas fa-brain text-primary",
-                                                  "actionType": "drawer",
-                                                  "drawer": {
-                                                    "closeOnEsc": true,
-                                                    "closeOnOutside": true,
-                                                    "size": "xl",
-                                                    "title": "AI解读  (ESC 关闭)",
-                                                    "body": [
-                                                      {
-                                                        "type": "websocketMarkdownViewer",
-                                                        "url": "/k8s/chat/describe",
-                                                        "params": {
-                                                          "describe": "${result}",
-                                                          "kind": "${kind}",
-                                                          "group": "${group}"
-                                                        }
-                                                      }
-                                                    ]
-                                                  }
-                                                },
-                                                {
-                                                  "type": "highlightHtml",
-                                                  "keywords": [
-                                                    "Error",
-                                                    "Warning"
-                                                  ],
-                                                  "html": "${result}"
-                                                }
-                                              ]
-                                            }
-                                          ]
-                                        }
-                                      },
-                                      {
-                                        "type": "button",
-                                        "icon": "fa fa-edit text-primary",
-                                        "tooltip": "Yaml编辑",
-                                        "actionType": "drawer",
-                                        "drawer": {
-                                          "closeOnEsc": true,
-                                          "closeOnOutside": true,
-                                          "size": "lg",
-                                          "title": "Yaml管理",
-                                          "body": [
-                                            {
-                                              "type": "tabs",
-                                              "tabsMode": "tiled",
-                                              "tabs": [
-                                                {
-                                                  "title": "查看编辑",
-                                                  "body": [
-                                                    {
-                                                      "type": "service",
-                                                      "api": "get:/k8s/${kind}/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
-                                                      "body": [
-                                                        {
-                                                          "type": "mEditor",
-                                                          "text": "${yaml}",
-                                                          "componentId": "yaml",
-                                                          "saveApi": "/k8s/${kind}/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
-                                                          "options": {
-                                                            "language": "yaml",
-                                                            "wordWrap": "on",
-                                                            "scrollbar": {
-                                                              "vertical": "auto"
-                                                            }
-                                                          }
-                                                        }
-                                                      ]
-                                                    }
-                                                  ]
-                                                },
-                                                {
-                                                  "title": "文档",
-                                                  "body": [
-                                                    {
-                                                      "type": "page",
-                                                      "asideResizor": true,
-                                                      "asideSticky": false,
-                                                      "aside": [
-                                                        {
-                                                          "type": "input-tree",
-                                                          "name": "tree",
-                                                          "initiallyOpen": false,
-                                                          "unfoldedLevel": 1,
-                                                          "searchable": true,
-                                                          "showOutline": true,
-                                                          "showIcon": true,
-                                                          "searchConfig": {
-                                                            "sticky": true
-                                                          },
-                                                          "heightAuto": true,
-                                                          "inputClassName": "no-border no-padder mt-1",
-                                                          "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
-                                                          "onEvent": {
-                                                            "change": {
-                                                              "actions": [
-                                                                {
-                                                                  "componentId": "basic",
-                                                                  "actionType": "reload",
-                                                                  "data": {
-                                                                    "description": "${event.data.item.description}",
-                                                                    "id": "${event.data.item.id}",
-                                                                    "full_id": "${event.data.item.full_id}",
-                                                                    "type": "${event.data.item.type}"
-                                                                  }
-                                                                },
-                                                                {
-                                                                  "componentId": "detail",
-                                                                  "actionType": "reload",
-                                                                  "data": {
-                                                                    "description": "${event.data.item.description}",
-                                                                    "id": "${event.data.item.id}",
-                                                                    "full_id": "${event.data.item.full_id}",
-                                                                    "type": "${event.data.item.type}"
-                                                                  }
-                                                                }
-                                                              ]
-                                                            }
-                                                          }
-                                                        }
-                                                      ],
-                                                      "toolbar": [
-                                                        {
-                                                          "type": "tpl",
-                                                          "tpl": ""
-                                                        }
-                                                      ],
-                                                      "body": [
-                                                        {
-                                                          "type": "service",
-                                                          "id": "basic",
-                                                          "body": [
-                                                            {
-                                                              "type": "tpl",
-                                                              "tpl": "<br><strong>属性：</strong> ${id}",
-                                                              "visibleOn": "${id}"
-                                                            },
-                                                            {
-                                                              "type": "button",
-                                                              "label": "示例",
-                                                              "level": "link",
-                                                              "icon": "fas fa-lightbulb text-warning",
-                                                              "actionType": "drawer",
-                                                              "drawer": {
-                                                                "overlay": false,
-                                                                "closeOnEsc": true,
-                                                                "closeOnOutside": true,
-                                                                "size": "lg",
-                                                                "title": "${kind}-${id} 参考样例（ESC 关闭）",
-                                                                "body": [
-                                                                  {
-                                                                    "type": "websocketMarkdownViewer",
-                                                                    "url": "/k8s/chat/example/field",
-                                                                    "params": {
-                                                                      "kind": "${kind}",
-                                                                      "group": "${group}",
-                                                                      "version": "${version}",
-                                                                      "field": "${full_id}"
-                                                                    }
-                                                                  }
-                                                                ]
-                                                              },
-                                                              "visibleOn": "${id}"
-                                                            },
-                                                            {
-                                                              "type": "tpl",
-                                                              "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
-                                                              "visibleOn": "${type}"
-                                                            },
-                                                            {
-                                                              "type": "tpl",
-                                                              "tpl": "<br><strong>描述：</strong> ${description}",
-                                                              "visibleOn": "${description}"
-                                                            }
-                                                          ]
-                                                        },
-                                                        {
-                                                          "type": "service",
-                                                          "id": "detail",
-                                                          "api": "post:/k8s/doc/detail",
-                                                          "body": [
-                                                            {
-                                                              "type": "divider",
-                                                              "title": "描述翻译",
-                                                              "titlePosition": "center",
-                                                              "visibleOn": "${translate}"
-                                                            },
-                                                            {
-                                                              "type": "markdown",
-                                                              "value": "${translate|raw}",
-                                                              "options": {
-                                                                "linkify": true,
-                                                                "html": true,
-                                                                "breaks": true
-                                                              },
-                                                              "visibleOn": "${translate}"
-                                                            }
-                                                          ]
-                                                        }
-                                                      ]
-                                                    }
-                                                  ]
-                                                }
-                                              ]
-                                            }
-                                          ],
-                                          "actions": []
-                                        }
-                                      }
-                                    ],
-                                    "toggled": true
-                                  },
-                                  {
-                                    "name": "metadata.name",
-                                    "label": "名称",
-                                    "type": "text"
-                                  },
-                                  {
-                                    "name": "spec.rules",
-                                    "label": "访问规则",
-                                    "type": "tpl",
-                                    "tpl": "<% if (data.spec.rules && data.spec.rules.length) { %><% data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'>域名: <%- rule.host || '*' %><br><% if (rule.http && rule.http.paths && rule.http.paths.length) { %><% rule.http.paths.forEach(function(path) { %><% if (path.backend && path.backend.service) { %>路径: <%- path.path %> → 服务: <%- path.backend.service.name %><br><% } %><% }); %><% } %></div><% }); %><% } %>"
                                   },
                                   {
                                     "name": "metadata.creationTimestamp",
