@@ -88,7 +88,6 @@ const NodeExec: React.FC = () => {
                         <span style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.65)' }}>
                             {nodeName}
                         </span>
-                        <span>（ESC 关闭）</span>
                     </div>
                 }
                 variant="outlined"
