@@ -30,6 +30,10 @@ func (p *pvcService) IncreasePVCCount(selectedCluster string, pvc *corev1.Persis
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
+	// 检查 pvc.Spec.StorageClassName 是否为 nil，避免空指针异常
+	if pvc.Spec.StorageClassName == nil {
+		return
+	}
 	h := slice.Filter(p.CountList, func(index int, item *pvcCount) bool {
 		return item.ClusterName == selectedCluster && item.Name == *pvc.Spec.StorageClassName
 	})
