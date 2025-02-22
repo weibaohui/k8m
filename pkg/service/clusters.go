@@ -308,30 +308,6 @@ func (c *clusterService) ScanClustersInDB() {
 		return
 	}
 
-	// memoryDBClusters := slice.Filter(c.clusterConfigs, func(index int, item *ClusterConfig) bool {
-	// 	return item.FileName == "DB"
-	// })
-
-	// 先找到内存中有，但是数据库中没有的
-	// for _, memoryDBCluster := range memoryDBClusters {
-	// 	found := false
-	// 	for _, kc := range list {
-	// 		if kc.Server == memoryDBCluster.Server && kc.User == memoryDBCluster.UserName && kc.Cluster == memoryDBCluster.ClusterName {
-	// 			found = true
-	// 			break
-	// 		}
-	// 	}
-	// 	if !found {
-	// 		for i, _ := range c.clusterConfigs {
-	// 			cc := c.clusterConfigs[i]
-	// 			if cc.Server == memoryDBCluster.Server && cc.UserName == memoryDBCluster.UserName && cc.ClusterName == memoryDBCluster.ClusterName {
-	// 				klog.V(6).Infof("删除内存中的集群 %s %s", memoryDBCluster.Server, memoryDBCluster.UserName)
-	// 				c.clusterConfigs[i] = nil
-	// 			}
-	// 		}
-	// 	}
-	// }
-
 	for i, cc := range c.clusterConfigs {
 		if cc.FileName == "DB" {
 			// 查一下list中是否存在
