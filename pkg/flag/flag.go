@@ -16,7 +16,7 @@ var config *Config
 var once sync.Once
 
 type Config struct {
-	Port              int    //gin 监听端口
+	Port              int    // gin 监听端口
 	KubeConfig        string // KUBECONFIG文件路径
 	ApiKey            string // OPENAI_API_KEY
 	ApiURL            string // OPENAI_API_URL
@@ -30,6 +30,7 @@ type Config struct {
 	JwtTokenSecret    string // JWT token secret
 	NodeShellImage    string // nodeShell 镜像
 	KubectlShellImage string // kubectlShell 镜像
+	SqlitePath        string // sqlite 数据库路径
 }
 
 func Init() *Config {
@@ -73,11 +74,14 @@ func (c *Config) InitFlags() {
 	// nodeShell 镜像
 	defaultNodeShellImage := getEnv("NODE_SHELL_IMAGE", "alpine:latest")
 
-	//kubectlShell 镜像
-	//bitnami/kubectl:latest
+	// kubectlShell 镜像
+	// bitnami/kubectl:latest
 	defaultKubectlShellImage := getEnv("KUBECTL_SHELL_IMAGE", "bitnami/kubectl:latest")
 	// 输出日志的级别
 	defaultLogV := getEnv("LOG_V", "2")
+
+	// sqlite数据库文件路径
+	defaultSqlitePath := getEnv("SQLITE_PATH", "/data/data.db")
 
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口")
@@ -92,6 +96,8 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.NodeShellImage, "node-shell-image", defaultNodeShellImage, "NodeShell 镜像。 默认为 alpine:latest，必须包含nsenter命令")
 	pflag.StringVar(&c.KubectlShellImage, "kubectl-shell-image", defaultKubectlShellImage, "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令")
 	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
+	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径")
+
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
