@@ -27,6 +27,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/rs"
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
+	"github.com/weibaohui/k8m/pkg/controller/template"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
@@ -314,6 +315,15 @@ func main() {
 		// Pod 资源使用情况
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 
+	}
+
+	mgm := r.Group("/mgm", middleware.AuthMiddleware())
+	{
+		mgm.GET("/custom/template_kind/list", template.ListKind)
+		mgm.POST("/custom/template_kind/add", template.AddKind)
+
+		mgm.GET("/custom/template/list/:kind", template.ListTemplate)
+		mgm.POST("/custom/template/add", template.AddTemplate)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
