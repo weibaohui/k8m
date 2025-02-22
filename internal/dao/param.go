@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/constants"
 )
 
 // Params 用于处理分页和排序参数，以及上下文中的用户信息
@@ -13,6 +14,7 @@ type Params struct {
 	Page     int                    // 当前页
 	PerPage  int                    // 每页数量
 	Queries  map[string]interface{} // 动态查询条件
+	UserName string                 // 登录用户名
 
 }
 
@@ -48,6 +50,8 @@ func BuildParams(c *gin.Context) *Params {
 		}
 	}
 
+	userName := c.GetString(constants.JwtUserName)
+
 	// 返回 Params 结构体
 	return &Params{
 		OrderBy:  orderBy,
@@ -55,5 +59,6 @@ func BuildParams(c *gin.Context) *Params {
 		Page:     page,
 		PerPage:  perPage,
 		Queries:  queries,
+		UserName: userName,
 	}
 }
