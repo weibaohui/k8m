@@ -29,6 +29,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/middleware"
+	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/callbacks"
 	"k8s.io/klog/v2"
