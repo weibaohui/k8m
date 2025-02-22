@@ -23,6 +23,7 @@ type CustomTemplate struct {
 func (c *CustomTemplate) List(params *dao.Params) ([]*CustomTemplate, int64, error) {
 	return dao.GenericQuery(params, c)
 }
+
 func (c *CustomTemplate) Save(params *dao.Params) error {
 	return dao.GenericSave(params, c)
 }
