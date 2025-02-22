@@ -16,6 +16,5 @@ func init() {
 func AutoMigrate() error {
 
 	// 添加需要迁移的所有模型
-
-	return dao.DB().AutoMigrate(&CustomTemplate{})
+	return dao.DB().AutoMigrate(&CustomTemplate{}, &KubeConfig{})
 }
