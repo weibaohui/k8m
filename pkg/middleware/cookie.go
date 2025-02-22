@@ -33,7 +33,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				false,                       // 是否 HttpOnly
 			)
 		}
-		//InCluster模式下，只有一个集群，那么就直接用InCluster
+		// InCluster模式下，只有一个集群，那么就直接用InCluster
 		if cfg.InCluster && len(allClusters) == 1 && sc != "InCluster" {
 			// 集群内模式,但是当前cookie不是InCluster,那么给他纠正过来
 			clusterID = "InCluster"
@@ -47,7 +47,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				false,                       // 是否 HttpOnly
 			)
 		}
-		//非集群内模式下，但是用了InCluster，肯定不对，需要纠正过来
+		// 非集群内模式下，但是用了InCluster，肯定不对，需要纠正过来
 		if !cfg.InCluster && sc == "InCluster" {
 			// 非集群内模式,但是当前cookie是InCluster,那么给他纠正过来
 			clusterID = service.ClusterService().FirstClusterID()
@@ -76,6 +76,8 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				strings.Contains(path, "/cluster/file/option_list") ||
 				strings.Contains(path, "/cluster/scan") ||
 				strings.Contains(path, "/cluster/all") ||
+				strings.Contains(path, "/cluster/kubeconfig/save") ||
+				strings.Contains(path, "/cluster/kubeconfig/remove") ||
 				strings.Contains(path, "/cluster/reconnect") ||
 				strings.Contains(path, "/cluster/setDefault")) {
 				c.JSON(512, gin.H{
