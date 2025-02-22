@@ -1,6 +1,8 @@
-import React, { useRef, useState } from 'react';
-import { Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider } from 'antd';
-import { DeleteFilled, EditFilled, PlusOutlined } from '@ant-design/icons';
+import React, {useRef, useState, useEffect} from 'react';
+import {Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider} from 'antd';
+import {DeleteFilled, EditFilled, PlusOutlined} from '@ant-design/icons';
+import {formatFinalGetUrl} from '@/utils/utils';
+import {fetcher} from '@/components/Amis/fetcher';
 
 interface TemplateItem {
     id: string;
@@ -111,7 +113,7 @@ spec:
     }
 ];
 
-const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
+const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
     const [templates, setTemplates] = useState<TemplateItem[]>(defaultTemplates);
     const [currentPage, setCurrentPage] = useState(1);
     const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
@@ -123,19 +125,32 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
         content: ''
     });
     const [newKind, setNewKind] = useState('');
-    const [resourceTypesList, setResourceTypesList] = useState([
-        'Deployment',
-        'Service',
-        'ConfigMap',
-        'StatefulSet',
-        'DaemonSet',
-        'Job',
-        'CronJob',
-        'PersistentVolumeClaim',
-        'Secret',
-        'Ingress',
-        'NetworkPolicy'
-    ]);
+    const [resourceTypesList, setResourceTypesList] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchResourceTypes = async () => {
+            try {
+                const response = await fetcher({
+                    url: '/mgm/custom/template_kind/list',
+                    method: 'get'
+                });
+                const data = await response.data;
+                //@ts-ignore
+                if (data?.data?.rows) {
+                    //@ts-ignore
+                    const types = data.data.rows.map(item => item.name);
+                    setResourceTypesList(types);
+                }
+            } catch (error) {
+                console.error('Failed to fetch resource types:', error);
+                Modal.error({
+                    title: '获取资源类型失败',
+                    content: '无法从服务器获取资源类型列表'
+                });
+            }
+        };
+        fetchResourceTypes();
+    }, []);
     const inputRef = useRef<InputRef>(null);
 
     const pageSize = 10;
@@ -151,8 +166,28 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
         }
     };
 
-    const onNewKindChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setNewKind(event.target.value);
+    const onNewKindChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setNewKind(value);
+
+        // 当输入新分类时，同步到后端数据库
+        if (value && !resourceTypesList.includes(value)) {
+            try {
+                await fetcher({
+                    url: '/mgm/custom/template_kind/add',
+                    method: 'post',
+                    data: {
+                        name: value
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to add new kind:', error);
+                Modal.error({
+                    title: '添加资源类型失败',
+                    content: '无法将新的资源类型保存到数据库'
+                });
+            }
+        }
     };
 
     const filteredTemplates = templates.filter(template =>
@@ -173,7 +208,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
             setTemplates(prevTemplates =>
                 prevTemplates.map(template =>
                     template.id === editingTemplate.id
-                        ? { ...template, ...editForm }
+                        ? {...template, ...editForm}
                         : template
                 )
             );
@@ -193,8 +228,8 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
     };
 
     const renderTemplate = (template: TemplateItem) => (
-        <List.Item key={template.id} className="list-item" style={{ cursor: 'pointer' }}
-            onClick={() => onSelectTemplate(template.content)}>
+        <List.Item key={template.id} className="list-item" style={{cursor: 'pointer'}}
+                   onClick={() => onSelectTemplate(template.content)}>
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -211,10 +246,10 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                 }}>
                     {template.name}
                 </div>
-                <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
+                <div style={{display: 'flex', gap: '8px', zIndex: 10}}>
                     <Button
                         type="text"
-                        icon={<EditFilled style={{ color: '#1890ff' }} />}
+                        icon={<EditFilled style={{color: '#1890ff'}}/>}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleNameEdit(template);
@@ -222,7 +257,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                     />
                     <Button
                         type="text"
-                        icon={<DeleteFilled style={{ color: '#f23034' }} />}
+                        icon={<DeleteFilled style={{color: '#f23034'}}/>}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(template.id);
@@ -235,7 +270,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
 
     return (
         <div>
-            <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+            <div style={{marginBottom: '10px', display: 'flex', gap: '8px'}}>
                 <Space.Compact>
                     <Button
                         variant="outlined"
@@ -253,7 +288,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                     </Button>
                 </Space.Compact>
                 <Select
-                    style={{ width: 200 }}
+                    style={{width: 200}}
                     value={selectedKind}
                     onChange={(value) => {
                         setSelectedKind(value);
@@ -264,8 +299,8 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                     dropdownRender={(menu) => (
                         <>
                             {menu}
-                            <Divider style={{ margin: '8px 0' }} />
-                            <Space style={{ padding: '0 8px 4px' }}>
+                            <Divider style={{margin: '8px 0'}}/>
+                            <Space style={{padding: '0 8px 4px'}}>
                                 <Input
                                     placeholder="请输入新的资源分类"
                                     ref={inputRef}
@@ -273,13 +308,13 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                                     onChange={onNewKindChange}
                                     onKeyDown={(e) => e.stopPropagation()}
                                 />
-                                <Button type="text" icon={<PlusOutlined />} onClick={handleAddKind}>
+                                <Button type="text" icon={<PlusOutlined/>} onClick={handleAddKind}>
                                     添加类型
                                 </Button>
                             </Space>
                         </>
                     )}
-                    options={resourceTypesList.map(type => ({ label: type, value: type }))}
+                    options={resourceTypesList.map(type => ({label: type, value: type}))}
                 />
             </div>
             <List
@@ -287,7 +322,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                 renderItem={renderTemplate}
                 bordered={true}
             />
-            <div style={{ marginTop: '16px', textAlign: 'right' }}>
+            <div style={{marginTop: '16px', textAlign: 'right'}}>
                 <Space.Compact>
                     <Button
                         type="default"
@@ -315,7 +350,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                 open={drawerVisible}
                 onClose={() => setDrawerVisible(false)}
                 footer={
-                    <div style={{ textAlign: 'right' }}>
+                    <div style={{textAlign: 'right'}}>
                         <Space>
                             <Button onClick={() => setDrawerVisible(false)}>取消</Button>
                             <Button type="primary" onClick={handleEditSubmit}>保存</Button>
@@ -323,29 +358,29 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate }) => {
                     </div>
                 }
             >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
                     <div>
-                        <div style={{ marginBottom: '8px' }}>模板名称</div>
+                        <div style={{marginBottom: '8px'}}>模板名称</div>
                         <Input
                             value={editForm.name}
-                            onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={(e) => setEditForm(prev => ({...prev, name: e.target.value}))}
                             placeholder="请输入模板名称"
                         />
                     </div>
                     <div>
-                        <div style={{ marginBottom: '8px' }}>资源分类</div>
+                        <div style={{marginBottom: '8px'}}>资源分类</div>
                         <Select
                             value={editForm.kind}
-                            onChange={(value) => setEditForm(prev => ({ ...prev, kind: value }))}
+                            onChange={(value) => setEditForm(prev => ({...prev, kind: value}))}
                             placeholder="请选择资源分类"
-                            options={resourceTypesList.map(type => ({ label: type, value: type }))}
+                            options={resourceTypesList.map(type => ({label: type, value: type}))}
                         />
                     </div>
                     <div>
-                        <div style={{ marginBottom: '8px' }}>模板内容</div>
+                        <div style={{marginBottom: '8px'}}>模板内容</div>
                         <Input.TextArea
                             value={editForm.content}
-                            onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
+                            onChange={(e) => setEditForm(prev => ({...prev, content: e.target.value}))}
                             placeholder="请输入YAML内容"
                             rows={15}
                         />
