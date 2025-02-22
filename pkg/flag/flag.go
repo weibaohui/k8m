@@ -81,7 +81,7 @@ func (c *Config) InitFlags() {
 	defaultLogV := getEnv("LOG_V", "2")
 
 	// sqlite数据库文件路径
-	defaultSqlitePath := getEnv("SQLITE_PATH", "/data/k8m.db")
+	defaultSqlitePath := getEnv("SQLITE_PATH", "./data/k8m.db")
 
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口")
