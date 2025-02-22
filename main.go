@@ -324,6 +324,7 @@ func main() {
 
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)
+		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)

@@ -63,7 +63,9 @@ func GenericGetOne[T any](params *Params, model T) (T, error) {
 	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
 	}
-	err := DB().Where(model).Limit(1).First(model).Error
+	dbQuery := DB().Model(model)
+	dbQuery = dbQuery.Where(model)
+	err := dbQuery.Limit(1).First(model).Error
 	return model, err
 }
 
@@ -74,8 +76,8 @@ func GenericSave[T any](params *Params, model T) error {
 	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
 	}
-	dbQuery := DB().Where(model)
-
+	dbQuery := DB().Model(model)
+	dbQuery = dbQuery.Where(model)
 	// 保存数据
 	if err := dbQuery.Save(model).Error; err != nil {
 		return err
@@ -92,6 +94,7 @@ func GenericDelete[T any](params *Params, model T, ids []int64) error {
 	}
 	// 构建数据库查询
 	dbQuery := DB().Model(model)
+	dbQuery = dbQuery.Where(model)
 
 	// 执行删除操作
 	if err := dbQuery.Delete(model, ids).Error; err != nil {

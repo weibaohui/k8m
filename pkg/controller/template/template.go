@@ -35,3 +35,14 @@ func SaveTemplate(c *gin.Context) {
 		"id": m.ID,
 	})
 }
+func DeleteTemplate(c *gin.Context) {
+	ids := c.Param("ids")
+	params := dao.BuildParams(c)
+	m := &models.CustomTemplate{}
+	err := m.Delete(params, ids)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}

@@ -168,8 +168,26 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
         Modal.confirm({
             title: '确认删除',
             content: '确定要删除这个模板吗？',
-            onOk: () => {
-                setTemplates(prevTemplates => prevTemplates.filter(t => t.id !== templateId));
+            onOk: async () => {
+                try {
+                    const response = await fetcher({
+                        url: `/mgm/custom/template/delete/${templateId}`,
+                        method: 'delete'
+                    });
+
+                    if (response.data?.status === 0) {
+                        setTemplates(prevTemplates => prevTemplates.filter(t => t.id !== templateId));
+                        message.success('模板已成功删除');
+                    } else {
+                        throw new Error(response.data?.msg || '删除失败');
+                    }
+                } catch (error) {
+                    console.error('Failed to delete template:', error);
+                    Modal.error({
+                        title: '删除失败',
+                        content: '无法删除模板：' + (error instanceof Error ? error.message : '未知错误')
+                    });
+                }
             }
         });
     };
