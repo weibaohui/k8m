@@ -7,7 +7,7 @@ import JSZip from 'jszip';
 import {saveAs} from 'file-saver';
 
 interface TemplateItem {
-    id: string;
+    id?: string;
     name: string;
     kind: string;
     content: string;
@@ -265,7 +265,6 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                                                 const name = pathParts[pathParts.length - 1].replace(/\.(yaml|yml)$/, '');
 
                                                 newTemplates.push({
-                                                    id: Math.random().toString(36).substring(2, 15),
                                                     content,
                                                     kind,
                                                     name
