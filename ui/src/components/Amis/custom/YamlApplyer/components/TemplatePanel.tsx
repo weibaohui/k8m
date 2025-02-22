@@ -352,8 +352,11 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                                             url: `/mgm/custom/template/list?page=${currentPage}&perPage=${pageSize}`,
                                             method: 'get'
                                         });
+                                        //@ts-ignore
                                         if (response.data?.status === 0 && response.data?.data?.rows) {
+                                            //@ts-ignore
                                             setTemplates(response.data.data.rows);
+                                            //@ts-ignore
                                             setTotal(response.data.data.count || 0);
                                         }
                                     } else {
