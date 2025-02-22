@@ -63,19 +63,25 @@ func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *
 
 	return results, total, nil
 }
-func GenericGetOne[T any](params *Params, model T) (T, error) {
+func GenericGetOne[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *gorm.DB) (T, error) {
 	// 如果CreatedBy为空，则补全
 	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
 	}
 	dbQuery := DB().Model(model)
 	dbQuery = dbQuery.Where(model)
+
+	// 执行自定义查询函数
+	for _, fn := range queryFuncs {
+		dbQuery = fn(dbQuery)
+	}
+
 	err := dbQuery.Limit(1).First(model).Error
 	return model, err
 }
 
 // GenericSave 是一个通用保存方法，适用于任意模型
-func GenericSave[T any](params *Params, model T) error {
+func GenericSave[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 
 	// 如果CreatedBy为空，则补全
 	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
@@ -83,6 +89,12 @@ func GenericSave[T any](params *Params, model T) error {
 	}
 	dbQuery := DB().Model(model)
 	dbQuery = dbQuery.Where(model)
+
+	// 执行自定义查询函数
+	for _, fn := range queryFuncs {
+		dbQuery = fn(dbQuery)
+	}
+
 	// 保存数据
 	if err := dbQuery.Save(model).Error; err != nil {
 		return err
@@ -92,7 +104,7 @@ func GenericSave[T any](params *Params, model T) error {
 }
 
 // GenericDelete 是一个通用的删除方法，适用于任意模型
-func GenericDelete[T any](params *Params, model T, ids []int64) error {
+func GenericDelete[T any](params *Params, model T, ids []int64, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	// 如果CreatedBy为空，则补全
 	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
@@ -100,6 +112,11 @@ func GenericDelete[T any](params *Params, model T, ids []int64) error {
 	// 构建数据库查询
 	dbQuery := DB().Model(model)
 	dbQuery = dbQuery.Where(model)
+
+	// 执行自定义查询函数
+	for _, fn := range queryFuncs {
+		dbQuery = fn(dbQuery)
+	}
 
 	// 执行删除操作
 	if err := dbQuery.Delete(model, ids).Error; err != nil {
