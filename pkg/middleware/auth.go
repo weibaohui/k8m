@@ -1,11 +1,14 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"k8s.io/klog/v2"
 )
@@ -37,13 +40,18 @@ func AuthMiddleware() gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
 		})
-
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token 无效"})
 			c.Abort()
 			return
 		}
-
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			amis.WriteJsonError(c, fmt.Errorf("invalid JWT claims"))
+			c.Abort()
+			return
+		}
+		c.Set(constants.JwtUserName, claims[constants.JwtUserName])
 		c.Next()
 	}
 }
