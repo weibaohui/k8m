@@ -5,6 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"gorm.io/gorm"
 )
 
 // CustomTemplateKind 表示用户自定义模板分类表
@@ -16,8 +17,8 @@ type CustomTemplateKind struct {
 	UpdatedAt time.Time `json:"updated_at" json:"updated_at"`                 // Automatically managed by GORM for update time
 }
 
-func (c *CustomTemplateKind) List(params *dao.Params) ([]*CustomTemplateKind, int64, error) {
-	return dao.GenericQuery(params, c)
+func (c *CustomTemplateKind) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*CustomTemplateKind, int64, error) {
+	return dao.GenericQuery(params, c, queryFuncs...)
 }
 func (c *CustomTemplateKind) Save(params *dao.Params) error {
 	return dao.GenericSave(params, c)
