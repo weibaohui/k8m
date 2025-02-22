@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"reflect"
 	"strings"
 	"sync"
 
@@ -12,9 +13,14 @@ func GenericQuery[T any](params *Params, model T) ([]T, int64, error) {
 	var total int64
 	var results []T
 
+	// 如果CreatedBy为空，则补全
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
+	}
 	// 构建数据库查询
 	dbQuery := DB().Model(model)
 
+	dbQuery = dbQuery.Where(model)
 	// 定义允许过滤的字段列表
 	validFields, err := GetTableFieldsWithCache(model)
 	if err != nil {
@@ -53,6 +59,10 @@ func GenericQuery[T any](params *Params, model T) ([]T, int64, error) {
 	return results, total, nil
 }
 func GenericGetOne[T any](params *Params, model T) (T, error) {
+	// 如果CreatedBy为空，则补全
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
+	}
 	err := DB().Where(model).Limit(1).First(model).Error
 	return model, err
 }
@@ -60,6 +70,10 @@ func GenericGetOne[T any](params *Params, model T) (T, error) {
 // GenericSave 是一个通用保存方法，适用于任意模型
 func GenericSave[T any](params *Params, model T) error {
 
+	// 如果CreatedBy为空，则补全
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
+	}
 	dbQuery := DB().Where(model)
 
 	// 保存数据
@@ -72,7 +86,10 @@ func GenericSave[T any](params *Params, model T) error {
 
 // GenericDelete 是一个通用的删除方法，适用于任意模型
 func GenericDelete[T any](params *Params, model T, ids []int64) error {
-
+	// 如果CreatedBy为空，则补全
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
+	}
 	// 构建数据库查询
 	dbQuery := DB().Model(model)
 
