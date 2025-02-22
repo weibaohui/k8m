@@ -227,85 +227,6 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
     return (
         <div>
             <div style={{marginBottom: '10px', display: 'flex', gap: '8px'}}>
-                <Space.Compact>
-
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            //@ts-ignore
-                            const newTemplate: TemplateItem = {
-                                name: `模板 ${templates.length + 1}`,
-                                content: '',
-                                kind: selectedKind
-                            };
-                            // 调用后端API保存新模板
-                            fetcher({
-                                url: '/mgm/custom/template/save',
-                                method: 'post',
-                                data: newTemplate
-                            }).then(response => {
-                                if (response.data?.status === 0) {
-                                    const savedTemplate = {
-                                        ...newTemplate,
-                                        //@ts-ignore
-                                        id: response.data.data.id || Math.random().toString(36).substring(2, 15)
-                                    };
-                                    setTemplates(prev => [...prev, savedTemplate]);
-                                    message.success('新模板已成功创建');
-                                } else {
-                                    throw new Error(response.data?.msg || '创建失败');
-                                }
-                            }).catch(error => {
-                                console.error('Failed to create template:', error);
-                                Modal.error({
-                                    title: '创建失败',
-                                    content: '无法创建新模板：' + error.message
-                                });
-                            });
-                        }}
-                    >
-                        新建模板
-                    </Button>
-                </Space.Compact>
-                <Select
-                    style={{width: 200}}
-                    value={selectedKind}
-                    onChange={(value) => {
-                        setCurrentPage(1);
-                        setSelectedKind(value);
-                    }}
-                    placeholder="按资源分类筛选"
-                    allowClear
-                    options={resourceTypesList.map(type => ({label: type, value: type}))}
-                />
-            </div>
-            <List
-                dataSource={filteredTemplates}
-                renderItem={renderTemplate}
-                bordered={true}
-            />
-            <div style={{marginTop: '16px', textAlign: 'right'}}>
-                <Space.Compact>
-                    <Button
-                        type="default"
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    >
-                        上一页
-                    </Button>
-                    <Button type="default" disabled>
-                        {currentPage}/{Math.ceil(total / pageSize)}
-                    </Button>
-                    <Button
-                        type="default"
-                        disabled={currentPage >= Math.ceil(total / pageSize)}
-                        onClick={() => setCurrentPage(prev => Math.min(Math.ceil(total / pageSize), prev + 1))}
-                    >
-                        下一页
-                    </Button>
-                </Space.Compact>
-            </div>
-            <div style={{marginBottom: '10px', display: 'flex', gap: '8px'}}>
                 <Button
                     variant="outlined"
                     onClick={async () => {
@@ -446,7 +367,84 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                 >
                     导出模板
                 </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => {
+                        //@ts-ignore
+                        const newTemplate: TemplateItem = {
+                            name: `模板 ${templates.length + 1}`,
+                            content: '',
+                            kind: selectedKind
+                        };
+                        // 调用后端API保存新模板
+                        fetcher({
+                            url: '/mgm/custom/template/save',
+                            method: 'post',
+                            data: newTemplate
+                        }).then(response => {
+                            if (response.data?.status === 0) {
+                                const savedTemplate = {
+                                    ...newTemplate,
+                                    //@ts-ignore
+                                    id: response.data.data.id || Math.random().toString(36).substring(2, 15)
+                                };
+                                setTemplates(prev => [...prev, savedTemplate]);
+                                message.success('新模板已成功创建');
+                            } else {
+                                throw new Error(response.data?.msg || '创建失败');
+                            }
+                        }).catch(error => {
+                            console.error('Failed to create template:', error);
+                            Modal.error({
+                                title: '创建失败',
+                                content: '无法创建新模板：' + error.message
+                            });
+                        });
+                    }}
+                >
+                    新建模板
+                </Button>
             </div>
+            <div style={{marginBottom: '10px', display: 'flex', gap: '8px'}}>
+                <Select
+                    style={{width: 200}}
+                    value={selectedKind}
+                    onChange={(value) => {
+                        setCurrentPage(1);
+                        setSelectedKind(value);
+                    }}
+                    placeholder="按资源分类筛选"
+                    allowClear
+                    options={resourceTypesList.map(type => ({label: type, value: type}))}
+                />
+            </div>
+            <List
+                dataSource={filteredTemplates}
+                renderItem={renderTemplate}
+                bordered={true}
+            />
+            <div style={{marginTop: '16px', textAlign: 'right'}}>
+                <Space.Compact>
+                    <Button
+                        type="default"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    >
+                        上一页
+                    </Button>
+                    <Button type="default" disabled>
+                        {currentPage}/{Math.ceil(total / pageSize)}
+                    </Button>
+                    <Button
+                        type="default"
+                        disabled={currentPage >= Math.ceil(total / pageSize)}
+                        onClick={() => setCurrentPage(prev => Math.min(Math.ceil(total / pageSize), prev + 1))}
+                    >
+                        下一页
+                    </Button>
+                </Space.Compact>
+            </div>
+
             <Drawer
                 title="编辑模板"
                 width={600}
