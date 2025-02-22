@@ -61,7 +61,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
         setLoading(true);
         try {
             const response = await fetcher({
-                url: '/mgm/kubeconfig/save',
+                url: '/k8s/cluster/kubeconfig/save',
                 method: 'post',
                 data: {
                     content: editorContent,
