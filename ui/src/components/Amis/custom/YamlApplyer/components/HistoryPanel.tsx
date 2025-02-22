@@ -15,9 +15,15 @@ interface HistoryPanelProps {
     onSelectRecord: (content: string) => void;
     historyRecords: RecordItem[];
     setHistoryRecords: React.Dispatch<React.SetStateAction<RecordItem[]>>;
+    onSaveTemplate: (content: string) => void;
 }
 
-const HistoryPanel: React.FC<HistoryPanelProps> = ({onSelectRecord, historyRecords, setHistoryRecords}) => {
+const HistoryPanel: React.FC<HistoryPanelProps> = ({
+                                                       onSelectRecord,
+                                                       historyRecords,
+                                                       setHistoryRecords,
+                                                       onSaveTemplate
+                                                   }) => {
     const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
     const [editingId, setEditingId] = useState<string>();
     const [editingName, setEditingName] = useState('');
@@ -106,6 +112,8 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({onSelectRecord, historyRecor
             setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
             setFavoriteRecords(prevRecords => [{...record, isFavorite: true}, ...prevRecords]);
             updateLocalStorage();
+            // 同时保存为模板
+            onSaveTemplate(record.content);
         } else {
             const favoriteRecord = favoriteRecords.find(r => r.id === recordId);
             if (favoriteRecord) {

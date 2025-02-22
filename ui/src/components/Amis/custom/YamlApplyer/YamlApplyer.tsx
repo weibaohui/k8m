@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { message } from 'antd';
+import React, {useState} from 'react';
+import {message} from 'antd';
 import HistoryPanel from './components/HistoryPanel';
 import EditorPanel from './components/EditorPanel';
 import TemplatePanel from './components/TemplatePanel';
+import {fetcher} from '@/components/Amis/fetcher';
 
 // 用 forwardRef 让组件兼容 AMIS
 const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
@@ -19,6 +20,28 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
 
     const handleRecordSelect = (content: string) => {
         setEditorContent(content);
+    };
+
+    const handleSaveTemplate = async (content: string) => {
+        try {
+            const newTemplate = {
+                name: `模板 ${new Date().toLocaleString()}`,
+                content: content,
+                kind: ''
+            };
+            const response = await fetcher({
+                url: '/mgm/custom/template/save',
+                method: 'post',
+                data: newTemplate
+            });
+            if (response.data?.status === 0) {
+                message.success('已同时保存为模板');
+            } else {
+                throw new Error(response.data?.msg || '保存模板失败');
+            }
+        } catch (error) {
+            message.error('保存模板失败：' + (error instanceof Error ? error.message : '未知错误'));
+        }
     };
 
     const handleSaveSuccess = (content: string) => {
@@ -43,19 +66,19 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
         setHistoryRecords(updatedRecords);
         localStorage.setItem('historyRecords', JSON.stringify(updatedRecords));
         message.success('已保存到历史记录');
-
     };
 
     return (
-        <div style={{ height: '100%', display: 'flex' }}>
-            <div style={{ width: '25%', borderRight: '1px solid #e5e6eb', padding: '10px', overflowY: 'auto' }}>
-                <HistoryPanel onSelectRecord={handleRecordSelect} historyRecords={historyRecords} setHistoryRecords={setHistoryRecords} />
+        <div style={{height: '100%', display: 'flex'}}>
+            <div style={{width: '25%', borderRight: '1px solid #e5e6eb', padding: '10px', overflowY: 'auto'}}>
+                <HistoryPanel onSelectRecord={handleRecordSelect} historyRecords={historyRecords}
+                              setHistoryRecords={setHistoryRecords} onSaveTemplate={handleSaveTemplate}/>
             </div>
-            <div style={{ width: '50%', padding: '10px', overflowY: 'auto' }}>
-                <EditorPanel onSaveSuccess={handleSaveSuccess} initialContent={editorContent} />
+            <div style={{width: '50%', padding: '10px', overflowY: 'auto'}}>
+                <EditorPanel onSaveSuccess={handleSaveSuccess} initialContent={editorContent}/>
             </div>
-            <div style={{ width: '25%', borderLeft: '1px solid #e5e6eb', padding: '10px', overflowY: 'auto' }}>
-                <TemplatePanel onSelectTemplate={handleRecordSelect} />
+            <div style={{width: '25%', borderLeft: '1px solid #e5e6eb', padding: '10px', overflowY: 'auto'}}>
+                <TemplatePanel onSelectTemplate={handleRecordSelect}/>
             </div>
         </div>
     );
