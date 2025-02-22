@@ -14,7 +14,8 @@ type KubeConfig struct {
 	Content   string    `gorm:"type:text" json:"content,omitempty"`           // 模板内容，支持大文本存储
 	Server    string    `gorm:"index" json:"server,omitempty"`
 	User      string    `gorm:"index" json:"user,omitempty"`
-	Cluster   string    `gorm:"index" json:"cluster,omitempty"`    // 模板类型，最大长度 100
+	Cluster   string    `gorm:"index" json:"cluster,omitempty"` // 模板类型，最大长度 100
+	Namespace string    `gorm:"index" json:"namespace,omitempty"`
 	CreatedBy string    `gorm:"index" json:"created_by,omitempty"` // 创建者
 	CreatedAt time.Time `json:"created_at,omitempty"`              // Automatically managed by GORM for creation time
 	UpdatedAt time.Time `json:"updated_at,omitempty"`              // Automatically managed by GORM for update time
