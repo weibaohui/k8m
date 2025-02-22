@@ -45,7 +45,7 @@ Usage of ./k8m:
       --login-type string                登录方式，password, oauth, token等,default is password (default "password")
       --node-shell-image string          NodeShell 镜像。 默认为 alpine:latest，必须包含`nsenter`命令 (default "alpine:latest")
   -p, --port int                         监听端口 (default 3618)
-      --sqlite-path string               sqlite数据库文件路径， (default "/data/k8m.db")
+      --sqlite-path string               sqlite数据库文件路径， (default "./data/k8m.db")
   -v, --v Level                          klog的日志级别 (default 2)
 ```
 

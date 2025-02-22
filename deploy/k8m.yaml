@@ -138,6 +138,8 @@ spec:
               value: bitnami/kubectl:latest
             - name: NODE_SHELL_IMAGE
               value: alpine:latest
+            - name: SQLITE_PATH
+              value: /app/data/k8m.db
           ports:
             - containerPort: 3618
               protocol: TCP
