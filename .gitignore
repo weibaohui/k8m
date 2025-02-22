@@ -26,3 +26,5 @@ bin/
 /ui/.idea/
 
 /data/
+/data/k8m.db
+
