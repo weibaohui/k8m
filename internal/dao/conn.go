@@ -3,6 +3,7 @@ package dao
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -35,6 +36,24 @@ func connDB() (*gorm.DB, error) {
 
 		cfg := flag.Init()
 
+		// 检测数据库文件是否存在
+		if _, err := os.Stat(cfg.SqlitePath); os.IsNotExist(err) {
+			// 创建文件夹、数据库文件
+			dir := filepath.Dir(cfg.SqlitePath)
+			err := os.MkdirAll(dir, os.ModePerm)
+			if err != nil {
+				klog.Errorf("创建数据库文件[%s]失败: %v", dir, err.Error())
+				return
+			}
+			// 创建数据库文件
+			file, err := os.Create(cfg.SqlitePath)
+			defer file.Close()
+
+			if err != nil {
+				klog.Errorf("创建数据库文件[%s]失败: %v", cfg.SqlitePath, err.Error())
+				return
+			}
+		}
 		db, err := gorm.Open(sqlite.Open(cfg.SqlitePath), &gorm.Config{
 			Logger: customLogger,
 		})
@@ -42,7 +61,7 @@ func connDB() (*gorm.DB, error) {
 			dbErr = err
 			return
 		}
-		klog.V(4).Infof("已连接数据库.")
+		klog.V(4).Infof("已连接数据库[%s].", cfg.SqlitePath)
 
 		dbInstance = db
 	})
