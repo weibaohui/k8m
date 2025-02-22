@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Button, List, Input, Modal, Space } from 'antd';
-import { DeleteFilled, EditFilled, StarFilled, StarOutlined } from '@ant-design/icons';
+import React, {useState, useEffect} from 'react';
+import {Button, List, Input, Modal, Space} from 'antd';
+import {DeleteFilled, EditFilled, StarFilled, StarOutlined} from '@ant-design/icons';
 import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
+import {saveAs} from 'file-saver';
 
 interface RecordItem {
     id: string;
@@ -17,7 +17,7 @@ interface HistoryPanelProps {
     setHistoryRecords: React.Dispatch<React.SetStateAction<RecordItem[]>>;
 }
 
-const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyRecords, setHistoryRecords }) => {
+const HistoryPanel: React.FC<HistoryPanelProps> = ({onSelectRecord, historyRecords, setHistoryRecords}) => {
     const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
     const [editingId, setEditingId] = useState<string>();
     const [editingName, setEditingName] = useState('');
@@ -60,14 +60,14 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
             setHistoryRecords(prevRecords =>
                 prevRecords.map(record =>
                     record.id === recordId
-                        ? { ...record, customName: editingName.trim() }
+                        ? {...record, customName: editingName.trim()}
                         : record
                 )
             );
             setFavoriteRecords(prevRecords =>
                 prevRecords.map(record =>
                     record.id === recordId
-                        ? { ...record, customName: editingName.trim() }
+                        ? {...record, customName: editingName.trim()}
                         : record
                 )
             );
@@ -104,7 +104,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
         const record = historyRecords.find(r => r.id === recordId);
         if (record) {
             setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-            setFavoriteRecords(prevRecords => [{ ...record, isFavorite: true }, ...prevRecords]);
+            setFavoriteRecords(prevRecords => [{...record, isFavorite: true}, ...prevRecords]);
             updateLocalStorage();
         } else {
             const favoriteRecord = favoriteRecords.find(r => r.id === recordId);
@@ -127,7 +127,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
     };
 
     const renderRecord = (record: RecordItem) => (
-        <List.Item key={record.id} data-record-id={record.id} className="list-item" style={{ cursor: 'pointer' }}
+        <List.Item key={record.id} data-record-id={record.id} className="list-item" style={{cursor: 'pointer'}}
                    onClick={() => onSelectRecord(record.content)}>
             <div style={{
                 display: 'flex',
@@ -144,7 +144,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                         onBlur={() => handleNameSubmit(record.id)}
                         onPressEnter={() => handleNameSubmit(record.id)}
                         placeholder="请输入新的名称"
-                        style={{ maxWidth: '100px' }}
+                        style={{maxWidth: '100px'}}
                     />
                 ) : (
                     <div style={{
@@ -158,10 +158,10 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                     </div>
                 )}
                 {editingId !== record.id && (
-                    <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
+                    <div style={{display: 'flex', gap: '8px', zIndex: 10}}>
                         <Button
                             type="text"
-                            icon={<EditFilled style={{ color: '#1890ff' }} />}
+                            icon={<EditFilled style={{color: '#1890ff'}}/>}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleNameEdit(record.id);
@@ -169,8 +169,8 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                         />
                         <Button
                             type="text"
-                            icon={activeTab === 'favorites' ? <StarFilled style={{ color: '#FFD700' }} /> :
-                                <StarOutlined />}
+                            icon={activeTab === 'favorites' ? <StarFilled style={{color: '#FFD700'}}/> :
+                                <StarOutlined/>}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 toggleFavorite(record.id);
@@ -178,7 +178,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                         />
                         <Button
                             type="text"
-                            icon={<DeleteFilled style={{ color: '#f23034' }} />}
+                            icon={<DeleteFilled style={{color: '#f23034'}}/>}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(record.id);
@@ -211,7 +211,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
 
             {activeTab === 'history' ? (
                 <div>
-                    <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                    <div style={{marginTop: '10px', marginBottom: '10px'}}>
                         <Button
                             variant="outlined"
                             onClick={() => {
@@ -244,7 +244,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                         renderItem={renderRecord}
                         bordered={true}
                     />
-                    <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                    <div style={{marginTop: '16px', textAlign: 'right'}}>
                         <Space.Compact>
                             <Button
                                 type="default"
@@ -268,7 +268,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                 </div>
             ) : (
                 <div>
-                    <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                    <div style={{marginTop: '10px', marginBottom: '10px'}}>
                         <Space.Compact>
                             <Button
                                 variant="outlined"
@@ -343,7 +343,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                                         const fileName = record.customName || `favorite_${index + 1}.yaml`;
                                         zip.file(fileName.endsWith('.yaml') ? fileName : `${fileName}.yaml`, record.content);
                                     });
-                                    const blob = await zip.generateAsync({ type: 'blob' });
+                                    const blob = await zip.generateAsync({type: 'blob'});
                                     saveAs(blob, 'favorites.zip');
                                 }}
                             >
@@ -356,7 +356,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                         renderItem={renderRecord}
                         bordered={true}
                     />
-                    <div style={{ marginTop: '16px', textAlign: 'right' }}>
+                    <div style={{marginTop: '16px', textAlign: 'right'}}>
                         <Space.Compact>
                             <Button
                                 type="default"
@@ -379,6 +379,16 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectRecord, historyReco
                     </div>
                 </div>
             )}
+            <div style={{
+                marginTop: '16px',
+                padding: '12px',
+                backgroundColor: '#f5f5f5',
+                borderRadius: '4px',
+                fontSize: '10px',
+                color: '#666'
+            }}>
+                提示：历史记录和收藏夹数据均存储在浏览器本地缓存中，清除浏览器缓存可能会导致数据丢失，请注意及时导出备份重要数据。
+            </div>
         </div>
     );
 };
