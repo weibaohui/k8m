@@ -24,11 +24,22 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
     const [total, setTotal] = useState(0);
     const pageSize = 10;
 
+
+    const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
+    const [drawerVisible, setDrawerVisible] = useState(false);
+    const [selectedKind, setSelectedKind] = useState<string>('');
+    const [editForm, setEditForm] = useState({
+        name: '',
+        kind: '',
+        content: ''
+    });
+    const [newKind, setNewKind] = useState('');
+    const [resourceTypesList, setResourceTypesList] = useState<string[]>([]);
     useEffect(() => {
         const fetchTemplates = async () => {
             try {
                 const response = await fetcher({
-                    url: `/mgm/custom/template/list?page=${currentPage}&perPage=${pageSize}`,
+                    url: `/mgm/custom/template/list?page=${currentPage}&perPage=${pageSize}${selectedKind ? `&kind=${selectedKind}` : ''}`,
                     method: 'get'
                 });
                 const data = response.data;
@@ -48,30 +59,19 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
             }
         };
         fetchTemplates();
-    }, [currentPage]);
-    const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
-    const [drawerVisible, setDrawerVisible] = useState(false);
-    const [selectedKind, setSelectedKind] = useState<string>('');
-    const [editForm, setEditForm] = useState({
-        name: '',
-        kind: '',
-        content: ''
-    });
-    const [newKind, setNewKind] = useState('');
-    const [resourceTypesList, setResourceTypesList] = useState<string[]>([]);
-
+    }, [currentPage, selectedKind]);
     useEffect(() => {
         const fetchResourceTypes = async () => {
             try {
                 const response = await fetcher({
-                    url: '/mgm/custom/template_kind/list',
+                    url: '/mgm/custom/template/kind/list',
                     method: 'get'
                 });
                 const data = await response.data;
                 //@ts-ignore
                 if (data?.data?.rows) {
                     //@ts-ignore
-                    const types = data.data.rows.map(item => item.name);
+                    const types = data.data.rows.map(item => item.kind);
                     setResourceTypesList(types);
                 }
             } catch (error) {
