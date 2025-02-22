@@ -90,6 +90,4 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
     );
 });
 
-YamlApplyer.displayName = 'YamlApplyer';
-
 export default YamlApplyer;

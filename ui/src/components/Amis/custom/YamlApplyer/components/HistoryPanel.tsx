@@ -26,12 +26,15 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
     const [currentPage, setCurrentPage] = useState(1);
 
     const pageSize = 10;
-
     const updateLocalStorage = () => {
         localStorage.setItem('historyRecords', JSON.stringify(historyRecords));
     };
 
+
     useEffect(() => {
+        if (historyRecords.length === 0) {
+            return;
+        }
         updateLocalStorage();
     }, [historyRecords]);
 
@@ -147,60 +150,60 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
 
 
             <div>
-                    <div style={{marginTop: '10px', marginBottom: '10px'}}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => {
-                                if (historyRecords.length === 0) {
-                                    Modal.warning({
-                                        title: '提示',
-                                        content: '暂无历史记录可删除'
-                                    });
-                                    return;
-                                }
-                                Modal.confirm({
-                                    title: '确认删除',
-                                    content: '确定要删除所有历史记录吗？此操作不可恢复。',
-                                    onOk: () => {
-                                        setHistoryRecords([]);
-                                        updateLocalStorage();
-                                        Modal.success({
-                                            title: '删除成功',
-                                            content: '已清空所有历史记录'
-                                        });
-                                    }
+                <div style={{marginTop: '10px', marginBottom: '10px'}}>
+                    <Button
+                        variant="outlined"
+                        onClick={() => {
+                            if (historyRecords.length === 0) {
+                                Modal.warning({
+                                    title: '提示',
+                                    content: '暂无历史记录可删除'
                                 });
-                            }}
+                                return;
+                            }
+                            Modal.confirm({
+                                title: '确认删除',
+                                content: '确定要删除所有历史记录吗？此操作不可恢复。',
+                                onOk: () => {
+                                    setHistoryRecords([]);
+                                    updateLocalStorage();
+                                    Modal.success({
+                                        title: '删除成功',
+                                        content: '已清空所有历史记录'
+                                    });
+                                }
+                            });
+                        }}
+                    >
+                        全部删除
+                    </Button>
+                </div>
+                <List
+                    dataSource={historyRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+                    renderItem={renderRecord}
+                    bordered={true}
+                />
+                <div style={{marginTop: '16px', textAlign: 'right'}}>
+                    <Space.Compact>
+                        <Button
+                            type="default"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         >
-                            全部删除
+                            上一页
                         </Button>
-                    </div>
-                    <List
-                        dataSource={historyRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
-                        renderItem={renderRecord}
-                        bordered={true}
-                    />
-                    <div style={{marginTop: '16px', textAlign: 'right'}}>
-                        <Space.Compact>
-                            <Button
-                                type="default"
-                                disabled={currentPage === 1}
-                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                            >
-                                上一页
-                            </Button>
-                            <Button type="default" disabled>
-                                {currentPage}/{Math.ceil(historyRecords.length / pageSize)}
-                            </Button>
-                            <Button
-                                type="default"
-                                disabled={currentPage >= Math.ceil(historyRecords.length / pageSize)}
-                                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(historyRecords.length / pageSize), prev + 1))}
-                            >
-                                下一页
-                            </Button>
-                        </Space.Compact>
-                    </div>
+                        <Button type="default" disabled>
+                            {currentPage}/{Math.ceil(historyRecords.length / pageSize)}
+                        </Button>
+                        <Button
+                            type="default"
+                            disabled={currentPage >= Math.ceil(historyRecords.length / pageSize)}
+                            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(historyRecords.length / pageSize), prev + 1))}
+                        >
+                            下一页
+                        </Button>
+                    </Space.Compact>
+                </div>
             </div>
             <div style={{
                 marginTop: '16px',
