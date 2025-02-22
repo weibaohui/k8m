@@ -322,7 +322,7 @@ func main() {
 		mgm.GET("/custom/template_kind/list", template.ListKind)
 		mgm.POST("/custom/template_kind/add", template.AddKind)
 
-		mgm.GET("/custom/template/list/:kind", template.ListTemplate)
+		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/add", template.AddTemplate)
 	}
 
