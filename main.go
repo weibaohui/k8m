@@ -67,6 +67,7 @@ func Init() {
 		// 先注册InCluster集群
 		service.ClusterService().RegisterInCluster()
 		// 再注册其他集群
+		service.ClusterService().ScanClustersInDB()
 		service.ClusterService().ScanClustersInDir(cfg.KubeConfig)
 		service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
 
@@ -249,6 +250,9 @@ func main() {
 		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
 		api.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
 		api.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
+		api.POST("/cluster/kubeconfig/save", kubeconfig.Save)
+		api.POST("/cluster/kubeconfig/remove", kubeconfig.Remove)
+
 		// k8s sts
 		api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", sts.Undo)
 		api.GET("/statefulset/ns/:ns/name/:name/rollout/history", sts.History)
@@ -324,7 +328,6 @@ func main() {
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)
 		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
-		mgm.POST("/kubeconfig/save", kubeconfig.Save)
 
 	}
 
