@@ -31,5 +31,7 @@ func AddTemplate(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonOK(c)
+	amis.WriteJsonData(c, gin.H{
+		"id": m.ID,
+	})
 }
