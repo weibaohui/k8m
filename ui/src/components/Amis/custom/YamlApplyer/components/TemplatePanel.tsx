@@ -2,6 +2,7 @@ import React, {useRef, useState, useEffect} from 'react';
 import {Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider, message} from 'antd';
 import {DeleteFilled, EditFilled, PlusOutlined} from '@ant-design/icons';
 import {fetcher} from '@/components/Amis/fetcher';
+import * as monaco from 'monaco-editor';
 
 interface TemplateItem {
     id: string;
@@ -17,11 +18,15 @@ interface TemplatePanelProps {
 const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
     const [templates, setTemplates] = useState<TemplateItem[]>([]);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const pageSize = 10;
+
     useEffect(() => {
         const fetchTemplates = async () => {
             try {
                 const response = await fetcher({
-                    url: '/mgm/custom/template/list',
+                    url: `/mgm/custom/template/list?page=${currentPage}&perPage=${pageSize}`,
                     method: 'get'
                 });
                 const data = response.data;
@@ -29,6 +34,8 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                 if (data?.status === 0 && data?.data?.rows) {
                     //@ts-ignore
                     setTemplates(data.data.rows);
+                    //@ts-ignore
+                    setTotal(data.data.count || 0);
                 }
             } catch (error) {
                 console.error('Failed to fetch templates:', error);
@@ -39,8 +46,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
             }
         };
         fetchTemplates();
-    }, []);
-    const [currentPage, setCurrentPage] = useState(1);
+    }, [currentPage]);
     const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [selectedKind, setSelectedKind] = useState<string>('');
@@ -78,7 +84,6 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
     }, []);
     const inputRef = useRef<InputRef>(null);
 
-    const pageSize = 10;
 
     const handleAddKind = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
         e.preventDefault();
@@ -306,7 +311,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                 />
             </div>
             <List
-                dataSource={filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+                dataSource={filteredTemplates}
                 renderItem={renderTemplate}
                 bordered={true}
             />
@@ -320,12 +325,12 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                         上一页
                     </Button>
                     <Button type="default" disabled>
-                        {currentPage}/{Math.ceil(templates.length / pageSize)}
+                        {currentPage}/{Math.ceil(total / pageSize)}
                     </Button>
                     <Button
                         type="default"
-                        disabled={currentPage >= Math.ceil(templates.length / pageSize)}
-                        onClick={() => setCurrentPage(prev => Math.min(Math.ceil(templates.length / pageSize), prev + 1))}
+                        disabled={currentPage >= Math.ceil(total / pageSize)}
+                        onClick={() => setCurrentPage(prev => Math.min(Math.ceil(total / pageSize), prev + 1))}
                     >
                         下一页
                     </Button>
@@ -366,11 +371,31 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                     </div>
                     <div>
                         <div style={{marginBottom: '8px'}}>模板内容</div>
-                        <Input.TextArea
-                            value={editForm.content}
-                            onChange={(e) => setEditForm(prev => ({...prev, content: e.target.value}))}
-                            placeholder="请输入YAML内容"
-                            rows={15}
+                        <div
+                            ref={(el) => {
+                                if (el && !el.hasChildNodes()) {
+                                    const editor = monaco.editor.create(el, {
+                                        value: editForm.content,
+                                        language: 'yaml',
+                                        theme: 'vs',
+                                        automaticLayout: true,
+                                        minimap: {
+                                            enabled: false
+                                        },
+                                        scrollbar: {
+                                            vertical: 'auto'
+                                        },
+                                        wordWrap: 'on'
+                                    });
+                                    editor.onDidChangeModelContent(() => {
+                                        setEditForm(prev => ({
+                                            ...prev,
+                                            content: editor.getValue()
+                                        }));
+                                    });
+                                }
+                            }}
+                            style={{height: '400px', border: '1px solid #d9d9d9'}}
                         />
                     </div>
                 </div>
