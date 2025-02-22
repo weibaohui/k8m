@@ -17,22 +17,22 @@ type CustomTemplate struct {
 	Cluster   string    `gorm:"index" json:"cluster,omitempty"`               // 模板类型，最大长度 100
 	IsGlobal  bool      `gorm:"index" json:"is_global,omitempty"`             // 模板类型，最大长度 100
 	CreatedBy string    `gorm:"index" json:"created_by,omitempty"`            // 创建者
-	CreatedAt time.Time `json:"created_at" json:"created_at,omitempty"`       // Automatically managed by GORM for creation time
-	UpdatedAt time.Time `json:"updated_at" json:"updated_at,omitempty"`       // Automatically managed by GORM for update time
+	CreatedAt time.Time `json:"created_at,omitempty"`                         // Automatically managed by GORM for creation time
+	UpdatedAt time.Time `json:"updated_at,omitempty"`                         // Automatically managed by GORM for update time
 }
 
 func (c *CustomTemplate) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*CustomTemplate, int64, error) {
 	return dao.GenericQuery(params, c, queryFuncs...)
 }
 
-func (c *CustomTemplate) Save(params *dao.Params) error {
-	return dao.GenericSave(params, c)
+func (c *CustomTemplate) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericSave(params, c, queryFuncs...)
 }
 
-func (c *CustomTemplate) Delete(params *dao.Params, ids string) error {
-	return dao.GenericDelete(params, c, utils.ToInt64Slice(ids))
+func (c *CustomTemplate) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericDelete(params, c, utils.ToInt64Slice(ids), queryFuncs...)
 }
 
-func (c *CustomTemplate) GetOne(params *dao.Params) (*CustomTemplate, error) {
-	return dao.GenericGetOne(params, c)
+func (c *CustomTemplate) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*CustomTemplate, error) {
+	return dao.GenericGetOne(params, c, queryFuncs...)
 }
