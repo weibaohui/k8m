@@ -60,8 +60,6 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
             }
         };
         fetchTemplates();
-    }, [currentPage, selectedKind, refreshKey]);
-    useEffect(() => {
         const fetchResourceTypes = async () => {
             try {
                 const response = await fetcher({
@@ -84,7 +82,8 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
             }
         };
         fetchResourceTypes();
-    }, []);
+    }, [currentPage, selectedKind, refreshKey]);
+
     const inputRef = useRef<InputRef>(null);
 
 

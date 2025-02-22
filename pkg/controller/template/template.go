@@ -26,6 +26,12 @@ func SaveTemplate(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	// 处理分类
+	if m.Kind == "" {
+		m.Kind = "未分类"
+	}
+
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
