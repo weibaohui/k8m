@@ -152,7 +152,10 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
         }
     };
 
-    const handleDelete = (templateId: string) => {
+    const handleDelete = (templateId?: string) => {
+        if (!templateId) {
+            return;
+        }
         Modal.confirm({
             title: '确认删除',
             content: '确定要删除这个模板吗？',
@@ -268,29 +271,11 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                     style={{width: 200}}
                     value={selectedKind}
                     onChange={(value) => {
-                        setSelectedKind(value);
                         setCurrentPage(1);
+                        setSelectedKind(value);
                     }}
                     placeholder="按资源分类筛选"
                     allowClear
-                    dropdownRender={(menu) => (
-                        <>
-                            {menu}
-                            <Divider style={{margin: '8px 0'}}/>
-                            <Space style={{padding: '0 8px 4px'}}>
-                                <Input
-                                    placeholder="请输入新的资源分类"
-                                    ref={inputRef}
-                                    value={newKind}
-                                    onChange={onNewKindChange}
-                                    onKeyDown={(e) => e.stopPropagation()}
-                                />
-                                <Button type="text" icon={<PlusOutlined/>} onClick={handleAddKind}>
-                                    添加类型
-                                </Button>
-                            </Space>
-                        </>
-                    )}
                     options={resourceTypesList.map(type => ({label: type, value: type}))}
                 />
             </div>
@@ -489,6 +474,26 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                             onChange={(value) => setEditForm(prev => ({...prev, kind: value}))}
                             placeholder="请选择资源分类"
                             options={resourceTypesList.map(type => ({label: type, value: type}))}
+                            style={{width: 200}}
+                            allowClear
+                            dropdownRender={(menu) => (
+                                <>
+                                    {menu}
+                                    <Divider style={{margin: '8px 0'}}/>
+                                    <Space style={{padding: '0 8px 4px'}}>
+                                        <Input
+                                            placeholder="请输入新的资源分类"
+                                            ref={inputRef}
+                                            value={newKind}
+                                            onChange={onNewKindChange}
+                                            onKeyDown={(e) => e.stopPropagation()}
+                                        />
+                                        <Button type="text" icon={<PlusOutlined/>} onClick={handleAddKind}>
+                                            添加分类
+                                        </Button>
+                                    </Space>
+                                </>
+                            )}
                         />
                     </div>
                     <div>
