@@ -26,6 +26,7 @@ import DiffEditorComponent from '@/components/Amis/custom/DiffEditor/index.tsx';
 import DeploymentRevisionDiffEditor from '@/components/Amis/custom/DiffEditor/DeploymentRevisonDiffEditor.tsx';
 import PodLogViewerComponent from '@/components/Amis/custom/LogView/PodLogViewer';
 import PodsLogViewerComponent from '@/components/Amis/custom/LogView/PodsLogViewer';
+import KubeConfigEditorComponent from '@/components/Amis/custom/KubeConfigEditor.tsx'
 // 注册自定义组件
 registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
 registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
@@ -56,6 +57,9 @@ registerRenderer({type: 'fileExplorer', component: FileExplorerComponent})
 registerRenderer({type: 'diffEditor', component: DiffEditorComponent})
 // @ts-ignore
 registerRenderer({type: 'deploymentRevisionDiffEditor', component: DeploymentRevisionDiffEditor})
+//@ts-ignore
+registerRenderer({type: 'kubeConfigEditor', component: KubeConfigEditorComponent})
+
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
 registerFilter("filterAnnotations", FilterAnnotations)
