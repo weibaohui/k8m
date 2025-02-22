@@ -320,7 +320,7 @@ func main() {
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
 	{
 		mgm.GET("/custom/template_kind/list", template.ListKind)
-		mgm.POST("/custom/template_kind/add", template.AddKind)
+		mgm.POST("/custom/template_kind/save", template.SaveKind)
 
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)

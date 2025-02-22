@@ -18,7 +18,7 @@ func ListKind(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
-func AddKind(c *gin.Context) {
+func SaveKind(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplateKind{}
 	err := c.ShouldBindJSON(&m)

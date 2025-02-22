@@ -99,7 +99,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
         if (value && !resourceTypesList.includes(value)) {
             try {
                 await fetcher({
-                    url: '/mgm/custom/template_kind/add',
+                    url: '/mgm/custom/template_kind/save',
                     method: 'post',
                     data: {
                         name: value
