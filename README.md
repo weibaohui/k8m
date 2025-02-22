@@ -32,32 +32,21 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 ```shell
 Usage of ./k8m:
-      --add_dir_header                   If true, adds the file directory to the header of the log messages
       --admin-password string            管理员密码 (default "123456")
       --admin-username string            管理员用户名 (default "admin")
-      --alsologtostderr                  log to standard error as well as files (no effect when -logtostderr=true)
   -k, --chatgpt-key string               大模型的自定义API Key (default "sk-xxxxxxx")
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-Coder-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
   -d, --debug                            调试模式
       --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
-  -c, --kubeconfig string                kubeconfig文件路径 (default "/Users/weibh/.kube/config")
+  -c, --kubeconfig string                kubeconfig文件路径 (default "/root/.kube/config")
       --kubectl-shell-image string       Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令 (default "bitnami/kubectl:latest")
       --log-v int                        klog的日志级别klog.V(2) (default 2)
-      --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
-      --log_dir string                   If non-empty, write log files in this directory (no effect when -logtostderr=true)
-      --log_file string                  If non-empty, use this log file (no effect when -logtostderr=true)
-      --log_file_max_size uint           Defines the maximum size a log file can grow to (no effect when -logtostderr=true). Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
       --login-type string                登录方式，password, oauth, token等,default is password (default "password")
-      --logtostderr                      log to standard error instead of files (default true)
-      --node-shell-image string          NodeShell 镜像。 默认为 alpine:latest，必须包含nsenter命令 (default "alpine:latest")
-      --one_output                       If true, only write logs to their native severity level (vs also writing to each lower severity level; no effect when -logtostderr=true)
+      --node-shell-image string          NodeShell 镜像。 默认为 alpine:latest，必须包含`nsenter`命令 (default "alpine:latest")
   -p, --port int                         监听端口 (default 3618)
-      --skip_headers                     If true, avoid header prefixes in the log messages
-      --skip_log_headers                 If true, avoid headers when opening log files (no effect when -logtostderr=true)
-      --stderrthreshold severity         logs at or above this threshold go to stderr when writing to files and stderr (no effect when -logtostderr=true or -alsologtostderr=true) (default 2)
-  -v, --v Level                          number for the log level verbosity (default 0)
-      --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
+      --sqlite-path string               sqlite数据库文件路径， (default "/data/k8m.db")
+  -v, --v Level                          klog的日志级别 (default 2)
 ```
 
 ## **ChatGPT 配置指南**
@@ -113,6 +102,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 | `JWT_TOKEN_SECRET`    | `"your-secret-key"`              | 用于 JWT Token 生成的密钥                                                |
 | `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`         | kubectl shell 镜像地址                                                |
 | `NODE_SHELL_IMAGE`    | `alpine:latest`                  | Node shell 镜像地址                                                   |
+| `SQLITE_PATH`         | `/data/k8m.db`                   | 持久化数据库地址，默认sqlite数据库，文件地址/data/k8m.db                             |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
@@ -246,7 +236,7 @@ make help
 ![输入图片说明](https://foruda.gitee.com/images/1740031049224924895/c8d5357b_77493.png "屏幕截图")
 ![输入图片说明](https://foruda.gitee.com/images/1740031092919251676/61e6246c_77493.png "屏幕截图")
 
-2、新增节点终端NodeShell 
+2、新增节点终端NodeShell
 在节点上执行命令
 ![输入图片说明](https://foruda.gitee.com/images/1740031147702527911/4cef40dc_77493.png "屏幕截图")
 ![输入图片说明](https://foruda.gitee.com/images/1740031249763550505/69fddee6_77493.png "屏幕截图")
