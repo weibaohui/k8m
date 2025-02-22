@@ -1,13 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import {Button, List, Input, Modal, Space} from 'antd';
-import {DeleteFilled, EditFilled, StarFilled, StarOutlined} from '@ant-design/icons';
-import JSZip from 'jszip';
-import {saveAs} from 'file-saver';
+import {DeleteFilled, EditFilled, StarOutlined} from '@ant-design/icons';
 
 interface RecordItem {
     id: string;
     content: string;
-    isFavorite: boolean;
     customName?: string;
 }
 
@@ -24,34 +21,22 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                                                        setHistoryRecords,
                                                        onSaveTemplate
                                                    }) => {
-    const [favoriteRecords, setFavoriteRecords] = useState<RecordItem[]>([]);
     const [editingId, setEditingId] = useState<string>();
     const [editingName, setEditingName] = useState('');
-    const [activeTab, setActiveTab] = useState('history');
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentFavoritePage, setCurrentFavoritePage] = useState(1);
 
     const pageSize = 10;
 
-    useEffect(() => {
-        const savedFavoriteRecords = localStorage.getItem('favoriteRecords');
-        setFavoriteRecords(savedFavoriteRecords ? JSON.parse(savedFavoriteRecords) : []);
-    }, []);
-
     const updateLocalStorage = () => {
         localStorage.setItem('historyRecords', JSON.stringify(historyRecords));
-        localStorage.setItem('favoriteRecords', JSON.stringify(favoriteRecords));
     };
 
     useEffect(() => {
         updateLocalStorage();
-    }, [historyRecords, favoriteRecords]);
+    }, [historyRecords]);
 
     const handleNameEdit = (recordId: string) => {
-        const record = activeTab === 'history'
-            ? historyRecords.find(r => r.id === recordId)
-            : favoriteRecords.find(r => r.id === recordId);
-
+        const record = historyRecords.find(r => r.id === recordId);
         if (record) {
             setEditingId(record.id);
             setEditingName(record.customName || '');
@@ -70,13 +55,6 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                         : record
                 )
             );
-            setFavoriteRecords(prevRecords =>
-                prevRecords.map(record =>
-                    record.id === recordId
-                        ? {...record, customName: editingName.trim()}
-                        : record
-                )
-            );
         }
         setEditingId('');
         setEditingName('');
@@ -88,49 +66,16 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
             title: '确认删除',
             content: '确定要删除这条记录吗？',
             onOk: () => {
-                if (activeTab === 'favorites') {
-                    const record = favoriteRecords.find(r => r.id === recordId);
-                    if (record) {
-                        setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-                        setHistoryRecords(prevRecords => [{
-                            ...record,
-                            id: Math.random().toString(36).substring(2, 15),
-                            isFavorite: false
-                        }, ...prevRecords]);
-                    }
-                } else {
-                    setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-                }
+                setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
                 updateLocalStorage();
             }
         });
     };
 
-    const toggleFavorite = (recordId: string) => {
+    const handleSaveTemplate = (recordId: string) => {
         const record = historyRecords.find(r => r.id === recordId);
         if (record) {
-            setHistoryRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-            setFavoriteRecords(prevRecords => [{...record, isFavorite: true}, ...prevRecords]);
-            updateLocalStorage();
-            // 同时保存为模板
             onSaveTemplate(record.content);
-        } else {
-            const favoriteRecord = favoriteRecords.find(r => r.id === recordId);
-            if (favoriteRecord) {
-                Modal.confirm({
-                    title: '确认取消收藏',
-                    content: '确定要取消收藏这条记录吗？',
-                    onOk: () => {
-                        setFavoriteRecords(prevRecords => prevRecords.filter(r => r.id !== recordId));
-                        setHistoryRecords(prevRecords => [{
-                            ...favoriteRecord,
-                            id: Math.random().toString(36).substring(2, 15),
-                            isFavorite: false
-                        }, ...prevRecords]);
-                        updateLocalStorage();
-                    }
-                });
-            }
         }
     };
 
@@ -177,11 +122,10 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                         />
                         <Button
                             type="text"
-                            icon={activeTab === 'favorites' ? <StarFilled style={{color: '#FFD700'}}/> :
-                                <StarOutlined/>}
+                            icon={<StarOutlined/>}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                toggleFavorite(record.id);
+                                handleSaveTemplate(record.id);
                             }}
                         />
                         <Button
@@ -200,25 +144,9 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
 
     return (
         <div>
-            <Space.Compact>
-                <Button
-                    variant="outlined"
-                    onClick={() => setActiveTab('history')}
-                    type={activeTab === 'history' ? 'primary' : 'default'}
-                >
-                    历史记录
-                </Button>
-                <Button
-                    variant="outlined"
-                    onClick={() => setActiveTab('favorites')}
-                    type={activeTab === 'favorites' ? 'primary' : 'default'}
-                >
-                    收藏
-                </Button>
-            </Space.Compact>
 
-            {activeTab === 'history' ? (
-                <div>
+
+            <div>
                     <div style={{marginTop: '10px', marginBottom: '10px'}}>
                         <Button
                             variant="outlined"
@@ -273,120 +201,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                             </Button>
                         </Space.Compact>
                     </div>
-                </div>
-            ) : (
-                <div>
-                    <div style={{marginTop: '10px', marginBottom: '10px'}}>
-                        <Space.Compact>
-                            <Button
-                                variant="outlined"
-                                onClick={() => {
-                                    const input = document.createElement('input');
-                                    input.type = 'file';
-                                    input.accept = '.zip';
-                                    input.onchange = async (e) => {
-                                        const file = (e.target as HTMLInputElement).files?.[0];
-                                        if (file) {
-                                            try {
-                                                const zip = await JSZip.loadAsync(file);
-                                                const yamlFiles = [];
-
-                                                for (const [fileName, fileData] of Object.entries(zip.files)) {
-                                                    if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
-                                                        const content = await fileData.async('text');
-                                                        const customName = fileName.replace(/\.(yaml|yml)$/, '');
-                                                        yamlFiles.push({
-                                                            id: Math.random().toString(36).substring(2, 15),
-                                                            content,
-                                                            isFavorite: true,
-                                                            customName
-                                                        });
-                                                    }
-                                                }
-
-                                                if (yamlFiles.length > 0) {
-                                                    const newRecords = yamlFiles.filter(newRecord =>
-                                                        !favoriteRecords.some(existingRecord =>
-                                                            existingRecord.content === newRecord.content
-                                                        )
-                                                    );
-
-                                                    if (newRecords.length > 0) {
-                                                        setFavoriteRecords(prev => [...prev, ...newRecords]);
-                                                        Modal.success({
-                                                            title: '导入成功',
-                                                            content: `成功导入 ${newRecords.length} 个YAML文件`
-                                                        });
-                                                        updateLocalStorage();
-                                                    } else {
-                                                        Modal.warning({
-                                                            title: '导入提示',
-                                                            content: '没有新的YAML文件需要导入'
-                                                        });
-                                                    }
-                                                } else {
-                                                    Modal.warning({
-                                                        title: '导入提示',
-                                                        content: 'ZIP文件中没有找到YAML文件'
-                                                    });
-                                                }
-                                            } catch (error) {
-                                                Modal.error({
-                                                    title: '导入失败',
-                                                    content: '无法解析ZIP文件或文件格式错误'
-                                                });
-                                            }
-                                        }
-                                    };
-                                    input.click();
-                                }}
-                            >
-                                导入备份
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                onClick={async () => {
-                                    const zip = new JSZip();
-                                    favoriteRecords.forEach((record, index) => {
-                                        const fileName = record.customName || `favorite_${index + 1}.yaml`;
-                                        zip.file(fileName.endsWith('.yaml') ? fileName : `${fileName}.yaml`, record.content);
-                                    });
-                                    const blob = await zip.generateAsync({type: 'blob'});
-                                    saveAs(blob, 'favorites.zip');
-                                }}
-                            >
-                                导出备份
-                            </Button>
-                        </Space.Compact>
-                    </div>
-                    <List
-                        dataSource={favoriteRecords.slice((currentFavoritePage - 1) * pageSize, currentFavoritePage * pageSize)}
-                        renderItem={renderRecord}
-                        bordered={true}
-                    />
-                    <div style={{marginTop: '16px', textAlign: 'right'}}>
-                        <Space.Compact>
-                            <Button
-                                type="default"
-                                disabled={currentFavoritePage === 1}
-                                onClick={() => setCurrentFavoritePage(prev => Math.max(1, prev - 1))}
-                            >
-                                上一页
-                            </Button>
-                            <Button type="default" disabled>
-                                {currentFavoritePage}/{Math.ceil(favoriteRecords.length / pageSize)}
-                            </Button>
-                            <Button
-                                type="default"
-                                disabled={currentFavoritePage >= Math.ceil(favoriteRecords.length / pageSize)}
-                                onClick={() => setCurrentFavoritePage(prev => Math.min(Math.ceil(favoriteRecords.length / pageSize), prev + 1))}
-                            >
-                                下一页
-                            </Button>
-                        </Space.Compact>
-                    </div>
-                </div>
-            )}
+            </div>
             <div style={{
                 marginTop: '16px',
                 padding: '12px',
@@ -395,7 +210,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                 fontSize: '10px',
                 color: '#666'
             }}>
-                提示：历史记录和收藏夹数据均存储在浏览器本地缓存中，清除浏览器缓存可能会导致数据丢失，请注意及时导出备份重要数据。
+                提示：历史记录数据存储在浏览器本地缓存中，清除浏览器缓存可能会导致数据丢失。
             </div>
         </div>
     );
