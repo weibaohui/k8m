@@ -68,7 +68,7 @@ build:
 	@echo "构建当前平台可执行文件..."
 	@mkdir -p $(OUTPUT_DIR)
 	@GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) \
-	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" \
+	    CGO_ENABLED=1 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" \
 	    -o "$(OUTPUT_DIR)/$(BINARY_NAME)" .
 
 # 为所有指定的平台和架构构建可执行文件
@@ -88,7 +88,7 @@ build-all:
 		ZIP_FILE="$(OUTPUT_FILE).zip"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
 		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
-		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=1 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
 		echo "打包为 ZIP (最大压缩级别): $$ZIP_FILE"; \
         (cd $(OUTPUT_DIR) && zip -9 "$(BINARY_NAME)-$(VERSION)-$$GOOS-$$GOARCH.zip" "$(BINARY_NAME)-$(VERSION)-$$GOOS-$$GOARCH$$EXT"); \
         echo "文件已打包: $$ZIP_FILE"; \
