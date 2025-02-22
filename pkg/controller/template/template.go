@@ -18,7 +18,7 @@ func ListTemplate(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
-func AddTemplate(c *gin.Context) {
+func SaveTemplate(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}
 	err := c.ShouldBindJSON(&m)

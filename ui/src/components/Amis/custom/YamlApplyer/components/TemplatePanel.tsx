@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect} from 'react';
-import {Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider} from 'antd';
+import {Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider, message} from 'antd';
 import {DeleteFilled, EditFilled, PlusOutlined} from '@ant-design/icons';
 import {fetcher} from '@/components/Amis/fetcher';
 
@@ -128,17 +128,39 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
         setDrawerVisible(true);
     };
 
-    const handleEditSubmit = () => {
+    const handleEditSubmit = async () => {
         if (editingTemplate && editForm.name.trim()) {
-            setTemplates(prevTemplates =>
-                prevTemplates.map(template =>
-                    template.id === editingTemplate.id
-                        ? {...template, ...editForm}
-                        : template
-                )
-            );
-            setDrawerVisible(false);
-            setEditingTemplate(null);
+            try {
+                const response = await fetcher({
+                    url: '/mgm/custom/template/save',
+                    method: 'post',
+                    data: {
+                        id: editingTemplate.id,
+                        ...editForm
+                    }
+                });
+
+                if (response.data?.status === 0) {
+                    setTemplates(prevTemplates =>
+                        prevTemplates.map(template =>
+                            template.id === editingTemplate.id
+                                ? {...template, ...editForm}
+                                : template
+                        )
+                    );
+                    setDrawerVisible(false);
+                    setEditingTemplate(null);
+                    message.success('模板已成功更新');
+                } else {
+                    throw new Error(response.data?.msg || '更新失败');
+                }
+            } catch (error) {
+                console.error('Failed to update template:', error);
+                Modal.error({
+                    title: '保存失败',
+                    content: '无法更新模板：' + (error instanceof Error ? error.message : '未知错误')
+                });
+            }
         }
     };
 
@@ -208,7 +230,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                             };
                             // 调用后端API保存新模板
                             fetcher({
-                                url: '/mgm/custom/template/add',
+                                url: '/mgm/custom/template/save',
                                 method: 'post',
                                 data: newTemplate
                             }).then(response => {
@@ -219,10 +241,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                                         id: response.data.data.id || Math.random().toString(36).substring(2, 15)
                                     };
                                     setTemplates(prev => [...prev, savedTemplate]);
-                                    Modal.success({
-                                        title: '创建成功',
-                                        content: '新模板已成功创建'
-                                    });
+                                    message.success('新模板已成功创建');
                                 } else {
                                     throw new Error(response.data?.msg || '创建失败');
                                 }

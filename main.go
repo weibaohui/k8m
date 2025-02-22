@@ -323,7 +323,7 @@ func main() {
 		mgm.POST("/custom/template_kind/add", template.AddKind)
 
 		mgm.GET("/custom/template/list", template.ListTemplate)
-		mgm.POST("/custom/template/add", template.AddTemplate)
+		mgm.POST("/custom/template/save", template.SaveTemplate)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
