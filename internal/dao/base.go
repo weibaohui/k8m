@@ -9,7 +9,7 @@ import (
 )
 
 // GenericQuery 是一个通用查询方法，适用于任意模型
-func GenericQuery[T any](params *Params, model T) ([]T, int64, error) {
+func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]T, int64, error) {
 	var total int64
 	var results []T
 
@@ -32,6 +32,11 @@ func GenericQuery[T any](params *Params, model T) ([]T, int64, error) {
 		if validFields[key] && value != "" && value != nil {
 			dbQuery = dbQuery.Where(key+" = ?", value)
 		}
+	}
+
+	// 执行自定义查询函数
+	for _, fn := range queryFuncs {
+		dbQuery = fn(dbQuery)
 	}
 
 	// 获取总记录数
