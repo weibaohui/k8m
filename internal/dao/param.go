@@ -13,6 +13,7 @@ type Params struct {
 	Page     int                    // 当前页
 	PerPage  int                    // 每页数量
 	Queries  map[string]interface{} // 动态查询条件
+
 }
 
 // BuildParams 从 gin.Context 中获取分页和排序参数
