@@ -36,7 +36,7 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
                 data: newTemplate
             });
             if (response.data?.status === 0) {
-                message.success('已同时保存为模板');
+                message.success('已保存为模板');
                 // 触发模板列表刷新
                 setTemplateRefreshKey(prev => prev + 1);
             } else {
