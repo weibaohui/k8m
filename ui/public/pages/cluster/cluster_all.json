@@ -19,6 +19,23 @@
           "api": "post:/k8s/cluster/scan"
         },
         {
+          "type": "button",
+          "label": "添加集群",
+          "level": "primary",
+          "actionType": "drawer",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "xl",
+            "title": "新增集群 kubeconfig (ESC 关闭)",
+            "body": [
+              {
+                "type": "kubeConfigEditor"
+              }
+            ]
+          }
+        },
+        {
           "type": "columns-toggler",
           "align": "right",
           "draggable": true,
