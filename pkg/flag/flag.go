@@ -81,7 +81,7 @@ func (c *Config) InitFlags() {
 	defaultLogV := getEnv("LOG_V", "2")
 
 	// sqlite数据库文件路径
-	defaultSqlitePath := getEnv("SQLITE_PATH", "/data/data.db")
+	defaultSqlitePath := getEnv("SQLITE_PATH", "/data/k8m.db")
 
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口")
@@ -96,7 +96,7 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.NodeShellImage, "node-shell-image", defaultNodeShellImage, "NodeShell 镜像。 默认为 alpine:latest，必须包含nsenter命令")
 	pflag.StringVar(&c.KubectlShellImage, "kubectl-shell-image", defaultKubectlShellImage, "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令")
 	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
-	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径")
+	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认/data/k8m.db")
 
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
