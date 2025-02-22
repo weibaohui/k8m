@@ -10,9 +10,11 @@ import (
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
@@ -130,6 +132,12 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 // IsConnected 判断集群是否连接
 func (c *clusterService) IsConnected(selectedCluster string) bool {
 	cluster := c.GetClusterByID(selectedCluster)
+	if cluster == nil {
+		return false
+	}
+	if cluster.ClusterConnectStatus == "" {
+		return false
+	}
 	connected := cluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected
 	return connected
 }
@@ -187,6 +195,8 @@ func (c *clusterService) Disconnect(fileName string, contextName string) {
 func (c *clusterService) Scan() {
 	cfg := flag.Init()
 	c.ScanClustersInDir(cfg.KubeConfig)
+
+	c.ScanClustersInDB()
 }
 
 // AllClusters 获取所有集群
@@ -287,6 +297,102 @@ func (c *clusterService) ScanClustersInDir(path string) {
 		}
 	}
 
+}
+func (c *clusterService) ScanClustersInDB() {
+	kc := &models.KubeConfig{}
+
+	var list []*models.KubeConfig
+	err := dao.DB().Model(kc).Find(&list).Error
+	if err != nil {
+		klog.Errorf("查询集群失败: %v", err)
+		return
+	}
+
+	// memoryDBClusters := slice.Filter(c.clusterConfigs, func(index int, item *ClusterConfig) bool {
+	// 	return item.FileName == "DB"
+	// })
+
+	// 先找到内存中有，但是数据库中没有的
+	// for _, memoryDBCluster := range memoryDBClusters {
+	// 	found := false
+	// 	for _, kc := range list {
+	// 		if kc.Server == memoryDBCluster.Server && kc.User == memoryDBCluster.UserName && kc.Cluster == memoryDBCluster.ClusterName {
+	// 			found = true
+	// 			break
+	// 		}
+	// 	}
+	// 	if !found {
+	// 		for i, _ := range c.clusterConfigs {
+	// 			cc := c.clusterConfigs[i]
+	// 			if cc.Server == memoryDBCluster.Server && cc.UserName == memoryDBCluster.UserName && cc.ClusterName == memoryDBCluster.ClusterName {
+	// 				klog.V(6).Infof("删除内存中的集群 %s %s", memoryDBCluster.Server, memoryDBCluster.UserName)
+	// 				c.clusterConfigs[i] = nil
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	for i, cc := range c.clusterConfigs {
+		if cc.FileName == "DB" {
+			// 查一下list中是否存在
+			filter := slice.Filter(list, func(index int, item *models.KubeConfig) bool {
+				if item.Server == cc.Server && item.User == cc.UserName && item.Cluster == cc.ClusterName {
+					return true
+				}
+				return false
+			})
+			if len(filter) == 0 {
+				// 在数据库中也不存在
+				// 从list中删除
+				c.clusterConfigs = slice.DeleteAt(c.clusterConfigs, i)
+			}
+		}
+	}
+
+	// 2. 处理数据库中的配置
+	for _, kc := range list {
+		config, err := clientcmd.Load([]byte(kc.Content))
+		if err != nil {
+			klog.V(6).Infof("解析集群 [%s]失败: %v", kc.Server, err)
+			continue
+		}
+
+		// 检查每个context
+		for contextName := range config.Contexts {
+			context := config.Contexts[contextName]
+			cluster := config.Clusters[context.Cluster]
+
+			if context.AuthInfo == kc.User {
+				// 检查是否已存在该配置
+				exists := false
+				for _, cc := range c.clusterConfigs {
+					if cc.FileName == "DB" && cc.Server == cluster.Server && cc.ContextName == contextName {
+						exists = true
+						break
+					}
+				}
+
+				// 如果不存在，添加新配置
+				if !exists {
+					clusterConfig := &ClusterConfig{
+						FileName:             "DB",
+						ContextName:          contextName,
+						UserName:             context.AuthInfo,
+						ClusterName:          context.Cluster,
+						Namespace:            context.Namespace,
+						kubeConfig:           []byte(kc.Content),
+						watchStatus:          make(map[string]*clusterWatchStatus),
+						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
+						Server:               cluster.Server,
+					}
+					clusterConfig.Server = cluster.Server
+					c.AddToClusterList(clusterConfig)
+				}
+
+			}
+
+		}
+	}
 }
 
 func (c *clusterService) AddToClusterList(clusterConfig *ClusterConfig) {
