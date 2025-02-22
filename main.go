@@ -20,6 +20,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
+	"github.com/weibaohui/k8m/pkg/controller/kubeconfig"
 	"github.com/weibaohui/k8m/pkg/controller/login"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
@@ -323,6 +324,8 @@ func main() {
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)
 		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
+		mgm.POST("/kubeconfig/save", kubeconfig.Save)
+
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
