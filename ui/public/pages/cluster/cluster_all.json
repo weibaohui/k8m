@@ -64,7 +64,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 240,
+          "width": 200,
           "buttons": [
             {
               "type": "button",
@@ -98,6 +98,21 @@
               "url": "/#/NodeExec?type=KubectlShell&fileName=${fileName}&contextName=${contextName}",
               "blank": true,
               "visibleOn": "clusterConnectStatus==='connected' && fileName!=='InCluster' "
+            },
+            {
+              "label": "解除纳管",
+              "actionType": "ajax",
+              "visibleOn": " fileName==='DB' ",
+              "confirmText": "确定要解除纳管?",
+              "api": {
+                "url": "/k8s/cluster/kubeconfig/remove",
+                "method": "post",
+                "data": {
+                  "server": "${server }",
+                  "user": "${userName }",
+                  "cluster": "${clusterName}"
+                }
+              }
             }
           ],
           "toggled": true
