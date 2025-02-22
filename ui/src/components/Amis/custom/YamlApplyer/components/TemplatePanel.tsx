@@ -1,7 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react';
 import {Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider} from 'antd';
 import {DeleteFilled, EditFilled, PlusOutlined} from '@ant-design/icons';
-import {formatFinalGetUrl} from '@/utils/utils';
 import {fetcher} from '@/components/Amis/fetcher';
 
 interface TemplateItem {
@@ -15,106 +14,32 @@ interface TemplatePanelProps {
     onSelectTemplate: (content: string) => void;
 }
 
-const defaultTemplates: TemplateItem[] = [
-    {
-        id: '1',
-        name: 'Nginx Deployment',
-        kind: 'Deployment',
-        content: `apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-  labels:
-    app: nginx
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80`
-    },
-    {
-        id: '2',
-        name: 'Redis Service',
-        kind: 'Service',
-        content: `apiVersion: v1
-kind: Service
-metadata:
-  name: redis-service
-spec:
-  selector:
-    app: redis
-  ports:
-    - protocol: TCP
-      port: 6379
-      targetPort: 6379`
-    },
-    {
-        id: '3',
-        name: 'MySQL ConfigMap',
-        kind: 'ConfigMap',
-        content: `apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mysql-config
-data:
-  mysql.conf: |
-    [mysqld]
-    max_connections=250
-    character-set-server=utf8mb4
-    collation-server=utf8mb4_unicode_ci`
-    },
-    {
-        id: '4',
-        name: 'MongoDB StatefulSet',
-        kind: 'StatefulSet',
-        content: `apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: mongodb
-spec:
-  serviceName: mongodb
-  replicas: 3
-  selector:
-    matchLabels:
-      app: mongodb
-  template:
-    metadata:
-      labels:
-        app: mongodb
-    spec:
-      containers:
-      - name: mongodb
-        image: mongo:4.4`
-    },
-    {
-        id: '5',
-        name: 'Persistent Volume Claim',
-        kind: 'PersistentVolumeClaim',
-        content: `apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongodb-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi`
-    }
-];
-
 const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
-    const [templates, setTemplates] = useState<TemplateItem[]>(defaultTemplates);
+    const [templates, setTemplates] = useState<TemplateItem[]>([]);
+
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            try {
+                const response = await fetcher({
+                    url: '/mgm/custom/template/list',
+                    method: 'get'
+                });
+                const data = response.data;
+                //@ts-ignore
+                if (data?.status === 0 && data?.data?.rows) {
+                    //@ts-ignore
+                    setTemplates(data.data.rows);
+                }
+            } catch (error) {
+                console.error('Failed to fetch templates:', error);
+                Modal.error({
+                    title: '获取模板列表失败',
+                    content: '无法从服务器获取模板列表'
+                });
+            }
+        };
+        fetchTemplates();
+    }, []);
     const [currentPage, setCurrentPage] = useState(1);
     const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
@@ -275,13 +200,39 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
                     <Button
                         variant="outlined"
                         onClick={() => {
+                            //@ts-ignore
                             const newTemplate: TemplateItem = {
-                                id: Math.random().toString(36).substring(2, 15),
                                 name: `模板 ${templates.length + 1}`,
                                 content: '',
                                 kind: selectedKind
                             };
-                            setTemplates(prev => [...prev, newTemplate]);
+                            // 调用后端API保存新模板
+                            fetcher({
+                                url: '/mgm/custom/template/add',
+                                method: 'post',
+                                data: newTemplate
+                            }).then(response => {
+                                if (response.data?.status === 0) {
+                                    const savedTemplate = {
+                                        ...newTemplate,
+                                        //@ts-ignore
+                                        id: response.data.data.id || Math.random().toString(36).substring(2, 15)
+                                    };
+                                    setTemplates(prev => [...prev, savedTemplate]);
+                                    Modal.success({
+                                        title: '创建成功',
+                                        content: '新模板已成功创建'
+                                    });
+                                } else {
+                                    throw new Error(response.data?.msg || '创建失败');
+                                }
+                            }).catch(error => {
+                                console.error('Failed to create template:', error);
+                                Modal.error({
+                                    title: '创建失败',
+                                    content: '无法创建新模板：' + error.message
+                                });
+                            });
                         }}
                     >
                         新建模板
