@@ -9,6 +9,7 @@ import {fetcher} from '@/components/Amis/fetcher';
 const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
     const [editorContent, setEditorContent] = useState<string>('');
     const [historyRecords, setHistoryRecords] = useState<any[]>([]);
+    const [templateRefreshKey, setTemplateRefreshKey] = useState<number>(0);
 
     // 初始化时从localStorage加载历史记录
     React.useEffect(() => {
@@ -25,7 +26,7 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
     const handleSaveTemplate = async (content: string) => {
         try {
             const newTemplate = {
-                name: `模板 ${new Date().toLocaleString()}`,
+                name: `模板-${Math.random().toString(36).substring(2, 8)}`,
                 content: content,
                 kind: ''
             };
@@ -36,6 +37,8 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
             });
             if (response.data?.status === 0) {
                 message.success('已同时保存为模板');
+                // 触发模板列表刷新
+                setTemplateRefreshKey(prev => prev + 1);
             } else {
                 throw new Error(response.data?.msg || '保存模板失败');
             }
@@ -71,14 +74,17 @@ const YamlApplyer = React.forwardRef<HTMLDivElement>(() => {
     return (
         <div style={{height: '100%', display: 'flex'}}>
             <div style={{width: '25%', borderRight: '1px solid #e5e6eb', padding: '10px', overflowY: 'auto'}}>
-                <HistoryPanel onSelectRecord={handleRecordSelect} historyRecords={historyRecords}
-                              setHistoryRecords={setHistoryRecords} onSaveTemplate={handleSaveTemplate}/>
+                <TemplatePanel onSelectTemplate={handleRecordSelect} refreshKey={templateRefreshKey}/>
             </div>
             <div style={{width: '50%', padding: '10px', overflowY: 'auto'}}>
                 <EditorPanel onSaveSuccess={handleSaveSuccess} initialContent={editorContent}/>
             </div>
             <div style={{width: '25%', borderLeft: '1px solid #e5e6eb', padding: '10px', overflowY: 'auto'}}>
-                <TemplatePanel onSelectTemplate={handleRecordSelect}/>
+                <HistoryPanel
+                    onSelectRecord={handleRecordSelect}
+                    historyRecords={historyRecords}
+                    setHistoryRecords={setHistoryRecords}
+                    onSaveTemplate={handleSaveTemplate}/>
             </div>
         </div>
     );

@@ -15,9 +15,10 @@ interface TemplateItem {
 
 interface TemplatePanelProps {
     onSelectTemplate: (content: string) => void;
+    refreshKey?: number;
 }
 
-const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
+const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshKey = 0}) => {
     const [templates, setTemplates] = useState<TemplateItem[]>([]);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -59,7 +60,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate}) => {
             }
         };
         fetchTemplates();
-    }, [currentPage, selectedKind]);
+    }, [currentPage, selectedKind, refreshKey]);
     useEffect(() => {
         const fetchResourceTypes = async () => {
             try {
