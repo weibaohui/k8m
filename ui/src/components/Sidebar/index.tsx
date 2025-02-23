@@ -5,7 +5,7 @@ const Sidebar = () => {
     const { collapse } = useStore(state => state)
 
     return (
-        <div style={{ height: 'calc(100vh - 64px)', minWidth: 0, flex: "auto", overflow: 'auto' }}>
+        <div style={{ height: 'calc(100vh - 110px)', minWidth: 0, flex: "auto", overflow: 'auto' }}>
             <Menu
                 mode="inline"
                 inlineCollapsed={collapse}
