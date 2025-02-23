@@ -27,13 +27,7 @@ func List(c *gin.Context) {
 				return db
 			},
 		}
-	case models.RoleClusterAdmin:
-		queryFuncs = []func(*gorm.DB) *gorm.DB{
-			func(db *gorm.DB) *gorm.DB {
-				return db.Where("created_by=?", user)
-			},
-		}
-	case models.RoleClusterReadonly:
+	case models.RoleClusterAdmin, models.RoleClusterReadonly:
 		queryFuncs = []func(*gorm.DB) *gorm.DB{
 			func(db *gorm.DB) *gorm.DB {
 				return db.Where("username=?", user)
@@ -108,38 +102,19 @@ func Save(c *gin.Context) {
 		"id": m.ID,
 	})
 }
-
-func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB {
-	//  管理页面，判断是否管理员，看到所有的用户，
-	user, role := amis.GetLoginUser(c)
-	var queryFuncs []func(*gorm.DB) *gorm.DB
-	switch role {
-	case models.RolePlatformAdmin:
-		params.UserName = ""
-		queryFuncs = []func(*gorm.DB) *gorm.DB{
-			func(db *gorm.DB) *gorm.DB {
-				return db
-			},
-		}
-	case models.RoleClusterAdmin:
-		queryFuncs = []func(*gorm.DB) *gorm.DB{
-			func(db *gorm.DB) *gorm.DB {
-				return db.Where("created_by=?", user)
-			},
-		}
-	case models.RoleClusterReadonly:
-		queryFuncs = []func(*gorm.DB) *gorm.DB{
-			func(db *gorm.DB) *gorm.DB {
-				return db.Where("username=?", user)
-			},
-		}
-	}
-	return queryFuncs
-}
 func Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.User{}
+
+	_, role := amis.GetLoginUser(c)
+
+	switch role {
+	case models.RoleClusterReadonly, models.RoleClusterAdmin:
+		// 非平台管理员，不能删除
+		amis.WriteJsonError(c, fmt.Errorf("非管理员不能删除用户"))
+		return
+	}
 
 	queryFuncs := genQueryFuncs(c, params)
 
@@ -187,4 +162,27 @@ func UpdatePsw(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonOK(c)
+}
+
+func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB {
+	//  管理页面，判断是否管理员，看到所有的用户，
+	user, role := amis.GetLoginUser(c)
+	var queryFuncs []func(*gorm.DB) *gorm.DB
+	switch role {
+	case models.RolePlatformAdmin:
+		params.UserName = ""
+		queryFuncs = []func(*gorm.DB) *gorm.DB{
+			func(db *gorm.DB) *gorm.DB {
+				return db
+			},
+		}
+	case models.RoleClusterAdmin, models.RoleClusterReadonly:
+		queryFuncs = []func(*gorm.DB) *gorm.DB{
+			func(db *gorm.DB) *gorm.DB {
+				return db.Where("username=?", user)
+			},
+		}
+
+	}
+	return queryFuncs
 }
