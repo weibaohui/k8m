@@ -160,6 +160,10 @@
                   "type": "form",
                   "api": "post:/mgm/user/save",
                   "body": [
+                      {
+                          "type": "hidden",
+                          "name": "id"
+                      },
                     {
                       "type": "input-text",
                       "name": "username",
