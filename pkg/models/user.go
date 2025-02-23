@@ -21,8 +21,9 @@ type User struct {
 }
 
 const (
-	RoleAdmin    = "admin"
-	RoleReadonly = "readonly"
+	RoleClusterAdmin    = "cluster_admin"
+	RoleClusterReadonly = "cluster_readonly"
+	RolePlatformAdmin   = "platform_admin"
 )
 
 func (c *User) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*User, int64, error) {

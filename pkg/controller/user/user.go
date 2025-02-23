@@ -42,7 +42,13 @@ func Save(c *gin.Context) {
 	}
 
 	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
-		return db.Select([]string{"username", "role"}).Updates(m)
+		if m.ID == 0 {
+			// 新增
+			return db
+		} else {
+			// 修改
+			return db.Select([]string{"username", "role"}).Updates(m)
+		}
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)

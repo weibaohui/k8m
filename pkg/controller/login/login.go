@@ -63,7 +63,7 @@ func LoginByPassword(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
 			return
 		}
-		token, _ := generateToken(req.Username, models.RoleAdmin)
+		token, _ := generateToken(req.Username, models.RolePlatformAdmin)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {

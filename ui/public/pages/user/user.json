@@ -47,12 +47,16 @@
                   "required": true,
                   "options": [
                     {
-                      "label": "管理员",
-                      "value": "admin"
+                      "label": "集群管理员",
+                      "value": "cluster_admin"
                     },
                     {
-                      "label": "只读用户",
-                      "value": "readonly"
+                      "label": "集群只读",
+                      "value": "cluster_readonly"
+                    },
+                    {
+                      "label": "平台管理员",
+                      "value": "platform_admin"
                     }
                   ],
                   "placeholder": "请选择角色"
@@ -160,10 +164,10 @@
                   "type": "form",
                   "api": "post:/mgm/user/save",
                   "body": [
-                      {
-                          "type": "hidden",
-                          "name": "id"
-                      },
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
                     {
                       "type": "input-text",
                       "name": "username",
@@ -187,12 +191,16 @@
                       "required": true,
                       "options": [
                         {
-                          "label": "管理员",
-                          "value": "admin"
+                          "label": "集群管理员",
+                          "value": "cluster_admin"
                         },
                         {
-                          "label": "只读用户",
-                          "value": "readonly"
+                          "label": "集群只读",
+                          "value": "cluster_readonly"
+                        },
+                        {
+                          "label": "平台管理员",
+                          "value": "platform_admin"
                         }
                       ],
                       "placeholder": "请选择角色"
@@ -283,8 +291,9 @@
           "label": "角色",
           "type": "mapping",
           "map": {
-            "admin": "管理员",
-            "readonly": "只读用户"
+            "cluster_admin": "集群管理员",
+            "cluster_readonly": "集群只读",
+            "platform_admin": "平台管理员"
           },
           "searchable": {
             "type": "select",
@@ -294,12 +303,16 @@
             "placeholder": "请选择角色",
             "options": [
               {
-                "label": "管理员",
-                "value": "admin"
+                "label": "集群管理员",
+                "value": "cluster_admin"
               },
               {
-                "label": "只读用户",
-                "value": "readonly"
+                "label": "集群只读",
+                "value": "cluster_readonly"
+              },
+              {
+                "label": "平台管理员",
+                "value": "platform_admin"
               }
             ]
           }

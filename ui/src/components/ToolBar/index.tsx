@@ -24,9 +24,16 @@ const Toolbar = () => {
                 const decoded = jwtDecode<DecodedToken>(token);
 
 
+                // 角色映射表
+                const roleMap: Record<string, string> = {
+                    'cluster_admin': '集群管理员',
+                    'cluster_readonly': '集群只读',
+                    'platform_admin': '平台管理员'
+                };
+
                 setUserInfo({
                     username: decoded.username || '',
-                    role: decoded.role === 'admin' ? '管理员' : decoded.role === 'readonly' ? '只读' : ''
+                    role: roleMap[decoded.role] || ''
                 });
             } catch (error) {
                 console.error('Failed to decode token:', error);
