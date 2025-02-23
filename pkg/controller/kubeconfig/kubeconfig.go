@@ -7,11 +7,20 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
 )
 
 func Save(c *gin.Context) {
+
+	_, role := amis.GetLoginUser(c)
+	switch role {
+	case models.RoleClusterReadonly, models.RoleClusterAdmin:
+		amis.WriteJsonError(c, fmt.Errorf("无权限"))
+		return
+	}
+
 	params := dao.BuildParams(c)
 	m := &models.KubeConfig{}
 	err := c.ShouldBindJSON(&m)
@@ -54,9 +63,19 @@ func Save(c *gin.Context) {
 
 	}
 
+	// 执行一下扫描
+	service.ClusterService().ScanClustersInDB()
+
 	amis.WriteJsonOK(c)
 }
 func Remove(c *gin.Context) {
+	_, role := amis.GetLoginUser(c)
+	switch role {
+	case models.RoleClusterReadonly, models.RoleClusterAdmin:
+		amis.WriteJsonError(c, fmt.Errorf("无权限"))
+		return
+	}
+
 	params := dao.BuildParams(c)
 	m := &models.KubeConfig{}
 	err := c.ShouldBindJSON(&m)
@@ -70,6 +89,9 @@ func Remove(c *gin.Context) {
 			_ = m.Delete(params, fmt.Sprintf("%d", item.ID))
 		}
 	}
+
+	// 执行一下扫描
+	service.ClusterService().ScanClustersInDB()
 
 	amis.WriteJsonOK(c)
 }

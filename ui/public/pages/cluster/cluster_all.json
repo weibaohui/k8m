@@ -20,7 +20,7 @@
         },
         {
           "type": "button",
-          "label": "添加集群",
+          "label": "纳管集群",
           "level": "primary",
           "actionType": "drawer",
           "drawer": {
@@ -32,7 +32,8 @@
               {
                 "type": "kubeConfigEditor"
               }
-            ]
+            ],
+            "actions": []
           }
         },
         {
@@ -64,21 +65,20 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 200,
+          "width": 240,
           "buttons": [
             {
               "type": "button",
-              "icon": "fas fa-redo",
+              "icon": "fas fa-link  text-primary",
               "label": "连接",
               "actionType": "ajax",
               "api": "post:/k8s/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
             },
             {
               "type": "button",
-              "icon": "fas fa-check",
+              "icon": "fas fa-check-circle  text-primary",
               "label": "切换",
               "actionType": "ajax",
-              "visibleOn": "clusterConnectStatus==='connected' ",
               "api": "post:/k8s/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
               "onEvent": {
                 "click": {
@@ -92,41 +92,52 @@
               }
             },
             {
-              "label": "kubectl",
-              "type": "button",
-              "actionType": "url",
-              "url": "/#/NodeExec?type=KubectlShell&fileName=${fileName}&contextName=${contextName}",
-              "blank": true,
-              "visibleOn": "clusterConnectStatus==='connected' && fileName!=='InCluster' "
-            },
-            {
-              "label": "解除纳管",
-              "actionType": "ajax",
-              "visibleOn": " fileName==='DB' ",
-              "confirmText": "确定要解除纳管?",
-              "api": {
-                "url": "/k8s/cluster/kubeconfig/remove",
-                "method": "post",
-                "data": {
-                  "server": "${server }",
-                  "user": "${userName }",
-                  "cluster": "${clusterName}"
+              "type": "dropdown-button",
+              "icon": "fas fa-ellipsis-h",
+              "tooltip": "更多操作",
+              "buttons": [
+                {
+                  "type": "button",
+                  "label": "解除纳管",
+                  "icon": "fas fa-unlink  text-primary",
+                  "actionType": "ajax",
+                  "visibleOn": " fileName==='DB' ",
+                  "confirmText": "确定要解除纳管?",
+                  "api": {
+                    "url": "/k8s/cluster/kubeconfig/remove",
+                    "method": "post",
+                    "data": {
+                      "server": "${server }",
+                      "user": "${userName }",
+                      "cluster": "${clusterName}"
+                    }
+                  }
+                },
+                {
+                  "type": "button",
+                  "label": "kubectl终端",
+                  "icon": "fas fa-terminal  text-primary",
+                  "actionType": "url",
+                  "url": "/#/NodeExec?type=KubectlShell&fileName=${fileName}&contextName=${contextName}",
+                  "blank": true
+                },
+                {
+                  "type": "button",
+                  "label": "shell日志",
+                  "icon": "fas fa-file-code text-primary",
+                  "actionType": "url",
+                  "blank": false,
+                  "url": "/#/log/shell?cluster=${fileName}/${contextName}"
+                },
+                {
+                  "type": "button",
+                  "label": "操作日志",
+                  "icon": "fas fa-history  text-primary",
+                  "actionType": "url",
+                  "blank": false,
+                  "url": "/#/log/operation?cluster=${fileName}/${contextName}"
                 }
-              }
-            },
-            {
-              "label": "命令日志",
-              "type": "button",
-              "actionType": "url",
-              "blank": true,
-              "url": "/#/log/shell?cluster=${fileName}/${contextName}"
-            },
-            {
-              "label": "操作日志",
-              "type": "button",
-              "actionType": "url",
-              "blank": true,
-              "url": "/#/log/operation?cluster=${fileName}/${contextName}"
+              ]
             }
           ],
           "toggled": true
