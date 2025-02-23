@@ -14,7 +14,7 @@ import (
 
 func Drain(c *gin.Context) {
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
@@ -23,7 +23,7 @@ func Drain(c *gin.Context) {
 }
 func Cordon(c *gin.Context) {
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
@@ -32,7 +32,7 @@ func Cordon(c *gin.Context) {
 }
 func Usage(c *gin.Context) {
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	usage := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
@@ -42,7 +42,7 @@ func Usage(c *gin.Context) {
 }
 func UnCordon(c *gin.Context) {
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
@@ -51,7 +51,7 @@ func UnCordon(c *gin.Context) {
 }
 
 func BatchDrain(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -81,7 +81,7 @@ func BatchDrain(c *gin.Context) {
 }
 
 func BatchCordon(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -111,7 +111,7 @@ func BatchCordon(c *gin.Context) {
 }
 
 func BatchUnCordon(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -141,7 +141,7 @@ func BatchUnCordon(c *gin.Context) {
 }
 
 func NameOptionList(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var list []unstructured.Unstructured
@@ -176,7 +176,7 @@ func NameOptionList(c *gin.Context) {
 
 // AllLabelList 获取所有节点上的标签
 func AllLabelList(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 	// 先拿到所有的lable列表
 	// 通过lable的kv去匹配node，将node name放入到label 结构体中，方便选择时做出判断
@@ -228,7 +228,7 @@ func AllLabelList(c *gin.Context) {
 
 // AllTaintList 获取所有节点上的污点
 func AllTaintList(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var nodeList []*v1.Node

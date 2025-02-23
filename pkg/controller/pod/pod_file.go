@@ -40,7 +40,7 @@ func FileList(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
@@ -73,7 +73,7 @@ func ShowFile(c *gin.Context) {
 		return
 	}
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
@@ -122,7 +122,7 @@ func SaveFile(c *gin.Context) {
 	}
 	klog.V(6).Infof("info \n%v\n", utils.ToJSON(info))
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
@@ -156,7 +156,7 @@ func DownloadFile(c *gin.Context) {
 	info.ContainerName = c.Query("containerName")
 	info.Namespace = c.Query("namespace")
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().
@@ -224,7 +224,7 @@ func UploadFile(c *gin.Context) {
 	// 替换FileName中非法字符
 	info.FileName = utils.SanitizeFileName(info.FileName)
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -293,7 +293,7 @@ func DeleteFile(c *gin.Context) {
 		return
 	}
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	poder := kom.Cluster(selectedCluster).WithContext(ctx).
 		Namespace(info.Namespace).
 		Name(info.PodName).Ctl().Pod().

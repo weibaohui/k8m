@@ -12,7 +12,7 @@ import (
 // ListTaint 获取某个节点上的污点
 func ListTaint(c *gin.Context) {
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var node v1.Node
@@ -61,7 +61,7 @@ func UpdateTaint(c *gin.Context) {
 
 func processTaint(c *gin.Context, mode string) error {
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var info TaintInfo

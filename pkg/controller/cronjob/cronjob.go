@@ -11,7 +11,7 @@ import (
 func Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
@@ -21,7 +21,7 @@ func Pause(c *gin.Context) {
 func Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.CronJob{}).Namespace(ns).Name(name).
@@ -30,7 +30,7 @@ func Resume(c *gin.Context) {
 }
 
 func BatchResume(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -63,7 +63,7 @@ func BatchResume(c *gin.Context) {
 }
 
 func BatchPause(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {

@@ -23,9 +23,9 @@ func GetLoginUser(c *gin.Context) (string, string) {
 	return user, role
 }
 
-func GetContextWithUser(c *gin.Context) *context.Context {
+func GetContextWithUser(c *gin.Context) context.Context {
 	user, role := GetLoginUser(c)
 	ctx := context.WithValue(c.Request.Context(), constants.JwtUserName, user)
 	ctx = context.WithValue(ctx, constants.JwtUserRole, role)
-	return &ctx
+	return ctx
 }

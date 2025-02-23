@@ -10,7 +10,7 @@ import (
 
 func SetDefault(c *gin.Context) {
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).
@@ -24,7 +24,7 @@ func SetDefault(c *gin.Context) {
 }
 
 func OptionList(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var list []v1.IngressClass

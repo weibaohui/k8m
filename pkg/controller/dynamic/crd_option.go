@@ -12,7 +12,7 @@ import (
 )
 
 func GroupOptionList(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	groups := getCrdGroupList(ctx, selectedCluster)
@@ -30,7 +30,7 @@ func GroupOptionList(c *gin.Context) {
 }
 
 func KindOptionList(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 	g := c.Query("spec[group]")
 	if g == "" {
@@ -68,7 +68,7 @@ type CrdTree struct {
 
 // Deprecated: 废弃，请不要使用
 func CrdGuidTreeThree(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	list, err := getCrdList(ctx, selectedCluster)
@@ -146,7 +146,7 @@ func CrdGuidTreeThree(c *gin.Context) {
 
 // Deprecated: 废弃，请不要使用
 func CrdGuidTree(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	groups := getCrdGroupList(ctx, selectedCluster)

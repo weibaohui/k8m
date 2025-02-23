@@ -16,7 +16,7 @@ import (
 )
 
 func BatchStop(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -48,7 +48,7 @@ func BatchStop(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 func BatchRestore(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -82,7 +82,7 @@ func BatchRestore(c *gin.Context) {
 func Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
@@ -90,7 +90,7 @@ func Restart(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 func BatchRestart(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -124,7 +124,7 @@ func BatchRestart(c *gin.Context) {
 func History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	list, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
@@ -139,7 +139,7 @@ func HistoryRevisionDiff(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	// 找到最新的rs
@@ -177,7 +177,7 @@ func HistoryRevisionDiff(c *gin.Context) {
 func Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
@@ -187,7 +187,7 @@ func Pause(c *gin.Context) {
 func Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
@@ -200,7 +200,7 @@ func Scale(c *gin.Context) {
 	replica := c.Param("replica")
 	r := utils.ToInt32(replica)
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Namespace(ns).Name(name).
@@ -211,7 +211,7 @@ func Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	r := utils.ToInt(revision)
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -228,7 +228,7 @@ func Undo(c *gin.Context) {
 func Event(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var metas []string

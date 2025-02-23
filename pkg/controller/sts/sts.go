@@ -12,7 +12,7 @@ import (
 func History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	list, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
@@ -26,7 +26,7 @@ func History(c *gin.Context) {
 func Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StatefulSet{}).Namespace(ns).Name(name).
@@ -35,7 +35,7 @@ func Restart(c *gin.Context) {
 }
 
 func BatchRestart(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -68,7 +68,7 @@ func BatchRestart(c *gin.Context) {
 }
 
 func BatchStop(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -101,7 +101,7 @@ func BatchStop(c *gin.Context) {
 }
 
 func BatchRestore(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -139,7 +139,7 @@ func Scale(c *gin.Context) {
 	r := utils.ToInt32(replica)
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	err := kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.StatefulSet{}).
 		Namespace(ns).Name(name).
@@ -150,7 +150,7 @@ func Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	r := utils.ToInt(revision)
 	selectedCluster := amis.GetSelectedCluster(c)
 

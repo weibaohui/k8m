@@ -58,7 +58,7 @@ func getPods(selectedCluster string, ctx context.Context, ns string, name string
 func LinksServices(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -79,7 +79,7 @@ func LinksServices(c *gin.Context) {
 func LinksEndpoints(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -102,7 +102,7 @@ func LinksEndpoints(c *gin.Context) {
 func LinksPVC(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -123,7 +123,7 @@ func LinksPVC(c *gin.Context) {
 func LinksPV(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -144,7 +144,7 @@ func LinksPV(c *gin.Context) {
 func LinksIngress(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -165,7 +165,7 @@ func LinksIngress(c *gin.Context) {
 func LinksEnv(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -186,7 +186,7 @@ func LinksEnv(c *gin.Context) {
 func LinksEnvFromPod(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -207,7 +207,7 @@ func LinksEnvFromPod(c *gin.Context) {
 func LinksConfigMap(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -228,7 +228,7 @@ func LinksConfigMap(c *gin.Context) {
 func LinksSecret(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -249,7 +249,7 @@ func LinksSecret(c *gin.Context) {
 func LinksNode(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -269,7 +269,7 @@ func LinksNode(c *gin.Context) {
 func LinksPod(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
 	selectedCluster := amis.GetSelectedCluster(c)
 	pods, err := getPods(selectedCluster, ctx, ns, name, kind)

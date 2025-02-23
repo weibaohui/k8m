@@ -10,7 +10,7 @@ import (
 )
 
 func OptionList(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var list []map[string]string

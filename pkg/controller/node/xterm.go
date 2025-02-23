@@ -22,7 +22,7 @@ var WebsocketMessageType = map[int]string{
 }
 
 func CreateNodeShell(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 	name := c.Param("node_name") // NodeName
 	cfg := flag.Init()
@@ -49,10 +49,10 @@ func CreateNodeShell(c *gin.Context) {
 }
 
 func CreateKubectlShell(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	name := c.Param("node_name")             // NodeName
 	clusterIDBase64 := c.Param("cluster_id") // 集群ID，base64编码
-	//base64 解码
+	// base64 解码
 	clusterIDBytes, err := base64.StdEncoding.DecodeString(clusterIDBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -65,7 +65,7 @@ func CreateKubectlShell(c *gin.Context) {
 		return
 	}
 
-	//当前限制为kubectl 安装到本集群中，那么要先检查是否可连接。
+	// 当前限制为kubectl 安装到本集群中，那么要先检查是否可连接。
 	if !service.ClusterService().IsConnected(clusterID) {
 		amis.WriteJsonError(c, fmt.Errorf("集群%s 不可用,请先连接该集群，然后重试", clusterID))
 	}

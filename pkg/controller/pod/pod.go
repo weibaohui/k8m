@@ -30,7 +30,7 @@ func StreamLogs(c *gin.Context) {
 	})
 }
 func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var pods []v1.Pod
@@ -74,7 +74,7 @@ func WsExec(c *gin.Context) {
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
 	cmd := c.Query("cmd")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	if cmd == "" {
@@ -126,7 +126,7 @@ func Exec(c *gin.Context) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*5))
@@ -183,7 +183,7 @@ func Exec(c *gin.Context) {
 func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	var pods []v1.Pod
 	err := kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
@@ -215,7 +215,7 @@ func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, 
 func Usage(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	usage := kom.Cluster(selectedCluster).WithContext(ctx).

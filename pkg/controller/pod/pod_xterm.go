@@ -87,7 +87,7 @@ func cmdLogger(c *gin.Context, cmd string) {
 		"cmd":             cmd,
 		"removeAfterExec": removeAfterExec,
 	}
-	//todo 存入数据库
+	// todo 存入数据库
 	klog.V(4).Infof("%s", utils.ToJSON(log))
 }
 
@@ -96,7 +96,7 @@ func Xterm(c *gin.Context) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Query("container_name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	if containerName == "" {

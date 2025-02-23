@@ -23,7 +23,7 @@ func List(c *gin.Context) {
 	group := c.Param("group")
 	kind := c.Param("kind")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	nsList := []string{}
@@ -153,7 +153,7 @@ func Event(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	apiVersion := fmt.Sprintf("%s", version)
@@ -182,7 +182,7 @@ func Fetch(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var obj *unstructured.Unstructured
@@ -208,7 +208,7 @@ func FetchJson(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var obj *unstructured.Unstructured
@@ -227,7 +227,7 @@ func Remove(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	err := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
@@ -254,7 +254,7 @@ func BatchRemove(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -287,7 +287,7 @@ func BatchForceRemove(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -327,7 +327,7 @@ func Save(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req yamlRequest
@@ -360,7 +360,7 @@ func Describe(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var result []byte
@@ -376,7 +376,7 @@ func Describe(c *gin.Context) {
 func UploadFile(c *gin.Context) {
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -400,7 +400,7 @@ func UploadFile(c *gin.Context) {
 }
 
 func Apply(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req yamlRequest
@@ -416,7 +416,7 @@ func Apply(c *gin.Context) {
 
 }
 func Delete(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req yamlRequest

@@ -45,7 +45,7 @@ func UpdateAnnotations(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var req struct {
@@ -105,7 +105,7 @@ func ListAnnotations(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var obj *unstructured.Unstructured

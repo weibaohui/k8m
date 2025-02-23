@@ -19,7 +19,7 @@ func ImagePullSecretOptionList(c *gin.Context) {
 	group := c.Param("group")
 	kind := c.Param("kind")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var item *unstructured.Unstructured
@@ -71,7 +71,7 @@ func ContainerInfo(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	containerName := c.Param("container_name")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var item *unstructured.Unstructured
@@ -208,7 +208,7 @@ func UpdateImageTag(c *gin.Context) {
 	group := c.Param("group")
 	kind := c.Param("kind")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var info imageInfo

@@ -21,7 +21,7 @@ func ListPodAntiAffinity(c *gin.Context) {
 	group := c.Param("group")
 	kind := c.Param("kind")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	// 先获取资源中的定义
@@ -79,7 +79,7 @@ func processPodAntiAffinity(c *gin.Context, action string) {
 	group := c.Param("group")
 	kind := c.Param("kind")
 	version := c.Param("version")
-	ctx := c.Request.Context()
+	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var info podAffinity
