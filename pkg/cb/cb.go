@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
@@ -42,8 +44,12 @@ func Audit(k8s *kom.Kubectl) error {
 func Delete(k8s *kom.Kubectl) error {
 	stmt := k8s.Statement
 	cluster := k8s.ID
-
-	cmd := fmt.Sprintf("%s %s", stmt.Command, strings.Join(stmt.Args, " "))
-	klog.V(2).Infof("k8s [%s] Exec cmd in %s %s/%s : %s \n", cluster, stmt.GVR.Resource, stmt.Namespace, stmt.Name, cmd)
+	username := stmt.Context.Value(constants.JwtUserName)
+	role := stmt.Context.Value(constants.JwtUserRole)
+	klog.Errorf("cluster %s,user %s name %s ,action delete", cluster, username, role)
+	switch role {
+	case models.RoleClusterReadonly:
+		return fmt.Errorf("非管理员不能删除资源")
+	}
 	return nil
 }
