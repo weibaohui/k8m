@@ -176,6 +176,12 @@
           }
         },
         {
+          "name": "action_result",
+          "label": "操作结果",
+          "type": "text",
+          "sortable": true
+        },
+        {
           "name": "created_at",
           "label": "创建时间",
           "type": "datetime",
