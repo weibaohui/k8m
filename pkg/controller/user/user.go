@@ -55,22 +55,43 @@ func Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	// 用户名不能为admin
 
+	// 用户名不能为admin
 	if m.Username == "admin" {
 		amis.WriteJsonError(c, fmt.Errorf("用户名不能为admin"))
 		return
 	}
+	_, role := amis.GetLoginUser(c)
+	if m.ID == 0 {
+		// 新增
+		switch role {
+		case models.RoleClusterAdmin, models.RoleClusterReadonly:
+			amis.WriteJsonError(c, fmt.Errorf("非管理员不能新增用户"))
+			return
+		}
+	} else {
+		// 修改
+		switch role {
+		case models.RolePlatformAdmin:
+			m.Role = models.RolePlatformAdmin
+		case models.RoleClusterReadonly:
+			m.Role = models.RoleClusterReadonly
+		}
+	}
 
-	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
+	queryFuncs := genQueryFuncs(c, params)
+
+	// 保存的时候需要单独处理
+	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
 		if m.ID == 0 {
 			// 新增
 			return db
 		} else {
 			// 修改
-			return db.Select([]string{"username", "role"}).Updates(m)
+			return db.Select([]string{"username", "role"})
 		}
 	})
+	err = m.Save(params, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -79,11 +100,42 @@ func Save(c *gin.Context) {
 		"id": m.ID,
 	})
 }
+
+func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB {
+	//  管理页面，判断是否管理员，看到所有的用户，
+	user, role := amis.GetLoginUser(c)
+	var queryFuncs []func(*gorm.DB) *gorm.DB
+	switch role {
+	case models.RolePlatformAdmin:
+		params.UserName = ""
+		queryFuncs = []func(*gorm.DB) *gorm.DB{
+			func(db *gorm.DB) *gorm.DB {
+				return db
+			},
+		}
+	case models.RoleClusterAdmin:
+		queryFuncs = []func(*gorm.DB) *gorm.DB{
+			func(db *gorm.DB) *gorm.DB {
+				return db.Where("created_by=?", user)
+			},
+		}
+	case models.RoleClusterReadonly:
+		queryFuncs = []func(*gorm.DB) *gorm.DB{
+			func(db *gorm.DB) *gorm.DB {
+				return db.Where("username=?", user)
+			},
+		}
+	}
+	return queryFuncs
+}
 func Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.User{}
-	err := m.Delete(params, ids)
+
+	queryFuncs := genQueryFuncs(c, params)
+
+	err := m.Delete(params, ids, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -91,7 +143,7 @@ func Delete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 func UpdatePsw(c *gin.Context) {
-	// todo 校验管理员权限，不是管理员不可以改
+
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 	m := &models.User{}
@@ -117,9 +169,11 @@ func UpdatePsw(c *gin.Context) {
 
 	m.Password = base64.StdEncoding.EncodeToString(psw)
 
-	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
+	queryFuncs := genQueryFuncs(c, params)
+	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
 		return db.Select([]string{"password", "salt"}).Updates(m)
 	})
+	err = m.Save(params, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
