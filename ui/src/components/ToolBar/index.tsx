@@ -1,9 +1,9 @@
-import {Avatar, Dropdown, Space, MenuProps} from 'antd';
-import {useNavigate} from 'react-router-dom';
+import { Avatar, Dropdown, Space, MenuProps } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
-import {UserOutlined} from '@ant-design/icons';
-import {useEffect, useState} from 'react';
-import {jwtDecode} from 'jwt-decode';
+import { UserOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 interface DecodedToken {
     username: string;
@@ -15,7 +15,7 @@ interface DecodedToken {
 
 const Toolbar = () => {
     const navigate = useNavigate();
-    const [userInfo, setUserInfo] = useState<{ username: string; role: string }>({username: '', role: ''});
+    const [userInfo, setUserInfo] = useState<{ username: string; role: string }>({ username: '', role: '' });
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -43,7 +43,7 @@ const Toolbar = () => {
         {
             key: 'username',
             label: (
-                <div style={{padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <div style={{ padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span>{userInfo.username}</span>
                     <span style={{
                         backgroundColor: '#f0f0f0',
@@ -57,7 +57,16 @@ const Toolbar = () => {
             )
         },
         {
-            key: 'divider',
+            key: 'divider-1',
+            type: 'divider'
+        },
+        {
+            key: 'user-mgm',
+            label: "用户管理",
+            onClick: () => navigate('/user/user')
+        },
+        {
+            key: 'divider-2',
             type: 'divider'
         },
         {
@@ -71,9 +80,9 @@ const Toolbar = () => {
         <div className={styles.toolbar}>
             <Space>
                 <li>
-                    <Dropdown menu={{items: menuItems}} placement='bottomRight'>
-                        <Avatar size="small" style={{backgroundColor: '#1677ff', cursor: 'pointer'}}>
-                            <UserOutlined style={{fontSize: 14}}/>
+                    <Dropdown menu={{ items: menuItems }} placement='bottomRight'>
+                        <Avatar size="small" style={{ backgroundColor: '#1677ff', cursor: 'pointer' }}>
+                            <UserOutlined style={{ fontSize: 14 }} />
                         </Avatar>
                     </Dropdown>
                 </li>
