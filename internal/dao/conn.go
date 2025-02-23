@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/flag"
-	"gorm.io/driver/sqlite" // Sqlite driver based on CGO
+	"github.com/weibaohui/k8m/sqlite"
+	_ "modernc.org/sqlite"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"k8s.io/klog/v2"
