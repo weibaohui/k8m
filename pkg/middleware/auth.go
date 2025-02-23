@@ -52,6 +52,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		c.Set(constants.JwtUserName, claims[constants.JwtUserName])
+		c.Set(constants.JwtUserRole, claims[constants.JwtUserRole])
 		c.Next()
 	}
 }

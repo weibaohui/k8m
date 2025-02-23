@@ -12,7 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -25,10 +27,11 @@ type LoginRequest struct {
 }
 
 // 生成 Token
-func generateToken(username string) (string, error) {
+func generateToken(username, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
+		constants.JwtUserName: username,
+		constants.JwtUserRole: role,
+		"exp":                 time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
 	})
 
 	cfg := flag.Init()
@@ -63,7 +66,7 @@ func LoginByPassword(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
 			return
 		}
-		token, _ := generateToken(req.Username)
+		token, _ := generateToken(req.Username, models.RoleAdmin)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {
@@ -75,7 +78,6 @@ func LoginByPassword(c *gin.Context) {
 		}
 		for _, v := range list {
 			if v.Username == req.Username {
-
 				decryptDBPsw, err := AesDecrypt(v.Password)
 				if err != nil {
 					amis.WriteJsonError(c, err)
@@ -86,7 +88,7 @@ func LoginByPassword(c *gin.Context) {
 					c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
 					return
 				}
-				token, _ := generateToken(req.Username)
+				token, _ := generateToken(v.Username, v.Role)
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return
 			}
