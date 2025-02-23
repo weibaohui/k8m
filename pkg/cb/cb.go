@@ -34,23 +34,28 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) 
 		cluster, username, role, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
 
 	log := models.OperationLog{
-		Action:    action,
-		Cluster:   cluster,
-		Kind:      stmt.GVK.Kind,
-		Name:      stmt.Name,
-		Namespace: stmt.Namespace,
-		UserName:  username,
-		Group:     stmt.GVK.Group,
-		Role:      role,
+		Action:       action,
+		Cluster:      cluster,
+		Kind:         stmt.GVK.Kind,
+		Name:         stmt.Name,
+		Namespace:    stmt.Namespace,
+		UserName:     username,
+		Group:        stmt.GVK.Group,
+		Role:         role,
+		ActionResult: "success",
+	}
+
+	var err error
+	if role == models.RoleClusterReadonly {
+		err = fmt.Errorf("非管理员不能%s资源", action)
+	}
+	if err != nil {
+		log.ActionResult = err.Error()
 	}
 	go func() {
 		service.OperationLogService().Add(&log)
 	}()
-
-	if role == models.RoleClusterReadonly {
-		return username, role, fmt.Errorf("非管理员不能%s资源", action)
-	}
-	return username, role, nil
+	return username, role, err
 }
 
 func handleDelete(k8s *kom.Kubectl) error {
