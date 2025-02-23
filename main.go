@@ -337,6 +337,7 @@ func main() {
 
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
+		mgm.GET("/log/operation/list", log.ListOperation)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)

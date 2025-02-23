@@ -18,3 +18,15 @@ func ListShell(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+
+func ListOperation(c *gin.Context) {
+	params := dao.BuildParams(c)
+	m := &models.OperationLog{}
+
+	items, total, err := m.List(params)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonListWithTotal(c, total, items)
+}

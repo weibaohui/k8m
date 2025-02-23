@@ -54,13 +54,6 @@
       "api": "get:/mgm/log/operation/list",
       "columns": [
         {
-          "type": "operation",
-          "label": "操作",
-          "width": 120,
-          "buttons": [],
-          "toggled": true
-        },
-        {
           "name": "username",
           "label": "用户名",
           "type": "text",
