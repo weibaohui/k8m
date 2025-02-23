@@ -16,24 +16,7 @@ func List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 
-	//  管理页面，判断是否管理员，看到所有的用户，
-	user, role := amis.GetLoginUser(c)
-	var queryFuncs []func(*gorm.DB) *gorm.DB
-	switch role {
-	case models.RolePlatformAdmin:
-		params.UserName = ""
-		queryFuncs = []func(*gorm.DB) *gorm.DB{
-			func(db *gorm.DB) *gorm.DB {
-				return db
-			},
-		}
-	case models.RoleClusterAdmin, models.RoleClusterReadonly:
-		queryFuncs = []func(*gorm.DB) *gorm.DB{
-			func(db *gorm.DB) *gorm.DB {
-				return db.Where("username=?", user)
-			},
-		}
-	}
+	queryFuncs := genQueryFuncs(c, params)
 	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
