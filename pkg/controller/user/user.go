@@ -16,7 +16,7 @@ func List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 
-	// todo 管理页面，判断是否管理员，看到所有的用户，
+	//  管理页面，判断是否管理员，看到所有的用户，
 	user, role := amis.GetLoginUser(c)
 	var queryFuncs []func(*gorm.DB) *gorm.DB
 	switch role {
