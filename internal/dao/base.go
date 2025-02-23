@@ -13,10 +13,22 @@ func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *
 	var total int64
 	var results []T
 
+	// 如果params为nil，创建一个默认的params
+	if params == nil {
+		params = &Params{
+			OrderBy:  "id",
+			OrderDir: "desc",
+			Page:     1,
+			PerPage:  15,
+			Queries:  make(map[string]interface{}),
+		}
+	}
+
 	// 如果CreatedBy为空，则补全
-	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" && params.UserName != "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
 	}
+
 	// 构建数据库查询
 	dbQuery := DB().Model(model)
 
@@ -64,10 +76,18 @@ func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *
 	return results, total, nil
 }
 func GenericGetOne[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *gorm.DB) (T, error) {
+	// 如果params为nil，创建一个默认的params
+	if params == nil {
+		params = &Params{
+			Queries: make(map[string]interface{}),
+		}
+	}
+
 	// 如果CreatedBy为空，则补全
-	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" && params.UserName != "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
 	}
+
 	dbQuery := DB().Model(model)
 	dbQuery = dbQuery.Where(model)
 
@@ -82,11 +102,18 @@ func GenericGetOne[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) 
 
 // GenericSave 是一个通用保存方法，适用于任意模型
 func GenericSave[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	// 如果params为nil，创建一个默认的params
+	if params == nil {
+		params = &Params{
+			Queries: make(map[string]interface{}),
+		}
+	}
 
 	// 如果CreatedBy为空，则补全
-	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" && params.UserName != "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
 	}
+
 	dbQuery := DB().Model(model)
 	dbQuery = dbQuery.Where(model)
 
@@ -105,10 +132,18 @@ func GenericSave[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *g
 
 // GenericDelete 是一个通用的删除方法，适用于任意模型
 func GenericDelete[T any](params *Params, model T, ids []int64, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	// 如果params为nil，创建一个默认的params
+	if params == nil {
+		params = &Params{
+			Queries: make(map[string]interface{}),
+		}
+	}
+
 	// 如果CreatedBy为空，则补全
-	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" {
+	if reflect.ValueOf(model).Elem().FieldByName("CreatedBy").String() == "" && params.UserName != "" {
 		reflect.ValueOf(model).Elem().FieldByName("CreatedBy").SetString(params.UserName)
 	}
+
 	// 构建数据库查询
 	dbQuery := DB().Model(model)
 	dbQuery = dbQuery.Where(model)
