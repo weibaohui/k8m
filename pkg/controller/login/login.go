@@ -3,6 +3,7 @@ package login
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -10,12 +11,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
+	"k8s.io/klog/v2"
 )
+
+var ErrorUerPassword = errors.New("用户名密码错误")
 
 // LoginRequest 用户结构体
 type LoginRequest struct {
@@ -38,8 +41,10 @@ func generateToken(username, role string) (string, error) {
 
 func LoginByPassword(c *gin.Context) {
 	var req LoginRequest
+	errorInfo := gin.H{"message": "用户名或密码错误"}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "参数错误"})
+		klog.Errorf("LoginByPassword %v", err.Error())
+		c.JSON(http.StatusUnauthorized, errorInfo)
 		return
 	}
 	// 初始化配置
@@ -48,7 +53,8 @@ func LoginByPassword(c *gin.Context) {
 	// 对密码进行解密
 	decrypt, err := utils.AesDecrypt(req.Password)
 	if err != nil {
-		amis.WriteJsonError(c, err)
+		klog.Errorf("LoginByPassword %v", err.Error())
+		c.JSON(http.StatusUnauthorized, errorInfo)
 		return
 	}
 
@@ -60,7 +66,7 @@ func LoginByPassword(c *gin.Context) {
 		// cfg 用户名密码
 		if string(decrypt) != cfg.AdminPassword {
 			// 前端处理登录状态码，不要修改
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
+			c.JSON(http.StatusUnauthorized, errorInfo)
 			return
 		}
 		token, _ := generateToken(req.Username, models.RolePlatformAdmin)
@@ -70,7 +76,8 @@ func LoginByPassword(c *gin.Context) {
 		// DB 用户名密码
 		list, err := service.UserService().List()
 		if err != nil {
-			amis.WriteJsonError(c, err)
+			klog.Errorf("LoginByPassword %v", err.Error())
+			c.JSON(http.StatusUnauthorized, errorInfo)
 			return
 		}
 		for _, v := range list {
@@ -79,17 +86,19 @@ func LoginByPassword(c *gin.Context) {
 				// 前端密码解密的值，加上盐值，重新计算
 				decryptPsw, err := utils.AesEncrypt([]byte(fmt.Sprintf("%s%s", string(decrypt), v.Salt)))
 				if err != nil {
-					amis.WriteJsonError(c, err)
+					klog.Errorf("LoginByPassword %v", err.Error())
+					c.JSON(http.StatusUnauthorized, errorInfo)
 					return
 				}
 				dbPsw, err := base64.StdEncoding.DecodeString(v.Password)
 				if err != nil {
-					amis.WriteJsonError(c, err)
+					klog.Errorf("LoginByPassword %v", err.Error())
+					c.JSON(http.StatusUnauthorized, errorInfo)
 					return
 				}
 				if !bytes.Equal(dbPsw, decryptPsw) {
 					// 前端处理登录状态码，不要修改
-					c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
+					c.JSON(http.StatusUnauthorized, errorInfo)
 					return
 				}
 
@@ -100,5 +109,5 @@ func LoginByPassword(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
+	c.JSON(http.StatusUnauthorized, errorInfo)
 }
