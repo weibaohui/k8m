@@ -29,6 +29,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/template"
+	"github.com/weibaohui/k8m/pkg/controller/user"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
@@ -328,7 +329,9 @@ func main() {
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)
 		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
-
+		mgm.GET("/user/list", user.List)
+		mgm.POST("/user/save", user.Save)
+		mgm.POST("/user/delete", user.Delete)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
