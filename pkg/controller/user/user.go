@@ -66,19 +66,23 @@ func Save(c *gin.Context) {
 			return
 		}
 	} else {
-		var originalUser models.User
-		err = dao.DB().Model(&models.User{}).
-			Where("id=?", m.ID).
-			Find(&originalUser).Error
-		if err != nil {
-			amis.WriteJsonError(c, fmt.Errorf("无此用户[%d]", m.ID))
-			return
+		switch role {
+		case models.RoleClusterAdmin, models.RoleClusterReadonly:
+			var originalUser models.User
+			err = dao.DB().Model(&models.User{}).
+				Where("id=?", m.ID).
+				Find(&originalUser).Error
+			if err != nil {
+				amis.WriteJsonError(c, fmt.Errorf("无此用户[%d]", m.ID))
+				return
+			}
+
+			// 如需限制不能修改的字段，请在下面赋值。
+			// 用户名、角色不能修改
+			m.Username = originalUser.Username
+			m.Role = originalUser.Role
 		}
 
-		// 如需限制不能修改的字段，请在下面赋值。
-		// 用户名、角色不能修改
-		m.Username = originalUser.Username
-		m.Role = originalUser.Role
 	}
 
 	queryFuncs := genQueryFuncs(c, params)
