@@ -19,6 +19,7 @@ var localPVService = &pvService{
 var localIngressService = &ingressService{
 	CountList: []*ingressCount{},
 }
+var localUserService = &userService{}
 
 func ChatService() *chatService {
 	return localChatService
@@ -49,4 +50,8 @@ func PVService() *pvService {
 }
 func IngressService() *ingressService {
 	return localIngressService
+}
+
+func UserService() *userService {
+	return localUserService
 }
