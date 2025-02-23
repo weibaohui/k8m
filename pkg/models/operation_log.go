@@ -10,17 +10,18 @@ import (
 
 // OperationLog 用户导入OperationLog
 type OperationLog struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
-	UserName  string    `json:"username,omitempty"`
-	Role      string    `json:"role,omitempty"`
-	Cluster   string    `gorm:"index" json:"cluster,omitempty"`
-	Namespace string    `json:"namespace,omitempty"`
-	Name      string    `json:"name,omitempty"`
-	Group     string    `json:"group,omitempty"`
-	Kind      string    `json:"kind,omitempty"`
-	Action    string    `json:"action,omitempty"`     // 操作类型
-	CreatedAt time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
-	UpdatedAt time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
+	UserName     string    `json:"username,omitempty"`
+	Role         string    `json:"role,omitempty"`
+	Cluster      string    `gorm:"index" json:"cluster,omitempty"`
+	Namespace    string    `json:"namespace,omitempty"`
+	Name         string    `json:"name,omitempty"`
+	Group        string    `json:"group,omitempty"`         // 资源group
+	Kind         string    `json:"kind,omitempty"`          // 资源kind
+	Action       string    `json:"action,omitempty"`        // 操作类型
+	ActionResult string    `json:"action_result,omitempty"` // 操作结果
+	CreatedAt    time.Time `json:"created_at,omitempty"`    // Automatically managed by GORM for creation time
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`    // Automatically managed by GORM for update time
 
 }
 
