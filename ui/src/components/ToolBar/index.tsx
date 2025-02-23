@@ -22,9 +22,11 @@ const Toolbar = () => {
         if (token) {
             try {
                 const decoded = jwtDecode<DecodedToken>(token);
+
+
                 setUserInfo({
                     username: decoded.username || '',
-                    role: decoded.role || ''
+                    role: decoded.role === 'admin' ? '管理员' : decoded.role === 'readonly' ? '只读' : ''
                 });
             } catch (error) {
                 console.error('Failed to decode token:', error);
@@ -41,9 +43,16 @@ const Toolbar = () => {
         {
             key: 'username',
             label: (
-                <div style={{padding: '4px 0'}}>
-                    <div>用户名：{userInfo.username}</div>
-                    <div>角色：{userInfo.role}</div>
+                <div style={{padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                    <span>{userInfo.username}</span>
+                    <span style={{
+                        backgroundColor: '#f0f0f0',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px'
+                    }}>
+                        {userInfo.role}
+                    </span>
                 </div>
             )
         },
