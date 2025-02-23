@@ -32,7 +32,6 @@ func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *
 	// 构建数据库查询
 	dbQuery := DB().Model(model)
 
-	dbQuery = dbQuery.Where(model)
 	// 定义允许过滤的字段列表
 	validFields, err := GetTableFieldsWithCache(model)
 	if err != nil {
@@ -89,7 +88,6 @@ func GenericGetOne[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) 
 	}
 
 	dbQuery := DB().Model(model)
-	dbQuery = dbQuery.Where(model)
 
 	// 执行自定义查询函数
 	for _, fn := range queryFuncs {
@@ -115,7 +113,6 @@ func GenericSave[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *g
 	}
 
 	dbQuery := DB().Model(model)
-	dbQuery = dbQuery.Where(model)
 
 	// 执行自定义查询函数
 	for _, fn := range queryFuncs {
