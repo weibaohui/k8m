@@ -21,6 +21,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
+	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/httpstream"
@@ -73,22 +75,23 @@ func removePod(selectedCluster string, ns string, podName string) {
 }
 
 func cmdLogger(c *gin.Context, cmd string) {
-	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Query("container_name")
 	selectedCluster := amis.GetSelectedCluster(c)
 	cmd = utils.CleanANSISequences(cmd)
-	log := gin.H{
-		"cluster":         selectedCluster,
-		"namespace":       ns,
-		"podName":         podName,
-		"containerName":   containerName,
-		"cmd":             cmd,
-		"removeAfterExec": removeAfterExec,
+	username, role := amis.GetLoginUser(c)
+	log := models.ShellLog{
+		Cluster:       selectedCluster,
+		Command:       cmd,
+		Namespace:     ns,
+		PodName:       podName,
+		ContainerName: containerName,
+		UserName:      username,
+		Role:          role,
 	}
-	// todo 存入数据库
-	klog.V(4).Infof("%s", utils.ToJSON(log))
+	service.ShellLogService().Add(&log)
+
 }
 
 func Xterm(c *gin.Context) {
