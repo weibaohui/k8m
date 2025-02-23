@@ -1,0 +1,194 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/mgm/log/operation/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [],
+          "toggled": true
+        },
+        {
+          "name": "username",
+          "label": "用户名",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "username",
+            "clearable": true,
+            "label": "用户名",
+            "placeholder": "输入用户名"
+          }
+        },
+        {
+          "name": "role",
+          "label": "角色",
+          "type": "mapping",
+          "map": {
+            "cluster_admin": "集群管理员",
+            "cluster_readonly": "集群只读",
+            "platform_admin": "平台管理员"
+          },
+          "searchable": {
+            "type": "select",
+            "name": "role",
+            "clearable": true,
+            "label": "角色",
+            "placeholder": "请选择角色",
+            "options": [
+              {
+                "label": "集群管理员",
+                "value": "cluster_admin"
+              },
+              {
+                "label": "集群只读",
+                "value": "cluster_readonly"
+              },
+              {
+                "label": "平台管理员",
+                "value": "platform_admin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "cluster",
+          "label": "集群",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "cluster",
+            "clearable": true,
+            "label": "集群",
+            "placeholder": "输入集群名称"
+          }
+        },
+        {
+          "name": "namespace",
+          "label": "命名空间",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "namespace",
+            "clearable": true,
+            "label": "命名空间",
+            "placeholder": "输入命名空间"
+          }
+        },
+        {
+          "name": "name",
+          "label": "资源名称",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "name",
+            "clearable": true,
+            "label": "资源名称",
+            "placeholder": "输入资源名称"
+          }
+        },
+        {
+          "name": "group",
+          "label": "资源组",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "group",
+            "clearable": true,
+            "label": "资源组",
+            "placeholder": "输入资源组"
+          }
+        },
+        {
+          "name": "kind",
+          "label": "资源类型",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "kind",
+            "clearable": true,
+            "label": "资源类型",
+            "placeholder": "输入资源类型"
+          }
+        },
+        {
+          "name": "action",
+          "label": "操作类型",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "action",
+            "clearable": true,
+            "label": "操作类型",
+            "placeholder": "输入操作类型"
+          }
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime",
+          "sortable": true
+        }
+      ]
+    }
+  ]
+}

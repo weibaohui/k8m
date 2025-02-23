@@ -113,6 +113,20 @@
                   "cluster": "${clusterName}"
                 }
               }
+            },
+            {
+              "label": "命令日志",
+              "type": "button",
+              "actionType": "url",
+              "blank": true,
+              "url": "/#/log/shell?cluster=${fileName}/${contextName}"
+            },
+            {
+              "label": "操作日志",
+              "type": "button",
+              "actionType": "url",
+              "blank": true,
+              "url": "/#/log/operation?cluster=${fileName}/${contextName}"
             }
           ],
           "toggled": true
