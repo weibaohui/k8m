@@ -61,7 +61,9 @@ func Save(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("用户名不能为admin"))
 		return
 	}
+
 	_, role := amis.GetLoginUser(c)
+
 	if m.ID == 0 {
 		// 新增
 		switch role {
@@ -70,13 +72,19 @@ func Save(c *gin.Context) {
 			return
 		}
 	} else {
-		// 修改
-		switch role {
-		case models.RolePlatformAdmin:
-			m.Role = models.RolePlatformAdmin
-		case models.RoleClusterReadonly:
-			m.Role = models.RoleClusterReadonly
+		var originalUser models.User
+		err = dao.DB().Model(&models.User{}).
+			Where("id=?", m.ID).
+			Find(&originalUser).Error
+		if err != nil {
+			amis.WriteJsonError(c, fmt.Errorf("无此用户[%d]", m.ID))
+			return
 		}
+
+		// 如需限制不能修改的字段，请在下面赋值。
+		// 用户名、角色不能修改
+		m.Username = originalUser.Username
+		m.Role = originalUser.Role
 	}
 
 	queryFuncs := genQueryFuncs(c, params)
