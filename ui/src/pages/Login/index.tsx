@@ -1,44 +1,14 @@
-import { Form, Input, Button, Checkbox, message } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import {Form, Input, Button, Checkbox, message} from 'antd'
+import {useNavigate} from 'react-router-dom'
 import {
     UserOutlined,
     LockOutlined
 } from '@ant-design/icons'
 import styles from './index.module.scss'
-import { useCallback, useEffect } from 'react'
-
-// @ts-ignore
-import CryptoJS from "crypto-js";
+import {useCallback, useEffect} from 'react'
+import {encrypt, decrypt} from '@/utils/crypto'
 
 const FormItem = Form.Item
-
-const secretKey = 'secret-key-16-ok';
-
-// 加密函数
-function encrypt(message: string) {
-    // key 和 iv 使用同一个值
-    const sKey = CryptoJS.enc.Utf8.parse(secretKey);
-    const encrypted = CryptoJS.AES.encrypt(message, sKey, {
-        iv: sKey,
-        mode: CryptoJS.mode.CBC, // CBC算法
-        padding: CryptoJS.pad.Pkcs7, //使用pkcs7 进行padding 后端需要注意
-    });
-
-    return encrypted.toString();
-}
-
-// 解密函数
-function decrypt(base64CipherText: string) {
-    // key 和 iv 使用同一个值
-    const sKey = CryptoJS.enc.Utf8.parse(secretKey);
-    const decrypted = CryptoJS.AES.decrypt(base64CipherText, sKey, {
-        iv: sKey,
-        mode: CryptoJS.mode.CBC, // CBC算法
-        padding: CryptoJS.pad.Pkcs7, //使用pkcs7 进行padding 后端需要注意
-    });
-
-    return decrypted.toString(CryptoJS.enc.Utf8);
-}
 
 const Login = () => {
     const navigate = useNavigate()
@@ -118,14 +88,14 @@ const Login = () => {
                 autoComplete='off'
             >
                 <div>
-                    <h2 style={{ color: '#666', fontSize: '24px', marginBottom: 20 }}>欢迎登录</h2>
+                    <h2 style={{color: '#666', fontSize: '24px', marginBottom: 20}}>欢迎登录</h2>
                 </div>
-                <FormItem name='username' rules={[{ required: true, message: '请输入用户名' }]}>
-                    <Input placeholder='请输入用户名' prefix={<UserOutlined />} />
+                <FormItem name='username' rules={[{required: true, message: '请输入用户名'}]}>
+                    <Input placeholder='请输入用户名' prefix={<UserOutlined/>}/>
                 </FormItem>
-                <FormItem name='password' rules={[{ required: true, message: '请输入密码' }]}>
+                <FormItem name='password' rules={[{required: true, message: '请输入密码'}]}>
                     <Input.Password
-                        prefix={<LockOutlined />}
+                        prefix={<LockOutlined/>}
                         placeholder='请输入密码'
                     />
                 </FormItem>
