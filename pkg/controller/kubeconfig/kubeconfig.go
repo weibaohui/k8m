@@ -65,7 +65,7 @@ func Save(c *gin.Context) {
 
 	// 执行一下扫描
 	service.ClusterService().ScanClustersInDB()
-
+	// 初始化本项目中的回调
 	amis.WriteJsonOK(c)
 }
 func Remove(c *gin.Context) {

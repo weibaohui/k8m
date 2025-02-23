@@ -24,8 +24,14 @@ import (
 )
 
 type clusterService struct {
-	clusterConfigs        []*ClusterConfig // 文件名+context名称 -> 集群配置
-	AggregateDelaySeconds int              // 聚合延迟时间
+	clusterConfigs        []*ClusterConfig                    // 文件名+context名称 -> 集群配置
+	AggregateDelaySeconds int                                 // 聚合延迟时间
+	callbackRegisterFunc  func(cluster *ClusterConfig) func() // 用来注册回调参数的回调方法
+
+}
+
+func (c *clusterService) SetRegisterCallbackFunc(callback func(cluster *ClusterConfig) func()) {
+	c.callbackRegisterFunc = callback
 }
 
 type ClusterConfig struct {
@@ -167,7 +173,8 @@ func (c *clusterService) Connect(fileName string, contextName string) {
 			clusterConfig.restConfig = nil
 			clusterConfig.Err = ""
 			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-			c.RegisterCluster(clusterConfig)
+			_, _ = c.RegisterCluster(clusterConfig)
+
 		}
 	}
 	klog.V(4).Infof("连接集群 %s %s 完毕", fileName, contextName)
@@ -299,6 +306,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 
 }
 func (c *clusterService) ScanClustersInDB() {
+
 	kc := &models.KubeConfig{}
 
 	var list []*models.KubeConfig
@@ -433,7 +441,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 	// 注册
 	for _, clusterConfig := range c.clusterConfigs {
 		// 改为只注册CurrentContext的这个
-		c.RegisterCluster(clusterConfig)
+		_, _ = c.RegisterCluster(clusterConfig)
 	}
 	// 打印serverVersion
 	for _, clusterConfig := range c.clusterConfigs {
@@ -443,6 +451,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 
 // RegisterCluster 从已扫描的集群列表中注册指定的某个集群
 func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, error) {
+
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
 	clusterID := clusterConfig.GetClusterID()
 	err := c.LoadRestConfig(clusterConfig)
@@ -472,6 +481,8 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	}
 	klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+	c.callbackRegisterFunc(clusterConfig)
+
 	return true, nil
 }
 
@@ -542,5 +553,5 @@ func (c *clusterService) RegisterInCluster() {
 	}
 
 	c.AddToClusterList(clusterConfig)
-	c.RegisterCluster(clusterConfig)
+	_, _ = c.RegisterCluster(clusterConfig)
 }

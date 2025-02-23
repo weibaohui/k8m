@@ -66,18 +66,19 @@ func Init() {
 		// 初始化kom
 		// 先注册回调，后面集群连接后，需要执行回调
 		callbacks.RegisterInit()
+
+		// 先把自定义钩子注册登记
+		service.ClusterService().SetRegisterCallbackFunc(cb.RegisterDefaultCallbacks)
+
 		// 先注册InCluster集群
 		service.ClusterService().RegisterInCluster()
 		// 再注册其他集群
 		service.ClusterService().ScanClustersInDB()
 		service.ClusterService().ScanClustersInDir(cfg.KubeConfig)
 		service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
-
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
 
-		// 初始化本项目中的回调
-		cb.RegisterCallback()
 	}()
 
 	// 启动watch

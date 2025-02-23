@@ -10,20 +10,18 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func RegisterCallback() {
-	clusters := service.ClusterService().ConnectedClusters()
-	for _, cluster := range clusters {
-		selectedCluster := service.ClusterService().ClusterID(cluster)
+func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
+	selectedCluster := service.ClusterService().ClusterID(cluster)
 
-		deleteCallback := kom.Cluster(selectedCluster).Callback().Delete()
-		_ = deleteCallback.Before("kom:delete").Register("k8m:delete", handleDelete)
-		updateCallback := kom.Cluster(selectedCluster).Callback().Update()
-		_ = updateCallback.Before("kom:update").Register("k8m:update", handleUpdate)
-		patchCallback := kom.Cluster(selectedCluster).Callback().Patch()
-		_ = patchCallback.Before("kom:patch").Register("k8m:patch", handlePatch)
-		createCallback := kom.Cluster(selectedCluster).Callback().Create()
-		_ = createCallback.Before("kom:create").Register("k8m:create", handleCreate)
-	}
+	deleteCallback := kom.Cluster(selectedCluster).Callback().Delete()
+	_ = deleteCallback.Before("kom:delete").Register("k8m:delete", handleDelete)
+	updateCallback := kom.Cluster(selectedCluster).Callback().Update()
+	_ = updateCallback.Before("kom:update").Register("k8m:update", handleUpdate)
+	patchCallback := kom.Cluster(selectedCluster).Callback().Patch()
+	_ = patchCallback.Before("kom:patch").Register("k8m:patch", handlePatch)
+	createCallback := kom.Cluster(selectedCluster).Callback().Create()
+	_ = createCallback.Before("kom:create").Register("k8m:create", handleCreate)
+	return nil
 }
 
 func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) {
