@@ -13,7 +13,8 @@ type User struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
 	Username  string    `gorm:"uniqueIndex;not null" json:"username,omitempty"`
 	Password  string    `gorm:"not null;index:idx_password" json:"password,omitempty"`
-	Role      string    `gorm:"not null;index:idx_role" json:"role,omitempty"`    // 管理员/只读
+	Role      string    `gorm:"not null;index:idx_role" json:"role,omitempty"` // 管理员/只读
+	Salt      string    `gorm:"not null" json:"salt,omitempty"`
 	CreatedBy string    `gorm:"index:idx_created_by" json:"created_by,omitempty"` // 创建者
 	CreatedAt time.Time `json:"created_at,omitempty"`                             // Automatically managed by GORM for creation time
 	UpdatedAt time.Time `json:"updated_at,omitempty"`                             // Automatically managed by GORM for update time
