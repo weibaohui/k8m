@@ -21,6 +21,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/kubeconfig"
+	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
@@ -333,6 +334,9 @@ func main() {
 		mgm.POST("/user/save", user.Save)
 		mgm.POST("/user/delete/:ids", user.Delete)
 		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
+
+		// log
+		mgm.GET("/log/shell/list", log.ListShell)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
