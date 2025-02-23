@@ -20,6 +20,8 @@ var localIngressService = &ingressService{
 	CountList: []*ingressCount{},
 }
 var localUserService = &userService{}
+var localOperationLogService = &operationLogService{}
+var localShellLogService = &shellLogService{}
 
 func ChatService() *chatService {
 	return localChatService
@@ -54,4 +56,11 @@ func IngressService() *ingressService {
 
 func UserService() *userService {
 	return localUserService
+}
+
+func OperationLogService() *operationLogService {
+	return localOperationLogService
+}
+func ShellLogService() *shellLogService {
+	return localShellLogService
 }
