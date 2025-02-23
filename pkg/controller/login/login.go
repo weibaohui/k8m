@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/service"
 )
 
 var secretKey = "secret-key-16-ok"
@@ -51,16 +52,47 @@ func LoginByPassword(c *gin.Context) {
 		return
 	}
 
-	if string(decrypt) != cfg.AdminPassword {
-		// 前端处理登录状态码，不要修改
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
-		return
-	}
+	// 验证用户名和密码
+	// 1、从cfg中获取用户名，先判断是不是admin，是进行密码比对
+	// 2、从DB中获取用户名密码
+
 	if req.Username == cfg.AdminUserName {
+		// cfg 用户名密码
+		if string(decrypt) != cfg.AdminPassword {
+			// 前端处理登录状态码，不要修改
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
+			return
+		}
 		token, _ := generateToken(req.Username)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
+	} else {
+		// DB 用户名密码
+		list, err := service.UserService().List()
+		if err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		for _, v := range list {
+			if v.Username == req.Username {
+
+				decryptDBPsw, err := AesDecrypt(v.Password)
+				if err != nil {
+					amis.WriteJsonError(c, err)
+					return
+				}
+				if string(decrypt) != string(decryptDBPsw) {
+					// 前端处理登录状态码，不要修改
+					c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
+					return
+				}
+				token, _ := generateToken(req.Username)
+				c.JSON(http.StatusOK, gin.H{"token": token})
+				return
+			}
+		}
 	}
+
 	c.JSON(http.StatusUnauthorized, gin.H{"message": "用户名或密码错误"})
 }
 
