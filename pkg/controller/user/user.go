@@ -90,7 +90,7 @@ func Save(c *gin.Context) {
 			return db
 		} else {
 			// 修改
-			return db.Select([]string{"username", "role"})
+			return db.Select([]string{"username", "role", "created_by"})
 		}
 	})
 	err = m.Save(params, queryFuncs...)
