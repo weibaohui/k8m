@@ -481,6 +481,8 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	}
 	klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+
+	// 先连接了，再执行回调注册，因为是绑定在kom上的， 只有上面的代码执行后，才会连接，才会有kom.Clusters()
 	c.callbackRegisterFunc(clusterConfig)
 
 	return true, nil
