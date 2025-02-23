@@ -26,58 +26,50 @@ func RegisterCallback() {
 	}
 }
 
-func handleDelete(k8s *kom.Kubectl) error {
+func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) {
 	stmt := k8s.Statement
 	cluster := k8s.ID
 
-	username := stmt.Context.Value(constants.JwtUserName)
-	role := stmt.Context.Value(constants.JwtUserRole)
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=delete, gck=[%s], resource=[%s/%s] ", cluster, username, role, stmt.GVK.String(), stmt.Namespace, stmt.Name)
-	switch role {
-	case models.RoleClusterReadonly:
-		return fmt.Errorf("非管理员不能删除资源")
+	username := fmt.Sprintf("%s", stmt.Context.Value(constants.JwtUserName))
+	role := fmt.Sprintf("%s", stmt.Context.Value(constants.JwtUserRole))
+	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=%s, gck=[%s], resource=[%s/%s] ",
+		cluster, username, role, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
+
+	log := models.OperationLog{
+		Action:    action,
+		Cluster:   cluster,
+		Kind:      stmt.GVK.Kind,
+		Name:      stmt.Name,
+		Namespace: stmt.Namespace,
+		UserName:  username,
+		Group:     stmt.GVK.Group,
 	}
-	return nil
+	go func() {
+		service.OperationLogService().Add(&log)
+	}()
+
+	if role == models.RoleClusterReadonly {
+		return username, role, fmt.Errorf("非管理员不能%s资源", action)
+	}
+	return username, role, nil
+}
+
+func handleDelete(k8s *kom.Kubectl) error {
+	_, _, err := handleCommonLogic(k8s, "delete")
+	return err
 }
 
 func handleUpdate(k8s *kom.Kubectl) error {
-	stmt := k8s.Statement
-	cluster := k8s.ID
-
-	username := stmt.Context.Value(constants.JwtUserName)
-	role := stmt.Context.Value(constants.JwtUserRole)
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=update, gck=[%s], resource=[%s/%s] ", cluster, username, role, stmt.GVK.String(), stmt.Namespace, stmt.Name)
-	switch role {
-	case models.RoleClusterReadonly:
-		return fmt.Errorf("非管理员不能更新资源")
-	}
-	return nil
+	_, _, err := handleCommonLogic(k8s, "update")
+	return err
 }
 
 func handlePatch(k8s *kom.Kubectl) error {
-	stmt := k8s.Statement
-	cluster := k8s.ID
-
-	username := stmt.Context.Value(constants.JwtUserName)
-	role := stmt.Context.Value(constants.JwtUserRole)
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=patch, gck=[%s], resource=[%s/%s] ", cluster, username, role, stmt.GVK.String(), stmt.Namespace, stmt.Name)
-	switch role {
-	case models.RoleClusterReadonly:
-		return fmt.Errorf("非管理员不能修改资源")
-	}
-	return nil
+	_, _, err := handleCommonLogic(k8s, "patch")
+	return err
 }
 
 func handleCreate(k8s *kom.Kubectl) error {
-	stmt := k8s.Statement
-	cluster := k8s.ID
-
-	username := stmt.Context.Value(constants.JwtUserName)
-	role := stmt.Context.Value(constants.JwtUserRole)
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=create, gck=[%s], resource=[%s/%s] ", cluster, username, role, stmt.GVK.String(), stmt.Namespace, stmt.Name)
-	switch role {
-	case models.RoleClusterReadonly:
-		return fmt.Errorf("非管理员不能创建资源")
-	}
-	return nil
+	_, _, err := handleCommonLogic(k8s, "create")
+	return err
 }
