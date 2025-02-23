@@ -41,7 +41,9 @@ func Save(c *gin.Context) {
 		return
 	}
 
-	err = m.Save(params)
+	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
+		return db.Select([]string{"username", "role"}).Updates(m)
+	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
