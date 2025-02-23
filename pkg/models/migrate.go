@@ -20,5 +20,7 @@ func AutoMigrate() error {
 		&CustomTemplate{},
 		&KubeConfig{},
 		&User{},
+		&OperationLog{},
+		&ShellLog{},
 	)
 }
