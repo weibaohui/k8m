@@ -20,6 +20,8 @@ func RegisterCallback() {
 		_ = execCallback.Register("k8m:exec", Audit)
 		streamExecCallback := kom.Cluster(selectedCluster).Callback().StreamExec()
 		_ = streamExecCallback.Register("k8m:streamExec", Audit)
+		deleteCallback := kom.Cluster(selectedCluster).Callback().Delete()
+		_ = deleteCallback.Register("k8m:delete", Delete)
 	}
 
 }
@@ -33,6 +35,14 @@ func Get(k8s *kom.Kubectl) error {
 func Audit(k8s *kom.Kubectl) error {
 	stmt := k8s.Statement
 	cluster := k8s.ID
+	cmd := fmt.Sprintf("%s %s", stmt.Command, strings.Join(stmt.Args, " "))
+	klog.V(2).Infof("k8s [%s] Exec cmd in %s %s/%s : %s \n", cluster, stmt.GVR.Resource, stmt.Namespace, stmt.Name, cmd)
+	return nil
+}
+func Delete(k8s *kom.Kubectl) error {
+	stmt := k8s.Statement
+	cluster := k8s.ID
+
 	cmd := fmt.Sprintf("%s %s", stmt.Command, strings.Join(stmt.Args, " "))
 	klog.V(2).Infof("k8s [%s] Exec cmd in %s %s/%s : %s \n", cluster, stmt.GVR.Resource, stmt.Namespace, stmt.Name, cmd)
 	return nil
