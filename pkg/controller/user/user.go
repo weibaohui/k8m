@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -71,8 +72,24 @@ func UpdatePsw(c *gin.Context) {
 		return
 	}
 	m.ID = uint(utils.ToInt64(id))
+
+	// 密码 + 盐重新计算
+	pswBytes, err := utils.AesDecrypt(m.Password)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	m.Salt = utils.RandNLengthString(8)
+	psw, err := utils.AesEncrypt([]byte(fmt.Sprintf("%s%s", string(pswBytes), m.Salt)))
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	m.Password = base64.StdEncoding.EncodeToString(psw)
+
 	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
-		return db.Select("password").Updates(m)
+		return db.Select([]string{"password", "salt"}).Updates(m)
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
