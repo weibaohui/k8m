@@ -1,0 +1,316 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建用户",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建用户  (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/mgm/user/save",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "username",
+                  "label": "用户名",
+                  "required": true,
+                  "placeholder": "请输入用户名",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 3,
+                    "maxLength": 20
+                  },
+                  "validationErrors": {
+                    "minLength": "用户名至少 3 个字符",
+                    "maxLength": "用户名最多 20 个字符"
+                  }
+                },
+                {
+                  "type": "select",
+                  "name": "role",
+                  "label": "角色",
+                  "required": true,
+                  "options": [
+                    {
+                      "label": "管理员",
+                      "value": "admin"
+                    },
+                    {
+                      "label": "只读用户",
+                      "value": "readonly"
+                    }
+                  ],
+                  "placeholder": "请选择角色"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "detailCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "/mgm/user/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/mgm/user/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-eye text-primary",
+              "actionType": "drawer",
+              "tooltip": "资源描述",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                "body": []
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑用户",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "编辑用户  (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/mgm/user/save",
+                  "body": [
+                    {
+                      "type": "input-text",
+                      "name": "username",
+                      "label": "用户名",
+                      "required": true,
+                      "placeholder": "请输入用户名",
+                      "validateOnChange": true,
+                      "validations": {
+                        "minLength": 3,
+                        "maxLength": 20
+                      },
+                      "validationErrors": {
+                        "minLength": "用户名至少 3 个字符",
+                        "maxLength": "用户名最多 20 个字符"
+                      }
+                    },
+                    {
+                      "type": "select",
+                      "name": "role",
+                      "label": "角色",
+                      "required": true,
+                      "options": [
+                        {
+                          "label": "管理员",
+                          "value": "admin"
+                        },
+                        {
+                          "label": "只读用户",
+                          "value": "readonly"
+                        }
+                      ],
+                      "placeholder": "请选择角色"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-key text-primary",
+              "actionType": "drawer",
+              "tooltip": "修改密码",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "修改密码  (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/mgm/user/password",
+                  "body": [
+                    {
+                      "type": "passwordEditor",
+                      "api": "/mgm/user/update_psw/${id}"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "修改成功",
+                    "saveFailed": "修改失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "actions": []
+              }
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "username",
+          "label": "用户名",
+          "type": "text",
+          "width": "180px",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "username",
+            "clearable": true,
+            "label": "用户名",
+            "placeholder": "输入用户名"
+          }
+        },
+        {
+          "name": "role",
+          "label": "角色",
+          "type": "mapping",
+          "map": {
+            "admin": "管理员",
+            "readonly": "只读用户"
+          },
+          "searchable": {
+            "type": "select",
+            "name": "role",
+            "clearable": true,
+            "label": "角色",
+            "placeholder": "请选择角色",
+            "options": [
+              {
+                "label": "管理员",
+                "value": "admin"
+              },
+              {
+                "label": "只读用户",
+                "value": "readonly"
+              }
+            ]
+          }
+        },
+        {
+          "name": "created_by",
+          "label": "创建者",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}
