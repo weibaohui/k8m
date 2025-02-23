@@ -331,7 +331,8 @@ func main() {
 		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
 		mgm.GET("/user/list", user.List)
 		mgm.POST("/user/save", user.Save)
-		mgm.POST("/user/delete", user.Delete)
+		mgm.POST("/user/delete/:ids", user.Delete)
+		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
