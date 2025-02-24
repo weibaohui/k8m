@@ -22,6 +22,12 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [displayName, setDisplayName] = useState('');
+    const [displayNameError, setDisplayNameError] = useState<string | null>(null);
+
+    const validateDisplayName = (name: string): boolean => {
+        const regex = /^[a-zA-Z0-9_]+$/;
+        return regex.test(name);
+    };
 
     const validateAndParseConfig = useCallback((content: string) => {
         try {
@@ -42,7 +48,8 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                 displayName: displayName || config.clusters[0].name
             });
 
-            setIsValid(true && displayName.trim() !== '');
+            const isDisplayNameValid = validateDisplayName(displayName);
+            setIsValid(isDisplayNameValid && displayName.trim() !== '');
             setError(null);
         } catch (err) {
             setIsValid(false);
@@ -50,6 +57,22 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
             setClusterInfo(null);
         }
     }, [displayName]);
+
+    const handleDisplayNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newDisplayName = e.target.value;
+        setDisplayName(newDisplayName);
+
+        if (!validateDisplayName(newDisplayName) && newDisplayName.trim() !== '') {
+            setDisplayNameError('集群名称只能包含英文字母、数字和下划线');
+        } else {
+            setDisplayNameError(null);
+        }
+
+        if (clusterInfo) {
+            setClusterInfo({...clusterInfo, displayName: newDisplayName});
+        }
+        setIsValid(() => clusterInfo !== null && newDisplayName.trim() !== '' && validateDisplayName(newDisplayName));
+    };
 
     const handleEditorChange = (value: string | undefined) => {
         const content = value || '';
@@ -116,23 +139,21 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     <input
                         type="text"
                         value={displayName}
-                        onChange={(e) => {
-                            const newDisplayName = e.target.value;
-                            setDisplayName(newDisplayName);
-                            if (clusterInfo) {
-                                setClusterInfo({...clusterInfo, displayName: newDisplayName});
-                            }
-                            setIsValid(() => clusterInfo !== null && newDisplayName.trim() !== '');
-                        }}
+                        onChange={handleDisplayNameChange}
                         style={{
                             padding: '4px 8px',
                             borderRadius: '4px',
                             flex: 1,
-                            border: !displayName.trim() ? '1px solid #ff4d4f' : '1px solid #d9d9d9'
+                            border: (!displayName.trim() || displayNameError) ? '1px solid #ff4d4f' : '1px solid #d9d9d9'
                         }}
-                        placeholder="请输入集群显示名称（必填）"
+                        placeholder="请输入集群显示名称（仅限英文字母、数字和下划线）"
                     />
                 </div>
+                {displayNameError && (
+                    <div style={{color: '#ff4d4f', fontSize: '12px', marginTop: '4px'}}>
+                        {displayNameError}
+                    </div>
+                )}
                 <Button
                     type="primary"
                     disabled={!isValid}
