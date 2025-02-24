@@ -101,7 +101,7 @@
                   "label": "解除纳管",
                   "icon": "fas fa-unlink  text-primary",
                   "actionType": "ajax",
-                  "visibleOn": " fileName==='DB' ",
+                  "visibleOn": " source==='DB' ",
                   "confirmText": "确定要解除纳管?",
                   "api": {
                     "url": "/k8s/cluster/kubeconfig/remove",
