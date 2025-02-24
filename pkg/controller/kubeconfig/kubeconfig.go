@@ -40,7 +40,10 @@ func Save(c *gin.Context) {
 		klog.V(6).Infof("解析 集群 [%s]失败: %v", m.Server, err)
 		return
 	}
+	index := 0
+	total := len(config.Contexts)
 	for contextName, _ := range config.Contexts {
+		index += 1
 		context := config.Contexts[contextName]
 		cluster := config.Clusters[context.Cluster]
 
@@ -51,6 +54,13 @@ func Save(c *gin.Context) {
 			Namespace: context.Namespace,
 			Content:   m.Content,
 		}
+
+		kc.DisplayName = m.DisplayName
+		// 大于1个，则名称加序列号
+		if total != 1 {
+			kc.DisplayName = fmt.Sprintf("%s-%d", m.DisplayName, index)
+		}
+
 		if list, _, err := kc.List(params); err == nil && list != nil {
 			for _, item := range list {
 				_ = kc.Delete(params, fmt.Sprintf("%d", item.ID))
