@@ -29,6 +29,9 @@ func Save(c *gin.Context) {
 		return
 	}
 
+	if m.DisplayName == "" {
+		m.DisplayName = m.Cluster
+	}
 	// 因先删除再创建
 	// 可能会更新地址的kubeconfig
 
