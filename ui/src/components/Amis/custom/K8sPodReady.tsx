@@ -1,9 +1,16 @@
 import React from 'react';
+import { Tooltip } from 'antd';
 
 interface K8sPodReadyProps {
     data: {
         status?: {
-            containerStatuses?: { ready: boolean }[];
+            containerStatuses?: { ready: boolean; name: string }[];
+            conditions?: Array<{
+                type: string;
+                status: string;
+                message?: string;
+                reason?: string;
+            }>;
         };
         spec?: {
             containers?: any[];
@@ -12,7 +19,7 @@ interface K8sPodReadyProps {
 }
 
 // 用 forwardRef 让组件兼容 AMIS
-const K8sPodReadyComponent = React.forwardRef<HTMLSpanElement, K8sPodReadyProps>(({data}, ref) => {
+const K8sPodReadyComponent = React.forwardRef<HTMLSpanElement, K8sPodReadyProps>(({ data }, ref) => {
     // 获取 Pod 状态中的容器状态列表
     const containerStatuses = data.status?.containerStatuses || [];
 
@@ -28,7 +35,50 @@ const K8sPodReadyComponent = React.forwardRef<HTMLSpanElement, K8sPodReadyProps>
     // 格式化状态 "N/M"
     const readyStatus = `${readyCount}/${totalCount}`;
 
-    return <span ref={ref}>{readyStatus}</span>;
+    // 获取未就绪容器的信息
+    const containerReadyCondition = data.status?.conditions?.find(
+        condition => condition.type === 'ContainersReady'
+    );
+
+    // 获取未就绪的容器列表
+    const unreadyContainers = containerStatuses
+        .filter(status => !status.ready)
+        .map(status => status.name);
+
+    // 根据容器就绪状态设置样式
+    const isAllReady = readyCount === totalCount;
+
+    const tooltipContent = isAllReady ? null : (
+        <div>
+            <div>未就绪容器：</div>
+            {unreadyContainers.map((name, index) => (
+                <div key={index}>• {name}</div>
+            ))}
+            {containerReadyCondition?.message && (
+                <div style={{ marginTop: '8px' }}>{containerReadyCondition.message}</div>
+            )}
+        </div>
+    );
+
+    const statusElement = (
+        <span className={`text font-medium ${isAllReady ? 'text-black' : 'text-danger'}`}>
+            {readyStatus}
+        </span>
+    );
+
+    return (
+        <span ref={ref}>
+            {isAllReady ? (
+                statusElement
+            ) : (unreadyContainers.length > 0 ? (
+                <Tooltip title={tooltipContent}>
+                    {statusElement}
+                </Tooltip>
+            ) : (
+                statusElement
+            ))}
+        </span>
+    );
 });
 
 export default K8sPodReadyComponent;
