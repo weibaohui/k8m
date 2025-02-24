@@ -1,5 +1,4 @@
-import React, {useState, useCallback} from 'react';
-import Editor from '@monaco-editor/react';
+import React, {useCallback, useState} from 'react';
 import * as yaml from 'js-yaml';
 import {Button, message} from 'antd';
 import {fetcher} from '@/components/Amis/fetcher';
@@ -163,19 +162,20 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     </div>
                 </div>
             )}
-            <div style={{border: '1px solid #d9d9d9', borderRadius: '4px'}}
-            >
-                <Editor
-                    height="300px"
-                    defaultLanguage="yaml"
-                    value={editorContent}
-                    onChange={handleEditorChange}
-                    options={{
-                        minimap: {enabled: false},
-                        lineNumbers: 'on',
-                        scrollBeyondLastLine: false,
-                        wordWrap: 'on'
+            <div style={{border: '1px solid #d9d9d9', borderRadius: '4px'}}>
+                <textarea
+                    style={{
+                        width: '100%',
+                        height: '300px',
+                        padding: '8px',
+                        fontFamily: 'monospace',
+                        resize: 'none',
+                        border: 'none',
+                        outline: 'none'
                     }}
+                    value={editorContent}
+                    onChange={(e) => handleEditorChange(e.target.value)}
+                    placeholder="请粘贴kubeconfig内容"
                 />
             </div>
         </div>
