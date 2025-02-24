@@ -127,7 +127,7 @@
                   "icon": "fas fa-file-code text-primary",
                   "actionType": "url",
                   "blank": false,
-                  "url": "/#/log/shell?cluster=${fileName}/${contextName}"
+                  "url": "/#/log/shell?cluster=${fileName === 'InCluster' ? fileName : `${fileName}/${contextName}`}"
                 },
                 {
                   "type": "button",
@@ -135,7 +135,7 @@
                   "icon": "fas fa-history  text-primary",
                   "actionType": "url",
                   "blank": false,
-                  "url": "/#/log/operation?cluster=${fileName}/${contextName}"
+                  "url": "/#/log/operation?cluster=${fileName === 'InCluster' ? fileName : `${fileName}/${contextName}`}"
                 }
               ]
             }
