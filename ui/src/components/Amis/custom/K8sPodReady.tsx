@@ -1,25 +1,13 @@
 import React from 'react';
-import { Tooltip } from 'antd';
+import {Tooltip} from 'antd';
+import {Pod} from '@/store/pod';
 
 interface K8sPodReadyProps {
-    data: {
-        status?: {
-            containerStatuses?: { ready: boolean; name: string }[];
-            conditions?: Array<{
-                type: string;
-                status: string;
-                message?: string;
-                reason?: string;
-            }>;
-        };
-        spec?: {
-            containers?: any[];
-        };
-    };
+    data: Pod;
 }
 
 // 用 forwardRef 让组件兼容 AMIS
-const K8sPodReadyComponent = React.forwardRef<HTMLSpanElement, K8sPodReadyProps>(({ data }, ref) => {
+const K8sPodReadyComponent = React.forwardRef<HTMLSpanElement, K8sPodReadyProps>(({data}, ref) => {
     // 获取 Pod 状态中的容器状态列表
     const containerStatuses = data.status?.containerStatuses || [];
 
@@ -55,7 +43,7 @@ const K8sPodReadyComponent = React.forwardRef<HTMLSpanElement, K8sPodReadyProps>
                 <div key={index}>• {name}</div>
             ))}
             {containerReadyCondition?.message && (
-                <div style={{ marginTop: '8px' }}>{containerReadyCondition.message}</div>
+                <div style={{marginTop: '8px'}}>{containerReadyCondition.message}</div>
             )}
         </div>
     );
