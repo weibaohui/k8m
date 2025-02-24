@@ -881,14 +881,7 @@
                             {
                               "name": "status.phase",
                               "label": "状态",
-                              "type": "mapping",
-                              "map": {
-                                "Running": "<span class='label label-success'>运行中</span>",
-                                "Pending": "<span class='label label-warning'>调度中</span>",
-                                "Succeeded": "<span class='label label-info'>成功完成</span>",
-                                "Failed": "<span class='label label-danger'>失败</span>",
-                                "Unknown": "<span class='label label-warning'>未知</span>"
-                              }
+                              "type": "k8sPodStatus"
                             },
                             {
                               "name": "status.podIP",
