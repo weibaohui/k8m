@@ -35,6 +35,7 @@ registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsCompon
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
 // @ts-ignore
 registerRenderer({ type: 'k8sAge', component: K8sAgeComponent })
+// @ts-ignore
 registerRenderer({ type: 'k8sPodReady', component: K8sPodReadyComponent })
 // @ts-ignore
 registerRenderer({ type: 'highlightHtml', component: HighlightHtmlComponent })
