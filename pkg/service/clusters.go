@@ -54,7 +54,13 @@ type ClusterConfig struct {
 	restConfig              *rest.Config                   // 直连rest.Config
 	kubeConfig              []byte                         // 集群配置.kubeconfig原始文件内容
 	watchStatusLock         sync.RWMutex                   // watch状态读写锁
+	Source                  ClusterConfigSource            `json:"source,omitempty"` // 配置文件来源
 }
+type ClusterConfigSource string
+
+var ClusterConfigSourceFile ClusterConfigSource = "File"
+var ClusterConfigSourceDB ClusterConfigSource = "DB"
+var ClusterConfigSourceInCluster ClusterConfigSource = "InCluster"
 
 // 记录每个集群的watch 启动情况
 // watch 有多种类型，需要记录
@@ -298,6 +304,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 				kubeConfig:           content,
 				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
+				Source:               ClusterConfigSourceFile,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
@@ -317,7 +324,7 @@ func (c *clusterService) ScanClustersInDB() {
 	}
 
 	for i, cc := range c.clusterConfigs {
-		if cc.FileName == "DB" {
+		if cc.Source == ClusterConfigSourceDB {
 			// 查一下list中是否存在
 			filter := slice.Filter(list, func(index int, item *models.KubeConfig) bool {
 				if item.Server == cc.Server && item.User == cc.UserName && item.Cluster == cc.ClusterName {
@@ -328,7 +335,7 @@ func (c *clusterService) ScanClustersInDB() {
 			if len(filter) == 0 {
 				// 在数据库中也不存在
 				// 从list中删除
-				//删除前先断开连接，避免watcher泄露
+				// 删除前先断开连接，避免watcher泄露
 				c.Disconnect(cc.FileName, cc.ContextName)
 				c.clusterConfigs = slice.DeleteAt(c.clusterConfigs, i)
 			}
@@ -361,7 +368,7 @@ func (c *clusterService) ScanClustersInDB() {
 				// 如果不存在，添加新配置
 				if !exists {
 					clusterConfig := &ClusterConfig{
-						FileName:             "DB",
+						FileName:             kc.DisplayName,
 						ContextName:          contextName,
 						UserName:             context.AuthInfo,
 						ClusterName:          context.Cluster,
@@ -370,6 +377,7 @@ func (c *clusterService) ScanClustersInDB() {
 						watchStatus:          make(map[string]*clusterWatchStatus),
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
+						Source:               ClusterConfigSourceDB,
 					}
 					clusterConfig.Server = cluster.Server
 					c.AddToClusterList(clusterConfig)
@@ -434,6 +442,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 				kubeConfig:           content,
 				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
+				Source:               ClusterConfigSourceFile,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
@@ -554,6 +563,7 @@ func (c *clusterService) RegisterInCluster() {
 		restConfig:           config,
 		watchStatus:          make(map[string]*clusterWatchStatus),
 		ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
+		Source:               ClusterConfigSourceInCluster,
 	}
 
 	c.AddToClusterList(clusterConfig)
