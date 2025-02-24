@@ -4,6 +4,9 @@ BINARY_NAME=k8m
 # 定义输出目录
 OUTPUT_DIR=bin
 
+# 定义构建工具，默认使用 podman
+BUILD_TOOL ?= podman
+
 # 定义版本信息，默认值为 v1.0.0，可以通过命令行覆盖
 # 例如 make build-all VERSION=v0.0.1
 VERSION ?= v1.0.0
@@ -36,8 +39,8 @@ all: build
 # 为当前平台构建可执行文件
 .PHONY: docker
 docker:
-	@echo "构建docker镜像..."
-	@docker buildx build \
+	@echo "使用 $(BUILD_TOOL) 构建镜像..."
+	@$(BUILD_TOOL) buildx build \
            --build-arg VERSION=$(VERSION) \
            --build-arg GIT_COMMIT=$(GIT_COMMIT) \
            --build-arg MODEL=$(MODEL) \
@@ -50,8 +53,8 @@ docker:
 # 为当前平台构建可执行文件
 .PHONY: pre
 pre:
-	@echo "构建docker镜像..."
-	@docker buildx build \
+	@echo "使用 $(BUILD_TOOL) 构建镜像..."
+	@$(BUILD_TOOL) buildx build \
            --build-arg VERSION=$(VERSION) \
            --build-arg GIT_COMMIT=$(GIT_COMMIT) \
            --build-arg MODEL=$(MODEL) \
@@ -59,9 +62,9 @@ pre:
      	   --build-arg API_URL=$(API_URL) \
      	   --platform=linux/arm64,linux/amd64 \
      	   -t weibh/k8m:$(VERSION) -f Dockerfile . --load
-	@docker push weibh/k8m:$(VERSION)
-	@docker tag weibh/k8m:$(VERSION) registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
-	@docker push registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+	@$(BUILD_TOOL) push weibh/k8m:$(VERSION)
+	@$(BUILD_TOOL) tag weibh/k8m:$(VERSION) registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+	@$(BUILD_TOOL) push registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
 
 
 
@@ -113,7 +116,7 @@ run: build
 .PHONY: help
 help:
 	@echo "可用的目标:"
-	@echo "  docker      构建docker镜像"
+	@echo "  docker      构建容器镜像 (使用 BUILD_TOOL 指定的构建工具，默认为 podman)"
 	@echo "  build       为当前平台构建可执行文件"
 	@echo "  build-all   为所有平台构建可执行文件"
 	@echo "  clean       清理生成的可执行文件"
