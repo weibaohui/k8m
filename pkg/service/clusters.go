@@ -192,6 +192,9 @@ func (c *clusterService) Disconnect(fileName string, contextName string) {
 
 	// 先清除原来的状态
 	cc := c.GetClusterByID(fmt.Sprintf("%s/%s", fileName, contextName))
+	if cc == nil {
+		return
+	}
 	cc.ServerVersion = ""
 	cc.restConfig = nil
 	cc.Err = ""

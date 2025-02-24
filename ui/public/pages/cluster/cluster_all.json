@@ -127,7 +127,7 @@
                   "icon": "fas fa-file-code text-primary",
                   "actionType": "url",
                   "blank": false,
-                  "url": "/#/log/shell?cluster=${fileName === 'InCluster' ? fileName : `${fileName}/${contextName}`}"
+                  "url": "/#/log/shell?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
                 },
                 {
                   "type": "button",
@@ -135,7 +135,7 @@
                   "icon": "fas fa-history  text-primary",
                   "actionType": "url",
                   "blank": false,
-                  "url": "/#/log/operation?cluster=${fileName === 'InCluster' ? fileName : `${fileName}/${contextName}`}"
+                  "url": "/#/log/operation?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
                 }
               ]
             }
@@ -144,7 +144,7 @@
         },
         {
           "name": "fileName",
-          "label": "文件名",
+          "label": "名称",
           "type": "text",
           "sortable": true,
           "searchable": {
@@ -222,6 +222,16 @@
           "label": "集群版本",
           "type": "text",
           "sortable": true
+        },
+        {
+          "name": "source",
+          "label": "来源",
+          "type": "mapping",
+          "map": {
+            "InCluster": "集群内",
+            "DB": "数据库",
+            "File": "文件"
+          }
         }
       ]
     }
