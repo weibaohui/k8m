@@ -59,6 +59,9 @@ pre:
      	   --build-arg API_URL=$(API_URL) \
      	   --platform=linux/arm64,linux/amd64 \
      	   -t weibh/k8m:$(VERSION) -f Dockerfile . --load
+	@docker push weibh/k8m:$(VERSION)
+	@docker tag weibh/k8m:$(VERSION) registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+	@docker push registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
 
 
 
