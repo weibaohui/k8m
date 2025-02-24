@@ -328,6 +328,8 @@ func (c *clusterService) ScanClustersInDB() {
 			if len(filter) == 0 {
 				// 在数据库中也不存在
 				// 从list中删除
+				//删除前先断开连接，避免watcher泄露
+				c.Disconnect(cc.FileName, cc.ContextName)
 				c.clusterConfigs = slice.DeleteAt(c.clusterConfigs, i)
 			}
 		}
