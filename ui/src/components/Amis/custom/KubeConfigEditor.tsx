@@ -13,6 +13,7 @@ interface ClusterInfo {
     serverUrl: string;
     userName: string;
     namespace?: string;
+    displayName: string;
 }
 
 const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigProps>(() => {
@@ -21,6 +22,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
     const [clusterInfo, setClusterInfo] = useState<ClusterInfo | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [displayName, setDisplayName] = useState('');
 
     const validateAndParseConfig = useCallback((content: string) => {
         try {
@@ -37,7 +39,8 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                 clusterName: config.clusters[0].name,
                 serverUrl: config.clusters[0].cluster.server,
                 userName: config.users[0].name,
-                namespace: config.contexts?.[0]?.context?.namespace
+                namespace: config.contexts?.[0]?.context?.namespace,
+                displayName: displayName || config.clusters[0].name
             });
 
             setIsValid(true);
@@ -47,7 +50,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
             setError(err instanceof Error ? err.message : '无效的配置格式');
             setClusterInfo(null);
         }
-    }, []);
+    }, [displayName]);
 
     const handleEditorChange = (value: string | undefined) => {
         const content = value || '';
@@ -68,7 +71,8 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     server: clusterInfo.serverUrl,
                     user: clusterInfo.userName,
                     cluster: clusterInfo.clusterName,
-                    namespace: clusterInfo.namespace
+                    namespace: clusterInfo.namespace,
+                    displayName: clusterInfo.displayName
                 }
             });
 
@@ -100,6 +104,41 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
             }}>
                 <div style={{color: '#1677ff'}}>请将kubeconfig文件内容粘贴到下面的编辑窗口</div>
             </div>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '12px',
+                gap: '8px'
+            }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1}}>
+                    <span>名称:</span>
+                    <input
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => {
+                            setDisplayName(e.target.value);
+                            if (clusterInfo) {
+                                setClusterInfo({...clusterInfo, displayName: e.target.value});
+                            }
+                        }}
+                        style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            flex: 1
+                        }}
+                        placeholder="请输入集群显示名称"
+                    />
+                </div>
+                <Button
+                    type="primary"
+                    disabled={!isValid}
+                    loading={loading}
+                    onClick={handleSave}
+                >
+                    确认纳管
+                </Button>
+            </div>
             {(
                 <div style={{
                     padding: '16px',
@@ -108,20 +147,9 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     border: '1px solid #e0e0e0'
                 }}>
                     <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
                         marginBottom: '12px'
                     }}>
                         <h4 style={{margin: 0}}>配置信息</h4>
-                        <Button
-                            type="primary"
-                            disabled={!isValid}
-                            loading={loading}
-                            onClick={handleSave}
-                        >
-                            确认纳管
-                        </Button>
                     </div>
                     <div style={{display: 'grid', gap: '8px'}}>
                         <div>集群名称: {clusterInfo?.clusterName}</div>
