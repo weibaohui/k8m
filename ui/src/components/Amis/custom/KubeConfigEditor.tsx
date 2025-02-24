@@ -43,7 +43,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                 displayName: displayName || config.clusters[0].name
             });
 
-            setIsValid(true);
+            setIsValid(true && displayName.trim() !== '');
             setError(null);
         } catch (err) {
             setIsValid(false);
@@ -112,22 +112,26 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                 gap: '8px'
             }}>
                 <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1}}>
+                    <span style={{color: '#ff4d4f', marginRight: '4px'}}>*</span>
                     <span>名称:</span>
                     <input
                         type="text"
                         value={displayName}
                         onChange={(e) => {
-                            setDisplayName(e.target.value);
+                            const newDisplayName = e.target.value;
+                            setDisplayName(newDisplayName);
                             if (clusterInfo) {
-                                setClusterInfo({...clusterInfo, displayName: e.target.value});
+                                setClusterInfo({...clusterInfo, displayName: newDisplayName});
                             }
+                            setIsValid(() => clusterInfo !== null && newDisplayName.trim() !== '');
                         }}
                         style={{
                             padding: '4px 8px',
                             borderRadius: '4px',
-                            flex: 1
+                            flex: 1,
+                            border: !displayName.trim() ? '1px solid #ff4d4f' : '1px solid #d9d9d9'
                         }}
-                        placeholder="请输入集群显示名称"
+                        placeholder="请输入集群显示名称（必填）"
                     />
                 </div>
                 <Button
