@@ -72,7 +72,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     user: clusterInfo.userName,
                     cluster: clusterInfo.clusterName,
                     namespace: clusterInfo.namespace,
-                    displayName: clusterInfo.displayName
+                    display_name: clusterInfo.displayName
                 }
             });
 
