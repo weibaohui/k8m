@@ -9,6 +9,13 @@ body {
   /* 隐藏溢出内容 */
 }
 
+.app-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 /* 如果你的内容需要滚动，可以为特定容器添加滚动样式 */
 .scrollable-container {
   height: 100%;
@@ -35,6 +42,67 @@ body {
   cursor: pointer;
 }
 
+
+        .floating-toolbar {
+            position: fixed;
+            left: 160px;
+            /* 距离左边 */
+            top: 0;
+            /* 距离顶部 */
+            z-index: 1000;
+            /* 确保显示在上层 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0);
+            padding: 10px;
+            height: 60px;
+        }
+
+        .floating-toolbar-right {
+            position: fixed;
+            right: 40px;
+            /* 距离右边 */
+            top: 0;
+            /* 距离顶部 */
+            z-index: 1000;
+            /* 确保显示在上层 */
+            /*display: flex;*/
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0);
+            /*padding: 10px;*/
+            height: 85px;
+        }
+
+/*隐藏select上选项的鼠标浮动图层*/
+.cxd-Tooltip.cxd-Tooltip--top.cxd-Tooltip--light {
+  display: none
+}
+
+
+.cxd-Select .cxd-PopOver.cxd-Select-popover.cxd-PopOver--v-top {
+  width: fit-content !important;
+}
+
+
+.cxd-Page-asideResizor {
+  z-index: 9900 !important;
+}
+
+.cxd-Tree-item .is-checked .cxd-Tree-itemLabel-item {
+  background-color: #d7e7fb !important;
+}
+/*让下拉菜单的图标好看一些*/
+.cxd-DropDown-menu .cxd-Button-icon {
+  margin-right: 10px;
+}
+
+.amis-scope .cxd-Link i {
+  font-size: var(--link-icon-size);
+  margin-left: 0;
+  margin-right: 8px;
+}
 //调整下antd select 的下拉框层索引
 // amis 弹窗的索引是1400
 .ant-select-dropdown {
