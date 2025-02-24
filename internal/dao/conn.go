@@ -10,8 +10,6 @@ import (
 	"github.com/weibaohui/k8m/internal/sqlite"
 	"github.com/weibaohui/k8m/pkg/flag"
 
-	_ "modernc.org/sqlite"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"k8s.io/klog/v2"
