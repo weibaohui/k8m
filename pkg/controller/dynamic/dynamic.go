@@ -47,6 +47,13 @@ func List(c *gin.Context) {
 		Namespace(nsList...).
 		GVK(group, version, kind)
 
+	if uniqueLabels, ok := jsonData["unique_labels"]; ok {
+		if uniqueLabels != "" {
+			delete(jsonData, "unique_labels")
+			sql = sql.WithLabelSelector(uniqueLabels.(string))
+		}
+	}
+
 	// 处理查询条件
 	queryConditions := parseNestedJSON("", jsonData)
 	queryConditions = slice.Filter(queryConditions, func(index int, item string) bool {
