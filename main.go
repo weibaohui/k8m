@@ -230,6 +230,7 @@ func main() {
 		api.POST("/node/batch/uncordon", node.BatchUnCordon)
 		api.GET("/node/name/option_list", node.NameOptionList)
 		api.GET("/node/labels/list", node.AllLabelList)
+		api.GET("/node/labels/unique_labels", node.UniqueLabels)
 		api.GET("/node/taints/list", node.AllTaintList)
 		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
 		api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", node.CreateKubectlShell)
@@ -322,6 +323,7 @@ func main() {
 		api.POST("/file/delete", pod.DeleteFile)
 		// Pod 资源使用情况
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
+		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
 
 	}
 

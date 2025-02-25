@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -224,4 +225,25 @@ func Usage(c *gin.Context) {
 		Name(name).
 		Ctl().Pod().ResourceUsageTable()
 	amis.WriteJsonData(c, usage)
+}
+
+func UniqueLabels(c *gin.Context) {
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	labels := service.PodService().GetUniquePodLabels(selectedCluster)
+
+	var names []map[string]string
+	for k, v := range labels {
+		kv := fmt.Sprintf("%s=%s", k, v)
+		names = append(names, map[string]string{
+			"label": kv,
+			"value": kv,
+		})
+	}
+	slice.SortBy(names, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
+	amis.WriteJsonData(c, gin.H{
+		"options": names,
+	})
 }

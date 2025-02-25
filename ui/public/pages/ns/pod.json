@@ -3691,6 +3691,17 @@
           "type": "text",
           "searchable": true,
           "visibleOn": "1==2"
+        },
+        {
+          "name": "unique_labels",
+          "label": "标签",
+          "visibleOn": "1==2",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "searchable": true,
+            "source": "/k8s/pod/labels/unique_labels"
+          }
         }
       ]
     }

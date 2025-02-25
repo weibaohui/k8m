@@ -240,7 +240,8 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false
+        "showBtnToolbar": false,
+        "defaultCollapsed": false
       },
       "headerToolbar": [
         {
@@ -853,8 +854,7 @@
           },
           "style": {
             "cursor": "pointer"
-          },
-          "searchable": true
+          }
         },
         {
           "name": "metadata.annotations",
@@ -1256,6 +1256,17 @@
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
+        },
+        {
+          "name": "unique_labels",
+          "label": "标签",
+          "visibleOn": "1==2",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "searchable": true,
+            "source": "/k8s/node/labels/unique_labels"
+          }
         }
       ]
     }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	v1 "k8s.io/api/core/v1"
@@ -16,8 +15,6 @@ import (
 // 要跟watch中的定时处理器保持一致
 var nodeStatusTTL = 5 * time.Minute
 
-type nodeService struct {
-}
 type ipUsage struct {
 	Total     int `json:"total"`
 	Used      int `json:"used"`
@@ -97,25 +94,6 @@ func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 		_, _ = n.CacheAllocatedStatus(selectedCluster, node.Name)
 	}
 	ClusterService().SetNodeStatusAggregated(selectedCluster, true)
-}
-
-func (n *nodeService) Watch() {
-	// 设置一个定时器，后台不断更新storageClass状态
-	inst := cron.New()
-	_, err := inst.AddFunc("@every 5m", func() {
-		// 延迟启动cron
-		clusters := ClusterService().ConnectedClusters()
-		for _, cluster := range clusters {
-			selectedCluster := ClusterService().ClusterID(cluster)
-			n.SyncNodeStatus(selectedCluster)
-			klog.V(6).Infof("执行定时更新Node状态%s", selectedCluster)
-		}
-	})
-	if err != nil {
-		klog.Errorf("新增Node定时任务报错: %v\n", err)
-	}
-	inst.Start()
-	klog.V(6).Infof("新增 Node  状态定时更新任务【@every 5m】\n")
 }
 
 func (n *nodeService) CacheIPUsage(selectedCluster string, nodeName string) (ipUsage, error) {
