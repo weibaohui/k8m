@@ -230,6 +230,20 @@ make help
 - **无法启动**：启动时卡住，请使用 k8m -v 6
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
 
+**v0.0.49更新**
+1、新增标签搜索：支持精确搜索、模糊搜索。
+精确搜索。可以搜索k，k=v两种方式精确搜索。默认列出所有标签。支持自定义新增搜索标签。
+![image](https://github.com/user-attachments/assets/38e102bb-0ac4-4b42-9dce-3443cad5e585)
+模糊搜索。可以搜索k，v中的任意满足。类似like %xx%的搜索方式。
+![image](https://github.com/user-attachments/assets/d899ce9b-bf3f-4e8c-ba85-631f2f6860dd)
+2、多集群纳管支持自定义名称。
+![image](https://github.com/user-attachments/assets/e612dd46-7589-4925-9910-4fbaf7fdace7)
+![image](https://github.com/user-attachments/assets/819cf9d6-c742-4439-b171-dc29ad890826)
+3、优化Pod状态显示
+在列表页展示pod状态，不同颜色区分正常运行与未就绪运行。
+![image](https://github.com/user-attachments/assets/3b408d03-6ede-4aa0-be55-18183accee46)
+![image](https://github.com/user-attachments/assets/bb1b2d85-6dd9-4f82-89a3-b9fe572e6112)
+
 **v0.0.44更新 **
 1、新增kubectl shell 功能
 可以web 页面执行 kubectl 命令了
