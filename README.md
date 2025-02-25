@@ -231,56 +231,60 @@ make help
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
 
 **v0.0.49更新**
-1、新增标签搜索：支持精确搜索、模糊搜索。
-精确搜索。可以搜索k，k=v两种方式精确搜索。默认列出所有标签。支持自定义新增搜索标签。
-![image](https://github.com/user-attachments/assets/38e102bb-0ac4-4b42-9dce-3443cad5e585)
-模糊搜索。可以搜索k，v中的任意满足。类似like %xx%的搜索方式。
-![image](https://github.com/user-attachments/assets/d899ce9b-bf3f-4e8c-ba85-631f2f6860dd)
-2、多集群纳管支持自定义名称。
-![image](https://github.com/user-attachments/assets/e612dd46-7589-4925-9910-4fbaf7fdace7)
-![image](https://github.com/user-attachments/assets/819cf9d6-c742-4439-b171-dc29ad890826)
-3、优化Pod状态显示
-在列表页展示pod状态，不同颜色区分正常运行与未就绪运行。
-![image](https://github.com/user-attachments/assets/3b408d03-6ede-4aa0-be55-18183accee46)
-![image](https://github.com/user-attachments/assets/bb1b2d85-6dd9-4f82-89a3-b9fe572e6112)
 
-**v0.0.44更新 **
-1、新增kubectl shell 功能
-可以web 页面执行 kubectl 命令了
-![输入图片说明](https://foruda.gitee.com/images/1740031049224924895/c8d5357b_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1740031092919251676/61e6246c_77493.png "屏幕截图")
+1. 新增标签搜索：支持精确搜索、模糊搜索。
+   精确搜索。
+2. 可以搜索k，k=v两种方式精确搜索。默认列出所有标签。支持自定义新增搜索标签。
+   ![image](https://github.com/user-attachments/assets/38e102bb-0ac4-4b42-9dce-3443cad5e585)
+   模糊搜索。
+3. 可以搜索k，v中的任意满足。类似like %xx%的搜索方式。
+   ![image](https://github.com/user-attachments/assets/d899ce9b-bf3f-4e8c-ba85-631f2f6860dd)
+4. 多集群纳管支持自定义名称。
+   ![image](https://github.com/user-attachments/assets/e612dd46-7589-4925-9910-4fbaf7fdace7)
+   ![image](https://github.com/user-attachments/assets/819cf9d6-c742-4439-b171-dc29ad890826)
+5. 优化Pod状态显示
+   在列表页展示pod状态，不同颜色区分正常运行与未就绪运行。
+   ![image](https://github.com/user-attachments/assets/3b408d03-6ede-4aa0-be55-18183accee46)
+   ![image](https://github.com/user-attachments/assets/bb1b2d85-6dd9-4f82-89a3-b9fe572e6112)
 
-2、新增节点终端NodeShell
-在节点上执行命令
-![输入图片说明](https://foruda.gitee.com/images/1740031147702527911/4cef40dc_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1740031249763550505/69fddee6_77493.png "屏幕截图")
-3、新增创建功能页面
-执行过的yaml会保存下来，下次打开页面可以直接点击，收藏的yaml可以导入导出。导出的文件为yaml，可以复用
-![输入图片说明](https://foruda.gitee.com/images/1740031367996726581/e1a357b7_77493.png "屏幕截图")
-![](https://foruda.gitee.com/images/1740031382494497806/d16b1a79_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1740031533749791121/4e64e286_77493.png "屏幕截图")
-4、deploy、ds、sts等类型新增关联资源
-4.1 容器组
-直接显示其下受控的pod容器组，并提供快捷操作
-![输入图片说明](https://foruda.gitee.com/images/1740031610441749272/cd485e87_77493.png "屏幕截图")
-4.2 关联事件
-显示deploy、rs、pod等所有相关的事件，一个页面看全相关事件
-![deploy](https://foruda.gitee.com/images/1740031712446573977/320c920b_77493.png "屏幕截图")
-4.3 日志
-显示Pod列表，可选择某个pod、Container展示日志
-![](https://foruda.gitee.com/images/1740031809856930240/fbbef393_77493.png "屏幕截图")
-4.4 历史版本
-支持历史版本查看，并可diff
-![输入图片说明](https://foruda.gitee.com/images/1740031862075460381/ebf50a7e_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1740031912370086873/dfa95a2f_77493.png "屏幕截图")
+**v0.0.44更新**
 
-5、全新AI对话窗口
-![输入图片说明](https://foruda.gitee.com/images/1740062818194113045/6ae3af0b_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1740062840392675452/a429aab8_77493.png "屏幕截图")
+1. 新增kubectl shell 功能
+   可以web 页面执行 kubectl 命令了
+   ![输入图片说明](https://foruda.gitee.com/images/1740031049224924895/c8d5357b_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740031092919251676/61e6246c_77493.png "屏幕截图")
 
-6、全新AI搜索方式，哪里不懂选哪里
-页面所有地方都可以`划词翻译`,哪里有疑问就选中哪里。
-![输入图片说明](https://foruda.gitee.com/images/1740062958174067230/7c377b16_77493.png "屏幕截图")
+2. 新增节点终端NodeShell
+   在节点上执行命令
+   ![输入图片说明](https://foruda.gitee.com/images/1740031147702527911/4cef40dc_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740031249763550505/69fddee6_77493.png "屏幕截图")
+3. 新增创建功能页面
+   执行过的yaml会保存下来，下次打开页面可以直接点击，收藏的yaml可以导入导出。导出的文件为yaml，可以复用
+   ![输入图片说明](https://foruda.gitee.com/images/1740031367996726581/e1a357b7_77493.png "屏幕截图")
+   ![](https://foruda.gitee.com/images/1740031382494497806/d16b1a79_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740031533749791121/4e64e286_77493.png "屏幕截图")
+4. deploy、ds、sts等类型新增关联资源
+   4.1 容器组
+   直接显示其下受控的pod容器组，并提供快捷操作
+   ![输入图片说明](https://foruda.gitee.com/images/1740031610441749272/cd485e87_77493.png "屏幕截图")
+   4.2 关联事件
+   显示deploy、rs、pod等所有相关的事件，一个页面看全相关事件
+   ![deploy](https://foruda.gitee.com/images/1740031712446573977/320c920b_77493.png "屏幕截图")
+   4.3 日志
+   显示Pod列表，可选择某个pod、Container展示日志
+   ![](https://foruda.gitee.com/images/1740031809856930240/fbbef393_77493.png "屏幕截图")
+   4.4 历史版本
+   支持历史版本查看，并可diff
+   ![输入图片说明](https://foruda.gitee.com/images/1740031862075460381/ebf50a7e_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740031912370086873/dfa95a2f_77493.png "屏幕截图")
+
+5. 全新AI对话窗口
+   ![输入图片说明](https://foruda.gitee.com/images/1740062818194113045/6ae3af0b_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740062840392675452/a429aab8_77493.png "屏幕截图")
+
+6. 全新AI搜索方式，哪里不懂选哪里
+   页面所有地方都可以`划词翻译`,哪里有疑问就选中哪里。
+   ![输入图片说明](https://foruda.gitee.com/images/1740062958174067230/7c377b16_77493.png "屏幕截图")
 
 **v0.0.21更新**
 
