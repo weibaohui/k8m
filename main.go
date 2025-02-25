@@ -323,6 +323,7 @@ func main() {
 		api.POST("/file/delete", pod.DeleteFile)
 		// Pod 资源使用情况
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
+		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
 
 	}
 
