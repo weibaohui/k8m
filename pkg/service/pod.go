@@ -10,6 +10,8 @@ import (
 )
 
 type podService struct {
+	// 存储Pod标签的map，key为集群ID，value为该集群下所有Pod的标签map
+	podLabels map[string][]*PodLabels
 	CountList []*StatusCount
 	lock      sync.RWMutex
 }
