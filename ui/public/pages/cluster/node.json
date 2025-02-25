@@ -1265,7 +1265,16 @@
             "type": "select",
             "clearable": true,
             "searchable": true,
-            "source": "/k8s/node/labels/unique_labels"
+            "source": "/k8s/node/labels/unique_labels",
+            "creatable": true,
+            "addControls": [
+              {
+                "type": "text",
+                "name": "label",
+                "label": "自定义标签",
+                "placeholder": "k=v,如果不写等号，则只搜索k"
+              }
+            ]
           }
         }
       ]
