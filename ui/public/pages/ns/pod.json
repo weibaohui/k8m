@@ -3147,7 +3147,7 @@
             "name": "metadata.labels",
             "clearable": true,
             "label": "模糊标签",
-            "placeholder": "模糊搜索k、v"
+            "placeholder": "模糊搜索label标签中的k、v"
           }
         },
         {
