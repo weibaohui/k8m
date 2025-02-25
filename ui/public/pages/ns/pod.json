@@ -3141,6 +3141,13 @@
           },
           "style": {
             "cursor": "pointer"
+          },
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.labels",
+            "clearable": true,
+            "label": "模糊标签",
+            "placeholder": "模糊搜索k、v"
           }
         },
         {
@@ -3694,7 +3701,7 @@
         },
         {
           "name": "unique_labels",
-          "label": "标签",
+          "label": "精确标签",
           "visibleOn": "1==2",
           "searchable": {
             "type": "select",
