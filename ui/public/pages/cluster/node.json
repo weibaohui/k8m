@@ -1260,6 +1260,7 @@
         {
           "name": "unique_labels",
           "label": "标签",
+          "visibleOn": "1==2",
           "searchable": {
             "type": "select",
             "clearable": true,
