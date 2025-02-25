@@ -1,11 +1,13 @@
 package node
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -284,4 +286,24 @@ func AllTaintList(c *gin.Context) {
 	}
 
 	amis.WriteJsonList(c, resultList)
+}
+func UniqueLabels(c *gin.Context) {
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	labels := service.NodeService().GetUniqueLabels(selectedCluster)
+
+	var names []map[string]string
+	for k, v := range labels {
+		kv := fmt.Sprintf("%s=%s", k, v)
+		names = append(names, map[string]string{
+			"label": kv,
+			"value": kv,
+		})
+	}
+	slice.SortBy(names, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
+	amis.WriteJsonData(c, gin.H{
+		"options": names,
+	})
 }
