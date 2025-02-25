@@ -1,6 +1,8 @@
 package service
 
-var localPodService = &podService{}
+var localPodService = &podService{
+	podLabels: make(map[string][]*PodLabels),
+}
 var localChatService = &chatService{}
 var localNodeService = &nodeService{
 	nodeLabels: make(map[string][]*NodeLabels),
