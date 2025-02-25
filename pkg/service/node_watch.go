@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/robfig/cron/v3"
@@ -112,7 +113,8 @@ func (n *nodeService) GetUniqueLabels(selectedCluster string) map[string]string 
 		for _, node := range nodeList {
 			// 将每个节点的标签添加到唯一标签集合中
 			for k, v := range node.Labels {
-				uniqueLabels[k] = v
+				labelKey := fmt.Sprintf("%s=%s", k, v)
+				uniqueLabels[labelKey] = labelKey
 			}
 		}
 	}

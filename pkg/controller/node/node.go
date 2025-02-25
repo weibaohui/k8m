@@ -1,7 +1,6 @@
 package node
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -293,11 +292,10 @@ func UniqueLabels(c *gin.Context) {
 	labels := service.NodeService().GetUniqueLabels(selectedCluster)
 
 	var names []map[string]string
-	for k, v := range labels {
-		kv := fmt.Sprintf("%s=%s", k, v)
+	for k := range labels {
 		names = append(names, map[string]string{
-			"label": kv,
-			"value": kv,
+			"label": k,
+			"value": k,
 		})
 	}
 	slice.SortBy(names, func(a, b map[string]string) bool {

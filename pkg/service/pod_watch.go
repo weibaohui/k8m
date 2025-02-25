@@ -356,7 +356,9 @@ func (p *podService) GetUniquePodLabels(selectedCluster string) map[string]strin
 		for _, pod := range podList {
 			// 将每个Pod的标签添加到唯一标签集合中
 			for k, v := range pod.Labels {
-				uniqueLabels[k] = v
+				// 使用 k=v 作为键和值，以支持相同key但不同value的标签
+				labelKey := fmt.Sprintf("%s=%s", k, v)
+				uniqueLabels[labelKey] = labelKey
 			}
 		}
 	}
