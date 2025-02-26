@@ -50,7 +50,6 @@ docker:
      	   -t weibh/k8m:$(VERSION) -f Dockerfile . --load
 
 
-# 为当前平台构建可执行文件
 .PHONY: pre
 pre:
 	@echo "使用 $(BUILD_TOOL) 构建镜像..."
@@ -60,12 +59,22 @@ pre:
            --build-arg MODEL=$(MODEL) \
      	   --build-arg API_KEY=$(API_KEY) \
      	   --build-arg API_URL=$(API_URL) \
-     	   --platform=linux/arm64,linux/amd64 \
-     	   -t weibh/k8m:$(VERSION) -f Dockerfile . --load
-	@$(BUILD_TOOL) push weibh/k8m:$(VERSION)
-	@$(BUILD_TOOL) tag weibh/k8m:$(VERSION) registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
-	@$(BUILD_TOOL) push registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+     	   --platform=linux/arm64 \
+     	   -t registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-arm64 --load -f Dockerfile .
+	@$(BUILD_TOOL) buildx build \
+           --build-arg VERSION=$(VERSION) \
+           --build-arg GIT_COMMIT=$(GIT_COMMIT) \
+           --build-arg MODEL=$(MODEL) \
+     	   --build-arg API_KEY=$(API_KEY) \
+     	   --build-arg API_URL=$(API_URL) \
+     	   --platform=linux/amd64 \
+     	   -t registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-amd64 --load -f Dockerfile .
 
+	@echo "创建 manifest 并聚合镜像..."
+	@$(BUILD_TOOL) manifest create registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION) \
+		registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-arm64 \
+		registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-amd64
+	@$(BUILD_TOOL) manifest push registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
 
 
 # 为当前平台构建可执行文件
