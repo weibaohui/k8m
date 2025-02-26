@@ -75,6 +75,19 @@ pre:
 		registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-arm64 \
 		registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-amd64
 	@$(BUILD_TOOL) manifest push registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+	@$(BUILD_TOOL) manifest inspect registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+
+# 为当前平台构建可执行文件
+.PHONY: sync
+sync:
+	@echo "从aliyun同步到docker hub..."
+	@$(BUILD_TOOL) pull --platform=linux/amd64 registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+	@$(BUILD_TOOL) tag registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION) weibh/k8m:$(VERSION)-amd64
+	@$(BUILD_TOOL) pull --platform=linux/arm64 registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
+	@$(BUILD_TOOL) tag registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION) weibh/k8m:$(VERSION)-arm64
+	@$(BUILD_TOOL) manifest create weibh/k8m:$(VERSION) weibh/k8m:$(VERSION)-arm64 weibh/k8m:$(VERSION)-amd64 
+	@$(BUILD_TOOL) push weibh/k8m:$(VERSION)
+	@$(BUILD_TOOL) manifest inspect weibh/k8m:$(VERSION)
 
 
 # 为当前平台构建可执行文件
@@ -120,6 +133,7 @@ clean:
 run: build
 	@echo "运行可执行文件..."
 	@./$(OUTPUT_DIR)/$(BINARY_NAME)
+
 
 # 帮助信息
 .PHONY: help
