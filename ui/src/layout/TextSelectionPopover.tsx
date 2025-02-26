@@ -56,7 +56,13 @@ const GlobalTextSelector: React.FC = () => {
                     titleClassName="selection-title"
                     title={selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
                 >
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div style={{ 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        alignItems: "center",
+                        maxHeight: "70vh",
+                        overflowY: "auto"
+                    }}>
                         {
                             amisRender({
                                 "type": "websocketMarkdownViewer",
