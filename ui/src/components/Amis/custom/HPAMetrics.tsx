@@ -1,7 +1,7 @@
 import { HPA } from '@/store/hpa';
 import React from 'react';
 import { Table, Tag, Tooltip } from 'antd';
-import { PercentageOutlined, DashboardOutlined, ApiOutlined, CloudOutlined, ContainerOutlined } from '@ant-design/icons';
+import { DashboardOutlined, ApiOutlined, CloudOutlined, ContainerOutlined } from '@ant-design/icons';
 
 interface HPAMetricsProps {
     data: HPA;
@@ -119,9 +119,9 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
             } else if (metric.type === 'ContainerResource' && metric.containerResource) {
                 name = `${metric.containerResource.container}/${metric.containerResource.name}`;
                 target = metric.containerResource.target;
-                current = data?.status?.currentMetrics?.find(m => 
-                    m.type === 'ContainerResource' && 
-                    m.containerResource?.container === metric.containerResource?.container && 
+                current = data?.status?.currentMetrics?.find(m =>
+                    m.type === 'ContainerResource' &&
+                    m.containerResource?.container === metric.containerResource?.container &&
                     m.containerResource?.name === metric.containerResource?.name
                 )?.containerResource?.current;
             } else if (metric.type === 'Pods' && metric.pods) {
