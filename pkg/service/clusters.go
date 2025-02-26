@@ -246,7 +246,13 @@ func (c *clusterService) RegisterClustersByPath(filePath string) {
 		klog.V(6).Infof("clusterConfigs为空，不进行注册")
 		return
 	}
-
+	// 处理路径中的 ~ 符号
+	expandedPath, err := utils.ExpandHomePath(filePath)
+	if err != nil {
+		klog.V(6).Infof("展开路径失败: %v", err)
+		return
+	}
+	filePath = expandedPath
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		klog.V(6).Infof("读取文件[%s]失败: %v", filePath, err)
@@ -265,6 +271,14 @@ func (c *clusterService) RegisterClustersByPath(filePath string) {
 
 // ScanClustersInDir 扫描文件夹下的kubeconfig文件，仅扫描形成列表但是不注册集群
 func (c *clusterService) ScanClustersInDir(path string) {
+	// 处理路径中的 ~ 符号
+	expandedPath, err := utils.ExpandHomePath(path)
+	if err != nil {
+		klog.V(6).Infof("展开路径失败: %v", err)
+		return
+	}
+	path = expandedPath
+
 	// 1. 通过kubeconfig文件，找到所在目录
 	dir := filepath.Dir(path)
 
