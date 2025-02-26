@@ -610,6 +610,12 @@
           }
         },
         {
+          "name": "副本数范围",
+          "label": "副本数范围",
+          "type": "tpl",
+          "tpl": "<% var minReplicas = data.spec.minReplicas || 'N/A'; var maxReplicas = data.spec.maxReplicas || 'N/A'; %><%= minReplicas %> ≦ 副本数 ≦ <%= maxReplicas %>"
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
