@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/klog/v2"
@@ -36,15 +37,22 @@ type Config struct {
 func Init() *Config {
 	once.Do(func() {
 		config = &Config{}
+		loadEnv()
 		config.InitFlags()
 	})
 	return config
 }
-
+func loadEnv() {
+	if err := godotenv.Load(); err != nil {
+		klog.Warningf("Error loading .env file: %v", err)
+	}
+}
 func (c *Config) InitFlags() {
+
 	// 如果有其他类似的引用，请参考下面的方式进行整合
 	// 初始化klog
 	klog.InitFlags(nil)
+
 	// 将Go的flag绑定到pflag
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
