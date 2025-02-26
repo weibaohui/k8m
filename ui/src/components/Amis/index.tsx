@@ -30,6 +30,7 @@ import KubeConfigEditorComponent from '@/components/Amis/custom/KubeConfigEditor
 import PasswordEditorWithForm from "@/components/Amis/custom/PasswordEditorWithForm/PasswordEditorWithForm.tsx";
 import K8sPodStatusComponent from "@/components/Amis/custom/K8sPodStatus.tsx";
 import HPAMetricsComponent from '@/components/Amis/custom/HPAMetrics';
+import HPABehaviorComponent from '@/components/Amis/custom/HPABehavior';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
@@ -69,6 +70,8 @@ registerRenderer({ type: 'passwordEditor', component: PasswordEditorWithForm })
 registerRenderer({ type: 'k8sPodStatus', component: K8sPodStatusComponent })
 //@ts-ignore
 registerRenderer({ type: 'hpaMetrics', component: HPAMetricsComponent })
+//@ts-ignore
+registerRenderer({ type: 'hpaBehavior', component: HPABehaviorComponent })
 
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
