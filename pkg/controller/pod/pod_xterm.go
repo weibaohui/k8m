@@ -155,6 +155,7 @@ func Xterm(c *gin.Context) {
 
 	// 创建 TTY 终端大小管理队列
 	sizeQueue := &TerminalSizeQueue{}
+
 	// 定义 Kubernetes Exec 请求
 	req := cluster.Client().CoreV1().RESTClient().
 		Post().
@@ -164,6 +165,8 @@ func Xterm(c *gin.Context) {
 		SubResource("exec").
 		Param("container", containerName).
 		Param("command", "/bin/sh").
+		Param("command", "-c").
+		Param("command", "TERM=xterm-256color; export TERM; [ -x /bin/bash ] && ([ -x /usr/bin/script ] && /usr/bin/script -q -c '/bin/bash' /dev/null || exec /bin/bash) || exec /bin/sh").
 		Param("tty", "true").
 		Param("stdin", "true").
 		Param("stdout", "true").
