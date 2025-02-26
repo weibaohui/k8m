@@ -82,6 +82,26 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
                 return <Tag color="default">-</Tag>;
             },
         },
+        {
+            title: '当前值',
+            dataIndex: 'current',
+            key: 'current',
+            render: (current: any) => {
+                if (!current) return <Tag color="default">-</Tag>;
+                if (current.averageUtilization) {
+                    return (
+                        <Tag color="processing">
+                            {current.averageUtilization}%
+                        </Tag>
+                    );
+                } else if (current.averageValue) {
+                    return <Tag color="success">{current.averageValue}</Tag>;
+                } else if (current.value) {
+                    return <Tag color="warning">{current.value}</Tag>;
+                }
+                return <Tag color="default">-</Tag>;
+            },
+        },
     ];
 
     const getMetricsData = () => {
@@ -90,22 +110,32 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
         return data.spec.metrics.map((metric, index) => {
             let name = '';
             let target = null;
+            let current = null;
 
             if (metric.type === 'Resource' && metric.resource) {
                 name = metric.resource.name;
                 target = metric.resource.target;
+                current = data?.status?.currentMetrics?.find(m => m.type === 'Resource' && m.resource?.name === name)?.resource?.current;
             } else if (metric.type === 'ContainerResource' && metric.containerResource) {
                 name = `${metric.containerResource.container}/${metric.containerResource.name}`;
                 target = metric.containerResource.target;
+                current = data?.status?.currentMetrics?.find(m => 
+                    m.type === 'ContainerResource' && 
+                    m.containerResource?.container === metric.containerResource?.container && 
+                    m.containerResource?.name === metric.containerResource?.name
+                )?.containerResource?.current;
             } else if (metric.type === 'Pods' && metric.pods) {
                 name = metric.pods.metric.name;
                 target = metric.pods.target;
+                current = data?.status?.currentMetrics?.find(m => m.type === 'Pods' && m.pods?.metric.name === name)?.pods?.current;
             } else if (metric.type === 'External' && metric.external) {
                 name = metric.external.metric.name;
                 target = metric.external.target;
+                current = data?.status?.currentMetrics?.find(m => m.type === 'External' && m.external?.metric.name === name)?.external?.current;
             } else if (metric.type === 'Object' && metric.object) {
                 name = metric.object.metric.name;
                 target = metric.object.target;
+                current = data?.status?.currentMetrics?.find(m => m.type === 'Object' && m.object?.metric.name === name)?.object?.current;
             }
 
             return {
@@ -113,6 +143,7 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
                 type: metric.type,
                 name,
                 target,
+                current,
             };
         });
     };

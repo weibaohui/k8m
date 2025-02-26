@@ -610,6 +610,11 @@
           }
         },
         {
+          "type": "tpl",
+          "tpl": "<%= data.spec.scaleTargetRef.kind %> - <%= data.spec.scaleTargetRef.name %>",
+          "label": "调整目标"
+        },
+        {
           "name": "副本数范围",
           "label": "副本数范围",
           "type": "tpl",
@@ -618,6 +623,16 @@
         {
           "label": "指标",
           "type": "hpaMetrics"
+        },
+        {
+          "type": "tpl",
+          "tpl": "<%= data.status.currentReplicas !== null ? data.status.currentReplicas : 'N/A' %> / <%= data.status.desiredReplicas !== null ? data.status.desiredReplicas : 'N/A' %>",
+          "label": "实例数<br><span class='text-gray-500 text-xs'>当前/预期</span>"
+        },
+        {
+          "name": "status.conditions",
+          "label": "条件",
+          "type": "k8sTextConditions"
         },
         {
           "name": "metadata.labels",
