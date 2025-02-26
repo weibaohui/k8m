@@ -27,3 +27,6 @@ bin/
 
 /data/
 /data/k8m.db
+
+/.env
+/.env.dev.local
