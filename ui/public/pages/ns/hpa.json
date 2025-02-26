@@ -616,6 +616,10 @@
           "tpl": "<% var minReplicas = data.spec.minReplicas || 'N/A'; var maxReplicas = data.spec.maxReplicas || 'N/A'; %><%= minReplicas %> ≦ 副本数 ≦ <%= maxReplicas %>"
         },
         {
+          "label": "指标",
+          "type": "hpaMetrics"
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
