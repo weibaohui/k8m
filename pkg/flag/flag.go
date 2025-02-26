@@ -43,7 +43,13 @@ func Init() *Config {
 	return config
 }
 func loadEnv() {
-	if err := godotenv.Load(); err != nil {
+	env := os.Getenv("K8M_ENV")
+	if "" == env {
+		// 默认开发环境加载".env.dev.local"
+		env = "dev"
+	}
+	// 依次加载并覆盖
+	if err := godotenv.Overload(".env", ".env."+env+".local"); err != nil {
 		klog.Warningf("Error loading .env file: %v", err)
 	}
 }
