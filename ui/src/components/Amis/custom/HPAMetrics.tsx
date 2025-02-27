@@ -1,124 +1,13 @@
 import { HPA } from '@/store/hpa';
 import React from 'react';
-import { Table, Tag, Tooltip } from 'antd';
-import { DashboardOutlined, ApiOutlined, CloudOutlined, ContainerOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 
 interface HPAMetricsProps {
     data: HPA;
 }
 
 const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>(({ data }, ref) => {
-    const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'Resource':
-                return <DashboardOutlined />;
-            case 'Pods':
-                return <ContainerOutlined />;
-            case 'Object':
-                return <ApiOutlined />;
-            case 'External':
-                return <CloudOutlined />;
-            case 'ContainerResource':
-                return <ContainerOutlined />;
-            default:
-                return null;
-        }
-    };
 
-    const getTypeColor = (type: string) => {
-        switch (type) {
-            case 'Resource':
-                return 'blue';
-            case 'Pods':
-                return 'green';
-            case 'Object':
-                return 'purple';
-            case 'External':
-                return 'orange';
-            case 'ContainerResource':
-                return 'cyan';
-            default:
-                return 'default';
-        }
-    };
-
-    const columns = [
-        {
-            title: '类型',
-            dataIndex: 'type',
-            key: 'type',
-            render: (type: string) => (
-                <Tag color={getTypeColor(type)} icon={getTypeIcon(type)}>
-                    {type}
-                </Tag>
-            ),
-        },
-        {
-            title: '名称',
-            dataIndex: 'name',
-            key: 'name',
-            render: (name: string) => (
-                <Tooltip title={name}>
-                    <span style={{ color: '#1890ff' }}>{name}</span>
-                </Tooltip>
-            ),
-        },
-        {
-            title: '目标值',
-            dataIndex: 'target',
-            key: 'target',
-            render: (target: any, record: any) => {
-                if (target.type === 'Utilization' && target.averageUtilization) {
-                    return (
-                        <Tag color="processing">
-                            {target.averageUtilization}%
-                        </Tag>
-                    );
-                } else if ((target.type === 'AverageValue' && target.averageValue) || (target.type === 'Value' && target.value)) {
-                    const value = target.averageValue || target.value;
-                    if (record.name === 'cpu') {
-                        // 将微核转换为核数
-                        const cores = parseInt(value) / 1000;
-                        return <Tag color="success">{cores}核</Tag>;
-                    } else if (record.name === 'memory') {
-                        // 将字节转换为Mi
-                        const mi = Math.round(parseInt(value) / (1024 * 1024));
-                        return <Tag color="success">{mi}Mi</Tag>;
-                    }
-                    return <Tag color="success">{value}</Tag>;
-                }
-                return <Tag color="default">-</Tag>;
-            },
-        },
-        {
-            title: '当前值',
-            dataIndex: 'current',
-            key: 'current',
-            render: (current: any, record: any) => {
-                if (!current) return <Tag color="default">-</Tag>;
-                if (current.averageUtilization) {
-                    return (
-                        <Tag color="processing">
-                            {current.averageUtilization}%
-                        </Tag>
-                    );
-                } else if (current.averageValue || current.value) {
-                    const value = current.averageValue || current.value;
-                    if (record.name === 'cpu') {
-                        // 将微核转换为核数
-                        const cores = parseInt(value) / 1000;
-                        return <Tag color="success">{cores}核</Tag>;
-                    } else if (record.name === 'memory') {
-                        // 将字节转换为Mi
-                        const mi = Math.round(parseInt(value) / (1024 * 1024));
-                        return <Tag color="success">{mi}Mi</Tag>;
-                    }
-                    return <Tag color="success">{value}</Tag>;
-                }
-                return <Tag color="default">-</Tag>;
-            },
-        },
-    ];
 
     const getMetricsData = () => {
         if (!data?.spec?.metrics) return [];
@@ -164,40 +53,53 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
         });
     };
 
+    const formatValue = (value: string | undefined, name: string) => {
+        if (!value) return '-';
+        if (name === 'cpu') {
+            const cores = parseInt(value) / 1000;
+            return `${cores}核`;
+        } else if (name === 'memory') {
+            if (value.endsWith('i')) return value;
+            const mi = Math.round(parseInt(value) / (1024 * 1024));
+            return `${mi}Mi`;
+        }
+        return value;
+    };
+
     return (
         <span ref={ref}>
-            <Table
-                columns={columns}
-                dataSource={getMetricsData()}
-                pagination={false}
-                size="small"
-                style={{
-                    backgroundColor: '#fff',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                }}
-                className="compact-table"
-                components={{
-                    body: {
-                        row: ({ children, ...props }) => (
-                            <tr
-                                {...props}
-                                style={{ height: '32px' }}
-                            >
-                                {children}
-                            </tr>
-                        ),
-                        cell: ({ children, ...props }) => (
-                            <td
-                                {...props}
-                                style={{ padding: '4px 8px' }}
-                            >
-                                {children}
-                            </td>
-                        ),
-                    },
-                }}
-            />
+            <div >
+                {getMetricsData().map((item, index) => (
+                    <div key={index} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                    }}>
+                        <Tooltip title={item.name}>
+                            <span style={{ color: '#1890ff' }}>{item.name}</span>
+                        </Tooltip>
+                        <span>/</span>
+                        <span style={{ color: '#1890ff' }}>
+                            {item?.target?.type === 'Utilization' && item.target.averageUtilization ?
+                                `${item.target.averageUtilization}%` :
+                                ((item?.target?.type === 'AverageValue' && item.target.averageValue) || (item?.target?.type === 'Value' && item.target.value)) ?
+                                    formatValue(item.target.averageValue || item.target.value, item.name) :
+                                    '-'
+                            }
+                        </span>
+                        <span>/</span>
+                        <span style={{ color: '#52c41a' }}>
+                            {!item.current ? '-' :
+                                item.current.averageUtilization ?
+                                    `${item.current.averageUtilization}%` :
+                                    (item.current.averageValue || item.current.value) ?
+                                        formatValue(item.current.averageValue || item.current.value, item.name) :
+                                        '-'
+                            }
+                        </span>
+                    </div>
+                ))}
+            </div>
         </span>
     );
 });

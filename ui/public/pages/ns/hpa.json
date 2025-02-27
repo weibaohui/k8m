@@ -610,23 +610,21 @@
           }
         },
         {
+          "label": "目标",
+          "width": "150px",
           "type": "tpl",
-          "tpl": "<%= data.spec.scaleTargetRef.kind %> - <%= data.spec.scaleTargetRef.name %>",
-          "label": "调整目标"
+          "tpl": "[<%= data.spec.scaleTargetRef.kind %>]<%= data.spec.scaleTargetRef.name %>"
         },
         {
           "name": "副本数范围",
           "label": "副本数范围",
+          "width": "150px",
           "type": "tpl",
           "tpl": "<% var minReplicas = data.spec.minReplicas || 'N/A'; var maxReplicas = data.spec.maxReplicas || 'N/A'; %><%= minReplicas %> ≦ 副本数 ≦ <%= maxReplicas %>"
         },
         {
-          "label": "指标",
+          "label": "指标<br><span class='text-gray-500 text-xs'>指标名称 / 阈值 / 当前</span>",
           "type": "hpaMetrics"
-        },
-        {
-          "label": "扩容行为",
-          "type": "hpaBehavior"
         },
         {
           "type": "tpl",
