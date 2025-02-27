@@ -623,7 +623,7 @@
           "tpl": "<% var minReplicas = data.spec.minReplicas || 'N/A'; var maxReplicas = data.spec.maxReplicas || 'N/A'; %><%= minReplicas %> ≦ 副本数 ≦ <%= maxReplicas %>"
         },
         {
-          "label": "指标<br><span class='text-gray-500 text-xs'>指标名称 / 阈值 / 当前</span>",
+          "label": "指标<br><span class='text-gray-500 text-xs'>指标名称 / 阈值 / 当前值</span>",
           "type": "hpaMetrics"
         },
         {

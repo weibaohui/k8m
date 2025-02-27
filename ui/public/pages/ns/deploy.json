@@ -988,7 +988,6 @@
                             "defaultCollapsed": false
                           },
                           "loadDataOnce": true,
-                          "syncLocation": false,
                           "perPage": 10,
                           "api": "get:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/events/all",
                           "columns": [
@@ -1108,6 +1107,341 @@
                       ]
                     },
                     {
+                      "title": "容器伸缩",
+                      "body": [
+                        {
+                          "type": "crud",
+                          "id": "detailCRUD",
+                          "name": "detailCRUD",
+                          "autoFillHeight": true,
+                          "autoGenerateFilter": {
+                            "columnsNum": 4,
+                            "showBtnToolbar": false
+                          },
+                          "headerToolbar": [
+                            {
+                              "type": "columns-toggler",
+                              "align": "right",
+                              "draggable": true,
+                              "icon": "fas fa-cog",
+                              "overlay": true,
+                              "footerBtnSize": "sm"
+                            },
+                            {
+                              "type": "tpl",
+                              "tpl": "共${count}条",
+                              "align": "right",
+                              "visibleOn": "${count}"
+                            },
+                            {
+                              "type": "columns-toggler",
+                              "align": "left"
+                            },
+                            "reload",
+                            "bulkActions"
+                          ],
+                          "loadDataOnce": true,
+                          "initFetch": true,
+                          "perPage": 10,
+                          "footerToolbar": [
+                            {
+                              "type": "pagination",
+                              "align": "right"
+                            },
+                            {
+                              "type": "statistics",
+                              "align": "right"
+                            },
+                            {
+                              "type": "switch-per-page",
+                              "align": "right"
+                            }
+                          ],
+                          "api": "get:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/hpa",
+                          "columns": [
+                            {
+                              "type": "operation",
+                              "label": "操作",
+                              "width": 120,
+                              "buttons": [
+                                {
+                                  "type": "button",
+                                  "icon": "fas fa-eye text-primary",
+                                  "actionType": "drawer",
+                                  "tooltip": "资源描述",
+                                  "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "xl",
+                                    "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                                    "body": [
+                                      {
+                                        "type": "service",
+                                        "api": "post:/k8s/HorizontalPodAutoscaler/group/autoscaling/version/v2/describe/ns/$metadata.namespace/name/$metadata.name",
+                                        "body": [
+                                          {
+                                            "type": "button",
+                                            "label": "AI解读",
+                                            "icon": "fas fa-brain text-primary",
+                                            "actionType": "drawer",
+                                            "drawer": {
+                                              "closeOnEsc": true,
+                                              "closeOnOutside": true,
+                                              "size": "xl",
+                                              "title": "AI解读  (ESC 关闭)",
+                                              "body": [
+                                                {
+                                                  "type": "websocketMarkdownViewer",
+                                                  "url": "/k8s/chat/describe",
+                                                  "params": {
+                                                    "kind": "${kind}",
+                                                    "group": "${group}",
+                                                    "version": "${version}",
+                                                    "name": "${metadata.name}",
+                                                    "namespace": "${metadata.namespace}"
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          {
+                                            "type": "highlightHtml",
+                                            "keywords": [
+                                              "Error",
+                                              "Warning"
+                                            ],
+                                            "html": "${result}"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "type": "button",
+                                  "icon": "fa fa-edit text-primary",
+                                  "tooltip": "Yaml编辑",
+                                  "actionType": "drawer",
+                                  "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "lg",
+                                    "title": "Yaml管理",
+                                    "body": [
+                                      {
+                                        "type": "tabs",
+                                        "tabsMode": "tiled",
+                                        "tabs": [
+                                          {
+                                            "title": "查看编辑",
+                                            "body": [
+                                              {
+                                                "type": "service",
+                                                "api": "get:/k8s/HorizontalPodAutoscaler/group/autoscaling/version/v2/ns/$metadata.namespace/name/$metadata.name",
+                                                "body": [
+                                                  {
+                                                    "type": "mEditor",
+                                                    "text": "${yaml}",
+                                                    "componentId": "yaml",
+                                                    "saveApi": "/k8s/HorizontalPodAutoscaler/group/autoscaling/version/v2/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                    "options": {
+                                                      "language": "yaml",
+                                                      "wordWrap": "on",
+                                                      "scrollbar": {
+                                                        "vertical": "auto"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "title": "文档",
+                                            "body": [
+                                              {
+                                                "type": "page",
+                                                "asideResizor": true,
+                                                "asideSticky": false,
+                                                "aside": [
+                                                  {
+                                                    "type": "input-tree",
+                                                    "name": "tree",
+                                                    "initiallyOpen": false,
+                                                    "unfoldedLevel": 1,
+                                                    "searchable": true,
+                                                    "showOutline": true,
+                                                    "showIcon": true,
+                                                    "searchConfig": {
+                                                      "sticky": true
+                                                    },
+                                                    "heightAuto": true,
+                                                    "inputClassName": "no-border no-padder mt-1",
+                                                    "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                                    "onEvent": {
+                                                      "change": {
+                                                        "actions": [
+                                                          {
+                                                            "componentId": "basic",
+                                                            "actionType": "reload",
+                                                            "data": {
+                                                              "description": "${event.data.item.description}",
+                                                              "id": "${event.data.item.id}",
+                                                              "full_id": "${event.data.item.full_id}",
+                                                              "type": "${event.data.item.type}"
+                                                            }
+                                                          },
+                                                          {
+                                                            "componentId": "detail",
+                                                            "actionType": "reload",
+                                                            "data": {
+                                                              "description": "${event.data.item.description}",
+                                                              "id": "${event.data.item.id}",
+                                                              "full_id": "${event.data.item.full_id}",
+                                                              "type": "${event.data.item.type}"
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                ],
+                                                "body": [
+                                                  {
+                                                    "type": "service",
+                                                    "id": "basic",
+                                                    "body": [
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>属性：</strong> ${id}",
+                                                        "visibleOn": "${id}"
+                                                      },
+                                                      {
+                                                        "type": "button",
+                                                        "label": "示例",
+                                                        "level": "link",
+                                                        "icon": "fas fa-lightbulb text-warning",
+                                                        "actionType": "drawer",
+                                                        "drawer": {
+                                                          "overlay": false,
+                                                          "closeOnEsc": true,
+                                                          "closeOnOutside": true,
+                                                          "size": "lg",
+                                                          "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                                          "body": [
+                                                            {
+                                                              "type": "websocketMarkdownViewer",
+                                                              "url": "/k8s/chat/example/field",
+                                                              "params": {
+                                                                "kind": "${kind}",
+                                                                "group": "${group}",
+                                                                "version": "${version}",
+                                                                "field": "${full_id}"
+                                                              }
+                                                            }
+                                                          ]
+                                                        },
+                                                        "visibleOn": "${id}"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                                                        "visibleOn": "${type}"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>描述：</strong> ${description}",
+                                                        "visibleOn": "${description}"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "service",
+                                                    "id": "detail",
+                                                    "api": "post:/k8s/doc/detail",
+                                                    "body": [
+                                                      {
+                                                        "type": "divider",
+                                                        "title": "描述翻译",
+                                                        "titlePosition": "center",
+                                                        "visibleOn": "${translate}"
+                                                      },
+                                                      {
+                                                        "type": "markdown",
+                                                        "value": "${translate|raw}",
+                                                        "options": {
+                                                          "linkify": true,
+                                                          "html": true,
+                                                          "breaks": true
+                                                        },
+                                                        "visibleOn": "${translate}"
+                                                      },
+                                                      {
+                                                        "type": "container",
+                                                        "body": [
+                                                          {
+                                                            "type": "tpl",
+                                                            "tpl": "<div style='height:80vh'>&nbsp</div>"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "actions": []
+                                  }
+                                }
+                              ],
+                              "toggled": true
+                            },
+                            {
+                              "name": "metadata.namespace",
+                              "label": "命名空间",
+                              "type": "text"
+                            },
+                            {
+                              "name": "metadata.name",
+                              "label": "名称",
+                              "type": "text",
+                              "width": "180px"
+                            },
+                            {
+                              "name": "副本数范围",
+                              "label": "副本数范围",
+                              "width": "150px",
+                              "type": "tpl",
+                              "tpl": "<% var minReplicas = data.spec.minReplicas || 'N/A'; var maxReplicas = data.spec.maxReplicas || 'N/A'; %><%= minReplicas %> ≦ 副本数 ≦ <%= maxReplicas %>"
+                            },
+                            {
+                              "label": "指标<br><span class='text-gray-500 text-xs'>指标名称 / 阈值 / 当前值</span>",
+                              "type": "hpaMetrics"
+                            },
+                            {
+                              "type": "tpl",
+                              "tpl": "<%= data.status.currentReplicas !== null ? data.status.currentReplicas : 'N/A' %> / <%= data.status.desiredReplicas !== null ? data.status.desiredReplicas : 'N/A' %>",
+                              "label": "实例数<br><span class='text-gray-500 text-xs'>当前/预期</span>"
+                            },
+                            {
+                              "name": "status.conditions",
+                              "label": "条件",
+                              "type": "k8sTextConditions"
+                            },
+                            {
+                              "name": "metadata.creationTimestamp",
+                              "label": "存在时长",
+                              "type": "k8sAge"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
                       "title": "日志",
                       "body": [
                         {
@@ -1156,8 +1490,7 @@
                               "align": "right"
                             }
                           ],
-                          "loadDataOnce": false,
-                          "syncLocation": false,
+                          "loadDataOnce": true,
                           "perPage": 10,
                           "api": "get:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/rollout/history",
                           "columns": [

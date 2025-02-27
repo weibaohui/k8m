@@ -182,3 +182,17 @@ func Event(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, eventList)
 }
+
+func HPA(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+	hpa, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).Namespace(ns).Name(name).
+		Ctl().ReplicaSet().HPAList()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, hpa)
+}

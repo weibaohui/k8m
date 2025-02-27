@@ -219,6 +219,7 @@ func main() {
 		api.POST("/deploy/ns/:ns/name/:name/rollout/resume", deploy.Resume)
 		api.POST("/deploy/ns/:ns/name/:name/scale/replica/:replica", deploy.Scale)
 		api.GET("/deploy/ns/:ns/name/:name/events/all", deploy.Event)
+		api.GET("/deploy/ns/:ns/name/:name/hpa", deploy.HPA)
 
 		// k8s node
 		api.POST("/node/drain/name/:name", node.Drain)
@@ -265,6 +266,7 @@ func main() {
 		api.POST("/statefulset/batch/stop", sts.BatchStop)
 		api.POST("/statefulset/batch/restore", sts.BatchRestore)
 		api.POST("/statefulset/ns/:ns/name/:name/scale/replica/:replica", sts.Scale)
+		api.GET("/statefulset/ns/:ns/name/:name/hpa", sts.HPA)
 
 		// k8s ds
 		api.POST("/daemonset/ns/:ns/name/:name/revision/:revision/rollout/undo", ds.Undo)
@@ -280,6 +282,7 @@ func main() {
 		api.POST("/replicaset/batch/stop", rs.BatchStop)
 		api.POST("/replicaset/batch/restore", rs.BatchRestore)
 		api.GET("/replicaset/ns/:ns/name/:name/events/all", rs.Event)
+		api.GET("/replicaset/ns/:ns/name/:name/hpa", rs.HPA)
 
 		// k8s configmap
 		api.POST("/configmap/ns/:ns/name/:name/import", cm.Import)

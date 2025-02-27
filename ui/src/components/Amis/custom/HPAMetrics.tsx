@@ -7,9 +7,11 @@ interface HPAMetricsProps {
 }
 
 const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>(({ data }, ref) => {
-
-
     const getMetricsData = () => {
+        console.log('data', data);
+        console.log('data', data.spec);
+        console.log('data', data.spec.metrics);
+
         if (!data?.spec?.metrics) return [];
 
         return data.spec.metrics.map((metric, index) => {
