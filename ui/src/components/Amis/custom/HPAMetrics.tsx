@@ -67,17 +67,25 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
             title: '目标值',
             dataIndex: 'target',
             key: 'target',
-            render: (target: any) => {
+            render: (target: any, record: any) => {
                 if (target.type === 'Utilization' && target.averageUtilization) {
                     return (
                         <Tag color="processing">
                             {target.averageUtilization}%
                         </Tag>
                     );
-                } else if (target.type === 'AverageValue' && target.averageValue) {
-                    return <Tag color="success">{target.averageValue}</Tag>;
-                } else if (target.type === 'Value' && target.value) {
-                    return <Tag color="warning">{target.value}</Tag>;
+                } else if ((target.type === 'AverageValue' && target.averageValue) || (target.type === 'Value' && target.value)) {
+                    const value = target.averageValue || target.value;
+                    if (record.name === 'cpu') {
+                        // 将微核转换为核数
+                        const cores = parseInt(value) / 1000;
+                        return <Tag color="success">{cores}核</Tag>;
+                    } else if (record.name === 'memory') {
+                        // 将字节转换为Mi
+                        const mi = Math.round(parseInt(value) / (1024 * 1024));
+                        return <Tag color="success">{mi}Mi</Tag>;
+                    }
+                    return <Tag color="success">{value}</Tag>;
                 }
                 return <Tag color="default">-</Tag>;
             },
@@ -86,7 +94,7 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
             title: '当前值',
             dataIndex: 'current',
             key: 'current',
-            render: (current: any) => {
+            render: (current: any, record: any) => {
                 if (!current) return <Tag color="default">-</Tag>;
                 if (current.averageUtilization) {
                     return (
@@ -94,10 +102,18 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
                             {current.averageUtilization}%
                         </Tag>
                     );
-                } else if (current.averageValue) {
-                    return <Tag color="success">{current.averageValue}</Tag>;
-                } else if (current.value) {
-                    return <Tag color="warning">{current.value}</Tag>;
+                } else if (current.averageValue || current.value) {
+                    const value = current.averageValue || current.value;
+                    if (record.name === 'cpu') {
+                        // 将微核转换为核数
+                        const cores = parseInt(value) / 1000;
+                        return <Tag color="success">{cores}核</Tag>;
+                    } else if (record.name === 'memory') {
+                        // 将字节转换为Mi
+                        const mi = Math.round(parseInt(value) / (1024 * 1024));
+                        return <Tag color="success">{mi}Mi</Tag>;
+                    }
+                    return <Tag color="success">{value}</Tag>;
                 }
                 return <Tag color="default">-</Tag>;
             },
@@ -159,6 +175,27 @@ const HPAMetricsComponent = React.forwardRef<HTMLSpanElement, HPAMetricsProps>((
                     backgroundColor: '#fff',
                     borderRadius: '8px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                }}
+                className="compact-table"
+                components={{
+                    body: {
+                        row: ({ children, ...props }) => (
+                            <tr
+                                {...props}
+                                style={{ height: '32px' }}
+                            >
+                                {children}
+                            </tr>
+                        ),
+                        cell: ({ children, ...props }) => (
+                            <td
+                                {...props}
+                                style={{ padding: '4px 8px' }}
+                            >
+                                {children}
+                            </td>
+                        ),
+                    },
                 }}
             />
         </span>
