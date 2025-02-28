@@ -2,6 +2,7 @@ package helm
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -257,9 +258,11 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	}
 
 	klog.V(0).Infof("[%s] start download index file", repoEntry.Name)
-	if _, err = cr.DownloadIndexFile(); err != nil {
+	indexFilePath, err := cr.DownloadIndexFile()
+	if err != nil {
 		return fmt.Errorf("[%s] download index file error: %v", repoEntry.Name, err)
 	}
+	klog.V(0).Infof("Index file = %s", indexFilePath)
 
 	if !isNewRepo {
 		klog.V(0).Infof("[%s] repo update success, path: %s", repoEntry.Name, rfPath)
@@ -274,6 +277,43 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 
 	klog.V(0).Infof("change repo success, path: %s", rfPath)
 
+	return nil
+}
+
+// 获取chart的版本号，TODO
+func (c *Client) GetVersions(err error, indexFilePath string) error {
+	// 读取 index.yaml 文件
+	file, err := os.ReadFile(indexFilePath)
+	if err != nil {
+		log.Fatalf("Error opening index file: %v", err)
+	}
+
+	// 解析 YAML 文件
+	var index repo.IndexFile
+
+	err = yaml.Unmarshal(file, &index)
+	if err != nil {
+		return err
+	}
+
+	// 查找 haproxy 的所有版本
+	chartName := "haproxy"
+	versions := []string{}
+	if chartEntries, ok := index.Entries[chartName]; ok {
+		for _, entry := range chartEntries {
+			versions = append(versions, entry.Version)
+		}
+	}
+
+	// 输出结果
+	if len(versions) == 0 {
+		fmt.Printf("No versions found for chart %s\n", chartName)
+	} else {
+		fmt.Printf("Available versions for %s:\n", chartName)
+		for _, v := range versions {
+			fmt.Println(v)
+		}
+	}
 	return nil
 }
 
