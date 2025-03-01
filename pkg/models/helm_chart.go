@@ -19,11 +19,12 @@ type HelmChart struct {
 	Home           string         `json:"home,omitempty"`                                // 项目主页URL
 	Icon           string         `json:"icon,omitempty"`                                // Chart图标链接
 	Keywords       pq.StringArray `gorm:"type:text[]" json:"keywords,omitempty"`         // 关键词（PostgreSQL数组类型）
-	KubeVersion    string         `json:"kubeVersion,omitempty"`
-	AppVersion     string         `json:"appVersion,omitempty"`
-	Deprecated     bool           `json:"deprecated,omitempty"` // Whether or not this chart is deprecated
+	KubeVersion    string         `json:"kubeVersion,omitempty"`                         // 最低k8s版本要求
+	AppVersion     string         `json:"appVersion,omitempty"`                          // app应用版本
+	Deprecated     bool           `json:"deprecated,omitempty"`                          // Whether or not this chart is deprecated
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
+	Sources        string         `json:"sources,omitempty"` // 源码主页
 }
 
 func (c *HelmChart) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*HelmChart, int64, error) {

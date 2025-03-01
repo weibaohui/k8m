@@ -349,6 +349,9 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 			AppVersion:     ct.AppVersion,
 			Deprecated:     ct.Deprecated,
 		}
+		if len(ct.Sources) > 0 {
+			m.Sources = ct.Sources[0]
+		}
 		err = m.Save(nil)
 		if err != nil {
 			klog.V(6).Infof("[%s] save helm chart to database error: %v", chartName, err)

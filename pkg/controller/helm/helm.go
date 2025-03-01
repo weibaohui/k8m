@@ -1,12 +1,14 @@
 package helm
 
 import (
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
+	"gorm.io/gorm"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
@@ -20,6 +22,54 @@ func ListRepo(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
+}
+
+// AddOrUpdateRepo 添加或更新Helm仓库
+func AddOrUpdateRepo(c *gin.Context) {
+	var repoEntry repo.Entry
+	if err := c.ShouldBindJSON(&repoEntry); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	h, err := getHelm(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	if err := h.AddOrUpdateRepo(&repoEntry); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+func RepoOptionList(c *gin.Context) {
+	params := dao.BuildParams(c)
+	m := &models.HelmRepository{}
+	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
+		return db.Distinct("name")
+	})
+	if err != nil {
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
+	var names []map[string]string
+	for _, n := range items {
+		names = append(names, map[string]string{
+			"label": n.Name,
+			"value": n.Name,
+		})
+	}
+	slice.SortBy(names, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
+	amis.WriteJsonData(c, gin.H{
+		"options": names,
+	})
 }
 func ListChart(c *gin.Context) {
 	// 从数据库查询列表
@@ -74,27 +124,6 @@ func ListReleaseHistory(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, history)
-}
-
-// AddOrUpdateRepo 添加或更新Helm仓库
-func AddOrUpdateRepo(c *gin.Context) {
-	var repoEntry repo.Entry
-	if err := c.ShouldBindJSON(&repoEntry); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	h, err := getHelm(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	if err := h.AddOrUpdateRepo(&repoEntry); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	amis.WriteJsonOK(c)
 }
 
 func getHelm(c *gin.Context) (helm.Helm, error) {

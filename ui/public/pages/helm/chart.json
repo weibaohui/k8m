@@ -53,7 +53,79 @@
           "type": "operation",
           "label": "操作",
           "width": 120,
-          "buttons": [],
+          "buttons": [
+            {
+              "type": "button",
+              "label": "详情",
+              "actionType": "drawer",
+              "drawer": {
+                "title": "${name} 详情 （ESC 关闭）",
+                "size": "lg",
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "body": {
+                  "type": "form",
+                  "mode": "horizontal",
+                  "horizontal": {
+                    "left": 2,
+                    "right": 8
+                  },
+                  "controls": [
+                    {
+                      "type": "static-image",
+                      "name": "icon",
+                      "thumbMode": "contain",
+                      "thumbRatio": "1:1",
+                      "width": "100px",
+                      "height": "100px"
+                    },
+                    {
+                      "type": "static",
+                      "name": "name",
+                      "label": "Chart名称"
+                    },
+                    {
+                      "type": "hidden",
+                      "name": "repository_name",
+                      "label": "仓库名称"
+                    },
+                    {
+                      "type": "static",
+                      "name": "latest_version",
+                      "label": "版本"
+                    },
+                    {
+                      "type": "static",
+                      "name": "description",
+                      "label": "描述"
+                    },
+                    {
+                      "label": "项目主页",
+                      "type": "tpl",
+                      "tpl": "<a href=${home} target=_blank>主页</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=${sources} target=_blank>源码</a>"
+                    },
+                    {
+                      "type": "static",
+                      "name": "keywords",
+                      "label": "关键词",
+                      "tpl": "${keywords | join: ', '}"
+                    },
+                    {
+                      "type": "static",
+                      "name": "deprecated",
+                      "label": "是否弃用",
+                      "tpl": "${deprecated ? '已弃用' : '正常'}"
+                    },
+                    {
+                      "type": "static",
+                      "name": "kubeVersion",
+                      "label": "Kubernetes版本"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
           "toggled": true
         },
         {
@@ -83,24 +155,26 @@
           "width": "300px"
         },
         {
-          "name": "home",
-          "label": "项目主页",
-          "type": "link"
-        },
-        {
           "name": "kubeVersion",
           "label": "Kubernetes版本",
-          "type": "text"
-        },
-        {
-          "name": "appVersion",
-          "label": "应用版本",
           "type": "text"
         },
         {
           "name": "deprecated",
           "label": "弃用",
           "type": "status"
+        },
+        {
+          "type": "text",
+          "name": "repository_name",
+          "label": "归属仓库",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "name": "repository_name",
+            "searchable": true,
+            "source": "/mgm/helm/repo/option_list"
+          }
         }
       ]
     }
