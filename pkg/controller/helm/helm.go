@@ -21,6 +21,17 @@ func ListRepo(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+func ListChart(c *gin.Context) {
+	// 从数据库查询列表
+	params := dao.BuildParams(c)
+	m := &models.HelmChart{}
+	items, total, err := m.List(params)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonListWithTotal(c, total, items)
+}
 
 func DeleteRepo(c *gin.Context) {
 	ids := c.Param("ids")
