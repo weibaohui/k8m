@@ -42,7 +42,22 @@ const items: () => MenuItem[] = () => {
             title: "Helm应用",
             icon: <i className="fab fa-app-store"></i>,
             key: "Helm",
-            onClick: () => onMenuClick('/helm/helm')
+            children: [
+                {
+                    label: "仓库",
+                    title: "仓库",
+                    icon: <i className="fa-solid fa-box-archive"></i>,
+                    key: "helm_repo",
+                    onClick: () => onMenuClick('/helm/repo')
+                },
+                {
+                    label: "应用",
+                    title: "应用",
+                    icon: <i className="fa-solid fa-cubes"></i>,
+                    key: "helm_chart",
+                    onClick: () => onMenuClick('/helm/chart')
+                },
+            ]
         },
         {
             label: "工作负载",
