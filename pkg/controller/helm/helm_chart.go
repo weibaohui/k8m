@@ -8,7 +8,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
-	"sigs.k8s.io/yaml"
 )
 
 func ListChart(c *gin.Context) {
@@ -40,13 +39,9 @@ func GetChartValue(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	bytes, err := yaml.Marshal(value)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+
 	amis.WriteJsonData(c, gin.H{
-		"yaml": string(bytes),
+		"yaml": value,
 	})
 }
 
