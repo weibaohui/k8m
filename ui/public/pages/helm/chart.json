@@ -124,7 +124,75 @@
                       "label": "Kubernetes版本"
                     }
                   ]
-                }
+                },
+                "actions": [
+                  {
+                    "type": "button",
+                    "label": "安装",
+                    "size": "sm",
+                    "actionType": "drawer",
+                    "drawer": {
+                      "title": "${name} 安装配置",
+                      "size": "lg",
+                      "closeOnEsc": true,
+                      "closeOnOutside": true,
+                      "body": {
+                        "type": "form",
+                        "mode": "horizontal",
+                        "horizontal": {
+                          "left": 2,
+                          "right": 8
+                        },
+                        "controls": [
+                          {
+                            "type": "static",
+                            "name": "install_version",
+                            "label": "版本"
+                          },
+                          {
+                            "type": "service",
+                            "api": "/mgm/helm/repo/${repository_name}/chart/${name}/version/${install_version}/values",
+                            "body": [
+                              {
+                                "type": "editor",
+                                "name": "values",
+                                "label": "Values配置",
+                                "language": "yaml",
+                                "value": "${yaml}",
+                                "allowFullscreen": true,
+                                "placeholder": "loading",
+                                "options": {
+                                  "wordWrap": "on",
+                                  "scrollbar": {
+                                    "vertical": "auto"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "actions": [
+                        {
+                          "type": "button",
+                          "label": "确认安装",
+                          "level": "primary",
+                          "actionType": "ajax",
+                          "api": {
+                            "method": "post",
+                            "url": "/mgm/helm/chart/install",
+                            "data": {
+                              "name": "${name}",
+                              "repository_name": "${repository_name}",
+                              "version": "${install_version}",
+                              "values": "${values}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
               }
             }
           ],
