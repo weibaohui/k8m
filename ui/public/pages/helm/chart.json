@@ -145,6 +145,11 @@
                         },
                         "controls": [
                           {
+                            "type": "text",
+                            "name": "release_name",
+                            "label": "名称"
+                          },
+                          {
                             "type": "static",
                             "name": "install_version",
                             "label": "版本"
@@ -180,11 +185,8 @@
                           "actionType": "ajax",
                           "api": {
                             "method": "post",
-                            "url": "/mgm/helm/chart/install",
+                            "url": "/mgm/helm/release/${release_name}/repo/${repository_name}/chart/${name}/version/${install_version}/install",
                             "data": {
-                              "name": "${name}",
-                              "repository_name": "${repository_name}",
-                              "version": "${install_version}",
                               "values": "${values}"
                             }
                           }
