@@ -7,9 +7,8 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/service"
+	"sigs.k8s.io/yaml"
 )
 
 func ListChart(c *gin.Context) {
@@ -26,23 +25,29 @@ func ListChart(c *gin.Context) {
 
 // GetChartValue 获取Chart的值
 func GetChartValue(c *gin.Context) {
+	repoName := c.Param("repo")
 	chartName := c.Param("chart")
 	version := c.Param("version")
 
-	selectedCluster := amis.GetSelectedCluster(c)
-	restConfig := service.ClusterService().GetClusterByID(selectedCluster).GetRestConfig()
-	h, err := helm.New(restConfig)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	value, err := h.GetChartValue(chartName, version)
+	value, err := h.GetChartValue(repoName, chartName, version)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, value)
+	bytes, err := yaml.Marshal(value)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{
+		"yaml": string(bytes),
+	})
 }
 
 // ChartVersionOptionList 获取Chart的版本列表
