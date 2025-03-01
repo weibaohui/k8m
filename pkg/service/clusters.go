@@ -107,6 +107,10 @@ func (c *ClusterConfig) GetClusterID() string {
 	return id
 }
 
+func (c *ClusterConfig) GetRestConfig() *rest.Config {
+	return c.restConfig
+}
+
 // ClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
 func (c *clusterService) ClusterID(clusterConfig *ClusterConfig) string {
 	return clusterConfig.GetClusterID()

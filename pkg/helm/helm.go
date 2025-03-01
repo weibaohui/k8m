@@ -4,18 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
+	"github.com/duke-git/lancet/v2/slice"
+	"github.com/weibaohui/k8m/pkg/models"
+	"gorm.io/gorm"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	clivalues "helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/registry"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	"helm.sh/helm/v3/pkg/strvals"
+	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/yaml"
 )
@@ -40,7 +44,7 @@ type Client struct {
 type Option func(client *Client)
 
 // New  Helm Interface
-func New(options ...Option) (Helm, error) {
+func New(restConfig *rest.Config, options ...Option) (Helm, error) {
 	h := Client{
 		setting: cli.New(),
 		driver:  "secret",
@@ -53,6 +57,7 @@ func New(options ...Option) (Helm, error) {
 	var ac action.Configuration
 	g := h.setting.RESTClientGetter()
 
+	h.getter = NewRESTClientGetterImpl(restConfig)
 	if h.getter != nil {
 		g = h.getter
 	}
@@ -86,10 +91,11 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 		if errors.Is(err, driver.ErrReleaseNotFound) {
 			return releases, nil
 		}
-		klog.Errorf("[%s] history client run error: %v", releaseName, err)
+		klog.Errorf("[%s] 1history client run error: %v", releaseName, err)
 		return nil, err
 	}
-
+	klog.V(0).Infof("[%s] history releases: %+v", releaseName, releases)
+	klog.V(0).Infof(" history releases: %d", len(releases))
 	return releases, nil
 }
 
@@ -112,8 +118,9 @@ func (c *Client) InstallRelease(releaseName, repoName, chartName, version string
 	ic.ReleaseName = releaseName
 	ic.Version = version
 	ic.Namespace = "default" // todo 传参
-
-	chartReq, err := c.getChart(chartName, version, &ic.ChartPathOptions)
+	client, _ := registry.NewClient()
+	ic.SetRegistryClient(client)
+	chartReq, err := c.getChart(repoName, chartName, version, &ic.ChartPathOptions)
 	if err != nil {
 		return fmt.Errorf("[%s] get chart error: %v", releaseName, err)
 	}
@@ -144,21 +151,50 @@ func (c *Client) InstallRelease(releaseName, repoName, chartName, version string
 }
 
 // getChart get chart
-func (c *Client) getChart(chartName, version string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, error) {
+func (c *Client) getChart(repoName, chartName, version string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, error) {
 	var (
 		lc  *chart.Chart
 		err error
 	)
-	option, err := chartPathOptions.LocateChart(chartName, c.setting)
+
+	// 创建HelmRepository对象
+	helmRepo := &models.HelmRepository{
+		Name: repoName,
+	}
+	helm, err := helmRepo.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("name = ?", repoName).First(helmRepo)
+	})
 	if err != nil {
-		return nil, fmt.Errorf("located charts %s error: %v", chartName, err)
+		return nil, err
+	}
+
+	// 读取repo 元信息
+	// 解析 YAML 文件
+	var index repo.IndexFile
+	err = yaml.Unmarshal([]byte(helm.Content), &index)
+	if err != nil {
+		return nil, err
+	}
+
+	var chartURL string
+	if cv, ok := index.Entries[chartName]; ok {
+		if item, ok := slice.FindBy(cv, func(index int, item *repo.ChartVersion) bool {
+			return item.Version == version
+		}); ok {
+			if len(item.URLs) > 0 {
+				chartURL = item.URLs[0]
+			}
+		}
+	}
+	option, err := chartPathOptions.LocateChart(chartURL, c.setting)
+	if err != nil {
+		return nil, fmt.Errorf("located charts %s error: %v", chartURL, err)
 	}
 
 	lc, err = loader.Load(option)
 	if err != nil {
 		return nil, fmt.Errorf("load chart path options error: %v", err)
 	}
-
 	return lc, nil
 }
 
@@ -199,8 +235,8 @@ func (c *Client) UpgradeRelease(releaseName, localRepoName, targetVersion string
 
 	uc.Version = targetVersion
 
-	chartName := fmt.Sprintf("%s/%s", localRepoName, r[len(r)-1].Chart.Name())
-	chartReq, err := c.getChart(chartName, targetVersion, &uc.ChartPathOptions)
+	chartName := r[len(r)-1].Chart.Name()
+	chartReq, err := c.getChart(localRepoName, chartName, targetVersion, &uc.ChartPathOptions)
 	if err != nil {
 		return fmt.Errorf("[%s] get chart error: %v", releaseName, err)
 	}
@@ -220,37 +256,22 @@ func (c *Client) UpgradeRelease(releaseName, localRepoName, targetVersion string
 func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	klog.V(0).Infof("load repo info: %+v", repoEntry)
 
-	rfPath := c.setting.RepositoryConfig
-
-	if _, err := os.Stat(rfPath); err != nil {
-		if !os.IsNotExist(err) {
-			return err
+	// 创建HelmRepository对象
+	helmRepo := &models.HelmRepository{
+		Name:     repoEntry.Name,
+		URL:      repoEntry.URL,
+		Username: repoEntry.Username,
+		Password: repoEntry.Password,
+	}
+	// 判断该名称、URL的仓库是否存在
+	// 检查是否存在相同名称和URL的仓库
+	if id, err := helmRepo.GetIDByNameAndURL(nil); err == nil && id > 0 {
+		helmRepo.ID = id
+	} else {
+		// 第一次创建，先保存到数据库
+		if err = helmRepo.Save(nil); err != nil {
+			return fmt.Errorf("save helm repository to database error: %v", err)
 		}
-		err := os.MkdirAll(filepath.Dir(rfPath), os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-
-	rfContent, err := os.ReadFile(rfPath)
-	if err != nil {
-		return fmt.Errorf("repo file read error, path: %s, error: %v", rfPath, err)
-	}
-
-	rf := repo.File{}
-
-	if err = yaml.Unmarshal(rfContent, &rf); err != nil {
-		return err
-	}
-
-	klog.V(0).Infof("load repo file: %+v", rf)
-
-	isNewRepo := true
-
-	// if has repo already exists, tip and update repo.
-	if rf.Has(repoEntry.Name) {
-		klog.V(0).Infof("[%s] repo already exists", repoEntry.Name)
-		isNewRepo = false
 	}
 
 	cr, err := repo.NewChartRepository(repoEntry, getter.All(c.setting))
@@ -265,18 +286,32 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	}
 	klog.V(0).Infof("Index file = %s", indexFilePath)
 
-	if !isNewRepo {
-		klog.V(0).Infof("[%s] repo update success, path: %s", repoEntry.Name, rfPath)
-		return nil
+	// 将索引文件加载到content字段中
+	file, err := os.ReadFile(indexFilePath)
+	if err != nil {
+		return fmt.Errorf("[%s] read index file error: %v", repoEntry.Name, err)
+	}
+	helmRepo.Content = string(file)
+
+	// 读取repo 元信息
+	// 解析 YAML 文件
+	var index repo.IndexFile
+
+	if err = yaml.Unmarshal(file, &index); err == nil {
+		helmRepo.Generated = index.Generated
 	}
 
-	// Update new repo to repo config file.
-	rf.Update(repoEntry)
-	if err := rf.WriteFile(c.setting.RepositoryConfig, 0644); err != nil {
-		return fmt.Errorf("write repo file %s error: %v", rfPath, err)
+	defer func() {
+		if err := os.Remove(indexFilePath); err != nil {
+			klog.V(6).Infof("[%s] remove index file error: %v", repoEntry.Name, err)
+		}
+	}()
+	// 保存到数据库
+	if err := helmRepo.UpdateContent(nil); err != nil {
+		return fmt.Errorf("Update helm repository Content   to database error: %v", err)
 	}
 
-	klog.V(0).Infof("change repo success, path: %s", rfPath)
+	klog.V(0).Infof("[%s] helm repository saved to database successfully", repoEntry.Name)
 
 	return nil
 }

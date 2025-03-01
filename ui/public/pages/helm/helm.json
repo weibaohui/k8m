@@ -1,0 +1,325 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建用户",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建用户  (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/mgm/user/save",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "username",
+                  "label": "用户名",
+                  "required": true,
+                  "placeholder": "请输入用户名",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 3,
+                    "maxLength": 20
+                  },
+                  "validationErrors": {
+                    "minLength": "用户名至少 3 个字符",
+                    "maxLength": "用户名最多 20 个字符"
+                  }
+                },
+                {
+                  "type": "select",
+                  "name": "role",
+                  "label": "角色",
+                  "required": true,
+                  "options": [
+                    {
+                      "label": "集群管理员",
+                      "value": "cluster_admin"
+                    },
+                    {
+                      "label": "集群只读",
+                      "value": "cluster_readonly"
+                    },
+                    {
+                      "label": "平台管理员",
+                      "value": "platform_admin"
+                    }
+                  ],
+                  "placeholder": "请选择角色"
+                },
+                {
+                  "type": "static",
+                  "label": "角色说明",
+                  "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。无用户管理权限。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。无用户管理权限。</p><p><strong>平台管理员：</strong>所有权限。</p></div>"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "detailCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "/mgm/user/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/mgm/helm/repo/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑用户",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "编辑用户  (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/mgm/user/save",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "username",
+                      "label": "用户名",
+                      "required": true,
+                      "placeholder": "请输入用户名",
+                      "validateOnChange": true,
+                      "validations": {
+                        "minLength": 3,
+                        "maxLength": 20
+                      },
+                      "validationErrors": {
+                        "minLength": "用户名至少 3 个字符",
+                        "maxLength": "用户名最多 20 个字符"
+                      }
+                    },
+                    {
+                      "type": "select",
+                      "name": "role",
+                      "label": "角色",
+                      "required": true,
+                      "options": [
+                        {
+                          "label": "集群管理员",
+                          "value": "cluster_admin"
+                        },
+                        {
+                          "label": "集群只读",
+                          "value": "cluster_readonly"
+                        },
+                        {
+                          "label": "平台管理员",
+                          "value": "platform_admin"
+                        }
+                      ],
+                      "placeholder": "请选择角色"
+                    },
+                    {
+                      "type": "static",
+                      "label": "角色说明",
+                      "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-key text-primary",
+              "actionType": "drawer",
+              "tooltip": "修改密码",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "修改密码  (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/mgm/user/password",
+                  "body": [
+                    {
+                      "type": "passwordEditor",
+                      "api": "/mgm/user/update_psw/${id}"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "修改成功",
+                    "saveFailed": "修改失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "actions": []
+              }
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "username",
+          "label": "用户名",
+          "type": "text",
+          "width": "180px",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "username",
+            "clearable": true,
+            "label": "用户名",
+            "placeholder": "输入用户名"
+          }
+        },
+        {
+          "name": "role",
+          "label": "角色",
+          "type": "mapping",
+          "map": {
+            "cluster_admin": "集群管理员",
+            "cluster_readonly": "集群只读",
+            "platform_admin": "平台管理员"
+          },
+          "searchable": {
+            "type": "select",
+            "name": "role",
+            "clearable": true,
+            "label": "角色",
+            "placeholder": "请选择角色",
+            "options": [
+              {
+                "label": "集群管理员",
+                "value": "cluster_admin"
+              },
+              {
+                "label": "集群只读",
+                "value": "cluster_readonly"
+              },
+              {
+                "label": "平台管理员",
+                "value": "platform_admin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}

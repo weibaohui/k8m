@@ -19,6 +19,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
+	"github.com/weibaohui/k8m/pkg/controller/helm"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/kubeconfig"
 	"github.com/weibaohui/k8m/pkg/controller/log"
@@ -344,6 +345,9 @@ func main() {
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
 		mgm.GET("/log/operation/list", log.ListOperation)
+
+		// helm
+		mgm.GET("/helm/repo/list", helm.ListReleaseHistory)
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
