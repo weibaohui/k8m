@@ -33,7 +33,7 @@ type Helm interface {
 	UninstallRelease(releaseName string) error
 	UpgradeRelease(releaseName, localRepoName, targetVersion string) error
 	GetChartValue(chartName, version string) (string, error)
-	GetChartVersions(chartName string) ([]string, error)
+	GetChartVersions(repoName string, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)
 }
 
@@ -400,40 +400,36 @@ func (c *Client) GetChartValue(chartName, version string) (string, error) {
 }
 
 // 获取chart的版本号，TODO
-func (c *Client) GetChartVersions(chartName string) ([]string, error) {
+func (c *Client) GetChartVersions(repoName string, chartName string) ([]string, error) {
+	var rp models.HelmRepository
+	err := dao.DB().Where("name=?", repoName).First(&rp).Error
+	if err != nil {
+		return nil, err
+	}
+
 	// // 读取 index.yaml 文件
 	// file, err := os.ReadFile(indexFilePath)
 	// if err != nil {
 	// 	log.Fatalf("Error opening index file: %v", err)
 	// }
 	//
-	// // 解析 YAML 文件
-	// var index repo.IndexFile
-	//
-	// err = yaml.Unmarshal(file, &index)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// // 查找 haproxy 的所有版本
-	// chartName := "haproxy"
-	// versions := []string{}
-	// if chartEntries, ok := index.Entries[chartName]; ok {
-	// 	for _, entry := range chartEntries {
-	// 		versions = append(versions, entry.Version)
-	// 	}
-	// }
-	//
-	// // 输出结果
-	// if len(versions) == 0 {
-	// 	fmt.Printf("No versions found for chart %s\n", chartName)
-	// } else {
-	// 	fmt.Printf("Available versions for %s:\n", chartName)
-	// 	for _, v := range versions {
-	// 		fmt.Println(v)
-	// 	}
-	// }
-	return nil, nil
+	// 解析 YAML 文件
+	var index repo.IndexFile
+
+	err = yaml.Unmarshal([]byte(rp.Content), &index)
+	if err != nil {
+		return nil, err
+	}
+
+	// 查找 haproxy 的所有版本
+	var versions []string
+	if chartEntries, ok := index.Entries[chartName]; ok {
+		for _, entry := range chartEntries {
+			versions = append(versions, entry.Version)
+		}
+	}
+
+	return versions, nil
 }
 
 func debug(format string, v ...interface{}) {
