@@ -32,7 +32,7 @@ type Helm interface {
 	InstallRelease(releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(releaseName string) error
 	UpgradeRelease(releaseName, localRepoName, targetVersion string) error
-	GetChartValue(repoName string, chartName, version string) (map[string]interface{}, error)
+	GetChartValue(repoName, chartName, version string) (string, error)
 	GetChartVersions(repoName string, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)
 }
@@ -189,16 +189,29 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 			}
 		}
 	}
+
 	option, err := chartPathOptions.LocateChart(chartURL, c.setting)
 	if err != nil {
 		return nil, fmt.Errorf("located charts %s error: %v", chartURL, err)
 	}
-
+	klog.V(0).Infof("chart option file %s", option)
 	lc, err = loader.Load(option)
+
 	if err != nil {
 		return nil, fmt.Errorf("load chart path options error: %v", err)
 	}
+
 	return lc, nil
+}
+
+// GetValuesYaml 提取 values.yaml 文件内容
+func GetValuesYaml(c *chart.Chart) string {
+	for _, file := range c.Raw {
+		if file.Name == "values.yaml" {
+			return string(file.Data)
+		}
+	}
+	return ""
 }
 
 // UninstallRelease uninstall release which deployed
@@ -394,7 +407,7 @@ func (c *Client) UpdateReposIndex(ids string) {
 	}
 
 }
-func (c *Client) GetChartValue(repoName, chartName, version string) (map[string]interface{}, error) {
+func (c *Client) GetChartValue(repoName, chartName, version string) (string, error) {
 	ic := action.NewInstall(c.ac)
 	ic.Version = version
 	ic.Namespace = "default" // todo 传参
@@ -402,9 +415,12 @@ func (c *Client) GetChartValue(repoName, chartName, version string) (map[string]
 	ic.SetRegistryClient(client)
 	chartReq, err := c.getChart(repoName, chartName, version, &ic.ChartPathOptions)
 	if err != nil {
-		return nil, fmt.Errorf("[%s/%s] get chart error: %v", repoName, chartName, err)
+		return "", fmt.Errorf("[%s/%s] get chart error: %v", repoName, chartName, err)
 	}
-	return chartReq.Values, nil
+	// 3. 获取 values.yaml
+	values := GetValuesYaml(chartReq)
+
+	return values, nil
 }
 
 // GetChartVersions 获取chart的版本
