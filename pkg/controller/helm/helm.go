@@ -1,6 +1,8 @@
 package helm
 
 import (
+	"strings"
+
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -85,12 +87,10 @@ func ListChart(c *gin.Context) {
 
 func DeleteRepo(c *gin.Context) {
 	ids := c.Param("ids")
-	params := dao.BuildParams(c)
-	m := &models.HelmRepository{}
-	if err := m.Delete(params, ids); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+	// 删除
+	dao.DB().Where("id in ?", strings.Split(ids, ",")).Delete(&models.HelmRepository{})
+	dao.DB().Where("repository_id in ?", strings.Split(ids, ",")).Delete(&models.HelmChart{})
+
 	amis.WriteJsonOK(c)
 }
 func UpdateReposIndex(c *gin.Context) {
