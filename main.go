@@ -347,7 +347,17 @@ func main() {
 		mgm.GET("/log/operation/list", log.ListOperation)
 
 		// helm
-		mgm.GET("/helm/repo/list", helm.ListReleaseHistory)
+		mgm.GET("/helm/release/:release/history/list", helm.ListReleaseHistory)
+		mgm.GET("/helm/repo/list", helm.ListRepo)
+		mgm.POST("/helm/repo/delete/:ids", helm.DeleteRepo)
+		mgm.POST("/helm/repo/update_index", helm.UpdateReposIndex)
+		mgm.POST("/helm/repo/save", helm.AddOrUpdateRepo)
+		mgm.GET("/helm/chart/:chart/versions", helm.GetChartVersions)
+		mgm.GET("/helm/repo/:repo/chart/:chart/value", helm.GetChartValue)
+		mgm.POST("/helm/release/:release/repo/:repo/chart/:chart/install", helm.InstallRelease)
+		mgm.POST("/helm/release/uninstall", helm.UninstallRelease)
+		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
+
 	}
 
 	ansi.ShowBootInfo(Version, flag.Init().Port)
