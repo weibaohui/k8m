@@ -21,8 +21,15 @@ type HelmRepository struct {
 	IsActive        bool      `gorm:"default:true" json:"is_active,omitempty"` // 是否启用
 	Content         string    `gorm:"type:text" json:"content,omitempty"`      // 模板内容，支持大文本存储
 	Generated       time.Time `json:"generated"`                               // repo 索引文件创建时间
-	CreatedAt       time.Time `json:"created_at,omitempty"`                    // Automatically managed by GORM for creation time
-	UpdatedAt       time.Time `json:"updated_at,omitempty"`                    // Automatically managed by GORM for update time
+
+	CertFile              string `json:"certFile"`
+	KeyFile               string `json:"keyFile"`
+	CAFile                string `json:"caFile"`
+	InsecureSkipTLSverify bool   `json:"insecure_skip_tls_verify"`
+	PassCredentialsAll    bool   `json:"pass_credentials_all"`
+
+	CreatedAt time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
+	UpdatedAt time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 
 func (c *HelmRepository) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*HelmRepository, int64, error) {
