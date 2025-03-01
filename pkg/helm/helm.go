@@ -32,7 +32,7 @@ type Helm interface {
 	InstallRelease(releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(releaseName string) error
 	UpgradeRelease(releaseName, localRepoName, targetVersion string) error
-	GetChartValue(chartName, version string) (string, error)
+	GetChartValue(repoName string, chartName, version string) (map[string]interface{}, error)
 	GetChartVersions(repoName string, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)
 }
@@ -394,12 +394,20 @@ func (c *Client) UpdateReposIndex(ids string) {
 	}
 
 }
-func (c *Client) GetChartValue(chartName, version string) (string, error) {
-
-	return "", nil
+func (c *Client) GetChartValue(repoName, chartName, version string) (map[string]interface{}, error) {
+	ic := action.NewInstall(c.ac)
+	ic.Version = version
+	ic.Namespace = "default" // todo 传参
+	client, _ := registry.NewClient()
+	ic.SetRegistryClient(client)
+	chartReq, err := c.getChart(repoName, chartName, version, &ic.ChartPathOptions)
+	if err != nil {
+		return nil, fmt.Errorf("[%s/%s] get chart error: %v", repoName, chartName, err)
+	}
+	return chartReq.Values, nil
 }
 
-// 获取chart的版本号，TODO
+// GetChartVersions 获取chart的版本
 func (c *Client) GetChartVersions(repoName string, chartName string) ([]string, error) {
 	var rp models.HelmRepository
 	err := dao.DB().Where("name=?", repoName).First(&rp).Error
@@ -407,15 +415,8 @@ func (c *Client) GetChartVersions(repoName string, chartName string) ([]string, 
 		return nil, err
 	}
 
-	// // 读取 index.yaml 文件
-	// file, err := os.ReadFile(indexFilePath)
-	// if err != nil {
-	// 	log.Fatalf("Error opening index file: %v", err)
-	// }
-	//
 	// 解析 YAML 文件
 	var index repo.IndexFile
-
 	err = yaml.Unmarshal([]byte(rp.Content), &index)
 	if err != nil {
 		return nil, err
