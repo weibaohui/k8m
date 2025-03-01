@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -32,6 +33,7 @@ type Helm interface {
 	UpgradeRelease(releaseName, localRepoName, targetVersion string) error
 	GetChartValue(chartName, version string) (string, error)
 	GetChartVersions(chartName string) ([]string, error)
+	UpdateReposIndex(ids string)
 }
 
 type Client struct {
@@ -274,6 +276,15 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 		}
 	}
 
+	go func() {
+		_ = c.updateRepoIndex(repoEntry, helmRepo)
+	}()
+	klog.V(0).Infof("[%s] helm repository saved to database successfully", repoEntry.Name)
+
+	return nil
+}
+
+func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRepository) error {
 	cr, err := repo.NewChartRepository(repoEntry, getter.All(c.setting))
 	if err != nil {
 		return err
@@ -302,18 +313,48 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	}
 
 	defer func() {
-		if err := os.Remove(indexFilePath); err != nil {
+		if err = os.Remove(indexFilePath); err != nil {
 			klog.V(6).Infof("[%s] remove index file error: %v", repoEntry.Name, err)
 		}
 	}()
 	// 保存到数据库
-	if err := helmRepo.UpdateContent(nil); err != nil {
+	if err = helmRepo.UpdateContent(nil); err != nil {
 		return fmt.Errorf("Update helm repository Content   to database error: %v", err)
 	}
-
-	klog.V(0).Infof("[%s] helm repository saved to database successfully", repoEntry.Name)
-
 	return nil
+}
+
+func (c *Client) UpdateReposIndex(ids string) {
+	// 解析ids为数组
+	idsArray := strings.Split(ids, ",")
+	m := models.HelmRepository{}
+	list, _, err := m.List(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id in ?", idsArray).Find(&m)
+	})
+	if err != nil {
+		klog.V(0).Infof("get helm repository list error: %v", err)
+		return
+	}
+
+	// 遍历ids，更新每个repo的index
+
+	for _, item := range list {
+
+		repoEntry := &repo.Entry{
+			Name:                  item.Name,
+			URL:                   item.URL,
+			Username:              item.Username,
+			Password:              item.Password,
+			CAFile:                item.CAFile,
+			CertFile:              item.CertFile,
+			KeyFile:               item.KeyFile,
+			InsecureSkipTLSverify: item.InsecureSkipTLSverify,
+			PassCredentialsAll:    item.PassCredentialsAll,
+		}
+		_ = c.updateRepoIndex(repoEntry, item)
+
+	}
+
 }
 func (c *Client) GetChartValue(chartName, version string) (string, error) {
 
