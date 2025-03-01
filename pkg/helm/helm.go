@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 	"helm.sh/helm/v3/pkg/action"
@@ -321,6 +322,40 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 	if err = helmRepo.UpdateContent(nil); err != nil {
 		return fmt.Errorf("Update helm repository Content   to database error: %v", err)
 	}
+
+	// 清空数据库中对应的chart repo
+	dao.DB().Where("repository_id = ?", helmRepo.ID).Delete(models.HelmChart{})
+	// 对index 提取ChartVersions
+	for chartName, versionList := range index.Entries {
+
+		if len(versionList) == 0 {
+			continue
+		}
+		slice.SortBy(versionList, func(a *repo.ChartVersion, b *repo.ChartVersion) bool {
+			return a.Created.After(b.Created)
+		})
+
+		ct := versionList[0]
+		m := models.HelmChart{
+			RepositoryID:   helmRepo.ID,
+			RepositoryName: helmRepo.Name,
+			Name:           chartName,
+			LatestVersion:  ct.Version,
+			Description:    ct.Description,
+			Home:           ct.Home,
+			Icon:           ct.Icon,
+			Keywords:       ct.Keywords,
+			KubeVersion:    ct.KubeVersion,
+			AppVersion:     ct.AppVersion,
+			Deprecated:     ct.Deprecated,
+		}
+		err = m.Save(nil)
+		if err != nil {
+			klog.V(6).Infof("[%s] save helm chart to database error: %v", chartName, err)
+		}
+
+	}
+
 	return nil
 }
 
