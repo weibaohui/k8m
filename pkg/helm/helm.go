@@ -1,8 +1,8 @@
 package helm
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -23,9 +23,11 @@ import (
 type Helm interface {
 	AddOrUpdateRepo(repoEntry *repo.Entry) error
 	GetReleaseHistory(releaseName string) ([]*release.Release, error)
-	InstallRelease(releaseName, chartName, version string, values ...string) error
+	InstallRelease(releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(releaseName string) error
 	UpgradeRelease(releaseName, localRepoName, targetVersion string) error
+	GetChartValue(chartName, version string) (string, error)
+	GetChartVersions(chartName string) ([]string, error)
 }
 
 type Client struct {
@@ -81,7 +83,7 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 
 	releases, err := hc.Run(releaseName)
 	if err != nil {
-		if err == driver.ErrReleaseNotFound {
+		if errors.Is(err, driver.ErrReleaseNotFound) {
 			return releases, nil
 		}
 		klog.Errorf("[%s] history client run error: %v", releaseName, err)
@@ -92,7 +94,7 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 }
 
 // InstallRelease install release
-func (c *Client) InstallRelease(releaseName, chartName, version string, values ...string) error {
+func (c *Client) InstallRelease(releaseName, repoName, chartName, version string, values ...string) error {
 	klog.V(0).Infof("install release, name: %s, version: %s, chartName: %s", releaseName, version, chartName)
 	klog.V(0).Infof("helm repository cache path: %s", c.setting.RepositoryCache)
 
@@ -153,7 +155,6 @@ func (c *Client) getChart(chartName, version string, chartPathOptions *action.Ch
 	}
 
 	lc, err = loader.Load(option)
-
 	if err != nil {
 		return nil, fmt.Errorf("load chart path options error: %v", err)
 	}
@@ -279,42 +280,46 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 
 	return nil
 }
+func (c *Client) GetChartValue(chartName, version string) (string, error) {
+
+	return "", nil
+}
 
 // 获取chart的版本号，TODO
-func (c *Client) GetVersions(err error, indexFilePath string) error {
-	// 读取 index.yaml 文件
-	file, err := os.ReadFile(indexFilePath)
-	if err != nil {
-		log.Fatalf("Error opening index file: %v", err)
-	}
-
-	// 解析 YAML 文件
-	var index repo.IndexFile
-
-	err = yaml.Unmarshal(file, &index)
-	if err != nil {
-		return err
-	}
-
-	// 查找 haproxy 的所有版本
-	chartName := "haproxy"
-	versions := []string{}
-	if chartEntries, ok := index.Entries[chartName]; ok {
-		for _, entry := range chartEntries {
-			versions = append(versions, entry.Version)
-		}
-	}
-
-	// 输出结果
-	if len(versions) == 0 {
-		fmt.Printf("No versions found for chart %s\n", chartName)
-	} else {
-		fmt.Printf("Available versions for %s:\n", chartName)
-		for _, v := range versions {
-			fmt.Println(v)
-		}
-	}
-	return nil
+func (c *Client) GetChartVersions(chartName string) ([]string, error) {
+	// // 读取 index.yaml 文件
+	// file, err := os.ReadFile(indexFilePath)
+	// if err != nil {
+	// 	log.Fatalf("Error opening index file: %v", err)
+	// }
+	//
+	// // 解析 YAML 文件
+	// var index repo.IndexFile
+	//
+	// err = yaml.Unmarshal(file, &index)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// // 查找 haproxy 的所有版本
+	// chartName := "haproxy"
+	// versions := []string{}
+	// if chartEntries, ok := index.Entries[chartName]; ok {
+	// 	for _, entry := range chartEntries {
+	// 		versions = append(versions, entry.Version)
+	// 	}
+	// }
+	//
+	// // 输出结果
+	// if len(versions) == 0 {
+	// 	fmt.Printf("No versions found for chart %s\n", chartName)
+	// } else {
+	// 	fmt.Printf("Available versions for %s:\n", chartName)
+	// 	for _, v := range versions {
+	// 		fmt.Println(v)
+	// 	}
+	// }
+	return nil, nil
 }
 
 func debug(format string, v ...interface{}) {
