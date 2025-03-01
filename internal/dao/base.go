@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -41,7 +42,7 @@ func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *
 	// 动态添加搜索条件
 	for key, value := range params.Queries {
 		if validFields[key] && value != "" && value != nil {
-			dbQuery = dbQuery.Where(key+" = ?", value)
+			dbQuery = dbQuery.Where(key+" like ?", "%"+fmt.Sprintf("%s", value)+"%")
 		}
 	}
 
