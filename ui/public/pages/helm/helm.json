@@ -15,56 +15,77 @@
           "type": "button",
           "icon": "fas fa-plus text-primary",
           "actionType": "drawer",
-          "label": "新建用户",
+          "label": "新增仓库",
           "drawer": {
             "closeOnEsc": true,
             "closeOnOutside": true,
-            "title": "新建用户  (ESC 关闭)",
+            "title": "新增Helm仓库  (ESC 关闭)",
             "body": {
               "type": "form",
-              "api": "post:/mgm/user/save",
+              "api": "post:/mgm/helm/repo/save",
               "body": [
+                {
+                  "type": "static",
+                  "label": "说明",
+                  "tpl": "<div class='alert alert-info'><p>添加Helm仓库后，您可以浏览和安装该仓库中的Chart包。如果仓库需要认证，请填写用户名和密码。</p></div>"
+                },
+                {
+                  "type": "input-text",
+                  "name": "name",
+                  "label": "仓库名称",
+                  "required": true,
+                  "placeholder": "请输入仓库名称"
+                },
+                {
+                  "type": "input-url",
+                  "name": "url",
+                  "label": "仓库URL",
+                  "required": true,
+                  "placeholder": "请输入仓库URL，例如：https://charts.bitnami.com/bitnami"
+                },
                 {
                   "type": "input-text",
                   "name": "username",
                   "label": "用户名",
-                  "required": true,
-                  "placeholder": "请输入用户名",
-                  "validateOnChange": true,
-                  "validations": {
-                    "minLength": 3,
-                    "maxLength": 20
-                  },
-                  "validationErrors": {
-                    "minLength": "用户名至少 3 个字符",
-                    "maxLength": "用户名最多 20 个字符"
-                  }
+                  "placeholder": "如果仓库需要认证，请输入用户名"
                 },
                 {
-                  "type": "select",
-                  "name": "role",
-                  "label": "角色",
-                  "required": true,
-                  "options": [
-                    {
-                      "label": "集群管理员",
-                      "value": "cluster_admin"
-                    },
-                    {
-                      "label": "集群只读",
-                      "value": "cluster_readonly"
-                    },
-                    {
-                      "label": "平台管理员",
-                      "value": "platform_admin"
-                    }
-                  ],
-                  "placeholder": "请选择角色"
+                  "type": "input-password",
+                  "name": "password",
+                  "label": "密码",
+                  "placeholder": "如果仓库需要认证，请输入密码"
                 },
                 {
-                  "type": "static",
-                  "label": "角色说明",
-                  "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。无用户管理权限。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。无用户管理权限。</p><p><strong>平台管理员：</strong>所有权限。</p></div>"
+                  "type": "input-text",
+                  "name": "certFile",
+                  "label": "证书文件",
+                  "placeholder": "可选：证书文件路径"
+                },
+                {
+                  "type": "input-text",
+                  "name": "keyFile",
+                  "label": "密钥文件",
+                  "placeholder": "可选：密钥文件路径"
+                },
+                {
+                  "type": "input-text",
+                  "name": "caFile",
+                  "label": "CA证书",
+                  "placeholder": "可选：CA证书文件路径"
+                },
+                {
+                  "type": "switch",
+                  "name": "insecure_skip_tls_verify",
+                  "label": "跳过TLS验证",
+                  "onText": "是",
+                  "offText": "否"
+                },
+                {
+                  "type": "switch",
+                  "name": "pass_credentials_all",
+                  "label": "传递所有凭证",
+                  "onText": "是",
+                  "offText": "否"
                 }
               ],
               "submitText": "保存",
@@ -103,25 +124,27 @@
           "align": "right",
           "visibleOn": "${count}"
         },
-        {
-          "type": "columns-toggler",
-          "align": "left"
-        },
         "reload",
         "bulkActions"
+      ],
+      "bulkActions": [
+        {
+          "label": "更新索引",
+          "actionType": "ajax",
+          "confirmText": "确定要更新索引?更新操作为后台操作，请稍后查看操作结果。",
+          "api": {
+            "url": "/mgm/helm/repo/update_index",
+            "method": "post",
+            "data": {
+              "ids": "${ids}"
+            }
+          }
+        }
       ],
       "loadDataOnce": false,
       "syncLocation": false,
       "initFetch": true,
       "perPage": 10,
-      "bulkActions": [
-        {
-          "label": "批量删除",
-          "actionType": "ajax",
-          "confirmText": "确定要批量删除?",
-          "api": "/mgm/user/delete/${ids}"
-        }
-      ],
       "footerToolbar": [
         {
           "type": "pagination",
@@ -147,14 +170,14 @@
               "type": "button",
               "icon": "fas fa-edit text-primary",
               "actionType": "drawer",
-              "tooltip": "编辑用户",
+              "tooltip": "编辑仓库",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "title": "编辑用户  (ESC 关闭)",
+                "title": "编辑Helm仓库  (ESC 关闭)",
                 "body": {
                   "type": "form",
-                  "api": "post:/mgm/user/save",
+                  "api": "post:/mgm/helm/repo/save",
                   "body": [
                     {
                       "type": "hidden",
@@ -162,45 +185,61 @@
                     },
                     {
                       "type": "input-text",
+                      "name": "name",
+                      "label": "仓库名称",
+                      "required": true,
+                      "placeholder": "请输入仓库名称"
+                    },
+                    {
+                      "type": "input-url",
+                      "name": "url",
+                      "label": "仓库URL",
+                      "required": true,
+                      "placeholder": "请输入仓库URL，例如：https://charts.bitnami.com/bitnami"
+                    },
+                    {
+                      "type": "input-text",
                       "name": "username",
                       "label": "用户名",
-                      "required": true,
-                      "placeholder": "请输入用户名",
-                      "validateOnChange": true,
-                      "validations": {
-                        "minLength": 3,
-                        "maxLength": 20
-                      },
-                      "validationErrors": {
-                        "minLength": "用户名至少 3 个字符",
-                        "maxLength": "用户名最多 20 个字符"
-                      }
+                      "placeholder": "如果仓库需要认证，请输入用户名"
                     },
                     {
-                      "type": "select",
-                      "name": "role",
-                      "label": "角色",
-                      "required": true,
-                      "options": [
-                        {
-                          "label": "集群管理员",
-                          "value": "cluster_admin"
-                        },
-                        {
-                          "label": "集群只读",
-                          "value": "cluster_readonly"
-                        },
-                        {
-                          "label": "平台管理员",
-                          "value": "platform_admin"
-                        }
-                      ],
-                      "placeholder": "请选择角色"
+                      "type": "input-password",
+                      "name": "password",
+                      "label": "密码",
+                      "placeholder": "如果仓库需要认证，请输入密码"
                     },
                     {
-                      "type": "static",
-                      "label": "角色说明",
-                      "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                      "type": "input-text",
+                      "name": "certFile",
+                      "label": "证书文件",
+                      "placeholder": "可选：证书文件路径"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "keyFile",
+                      "label": "密钥文件",
+                      "placeholder": "可选：密钥文件路径"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "caFile",
+                      "label": "CA证书",
+                      "placeholder": "可选：CA证书文件路径"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "insecure_skip_tls_verify",
+                      "label": "跳过TLS验证",
+                      "onText": "是",
+                      "offText": "否"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "pass_credentials_all",
+                      "label": "传递所有凭证",
+                      "onText": "是",
+                      "offText": "否"
                     }
                   ],
                   "submitText": "保存",
@@ -227,92 +266,44 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-key text-primary",
-              "actionType": "drawer",
-              "tooltip": "修改密码",
-              "drawer": {
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "title": "修改密码  (ESC 关闭)",
-                "body": {
-                  "type": "form",
-                  "api": "post:/mgm/user/password",
-                  "body": [
-                    {
-                      "type": "passwordEditor",
-                      "api": "/mgm/user/update_psw/${id}"
-                    }
-                  ],
-                  "submitText": "保存",
-                  "resetText": "重置",
-                  "messages": {
-                    "saveSuccess": "修改成功",
-                    "saveFailed": "修改失败"
-                  },
-                  "onEvent": {
-                    "submitSucc": {
-                      "actions": [
-                        {
-                          "actionType": "reload",
-                          "componentId": "detailCRUD"
-                        },
-                        {
-                          "actionType": "closeDrawer"
-                        }
-                      ]
-                    }
-                  }
-                },
-                "actions": []
-              }
+              "icon": "fas fa-trash text-danger",
+              "actionType": "ajax",
+              "tooltip": "删除仓库",
+              "confirmText": "确定要删除该仓库吗？",
+              "api": "post:/mgm/helm/repo/delete/${id}"
             }
           ],
           "toggled": true
         },
         {
-          "name": "username",
-          "label": "用户名",
+          "name": "name",
+          "label": "仓库名称",
           "type": "text",
           "width": "180px",
           "sortable": true,
           "searchable": {
             "type": "input-text",
-            "name": "username",
+            "name": "name",
             "clearable": true,
-            "label": "用户名",
-            "placeholder": "输入用户名"
+            "label": "仓库名称",
+            "placeholder": "输入仓库名称"
           }
         },
         {
-          "name": "role",
-          "label": "角色",
-          "type": "mapping",
-          "map": {
-            "cluster_admin": "集群管理员",
-            "cluster_readonly": "集群只读",
-            "platform_admin": "平台管理员"
-          },
-          "searchable": {
-            "type": "select",
-            "name": "role",
-            "clearable": true,
-            "label": "角色",
-            "placeholder": "请选择角色",
-            "options": [
-              {
-                "label": "集群管理员",
-                "value": "cluster_admin"
-              },
-              {
-                "label": "集群只读",
-                "value": "cluster_readonly"
-              },
-              {
-                "label": "平台管理员",
-                "value": "platform_admin"
-              }
-            ]
-          }
+          "name": "url",
+          "label": "仓库URL",
+          "type": "text",
+          "width": "300px"
+        },
+        {
+          "name": "generated",
+          "label": "索引时间",
+          "type": "datetime"
+        },
+        {
+          "name": "updated_at",
+          "label": "更新时间",
+          "type": "datetime"
         },
         {
           "name": "created_at",
