@@ -354,9 +354,9 @@ func main() {
 		mgm.POST("/helm/repo/save", helm.AddOrUpdateRepo)
 		mgm.GET("/helm/repo/option_list", helm.RepoOptionList)
 		mgm.GET("/helm/repo/:repo/chart/:chart/versions", helm.ChartVersionOptionList)
+		mgm.GET("/helm/repo/:repo/chart/:chart/version/:version/values", helm.GetChartValue)
 
 		mgm.GET("/helm/chart/list", helm.ListChart)
-		mgm.GET("/helm/repo/:repo/chart/:chart/value", helm.GetChartValue)
 		mgm.POST("/helm/release/:release/repo/:repo/chart/:chart/install", helm.InstallRelease)
 		mgm.POST("/helm/release/uninstall", helm.UninstallRelease)
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
