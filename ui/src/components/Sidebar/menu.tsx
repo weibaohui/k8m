@@ -1,5 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import type { MenuProps } from 'antd';
+import {useNavigate} from "react-router-dom";
+import type {MenuProps} from 'antd';
+
 type MenuItem = Required<MenuProps>['items'][number];
 
 const items: () => MenuItem[] = () => {
@@ -35,6 +36,13 @@ const items: () => MenuItem[] = () => {
             icon: <i className="fa-solid fa-bell"></i>,
             key: "event",
             onClick: () => onMenuClick('/ns/event')
+        },
+        {
+            label: "Helm应用",
+            title: "Helm应用",
+            icon: <i className="fab fa-app-store"></i>,
+            key: "Helm",
+            onClick: () => onMenuClick('/helm/helm')
         },
         {
             label: "工作负载",
