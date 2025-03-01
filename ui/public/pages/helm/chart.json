@@ -1,0 +1,108 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "bulkActions": [],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/mgm/helm/chart/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [],
+          "toggled": true
+        },
+        {
+          "name": "name",
+          "label": "应用",
+          "type": "tpl",
+          "width": "180px",
+          "tpl": "<img src=\"${icon}\" style=\"width: 20px; height: 20px; margin-right: 5px; vertical-align: middle;\"/>${name}",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "name",
+            "clearable": true,
+            "label": "应用",
+            "placeholder": "输入应用名称"
+          }
+        },
+        {
+          "name": "latest_version",
+          "label": "最新版本",
+          "type": "text"
+        },
+        {
+          "name": "description",
+          "label": "描述",
+          "type": "text",
+          "width": "300px"
+        },
+        {
+          "name": "home",
+          "label": "项目主页",
+          "type": "link"
+        },
+        {
+          "name": "kubeVersion",
+          "label": "Kubernetes版本",
+          "type": "text"
+        },
+        {
+          "name": "appVersion",
+          "label": "应用版本",
+          "type": "text"
+        },
+        {
+          "name": "deprecated",
+          "label": "弃用",
+          "type": "status"
+        }
+      ]
+    }
+  ]
+}
