@@ -90,9 +90,11 @@
                       "label": "仓库名称"
                     },
                     {
-                      "type": "static",
-                      "name": "latest_version",
-                      "label": "版本"
+                      "type": "select",
+                      "name": "install_version",
+                      "label": "版本",
+                      "clearable": true,
+                      "source": "/mgm/helm/repo/${repository_name}/chart/${name}/versions"
                     },
                     {
                       "type": "static",
