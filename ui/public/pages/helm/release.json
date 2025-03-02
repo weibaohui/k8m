@@ -29,7 +29,7 @@
         "bulkActions"
       ],
       "bulkActions": [],
-      "loadDataOnce": false,
+      "loadDataOnce": true,
       "syncLocation": false,
       "initFetch": true,
       "perPage": 10,
