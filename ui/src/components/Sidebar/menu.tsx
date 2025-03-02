@@ -46,17 +46,24 @@ const items: () => MenuItem[] = () => {
                 {
                     label: "仓库",
                     title: "仓库",
-                    icon: <i className="fa-solid fa-box-archive"></i>,
+                    icon: <i className="fas fa-database"></i>,
                     key: "helm_repo",
                     onClick: () => onMenuClick('/helm/repo')
                 },
                 {
-                    label: "应用",
-                    title: "应用",
+                    label: "应用包",
+                    title: "应用包",
                     icon: <i className="fa-solid fa-cubes"></i>,
                     key: "helm_chart",
                     onClick: () => onMenuClick('/helm/chart')
                 },
+                {
+                    label: "应用实例",
+                    title: "应用实例",
+                    icon: <i className="fas fa-layer-group"></i>,
+                    key: "helm_release",
+                    onClick: () => onMenuClick('/helm/release')
+                }
             ]
         },
         {
