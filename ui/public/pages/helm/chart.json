@@ -142,8 +142,8 @@
                         "type": "form",
                         "mode": "horizontal",
                         "horizontal": {
-                          "left": 2,
-                          "right": 8
+                          "left": 1,
+                          "right": 9
                         },
                         "controls": [
                           {
@@ -172,7 +172,7 @@
                               {
                                 "type": "editor",
                                 "name": "values",
-                                "label": "Values配置",
+                                "label": "安装参数",
                                 "language": "yaml",
                                 "value": "${yaml}",
                                 "allowFullscreen": true,
