@@ -28,7 +28,7 @@ import (
 type Helm interface {
 	AddOrUpdateRepo(repoEntry *repo.Entry) error
 	GetReleaseHistory(releaseName string) ([]*release.Release, error)
-	InstallRelease(releaseName, repoName, chartName, version string, values ...string) error
+	InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(releaseName string) error
 	UpgradeRelease(releaseName, localRepoName, targetVersion string) error
 	GetChartValue(repoName, chartName, version string) (string, error)
@@ -46,7 +46,8 @@ type Client struct {
 type Option func(client *Client)
 
 // New  Helm Interface
-func New(restConfig *rest.Config, options ...Option) (Helm, error) {
+// 此处namespace 决定了release 记录信息写入哪个命名空间
+func New(restConfig *rest.Config, namespace string, options ...Option) (Helm, error) {
 	h := Client{
 		setting: cli.New(),
 		driver:  "secret",
@@ -64,7 +65,8 @@ func New(restConfig *rest.Config, options ...Option) (Helm, error) {
 		g = h.getter
 	}
 
-	err := ac.Init(g, h.setting.Namespace(), h.driver, debug)
+	// 指定命名空间
+	err := ac.Init(g, namespace, h.driver, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +104,7 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 }
 
 // InstallRelease install release
-func (c *Client) InstallRelease(releaseName, repoName, chartName, version string, values ...string) error {
+func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error {
 	klog.V(0).Infof("install release, name: %s, version: %s, chartName: %s", releaseName, version, chartName)
 	klog.V(0).Infof("helm repository cache path: %s", c.setting.RepositoryCache)
 
@@ -119,7 +121,7 @@ func (c *Client) InstallRelease(releaseName, repoName, chartName, version string
 
 	ic.ReleaseName = releaseName
 	ic.Version = version
-	ic.Namespace = "default" // todo 传参
+	ic.Namespace = namespace
 	client, _ := registry.NewClient()
 	ic.SetRegistryClient(client)
 	chartReq, err := c.getChart(repoName, chartName, version, &ic.ChartPathOptions)
@@ -434,7 +436,6 @@ func (c *Client) UpdateReposIndex(ids string) {
 func (c *Client) GetChartValue(repoName, chartName, version string) (string, error) {
 	ic := action.NewInstall(c.ac)
 	ic.Version = version
-	ic.Namespace = "default" // todo 传参
 	client, _ := registry.NewClient()
 	ic.SetRegistryClient(client)
 	chartReq, err := c.getChart(repoName, chartName, version, &ic.ChartPathOptions)
