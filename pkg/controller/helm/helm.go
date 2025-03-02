@@ -27,11 +27,25 @@ func ListReleaseHistory(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, history)
 }
+func ListRelease(c *gin.Context) {
+	ns := c.Param("ns")
+	h, err := getHelm(c, ns)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	list, err := h.GetReleaseList()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, list)
+}
 
 func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
-	if namespace == "" {
-		namespace = "default"
-	}
+	// if namespace == "" {
+	// 	namespace = "default"
+	// }
 	selectedCluster := amis.GetSelectedCluster(c)
 	restConfig := service.ClusterService().GetClusterByID(selectedCluster).GetRestConfig()
 	h, err := helm.New(restConfig, namespace)
