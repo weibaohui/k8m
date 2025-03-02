@@ -13,14 +13,13 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
-	clivalues "helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/registry"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"helm.sh/helm/v3/pkg/storage/driver"
-	"helm.sh/helm/v3/pkg/strvals"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/yaml"
@@ -128,29 +127,40 @@ func (c *Client) InstallRelease(releaseName, repoName, chartName, version string
 		return fmt.Errorf("[%s] get chart error: %v", releaseName, err)
 	}
 
-	var vals map[string]interface{}
+	// 4. 加载默认 values.yaml
+	defaultValues, err := chartutil.CoalesceValues(chartReq, nil)
+	if err != nil {
+		return fmt.Errorf("Failed to coalesce default values: %v\n", err)
+	}
 
-	// if values setting, merge values to vals
+	finalValues := defaultValues
+
 	if len(values) != 0 {
-		cvOptions := &clivalues.Options{}
-		vals, err = cvOptions.MergeValues(getter.All(c.setting))
+		// 5. 加载自定义 values.yaml
+		customValues, err := ParseValuesYaml(values[0])
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to parse custom values: %v\n", err)
 		}
 
-		if err = strvals.ParseInto(values[0], vals); err != nil {
-			return err
-		}
+		// 6. 合并默认值 + 自定义值
+		finalValues = chartutil.CoalesceTables(defaultValues.AsMap(), customValues)
 
 	}
 
-	if _, err = ic.Run(chartReq, vals); err != nil {
+	klog.V(0).Infof("values: \n%s", finalValues)
+	if _, err = ic.Run(chartReq, finalValues); err != nil {
 		return fmt.Errorf("[%s] install error: %v", releaseName, err)
 	}
 
 	klog.V(0).Infof("[%s] release install success", releaseName)
 
 	return nil
+}
+func ParseValuesYaml(data string) (map[string]interface{}, error) {
+
+	var result map[string]interface{}
+	err := yaml.Unmarshal([]byte(data), &result)
+	return result, err
 }
 
 // getChart get chart
@@ -159,6 +169,23 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 		lc  *chart.Chart
 		err error
 	)
+
+	// 先从本地获取
+	option, err := chartPathOptions.LocateChart(fmt.Sprintf("%s/%s", repoName, chartName), c.setting)
+	if err == nil && option != "" {
+		lc, err = loader.Load(option)
+		if err == nil && lc != nil {
+			// 找到本地缓存
+			klog.V(0).Infof("使用[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
+			return lc, nil
+		}
+	}
+	if err != nil {
+		klog.V(0).Infof("获取本地[%s/%s-%s]报错%s", repoName, chartName, version, err)
+	}
+	// 容器环境下可能会重启、丢失配置文件
+	// todo 将HELM 缓存文件写到配置中
+	klog.V(0).Infof("未找到[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
 
 	// 创建HelmRepository对象
 	helmRepo := &models.HelmRepository{
@@ -192,8 +219,10 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 
 	filepath, err := chartPathOptions.LocateChart(chartURL, c.setting)
 	if err != nil {
-		return nil, fmt.Errorf("located charts %s error: %v", chartURL, err)
+		return nil, fmt.Errorf("定位Chart %s 失败: %v。请尝试更新缓存", chartURL, err)
 	}
+	klog.V(0).Infof("使用[%s/%s] 在线地址 %s", repoName, chartName, chartURL)
+
 	klog.V(0).Infof("chart filepath  %s", filepath)
 	lc, err = loader.Load(filepath)
 
@@ -326,11 +355,6 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 		helmRepo.Generated = index.Generated
 	}
 
-	defer func() {
-		if err = os.Remove(indexFilePath); err != nil {
-			klog.V(6).Infof("[%s] remove index file error: %v", repoEntry.Name, err)
-		}
-	}()
 	// 保存到数据库
 	if err = helmRepo.UpdateContent(nil); err != nil {
 		return fmt.Errorf("Update helm repository Content   to database error: %v", err)
