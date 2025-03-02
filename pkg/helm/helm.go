@@ -190,12 +190,12 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 		}
 	}
 
-	option, err := chartPathOptions.LocateChart(chartURL, c.setting)
+	filepath, err := chartPathOptions.LocateChart(chartURL, c.setting)
 	if err != nil {
 		return nil, fmt.Errorf("located charts %s error: %v", chartURL, err)
 	}
-	klog.V(0).Infof("chart option file %s", option)
-	lc, err = loader.Load(option)
+	klog.V(0).Infof("chart filepath  %s", filepath)
+	lc, err = loader.Load(filepath)
 
 	if err != nil {
 		return nil, fmt.Errorf("load chart path options error: %v", err)
