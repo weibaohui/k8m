@@ -1,7 +1,7 @@
 package helm
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -42,7 +42,8 @@ func InstallRelease(c *gin.Context) {
 	version := c.Param("version")
 
 	var req struct {
-		Values string `json:"values,omitempty"`
+		Values    string `json:"values,omitempty"`
+		Namespace string `json:"ns,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -56,19 +57,11 @@ func InstallRelease(c *gin.Context) {
 		return
 	}
 
-	// values 中有#注释
-	// 逐行对values 进行处理，去掉#注释
-	values := strings.Split(req.Values, "\n")
-	for i, v := range values {
-		if strings.HasPrefix(strings.TrimSpace(v), "#") {
-			values[i] = ""
-		}
-	}
-	// 删除空行
-	values = utils.RemoveEmptyLines(values)
-
-	req.Values = strings.Join(values, "\n")
 	klog.V(0).Infof("values: \n%s", req.Values)
+
+	if releaseName == "" {
+		releaseName = fmt.Sprintf("%s-%d", chartName, utils.RandNDigitInt(8))
+	}
 	if err = h.InstallRelease(releaseName, repoName, chartName, version, req.Values); err != nil {
 		amis.WriteJsonError(c, err)
 		return
