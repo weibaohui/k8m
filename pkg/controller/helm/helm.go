@@ -14,7 +14,8 @@ import (
 // ListReleaseHistory 获取Release的历史版本
 func ListReleaseHistory(c *gin.Context) {
 	releaseName := c.Param("name")
-	h, err := getHelm(c)
+	ns := c.Param("ns")
+	h, err := getHelm(c, ns)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -27,10 +28,13 @@ func ListReleaseHistory(c *gin.Context) {
 	amis.WriteJsonData(c, history)
 }
 
-func getHelm(c *gin.Context) (helm.Helm, error) {
+func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
+	if namespace == "" {
+		namespace = "default"
+	}
 	selectedCluster := amis.GetSelectedCluster(c)
 	restConfig := service.ClusterService().GetClusterByID(selectedCluster).GetRestConfig()
-	h, err := helm.New(restConfig)
+	h, err := helm.New(restConfig, namespace)
 	return h, err
 }
 
@@ -51,7 +55,7 @@ func InstallRelease(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c)
+	h, err := getHelm(c, req.Namespace)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -62,7 +66,7 @@ func InstallRelease(c *gin.Context) {
 	if releaseName == "" {
 		releaseName = fmt.Sprintf("%s-%d", chartName, utils.RandNDigitInt(8))
 	}
-	if err = h.InstallRelease(releaseName, repoName, chartName, version, req.Values); err != nil {
+	if err = h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -72,7 +76,8 @@ func InstallRelease(c *gin.Context) {
 // UninstallRelease 卸载Helm Release
 func UninstallRelease(c *gin.Context) {
 	releaseName := c.Param("name")
-	h, err := getHelm(c)
+	ns := c.Param("ns")
+	h, err := getHelm(c, ns)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -87,6 +92,8 @@ func UninstallRelease(c *gin.Context) {
 
 // UpgradeRelease 升级Helm Release
 func UpgradeRelease(c *gin.Context) {
+	ns := c.Param("ns")
+
 	var req struct {
 		ReleaseName string `json:"release_name"`
 		RepoName    string `json:"repo_name"`
@@ -98,7 +105,8 @@ func UpgradeRelease(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c)
+	h, err := getHelm(c, ns)
+
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
