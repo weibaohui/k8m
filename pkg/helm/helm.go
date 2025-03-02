@@ -34,6 +34,7 @@ type Helm interface {
 	GetChartValue(repoName, chartName, version string) (string, error)
 	GetChartVersions(repoName string, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)
+	GetReleaseList() ([]*release.Release, error)
 }
 
 type Client struct {
@@ -100,6 +101,23 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 	}
 	klog.V(0).Infof("[%s] history releases: %+v", releaseName, releases)
 	klog.V(0).Infof(" history releases: %d", len(releases))
+	return releases, nil
+}
+func (c *Client) GetReleaseList() ([]*release.Release, error) {
+
+	// 创建 List 对象
+	listAction := action.NewList(c.ac)
+	// 过滤仅展示已部署的 Release
+	listAction.All = true
+	// 是否跨命名空间获取
+	listAction.AllNamespaces = true
+
+	// 获取 Release 列表
+	releases, err := listAction.Run()
+	if err != nil {
+		klog.V(6).Infof("Failed to list releases: %v", err)
+		return nil, err
+	}
 	return releases, nil
 }
 
