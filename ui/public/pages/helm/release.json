@@ -97,27 +97,34 @@
                       "tpl": "${chart.metadata.version} ${info.status}"
                     },
                     {
-                      "type": "button",
+                      "name": "params",
                       "label": "安装参数",
-                      "actionType": "drawer",
-                      "drawer": {
-                        "overlay": false,
-                        "closeOnEsc": true,
-                        "closeOnOutside": true,
-                        "size": "xl",
-                        "title": "参数查看（ESC 关闭）",
-                        "body": [
-                          {
-                            "type": "diffEditor",
-                            "originalValue": "${chart.values}",
-                            "modifiedValue": "${config}",
-                            "originalLabel": "默认参数",
-                            "modifiedLabel": "用户指定参数",
-                            "readOnly": true,
-                            "language": "yaml"
+                      "type": "container",
+                      "body": [
+                        {
+                          "type": "button",
+                          "label": "点击查看",
+                          "actionType": "drawer",
+                          "drawer": {
+                            "overlay": false,
+                            "closeOnEsc": true,
+                            "closeOnOutside": true,
+                            "size": "xl",
+                            "title": "参数查看（ESC 关闭）",
+                            "body": [
+                              {
+                                "type": "diffEditor",
+                                "originalValue": "${chart.values}",
+                                "modifiedValue": "${config}",
+                                "originalLabel": "默认参数",
+                                "modifiedLabel": "用户指定参数",
+                                "readOnly": true,
+                                "language": "yaml"
+                              }
+                            ]
                           }
-                        ]
-                      }
+                        }
+                      ]
                     },
                     {
                       "name": "info.notes",
