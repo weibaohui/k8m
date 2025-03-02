@@ -26,13 +26,14 @@ func ListRepo(c *gin.Context) {
 
 // AddOrUpdateRepo 添加或更新Helm仓库
 func AddOrUpdateRepo(c *gin.Context) {
+	ns := c.Param("ns")
 	var repoEntry repo.Entry
 	if err := c.ShouldBindJSON(&repoEntry); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	h, err := getHelm(c)
+	h, err := getHelm(c, ns)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -81,6 +82,8 @@ func DeleteRepo(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 func UpdateReposIndex(c *gin.Context) {
+	ns := c.Param("ns")
+
 	var req struct {
 		IDs string `json:"ids"`
 	}
@@ -88,7 +91,7 @@ func UpdateReposIndex(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	h, err := getHelm(c)
+	h, err := getHelm(c, ns)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
