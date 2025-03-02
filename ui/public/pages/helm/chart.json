@@ -94,6 +94,7 @@
                       "name": "install_version",
                       "label": "版本",
                       "clearable": true,
+                      "value": "${latest_version}",
                       "source": "/mgm/helm/repo/${repository_name}/chart/${name}/versions"
                     },
                     {
@@ -131,6 +132,7 @@
                     "label": "安装",
                     "size": "sm",
                     "actionType": "drawer",
+                    "close": true,
                     "drawer": {
                       "title": "${name} 安装配置",
                       "size": "lg",
@@ -145,14 +147,23 @@
                         },
                         "controls": [
                           {
-                            "type": "text",
-                            "name": "release_name",
-                            "label": "名称"
-                          },
-                          {
                             "type": "static",
                             "name": "install_version",
                             "label": "版本"
+                          },
+                          {
+                            "type": "text",
+                            "name": "release_name",
+                            "label": "部署名称",
+                            "placeholder": "名称可选"
+                          },
+                          {
+                            "label": "部署空间",
+                            "type": "select",
+                            "name": "ns",
+                            "searchable": true,
+                            "required": true,
+                            "source": "/k8s/ns/option_list"
                           },
                           {
                             "type": "service",
@@ -182,12 +193,17 @@
                           "type": "button",
                           "label": "确认安装",
                           "level": "primary",
+                          "close": true,
                           "actionType": "ajax",
+                          "required": [
+                            "ns"
+                          ],
                           "api": {
                             "method": "post",
                             "url": "/mgm/helm/release/${release_name}/repo/${repository_name}/chart/${name}/version/${install_version}/install",
                             "data": {
-                              "values": "${values}"
+                              "values": "${values}",
+                              "ns": "${ns}"
                             }
                           }
                         }
