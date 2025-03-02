@@ -1,0 +1,167 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "bulkActions": [],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/mgm/helm/release/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "label": "详情",
+              "actionType": "drawer",
+              "drawer": {
+                "title": "${name} 详情 （ESC 关闭）",
+                "size": "lg",
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "body": {
+                  "type": "form",
+                  "mode": "horizontal",
+                  "horizontal": {
+                    "left": 1,
+                    "right": 9
+                  },
+                  "controls": [
+                    {
+                      "type": "static-image",
+                      "name": "chart.metadata.icon",
+                      "thumbMode": "contain",
+                      "thumbRatio": "1:1",
+                      "width": "100px",
+                      "height": "100px"
+                    },
+                    {
+                      "label": "应用信息",
+                      "type": "tpl",
+                      "tpl": " <a href=${chart.metadata.home} target=_blank>主页</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=${chart.metadata.sources} target=_blank>源码</a>"
+                    },
+                    {
+                      "name": "name",
+                      "label": "应用实例",
+                      "type": "tpl",
+                      "tpl": "${namespace}/${name}"
+                    },
+                    {
+                      "name": "info.status",
+                      "label": "实例状态",
+                      "type": "tpl",
+                      "tpl": "${chart.metadata.version} ${info.status}"
+                    },
+                    {
+                      "name": "info.notes",
+                      "label": "安装结果",
+                      "type": "tpl",
+                      "tpl": "${info.notes}",
+                      "style": {
+                        "whiteSpace": "pre-wrap"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "name",
+          "label": "应用",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "name",
+            "clearable": true,
+            "label": "应用",
+            "placeholder": "输入应用名称"
+          }
+        },
+        {
+          "name": "namespace",
+          "label": "命名空间",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "chart.metadata.name",
+          "label": "chart包",
+          "type": "text"
+        },
+        {
+          "name": "chart.metadata.appVersion",
+          "label": "版本",
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "label": "历史版本",
+          "type": "text"
+        },
+        {
+          "name": "info.status",
+          "label": "状态",
+          "type": "text"
+        },
+        {
+          "name": "info.first_deployed",
+          "label": "安装时间",
+          "type": "datetime"
+        },
+        {
+          "name": "info.last_deployed",
+          "label": "最后更新",
+          "type": "k8sAge"
+        }
+      ]
+    }
+  ]
+}
