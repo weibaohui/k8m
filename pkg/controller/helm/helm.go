@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/service"
+	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/klog/v2"
 )
 
@@ -38,6 +39,9 @@ func ListRelease(c *gin.Context) {
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+	if list == nil {
+		list = make([]*release.Release, 0)
 	}
 	amis.WriteJsonData(c, list)
 }
@@ -75,16 +79,16 @@ func InstallRelease(c *gin.Context) {
 		return
 	}
 
-	klog.V(0).Infof("values: \n%s", req.Values)
-
 	if releaseName == "" {
 		releaseName = fmt.Sprintf("%s-%d", chartName, utils.RandNDigitInt(8))
 	}
-	if err = h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	amis.WriteJsonOK(c)
+	go func() {
+		if err := h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values); err != nil {
+			klog.Errorf("install %s/%s error %v", req.Namespace, releaseName, err)
+		}
+	}()
+
+	amis.WriteJsonOKMsg(c, "正在安装中，界面显示可能有延迟")
 }
 
 // UninstallRelease 卸载Helm Release
@@ -98,6 +102,38 @@ func UninstallRelease(c *gin.Context) {
 	}
 
 	if err := h.UninstallRelease(releaseName); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+func BatchUninstallRelease(c *gin.Context) {
+	var req struct {
+		Names      []string `json:"name_list"`
+		Namespaces []string `json:"ns_list"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var err error
+	for i := 0; i < len(req.Names); i++ {
+		name := req.Names[i]
+		ns := req.Namespaces[i]
+		h, err := getHelm(c, ns)
+		if err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+
+		x := h.UninstallRelease(name)
+		if x != nil {
+			klog.V(6).Infof("batch remove %s/%s error %v", ns, name, x)
+			err = x
+		}
+	}
+	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
