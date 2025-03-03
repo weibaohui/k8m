@@ -4156,7 +4156,7 @@
         {
           "type": "progress",
           "mode": "line",
-          "value": "${status.replicas > 0 ? (status.fullyLabeledReplicas / status.replicas) * 100 : 0}",
+          "value": "${status.replicas > 0 ? ROUND((status.fullyLabeledReplicas / status.replicas),2) * 100 : 0}",
           "striped": true,
           "label": "当前状态",
           "animate": true,
