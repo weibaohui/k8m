@@ -1,5 +1,5 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -37,35 +37,7 @@ const items: () => MenuItem[] = () => {
             key: "event",
             onClick: () => onMenuClick('/ns/event')
         },
-        {
-            label: "Helm应用",
-            title: "Helm应用",
-            icon: <i className="fab fa-app-store"></i>,
-            key: "Helm",
-            children: [
-                {
-                    label: "仓库",
-                    title: "仓库",
-                    icon: <i className="fas fa-database"></i>,
-                    key: "helm_repo",
-                    onClick: () => onMenuClick('/helm/repo')
-                },
-                {
-                    label: "应用包",
-                    title: "应用包",
-                    icon: <i className="fa-solid fa-cubes"></i>,
-                    key: "helm_chart",
-                    onClick: () => onMenuClick('/helm/chart')
-                },
-                {
-                    label: "应用实例",
-                    title: "应用实例",
-                    icon: <i className="fas fa-layer-group"></i>,
-                    key: "helm_release",
-                    onClick: () => onMenuClick('/helm/release')
-                }
-            ]
-        },
+
         {
             label: "工作负载",
             title: "工作负载",
@@ -135,6 +107,35 @@ const items: () => MenuItem[] = () => {
                     onClick: () => onMenuClick('/crd/crd')
                 }
             ],
+        },
+        {
+            label: "Helm应用",
+            title: "Helm应用",
+            icon: <i className="fab fa-app-store"></i>,
+            key: "Helm",
+            children: [
+                {
+                    label: "仓库",
+                    title: "仓库",
+                    icon: <i className="fas fa-database"></i>,
+                    key: "helm_repo",
+                    onClick: () => onMenuClick('/helm/repo')
+                },
+                {
+                    label: "应用包",
+                    title: "应用包",
+                    icon: <i className="fa-solid fa-cubes"></i>,
+                    key: "helm_chart",
+                    onClick: () => onMenuClick('/helm/chart')
+                },
+                {
+                    label: "应用实例",
+                    title: "应用实例",
+                    icon: <i className="fas fa-layer-group"></i>,
+                    key: "helm_release",
+                    onClick: () => onMenuClick('/helm/release')
+                }
+            ]
         },
         {
             label: "配置",
