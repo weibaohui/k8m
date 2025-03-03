@@ -122,7 +122,7 @@
                     {
                       "type": "static",
                       "name": "kubeVersion",
-                      "label": "Kubernetes版本"
+                      "label": "k8s版本要求"
                     }
                   ]
                 },
@@ -240,11 +240,18 @@
           "name": "description",
           "label": "描述",
           "type": "text",
-          "width": "300px"
+          "width": "300px",
+          "searchable": {
+            "type": "input-text",
+            "name": "description",
+            "clearable": true,
+            "label": "描述",
+            "placeholder": "输入描述"
+          }
         },
         {
           "name": "kubeVersion",
-          "label": "Kubernetes版本",
+          "label": "k8s版本要求",
           "type": "text"
         },
         {
