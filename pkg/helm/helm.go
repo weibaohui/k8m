@@ -86,7 +86,7 @@ func WithRESTClientGetter(getter *RESTClientGetterImpl) Option {
 
 // GetReleaseHistory check release installed or not
 func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, error) {
-	klog.V(0).Infof("[%s] get release on target cluster", releaseName)
+	klog.V(6).Infof("[%s] get release on target cluster", releaseName)
 
 	// use HELM_NAMESPACE find release
 	hc := action.NewHistory(c.ac)
@@ -99,8 +99,8 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 		klog.Errorf("[%s] 1history client run error: %v", releaseName, err)
 		return nil, err
 	}
-	klog.V(0).Infof("[%s] history releases: %+v", releaseName, releases)
-	klog.V(0).Infof(" history releases: %d", len(releases))
+	klog.V(6).Infof("[%s] history releases: %+v", releaseName, releases)
+	klog.V(6).Infof(" history releases: %d", len(releases))
 	return releases, nil
 }
 func (c *Client) GetReleaseList() ([]*release.Release, error) {
@@ -122,8 +122,8 @@ func (c *Client) GetReleaseList() ([]*release.Release, error) {
 
 // InstallRelease install release
 func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error {
-	klog.V(0).Infof("install release, name: %s, version: %s, chartName: %s", releaseName, version, chartName)
-	klog.V(0).Infof("helm repository cache path: %s", c.setting.RepositoryCache)
+	klog.V(6).Infof("install release, name: %s, version: %s, chartName: %s", releaseName, version, chartName)
+	klog.V(6).Infof("helm repository cache path: %s", c.setting.RepositoryCache)
 
 	if res, err := c.GetReleaseHistory(releaseName); err != nil {
 		return err
@@ -166,12 +166,12 @@ func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, ver
 
 	}
 
-	klog.V(0).Infof("values: \n%s", finalValues)
+	klog.V(6).Infof("values: \n%s", finalValues)
 	if _, err = ic.Run(chartReq, finalValues); err != nil {
 		return fmt.Errorf("[%s] install error: %v", releaseName, err)
 	}
 
-	klog.V(0).Infof("[%s] release install success", releaseName)
+	klog.V(6).Infof("[%s] release install success", releaseName)
 
 	return nil
 }
@@ -195,16 +195,16 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 		lc, err = loader.Load(option)
 		if err == nil && lc != nil {
 			// 找到本地缓存
-			klog.V(0).Infof("使用[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
+			klog.V(6).Infof("使用[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
 			return lc, nil
 		}
 	}
 	if err != nil {
-		klog.V(0).Infof("获取本地[%s/%s-%s]报错%s", repoName, chartName, version, err)
+		klog.V(6).Infof("获取本地[%s/%s-%s]报错%s", repoName, chartName, version, err)
 	}
 	// 容器环境下可能会重启、丢失配置文件
 	// todo 将HELM 缓存文件写到配置中
-	klog.V(0).Infof("未找到[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
+	klog.V(6).Infof("未找到[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
 
 	// 创建HelmRepository对象
 	helmRepo := &models.HelmRepository{
@@ -240,9 +240,9 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 	if err != nil {
 		return nil, fmt.Errorf("定位Chart %s 失败: %v。请尝试更新缓存", chartURL, err)
 	}
-	klog.V(0).Infof("使用[%s/%s] 在线地址 %s", repoName, chartName, chartURL)
+	klog.V(6).Infof("使用[%s/%s] 在线地址 %s", repoName, chartName, chartURL)
 
-	klog.V(0).Infof("chart filepath  %s", filepath)
+	klog.V(6).Infof("chart filepath  %s", filepath)
 	lc, err = loader.Load(filepath)
 
 	if err != nil {
@@ -275,7 +275,7 @@ func (c *Client) UninstallRelease(releaseName string) error {
 		return fmt.Errorf("[%s] run uninstall client error: %v", releaseName, err)
 	}
 
-	klog.V(0).Infof("[%s] uninstall release success", releaseName)
+	klog.V(6).Infof("[%s] uninstall release success", releaseName)
 
 	return nil
 }
@@ -310,7 +310,7 @@ func (c *Client) UpgradeRelease(releaseName, localRepoName, targetVersion string
 			r[len(r)-1].Chart.Metadata.Version, targetVersion, err)
 	}
 
-	klog.V(0).Infof("[%s] release upgrade from version %s to %s success", releaseName,
+	klog.V(6).Infof("[%s] release upgrade from version %s to %s success", releaseName,
 		r[len(r)-1].Chart.Metadata.Version, targetVersion)
 
 	return nil
@@ -318,7 +318,7 @@ func (c *Client) UpgradeRelease(releaseName, localRepoName, targetVersion string
 
 // AddOrUpdateRepo Add or update repo from repo config
 func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
-	klog.V(0).Infof("load repo info: %+v", repoEntry)
+	klog.V(6).Infof("load repo info: %+v", repoEntry)
 
 	// 创建HelmRepository对象
 	helmRepo := &models.HelmRepository{
@@ -341,7 +341,7 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	go func() {
 		_ = c.updateRepoIndex(repoEntry, helmRepo)
 	}()
-	klog.V(0).Infof("[%s] helm repository saved to database successfully", repoEntry.Name)
+	klog.V(6).Infof("[%s] helm repository saved to database successfully", repoEntry.Name)
 
 	return nil
 }
@@ -352,12 +352,12 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 		return err
 	}
 
-	klog.V(0).Infof("[%s] start download index file", repoEntry.Name)
+	klog.V(6).Infof("[%s] start download index file", repoEntry.Name)
 	indexFilePath, err := cr.DownloadIndexFile()
 	if err != nil {
 		return fmt.Errorf("[%s] download index file error: %v", repoEntry.Name, err)
 	}
-	klog.V(0).Infof("Index file = %s", indexFilePath)
+	klog.V(6).Infof("Index file = %s", indexFilePath)
 
 	// 将索引文件加载到content字段中
 	file, err := os.ReadFile(indexFilePath)
@@ -426,7 +426,7 @@ func (c *Client) UpdateReposIndex(ids string) {
 		return db.Where("id in ?", idsArray).Find(&m)
 	})
 	if err != nil {
-		klog.V(0).Infof("get helm repository list error: %v", err)
+		klog.V(6).Infof("get helm repository list error: %v", err)
 		return
 	}
 
@@ -492,5 +492,5 @@ func (c *Client) GetChartVersions(repoName string, chartName string) ([]string, 
 }
 
 func debug(format string, v ...interface{}) {
-	klog.V(0).Infof(format, v...)
+	klog.V(6).Infof(format, v...)
 }
