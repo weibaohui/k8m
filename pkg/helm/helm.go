@@ -104,13 +104,12 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 	return releases, nil
 }
 func (c *Client) GetReleaseList() ([]*release.Release, error) {
-
 	// 创建 List 对象
 	listAction := action.NewList(c.ac)
-	// 过滤仅展示已部署的 Release
-	listAction.All = true
-	// 是否跨命名空间获取
 	listAction.AllNamespaces = true
+	// 添加状态掩码过滤
+	listAction.StateMask = action.ListDeployed | action.ListUninstalled | action.ListFailed | action.ListSuperseded | action.ListUninstalling | action.ListPendingInstall | action.ListPendingUpgrade | action.ListPendingRollback | action.ListUnknown
+	listAction.All = true
 
 	// 获取 Release 列表
 	releases, err := listAction.Run()
