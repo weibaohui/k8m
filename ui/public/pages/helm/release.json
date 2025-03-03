@@ -28,7 +28,21 @@
         "reload",
         "bulkActions"
       ],
-      "bulkActions": [],
+      "bulkActions": [
+        {
+          "label": "卸载应用",
+          "actionType": "ajax",
+          "confirmText": "确定要卸载吗。",
+          "api": {
+            "url": "/mgm/helm/release/batch/uninstall",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:name }",
+              "ns_list": "${selectedItems | pick:namespace }"
+            }
+          }
+        }
+      ],
       "loadDataOnce": true,
       "syncLocation": false,
       "initFetch": true,
@@ -93,8 +107,30 @@
                     {
                       "name": "info.status",
                       "label": "实例状态",
-                      "type": "tpl",
-                      "tpl": "${chart.metadata.version} ${info.status}"
+                      "type": "container",
+                      "body": [
+                        {
+                          "type": "tpl",
+                          "tpl": "<span class='label label-success'>${chart.metadata.version}</span>&nbsp;&nbsp;&nbsp;&nbsp;"
+                        },
+                        {
+                          "name": "info.status",
+                          "label": "状态",
+                          "type": "mapping",
+                          "map": {
+                            "deployed": "<span class='label label-success'>已部署</span>",
+                            "uninstalled": "<span class='label label-default'>已卸载</span>",
+                            "failed": "<span class='label label-danger'>失败</span>",
+                            "superseded": "<span class='label label-info'>已取代</span>",
+                            "uninstalling": "<span class='label label-primary'>卸载中</span>",
+                            "pending-install": "<span class='label label-warning'>待安装</span>",
+                            "pending-upgrade": "<span class='label label-warning'>待升级</span>",
+                            "pending-rollback": "<span class='label label-warning'>待回滚</span>",
+                            "unknown": "<span class='label label-default'>未知</span>",
+                            "*": "<span class='label label-warning'>${info.status}</span>"
+                          }
+                        }
+                      ]
                     },
                     {
                       "name": "params",
@@ -179,7 +215,19 @@
         {
           "name": "info.status",
           "label": "状态",
-          "type": "text"
+          "type": "mapping",
+          "map": {
+            "deployed": "<span class='label label-success'>已部署</span>",
+            "uninstalled": "<span class='label label-default'>已卸载</span>",
+            "failed": "<span class='label label-danger'>失败</span>",
+            "superseded": "<span class='label label-info'>已取代</span>",
+            "uninstalling": "<span class='label label-primary'>卸载中</span>",
+            "pending-install": "<span class='label label-warning'>待安装</span>",
+            "pending-upgrade": "<span class='label label-warning'>待升级</span>",
+            "pending-rollback": "<span class='label label-warning'>待回滚</span>",
+            "unknown": "<span class='label label-default'>未知</span>",
+            "*": "<span class='label label-warning'>${info.status}</span>"
+          }
         },
         {
           "name": "info.first_deployed",
