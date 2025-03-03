@@ -5330,7 +5330,7 @@
         {
           "type": "progress",
           "mode": "line",
-          "value": "${ROUND((status.readyReplicas / spec.replicas),2) * 100}",
+          "value": "<%= data.spec.replicas!== 0? (data.status.readyReplicas / data.spec.replicas * 100).toFixed(2) : '0.00' %>",
           "striped": true,
           "label": "当前状态",
           "animate": true,
