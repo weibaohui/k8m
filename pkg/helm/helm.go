@@ -162,7 +162,7 @@ func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, ver
 		}
 
 		// 6. 合并默认值 + 自定义值
-		finalValues = chartutil.CoalesceTables(defaultValues.AsMap(), customValues)
+		finalValues = chartutil.CoalesceTables(customValues, defaultValues.AsMap())
 
 	}
 
