@@ -3,6 +3,7 @@ package helm
 import (
 	"fmt"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -40,6 +41,9 @@ func ListRelease(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	slice.SortBy(list, func(i, j *release.Release) bool {
+		return i.Info.LastDeployed.After(j.Info.LastDeployed)
+	})
 	if list == nil {
 		list = make([]*release.Release, 0)
 	}
