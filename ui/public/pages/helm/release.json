@@ -76,7 +76,6 @@
                 "title": "${name} 详情 （ESC 关闭）",
                 "size": "lg",
                 "closeOnEsc": true,
-                "closeOnOutside": true,
                 "body": {
                   "type": "form",
                   "mode": "horizontal",
@@ -163,6 +162,29 @@
                       ]
                     },
                     {
+                      "name": "params",
+                      "label": "更新参数",
+                      "type": "container",
+                      "body": [
+                        {
+                          "type": "button",
+                          "label": "更新参数",
+                          "actionType": "drawer",
+                          "drawer": {
+                            "overlay": false,
+                            "closeOnEsc": true,
+                            "size": "xl",
+                            "title": "更新（ESC 关闭）",
+                            "body": [
+                              {
+                                "type": "helmUpdateRelease"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
                       "name": "info.notes",
                       "label": "安装结果",
                       "type": "tpl",
@@ -203,7 +225,7 @@
           "type": "text"
         },
         {
-          "name": "chart.metadata.appVersion",
+          "name": "chart.metadata.version",
           "label": "版本",
           "type": "text"
         },
