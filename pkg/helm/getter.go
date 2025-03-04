@@ -22,6 +22,8 @@ func NewRESTClientGetterImpl(rc *rest.Config) *RESTClientGetterImpl {
 }
 
 func (r *RESTClientGetterImpl) ToRESTConfig() (*rest.Config, error) {
+	r.rc.ContentType = "application/json"
+	r.rc.AcceptContentTypes = "application/json"
 	return r.rc, nil
 }
 
