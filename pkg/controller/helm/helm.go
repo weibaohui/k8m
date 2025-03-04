@@ -121,7 +121,6 @@ func BatchUninstallRelease(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
@@ -137,10 +136,7 @@ func BatchUninstallRelease(c *gin.Context) {
 			err = x
 		}
 	}
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+
 	amis.WriteJsonOK(c)
 }
 
@@ -149,9 +145,10 @@ func UpgradeRelease(c *gin.Context) {
 	ns := c.Param("ns")
 
 	var req struct {
-		ReleaseName string `json:"release_name"`
-		RepoName    string `json:"repo_name"`
-		Version     string `json:"version"`
+		ReleaseName string `json:"release_name,omitempty"`
+		RepoName    string `json:"repo_name,omitempty"`
+		Version     string `json:"version,omitempty"`
+		Values      string `json:"values,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -166,7 +163,7 @@ func UpgradeRelease(c *gin.Context) {
 		return
 	}
 
-	if err := h.UpgradeRelease(req.ReleaseName, req.RepoName, req.Version); err != nil {
+	if err := h.UpgradeRelease(req.ReleaseName, req.RepoName, req.Version, req.Values); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
