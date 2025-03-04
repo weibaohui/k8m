@@ -30,7 +30,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
             lineWidth: -1,  // 禁用自动换行
             noRefs: true    // 避免引用标记
         });
-        setValues(ov);
+        setValues(ov)
     }, [data.config])
 
     useEffect(() => {
@@ -56,7 +56,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                 url: `/mgm/helm/repo/${repoName}/chart/${chartName}/version/${version}/values`,
                 method: 'get'
             });
-            //@ts-ignore
+            // @ts-ignore
             setValues(response.data?.data.yaml || '');
         } catch (error) {
             message.error('获取参数值失败');
@@ -102,7 +102,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                         onClick={fetchValues}
                         style={{marginRight: 16}}
                     >
-                        🗳️ 加载默认参数
+                        🗳️ 加载Chart包默认参数
                     </Button>
                     <Button
                         type="default"
@@ -115,7 +115,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                             setValues(ov);
                         }}
                     >
-                        ⚙️ 使用用户参数
+                        ⚙️ 使用用户输入参数
                     </Button>
                 </Form.Item>
                 <Form.Item label="升/降版本">
