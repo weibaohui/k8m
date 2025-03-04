@@ -30,7 +30,7 @@ type Helm interface {
 	GetReleaseHistory(releaseName string) ([]*release.Release, error)
 	InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(releaseName string) error
-	UpgradeRelease(releaseName, localRepoName, targetVersion string) error
+	UpgradeRelease(releaseName, repoName, targetVersion string, values ...string) error
 	GetChartValue(repoName, chartName, version string) (string, error)
 	GetChartVersions(repoName string, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)
@@ -281,7 +281,7 @@ func (c *Client) UninstallRelease(releaseName string) error {
 }
 
 // UpgradeRelease upgrade release version
-func (c *Client) UpgradeRelease(releaseName, localRepoName, targetVersion string) error {
+func (c *Client) UpgradeRelease(releaseName, repoName, targetVersion string, values ...string) error {
 	// use HELM_NAMESPACE find release
 	uc := action.NewUpgrade(c.ac)
 	r, err := c.GetReleaseHistory(releaseName)
@@ -293,25 +293,48 @@ func (c *Client) UpgradeRelease(releaseName, localRepoName, targetVersion string
 		return fmt.Errorf("[%s] release doesn't install", releaseName)
 	}
 
-	if r[len(r)-1].Chart.Metadata.Version == targetVersion {
-		return fmt.Errorf("[%s] version %s already installed", releaseName, r[len(r)-1].Chart.Metadata.Version)
+	version := r[len(r)-1]
+	if version.Chart.Metadata.Version == targetVersion {
+		return fmt.Errorf("[%s] version %s already installed", releaseName, version.Chart.Metadata.Version)
 	}
 
 	uc.Version = targetVersion
-
-	chartName := r[len(r)-1].Chart.Name()
-	chartReq, err := c.getChart(localRepoName, chartName, targetVersion, &uc.ChartPathOptions)
+	uc.Namespace = version.Namespace
+	client, _ := registry.NewClient()
+	uc.SetRegistryClient(client)
+	chartName := version.Chart.Name()
+	chartReq, err := c.getChart(repoName, chartName, targetVersion, &uc.ChartPathOptions)
 	if err != nil {
 		return fmt.Errorf("[%s] get chart error: %v", releaseName, err)
 	}
 
-	if _, err = uc.Run(releaseName, chartReq, nil); err != nil {
+	// 4. 加载默认 values.yaml
+	defaultValues, err := chartutil.CoalesceValues(chartReq, nil)
+	if err != nil {
+		return fmt.Errorf("Failed to coalesce default values: %v\n", err)
+	}
+
+	finalValues := defaultValues
+
+	if len(values) != 0 {
+		// 5. 加载自定义 values.yaml
+		customValues, err := ParseValuesYaml(values[0])
+		if err != nil {
+			return fmt.Errorf("Failed to parse custom values: %v\n", err)
+		}
+
+		// 6. 合并默认值 + 自定义值
+		finalValues = chartutil.CoalesceTables(customValues, defaultValues.AsMap())
+
+	}
+
+	if _, err = uc.Run(releaseName, chartReq, finalValues); err != nil {
 		return fmt.Errorf("[%s] release upgrade from version %s to %s error: %v", releaseName,
-			r[len(r)-1].Chart.Metadata.Version, targetVersion, err)
+			version.Chart.Metadata.Version, targetVersion, err)
 	}
 
 	klog.V(6).Infof("[%s] release upgrade from version %s to %s success", releaseName,
-		r[len(r)-1].Chart.Metadata.Version, targetVersion)
+		version.Chart.Metadata.Version, targetVersion)
 
 	return nil
 }
