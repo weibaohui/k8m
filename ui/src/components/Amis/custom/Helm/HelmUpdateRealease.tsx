@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Button, Form, Select, message} from 'antd';
+import {Button, Col, Form, Row, Select, message} from 'antd';
 import Editor from '@monaco-editor/react';
 import {fetcher} from '@/components/Amis/fetcher';
 import yaml from "js-yaml";
@@ -21,6 +21,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
     const [version, setVersion] = useState('');
     const [values, setValues] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(false);
     let repoName = data.info.description
     let chartName = data.chart.metadata.name
     let releaseName = data.name
@@ -51,6 +52,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
         fetchVersions();
     }, [chartName]);
     const fetchValues = async () => {
+        setIsFetching(true);
         try {
             const response = await fetcher({
                 url: `/mgm/helm/repo/${repoName}/chart/${chartName}/version/${version}/values`,
@@ -60,11 +62,17 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
             setValues(response.data?.data.yaml || '');
         } catch (error) {
             message.error('获取参数值失败');
+        } finally {
+            setIsFetching(false);
         }
     };
 
 
     const handleSubmit = async () => {
+        if (!version) {
+            message.error('请选择一个版本');
+            return;
+        }
         setLoading(true);
         try {
             await fetcher({
@@ -100,6 +108,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                     <Button
                         type="default"
                         onClick={fetchValues}
+                        loading={isFetching}
                         style={{marginRight: 16}}
                     >
                         🗳️ 加载Chart包默认参数
@@ -119,30 +128,44 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                     </Button>
                 </Form.Item>
                 <Form.Item label="升/降版本">
-                    <Select
-                        value={version}
-                        onChange={setVersion}
-                        options={(Array.isArray(versions) ? versions : []).map(v => ({label: v, value: v}))}
-                        placeholder="请选择版本"
-                    />
+                    <Row gutter={16}>
+
+                        <Col span={12}>
+                            <Select
+                                value={version}
+                                onChange={setVersion}
+                                options={(Array.isArray(versions) ? versions : []).map(v => ({label: v, value: v}))}
+                                placeholder="请选择目标版本"
+                            />
+                        </Col>
+                        <Col span={12}>
+                            <div style={{lineHeight: '32px'}}>
+                                当前版本：{data.chart.metadata.version}
+                            </div>
+                        </Col>
+                    </Row>
                 </Form.Item>
 
                 <Form.Item label="安装参数">
-                    <Editor
-                        height="600px"
-                        language="yaml"
-                        value={values}
-                        options={{
-                            minimap: {enabled: false},
-                            scrollBeyondLastLine: false,
-                            automaticLayout: true,
-                            wordWrap: 'on',
-                            scrollbar: {
-                                vertical: 'auto',
-                                verticalScrollbarSize: 8
-                            }
-                        }}
-                    />
+                    <div style={{border: '1px solid #d9d9d9', borderRadius: '4px'}}
+                    >
+                        <Editor
+                            height="600px"
+                            language="yaml"
+                            value={values}
+                            options={{
+                                minimap: {enabled: false},
+                                scrollBeyondLastLine: false,
+                                automaticLayout: true,
+                                wordWrap: 'on',
+                                scrollbar: {
+                                    vertical: 'auto',
+                                    verticalScrollbarSize: 8
+                                }
+                            }}
+                        />
+                    </div>
+
                 </Form.Item>
 
 
