@@ -141,6 +141,8 @@ func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, ver
 	ic.Namespace = namespace
 	client, _ := registry.NewClient()
 	ic.SetRegistryClient(client)
+	// 安装时，写入到release的info.Description中。
+	ic.Description = repoName
 	chartReq, err := c.getChart(repoName, chartName, version, &ic.ChartPathOptions)
 	if err != nil {
 		return fmt.Errorf("[%s] get chart error: %v", releaseName, err)
@@ -165,7 +167,6 @@ func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, ver
 		finalValues = chartutil.CoalesceTables(customValues, defaultValues.AsMap())
 
 	}
-
 	klog.V(6).Infof("values: \n%s", finalValues)
 	if _, err = ic.Run(chartReq, finalValues); err != nil {
 		return fmt.Errorf("[%s] install error: %v", releaseName, err)
