@@ -189,7 +189,7 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 		lc  *chart.Chart
 		err error
 	)
-	klog.V(0).Infof("LocalPath=%s/%s-%s.tgz", c.setting.RepositoryCache, chartName, version)
+	klog.V(6).Infof("LocalPath=%s/%s-%s.tgz", c.setting.RepositoryCache, chartName, version)
 	localPath := fmt.Sprintf("%s/%s-%s.tgz", c.setting.RepositoryCache, chartName, version)
 	if _, err = os.Stat(localPath); err == nil {
 		lc, err = loader.Load(localPath)
