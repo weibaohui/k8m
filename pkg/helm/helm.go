@@ -285,6 +285,7 @@ func (c *Client) UninstallRelease(releaseName string) error {
 func (c *Client) UpgradeRelease(releaseName, repoName, targetVersion string, values ...string) error {
 	// use HELM_NAMESPACE find release
 	uc := action.NewUpgrade(c.ac)
+
 	r, err := c.GetReleaseHistory(releaseName)
 	if err != nil {
 		return err
@@ -295,10 +296,10 @@ func (c *Client) UpgradeRelease(releaseName, repoName, targetVersion string, val
 	}
 
 	version := r[len(r)-1]
-	if version.Chart.Metadata.Version == targetVersion {
-		return fmt.Errorf("[%s] version %s already installed", releaseName, version.Chart.Metadata.Version)
-	}
-
+	// 同版本更新参数不能阻止
+	// if version.Chart.Metadata.Version == targetVersion {
+	// 	return fmt.Errorf("[%s] version %s already installed", releaseName, version.Chart.Metadata.Version)
+	// }
 	uc.Version = targetVersion
 	uc.Namespace = version.Namespace
 	client, _ := registry.NewClient()
