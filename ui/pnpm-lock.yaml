@@ -59,6 +59,9 @@ importers:
       amis-ui:
         specifier: ^6.11.0
         version: 6.11.0(@types/react@18.2.56)(amis-core@6.11.0(@types/react@18.2.56)(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0))(amis-formula@6.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      ansi-to-html:
+        specifier: ^0.7.2
+        version: 0.7.2
       antd:
         specifier: ^5.24.0
         version: 5.24.0(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -998,6 +1001,11 @@ packages:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
 
+  ansi-to-html@0.7.2:
+    resolution: {integrity: sha512-v6MqmEpNlxF+POuyhKkidusCHWWkaLcGRURzivcU3I9tv7k4JVhFcnukrM5Rlk2rUywdZuzYAZ+kbZqWCnfN3g==}
+    engines: {node: '>=8.0.0'}
+    hasBin: true
+
   antd@5.24.0:
     resolution: {integrity: sha512-05PZBIf6ijLHAQskBTW3nwS2t7tQmyLA6Xq8vK2Sk5tsgCsH/UE1cNCDYnKFGRJ7cKYuWJ565JDo9LejbiO42A==}
     peerDependencies:
@@ -1294,6 +1302,9 @@ packages:
 
   entities@2.1.0:
     resolution: {integrity: sha512-hCx1oky9PFrJ611mf0ifBLBRW8lUUVRlFolb5gWRfIELabBlbp9xZvrqZLZAs+NxFnbfQoeGd8wDkygjg7U85w==}
+
+  entities@2.2.0:
+    resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
 
   es6-promise@4.2.8:
     resolution: {integrity: sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==}
@@ -3726,6 +3737,10 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
 
+  ansi-to-html@0.7.2:
+    dependencies:
+      entities: 2.2.0
+
   antd@5.24.0(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@ant-design/colors': 7.2.0
@@ -4083,6 +4098,8 @@ snapshots:
       once: 1.4.0
 
   entities@2.1.0: {}
+
+  entities@2.2.0: {}
 
   es6-promise@4.2.8: {}
 
