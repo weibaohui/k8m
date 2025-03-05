@@ -357,7 +357,7 @@ func main() {
 		mgm.GET("/helm/chart/list", helm.ListChart)
 
 		mgm.GET("/helm/release/list", helm.ListRelease)
-		mgm.GET("/helm/release/:release/history/list", helm.ListReleaseHistory)
+		mgm.GET("/helm/release/ns/:ns/name/:name/history/list", helm.ListReleaseHistory)
 		mgm.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", helm.InstallRelease)
 		mgm.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
 		mgm.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
