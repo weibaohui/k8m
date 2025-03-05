@@ -151,7 +151,7 @@ func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, ver
 	// 4. 加载默认 values.yaml
 	defaultValues, err := chartutil.CoalesceValues(chartReq, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to coalesce default values: %v\n", err)
+		return fmt.Errorf("failed to coalesce default values: %v", err)
 	}
 
 	finalValues := defaultValues
@@ -160,7 +160,7 @@ func (c *Client) InstallRelease(namespace, releaseName, repoName, chartName, ver
 		// 5. 加载自定义 values.yaml
 		customValues, err := ParseValuesYaml(values[0])
 		if err != nil {
-			return fmt.Errorf("Failed to parse custom values: %v\n", err)
+			return fmt.Errorf("failed to parse custom values: %v", err)
 		}
 
 		// 6. 合并默认值 + 自定义值
@@ -323,7 +323,7 @@ func (c *Client) UpgradeRelease(releaseName, repoName, targetVersion string, val
 		// 5. 加载自定义 values.yaml
 		customValues, err := ParseValuesYaml(values[0])
 		if err != nil {
-			return fmt.Errorf("Failed to parse custom values: %v\n", err)
+			return fmt.Errorf("failed to parse custom values: %v", err)
 		}
 
 		// 6. 合并默认值 + 自定义值
@@ -402,7 +402,7 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 
 	// 保存到数据库
 	if err = helmRepo.UpdateContent(nil); err != nil {
-		return fmt.Errorf("Update helm repository Content   to database error: %v", err)
+		return fmt.Errorf("update helm repository Content to database error: %v", err)
 	}
 
 	// 清空数据库中对应的chart repo
