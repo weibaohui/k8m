@@ -37,6 +37,13 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                     //@ts-ignore
                     const podList = response.data.data?.rows;
                     setPods(podList);
+                    if (podList.length > 0) {
+                        const firstPod = podList[0];
+                        setSelectedPod({
+                            namespace: firstPod.metadata.namespace,
+                            name: firstPod.metadata.name
+                        });
+                    }
                 } else {
                     console.warn('No pod data found in response:', response);
                     setPods([]);
