@@ -53,6 +53,10 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
         fetchVersions();
     }, [chartName]);
     const fetchValues = async () => {
+        if (!version) {
+            message.error('请先选择版本');
+            return;
+        }
         setIsFetching(true);
         try {
             const response = await fetcher({
@@ -155,6 +159,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                             height="600px"
                             language="yaml"
                             value={values}
+                            onChange={(value) => setValues(value || '')}
                             options={{
                                 minimap: {enabled: false},
                                 scrollBeyondLastLine: false,
