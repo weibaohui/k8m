@@ -142,13 +142,13 @@ func BatchUninstallRelease(c *gin.Context) {
 
 // UpgradeRelease 升级Helm Release
 func UpgradeRelease(c *gin.Context) {
-	ns := c.Param("ns")
 
 	var req struct {
 		ReleaseName string `json:"release_name,omitempty"`
 		RepoName    string `json:"repo_name,omitempty"`
 		Version     string `json:"version,omitempty"`
 		Values      string `json:"values,omitempty"`
+		Namespace   string `json:"namespace,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -156,7 +156,7 @@ func UpgradeRelease(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c, req.Namespace)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
