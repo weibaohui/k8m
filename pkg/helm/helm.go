@@ -304,6 +304,7 @@ func (c *Client) UpgradeRelease(releaseName, repoName, targetVersion string, val
 	uc.Namespace = version.Namespace
 	client, _ := registry.NewClient()
 	uc.SetRegistryClient(client)
+	uc.Description = repoName
 	chartName := version.Chart.Name()
 	chartReq, err := c.getChart(repoName, chartName, targetVersion, &uc.ChartPathOptions)
 	if err != nil {
@@ -313,7 +314,7 @@ func (c *Client) UpgradeRelease(releaseName, repoName, targetVersion string, val
 	// 4. 加载默认 values.yaml
 	defaultValues, err := chartutil.CoalesceValues(chartReq, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to coalesce default values: %v\n", err)
+		return fmt.Errorf("failed to coalesce default values: %v", err)
 	}
 
 	finalValues := defaultValues
