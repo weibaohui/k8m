@@ -179,6 +179,13 @@
                               {
                                 "type": "helmUpdateRelease"
                               }
+                            ],
+                            "actions": [
+                              {
+                                "type": "button",
+                                "label": "关闭",
+                                "close": true
+                              }
                             ]
                           }
                         }
@@ -194,7 +201,14 @@
                       }
                     }
                   ]
-                }
+                },
+                "actions": [
+                  {
+                    "type": "button",
+                    "label": "关闭",
+                    "close": true
+                  }
+                ]
               }
             }
           ],
