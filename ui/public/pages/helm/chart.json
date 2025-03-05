@@ -62,7 +62,6 @@
                 "title": "${name} 详情 （ESC 关闭）",
                 "size": "lg",
                 "closeOnEsc": true,
-                "closeOnOutside": true,
                 "body": {
                   "type": "form",
                   "mode": "horizontal",
@@ -129,7 +128,13 @@
                 "actions": [
                   {
                     "type": "button",
+                    "label": "关闭",
+                    "close": true
+                  },
+                  {
+                    "type": "button",
                     "label": "安装",
+                    "level": "primary",
                     "size": "sm",
                     "actionType": "drawer",
                     "close": true,
@@ -137,7 +142,6 @@
                       "title": "${name} 安装配置",
                       "size": "lg",
                       "closeOnEsc": true,
-                      "closeOnOutside": true,
                       "body": {
                         "type": "form",
                         "mode": "horizontal",
@@ -189,6 +193,11 @@
                         ]
                       },
                       "actions": [
+                        {
+                          "type": "button",
+                          "label": "关闭",
+                          "close": true
+                        },
                         {
                           "type": "button",
                           "label": "确认安装",
