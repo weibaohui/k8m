@@ -189,23 +189,19 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 		lc  *chart.Chart
 		err error
 	)
-
-	// 先从本地获取
-	option, err := chartPathOptions.LocateChart(fmt.Sprintf("%s/%s", repoName, chartName), c.setting)
-	if err == nil && option != "" {
-		lc, err = loader.Load(option)
+	klog.V(0).Infof("LocalPath=%s/%s-%s.tgz", c.setting.RepositoryCache, chartName, version)
+	localPath := fmt.Sprintf("%s/%s-%s.tgz", c.setting.RepositoryCache, chartName, version)
+	if _, err = os.Stat(localPath); err == nil {
+		lc, err = loader.Load(localPath)
 		if err == nil && lc != nil {
 			// 找到本地缓存
-			klog.V(6).Infof("使用[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
+			klog.V(6).Infof("使用[%s/%s-%s]本地缓存 %s", repoName, chartName, version, localPath)
 			return lc, nil
 		}
+		if err != nil {
+			klog.V(6).Infof("未找到[%s/%s-%s]本地缓存 %s", repoName, chartName, version, localPath)
+		}
 	}
-	if err != nil {
-		klog.V(6).Infof("获取本地[%s/%s-%s]报错%s", repoName, chartName, version, err)
-	}
-	// 容器环境下可能会重启、丢失配置文件
-	// todo 将HELM 缓存文件写到配置中
-	klog.V(6).Infof("未找到[%s/%s-%s]本地缓存 %s", repoName, chartName, version, option)
 
 	// 创建HelmRepository对象
 	helmRepo := &models.HelmRepository{
