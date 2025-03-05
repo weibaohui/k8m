@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
+import AnsiToHtml from 'ansi-to-html';
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -83,15 +84,21 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     }, [finalUrl]);
 
 
+    // 创建一个转换器实例
+    const converter = new AnsiToHtml();
     return (
         <div ref={dom} style={{ whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px' }}>
             {errorMessage && <div style={{ color: errorMessage == "Connected" ? '#00FF00' : 'red' }}>{errorMessage} 共计：{lines.length}行</div>}
 
             <pre style={{ whiteSpace: 'pre-wrap' }}>
                 {lines.map((line, index) => (
-                    <div key={index}>{line}</div>
-                ))
-                }
+                    <div
+                        key={index}
+                        dangerouslySetInnerHTML={{
+                            __html: converter.toHtml(line)
+                        }}
+                    />
+                ))}
             </pre>
         </div>
     );
