@@ -25,6 +25,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
     let repoName = data.info.description
     let chartName = data.chart.metadata.name
     let releaseName = data.name
+    let namespace = data.namespace
     useEffect(() => {
         const ov = yaml.dump(data.config, {
             indent: 2,
@@ -43,7 +44,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                 });
                 // @ts-ignore
                 var options = response.data?.data?.options;
-                options = options.filter((opt: string) => opt !== data.chart.metadata.version);
+                // options = options.filter((opt: string) => opt !== data.chart.metadata.version);
                 setVersions(options || []);
             } catch (error) {
                 message.error('获取版本列表失败');
@@ -82,7 +83,8 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                     values,
                     release_name: releaseName,
                     repo_name: repoName,
-                    version: version
+                    version: version,
+                    namespace: namespace
                 }
             });
             message.success('更新成功');
