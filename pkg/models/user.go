@@ -11,6 +11,7 @@ import (
 // User 用户导入User
 type User struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
+	GroupName uint      `gorm:"index" json:"group_name,omitempty"`
 	Username  string    `gorm:"uniqueIndex;not null" json:"username,omitempty"`
 	Password  string    `gorm:"not null;index:idx_password" json:"password,omitempty"`
 	Role      string    `gorm:"not null;index:idx_role" json:"role,omitempty"` // 管理员/只读
