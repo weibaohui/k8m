@@ -3,52 +3,13 @@ package helm
 import (
 	"fmt"
 
-	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
-	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/helm"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
-	"helm.sh/helm/v3/pkg/release"
-	"k8s.io/klog/v2"
 )
-
-// ListReleaseHistory 获取Release的历史版本
-func ListReleaseHistory(c *gin.Context) {
-	releaseName := c.Param("name")
-	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	history, err := h.GetReleaseHistory(releaseName)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	amis.WriteJsonData(c, history)
-}
-func ListRelease(c *gin.Context) {
-	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	list, err := h.GetReleaseList()
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	slice.SortBy(list, func(i, j *release.Release) bool {
-		return i.Info.LastDeployed.After(j.Info.LastDeployed)
-	})
-	if list == nil {
-		list = make([]*release.Release, 0)
-	}
-	amis.WriteJsonData(c, list)
-}
 
 func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
 	// if namespace == "" {
@@ -60,112 +21,33 @@ func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
 	return h, err
 }
 
-// InstallRelease 安装Helm Release
-func InstallRelease(c *gin.Context) {
-	releaseName := c.Param("release")
-	repoName := c.Param("repo")
-	chartName := c.Param("chart")
-	version := c.Param("version")
+func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, repoName string) (string, string, error) {
+	cluster := amis.GetSelectedCluster(c)
+	ctx := amis.GetContextWithUser(c)
+	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
+	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
 
-	var req struct {
-		Values    string `json:"values,omitempty"`
-		Namespace string `json:"ns,omitempty"`
+	log := models.OperationLog{
+		Action:       action,
+		Cluster:      cluster,
+		Kind:         "Helm",
+		Name:         releaseName,
+		Namespace:    namespace,
+		UserName:     username,
+		Group:        repoName,
+		Role:         role,
+		ActionResult: "success",
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		amis.WriteJsonError(c, err)
-		return
+	var err error
+	if role == models.RoleClusterReadonly {
+		err = fmt.Errorf("非管理员不能%s资源", action)
 	}
-
-	h, err := getHelm(c, req.Namespace)
 	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	if releaseName == "" {
-		releaseName = fmt.Sprintf("%s-%d", chartName, utils.RandNDigitInt(8))
+		log.ActionResult = err.Error()
 	}
 	go func() {
-		if err := h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values); err != nil {
-			klog.Errorf("install %s/%s error %v", req.Namespace, releaseName, err)
-		}
+		service.OperationLogService().Add(&log)
 	}()
-
-	amis.WriteJsonOKMsg(c, "正在安装中，界面显示可能有延迟")
-}
-
-// UninstallRelease 卸载Helm Release
-func UninstallRelease(c *gin.Context) {
-	releaseName := c.Param("name")
-	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	if err := h.UninstallRelease(releaseName); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	amis.WriteJsonOK(c)
-}
-
-func BatchUninstallRelease(c *gin.Context) {
-	var req struct {
-		Names      []string `json:"name_list"`
-		Namespaces []string `json:"ns_list"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	for i := 0; i < len(req.Names); i++ {
-		name := req.Names[i]
-		ns := req.Namespaces[i]
-		h, err := getHelm(c, ns)
-		if err != nil {
-			amis.WriteJsonError(c, err)
-			return
-		}
-
-		x := h.UninstallRelease(name)
-		if x != nil {
-			klog.V(6).Infof("batch remove %s/%s error %v", ns, name, x)
-			err = x
-		}
-	}
-
-	amis.WriteJsonOK(c)
-}
-
-// UpgradeRelease 升级Helm Release
-func UpgradeRelease(c *gin.Context) {
-
-	var req struct {
-		ReleaseName string `json:"release_name,omitempty"`
-		RepoName    string `json:"repo_name,omitempty"`
-		Version     string `json:"version,omitempty"`
-		Values      string `json:"values,omitempty"`
-		Namespace   string `json:"namespace,omitempty"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	h, err := getHelm(c, req.Namespace)
-
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	if err := h.UpgradeRelease(req.ReleaseName, req.RepoName, req.Version, req.Values); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	amis.WriteJsonOK(c)
+	return username, role, err
 }
