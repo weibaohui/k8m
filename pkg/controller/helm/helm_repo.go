@@ -27,6 +27,14 @@ func ListRepo(c *gin.Context) {
 // AddOrUpdateRepo 添加或更新Helm仓库
 func AddOrUpdateRepo(c *gin.Context) {
 	ns := c.Param("ns")
+
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "AddOrUpdateRepo", "", ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
 	var repoEntry repo.Entry
 	if err := c.ShouldBindJSON(&repoEntry); err != nil {
 		amis.WriteJsonError(c, err)
@@ -75,6 +83,14 @@ func RepoOptionList(c *gin.Context) {
 
 func DeleteRepo(c *gin.Context) {
 	ids := c.Param("ids")
+
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "DeleteRepo", ids, "", "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
 	// 删除
 	dao.DB().Where("id in ?", strings.Split(ids, ",")).Delete(&models.HelmRepository{})
 	dao.DB().Where("repository_id in ?", strings.Split(ids, ",")).Delete(&models.HelmChart{})
@@ -91,6 +107,14 @@ func UpdateReposIndex(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "UpdateReposIndex", req.IDs, "", "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
 	h, err := getHelm(c, ns)
 	if err != nil {
 		amis.WriteJsonError(c, err)
