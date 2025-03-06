@@ -112,26 +112,8 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
     return (
         <div>
             <Form layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-                <Form.Item label="基本信息">
-                    <Row justify={'start'} >
-                        <Col span={8}>
-                            <Form.Item label="所属集群" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-                                <Typography.Text ellipsis={{ tooltip: true }} >{clusterInfo}</Typography.Text>
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="发布名称" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-                                <Typography.Text ellipsis={{ tooltip: true }} >{namespace}/{releaseName}</Typography.Text>
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Chart名称" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-                                <Typography.Text ellipsis={{ tooltip: true }} >{chartName}</Typography.Text>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </Form.Item>
-                <Form.Item wrapperCol={{ offset: 4, span: 20 }}>
+
+                <Form.Item label="更新操作">
                     <Button
                         type="primary"
                         onClick={handleSubmit}
@@ -161,6 +143,25 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                     >
                         ⚙️ 使用用户输入参数
                     </Button>
+                </Form.Item>
+                <Form.Item label="基本信息">
+                    <Row justify={'start'}  >
+                        <Col span={8}>
+                            <Form.Item label="所属集群" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                                <Typography.Text ellipsis={{ tooltip: true }} >{clusterInfo}</Typography.Text>
+                            </Form.Item>
+                        </Col>
+                        <Col span={6}>
+                            <Form.Item label="发布名称" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                                <Typography.Text ellipsis={{ tooltip: true }} >{namespace}/{releaseName}</Typography.Text>
+                            </Form.Item>
+                        </Col>
+                        <Col span={6}>
+                            <Form.Item label="Chart名称" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                                <Typography.Text ellipsis={{ tooltip: true }} >{chartName}</Typography.Text>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Form.Item>
                 <Form.Item label="升/降版本">
                     <Row gutter={16}>
