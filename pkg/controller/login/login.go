@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
@@ -101,8 +102,13 @@ func LoginByPassword(c *gin.Context) {
 					c.JSON(http.StatusUnauthorized, errorInfo)
 					return
 				}
-
-				token, _ := generateToken(v.Username, v.Role)
+				ug := &models.UserGroup{}
+				err = dao.DB().Where("group_name=?", v.GroupName).First(&ug).Error
+				if err != nil {
+					c.JSON(http.StatusUnauthorized, errorInfo)
+					return
+				}
+				token, _ := generateToken(v.Username, ug.Role)
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return
 			}
