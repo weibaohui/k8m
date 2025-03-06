@@ -27,9 +27,9 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) {
 	stmt := k8s.Statement
 	cluster := k8s.ID
-
-	username := fmt.Sprintf("%s", stmt.Context.Value(constants.JwtUserName))
-	role := fmt.Sprintf("%s", stmt.Context.Value(constants.JwtUserRole))
+	ctx := stmt.Context
+	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
+	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
 	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=%s, gck=[%s], resource=[%s/%s] ",
 		cluster, username, role, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
 
