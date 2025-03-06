@@ -10,8 +10,9 @@ import (
 
 type UserGroup struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	GroupName   string    `gorm:"uniqueIndex;not null" json:"group_name,omitempty"`
+	GroupName   string    `gorm:"index" json:"group_name,omitempty"`
 	Description string    `json:"description,omitempty"`
+	Role        string    `gorm:"index" json:"role,omitempty"` // 管理员/只读
 	CreatedBy   string    `gorm:"index" json:"created_by,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
