@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
@@ -38,18 +39,17 @@ func SaveUserGroup(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	var original models.UserGroup
-	err = dao.DB().Model(&models.UserGroup{}).Where("id = ?", m.ID).First(&original).Error
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+	original := &models.UserGroup{}
+	dao.DB().Model(&models.UserGroup{}).Where("id = ?", m.ID).First(&original)
+	time.Sleep(time.Second * 1)
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	dao.DB().Model(&models.User{}).Where("group_name = ?", original.GroupName).Update("group_name", m.GroupName)
+	if original != nil {
+		dao.DB().Model(&models.User{}).Where("group_name = ?", original.GroupName).Update("group_name", m.GroupName)
+	}
 
 	amis.WriteJsonData(c, gin.H{
 		"id": m.ID,
