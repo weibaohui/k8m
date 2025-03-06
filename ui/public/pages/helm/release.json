@@ -2,6 +2,51 @@
   "type": "page",
   "body": [
     {
+      "type": "container",
+      "className": "floating-toolbar-right",
+      "body": [
+        {
+          "type": "wrapper",
+          "style": {
+            "display": "inline-flex"
+          },
+          "body": [
+            {
+              "type": "form",
+              "mode": "inline",
+              "wrapWithPanel": false,
+              "body": [
+                {
+                  "label": "集群",
+                  "type": "select",
+                  "multiple": false,
+                  "name": "cluster",
+                  "id": "cluster",
+                  "searchable": true,
+                  "source": "/k8s/cluster/option_list",
+                  "value": "${cookie:selectedCluster|url_decode}",
+                  "onEvent": {
+                    "change": {
+                      "actions": [
+                        {
+                          "actionType": "ajax",
+                          "api": "post:/k8s/cluster/setDefault/full_name/${event.data.value|url_encode}"
+                        },
+                        {
+                          "actionType": "custom",
+                          "script": "window.location.reload();"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "type": "crud",
       "id": "detailCRUD",
       "name": "detailCRUD",
@@ -32,7 +77,7 @@
         {
           "label": "卸载应用",
           "actionType": "ajax",
-          "confirmText": "确定要卸载吗。",
+          "confirmText": "确定要卸载吗？",
           "api": {
             "url": "/mgm/helm/release/batch/uninstall",
             "method": "post",
@@ -181,7 +226,7 @@
                             "overlay": false,
                             "closeOnEsc": true,
                             "size": "xl",
-                            "title": "更新（ESC 关闭）",
+                            "title": "更新${name}（ESC 关闭）",
                             "body": [
                               {
                                 "type": "helmUpdateRelease"
