@@ -38,12 +38,19 @@ func SaveUserGroup(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
+	var original models.UserGroup
+	err = dao.DB().Model(&models.UserGroup{}).Where("id = ?", m.ID).First(&original).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	dao.DB().Model(&models.User{}).Where("group_name = ?", original.GroupName).Update("group_name", m.GroupName)
+
 	amis.WriteJsonData(c, gin.H{
 		"id": m.ID,
 	})
@@ -87,8 +94,8 @@ func handleCommonLogic(c *gin.Context, action string, groupName string) (string,
 	}
 
 	var err error
-	if role == models.RoleClusterReadonly {
-		err = fmt.Errorf("非管理员不能%s资源", action)
+	if role != models.RolePlatformAdmin {
+		err = fmt.Errorf("非平台管理员不能%s资源", action)
 	}
 	if err != nil {
 		log.ActionResult = err.Error()
