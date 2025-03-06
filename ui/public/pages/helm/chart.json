@@ -207,6 +207,12 @@
                             "placeholder": "名称可选"
                           },
                           {
+                            "type": "tpl",
+                            "tpl": "${cookie:selectedCluster|url_decode}",
+                            "name": "release_name",
+                            "label": "集群"
+                          },
+                          {
                             "label": "部署空间",
                             "type": "select",
                             "name": "ns",
