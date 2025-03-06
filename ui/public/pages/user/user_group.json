@@ -1,0 +1,217 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "groupCRUD",
+      "name": "groupCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建用户组",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建用户组  (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/mgm/user_group/save",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "group_name",
+                  "label": "组名",
+                  "required": true,
+                  "placeholder": "请输入用户组名称",
+                  "validations": {
+                    "minLength": 2,
+                    "maxLength": 20
+                  }
+                },
+                {
+                  "type": "select",
+                  "name": "role",
+                  "label": "角色",
+                  "required": true,
+                  "options": [
+                    {
+                      "label": "集群管理员",
+                      "value": "cluster_admin"
+                    },
+                    {
+                      "label": "集群只读",
+                      "value": "cluster_readonly"
+                    },
+                    {
+                      "label": "平台管理员",
+                      "value": "platform_admin"
+                    }
+                  ],
+                  "placeholder": "请选择角色"
+                },
+                {
+                  "type": "textarea",
+                  "name": "description",
+                  "label": "描述",
+                  "placeholder": "请输入用户组描述"
+                },
+                {
+                  "type": "static",
+                  "label": "角色说明",
+                  "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                }
+              ],
+              "submitText": "保存",
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "groupCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "api": "get:/mgm/user_group/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑用户组",
+              "drawer": {
+                "title": "编辑用户组",
+                "body": {
+                  "type": "form",
+                  "api": "post:/mgm/user_group/save",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "group_name",
+                      "label": "组名"
+                    },
+                    {
+                      "type": "select",
+                      "name": "role",
+                      "label": "角色",
+                      "required": true,
+                      "options": [
+                        {
+                          "label": "集群管理员",
+                          "value": "cluster_admin"
+                        },
+                        {
+                          "label": "集群只读",
+                          "value": "cluster_readonly"
+                        },
+                        {
+                          "label": "平台管理员",
+                          "value": "platform_admin"
+                        }
+                      ],
+                      "placeholder": "请选择角色"
+                    },
+                    {
+                      "type": "textarea",
+                      "name": "description",
+                      "label": "描述"
+                    },
+                    {
+                      "type": "static",
+                      "label": "角色说明",
+                      "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-trash text-danger",
+              "actionType": "ajax",
+              "confirmText": "确定删除该用户组？",
+              "api": "delete:/mgm/user_group/delete/${id}"
+            }
+          ]
+        },
+        {
+          "name": "group_name",
+          "label": "组名",
+          "sortable": true
+        },
+        {
+          "name": "description",
+          "label": "描述"
+        },
+        {
+          "name": "role",
+          "label": "角色",
+          "type": "mapping",
+          "map": {
+            "cluster_admin": "集群管理员",
+            "cluster_readonly": "集群只读",
+            "platform_admin": "平台管理员"
+          },
+          "searchable": {
+            "type": "select",
+            "name": "role",
+            "clearable": true,
+            "label": "角色",
+            "placeholder": "请选择角色",
+            "options": [
+              {
+                "label": "集群管理员",
+                "value": "cluster_admin"
+              },
+              {
+                "label": "集群只读",
+                "value": "cluster_readonly"
+              },
+              {
+                "label": "平台管理员",
+                "value": "platform_admin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ],
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "/mgm/user_group/delete/${ids}"
+        }
+      ]
+    }
+  ]
+}
