@@ -1,7 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import {Button, Col, Form, Row, Select, message} from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Button, Col, Form, Row, Select, Typography, message } from 'antd';
 import Editor from '@monaco-editor/react';
-import {fetcher} from '@/components/Amis/fetcher';
+import { fetcher } from '@/components/Amis/fetcher';
 import yaml from "js-yaml";
 
 interface HelmUpdateReleaseProps {
@@ -16,12 +16,22 @@ interface HelmUpdateReleaseProps {
     data: Record<string, any>
 }
 
-const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleaseProps>(({data}, _) => {
+const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleaseProps>(({ data }, _) => {
     const [versions, setVersions] = useState<string[]>([]);
     const [version, setVersion] = useState('');
     const [values, setValues] = useState('');
     const [loading, setLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
+    const [clusterInfo, setClusterInfo] = useState('');
+
+    useEffect(() => {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('selectedCluster='))
+            ?.split('=')[1];
+
+        setClusterInfo(cookieValue ? decodeURIComponent(cookieValue) : '未选择集群');
+    }, []);
     let repoName = data.info.description
     let chartName = data.chart.metadata.name
     let releaseName = data.name
@@ -101,13 +111,32 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
 
     return (
         <div>
-            <Form layout="horizontal" labelCol={{span: 4}} wrapperCol={{span: 20}}>
-                <Form.Item wrapperCol={{offset: 4, span: 20}}>
+            <Form layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+                <Form.Item label="基本信息">
+                    <Row justify={'start'} >
+                        <Col span={8}>
+                            <Form.Item label="所属集群" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                                <Typography.Text ellipsis={{ tooltip: true }} >{clusterInfo}</Typography.Text>
+                            </Form.Item>
+                        </Col>
+                        <Col span={6}>
+                            <Form.Item label="发布名称" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                                <Typography.Text ellipsis={{ tooltip: true }} >{namespace}/{releaseName}</Typography.Text>
+                            </Form.Item>
+                        </Col>
+                        <Col span={6}>
+                            <Form.Item label="Chart名称" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                                <Typography.Text ellipsis={{ tooltip: true }} >{chartName}</Typography.Text>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </Form.Item>
+                <Form.Item wrapperCol={{ offset: 4, span: 20 }}>
                     <Button
                         type="primary"
                         onClick={handleSubmit}
                         loading={loading}
-                        style={{marginRight: 16}}
+                        style={{ marginRight: 16 }}
                     >
                         提交更新
                     </Button>
@@ -115,7 +144,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                         type="default"
                         onClick={fetchValues}
                         loading={isFetching}
-                        style={{marginRight: 16}}
+                        style={{ marginRight: 16 }}
                     >
                         🗳️ 加载Chart包默认参数
                     </Button>
@@ -140,12 +169,12 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                             <Select
                                 value={version}
                                 onChange={setVersion}
-                                options={(Array.isArray(versions) ? versions : []).map(v => ({label: v, value: v}))}
+                                options={(Array.isArray(versions) ? versions : []).map(v => ({ label: v, value: v }))}
                                 placeholder="请选择目标版本"
                             />
                         </Col>
                         <Col span={12}>
-                            <div style={{lineHeight: '32px'}}>
+                            <div style={{ lineHeight: '32px' }}>
                                 当前版本：{data.chart.metadata.version}
                             </div>
                         </Col>
@@ -153,7 +182,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                 </Form.Item>
 
                 <Form.Item label="安装参数">
-                    <div style={{border: '1px solid #d9d9d9', borderRadius: '4px'}}
+                    <div style={{ border: '1px solid #d9d9d9', borderRadius: '4px' }}
                     >
                         <Editor
                             height="600px"
@@ -161,7 +190,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                             value={values}
                             onChange={(value) => setValues(value || '')}
                             options={{
-                                minimap: {enabled: false},
+                                minimap: { enabled: false },
                                 scrollBeyondLastLine: false,
                                 automaticLayout: true,
                                 wordWrap: 'on',
