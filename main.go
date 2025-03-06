@@ -337,10 +337,18 @@ func main() {
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)
 		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
+
+		// user
 		mgm.GET("/user/list", user.List)
 		mgm.POST("/user/save", user.Save)
 		mgm.POST("/user/delete/:ids", user.Delete)
 		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
+
+		// user_group
+		mgm.GET("/user_group/list", user.ListUserGroup)
+		mgm.POST("/user_group/save", user.SaveUserGroup)
+		mgm.POST("/user_group/delete/:ids", user.DeleteUserGroup)
+		mgm.GET("/user_group/option_list", user.UserGroupOptionList)
 
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
