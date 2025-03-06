@@ -27,9 +27,6 @@ func AutoMigrate() error {
 		&ShellLog{},
 		&HelmRepository{},
 		&HelmChart{},
-		&HelmDependency{},
-		&HelmChartVersion{},
-		&HelmMaintainer{},
 	)
 }
 func FixClusterName() error {
