@@ -63,7 +63,6 @@ func Save(c *gin.Context) {
 			// 如需限制不能修改的字段，请在下面赋值。
 			// 用户名、角色不能修改
 			m.Username = originalUser.Username
-			m.Role = originalUser.Role
 		}
 
 	}
@@ -77,7 +76,7 @@ func Save(c *gin.Context) {
 			return db
 		} else {
 			// 修改
-			return db.Select([]string{"username", "role"})
+			return db.Select([]string{"username", "group_name"})
 		}
 	})
 	err = m.Save(params, queryFuncs...)
