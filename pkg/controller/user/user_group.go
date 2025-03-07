@@ -39,16 +39,10 @@ func SaveUserGroup(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	original := &models.UserGroup{}
-	dao.DB().Model(&models.UserGroup{}).Where("id = ?", m.ID).First(&original)
-	time.Sleep(time.Second * 1)
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
-	}
-	if original != nil {
-		dao.DB().Model(&models.User{}).Where("group_name = ?", original.GroupName).Update("group_name", m.GroupName)
 	}
 
 	amis.WriteJsonData(c, gin.H{
@@ -101,16 +95,17 @@ func handleCommonLogic(c *gin.Context, action string, groupName string) (string,
 		log.ActionResult = err.Error()
 	}
 	go func() {
+		time.Sleep(1 * time.Second)
 		service.OperationLogService().Add(&log)
 	}()
 	return username, role, err
 }
 
-func UserGroupOptionList(c *gin.Context) {
+func GroupOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Distinct("GroupName")
+		return db.Distinct("id,group_name")
 	})
 	if err != nil {
 		amis.WriteJsonData(c, gin.H{
