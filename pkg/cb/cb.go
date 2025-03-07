@@ -2,6 +2,7 @@ package cb
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -53,6 +54,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) 
 		log.ActionResult = err.Error()
 	}
 	go func() {
+		time.Sleep(1 * time.Second)
 		service.OperationLogService().Add(&log)
 	}()
 	return username, role, err
