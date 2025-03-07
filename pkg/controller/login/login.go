@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,13 +29,14 @@ type LoginRequest struct {
 }
 
 // 生成 Token
-func generateToken(username, role string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		constants.JwtUserName: username,
-		constants.JwtUserRole: role,
-		"exp":                 time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
+func generateToken(username string, roles []string) (string, error) {
+	role := constants.JwtUserRole
+	name := constants.JwtUserName
+	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		name:  username,
+		role:  strings.Join(roles, ","),
+		"exp": time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
 	})
-
 	cfg := flag.Init()
 	var jwtSecret = []byte(cfg.JwtTokenSecret)
 	return token.SignedString(jwtSecret)
@@ -70,7 +72,7 @@ func LoginByPassword(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, errorInfo)
 			return
 		}
-		token, _ := generateToken(req.Username, models.RolePlatformAdmin)
+		token, _ := generateToken(req.Username, []string{models.RolePlatformAdmin})
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {
@@ -102,13 +104,19 @@ func LoginByPassword(c *gin.Context) {
 					c.JSON(http.StatusUnauthorized, errorInfo)
 					return
 				}
-				ug := &models.UserGroup{}
-				err = dao.DB().Where("group_name=?", v.GroupName).First(&ug).Error
+				var ugList []models.UserGroup
+				err = dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(v.GroupNames, ",")).Distinct("role").First(&ugList).Error
 				if err != nil {
 					c.JSON(http.StatusUnauthorized, errorInfo)
 					return
 				}
-				token, _ := generateToken(v.Username, ug.Role)
+				// 查询所有的用户组，判断用户组的角色
+				// 形成一个用户组对应的角色列表
+				var roles []string
+				for _, ug := range ugList {
+					roles = append(roles, ug.Role)
+				}
+				token, _ := generateToken(v.Username, roles)
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return
 			}
