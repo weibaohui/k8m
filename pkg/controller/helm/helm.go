@@ -2,6 +2,7 @@ package helm
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -47,6 +48,7 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 		log.ActionResult = err.Error()
 	}
 	go func() {
+		time.Sleep(1 * time.Second)
 		service.OperationLogService().Add(&log)
 	}()
 	return username, role, err
