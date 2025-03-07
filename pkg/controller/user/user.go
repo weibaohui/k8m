@@ -17,6 +17,7 @@ func List(c *gin.Context) {
 	m := &models.User{}
 
 	queryFuncs := genQueryFuncs(c, params)
+
 	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -76,7 +77,7 @@ func Save(c *gin.Context) {
 			return db
 		} else {
 			// 修改
-			return db.Select([]string{"username", "group_name"})
+			return db.Select([]string{"username", "group_names"})
 		}
 	})
 	err = m.Save(params, queryFuncs...)
