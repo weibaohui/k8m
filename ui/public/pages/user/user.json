@@ -42,11 +42,10 @@
                 },
                 {
                   "label": "用户组",
-                  "type": "select",
-                  "name": "group_name",
-                  "placeholder": "请选择用户组",
-                  "clearable": true,
-                  "searchable": true,
+                  "type": "checkboxes",
+                  "name": "group_names",
+                  "inline": true,
+                  "multiple": true,
                   "source": "/mgm/user_group/option_list"
                 }
               ],
@@ -161,11 +160,10 @@
                     },
                     {
                       "label": "用户组",
-                      "type": "select",
-                      "name": "group_name",
-                      "placeholder": "请选择用户组",
-                      "clearable": true,
-                      "searchable": true,
+                      "type": "checkboxes",
+                      "name": "group_names",
+                      "inline": true,
+                      "multiple": true,
                       "source": "/mgm/user_group/option_list"
                     }
                   ],
@@ -252,7 +250,7 @@
         {
           "label": "用户组",
           "type": "text",
-          "name": "group_name"
+          "name": "group_names"
         },
         {
           "name": "created_at",
