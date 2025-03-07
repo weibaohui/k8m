@@ -348,7 +348,7 @@ func main() {
 		mgm.GET("/user_group/list", user.ListUserGroup)
 		mgm.POST("/user_group/save", user.SaveUserGroup)
 		mgm.POST("/user_group/delete/:ids", user.DeleteUserGroup)
-		mgm.GET("/user_group/option_list", user.UserGroupOptionList)
+		mgm.GET("/user_group/option_list", user.GroupOptionList)
 
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
