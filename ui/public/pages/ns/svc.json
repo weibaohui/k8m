@@ -188,6 +188,38 @@
           }
         },
         {
+          "type": "button",
+          "label": "智检",
+          "level": "link",
+          "icon": "fas fa-walking text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "AI 智能巡检 ${kind} （ESC 关闭）",
+            "body": [
+              {
+                "type": "service",
+                "id": "detail",
+                "api": "get:/k8s/k8s_gpt/kind/${kind}/run",
+                "body": [
+                  {
+                    "type": "markdown",
+                    "value": "${result|raw}",
+                    "options": {
+                      "linkify": true,
+                      "html": true,
+                      "breaks": true
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
           "label": "创建",
           "icon": "fas fa-dharmachakra text-primary",
           "type": "button",
