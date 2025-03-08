@@ -145,7 +145,7 @@ func Exec(c *gin.Context) {
 	var humanCommand string
 	chatService := service.ChatService()
 	humanCommand = payload.Command
-	if chatService.IsEnabled() {
+	if service.AIService().IsEnabled() {
 		prompt := fmt.Sprintf("请根据用户描述，给出最合适的一条命令。第一步，给出命令，第二步，检查命令是否为单行单个命令。请务必注意，只给出一条命令。请不要使用top、tail -f等流式输出的命令，请要不使用tzdate等交互性的命令。只能使用输入命令，紧接着输出完整返回的命令。请不要做任何解释。最终的代码一定、务必、必须用```bash\n命令写这里\n```包裹起来\n以下为用户的要求:\n%s", strings.TrimPrefix(payload.Command, "#"))
 		aiCmd := chatService.Chat(prompt)
 		cleanCmd := chatService.CleanCmd(aiCmd)
