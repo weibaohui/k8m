@@ -20,6 +20,7 @@ import (
 	"sync"
 	"time"
 
+	openapi_v2 "github.com/google/gnostic/openapiv2"
 	"github.com/weibaohui/k8m/pkg/ai"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analyzer"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
@@ -97,24 +98,17 @@ func (a *Analysis) RunAnalysis() {
 	var activeFilters []string
 
 	coreAnalyzerMap, analyzerMap := analyzer.GetAnalyzerMap()
-
-	// we get the openapi schema from the server only if required by the flag "with-doc"
+	openapiSchema := &openapi_v2.Document{}
 	if a.WithDoc {
-		// TODO 找具体的定义文档
-		// var openApiErr error
-		kom.DefaultCluster().Status().Docs()
-		// openapiSchema, openApiErr = a.Client.Client.Discovery().OpenAPISchema()
-		// if openApiErr != nil {
-		// 	a.Errors = append(a.Errors, fmt.Sprintf("[KubernetesDoc] %s", openApiErr))
-		// }
+		openapiSchema = kom.Cluster(a.ClusterID).Status().OpenAPISchema()
 	}
-
 	analyzerConfig := common.Analyzer{
 		ClusterID:     a.ClusterID,
 		Context:       a.Context,
 		Namespace:     a.Namespace,
 		LabelSelector: a.LabelSelector,
 		AIClient:      a.AIClient,
+		OpenapiSchema: openapiSchema,
 	}
 
 	semaphore := make(chan struct{}, a.MaxConcurrency)
