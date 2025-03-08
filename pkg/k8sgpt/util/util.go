@@ -16,13 +16,9 @@ package util
 import (
 	"context"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 
@@ -177,34 +173,6 @@ func ReplaceIfMatch(text string, pattern string, replacement string) string {
 		text = re.ReplaceAllString(text, replacement)
 	}
 	return text
-}
-
-func GetCacheKey(provider string, language string, sEnc string) string {
-	data := fmt.Sprintf("%s-%s-%s", provider, language, sEnc)
-
-	hash := sha256.Sum256([]byte(data))
-
-	return hex.EncodeToString(hash[:])
-}
-
-func FileExists(path string) (bool, error) {
-	if _, err := os.Stat(path); err == nil {
-		return true, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false, nil
-	} else {
-		return false, err
-	}
-}
-
-func EnsureDirExists(dir string) error {
-	err := os.MkdirAll(dir, 0o755)
-
-	if errors.Is(err, os.ErrExist) {
-		return nil
-	}
-
-	return err
 }
 
 func MapToString(m map[string]string) string {
