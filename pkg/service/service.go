@@ -26,6 +26,7 @@ var localIngressService = &ingressService{
 var localUserService = &userService{}
 var localOperationLogService = &operationLogService{}
 var localShellLogService = &shellLogService{}
+var localAiService = &aiService{}
 
 func ChatService() *chatService {
 	return localChatService
@@ -67,4 +68,8 @@ func OperationLogService() *operationLogService {
 }
 func ShellLogService() *shellLogService {
 	return localShellLogService
+}
+func AIService() *aiService {
+	return localAiService
+
 }
