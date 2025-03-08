@@ -72,3 +72,46 @@ func RunAnalysis(c *gin.Context) {
 	})
 
 }
+func ClusterRunAnalysis(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	config, err := analysis.NewAnalysis(ctx,
+		selectedCluster,
+		[]string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim", "Service", "Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration", "MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}, // Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)
+		"*",
+		"",
+		true,
+		1,
+		true,
+		false,
+	)
+
+	if err != nil {
+		klog.Errorf("Error: %v", err)
+		return
+	}
+	defer config.Close()
+
+	config.RunAnalysis()
+	var output = "markdown"
+	if err := config.GetAIResults(true); err != nil {
+		color.Red("Error: %v", err)
+		return
+
+	}
+	// print results
+	output_data, err := config.PrintOutput(output)
+	if err != nil {
+		color.Red("Error: %v", err)
+		return
+
+	}
+	// statsData := config.PrintStats()
+	// fmt.Println(string(statsData))
+
+	amis.WriteJsonData(c, gin.H{
+		"result": string(output_data),
+	})
+
+}
