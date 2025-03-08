@@ -40,8 +40,7 @@ type ResourceData struct {
 }
 
 func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
-	chatService := service.ChatService()
-	if !chatService.IsEnabled() {
+	if !service.AIService().IsEnabled() {
 		amis.WriteJsonData(c, gin.H{
 			"result": "请先配置开启ChatGPT功能",
 		})
@@ -56,7 +55,7 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 	}
 
 	prompt := promptFunc(data)
-	stream, err := chatService.GetChatStream(prompt)
+	stream, err := service.ChatService().GetChatStream(prompt)
 	if err != nil {
 		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
 		return
