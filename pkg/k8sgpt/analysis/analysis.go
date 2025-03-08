@@ -25,6 +25,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
 	"github.com/weibaohui/k8m/pkg/service"
+	"github.com/weibaohui/kom/kom"
 )
 
 type Analysis struct {
@@ -101,7 +102,7 @@ func (a *Analysis) RunAnalysis() {
 	if a.WithDoc {
 		// TODO 找具体的定义文档
 		// var openApiErr error
-
+		kom.DefaultCluster().Status().Docs()
 		// openapiSchema, openApiErr = a.Client.Client.Discovery().OpenAPISchema()
 		// if openApiErr != nil {
 		// 	a.Errors = append(a.Errors, fmt.Sprintf("[KubernetesDoc] %s", openApiErr))
