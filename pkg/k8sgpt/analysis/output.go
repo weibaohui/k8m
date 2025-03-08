@@ -116,7 +116,7 @@ func (a *Analysis) markdownOutput() ([]byte, error) {
 	}
 
 	for n, result := range a.Results {
-		output.WriteString(fmt.Sprintf("### %d: `%s` %s (%s)\n\n",
+		output.WriteString(fmt.Sprintf("### %d: `%s` %s %s\n\n",
 			n+1,
 			result.Kind,
 			result.Name,
