@@ -319,7 +319,8 @@ func main() {
 		api.GET("/chat/example/field", chat.FieldExample)
 		api.GET("/chat/ws_chatgpt", chat.GPTShell)
 
-		api.GET("/k8s_gpt/run", k8sgpt.RunAnalysis)
+		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.RunAnalysis)
+		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
 
 		// pod 文件浏览上传下载
 		api.POST("/file/list", pod.FileList)
