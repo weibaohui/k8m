@@ -200,6 +200,11 @@
             "title": "AI 智能巡检 ${kind} （ESC 关闭）",
             "body": [
               {
+                "type": "alert",
+                "level": "success",
+                "body": "温馨提示：大模型诊断需要几秒~几分钟时间，请稍后"
+              },
+              {
                 "type": "service",
                 "id": "detail",
                 "api": "get:/k8s/k8s_gpt/kind/${kind}/run",
