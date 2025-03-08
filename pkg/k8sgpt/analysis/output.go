@@ -9,8 +9,9 @@ import (
 )
 
 var outputFormats = map[string]func(*Analysis) ([]byte, error){
-	"json": (*Analysis).jsonOutput,
-	"text": (*Analysis).textOutput,
+	"json":     (*Analysis).jsonOutput,
+	"text":     (*Analysis).textOutput,
+	"markdown": (*Analysis).markdownOutput,
 }
 
 func getOutputFormats() []string {
@@ -70,13 +71,6 @@ func (a *Analysis) PrintStats() []byte {
 func (a *Analysis) textOutput() ([]byte, error) {
 	var output strings.Builder
 
-	// Print the AI provider used for this analysis (if explain was enabled).
-	if a.Explain {
-		output.WriteString(fmt.Sprintf("AI Provider: %s\n", color.YellowString(a.AnalysisAIProvider)))
-	} else {
-		output.WriteString(fmt.Sprintf("AI Provider: %s\n", color.YellowString("AI not used; --explain not set")))
-	}
-
 	if len(a.Errors) != 0 {
 		output.WriteString("\n")
 		output.WriteString(color.YellowString("Warnings : \n"))
@@ -101,6 +95,40 @@ func (a *Analysis) textOutput() ([]byte, error) {
 			}
 		}
 		output.WriteString(color.GreenString(result.Details + "\n"))
+	}
+	return []byte(output.String()), nil
+}
+
+func (a *Analysis) markdownOutput() ([]byte, error) {
+	var output strings.Builder
+
+	if len(a.Errors) != 0 {
+		output.WriteString("## Warnings\n\n")
+		for _, aerror := range a.Errors {
+			output.WriteString(fmt.Sprintf("- **%s**\n", aerror))
+		}
+	}
+
+	output.WriteString("\n")
+	if len(a.Results) == 0 {
+		output.WriteString("## No problems detected\n")
+		return []byte(output.String()), nil
+	}
+
+	for n, result := range a.Results {
+		output.WriteString(fmt.Sprintf("### %d: `%s` %s (%s)\n\n",
+			n+1,
+			result.Kind,
+			result.Name,
+			result.ParentObject))
+
+		for _, err := range result.Error {
+			output.WriteString(fmt.Sprintf("- **Error:** %s  \n", err.Text))
+			if err.KubernetesDoc != "" {
+				output.WriteString(fmt.Sprintf("  - Kubernetes Doc: %s  \n", err.KubernetesDoc))
+			}
+		}
+		output.WriteString(fmt.Sprintf("\n```\n%s\n```\n\n", result.Details))
 	}
 	return []byte(output.String()), nil
 }
