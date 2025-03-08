@@ -27,12 +27,12 @@ import (
 	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
+	"k8s.io/klog/v2"
 )
 
 type Analysis struct {
 	Context            context.Context
 	Filters            []string
-	Language           string
 	AIClient           ai.IAI
 	Results            []common.Result
 	Errors             []string
@@ -191,7 +191,7 @@ func (a *Analysis) executeAnalyzer(analyzer common.IAnalyzer, filter string, ana
 	<-semaphore
 }
 
-func (a *Analysis) GetAIResults(output string, anonymize bool) error {
+func (a *Analysis) GetAIResults(anonymize bool) error {
 	if len(a.Results) == 0 {
 		return nil
 	}
@@ -205,7 +205,7 @@ func (a *Analysis) GetAIResults(output string, anonymize bool) error {
 					failure.Text = util.ReplaceIfMatch(failure.Text, s.Unmasked, s.Masked)
 				}
 			}
-			texts = append(texts, failure.Text)
+			texts = append(texts, fmt.Sprintf("错误：%s\n,相关字段解释：%s", failure.Text, failure.KubernetesDoc))
 		}
 
 		promptTemplate := ai.PromptMap["default"]
@@ -243,7 +243,8 @@ func (a *Analysis) getAIResultForSanitizedFailures(texts []string, promptTmpl st
 	inputKey := strings.Join(texts, " ")
 
 	// Process template.
-	prompt := fmt.Sprintf(strings.TrimSpace(promptTmpl), a.Language, inputKey)
+	prompt := fmt.Sprintf(strings.TrimSpace(promptTmpl), inputKey)
+	klog.V(6).Infof("提示词: \n%s\n", prompt)
 	response, err := a.AIClient.GetCompletion(a.Context, prompt)
 	if err != nil {
 		return "", err
