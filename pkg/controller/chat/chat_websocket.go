@@ -30,8 +30,7 @@ var WebsocketMessageType = map[int]string{
 
 func GPTShell(c *gin.Context) {
 
-	chatService := service.ChatService()
-	if !chatService.IsEnabled() {
+	if !service.AIService().IsEnabled() {
 		amis.WriteJsonData(c, gin.H{
 			"result": "请先配置开启ChatGPT功能",
 		})
@@ -154,7 +153,7 @@ func GPTShell(c *gin.Context) {
 
 			klog.V(6).Infof("prompt: %s", string(data))
 
-			stream, err := chatService.GetChatStream(string(data))
+			stream, err := service.ChatService().GetChatStream(string(data))
 			if err != nil {
 				klog.V(6).Infof(fmt.Sprintf("failed to write %v bytes to tty: %s", len(dataBuffer), err))
 				continue
