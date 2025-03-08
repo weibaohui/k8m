@@ -10,54 +10,53 @@ const (
 	解决方案: {此处分步说明解决方案}
 	`
 
-	prom_conf_prompt = `Simplify the following Prometheus error message delimited by triple dashes written in --- %s --- language; --- %s ---.
-	This error came when validating the Prometheus configuration file.
-	Provide step by step instructions to fix, with suggestions, referencing Prometheus documentation if relevant.
-	Write the output in the following format in no more than 300 characters:
-	Error: {Explain error here}
-	Solution: {Step by step solution here}
+	prom_conf_prompt = `简化以下由三个破折号分隔的Prometheus错误信息，
+	原语言为--- %s ---；
+	错误内容：--- %s ---。
+	该错误发生在验证Prometheus配置文件时。
+	请参考Prometheus文档（如适用），提供分步修复指导及建议。
+	输出格式如下（字符数不超过300）：
+	错误信息: {此处解释错误}
+	解决方案: {此处分步说明解决方案}
 	`
 
 	prom_relabel_prompt = `
-	Return your prompt in this language: %s, beginning with
-	The following is a list of the form:
+	请使用以下语言生成响应：%s
+	配置列表形式如下：
 	job_name:
 	{Prometheus job_name}
 	relabel_configs:
-	{Prometheus relabel_configs}
+	{Prometheus重标记配置}
 	kubernetes_sd_configs:
-	{Prometheus service discovery config}
+	{Prometheus服务发现配置}
 	---
 	%s
 	---
-	For each job_name, describe the Kubernetes service and pod labels,
-	namespaces, ports, and containers they match.
-	Return the message:
-	Discovered and parsed Prometheus scrape configurations.
-	For targets to be scraped by Prometheus, ensure they are running with
-	at least one of the following label sets:
-	Then for each job, write this format:
-	- Job: {job_name}
-	  - Service Labels:
-	    - {list of service labels}
-	  - Pod Labels:
-	    - {list of pod labels}
-	  - Namespaces:
-	    - {list of namespaces}
-	  - Ports:
-	    - {list of ports}
-	  - Containers:
-	    - {list of container names}
+	请为每个job_name描述其匹配的Kubernetes服务和Pod标签、
+	命名空间、端口及容器。
+	返回消息：
+	已发现并解析Prometheus抓取配置。
+	确保被监控目标运行时有以下至少一个标签集：
+	按以下格式为每个job生成报告：
+	- 任务: {job_name}
+	  - 服务标签:
+	    - {服务标签列表}
+	  - Pod标签:
+	    - {Pod标签列表}
+	  - 命名空间:
+	    - {命名空间列表}
+	  - 端口:
+	    - {端口列表}
+	  - 容器:
+	    - {容器名称列表}
 	`
-
-	kyverno_prompt = `Simplify the following Kyverno warnings message delimited by triple dashes written in --- %s --- language; --- %s ---.
-	Provide the most probable solution as a kubectl command. 
-
-	Write the output in the following format, for the solution, only show the kubectl command:
-	
-	Error: {Explain error here}
-
-	Solution: {kubectl command}
+	kyverno_prompt = `简化以下由三个破折号分隔的Kyverno告警信息，
+	原语言为--- %s ---；
+	告警内容：--- %s ---。
+	请提供最可能的kubectl命令解决方案。
+	输出格式要求（仅显示解决方案命令）：
+	错误信息: {此处解释错误}
+	解决方案: {kubectl command}
 	`
 )
 
