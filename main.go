@@ -21,6 +21,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/helm"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
+	"github.com/weibaohui/k8m/pkg/controller/k8sgpt"
 	"github.com/weibaohui/k8m/pkg/controller/kubeconfig"
 	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
@@ -61,7 +62,7 @@ func Init() {
 	}
 
 	// 初始化ChatService
-	service.ChatService().SetVars(ApiKey, ApiUrl, Model)
+	service.AIService().SetVars(ApiKey, ApiUrl, Model)
 
 	go func() {
 		// 初始化kom
@@ -317,6 +318,8 @@ func main() {
 		api.GET("/chat/example", chat.Example)
 		api.GET("/chat/example/field", chat.FieldExample)
 		api.GET("/chat/ws_chatgpt", chat.GPTShell)
+
+		api.GET("/k8s_gpt/run", k8sgpt.RunAnalysis)
 
 		// pod 文件浏览上传下载
 		api.POST("/file/list", pod.FileList)
