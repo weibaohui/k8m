@@ -46,6 +46,7 @@ func (a *Analysis) ResultWithStatus() (ResultWithStatus, error) {
 		Results:  a.Results,
 		Errors:   a.Errors,
 		Status:   status,
+		Stats:    a.Stats,
 	}
 
 	return result, nil
