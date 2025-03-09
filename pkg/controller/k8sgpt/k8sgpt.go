@@ -5,7 +5,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/kubernetes"
-	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -30,18 +29,20 @@ func GetFields(c *gin.Context) {
 func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 	ctx := amis.GetContextWithUser(c)
 	clusterID := amis.GetSelectedCluster(c)
+	ns := c.Param("ns")
+	if ns == "" {
+		ns = "*"
+	}
 	cfg := &analysis.Analysis{
 		ClusterID:      clusterID,
 		Context:        ctx,
-		Namespace:      "*",
+		Namespace:      ns,
 		LabelSelector:  "",
 		MaxConcurrency: 1,
 		WithDoc:        true,
 		WithStats:      false,
 	}
-	if client, err := service.AIService().DefaultClient(); err == nil {
-		cfg.AIClient = client
-	}
+
 	return cfg
 }
 
@@ -54,20 +55,19 @@ func ResourceRunAnalysis(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{"result": string(result)})
+	amis.WriteJsonData(c, result)
 }
 func ClusterRunAnalysis(c *gin.Context) {
 	cfg := createAnalysisConfig(c)
 	cfg.Filters = []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
 		"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",
 		"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
-	cfg.Explain = false
 	result, err := analysis.Run(cfg)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{"result": string(result)})
+	amis.WriteJsonData(c, result)
 }
 
 func AsyncClusterRunAnalysis(c *gin.Context) {
@@ -75,12 +75,11 @@ func AsyncClusterRunAnalysis(c *gin.Context) {
 	cfg.Filters = []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
 		"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",
 		"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
-	cfg.Explain = true
 
 	result, err := analysis.Run(cfg)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{"result": string(result)})
+	amis.WriteJsonData(c, result)
 }
