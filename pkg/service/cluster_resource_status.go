@@ -1,6 +1,9 @@
 package service
 
-import "k8s.io/klog/v2"
+import (
+	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
+	"k8s.io/klog/v2"
+)
 
 func (c *clusterService) SetNodeStatusAggregated(selectedCluster string, true bool) {
 	clusterConfig := c.GetClusterByID(selectedCluster)
@@ -87,4 +90,13 @@ func (c *clusterService) GetIngressStatusAggregated(selectedCluster string) bool
 		return false
 	}
 	return clusterConfig.IngressStatusAggregated
+}
+
+func (c *clusterService) SetClusterScanStatus(selectedCluster string, result *analysis.ResultWithStatus) {
+	clusterConfig := c.GetClusterByID(selectedCluster)
+	if clusterConfig == nil {
+		return
+	}
+	clusterConfig.SetClusterScanStatus(result)
+
 }

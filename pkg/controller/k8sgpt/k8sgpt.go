@@ -5,6 +5,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/kubernetes"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -67,5 +68,6 @@ func ClusterRunAnalysis(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	go service.ClusterService().SetClusterScanStatus(cfg.ClusterID, result)
 	amis.WriteJsonData(c, result)
 }

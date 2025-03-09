@@ -14,6 +14,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/watch"
@@ -54,7 +55,8 @@ type ClusterConfig struct {
 	restConfig              *rest.Config                   // 直连rest.Config
 	kubeConfig              []byte                         // 集群配置.kubeconfig原始文件内容
 	watchStatusLock         sync.RWMutex                   // watch状态读写锁
-	Source                  ClusterConfigSource            `json:"source,omitempty"` // 配置文件来源
+	Source                  ClusterConfigSource            `json:"source,omitempty"`                 // 配置文件来源
+	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 }
 type ClusterConfigSource string
 
@@ -109,6 +111,10 @@ func (c *ClusterConfig) GetClusterID() string {
 
 func (c *ClusterConfig) GetRestConfig() *rest.Config {
 	return c.restConfig
+}
+
+func (c *ClusterConfig) SetClusterScanStatus(result *analysis.ResultWithStatus) {
+	c.K8sGPTProblemsCount = result.Problems
 }
 
 // ClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
