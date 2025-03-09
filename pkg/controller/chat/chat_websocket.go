@@ -154,6 +154,7 @@ func GPTShell(c *gin.Context) {
 			klog.V(6).Infof("prompt: %s", string(data))
 
 			stream, err := service.ChatService().GetChatStream(string(data))
+
 			if err != nil {
 				klog.V(6).Infof(fmt.Sprintf("failed to write %v bytes to tty: %s", len(dataBuffer), err))
 				continue
@@ -171,11 +172,17 @@ func GPTShell(c *gin.Context) {
 
 				// 发送数据给客户端
 				// 写入outBuffer
-				outBuffer.Write([]byte(response.Choices[0].Delta.Content))
+				_, err = outBuffer.Write([]byte(response.Choices[0].Delta.Content))
 
 			}
 
+			err = stream.Close()
+			if err != nil {
+				klog.V(6).Infof("stream close error:%v", err)
+			}
+			klog.V(6).Infof("stream close ")
 		}
+
 	}()
 	waiter.Wait()
 	select {}
