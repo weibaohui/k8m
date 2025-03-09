@@ -16,7 +16,6 @@ package analyzer
 import (
 	"fmt"
 
-	"github.com/fatih/color"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/kubernetes"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
@@ -24,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	eventsv1 "k8s.io/api/events/v1"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
+	"k8s.io/klog/v2"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -68,7 +68,7 @@ func (ServiceAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 			var svc *corev1.Service
 			err = kom.Cluster(a.ClusterID).WithContext(a.Context).Resource(&corev1.Service{}).Namespace(ep.Namespace).Name(ep.Name).Get(&svc).Error
 			if err != nil {
-				color.Yellow("Service %s/%s does not exist", ep.Namespace, ep.Name)
+				klog.V(6).Infof("Service %s/%s does not exist", ep.Namespace, ep.Name)
 				continue
 			}
 
