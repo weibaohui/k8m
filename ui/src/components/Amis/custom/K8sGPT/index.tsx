@@ -1,8 +1,9 @@
-import { replacePlaceholders } from '@/utils/utils';
-import React, { useEffect, useState } from 'react';
-import { fetcher } from "@/components/Amis/fetcher.ts";
-import { Alert, Card, List, message, Space, Tag, Typography } from 'antd';
-import { ExclamationCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import {replacePlaceholders} from '@/utils/utils';
+import React, {useEffect, useState} from 'react';
+import {fetcher} from "@/components/Amis/fetcher.ts";
+import {Alert, Button, Card, List, message, Space, Tag, Typography} from 'antd';
+import {ExclamationCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined} from '@ant-design/icons';
+import WebSocketMarkdownViewerComponent from '../WebSocketMarkdownViewer';
 
 interface K8sGPTProps {
     data: Record<string, any>; // 泛型数据类型
@@ -29,22 +30,21 @@ interface K8sGPTResult {
         parentObject: string;
     }>;
 }
-// 定义 API 响应的接口
+
 interface ApiResponse {
     status: number;
     msg?: string;
     data?: {
         status: number;
         msg?: string;
-        data: {
-            result?: string | K8sGPTResult;
-        }
+        data: K8sGPTResult;
     };
 }
-// 用 forwardRef 包装组件
+
 const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<K8sGPTResult | null>(null);
+    const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
     let finalUrl = replacePlaceholders(props.api, props.data);
 
@@ -61,10 +61,7 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
             if (response.data?.status !== 0) {
                 message.error(`获取巡检结果失败:请尝试刷新后重试。 ${response.data?.msg}`);
             } else {
-                // 将JSON字符串转换为结构体
-                const result = typeof response.data.data?.result === 'string'
-                    ? JSON.parse(response.data.data.result)
-                    : response.data.data?.result;
+                const result = response.data.data;
                 setResult(result);
             }
         } catch (error) {
@@ -78,8 +75,15 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
         handleGet();
     }, []);
 
+    const toggleExplanation = (itemKey: string) => {
+        setExpandedItems(prev => ({
+            ...prev,
+            [itemKey]: !prev[itemKey]
+        }));
+    };
+
     if (loading) {
-        return <Card loading={true} />;
+        return <Card loading={true}/>;
     }
 
     if (!result) {
@@ -92,7 +96,8 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
                 <Space>
                     <Typography.Text strong>K8s资源巡检结果</Typography.Text>
                     <Tag color={result.status === 'ProblemDetected' ? 'error' : 'success'}
-                        icon={result.status === 'ProblemDetected' ? <ExclamationCircleOutlined /> : <CheckCircleOutlined />}>
+                         icon={result.status === 'ProblemDetected' ? <ExclamationCircleOutlined/> :
+                             <CheckCircleOutlined/>}>
                         {result.status === 'ProblemDetected' ? '发现问题' : '正常'}
                     </Tag>
                     {result.problems > 0 && (
@@ -103,26 +108,53 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
         >
             <List
                 dataSource={result.results}
-                renderItem={item => (
-                    <List.Item>
-                        <div style={{ width: '100%' }}>
-                            <Typography.Text strong style={{ marginBottom: '8px', display: 'block' }}>
-                                {item.kind}: {item.name}
-                            </Typography.Text>
-                            <Space direction="vertical" style={{ width: '100%' }}>
-                                {item.error.map((error, index) => (
-                                    <Alert
-                                        key={index}
-                                        message={error.Text}
-                                        description={error.KubernetesDoc}
-                                        type="error"
-                                        showIcon
-                                    />
-                                ))}
-                            </Space>
-                        </div>
-                    </List.Item>
-                )}
+                renderItem={item => {
+                    const itemKey = `${item.kind}-${item.name}`;
+                    return (
+                        <List.Item>
+                            <div style={{width: '100%'}}>
+                                <Typography.Text strong style={{marginBottom: '8px', display: 'block'}}>
+                                    {item.kind}: {item.name}
+                                </Typography.Text>
+                                <Space direction="vertical" style={{width: '100%'}}>
+                                    {item.error.map((error, index) => (
+                                        <div key={index} style={{width: '100%'}}>
+                                            <Alert
+                                                message={error.Text}
+                                                description={error.KubernetesDoc}
+                                                type="error"
+                                                showIcon
+                                                action={
+                                                    <Button
+                                                        icon={<QuestionCircleOutlined/>}
+                                                        onClick={() => toggleExplanation(`${itemKey}-${index}`)}
+                                                        type="link"
+                                                    >
+                                                        AI解释
+                                                    </Button>
+                                                }
+                                            />
+                                            {expandedItems[`${itemKey}-${index}`] && (
+                                                <div style={{marginTop: '8px', marginBottom: '16px'}}>
+                                                    <WebSocketMarkdownViewerComponent
+                                                        url="/k8s/chat/k8s_gpt/resource"
+                                                        params={{
+                                                            kind: item.kind,
+                                                            name: item.name,
+                                                            data: error.Text,
+                                                            field: error.KubernetesDoc
+                                                        }}
+                                                        data={{}}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </Space>
+                            </div>
+                        </List.Item>
+                    );
+                }}
             />
         </Card>
     );
