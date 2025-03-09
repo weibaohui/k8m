@@ -206,7 +206,8 @@
                 "body": "温馨提示：大模型诊断需要几秒~几分钟时间，请稍后"
               },
               {
-                "type": "k8sGPT"
+                "type": "k8sGPT",
+                "api": "/k8s/k8s_gpt/kind/${kind}/run"
               },
               {
                 "type": "service",
