@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 
+	"github.com/fatih/color"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/cb"
-	"github.com/weibaohui/k8m/pkg/comm/ansi"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
@@ -379,9 +381,31 @@ func main() {
 
 	}
 
-	ansi.ShowBootInfo(Version, flag.Init().Port)
+	showBootInfo(Version, flag.Init().Port)
 	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))
 	if err != nil {
 		klog.Fatalf("Error %v", err)
 	}
+}
+
+func showBootInfo(version string, port int) {
+
+	// 获取本机所有 IP 地址
+	ips, err := utils.GetLocalIPs()
+	if err != nil {
+		klog.Fatalf("获取本机 IP 失败: %v", err)
+		os.Exit(1)
+	}
+	// 打印 Vite 风格的启动信息
+	color.Green("k8m %s  启动成功", version)
+	fmt.Printf("%s  ", color.GreenString("➜"))
+	fmt.Printf("%s    ", color.New(color.Bold).Sprint("Local:"))
+	fmt.Printf("%s\n", color.MagentaString("http://localhost:%d/", port))
+
+	for _, ip := range ips {
+		fmt.Printf("%s  ", color.GreenString("➜"))
+		fmt.Printf("%s  ", color.New(color.Bold).Sprint("Network:"))
+		fmt.Printf("%s\n", color.MagentaString("http://%s:%d/", ip, port))
+	}
+
 }
