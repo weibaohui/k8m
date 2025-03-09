@@ -50,10 +50,11 @@ const (
 )
 
 type ResultWithStatus struct {
-	Errors   AnalysisErrors  `json:"errors"`   // 错误信息
-	Status   AnalysisStatus  `json:"status"`   // 统计状态信息
-	Problems int             `json:"problems"` // 错误统计数量
-	Results  []common.Result `json:"results"`  // 分析统计结果
+	Errors   AnalysisErrors         `json:"errors,omitempty"`   // 错误信息
+	Status   AnalysisStatus         `json:"status,omitempty"`   // 统计状态信息
+	Problems int                    `json:"problems,omitempty"` // 错误统计数量
+	Results  []common.Result        `json:"results,omitempty"`  // 分析统计结果
+	Stats    []common.AnalysisStats `json:"stats,omitempty"`    // 运行状态统计
 }
 
 // Run 运行入口
