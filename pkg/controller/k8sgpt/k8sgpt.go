@@ -1,6 +1,8 @@
 package k8sgpt
 
 import (
+	"strings"
+
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -27,21 +29,70 @@ func GetFields(c *gin.Context) {
 	v2 := apiDoc.GetApiDocV2("spec.template.spec.containers.imagePullPolicy")
 	amis.WriteJsonData(c, v2)
 }
+
+type AnalysisConfig struct {
+	Filters        []string
+	Explain        bool
+	Async          bool
+	Namespace      string
+	labelSelector  string
+	maxConcurrency int
+	withDoc        bool
+	withStats      bool
+}
+
+func createAnalysisConfig(c *gin.Context) *AnalysisConfig {
+	kind := c.Param("kind")
+	if kind != "" {
+		return &AnalysisConfig{
+			Filters:        []string{kind},
+			Explain:        c.Param("explain") == "true",
+			Async:          false,
+			Namespace:      "*",
+			labelSelector:  "",
+			maxConcurrency: 1,
+			withDoc:        true,
+			withStats:      false,
+		}
+	}
+	return &AnalysisConfig{
+		Filters: []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
+			"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",
+			"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"},
+		Explain:        true,
+		Async:          strings.Contains(c.Request.URL.Path, "async"),
+		Namespace:      "*",
+		labelSelector:  "",
+		maxConcurrency: 1,
+		withDoc:        true,
+		withStats:      false,
+	}
+}
+
+func writeAnalysisResult(c *gin.Context, config *analysis.Analysis) {
+	output := "markdown"
+	outputData, err := config.PrintOutput(output)
+	if err != nil {
+		color.Red("Error: %v", err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{"result": string(outputData)})
+}
+
 func RunAnalysis(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	kind := c.Param("kind")
-	explain := c.Param("explain") == "true"
-	selectedCluster := amis.GetSelectedCluster(c)
-	config, err := analysis.NewAnalysis(ctx,
-		selectedCluster,
-		// []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim", "Service", "Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration", "MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy", "Log"}, // Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)
-		[]string{kind}, // Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)
-		"*",
-		"",
-		explain,
-		1,
-		true,
-		false,
+	cfg := createAnalysisConfig(c)
+
+	config, err := analysis.NewAnalysis(
+		ctx,
+		amis.GetSelectedCluster(c),
+		cfg.Filters,
+		cfg.Namespace,
+		cfg.labelSelector,
+		cfg.Explain,
+		cfg.maxConcurrency,
+		cfg.withDoc,
+		cfg.withStats,
 	)
 
 	if err != nil {
@@ -52,87 +103,38 @@ func RunAnalysis(c *gin.Context) {
 
 	config.RunAnalysis()
 
-	if explain {
+	if cfg.Explain {
 		if err := config.GetAIResults(true); err != nil {
 			color.Red("Error: %v", err)
 			return
 		}
 	}
 
-	var output = "markdown"
-
-	// print results
-	output_data, err := config.PrintOutput(output)
-	if err != nil {
-		color.Red("Error: %v", err)
-		return
-
-	}
-	// statsData := config.PrintStats()
-	// fmt.Println(string(statsData))
-
-	amis.WriteJsonData(c, gin.H{
-		"result": string(output_data),
-	})
-
+	writeAnalysisResult(c, config)
 }
 func ClusterRunAnalysis(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
-
-	config, err := analysis.NewAnalysis(ctx,
-		selectedCluster,
-		[]string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim", "Service", "Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration", "MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}, // Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)
-		"*",
-		"",
-		true,
-		1,
-		true,
-		false,
-	)
-
-	if err != nil {
-		klog.Errorf("Error: %v", err)
-		return
-	}
-	defer config.Close()
-
-	config.RunAnalysis()
-
-	var output = "markdown"
-	if err := config.GetAIResults(true); err != nil {
-		color.Red("Error: %v", err)
-		return
-
-	}
-	// print results
-	output_data, err := config.PrintOutput(output)
-	if err != nil {
-		color.Red("Error: %v", err)
-		return
-
-	}
-	// statsData := config.PrintStats()
-	// fmt.Println(string(statsData))
-
-	amis.WriteJsonData(c, gin.H{
-		"result": string(output_data),
-	})
-
+	handleAnalysisRequest(c, true)
 }
-func AsyncClusterRunAnalysis(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
 
-	config, err := analysis.NewAnalysis(ctx,
-		selectedCluster,
-		[]string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim", "Service", "Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration", "MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}, // Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)
-		"*",
-		"",
-		false,
-		1,
-		true,
-		false,
+func AsyncClusterRunAnalysis(c *gin.Context) {
+	handleAnalysisRequest(c, false)
+}
+
+func handleAnalysisRequest(c *gin.Context, explain bool) {
+	ctx := amis.GetContextWithUser(c)
+	cfg := createAnalysisConfig(c)
+	cfg.Explain = explain
+
+	config, err := analysis.NewAnalysis(
+		ctx,
+		amis.GetSelectedCluster(c),
+		cfg.Filters,
+		cfg.Namespace,
+		cfg.labelSelector,
+		cfg.Explain,
+		cfg.maxConcurrency,
+		cfg.withDoc,
+		cfg.withStats,
 	)
 
 	if err != nil {
@@ -143,28 +145,12 @@ func AsyncClusterRunAnalysis(c *gin.Context) {
 
 	config.RunAnalysis()
 
-	// 完成巡检结果存放在config.Results
-	// 改为异步获取AI解答
-	//
-
-	var output = "markdown"
-	if err := config.GetAIResults(true); err != nil {
-		color.Red("Error: %v", err)
-		return
-
+	if cfg.Explain {
+		if err := config.GetAIResults(true); err != nil {
+			color.Red("Error: %v", err)
+			return
+		}
 	}
-	// print results
-	output_data, err := config.PrintOutput(output)
-	if err != nil {
-		color.Red("Error: %v", err)
-		return
 
-	}
-	// statsData := config.PrintStats()
-	// fmt.Println(string(statsData))
-
-	amis.WriteJsonData(c, gin.H{
-		"result": string(output_data),
-	})
-
+	writeAnalysisResult(c, config)
 }
