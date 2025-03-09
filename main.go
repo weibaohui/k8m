@@ -323,7 +323,7 @@ func main() {
 		api.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
 
 		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.ResourceRunAnalysis)
-		api.GET("/k8s_gpt/cluster/run", k8sgpt.ClusterRunAnalysis)
+		api.GET("/k8s_gpt/cluster/:cluster/run", k8sgpt.ClusterRunAnalysis)
 		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
 
 		// pod 文件浏览上传下载
