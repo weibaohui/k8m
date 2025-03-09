@@ -18,13 +18,13 @@ func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, 
 	client, err := AIService().DefaultClient()
 
 	if err != nil {
-		klog.V(2).Infof("获取AI服务错误 : %v\n", err)
+		klog.V(6).Infof("获取AI服务错误 : %v\n", err)
 		return nil, fmt.Errorf("获取AI服务错误 : %v", err)
 	}
 	stream, err := client.GetStreamCompletion(context.Background(), chat)
 
 	if err != nil {
-		klog.V(2).Infof("ChatCompletion error: %v\n", err)
+		klog.V(6).Infof("ChatCompletion error: %v\n", err)
 		return nil, err
 	}
 
