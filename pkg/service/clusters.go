@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -36,6 +37,8 @@ func (c *clusterService) SetRegisterCallbackFunc(callback func(cluster *ClusterC
 }
 
 type ClusterConfig struct {
+	ClusterID               string                         `json:"cluster_id,omitempty"`              // 自动生成，不要赋值
+	ClusterIDBase64         string                         `json:"cluster_id_base64,omitempty"`       // 自动生成，不要赋值
 	FileName                string                         `json:"fileName,omitempty"`                // kubeconfig 文件名称
 	ContextName             string                         `json:"contextName,omitempty"`             // context名称
 	ClusterName             string                         `json:"clusterName,omitempty"`             // 集群名称
@@ -106,6 +109,8 @@ func (c *ClusterConfig) GetClusterID() string {
 	if id == "InCluster/InCluster" {
 		id = "InCluster"
 	}
+	c.ClusterID = id
+	c.ClusterIDBase64 = base64.StdEncoding.EncodeToString([]byte(id))
 	return id
 }
 
