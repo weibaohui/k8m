@@ -319,7 +319,7 @@ func main() {
 		api.GET("/chat/example/field", chat.FieldExample)
 		api.GET("/chat/ws_chatgpt", chat.GPTShell)
 
-		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.RunAnalysis)
+		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.ResourceRunAnalysis)
 		api.GET("/k8s_gpt/cluster/run", k8sgpt.ClusterRunAnalysis)
 		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
 
