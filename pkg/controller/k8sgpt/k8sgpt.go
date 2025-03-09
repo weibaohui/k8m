@@ -30,15 +30,15 @@ func GetFields(c *gin.Context) {
 func RunAnalysis(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
+	explain := c.Param("explain") == "true"
 	selectedCluster := amis.GetSelectedCluster(c)
-
 	config, err := analysis.NewAnalysis(ctx,
 		selectedCluster,
 		// []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim", "Service", "Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration", "MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy", "Log"}, // Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)
 		[]string{kind}, // Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)
 		"*",
 		"",
-		true,
+		explain,
 		1,
 		true,
 		false,
@@ -51,12 +51,16 @@ func RunAnalysis(c *gin.Context) {
 	defer config.Close()
 
 	config.RunAnalysis()
-	var output = "markdown"
-	if err := config.GetAIResults(true); err != nil {
-		color.Red("Error: %v", err)
-		return
 
+	if explain {
+		if err := config.GetAIResults(true); err != nil {
+			color.Red("Error: %v", err)
+			return
+		}
 	}
+
+	var output = "markdown"
+
 	// print results
 	output_data, err := config.PrintOutput(output)
 	if err != nil {
