@@ -2,6 +2,7 @@ package k8sgpt
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/kubernetes"
@@ -30,6 +31,16 @@ func GetFields(c *gin.Context) {
 func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 	ctx := amis.GetContextWithUser(c)
 	clusterID := amis.GetSelectedCluster(c)
+	clusterIDBase64 := c.Param("cluster") // 路径上传递的集群名称
+	if clusterIDBase64 != "" {
+		if id, err := utils.DecodeBase64(clusterIDBase64); err == nil {
+			if id != "" {
+				// 路径中传了集群名称
+				clusterID = id
+			}
+		}
+	}
+
 	ns := c.Param("ns")
 	if ns == "" {
 		ns = "*"
