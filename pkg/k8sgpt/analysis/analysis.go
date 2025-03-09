@@ -77,7 +77,7 @@ func Run(cfg *Analysis) ([]byte, error) {
 		}
 	}
 
-	output := "markdown"
+	output := "json"
 	outputData, err := runner.PrintOutput(output)
 	if err != nil {
 		return nil, err
