@@ -31,20 +31,19 @@ import (
 )
 
 type Analysis struct {
-	Context            context.Context
-	Filters            []string
-	AIClient           ai.IAI
-	Results            []common.Result
-	Errors             []string
-	Namespace          string
-	LabelSelector      string
-	Explain            bool
-	MaxConcurrency     int
-	AnalysisAIProvider string // The name of the AI Provider used for this analysis
-	WithDoc            bool
-	WithStats          bool
-	Stats              []common.AnalysisStats
-	ClusterID          string
+	Context        context.Context
+	ClusterID      string                 // 集群ID
+	AIClient       ai.IAI                 // AI
+	Filters        []string               // 资源类型
+	Namespace      string                 // 资源命名空间
+	LabelSelector  string                 // k8s 获取资源的label selector
+	Explain        bool                   // 是否使用AI进行解释
+	MaxConcurrency int                    // 资源并发
+	WithDoc        bool                   // 是否携带字段解释
+	WithStats      bool                   // 是否携带统计信息
+	Stats          []common.AnalysisStats // 统计信息
+	Results        []common.Result        // 分析结果
+	Errors         []string               // 错误
 }
 
 type (
@@ -58,17 +57,13 @@ const (
 )
 
 type JsonOutput struct {
-	Provider string          `json:"provider"`
-	Errors   AnalysisErrors  `json:"errors"`
-	Status   AnalysisStatus  `json:"status"`
-	Problems int             `json:"problems"`
-	Results  []common.Result `json:"results"`
+	Errors   AnalysisErrors  `json:"errors"`   // 错误信息
+	Status   AnalysisStatus  `json:"status"`   // 统计状态信息
+	Problems int             `json:"problems"` // 错误统计数量
+	Results  []common.Result `json:"results"`  // 分析统计结果
 }
 
 func NewAnalysis(ctx context.Context, clusterID string, filters []string, namespace string, labelSelector string, explain bool, maxConcurrency int, withDoc bool, withStats bool) (*Analysis, error) {
-
-	// Load remote cache if it is configured.
-
 	a := &Analysis{
 		Context:        ctx,
 		ClusterID:      clusterID,
@@ -90,7 +85,6 @@ func NewAnalysis(ctx context.Context, clusterID string, filters []string, namesp
 		return nil, err
 	}
 	a.AIClient = client
-	a.AnalysisAIProvider = "k8m ai"
 	return a, nil
 }
 
