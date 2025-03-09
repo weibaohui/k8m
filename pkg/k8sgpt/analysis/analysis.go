@@ -16,27 +16,21 @@ package analysis
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
 	openapi_v2 "github.com/google/gnostic/openapiv2"
-	"github.com/weibaohui/k8m/pkg/ai"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analyzer"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
 	"github.com/weibaohui/kom/kom"
-	"k8s.io/klog/v2"
 )
 
 type Analysis struct {
 	Context        context.Context
 	ClusterID      string                 // 集群ID
-	AIClient       ai.IAI                 // AI
 	Filters        []string               // 资源类型
 	Namespace      string                 // 资源命名空间
 	LabelSelector  string                 // k8s 获取资源的label selector
-	Explain        bool                   // 是否使用AI进行解释
 	MaxConcurrency int                    // 资源并发
 	WithDoc        bool                   // 是否携带字段解释
 	WithStats      bool                   // 是否携带统计信息
@@ -63,26 +57,20 @@ type JsonOutput struct {
 }
 
 // Run 运行入口
-func Run(cfg *Analysis) ([]byte, error) {
+func Run(cfg *Analysis) (*JsonOutput, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("分析选项不能为空")
 	}
 	runner := cfg
 
-	defer runner.Close()
 	runner.RunAnalysis()
-	if cfg.Explain {
-		if err := runner.ExplainResultsByAI(true); err != nil {
-			return nil, err
-		}
-	}
 
-	output := "json"
-	outputData, err := runner.PrintOutput(output)
+	result, err := runner.ResultWithStatus()
 	if err != nil {
 		return nil, err
 	}
-	return outputData, nil
+
+	return &result, nil
 }
 
 func (a *Analysis) RunAnalysis() {
@@ -98,7 +86,6 @@ func (a *Analysis) RunAnalysis() {
 		Context:       a.Context,
 		Namespace:     a.Namespace,
 		LabelSelector: a.LabelSelector,
-		AIClient:      a.AIClient,
 		OpenapiSchema: openapiSchema,
 	}
 
@@ -180,73 +167,4 @@ func (a *Analysis) executeAnalyzer(analyzer common.IAnalyzer, filter string, ana
 		a.Results = append(a.Results, results...)
 	}
 	<-semaphore
-}
-
-func (a *Analysis) ExplainResultsByAI(anonymize bool) error {
-	if len(a.Results) == 0 {
-		return nil
-	}
-
-	for index, analysis := range a.Results {
-		var texts []string
-
-		for _, failure := range analysis.Error {
-			if anonymize {
-				for _, s := range failure.Sensitive {
-					failure.Text = util.ReplaceIfMatch(failure.Text, s.Unmasked, s.Masked)
-				}
-			}
-			texts = append(texts, fmt.Sprintf("错误：%s\n,相关字段解释：%s", failure.Text, failure.KubernetesDoc))
-		}
-
-		promptTemplate := ai.PromptMap["default"]
-		// If the resource `Kind` comes from an "integration plugin",
-		// maybe a customized prompt template will be involved.
-		if prompt, ok := ai.PromptMap[analysis.Kind]; ok {
-			promptTemplate = prompt
-		}
-		result, err := a.getAIResultForSanitizedFailures(texts, promptTemplate)
-		if err != nil {
-
-			// Check for exhaustion.
-			if strings.Contains(err.Error(), "status code: 429") {
-				return fmt.Errorf("exhausted API quota for AI provider %s: %v", a.AIClient.GetName(), err)
-			}
-			return fmt.Errorf("failed while calling AI provider %s: %v", a.AIClient.GetName(), err)
-		}
-
-		if anonymize {
-			for _, failure := range analysis.Error {
-				for _, s := range failure.Sensitive {
-					result = strings.ReplaceAll(result, s.Masked, s.Unmasked)
-				}
-			}
-		}
-
-		analysis.Details = result
-
-		a.Results[index] = analysis
-	}
-	return nil
-}
-
-func (a *Analysis) getAIResultForSanitizedFailures(texts []string, promptTmpl string) (string, error) {
-	inputKey := strings.Join(texts, " ")
-
-	// Process template.
-	prompt := fmt.Sprintf(strings.TrimSpace(promptTmpl), inputKey)
-	klog.V(6).Infof("提示词: \n%s\n", prompt)
-	response, err := a.AIClient.GetCompletion(a.Context, prompt)
-	if err != nil {
-		return "", err
-	}
-
-	return response, nil
-}
-
-func (a *Analysis) Close() {
-	if a.AIClient == nil {
-		return
-	}
-	a.AIClient.Close()
 }
