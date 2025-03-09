@@ -25,7 +25,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analyzer"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
-	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
@@ -63,29 +62,27 @@ type JsonOutput struct {
 	Results  []common.Result `json:"results"`  // 分析统计结果
 }
 
-func NewAnalysis(ctx context.Context, clusterID string, filters []string, namespace string, labelSelector string, explain bool, maxConcurrency int, withDoc bool, withStats bool) (*Analysis, error) {
-	a := &Analysis{
-		Context:        ctx,
-		ClusterID:      clusterID,
-		Filters:        filters,
-		Namespace:      namespace,
-		LabelSelector:  labelSelector,
-		Explain:        explain,
-		MaxConcurrency: maxConcurrency,
-		WithDoc:        withDoc,
-		WithStats:      withStats,
+// Run 运行入口
+func Run(cfg *Analysis) ([]byte, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("分析选项不能为空")
 	}
-	if !explain {
-		// Return early if AI use was not requested.
-		return a, nil
+	runner := cfg
+
+	defer runner.Close()
+	runner.RunAnalysis()
+	if cfg.Explain {
+		if err := runner.ExplainResultsByAI(true); err != nil {
+			return nil, err
+		}
 	}
 
-	client, err := service.AIService().DefaultClient()
+	output := "markdown"
+	outputData, err := runner.PrintOutput(output)
 	if err != nil {
 		return nil, err
 	}
-	a.AIClient = client
-	return a, nil
+	return outputData, nil
 }
 
 func (a *Analysis) RunAnalysis() {
@@ -185,7 +182,7 @@ func (a *Analysis) executeAnalyzer(analyzer common.IAnalyzer, filter string, ana
 	<-semaphore
 }
 
-func (a *Analysis) GetAIResults(anonymize bool) error {
+func (a *Analysis) ExplainResultsByAI(anonymize bool) error {
 	if len(a.Results) == 0 {
 		return nil
 	}
