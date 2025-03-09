@@ -49,7 +49,7 @@ const (
 	StateProblemDetected AnalysisStatus = "ProblemDetected"
 )
 
-type JsonOutput struct {
+type ResultWithStatus struct {
 	Errors   AnalysisErrors  `json:"errors"`   // 错误信息
 	Status   AnalysisStatus  `json:"status"`   // 统计状态信息
 	Problems int             `json:"problems"` // 错误统计数量
@@ -57,7 +57,7 @@ type JsonOutput struct {
 }
 
 // Run 运行入口
-func Run(cfg *Analysis) (*JsonOutput, error) {
+func Run(cfg *Analysis) (*ResultWithStatus, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("分析选项不能为空")
 	}

@@ -40,7 +40,7 @@ func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 		LabelSelector:  "",
 		MaxConcurrency: 1,
 		WithDoc:        true,
-		WithStats:      false,
+		WithStats:      true,
 	}
 
 	return cfg
@@ -62,20 +62,6 @@ func ClusterRunAnalysis(c *gin.Context) {
 	cfg.Filters = []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
 		"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",
 		"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
-	result, err := analysis.Run(cfg)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	amis.WriteJsonData(c, result)
-}
-
-func AsyncClusterRunAnalysis(c *gin.Context) {
-	cfg := createAnalysisConfig(c)
-	cfg.Filters = []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
-		"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",
-		"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
-
 	result, err := analysis.Run(cfg)
 	if err != nil {
 		amis.WriteJsonError(c, err)

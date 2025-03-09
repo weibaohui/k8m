@@ -17,7 +17,7 @@ func (a *Analysis) jsonOutput() ([]byte, error) {
 		status = StateOK
 	}
 
-	result := JsonOutput{
+	result := ResultWithStatus{
 		Problems: problems,
 		Results:  a.Results,
 		Errors:   a.Errors,
@@ -29,7 +29,7 @@ func (a *Analysis) jsonOutput() ([]byte, error) {
 	}
 	return output, nil
 }
-func (a *Analysis) ResultWithStatus() (JsonOutput, error) {
+func (a *Analysis) ResultWithStatus() (ResultWithStatus, error) {
 	var problems int
 	var status AnalysisStatus
 	for _, result := range a.Results {
@@ -41,7 +41,7 @@ func (a *Analysis) ResultWithStatus() (JsonOutput, error) {
 		status = StateOK
 	}
 
-	result := JsonOutput{
+	result := ResultWithStatus{
 		Problems: problems,
 		Results:  a.Results,
 		Errors:   a.Errors,
