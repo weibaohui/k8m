@@ -92,6 +92,7 @@ func WriteWebSocketChatCompletionStream(c *gin.Context, stream *openai.ChatCompl
 			// 处理关闭流时的错误
 			klog.V(6).Infof("stream close error:%v", err)
 		}
+		klog.V(6).Infof("stream close ")
 	}()
 
 	for {
