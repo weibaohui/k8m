@@ -40,7 +40,7 @@ func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 		LabelSelector:  "",
 		MaxConcurrency: 1,
 		WithDoc:        true,
-		WithStats:      true,
+		WithStats:      false,
 	}
 
 	return cfg
