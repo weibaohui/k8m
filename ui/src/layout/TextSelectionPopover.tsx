@@ -41,7 +41,7 @@ const GlobalTextSelector: React.FC = () => {
 
 
     return ReactDOM.createPortal(
-        <Draggable>
+        <Draggable handle=".selection-title">
             <div
                 className="selection-card"
                 style={{
@@ -56,12 +56,12 @@ const GlobalTextSelector: React.FC = () => {
                     titleClassName="selection-title"
                     title={selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
                 >
-                    <div style={{ 
-                        display: "flex", 
-                        flexDirection: "column", 
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
                         alignItems: "center",
-                        maxHeight: "70vh",
-                        overflowY: "auto"
+                        maxHeight: "50vh",
+                        overflow: "auto"
                     }}>
                         {
                             amisRender({
