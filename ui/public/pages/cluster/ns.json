@@ -546,7 +546,7 @@
             },
             {
               "type": "dropdown-button",
-              "icon": "fa fa-ellipsis-h",
+              "level": "link",
               "buttons": [
                 {
                   "type": "link",
