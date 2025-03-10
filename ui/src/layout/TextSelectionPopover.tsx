@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import ReactDOM from "react-dom";
-import { render as amisRender } from "amis";
-import { Card } from "amis-ui";
+import {render as amisRender} from "amis";
+import {Card} from "amis-ui";
 import Draggable from "react-draggable";
 import './TextSelectionPopover.css';
 
@@ -52,9 +52,12 @@ const GlobalTextSelector: React.FC = () => {
                     overflow: "auto"
                 }}
             >
-                <Card style={{ width: '50hv', maxWidth: '500px' }}
-                    titleClassName="selection-title"
-                    title={selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
+                <Card style={{width: '50hv', maxWidth: '500px'}}
+                      titleClassName="selection-title"
+                      title={<>
+                          <i className="fas fa-grip-vertical" style={{marginRight: '8px'}}></i>
+                          {selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
+                      </>}
                 >
                     <div style={{
                         display: "flex",
@@ -76,7 +79,8 @@ const GlobalTextSelector: React.FC = () => {
                 </Card>
 
 
-            </div></Draggable>,
+            </div>
+        </Draggable>,
         document.body
     );
 };
