@@ -371,7 +371,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 150,
+          "width": 120,
           "buttons": [
             {
               "type": "button",
@@ -605,11 +605,25 @@
                 ],
                 "actions": []
               }
-            },
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.namespace",
+          "label": "命名空间",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "metadata.name",
+          "label": "名称",
+          "type": "container",
+          "body": [
             {
-              "tooltip": "关联资源",
               "type": "button",
-              "icon": "fas fa-code-branch text-primary",
+              "label": "${metadata.name}",
+              "level": "link",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
@@ -3569,13 +3583,15 @@
               }
             }
           ],
-          "toggled": true
-        },
-        {
-          "name": "metadata.namespace",
-          "label": "命名空间",
-          "type": "text",
-          "sortable": true
+          "width": "180px",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.name",
+            "clearable": true,
+            "label": "名称",
+            "placeholder": "输入名称"
+          }
         },
         {
           "name": "metadata.name",

@@ -372,7 +372,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 150,
+          "width": 120,
           "buttons": [
             {
               "type": "button",
@@ -608,9 +608,58 @@
               }
             },
             {
-              "tooltip": "关联资源",
               "type": "button",
-              "icon": "fas fa-code-branch text-primary",
+              "icon": "fa fa-terminal text-primary",
+              "actionType": "drawer",
+              "tooltip": "终端",
+              "drawer": {
+                "closeOnEsc": true,
+                "width": "100%",
+                "title": "容器终端 (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "fileExplorer"
+                  }
+                ],
+                "actions": []
+              }
+            },
+            {
+              "tooltip": "日志",
+              "icon": "fa fa-list text-primary",
+              "type": "button",
+              "level": "link",
+              "actionType": "url",
+              "blank": true,
+              "url": "/#/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.namespace",
+          "label": "命名空间",
+          "type": "text",
+          "sortable": true,
+          "searchable": {
+            "name": "metadata.namespace",
+            "clearable": true,
+            "label": "命名空间",
+            "placeholder": "输入命名空间",
+            "type": "select",
+            "searchable": true,
+            "source": "/k8s/ns/option_list"
+          }
+        },
+        {
+          "name": "metadata.name",
+          "label": "名称",
+          "type": "container",
+          "body": [
+            {
+              "type": "button",
+              "label": "${metadata.name}",
+              "level": "link",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
@@ -2887,55 +2936,8 @@
                   ]
                 }
               }
-            },
-            {
-              "type": "button",
-              "icon": "fa fa-terminal text-primary",
-              "actionType": "drawer",
-              "tooltip": "终端",
-              "drawer": {
-                "closeOnEsc": true,
-                "width": "100%",
-                "title": "容器终端 (ESC 关闭)",
-                "body": [
-                  {
-                    "type": "fileExplorer"
-                  }
-                ],
-                "actions": []
-              }
-            },
-            {
-              "tooltip": "日志",
-              "icon": "fa fa-list text-primary",
-              "type": "button",
-              "level": "link",
-              "actionType": "url",
-              "blank": true,
-              "url": "/#/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
             }
           ],
-          "toggled": true
-        },
-        {
-          "name": "metadata.namespace",
-          "label": "命名空间",
-          "type": "text",
-          "sortable": true,
-          "searchable": {
-            "name": "metadata.namespace",
-            "clearable": true,
-            "label": "命名空间",
-            "placeholder": "输入命名空间",
-            "type": "select",
-            "searchable": true,
-            "source": "/k8s/ns/option_list"
-          }
-        },
-        {
-          "name": "metadata.name",
-          "label": "名称",
-          "type": "text",
           "width": "180px",
           "sortable": true,
           "searchable": {
