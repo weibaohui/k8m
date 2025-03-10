@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -8,11 +9,27 @@ import (
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
+	"slices"
 )
 
 func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
+		// 获取请求路径
+		path := c.Request.URL.Path
+
+		// 检查文件后缀，如果是静态文件则直接跳过
+		ext := filepath.Ext(path)
+		if ext != "" {
+			// 常见的静态文件后缀
+			staticExts := []string{".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".map"}
+			if slices.Contains(staticExts, ext) {
+				// 静态文件请求，直接跳过集群检测
+				c.Next()
+				return
+			}
+		}
+
 		cfg := flag.Init()
 		var clusterID string
 		allClusters := service.ClusterService().AllClusters()
