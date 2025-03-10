@@ -665,7 +665,13 @@
                 "closeOnEsc": true,
                 "title": "${kind}/${metadata.namespace}/${metadata.name}-${status.podIP} 关联资源 （ESC 关闭）",
                 "size": "xl",
-                "actions": [],
+                "actions": [
+                  {
+                    "type": "button",
+                    "label": "关闭",
+                    "close": true
+                  }
+                ],
                 "body": {
                   "type": "tabs",
                   "tabs": [
