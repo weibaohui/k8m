@@ -19,7 +19,7 @@ func init() {
 func AutoMigrate() error {
 
 	// 添加需要迁移的所有模型
-	return dao.DB().AutoMigrate(
+	err := dao.DB().AutoMigrate(
 		&CustomTemplate{},
 		&KubeConfig{},
 		&User{},
@@ -29,6 +29,15 @@ func AutoMigrate() error {
 		&HelmChart{},
 		&UserGroup{},
 	)
+	if err != nil {
+		klog.Errorf("数据库迁移报错: %v", err.Error())
+	}
+	// 删除 user 表 name 字段，已弃用
+	err = dao.DB().Migrator().DropColumn(&User{}, "Role")
+	if err != nil {
+		klog.Errorf("数据库迁移 User 表 DropColumn Role 报错: %v", err.Error())
+	}
+	return nil
 }
 func FixClusterName() error {
 	// 将display_name为空的记录更新为cluster字段
