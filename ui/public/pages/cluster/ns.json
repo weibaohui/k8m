@@ -549,16 +549,187 @@
               "level": "link",
               "buttons": [
                 {
+                  "type": "button",
+                  "icon": "fa-solid fa-plus text-success",
+                  "label": "创建资源配额",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "创建资源配额",
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "body": [
+                      {
+                        "type": "form",
+                        "api": "post:/k8s/ResourceQuota/create",
+                        "body": [
+                          {
+                            "type": "input-text",
+                            "name": "name",
+                            "label": "名称",
+                            "required": true,
+                            "placeholder": "请输入资源配额名称"
+                          },
+                          {
+                            "type": "input-text",
+                            "name": "metadata.namespace",
+                            "label": "命名空间",
+                            "value": "${metadata.name}",
+                            "readOnly": true
+                          },
+                          {
+                            "type": "divider",
+                            "title": "资源限制"
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.requests.memory",
+                                "label": "内存请求",
+                                "placeholder": "例如: 2",
+                                "addOn": "Gi"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.limits.memory",
+                                "label": "内存上限",
+                                "placeholder": "例如: 10",
+                                "addOn": "Gi"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.requests.cpu",
+                                "label": "CPU请求",
+                                "placeholder": "例如: 500",
+                                "addOn": "微核"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.limits.cpu",
+                                "label": "CPU上限",
+                                "placeholder": "例如: 1000",
+                                "addOn": "微核"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.requests.storage",
+                                "label": "存储请求",
+                                "placeholder": "例如: 10",
+                                "addOn": "Gi"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.pods",
+                                "label": "Pod数量",
+                                "placeholder": "例如: 10",
+                                "addOn": "个"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.configmaps",
+                                "label": "配置映射数量",
+                                "placeholder": "例如: 10",
+                                "addOn": "个"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.replicationcontrollers",
+                                "label": "副本控制器数量",
+                                "placeholder": "例如: 10",
+                                "addOn": "个"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.resourcequotas",
+                                "label": "资源配额数量",
+                                "placeholder": "例如: 5",
+                                "addOn": "个"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.services",
+                                "label": "服务数量",
+                                "placeholder": "例如: 10",
+                                "addOn": "个"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.loadbalancers",
+                                "label": "负载均衡器数量",
+                                "placeholder": "例如: 5",
+                                "addOn": "个"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.nodeports",
+                                "label": "节点端口数量",
+                                "placeholder": "例如: 5",
+                                "addOn": "个"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.secrets",
+                                "label": "保密字典数量",
+                                "placeholder": "例如: 10",
+                                "addOn": "个"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "spec.hard.persistentvolumeclaims",
+                                "label": "持久卷声明数量",
+                                "placeholder": "例如: 5",
+                                "addOn": "个"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
                   "type": "link",
                   "icon": "fa-solid fa-chart-pie text-primary",
-                  "body": "资源配额",
+                  "body": "查看资源配额",
                   "blank": false,
                   "href": "/#/ns/resource_quota?metadata[namespace]=${metadata.name}"
                 },
                 {
                   "type": "link",
                   "icon": "fa-solid fa-compress text-primary",
-                  "body": "限制范围",
+                  "body": "查看限制范围",
                   "blank": false,
                   "href": "/#/ns/limit_range?metadata[namespace]=${metadata.name}"
                 }
