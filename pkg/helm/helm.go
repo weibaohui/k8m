@@ -232,7 +232,7 @@ func (c *Client) getChart(repoName, chartName, version string, chartPathOptions 
 			}
 		}
 	}
-
+	klog.V(6).Infof("chartURL  %s", chartURL)
 	filepath, err := chartPathOptions.LocateChart(chartURL, c.setting)
 	if err != nil {
 		return nil, fmt.Errorf("定位Chart %s 失败: %v。请尝试更新缓存", chartURL, err)
