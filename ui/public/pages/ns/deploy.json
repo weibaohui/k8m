@@ -3209,7 +3209,7 @@
                       ]
                     },
                     {
-                      "title": "定义环境变量",
+                      "title": "环境变量",
                       "body": {
                         "type": "crud",
                         "autoGenerateFilter": {
