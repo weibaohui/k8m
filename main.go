@@ -250,6 +250,7 @@ func main() {
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
 		api.POST("/ResourceQuota/create", ns.CreateResouceQuota)
+		api.POST("/LimitRange/create", ns.CreateLimitRange)
 
 		// k8s cluster
 		api.GET("/cluster/all", cluster.List)
