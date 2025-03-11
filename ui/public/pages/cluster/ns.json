@@ -727,6 +727,155 @@
                   "href": "/#/ns/resource_quota?metadata[namespace]=${metadata.name}"
                 },
                 {
+                  "type": "button",
+                  "icon": "fa-solid fa-plus text-success",
+                  "label": "创建限制范围",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "创建限制范围",
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "body": [
+                      {
+                        "type": "form",
+                        "api": "post:/k8s/LimitRange/create",
+                        "body": [
+                          {
+                            "type": "input-text",
+                            "name": "name",
+                            "label": "名称",
+                            "required": true,
+                            "placeholder": "请输入限制范围名称"
+                          },
+                          {
+                            "type": "input-text",
+                            "name": "metadata.namespace",
+                            "label": "命名空间",
+                            "value": "${metadata.name}",
+                            "readOnly": true
+                          },
+                          {
+                            "type": "divider",
+                            "title": "限制范围配置"
+                          },
+                          {
+                            "type": "combo",
+                            "name": "spec.limits",
+                            "label": "限制项",
+                            "multiple": true,
+                            "multiLine": true,
+                            "minLength": 1,
+                            "addButtonText": "添加限制项",
+                            "items": [
+                              {
+                                "type": "select",
+                                "name": "type",
+                                "label": "类型",
+                                "required": true,
+                                "options": [
+                                  {
+                                    "label": "容器",
+                                    "value": "Container"
+                                  },
+                                  {
+                                    "label": "Pod",
+                                    "value": "Pod"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "group",
+                                "body": [
+                                  {
+                                    "type": "input-text",
+                                    "name": "default.cpu",
+                                    "label": "默认CPU",
+                                    "placeholder": "例如: 500",
+                                    "addOn": "微核",
+                                    "columnClassName": "col-sm-6"
+                                  },
+                                  {
+                                    "type": "input-text",
+                                    "name": "default.memory",
+                                    "label": "默认内存",
+                                    "placeholder": "例如: 2",
+                                    "addOn": "Mi",
+                                    "columnClassName": "col-sm-6"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "group",
+                                "body": [
+                                  {
+                                    "type": "input-text",
+                                    "name": "defaultRequest.cpu",
+                                    "label": "默认请求CPU",
+                                    "placeholder": "例如: 200",
+                                    "addOn": "微核",
+                                    "columnClassName": "col-sm-6"
+                                  },
+                                  {
+                                    "type": "input-text",
+                                    "name": "defaultRequest.memory",
+                                    "label": "默认请求内存",
+                                    "placeholder": "例如: 1",
+                                    "addOn": "Mi",
+                                    "columnClassName": "col-sm-6"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "group",
+                                "body": [
+                                  {
+                                    "type": "input-text",
+                                    "name": "min.cpu",
+                                    "label": "最小CPU",
+                                    "placeholder": "例如: 100",
+                                    "addOn": "微核",
+                                    "columnClassName": "col-sm-6"
+                                  },
+                                  {
+                                    "type": "input-text",
+                                    "name": "min.memory",
+                                    "label": "最小内存",
+                                    "placeholder": "例如: 0.5",
+                                    "addOn": "Mi",
+                                    "columnClassName": "col-sm-6"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "group",
+                                "body": [
+                                  {
+                                    "type": "input-text",
+                                    "name": "max.cpu",
+                                    "label": "最大CPU",
+                                    "placeholder": "例如: 1000",
+                                    "addOn": "微核",
+                                    "columnClassName": "col-sm-6"
+                                  },
+                                  {
+                                    "type": "input-text",
+                                    "name": "max.memory",
+                                    "label": "最大内存",
+                                    "placeholder": "例如: 4",
+                                    "addOn": "Mi",
+                                    "columnClassName": "col-sm-6"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
                   "type": "link",
                   "icon": "fa-solid fa-compress text-primary",
                   "body": "查看限制范围",
