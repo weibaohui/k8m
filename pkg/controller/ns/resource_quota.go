@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -54,6 +55,14 @@ func CreateResouceQuota(c *gin.Context) {
 
 	// 处理requests资源
 	for name, value := range data.Spec.Hard.Requests {
+		// 检查是否为小数值
+		if name == "cpu" || name == "memory" {
+			if utils.IsDecimal(value) {
+				amis.WriteJsonError(c, fmt.Errorf("资源值不能为小数，请使用整数值: %s=%s", name, value))
+				return
+			}
+		}
+		
 		if name == "cpu" {
 			value = fmt.Sprintf("%sm", value)
 		}
@@ -70,6 +79,14 @@ func CreateResouceQuota(c *gin.Context) {
 
 	// 处理limits资源
 	for name, value := range data.Spec.Hard.Limits {
+		// 检查是否为小数值
+		if name == "cpu" || name == "memory" {
+			if utils.IsDecimal(value) {
+				amis.WriteJsonError(c, fmt.Errorf("资源值不能为小数，请使用整数值: %s=%s", name, value))
+				return
+			}
+		}
+		
 		if name == "cpu" {
 			value = fmt.Sprintf("%sm", value)
 		}
@@ -99,6 +116,16 @@ func CreateResouceQuota(c *gin.Context) {
 
 	for name, value := range resourceMap {
 		if value != "" {
+			// 检查是否为小数值
+			if name == "pods" || name == "configmaps" || name == "replicationcontrollers" || 
+			   name == "resourcequotas" || name == "services" || name == "services.loadbalancers" || 
+			   name == "services.nodeports" || name == "secrets" || name == "persistentvolumeclaims" {
+				if utils.IsDecimal(value) {
+					amis.WriteJsonError(c, fmt.Errorf("资源值不能为小数，请使用整数值: %s=%s", name, value))
+					return
+				}
+			}
+			
 			quantity, err := resource.ParseQuantity(value)
 			if err != nil {
 				amis.WriteJsonError(c, err)
