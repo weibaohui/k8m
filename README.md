@@ -40,7 +40,7 @@ Usage of ./k8m:
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-Coder-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
   -d, --debug                            调试模式
-      --in-cluster                       是否自动注册纳管宿主集群，默认否
+      --in-cluster                       是否自动注册纳管宿主集群，默认启用
       --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
   -c, --kubeconfig string                kubeconfig文件路径 (default "/root/.kube/config")
       --kubectl-shell-image string       Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令 (default "bitnami/kubectl:latest")
@@ -106,7 +106,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 | `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`         | kubectl shell 镜像地址                                                |
 | `NODE_SHELL_IMAGE`    | `alpine:latest`                  | Node shell 镜像地址                                                   |
 | `SQLITE_PATH`         | `/data/k8m.db`                   | 持久化数据库地址，默认sqlite数据库，文件地址/data/k8m.db                             |
-| `IN_CLUSTER`          | `"false"`                        | 是否自动注册纳管宿主集群，默认否                                                  |
+| `IN_CLUSTER`          | `"true"`                         | 是否自动注册纳管宿主集群，默认启用                                                 |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
