@@ -134,6 +134,8 @@ spec:
               value: "false"
             - name: LOG_V
               value: "2"
+            - name: IN_CLUSTER
+              value: "true"
             - name: KUBECTL_SHELL_IMAGE
               value: bitnami/kubectl:latest
             - name: NODE_SHELL_IMAGE
