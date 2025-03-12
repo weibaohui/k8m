@@ -74,8 +74,14 @@ func Init() {
 		// 先把自定义钩子注册登记
 		service.ClusterService().SetRegisterCallbackFunc(cb.RegisterDefaultCallbacks)
 
-		// 先注册InCluster集群
-		service.ClusterService().RegisterInCluster()
+		if cfg.InCluster {
+			klog.V(6).Infof("启用InCluster模式，自动注册纳管宿主集群")
+			// 注册InCluster集群
+			service.ClusterService().RegisterInCluster()
+		} else {
+			klog.V(6).Infof("未启用InCluster模式，忽略宿主集群纳管")
+		}
+
 		// 再注册其他集群
 		service.ClusterService().ScanClustersInDB()
 		service.ClusterService().ScanClustersInDir(cfg.KubeConfig)
@@ -249,7 +255,7 @@ func main() {
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)
-		api.POST("/ResourceQuota/create", ns.CreateResouceQuota)
+		api.POST("/ResourceQuota/create", ns.CreateResourceQuota)
 		api.POST("/LimitRange/create", ns.CreateLimitRange)
 
 		// k8s cluster
