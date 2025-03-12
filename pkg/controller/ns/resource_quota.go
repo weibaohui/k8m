@@ -12,7 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateResouceQuota(c *gin.Context) {
+func CreateResourceQuota(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
@@ -62,7 +62,7 @@ func CreateResouceQuota(c *gin.Context) {
 				return
 			}
 		}
-		
+
 		if name == "cpu" {
 			value = fmt.Sprintf("%sm", value)
 		}
@@ -86,7 +86,7 @@ func CreateResouceQuota(c *gin.Context) {
 				return
 			}
 		}
-		
+
 		if name == "cpu" {
 			value = fmt.Sprintf("%sm", value)
 		}
@@ -117,15 +117,15 @@ func CreateResouceQuota(c *gin.Context) {
 	for name, value := range resourceMap {
 		if value != "" {
 			// 检查是否为小数值
-			if name == "pods" || name == "configmaps" || name == "replicationcontrollers" || 
-			   name == "resourcequotas" || name == "services" || name == "services.loadbalancers" || 
-			   name == "services.nodeports" || name == "secrets" || name == "persistentvolumeclaims" {
+			if name == "pods" || name == "configmaps" || name == "replicationcontrollers" ||
+				name == "resourcequotas" || name == "services" || name == "services.loadbalancers" ||
+				name == "services.nodeports" || name == "secrets" || name == "persistentvolumeclaims" {
 				if utils.IsDecimal(value) {
 					amis.WriteJsonError(c, fmt.Errorf("资源值不能为小数，请使用整数值: %s=%s", name, value))
 					return
 				}
 			}
-			
+
 			quantity, err := resource.ParseQuantity(value)
 			if err != nil {
 				amis.WriteJsonError(c, err)
