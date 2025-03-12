@@ -14,7 +14,8 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
 - **简便易用**：友好的用户界面和直观的操作流程，让 Kubernetes 管理更加轻松。
 - **高效性能**：后端采用 Golang 构建，前端基于百度 AMIS，保证资源利用率高、响应速度快。
-- **AI驱动融合**：基于ChatGPT实现划词解释、资源指南、YAML属性自动翻译、Describe信息解读、日志AI问诊、运行命令推荐,并集成了[`k8s-gpt`](https://github.com/k8sgpt-ai/k8sgpt)功能，实现中文展现，为管理k8s提供智能化支持。
+- **AI驱动融合**：基于ChatGPT实现划词解释、资源指南、YAML属性自动翻译、Describe信息解读、日志AI问诊、运行命令推荐,并集成了[
+  `k8s-gpt`](https://github.com/k8sgpt-ai/k8sgpt)功能，实现中文展现，为管理k8s提供智能化支持。
 - **多集群管理**：自动识别集群内部使用InCluster模式，配置kubeconfig路径后自动扫描同级目录下的配置文件，同时注册管理多个集群。
 - **Pod 文件管理**：支持 Pod 内文件的浏览、编辑、上传、下载、删除，简化日常操作。
 - **Pod 运行管理**：支持实时查看 Pod 日志，下载日志，并在 Pod 内直接执行 Shell 命令。
@@ -39,6 +40,7 @@ Usage of ./k8m:
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-Coder-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
   -d, --debug                            调试模式
+      --in-cluster                       是否自动注册纳管宿主集群，默认否
       --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
   -c, --kubeconfig string                kubeconfig文件路径 (default "/root/.kube/config")
       --kubectl-shell-image string       Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令 (default "bitnami/kubectl:latest")
@@ -104,6 +106,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 | `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`         | kubectl shell 镜像地址                                                |
 | `NODE_SHELL_IMAGE`    | `alpine:latest`                  | Node shell 镜像地址                                                   |
 | `SQLITE_PATH`         | `/data/k8m.db`                   | 持久化数据库地址，默认sqlite数据库，文件地址/data/k8m.db                             |
+| `IN_CLUSTER`          | `"false"`                        | 是否自动注册纳管宿主集群，默认否                                                  |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
@@ -232,52 +235,51 @@ make help
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
 
 **v0.0.53更新**
+
 1. 日志查看支持颜色，如果输出console的时候带有颜色，那么在pod 日志查看时就可以显示。
-![输入图片说明](https://foruda.gitee.com/images/1741180128542917712/d4034cfb_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1741180128542917712/d4034cfb_77493.png "屏幕截图")
 2. Helm功能上线
-2.1 新增helm仓库
-![输入图片说明](https://foruda.gitee.com/images/1741180306318265893/f7c561cf_77493.png "屏幕截图")
-2.2 安装helm chart 应用
-应用列表
-![输入图片说明](https://foruda.gitee.com/images/1741180337250117323/373632c3_77493.png "屏幕截图")
-查看应用
-![输入图片说明](https://foruda.gitee.com/images/1741180373708023891/01b2eef5_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1741180423218217871/b1b2b06f_77493.png "屏幕截图")
-支持对参数内容选中划词AI解释
-![输入图片说明](https://foruda.gitee.com/images/1741180604109610379/b26ae294_77493.png "屏幕截图")
-2.3 查看已部署release
-![输入图片说明](https://foruda.gitee.com/images/1741180730249955448/bd51776e_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1741180757526613636/3cff8334_77493.png "屏幕截图")
-2.4 查看安装参数
-![输入图片说明](https://foruda.gitee.com/images/1741180785289693466/dd1e08ab_77493.png "屏幕截图")
-2.5 更新、升级、降级部署版本
-![输入图片说明](https://foruda.gitee.com/images/1741180817303995346/b2bb7472_77493.png "屏幕截图")
-2.6 查看已部署release变更历史
-![输入图片说明](https://foruda.gitee.com/images/1741180840762812700/ccd3aa07_77493.png "屏幕截图")
+   2.1 新增helm仓库
+   ![输入图片说明](https://foruda.gitee.com/images/1741180306318265893/f7c561cf_77493.png "屏幕截图")
+   2.2 安装helm chart 应用
+   应用列表
+   ![输入图片说明](https://foruda.gitee.com/images/1741180337250117323/373632c3_77493.png "屏幕截图")
+   查看应用
+   ![输入图片说明](https://foruda.gitee.com/images/1741180373708023891/01b2eef5_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1741180423218217871/b1b2b06f_77493.png "屏幕截图")
+   支持对参数内容选中划词AI解释
+   ![输入图片说明](https://foruda.gitee.com/images/1741180604109610379/b26ae294_77493.png "屏幕截图")
+   2.3 查看已部署release
+   ![输入图片说明](https://foruda.gitee.com/images/1741180730249955448/bd51776e_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1741180757526613636/3cff8334_77493.png "屏幕截图")
+   2.4 查看安装参数
+   ![输入图片说明](https://foruda.gitee.com/images/1741180785289693466/dd1e08ab_77493.png "屏幕截图")
+   2.5 更新、升级、降级部署版本
+   ![输入图片说明](https://foruda.gitee.com/images/1741180817303995346/b2bb7472_77493.png "屏幕截图")
+   2.6 查看已部署release变更历史
+   ![输入图片说明](https://foruda.gitee.com/images/1741180840762812700/ccd3aa07_77493.png "屏幕截图")
 
-  
 **v0.0.50更新**
-1. 新增HPA
-![输入图片说明](https://foruda.gitee.com/images/1740664600490309267/48ff3895_77493.png "屏幕截图")
-2. 关联资源增加HPA
-![输入图片说明](https://foruda.gitee.com/images/1740664626159889748/96a40af4_77493.png "屏幕截图")
 
+1. 新增HPA
+   ![输入图片说明](https://foruda.gitee.com/images/1740664600490309267/48ff3895_77493.png "屏幕截图")
+2. 关联资源增加HPA
+   ![输入图片说明](https://foruda.gitee.com/images/1740664626159889748/96a40af4_77493.png "屏幕截图")
 
 **v0.0.49更新**
 
 1. 新增标签搜索：支持精确搜索、模糊搜索。
-精确搜索。可以搜索k，k=v两种方式精确搜索。默认列出所有标签。支持自定义新增搜索标签。
-![输入图片说明](https://foruda.gitee.com/images/1740664804869894211/257140ad_77493.png "屏幕截图")
-模糊搜索。可以搜索k，v中的任意满足。类似like %xx%的搜索方式。
-![输入图片说明](https://foruda.gitee.com/images/1740664820221541385/cf840a61_77493.png "屏幕截图")
+   精确搜索。可以搜索k，k=v两种方式精确搜索。默认列出所有标签。支持自定义新增搜索标签。
+   ![输入图片说明](https://foruda.gitee.com/images/1740664804869894211/257140ad_77493.png "屏幕截图")
+   模糊搜索。可以搜索k，v中的任意满足。类似like %xx%的搜索方式。
+   ![输入图片说明](https://foruda.gitee.com/images/1740664820221541385/cf840a61_77493.png "屏幕截图")
 2. 多集群纳管支持自定义名称。
-![输入图片说明](https://foruda.gitee.com/images/1740664838997975455/95aeec37_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1740664855863544600/3496c16f_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740664838997975455/95aeec37_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740664855863544600/3496c16f_77493.png "屏幕截图")
 3. 优化Pod状态显示
-在列表页展示pod状态，不同颜色区分正常运行与未就绪运行。
-![输入图片说明](https://foruda.gitee.com/images/1740664869098640512/0d4002eb_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1740664883842793338/17f94df3_77493.png "屏幕截图")
-
+   在列表页展示pod状态，不同颜色区分正常运行与未就绪运行。
+   ![输入图片说明](https://foruda.gitee.com/images/1740664869098640512/0d4002eb_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1740664883842793338/17f94df3_77493.png "屏幕截图")
 
 **v0.0.44更新**
 
