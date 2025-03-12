@@ -574,16 +574,13 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 
 // RegisterInCluster 将InCluster的配置注册到集群列表中
 func (c *clusterService) RegisterInCluster() {
-	cfg := flag.Init()
 
 	// 获取InCluster的配置
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		klog.V(6).Infof("获取InCluster的配置失败: %v", err)
-		cfg.InCluster = false
 		return
 	}
-	cfg.InCluster = true
 
 	// 3. 生成 ClusterConfig
 	clusterConfig := &ClusterConfig{
