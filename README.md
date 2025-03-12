@@ -234,6 +234,17 @@ make help
 - **无法启动**：启动时卡住，请使用 k8m -v 6
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
 
+**v0.0.60更新**
+
+1. 增加helm 常用仓库
+   ![输入图片说明](https://foruda.gitee.com/images/1741792802066909841/f20b8736_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1741792815487933294/a4b9c193_77493.png "屏幕截图")
+2. Namespace增加LimitRange、ResourceQuota快捷菜单
+   ![输入图片说明](https://foruda.gitee.com/images/1741792871141287157/f0a51266_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1741792891386812848/ad928eb1_77493.png "屏幕截图")
+3. 增加InCluster模式开关
+   默认开启InCluster模式，如需关闭，可以注入环境变量，或修改配置文件，或修改命令行参数
+
 **v0.0.53更新**
 
 1. 日志查看支持颜色，如果输出console的时候带有颜色，那么在pod 日志查看时就可以显示。
