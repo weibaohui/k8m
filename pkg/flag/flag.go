@@ -82,6 +82,8 @@ func (c *Config) InitFlags() {
 	// 默认debug为false
 	defaultDebug := getEnvAsBool("DEBUG", false)
 
+	defaultInCluster := getEnvAsBool("IN_CLUSTER", false)
+
 	// jwt token secret
 	defaultJwtTokenSecret := getEnv("JWT_TOKEN_SECRET", "your-secret-key")
 
@@ -111,7 +113,7 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.KubectlShellImage, "kubectl-shell-image", defaultKubectlShellImage, "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令")
 	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
 	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认/data/k8m.db")
-
+	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认否")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
