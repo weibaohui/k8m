@@ -76,7 +76,10 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
             // 连接事件
             ws.onopen = () => {
                 term.focus();
+                // 延迟100ms执行fit以确保终端完全初始化
                 setTimeout(() => fitAddon.fit(), 100);
+                setTimeout(() => fitAddon.fit(), 1000);
+                // 连接成功时不显示Connected消息
                 // term.write("\x1b[32mConnected\x1b[0m\r\n");
             };
             ws.onmessage = (event) => term.write(event.data);
