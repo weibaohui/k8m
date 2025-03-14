@@ -392,6 +392,7 @@ func (p *podService) watchSingleCluster(selectedCluster string) watch.Interface 
 				p.UpdatePodLabels(selectedCluster, pod.Namespace, pod.Name, pod.Labels)
 				klog.V(6).Infof("%s 添加Pod [ %s/%s ] 标签数量: %d\n", selectedCluster, pod.Namespace, pod.Name, len(pod.Labels))
 			case watch.Modified:
+				p.RemoveCacheAllocatedStatus(selectedCluster, &pod)
 				p.CacheAllocatedStatus(selectedCluster, &pod)
 				// 修改Pod时，更新Pod标签
 				p.UpdatePodLabels(selectedCluster, pod.Namespace, pod.Name, pod.Labels)
