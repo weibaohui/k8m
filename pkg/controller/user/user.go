@@ -159,6 +159,7 @@ func Generate2FASecret(c *gin.Context) {
 	userID := c.Param("id")
 
 	// 获取用户信息
+	// TODO 校验是否当前用户，只能给自己开启
 	user := &models.User{}
 	user.ID = uint(utils.ToInt64(userID))
 	queryFuncs := genQueryFuncs(c, params)
@@ -203,6 +204,7 @@ func Generate2FASecret(c *gin.Context) {
 		"qr_url":       qrURL,
 		"backup_codes": backupCodes,
 	})
+
 }
 
 // Enable2FA 验证并启用2FA
@@ -221,6 +223,8 @@ func Enable2FA(c *gin.Context) {
 	}
 
 	// 获取用户信息
+	// TODO 校验是否当前用户，只能给自己开启
+
 	user := &models.User{}
 	user.ID = uint(utils.ToInt64(userID))
 	queryFuncs := genQueryFuncs(c, params)
