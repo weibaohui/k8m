@@ -26,6 +26,9 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 **k8m** 的设计理念是“AI驱动，轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
 
+<img width="600" alt="image" src="https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e" />
+
+
 ## **运行**
 
 1. **下载**：从 [GitHub](https://github.com/weibaohui/k8m) 下载最新版本。
