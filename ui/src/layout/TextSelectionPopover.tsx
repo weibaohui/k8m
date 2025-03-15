@@ -4,10 +4,12 @@ import { render as amisRender } from "amis";
 import { Card } from "amis-ui";
 import Draggable from "react-draggable";
 import './TextSelectionPopover.css';
-
+import { SpaceContext } from "antd/lib/space";
+import { Tooltip } from "antd";
 
 const GlobalTextSelector: React.FC = () => {
     const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     useEffect(() => {
         const handleMouseUp = (event: MouseEvent) => {
@@ -25,8 +27,8 @@ const GlobalTextSelector: React.FC = () => {
 
             setSelection({
                 text: selectedText,
-                x: event.clientX + window.scrollX, // ✅ 使用鼠标点击的 X 坐标
-                y: event.clientY + window.scrollY  // ✅ 使用鼠标点击的 Y 坐标
+                x: event.clientX + window.scrollX,
+                y: event.clientY + window.scrollY
             });
 
         };
@@ -39,32 +41,50 @@ const GlobalTextSelector: React.FC = () => {
 
     if (!selection) return null;
 
-
     return ReactDOM.createPortal(
-        <Draggable handle=".selection-title">
+        <Draggable handle=".selection-title" disabled={isFullscreen}>
             <div
                 className="selection-card"
                 style={{
                     position: "absolute",
-                    top: selection.y + 5,
-                    left: selection.x,
+                    top: isFullscreen ? 0 : selection.y + 5,
+                    left: isFullscreen ? 0 : selection.x,
                     zIndex: 100000000,
-                    width: "550px",
-                    overflow: "auto"
+                    width: isFullscreen ? "100vw" : "550px",
+                    height: isFullscreen ? "100vh" : "auto",
+                    overflow: "auto",
+                    transition: "all 0.3s ease"
                 }}
             >
                 <Card
                     titleClassName="selection-title"
                     title={<>
-                        <i className="fas fa-grip-vertical" style={{ marginRight: '8px' }}></i>
+                        <i className="fas fa-grip-vertical" style={{ marginRight: '8px', visibility: isFullscreen ? 'hidden' : 'visible' }}></i>
                         {selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
+                        &nbsp;&nbsp;
+                        <Tooltip color="#108ee9" placement="right" title={isFullscreen ? '退出全屏' : '全屏'}>
+
+                            <i
+                                className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand-arrows-alt'}`}
+                                style={{
+                                    marginLeft: 'auto',
+                                    cursor: 'pointer',
+                                    fontSize: '14px'
+                                }}
+                                onClick={() => setIsFullscreen(!isFullscreen)}
+                            />
+                        </Tooltip>
+
                     </>}
+                    style={{
+                        height: isFullscreen ? '100%' : 'auto'
+                    }}
                 >
                     <div style={{
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        maxHeight: "50vh",
+                        maxHeight: isFullscreen ? "calc(100vh - 60px)" : "50vh",
                         overflow: "auto"
                     }}>
                         {
@@ -74,13 +94,11 @@ const GlobalTextSelector: React.FC = () => {
                                 "params": {
                                     "question": selection.text
                                 },
-                                "width": "500px"
+                                "width": isFullscreen ? "100%" : "500px"
                             })
                         }
                     </div>
                 </Card>
-
-
             </div>
         </Draggable>,
         document.body
