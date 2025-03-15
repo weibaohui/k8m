@@ -1,12 +1,13 @@
-import {Form, Input, Button, Checkbox, message} from 'antd'
-import {useNavigate} from 'react-router-dom'
+import { Form, Input, Button, Checkbox, message } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import {
     UserOutlined,
-    LockOutlined
+    LockOutlined,
+    SafetyOutlined
 } from '@ant-design/icons'
 import styles from './index.module.scss'
-import {useCallback, useEffect} from 'react'
-import {encrypt, decrypt} from '@/utils/crypto'
+import { useCallback, useEffect } from 'react'
+import { encrypt, decrypt } from '@/utils/crypto'
 
 const FormItem = Form.Item
 
@@ -45,6 +46,7 @@ const Login = () => {
                     body: JSON.stringify({
                         username: values.username,
                         password: encryptedPassword,  // 发送加密后的密码
+                        code: values.code // 添加2FA验证码
                     }),
                 });
                 const data = await res.json();
@@ -88,15 +90,21 @@ const Login = () => {
                 autoComplete='off'
             >
                 <div>
-                    <h2 style={{color: '#666', fontSize: '24px', marginBottom: 20}}>欢迎登录</h2>
+                    <h2 style={{ color: '#666', fontSize: '24px', marginBottom: 20 }}>欢迎登录</h2>
                 </div>
-                <FormItem name='username' rules={[{required: true, message: '请输入用户名'}]}>
-                    <Input placeholder='请输入用户名' prefix={<UserOutlined/>}/>
+                <FormItem name='username' rules={[{ required: true, message: '请输入用户名' }]}>
+                    <Input placeholder='请输入用户名' prefix={<UserOutlined />} />
                 </FormItem>
-                <FormItem name='password' rules={[{required: true, message: '请输入密码'}]}>
+                <FormItem name='password' rules={[{ required: true, message: '请输入密码' }]}>
                     <Input.Password
-                        prefix={<LockOutlined/>}
+                        prefix={<LockOutlined />}
                         placeholder='请输入密码'
+                    />
+                </FormItem>
+                <FormItem name='code'>
+                    <Input
+                        prefix={<SafetyOutlined />}
+                        placeholder='请输入2FA验证码，未开启可不填'
                     />
                 </FormItem>
                 <FormItem name='remember' valuePropName='checked'>

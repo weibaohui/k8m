@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/comm/utils/totp"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -26,6 +27,7 @@ var ErrorUerPassword = errors.New("用户名密码错误")
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	Code     string `json:"code"`
 }
 
 // 生成 Token
@@ -72,6 +74,7 @@ func LoginByPassword(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, errorInfo)
 			return
 		}
+		// Admin用户不需要2FA验证
 		token, _ := generateToken(req.Username, []string{models.RolePlatformAdmin})
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
@@ -103,6 +106,20 @@ func LoginByPassword(c *gin.Context) {
 					// 前端处理登录状态码，不要修改
 					c.JSON(http.StatusUnauthorized, errorInfo)
 					return
+				}
+
+				// 检查是否启用了2FA
+				if v.TwoFAEnabled {
+					// 如果启用了2FA但未提供验证码
+					if req.Code == "" {
+						c.JSON(http.StatusUnauthorized, gin.H{"message": "请输入2FA验证码"})
+						return
+					}
+					// 验证2FA代码
+					if !totp.ValidateCode(v.TwoFASecret, req.Code) {
+						c.JSON(http.StatusUnauthorized, gin.H{"message": "2FA验证码错误"})
+						return
+					}
 				}
 				var ugList []models.UserGroup
 				err = dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(v.GroupNames, ",")).Distinct("role").First(&ugList).Error
