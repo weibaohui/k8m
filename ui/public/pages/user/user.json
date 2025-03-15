@@ -263,8 +263,27 @@
             },
             {
               "type": "button",
+              "actionType": "ajax",
+              "label": "关闭",
+              "level": "link",
+              "confirmText": "确定要关闭2FA验证吗？关闭后将不再需要验证码登录。",
+              "api": "post:/mgm/user/2fa/disable/${id}",
+              "visibleOn": "two_fa_enabled===true",
+              "onEvent": {
+                "success": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "detailCRUD"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "button",
               "actionType": "drawer",
-              "label": "启用",
+              "label": "绑定",
               "level": "link",
               "drawer": {
                 "closeOnEsc": true,
