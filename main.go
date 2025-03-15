@@ -352,6 +352,7 @@ func main() {
 	{
 		// 2FA
 		mgm.POST("/user/2fa/generate/:id", user.Generate2FASecret)
+		mgm.POST("/user/2fa/disable/:id", user.Disable2FA)
 		mgm.POST("/user/2fa/enable/:id", user.Enable2FA)
 
 		mgm.GET("/custom/template/kind/list", template.ListKind)
