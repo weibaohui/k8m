@@ -229,12 +229,43 @@
                 },
                 "actions": []
               }
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "username",
+          "label": "用户名",
+          "type": "text",
+          "width": "180px",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "username",
+            "clearable": true,
+            "label": "用户名",
+            "placeholder": "输入用户名"
+          }
+        },
+        {
+          "label": "用户组",
+          "type": "text",
+          "name": "group_names"
+        },
+        {
+          "name": "two_fa_enabled",
+          "label": "2FA状态",
+          "type": "container",
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "${two_fa_enabled ? `<span class=\"text-success\"><i class=\"fas fa-shield-alt\"></i> ${two_fa_type || 'TOTP'}</span>` : `<span class=\"text-muted\"><i class=\"fas fa-shield-alt\"></i> 未启用</span>`}"
             },
             {
               "type": "button",
-              "icon": "fas fa-shield-alt text-primary",
               "actionType": "drawer",
-              "tooltip": "2FA验证",
+              "label": "绑定",
+              "level": "link",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
@@ -285,33 +316,7 @@
                 }
               }
             }
-          ],
-          "toggled": true
-        },
-        {
-          "name": "username",
-          "label": "用户名",
-          "type": "text",
-          "width": "180px",
-          "sortable": true,
-          "searchable": {
-            "type": "input-text",
-            "name": "username",
-            "clearable": true,
-            "label": "用户名",
-            "placeholder": "输入用户名"
-          }
-        },
-        {
-          "label": "用户组",
-          "type": "text",
-          "name": "group_names"
-        },
-        {
-          "name": "two_fa_enabled",
-          "label": "2FA状态",
-          "type": "tpl",
-          "tpl": "${two_fa_enabled ? `<span class=\"text-success\"><i class=\"fas fa-shield-alt\"></i> ${two_fa_type || 'TOTP'}</span>` : `<span class=\"text-muted\"><i class=\"fas fa-shield-alt\"></i> 未启用</span>`}"
+          ]
         },
         {
           "name": "created_at",
