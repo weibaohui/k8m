@@ -245,10 +245,12 @@
                   "initApi": "post:/mgm/user/2fa/generate/${id}",
                   "body": [
                     {
+                      "name": "qr-code",
                       "type": "qr-code",
                       "codeSize": 128,
                       "value": "${qr_url}",
-                      "label": "请使用身份验证器扫描二维码"
+                      "label": "请使用身份验证器扫描二维码",
+                      "className": "text-center"
                     },
                     {
                       "type": "input-text",
@@ -256,6 +258,10 @@
                       "label": "验证码",
                       "required": true,
                       "placeholder": "请输入验证码"
+                    },
+                    {
+                      "type": "tpl",
+                      "tpl": "<div class='alert alert-info'><p><strong>绑定说明：</strong></p><ol><li>请先下载并安装支持的身份验证器应用：<ul><li>Google Authenticator (<a href='https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2' target='_blank'>Android</a> / <a href='https://apps.apple.com/app/google-authenticator/id388497605' target='_blank'>iOS</a>)</li><li>Microsoft Authenticator (<a href='https://play.google.com/store/apps/details?id=com.azure.authenticator' target='_blank'>Android</a> / <a href='https://apps.apple.com/app/microsoft-authenticator/id983156458' target='_blank'>iOS</a>)</li></ul></li><li>打开验证器应用，点击添加账号或扫描二维码</li><li>使用验证器扫描上方显示的二维码</li><li>等待验证器生成6位数验证码</li><li>将验证码输入上方输入框进行验证</li><li>验证成功后，每次登录时都需要输入验证器生成的验证码</li></ol><p><strong>注意：</strong>请妥善保管验证器，如果手机丢失或更换设备，将无法登录系统。建议备份验证器的恢复码。</p></div>"
                     }
                   ],
                   "submitText": "验证",
