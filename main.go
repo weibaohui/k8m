@@ -350,6 +350,10 @@ func main() {
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
 	{
+		// 2FA
+		mgm.POST("/user/2fa/generate/:id", user.Generate2FASecret)
+		mgm.POST("/user/2fa/enable/:id", user.Enable2FA)
+
 		mgm.GET("/custom/template/kind/list", template.ListKind)
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)
