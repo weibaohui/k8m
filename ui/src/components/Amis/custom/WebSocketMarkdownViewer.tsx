@@ -65,6 +65,7 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
                             backgroundColor: "#f5f5f5",
                             padding: "10px",
                             borderRadius: "5px",
+                            maxHeight: "calc(100% - 40px)",
                             overflowX: "auto",
                         }}
                     >
@@ -74,6 +75,11 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
                             amisRender({
                                 type: "markdown",
                                 value: markdownContent,
+                                options: {
+                                    linkify: true,
+                                    html: true,
+                                    breaks: true
+                                },
                             })
                         )}
                     </div>
