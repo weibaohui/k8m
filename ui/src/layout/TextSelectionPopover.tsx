@@ -4,8 +4,6 @@ import { render as amisRender } from "amis";
 import { Card } from "amis-ui";
 import Draggable from "react-draggable";
 import './TextSelectionPopover.css';
-import { SpaceContext } from "antd/lib/space";
-import { Tooltip } from "antd";
 
 const GlobalTextSelector: React.FC = () => {
     const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
@@ -53,7 +51,7 @@ const GlobalTextSelector: React.FC = () => {
                     width: isFullscreen ? "100vw" : "550px",
                     height: isFullscreen ? "100vh" : "auto",
                     overflow: "auto",
-                    transition: "all 0.3s ease"
+                    transition: "all 0.1s ease"
                 }}
             >
                 <Card
@@ -62,18 +60,16 @@ const GlobalTextSelector: React.FC = () => {
                         <i className="fas fa-grip-vertical" style={{ marginRight: '8px', visibility: isFullscreen ? 'hidden' : 'visible' }}></i>
                         {selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
                         &nbsp;&nbsp;
-                        <Tooltip color="#108ee9" placement="right" title={isFullscreen ? '退出全屏' : '全屏'}>
 
-                            <i
-                                className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand-arrows-alt'}`}
-                                style={{
-                                    marginLeft: 'auto',
-                                    cursor: 'pointer',
-                                    fontSize: '14px'
-                                }}
-                                onClick={() => setIsFullscreen(!isFullscreen)}
-                            />
-                        </Tooltip>
+                        <i
+                            className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand-arrows-alt'}`}
+                            style={{
+                                marginLeft: 'auto',
+                                cursor: 'pointer',
+                                fontSize: '14px'
+                            }}
+                            onClick={() => setIsFullscreen(!isFullscreen)}
+                        />
 
                     </>}
                     style={{
