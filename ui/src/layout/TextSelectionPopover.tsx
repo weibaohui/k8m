@@ -49,6 +49,7 @@ const GlobalTextSelector: React.FC = () => {
                     top: selection.y + 5,
                     left: selection.x,
                     zIndex: 100000000,
+                    width: "550px",
                     overflow: "auto"
                 }}
             >
