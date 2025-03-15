@@ -26,8 +26,8 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 **k8m** 的设计理念是“AI驱动，轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
 
+<a href="https://www.producthunt.com/posts/k8m?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-k8m" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=941047&theme=light&t=1742013483005" alt="k8m - 轻量级跨平台&#0032;Kubernetes&#0032;智能管理平台，AI&#0032;驱动高效运维与数据安全 | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 <img width="600" alt="image" src="https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e" />
-
 
 ## **运行**
 
@@ -236,6 +236,17 @@ make help
 - **文件浏览权限问题**：依赖容器内的ls命令，请在容器内安装shell、tar、cat等命令 。
 - **无法启动**：启动时卡住，请使用 k8m -v 6
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
+
+**v0.0.61 更新**
+
+1. 新增2FA两步验证
+   启用后，登录时需填写验证码，增强安全性
+   ![输入图片说明](https://foruda.gitee.com/images/1742012358386285979/eada8b94_77493.png "屏幕截图")
+2. InCluster运行模式增加开关
+   默认开启，可设置环境变量显式关闭。按需开启。
+3. 优化资源用量显示逻辑
+   未设置资源用量，在k8s中属于最低保障等级。界面显示进度条调整为红色100%，提醒管理员关注。
+   ![资源用量](https://foruda.gitee.com/images/1742012525046823733/35acfc96_77493.png "屏幕截图")
 
 **v0.0.60更新**
 
