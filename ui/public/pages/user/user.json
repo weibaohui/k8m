@@ -264,7 +264,7 @@
             {
               "type": "button",
               "actionType": "drawer",
-              "label": "绑定",
+              "label": "启用",
               "level": "link",
               "drawer": {
                 "closeOnEsc": true,
