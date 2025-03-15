@@ -17,7 +17,9 @@ func List(c *gin.Context) {
 	m := &models.User{}
 
 	queryFuncs := genQueryFuncs(c, params)
-
+	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
+		return db.Select([]string{"id", "group_names", "two_fa_enabled", "username", "two_fa_type", "created_at", "updated_at"})
+	})
 	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
