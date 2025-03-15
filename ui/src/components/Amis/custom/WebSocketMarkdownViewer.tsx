@@ -5,12 +5,12 @@ import { formatFinalGetUrl } from "@/utils/utils";
 interface WebSocketMarkdownViewerProps {
     url: string;
     params: Record<string, string>;
-    data: Record<string, any>
-
+    data: Record<string, any>;
+    width?: string;
 }
 
 const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({ url, data, params }, _) => {
+    ({ url, data, params, width }, _) => {
         url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
@@ -58,7 +58,7 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
 
         return (
             <>
-                <div>
+                <div style={{ width: width || "90vh" }}>
                     <p style={{ display: "none" }}>WebSocket Status: {status}</p>
                     <div
                         style={{
