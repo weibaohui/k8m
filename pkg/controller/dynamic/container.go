@@ -223,14 +223,14 @@ func UpdateImageTag(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	patchJSON := utils.ToJSON(patchData)
 
+	patchJSON := utils.ToJSON(patchData)
 	var item interface{}
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).Name(name).
-		Patch(&item, types.MergePatchType, patchJSON).Error
+		Patch(&item, types.StrategicMergePatchType, patchJSON).Error
 	amis.WriteJsonErrorOrOK(c, err)
 }
 

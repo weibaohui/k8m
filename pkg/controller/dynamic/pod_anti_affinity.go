@@ -120,7 +120,7 @@ func processPodAntiAffinity(c *gin.Context, action string) {
 		WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).Name(name).
-		Patch(&obj, types.MergePatchType, patchJSON).Error
+		Patch(&obj, types.StrategicMergePatchType, patchJSON).Error
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
