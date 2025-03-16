@@ -1120,14 +1120,14 @@
         },
         {
           "name": "resource",
-          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
+          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比</span>",
           "type": "container",
           "width": "150px",
           "body": [
             {
               "type": "progress",
               "label": "request",
-              "value": "<%= data.metadata.annotations['cpu.requestFraction'] %>",
+              "value": "<%= data.metadata.annotations['cpu.requestFraction'] && Number(data.metadata.annotations['cpu.requestFraction']) !== 0 ? data.metadata.annotations['cpu.requestFraction'] : 100 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -1142,7 +1142,7 @@
             {
               "type": "progress",
               "label": "limit",
-              "value": "<%= data.metadata.annotations['cpu.limitFraction'] %>",
+              "value": "<%= data.metadata.annotations['cpu.limitFraction'] && Number(data.metadata.annotations['cpu.limitFraction']) !== 0 ? data.metadata.annotations['cpu.limitFraction'] : 100 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -1158,14 +1158,14 @@
         },
         {
           "name": "resource",
-          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量/上限用量</span>",
+          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比</span>",
           "type": "container",
           "width": "150px",
           "body": [
             {
               "type": "progress",
               "label": "request",
-              "value": "<%= data.metadata.annotations['memory.requestFraction'] %>",
+              "value": "<%= data.metadata.annotations['memory.requestFraction'] && Number(data.metadata.annotations['memory.requestFraction']) !== 0 ? data.metadata.annotations['memory.requestFraction'] : 100 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -1180,7 +1180,7 @@
             {
               "type": "progress",
               "label": "limit",
-              "value": "<%= data.metadata.annotations['memory.limitFraction'] %>",
+              "value": "<%= data.metadata.annotations['memory.limitFraction'] && Number(data.metadata.annotations['memory.limitFraction']) !== 0 ? data.metadata.annotations['memory.limitFraction'] : 100 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
