@@ -69,12 +69,6 @@ func Generate2FASecret(c *gin.Context) {
 		return
 	}
 
-	// 检查是否已启用2FA
-	if user.TwoFAEnabled {
-		amis.WriteJsonError(c, fmt.Errorf("2FA已启用，请先禁用"))
-		return
-	}
-
 	// 生成TOTP密钥和二维码URL
 	secret, qrURL, err := totp.GenerateSecret(user.Username)
 	if err != nil {
@@ -93,11 +87,11 @@ func Generate2FASecret(c *gin.Context) {
 	user.TwoFASecret = secret
 	user.TwoFAType = "totp"
 	user.TwoFABackupCodes = strings.Join(backupCodes, ",")
-	user.TwoFAEnabled = true
+	user.TwoFAEnabled = false
 
 	// 保存到数据库
 	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
-		return db.Select([]string{"two_fa_secret", "two_fa_type", "two_fa_backup_codes", "two_fa_enabled"})
+		return db.Select([]string{"two_fa_secret", "two_fa_type", "two_fa_backup_codes", "two_fa_enabled", "two_fa_app_name"})
 	})
 	err = user.Save(params, queryFuncs...)
 	if err != nil {
@@ -121,7 +115,8 @@ func Enable2FA(c *gin.Context) {
 
 	// 获取用户输入的验证码
 	type Enable2FARequest struct {
-		Code string `json:"code"`
+		Code    string `json:"code"`
+		AppName string `json:"app_name"`
 	}
 	var req Enable2FARequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -148,10 +143,10 @@ func Enable2FA(c *gin.Context) {
 
 	// 启用2FA
 	user.TwoFAEnabled = true
-
+	user.TwoFAAppName = req.AppName
 	// 保存到数据库
 	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
-		return db.Select([]string{"two_fa_enabled"})
+		return db.Select([]string{"two_fa_enabled", "two_fa_app_name"})
 	})
 	err = user.Save(params, queryFuncs...)
 	if err != nil {

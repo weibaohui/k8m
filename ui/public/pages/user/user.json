@@ -259,7 +259,7 @@
           "body": [
             {
               "type": "tpl",
-              "tpl": "${two_fa_enabled ? `<span class=\"text-success\"><i class=\"fas fa-shield-alt\"></i> ${two_fa_type || 'TOTP'}</span>` : `<span class=\"text-muted\"><i class=\"fas fa-shield-alt\"></i> 未启用</span>`}"
+              "tpl": "${two_fa_enabled ? `<span class=\"text-success\"><i class=\"fas fa-shield-alt\"></i> ${two_fa_type || 'TOTP'} ${two_fa_app_name}</span>` : `<span class=\"text-muted\"><i class=\"fas fa-shield-alt\"></i> 未启用</span>`}"
             },
             {
               "type": "button",
@@ -308,6 +308,14 @@
                       "label": "验证码",
                       "required": true,
                       "placeholder": "请输入验证码"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "app_name",
+                      "label": "应用名称",
+                      "required": true,
+                      "placeholder": "软件名称",
+                      "description": "为此验证器起个名字，避免忘记绑定到哪个软件上了"
                     },
                     {
                       "type": "tpl",

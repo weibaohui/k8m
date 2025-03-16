@@ -23,6 +23,8 @@ type User struct {
 	TwoFAType        string `gorm:"size:20" json:"two_fa_type,omitempty"`          // 2FA类型：如 'totp', 'sms', 'email'
 	TwoFASecret      string `gorm:"size:100" json:"two_fa_secret,omitempty"`       // 2FA密钥
 	TwoFABackupCodes string `gorm:"size:500" json:"two_fa_backup_codes,omitempty"` // 备用恢复码，逗号分隔
+	TwoFAAppName     string `gorm:"size:100" json:"two_fa_app_name,omitempty"`     // 2FA应用名称，用于提醒用户使用的是哪个软件
+
 }
 
 const (
