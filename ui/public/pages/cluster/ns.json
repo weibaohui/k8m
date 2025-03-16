@@ -944,7 +944,7 @@
         },
         {
           "name": "resource",
-          "label": "CPU用量<br><span class='text-gray-500 text-xs'>请求用量/上限用量/实时用量(核)</span>",
+          "label": "CPU用量(核)<br><span class='text-gray-500 text-xs'>请求用量/上限用量/实时用量</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -956,7 +956,7 @@
         },
         {
           "name": "resource",
-          "label": "内存用量<br><span class='text-gray-500 text-xs'>请求用量/上限用量/实时用量(Gi)</span>",
+          "label": "内存用量(Gi)<br><span class='text-gray-500 text-xs'>请求用量/上限用量/实时用量</span>",
           "type": "container",
           "width": "150px",
           "body": [
