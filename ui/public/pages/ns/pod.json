@@ -3056,7 +3056,7 @@
         },
         {
           "name": "resource",
-          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量<br>上限用量</span>",
+          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -3094,7 +3094,7 @@
         },
         {
           "name": "resource",
-          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量<br>上限用量</span>",
+          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比</span>",
           "type": "container",
           "width": "150px",
           "body": [
