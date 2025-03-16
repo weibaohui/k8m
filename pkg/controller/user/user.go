@@ -66,6 +66,7 @@ func Save(c *gin.Context) {
 			// 如需限制不能修改的字段，请在下面赋值。
 			// 用户名、角色不能修改
 			m.Username = originalUser.Username
+			m.GroupNames = originalUser.GroupNames
 		}
 
 	}
