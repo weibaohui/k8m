@@ -578,7 +578,9 @@ func (c *clusterService) RegisterInCluster() {
 	// 获取InCluster的配置
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		klog.V(6).Infof("获取InCluster的配置失败: %v", err)
+		cfg := flag.Init()
+		cfg.InCluster = false
+		klog.Errorf("获取InCluster的配置失败,InCluster模式关闭.错误：%v", err)
 		return
 	}
 
