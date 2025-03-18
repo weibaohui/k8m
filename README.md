@@ -25,8 +25,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - **完全开源**：开放所有源码，无任何限制，可自由定制和扩展，可商业使用。
 
 **k8m** 的设计理念是“AI驱动，轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
-
-<a href="https://www.producthunt.com/posts/k8m?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-k8m" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=941047&theme=light&t=1742013483005" alt="k8m - 轻量级跨平台&#0032;Kubernetes&#0032;智能管理平台，AI&#0032;驱动高效运维与数据安全 | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+ 
 <img width="600" alt="image" src="https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e" />
 
 ## **运行**
