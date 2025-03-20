@@ -1,0 +1,253 @@
+{
+    "type": "page",
+    "title": "MCP管理",
+    "body": {
+        "type": "crud",
+        "api": "/mgm/mcp/list",
+        "autoFillHeight": true,
+        "autoGenerateFilter": {
+            "columnsNum": 4,
+            "showBtnToolbar": false
+        },
+        "headerToolbar": [
+            {
+                "type": "columns-toggler",
+                "align": "right",
+                "draggable": true,
+                "icon": "fas fa-cog",
+                "overlay": true,
+                "footerBtnSize": "sm"
+            },
+            {
+                "type": "tpl",
+                "tpl": "共${count}条",
+                "align": "right",
+                "visibleOn": "${count}"
+            },
+            {
+                "type": "columns-toggler",
+                "align": "left"
+            },
+            "reload",
+            "bulkActions",
+            {
+                "type": "button",
+                "label": "添加服务器",
+                "icon": "fa fa-plus",
+                "actionType": "dialog",
+                "dialog": {
+                    "title": "添加服务器",
+                    "body": {
+                        "type": "form",
+                        "api": "/mgm/mcp",
+                        "body": [
+                            {
+                                "type": "input-text",
+                                "name": "name",
+                                "label": "服务器名称",
+                                "required": true
+                            },
+                            {
+                                "type": "input-text",
+                                "name": "url",
+                                "label": "服务器地址",
+                                "required": true
+                            },
+                            {
+                                "type": "switch",
+                                "name": "enabled",
+                                "label": "是否启用",
+                                "value": true
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "loadDataOnce": true,
+        "syncLocation": false,
+        "perPage": 10,
+        "columns": [
+            {
+                "name": "configs.name",
+                "label": "服务器名称"
+            },
+            {
+                "name": "configs.url",
+                "label": "服务器地址"
+            },
+            {
+                "name": "initialize_results.serverInfo",
+                "label": "服务",
+                "type": "tpl",
+                "tpl": "${initialize_results.serverInfo.name} - ${initialize_results.serverInfo.version}"
+            },
+            {
+                "name": "configs.enabled",
+                "label": "状态",
+                "type": "status",
+                "map": {
+                    "true": "已启用",
+                    "false": "已禁用"
+                }
+            },
+            {
+                "name": "tools",
+                "label": "工具",
+                "type": "each",
+                "items": {
+                    "type": "tag",
+                    "label": "${name}",
+                    "className": "cursor-pointer",
+                    "onEvent": {
+                        "click": {
+                            "actions": [
+                                {
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                        "title": "工具信息 - ${name}",
+                                        "size": "lg",
+                                        "body": {
+                                            "type": "form",
+                                            "mode": "horizontal",
+                                            "body": [
+                                                {
+                                                    "type": "static",
+                                                    "label": "工具名称",
+                                                    "value": "${name}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "工具描述",
+                                                    "value": "${description}"
+                                                },
+                                                {
+                                                    "type": "json",
+                                                    "label": "输入参数",
+                                                    "levelExpand": 8,
+                                                    "value": "${inputSchema|json}"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "name": "resources",
+                "label": "资源",
+                "type": "each",
+                "items": {
+                    "type": "tag",
+                    "label": "${name}"
+                }
+            },
+            {
+                "name": "prompts",
+                "label": "提示",
+                "type": "each",
+                "items": {
+                    "type": "tag",
+                    "label": "${name}",
+                    "className": "cursor-pointer",
+                    "onEvent": {
+                        "click": {
+                            "actions": [
+                                {
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                        "title": "工具信息 - ${name}",
+                                        "size": "lg",
+                                        "body": {
+                                            "type": "form",
+                                            "mode": "horizontal",
+                                            "body": [
+                                                {
+                                                    "type": "static",
+                                                    "label": "工具名称",
+                                                    "value": "${name}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "工具描述",
+                                                    "value": "${description}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "输入参数",
+                                                    "value": "${inputSchema}",
+                                                    "valueType": "json"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "name": "server_status.last_ping_success",
+                "label": "连接状态",
+                "type": "status",
+                "map": {
+                    "true": "正常",
+                    "false": "异常"
+                }
+            },
+            {
+                "name": "server_status.last_ping_time",
+                "label": "最后ping时间",
+                "type": "datetime"
+            },
+            {
+                "type": "operation",
+                "label": "操作",
+                "buttons": [
+                    {
+                        "type": "button",
+                        "label": "编辑",
+                        "actionType": "dialog",
+                        "dialog": {
+                            "title": "编辑服务器",
+                            "body": {
+                                "type": "form",
+                                "api": "put:/mgm/mcp/$name",
+                                "body": [
+                                    {
+                                        "type": "input-text",
+                                        "name": "name",
+                                        "label": "服务器名称",
+                                        "required": true
+                                    },
+                                    {
+                                        "type": "input-text",
+                                        "name": "url",
+                                        "label": "服务器地址",
+                                        "required": true
+                                    },
+                                    {
+                                        "type": "switch",
+                                        "name": "enabled",
+                                        "label": "是否启用"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "button",
+                        "label": "删除",
+                        "actionType": "ajax",
+                        "confirmText": "确认要删除该服务器吗？",
+                        "api": "delete:/mgm/mcp/$name"
+                    }
+                ]
+            }
+        ]
+    }
+}
