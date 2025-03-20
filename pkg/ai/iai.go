@@ -24,8 +24,10 @@ type IAI interface {
 	Configure(config IAIConfig) error
 	GetCompletion(ctx context.Context, prompt string) (string, error)
 	GetStreamCompletion(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
+	GetCompletionWithTools(ctx context.Context, prompt string) ([]openai.ToolCall, string, error)
 	GetName() string
 	Close()
+	SetTools(tools []openai.Tool)
 }
 
 type nopCloser struct{}
