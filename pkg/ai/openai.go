@@ -30,7 +30,13 @@ type OpenAIClient struct {
 	model       string
 	temperature float32
 	topP        float32
+	tools       []openai.Tool
+
 	// organizationId string
+}
+
+func (c *OpenAIClient) SetTools(tools []openai.Tool) {
+	c.tools = tools
 }
 
 func (c *OpenAIClient) Configure(config IAIConfig) error {
@@ -94,6 +100,25 @@ func (c *OpenAIClient) GetCompletion(ctx context.Context, prompt string) (string
 	}
 	return resp.Choices[0].Message.Content, nil
 }
+func (c *OpenAIClient) GetCompletionWithTools(ctx context.Context, prompt string) ([]openai.ToolCall, string, error) {
+
+	// Create a completion request
+	resp, err := c.client.CreateChatCompletion(ctx,
+		openai.ChatCompletionRequest{
+			Model: c.model,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: prompt,
+				},
+			},
+		})
+	if err != nil {
+		return nil, "", err
+	}
+	return resp.Choices[0].Message.ToolCalls, resp.Choices[0].Message.Content, nil
+}
+
 func (c *OpenAIClient) GetStreamCompletion(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error) {
 	stream, err := c.client.CreateChatCompletionStream(ctx, openai.ChatCompletionRequest{
 		Model: c.model,
