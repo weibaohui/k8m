@@ -27,6 +27,7 @@ var localUserService = &userService{}
 var localOperationLogService = &operationLogService{}
 var localShellLogService = &shellLogService{}
 var localAiService = &aiService{}
+var localMcpService = &mcpService{}
 
 func ChatService() *chatService {
 	return localChatService
@@ -72,4 +73,9 @@ func ShellLogService() *shellLogService {
 func AIService() *aiService {
 	return localAiService
 
+}
+
+func McpService() *mcpService {
+	
+	return localMcpService
 }
