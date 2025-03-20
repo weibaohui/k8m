@@ -27,6 +27,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/kubeconfig"
 	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
+	"github.com/weibaohui/k8m/pkg/controller/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
@@ -100,6 +101,7 @@ func Init() {
 			service.PVService().Watch()
 			service.IngressService().Watch()
 		})
+		service.McpService().Init()
 	}()
 
 }
@@ -392,6 +394,9 @@ func main() {
 		mgm.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
 		mgm.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
+
+		// mcp
+		mgm.GET("/mcp/list", mcp.List)
 
 	}
 
