@@ -2,6 +2,8 @@ package chat
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +13,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/sashabaranov/go-openai"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -153,13 +157,15 @@ func GPTShell(c *gin.Context) {
 
 			klog.V(6).Infof("prompt: %s", string(data))
 
-			stream, err := service.ChatService().GetChatStream(string(data))
+			tools := service.McpService().Host().GetAllTools(context.Background())
+			klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
+			stream, err := service.ChatService().GetChatStream(string(data), tools...)
 
 			if err != nil {
 				klog.V(6).Infof(fmt.Sprintf("failed to write %v bytes to tty: %s", len(dataBuffer), err))
 				continue
 			}
-
+			var toolCallBuffer []openai.ToolCall
 			for {
 				response, err := stream.Recv()
 				if err != nil {
@@ -170,10 +176,38 @@ func GPTShell(c *gin.Context) {
 					continue
 				}
 
+				// 设置了工具
+				if len(tools) > 0 {
+					for _, choice := range response.Choices {
+						// 大模型选择了执行工具
+						// 解析当前的ToolCalls
+						var currentCalls []openai.ToolCall
+						if err := json.Unmarshal([]byte(utils.ToJSON(choice.Delta.ToolCalls)), &currentCalls); err == nil {
+							toolCallBuffer = append(toolCallBuffer, currentCalls...)
+						}
+
+						// 当收到空的ToolCalls时，表示一个完整的ToolCall已经接收完成
+						if len(choice.Delta.ToolCalls) == 0 && len(toolCallBuffer) > 0 {
+							// 合并并处理完整的ToolCall
+							mergedCalls := MergeToolCalls(toolCallBuffer)
+
+							klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
+
+							// 使用合并后的ToolCalls执行操作
+							results := service.McpService().Host().ExecTools(context.Background(), mergedCalls)
+							for _, r := range results {
+								outBuffer.Write([]byte(utils.ToJSON(r)))
+							}
+							// 清空缓冲区
+							toolCallBuffer = nil
+						}
+					}
+
+				}
+
 				// 发送数据给客户端
 				// 写入outBuffer
-				_, err = outBuffer.Write([]byte(response.Choices[0].Delta.Content))
-
+				outBuffer.Write([]byte(response.Choices[0].Delta.Content))
 			}
 
 			err = stream.Close()
@@ -207,4 +241,37 @@ func createExecutor(url *url.URL, config *rest.Config) (remotecommand.Executor, 
 		return nil, err
 	}
 	return exec, nil
+}
+
+// MergeToolCalls 合并流式返回的ToolCall数据
+func MergeToolCalls(toolCalls []openai.ToolCall) []openai.ToolCall {
+	mergedCalls := make(map[int]*openai.ToolCall)
+
+	for _, call := range toolCalls {
+		if existing, ok := mergedCalls[*call.Index]; ok {
+			// 合并现有数据
+			if call.ID != "" {
+				existing.ID = call.ID
+			}
+			if call.Type != "" {
+				existing.Type = call.Type
+			}
+			if call.Function.Name != "" {
+				existing.Function.Name = call.Function.Name
+			}
+			if call.Function.Arguments != "" {
+				existing.Function.Arguments += call.Function.Arguments
+			}
+		} else {
+			// 创建新的ToolCall
+			mergedCalls[*call.Index] = &call
+		}
+	}
+
+	// 转换为切片
+	result := make([]openai.ToolCall, 0, len(mergedCalls))
+	for _, call := range mergedCalls {
+		result = append(result, *call)
+	}
+	return result
 }
