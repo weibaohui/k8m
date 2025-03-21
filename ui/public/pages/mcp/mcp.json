@@ -77,12 +77,6 @@
                 "label": "服务器地址"
             },
             {
-                "name": "initialize_results.serverInfo",
-                "label": "服务",
-                "type": "tpl",
-                "tpl": "${initialize_results.serverInfo.name} - ${initialize_results.serverInfo.version}"
-            },
-            {
                 "name": "configs.enabled",
                 "label": "启用",
                 "type": "status",
@@ -94,45 +88,31 @@
             {
                 "name": "tools",
                 "label": "工具",
-                "type": "each",
-                "items": {
-                    "type": "tag",
-                    "label": "${name}",
-                    "className": "cursor-pointer",
-                    "onEvent": {
-                        "click": {
-                            "actions": [
-                                {
-                                    "actionType": "drawer",
-                                    "drawer": {
-                                        "title": "工具信息 - ${name}",
-                                        "size": "lg",
-                                        "body": {
-                                            "type": "form",
-                                            "mode": "horizontal",
-                                            "body": [
-                                                {
-                                                    "type": "static",
-                                                    "label": "工具名称",
-                                                    "value": "${name}"
-                                                },
-                                                {
-                                                    "type": "static",
-                                                    "label": "工具描述",
-                                                    "value": "${description}"
-                                                },
-                                                {
-                                                    "type": "json",
-                                                    "label": "输入参数",
-                                                    "levelExpand": 8,
-                                                    "value": "${inputSchema|json}"
-                                                }
-                                            ]
-                                        }
+                "type": "tpl",
+                "tpl": "${COUNT(tools)}",
+                "className": "cursor-pointer",
+                "onEvent": {
+                    "click": {
+                        "actions": [
+                            {
+                                "actionType": "drawer",
+                                "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "md",
+                                    "body": {
+                                        "type": "table",
+                                        "source": "${tools}",
+                                        "columns": [
+                                            {
+                                                "name": "name",
+                                                "label": "工具名称"
+                                            }
+                                        ]
                                     }
                                 }
-                            ]
-                        }
+                            }
+                        ]
                     }
                 }
             },
