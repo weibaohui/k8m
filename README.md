@@ -25,7 +25,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - **完全开源**：开放所有源码，无任何限制，可自由定制和扩展，可商业使用。
 
 **k8m** 的设计理念是“AI驱动，轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
- 
+
 <img width="600" alt="image" src="https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e" />
 
 ## **运行**
@@ -39,7 +39,7 @@ Usage of ./k8m:
       --admin-password string            管理员密码 (default "123456")
       --admin-username string            管理员用户名 (default "admin")
   -k, --chatgpt-key string               大模型的自定义API Key (default "sk-xxxxxxx")
-  -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-Coder-7B-Instruct")
+  -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
   -d, --debug                            调试模式
       --in-cluster                       是否自动注册纳管宿主集群，默认启用
@@ -68,7 +68,7 @@ Usage of ./k8m:
 ```bash
 export OPENAI_API_KEY="sk-XXXXX"
 export OPENAI_API_URL="https://api.siliconflow.cn/v1"
-export OPENAI_MODEL="Qwen/Qwen2.5-Coder-7B-Instruct"
+export OPENAI_MODEL="Qwen/Qwen2.5-7B-Instruct"
 ```
 
 ### **ChatGPT 状态调试**
@@ -92,23 +92,23 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 
 以下是k8m支持的环境变量设置参数及其作用的表格：
 
-| 环境变量                  | 默认值                              | 说明                                                                |
-|-----------------------|----------------------------------|-------------------------------------------------------------------|
-| `PORT`                | `3618`                           | 监听的端口号                                                            |
-| `KUBECONFIG`          | `~/.kube/config`                 | `kubeconfig` 文件路径                                                 |
-| `OPENAI_API_KEY`      | `""`                             | 大模型的 API Key                                                      |
-| `OPENAI_API_URL`      | `""`                             | 大模型的 API URL                                                      |
-| `OPENAI_MODEL`        | `Qwen/Qwen2.5-Coder-7B-Instruct` | 大模型的默认模型名称，如需DeepSeek，请设置为deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
-| `LOGIN_TYPE`          | `"password"`                     | 登录方式（如 `password`, `oauth`, `token`）                              |
-| `ADMIN_USERNAME`      | `"admin"`                        | 管理员用户名                                                            |
-| `ADMIN_PASSWORD`      | `"123456"`                       | 管理员密码                                                             |
-| `DEBUG`               | `"false"`                        | 是否开启 `debug` 模式                                                   |
-| `LOG_V`               | `"2"`                            | log输出日志，同klog用法                                                   |
-| `JWT_TOKEN_SECRET`    | `"your-secret-key"`              | 用于 JWT Token 生成的密钥                                                |
-| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`         | kubectl shell 镜像地址                                                |
-| `NODE_SHELL_IMAGE`    | `alpine:latest`                  | Node shell 镜像地址                                                   |
-| `SQLITE_PATH`         | `/data/k8m.db`                   | 持久化数据库地址，默认sqlite数据库，文件地址/data/k8m.db                             |
-| `IN_CLUSTER`          | `"true"`                         | 是否自动注册纳管宿主集群，默认启用                                                 |
+| 环境变量                  | 默认值                        | 说明                                                                |
+|-----------------------|----------------------------|-------------------------------------------------------------------|
+| `PORT`                | `3618`                     | 监听的端口号                                                            |
+| `KUBECONFIG`          | `~/.kube/config`           | `kubeconfig` 文件路径                                                 |
+| `OPENAI_API_KEY`      | `""`                       | 大模型的 API Key                                                      |
+| `OPENAI_API_URL`      | `""`                       | 大模型的 API URL                                                      |
+| `OPENAI_MODEL`        | `Qwen/Qwen2.5-7B-Instruct` | 大模型的默认模型名称，如需DeepSeek，请设置为deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
+| `LOGIN_TYPE`          | `"password"`               | 登录方式（如 `password`, `oauth`, `token`）                              |
+| `ADMIN_USERNAME`      | `"admin"`                  | 管理员用户名                                                            |
+| `ADMIN_PASSWORD`      | `"123456"`                 | 管理员密码                                                             |
+| `DEBUG`               | `"false"`                  | 是否开启 `debug` 模式                                                   |
+| `LOG_V`               | `"2"`                      | log输出日志，同klog用法                                                   |
+| `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                |
+| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`   | kubectl shell 镜像地址                                                |
+| `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址                                                   |
+| `SQLITE_PATH`         | `/data/k8m.db`             | 持久化数据库地址，默认sqlite数据库，文件地址/data/k8m.db                             |
+| `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                 |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
@@ -237,12 +237,11 @@ make help
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
 
 **v0.0.62 更新**
+
 1. 划词解释增加全屏按钮
-解决部分情况下解释内容非常多，查看不方便，以及滚动条不能完整滚动的问题。
-![输入图片说明](https://foruda.gitee.com/images/1742085361623662812/c569323a_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1742085379102268742/769429f2_77493.png "屏幕截图")
-
-
+   解决部分情况下解释内容非常多，查看不方便，以及滚动条不能完整滚动的问题。
+   ![输入图片说明](https://foruda.gitee.com/images/1742085361623662812/c569323a_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1742085379102268742/769429f2_77493.png "屏幕截图")
 
 **v0.0.61 更新**
 
