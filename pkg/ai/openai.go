@@ -112,6 +112,7 @@ func (c *OpenAIClient) GetCompletionWithTools(ctx context.Context, prompt string
 					Content: prompt,
 				},
 			},
+			Tools: c.tools,
 		})
 	if err != nil {
 		return nil, "", err
@@ -128,6 +129,20 @@ func (c *OpenAIClient) GetStreamCompletion(ctx context.Context, prompt string) (
 				Content: prompt,
 			},
 		},
+		Stream: true,
+	})
+	return stream, err
+}
+func (c *OpenAIClient) GetStreamCompletionWithTools(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error) {
+	stream, err := c.client.CreateChatCompletionStream(ctx, openai.ChatCompletionRequest{
+		Model: c.model,
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: prompt,
+			},
+		},
+		Tools:  c.tools,
 		Stream: true,
 	})
 	return stream, err
