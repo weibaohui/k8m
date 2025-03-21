@@ -72,7 +72,7 @@ func (c *Config) InitFlags() {
 	// 默认apiKey为环境变量OPENAI_API_KEY/OPENAI_API_URL/
 	defaultApiKey := getEnv("OPENAI_API_KEY", "")
 	defaultApiURL := getEnv("OPENAI_API_URL", "")
-	defaultModel := getEnv("OPENAI_MODEL", "Qwen/Qwen2.5-Coder-7B-Instruct")
+	defaultModel := getEnv("OPENAI_MODEL", "Qwen/Qwen2.5-7B-Instruct")
 
 	// 默认登录方式为password
 	defaultLoginType := getEnv("LOGIN_TYPE", "password")
