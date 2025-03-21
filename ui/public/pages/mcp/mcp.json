@@ -221,6 +221,12 @@
                     },
                     {
                         "type": "button",
+                        "label": "连接",
+                        "actionType": "ajax",
+                        "api": "post:/mgm/mcp/connect/${configs.name}"
+                    },
+                    {
+                        "type": "button",
                         "label": "删除",
                         "actionType": "ajax",
                         "confirmText": "确认要删除该服务器吗？",
