@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/ai"
+	"k8s.io/klog/v2"
 )
 
 // ToolCallResult 存储工具调用的结果
@@ -27,12 +29,23 @@ func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai ai.IAI, prompt strin
 		return "", nil, err
 	}
 
+	results := m.ExecTools(ctx, toolCalls)
+
+	return content, results, nil
+
+}
+
+func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []ToolCallResult {
 	// 存储所有工具调用的结果
 	var results []ToolCallResult
 
 	// 处理工具调用
 	if toolCalls != nil {
 		for _, toolCall := range toolCalls {
+
+			klog.V(8).Infof("Tool Name: %s\n", toolCall.Function.Name)
+			klog.V(8).Infof("Tool Arguments: %s\n", toolCall.Function.Arguments)
+
 			result := ToolCallResult{
 				ToolName: toolCall.Function.Name,
 			}
@@ -82,7 +95,5 @@ func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai ai.IAI, prompt strin
 			results = append(results, result)
 		}
 	}
-
-	return content, results, nil
-
+	return results
 }
