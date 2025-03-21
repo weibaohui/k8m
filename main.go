@@ -49,7 +49,7 @@ var embeddedFiles embed.FS
 var Version string
 var GitCommit string
 
-var Model = "Qwen/Qwen2.5-Coder-7B-Instruct"
+var Model = "Qwen/Qwen2.5-7B-Instruct"
 var ApiKey string
 var ApiUrl string
 
