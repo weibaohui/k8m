@@ -1,7 +1,7 @@
-import React, {useEffect, useRef, useState} from "react";
-import {render as amisRender} from "amis";
-import {formatFinalGetUrl} from "@/utils/utils";
-import {Button, Flex, Space, Typography} from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { render as amisRender } from "amis";
+import { formatFinalGetUrl } from "@/utils/utils";
+import { Button, Flex, Space, Typography } from "antd";
 import {
     BulbOutlined,
     InfoCircleOutlined,
@@ -11,7 +11,7 @@ import {
     SmileOutlined,
     UserOutlined
 } from "@ant-design/icons";
-import {Bubble, BubbleProps, Prompts, PromptsProps, Sender, Welcome} from "@ant-design/x";
+import { Bubble, BubbleProps, Prompts, PromptsProps, Sender, Welcome } from "@ant-design/x";
 
 interface WebSocketChatGPTProps {
     url: string;
@@ -20,8 +20,8 @@ interface WebSocketChatGPTProps {
 }
 
 const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>(
-    ({url, data, params}, _) => {
-        url = formatFinalGetUrl({url, data, params});
+    ({ url, data, params }, _) => {
+        url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
@@ -42,6 +42,18 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
 
             ws.onopen = () => setStatus("Connected");
 
+            const formatToolCallResult = (message: any) => {
+                try {
+                    const data = JSON.parse(message);
+                    if (data.tool_name && data.parameters && data.result) {
+                        return `🛠️ **工具调用**: ${data.tool_name}\n\n📝 **参数**:\n\`\`\`json\n${JSON.stringify(data.parameters, null, 2)}\n\`\`\`\n\n🎯 **结果**:\n${data.result}`;
+                    }
+                    return message;
+                } catch {
+                    return message;
+                }
+            };
+
             ws.onmessage = (event) => {
                 try {
                     const rawMessage = event.data || "";
@@ -51,17 +63,18 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                             const aiPlaceholderIndex = prev.findIndex(
                                 (msg) => msg.role === "ai" && msg.content === "thinking"
                             );
+                            const formattedMessage = formatToolCallResult(rawMessage);
                             if (aiPlaceholderIndex !== -1) {
                                 return prev.map((msg, index) =>
-                                    index === aiPlaceholderIndex ? {...msg, content: rawMessage} : msg
+                                    index === aiPlaceholderIndex ? { ...msg, content: formattedMessage } : msg
                                 );
                             }
                             // 如果没有找到占位符，默认行为
                             if (prev.length === 0 || prev[prev.length - 1].role !== "ai") {
-                                return [...prev, {role: "ai", content: rawMessage}];
+                                return [...prev, { role: "ai", content: formattedMessage }];
                             } else {
                                 return prev.map((msg, index) =>
-                                    index === prev.length - 1 ? {...msg, content: msg.content + rawMessage} : msg
+                                    index === prev.length - 1 ? { ...msg, content: msg.content + formattedMessage } : msg
                                 );
                             }
                         });
@@ -94,8 +107,8 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
             // 立即显示用户消息，并准备新的 AI 回复条目
             setMessages((prev) => [
                 ...prev,
-                {role: "user", content: `${inputMessage}`},
-                {role: "ai", content: "thinking"} // 插入AI思考中的占位符
+                { role: "user", content: `${inputMessage}` },
+                { role: "ai", content: "thinking" } // 插入AI思考中的占位符
             ]);
 
             setInputMessage(""); // 清空输入框
@@ -121,25 +134,25 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         const items: PromptsProps['items'] = [
             {
                 key: '1',
-                icon: <BulbOutlined style={{color: '#FFD700'}}/>,
+                icon: <BulbOutlined style={{ color: '#FFD700' }} />,
                 label: 'yaml编写',
                 description: '请给我一个基本的nginx 部署yaml',
             },
             {
                 key: '2',
-                icon: <InfoCircleOutlined style={{color: '#1890FF'}}/>,
+                icon: <InfoCircleOutlined style={{ color: '#1890FF' }} />,
                 label: '网络',
                 description: '请解释下Deploy中的HostNetwork如何配置？',
             },
             {
                 key: '3',
-                icon: <RocketOutlined style={{color: '#722ED1'}}/>,
+                icon: <RocketOutlined style={{ color: '#722ED1' }} />,
                 label: '启动',
                 description: '如何提升容器的启动速度？',
             },
             {
                 key: '4',
-                icon: <SmileOutlined style={{color: '#52C41A'}}/>,
+                icon: <SmileOutlined style={{ color: '#52C41A' }} />,
                 label: '资源配额',
                 description: '如何配置容器配额及资源限制',
             },
@@ -147,7 +160,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         ];
         return (
             <>
-                <div style={{width: "100%", height: "100%", minHeight: "600px"}}>
+                <div style={{ width: "100%", height: "100%", minHeight: "600px" }}>
 
                     {
                         messages.length == 0 && <>
@@ -183,7 +196,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                 <Bubble
                                     placement={msg.role === "user" ? "end" : "start"}
                                     content={msg.content}
-                                    avatar={{icon: <UserOutlined/>}}
+                                    avatar={{ icon: <UserOutlined /> }}
                                     messageRender={renderMarkdown}
                                     loading={msg.role === 'ai' && msg.content === 'thinking'}
                                 />
@@ -198,7 +211,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                     onClick={() => {
                                         setMessages([]);
                                     }}
-                                    icon={<PlusOutlined/>}
+                                    icon={<PlusOutlined />}
                                     style={{
                                         width: '100px',
                                         backgroundImage: 'linear-gradient(97deg, #f2f9fe 0%, #f7f3ff 100%)',
@@ -226,15 +239,15 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                 setLoading(false);
                             }}
                             actions={(_, info) => {
-                                const {SendButton, ClearButton} = info.components;
+                                const { SendButton, ClearButton } = info.components;
 
                                 return (
                                     <Space size="small">
                                         <Typography.Text type="secondary">
                                             <small>`Shift + Enter` 换行</small>
                                         </Typography.Text>
-                                        <ClearButton/>
-                                        <SendButton type="primary" icon={<OpenAIOutlined/>} disabled={false}/>
+                                        <ClearButton />
+                                        <SendButton type="primary" icon={<OpenAIOutlined />} disabled={false} />
                                     </Space>
                                 );
                             }}
