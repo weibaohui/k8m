@@ -84,7 +84,7 @@
             },
             {
                 "name": "configs.enabled",
-                "label": "状态",
+                "label": "启用",
                 "type": "status",
                 "map": {
                     "true": "已启用",
