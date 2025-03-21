@@ -12,7 +12,7 @@ BUILD_TOOL ?= podman
 VERSION ?= v1.0.0
 API_KEY ?= "xyz"
 API_URL ?= "https://public.chatgpt.k8m.site/v1"
-MODEL ?= "Qwen/Qwen2.5-Coder-7B-Instruct"
+MODEL ?= "Qwen/Qwen2.5-7B-Instruct"
 
 # 获取当前 Git commit 的简短哈希
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD)
