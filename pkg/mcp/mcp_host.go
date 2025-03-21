@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
@@ -83,7 +84,9 @@ func (m *MCPHost) ListServers() []MCPServer {
 		}
 		servers = append(servers, server)
 	}
-
+	slice.SortBy(servers, func(a, b MCPServer) bool {
+		return a.Configs.Name < b.Configs.Name
+	})
 	return servers
 
 }
