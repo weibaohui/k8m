@@ -108,6 +108,12 @@ func (IngressAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 			if rule.HTTP != nil {
 				for _, path := range rule.HTTP.Paths {
 
+					if path.Backend.Service == nil {
+						continue
+					}
+					if path.Backend.Service.Name == "" {
+						continue
+					}
 					var svc *v1.Service
 					err = kom.Cluster(a.ClusterID).WithContext(a.Context).Resource(&v1.Service{}).Namespace(ing.Namespace).Name(path.Backend.Service.Name).Get(&svc).Error
 					if err != nil {
