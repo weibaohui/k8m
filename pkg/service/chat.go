@@ -13,7 +13,7 @@ import (
 type chatService struct {
 }
 
-func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, error) {
+func (c *chatService) GetChatStream(chat string, tools ...openai.Tool) (*openai.ChatCompletionStream, error) {
 
 	client, err := AIService().DefaultClient()
 
@@ -21,7 +21,8 @@ func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, 
 		klog.V(6).Infof("获取AI服务错误 : %v\n", err)
 		return nil, fmt.Errorf("获取AI服务错误 : %v", err)
 	}
-	stream, err := client.GetStreamCompletion(context.Background(), chat)
+	client.SetTools(tools)
+	stream, err := client.GetStreamCompletionWithTools(context.Background(), chat)
 
 	if err != nil {
 		klog.V(6).Infof("ChatCompletion error: %v\n", err)
