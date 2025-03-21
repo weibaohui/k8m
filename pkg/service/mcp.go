@@ -45,6 +45,14 @@ func (m *mcpService) Run() {
 			Name:    "dynamics365",
 			URL:     "https://mcp.composio.dev/dynamics365/repulsive-quaint-plumber-9mTBRR",
 			Enabled: true,
+		}, {
+			Name:    "time",
+			URL:     "https://router.mcp.so/sse/po6bz3m8iuv5qg",
+			Enabled: true,
+		}, {
+			Name:    "Fetch",
+			URL:     "https://router.mcp.so/sse/ji513cm8iv20ga",
+			Enabled: true,
 		},
 	}
 
