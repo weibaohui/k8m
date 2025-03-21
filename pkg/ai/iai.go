@@ -23,8 +23,9 @@ import (
 type IAI interface {
 	Configure(config IAIConfig) error
 	GetCompletion(ctx context.Context, prompt string) (string, error)
-	GetStreamCompletion(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
 	GetCompletionWithTools(ctx context.Context, prompt string) ([]openai.ToolCall, string, error)
+	GetStreamCompletion(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
+	GetStreamCompletionWithTools(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
 	GetName() string
 	Close()
 	SetTools(tools []openai.Tool)
