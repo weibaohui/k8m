@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/ai"
@@ -43,11 +45,12 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 	if toolCalls != nil {
 		for _, toolCall := range toolCalls {
 
-			klog.V(8).Infof("Tool Name: %s\n", toolCall.Function.Name)
+			fullToolName := toolCall.Function.Name
+			klog.V(8).Infof("Tool Name: %s\n", fullToolName)
 			klog.V(8).Infof("Tool Arguments: %s\n", toolCall.Function.Arguments)
 
 			result := ToolCallResult{
-				ToolName: toolCall.Function.Name,
+				ToolName: fullToolName,
 			}
 
 			// 解析参数
@@ -59,25 +62,33 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			}
 			result.Parameters = args
 
-			toolName, serverName, err := parseToolName(toolCall.Function.Name)
-
+			var cli *client.SSEMCPClient
+			var toolName, serverName string
+			var err error
+			if strings.Contains(fullToolName, "@") {
+				// 如果识别的ToolName包含
+				toolName, serverName, _ = parseToolName(fullToolName)
+			} else {
+				toolName = fullToolName
+				serverName = m.GetServerNameByToolName(toolName)
+			}
+			if serverName == "" {
+				// 解析失败，尝试直接用toolName
+				result.Error = fmt.Sprintf("根据Tool名称 %s 解析MCP Server 名称失败: %v", fullToolName, err)
+				results = append(results, result)
+				continue
+			}
 			// 执行工具调用
 			callRequest := mcp.CallToolRequest{}
 			callRequest.Params.Name = toolName
 			callRequest.Params.Arguments = args
 
-			if err != nil {
-				result.Error = fmt.Sprintf("解析MCP Server 名称失败: %v", err)
-				results = append(results, result)
-				continue
-			}
-			cli, err := m.GetClient(serverName)
+			cli, err = m.GetClient(serverName)
 			if err != nil {
 				result.Error = fmt.Sprintf("获取MCP Client 失败: %v", err)
 				results = append(results, result)
 				continue
 			}
-
 			// 执行工具
 			callResult, err := cli.CallTool(ctx, callRequest)
 			if err != nil {
