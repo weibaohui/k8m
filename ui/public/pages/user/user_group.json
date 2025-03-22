@@ -1,5 +1,6 @@
 {
   "type": "page",
+  "title": "用户组管理",
   "body": [
     {
       "type": "crud",
