@@ -5,7 +5,6 @@ import { Button, Flex, Space, Typography } from "antd";
 import {
     BulbOutlined,
     InfoCircleOutlined,
-    OpenAIOutlined,
     PlusOutlined,
     RocketOutlined,
     SmileOutlined,
@@ -46,7 +45,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                 try {
                     const data = JSON.parse(message);
                     if (data.tool_name && data.parameters && data.result) {
-                        return `🛠️ **工具调用**: ${data.tool_name}\n\n📝 **参数**:\n\`\`\`json\n${JSON.stringify(data.parameters, null, 2)}\n\`\`\`\n\n🎯 **结果**:\n${data.result}`;
+                        return `🛠️ **工具调用**: ${data.tool_name}\n\n📝 **参数**:\n\`\`\`json\n${JSON.stringify(data.parameters, null, 2)}\n\`\`\`\n\n🎯 **结果**:\n${data.result}\n`;
                     }
                     return message;
                 } catch {
@@ -95,7 +94,6 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         }, [url]);
 
         // 发送消息
-        // 发送消息
         const handleSendMessage = () => {
             setLoading(true);
             if (!inputMessage.trim()) return;
@@ -125,7 +123,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         useEffect(() => {
             scrollToBottom();
         }, [messages]);
-        const renderMarkdown: BubbleProps['messageRender'] = (content) => {
+        const renderMarkdown: BubbleProps['messageRender'] = (content: string) => {
             return amisRender({
                 type: "markdown",
                 value: content
@@ -158,6 +156,15 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
             },
 
         ];
+        const fooAvatar: React.CSSProperties = {
+            color: '#f56a00',
+            backgroundColor: '#fde3cf',
+        };
+
+        const barAvatar: React.CSSProperties = {
+            color: '#fff',
+            backgroundColor: '#87d068',
+        };
         return (
             <>
                 <div style={{ width: "100%", height: "100%", minHeight: "600px" }}>
@@ -196,7 +203,12 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                 <Bubble
                                     placement={msg.role === "user" ? "end" : "start"}
                                     content={msg.content}
-                                    avatar={{ icon: <UserOutlined /> }}
+                                    avatar={{
+                                        icon: msg.role === "user"
+                                            ? <UserOutlined />
+                                            : <RocketOutlined />,
+                                        style: msg.role === "user" ? barAvatar : fooAvatar,
+                                    }}
                                     messageRender={renderMarkdown}
                                     loading={msg.role === 'ai' && msg.content === 'thinking'}
                                 />
@@ -247,7 +259,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                             <small>`Shift + Enter` 换行</small>
                                         </Typography.Text>
                                         <ClearButton />
-                                        <SendButton type="primary" icon={<OpenAIOutlined />} disabled={false} />
+                                        <SendButton type="primary" disabled={false} />
                                     </Space>
                                 );
                             }}
