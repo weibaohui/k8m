@@ -402,6 +402,9 @@ func (m *MCPHost) RemoveServerById(id uint) {
 	}
 }
 
+// GetServerNameByToolName 根据工具名称获取对应的服务器名称
+// 如果多个服务器都提供了相同的工具，返回第一个找到的服务器名称，有一定的随机性
+// 如果没有找到对应的服务器，返回空字符串
 func (m *MCPHost) GetServerNameByToolName(toolName string) string {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
