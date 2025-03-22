@@ -39,7 +39,7 @@
                     "title": "添加服务器",
                     "body": {
                         "type": "form",
-                        "api": "/mgm/mcp",
+                        "api": "/mgm/mcp/save",
                         "body": [
                             {
                                 "type": "input-text",
@@ -64,20 +64,34 @@
                 }
             }
         ],
+        "bulkActions": [
+            {
+                "label": "批量删除",
+                "actionType": "ajax",
+                "confirmText": "确定要批量删除?",
+                "api": {
+                    "url": "mgm/mcp/delete",
+                    "method": "post",
+                    "data": {
+                        "ids": "${selectedItems | pick:config.id }"
+                    }
+                }
+            }
+        ],
         "loadDataOnce": true,
         "syncLocation": false,
         "perPage": 10,
         "columns": [
             {
-                "name": "configs.name",
+                "name": "config.name",
                 "label": "服务器名称"
             },
             {
-                "name": "configs.url",
+                "name": "config.url",
                 "label": "服务器地址"
             },
             {
-                "name": "configs.enabled",
+                "name": "config.enabled",
                 "label": "启用",
                 "type": "status",
                 "map": {
@@ -196,8 +210,13 @@
                             "title": "编辑服务器",
                             "body": {
                                 "type": "form",
-                                "api": "put:/mgm/mcp/$name",
+                                "api": "post:/mgm/mcp/save",
                                 "body": [
+                                    {
+                                        "type": "hidden",
+                                        "name": "id",
+                                        "required": true
+                                    },
                                     {
                                         "type": "input-text",
                                         "name": "name",
@@ -223,14 +242,7 @@
                         "type": "button",
                         "label": "连接",
                         "actionType": "ajax",
-                        "api": "post:/mgm/mcp/connect/${configs.name}"
-                    },
-                    {
-                        "type": "button",
-                        "label": "删除",
-                        "actionType": "ajax",
-                        "confirmText": "确认要删除该服务器吗？",
-                        "api": "delete:/mgm/mcp/$name"
+                        "api": "post:/mgm/mcp/connect/${config.name}"
                     }
                 ]
             }
