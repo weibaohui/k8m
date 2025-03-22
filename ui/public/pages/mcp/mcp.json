@@ -189,8 +189,8 @@
                 "label": "连接状态",
                 "type": "mapping",
                 "map": {
-                    "*": "已连接",
-                    "": "未连接"
+                    "": "<span class='label label-danger'>未连接</span>",
+                    "*": "<span class='label label-success'>已连接</span>"
                 }
             },
             {
