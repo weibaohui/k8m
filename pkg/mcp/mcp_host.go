@@ -16,6 +16,7 @@ import (
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
+	ID      uint   `json:"id"`
 	URL     string `json:"url,omitempty"`
 	Name    string `json:"name,omitempty"`
 	Enabled bool   `json:"enabled,omitempty"`
@@ -44,7 +45,8 @@ type MCPHost struct {
 	serverStatus map[string]ServerStatus
 }
 type MCPServer struct {
-	Configs           ServerConfig          `json:"configs,omitempty"`
+	ServerConfig
+	Config            ServerConfig          `json:"config,omitempty"`
 	Tools             []mcp.Tool            `json:"tools,omitempty"`
 	Resources         []mcp.Resource        `json:"resources,omitempty"`
 	Prompts           []mcp.Prompt          `json:"prompts,omitempty"`
@@ -75,7 +77,8 @@ func (m *MCPHost) ListServers() []MCPServer {
 	// 遍历所有配置，转换为MCPServer结构
 	for name, config := range m.configs {
 		server := MCPServer{
-			Configs:           config,
+			ServerConfig:      config,
+			Config:            config,
 			Tools:             m.Tools[name],
 			Resources:         m.Resources[name],
 			Prompts:           m.Prompts[name],
@@ -85,7 +88,7 @@ func (m *MCPHost) ListServers() []MCPServer {
 		servers = append(servers, server)
 	}
 	slice.SortBy(servers, func(a, b MCPServer) bool {
-		return a.Configs.Name < b.Configs.Name
+		return a.Config.Name < b.Config.Name
 	})
 	return servers
 
@@ -93,10 +96,10 @@ func (m *MCPHost) ListServers() []MCPServer {
 
 // AddServer 添加服务器配置
 func (m *MCPHost) AddServer(config ServerConfig) error {
+	m.RemoveServer(config)
 	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
 	m.configs[config.Name] = config
+	m.mutex.Unlock()
 	return nil
 }
 
@@ -384,4 +387,27 @@ func (m *MCPHost) GetAllServerStatus() map[string]ServerStatus {
 	}
 
 	return statusCopy
+}
+
+func (m *MCPHost) RemoveServer(config ServerConfig) {
+	// 断开与服务器的连接
+	m.DisconnectServer(config.Name)
+	// 删除服务器配置
+	delete(m.configs, config.Name)
+	// 删除服务器的工具、资源和提示能力
+	delete(m.Tools, config.Name)
+	delete(m.Resources, config.Name)
+	delete(m.Prompts, config.Name)
+	delete(m.InitializeResults, config.Name)
+	// 删除服务器状态记录
+	delete(m.serverStatus, config.Name)
+
+}
+
+func (m *MCPHost) RemoveServerById(id uint) {
+	for _, cfg := range m.configs {
+		if cfg.ID == id {
+			m.RemoveServer(cfg)
+		}
+	}
 }
