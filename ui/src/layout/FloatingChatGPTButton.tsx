@@ -1,14 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import {useEffect, useState, useRef} from "react";
 import Draggable from "react-draggable";
-import { render as amisRender } from "amis";
-import { Button, Drawer } from "antd";
-import { OpenAIFilled } from "@ant-design/icons";
+import {render as amisRender} from "amis";
+import {Button, Drawer} from "antd";
+import {OpenAIFilled} from "@ant-design/icons";
 
 const FloatingChatGPTButton = () => {
     const [visible, setVisible] = useState(false);
-    const [position, setPosition] = useState({ x: 3000, y: 3000 });
+    const [position, setPosition] = useState({x: 3000, y: 3000});
     const [isDragging, setIsDragging] = useState(false); // 拖拽状态
-    const startPositionRef = useRef({ x: 0, y: 0 }); // 鼠标点击的初始位置
+    const startPositionRef = useRef({x: 0, y: 0}); // 鼠标点击的初始位置
 
     useEffect(() => {
         const buttonWidth = 30;
@@ -21,24 +21,24 @@ const FloatingChatGPTButton = () => {
             const parsedPosition = JSON.parse(savedPosition);
             const validX = Math.min(Math.max(parsedPosition.x, 0), maxX);
             const validY = Math.min(Math.max(parsedPosition.y, 0), maxY);
-            setPosition({ x: validX, y: validY });
+            setPosition({x: validX, y: validY});
         } else {
-            setPosition({ x: maxX, y: maxY });
+            setPosition({x: maxX, y: maxY});
         }
     }, []);
 
     const handleDrag = (_: any, data: any) => {
-        setPosition({ x: data.x, y: data.y });
-        localStorage.setItem("buttonPosition", JSON.stringify({ x: data.x, y: data.y }));
+        setPosition({x: data.x, y: data.y});
+        localStorage.setItem("buttonPosition", JSON.stringify({x: data.x, y: data.y}));
     };
 
     const handleStart = (e: any) => {
-        startPositionRef.current = { x: e.clientX, y: e.clientY };
+        startPositionRef.current = {x: e.clientX, y: e.clientY};
         setIsDragging(true); // 开始拖动
     };
 
     const handleStop = (e: any) => {
-        const endPosition = { x: e.clientX, y: e.clientY };
+        const endPosition = {x: e.clientX, y: e.clientY};
         const distance = Math.sqrt(
             Math.pow(endPosition.x - startPositionRef.current.x, 2) +
             Math.pow(endPosition.y - startPositionRef.current.y, 2)
@@ -63,7 +63,7 @@ const FloatingChatGPTButton = () => {
                 <Button
                     type="primary"
                     shape="circle"
-                    icon={<OpenAIFilled />}
+                    icon={<OpenAIFilled/>}
                     style={{
                         position: "fixed",
                         zIndex: 180000,
@@ -86,6 +86,7 @@ const FloatingChatGPTButton = () => {
                 footer={null}
                 zIndex={180000}
                 open={visible}
+                maskClosable={false}
             >
                 {amisRender({
                     type: "chatgpt",
