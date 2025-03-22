@@ -66,7 +66,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			var toolName, serverName string
 			var err error
 			if strings.Contains(fullToolName, "@") {
-				// 如果识别的ToolName包含
+				// 如果识别的ToolName包含@，则解析ToolName
 				toolName, serverName, _ = parseToolName(fullToolName)
 			} else {
 				toolName = fullToolName
