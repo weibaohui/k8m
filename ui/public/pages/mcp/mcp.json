@@ -185,13 +185,10 @@
                 }
             },
             {
-                "name": "server_status.last_ping_success",
-                "label": "连接状态",
-                "type": "status",
-                "map": {
-                    "true": "正常",
-                    "false": "异常"
-                }
+                "name": "initialize_results.serverInfo",
+                "label": "服务版本",
+                "type": "tpl",
+                "tpl": "${initialize_results.serverInfo.version}"
             },
             {
                 "name": "server_status.last_ping_time",
