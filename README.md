@@ -165,7 +165,6 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
     - `arm64`
     - `ppc64le`
     - `s390x`
-    - `mips64le`
     - `riscv64`
 - **Darwin（macOS）**:
     - `amd64`
@@ -173,48 +172,6 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 - **Windows**:
     - `amd64`
     - `arm64`
-
-### **使用示例**
-
-#### **1. 为当前平台构建**
-
-构建适用于当前操作系统和架构的 `k8m` 可执行文件：
-
-```bash
-make build
-```
-
-#### **2. 为所有支持的平台构建**
-
-交叉编译 `k8m` 为所有指定的平台和架构：
-
-```bash
-make build-all
-```
-
-#### **3. 运行可执行文件**
-
-在 Unix 系统上构建并运行 `k8m`：
-
-```bash
-make run
-```
-
-#### **4. 清理构建产物**
-
-删除所有编译生成的可执行文件和 `bin/` 目录：
-
-```bash
-make clean
-```
-
-#### **5. 查看帮助信息**
-
-显示所有可用的 Makefile 目标及其描述：
-
-```bash
-make help
-```
 
 ### **附加说明**
 
@@ -235,6 +192,13 @@ make help
 - **文件浏览权限问题**：依赖容器内的ls命令，请在容器内安装shell、tar、cat等命令 。
 - **无法启动**：启动时卡住，请使用 k8m -v 6
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
+
+**v0.0.64 更新**
+
+1. 增加MCP支持
+   ![输入图片说明](https://foruda.gitee.com/images/1742621225108846936/0a614dcb_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1742621196785322998/4174b937_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1742621204002335466/8a02cd2c_77493.png "屏幕截图")
 
 **v0.0.62 更新**
 
