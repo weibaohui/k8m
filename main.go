@@ -398,6 +398,8 @@ func main() {
 		// mcp
 		mgm.GET("/mcp/list", mcp.List)
 		mgm.POST("/mcp/connect/:name", mcp.Connect)
+		mgm.POST("/mcp/delete", mcp.Delete)
+		mgm.POST("/mcp/save", mcp.AddOrUpdate)
 
 	}
 
