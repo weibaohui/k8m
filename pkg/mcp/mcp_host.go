@@ -24,9 +24,9 @@ type ServerConfig struct {
 
 // ServerStatus 服务器状态记录
 type ServerStatus struct {
-	LastPingTime    time.Time `json:"last_ping_time,omitempty"`
-	LastPingSuccess bool      `json:"last_ping_success,omitempty"`
-	LastError       string    `json:"last_error,omitempty"`
+	LastPingTime    *time.Time `json:"last_ping_time,omitempty"`
+	LastPingSuccess bool       `json:"last_ping_success,omitempty"`
+	LastError       string     `json:"last_error,omitempty"`
 }
 
 // MCPHost MCP服务器管理器
@@ -244,29 +244,21 @@ func (m *MCPHost) Ping(ctx context.Context, serverName string) error {
 func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 	// 从所有可用的MCP服务器收集工具列表
 	var allTools []openai.Tool
-
 	// 遍历所有服务器获取工具
 	m.mutex.RLock()
-	for serverName, cli := range m.clients {
-		toolsRequest := mcp.ListToolsRequest{}
-		toolsResult, err := cli.ListTools(ctx, toolsRequest)
-		if err != nil {
-			log.Printf("从服务器 %s 获取工具列表失败: %v", serverName, err)
-			continue
-		}
-
-		// 为每个工具添加服务器标识
-		for _, tool := range toolsResult.Tools {
+	for serverName, tools := range m.Tools {
+		for _, tool := range tools {
 			allTools = append(allTools, openai.Tool{
 				Type: openai.ToolTypeFunction,
 				Function: &openai.FunctionDefinition{
 					// 在工具名称中添加服务器标识
 					Name:        buildToolName(tool.Name, serverName),
-					Description: tool.Description,
+					Description: tool.Name,
 					Parameters:  tool.InputSchema,
 				},
 			})
 		}
+
 	}
 	m.mutex.RUnlock()
 	return allTools
@@ -344,8 +336,9 @@ func (m *MCPHost) PingAll(ctx context.Context) map[string]ServerStatus {
 
 	// 遍历所有客户端进行ping操作
 	for serverName, cli := range m.clients {
+		now := time.Now()
 		status := ServerStatus{
-			LastPingTime: time.Now(),
+			LastPingTime: &now,
 		}
 
 		err := cli.Ping(ctx)
