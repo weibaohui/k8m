@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/mcp"
+	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
@@ -16,61 +18,111 @@ func (m *mcpService) Init() {
 	if m.host == nil {
 		m.host = mcp.NewMCPHost()
 	}
-	m.Run()
+	m.run()
 }
 func (m *mcpService) Host() *mcp.MCPHost {
 	return m.host
 }
-func (m *mcpService) Run() {
-
-	// 创建MCP管理器
-
-	// 添加服务器配置
-	servers := []mcp.ServerConfig{
-		{
-			Name:    "server1",
-			URL:     "http://localhost:9292/sse",
-			Enabled: true,
-		},
-		{
-			Name:    "server2",
-			URL:     "http://localhost:9293/sse",
-			Enabled: true,
-		},
-		{
-			Name:    "github",
-			URL:     "https://mcp.composio.dev/github/repulsive-quaint-plumber-9mTBRR",
-			Enabled: true,
-		}, {
-			Name:    "dynamics365",
-			URL:     "https://mcp.composio.dev/dynamics365/repulsive-quaint-plumber-9mTBRR",
-			Enabled: true,
-		}, {
-			Name:    "time",
-			URL:     "https://router.mcp.so/sse/po6bz3m8iuv5qg",
-			Enabled: true,
-		}, {
-			Name:    "Fetch",
-			URL:     "https://router.mcp.so/sse/ji513cm8iv20ga",
-			Enabled: true,
-		},
+func (m *mcpService) AddServer(server models.MCPServerConfig) {
+	// 将server转换为mcp.ServerConfig
+	serverConfig := mcp.ServerConfig{
+		ID:      server.ID,
+		Name:    server.Name,
+		URL:     server.URL,
+		Enabled: server.Enabled,
+	}
+	err := m.host.AddServer(serverConfig)
+	if err != nil {
+		klog.V(6).Infof("Failed to add server %s: %v", server.Name, err)
+		return
 	}
 
-	// 添加并连接服务器
-	ctx := context.Background()
+	if server.Enabled {
+		err := m.host.ConnectServer(context.Background(), server.Name)
+		if err != nil {
+			klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
+			return
+		}
+		klog.V(6).Infof("Successfully connected to server: %s", server.Name)
+	}
+
+}
+func (m *mcpService) AddServers(servers []models.MCPServerConfig) {
 	for _, server := range servers {
-		if err := m.host.AddServer(server); err != nil {
+		// 将server转换为mcp.ServerConfig
+		serverConfig := mcp.ServerConfig{
+			ID:      server.ID,
+			Name:    server.Name,
+			URL:     server.URL,
+			Enabled: server.Enabled,
+		}
+		err := m.host.AddServer(serverConfig)
+		if err != nil {
 			klog.V(6).Infof("Failed to add server %s: %v", server.Name, err)
 			continue
 		}
 
-		if err := m.host.ConnectServer(ctx, server.Name); err != nil {
-			klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
-			continue
+		if server.Enabled {
+			err := m.host.ConnectServer(context.Background(), server.Name)
+			if err != nil {
+				klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
+				continue
+			}
+			klog.V(6).Infof("Successfully connected to server: %s", server.Name)
 		}
-
-		klog.V(6).Infof("Successfully connected to server: %s", server.Name)
 	}
+
+}
+func (m *mcpService) RemoveServer(server models.MCPServerConfig) {
+	// 将server转换为mcp.ServerConfig
+	serverConfig := mcp.ServerConfig{
+		Name:    server.Name,
+		URL:     server.URL,
+		Enabled: server.Enabled,
+	}
+	m.host.RemoveServer(serverConfig)
+}
+func (m *mcpService) run() {
+
+	// 创建MCP管理器
+
+	// 添加服务器配置
+	// servers := []mcp.ServerConfig{
+	// 	{
+	// 		Name:    "server1",
+	// 		URL:     "http://localhost:9292/sse",
+	// 		Enabled: true,
+	// 	},
+	// 	{
+	// 		Name:    "server2",
+	// 		URL:     "http://localhost:9293/sse",
+	// 		Enabled: true,
+	// 	},
+	// 	{
+	// 		Name:    "github",
+	// 		URL:     "https://mcp.composio.dev/github/repulsive-quaint-plumber-9mTBRR",
+	// 		Enabled: true,
+	// 	}, {
+	// 		Name:    "dynamics365",
+	// 		URL:     "https://mcp.composio.dev/dynamics365/repulsive-quaint-plumber-9mTBRR",
+	// 		Enabled: true,
+	// 	}, {
+	// 		Name:    "time",
+	// 		URL:     "https://router.mcp.so/sse/po6bz3m8iuv5qg",
+	// 		Enabled: true,
+	// 	}, {
+	// 		Name:    "Fetch",
+	// 		URL:     "https://router.mcp.so/sse/ji513cm8iv20ga",
+	// 		Enabled: true,
+	// 	},
+	// }
+
+	var mcpServers []models.MCPServerConfig
+	err := dao.DB().Model(&models.MCPServerConfig{}).Find(&mcpServers).Error
+	if err != nil {
+		return
+	}
+	m.AddServers(mcpServers)
 
 	// 启动定期ping检查
 	go func() {
@@ -80,7 +132,7 @@ func (m *mcpService) Run() {
 		for {
 			select {
 			case <-ticker.C:
-				status := m.host.PingAll(ctx)
+				status := m.host.PingAll(context.Background())
 				for serverName, serverStatus := range status {
 					if serverStatus.LastPingSuccess {
 						klog.V(6).Infof("Server %s is healthy, last ping time: %v", serverName, serverStatus.LastPingTime)
@@ -88,10 +140,19 @@ func (m *mcpService) Run() {
 						klog.V(6).Infof("Server %s is unhealthy, last ping time: %v, error: %s", serverName, serverStatus.LastPingTime, serverStatus.LastError)
 					}
 				}
-			case <-ctx.Done():
+			case <-context.Background().Done():
 				return
 			}
 		}
 	}()
 
+}
+
+func (m *mcpService) RemoveServerById(server models.MCPServerConfig) {
+	m.host.RemoveServerById(server.ID)
+}
+
+func (m *mcpService) UpdateServer(entity models.MCPServerConfig) {
+	m.RemoveServerById(entity)
+	m.AddServer(entity)
 }
