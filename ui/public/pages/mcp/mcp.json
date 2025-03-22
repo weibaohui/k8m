@@ -62,6 +62,24 @@
                         ]
                     }
                 }
+            },
+            {
+                "type": "button",
+                "label": "MCP导航",
+                "icon": "fa fa-compass",
+                "actionType": "drawer",
+                "drawer": {
+                    "title": "MCP导航",
+                    "size": "md",
+                    "body": [
+                        {
+                            "type": "link",
+                            "href": "https://mcp.so/servers",
+                            "body": "mcp.so",
+                            "htmlTarget": "_blank"
+                        }
+                    ]
+                }
             }
         ],
         "bulkActions": [
