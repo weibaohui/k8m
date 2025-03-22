@@ -73,11 +73,6 @@ const Toolbar = () => {
             onClick: () => navigate('/user/user')
         },
         {
-            key: 'user-group-mgm',
-            label: "用户组管理",
-            onClick: () => navigate('/user/user_group')
-        },
-        {
             key: 'divider-2',
             type: 'divider'
         },
