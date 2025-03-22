@@ -179,9 +179,6 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 	if err = m.SyncServerCapabilities(ctx, serverName); err != nil {
 		// 如果同步失败，需要清理资源
 		cli.Close()
-		m.mutex.Lock()
-		delete(m.clients, serverName)
-		m.mutex.Unlock()
 		return fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
 	}
 
@@ -403,4 +400,18 @@ func (m *MCPHost) RemoveServerById(id uint) {
 			m.RemoveServer(cfg)
 		}
 	}
+}
+
+func (m *MCPHost) GetServerNameByToolName(toolName string) string {
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
+	for serverName, tools := range m.Tools {
+		for _, tool := range tools {
+			if tool.Name == toolName {
+				return serverName
+			}
+		}
+	}
+	return ""
 }
