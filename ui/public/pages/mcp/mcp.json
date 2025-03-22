@@ -186,9 +186,12 @@
             },
             {
                 "name": "initialize_results.serverInfo",
-                "label": "服务版本",
-                "type": "tpl",
-                "tpl": "${initialize_results.serverInfo.version}"
+                "label": "连接状态",
+                "type": "mapping",
+                "map": {
+                    "*": "已连接",
+                    "": "未连接"
+                }
             },
             {
                 "name": "server_status.last_ping_time",
