@@ -84,39 +84,6 @@ func (m *mcpService) RemoveServer(server models.MCPServerConfig) {
 }
 func (m *mcpService) run() {
 
-	// 创建MCP管理器
-
-	// 添加服务器配置
-	// servers := []mcp.ServerConfig{
-	// 	{
-	// 		Name:    "server1",
-	// 		URL:     "http://localhost:9292/sse",
-	// 		Enabled: true,
-	// 	},
-	// 	{
-	// 		Name:    "server2",
-	// 		URL:     "http://localhost:9293/sse",
-	// 		Enabled: true,
-	// 	},
-	// 	{
-	// 		Name:    "github",
-	// 		URL:     "https://mcp.composio.dev/github/repulsive-quaint-plumber-9mTBRR",
-	// 		Enabled: true,
-	// 	}, {
-	// 		Name:    "dynamics365",
-	// 		URL:     "https://mcp.composio.dev/dynamics365/repulsive-quaint-plumber-9mTBRR",
-	// 		Enabled: true,
-	// 	}, {
-	// 		Name:    "time",
-	// 		URL:     "https://router.mcp.so/sse/po6bz3m8iuv5qg",
-	// 		Enabled: true,
-	// 	}, {
-	// 		Name:    "Fetch",
-	// 		URL:     "https://router.mcp.so/sse/ji513cm8iv20ga",
-	// 		Enabled: true,
-	// 	},
-	// }
-
 	var mcpServers []models.MCPServerConfig
 	err := dao.DB().Model(&models.MCPServerConfig{}).Find(&mcpServers).Error
 	if err != nil {
