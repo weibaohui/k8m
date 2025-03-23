@@ -192,7 +192,6 @@ func (m *MCPHost) DisconnectServer(serverName string) error {
 
 	if cli, exists := m.clients[serverName]; exists {
 		cli.Close()
-		delete(m.clients, serverName)
 	}
 	return nil
 }
