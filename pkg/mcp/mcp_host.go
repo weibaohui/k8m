@@ -200,12 +200,73 @@ func (m *MCPHost) DisconnectServer(serverName string) error {
 // GetClient 获取指定服务器的客户端
 func (m *MCPHost) GetClient(serverName string) (*client.SSEMCPClient, error) {
 	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
 	cli, exists := m.clients[serverName]
 	if !exists {
+		m.mutex.RUnlock()
 		return nil, fmt.Errorf("client not found: %s", serverName)
 	}
+
+	// 先进行ping检测
+	ctx := context.Background()
+	err := cli.Ping(ctx)
+	if err != nil {
+		// 如果ping失败，释放读锁
+		m.mutex.RUnlock()
+
+		// 获取配置信息
+		m.mutex.RLock()
+		config, exists := m.configs[serverName]
+		m.mutex.RUnlock()
+		if !exists {
+			return nil, fmt.Errorf("server config not found: %s", serverName)
+		}
+
+		// 重新连接
+		newCli, err := client.NewSSEMCPClient(config.URL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create new client for %s: %v", serverName, err)
+		}
+
+		if err := newCli.Start(ctx); err != nil {
+			newCli.Close()
+			return nil, fmt.Errorf("failed to start new client for %s: %v", serverName, err)
+		}
+
+		// 初始化客户端
+		initRequest := mcp.InitializeRequest{}
+		initRequest.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
+		initRequest.Params.ClientInfo = mcp.Implementation{
+			Name:    "multi-server-client",
+			Version: "1.0.0",
+		}
+		result, err := newCli.Initialize(ctx, initRequest)
+		if err != nil {
+			newCli.Close()
+			return nil, fmt.Errorf("failed to initialize new client for %s: %v", serverName, err)
+		}
+
+		// 更新客户端和初始化结果
+		m.mutex.Lock()
+		// 关闭旧的客户端
+		if oldCli, exists := m.clients[serverName]; exists {
+			oldCli.Close()
+		}
+		m.clients[serverName] = newCli
+		m.InitializeResults[serverName] = result
+		m.mutex.Unlock()
+
+		// 同步服务器能力
+		if err = m.SyncServerCapabilities(ctx, serverName); err != nil {
+			// 如果同步失败，需要清理资源
+			newCli.Close()
+			return nil, fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
+		}
+
+		return newCli, nil
+	}
+
+	// ping成功，释放读锁并返回客户端
+	m.mutex.RUnlock()
 	return cli, nil
 }
 
