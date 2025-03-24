@@ -77,39 +77,6 @@ export default defineConfig(({mode}) => {
                 }
             ),
         },
-        build: {
-          rollupOptions: {
-            output: {
-              manualChunks(id) {
-                if (id.includes('node_modules')) {
-                  if (id.includes('react') || id.includes('amis')) {
-                    return 'vendor';
-                  }
-                  if (id.includes('monaco-editor')) {
-                    return 'editor';
-                  }
-                  if (id.includes('tinymce')) {
-                    return 'rich-text';
-                  }
-                  if (id.includes('echarts')) {
-                    return 'charts';
-                  }
-                  if (id.includes('exceljs') || id.includes('xlsx')) {
-                    return 'excel';
-                  }
-                  if (id.includes('pdf')) {
-                    return 'pdf';
-                  }
-                  if (id.includes('mpegts') || id.includes('hls')) {
-                    return 'video';
-                  }
-                  return 'deps';
-                }
-              }
-            }
-          },
-          chunkSizeWarningLimit: 1000
-        },
         plugins: [react(), monacoEditorPlugin({})],
     }
 })
