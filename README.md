@@ -52,6 +52,7 @@ Usage of ./k8m:
       --node-shell-image string          NodeShell 镜像。 默认为 alpine:latest，必须包含`nsenter`命令 (default "alpine:latest")
   -p, --port int                         监听端口 (default 3618)
       --sqlite-path string               sqlite数据库文件路径， (default "./data/k8m.db")
+  -s, --mcp-server-port int              MCP Server 监听端口，默认3619 (default 3619)
   -v, --v Level                          klog的日志级别 (default 2)
 ```
 
@@ -96,6 +97,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-Coder-7B-Instruc
 | 环境变量                  | 默认值                        | 说明                                                                |
 |-----------------------|----------------------------|-------------------------------------------------------------------|
 | `PORT`                | `3618`                     | 监听的端口号                                                            |
+| `MCP_SERVER_PORT`     | `3619`                     | 内置多集群k8s MCP Server监听的端口号                                         |
 | `KUBECONFIG`          | `~/.kube/config`           | `kubeconfig` 文件路径                                                 |
 | `OPENAI_API_KEY`      | `""`                       | 大模型的 API Key                                                      |
 | `OPENAI_API_URL`      | `""`                       | 大模型的 API URL                                                      |
@@ -193,14 +195,15 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 - **文件浏览权限问题**：依赖容器内的ls命令，请在容器内安装shell、tar、cat等命令 。
 - **无法启动**：启动时卡住，请使用 k8m -v 6
   命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
-**V0.0.66更新**
+  **V0.0.66更新**
+
 1. 新增MCP支持。
 2. 内置支持k8s多集群操作：
-   1. list_k8s_resource
-   2. get_k8s_resource
-   3. delete_k8s_resource
-   4. describe_k8s_resource
-   5. get_pod_logs
+    1. list_k8s_resource
+    2. get_k8s_resource
+    3. delete_k8s_resource
+    4. describe_k8s_resource
+    5. get_pod_logs
 
 **v0.0.64 更新**
 
