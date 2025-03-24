@@ -200,20 +200,8 @@
             "title": "AI 智能巡检 ${kind} （ESC 关闭）",
             "body": [
               {
-                "type": "service",
-                "id": "detail",
-                "api": "get:/k8s/k8s_gpt/kind/${kind}/run",
-                "body": [
-                  {
-                    "type": "markdown",
-                    "value": "${result|raw}",
-                    "options": {
-                      "linkify": true,
-                      "html": true,
-                      "breaks": true
-                    }
-                  }
-                ]
+                "type": "k8sGPT",
+                "api": "/k8s/k8s_gpt/kind/${kind}/run"
               }
             ]
           }
