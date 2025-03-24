@@ -41,7 +41,7 @@ import (
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/callbacks"
-	mcp2 "github.com/weibaohui/kom/mcp"
+	kom_mcp "github.com/weibaohui/kom/mcp"
 	"k8s.io/klog/v2"
 )
 
@@ -90,7 +90,8 @@ func Init() {
 		service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
-		mcp2.RunMCPServer("k8m", Version, cfg.MCPServerPort)
+		klog.Infof("启动MCP Server, 监听端口: %d", cfg.MCPServerPort)
+		kom_mcp.RunMCPServer("k8m", Version, cfg.MCPServerPort)
 	}()
 
 	// 启动watch
