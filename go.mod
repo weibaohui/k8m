@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/duke-git/lancet/v2 v2.3.5
 	github.com/fatih/color v1.18.0
-	github.com/gin-contrib/cors v1.7.3
+	github.com/gin-contrib/cors v1.7.4
 	github.com/gin-contrib/gzip v1.2.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v4 v4.5.1
@@ -14,13 +14,13 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/mark3labs/mcp-go v0.14.1
+	github.com/mark3labs/mcp-go v0.15.0
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.38.0
 	github.com/spf13/pflag v1.0.6
-	github.com/weibaohui/kom v0.1.75
+	github.com/weibaohui/kom v0.1.76
 	golang.org/x/net v0.37.0
 	gorm.io/gorm v1.25.12
 	helm.sh/helm/v3 v3.17.1
