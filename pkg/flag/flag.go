@@ -18,6 +18,7 @@ var once sync.Once
 
 type Config struct {
 	Port              int    // gin 监听端口
+	MCPServerPort     int    // MCPServerPort 监听端口
 	KubeConfig        string // KUBECONFIG文件路径
 	ApiKey            string // OPENAI_API_KEY
 	ApiURL            string // OPENAI_API_URL
@@ -99,8 +100,11 @@ func (c *Config) InitFlags() {
 	// sqlite数据库文件路径
 	defaultSqlitePath := getEnv("SQLITE_PATH", "./data/k8m.db")
 
+	//MCPServerPort
+	defaultMCPServerPort := getEnvAsInt("MCP_SERVER_PORT", 3619)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
-	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口")
+	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
 	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "大模型的自定义API URL")
 	pflag.StringVarP(&c.ApiModel, "chatgpt-model", "m", defaultModel, "大模型的自定义模型名称")
@@ -114,6 +118,8 @@ func (c *Config) InitFlags() {
 	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
 	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认/data/k8m.db")
 	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认启用")
+	pflag.IntVarP(&c.MCPServerPort, "mcp-server-port", "s", defaultMCPServerPort, "MCP Server 监听端口，默认3619")
+
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
