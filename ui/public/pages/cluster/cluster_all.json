@@ -123,26 +123,6 @@
                 },
                 {
                   "type": "button",
-                  "label": "AI智检",
-                  "level": "link",
-                  "icon": "fas fa-walking text-primary",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "overlay": false,
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "size": "lg",
-                    "title": "AI 智能巡检 集群${clusterName} （ESC 关闭）",
-                    "body": [
-                      {
-                        "type": "k8sGPT",
-                        "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "button",
                   "label": "shell日志",
                   "icon": "fas fa-file-code text-primary",
                   "actionType": "url",
@@ -242,7 +222,14 @@
             },
             {
               "type": "button",
-              "label": "${k8s_gpt_problems_count > 0 ? '查看' : '检测'}",
+              "label": "智检",
+              "level": "link",
+              "actionType": "ajax",
+              "api": "post:/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
+            },
+            {
+              "type": "button",
+              "label": "查看",
               "level": "link",
               "actionType": "drawer",
               "drawer": {
@@ -254,7 +241,7 @@
                 "body": [
                   {
                     "type": "k8sGPT",
-                    "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
+                    "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/result"
                   }
                 ]
               }
