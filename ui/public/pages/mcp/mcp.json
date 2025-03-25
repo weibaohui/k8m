@@ -180,14 +180,51 @@
                                     "drawer": {
                                         "closeOnEsc": true,
                                         "closeOnOutside": true,
-                                        "size": "md",
+                                        "size": "lg",
                                         "body": {
                                             "type": "table",
                                             "source": "${tools}",
                                             "columns": [
                                                 {
                                                     "name": "name",
-                                                    "label": "工具名称"
+                                                    "label": "工具名称",
+                                                    "className": "cursor-pointer",
+                                                    "onEvent": {
+                                                        "click": {
+                                                            "actions": [
+                                                                {
+                                                                    "actionType": "drawer",
+                                                                    "drawer": {
+                                                                        "title": "工具信息 - ${name}",
+                                                                        "closeOnEsc": true,
+                                                                        "closeOnOutside": true,
+                                                                        "size": "lg",
+                                                                        "body": {
+                                                                            "type": "form",
+                                                                            "mode": "horizontal",
+                                                                            "body": [
+                                                                                {
+                                                                                    "type": "tpl",
+                                                                                    "tpl": "用途:<br>${description|raw}"
+                                                                                },
+                                                                                {
+                                                                                    "type": "tpl",
+                                                                                    "tpl": "<br>参数:<br>"
+                                                                                },
+                                                                                {
+                                                                                    "type": "json",
+                                                                                    "label": "输入参数",
+                                                                                    "value": "${inputSchema|json}",
+                                                                                    "levelExpand": 3,
+                                                                                    "className": "m-1"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
                                                 }
                                             ]
                                         }
