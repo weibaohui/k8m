@@ -100,3 +100,11 @@ func (c *clusterService) SetClusterScanStatus(selectedCluster string, result *an
 	clusterConfig.SetClusterScanStatus(result)
 
 }
+
+func (c *clusterService) GetClusterScanResult(selectedCluster string) *analysis.ResultWithStatus {
+	clusterConfig := c.GetClusterByID(selectedCluster)
+	if clusterConfig == nil {
+		return nil
+	}
+	return clusterConfig.GetClusterScanResult()
+}
