@@ -1,7 +1,7 @@
 import { replacePlaceholders } from '@/utils/utils';
 import React, { useEffect, useState } from 'react';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import formatLocalTime from "../K8sDate";
+import k8sDate from "../K8sDate";
 import { Alert, Button, Card, List, message, Space, Tag, Typography } from 'antd';
 import { ExclamationCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import WebSocketMarkdownViewerComponent from '../WebSocketMarkdownViewer';
@@ -106,7 +106,7 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
                         <Tag color="warning">发现 {result.problems} 个问题</Tag>
                     )}
                     {result.lastRunTime && (
-                        <Tag color="processing">最后运行: {formatLocalTime(result.lastRunTime)}</Tag>
+                        <Tag color="processing">最后运行: {k8sDate(result.lastRunTime)}</Tag>
                     )}
                 </Space>
             }
