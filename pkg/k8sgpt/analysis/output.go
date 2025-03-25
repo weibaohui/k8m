@@ -3,6 +3,7 @@ package analysis
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 func (a *Analysis) jsonOutput() ([]byte, error) {
@@ -42,11 +43,12 @@ func (a *Analysis) ResultWithStatus() (ResultWithStatus, error) {
 	}
 
 	result := ResultWithStatus{
-		Problems: problems,
-		Results:  a.Results,
-		Errors:   a.Errors,
-		Status:   status,
-		Stats:    a.Stats,
+		Problems:    problems,
+		Results:     a.Results,
+		Errors:      a.Errors,
+		Status:      status,
+		Stats:       a.Stats,
+		LastRunTime: time.Now(),
 	}
 
 	return result, nil
