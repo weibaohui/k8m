@@ -205,6 +205,19 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
     4. describe_k8s_resource
     5. get_pod_logs
 
+**v0.0.67 更新**
+
+1. 新增：MCP查询事件工具
+   ![输入图片说明](https://foruda.gitee.com/images/1742916865442166281/43b26650_77493.png "屏幕截图")
+2. 新增：MCP查询注册集群工具
+   ![输入图片说明](https://foruda.gitee.com/images/1742917222171687147/216d03f1_77493.png "屏幕截图")
+3. 新增：MCP查询事件工具
+   ![输入图片说明](https://foruda.gitee.com/images/1742917268538391635/9e25fbb3_77493.png "屏幕截图")
+4. 增强：列表查询资源支持label ，如app=k8m
+   ![输入图片说明](https://foruda.gitee.com/images/1742916917319897798/a2171fd2_77493.png "屏幕截图")
+5. 增强：MCP服务器增加快捷开启关闭按钮
+   ![输入图片说明](https://foruda.gitee.com/images/1742916947056442916/6c33d7c2_77493.png "屏幕截图")
+
 **v0.0.64 更新**
 
 1. 增加MCP支持
