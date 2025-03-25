@@ -1,6 +1,8 @@
 package k8sgpt
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -9,6 +11,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/klog/v2"
 )
 
 func GetFields(c *gin.Context) {
@@ -71,14 +74,32 @@ func ResourceRunAnalysis(c *gin.Context) {
 }
 func ClusterRunAnalysis(c *gin.Context) {
 	cfg := createAnalysisConfig(c)
-	cfg.Filters = []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
-		"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",
-		"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
-	result, err := analysis.Run(cfg)
-	if err != nil {
-		amis.WriteJsonError(c, err)
+	if !service.ClusterService().IsConnected(cfg.ClusterID) {
+		amis.WriteJsonError(c, fmt.Errorf("集群 %s 未连接", cfg.ClusterID))
 		return
 	}
-	go service.ClusterService().SetClusterScanStatus(cfg.ClusterID, result)
-	amis.WriteJsonData(c, result)
+
+	go func() {
+		cfg.Filters = []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
+			"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",
+			"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
+
+		if result, err := analysis.Run(cfg); err == nil {
+			klog.V(6).Infof("ClusterRunAnalysis result: %v", result)
+			service.ClusterService().SetClusterScanStatus(cfg.ClusterID, result)
+		} else {
+			klog.V(6).Infof("ClusterRunAnalysis result error: %v", err)
+		}
+	}()
+
+	amis.WriteJsonOKMsg(c, "后台执行，请稍后查看")
+}
+func GetClusterRunAnalysisResult(c *gin.Context) {
+	cfg := createAnalysisConfig(c)
+	scanResult := service.ClusterService().GetClusterScanResult(cfg.ClusterID)
+	if scanResult == nil {
+		amis.WriteJsonOKMsg(c, "暂无数据，请先点击执行检查")
+		return
+	}
+	amis.WriteJsonData(c, scanResult)
 }
