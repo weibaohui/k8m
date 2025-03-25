@@ -60,6 +60,7 @@ type ClusterConfig struct {
 	watchStatusLock         sync.RWMutex                   // watch状态读写锁
 	Source                  ClusterConfigSource            `json:"source,omitempty"`                 // 配置文件来源
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
+	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
 }
 type ClusterConfigSource string
 
@@ -116,10 +117,6 @@ func (c *ClusterConfig) GetClusterID() string {
 
 func (c *ClusterConfig) GetRestConfig() *rest.Config {
 	return c.restConfig
-}
-
-func (c *ClusterConfig) SetClusterScanStatus(result *analysis.ResultWithStatus) {
-	c.K8sGPTProblemsCount = result.Problems
 }
 
 // ClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
@@ -599,4 +596,15 @@ func (c *clusterService) RegisterInCluster() {
 
 	c.AddToClusterList(clusterConfig)
 	_, _ = c.RegisterCluster(clusterConfig)
+}
+
+func (c *ClusterConfig) SetClusterScanStatus(result *analysis.ResultWithStatus) {
+	c.K8sGPTProblemsCount = result.Problems
+	c.K8sGPTProblemsResult = result
+
+}
+func (c *ClusterConfig) GetClusterScanResult() *analysis.ResultWithStatus {
+
+	return c.K8sGPTProblemsResult
+
 }
