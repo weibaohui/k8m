@@ -213,6 +213,7 @@
         {
           "name": "k8s_gpt_problems_count",
           "label": "智检",
+          "width": "200px",
           "type": "container",
           "body": [
             {
