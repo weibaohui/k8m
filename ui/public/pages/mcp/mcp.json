@@ -180,7 +180,7 @@
                                     "drawer": {
                                         "closeOnEsc": true,
                                         "closeOnOutside": true,
-                                        "size": "lg",
+                                        "size": "md",
                                         "body": {
                                             "type": "table",
                                             "source": "${tools}",
