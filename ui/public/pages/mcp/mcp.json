@@ -48,6 +48,7 @@
         {
             "type": "crud",
             "api": "/mgm/mcp/list",
+            "quickSaveItemApi": "/mgm/mcp/save/id/${id}/status/${config.enabled}",
             "autoFillHeight": true,
             "autoGenerateFilter": {
                 "columnsNum": 4,
@@ -160,10 +161,13 @@
                 {
                     "name": "config.enabled",
                     "label": "启用",
-                    "type": "status",
-                    "map": {
-                        "true": "已启用",
-                        "false": "已禁用"
+                    "quickEdit": {
+                        "mode": "inline",
+                        "type": "switch",
+                        "onText": "开启",
+                        "offText": "关闭",
+                        "saveImmediately": true,
+                        "resetOnFailed": true
                     }
                 },
                 {
