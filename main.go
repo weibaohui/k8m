@@ -402,6 +402,7 @@ func main() {
 		mgm.POST("/mcp/connect/:name", mcp.Connect)
 		mgm.POST("/mcp/delete", mcp.Delete)
 		mgm.POST("/mcp/save", mcp.AddOrUpdate)
+		mgm.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
 
 	}
 
