@@ -71,6 +71,37 @@ func AddOrUpdate(c *gin.Context) {
 	service.McpService().UpdateServer(entity)
 	amis.WriteJsonErrorOrOK(c, err)
 }
+func QuickSave(c *gin.Context) {
+	id := c.Param("id")
+	status := c.Param("status")
+	params := dao.BuildParams(c)
+
+	var entity models.MCPServerConfig
+	err := dao.DB().Where("id = ?", id).First(&entity).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 检查权限
+	_, _, err = handleCommonLogic(c, "AddOrUpdateRepo", entity.Name, entity.URL)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	if status == "true" {
+		entity.Enabled = true
+	} else {
+		entity.Enabled = false
+	}
+	err = entity.Save(params)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	service.McpService().UpdateServer(entity)
+	amis.WriteJsonErrorOrOK(c, err)
+}
 
 func handleCommonLogic(c *gin.Context, action string, name, url string) (string, string, error) {
 	ctx := amis.GetContextWithUser(c)
