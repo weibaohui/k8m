@@ -1,8 +1,9 @@
-import {replacePlaceholders} from '@/utils/utils';
-import React, {useEffect, useState} from 'react';
-import {fetcher} from "@/components/Amis/fetcher.ts";
-import {Alert, Button, Card, List, message, Space, Tag, Typography} from 'antd';
-import {ExclamationCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined} from '@ant-design/icons';
+import { replacePlaceholders } from '@/utils/utils';
+import React, { useEffect, useState } from 'react';
+import { fetcher } from "@/components/Amis/fetcher.ts";
+import formatLocalTime from "../K8sDate";
+import { Alert, Button, Card, List, message, Space, Tag, Typography } from 'antd';
+import { ExclamationCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import WebSocketMarkdownViewerComponent from '../WebSocketMarkdownViewer';
 
 interface K8sGPTProps {
@@ -15,6 +16,7 @@ interface K8sGPTResult {
     errors: any;
     status: string;
     problems: number;
+    lastRunTime?: string;
     results: Array<{
         kind: string;
         name: string;
@@ -83,7 +85,7 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
     };
 
     if (loading) {
-        return <Card loading={true}/>;
+        return <Card loading={true} />;
     }
 
     if (!result) {
@@ -96,12 +98,15 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
                 <Space>
                     <Typography.Text strong>K8s资源巡检结果</Typography.Text>
                     <Tag color={result.status === 'ProblemDetected' ? 'error' : 'success'}
-                         icon={result.status === 'ProblemDetected' ? <ExclamationCircleOutlined/> :
-                             <CheckCircleOutlined/>}>
+                        icon={result.status === 'ProblemDetected' ? <ExclamationCircleOutlined /> :
+                            <CheckCircleOutlined />}>
                         {result.status === 'ProblemDetected' ? '发现问题' : '正常'}
                     </Tag>
                     {result.problems > 0 && (
                         <Tag color="warning">发现 {result.problems} 个问题</Tag>
+                    )}
+                    {result.lastRunTime && (
+                        <Tag color="processing">最后运行: {formatLocalTime(result.lastRunTime)}</Tag>
                     )}
                 </Space>
             }
@@ -112,13 +117,13 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
                     const itemKey = `${item.kind}-${item.name}`;
                     return (
                         <List.Item>
-                            <div style={{width: '100%'}}>
-                                <Typography.Text strong style={{marginBottom: '8px', display: 'block'}}>
+                            <div style={{ width: '100%' }}>
+                                <Typography.Text strong style={{ marginBottom: '8px', display: 'block' }}>
                                     {item.kind}: {item.name}
                                 </Typography.Text>
-                                <Space direction="vertical" style={{width: '100%'}}>
+                                <Space direction="vertical" style={{ width: '100%' }}>
                                     {item.error.map((error, index) => (
-                                        <div key={index} style={{width: '100%'}}>
+                                        <div key={index} style={{ width: '100%' }}>
                                             <Alert
                                                 message={error.Text}
                                                 description={error.KubernetesDoc}
@@ -126,7 +131,7 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
                                                 showIcon
                                                 action={
                                                     <Button
-                                                        icon={<QuestionCircleOutlined/>}
+                                                        icon={<QuestionCircleOutlined />}
                                                         onClick={() => toggleExplanation(`${itemKey}-${index}`)}
                                                         type="link"
                                                     >
@@ -135,7 +140,7 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
                                                 }
                                             />
                                             {expandedItems[`${itemKey}-${index}`] && (
-                                                <div style={{marginTop: '8px', marginBottom: '16px'}}>
+                                                <div style={{ marginTop: '8px', marginBottom: '16px' }}>
                                                     <WebSocketMarkdownViewerComponent
                                                         url="/k8s/chat/k8s_gpt/resource"
                                                         params={{
