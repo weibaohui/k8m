@@ -194,7 +194,8 @@ func GPTShell(c *gin.Context) {
 							klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
 
 							// 使用合并后的ToolCalls执行操作
-							results := service.McpService().Host().ExecTools(context.Background(), mergedCalls)
+							ctx := amis.GetContextWithUser(c)
+							results := service.McpService().Host().ExecTools(ctx, mergedCalls)
 							for _, r := range results {
 								outBuffer.Write([]byte(utils.ToJSON(r)))
 							}
