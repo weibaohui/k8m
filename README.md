@@ -143,9 +143,9 @@ brew install kind
 kind create cluster --name k8sgpt-demo
 ```
 
-# 将k8m部署到集群中体验
+## 将k8m部署到集群中体验
 
-## 安装脚本
+### 安装脚本
 
 ```docker
 kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main/deploy/k8m.yaml
@@ -155,7 +155,7 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
   默认使用了nodePort开放，请访问31999端口。或自行配置Ingress
   http://NodePortIP:31999
 
-## 修改配置
+### 修改配置
 首选建议通过修改环境变量方式进行修改。 例如增加deploy.yaml中的env参数
 
 ## 内置MCP Server 使用说明
