@@ -87,6 +87,10 @@ spec:
       protocol: TCP
       port: 3618
       targetPort: 3618
+    - name: http-k8m-mcp
+      protocol: TCP
+      port: 3619
+      targetPort: 3619
   selector:
     app: k8m
   type: ClusterIP
@@ -105,6 +109,11 @@ spec:
       port: 3618
       targetPort: 3618
       nodePort: 31999
+    - name: http-k8m-mcp
+      protocol: TCP
+      port: 3619
+      targetPort: 3619
+      nodePort: 31919
   selector:
     app: k8m
   type: NodePort
@@ -146,6 +155,9 @@ spec:
             - containerPort: 3618
               protocol: TCP
               name: http-k8m
+            - containerPort: 3619
+              protocol: TCP
+              name: http-k8m-mcp
           imagePullPolicy: IfNotPresent
       restartPolicy: Always
       serviceAccountName: k8m
