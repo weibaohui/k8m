@@ -156,46 +156,56 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
   http://NodePortIP:31999
 
 ## 修改配置
-
 首选建议通过修改环境变量方式进行修改。 例如增加deploy.yaml中的env参数
 
-### **跨平台编译支持**
+## 内置MCP Server 使用说明
+### 访问端点 
+应用程序使用3619端口。NodePort使用31919端口。
+如果二进制方式直接启动，那么访问地址为http://ip:3619/sse
+如果集群方式启动，则访问地址为则访问地址为http://nodeIP:31919/sse
+### 集群管理范围
+内置MCP Server 管理范围与k8m 纳管的集群范围一致。
+界面内已连接的集群均可使用。
+### 内置MCP Server 配置说明
+MCP Server 内置了以下工具：
+``` bash
+list_clusters # 列出当前注册集群
+list_k8s_event # 列出事件，支持集群、相关资源名称
+list_k8s_resource # 列出资源,支持集群、命名空间、名称，支持CRD资源
+get_k8s_resource # 获取资源,支持集群、命名空间、名称，支持CRD资源
+delete_k8s_resource # 删除资源,支持集群、命名空间、名称，支持CRD资源
+describe_k8s_resource # 描述资源,支持集群、命名空间、名称，支持CRD资源
+get_pod_logs # 获取POD日志,支持集群、命名空间、名称，支持设置最后多少条日志
+```
+### AI工具集成
 
-**build-all** 目标支持以下操作系统和架构组合的交叉编译：
+#### Claude Desktop
+1. 打开Claude Desktop设置面板
+2. 在API配置区域添加MCP Server地址
+3. 启用SSE事件监听功能
+4. 验证连接状态
 
-- **Linux**:
-    - `amd64`
-    - `arm64`
-    - `ppc64le`
-    - `s390x`
-    - `riscv64`
-- **Darwin（macOS）**:
-    - `amd64`
-    - `arm64`
-- **Windows**:
-    - `amd64`
-    - `arm64`
+#### Cursor
+1. 进入Cursor设置界面
+2. 找到扩展服务配置选项
+3. 添加MCP Server的URL（例如：http://localhost:3619/sse）
+4. 开启实时事件通知
 
-### **附加说明**
+#### Windsurf
+1. 访问配置中心
+2. 设置API服务器地址
+3. 启用实时事件通知
+4. 测试连接
 
-- **版本控制**：你可以在构建时通过传递 `VERSION` 变量来指定自定义版本：
-  ```bash
-  make build VERSION=v2.0.0
-  ```
-- **可执行文件扩展名**：对于 Windows 构建，Makefile 会自动为可执行文件添加 `.exe` 扩展名。
-- **依赖性**：确保 Git 已安装并且项目已初始化为 Git 仓库，以便正确获取 `GIT_COMMIT` 哈希值。
+### MCP常见问题
+1. 确保MCP Server正常运行且端口可访问
+2. 检查网络连接是否正常
+3. 验证SSE连接是否成功建立
+4. 查看工具日志以排查连接问题，MCP执行失败会有报错记录。
+ 
 
-### **故障排除**
 
-- **缺少依赖**：如果遇到与缺少命令相关的错误（如 `make`、`go` 等），请确保所有先决条件已安装并正确配置在系统的 `PATH` 中。
-- **权限问题**：如果在运行 `make run` 时收到权限被拒绝的错误，请确保 `bin/` 目录和编译后的二进制文件具有必要的执行权限：
-  ```bash
-  chmod +x bin/k8m
-  ```
-- **文件浏览权限问题**：依赖容器内的ls命令，请在容器内安装shell、tar、cat等命令 。
-- **无法启动**：启动时卡住，请使用 k8m -v 6
-  命令启动，会输出更多日志，一般是由于部分版本的k8s集群的openAPI文档格式问题导致，请将日志贴到issue，或微信发我，我将优先处理 。
-  **V0.0.66更新**
+**V0.0.66更新**
 
 1. 新增MCP支持。
 2. 内置支持k8s多集群操作：
