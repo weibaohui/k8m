@@ -31,6 +31,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
+	"github.com/weibaohui/k8m/pkg/controller/role"
 	"github.com/weibaohui/k8m/pkg/controller/rs"
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
@@ -157,6 +158,30 @@ func main() {
 		auth.POST("/login", login.LoginByPassword)
 	}
 
+	user_role := r.Group("/user_role", middleware.AuthMiddleware())
+	{
+		// 获取角色列表
+		user_role.GET("/list", role.List)
+		// 创建新角色
+		user_role.POST("/create", role.Create)
+		// 获取角色详情
+		user_role.GET("/detail/:role_id", role.Detail)
+		// 更新角色
+		user_role.POST("/update/:role_id", role.Update)
+		// 删除角色
+		user_role.DELETE("/delete/:role_id", role.Delete)
+	}
+	permissions := r.Group("/permissions", middleware.AuthMiddleware())
+	{
+		// 检查用户权限
+		permissions.GET("/check", role.CheckUserPermission)
+		// 创建权限绑定
+		permissions.POST("/binding", role.CreateBinding)
+		// 删除权限绑定
+		permissions.DELETE("/binding/:binding_id", role.DeleteBinding)
+		// 获取权限绑定列表
+		permissions.GET("/bindings", role.ListBindings)
+	}
 	api := r.Group("/k8s", middleware.AuthMiddleware())
 	{
 		// dynamic
