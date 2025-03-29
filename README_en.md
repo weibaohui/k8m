@@ -202,6 +202,10 @@ All connected clusters in the interface can be used.
 |                       | `get_node_resource_usage`      | Query resource usage of node                     |
 |                       | `get_node_ip_usage`            | Query Pod IP resource usage on node              |
 |                       | `get_node_pod_count`           | Query Pod count on node                          |
+|                       | `drain_node`                   | Execute Drain for node                           |
+|                       | `get_node_resource_usage`      | Query resource usage of node                     |
+|                       | `get_node_ip_usage`            | Query Pod IP resource usage on node              |
+|                       | `get_node_pod_count`           | Query Pod count on node                          |
 | **Pod Management (14)** | `list_pod_files`               | List Pod files                                   |
 |                       | `list_all_pod_files`           | List all Pod files                               |
 |                       | `delete_pod_file`              | Delete Pod file                                  |
@@ -222,5 +226,3 @@ All connected clusters in the interface can be used.
 |                       | `get_storageclass_pvc_count`   | Get PVC count under StorageClass                 |
 |                       | `get_storageclass_pv_count`    | Get PV count under StorageClass                  |
 | **Ingress Management (1)** | `set_default_ingressclass`     | Set default IngressClass                         |
-
-### AI Tool Integration
