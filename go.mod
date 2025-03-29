@@ -14,14 +14,14 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/mark3labs/mcp-go v0.16.0
+	github.com/mark3labs/mcp-go v0.17.0
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.38.1
 	github.com/spf13/pflag v1.0.6
 	github.com/weibaohui/kom v0.2.4
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	gorm.io/gorm v1.25.12
 	helm.sh/helm/v3 v3.17.2
 	k8s.io/api v0.32.3
@@ -29,7 +29,7 @@ require (
 	k8s.io/client-go v0.32.3
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kubectl v0.32.3
-	modernc.org/sqlite v1.36.2
+	modernc.org/sqlite v1.36.3
 	sigs.k8s.io/gateway-api v1.2.1
 	sigs.k8s.io/yaml v1.4.0
 )
