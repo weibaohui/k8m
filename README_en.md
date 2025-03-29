@@ -1,232 +1,226 @@
-# k8m
+## **k8m**
+
 [English](README_en.md) | [中文](README.md)
 
-**k8m** is a lightweight console tool that integrates AI and Kubernetes, designed to simplify cluster management. Built on AMIS and using [`kom`](https://github.com/weibaohui/kom)  as the Kubernetes API client, **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
+[![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
+
+**k8m** is an AI-driven Mini Kubernetes AI Dashboard lightweight console tool designed to simplify cluster management. It is built on AMIS and uses [`kom`](https://github.com/weibaohui/kom) as the Kubernetes API client. **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
 
 ### Key Features
+
 - **Compact Design**: All functionalities are packed into a single executable file for easy deployment and use.
 - **User-Friendly**: An intuitive user interface and straightforward workflows make Kubernetes management effortless.
 - **High Performance**: Backend built with Golang and frontend based on Baidu AMIS ensure high resource efficiency and fast responsiveness.
+- **AI-Driven Integration**: Provides intelligent support for managing Kubernetes with features like word explanation, resource guide, YAML attribute translation, Describe information interpretation, log AI diagnosis, and command recommendation, integrated with [`k8s-gpt`](https://github.com/k8sgpt-ai/k8sgpt) for Chinese display.
+- **MCP Integration**: Visual management of MCP, enabling large model calls to Tools, with 49 built-in k8s multi-cluster MCP tools, allowing for over a hundred cluster operations. It can serve as an MCP Server for other large model software, facilitating easy management of k8s with large models. Supports mainstream services like mcp.so.
+- **Multi-Cluster Management**: Automatically recognizes clusters using InCluster mode, scans configuration files in the same directory after configuring the kubeconfig path, and registers multiple clusters for management.
 - **Pod File Management**: Enables browsing, editing, uploading, downloading, and deleting files within Pods, simplifying daily operations.
 - **Pod Operations Management**: Supports real-time Pod log viewing, log downloads, and direct Shell command execution within Pods.
 - **CRD Management**: Automatically discovers and manages CRD resources to improve productivity.
-- **Intelligent Translation and Diagnostics**: Offers YAML property translation, event anomaly diagnosis, and log analysis to provide smart troubleshooting support.
+- **Helm Marketplace**: Supports free addition of Helm repositories, one-click installation, uninstallation, and upgrade of Helm applications.
 - **Cross-Platform Support**: Compatible with Linux, macOS, and Windows, and supports various architectures like x86 and ARM for seamless multi-platform operation.
+- **Fully Open Source**: All source code is open without any restrictions, allowing for free customization and extension, and commercial use.
 
-The design philosophy of **k8m** is "lightweight and efficient, simplifying complexity." It helps developers and operators quickly get started and effortlessly manage Kubernetes clusters.
+**k8m**'s design philosophy is "AI-driven, lightweight and efficient, simplifying complexity," helping developers and operators quickly get started and effortlessly manage Kubernetes clusters.
+
+<img width="600" alt="image" src="https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e" />
 
 ## **Run**
+
 1. **Download**: Download the latest version from [GitHub](https://github.com/weibaohui/k8m).
 2. **Run**: Start with the `./k8m` command and visit [http://127.0.0.1:3618](http://127.0.0.1:3618).
 3. **Parameters**:
+
 ```shell
-  ./k8m -h
-      --add_dir_header                   If true, adds the file directory to the header of the log messages
-      --alsologtostderr                  log to standard error as well as files (no effect when -logtostderr=true)
-  -k, --chatgpt-key string               API Key for ChatGPT (default "sk-XXXX")
-  -u, --chatgpt-url string               API URL for ChatGPT (default "https://api.siliconflow.cn/v1")
-  -d, --debug                            Debug mode, same as GIN_MODE
-  -c, --kubeconfig string                Absolute path to the kubeConfig file (default "/Users/xxx/.kube/config")
-      --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
-      --log_dir string                   If non-empty, write log files in this directory (no effect when -logtostderr=true)
-      --log_file string                  If non-empty, use this log file (no effect when -logtostderr=true)
-      --log_file_max_size uint           Defines the maximum size a log file can grow to (no effect when -logtostderr=true). Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
-      --logtostderr                      log to standard error instead of files (default true)
-      --one_output                       If true, only write logs to their native severity level (vs also writing to each lower severity level; no effect when -logtostderr=true)
-  -p, --port int                         Port for the server to listen on (default 3618)
-      --skip_headers                     If true, avoid header prefixes in the log messages
-      --skip_log_headers                 If true, avoid headers when opening log files (no effect when -logtostderr=true)
-      --stderrthreshold severity         logs at or above this threshold go to stderr when writing to files and stderr (no effect when -logtostderr=true or -alsologtostderr=true) (default 2)
-  -v, --v Level                          number for the log level verbosity (default 0)
-      --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
+Usage of ./k8m:
+      --admin-password string            Administrator password (default "123456")
+      --admin-username string            Administrator username (default "admin")
+  -k, --chatgpt-key string               Custom API Key for large models (default "sk-xxxxxxx")
+  -m, --chatgpt-model string             Custom model name for large models (default "Qwen/Qwen2.5-7B-Instruct")
+  -u, --chatgpt-url string               Custom API URL for large models (default "https://api.siliconflow.cn/v1")
+  -d, --debug                            Debug mode
+      --in-cluster                       Whether to automatically register and manage the host cluster, enabled by default
+      --jwt-token-secret string          Secret used for generating JWT token after login (default "your-secret-key")
+  -c, --kubeconfig string                Path to kubeconfig file (default "/root/.kube/config")
+      --kubectl-shell-image string       Kubectl Shell image. Default is bitnami/kubectl:latest, must contain kubectl command (default "bitnami/kubectl:latest")
+      --log-v int                        Log level for klog.klog.V(2) (default 2)
+      --login-type string                Login method, password, oauth, token, etc., default is password (default "password")
+      --node-shell-image string          NodeShell image. Default is alpine:latest, must contain `nsenter` command (default "alpine:latest")
+  -p, --port int                         Listening port (default 3618)
+      --sqlite-path string               Path to sqlite database file (default "./data/k8m.db")
+  -s, --mcp-server-port int              MCP Server listening port, default 3619 (default 3619)
+  -v, --v Level                          Log level for klog (default 2)
 ```
 
 ## **ChatGPT Configuration Guide**
 
-
 ### Built-in GPT
+
 Starting from version v0.0.8, GPT is built-in and does not require configuration.
 If you need to use your own GPT, please refer to the steps below.
 
 ### **Environment Variable Configuration**
+
 Set the environment variables to enable ChatGPT.
+
 ```bash
 export OPENAI_API_KEY="sk-XXXXX"
 export OPENAI_API_URL="https://api.siliconflow.cn/v1"
+export OPENAI_MODEL="Qwen/Qwen2.5-7B-Instruct"
 ```
+
+### **ChatGPT Status Debugging**
+
+If setting parameters does not work, try using `./k8m -v 6` to get more debugging information.
+The following information will be output, check the logs to confirm whether ChatGPT is enabled.
+
+```go
+ChatGPT enabled status:true
+ChatGPT enabled key:sk-hl**********************************************, url:https://api.siliconflow.cn/v1
+ChatGPT uses model set in environment variables:Qwen/Qwen2.5-Coder-7B-Instruc
+```
+
 ### **ChatGPT Account**
-This project integrates the [github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai) SDK. For users in China, it's recommended to use the [Silicon Flow](https://cloud.siliconflow.cn/) service. After logging in, create an API_KEY at [https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak).
 
-## **Makefile Usage Guide**
+This project integrates the [github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai) SDK.
+For users in China, it's recommended to use the [Silicon Flow](https://cloud.siliconflow.cn/) service.
+After logging in, create an API_KEY at [https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak).
 
-The **Makefile** in this project is used to automate common tasks such as building, testing, and cleaning the project. Below is a detailed usage guide to help you understand how to use the targets defined in the Makefile.
+## **k8m Environment Variable Settings**
 
-### **Prerequisites**
+Below is a table of environment variable settings supported by k8m and their functions:
 
-Before using the Makefile, ensure that the following tools are installed on your system:
+| Environment Variable       | Default Value                | Description                                                        |
+|----------------------------|------------------------------|--------------------------------------------------------------------|
+| `PORT`                     | `3618`                       | Listening port number                                              |
+| `MCP_SERVER_PORT`          | `3619`                       | Listening port number for built-in multi-cluster k8s MCP Server    |
+| `KUBECONFIG`               | `~/.kube/config`             | Path to `kubeconfig` file                                          |
+| `OPENAI_API_KEY`           | `""`                         | API Key for large models                                           |
+| `OPENAI_API_URL`           | `""`                         | API URL for large models                                           |
+| `OPENAI_MODEL`             | `Qwen/Qwen2.5-7B-Instruct`   | Default model name for large models, set to deepseek-ai/DeepSeek-R1-Distill-Qwen-7B if needed |
+| `LOGIN_TYPE`               | `"password"`                | Login method (e.g., `password`, `oauth`, `token`)                  |
+| `ADMIN_USERNAME`           | `"admin"`                   | Administrator username                                             |
+| `ADMIN_PASSWORD`           | `"123456"`                  | Administrator password                                             |
+| `DEBUG`                    | `"false"`                   | Whether to enable `debug` mode                                     |
+| `LOG_V`                    | `"2"`                       | Log output level, same usage as klog                               |
+| `JWT_TOKEN_SECRET`         | `"your-secret-key"`         | Secret used for generating JWT Token                               |
+| `KUBECTL_SHELL_IMAGE`      | `bitnami/kubectl:latest`     | kubectl shell image address                                        |
+| `NODE_SHELL_IMAGE`         | `alpine:latest`              | Node shell image address                                           |
+| `SQLITE_PATH`              | `/data/k8m.db`               | Persistent database address, default sqlite database, file address /data/k8m.db |
+| `IN_CLUSTER`               | `"true"`                    | Whether to automatically register and manage the host cluster, enabled by default |
 
-- **Go (Golang)** - [Download and install Go](https://golang.org/dl/)
-- **Make** - Usually pre-installed on Linux and macOS. For Windows users, consider using [GNU Make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm) or [WSL (Windows Subsystem for Linux)](https://docs.microsoft.com/en-us/windows/wsl/install)
-- **Git** - For retrieving the current commit hash
+These environment variables can be set when running the application, for example:
 
-### **Available Targets**
-
-#### 1. **make**
-- **Description**: The default target, builds the executable for the current platform.
-- **Usage**:
-  ```bash
-  make
-  ```
-
-#### 2. **build**
-- **Description**: Builds the executable for the current platform based on the OS and architecture.
-- **Usage**:
-  ```bash
-  make build
-  ```
-- **Output**: The compiled binary will be located in the `bin/` directory with the filename `k8m` (or `k8m.exe` for Windows).
-
-#### 3. **build-all**
-- **Description**: Cross-compiles the executable for all specified platforms and architectures.
-- **Usage**:
-  ```bash
-  make build-all
-  ```
-- **Output**: Executables for different platforms will be located in the `bin/` directory, named as `k8m-<GOOS>-<GOARCH>` (e.g., `k8m-linux-amd64`, `k8m-windows-amd64.exe`).
-
-#### 4. **clean**
-- **Description**: Removes the `bin/` directory and all compiled executables.
-- **Usage**:
-  ```bash
-  make clean
-  ```
-- **Output**: The `bin/` directory and its contents will be deleted.
-
-#### 5. **run**
-- **Description**: Builds and runs the executable for the current platform. **Note**: This target is Unix-only (Linux and macOS).
-- **Usage**:
-  ```bash
-  make run
-  ```
-- **Output**: The application will start running locally.
-
-#### 6. **help**
-- **Description**: Displays all available Makefile targets and their descriptions.
-- **Usage**:
-  ```bash
-  make help
-  ```
-
-### **Cross-Platform Compilation Support**
-
-The **build-all** target supports cross-compiling for the following OS and architecture combinations:
-
-- **Linux**:
-    - `amd64`
-    - `arm64`
-    - `ppc64le`
-    - `s390x`
-    - `mips64le`
-    - `riscv64`
-- **Darwin (macOS)**:
-    - `amd64`
-    - `arm64`
-- **Windows**:
-    - `amd64`
-    - `arm64`
-
-### **Usage Examples**
-
-#### **1. Build for the current platform**
-
-Build the `k8m` executable for the current OS and architecture:
-```bash
-make build
+```sh
+export PORT=8080
+export OPENAI_API_KEY="your-api-key"
+export GIN_MODE="release"
+./k8m
 ```
 
-#### **2. Build for all supported platforms**
+**Note: Environment variables will be overridden by startup parameters.**
 
-Cross-compile `k8m` for all specified platforms and architectures:
-```bash
-make build-all
+## Running with Containerized k8s Cluster
+
+Use [KinD](https://kind.sigs.k8s.io/docs/user/quick-start/) or [MiniKube](https://minikube.sigs.k8s.io/docs/start/) to install a small k8s cluster.
+
+## KinD Method
+
+* Create KinD Kubernetes Cluster
+
+```
+brew install kind
 ```
 
-#### **3. Run the executable**
+* Create a new Kubernetes cluster:
 
-On Unix systems, build and run `k8m`:
-```bash
-make run
+```
+kind create cluster --name k8sgpt-demo
 ```
 
-#### **4. Clean build artifacts**
+## Deploy k8m to the Cluster for Experience
 
-Remove all compiled executables and the `bin/` directory:
-```bash
-make clean
+### Installation Script
+
+```docker
+kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main/deploy/k8m.yaml
 ```
 
-#### **5. View help information**
+* Access:
+  NodePort is used by default, please access port 31999. Or configure Ingress yourself.
+  http://NodePortIP:31999
 
-Display all available Makefile targets and their descriptions:
-```bash
-make help
-```
+### Modify Configuration
 
-### **Additional Notes**
+It is recommended to modify through environment variables first. For example, add env parameters in deploy.yaml.
 
-- **Version Control**: You can specify a custom version during the build by passing the `VERSION` variable:
-  ```bash
-  make build VERSION=v2.0.0
-  ```
-- **Executable File Extensions**: For Windows builds, the Makefile will automatically append the `.exe` extension to the executable.
-- **Dependencies**: Ensure that Git is installed and the project is initialized as a Git repository to correctly retrieve the `GIT_COMMIT` hash.
+## Built-in MCP Server Usage Instructions
 
-### **Troubleshooting**
+### Service Endpoint, Can be Developed for Use by Other AI Tools
 
-- **Missing Dependencies**: If you encounter errors related to missing commands (e.g., `make`, `go`), ensure that all prerequisites are installed and correctly configured in your system's `PATH`.
-- **Permission Issues**: If you receive permission denied errors when running `make run`, ensure that the `bin/` directory and the compiled binary have the necessary execution permissions:
-  ```bash
-  chmod +x bin/k8m
-  ```
-- **File Browsing Permission Issue**:Depends on the ls command within the container. Please install commands such as shell, tar, and cat within the container.
+MCP program uses port 3619. NodePort uses port 31919.
+If started in binary mode, the access address is http://ip:3619/sse
+If started in cluster mode, the access address is http://nodeIP:31919/sse
 
+### Cluster Management Scope
 
-## **Show**
+The management scope of the built-in MCP Server is consistent with the cluster scope managed by k8m.
+All connected clusters in the interface can be used.
 
-### Workloads
-![workload](images/workload.png)
+### Built-in MCP Server Configuration Instructions
 
-### File Editing Within Pods
-![file-edit](images/file-edit.png)
+#### MCP Tool List (49 types)
 
-### Uploading Files to Pods
-![upload](images/upload.png)
+| Category              | Method                          | Description                                     |
+|-----------------------|---------------------------------|-------------------------------------------------|
+| **Cluster Management (1)** | `list_clusters`                | List all registered Kubernetes clusters          |
+| **Deployment Management (12)** | `scale_deployment`             | Scale Deployment                                 |
+|                       | `restart_deployment`           | Restart Deployment                               |
+|                       | `stop_deployment`              | Stop Deployment                                  |
+|                       | `restore_deployment`           | Restore Deployment                               |
+|                       | `update_tag_deployment`        | Update Deployment image tag                      |
+|                       | `rollout_history_deployment`   | Query Deployment upgrade history                 |
+|                       | `rollout_undo_deployment`      | Rollback Deployment                              |
+|                       | `rollout_pause_deployment`     | Pause Deployment upgrade                         |
+|                       | `rollout_resume_deployment`    | Resume Deployment upgrade                        |
+|                       | `rollout_status_deployment`    | Query Deployment upgrade status                  |
+|                       | `hpa_list_deployment`          | Query HPA list of Deployment                     |
+|                       | `list_deployment_pods`         | Get Pod list managed by Deployment               |
+| **Dynamic Resource Management (including CRD, 8)** | `get_k8s_resource`             | Get k8s resource                                 |
+|                       | `describe_k8s_resource`        | Describe k8s resource                            |
+|                       | `delete_k8s_resource`          | Delete k8s resource                              |
+|                       | `list_k8s_resource`            | List k8s resources in list form                  |
+|                       | `list_k8s_event`               | List k8s events in list form                     |
+|                       | `patch_k8s_resource`           | Update k8s resource using JSON Patch             |
+|                       | `label_k8s_resource`           | Add or delete labels for k8s resources           |
+|                       | `annotate_k8s_resource`        | Add or delete annotations for k8s resources      |
+| **Node Management (8)** | `taint_node`                   | Add taint to node                                |
+|                       | `untaint_node`                 | Remove taint from node                           |
+|                       | `cordon_node`                  | Set Cordon for node                              |
+|                       | `uncordon_node`                | Cancel Cordon for node                           |
+|                       | `drain_node`                   | Execute Drain for node                           |
+|                       | `get_node_resource_usage`      | Query resource usage of node                     |
+|                       | `get_node_ip_usage`            | Query Pod IP resource usage on node              |
+|                       | `get_node_pod_count`           | Query Pod count on node                          |
+| **Pod Management (14)** | `list_pod_files`               | List Pod files                                   |
+|                       | `list_all_pod_files`           | List all Pod files                               |
+|                       | `delete_pod_file`              | Delete Pod file                                  |
+|                       | `upload_file_to_pod`           | Upload file to Pod, supports passing text content and storing as Pod file |
+|                       | `get_pod_logs`                 | Get Pod logs                                     |
+|                       | `run_command_in_pod`           | Execute command in Pod                           |
+|                       | `get_pod_linked_service`       | Get Service linked to Pod                        |
+|                       | `get_pod_linked_ingress`       | Get Ingress linked to Pod                        |
+|                       | `get_pod_linked_endpoints`     | Get Endpoints linked to Pod                      |
+|                       | `get_pod_linked_pvc`           | Get PVC linked to Pod                            |
+|                       | `get_pod_linked_pv`            | Get PV linked to Pod                             |
+|                       | `get_pod_linked_env`           | Get runtime environment variables of Pod by running env command in Pod |
+|                       | `get_pod_linked_env_from_yaml` | Get runtime environment variables of Pod from Pod yaml definition |
+|                       | `get_pod_resource_usage`       | Get resource usage of Pod, including CPU and memory request values, limit values, allocatable values, and usage ratios |
+| **YAML Management (2)** | `apply_yaml`                   | Apply YAML resource                              |
+|                       | `delete_yaml`                  | Delete YAML resource                             |
+| **Storage Management (3)** | `set_default_storageclass`     | Set default StorageClass                         |
+|                       | `get_storageclass_pvc_count`   | Get PVC count under StorageClass                 |
+|                       | `get_storageclass_pv_count`    | Get PV count under StorageClass                  |
+| **Ingress Management (1)** | `set_default_ingressclass`     | Set default IngressClass                         |
 
-### Downloading Files from Pods
-![download](images/download.png)
-
-### Tag Updates
-![tag-update](images/tag-update.png)
-
-### Log Viewing
-![log-view](images/log-view.png)
-
-### Automatic YAML Attribute Translation
-k8m offers integrated YAML browsing, editing, and documentation features with automatic YAML attribute translation. Whether you're looking up field definitions or verifying configuration details, you can skip the tedious searches, significantly boosting your efficiency.  
-![yaml-editor](images/yaml.png)  
-![YAML Attribute Translation](images/yaml-ai-1.png)
-
-### Event AI Diagnostics
-In the Event page, k8m comes with built-in AI diagnostic capabilities to intelligently analyze abnormal events and provide detailed explanations. By clicking the "AI Brain" button next to an event, you can view the diagnostic results within moments and quickly pinpoint the root cause of issues.  
-![Event Diagnostics](images/event-3.png)
-
-### Error Log AI Diagnostics
-Log analysis is a crucial step in troubleshooting, but large volumes of error messages can make it challenging to identify issues efficiently. k8m supports AI-powered log diagnostics to quickly detect critical errors and generate actionable suggestions. Simply select the relevant log entries, click the AI diagnostic button, and receive a comprehensive report.  
-![Log Diagnostics](images/log-ai-4.png)
-
-### Automatic Command Generation
-Command operations within Pods are an inevitable part of daily maintenance. With AI assistance, you only need to describe your requirements, and k8m will automatically generate suitable commands for your reference, saving time and improving efficiency.  
-![Command Auto-Generation](images/AI-command-3.png)
-
-### HELP & SUPPORT
-If you have any further questions or need additional assistance, feel free to reach out!
+### AI Tool Integration
