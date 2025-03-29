@@ -38,7 +38,9 @@ func (m *mcpService) AddServer(server models.MCPServerConfig) {
 	}
 
 	if server.Enabled {
-		err := m.host.ConnectServer(context.Background(), server.Name)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		err := m.host.ConnectServer(ctx, server.Name)
 		if err != nil {
 			klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
 			return
@@ -63,7 +65,9 @@ func (m *mcpService) AddServers(servers []models.MCPServerConfig) {
 		}
 
 		if server.Enabled {
-			err := m.host.ConnectServer(context.Background(), server.Name)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			err := m.host.ConnectServer(ctx, server.Name)
+			cancel()
 			if err != nil {
 				klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
 				continue
@@ -99,7 +103,10 @@ func (m *mcpService) run() {
 		for {
 			select {
 			case <-ticker.C:
-				status := m.host.PingAll(context.Background())
+
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				status := m.host.PingAll(ctx)
+				cancel()
 				for serverName, serverStatus := range status {
 					if serverStatus.LastPingSuccess {
 						klog.V(6).Infof("Server %s is healthy, last ping time: %v", serverName, serverStatus.LastPingTime)

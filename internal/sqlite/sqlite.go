@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"strconv"
+	"time"
 
 	"gorm.io/gorm/callbacks"
 
@@ -59,7 +60,9 @@ func (dialector Dialector) Initialize(db *gorm.DB) (err error) {
 	}
 
 	var version string
-	if err := db.ConnPool.QueryRowContext(context.Background(), "select sqlite_version()").Scan(&version); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := db.ConnPool.QueryRowContext(ctx, "select sqlite_version()").Scan(&version); err != nil {
 		return err
 	}
 	// https://www.sqlite.org/releaselog/3_35_0.html

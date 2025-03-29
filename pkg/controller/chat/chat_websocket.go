@@ -157,7 +157,10 @@ func GPTShell(c *gin.Context) {
 
 			klog.V(6).Infof("prompt: %s", string(data))
 
-			tools := service.McpService().Host().GetAllTools(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+			tools := service.McpService().Host().GetAllTools(ctx)
+			cancel()
 			klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
 			stream, err := service.ChatService().GetChatStream(string(data), tools...)
 
@@ -195,7 +198,7 @@ func GPTShell(c *gin.Context) {
 							klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
 
 							// 使用合并后的ToolCalls执行操作
-							ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+							ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 							results := service.McpService().Host().ExecTools(ctx, mergedCalls)
 							cancel()
 							for _, r := range results {

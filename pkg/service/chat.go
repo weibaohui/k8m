@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 	"k8s.io/klog/v2"
@@ -22,7 +23,9 @@ func (c *chatService) GetChatStream(chat string, tools ...openai.Tool) (*openai.
 		return nil, fmt.Errorf("获取AI服务错误 : %v", err)
 	}
 	client.SetTools(tools)
-	stream, err := client.GetStreamCompletionWithTools(context.Background(), chat)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	stream, err := client.GetStreamCompletionWithTools(ctx, chat)
 
 	if err != nil {
 		klog.V(6).Infof("ChatCompletion error: %v\n", err)
@@ -39,7 +42,9 @@ func (c *chatService) Chat(chat string) string {
 		klog.V(2).Infof("获取AI服务错误 : %v\n", err)
 		return ""
 	}
-	result, err := client.GetCompletion(context.TODO(), chat)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	result, err := client.GetCompletion(ctx, chat)
 	if err != nil {
 		klog.V(2).Infof("ChatCompletion error: %v\n", err)
 		return ""
