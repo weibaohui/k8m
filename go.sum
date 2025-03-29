@@ -1215,8 +1215,8 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/weibaohui/kom v0.2.4 h1:AQOYrIN2Q/8/zi+l8YAFRI8c0vNWHoHUuGZzpLVd+G8=
-github.com/weibaohui/kom v0.2.4/go.mod h1:EFODVi9l/JJ9zjh5ipwcqbON9MiJAfd6AOOc7hXjIrA=
+github.com/weibaohui/kom v0.2.5 h1:GGlIjPqlm38Eh0Ot5wpJmuIewSTFv7NZsBwiSKD2aDA=
+github.com/weibaohui/kom v0.2.5/go.mod h1:2MFWt/7U6pTzmPscaCXPSSnm8sMDknG2SqFo+Ptro+M=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
 github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
