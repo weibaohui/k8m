@@ -100,6 +100,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			// 执行工具
 			callResult, err := cli.CallTool(ctx, callRequest)
 			if err != nil {
+				klog.V(6).Infof("工具执行失败: %v\n", err)
 				result.Error = fmt.Sprintf("工具执行失败: %v", err)
 				results = append(results, result)
 				continue
