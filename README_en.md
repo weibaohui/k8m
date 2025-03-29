@@ -154,7 +154,46 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 It is recommended to modify through environment variables first. For example, add env parameters in deploy.yaml.
 
-## Built-in MCP Server Usage Instructions
+## Built-in MCP Server Guide
+
+### AI Tool Integration
+
+#### General Configuration
+
+Suitable for MCP tool integration like Cursor, Claude Desktop, Windsurf, etc. You can also use these software's UI to add configurations.
+
+```json
+{
+  "mcpServers": {
+    "kom": {
+      "type": "sse",
+      "url": "http://IP:9096/sse"
+    }
+  }
+}
+```
+
+#### Claude Desktop
+1. Open Claude Desktop settings panel
+2. Add MCP Server address in API configuration section
+3. Enable SSE event listening
+4. Verify connection status
+
+#### Cursor
+1. Enter Cursor settings interface
+2. Find extension service configuration
+3. Add MCP Server URL (e.g. http://localhost:3619/sse)
+
+#### Windsurf
+1. Access configuration center
+2. Set API server address
+
+### MCP FAQ
+1. Ensure MCP Server is running with accessible ports
+2. Check network connectivity
+3. Verify SSE connection establishment
+4. Check tool logs for troubleshooting (failed MCP executions will have error records)
+
 
 ### Service Endpoint, Can be Developed for Use by Other AI Tools
 
@@ -226,3 +265,27 @@ All connected clusters in the interface can be used.
 |                       | `get_storageclass_pvc_count`   | Get PVC count under StorageClass                 |
 |                       | `get_storageclass_pv_count`    | Get PV count under StorageClass                  |
 | **Ingress Management (1)** | `set_default_ingressclass`     | Set default IngressClass                         |
+
+
+**v0.0.66 Update**
+1. Added MCP support
+2. Built-in multi-cluster operations:
+   1. list_k8s_resource
+   2. get_k8s_resource
+   3. delete_k8s_resource
+   4. describe_k8s_resource
+   5. get_pod_logs
+
+**v0.0.67 Update**
+1. New MCP event query tool
+   ![Screenshot](https://foruda.gitee.com/images/1742916865442166281/43b26650_77493.png)
+2. New cluster registration query tool
+   ![Screenshot](https://foruda.gitee.com/images/1742917222171687147/216d03f1_77493.png)
+3. Enhanced label-based resource filtering (e.g. app=k8m)
+   ![Screenshot](https://foruda.gitee.com/images/1742916917319897798/a2171fd2_77493.png)
+4. Added quick enable/disable toggle for MCP Server
+   ![Screenshot](https://foruda.gitee.com/images/1742916947056442916/6c33d7c2_77493.png)
+
+**v0.0.64 Update**
+1. Initial MCP support implementation
+   ![Screenshot](https://foruda.gitee.com/images/1742621225108846936/0a614dcb_77493.png)
