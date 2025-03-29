@@ -94,32 +94,6 @@ func (m *mcpService) run() {
 		return
 	}
 	m.AddServers(mcpServers)
-
-	// 启动定期ping检查
-	go func() {
-		ticker := time.NewTicker(30 * time.Second) // 每30秒执行一次
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-
-				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				status := m.host.PingAll(ctx)
-				cancel()
-				for serverName, serverStatus := range status {
-					if serverStatus.LastPingSuccess {
-						klog.V(6).Infof("Server %s is healthy, last ping time: %v", serverName, serverStatus.LastPingTime)
-					} else {
-						klog.V(6).Infof("Server %s is unhealthy, last ping time: %v, error: %s", serverName, serverStatus.LastPingTime, serverStatus.LastError)
-					}
-				}
-			case <-context.Background().Done():
-				return
-			}
-		}
-	}()
-
 }
 
 func (m *mcpService) RemoveServerById(server models.MCPServerConfig) {

@@ -3,9 +3,7 @@ package mcp
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
-	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/mark3labs/mcp-go/client"
@@ -22,13 +20,6 @@ type ServerConfig struct {
 	Enabled bool   `json:"enabled,omitempty"`
 }
 
-// ServerStatus 服务器状态记录
-type ServerStatus struct {
-	LastPingTime    *time.Time `json:"last_ping_time,omitempty"`
-	LastPingSuccess bool       `json:"last_ping_success,omitempty"`
-	LastError       string     `json:"last_error,omitempty"`
-}
-
 // MCPHost MCP服务器管理器
 type MCPHost struct {
 	clients map[string]*client.SSEMCPClient
@@ -41,8 +32,6 @@ type MCPHost struct {
 	// 记录每个服务器的提示能力
 	Prompts           map[string][]mcp.Prompt
 	InitializeResults map[string]*mcp.InitializeResult
-	// 记录服务器状态
-	serverStatus map[string]ServerStatus
 }
 type MCPServer struct {
 	ServerConfig
@@ -51,7 +40,6 @@ type MCPServer struct {
 	Resources         []mcp.Resource        `json:"resources,omitempty"`
 	Prompts           []mcp.Prompt          `json:"prompts,omitempty"`
 	InitializeResults *mcp.InitializeResult `json:"initialize_results,omitempty"`
-	ServerStatus      ServerStatus          `json:"server_status,omitempty"`
 }
 
 // NewMCPHost 创建新的MCP管理器
@@ -63,7 +51,6 @@ func NewMCPHost() *MCPHost {
 		Resources:         make(map[string][]mcp.Resource),
 		Prompts:           make(map[string][]mcp.Prompt),
 		InitializeResults: make(map[string]*mcp.InitializeResult),
-		serverStatus:      make(map[string]ServerStatus),
 	}
 }
 
@@ -81,7 +68,6 @@ func (m *MCPHost) ListServers() []MCPServer {
 			Resources:         m.Resources[name],
 			Prompts:           m.Prompts[name],
 			InitializeResults: m.InitializeResults[name],
-			ServerStatus:      m.serverStatus[name],
 		}
 		servers = append(servers, server)
 	}
@@ -258,23 +244,7 @@ func (m *MCPHost) Close() {
 	m.mutex.Unlock()
 
 }
-
-// Ping 检测指定服务器的连接状态
-func (m *MCPHost) Ping(ctx context.Context, serverName string) error {
-
-	cli, exists := m.clients[serverName]
-	if !exists {
-		return fmt.Errorf("client not found: %s", serverName)
-	}
-
-	err := cli.Ping(ctx)
-	if err != nil {
-		return fmt.Errorf("ping failed for server %s: %v", serverName, err)
-	}
-
-	return nil
-}
-
+ 
 func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 	// 从所有可用的MCP服务器收集工具列表
 	var allTools []openai.Tool
@@ -348,61 +318,6 @@ func (m *MCPHost) GetPrompts(ctx context.Context, serverName string) ([]mcp.Prom
 	return result.Prompts, nil
 }
 
-// PingAll 检测所有服务器的连接状态
-func (m *MCPHost) PingAll(ctx context.Context) map[string]ServerStatus {
-
-	// 如果serverStatus为nil，初始化它
-	if m.serverStatus == nil {
-		m.serverStatus = make(map[string]ServerStatus)
-	}
-
-	// 遍历所有客户端进行ping操作
-	for serverName, cli := range m.clients {
-		now := time.Now()
-		status := ServerStatus{
-			LastPingTime: &now,
-		}
-
-		err := cli.Ping(ctx)
-		if err != nil {
-			status.LastPingSuccess = false
-			status.LastError = err.Error()
-			log.Printf("Ping failed for server %s: %v", serverName, err)
-		} else {
-			status.LastPingSuccess = true
-			status.LastError = ""
-		}
-
-		m.mutex.Lock()
-		m.serverStatus[serverName] = status
-		m.mutex.Unlock()
-
-	}
-
-	return m.serverStatus
-}
-
-// GetServerStatus 获取指定服务器的状态
-func (m *MCPHost) GetServerStatus(serverName string) (ServerStatus, error) {
-
-	if status, exists := m.serverStatus[serverName]; exists {
-		return status, nil
-	}
-	return ServerStatus{}, fmt.Errorf("server status not found: %s", serverName)
-}
-
-// GetAllServerStatus 获取所有服务器的状态
-func (m *MCPHost) GetAllServerStatus() map[string]ServerStatus {
-
-	// 创建一个新的map来存储状态的副本
-	statusCopy := make(map[string]ServerStatus)
-	for k, v := range m.serverStatus {
-		statusCopy[k] = v
-	}
-
-	return statusCopy
-}
-
 func (m *MCPHost) RemoveServer(config ServerConfig) {
 	m.mutex.Lock()
 	// 断开与服务器的连接
@@ -414,8 +329,6 @@ func (m *MCPHost) RemoveServer(config ServerConfig) {
 	delete(m.Resources, config.Name)
 	delete(m.Prompts, config.Name)
 	delete(m.InitializeResults, config.Name)
-	// 删除服务器状态记录
-	delete(m.serverStatus, config.Name)
 	m.mutex.Unlock()
 }
 
