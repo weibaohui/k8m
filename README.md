@@ -16,7 +16,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - **高效性能**：后端采用 Golang 构建，前端基于百度 AMIS，保证资源利用率高、响应速度快。
 - **AI驱动融合**：基于ChatGPT实现划词解释、资源指南、YAML属性自动翻译、Describe信息解读、日志AI问诊、运行命令推荐,并集成了[
   `k8s-gpt`](https://github.com/k8sgpt-ai/k8sgpt)功能，实现中文展现，为管理k8s提供智能化支持。
-- **MCP集成**:界面化轻松集成MCP，实现大模型调用Tools，支持mcp.so主流服务。内置k8s多集群MCP，轻松实现大模型管理k8s。
+- **MCP集成**:界面化轻松集成MCP，实现大模型调用Tools，支持mcp.so主流服务。内置k8s多集群MCP工具35种，可组合实现超百种集群操作。轻松实现大模型管理k8s。
 - **多集群管理**：自动识别集群内部使用InCluster模式，配置kubeconfig路径后自动扫描同级目录下的配置文件，同时注册管理多个集群。
 - **Pod 文件管理**：支持 Pod 内文件的浏览、编辑、上传、下载、删除，简化日常操作。
 - **Pod 运行管理**：支持实时查看 Pod 日志，下载日志，并在 Pod 内直接执行 Shell 命令。
