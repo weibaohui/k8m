@@ -16,7 +16,8 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - **高效性能**：后端采用 Golang 构建，前端基于百度 AMIS，保证资源利用率高、响应速度快。
 - **AI驱动融合**：基于ChatGPT实现划词解释、资源指南、YAML属性自动翻译、Describe信息解读、日志AI问诊、运行命令推荐,并集成了[
   `k8s-gpt`](https://github.com/k8sgpt-ai/k8sgpt)功能，实现中文展现，为管理k8s提供智能化支持。
-- **MCP集成**:可视化管理MCP，实现大模型调用Tools，内置k8s多集群MCP工具35种，可组合实现超百种集群操作。轻松实现大模型管理k8s。支持mcp.so主流服务。
+- **MCP集成**:可视化管理MCP，实现大模型调用Tools，内置k8s多集群MCP工具49种，可组合实现超百种集群操作，可作为MCP Server
+  供其他大模型软件使用。轻松实现大模型管理k8s。支持mcp.so主流服务。
 - **多集群管理**：自动识别集群内部使用InCluster模式，配置kubeconfig路径后自动扫描同级目录下的配置文件，同时注册管理多个集群。
 - **Pod 文件管理**：支持 Pod 内文件的浏览、编辑、上传、下载、删除，简化日常操作。
 - **Pod 运行管理**：支持实时查看 Pod 日志，下载日志，并在 Pod 内直接执行 Shell 命令。
@@ -161,9 +162,9 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 ## 内置MCP Server 使用说明
 
-### 访问端点
+### 服务端点，可开发供其他AI工具使用
 
-应用程序使用3619端口。NodePort使用31919端口。
+MCP程序使用3619端口。NodePort使用31919端口。
 如果二进制方式直接启动，那么访问地址为http://ip:3619/sse
 如果集群方式启动，则访问地址为则访问地址为http://nodeIP:31919/sse
 
@@ -174,47 +175,76 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 ### 内置MCP Server 配置说明
 
-| 类别          | 方法                              | 描述                   |
-|-------------|---------------------------------|----------------------|
-| **集群管理**    | `list_clusters`                 | 列出所有已注册的Kubernetes集群 |
-| **部署管理**    | `scale_deployment`              | 扩缩容Deployment        |
-|             | `restart_deployment`            | 重启Deployment         |
-|             | `stop_deployment`               | 停止Deployment         |
-|             | `restore_deployment`            | 恢复Deployment         |
-|             | `update_tag_deployment`         | 更新Deployment镜像标签     |
-|             | `rollout_history_deployment`    | 查询Deployment升级历史     |
-|             | `rollout_undo_deployment`       | 回滚Deployment         |
-|             | `rollout_pause_deployment`      | 暂停Deployment升级       |
-|             | `rollout_resume_deployment`     | 恢复Deployment升级       |
-|             | `rollout_status_deployment`     | 查询Deployment升级状态     |
-|             | `hpa_list_deployment`           | 查询Deployment的HPA列表   |
-| **动态资源管理**  | `get_dynamic_resource`          | 获取动态资源               |
-|             | `get_dynamic_resource_describe` | 描述动态资源               |
-|             | `delete_dynamic_resource`       | 删除动态资源               |
-|             | `list_dynamic_resource`         | 列出动态资源               |
-| **节点管理**    | `taint_node`                    | 为节点添加污点              |
-|             | `untaint_node`                  | 为节点移除污点              |
-|             | `cordon_node`                   | 为节点设置Cordon          |
-|             | `uncordon_node`                 | 为节点取消Cordon          |
-|             | `drain_node`                    | 为节点执行Drain           |
-|             | `node_resource_usage`           | 查询节点资源使用情况           |
-|             | `node_ip_usage`                 | 查询节点IP资源使用情况         |
-|             | `node_pod_count`                | 查询节点Pod数量            |
-| **Pod 管理**  | `list_pod_files`                | 列出Pod文件              |
-|             | `list_all_pod_files`            | 列出Pod所有文件            |
-|             | `delete_pod_file`               | 删除Pod文件              |
-|             | `get_pod_logs`                  | 获取Pod日志              |
-|             | `get_pod_linked_service`        | 获取Pod关联的Service      |
-|             | `get_pod_linked_ingress`        | 获取Pod关联的Ingress      |
-|             | `get_pod_linked_endpoints`      | 获取Pod关联的Endpoints    |
-|             | `get_pod_linked_pvc`            | 获取Pod关联的PVC          |
-|             | `get_pod_linked_pv`             | 获取Pod关联的PV           |
-|             | `get_pod_linked_env`            | 获取Pod运行时环境变量         |
-|             | `get_pod_exec`                  | 在Pod中执行命令            |
-| **YAML 管理** | `apply_dynamic_resource`        | 应用YAML资源             |
-|             | `delete_dynamic_resource`       | 删除YAML资源             |
+#### MCP工具列表（49种）
+
+| 类别                 | 方法                             | 描述                                      |
+|--------------------|--------------------------------|-----------------------------------------|
+| **集群管理（1）**        | `list_clusters`                | 列出所有已注册的Kubernetes集群                    |
+| **部署管理（12）**       | `scale_deployment`             | 扩缩容Deployment                           |
+|                    | `restart_deployment`           | 重启Deployment                            |
+|                    | `stop_deployment`              | 停止Deployment                            |
+|                    | `restore_deployment`           | 恢复Deployment                            |
+|                    | `update_tag_deployment`        | 更新Deployment镜像标签                        |
+|                    | `rollout_history_deployment`   | 查询Deployment升级历史                        |
+|                    | `rollout_undo_deployment`      | 回滚Deployment                            |
+|                    | `rollout_pause_deployment`     | 暂停Deployment升级                          |
+|                    | `rollout_resume_deployment`    | 恢复Deployment升级                          |
+|                    | `rollout_status_deployment`    | 查询Deployment升级状态                        |
+|                    | `hpa_list_deployment`          | 查询Deployment的HPA列表                      |
+|                    | `list_deployment_pods`         | 获取Deployment管理的Pod列表                    |
+| **动态资源管理(含CRD，8)** | `get_k8s_resource`             | 获取k8s资源                                 |
+|                    | `describe_k8s_resource`        | 描述k8s资源                                 |
+|                    | `delete_k8s_resource`          | 删除k8s资源                                 |
+|                    | `list_k8s_resource`            | 列表形式获取k8s资源                             |
+|                    | `list_k8s_event`               | 列表形式获取k8s事件                             |
+|                    | `patch_k8s_resource`           | 更新k8s资源，以JSON Patch方式更新                 |                               |
+|                    | `label_k8s_resource`           | 为k8s资源添加或删除标签                           |
+|                    | `annotate_k8s_resource`        | 为k8s资源添加或删除注解                           |
+| **节点管理（8）**        | `taint_node`                   | 为节点添加污点                                 |
+|                    | `untaint_node`                 | 为节点移除污点                                 |
+|                    | `cordon_node`                  | 为节点设置Cordon                             |
+|                    | `uncordon_node`                | 为节点取消Cordon                             |
+|                    | `drain_node`                   | 为节点执行Drain                              |
+|                    | `get_node_resource_usage`      | 查询节点的资源使用情况                             |
+|                    | `get_node_ip_usage`            | 查询节点上Pod IP资源使用情况                       |
+|                    | `get_node_pod_count`           | 查询节点上的Pod数量                             |
+| **Pod 管理（14）**     | `list_pod_files`               | 列出Pod文件                                 |
+|                    | `list_all_pod_files`           | 列出Pod所有文件                               |
+|                    | `delete_pod_file`              | 删除Pod文件                                 |
+|                    | `upload_file_to_pod`           | 上传文件到Pod内，支持传递文本内容，存储为Pod内文件            |
+|                    | `get_pod_logs`                 | 获取Pod日志                                 |
+|                    | `run_command_in_pod`           | 在Pod中执行命令                               |
+|                    | `get_pod_linked_service`       | 获取Pod关联的Service                         |
+|                    | `get_pod_linked_ingress`       | 获取Pod关联的Ingress                         |
+|                    | `get_pod_linked_endpoints`     | 获取Pod关联的Endpoints                       |
+|                    | `get_pod_linked_pvc`           | 获取Pod关联的PVC                             |
+|                    | `get_pod_linked_pv`            | 获取Pod关联的PV                              |
+|                    | `get_pod_linked_env`           | 通过在pod内运行env命令获取Pod运行时环境变量              |
+|                    | `get_pod_linked_env_from_yaml` | 通过Pod yaml定义获取Pod运行时环境变量                |
+|                    | `get_pod_resource_usage`       | 获取Pod的资源使用情况，包括CPU和内存的请求值、限制值、可分配值和使用比例 |
+| **YAML管理（2）**      | `apply_yaml`                   | 应用YAML资源                                |
+|                    | `delete_yaml`                  | 删除YAML资源                                |
+| **存储管理（3）**        | `set_default_storageclass`     | 设置默认StorageClass                        |
+|                    | `get_storageclass_pvc_count`   | 获取StorageClass下的PVC数量                   |
+|                    | `get_storageclass_pv_count`    | 获取StorageClass下的PV数量                    |
+| **Ingress管理（1）**   | `set_default_ingressclass`     | 设置默认IngressClass                        |
 
 ### AI工具集成
+
+#### 通用配置文件
+
+适合MCP工具集成，如Cursor、Claude Desktop、Windsurf等，此外也可以使用这些软件的UI操作界面进行添加。
+
+```json
+{
+  "mcpServers": {
+    "kom": {
+      "type": "sse",
+      "url": "http://IP:9096/sse"
+    }
+  }
+}
+```
 
 #### Claude Desktop
 
@@ -228,14 +258,11 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 1. 进入Cursor设置界面
 2. 找到扩展服务配置选项
 3. 添加MCP Server的URL（例如：http://localhost:3619/sse）
-4. 开启实时事件通知
 
 #### Windsurf
 
 1. 访问配置中心
 2. 设置API服务器地址
-3. 启用实时事件通知
-4. 测试连接
 
 ### MCP常见问题
 
