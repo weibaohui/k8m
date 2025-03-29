@@ -68,8 +68,6 @@ func NewMCPHost() *MCPHost {
 }
 
 func (m *MCPHost) ListServers() []MCPServer {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
 
 	// 创建结果切片
 	var servers []MCPServer
@@ -133,10 +131,7 @@ func (m *MCPHost) SyncServerCapabilities(ctx context.Context, serverName string)
 
 // ConnectServer 连接到指定服务器
 func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
-	// 获取配置信息时加锁
-	m.mutex.Lock()
 	config, exists := m.configs[serverName]
-	m.mutex.Unlock()
 
 	if !exists {
 		return fmt.Errorf("server config not found: %s", serverName)
@@ -187,8 +182,6 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 
 // DisconnectServer 断开与指定服务器的连接
 func (m *MCPHost) DisconnectServer(serverName string) error {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
 
 	if cli, exists := m.clients[serverName]; exists {
 		cli.Close()
@@ -197,25 +190,18 @@ func (m *MCPHost) DisconnectServer(serverName string) error {
 }
 
 // GetClient 获取指定服务器的客户端
-func (m *MCPHost) GetClient(serverName string) (*client.SSEMCPClient, error) {
-	m.mutex.RLock()
+func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSEMCPClient, error) {
 	cli, exists := m.clients[serverName]
 	if !exists {
-		m.mutex.RUnlock()
 		return nil, fmt.Errorf("client not found: %s", serverName)
 	}
 
 	// 先进行ping检测
-	ctx := context.Background()
 	err := cli.Ping(ctx)
 	if err != nil {
-		// 如果ping失败，释放读锁
-		m.mutex.RUnlock()
 
 		// 获取配置信息
-		m.mutex.RLock()
 		config, exists := m.configs[serverName]
-		m.mutex.RUnlock()
 		if !exists {
 			return nil, fmt.Errorf("server config not found: %s", serverName)
 		}
@@ -244,46 +230,37 @@ func (m *MCPHost) GetClient(serverName string) (*client.SSEMCPClient, error) {
 			return nil, fmt.Errorf("failed to initialize new client for %s: %v", serverName, err)
 		}
 
-		// 更新客户端和初始化结果
-		m.mutex.Lock()
-		// 关闭旧的客户端
-		if oldCli, exists := m.clients[serverName]; exists {
-			oldCli.Close()
-		}
 		m.clients[serverName] = newCli
 		m.InitializeResults[serverName] = result
-		m.mutex.Unlock()
-
-		// 同步服务器能力
-		if err = m.SyncServerCapabilities(ctx, serverName); err != nil {
-			// 如果同步失败，需要清理资源
-			newCli.Close()
-			return nil, fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
-		}
+		klog.V(6).Infof("创建客户端连接 server %s", serverName)
+		// // 同步服务器能力
+		// if err = m.SyncServerCapabilities(ctx, serverName); err != nil {
+		// 	// 如果同步失败，需要清理资源
+		// 	newCli.Close()
+		// 	return nil, fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
+		// }
 
 		return newCli, nil
 	}
-
+	klog.V(6).Infof("ping success for server %s", serverName)
 	// ping成功，释放读锁并返回客户端
-	m.mutex.RUnlock()
 	return cli, nil
 }
 
 // Close 关闭所有连接
 func (m *MCPHost) Close() {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
 
 	for _, cli := range m.clients {
 		cli.Close()
 	}
+	m.mutex.Lock()
 	m.clients = make(map[string]*client.SSEMCPClient)
+	m.mutex.Unlock()
+
 }
 
 // Ping 检测指定服务器的连接状态
 func (m *MCPHost) Ping(ctx context.Context, serverName string) error {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
 
 	cli, exists := m.clients[serverName]
 	if !exists {
@@ -302,7 +279,6 @@ func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 	// 从所有可用的MCP服务器收集工具列表
 	var allTools []openai.Tool
 	// 遍历所有服务器获取工具
-	m.mutex.RLock()
 	for serverName, tools := range m.Tools {
 		for _, tool := range tools {
 			allTools = append(allTools, openai.Tool{
@@ -317,16 +293,12 @@ func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 		}
 
 	}
-	m.mutex.RUnlock()
 	return allTools
 }
 
 // GetTools 获取指定服务器的工具列表
 func (m *MCPHost) GetTools(ctx context.Context, serverName string) ([]mcp.Tool, error) {
-	// 获取客户端时加读锁
-	m.mutex.RLock()
 	cli, exists := m.clients[serverName]
-	m.mutex.RUnlock()
 
 	if !exists {
 		return nil, fmt.Errorf("client not found: %s", serverName)
@@ -343,10 +315,7 @@ func (m *MCPHost) GetTools(ctx context.Context, serverName string) ([]mcp.Tool, 
 
 // GetResources 获取指定服务器的资源能力
 func (m *MCPHost) GetResources(ctx context.Context, serverName string) ([]mcp.Resource, error) {
-	// 获取客户端时加读锁
-	m.mutex.RLock()
 	cli, exists := m.clients[serverName]
-	m.mutex.RUnlock()
 
 	if !exists {
 		return nil, fmt.Errorf("client not found: %s", serverName)
@@ -364,9 +333,7 @@ func (m *MCPHost) GetResources(ctx context.Context, serverName string) ([]mcp.Re
 // GetPrompts 获取指定服务器的提示能力
 func (m *MCPHost) GetPrompts(ctx context.Context, serverName string) ([]mcp.Prompt, error) {
 	// 获取客户端时加读锁
-	m.mutex.RLock()
 	cli, exists := m.clients[serverName]
-	m.mutex.RUnlock()
 
 	if !exists {
 		return nil, fmt.Errorf("client not found: %s", serverName)
@@ -383,8 +350,6 @@ func (m *MCPHost) GetPrompts(ctx context.Context, serverName string) ([]mcp.Prom
 
 // PingAll 检测所有服务器的连接状态
 func (m *MCPHost) PingAll(ctx context.Context) map[string]ServerStatus {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
 
 	// 如果serverStatus为nil，初始化它
 	if m.serverStatus == nil {
@@ -408,7 +373,10 @@ func (m *MCPHost) PingAll(ctx context.Context) map[string]ServerStatus {
 			status.LastError = ""
 		}
 
+		m.mutex.Lock()
 		m.serverStatus[serverName] = status
+		m.mutex.Unlock()
+
 	}
 
 	return m.serverStatus
@@ -416,8 +384,6 @@ func (m *MCPHost) PingAll(ctx context.Context) map[string]ServerStatus {
 
 // GetServerStatus 获取指定服务器的状态
 func (m *MCPHost) GetServerStatus(serverName string) (ServerStatus, error) {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
 
 	if status, exists := m.serverStatus[serverName]; exists {
 		return status, nil
@@ -427,8 +393,6 @@ func (m *MCPHost) GetServerStatus(serverName string) (ServerStatus, error) {
 
 // GetAllServerStatus 获取所有服务器的状态
 func (m *MCPHost) GetAllServerStatus() map[string]ServerStatus {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
 
 	// 创建一个新的map来存储状态的副本
 	statusCopy := make(map[string]ServerStatus)
@@ -440,8 +404,9 @@ func (m *MCPHost) GetAllServerStatus() map[string]ServerStatus {
 }
 
 func (m *MCPHost) RemoveServer(config ServerConfig) {
+	m.mutex.Lock()
 	// 断开与服务器的连接
-	m.DisconnectServer(config.Name)
+	_ = m.DisconnectServer(config.Name)
 	// 删除服务器配置
 	delete(m.configs, config.Name)
 	// 删除服务器的工具、资源和提示能力
@@ -451,7 +416,7 @@ func (m *MCPHost) RemoveServer(config ServerConfig) {
 	delete(m.InitializeResults, config.Name)
 	// 删除服务器状态记录
 	delete(m.serverStatus, config.Name)
-
+	m.mutex.Unlock()
 }
 
 func (m *MCPHost) RemoveServerById(id uint) {
@@ -466,8 +431,6 @@ func (m *MCPHost) RemoveServerById(id uint) {
 // 如果多个服务器都提供了相同的工具，返回第一个找到的服务器名称，有一定的随机性
 // 如果没有找到对应的服务器，返回空字符串
 func (m *MCPHost) GetServerNameByToolName(toolName string) string {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
 
 	for serverName, tools := range m.Tools {
 		for _, tool := range tools {

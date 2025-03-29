@@ -10,6 +10,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/ai"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"k8s.io/klog/v2"
 )
 
@@ -46,8 +47,8 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 		for _, toolCall := range toolCalls {
 
 			fullToolName := toolCall.Function.Name
-			klog.V(8).Infof("Tool Name: %s\n", fullToolName)
-			klog.V(8).Infof("Tool Arguments: %s\n", toolCall.Function.Arguments)
+			klog.V(6).Infof("Tool Name: %s\n", fullToolName)
+			klog.V(6).Infof("Tool Arguments: %s\n", toolCall.Function.Arguments)
 
 			result := ToolCallResult{
 				ToolName: fullToolName,
@@ -55,11 +56,15 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 
 			// 解析参数
 			var args map[string]interface{}
-			if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args); err != nil {
-				result.Error = fmt.Sprintf("failed to parse tool arguments: %v", err)
-				results = append(results, result)
-				continue
+			if toolCall.Function.Arguments != "" {
+				if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args); err != nil {
+					result.Error = fmt.Sprintf("failed to parse tool arguments: %v", err)
+					klog.V(6).Infof("参数解析Error: %s\n", result.Error)
+					results = append(results, result)
+					continue
+				}
 			}
+
 			result.Parameters = args
 
 			var cli *client.SSEMCPClient
@@ -72,19 +77,22 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 				toolName = fullToolName
 				serverName = m.GetServerNameByToolName(toolName)
 			}
+			klog.V(6).Infof("解析ToolName: %s, ServerName: %s\n", toolName, serverName)
 			if serverName == "" {
 				// 解析失败，尝试直接用toolName
 				result.Error = fmt.Sprintf("根据Tool名称 %s 解析MCP Server 名称失败: %v", fullToolName, err)
 				results = append(results, result)
 				continue
 			}
+			klog.V(6).Infof("解析ToolName: %s, ServerName: %s\n", toolName, serverName)
 			// 执行工具调用
 			callRequest := mcp.CallToolRequest{}
 			callRequest.Params.Name = toolName
 			callRequest.Params.Arguments = args
-
-			cli, err = m.GetClient(serverName)
+			klog.V(6).Infof("执行工具调用: %s\n", utils.ToJSON(callRequest))
+			cli, err = m.GetClient(ctx, serverName)
 			if err != nil {
+				klog.V(6).Infof("获取MCP Client 失败: %v\n", err)
 				result.Error = fmt.Sprintf("获取MCP Client 失败: %v", err)
 				results = append(results, result)
 				continue

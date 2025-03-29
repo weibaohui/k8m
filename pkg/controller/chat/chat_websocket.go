@@ -172,6 +172,7 @@ func GPTShell(c *gin.Context) {
 					if err == io.EOF {
 						break
 					}
+					klog.V(6).Infof("stream Recv error:%v", err)
 					// 处理其他错误
 					continue
 				}
@@ -194,8 +195,9 @@ func GPTShell(c *gin.Context) {
 							klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
 
 							// 使用合并后的ToolCalls执行操作
-							ctx := amis.GetContextWithUser(c)
+							ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 							results := service.McpService().Host().ExecTools(ctx, mergedCalls)
+							cancel()
 							for _, r := range results {
 								outBuffer.Write([]byte(utils.ToJSON(r)))
 							}
