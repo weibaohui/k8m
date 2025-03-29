@@ -156,63 +156,93 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
   http://NodePortIP:31999
 
 ### 修改配置
+
 首选建议通过修改环境变量方式进行修改。 例如增加deploy.yaml中的env参数
 
 ## 内置MCP Server 使用说明
-### 访问端点 
+
+### 访问端点
+
 应用程序使用3619端口。NodePort使用31919端口。
 如果二进制方式直接启动，那么访问地址为http://ip:3619/sse
 如果集群方式启动，则访问地址为则访问地址为http://nodeIP:31919/sse
+
 ### 集群管理范围
+
 内置MCP Server 管理范围与k8m 纳管的集群范围一致。
 界面内已连接的集群均可使用。
+
 ### 内置MCP Server 配置说明
-MCP Server 内置了以下工具：
-``` bash
-list_clusters # 列出当前注册集群
-list_k8s_event # 列出事件，支持集群、相关资源名称
-list_k8s_resource # 列出资源,支持集群、命名空间、名称，支持CRD资源
-get_k8s_resource # 获取资源,支持集群、命名空间、名称，支持CRD资源
-delete_k8s_resource # 删除资源,支持集群、命名空间、名称，支持CRD资源
-describe_k8s_resource # 描述资源,支持集群、命名空间、名称，支持CRD资源
-get_pod_logs # 获取POD日志,支持集群、命名空间、名称，支持设置最后多少条日志
-get_pod_linked_endpoints
-get_pod_linked_ingresses
-get_pod_linked_pv
-get_pod_linked_pvc
-get_pod_linked_services
-get_pod_logs
-pod_file_operations
-restart_deployment
-scale_deployment
-```
+
+| 类别          | 方法                              | 描述                   |
+|-------------|---------------------------------|----------------------|
+| **集群管理**    | `list_clusters`                 | 列出所有已注册的Kubernetes集群 |
+| **部署管理**    | `scale_deployment`              | 扩缩容Deployment        |
+|             | `restart_deployment`            | 重启Deployment         |
+|             | `stop_deployment`               | 停止Deployment         |
+|             | `restore_deployment`            | 恢复Deployment         |
+|             | `update_tag_deployment`         | 更新Deployment镜像标签     |
+|             | `rollout_history_deployment`    | 查询Deployment升级历史     |
+|             | `rollout_undo_deployment`       | 回滚Deployment         |
+|             | `rollout_pause_deployment`      | 暂停Deployment升级       |
+|             | `rollout_resume_deployment`     | 恢复Deployment升级       |
+|             | `rollout_status_deployment`     | 查询Deployment升级状态     |
+|             | `hpa_list_deployment`           | 查询Deployment的HPA列表   |
+| **动态资源管理**  | `get_dynamic_resource`          | 获取动态资源               |
+|             | `get_dynamic_resource_describe` | 描述动态资源               |
+|             | `delete_dynamic_resource`       | 删除动态资源               |
+|             | `list_dynamic_resource`         | 列出动态资源               |
+| **节点管理**    | `taint_node`                    | 为节点添加污点              |
+|             | `untaint_node`                  | 为节点移除污点              |
+|             | `cordon_node`                   | 为节点设置Cordon          |
+|             | `uncordon_node`                 | 为节点取消Cordon          |
+|             | `drain_node`                    | 为节点执行Drain           |
+|             | `node_resource_usage`           | 查询节点资源使用情况           |
+|             | `node_ip_usage`                 | 查询节点IP资源使用情况         |
+|             | `node_pod_count`                | 查询节点Pod数量            |
+| **Pod 管理**  | `list_pod_files`                | 列出Pod文件              |
+|             | `list_all_pod_files`            | 列出Pod所有文件            |
+|             | `delete_pod_file`               | 删除Pod文件              |
+|             | `get_pod_logs`                  | 获取Pod日志              |
+|             | `get_pod_linked_service`        | 获取Pod关联的Service      |
+|             | `get_pod_linked_ingress`        | 获取Pod关联的Ingress      |
+|             | `get_pod_linked_endpoints`      | 获取Pod关联的Endpoints    |
+|             | `get_pod_linked_pvc`            | 获取Pod关联的PVC          |
+|             | `get_pod_linked_pv`             | 获取Pod关联的PV           |
+|             | `get_pod_linked_env`            | 获取Pod运行时环境变量         |
+|             | `get_pod_exec`                  | 在Pod中执行命令            |
+| **YAML 管理** | `apply_dynamic_resource`        | 应用YAML资源             |
+|             | `delete_dynamic_resource`       | 删除YAML资源             |
+
 ### AI工具集成
 
 #### Claude Desktop
+
 1. 打开Claude Desktop设置面板
 2. 在API配置区域添加MCP Server地址
 3. 启用SSE事件监听功能
 4. 验证连接状态
 
 #### Cursor
+
 1. 进入Cursor设置界面
 2. 找到扩展服务配置选项
 3. 添加MCP Server的URL（例如：http://localhost:3619/sse）
 4. 开启实时事件通知
 
 #### Windsurf
+
 1. 访问配置中心
 2. 设置API服务器地址
 3. 启用实时事件通知
 4. 测试连接
 
 ### MCP常见问题
+
 1. 确保MCP Server正常运行且端口可访问
 2. 检查网络连接是否正常
 3. 验证SSE连接是否成功建立
 4. 查看工具日志以排查连接问题，MCP执行失败会有报错记录。
- 
-
 
 **V0.0.66更新**
 
