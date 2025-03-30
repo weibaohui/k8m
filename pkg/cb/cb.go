@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -22,17 +23,18 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 	_ = patchCallback.Before("kom:patch").Register("k8m:patch", handlePatch)
 	createCallback := kom.Cluster(selectedCluster).Callback().Create()
 	_ = createCallback.Before("kom:create").Register("k8m:create", handleCreate)
+	execCallback := kom.Cluster(selectedCluster).Callback().Exec()
+	_ = execCallback.Before("kom:exec").Register("k8m:exec", handleExec)
+
 	return nil
 }
 
-func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) {
+func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error) {
 	stmt := k8s.Statement
 	cluster := k8s.ID
 	ctx := stmt.Context
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=%s, gck=[%s], resource=[%s/%s] ",
-		cluster, username, role, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
+	roles := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
 
 	log := models.OperationLog{
 		Action:       action,
@@ -42,19 +44,27 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) 
 		Namespace:    stmt.Namespace,
 		UserName:     username,
 		Group:        stmt.GVK.Group,
-		Role:         role,
+		Role:         roles,
 		ActionResult: "success",
 	}
 
 	var err error
-	clusterRole, _ := service.UserService().GetClusterRole(cluster, username, role)
+	clusterRoles, _ := service.UserService().GetClusterRole(cluster, username, roles)
 
-	if clusterRole == "" {
+	if len(clusterRoles) == 0 {
 		err = fmt.Errorf("非管理员不能%s资源", action)
 	}
 
-	if clusterRole == models.RoleClusterReadonly {
-		err = fmt.Errorf("非管理员不能%s资源", action)
+	switch action {
+	case "exec":
+		// 只允许具备exec权限的用户，包括管理员和平台管理员、exec权限的用户
+		if !(slice.Contain(clusterRoles, models.RolePlatformAdmin) || slice.Contain(clusterRoles, models.RoleClusterAdmin) || slice.Contain(clusterRoles, models.RoleClusterPodExec)) {
+			err = fmt.Errorf("非管理员,且无exec权限，不能%s资源", action)
+		}
+	case "delete", "update", "patch", "create":
+		if !(slice.Contain(clusterRoles, models.RolePlatformAdmin) || slice.Contain(clusterRoles, models.RoleClusterAdmin)) {
+			err = fmt.Errorf("非管理员不能%s资源", action)
+		}
 	}
 
 	if err != nil {
@@ -64,7 +74,10 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) 
 		time.Sleep(1 * time.Second)
 		service.OperationLogService().Add(&log)
 	}()
-	return username, role, err
+	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s，roles=%v, operation=%s, gck=[%s], resource=[%s/%s] ",
+		cluster, username, roles, clusterRoles, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
+	klog.V(6).Infof("final error=%v", err)
+	return username, clusterRoles, err
 }
 
 func handleDelete(k8s *kom.Kubectl) error {
@@ -84,5 +97,9 @@ func handlePatch(k8s *kom.Kubectl) error {
 
 func handleCreate(k8s *kom.Kubectl) error {
 	_, _, err := handleCommonLogic(k8s, "create")
+	return err
+}
+func handleExec(k8s *kom.Kubectl) error {
+	_, _, err := handleCommonLogic(k8s, "exec")
 	return err
 }
