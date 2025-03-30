@@ -27,7 +27,8 @@ func (u *userService) List() ([]*models.User, error) {
 // cluster: 集群名称
 // username: 用户名
 // jwtUserRole: JWT用户角色,从context传递
-func (u *userService) GetClusterRole(cluster string, username string, jwtUserRoles string) (string, error) {
+// 返回值：角色列表
+func (u *userService) GetClusterRole(cluster string, username string, jwtUserRoles string) ([]string, error) {
 	//jwtUserRoles可能为一个字符串逗号分隔的角色列表
 	if jwtUserRoles != "" {
 		roles := strings.SplitSeq(jwtUserRoles, ",")
@@ -36,7 +37,7 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 			//不是平台管理员就是普通用户，这是权限系统的设定，只有这两种角色
 			//普通用户需要接受集群权限授权，那么就往下执行，查看是否具有集群授权
 			if role == models.RolePlatformAdmin {
-				return role, nil
+				return []string{role}, nil
 			}
 		}
 	}
@@ -45,24 +46,16 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 	params.PerPage = 10000000
 	clusterRole := &models.ClusterUserRole{}
 	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Where("cluster = ? AND username = ?", cluster, username)
+		return db.Distinct("role").Where("cluster = ? AND username = ?", cluster, username)
 	}
-	roles, _, err := clusterRole.List(params, queryFunc)
+	items, _, err := clusterRole.List(params, queryFunc)
 	if err != nil {
-		return "", err
+		return []string{}, err
 	}
-	// 遍历所有角色，如果存在admin权限就返回admin
-	for _, role := range roles {
-		if role.Role == models.RoleClusterAdmin || role.Role == models.RolePlatformAdmin {
-			return role.Role, nil
-		}
-	}
-	// 如果没有找到admin权限，返回readonly权限（如果有的话）
-	for _, role := range roles {
-		if role.Role == models.RoleClusterReadonly {
-			return role.Role, nil
-		}
+	var roles []string
+	for _, item := range items {
+		roles = append(roles, item.Role)
 	}
 
-	return "", nil
+	return roles, nil
 }
