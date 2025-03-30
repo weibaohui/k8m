@@ -28,10 +28,21 @@ func (u *userService) GetClusterRole(cluster string, username string) (string, e
 	queryFunc := func(db *gorm.DB) *gorm.DB {
 		return db.Where("cluster = ? AND username = ?", cluster, username)
 	}
-	role, err := clusterRole.GetOne(params, queryFunc)
-
+	roles, _, err := clusterRole.List(params, queryFunc)
 	if err != nil {
 		return "", err
 	}
-	return role.Role, nil
+	// 遍历所有角色，如果存在admin权限就返回admin
+	for _, role := range roles {
+		if role.Role == models.RoleClusterAdmin || role.Role == models.RolePlatformAdmin {
+			return role.Role, nil
+		}
+	}
+	// 如果没有找到admin权限，返回readonly权限（如果有的话）
+	for _, role := range roles {
+		if role.Role == models.RoleClusterReadonly {
+			return role.Role, nil
+		}
+	}
+	return "", nil
 }
