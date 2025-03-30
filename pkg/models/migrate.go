@@ -19,7 +19,7 @@ func init() {
 
 	_ = FixClusterName()
 	_ = AddInnerMCPServer()
-	//将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
+	//TODO:将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
 }
 func AutoMigrate() error {
 
