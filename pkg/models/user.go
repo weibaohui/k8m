@@ -28,9 +28,11 @@ type User struct {
 }
 
 const (
-	RoleClusterAdmin    = "cluster_admin"
-	RoleClusterReadonly = "cluster_readonly"
-	RolePlatformAdmin   = "platform_admin"
+	RoleClusterAdmin    = "cluster_admin"    // 集群管理员
+	RoleClusterReadonly = "cluster_readonly" // 集群只读权限
+	RolePlatformAdmin   = "platform_admin"   // 平台管理员
+	RoleClusterPodExec  = "cluster_pod_exec" // 集群Pod内执行命令权限
+	RoleGuest           = "guest"            // 普通用户，游客,无任何集群权限，也看不到集群列表
 )
 
 func (c *User) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*User, int64, error) {
