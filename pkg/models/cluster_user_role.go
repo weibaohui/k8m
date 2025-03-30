@@ -12,7 +12,7 @@ import (
 type ClusterUserRole struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Cluster   string    `gorm:"index" json:"cluster,omitempty"`    // 集群名称
-	UserName  string    `gorm:"index" json:"username,omitempty"`   // 用户名
+	Username  string    `gorm:"index" json:"username,omitempty"`   // 用户名
 	Role      string    `gorm:"index" json:"role,omitempty"`       // 角色类型：readonly/admin
 	CreatedBy string    `gorm:"index" json:"created_by,omitempty"` // 创建者
 	CreatedAt time.Time `json:"created_at,omitempty"`
