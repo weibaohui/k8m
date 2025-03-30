@@ -43,12 +43,8 @@
                   "required": true,
                   "options": [
                     {
-                      "label": "集群管理员",
-                      "value": "cluster_admin"
-                    },
-                    {
-                      "label": "集群只读",
-                      "value": "cluster_readonly"
+                      "label": "普通用户",
+                      "value": "guest"
                     },
                     {
                       "label": "平台管理员",
@@ -64,9 +60,14 @@
                   "placeholder": "请输入用户组描述"
                 },
                 {
-                  "type": "static",
-                  "label": "角色说明",
-                  "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                  "type": "alert",
+                  "level": "success",
+                  "body": "<div class='alert alert-info'><p><strong>普通用户：</strong>无集群权限，除非在集群中进行显式授权。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                },
+                {
+                  "type": "alert",
+                  "level": "success",
+                  "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p></div>"
                 }
               ],
               "submitText": "保存",
@@ -122,12 +123,8 @@
                       "required": true,
                       "options": [
                         {
-                          "label": "集群管理员",
-                          "value": "cluster_admin"
-                        },
-                        {
-                          "label": "集群只读",
-                          "value": "cluster_readonly"
+                          "label": "普通用户",
+                          "value": "guest"
                         },
                         {
                           "label": "平台管理员",
@@ -142,9 +139,14 @@
                       "label": "描述"
                     },
                     {
-                      "type": "static",
-                      "label": "角色说明",
-                      "tpl": "<div class='alert alert-info'><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                      "type": "alert",
+                      "level": "success",
+                      "body": "<div class='alert alert-info'><p><strong>普通用户：</strong>无集群权限，除非在集群中进行显式授权。</p><p><strong>平台管理员：</strong>可以管理平台配置、用户权限等系统级设置。</p></div>"
+                    },
+                    {
+                      "type": "alert",
+                      "level": "success",
+                      "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p></div>"
                     }
                   ]
                 }
@@ -173,8 +175,7 @@
           "label": "角色",
           "type": "mapping",
           "map": {
-            "cluster_admin": "集群管理员",
-            "cluster_readonly": "集群只读",
+            "guest": "普通用户",
             "platform_admin": "平台管理员"
           },
           "searchable": {
