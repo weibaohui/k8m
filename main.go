@@ -377,6 +377,11 @@ func main() {
 		mgm.POST("/user_group/delete/:ids", user.DeleteUserGroup)
 		mgm.GET("/user_group/option_list", user.GroupOptionList)
 
+		// 集群权限设置
+		mgm.GET("/cluster_permissions/:cluster/role/:role/user/list", user.ListClusterPermissions)
+		mgm.POST("/cluster_permissions/save", user.SaveClusterPermission)
+		mgm.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
+
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
 		mgm.GET("/log/operation/list", log.ListOperation)

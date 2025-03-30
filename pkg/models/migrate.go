@@ -27,6 +27,7 @@ func AutoMigrate() error {
 		&CustomTemplate{},
 		&KubeConfig{},
 		&User{},
+		&ClusterUserRole{},
 		&OperationLog{},
 		&ShellLog{},
 		&HelmRepository{},
