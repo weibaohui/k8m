@@ -22,8 +22,12 @@ func (u *userService) List() ([]*models.User, error) {
 }
 
 // GetClusterRole 获取用户在指定集群中的角色权限
-func (u *userService) GetClusterRole(cluster string, username string) (string, error) {
+// cluster: 集群名称
+// username: 用户名
+// jwtUserRole: JWT用户角色,从context传递
+func (u *userService) GetClusterRole(cluster string, username string, jwtUserRole string) (string, error) {
 	params := &dao.Params{}
+	params.PerPage = 10000000
 	clusterRole := &models.ClusterUserRole{}
 	queryFunc := func(db *gorm.DB) *gorm.DB {
 		return db.Where("cluster = ? AND username = ?", cluster, username)
@@ -44,5 +48,11 @@ func (u *userService) GetClusterRole(cluster string, username string) (string, e
 			return role.Role, nil
 		}
 	}
+
+	// 如果数据库中没有,则使用jwtUserRole
+	if jwtUserRole != "" {
+		return jwtUserRole, nil
+	}
+
 	return "", nil
 }
