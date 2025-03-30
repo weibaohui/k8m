@@ -248,7 +248,12 @@
                             "body": [
                               {
                                 "type": "crud",
-                                "api": "get:/k8s/cluster/users/admin/${fileName}/${contextName}",
+                                "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user/list",
+                                "autoFillHeight": true,
+                                "autoGenerateFilter": {
+                                  "columnsNum": 4,
+                                  "showBtnToolbar": false
+                                },
                                 "headerToolbar": [
                                   {
                                     "type": "button",
@@ -256,16 +261,19 @@
                                     "level": "primary",
                                     "actionType": "dialog",
                                     "dialog": {
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
                                       "title": "添加管理员",
                                       "body": {
                                         "type": "form",
-                                        "api": "post:/k8s/cluster/users/admin/${fileName}/${contextName}",
+                                        "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/save",
                                         "body": [
                                           {
                                             "type": "transfer",
                                             "name": "users",
                                             "label": "选择用户",
-                                            "source": "get:/k8s/users/list",
+                                            "source": "get:/mgm/user/option_list",
                                             "searchable": true,
                                             "selectMode": "list"
                                           }
@@ -274,31 +282,56 @@
                                     }
                                   },
                                   {
+                                    "type": "columns-toggler",
+                                    "align": "right",
+                                    "draggable": true,
+                                    "icon": "fas fa-cog",
+                                    "overlay": true,
+                                    "footerBtnSize": "sm"
+                                  },
+                                  {
                                     "type": "tpl",
                                     "tpl": "共${count}条",
                                     "align": "right",
                                     "visibleOn": "${count}"
+                                  },
+                                  {
+                                    "type": "columns-toggler",
+                                    "align": "left"
+                                  },
+                                  "reload",
+                                  "bulkActions"
+                                ],
+                                "loadDataOnce": false,
+                                "syncLocation": false,
+                                "initFetch": true,
+                                "perPage": 10,
+                                "bulkActions": [
+                                  {
+                                    "label": "批量删除",
+                                    "actionType": "ajax",
+                                    "confirmText": "确定要批量删除?",
+                                    "api": "post:/mgm/cluster_permissions/${ids}"
                                   }
                                 ],
                                 "columns": [
                                   {
-                                    "name": "userName",
+                                    "name": "username",
                                     "label": "用户名"
                                   },
                                   {
-                                    "type": "operation",
-                                    "label": "操作",
-                                    "buttons": [
-                                      {
-                                        "type": "button",
-                                        "label": "删除",
-                                        "level": "link",
-                                        "className": "text-danger",
-                                        "confirmText": "确定要删除该用户吗？",
-                                        "actionType": "ajax",
-                                        "api": "delete:/k8s/cluster/users/admin/${fileName}/${contextName}/${userName}"
-                                      }
-                                    ]
+                                    "name": "role",
+                                    "label": "角色",
+                                    "type": "mapping",
+                                    "map": {
+                                      "cluster_admin": "集群管理员",
+                                      "cluster_readonly": "集群只读",
+                                      "platform_admin": "平台管理员"
+                                    }
+                                  },
+                                  {
+                                    "name": "cluster",
+                                    "label": "集群"
                                   }
                                 ]
                               }

@@ -17,10 +17,23 @@ import (
 )
 
 func ListClusterPermissions(c *gin.Context) {
+	clusterBase64 := c.Param("cluster")
+	role := c.Param("role")
+	cluster, err := utils.DecodeBase64(clusterBase64)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
 	params := dao.BuildParams(c)
 	m := &models.ClusterUserRole{}
-
-	items, total, err := m.List(params)
+	m.Cluster = cluster
+	m.Role = role
+	queryFuncs := genQueryFuncs(c, params)
+	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
+		return db.Where(m)
+	})
+	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
