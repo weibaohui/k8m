@@ -19,7 +19,7 @@ func init() {
 
 	_ = FixClusterName()
 	_ = AddInnerMCPServer()
-	//TODO:将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
+	_ = FixRoleName()
 }
 func AutoMigrate() error {
 
@@ -44,6 +44,16 @@ func AutoMigrate() error {
 	if err != nil {
 		klog.Errorf("数据库迁移 User 表 DropColumn Role 报错: %v", err.Error())
 	}
+	return nil
+}
+func FixRoleName() error {
+	// 将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
+	result := dao.DB().Model(&UserGroup{}).Where("role != ?", "platform_admin").Update("role", "guest")
+	if result.Error != nil {
+		klog.Errorf("更新用户组表中角色失败: %v", result.Error)
+		return result.Error
+	}
+
 	return nil
 }
 func FixClusterName() error {
