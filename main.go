@@ -370,6 +370,7 @@ func main() {
 		mgm.POST("/user/save", user.Save)
 		mgm.POST("/user/delete/:ids", user.Delete)
 		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
+		mgm.GET("/user/option_list", user.UserOptionList)
 
 		// user_group
 		mgm.GET("/user_group/list", user.ListUserGroup)
@@ -378,8 +379,8 @@ func main() {
 		mgm.GET("/user_group/option_list", user.GroupOptionList)
 
 		// 集群权限设置
-		mgm.GET("/cluster_permissions/:cluster/role/:role/user/list", user.ListClusterPermissions)
-		mgm.POST("/cluster_permissions/save", user.SaveClusterPermission)
+		mgm.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
+		mgm.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
 		mgm.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 
 		// log
