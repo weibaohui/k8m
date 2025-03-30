@@ -17,15 +17,22 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 
 	deleteCallback := kom.Cluster(selectedCluster).Callback().Delete()
 	_ = deleteCallback.Before("kom:delete").Register("k8m:delete", handleDelete)
+
 	updateCallback := kom.Cluster(selectedCluster).Callback().Update()
 	_ = updateCallback.Before("kom:update").Register("k8m:update", handleUpdate)
+
 	patchCallback := kom.Cluster(selectedCluster).Callback().Patch()
 	_ = patchCallback.Before("kom:patch").Register("k8m:patch", handlePatch)
+
 	createCallback := kom.Cluster(selectedCluster).Callback().Create()
 	_ = createCallback.Before("kom:create").Register("k8m:create", handleCreate)
-	execCallback := kom.Cluster(selectedCluster).Callback().Exec()
-	_ = execCallback.Before("kom:exec").Register("k8m:exec", handleExec)
 
+	execCallback := kom.Cluster(selectedCluster).Callback().Exec()
+	_ = execCallback.Before("*").Register("k8m:pod-exec", handleExec)
+
+	streamExecCallback := kom.Cluster(selectedCluster).Callback().StreamExec()
+	_ = streamExecCallback.Before("*").Register("k8m:pod-stream-exec", handleExec)
+	klog.V(6).Infof("registered callbacks for cluster %s", selectedCluster)
 	return nil
 }
 
