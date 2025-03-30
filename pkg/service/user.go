@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
@@ -25,7 +27,20 @@ func (u *userService) List() ([]*models.User, error) {
 // cluster: 集群名称
 // username: 用户名
 // jwtUserRole: JWT用户角色,从context传递
-func (u *userService) GetClusterRole(cluster string, username string, jwtUserRole string) (string, error) {
+func (u *userService) GetClusterRole(cluster string, username string, jwtUserRoles string) (string, error) {
+	//jwtUserRoles可能为一个字符串逗号分隔的角色列表
+	if jwtUserRoles != "" {
+		roles := strings.SplitSeq(jwtUserRoles, ",")
+		for role := range roles {
+			//只有平台管理员才返回，这是最大权限了
+			//不是平台管理员就是普通用户，这是权限系统的设定，只有这两种角色
+			//普通用户需要接受集群权限授权，那么就往下执行，查看是否具有集群授权
+			if role == models.RolePlatformAdmin {
+				return role, nil
+			}
+		}
+	}
+
 	params := &dao.Params{}
 	params.PerPage = 10000000
 	clusterRole := &models.ClusterUserRole{}
@@ -47,11 +62,6 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 		if role.Role == models.RoleClusterReadonly {
 			return role.Role, nil
 		}
-	}
-
-	// 如果数据库中没有,则使用jwtUserRole
-	if jwtUserRole != "" {
-		return jwtUserRole, nil
 	}
 
 	return "", nil
