@@ -47,9 +47,21 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, string, error) 
 	}
 
 	var err error
-	if role == models.RoleClusterReadonly {
+	clusterRole, err := service.UserService().GetClusterRole(cluster, username)
+	//clusterRole 为最高优先级
+	if clusterRole == models.RoleClusterAdmin {
+		//管理员不做处理
+	}
+	if clusterRole == models.RoleClusterReadonly {
 		err = fmt.Errorf("非管理员不能%s资源", action)
 	}
+	if clusterRole == "" {
+		//没有对该用户单独指定该集群的操作权限，那么使用ctx传递过来的用户角色
+		if role == models.RoleClusterReadonly {
+			err = fmt.Errorf("非管理员不能%s资源", action)
+		}
+	}
+
 	if err != nil {
 		log.ActionResult = err.Error()
 	}
