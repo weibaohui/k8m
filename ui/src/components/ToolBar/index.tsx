@@ -26,14 +26,13 @@ const Toolbar = () => {
 
                 // 角色映射表
                 const roleMap: Record<string, string> = {
-                    'cluster_admin': '集群管理员',
-                    'cluster_readonly': '集群只读',
+                    'guest': '普通用户',
                     'platform_admin': '平台管理员'
                 };
 
                 setUserInfo({
                     username: decoded.username || '',
-                    role: roleMap[decoded.role] || ''
+                    role: roleMap[decoded.role] || '普通用户'
                 });
             } catch (error) {
                 console.error('Failed to decode token:', error);
