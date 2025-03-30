@@ -16,11 +16,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
@@ -101,6 +103,17 @@ func Xterm(c *gin.Context) {
 	containerName := c.Query("container_name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
+
+	//TODO 转移到kom中，走cb
+	var err error
+	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
+	roles := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+	clusterRoles, _ := service.UserService().GetClusterRole(selectedCluster, username, roles)
+
+	if len(clusterRoles) == 0 || !(slice.Contain(clusterRoles, models.RolePlatformAdmin) || slice.Contain(clusterRoles, models.RoleClusterAdmin) || slice.Contain(clusterRoles, models.RoleClusterPodExec)) {
+		amis.WriteJsonError(c, fmt.Errorf("非管理员,且无exec权限，不能执行Exec命令"))
+		return
+	}
 
 	if containerName == "" {
 		amis.WriteJsonError(c, errors.New("container_name is required"))
