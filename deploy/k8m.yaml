@@ -137,7 +137,7 @@ spec:
     spec:
       containers:
         - name: k8m
-          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:0.0.68
+          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:0.0.70
           env:
             - name: DEBUG
               value: "false"
