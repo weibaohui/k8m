@@ -406,11 +406,11 @@ func main() {
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
 
 		// mcp
-		mgm.GET("/mcp/list", mcp.List)
-		mgm.POST("/mcp/connect/:name", mcp.Connect)
-		mgm.POST("/mcp/delete", mcp.Delete)
-		mgm.POST("/mcp/save", mcp.AddOrUpdate)
-		mgm.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
+		mgm.GET("/mcp/list", middleware.RolePlatformOnly(mcp.List))
+		mgm.POST("/mcp/connect/:name", middleware.RolePlatformOnly(mcp.Connect))
+		mgm.POST("/mcp/delete", middleware.RolePlatformOnly(mcp.Delete))
+		mgm.POST("/mcp/save", middleware.RolePlatformOnly(mcp.AddOrUpdate))
+		mgm.POST("/mcp/save/id/:id/status/:status", middleware.RolePlatformOnly(mcp.QuickSave))
 
 	}
 
