@@ -13,7 +13,21 @@ import (
 )
 
 func List(c *gin.Context) {
+	user, role := amis.GetLoginUser(c)
+
 	clusters := service.ClusterService().AllClusters()
+	if role != models.RolePlatformAdmin {
+		userCluster, err := service.UserService().GetClusters(user)
+		if err != nil {
+			amis.WriteJsonData(c, gin.H{
+				"options": make([]map[string]string, 0),
+			})
+			return
+		}
+		clusters = slice.Filter(clusters, func(index int, cluster *service.ClusterConfig) bool {
+			return slice.Contain(userCluster, cluster.GetClusterID())
+		})
+	}
 	amis.WriteJsonData(c, clusters)
 }
 
