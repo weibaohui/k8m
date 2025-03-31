@@ -1,21 +1,52 @@
 import { useNavigate } from "react-router-dom";
 import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
+
+// 定义用户角色接口
+interface UserRoleResponse {
+    role: string;  // 根据实际数据结构调整类型
+}
 
 type MenuItem = Required<MenuProps>['items'][number];
 
 const items: () => MenuItem[] = () => {
     const navigate = useNavigate()
+    const [userRole, setUserRole] = useState<string>('');
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            try {
+                const response = await fetcher({
+                    url: '/mgm/user/role',
+                    method: 'get'
+                });
+                // 检查 response.data 是否存在，并确保其类型正确
+                if (response.data && typeof response.data === 'object') {
+                    const role = response.data.data as UserRoleResponse;
+                    setUserRole(role.role);
+                    // console.log('User Role:', role.role);
+                }
+            } catch (error) {
+                console.error('Failed to fetch user role:', error);
+            }
+        };
+        fetchUserRole();
+    }, []);
+
     const onMenuClick = (path: string) => {
         navigate(path)
     }
     return [
-        {
-            label: "多集群",
-            title: "多集群",
-            icon: <i className="fa-solid fa-server"></i>,
-            key: "cluster_all",
-            onClick: () => onMenuClick('/cluster/cluster_all')
-        },
+        ...(userRole === 'platform_admin' ? [
+            {
+                label: "多集群",
+                title: "多集群",
+                icon: <i className="fa-solid fa-server"></i>,
+                key: "cluster_all",
+                onClick: () => onMenuClick('/cluster/cluster_all')
+            }
+        ] : []),
         {
             label: "命名空间",
             title: "命名空间",
@@ -365,18 +396,20 @@ const items: () => MenuItem[] = () => {
                     key: "user_management",
                     onClick: () => onMenuClick('/user/user')
                 },
-                {
-                    label: "用户组管理",
-                    icon: <i className="fa-solid fa-user-group"></i>,
-                    key: "user_group_management",
-                    onClick: () => onMenuClick('/user/user_group')
-                },
-                {
-                    label: "MCP管理",
-                    icon: <i className="fa-solid fa-server"></i>,
-                    key: "mcp_management",
-                    onClick: () => onMenuClick('/mcp/mcp')
-                },
+                ...(userRole === 'platform_admin' ? [
+                    {
+                        label: "用户组管理",
+                        icon: <i className="fa-solid fa-user-group"></i>,
+                        key: "user_group_management",
+                        onClick: () => onMenuClick('/user/user_group')
+                    },
+                    {
+                        label: "MCP管理",
+                        icon: <i className="fa-solid fa-server"></i>,
+                        key: "mcp_management",
+                        onClick: () => onMenuClick('/mcp/mcp')
+                    }
+                ] : []),
             ],
         },
     ];
