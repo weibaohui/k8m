@@ -59,3 +59,24 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 
 	return roles, nil
 }
+
+// GetClusters 获取用户有权限的集群列表
+// username: 用户名
+func (u *userService) GetClusters(username string) ([]string, error) {
+	params := &dao.Params{}
+	params.PerPage = 10000000
+	clusterRole := &models.ClusterUserRole{}
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Distinct("cluster").Where(" username = ?", username)
+	}
+	items, _, err := clusterRole.List(params, queryFunc)
+	if err != nil {
+		return []string{}, err
+	}
+	var clusters []string
+	for _, item := range items {
+		clusters = append(clusters, item.Cluster)
+	}
+
+	return clusters, nil
+}
