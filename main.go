@@ -264,16 +264,16 @@ func main() {
 
 		// k8s cluster
 		api.GET("/cluster/all", cluster.List)
-		api.POST("/cluster/scan", cluster.Scan)
+		api.POST("/cluster/scan", middleware.RolePlatformOnly(cluster.Scan))
 		api.GET("/cluster/option_list", cluster.OptionList)
-		api.GET("/cluster/file/option_list", cluster.FileOptionList)
+		api.GET("/cluster/file/option_list", middleware.RolePlatformOnly(cluster.FileOptionList))
 		api.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
 		api.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
 		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
 		api.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
 		api.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
-		api.POST("/cluster/kubeconfig/save", kubeconfig.Save)
-		api.POST("/cluster/kubeconfig/remove", kubeconfig.Remove)
+		api.POST("/cluster/kubeconfig/save", middleware.RolePlatformOnly(kubeconfig.Save))
+		api.POST("/cluster/kubeconfig/remove", middleware.RolePlatformOnly(kubeconfig.Remove))
 
 		// k8s sts
 		api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", sts.Undo)
@@ -369,20 +369,20 @@ func main() {
 		mgm.GET("/user/list", user.List)
 		mgm.GET("/user/role", user.Role)
 		mgm.POST("/user/save", user.Save)
-		mgm.POST("/user/delete/:ids", user.Delete)
+		mgm.POST("/user/delete/:ids", middleware.RolePlatformOnly(user.Delete))
 		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
-		mgm.GET("/user/option_list", user.UserOptionList)
+		mgm.GET("/user/option_list", middleware.RolePlatformOnly(user.UserOptionList))
 
 		// user_group
-		mgm.GET("/user_group/list", user.ListUserGroup)
-		mgm.POST("/user_group/save", user.SaveUserGroup)
-		mgm.POST("/user_group/delete/:ids", user.DeleteUserGroup)
-		mgm.GET("/user_group/option_list", user.GroupOptionList)
+		mgm.GET("/user_group/list", middleware.RolePlatformOnly(user.ListUserGroup))
+		mgm.POST("/user_group/save", middleware.RolePlatformOnly(user.SaveUserGroup))
+		mgm.POST("/user_group/delete/:ids", middleware.RolePlatformOnly(user.DeleteUserGroup))
+		mgm.GET("/user_group/option_list", middleware.RolePlatformOnly(user.GroupOptionList))
 
 		// 集群权限设置
-		mgm.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
-		mgm.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
-		mgm.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
+		mgm.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", middleware.RolePlatformOnly(user.ListClusterPermissions))
+		mgm.POST("/cluster_permissions/cluster/:cluster/role/:role/save", middleware.RolePlatformOnly(user.SaveClusterPermission))
+		mgm.POST("/cluster_permissions/:ids", middleware.RolePlatformOnly(user.DeleteClusterPermission))
 
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
