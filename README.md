@@ -271,15 +271,10 @@ MCP程序使用3619端口。NodePort使用31919端口。
 3. 验证SSE连接是否成功建立
 4. 查看工具日志以排查连接问题，MCP执行失败会有报错记录。
 
-**V0.0.66更新**
-
-1. 新增MCP支持。
-2. 内置支持k8s多集群操作：
-    1. list_k8s_resource
-    2. get_k8s_resource
-    3. delete_k8s_resource
-    4. describe_k8s_resource
-    5. get_pod_logs
+**V0.0.70 更新**
+权限管理调整：
+按集群进行权限隔离
+![输入图片说明](https://foruda.gitee.com/images/1743436163730546653/203d33f7_77493.png "屏幕截图")
 
 **v0.0.67 更新**
 
@@ -293,6 +288,16 @@ MCP程序使用3619端口。NodePort使用31919端口。
    ![输入图片说明](https://foruda.gitee.com/images/1742916917319897798/a2171fd2_77493.png "屏幕截图")
 5. 增强：MCP服务器增加快捷开启关闭按钮
    ![输入图片说明](https://foruda.gitee.com/images/1742916947056442916/6c33d7c2_77493.png "屏幕截图")
+
+**V0.0.66更新**
+
+1. 新增MCP支持。
+2. 内置支持k8s多集群操作：
+    1. list_k8s_resource
+    2. get_k8s_resource
+    3. delete_k8s_resource
+    4. describe_k8s_resource
+    5. get_pod_logs
 
 **v0.0.64 更新**
 
