@@ -13,6 +13,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// 获取当前用户的Role信息
+func Role(c *gin.Context) {
+	_, role := amis.GetLoginUser(c)
+	amis.WriteJsonData(c, gin.H{
+		"role": role,
+	})
+}
 func List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}

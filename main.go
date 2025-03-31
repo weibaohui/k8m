@@ -367,6 +367,7 @@ func main() {
 
 		// user
 		mgm.GET("/user/list", user.List)
+		mgm.GET("/user/role", user.Role)
 		mgm.POST("/user/save", user.Save)
 		mgm.POST("/user/delete/:ids", user.Delete)
 		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
