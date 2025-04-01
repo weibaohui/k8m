@@ -1,8 +1,9 @@
 import React from 'react';
-import * as monaco from 'monaco-editor';
-import {DiffEditor} from '@monaco-editor/react';
-import yaml from "js-yaml";
+import { loader } from '@monaco-editor/react';
 
+import * as monaco from 'monaco-editor';
+import { DiffEditor } from '@monaco-editor/react';
+import yaml from "js-yaml";
 interface DiffEditorProps {
     originalValue?: string; // 左侧编辑器的内容（历史版本）
     modifiedValue?: string; // 右侧编辑器的内容（最新版本）
@@ -67,7 +68,7 @@ const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>((p
         renderSideBySide: true, // 左右分栏显示
         automaticLayout: true, // 自动布局
         scrollBeyondLastLine: false,
-        minimap: {enabled: false}, // 禁用小地图
+        minimap: { enabled: false }, // 禁用小地图
         folding: true, // 启用代码折叠
         lineNumbers: 'on',
         wordWrap: 'on',
@@ -105,11 +106,15 @@ const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>((p
         }
 
     }
-
+    loader.config({
+        paths: {
+            vs: '/monacoeditorwork'
+        }
+    })
     return (
-        <div style={{width, height}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
-                <div style={{width: '50%', display: 'flex', justifyContent: 'center'}}>
+        <div style={{ width, height }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ width: '50%', display: 'flex', justifyContent: 'center' }}>
                     <div style={{
                         padding: '4px 8px',
                         backgroundColor: '#f0f0f0',
@@ -117,7 +122,7 @@ const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>((p
                         fontSize: '14px'
                     }}>{originalLabel}</div>
                 </div>
-                <div style={{width: '50%', display: 'flex', justifyContent: 'center'}}>
+                <div style={{ width: '50%', display: 'flex', justifyContent: 'center' }}>
                     <div style={{
                         padding: '4px 8px',
                         backgroundColor: '#f0f0f0',
@@ -126,7 +131,7 @@ const DiffEditorComponent = React.forwardRef<HTMLDivElement, DiffEditorProps>((p
                     }}>{modifiedLabel}</div>
                 </div>
             </div>
-            <div style={{border: '1px solid #e5e6eb', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'}}>
+            <div style={{ border: '1px solid #e5e6eb', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                 <DiffEditor
                     height="calc(100vh)"
                     language={language}
