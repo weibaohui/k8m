@@ -513,6 +513,7 @@ MCP程序使用3619端口。NodePort使用31919端口。
 ### 特别鸣谢
 
 [zhaomingcheng01](https://github.com/zhaomingcheng01)：提出了诸多非常高质量的建议，为k8m的易用好用做出了卓越贡献~
+
 [La0jin](https://github.com/La0jin):提供在线资源及维护，极大提升了k8m的展示效果
 
 ## 联系我
