@@ -2,10 +2,20 @@ import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import monacoEditorPlugin from 'vite-plugin-monaco-editor';
-
+import { copy } from 'fs-extra'
+ 
 export default defineConfig(({mode}) => {
     console.log('current mode', mode)
+
     return {
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks: undefined
+                }
+            }
+        },
+
         base: '/',
         server: {
             port: 3000,
@@ -77,6 +87,22 @@ export default defineConfig(({mode}) => {
                 }
             ),
         },
-        plugins: [react(), monacoEditorPlugin({})],
+        plugins: [react(),
+            monacoEditorPlugin({
+                publicPath: '/monacoeditorwork', // 静态资源输出路径
+            }),
+            {
+                name: 'copy-monaco-loader',
+                closeBundle() {
+                        copy('node_modules/monaco-editor/min/vs/loader.js', 'dist/monacoeditorwork/loader.js', { overwrite: true })
+                        copy('node_modules/monaco-editor/min/vs/editor', 'dist/monacoeditorwork/editor', { overwrite: true })
+                        copy('node_modules/monaco-editor/min/vs/language', 'dist/monacoeditorwork/language', { overwrite: true })
+                        copy('node_modules/monaco-editor/min/vs/base', 'dist/monacoeditorwork/base', { overwrite: true })
+                        copy('node_modules/monaco-editor/min/vs/basic-languages', 'dist/monacoeditorwork/basic-languages', { overwrite: true })
+                    }
+            }
+        ],
+        
+
     }
 })
