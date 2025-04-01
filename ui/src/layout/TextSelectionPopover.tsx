@@ -4,12 +4,32 @@ import { render as amisRender } from "amis";
 import { Card } from "amis-ui";
 import Draggable from "react-draggable";
 import './TextSelectionPopover.css';
+import { fetcher } from "@/components/Amis/fetcher";
 
 const GlobalTextSelector: React.FC = () => {
     const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isEnabled, setIsEnabled] = useState(false);
 
     useEffect(() => {
+        // 从后端获取配置
+        fetcher({
+            url: '/mgm/config/AnySelect',
+            method: 'get'
+        })
+            .then(response => {
+                //@ts-ignore
+                setIsEnabled(response.data?.data === 'true' ?? false);
+            })
+            .catch(error => {
+                console.error('Error fetching AnySelect config:', error);
+                setIsEnabled(false);
+            });
+    }, []);
+
+    useEffect(() => {
+        if (!isEnabled) return;
+
         const handleMouseUp = (event: MouseEvent) => {
             // 检查点击是否发生在卡片内部
             const card = document.querySelector('.selection-card');
@@ -28,16 +48,15 @@ const GlobalTextSelector: React.FC = () => {
                 x: event.clientX + window.scrollX,
                 y: event.clientY + window.scrollY
             });
-
         };
 
         document.addEventListener("mouseup", handleMouseUp);
         return () => {
             document.removeEventListener("mouseup", handleMouseUp);
         };
-    }, []);
+    }, [isEnabled]);
 
-    if (!selection) return null;
+    if (!selection || !isEnabled) return null;
 
     return ReactDOM.createPortal(
         <Draggable handle=".selection-title" disabled={isFullscreen}>

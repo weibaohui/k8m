@@ -16,6 +16,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
+	"github.com/weibaohui/k8m/pkg/controller/config"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
@@ -411,6 +412,9 @@ func main() {
 		mgm.POST("/mcp/delete", middleware.RolePlatformOnly(mcp.Delete))
 		mgm.POST("/mcp/save", middleware.RolePlatformOnly(mcp.AddOrUpdate))
 		mgm.POST("/mcp/save/id/:id/status/:status", middleware.RolePlatformOnly(mcp.QuickSave))
+
+		// config
+		mgm.GET("/config/:key", config.Config)
 
 	}
 

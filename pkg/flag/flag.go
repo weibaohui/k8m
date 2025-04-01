@@ -33,6 +33,7 @@ type Config struct {
 	NodeShellImage    string // nodeShell 镜像
 	KubectlShellImage string // kubectlShell 镜像
 	SqlitePath        string // sqlite 数据库路径
+	AnySelect         bool   // 是否开启任意选择，默认开启
 }
 
 func Init() *Config {
@@ -103,6 +104,9 @@ func (c *Config) InitFlags() {
 	//MCPServerPort
 	defaultMCPServerPort := getEnvAsInt("MCP_SERVER_PORT", 3619)
 
+	// 默认开启任意选择
+	defaultAnySelect := getEnvAsBool("ANY_SELECT", true)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -119,6 +123,7 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认/data/k8m.db")
 	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认启用")
 	pflag.IntVarP(&c.MCPServerPort, "mcp-server-port", "s", defaultMCPServerPort, "MCP Server 监听端口，默认3619")
+	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
 
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
