@@ -9,6 +9,10 @@
 Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 模型交互能力，同时支持接入您自己的私有化大模型。
 
+### 演示DEMO
+[DEMO](http://107.150.119.151:3618)
+用户名密码 demo/demo
+
 ### 主要特点
 
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
@@ -509,6 +513,7 @@ MCP程序使用3619端口。NodePort使用31919端口。
 ### 特别鸣谢
 
 [zhaomingcheng01](https://github.com/zhaomingcheng01)：提出了诸多非常高质量的建议，为k8m的易用好用做出了卓越贡献~
+[La0jin](https://github.com/La0jin):提供在线资源及维护，极大提升了k8m的展示效果
 
 ## 联系我
 
