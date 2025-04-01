@@ -8,21 +8,22 @@ export default defineConfig(({mode}) => {
     console.log('current mode', mode)
 
     return {
-        build: {
-            rollupOptions: {
-                output: {
-                    manualChunks: undefined
-                }
-            }
-        },
-
         base: '/',
         server: {
             port: 3000,
             open: true,
             host: '0.0.0.0',
+            // 添加静态文件服务
+            fs: {
+                allow: ['..'],
+            },
             // 添加代理配置
+            // 添加monaco-editor静态文件代理
             proxy: {
+                '/monacoeditorwork': {
+                    target: 'http://localhost:3000',
+                    rewrite: (path) => path.replace(/^\/monacoeditorwork/, '/node_modules/monaco-editor/min/vs'),
+                },
                 '/auth': {
                     target: 'http://127.0.0.1:3618',
                     changeOrigin: true,
