@@ -9,6 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"k8s.io/klog/v2"
 )
 
@@ -193,12 +194,24 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		}
 
 		// 重新连接
-		newCli, err := client.NewSSEMCPClient(config.URL)
+		username := ""
+		if usernameVal, ok := ctx.Value(constants.JwtUserName).(string); ok {
+			username = usernameVal
+		}
+		role := ""
+		if roleVal, ok := ctx.Value(constants.JwtUserRole).(string); ok {
+			role = roleVal
+		}
+
+		newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
+			constants.JwtUserName: username,
+			constants.JwtUserRole: role,
+		}))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create new client for %s: %v", serverName, err)
 		}
 
-		if err := newCli.Start(ctx); err != nil {
+		if err = newCli.Start(ctx); err != nil {
 			newCli.Close()
 			return nil, fmt.Errorf("failed to start new client for %s: %v", serverName, err)
 		}
@@ -210,6 +223,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 			Name:    "multi-server-client",
 			Version: "1.0.0",
 		}
+
 		result, err := newCli.Initialize(ctx, initRequest)
 		if err != nil {
 			newCli.Close()
@@ -219,12 +233,6 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		m.clients[serverName] = newCli
 		m.InitializeResults[serverName] = result
 		klog.V(6).Infof("创建客户端连接 server %s", serverName)
-		// // 同步服务器能力
-		// if err = m.SyncServerCapabilities(ctx, serverName); err != nil {
-		// 	// 如果同步失败，需要清理资源
-		// 	newCli.Close()
-		// 	return nil, fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
-		// }
 
 		return newCli, nil
 	}
@@ -244,7 +252,7 @@ func (m *MCPHost) Close() {
 	m.mutex.Unlock()
 
 }
- 
+
 func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 	// 从所有可用的MCP服务器收集工具列表
 	var allTools []openai.Tool
