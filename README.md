@@ -45,6 +45,7 @@ Usage of ./k8m:
       --admin-password string            管理员密码 (default "123456")
       --admin-username string            管理员用户名 (default "admin")
       --any-select                       是否开启任意选择划词解释，默认开启 (default true)
+      --print-config                     是否打印配置信息 (default false)
   -k, --chatgpt-key string               大模型的自定义API Key (default "sk-xxxxxxx")
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
@@ -119,6 +120,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 | `SQLITE_PATH`         | `/data/k8m.db`             | 持久化数据库地址，默认sqlite数据库，文件地址/data/k8m.db                             |
 | `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                 |
 | `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                  |
+| `PRINT_CONFIG`         | `"false"`                  | 是否打印配置信息                                                             |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
