@@ -46,8 +46,10 @@ func UpdateImageName(imageName string, imagePrefix string) string {
 
 // 获取镜像名称及Tag
 func GetImageNameAndTag(imageName string) (string, string) {
-	// 拆分镜像名称路径，查找第一个冒号位置
-	colonIndex := strings.Index(imageName, ":")
+	// 拆分镜像名称路径，查找最后一个冒号位置
+	//harbor.sdibt.com:5000/public/nginx:1.02
+
+	colonIndex := strings.LastIndex(imageName, ":")
 	if colonIndex == -1 {
 		// 没有冒号，默认为无Tag
 		return imageName, "latest"
