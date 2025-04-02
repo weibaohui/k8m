@@ -64,6 +64,238 @@ func ImagePullSecretOptionList(c *gin.Context) {
 	})
 }
 
+func ContainerResourcesInfo(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	group := c.Param("group")
+	kind := c.Param("kind")
+	version := c.Param("version")
+	containerName := c.Param("container_name")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var item *unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).
+		Name(name).Get(&item).Error
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	requestCPU, limitCPU, requestMemory, limitMemory, err := getContainerResourcesInfoByName(item, containerName)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{
+		"name":           containerName,
+		"request_cpu":    requestCPU,
+		"limit_cpu":      limitCPU,
+		"request_memory": requestMemory,
+		"limit_memory":   limitMemory,
+	})
+
+}
+
+func getContainerResourcesInfoByName(item *unstructured.Unstructured, containerName string) (string, string, string, string, error) {
+	// 获取资源类型
+	kind := item.GetKind()
+
+	// 根据资源类型获取 containers 的路径
+	resourcePaths, err := getResourcePaths(kind)
+	if err != nil {
+		return "", "", "", "", err
+	}
+	containersPath := append(resourcePaths, "containers")
+
+	// 获取嵌套字段
+	containers, found, err := unstructured.NestedSlice(item.Object, containersPath...)
+	if err != nil {
+		return "", "", "", "", fmt.Errorf("error getting containers: %w", err)
+	}
+	if !found {
+		return "", "", "", "", fmt.Errorf("containers field not found")
+	}
+
+	// 遍历 containers 列表
+	for _, container := range containers {
+		// 断言 container 类型为 map[string]interface{}
+		containerMap, ok := container.(map[string]interface{})
+		if !ok {
+			return "", "", "", "", fmt.Errorf("unexpected container format")
+		}
+
+		// 获取容器的 name
+		name, _, err := unstructured.NestedString(containerMap, "name")
+		if err != nil {
+			return "", "", "", "", fmt.Errorf("error getting container name: %w", err)
+		}
+
+		// 如果 name 匹配目标容器名，则获取其 image
+		if name == containerName {
+			// 获取 resources
+			resourcesMap, found, err := unstructured.NestedMap(containerMap, "resources")
+			if err != nil {
+				return "", "", "", "", fmt.Errorf("error getting container resources: %w", err)
+			}
+			if !found {
+				return "", "", "", "", nil // 如果没有 resources 字段，返回空字符串
+			}
+
+			// 获取 requests
+			requestsMap, found, err := unstructured.NestedMap(resourcesMap, "requests")
+			if err != nil {
+				return "", "", "", "", fmt.Errorf("error getting container requests: %w", err)
+			}
+			if !found {
+				requestsMap = make(map[string]interface{}) // 如果没有 requests 字段，初始化为空 map
+			}
+
+			// 获取 limits
+			limitsMap, found, err := unstructured.NestedMap(resourcesMap, "limits")
+			if err != nil {
+				return "", "", "", "", fmt.Errorf("error getting container limits: %w", err)
+			}
+			if !found {
+				limitsMap = make(map[string]interface{}) // 如果没有 limits 字段，初始化为空 map
+			}
+
+			// 获取 request CPU
+			requestCPU, _, err := unstructured.NestedString(requestsMap, "cpu")
+			if err != nil {
+				return "", "", "", "", fmt.Errorf("error getting container request cpu: %w", err)
+			}
+
+			// 获取 request 内存
+			requestMemory, _, err := unstructured.NestedString(requestsMap, "memory")
+			if err != nil {
+				return "", "", "", "", fmt.Errorf("error getting container request memory: %w", err)
+			}
+
+			// 获取 limit CPU
+			limitCPU, _, err := unstructured.NestedString(limitsMap, "cpu")
+			if err != nil {
+				return "", "", "", "", fmt.Errorf("error getting container limit cpu: %w", err)
+			}
+
+			// 获取 limit 内存
+			limitMemory, _, err := unstructured.NestedString(limitsMap, "memory")
+			if err != nil {
+				return "", "", "", "", fmt.Errorf("error getting container limit memory: %w", err)
+			}
+
+			return requestCPU, limitCPU, requestMemory, limitMemory, nil
+		}
+	}
+
+	// 如果未找到匹配的容器名
+	return "", "", "", "", fmt.Errorf("container with name %q not found", containerName)
+}
+
+// 资源信息结构体
+// json
+// {"container_name":"my-container","request_cpu":"1","request_memory":"1","request_memory":"1Gi","limit_memory":"1Gi"}
+type resourceInfo struct {
+	ContainerName string `json:"container_name"`
+	RequestCpu    string `json:"request_cpu"`
+	LimitCpu      string `json:"limit_cpu"`
+	RequestMemory string `json:"request_memory"`
+	LimitMemory   string `json:"limit_memory"`
+}
+
+func UpdateResources(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	group := c.Param("group")
+	kind := c.Param("kind")
+	version := c.Param("version")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var info resourceInfo
+
+	if err := c.ShouldBindJSON(&info); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	patchData, err := generateResourcePatch(kind, info)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	patchJSON := utils.ToJSON(patchData)
+	var item interface{}
+	err = kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).Name(name).
+		Patch(&item, types.StrategicMergePatchType, patchJSON).Error
+	amis.WriteJsonErrorOrOK(c, err)
+}
+
+// 生成资源patch数据
+func generateResourcePatch(kind string, info resourceInfo) (map[string]interface{}, error) {
+	// 获取资源路径
+	paths, err := getResourcePaths(kind)
+	if err != nil {
+		return nil, err
+	}
+
+	// 动态构造 patch 数据
+	patch := make(map[string]interface{})
+	current := patch
+
+	// 按层级动态生成嵌套结构
+	for _, path := range paths {
+		if _, exists := current[path]; !exists {
+			current[path] = make(map[string]interface{})
+		}
+		current = current[path].(map[string]interface{})
+	}
+
+	// 构造资源请求和限制
+	resources := make(map[string]interface{})
+
+	// 设置请求资源
+	requests := make(map[string]string)
+	if info.RequestCpu != "" {
+		requests["cpu"] = info.RequestCpu
+	}
+	if info.RequestMemory != "" {
+		requests["memory"] = info.RequestMemory
+	}
+	if len(requests) > 0 {
+		resources["requests"] = requests
+	}
+
+	// 设置限制资源
+	limits := make(map[string]string)
+	if info.LimitCpu != "" {
+		limits["cpu"] = info.LimitCpu
+	}
+	if info.LimitMemory != "" {
+		limits["memory"] = info.LimitMemory
+	}
+	if len(limits) > 0 {
+		resources["limits"] = limits
+	}
+
+	// 构造容器数组
+	current["containers"] = []map[string]interface{}{
+		{
+			"name":      info.ContainerName,
+			"resources": resources,
+		},
+	}
+
+	return patch, nil
+}
+
 func ContainerInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")

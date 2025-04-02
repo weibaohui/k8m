@@ -753,12 +753,12 @@
                 },
                 {
                   "type": "button",
-                  "label": "扩缩容",
+                  "label": "调整副本数量",
                   "icon": "fas fa-plus-circle text-primary",
                   "level": "link",
                   "actionType": "dialog",
                   "dialog": {
-                    "title": "扩缩容",
+                    "title": "调整副本数量",
                     "body": {
                       "type": "form",
                       "api": {
@@ -774,6 +774,105 @@
                         }
                       ]
                     }
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-memory text-primary",
+                  "label": "调整资源限制",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "position": "left",
+                    "title": "编辑资源限制",
+                    "body": [
+                      {
+                        "type": "page",
+                        "body": [
+                          {
+                            "type": "panel",
+                            "title": "当前容器资源",
+                            "body": {
+                              "name": "spec.template.spec.containers",
+                              "type": "each",
+                              "items": {
+                                "type": "tpl",
+                                "tpl": "<div style='margin-bottom: 10px;'>容器：<strong class='text-green-500 font-black'>${name}</strong><br>CPU请求/限制：${resources.requests.cpu|default:'未设置'}/${resources.limits.cpu|default:'未设置'}<br>内存请求/限制：${resources.requests.memory|default:'未设置'}/${resources.limits.memory|default:'未设置'}</div>"
+                              }
+                            }
+                          },
+                          {
+                            "type": "form",
+                            "title": "更新资源限制",
+                            "name": "resource-edit-form",
+                            "api": "post:/k8s/$kind/group/$group/version/$version/update_resources/ns/$metadata.namespace/name/$metadata.name",
+                            "actions": [],
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "container_name",
+                                "label": "容器",
+                                "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.template.spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "service",
+                                "api": "/k8s/$kind/group/$group/version/$version/container_resources_info/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                                "body": [
+                                  {
+                                    "type": "group",
+                                    "body": [
+                                      {
+                                        "type": "panel",
+                                        "title": "CPU设置",
+                                        "body": [
+                                          {
+                                            "type": "input-text",
+                                            "name": "request_cpu",
+                                            "label": "CPU请求",
+                                            "placeholder": "如: 500m 或 0.5",
+                                            "description": "容器启动时请求的CPU资源"
+                                          },
+                                          {
+                                            "type": "input-text",
+                                            "name": "limit_cpu",
+                                            "label": "CPU限制",
+                                            "placeholder": "如: 1 或 1000m",
+                                            "description": "容器最大可使用的CPU资源"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "panel",
+                                        "title": "内存设置",
+                                        "body": [
+                                          {
+                                            "type": "input-text",
+                                            "name": "request_memory",
+                                            "label": "内存请求",
+                                            "placeholder": "如: 512Mi 或 1Gi",
+                                            "description": "容器启动时请求的内存资源"
+                                          },
+                                          {
+                                            "type": "input-text",
+                                            "name": "limit_memory",
+                                            "label": "内存限制",
+                                            "placeholder": "如: 1Gi 或 2Gi",
+                                            "description": "容器最大可使用的内存资源"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   }
                 }
               ]
