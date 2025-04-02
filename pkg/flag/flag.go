@@ -7,8 +7,10 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/klog/v2"
 )
@@ -34,6 +36,7 @@ type Config struct {
 	KubectlShellImage string // kubectlShell 镜像
 	SqlitePath        string // sqlite 数据库路径
 	AnySelect         bool   // 是否开启任意选择，默认开启
+	PrintConfig       bool   // 是否打印配置信息
 }
 
 func Init() *Config {
@@ -41,6 +44,10 @@ func Init() *Config {
 		config = &Config{}
 		loadEnv()
 		config.InitFlags()
+		// 根据PrintConfig决定是否打印配置信息
+		if config.PrintConfig {
+			klog.Infof("已开启配置信息打印选项.%s:\n %+v\n%s\n", color.RedString("生产环境请务必关闭"), utils.ToJSON(config), color.RedString("生产环境请务必关闭"))
+		}
 	})
 	return config
 }
@@ -107,6 +114,9 @@ func (c *Config) InitFlags() {
 	// 默认开启任意选择
 	defaultAnySelect := getEnvAsBool("ANY_SELECT", true)
 
+	// 默认不打印配置
+	defaultPrintConfig := getEnvAsBool("PRINT_CONFIG", false)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -124,6 +134,7 @@ func (c *Config) InitFlags() {
 	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认启用")
 	pflag.IntVarP(&c.MCPServerPort, "mcp-server-port", "s", defaultMCPServerPort, "MCP Server 监听端口，默认3619")
 	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
+	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")
 
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
