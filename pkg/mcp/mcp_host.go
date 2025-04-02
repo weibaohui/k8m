@@ -203,6 +203,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 			role = roleVal
 		}
 
+		//执行时携带用户名、角色信息
 		newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
 			constants.JwtUserName: username,
 			constants.JwtUserRole: role,
