@@ -8,15 +8,13 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/metadata"
-	"k8s.io/klog/v2"
 )
 
 func Start(version string, port int) {
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
 		username := r.Header.Get(constants.JwtUserName)
 		role := r.Header.Get(constants.JwtUserRole)
-		klog.Infof("%s: %s", constants.JwtUserName, username)
-		klog.Infof("%s: %s", constants.JwtUserRole, role)
+		//发起mcp调用请求时注入用户名、角色信息
 		ctx = context.WithValue(ctx, constants.JwtUserName, username)
 		ctx = context.WithValue(ctx, constants.JwtUserRole, role)
 		return ctx
