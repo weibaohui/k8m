@@ -20,4 +20,8 @@ ADD reload.sh /app/reload.sh
 RUN chmod +x /app/reload.sh
 
 COPY --from=builder /app/k8m /app/k8m
+#k8m Server
+EXPOSE 3618
+#MCP Server
+EXPOSE 3619 
 ENTRYPOINT ["/app/reload.sh","k8m","/app"]
