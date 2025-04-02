@@ -17,6 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/client-go/rest"
@@ -198,8 +199,11 @@ func GPTShell(c *gin.Context) {
 							klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
 
 							// 使用合并后的ToolCalls执行操作
-							ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-							results := service.McpService().Host().ExecTools(ctx, mergedCalls)
+							username, role := amis.GetLoginUser(c)
+							klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
+							ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
+							ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
+							results := service.McpService().Host().ExecTools(ctxInst, mergedCalls)
 							cancel()
 							for _, r := range results {
 								outBuffer.Write([]byte(utils.ToJSON(r)))
