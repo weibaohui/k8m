@@ -18,7 +18,7 @@ func (m *mcpService) Init() {
 	if m.host == nil {
 		m.host = mcp.NewMCPHost()
 	}
-	m.run()
+	m.Start()
 }
 func (m *mcpService) Host() *mcp.MCPHost {
 	return m.host
@@ -86,7 +86,7 @@ func (m *mcpService) RemoveServer(server models.MCPServerConfig) {
 	}
 	m.host.RemoveServer(serverConfig)
 }
-func (m *mcpService) run() {
+func (m *mcpService) Start() {
 
 	var mcpServers []models.MCPServerConfig
 	err := dao.DB().Model(&models.MCPServerConfig{}).Find(&mcpServers).Error
