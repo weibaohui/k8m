@@ -11,6 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/klog"
 )
 
 func ImagePullSecretOptionList(c *gin.Context) {
@@ -504,6 +505,192 @@ func generateDynamicPatch(kind string, info imageInfo) (map[string]interface{}, 
 			"name":            info.ContainerName,
 			"image":           fmt.Sprintf("%s:%s", info.Image, info.Tag),
 			"imagePullPolicy": info.ImagePullPolicy,
+		},
+	}
+
+	return patch, nil
+}
+
+// 接口 获取容器健康检查信息
+func ContainerHealthChecksInfo(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	group := c.Param("group")
+	kind := c.Param("kind")
+	version := c.Param("version")
+	containerName := c.Param("container_name")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var item *unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).
+		Name(name).Get(&item).Error
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	healthChecks, err := getContainerHealthChecksByName(item, containerName)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonData(c, gin.H{
+		"container_name":  containerName,
+		"readiness_probe": healthChecks["readinessProbe"],
+		"liveness_probe":  healthChecks["livenessProbe"],
+	})
+}
+
+// 获取容器健康检查信息
+func getContainerHealthChecksByName(item *unstructured.Unstructured, containerName string) (map[string]interface{}, error) {
+	// 获取资源类型
+	kind := item.GetKind()
+
+	// 根据资源类型获取 containers 的路径
+	resourcePaths, err := getResourcePaths(kind)
+	if err != nil {
+		return nil, err
+	}
+	containersPath := append(resourcePaths, "containers")
+
+	// 获取嵌套字段
+	containers, found, err := unstructured.NestedSlice(item.Object, containersPath...)
+	if err != nil {
+		return nil, fmt.Errorf("error getting containers: %w", err)
+	}
+	if !found {
+		return nil, fmt.Errorf("containers field not found")
+	}
+
+	// 遍历 containers 列表
+	for _, container := range containers {
+		containerMap, ok := container.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("unexpected container format")
+		}
+
+		name, _, err := unstructured.NestedString(containerMap, "name")
+		if err != nil {
+			return nil, fmt.Errorf("error getting container name: %w", err)
+		}
+
+		if name == containerName {
+			result := make(map[string]interface{})
+
+			// 获取就绪检查
+			if readinessProbe, found, _ := unstructured.NestedMap(containerMap, "readinessProbe"); found {
+				result["readinessProbe"] = readinessProbe
+			}
+
+			// 获取存活检查
+			if livenessProbe, found, _ := unstructured.NestedMap(containerMap, "livenessProbe"); found {
+				result["livenessProbe"] = livenessProbe
+			}
+
+			return result, nil
+		}
+	}
+
+	return nil, fmt.Errorf("container with name %q not found", containerName)
+}
+
+// 健康检查配置结构体
+type HealthCheckInfo struct {
+	ContainerName  string                 `json:"container_name"`
+	LivenessType   string                 `json:"liveness_type"`
+	ReadinessType  string                 `json:"readiness_type"`
+	ReadinessProbe map[string]interface{} `json:"readiness_probe,omitempty"`
+	LivenessProbe  map[string]interface{} `json:"liveness_probe,omitempty"`
+}
+
+// 接口 更新容器健康检查
+func UpdateHealthChecks(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	group := c.Param("group")
+	kind := c.Param("kind")
+	version := c.Param("version")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var info HealthCheckInfo
+	if err := c.ShouldBindJSON(&info); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	patchData, err := generateHealthCheckPatch(kind, info)
+	klog.Info(patchData)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	patchJSON := utils.ToJSON(patchData)
+	var item interface{}
+	err = kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).Name(name).
+		Patch(&item, types.StrategicMergePatchType, patchJSON).Error // 指定 Patch 类型
+	amis.WriteJsonErrorOrOK(c, err)
+}
+
+// 生成健康检查的 patch 数据
+func generateHealthCheckPatch(kind string, info HealthCheckInfo) (map[string]interface{}, error) {
+	// 获取资源路径
+	paths, err := getResourcePaths(kind)
+	if err != nil {
+		return nil, err
+	}
+
+	// 动态构造 patch 数据
+	patch := make(map[string]interface{})
+	current := patch
+
+	// 按层级动态生成嵌套结构
+	for _, path := range paths {
+		if _, exists := current[path]; !exists {
+			current[path] = make(map[string]interface{})
+		}
+		current = current[path].(map[string]interface{})
+	}
+	// 判断健康检查类型
+	if info.LivenessType == "httpGet" {
+		info.LivenessProbe["exec"] = nil
+		info.LivenessProbe["tcpSocket"] = nil
+	} else if info.LivenessType == "exec" {
+		info.LivenessProbe["httpGet"] = nil
+		info.LivenessProbe["tcpSocket"] = nil
+	} else if info.LivenessType == "tcpSocket" {
+		info.LivenessProbe["httpGet"] = nil
+		info.LivenessProbe["exec"] = nil
+	} else {
+		info.LivenessProbe = nil
+	}
+	if info.ReadinessType == "httpGet" {
+		info.ReadinessProbe["exec"] = nil
+		info.ReadinessProbe["tcpSocket"] = nil
+	} else if info.ReadinessType == "exec" {
+		info.ReadinessProbe["httpGet"] = nil
+		info.ReadinessProbe["tcpSocket"] = nil
+	} else if info.ReadinessType == "tcpSocket" {
+		info.ReadinessProbe["httpGet"] = nil
+		info.ReadinessProbe["exec"] = nil
+	} else {
+		info.ReadinessProbe = nil
+	}
+
+	// 构造容器数组
+	current["containers"] = []map[string]interface{}{
+		{
+			"name":           info.ContainerName,
+			"livenessProbe":  info.LivenessProbe,
+			"readinessProbe": info.ReadinessProbe,
 		},
 	}
 
