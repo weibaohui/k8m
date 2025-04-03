@@ -143,6 +143,8 @@
                   "icon": "fas fa-user-shield  text-primary",
                   "actionType": "drawer",
                   "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
                     "title": "集群权限管理",
                     "size": "lg",
                     "body": [
