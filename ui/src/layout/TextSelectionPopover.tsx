@@ -19,7 +19,7 @@ const GlobalTextSelector: React.FC = () => {
         })
             .then(response => {
                 //@ts-ignore
-                setIsEnabled(response.data?.data === 'true' ?? false);
+                setIsEnabled(response.data?.data === 'true');
             })
             .catch(error => {
                 console.error('Error fetching AnySelect config:', error);
