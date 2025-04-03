@@ -110,7 +110,7 @@ func (m *MCPHost) SyncServerCapabilities(ctx context.Context, serverName string)
 	m.Resources[serverName] = resources
 	m.Prompts[serverName] = prompts
 	m.mutex.Unlock()
-
+	klog.V(6).Infof("同步服务器能力 [%s] 工具:%d 资源:%d 提示:%d", serverName, len(tools), len(resources), len(prompts))
 	return nil
 }
 
@@ -158,6 +158,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		constants.JwtUserName: username,
 		constants.JwtUserRole: role,
 	}))
+	klog.V(6).Infof("访问MCP 服务器 [%s:%s] 携带信息%s %s", serverName, config.URL, username, role)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new client for %s: %v", serverName, err)
 	}
@@ -167,7 +168,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		return nil, fmt.Errorf("failed to start new client for %s: %v", serverName, err)
 	}
 
-	// 初始化客户端
+	//  初始化客户端
 	initRequest := mcp.InitializeRequest{}
 	initRequest.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
 	initRequest.Params.ClientInfo = mcp.Implementation{
@@ -180,9 +181,11 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		newCli.Close()
 		return nil, fmt.Errorf("failed to initialize new client for %s: %v", serverName, err)
 	}
-	m.InitializeResults[serverName] = result
-	klog.V(6).Infof("创建客户端连接 server %s", serverName)
-
+	go func() {
+		m.mutex.Lock()
+		m.InitializeResults[serverName] = result
+		m.mutex.Unlock()
+	}()
 	return newCli, nil
 
 }
@@ -193,6 +196,9 @@ func (m *MCPHost) Close() {
 }
 
 func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
+	if len(m.Tools) == 0 {
+		return nil
+	}
 	// 从所有可用的MCP服务器收集工具列表
 	var allTools []openai.Tool
 	// 遍历所有服务器获取工具
