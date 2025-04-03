@@ -31,12 +31,14 @@ type LoginRequest struct {
 }
 
 // 生成 Token
-func generateToken(username string, roles []string) (string, error) {
+func generateToken(username string, roles []string, clusters []string) (string, error) {
 	role := constants.JwtUserRole
 	name := constants.JwtUserName
+	cst := constants.JwtClusters
 	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		name:  username,
 		role:  strings.Join(roles, ","),
+		cst:   strings.Join(clusters, ","),
 		"exp": time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
 	})
 	cfg := flag.Init()
@@ -75,7 +77,7 @@ func LoginByPassword(c *gin.Context) {
 			return
 		}
 		// Admin用户不需要2FA验证
-		token, _ := generateToken(req.Username, []string{models.RolePlatformAdmin})
+		token, _ := generateToken(req.Username, []string{models.RolePlatformAdmin}, []string{})
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {
@@ -133,7 +135,10 @@ func LoginByPassword(c *gin.Context) {
 				for _, ug := range ugList {
 					roles = append(roles, ug.Role)
 				}
-				token, _ := generateToken(v.Username, roles)
+
+				//查询用户对应的集群
+				clusters, _ := service.UserService().GetClusters(v.Username)
+				token, _ := generateToken(v.Username, roles, clusters)
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return
 			}
