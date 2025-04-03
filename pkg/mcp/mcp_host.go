@@ -23,7 +23,6 @@ type ServerConfig struct {
 
 // MCPHost MCP服务器管理器
 type MCPHost struct {
-	clients map[string]*client.SSEMCPClient
 	configs map[string]ServerConfig
 	mutex   sync.RWMutex
 	// 记录每个服务器的工具列表
@@ -46,7 +45,6 @@ type MCPServer struct {
 // NewMCPHost 创建新的MCP管理器
 func NewMCPHost() *MCPHost {
 	return &MCPHost{
-		clients:           make(map[string]*client.SSEMCPClient),
 		configs:           make(map[string]ServerConfig),
 		Tools:             make(map[string][]mcp.Tool),
 		Resources:         make(map[string][]mcp.Resource),
@@ -128,14 +126,45 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 		return fmt.Errorf("server is disabled: %s", serverName)
 	}
 
-	cli, err := client.NewSSEMCPClient(config.URL)
-	if err != nil {
-		return fmt.Errorf("failed to create client for %s: %v", serverName, err)
+	// 在锁外同步服务器能力
+	if err := m.SyncServerCapabilities(ctx, serverName); err != nil {
+		return fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
 	}
 
-	if err := cli.Start(ctx); err != nil {
-		cli.Close()
-		return fmt.Errorf("failed to start client for %s: %v", serverName, err)
+	return nil
+}
+
+// GetClient 获取指定服务器的客户端
+func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSEMCPClient, error) {
+
+	// 获取配置信息
+	config, exists := m.configs[serverName]
+	if !exists {
+		return nil, fmt.Errorf("server config not found: %s", serverName)
+	}
+
+	// 重新连接
+	username := ""
+	if usernameVal, ok := ctx.Value(constants.JwtUserName).(string); ok {
+		username = usernameVal
+	}
+	role := ""
+	if roleVal, ok := ctx.Value(constants.JwtUserRole).(string); ok {
+		role = roleVal
+	}
+
+	// 执行时携带用户名、角色信息
+	newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
+		constants.JwtUserName: username,
+		constants.JwtUserRole: role,
+	}))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new client for %s: %v", serverName, err)
+	}
+
+	if err = newCli.Start(ctx); err != nil {
+		newCli.Close()
+		return nil, fmt.Errorf("failed to start new client for %s: %v", serverName, err)
 	}
 
 	// 初始化客户端
@@ -145,112 +174,21 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 		Name:    "multi-server-client",
 		Version: "1.0.0",
 	}
-	result, err := cli.Initialize(ctx, initRequest)
-	if err != nil {
-		cli.Close()
-		return fmt.Errorf("failed to initialize client for %s: %v", serverName, err)
-	}
 
-	// 更新共享资源时加锁
-	m.mutex.Lock()
-	m.clients[serverName] = cli
+	result, err := newCli.Initialize(ctx, initRequest)
+	if err != nil {
+		newCli.Close()
+		return nil, fmt.Errorf("failed to initialize new client for %s: %v", serverName, err)
+	}
 	m.InitializeResults[serverName] = result
-	m.mutex.Unlock()
+	klog.V(6).Infof("创建客户端连接 server %s", serverName)
 
-	// 在锁外同步服务器能力
-	if err = m.SyncServerCapabilities(ctx, serverName); err != nil {
-		// 如果同步失败，需要清理资源
-		cli.Close()
-		return fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
-	}
+	return newCli, nil
 
-	return nil
-}
-
-// DisconnectServer 断开与指定服务器的连接
-func (m *MCPHost) DisconnectServer(serverName string) error {
-
-	if cli, exists := m.clients[serverName]; exists {
-		cli.Close()
-	}
-	return nil
-}
-
-// GetClient 获取指定服务器的客户端
-func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSEMCPClient, error) {
-	cli, exists := m.clients[serverName]
-	if !exists {
-		return nil, fmt.Errorf("client not found: %s", serverName)
-	}
-
-	// 先进行ping检测
-	err := cli.Ping(ctx)
-	if err != nil {
-
-		// 获取配置信息
-		config, exists := m.configs[serverName]
-		if !exists {
-			return nil, fmt.Errorf("server config not found: %s", serverName)
-		}
-
-		// 重新连接
-		username := ""
-		if usernameVal, ok := ctx.Value(constants.JwtUserName).(string); ok {
-			username = usernameVal
-		}
-		role := ""
-		if roleVal, ok := ctx.Value(constants.JwtUserRole).(string); ok {
-			role = roleVal
-		}
-
-		//执行时携带用户名、角色信息
-		newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
-			constants.JwtUserName: username,
-			constants.JwtUserRole: role,
-		}))
-		if err != nil {
-			return nil, fmt.Errorf("failed to create new client for %s: %v", serverName, err)
-		}
-
-		if err = newCli.Start(ctx); err != nil {
-			newCli.Close()
-			return nil, fmt.Errorf("failed to start new client for %s: %v", serverName, err)
-		}
-
-		// 初始化客户端
-		initRequest := mcp.InitializeRequest{}
-		initRequest.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
-		initRequest.Params.ClientInfo = mcp.Implementation{
-			Name:    "multi-server-client",
-			Version: "1.0.0",
-		}
-
-		result, err := newCli.Initialize(ctx, initRequest)
-		if err != nil {
-			newCli.Close()
-			return nil, fmt.Errorf("failed to initialize new client for %s: %v", serverName, err)
-		}
-
-		m.clients[serverName] = newCli
-		m.InitializeResults[serverName] = result
-		klog.V(6).Infof("创建客户端连接 server %s", serverName)
-
-		return newCli, nil
-	}
-	klog.V(6).Infof("ping success for server %s", serverName)
-	// ping成功，释放读锁并返回客户端
-	return cli, nil
 }
 
 // Close 关闭所有连接
 func (m *MCPHost) Close() {
-
-	for _, cli := range m.clients {
-		cli.Close()
-	}
-	m.mutex.Lock()
-	m.clients = make(map[string]*client.SSEMCPClient)
-	m.mutex.Unlock()
 
 }
 
@@ -277,10 +215,9 @@ func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 
 // GetTools 获取指定服务器的工具列表
 func (m *MCPHost) GetTools(ctx context.Context, serverName string) ([]mcp.Tool, error) {
-	cli, exists := m.clients[serverName]
-
-	if !exists {
-		return nil, fmt.Errorf("client not found: %s", serverName)
+	cli, err := m.GetClient(ctx, serverName)
+	if err != nil {
+		return nil, err
 	}
 
 	toolsRequest := mcp.ListToolsRequest{}
@@ -294,12 +231,10 @@ func (m *MCPHost) GetTools(ctx context.Context, serverName string) ([]mcp.Tool, 
 
 // GetResources 获取指定服务器的资源能力
 func (m *MCPHost) GetResources(ctx context.Context, serverName string) ([]mcp.Resource, error) {
-	cli, exists := m.clients[serverName]
-
-	if !exists {
-		return nil, fmt.Errorf("client not found: %s", serverName)
+	cli, err := m.GetClient(ctx, serverName)
+	if err != nil {
+		return nil, err
 	}
-
 	req := mcp.ListResourcesRequest{}
 	result, err := cli.ListResources(ctx, req)
 	if err != nil {
@@ -311,13 +246,10 @@ func (m *MCPHost) GetResources(ctx context.Context, serverName string) ([]mcp.Re
 
 // GetPrompts 获取指定服务器的提示能力
 func (m *MCPHost) GetPrompts(ctx context.Context, serverName string) ([]mcp.Prompt, error) {
-	// 获取客户端时加读锁
-	cli, exists := m.clients[serverName]
-
-	if !exists {
-		return nil, fmt.Errorf("client not found: %s", serverName)
+	cli, err := m.GetClient(ctx, serverName)
+	if err != nil {
+		return nil, err
 	}
-
 	req := mcp.ListPromptsRequest{}
 	result, err := cli.ListPrompts(ctx, req)
 	if err != nil {
@@ -329,8 +261,7 @@ func (m *MCPHost) GetPrompts(ctx context.Context, serverName string) ([]mcp.Prom
 
 func (m *MCPHost) RemoveServer(config ServerConfig) {
 	m.mutex.Lock()
-	// 断开与服务器的连接
-	_ = m.DisconnectServer(config.Name)
+
 	// 删除服务器配置
 	delete(m.configs, config.Name)
 	// 删除服务器的工具、资源和提示能力
