@@ -93,18 +93,21 @@ func Init() {
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
 		klog.Infof("启动MCP Server, 监听端口: %d", cfg.MCPServerPort)
 		mcp2.Start(Version, cfg.MCPServerPort)
+
 	}()
 
 	// 启动watch
 	go func() {
+		service.McpService().Init()
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
 			service.PVCService().Watch()
 			service.PVService().Watch()
 			service.IngressService().Watch()
+			service.McpService().Start()
 		})
-		service.McpService().Init()
+
 	}()
 
 }
