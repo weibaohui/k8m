@@ -23,6 +23,7 @@ on:
 
 env:
   DOCKERHUB_USERNAME: eryajf
+  ALIHUB_URL: registry.cn-hangzhou.aliyuncs.com
   ALIHUB_USERNAME: eryajf
   IMAGE_REPONAME: k8m
 
@@ -55,6 +56,14 @@ jobs:
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      # 镜像推送到 阿里云仓库
+      - name: Login to the Ali Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.ALIHUB_URL }}
+          username: ${{ env.ALIHUB_USERNAME }}
+          password: ${{ secrets.ALIHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v4
@@ -69,21 +78,5 @@ jobs:
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
             ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ steps.date.outputs.today }}
-
-      # 镜像推送到 阿里云仓库
-      - name: Login to the Ali Registry
-        uses: docker/login-action@v2
-        with:
-          registry: registry.cn-hangzhou.aliyuncs.com
-          username: ${{ env.ALIHUB_USERNAME }}
-          password: ${{ secrets.ALIHUB_TOKEN }}
-
-      - name: Build and push to Ali
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            registry.cn-hangzhou.aliyuncs.com/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
-            registry.cn-hangzhou.aliyuncs.com/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
+            ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
+            ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest

@@ -37,6 +37,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 #k8m Server
 EXPOSE 3618
 #MCP Server
-EXPOSE 3619 
+EXPOSE 3619
 
 CMD /app/k8m
