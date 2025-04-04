@@ -67,13 +67,15 @@ const Toolbar = () => {
             type: 'divider'
         },
         {
-            key: 'user-profile-login_settings',
+            key: "user_profile_login_settings",
             label: "登录设置",
+            icon: <i className="fa-solid fa-key"></i>,
             onClick: () => navigate('/user/profile/login_settings')
         },
         {
-            key: 'user-profile-my-clusters',
+            key: "user_profile_clusters",
             label: "集群权限",
+            icon: <i className="fa-solid fa-server"></i>,
             onClick: () => navigate('/user/profile/my_clusters')
         },
         {
