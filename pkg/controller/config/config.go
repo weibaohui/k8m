@@ -22,7 +22,8 @@ func Config(c *gin.Context) {
 }
 
 func GetConfig(c *gin.Context) {
-	config, err := service.ConfigService().GetConfig(c.Request.Context())
+	config, err := service.ConfigService().GetConfig()
+
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -36,7 +37,7 @@ func UpdateConfig(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	if err := service.ConfigService().UpdateConfig(c.Request.Context(), &config); err != nil {
+	if err := service.ConfigService().UpdateConfig(&config); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
