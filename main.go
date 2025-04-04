@@ -365,26 +365,32 @@ func main() {
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
 	{
-		// 2FA
-		mgm.POST("/user/2fa/generate/:id", user.Generate2FASecret)
-		mgm.POST("/user/2fa/disable/:id", user.Disable2FA)
-		mgm.POST("/user/2fa/enable/:id", user.Enable2FA)
 
 		mgm.GET("/custom/template/kind/list", template.ListKind)
 		mgm.GET("/custom/template/list", template.ListTemplate)
 		mgm.POST("/custom/template/save", template.SaveTemplate)
 		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
 
-		// user
-		mgm.GET("/user/list", user.List)
-		mgm.GET("/user/role", user.Role)
-		mgm.POST("/user/save", user.Save)
+		// user 平台管理员可操作
+		mgm.GET("/user/list", middleware.RolePlatformOnly(user.List))
+		mgm.GET("/user/role", middleware.RolePlatformOnly(user.Role))
+		mgm.POST("/user/save", middleware.RolePlatformOnly(user.Save))
 		mgm.POST("/user/delete/:ids", middleware.RolePlatformOnly(user.Delete))
-		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
+		mgm.POST("/user/update_psw/:id", middleware.RolePlatformOnly(user.UpdatePsw))
 		mgm.GET("/user/option_list", middleware.RolePlatformOnly(user.UserOptionList))
+		// 2FA 平台管理员可操作
+		mgm.POST("/user/2fa/generate/:id", middleware.RolePlatformOnly(user.Generate2FASecret))
+		mgm.POST("/user/2fa/disable/:id", middleware.RolePlatformOnly(user.Disable2FA))
+		mgm.POST("/user/2fa/enable/:id", middleware.RolePlatformOnly(user.Enable2FA))
 
-		// user profile
+		// user profile 用户自己操作
+		mgm.GET("/user/profile", profile.Profile)
 		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
+		mgm.POST("/user/profile/update_psw", profile.UpdatePsw)
+		// user profile 2FA 用户自己操作
+		mgm.POST("/user/2fa/generate", profile.Generate2FASecret)
+		mgm.POST("/user/2fa/disable", profile.Disable2FA)
+		mgm.POST("/user/2fa/enable", profile.Enable2FA)
 
 		// user_group
 		mgm.GET("/user_group/list", middleware.RolePlatformOnly(user.ListUserGroup))

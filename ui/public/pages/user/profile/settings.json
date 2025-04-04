@@ -1,200 +1,22 @@
 {
   "type": "page",
-  "title": "用户管理",
+  "title": "个人设置",
   "body": [
     {
       "type": "crud",
       "id": "detailCRUD",
       "name": "detailCRUD",
       "autoFillHeight": true,
-      "autoGenerateFilter": {
-        "columnsNum": 4,
-        "showBtnToolbar": false
-      },
-      "headerToolbar": [
-        {
-          "type": "button",
-          "icon": "fas fa-plus text-primary",
-          "actionType": "drawer",
-          "label": "新建用户",
-          "drawer": {
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "title": "新建用户  (ESC 关闭)",
-            "body": {
-              "type": "form",
-              "api": "post:/mgm/user/save",
-              "body": [
-                {
-                  "type": "input-text",
-                  "name": "username",
-                  "label": "用户名",
-                  "required": true,
-                  "placeholder": "请输入用户名",
-                  "validateOnChange": true,
-                  "validations": {
-                    "minLength": 3,
-                    "maxLength": 20
-                  },
-                  "validationErrors": {
-                    "minLength": "用户名至少 3 个字符",
-                    "maxLength": "用户名最多 20 个字符"
-                  }
-                },
-                {
-                  "label": "用户组",
-                  "type": "checkboxes",
-                  "name": "group_names",
-                  "inline": true,
-                  "multiple": true,
-                  "source": "/mgm/user_group/option_list"
-                }
-              ],
-              "submitText": "保存",
-              "resetText": "重置",
-              "messages": {
-                "saveSuccess": "保存成功",
-                "saveFailed": "保存失败"
-              },
-              "onEvent": {
-                "submitSucc": {
-                  "actions": [
-                    {
-                      "actionType": "reload",
-                      "componentId": "detailCRUD"
-                    },
-                    {
-                      "actionType": "closeDrawer"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        {
-          "type": "columns-toggler",
-          "align": "right",
-          "draggable": true,
-          "icon": "fas fa-cog",
-          "overlay": true,
-          "footerBtnSize": "sm"
-        },
-        {
-          "type": "tpl",
-          "tpl": "共${count}条",
-          "align": "right",
-          "visibleOn": "${count}"
-        },
-        {
-          "type": "columns-toggler",
-          "align": "left"
-        },
-        "reload",
-        "bulkActions"
-      ],
-      "loadDataOnce": false,
-      "syncLocation": false,
-      "initFetch": true,
-      "perPage": 10,
-      "bulkActions": [
-        {
-          "label": "批量删除",
-          "actionType": "ajax",
-          "confirmText": "确定要批量删除?",
-          "api": "/mgm/user/delete/${ids}"
-        }
-      ],
-      "footerToolbar": [
-        {
-          "type": "pagination",
-          "align": "right"
-        },
-        {
-          "type": "statistics",
-          "align": "right"
-        },
-        {
-          "type": "switch-per-page",
-          "align": "right"
-        }
-      ],
-      "api": "get:/mgm/user/list",
+      "api": "get:/mgm/user/profile",
       "columns": [
         {
           "type": "operation",
           "label": "操作",
-          "width": 120,
           "buttons": [
             {
               "type": "button",
-              "icon": "fas fa-edit text-primary",
               "actionType": "drawer",
-              "tooltip": "编辑用户",
-              "drawer": {
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "title": "编辑用户  (ESC 关闭)",
-                "body": {
-                  "type": "form",
-                  "api": "post:/mgm/user/save",
-                  "body": [
-                    {
-                      "type": "hidden",
-                      "name": "id"
-                    },
-                    {
-                      "type": "input-text",
-                      "name": "username",
-                      "label": "用户名",
-                      "required": true,
-                      "placeholder": "请输入用户名",
-                      "validateOnChange": true,
-                      "validations": {
-                        "minLength": 3,
-                        "maxLength": 20
-                      },
-                      "validationErrors": {
-                        "minLength": "用户名至少 3 个字符",
-                        "maxLength": "用户名最多 20 个字符"
-                      }
-                    },
-                    {
-                      "label": "用户组",
-                      "type": "checkboxes",
-                      "name": "group_names",
-                      "inline": true,
-                      "multiple": true,
-                      "source": "/mgm/user_group/option_list"
-                    }
-                  ],
-                  "submitText": "保存",
-                  "resetText": "重置",
-                  "messages": {
-                    "saveSuccess": "保存成功",
-                    "saveFailed": "保存失败"
-                  },
-                  "onEvent": {
-                    "submitSucc": {
-                      "actions": [
-                        {
-                          "actionType": "reload",
-                          "componentId": "detailCRUD"
-                        },
-                        {
-                          "actionType": "closeDrawer"
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "type": "button",
-              "icon": "fas fa-key text-primary",
-              "actionType": "drawer",
-              "tooltip": "修改密码",
+              "label": "修改密码",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
@@ -204,7 +26,7 @@
                   "body": [
                     {
                       "type": "passwordEditor",
-                      "api": "/mgm/user/update_psw/${id}"
+                      "api": "/mgm/user/profile/update_psw"
                     }
                   ],
                   "submitText": "保存",
@@ -218,7 +40,7 @@
                       "actions": [
                         {
                           "actionType": "reload",
-                          "componentId": "detailCRUD"
+                          "componentId": "profileCRUD"
                         },
                         {
                           "actionType": "closeDrawer"
@@ -226,14 +48,13 @@
                       ]
                     }
                   }
-                },
-                "actions": []
+                }
               }
             }
-          ],
-          "toggled": true
+            
+          ]
         },
-        {
+         {
           "name": "username",
           "label": "用户名",
           "type": "text",
@@ -349,6 +170,11 @@
           "name": "created_at",
           "label": "创建时间",
           "type": "datetime"
+        },
+         {
+          "name": "created_by",
+          "label": "创建人",
+          "type": "text"
         }
       ]
     }
