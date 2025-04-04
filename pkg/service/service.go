@@ -76,6 +76,10 @@ func AIService() *aiService {
 }
 
 func McpService() *mcpService {
-	
+
 	return localMcpService
+}
+
+func ConfigService() *configService {
+	return NewConfigService()
 }
