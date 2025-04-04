@@ -67,9 +67,9 @@ const Toolbar = () => {
             type: 'divider'
         },
         {
-            key: 'user-profile-settings',
-            label: "个人设置",
-            onClick: () => navigate('/user/profile/settings')
+            key: 'user-profile-login_settings',
+            label: "登录设置",
+            onClick: () => navigate('/user/profile/login_settings')
         },
         {
             key: 'user-profile-my-clusters',

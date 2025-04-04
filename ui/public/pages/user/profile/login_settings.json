@@ -1,6 +1,6 @@
 {
   "type": "page",
-  "title": "个人设置",
+  "title": "登录设置",
   "body": [
     {
       "type": "crud",
@@ -51,10 +51,9 @@
                 }
               }
             }
-            
           ]
         },
-         {
+        {
           "name": "username",
           "label": "用户名",
           "type": "text",
@@ -171,7 +170,7 @@
           "label": "创建时间",
           "type": "datetime"
         },
-         {
+        {
           "name": "created_by",
           "label": "创建人",
           "type": "text"

@@ -416,13 +416,13 @@ const items: () => MenuItem[] = () => {
             key: "user_profile",
             children: [
                 {
-                    label: "设置",
-                    icon: <i className="fa-solid fa-gear"></i>,
-                    key: "user_profile_settings",
-                    onClick: () => onMenuClick('/user/profile/settings')
+                    label: "登录设置",
+                    icon: <i className="fa-solid fa-key"></i>,
+                    key: "user_profile_login_settings",
+                    onClick: () => onMenuClick('/user/profile/login_settings')
                 },
                 {
-                    label: "我的集群",
+                    label: "集群权限",
                     icon: <i className="fa-solid fa-server"></i>,
                     key: "user_profile_clusters",
                     onClick: () => onMenuClick('/user/profile/my_clusters')

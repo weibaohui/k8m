@@ -1,6 +1,13 @@
 {
     "type": "page",
-    "title": "我的集群",
+    "title": "集群权限",
+    "remark": {
+        "body": "用户拥有的集群权限列表，如需增加权限，请联系平台管理员。",
+        "icon": "question-mark",
+        "placement": "right",
+        "trigger": "click",
+        "rootClose": true
+    },
     "body": [
         {
             "type": "crud",
