@@ -67,9 +67,14 @@ const Toolbar = () => {
             type: 'divider'
         },
         {
-            key: 'user-mgm',
-            label: "用户管理",
-            onClick: () => navigate('/user/user')
+            key: 'user-profile-settings',
+            label: "个人设置",
+            onClick: () => navigate('/user/profile/settings')
+        },
+        {
+            key: 'user-profile-my-clusters',
+            label: "集群权限",
+            onClick: () => navigate('/user/profile/my_clusters')
         },
         {
             key: 'divider-2',
