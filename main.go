@@ -382,6 +382,9 @@ func main() {
 		mgm.POST("/user/update_psw/:id", user.UpdatePsw)
 		mgm.GET("/user/option_list", middleware.RolePlatformOnly(user.UserOptionList))
 
+		// user profile
+		mgm.GET("/user/profile/cluster/permissions/list", user.ListUserPermissions)
+
 		// user_group
 		mgm.GET("/user_group/list", middleware.RolePlatformOnly(user.ListUserGroup))
 		mgm.POST("/user_group/save", middleware.RolePlatformOnly(user.SaveUserGroup))

@@ -1,0 +1,42 @@
+{
+    "type": "page",
+    "title": "我的集群",
+    "body": [
+        {
+            "type": "crud",
+            "id": "myClustersCRUD",
+            "name": "myClustersCRUD",
+            "autoFillHeight": true,
+            "api": "get:/mgm/user/profile/cluster/permissions/list",
+            "columns": [
+                {
+                    "name": "username",
+                    "label": "用户名"
+                },
+                {
+                    "name": "cluster",
+                    "label": "集群名称",
+                    "sortable": true
+                },
+                {
+                    "name": "role",
+                    "label": "权限",
+                    "type": "mapping",
+                    "map": {
+                        "cluster_admin": "集群管理员",
+                        "cluster_readonly": "集群只读"
+                    }
+                },
+                {
+                    "name": "created_at",
+                    "label": "授权时间",
+                    "type": "datetime"
+                },
+                {
+                    "name": "created_by",
+                    "label": "授权人"
+                }
+            ]
+        }
+    ]
+}
