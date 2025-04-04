@@ -390,6 +390,12 @@ const items: () => MenuItem[] = () => {
                 key: "platform_settings",
                 children: [
                     {
+                        label: "系统配置",
+                        icon: <i className="fa-solid fa-gear"></i>,
+                        key: "system_config",
+                        onClick: () => onMenuClick('/config/config')
+                    },
+                    {
                         label: "用户管理",
                         icon: <i className="fa-solid fa-users"></i>,
                         key: "user_management",
