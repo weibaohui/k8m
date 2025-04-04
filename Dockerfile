@@ -1,11 +1,3 @@
-FROM node:18-alpine  AS node-builder
-
-WORKDIR /app
-
-ADD ui .
-
-RUN npm i -g pnpm && pnpm install && pnpm build
-
 FROM golang:1.24-alpine  AS golang-builder
 
 ENV GOPROXY="https://goproxy.io"
@@ -13,7 +5,6 @@ ENV GOPROXY="https://goproxy.io"
 WORKDIR /app
 
 ADD . .
-COPY --from=node-builder /app/dist ./ui/dist
 
 RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories \
     && apk upgrade && apk add --no-cache --virtual .build-deps \
