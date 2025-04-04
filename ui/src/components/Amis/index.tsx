@@ -115,10 +115,7 @@ const Amis = ({ schema }: Props) => {
                 {},
                 {
                     theme: 'cxd',
-                    updateLocation: (to: unknown, replace: unknown) => {
-                        console.log(to)
-                        console.log(replace)
-                    },
+                    updateLocation: () => { },
                     fetcher,
                     isCancel: value => axios.isCancel(value),
                 })
