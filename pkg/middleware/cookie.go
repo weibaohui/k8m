@@ -59,8 +59,10 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		//注意，这里的role，可能是一个数组，需要处理一下
 		role := claims[constants.JwtUserRole].(string)
 		cst := claims[constants.JwtClusters].(string)
+		roles := strings.Split(role, ",")
 		csts := strings.Split(cst, ",")
 		// klog.V(6).Infof("username=%s", username)
 
@@ -71,7 +73,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		if err != nil {
 			// 不存在cookie
 
-			if role == models.RolePlatformAdmin {
+			if slices.Contains(roles, models.RolePlatformAdmin) {
 				// 平台管理员，选一个
 				clusterID = service.ClusterService().FirstClusterID()
 			} else {
@@ -85,7 +87,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			if clusterID == "" {
 				// 没有集群，说明不是管理员，也没有权限，那么就不要访问了
 				c.JSON(512, gin.H{
-					"msg": "no cluster",
+					"msg": "无可用集群",
 				})
 				c.Abort()
 				return
@@ -117,18 +119,30 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		}
 
 		// 如果sc为空，说明没有选择，不能直接使用
-		// 或者sc不在权限列表中
-		// 如果设置了sc，但是不能用
-		// 或者设置了sc，但是不在权限列表中（平台管理员为空，要排除）
-		// klog.V(6).Infof("csts=%v", csts)
-		// klog.V(6).Infof("sc=%v", sc)
-		if (sc != "" && !service.ClusterService().IsConnected(sc)) || (sc == "") || (sc != "" && role != models.RolePlatformAdmin && !slices.Contains(csts, sc)) {
-
-			//512 集群选择的跳转
+		if sc == "" {
 			c.JSON(512, gin.H{
-				"msg": sc,
+				"msg": "请选择集群",
 			})
 			c.Abort()
+			return
+		}
+
+		// 如果设置了sc，但是集群未连接
+		if !service.ClusterService().IsConnected(sc) {
+			c.JSON(512, gin.H{
+				"msg": "集群未连接，请先连接: " + sc,
+			})
+			c.Abort()
+			return
+		}
+
+		// 如果不是平台管理员，检查是否有权限访问该集群
+		if !slices.Contains(roles, models.RolePlatformAdmin) && !slices.Contains(csts, sc) {
+			c.JSON(512, gin.H{
+				"msg": "无权限访问集群: " + sc,
+			})
+			c.Abort()
+			return
 		}
 		// 继续处理下一个中间件或最终路由
 		c.Next()
