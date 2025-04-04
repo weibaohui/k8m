@@ -390,20 +390,20 @@ const items: () => MenuItem[] = () => {
                 key: "platform_settings",
                 children: [
                     {
-                        label: "系统配置",
-                        icon: <i className="fa-solid fa-gear"></i>,
+                        label: "参数设置",
+                        icon: <i className="fa-solid fa-sliders"></i>,
                         key: "system_config",
                         onClick: () => onMenuClick('/config/config')
                     },
                     {
                         label: "用户管理",
-                        icon: <i className="fa-solid fa-users"></i>,
+                        icon: <i className="fa-solid fa-user-gear"></i>,
                         key: "user_management",
                         onClick: () => onMenuClick('/user/user')
                     },
                     {
                         label: "用户组管理",
-                        icon: <i className="fa-solid fa-user-group"></i>,
+                        icon: <i className="fa-solid fa-users-gear"></i>,
                         key: "user_group_management",
                         onClick: () => onMenuClick('/user/user_group')
                     },
