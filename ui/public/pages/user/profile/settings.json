@@ -75,7 +75,7 @@
         },
         {
           "name": "two_fa_enabled",
-          "label": "2FA状态",
+          "label": "2步验证",
           "type": "container",
           "body": [
             {
@@ -87,8 +87,8 @@
               "actionType": "ajax",
               "label": "关闭",
               "level": "link",
-              "confirmText": "确定要关闭2FA验证吗？关闭后将不再需要验证码登录。",
-              "api": "post:/mgm/user/2fa/disable/${id}",
+              "confirmText": "确定要关闭2步验证吗？关闭后将不再需要验证码登录。",
+              "api": "post:/mgm/user/profile/2fa/disable",
               "visibleOn": "two_fa_enabled===true",
               "onEvent": {
                 "success": {
@@ -109,11 +109,11 @@
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "title": "2FA验证  (ESC 关闭)",
+                "title": "2步验证  (ESC 关闭)",
                 "body": {
                   "type": "form",
-                  "api": "post:/mgm/user/2fa/enable/${id}",
-                  "initApi": "post:/mgm/user/2fa/generate/${id}",
+                  "api": "post:/mgm/user/profile/2fa/enable",
+                  "initApi": "post:/mgm/user/profile/2fa/generate",
                   "body": [
                     {
                       "name": "qr-code",
@@ -143,10 +143,10 @@
                       "tpl": "<div class='alert alert-info'><p><strong>绑定说明：</strong></p><ol><li>请先下载并安装支持的身份验证器应用：<ul><li>Google Authenticator (<a href='https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2' target='_blank'>Android</a> / <a href='https://apps.apple.com/app/google-authenticator/id388497605' target='_blank'>iOS</a>)</li><li>Microsoft Authenticator (<a href='https://play.google.com/store/apps/details?id=com.azure.authenticator' target='_blank'>Android</a> / <a href='https://apps.apple.com/app/microsoft-authenticator/id983156458' target='_blank'>iOS</a>)</li><li>其他支持TOTP协议的身份验证器应用也可使用，如Authy、1Password等</li></ul></li><li>打开验证器应用，点击添加账号或扫描二维码</li><li>使用验证器扫描上方显示的二维码</li><li>等待验证器生成6位数验证码</li><li>将验证码输入上方输入框进行验证</li><li>验证成功后，每次登录时都需要输入验证器生成的验证码</li></ol><p><strong>注意：</strong>请妥善保管验证器，如果手机丢失或更换设备，将无法登录系统。建议备份验证器的恢复码。</p></div>"
                     }
                   ],
-                  "submitText": "验证",
+                  "submitText": "绑定",
                   "messages": {
-                    "saveSuccess": "验证成功",
-                    "saveFailed": "验证失败"
+                    "saveSuccess": "绑定成功",
+                    "saveFailed": "绑定失败"
                   },
                   "onEvent": {
                     "submitSucc": {

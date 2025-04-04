@@ -413,7 +413,7 @@ const items: () => MenuItem[] = () => {
         {
             label: "个人中心",
             icon: <i className="fa-solid fa-user"></i>,
-            key: "user_profile_settings",
+            key: "user_profile",
             children: [
                 {
                     label: "设置",

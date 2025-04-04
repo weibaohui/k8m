@@ -21,12 +21,6 @@ func Disable2FA(c *gin.Context) {
 	user.Username = params.UserName
 	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
-	// 检查是否已启用2FA
-	if !user.TwoFAEnabled {
-		amis.WriteJsonError(c, fmt.Errorf("2FA未启用"))
-		return
-	}
-
 	// 清除2FA相关信息
 	user.TwoFAEnabled = false
 	user.TwoFASecret = ""
@@ -54,6 +48,20 @@ func Generate2FASecret(c *gin.Context) {
 	user := &models.User{}
 	user.Username = params.UserName
 	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+
+	err := dao.DB().
+		Where("username=?", user.Username).
+		First(user).Error
+
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("用户不存在"))
+		return
+	}
+	// 检查是否已启用2FA
+	if user.TwoFAEnabled {
+		amis.WriteJsonError(c, fmt.Errorf("2步验证已绑定，如需重新绑定，请先关闭。"))
+		return
+	}
 
 	// 生成TOTP密钥和二维码URL
 	secret, qrURL, err := totp.GenerateSecret(user.Username)
