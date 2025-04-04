@@ -56,16 +56,7 @@
         {
           "name": "username",
           "label": "用户名",
-          "type": "text",
-          "width": "180px",
-          "sortable": true,
-          "searchable": {
-            "type": "input-text",
-            "name": "username",
-            "clearable": true,
-            "label": "用户名",
-            "placeholder": "输入用户名"
-          }
+          "type": "text"
         },
         {
           "label": "用户组",
@@ -169,11 +160,6 @@
           "name": "created_at",
           "label": "创建时间",
           "type": "datetime"
-        },
-        {
-          "name": "created_by",
-          "label": "创建人",
-          "type": "text"
         }
       ]
     }
