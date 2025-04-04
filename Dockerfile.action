@@ -1,0 +1,20 @@
+FROM alpine:3.21
+
+ARG PLATFORM="linux/amd64"
+
+WORKDIR /app
+
+ENV TZ=Asia/Shanghai
+
+COPY bin/k8m-v1.0.0-${PLATFORM/\//-} k8m
+
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk upgrade && apk add --no-cache curl bash inotify-tools kubectl alpine-conf busybox-extras sqlite tzdata \
+    && apk del alpine-conf && rm -rf /var/cache/* && chmod +x k8m
+
+#k8m Server
+EXPOSE 3618
+#MCP Server
+EXPOSE 3619
+
+CMD /app/k8m
