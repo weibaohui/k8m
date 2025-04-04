@@ -542,4 +542,4 @@ MCP程序使用3619端口。NodePort使用31919端口。
 
 ## 微信群
 
-![img](images/wechat.jpg)
+![输入图片说明](https://foruda.gitee.com/images/1743782774634886044/96829f36_77493.png "屏幕截图")
