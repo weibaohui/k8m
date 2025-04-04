@@ -48,8 +48,7 @@ jobs:
       run: |
         cd ui
         pnpm install
-    - name: 编译前端
-      run: pnpm build
+        pnpm build
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v4
