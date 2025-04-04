@@ -374,22 +374,20 @@ func main() {
 		// 获取当前登录用户的角色，登录即可
 		mgm.GET("/user/role", user.Role)
 
-		// user 平台管理员可操作
+		// user 平台管理员可操作，管理用户
 		mgm.GET("/user/list", middleware.RolePlatformOnly(user.List))
 		mgm.POST("/user/save", middleware.RolePlatformOnly(user.Save))
 		mgm.POST("/user/delete/:ids", middleware.RolePlatformOnly(user.Delete))
 		mgm.POST("/user/update_psw/:id", middleware.RolePlatformOnly(user.UpdatePsw))
 		mgm.GET("/user/option_list", middleware.RolePlatformOnly(user.UserOptionList))
-		// 2FA 平台管理员可操作
-		mgm.POST("/user/2fa/generate/:id", middleware.RolePlatformOnly(user.Generate2FASecret))
+		// 2FA 平台管理员可操作，管理用户
 		mgm.POST("/user/2fa/disable/:id", middleware.RolePlatformOnly(user.Disable2FA))
-		mgm.POST("/user/2fa/enable/:id", middleware.RolePlatformOnly(user.Enable2FA))
 
-		// user profile 用户自己操作
+		// user profile 用户自助操作
 		mgm.GET("/user/profile", profile.Profile)
 		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
 		mgm.POST("/user/profile/update_psw", profile.UpdatePsw)
-		// user profile 2FA 用户自己操作
+		// user profile 2FA 用户自助操作
 		mgm.POST("/user/profile/2fa/generate", profile.Generate2FASecret)
 		mgm.POST("/user/profile/2fa/disable", profile.Disable2FA)
 		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
