@@ -44,12 +44,15 @@ func Init() *Config {
 		config = &Config{}
 		loadEnv()
 		config.InitFlags()
-		// 根据PrintConfig决定是否打印配置信息
-		if config.PrintConfig {
-			klog.Infof("已开启配置信息打印选项.%s:\n %+v\n%s\n", color.RedString("生产环境请务必关闭"), utils.ToJSON(config), color.RedString("生产环境请务必关闭"))
-		}
+
 	})
 	return config
+}
+func (c *Config) ShowConfigInfo() {
+	// 根据PrintConfig决定是否打印配置信息
+	if c.PrintConfig {
+		klog.Infof("已开启配置信息打印选项.%s:\n %+v\n%s\n", color.RedString("生产环境请务必关闭"), utils.ToJSON(config), color.RedString("生产环境请务必关闭"))
+	}
 }
 func loadEnv() {
 	env := os.Getenv("K8M_ENV")
@@ -108,7 +111,7 @@ func (c *Config) InitFlags() {
 	// sqlite数据库文件路径
 	defaultSqlitePath := getEnv("SQLITE_PATH", "./data/k8m.db")
 
-	//MCPServerPort
+	// MCPServerPort
 	defaultMCPServerPort := getEnvAsInt("MCP_SERVER_PORT", 3619)
 
 	// 默认开启任意选择
