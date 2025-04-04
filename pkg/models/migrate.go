@@ -20,6 +20,7 @@ func init() {
 	_ = FixClusterName()
 	_ = AddInnerMCPServer()
 	_ = FixRoleName()
+	_ = InitConfigTable()
 }
 func AutoMigrate() error {
 
@@ -87,6 +88,29 @@ func AddInnerMCPServer() error {
 			return err
 		}
 		klog.V(4).Info("成功添加内部MCP服务器配置")
+	}
+
+	return nil
+}
+func InitConfigTable() error {
+	var count int64
+	if err := dao.DB().Model(&Config{}).Count(&count).Error; err != nil {
+		klog.Errorf("查询配置表: %v", err)
+		return err
+	}
+	if count == 0 {
+		config := &Config{
+			AnySelect:   true,
+			PrintConfig: false,
+			LogV:        2,
+			Port:        3618,
+			Debug:       false,
+		}
+		if err := dao.DB().Create(config).Error; err != nil {
+			klog.Errorf("初始化配置表失败: %v", err)
+			return err
+		}
+		klog.V(4).Info("成功初始化配置表")
 	}
 
 	return nil
