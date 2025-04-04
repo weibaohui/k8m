@@ -56,12 +56,14 @@ jobs:
         go-version-file: 'go.mod'
         cache-dependency-path: 'go.sum'
 
+    - name: Install UPX
+      uses: crazy-max/ghaction-upx@v3
+      with:
+        install-only: true
+
     - name: 安装依赖
       run: |
-        apt install -y make wget
-        wget https://github.com/upx/upx/releases/download/v5.0.0/upx-5.0.0-amd64_linux.tar.xz
-        tar xf upx-5.0.0-amd64_linux.tar.xz && mv upx-5.0.0-amd64_linux /usr/local/bin/upx
-        chmod +x /usr/local/bin/upx && make build-linux
+        make build-linux
 
     # - name: Inject slug/short variables
     #   uses: rlespinasse/github-slug-action@v4
