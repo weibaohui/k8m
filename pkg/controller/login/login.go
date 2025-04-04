@@ -124,7 +124,7 @@ func LoginByPassword(c *gin.Context) {
 					}
 				}
 				var ugList []models.UserGroup
-				err = dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(v.GroupNames, ",")).Distinct("role").First(&ugList).Error
+				err = dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(v.GroupNames, ",")).Distinct("role").Find(&ugList).Error
 				if err != nil {
 					c.JSON(http.StatusUnauthorized, errorInfo)
 					return

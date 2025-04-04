@@ -22,17 +22,10 @@ const Toolbar = () => {
         if (token) {
             try {
                 const decoded = jwtDecode<DecodedToken>(token);
-
-
-                // 角色映射表
-                const roleMap: Record<string, string> = {
-                    'guest': '普通用户',
-                    'platform_admin': '平台管理员'
-                };
-
+                //role 可能为guest,platform_admin，也可能为guset
                 setUserInfo({
                     username: decoded.username || '',
-                    role: roleMap[decoded.role] || '普通用户'
+                    role: decoded.role.includes('platform_admin') ? '平台管理员' : '普通用户'
                 });
             } catch (error) {
                 console.error('Failed to decode token:', error);

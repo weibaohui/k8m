@@ -25,17 +25,12 @@ func GetLoginUser(c *gin.Context) (string, string) {
 	role := c.GetString(constants.JwtUserRole)
 
 	roles := strings.Split(role, ",")
-	// 优先检查平台管理员
+	role = models.RoleGuest
+
+	// 检查是否平台管理员
 	if slice.Contain(roles, models.RolePlatformAdmin) {
 		role = models.RolePlatformAdmin
-	} else if slice.Contain(roles, models.RoleClusterAdmin) {
-		// 其次检查集群管理员
-		role = models.RoleClusterAdmin
-	} else {
-		// 默认设为只读
-		role = models.RoleClusterReadonly
 	}
-
 	return user, role
 }
 
