@@ -21,7 +21,7 @@ on:
       tags:
         description: 'Test scenario tags'
 
-environment:
+env:
   DOCKERHUB_USERNAME: eryajf
   ALIHUB_USERNAME: eryajf
   IMAGE_REPONAME: k8m
