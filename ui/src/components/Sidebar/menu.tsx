@@ -383,18 +383,18 @@ const items: () => MenuItem[] = () => {
                 },
             ],
         },
-        {
-            label: "平台设置",
-            icon: <i className="fa-solid fa-wrench"></i>,
-            key: "platform_settings",
-            children: [
-                {
-                    label: "用户管理",
-                    icon: <i className="fa-solid fa-users"></i>,
-                    key: "user_management",
-                    onClick: () => onMenuClick('/user/user')
-                },
-                ...(userRole === 'platform_admin' ? [
+        ...(userRole === 'platform_admin' ? [
+            {
+                label: "平台设置",
+                icon: <i className="fa-solid fa-wrench"></i>,
+                key: "platform_settings",
+                children: [
+                    {
+                        label: "用户管理",
+                        icon: <i className="fa-solid fa-users"></i>,
+                        key: "user_management",
+                        onClick: () => onMenuClick('/user/user')
+                    },
                     {
                         label: "用户组管理",
                         icon: <i className="fa-solid fa-user-group"></i>,
@@ -407,9 +407,10 @@ const items: () => MenuItem[] = () => {
                         key: "mcp_management",
                         onClick: () => onMenuClick('/mcp/mcp')
                     }
-                ] : []),
-            ],
-        },
+                ],
+            },
+        ] : []),
+
         {
             label: "个人中心",
             icon: <i className="fa-solid fa-user"></i>,
