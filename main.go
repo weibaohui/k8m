@@ -59,6 +59,13 @@ var ApiUrl string
 func Init() {
 	// 初始化配置
 	cfg := flag.Init()
+	// 从数据库中更新配置
+	err := service.ConfigService().UpdateFlagFromDBConfig()
+	if err != nil {
+		klog.Errorf("加载数据库内配置信息失败 error: %v", err)
+	}
+
+	cfg.ShowConfigInfo()
 
 	// 打印版本和 Git commit 信息
 	klog.V(2).Infof("版本: %s\n", Version)
@@ -433,6 +440,8 @@ func main() {
 
 		// config
 		mgm.GET("/config/:key", config.Config)
+		mgm.GET("/config/all", middleware.RolePlatformOnly(config.GetConfig))
+		mgm.POST("/config/update", middleware.RolePlatformOnly(config.UpdateConfig))
 
 	}
 
