@@ -37,6 +37,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/template"
 	"github.com/weibaohui/k8m/pkg/controller/user"
+	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
 	mcp2 "github.com/weibaohui/k8m/pkg/mcp"
 	"github.com/weibaohui/k8m/pkg/middleware"
@@ -383,7 +384,7 @@ func main() {
 		mgm.GET("/user/option_list", middleware.RolePlatformOnly(user.UserOptionList))
 
 		// user profile
-		mgm.GET("/user/profile/cluster/permissions/list", user.ListUserPermissions)
+		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
 
 		// user_group
 		mgm.GET("/user_group/list", middleware.RolePlatformOnly(user.ListUserGroup))
