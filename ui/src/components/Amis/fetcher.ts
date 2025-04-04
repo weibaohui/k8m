@@ -28,6 +28,9 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
                 message.error(`集群【${cluster}】当前处于非连接状态。请先连接或切换其他集群`)
                 window.location.href = '/#/cluster/cluster_all';
             }
+            if (error.response && error.response.status === 403) {
+                message.error(`权限不足，请联系管理员`)
+            }
             return Promise.reject(error); // 继续处理其他错误
         }
     );
