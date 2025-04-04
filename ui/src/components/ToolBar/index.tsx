@@ -43,7 +43,7 @@ const Toolbar = () => {
             key: 'username',
             label: (
                 <div style={{ padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>角色</span>
+                    <span>{userInfo.username}</span>
                     <span style={{
                         backgroundColor: '#f0f0f0',
                         padding: '2px 8px',
@@ -91,7 +91,7 @@ const Toolbar = () => {
                             <Avatar size="small" style={{ backgroundColor: '#1677ff' }} >
                                 <UserOutlined style={{ fontSize: 14 }} />
                             </Avatar>
-                            <span className='ml-1'>{userInfo.username}</span>
+                            {/* <span className='ml-1'>{userInfo.username}</span> */}
                         </span>
                     </Dropdown>
                 </li>
