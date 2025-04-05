@@ -3,6 +3,8 @@ package middleware
 import (
 	"net/http"
 	"reflect"
+	"slices"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -24,7 +26,8 @@ func RolePlatformOnly(handler interface{}) gin.HandlerFunc {
 		// requiredRole := handlerType.Name()
 
 		// 权限检查
-		if role != models.RolePlatformAdmin {
+		roles := strings.Split(role, ",")
+		if !slices.Contains(roles, models.RolePlatformAdmin) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Access Denied for your role"})
 			c.Abort()
 			return
