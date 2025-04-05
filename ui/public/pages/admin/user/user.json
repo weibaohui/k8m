@@ -229,6 +229,90 @@
                 },
                 "actions": []
               }
+            },
+            {
+              "type": "button",
+              "tooltip": "授权",
+              "icon": "fas fa-user-shield  text-primary",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "集群权限管理",
+                "size": "lg",
+                "body": [
+                  {
+                    "type": "crud",
+                    "api": "get:/admin/cluster_permissions/user/$username/list",
+                    "autoFillHeight": true,
+                    "autoGenerateFilter": {
+                      "columnsNum": 4,
+                      "showBtnToolbar": false
+                    },
+                    "headerToolbar": [
+                      {
+                        "type": "columns-toggler",
+                        "align": "right",
+                        "draggable": true,
+                        "icon": "fas fa-cog",
+                        "overlay": true,
+                        "footerBtnSize": "sm"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "共${count}条",
+                        "align": "right",
+                        "visibleOn": "${count}"
+                      },
+                      {
+                        "type": "columns-toggler",
+                        "align": "left"
+                      },
+                      "reload",
+                      "bulkActions"
+                    ],
+                    "loadDataOnce": false,
+                    "syncLocation": false,
+                    "initFetch": true,
+                    "perPage": 10,
+                    "bulkActions": [
+                      {
+                        "label": "批量删除",
+                        "actionType": "ajax",
+                        "confirmText": "确定要批量删除?",
+                        "api": "post:/admin/cluster_permissions/${ids}"
+                      }
+                    ],
+                    "columns": [
+                      {
+                        "name": "username",
+                        "label": "用户名"
+                      },
+                      {
+                        "name": "cluster",
+                        "label": "集群"
+                      },
+                      {
+                        "name": "role",
+                        "label": "角色",
+                        "type": "mapping",
+                        "map": {
+                          "cluster_admin": "集群管理员",
+                          "cluster_readonly": "集群只读",
+                          "cluster_pod_exec": "Exec权限"
+                        }
+                      },
+                      {
+                        "name": "namespaces",
+                        "label": "限制命名空间",
+                        "type": "tpl",
+                        "tpl": "${namespaces | split:',')}",
+                        "placeholder": "-"
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ],
           "toggled": true
