@@ -69,7 +69,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: workspace
-        path: .  # 上传当前工作目录全部内容
+        path: |
+          .
+          !ui/node_modules
 
   buildImage:
     needs: buildx
@@ -88,8 +90,7 @@ jobs:
       with:
         name: workspace
         path: .  # 覆盖当前目录
-    - name: Verify files
-      run: cat output.txt  # 此时可读取 job1 生成的文件
+
     - name: print env
       run: |
         env
