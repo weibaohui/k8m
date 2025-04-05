@@ -17,80 +17,94 @@ func OptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	var list []map[string]string
-	// 先判断kubeconfig中是否限制了namespace
-	// 1、如果限制了，那么从cluster 实例中取
-	// 2、如果没有限制，那么从集群中取
+	// 处理集群中有限制namespace的情况
+	if list, ok := handleRestrictedNamespace(selectedCluster); ok {
+		sortAndRespond(c, list)
+		return
+	}
+
+	// 处理平台管理员的情况
+	if list, ok := handlePlatformAdmin(c, ctx, selectedCluster); ok {
+		sortAndRespond(c, list)
+		return
+	}
+
+	// 处理普通用户的情况
+	if list, ok := handleNormalUser(c, selectedCluster); ok {
+		sortAndRespond(c, list)
+		return
+	}
+
+}
+
+func handleRestrictedNamespace(selectedCluster string) ([]map[string]string, bool) {
 	cluster := service.ClusterService().GetClusterByID(selectedCluster)
 	if cluster != nil && cluster.Namespace != "" {
-		list = append(list, map[string]string{
+		list := []map[string]string{{
 			"label": cluster.Namespace,
 			"value": cluster.Namespace,
-		})
-		amis.WriteJsonData(c, gin.H{
-			"options": list,
-		})
-		return
+		}}
+		return list, true
 	}
+	return nil, false
+}
 
-	// 没有指定的情况
-
+func handlePlatformAdmin(c *gin.Context, ctx context.Context, selectedCluster string) ([]map[string]string, bool) {
 	if amis.IsCurrentUserPlatformAdmin(c) {
-		// 如果是平台管理员，则看到集群下的全部命名空间
 		nsList, err := getClusterNsList(ctx, selectedCluster)
 		if err != nil {
-			amis.WriteJsonData(c, gin.H{
-				"options": make([]map[string]string, 0),
-			})
-			return
+			return make([]map[string]string, 0), true
 		}
-		amis.WriteJsonData(c, gin.H{
-			"options": nsList,
-		})
-		return
+		return nsList, true
+	}
+	return nil, false
+}
+
+func handleNormalUser(c *gin.Context, selectedCluster string) ([]map[string]string, bool) {
+	_, _, clusterUserRoles := amis.GetLoginUserWithClusterRoles(c)
+	if clusterUserRoles == nil {
+		return nil, false
 	}
 
-	// 不是平台管理员
-	// 先看jwt登录用户中，是否有限制的ns
-	_, _, clusterUserRoles := amis.GetLoginUserWithClusterRoles(c)
-	if clusterUserRoles != nil {
-		// 先筛选带有ns的授权列表
-		clusterUserRoles = slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
-			return item.Namespaces != "" && item.Cluster == selectedCluster
-		})
-		if len(clusterUserRoles) > 0 {
-			// 具有授权列表，摘取其中的ns
-			for _, item := range clusterUserRoles {
-				if item.Namespaces != "" {
-					ns := strings.Split(item.Namespaces, ",")
-					for _, n := range ns {
-						list = append(list, map[string]string{
-							"label": n,
-							"value": n,
-						})
-					}
-				}
-			}
-			amis.WriteJsonData(c, gin.H{
-				"options": list,
-			})
-			return
-		} else {
-			// 说明没有限制ns，那么应该读取集群中的ns
-			// 如果是平台管理员，则看到集群下的全部命名空间
-			nsList, err := getClusterNsList(ctx, selectedCluster)
-			if err != nil {
-				amis.WriteJsonData(c, gin.H{
-					"options": make([]map[string]string, 0),
+	// 筛选带有ns的授权列表
+	clusterUserRoles = slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+		return item.Namespaces != "" && item.Cluster == selectedCluster
+	})
+
+	if len(clusterUserRoles) > 0 {
+		// 处理有限制namespace的用户
+		return handleUserWithNamespaceRestriction(clusterUserRoles)
+	}
+
+	// 处理没有限制namespace的用户
+	return handleUserWithoutNamespaceRestriction(c, selectedCluster)
+}
+
+func handleUserWithNamespaceRestriction(roles []*models.ClusterUserRole) ([]map[string]string, bool) {
+	var list []map[string]string
+	for _, item := range roles {
+		if item.Namespaces != "" {
+			ns := strings.Split(item.Namespaces, ",")
+			for _, n := range ns {
+				list = append(list, map[string]string{
+					"label": n,
+					"value": n,
 				})
-				return
 			}
-			amis.WriteJsonData(c, gin.H{
-				"options": nsList,
-			})
-			return
 		}
 	}
+	return list, true
+}
+
+func handleUserWithoutNamespaceRestriction(ctx context.Context, selectedCluster string) ([]map[string]string, bool) {
+	nsList, err := getClusterNsList(ctx, selectedCluster)
+	if err != nil {
+		return make([]map[string]string, 0), true
+	}
+	return nsList, true
+}
+
+func sortAndRespond(c *gin.Context, list []map[string]string) {
 
 	slice.SortBy(list, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
