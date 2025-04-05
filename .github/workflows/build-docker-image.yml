@@ -66,6 +66,7 @@ jobs:
         make build-linux
 
   buildImage:
+    needs: buildx
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -75,6 +76,9 @@ jobs:
       run: |
         platform=${{ matrix.platform }}
         echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+    - name: print env
+      run: |
+        env
 
     - uses: actions/checkout@v4
     - name: Inject slug/short variables
