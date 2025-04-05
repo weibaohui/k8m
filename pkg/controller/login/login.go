@@ -31,15 +31,25 @@ type LoginRequest struct {
 }
 
 // 生成 Token
-func generateToken(username string, roles []string, clusters []string) (string, error) {
+func generateToken(username string, roles []string, clusters []*models.ClusterUserRole) (string, error) {
 	role := constants.JwtUserRole
 	name := constants.JwtUserName
 	cst := constants.JwtClusters
+	cstUserRoles := constants.JwtClusterUserRoles
+
+	var clusterNames []string
+	if clusters != nil {
+		for _, cluster := range clusters {
+			clusterNames = append(clusterNames, cluster.Cluster)
+		}
+	}
+
 	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		name:  username,
-		role:  strings.Join(roles, ","),
-		cst:   strings.Join(clusters, ","),
-		"exp": time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
+		name:         username,
+		role:         strings.Join(roles, ","),              // 角色列表
+		cst:          strings.Join(clusterNames, ","),       // 集群名称列表
+		cstUserRoles: utils.ToJSON(clusters),                // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
+		"exp":        time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
 	})
 	cfg := flag.Init()
 	var jwtSecret = []byte(cfg.JwtTokenSecret)
@@ -77,7 +87,7 @@ func LoginByPassword(c *gin.Context) {
 			return
 		}
 		// Admin用户不需要2FA验证
-		token, _ := generateToken(req.Username, []string{models.RolePlatformAdmin}, []string{})
+		token, _ := generateToken(req.Username, []string{models.RolePlatformAdmin}, nil)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {
@@ -136,9 +146,11 @@ func LoginByPassword(c *gin.Context) {
 					roles = append(roles, ug.Role)
 				}
 
-				//查询用户对应的集群
+				// 查询用户对应的集群
 				clusters, _ := service.UserService().GetClusters(v.Username)
+
 				token, _ := generateToken(v.Username, roles, clusters)
+
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return
 			}
