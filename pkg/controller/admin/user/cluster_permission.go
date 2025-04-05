@@ -53,6 +53,25 @@ func ListClusterPermissionsByUserName(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+func ListClusterPermissionsByClusterID(c *gin.Context) {
+	clusterBase64 := c.Param("cluster")
+	cluster, err := utils.DecodeBase64(clusterBase64)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	params := dao.BuildParams(c)
+	m := &models.ClusterUserRole{}
+	m.Cluster = cluster
+	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where(m)
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonListWithTotal(c, total, items)
+}
 func SaveClusterPermission(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
