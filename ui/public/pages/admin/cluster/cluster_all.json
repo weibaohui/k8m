@@ -96,7 +96,7 @@
                   {
                     "type": "alert",
                     "level": "success",
-                    "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p></div>"
+                    "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p><p><strong>限制命名空间：</strong>置空表示不限制，可访问所有命名空间。如果填写了，那么用户就只能访问指定的命名空间了。</p></div>"
                   },
                   {
                     "type": "tabs",
@@ -107,6 +107,7 @@
                           {
                             "type": "crud",
                             "api": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/user/list",
+                            "quickSaveItemApi": "/admin/cluster_permissions/update_namespaces/$id",
                             "autoFillHeight": true,
                             "autoGenerateFilter": {
                               "columnsNum": 4,
@@ -193,7 +194,19 @@
                               },
                               {
                                 "name": "namespaces",
-                                "label": "命名空间"
+                                "label": "限制命名空间",
+                                "type": "tpl",
+                                "tpl": "${namespaces | split:',')}",
+                                "placeholder": "-",
+                                "quickEdit": {
+                                  "type": "input-array",
+                                  "inline": true,
+                                  "items": {
+                                    "type": "input-text",
+                                    "clearable": false
+                                  },
+                                  "saveImmediately": true
+                                }
                               }
                             ]
                           }
@@ -205,6 +218,7 @@
                           {
                             "type": "crud",
                             "api": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/user/list",
+                            "quickSaveItemApi": "/admin/cluster_permissions/update_namespaces/$id",
                             "autoFillHeight": true,
                             "autoGenerateFilter": {
                               "columnsNum": 4,
@@ -288,6 +302,22 @@
                               {
                                 "name": "cluster",
                                 "label": "集群"
+                              },
+                              {
+                                "name": "namespaces",
+                                "label": "限制命名空间",
+                                "type": "tpl",
+                                "tpl": "${namespaces | split:',')}",
+                                "placeholder": "-",
+                                "quickEdit": {
+                                  "type": "input-array",
+                                  "inline": true,
+                                  "items": {
+                                    "type": "input-text",
+                                    "clearable": false
+                                  },
+                                  "saveImmediately": true
+                                }
                               }
                             ]
                           }
@@ -299,6 +329,7 @@
                           {
                             "type": "crud",
                             "api": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user/list",
+                            "quickSaveItemApi": "/admin/cluster_permissions/update_namespaces/$id",
                             "autoFillHeight": true,
                             "autoGenerateFilter": {
                               "columnsNum": 4,
@@ -382,6 +413,22 @@
                               {
                                 "name": "cluster",
                                 "label": "集群"
+                              },
+                              {
+                                "name": "namespaces",
+                                "label": "限制命名空间",
+                                "type": "tpl",
+                                "tpl": "${namespaces | split:',')}",
+                                "placeholder": "-",
+                                "quickEdit": {
+                                  "type": "input-array",
+                                  "inline": true,
+                                  "items": {
+                                    "type": "input-text",
+                                    "clearable": false
+                                  },
+                                  "saveImmediately": true
+                                }
                               }
                             ]
                           }

@@ -88,7 +88,7 @@ func handleCommonLogic(c *gin.Context, action string, groupName string) (string,
 	}
 
 	var err error
-	if role != models.RolePlatformAdmin {
+	if !amis.IsLoginedUserPlatformAdmin(c) {
 		err = fmt.Errorf("非平台管理员不能%s资源", action)
 	}
 	if err != nil {

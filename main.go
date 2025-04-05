@@ -444,6 +444,7 @@ func main() {
 		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
 		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
+		admin.POST("/cluster_permissions/update_namespaces/:id", user.UpdateNamespaces)
 
 		// 管理集群、纳管\解除纳管\扫描
 		admin.POST("/cluster/scan", cluster.Scan)

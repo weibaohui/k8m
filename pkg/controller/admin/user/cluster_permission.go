@@ -9,7 +9,6 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
@@ -66,7 +65,7 @@ func SaveClusterPermission(c *gin.Context) {
 		return
 	}
 
-	_, _, err = handlePermissionCommonLogic(c, "保存", fmt.Sprintf("cluster %s save permission %v", cluster, userList.Users))
+	_, _, err = handlePermissionCommonLogic(c, "保存", cluster, userList.Users)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -100,7 +99,7 @@ func SaveClusterPermission(c *gin.Context) {
 func DeleteClusterPermission(c *gin.Context) {
 	ids := c.Param("ids")
 
-	_, _, err := handlePermissionCommonLogic(c, "删除", ids)
+	_, _, err := handlePermissionCommonLogic(c, "删除", "", ids)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -117,11 +116,44 @@ func DeleteClusterPermission(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func handlePermissionCommonLogic(c *gin.Context, action string, clusterName string) (string, string, error) {
-	ctx := amis.GetContextWithUser(c)
-	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+func UpdateNamespaces(c *gin.Context) {
+	id := c.Param("id")
+	type requestBody struct {
+		Namespaces []string `json:"namespaces"`
+		Username   string   `json:"username"`
+		Cluster    string   `json:"cluster"`
+		Role       string   `json:"role"`
+	}
+	var nsList requestBody
 
+	err := c.ShouldBindJSON(&nsList)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	_, _, err = handlePermissionCommonLogic(c, "授权Namespace", nsList.Cluster, utils.ToJSON(nsList))
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	params := dao.BuildParams(c)
+	m := &models.ClusterUserRole{}
+	m.ID = utils.ToUInt(id)
+	m.Namespaces = strings.Join(nsList.Namespaces, ",")
+	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
+		return db.Select("namespaces")
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+// TODO 日志记录写一个专门的方法，现在这个不好
+func log2DB(c *gin.Context, action string, clusterName string, params string, err error) {
+	username, role := amis.GetLoginUser(c)
 	log := models.OperationLog{
 		Action:       action,
 		Cluster:      clusterName,
@@ -130,12 +162,8 @@ func handlePermissionCommonLogic(c *gin.Context, action string, clusterName stri
 		UserName:     username,
 		Group:        clusterName,
 		Role:         role,
+		Params:       params,
 		ActionResult: "success",
-	}
-
-	var err error
-	if role != models.RolePlatformAdmin {
-		err = fmt.Errorf("非平台管理员不能%s权限配置", action)
 	}
 
 	if err != nil {
@@ -145,6 +173,16 @@ func handlePermissionCommonLogic(c *gin.Context, action string, clusterName stri
 	go func() {
 		time.Sleep(1 * time.Second)
 		service.OperationLogService().Add(&log)
+	}()
+}
+func handlePermissionCommonLogic(c *gin.Context, action string, clusterName string, params string) (string, string, error) {
+	username, role := amis.GetLoginUser(c)
+	var err error
+	if !amis.IsLoginedUserPlatformAdmin(c) {
+		err = fmt.Errorf("非平台管理员不能%s权限配置", action)
+	}
+	go func() {
+		log2DB(c, action, clusterName, params, err)
 	}()
 
 	return username, role, err
