@@ -26,7 +26,7 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
             if (error.response && error.response.status === 512) {
                 var cluster = error.response.data.msg;
                 message.error(`${cluster}。如有疑问请联系管理员。`)
-                window.location.href = '/#/cluster/cluster_all';
+                window.location.href = '/#/user/cluster/cluster_user';
             }
             if (error.response && error.response.status === 403) {
                 message.error(`权限不足，请联系管理员。`)
