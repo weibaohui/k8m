@@ -1,61 +1,61 @@
 {
-    "type": "page",
-    "title": "集群权限",
-    "remark": {
-        "body": "用户拥有的集群权限列表，如需增加权限，请联系平台管理员。",
-        "icon": "question-mark",
-        "placement": "right",
-        "trigger": "click",
-        "rootClose": true
+  "type": "page",
+  "title": "集群权限",
+  "remark": {
+    "body": "用户拥有的集群权限列表，如需增加权限，请联系平台管理员。",
+    "icon": "question-mark",
+    "placement": "right",
+    "trigger": "click",
+    "rootClose": true
+  },
+  "body": [
+    {
+      "type": "alert",
+      "level": "success",
+      "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p><p><strong>限制命名空间：</strong>置空表示不限制，可访问该集群下所有的命名空间。如果填写了，那么用户就只能访问指定的命名空间了。</p></div>"
     },
-    "body": [
+    {
+      "type": "crud",
+      "id": "myClustersCRUD",
+      "name": "myClustersCRUD",
+      "autoFillHeight": true,
+      "api": "get:/mgm/user/profile/cluster/permissions/list",
+      "columns": [
         {
-            "type": "alert",
-            "level": "success",
-            "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p><p><strong>限制命名空间：</strong>置空表示不限制，可访问所有命名空间。如果填写了，那么用户就只能访问指定的命名空间了。</p></div>"
+          "name": "username",
+          "label": "用户名"
         },
         {
-            "type": "crud",
-            "id": "myClustersCRUD",
-            "name": "myClustersCRUD",
-            "autoFillHeight": true,
-            "api": "get:/mgm/user/profile/cluster/permissions/list",
-            "columns": [
-                {
-                    "name": "username",
-                    "label": "用户名"
-                },
-                {
-                    "name": "cluster",
-                    "label": "集群名称",
-                    "sortable": true
-                },
-                {
-                    "name": "role",
-                    "label": "权限",
-                    "type": "mapping",
-                    "map": {
-                        "cluster_admin": "集群管理员",
-                        "cluster_readonly": "集群只读"
-                    }
-                },
-                {
-                    "name": "namespaces",
-                    "label": "限制命名空间",
-                    "type": "tpl",
-                    "tpl": "${namespaces | split:',')}",
-                    "placeholder": "-"
-                },
-                {
-                    "name": "created_at",
-                    "label": "授权时间",
-                    "type": "datetime"
-                },
-                {
-                    "name": "created_by",
-                    "label": "授权人"
-                }
-            ]
+          "name": "cluster",
+          "label": "集群名称",
+          "sortable": true
+        },
+        {
+          "name": "role",
+          "label": "权限",
+          "type": "mapping",
+          "map": {
+            "cluster_admin": "集群管理员",
+            "cluster_readonly": "集群只读"
+          }
+        },
+        {
+          "name": "namespaces",
+          "label": "限制命名空间",
+          "type": "tpl",
+          "tpl": "${namespaces | split:',')}",
+          "placeholder": "-"
+        },
+        {
+          "name": "created_at",
+          "label": "授权时间",
+          "type": "datetime"
+        },
+        {
+          "name": "created_by",
+          "label": "授权人"
         }
-    ]
+      ]
+    }
+  ]
 }
