@@ -56,7 +56,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 
 			// 解析参数
 			var args map[string]interface{}
-			if toolCall.Function.Arguments != "" {
+			if toolCall.Function.Arguments != "" && toolCall.Function.Arguments != "{}" && toolCall.Function.Arguments != "null" {
 				if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args); err != nil {
 					result.Error = fmt.Sprintf("failed to parse tool arguments: %v", err)
 					klog.V(6).Infof("参数解析Error: %s\n", result.Error)
