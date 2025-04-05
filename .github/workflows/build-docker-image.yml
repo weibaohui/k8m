@@ -82,7 +82,6 @@ jobs:
     steps:
     - name: Prepare
       run: |
-        mv bin/* ./
         platform=${{ matrix.platform }}
         echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
@@ -94,10 +93,10 @@ jobs:
 
     - name: print env
       run: |
+        mv bin/* ./
         env
         ls -l
 
-    - uses: actions/checkout@v4
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v4
 
