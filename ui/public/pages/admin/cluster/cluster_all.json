@@ -16,7 +16,7 @@
           "label": "重新扫描",
           "level": "primary",
           "actionType": "ajax",
-          "api": "post:/k8s/cluster/scan"
+          "api": "post:/admin/cluster/scan"
         },
         {
           "type": "button",
@@ -60,7 +60,7 @@
       "loadDataOnce": true,
       "syncLocation": false,
       "perPage": 10,
-      "api": "get:/k8s/cluster/all",
+      "api": "get:/admin/cluster/all",
       "columns": [
         {
           "type": "operation",
@@ -72,14 +72,14 @@
               "icon": "fas fa-link  text-primary",
               "label": "连接",
               "actionType": "ajax",
-              "api": "post:/k8s/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
+              "api": "post:/admin/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
             },
             {
               "type": "button",
               "icon": "fas fa-check-circle  text-primary",
               "label": "切换",
               "actionType": "ajax",
-              "api": "post:/k8s/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
+              "api": "post:/admin/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
               "onEvent": {
                 "click": {
                   "actions": [
@@ -115,7 +115,7 @@
                         "body": [
                           {
                             "type": "crud",
-                            "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/user/list",
+                            "api": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/user/list",
                             "autoFillHeight": true,
                             "autoGenerateFilter": {
                               "columnsNum": 4,
@@ -134,13 +134,13 @@
                                   "title": "添加只读用户",
                                   "body": {
                                     "type": "form",
-                                    "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/save",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/save",
                                     "body": [
                                       {
                                         "type": "transfer",
                                         "name": "users",
                                         "label": "选择用户",
-                                        "source": "get:/mgm/user/option_list",
+                                        "source": "get:/admin/user/option_list",
                                         "searchable": true,
                                         "selectMode": "list"
                                       }
@@ -178,7 +178,7 @@
                                 "label": "批量删除",
                                 "actionType": "ajax",
                                 "confirmText": "确定要批量删除?",
-                                "api": "post:/mgm/cluster_permissions/${ids}"
+                                "api": "post:/admin/cluster_permissions/${ids}"
                               }
                             ],
                             "columns": [
@@ -209,7 +209,7 @@
                         "body": [
                           {
                             "type": "crud",
-                            "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/user/list",
+                            "api": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/user/list",
                             "autoFillHeight": true,
                             "autoGenerateFilter": {
                               "columnsNum": 4,
@@ -228,13 +228,13 @@
                                   "title": "添加管理员",
                                   "body": {
                                     "type": "form",
-                                    "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/save",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/save",
                                     "body": [
                                       {
                                         "type": "transfer",
                                         "name": "users",
                                         "label": "选择用户",
-                                        "source": "get:/mgm/user/option_list",
+                                        "source": "get:/admin/user/option_list",
                                         "searchable": true,
                                         "selectMode": "list"
                                       }
@@ -272,7 +272,7 @@
                                 "label": "批量删除",
                                 "actionType": "ajax",
                                 "confirmText": "确定要批量删除?",
-                                "api": "post:/mgm/cluster_permissions/${ids}"
+                                "api": "post:/admin/cluster_permissions/${ids}"
                               }
                             ],
                             "columns": [
@@ -303,7 +303,7 @@
                         "body": [
                           {
                             "type": "crud",
-                            "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user/list",
+                            "api": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user/list",
                             "autoFillHeight": true,
                             "autoGenerateFilter": {
                               "columnsNum": 4,
@@ -322,13 +322,13 @@
                                   "title": "添加管理员",
                                   "body": {
                                     "type": "form",
-                                    "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/save",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/save",
                                     "body": [
                                       {
                                         "type": "transfer",
                                         "name": "users",
                                         "label": "选择用户",
-                                        "source": "get:/mgm/user/option_list",
+                                        "source": "get:/admin/user/option_list",
                                         "searchable": true,
                                         "selectMode": "list"
                                       }
@@ -366,7 +366,7 @@
                                 "label": "批量删除",
                                 "actionType": "ajax",
                                 "confirmText": "确定要批量删除?",
-                                "api": "post:/mgm/cluster_permissions/${ids}"
+                                "api": "post:/admin/cluster_permissions/${ids}"
                               }
                             ],
                             "columns": [
@@ -410,7 +410,7 @@
                   "visibleOn": " source==='DB' ",
                   "confirmText": "确定要解除纳管?",
                   "api": {
-                    "url": "/k8s/cluster/kubeconfig/remove",
+                    "url": "/admin/cluster/kubeconfig/remove",
                     "method": "post",
                     "data": {
                       "server": "${server }",
@@ -456,7 +456,7 @@
           "searchable": {
             "type": "select",
             "searchable": true,
-            "source": "/k8s/cluster/file/option_list"
+            "source": "/admin/cluster/file/option_list"
           }
         },
         {
@@ -534,7 +534,7 @@
                   "label": "检测",
                   "level": "link",
                   "actionType": "ajax",
-                  "api": "post:/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
+                  "api": "post:/admin/k8s_gpt/cluster/${cluster_id_base64}/run"
                 },
                 {
                   "type": "button",
@@ -550,7 +550,7 @@
                     "body": [
                       {
                         "type": "k8sGPT",
-                        "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/result"
+                        "api": "/admin/k8s_gpt/cluster/${cluster_id_base64}/result"
                       }
                     ]
                   }

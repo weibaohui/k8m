@@ -288,19 +288,6 @@ func main() {
 		api.POST("/ResourceQuota/create", ns.CreateResourceQuota)
 		api.POST("/LimitRange/create", ns.CreateLimitRange)
 
-		// k8s cluster
-		api.GET("/cluster/all", cluster.List)
-		api.POST("/cluster/scan", middleware.RolePlatformOnly(cluster.Scan))
-		api.GET("/cluster/option_list", cluster.OptionList)
-		api.GET("/cluster/file/option_list", cluster.FileOptionList)
-		api.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
-		api.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
-		api.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
-		api.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
-		api.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
-		api.POST("/cluster/kubeconfig/save", middleware.RolePlatformOnly(kubeconfig.Save))
-		api.POST("/cluster/kubeconfig/remove", middleware.RolePlatformOnly(kubeconfig.Remove))
-
 		// k8s sts
 		api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", sts.Undo)
 		api.GET("/statefulset/ns/:ns/name/:name/rollout/history", sts.History)
@@ -451,6 +438,19 @@ func main() {
 		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 
+		//管理集群、纳管、切换等
+		// k8s cluster
+		admin.GET("/cluster/all", cluster.List)
+		admin.POST("/cluster/scan", cluster.Scan)
+		admin.GET("/cluster/option_list", cluster.OptionList)
+		admin.GET("/cluster/file/option_list", cluster.FileOptionList)
+		admin.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
+		admin.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
+		admin.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
+		admin.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
+		admin.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
+		admin.POST("/cluster/kubeconfig/save", kubeconfig.Save)
+		admin.POST("/cluster/kubeconfig/remove", kubeconfig.Remove)
 	}
 
 	showBootInfo(Version, flag.Init().Port)
