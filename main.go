@@ -27,7 +27,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/helm"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/k8sgpt"
-	"github.com/weibaohui/k8m/pkg/controller/kubeconfig"
 	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
 	"github.com/weibaohui/k8m/pkg/controller/node"
@@ -450,8 +449,8 @@ func main() {
 		// k8s cluster
 		admin.POST("/cluster/scan", cluster.Scan)
 		admin.GET("/cluster/file/option_list", cluster.FileOptionList)
-		admin.POST("/cluster/kubeconfig/save", kubeconfig.Save)
-		admin.POST("/cluster/kubeconfig/remove", kubeconfig.Remove)
+		admin.POST("/cluster/kubeconfig/save", cluster.SaveKubeConfig)
+		admin.POST("/cluster/kubeconfig/remove", cluster.RemoveKubeConfig)
 		// 断开集群，断开后所有人都不可用
 		admin.POST("/cluster/:cluster/disconnect", cluster.Disconnect)
 
