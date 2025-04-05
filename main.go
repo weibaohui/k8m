@@ -13,10 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/controller/admin/config"
+	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
+	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
-	"github.com/weibaohui/k8m/pkg/controller/config"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
 	"github.com/weibaohui/k8m/pkg/controller/doc"
@@ -28,15 +30,14 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/kubeconfig"
 	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
-	"github.com/weibaohui/k8m/pkg/controller/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/node"
 	"github.com/weibaohui/k8m/pkg/controller/ns"
+	"github.com/weibaohui/k8m/pkg/controller/param"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/controller/rs"
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/template"
-	"github.com/weibaohui/k8m/pkg/controller/user"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
 	mcp2 "github.com/weibaohui/k8m/pkg/mcp"
@@ -169,6 +170,14 @@ func main() {
 		auth.POST("/login", login.LoginByPassword)
 	}
 
+	// 公共参数
+	params := r.Group("/params", middleware.AuthMiddleware())
+	{
+		// 获取当前登录用户的角色，登录即可
+		params.GET("/user/role", param.Role)
+		// 获取某个配置项
+		params.GET("/config/:key", param.Config)
+	}
 	api := r.Group("/k8s", middleware.AuthMiddleware())
 	{
 		// dynamic
@@ -378,9 +387,6 @@ func main() {
 		mgm.POST("/custom/template/save", template.SaveTemplate)
 		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
 
-		// 获取当前登录用户的角色，登录即可
-		mgm.GET("/user/role", user.Role)
-
 		// user profile 用户自助操作
 		mgm.GET("/user/profile", profile.Profile)
 		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
@@ -389,11 +395,6 @@ func main() {
 		mgm.POST("/user/profile/2fa/generate", profile.Generate2FASecret)
 		mgm.POST("/user/profile/2fa/disable", profile.Disable2FA)
 		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
-
-		// 集群权限设置
-		mgm.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", middleware.RolePlatformOnly(user.ListClusterPermissions))
-		mgm.POST("/cluster_permissions/cluster/:cluster/role/:role/save", middleware.RolePlatformOnly(user.SaveClusterPermission))
-		mgm.POST("/cluster_permissions/:ids", middleware.RolePlatformOnly(user.DeleteClusterPermission))
 
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
@@ -415,9 +416,6 @@ func main() {
 		mgm.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
 		mgm.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
-
-		// config
-		mgm.GET("/config/:key", config.Config)
 
 	}
 
@@ -447,6 +445,12 @@ func main() {
 		admin.POST("/mcp/delete", mcp.Delete)
 		admin.POST("/mcp/save", mcp.AddOrUpdate)
 		admin.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
+
+		// 集群权限设置
+		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
+		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
+		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
+
 	}
 
 	showBootInfo(Version, flag.Init().Port)
