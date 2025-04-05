@@ -26,7 +26,7 @@ func List(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	nsList := []string{}
+	var nsList []string
 	if strings.Contains(ns, ",") {
 		nsList = strings.Split(ns, ",")
 	} else {
