@@ -65,7 +65,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 240,
+          "width": 300,
           "buttons": [
             {
               "type": "button",
@@ -89,6 +89,312 @@
                     }
                   ]
                 }
+              }
+            },
+            {
+              "type": "button",
+              "label": "授权",
+              "icon": "fas fa-user-shield  text-primary",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "集群权限管理",
+                "size": "lg",
+                "body": [
+                  {
+                    "type": "alert",
+                    "level": "success",
+                    "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p></div>"
+                  },
+                  {
+                    "type": "tabs",
+                    "tabs": [
+                      {
+                        "title": "集群只读",
+                        "body": [
+                          {
+                            "type": "crud",
+                            "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/user/list",
+                            "autoFillHeight": true,
+                            "autoGenerateFilter": {
+                              "columnsNum": 4,
+                              "showBtnToolbar": false
+                            },
+                            "headerToolbar": [
+                              {
+                                "type": "button",
+                                "label": "添加用户",
+                                "level": "primary",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "添加只读用户",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/save",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "users",
+                                        "label": "选择用户",
+                                        "source": "get:/mgm/user/option_list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "columns-toggler",
+                                "align": "right",
+                                "draggable": true,
+                                "icon": "fas fa-cog",
+                                "overlay": true,
+                                "footerBtnSize": "sm"
+                              },
+                              {
+                                "type": "tpl",
+                                "tpl": "共${count}条",
+                                "align": "right",
+                                "visibleOn": "${count}"
+                              },
+                              {
+                                "type": "columns-toggler",
+                                "align": "left"
+                              },
+                              "reload",
+                              "bulkActions"
+                            ],
+                            "loadDataOnce": false,
+                            "syncLocation": false,
+                            "initFetch": true,
+                            "perPage": 10,
+                            "bulkActions": [
+                              {
+                                "label": "批量删除",
+                                "actionType": "ajax",
+                                "confirmText": "确定要批量删除?",
+                                "api": "post:/mgm/cluster_permissions/${ids}"
+                              }
+                            ],
+                            "columns": [
+                              {
+                                "name": "username",
+                                "label": "用户名"
+                              },
+                              {
+                                "name": "role",
+                                "label": "角色",
+                                "type": "mapping",
+                                "map": {
+                                  "cluster_admin": "集群管理员",
+                                  "cluster_readonly": "集群只读",
+                                  "platform_admin": "平台管理员"
+                                }
+                              },
+                              {
+                                "name": "cluster",
+                                "label": "集群"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "title": "Exec权限",
+                        "body": [
+                          {
+                            "type": "crud",
+                            "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/user/list",
+                            "autoFillHeight": true,
+                            "autoGenerateFilter": {
+                              "columnsNum": 4,
+                              "showBtnToolbar": false
+                            },
+                            "headerToolbar": [
+                              {
+                                "type": "button",
+                                "label": "添加用户",
+                                "level": "primary",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "添加管理员",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/save",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "users",
+                                        "label": "选择用户",
+                                        "source": "get:/mgm/user/option_list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "columns-toggler",
+                                "align": "right",
+                                "draggable": true,
+                                "icon": "fas fa-cog",
+                                "overlay": true,
+                                "footerBtnSize": "sm"
+                              },
+                              {
+                                "type": "tpl",
+                                "tpl": "共${count}条",
+                                "align": "right",
+                                "visibleOn": "${count}"
+                              },
+                              {
+                                "type": "columns-toggler",
+                                "align": "left"
+                              },
+                              "reload",
+                              "bulkActions"
+                            ],
+                            "loadDataOnce": false,
+                            "syncLocation": false,
+                            "initFetch": true,
+                            "perPage": 10,
+                            "bulkActions": [
+                              {
+                                "label": "批量删除",
+                                "actionType": "ajax",
+                                "confirmText": "确定要批量删除?",
+                                "api": "post:/mgm/cluster_permissions/${ids}"
+                              }
+                            ],
+                            "columns": [
+                              {
+                                "name": "username",
+                                "label": "用户名"
+                              },
+                              {
+                                "name": "role",
+                                "label": "角色",
+                                "type": "mapping",
+                                "map": {
+                                  "cluster_admin": "集群管理员",
+                                  "cluster_readonly": "集群只读",
+                                  "platform_admin": "平台管理员"
+                                }
+                              },
+                              {
+                                "name": "cluster",
+                                "label": "集群"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "title": "集群管理员",
+                        "body": [
+                          {
+                            "type": "crud",
+                            "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user/list",
+                            "autoFillHeight": true,
+                            "autoGenerateFilter": {
+                              "columnsNum": 4,
+                              "showBtnToolbar": false
+                            },
+                            "headerToolbar": [
+                              {
+                                "type": "button",
+                                "label": "添加用户",
+                                "level": "primary",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "添加管理员",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/save",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "users",
+                                        "label": "选择用户",
+                                        "source": "get:/mgm/user/option_list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "columns-toggler",
+                                "align": "right",
+                                "draggable": true,
+                                "icon": "fas fa-cog",
+                                "overlay": true,
+                                "footerBtnSize": "sm"
+                              },
+                              {
+                                "type": "tpl",
+                                "tpl": "共${count}条",
+                                "align": "right",
+                                "visibleOn": "${count}"
+                              },
+                              {
+                                "type": "columns-toggler",
+                                "align": "left"
+                              },
+                              "reload",
+                              "bulkActions"
+                            ],
+                            "loadDataOnce": false,
+                            "syncLocation": false,
+                            "initFetch": true,
+                            "perPage": 10,
+                            "bulkActions": [
+                              {
+                                "label": "批量删除",
+                                "actionType": "ajax",
+                                "confirmText": "确定要批量删除?",
+                                "api": "post:/mgm/cluster_permissions/${ids}"
+                              }
+                            ],
+                            "columns": [
+                              {
+                                "name": "username",
+                                "label": "用户名"
+                              },
+                              {
+                                "name": "role",
+                                "label": "角色",
+                                "type": "mapping",
+                                "map": {
+                                  "cluster_admin": "集群管理员",
+                                  "cluster_readonly": "集群只读",
+                                  "platform_admin": "平台管理员"
+                                }
+                              },
+                              {
+                                "name": "cluster",
+                                "label": "集群"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
             },
             {
@@ -136,312 +442,6 @@
                   "actionType": "url",
                   "blank": false,
                   "url": "/#/log/operation?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
-                },
-                {
-                  "type": "button",
-                  "label": "权限管理",
-                  "icon": "fas fa-user-shield  text-primary",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "title": "集群权限管理",
-                    "size": "lg",
-                    "body": [
-                      {
-                        "type": "alert",
-                        "level": "success",
-                        "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p></div>"
-                      },
-                      {
-                        "type": "tabs",
-                        "tabs": [
-                          {
-                            "title": "集群只读",
-                            "body": [
-                              {
-                                "type": "crud",
-                                "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/user/list",
-                                "autoFillHeight": true,
-                                "autoGenerateFilter": {
-                                  "columnsNum": 4,
-                                  "showBtnToolbar": false
-                                },
-                                "headerToolbar": [
-                                  {
-                                    "type": "button",
-                                    "label": "添加用户",
-                                    "level": "primary",
-                                    "actionType": "dialog",
-                                    "dialog": {
-                                      "closeOnEsc": true,
-                                      "closeOnOutside": true,
-                                      "size": "lg",
-                                      "title": "添加只读用户",
-                                      "body": {
-                                        "type": "form",
-                                        "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/save",
-                                        "body": [
-                                          {
-                                            "type": "transfer",
-                                            "name": "users",
-                                            "label": "选择用户",
-                                            "source": "get:/mgm/user/option_list",
-                                            "searchable": true,
-                                            "selectMode": "list"
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "right",
-                                    "draggable": true,
-                                    "icon": "fas fa-cog",
-                                    "overlay": true,
-                                    "footerBtnSize": "sm"
-                                  },
-                                  {
-                                    "type": "tpl",
-                                    "tpl": "共${count}条",
-                                    "align": "right",
-                                    "visibleOn": "${count}"
-                                  },
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "left"
-                                  },
-                                  "reload",
-                                  "bulkActions"
-                                ],
-                                "loadDataOnce": false,
-                                "syncLocation": false,
-                                "initFetch": true,
-                                "perPage": 10,
-                                "bulkActions": [
-                                  {
-                                    "label": "批量删除",
-                                    "actionType": "ajax",
-                                    "confirmText": "确定要批量删除?",
-                                    "api": "post:/mgm/cluster_permissions/${ids}"
-                                  }
-                                ],
-                                "columns": [
-                                  {
-                                    "name": "username",
-                                    "label": "用户名"
-                                  },
-                                  {
-                                    "name": "role",
-                                    "label": "角色",
-                                    "type": "mapping",
-                                    "map": {
-                                      "cluster_admin": "集群管理员",
-                                      "cluster_readonly": "集群只读",
-                                      "platform_admin": "平台管理员"
-                                    }
-                                  },
-                                  {
-                                    "name": "cluster",
-                                    "label": "集群"
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "title": "Exec权限",
-                            "body": [
-                              {
-                                "type": "crud",
-                                "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/user/list",
-                                "autoFillHeight": true,
-                                "autoGenerateFilter": {
-                                  "columnsNum": 4,
-                                  "showBtnToolbar": false
-                                },
-                                "headerToolbar": [
-                                  {
-                                    "type": "button",
-                                    "label": "添加用户",
-                                    "level": "primary",
-                                    "actionType": "dialog",
-                                    "dialog": {
-                                      "closeOnEsc": true,
-                                      "closeOnOutside": true,
-                                      "size": "lg",
-                                      "title": "添加管理员",
-                                      "body": {
-                                        "type": "form",
-                                        "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/save",
-                                        "body": [
-                                          {
-                                            "type": "transfer",
-                                            "name": "users",
-                                            "label": "选择用户",
-                                            "source": "get:/mgm/user/option_list",
-                                            "searchable": true,
-                                            "selectMode": "list"
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "right",
-                                    "draggable": true,
-                                    "icon": "fas fa-cog",
-                                    "overlay": true,
-                                    "footerBtnSize": "sm"
-                                  },
-                                  {
-                                    "type": "tpl",
-                                    "tpl": "共${count}条",
-                                    "align": "right",
-                                    "visibleOn": "${count}"
-                                  },
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "left"
-                                  },
-                                  "reload",
-                                  "bulkActions"
-                                ],
-                                "loadDataOnce": false,
-                                "syncLocation": false,
-                                "initFetch": true,
-                                "perPage": 10,
-                                "bulkActions": [
-                                  {
-                                    "label": "批量删除",
-                                    "actionType": "ajax",
-                                    "confirmText": "确定要批量删除?",
-                                    "api": "post:/mgm/cluster_permissions/${ids}"
-                                  }
-                                ],
-                                "columns": [
-                                  {
-                                    "name": "username",
-                                    "label": "用户名"
-                                  },
-                                  {
-                                    "name": "role",
-                                    "label": "角色",
-                                    "type": "mapping",
-                                    "map": {
-                                      "cluster_admin": "集群管理员",
-                                      "cluster_readonly": "集群只读",
-                                      "platform_admin": "平台管理员"
-                                    }
-                                  },
-                                  {
-                                    "name": "cluster",
-                                    "label": "集群"
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "title": "集群管理员",
-                            "body": [
-                              {
-                                "type": "crud",
-                                "api": "get:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user/list",
-                                "autoFillHeight": true,
-                                "autoGenerateFilter": {
-                                  "columnsNum": 4,
-                                  "showBtnToolbar": false
-                                },
-                                "headerToolbar": [
-                                  {
-                                    "type": "button",
-                                    "label": "添加用户",
-                                    "level": "primary",
-                                    "actionType": "dialog",
-                                    "dialog": {
-                                      "closeOnEsc": true,
-                                      "closeOnOutside": true,
-                                      "size": "lg",
-                                      "title": "添加管理员",
-                                      "body": {
-                                        "type": "form",
-                                        "api": "post:/mgm/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/save",
-                                        "body": [
-                                          {
-                                            "type": "transfer",
-                                            "name": "users",
-                                            "label": "选择用户",
-                                            "source": "get:/mgm/user/option_list",
-                                            "searchable": true,
-                                            "selectMode": "list"
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "right",
-                                    "draggable": true,
-                                    "icon": "fas fa-cog",
-                                    "overlay": true,
-                                    "footerBtnSize": "sm"
-                                  },
-                                  {
-                                    "type": "tpl",
-                                    "tpl": "共${count}条",
-                                    "align": "right",
-                                    "visibleOn": "${count}"
-                                  },
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "left"
-                                  },
-                                  "reload",
-                                  "bulkActions"
-                                ],
-                                "loadDataOnce": false,
-                                "syncLocation": false,
-                                "initFetch": true,
-                                "perPage": 10,
-                                "bulkActions": [
-                                  {
-                                    "label": "批量删除",
-                                    "actionType": "ajax",
-                                    "confirmText": "确定要批量删除?",
-                                    "api": "post:/mgm/cluster_permissions/${ids}"
-                                  }
-                                ],
-                                "columns": [
-                                  {
-                                    "name": "username",
-                                    "label": "用户名"
-                                  },
-                                  {
-                                    "name": "role",
-                                    "label": "角色",
-                                    "type": "mapping",
-                                    "map": {
-                                      "cluster_admin": "集群管理员",
-                                      "cluster_readonly": "集群只读",
-                                      "platform_admin": "平台管理员"
-                                    }
-                                  },
-                                  {
-                                    "name": "cluster",
-                                    "label": "集群"
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
                 }
               ]
             }
