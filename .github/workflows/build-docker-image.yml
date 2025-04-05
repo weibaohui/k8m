@@ -79,6 +79,11 @@ jobs:
     - name: print env
       run: |
         env
+        ls -l
+        echo "-------------------------------"
+        ls -l bin
+        echo "-------------------------------"
+        ls -l ui
 
     - uses: actions/checkout@v4
     - name: Inject slug/short variables
