@@ -34,6 +34,13 @@ func GetLoginUser(c *gin.Context) (string, string) {
 	return user, role
 }
 
+// IsLoginedUserPlatformAdmin 检测当前登录用户是否为平台管理员
+func IsLoginedUserPlatformAdmin(c *gin.Context) bool {
+	role := c.GetString(constants.JwtUserRole)
+	roles := strings.Split(role, ",")
+	return slice.Contain(roles, models.RolePlatformAdmin)
+}
+
 func GetContextWithUser(c *gin.Context) context.Context {
 	user, role := GetLoginUser(c)
 	ctx := context.WithValue(c.Request.Context(), constants.JwtUserName, user)
