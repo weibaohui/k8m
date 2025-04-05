@@ -38,7 +38,13 @@ const items: () => MenuItem[] = () => {
         navigate(path)
     }
     return [
-
+        {
+            label: "多集群",
+            title: "多集群",
+            icon: <i className="fa-solid fa-server"></i>,
+            key: "cluster_user",
+            onClick: () => onMenuClick('/user/cluster/cluster_user')
+        },
         {
             label: "命名空间",
             title: "命名空间",

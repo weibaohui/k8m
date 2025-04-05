@@ -177,9 +177,10 @@ func main() {
 		params.GET("/user/role", param.UserRole)
 		// 获取某个配置项
 		params.GET("/config/:key", param.Config)
-		// 获取当前登录用户的集群列表
+		// 获取当前登录用户的集群列表,下拉列表
 		params.GET("/cluster/option_list", param.ClusterOptionList)
-
+		// 获取当前登录用户的集群列表,table列表
+		params.GET("/cluster/all", param.ClusterTableList)
 	}
 	api := r.Group("/k8s", middleware.AuthMiddleware())
 	{
@@ -407,6 +408,13 @@ func main() {
 		mgm.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
 
+		//集群管理 ，连接切换等
+		mgm.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
+		mgm.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
+		mgm.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
+		mgm.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
+		mgm.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
+
 	}
 
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
@@ -441,16 +449,10 @@ func main() {
 		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 
-		// 管理集群、纳管、切换等
+		// 管理集群、纳管\解除纳管\扫描
 		// k8s cluster
-		admin.GET("/cluster/all", cluster.List)
 		admin.POST("/cluster/scan", cluster.Scan)
 		admin.GET("/cluster/file/option_list", cluster.FileOptionList)
-		admin.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
-		admin.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
-		admin.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
-		admin.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
-		admin.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
 		admin.POST("/cluster/kubeconfig/save", kubeconfig.Save)
 		admin.POST("/cluster/kubeconfig/remove", kubeconfig.Remove)
 	}

@@ -1,5 +1,6 @@
 {
   "type": "page",
+  "title": "多集群管理",
   "body": [
     {
       "type": "crud",
@@ -60,7 +61,7 @@
       "loadDataOnce": true,
       "syncLocation": false,
       "perPage": 10,
-      "api": "get:/admin/cluster/all",
+      "api": "get:/params/cluster/all",
       "columns": [
         {
           "type": "operation",
@@ -72,14 +73,14 @@
               "icon": "fas fa-link  text-primary",
               "label": "连接",
               "actionType": "ajax",
-              "api": "post:/admin/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
+              "api": "post:/mgm/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
             },
             {
               "type": "button",
               "icon": "fas fa-check-circle  text-primary",
               "label": "切换",
               "actionType": "ajax",
-              "api": "post:/admin/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
+              "api": "post:/mgm/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
               "onEvent": {
                 "click": {
                   "actions": [
@@ -515,49 +516,6 @@
             }
           },
           "popOverEnableOn": "this.err"
-        },
-        {
-          "name": "k8s_gpt_problems_count",
-          "label": "智检",
-          "width": "200px",
-          "type": "container",
-          "body": [
-            {
-              "type": "tpl",
-              "tpl": "<% if (data.k8s_gpt_problems_count) { %><span class='label label-danger'><%=data.k8s_gpt_problems_count%></span><% } %>"
-            },
-            {
-              "type": "container",
-              "body": [
-                {
-                  "type": "button",
-                  "label": "检测",
-                  "level": "link",
-                  "actionType": "ajax",
-                  "api": "post:/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
-                },
-                {
-                  "type": "button",
-                  "label": "查看",
-                  "level": "link",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "overlay": false,
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "size": "lg",
-                    "title": "AI 智能巡检 集群${clusterName} （ESC 关闭）",
-                    "body": [
-                      {
-                        "type": "k8sGPT",
-                        "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/result"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          ]
         },
         {
           "name": "server",
