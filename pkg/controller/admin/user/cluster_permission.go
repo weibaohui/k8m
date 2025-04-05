@@ -210,7 +210,7 @@ func log2DB(c *gin.Context, action string, clusterName string, params string, er
 func handlePermissionCommonLogic(c *gin.Context, action string, clusterName string, params string) (string, string, error) {
 	username, role := amis.GetLoginUser(c)
 	var err error
-	if !amis.IsLoginedUserPlatformAdmin(c) {
+	if !amis.IsCurrentUserPlatformAdmin(c) {
 		err = fmt.Errorf("非平台管理员不能%s权限配置", action)
 	}
 	go func() {

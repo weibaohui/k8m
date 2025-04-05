@@ -21,7 +21,7 @@ func ClusterOptionList(c *gin.Context) {
 		})
 		return
 	}
-	if !amis.IsLoginedUserPlatformAdmin(c) {
+	if !amis.IsCurrentUserPlatformAdmin(c) {
 		userCluster, err := service.UserService().GetClusterNames(user)
 		if err != nil {
 			amis.WriteJsonData(c, gin.H{
@@ -57,7 +57,7 @@ func ClusterTableList(c *gin.Context) {
 	user, _ := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
-	if !amis.IsLoginedUserPlatformAdmin(c) {
+	if !amis.IsCurrentUserPlatformAdmin(c) {
 		userCluster, err := service.UserService().GetClusterNames(user)
 		if err != nil {
 			amis.WriteJsonData(c, gin.H{
