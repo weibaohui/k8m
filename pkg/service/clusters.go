@@ -181,29 +181,28 @@ func (c *clusterService) DelayStartFunc(f func()) {
 }
 
 // Connect 重新连接集群
-func (c *clusterService) Connect(fileName string, contextName string) {
-	klog.V(4).Infof("连接集群 %s %s 开始", fileName, contextName)
+func (c *clusterService) Connect(clusterID string) {
+	klog.V(4).Infof("连接集群 %s 开始", clusterID)
 	// 先清除原来的状态
-	for _, clusterConfig := range c.clusterConfigs {
-		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
-			klog.V(4).Infof("Connect 发现原集群，清理集群 %s %s 原始信息", fileName, contextName)
-			clusterConfig.ServerVersion = ""
-			clusterConfig.restConfig = nil
-			clusterConfig.Err = ""
-			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-			_, _ = c.RegisterCluster(clusterConfig)
-
-		}
+	cc := c.GetClusterByID(clusterID)
+	if cc != nil {
+		klog.V(4).Infof("Connect 发现原集群，清理集群 %s  原始信息", clusterID)
+		cc.ServerVersion = ""
+		cc.restConfig = nil
+		cc.Err = ""
+		cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
+		_, _ = c.RegisterCluster(cc)
 	}
-	klog.V(4).Infof("连接集群 %s %s 完毕", fileName, contextName)
+
+	klog.V(4).Infof("连接集群 %s 完毕", clusterID)
 }
 
 // Disconnect 断开连接
-func (c *clusterService) Disconnect(fileName string, contextName string) {
-	klog.V(4).Infof("Disconnect 清理集群 %s %s 原始信息", fileName, contextName)
+func (c *clusterService) Disconnect(clusterID string) {
+	klog.V(4).Infof("Disconnect 清理集群 %s 原始信息", clusterID)
 
 	// 先清除原来的状态
-	cc := c.GetClusterByID(fmt.Sprintf("%s/%s", fileName, contextName))
+	cc := c.GetClusterByID(clusterID)
 	if cc == nil {
 		return
 	}
@@ -218,7 +217,6 @@ func (c *clusterService) Disconnect(fileName string, contextName string) {
 		}
 	}
 	// 从kom解除
-	clusterID := cc.ClusterID
 	kom.Clusters().RemoveClusterById(clusterID)
 }
 
@@ -281,7 +279,7 @@ func (c *clusterService) RegisterClustersByPath(filePath string) {
 	contextName := config.CurrentContext
 
 	fileName := filepath.Base(filePath)
-	c.Connect(fileName, contextName)
+	c.Connect(fmt.Sprintf("%s/%s", fileName, contextName))
 }
 
 // ScanClustersInDir 扫描文件夹下的kubeconfig文件，仅扫描形成列表但是不注册集群
@@ -330,6 +328,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 			clusterConfig := &ClusterConfig{
 				FileName:             file.Name(),
 				ContextName:          contextName,
+				ClusterID:            fmt.Sprintf("%s/%s", file.Name(), contextName),
 				UserName:             context.AuthInfo,
 				ClusterName:          context.Cluster,
 				Namespace:            context.Namespace,
@@ -368,7 +367,7 @@ func (c *clusterService) ScanClustersInDB() {
 				// 在数据库中也不存在
 				// 从list中删除
 				// 删除前先断开连接，避免watcher泄露
-				c.Disconnect(cc.FileName, cc.ContextName)
+				c.Disconnect(cc.ClusterID)
 				c.clusterConfigs = slice.DeleteAt(c.clusterConfigs, i)
 			}
 		}
@@ -402,6 +401,7 @@ func (c *clusterService) ScanClustersInDB() {
 					clusterConfig := &ClusterConfig{
 						FileName:             kc.DisplayName,
 						ContextName:          contextName,
+						ClusterID:            fmt.Sprintf("%s/%s", kc.DisplayName, contextName),
 						UserName:             context.AuthInfo,
 						ClusterName:          context.Cluster,
 						Namespace:            context.Namespace,
@@ -589,6 +589,7 @@ func (c *clusterService) RegisterInCluster() {
 		ClusterName:          "kubernetes", // InCluster 模式没有 context, 设定默认名称
 		FileName:             "InCluster",
 		ContextName:          "InCluster",
+		ClusterID:            "InCluster",
 		Server:               config.Host,
 		IsInCluster:          true,
 		restConfig:           config,

@@ -409,10 +409,8 @@ func main() {
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
 
 		// 集群管理 ，连接切换等
-		mgm.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
-		mgm.POST("/cluster/setDefault/fileName/:fileName/contextName/:contextName", cluster.SetDefault)
-		mgm.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
-		mgm.POST("/cluster/setDefault/full_name/InCluster", cluster.SetDefaultInCluster)
+		mgm.POST("/cluster/:cluster/reconnect", cluster.Reconnect)
+		mgm.POST("/cluster/:cluster/setDefault", cluster.SetDefault)
 
 	}
 
@@ -455,7 +453,7 @@ func main() {
 		admin.POST("/cluster/kubeconfig/save", kubeconfig.Save)
 		admin.POST("/cluster/kubeconfig/remove", kubeconfig.Remove)
 		// 断开集群，断开后所有人都不可用
-		admin.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
+		admin.POST("/cluster/:cluster/disconnect", cluster.Disconnect)
 
 	}
 

@@ -73,14 +73,14 @@
               "icon": "fas fa-link  text-primary",
               "label": "连接",
               "actionType": "ajax",
-              "api": "post:/mgm/cluster/reconnect/fileName/${fileName}/contextName/${contextName}"
+              "api": "post:/mgm/cluster/${cluster_id_base64}/reconnect"
             },
             {
               "type": "button",
-              "icon": "fas fa-link  text-primary",
+              "icon": "fas fa-unlink text-primary",
               "label": "断开",
               "actionType": "ajax",
-              "api": "post:/admin/cluster/disconnect/fileName/${fileName}/contextName/${contextName}"
+              "api": "post:/admin/cluster/${cluster_id_base64}/disconnect"
             },
             {
               "type": "button",
