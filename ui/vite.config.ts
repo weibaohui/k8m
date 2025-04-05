@@ -2,8 +2,8 @@ import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import monacoEditorPlugin from 'vite-plugin-monaco-editor';
-import { copy } from 'fs-extra'
- 
+import {copy} from 'fs-extra'
+
 export default defineConfig(({mode}) => {
     console.log('current mode', mode)
 
@@ -38,6 +38,19 @@ export default defineConfig(({mode}) => {
                     },
                 },
                 '/k8s': {
+                    target: 'http://127.0.0.1:3618',
+                    changeOrigin: true,
+                    configure: (proxy) => {
+                        proxy.on('proxyReq', (proxyReq, req) => {
+                            const originalPath = req.url;
+                            console.log(`Before restoring: ${originalPath}`);
+                            // @ts-expect-error
+                            proxyReq.path = originalPath.replace('%2F%2F', '//');
+                            console.log(`Restored path: ${proxyReq.path}`);
+                        });
+                    },
+                },
+                '/params': {
                     target: 'http://127.0.0.1:3618',
                     changeOrigin: true,
                     configure: (proxy) => {
@@ -108,15 +121,15 @@ export default defineConfig(({mode}) => {
             {
                 name: 'copy-monaco-loader',
                 closeBundle() {
-                        copy('node_modules/monaco-editor/min/vs/loader.js', 'dist/monacoeditorwork/loader.js', { overwrite: true })
-                        copy('node_modules/monaco-editor/min/vs/editor', 'dist/monacoeditorwork/editor', { overwrite: true })
-                        copy('node_modules/monaco-editor/min/vs/language', 'dist/monacoeditorwork/language', { overwrite: true })
-                        copy('node_modules/monaco-editor/min/vs/base', 'dist/monacoeditorwork/base', { overwrite: true })
-                        copy('node_modules/monaco-editor/min/vs/basic-languages', 'dist/monacoeditorwork/basic-languages', { overwrite: true })
-                    }
+                    copy('node_modules/monaco-editor/min/vs/loader.js', 'dist/monacoeditorwork/loader.js', {overwrite: true})
+                    copy('node_modules/monaco-editor/min/vs/editor', 'dist/monacoeditorwork/editor', {overwrite: true})
+                    copy('node_modules/monaco-editor/min/vs/language', 'dist/monacoeditorwork/language', {overwrite: true})
+                    copy('node_modules/monaco-editor/min/vs/base', 'dist/monacoeditorwork/base', {overwrite: true})
+                    copy('node_modules/monaco-editor/min/vs/basic-languages', 'dist/monacoeditorwork/basic-languages', {overwrite: true})
+                }
             }
         ],
-        
+
 
     }
 })
