@@ -442,8 +442,8 @@ func main() {
 
 		// 集群权限设置
 		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
-		admin.GET("/cluster_permissions/user/:username/list", user.ListClusterPermissionsByUserName)    //列出指定用户拥有的集群权限
-		admin.GET("/cluster_permissions/cluster/:cluster/list", user.ListClusterPermissionsByClusterID) //列出指定集群下所有授权情况
+		admin.GET("/cluster_permissions/user/:username/list", user.ListClusterPermissionsByUserName)    // 列出指定用户拥有的集群权限
+		admin.GET("/cluster_permissions/cluster/:cluster/list", user.ListClusterPermissionsByClusterID) // 列出指定集群下所有授权情况
 		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 		admin.POST("/cluster_permissions/update_namespaces/:id", user.UpdateNamespaces)
