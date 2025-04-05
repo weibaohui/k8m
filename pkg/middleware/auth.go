@@ -23,9 +23,13 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// 设置信息传递，后面才能从ctx中获取到用户信息
 		c.Set(constants.JwtUserName, claims[constants.JwtUserName])
 		c.Set(constants.JwtUserRole, claims[constants.JwtUserRole])
 		c.Set(constants.JwtClusters, claims[constants.JwtClusters])
+		// 判断 claims[constants.JwtClusterUserRoles]的类型，应该是[]models.ClusterUserRole
+		// 为什么会出现string？
+		c.Set(constants.JwtClusterUserRoles, claims[constants.JwtClusterUserRoles])
 		c.Next()
 	}
 }
@@ -40,9 +44,7 @@ func PlatformAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		username := claims[constants.JwtUserName].(string)
 		role := claims[constants.JwtUserRole].(string)
-		cst := claims[constants.JwtClusters].(string)
 
 		// 权限检查
 		roles := strings.Split(role, ",")
@@ -52,9 +54,11 @@ func PlatformAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set(constants.JwtUserName, username)
-		c.Set(constants.JwtUserRole, role)
-		c.Set(constants.JwtClusters, cst)
+		// 设置信息传递，后面才能从ctx中获取到用户信息
+		c.Set(constants.JwtUserName, claims[constants.JwtUserName])
+		c.Set(constants.JwtUserRole, claims[constants.JwtUserRole])
+		c.Set(constants.JwtClusters, claims[constants.JwtClusters])
+		c.Set(constants.JwtClusterUserRoles, claims[constants.JwtClusterUserRoles])
 		c.Next()
 	}
 }
