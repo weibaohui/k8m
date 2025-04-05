@@ -446,7 +446,6 @@ func main() {
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 
 		// 管理集群、纳管\解除纳管\扫描
-		// k8s cluster
 		admin.POST("/cluster/scan", cluster.Scan)
 		admin.GET("/cluster/file/option_list", cluster.FileOptionList)
 		admin.POST("/cluster/kubeconfig/save", cluster.SaveKubeConfig)
