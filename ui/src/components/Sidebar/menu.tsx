@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import type { MenuProps } from 'antd';
-import { useEffect, useState } from 'react';
-import { fetcher } from '../Amis/fetcher';
+import {useNavigate} from "react-router-dom";
+import type {MenuProps} from 'antd';
+import {useEffect, useState} from 'react';
+import {fetcher} from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -18,7 +18,7 @@ const items: () => MenuItem[] = () => {
         const fetchUserRole = async () => {
             try {
                 const response = await fetcher({
-                    url: '/mgm/user/role',
+                    url: '/params/user/role',
                     method: 'get'
                 });
                 // 检查 response.data 是否存在，并确保其类型正确
