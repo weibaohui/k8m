@@ -17,25 +17,20 @@ const NodeExec: React.FC = () => {
     const [searchParams] = useSearchParams();
     const nodeName = searchParams.get('nodeName') || '';
     const type = searchParams.get('type') || ''; //NodeShell or KubectlShell
-    const fileName = searchParams.get('fileName') || ''; //base64加密过的避免/等字符串
-    const contextName = searchParams.get('contextName') || ''; //base64加密过的避免/等字符串
+
+    const clusterID = searchParams.get('clusterID') || ''; //base64加密过的避免/等字符串
     const [podShell, setPodShell] = useState<PodShell>();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>();
 
     let url = ''
     if (type == 'KubectlShell') {
-        if (!fileName || !contextName) {
+        if (!clusterID) {
             return <div>请在URL中提供文件名和上下文名称参数</div>;
         }
 
         //单独处理下InCluster模式的特殊命名
-        let clusterId = fileName + "/" + contextName
-        if (fileName == "InCluster" || contextName == "InCluster") {
-            clusterId = "InCluster"
-        }
-        const base64EncodedClusterId = btoa(clusterId);
-        url = `/k8s/node/name/${nodeName}/cluster_id/${base64EncodedClusterId}/create_kubectl_shell`
+        url = `/k8s/node/name/${nodeName}/cluster_id/${clusterID}/create_kubectl_shell`
     } else {
         if (!nodeName) {
             return <div>请在URL中提供节点名称参数</div>;
@@ -75,7 +70,7 @@ const NodeExec: React.FC = () => {
             .finally(() => {
                 setLoading(false);
             });
-    }, [nodeName, type, fileName, contextName]);
+    }, [nodeName, type, clusterID]);
 
 
 
