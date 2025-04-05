@@ -69,9 +69,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: workspace
-        path: |
-          .
-          !ui/node_modules
+        path: bin
 
   buildImage:
     needs: buildx
@@ -84,6 +82,8 @@ jobs:
       run: |
         platform=${{ matrix.platform }}
         echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+    - uses: actions/checkout@v4
 
     - name: Download workspace
       uses: actions/download-artifact@v4
@@ -136,6 +136,7 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         build-args: |
           PLATFORM=${{ env.PLATFORM_PAIR }}
+          --platform=${{ matrix.platform }}
         # 给清单打上多个标签
         tags: |
           ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
