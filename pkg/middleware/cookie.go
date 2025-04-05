@@ -42,14 +42,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			strings.HasPrefix(path, "/params/") || // 配置参数
 			strings.HasPrefix(path, "/mgm/") || // 个人中心
 			strings.HasPrefix(path, "/admin/") || // 管理后台
-			strings.HasPrefix(path, "/public/") ||
-			strings.Contains(path, "/cluster/file/option_list") ||
-			strings.Contains(path, "/cluster/scan") ||
-			strings.Contains(path, "/cluster/all") ||
-			strings.Contains(path, "/cluster/kubeconfig/save") ||
-			strings.Contains(path, "/cluster/kubeconfig/remove") ||
-			strings.Contains(path, "/cluster/reconnect") ||
-			strings.Contains(path, "/cluster/setDefault") {
+			strings.HasPrefix(path, "/public/") {
 			c.Next()
 			return
 
