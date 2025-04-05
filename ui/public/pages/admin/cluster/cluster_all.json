@@ -185,7 +185,7 @@
                                 "map": {
                                   "cluster_admin": "集群管理员",
                                   "cluster_readonly": "集群只读",
-                                  "platform_admin": "平台管理员"
+                                  "cluster_pod_exec": "Exec权限"
                                 }
                               },
                               {
@@ -296,7 +296,7 @@
                                 "map": {
                                   "cluster_admin": "集群管理员",
                                   "cluster_readonly": "集群只读",
-                                  "platform_admin": "平台管理员"
+                                  "cluster_pod_exec": "Exec权限"
                                 }
                               },
                               {
@@ -407,7 +407,7 @@
                                 "map": {
                                   "cluster_admin": "集群管理员",
                                   "cluster_readonly": "集群只读",
-                                  "platform_admin": "平台管理员"
+                                  "cluster_pod_exec": "Exec权限"
                                 }
                               },
                               {
