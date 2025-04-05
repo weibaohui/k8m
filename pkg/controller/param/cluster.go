@@ -2,19 +2,16 @@ package param
 
 import (
 	"fmt"
-	"slices"
-	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
 func ClusterOptionList(c *gin.Context) {
-	user, role := amis.GetLoginUser(c)
+	user, _ := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
 
@@ -24,8 +21,7 @@ func ClusterOptionList(c *gin.Context) {
 		})
 		return
 	}
-	roles := strings.Split(role, ",")
-	if !slices.Contains(roles, models.RolePlatformAdmin) {
+	if !amis.IsLoginedUserPlatformAdmin(c) {
 		userCluster, err := service.UserService().GetClusters(user)
 		if err != nil {
 			amis.WriteJsonData(c, gin.H{
