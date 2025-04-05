@@ -778,31 +778,6 @@
                 },
                 {
                   "type": "button",
-                  "label": "调整副本数量",
-                  "icon": "fas fa-plus-circle text-primary",
-                  "level": "link",
-                  "actionType": "dialog",
-                  "dialog": {
-                    "title": "调整副本数量",
-                    "body": {
-                      "type": "form",
-                      "api": {
-                        "url": "/k8s/statefulset/ns/$metadata.namespace/name/$metadata.name/scale/replica/${spec.replicas}",
-                        "method": "post",
-                        "data": {}
-                      },
-                      "body": [
-                        {
-                          "type": "input-number",
-                          "name": "spec.replicas",
-                          "label": "副本"
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "type": "button",
                   "icon": "fas fa-memory text-primary",
                   "label": "调整资源限制",
                   "actionType": "dialog",
