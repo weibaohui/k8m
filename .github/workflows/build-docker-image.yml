@@ -121,11 +121,13 @@ jobs:
         password: ${{ secrets.ALIHUB_TOKEN }}
 
     - name: Build and push
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile
         push: ${{ github.event_name != 'pull_request' }}
+        cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache,mode=max
         platforms: linux/amd64,linux/arm64
         # 给清单打上多个标签
         tags: |

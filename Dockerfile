@@ -6,11 +6,9 @@ WORKDIR /app
 
 ADD . .
 
-RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories \
-    && apk upgrade && apk add --no-cache --virtual .build-deps \
-    ca-certificates gcc g++ curl upx
-
-RUN go build -o k8m . && upx -9 k8m
+RUN apk add upx
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go build -o k8m . && apk add upx && upx -9 k8m
 
 ### build final image
 FROM alpine:3.21
