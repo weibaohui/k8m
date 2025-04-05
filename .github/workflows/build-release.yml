@@ -28,46 +28,60 @@ jobs:
         pnpm install
         pnpm build
 
-    - name: 设置go环境
-      uses: actions/setup-go@v5
+    - name: 上传到共享
+      uses: actions/upload-artifact@v4
       with:
-        go-version-file: 'go.mod'
-        cache-dependency-path: 'go.sum'
+        name: workspace
+        path: ui/dist
 
-    - name: 安装 UPX
-      uses: crazy-max/ghaction-upx@v3
-      with:
-        install-only: true
+    # - name: 设置go环境
+    #   uses: actions/setup-go@v5
+    #   with:
+    #     go-version-file: 'go.mod'
+    #     cache-dependency-path: 'go.sum'
 
-    - name: 编译后端
-      run: |
-        make build-all
+    # - name: 安装 UPX
+    #   uses: crazy-max/ghaction-upx@v3
+    #   with:
+    #     install-only: true
 
-    - name: 上传二进制
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: bin/k8m*
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
+    # - name: 编译后端
+    #   run: |
+    #     make build-all
 
-  # build-go-binary:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       goos: [linux, windows, darwin]
-  #       goarch: [amd64, arm64]
-  #       exclude:
-  #         - goarch: arm64
-  #           goos: windows
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: wangyoucao577/go-release-action@v1
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         goos: ${{ matrix.goos }}
-  #         goarch: ${{ matrix.goarch }}
-  #         goversion: 1.24
-  #         binary_name: "k8m"
-  #         extra_files: LICENSE README.md
+    # - name: 上传二进制
+    #   uses: svenstaro/upload-release-action@v2
+    #   with:
+    #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #     file: bin/k8m*
+    #     tag: ${{ github.ref }}
+    #     overwrite: true
+    #     file_glob: true
+
+  build-go-binary:
+    needs: build-frontend
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goarch: arm64
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: 从共享下载
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace
+          path: ui/dist
+
+      - uses: wangyoucao577/go-release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: 1.24
+          binary_name: "k8m"
+          extra_files: LICENSE README.md
+          executable_compression: 'upx -v -9'
