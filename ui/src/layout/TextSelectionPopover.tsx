@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import ReactDOM from "react-dom";
-import { render as amisRender } from "amis";
-import { Card } from "amis-ui";
+import {render as amisRender} from "amis";
+import {Card} from "amis-ui";
 import Draggable from "react-draggable";
 import './TextSelectionPopover.css';
-import { fetcher } from "@/components/Amis/fetcher";
+import {fetcher} from "@/components/Amis/fetcher";
 
 const GlobalTextSelector: React.FC = () => {
     const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
@@ -14,7 +14,7 @@ const GlobalTextSelector: React.FC = () => {
     useEffect(() => {
         // 从后端获取配置
         fetcher({
-            url: '/mgm/config/AnySelect',
+            url: '/params/config/AnySelect',
             method: 'get'
         })
             .then(response => {
@@ -76,7 +76,8 @@ const GlobalTextSelector: React.FC = () => {
                 <Card
                     titleClassName="selection-title"
                     title={<>
-                        <i className="fas fa-grip-vertical" style={{ marginRight: '8px', visibility: isFullscreen ? 'hidden' : 'visible' }}></i>
+                        <i className="fas fa-grip-vertical"
+                           style={{marginRight: '8px', visibility: isFullscreen ? 'hidden' : 'visible'}}></i>
                         {selection.text.length > 40 ? selection.text.slice(0, 40) + "..." : selection.text}
                         &nbsp;&nbsp;
 
