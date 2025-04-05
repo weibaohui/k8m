@@ -416,13 +416,6 @@ func main() {
 		mgm.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
 
-		// mcp
-		mgm.GET("/mcp/list", middleware.RolePlatformOnly(mcp.List))
-		mgm.POST("/mcp/connect/:name", middleware.RolePlatformOnly(mcp.Connect))
-		mgm.POST("/mcp/delete", middleware.RolePlatformOnly(mcp.Delete))
-		mgm.POST("/mcp/save", middleware.RolePlatformOnly(mcp.AddOrUpdate))
-		mgm.POST("/mcp/save/id/:id/status/:status", middleware.RolePlatformOnly(mcp.QuickSave))
-
 		// config
 		mgm.GET("/config/:key", config.Config)
 
@@ -447,6 +440,13 @@ func main() {
 		// 平参数配置
 		admin.GET("/config/all", config.GetConfig)
 		admin.POST("/config/update", config.UpdateConfig)
+
+		// mcp
+		admin.GET("/mcp/list", mcp.List)
+		admin.POST("/mcp/connect/:name", mcp.Connect)
+		admin.POST("/mcp/delete", mcp.Delete)
+		admin.POST("/mcp/save", mcp.AddOrUpdate)
+		admin.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
 	}
 
 	showBootInfo(Version, flag.Init().Port)

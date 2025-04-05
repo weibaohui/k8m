@@ -47,8 +47,8 @@
     },
     {
       "type": "crud",
-      "api": "/mgm/mcp/list",
-      "quickSaveItemApi": "/mgm/mcp/save/id/${id}/status/${config.enabled}",
+      "api": "/admin/mcp/list",
+      "quickSaveItemApi": "/admin/mcp/save/id/${id}/status/${config.enabled}",
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
@@ -84,7 +84,7 @@
             "title": "添加服务器",
             "body": {
               "type": "form",
-              "api": "/mgm/mcp/save",
+              "api": "/admin/mcp/save",
               "body": [
                 {
                   "type": "alert",
@@ -138,7 +138,7 @@
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
           "api": {
-            "url": "mgm/mcp/delete",
+            "url": "/admin/mcp/delete",
             "method": "post",
             "data": {
               "ids": "${selectedItems | pick:config.id }"
@@ -313,7 +313,7 @@
                 "title": "编辑服务器",
                 "body": {
                   "type": "form",
-                  "api": "post:/mgm/mcp/save",
+                  "api": "post:/admin/mcp/save",
                   "body": [
                     {
                       "type": "hidden",
@@ -345,7 +345,7 @@
               "type": "button",
               "label": "连接",
               "actionType": "ajax",
-              "api": "post:/mgm/mcp/connect/${config.name}"
+              "api": "post:/admin/mcp/connect/${config.name}"
             }
           ]
         }
