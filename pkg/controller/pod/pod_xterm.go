@@ -71,9 +71,9 @@ func (t *TerminalSizeQueue) Push(cols, rows uint16) {
 	t.sizes = append(t.sizes, remotecommand.TerminalSize{Width: cols, Height: rows})
 }
 
-func removePod(selectedCluster string, ns string, podName string) {
+func removePod(ctx context.Context, selectedCluster string, ns string, podName string) {
 	// 删除Pod
-	kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Delete()
+	kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Delete()
 }
 
 func cmdLogger(c *gin.Context, cmd string) {
@@ -104,7 +104,7 @@ func Xterm(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	//TODO 转移到kom中，走cb
+	// TODO 转移到kom中，走cb
 	var err error
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 	roles := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
@@ -124,7 +124,7 @@ func Xterm(c *gin.Context) {
 	var cleanupOnce sync.Once
 	cleanup := func() {
 		if removeAfterExec != "" {
-			removePod(selectedCluster, ns, podName)
+			removePod(ctx, selectedCluster, ns, podName)
 		}
 	}
 	// 确保函数退出时执行清理
