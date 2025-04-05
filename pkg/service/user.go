@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 )
@@ -36,7 +37,7 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 			// 只有平台管理员才返回，这是最大权限了
 			// 不是平台管理员就是普通用户，这是权限系统的设定，只有这两种角色
 			// 普通用户需要接受集群权限授权，那么就往下执行，查看是否具有集群授权
-			if role == models.RolePlatformAdmin {
+			if role == constants.RolePlatformAdmin {
 				return []string{role}, nil
 			}
 		}

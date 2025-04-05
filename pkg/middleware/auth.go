@@ -9,7 +9,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
-	"github.com/weibaohui/k8m/pkg/models"
 )
 
 // AuthMiddleware 登录校验
@@ -48,7 +47,7 @@ func PlatformAuthMiddleware() gin.HandlerFunc {
 
 		// 权限检查
 		roles := strings.Split(role, ",")
-		if !slices.Contains(roles, models.RolePlatformAdmin) {
+		if !slices.Contains(roles, constants.RolePlatformAdmin) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "平台管理员权限校验失败"})
 			c.Abort()
 			return

@@ -62,7 +62,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	roles, _ := service.UserService().GetClusterRole(cluster, username, roleString)
 
 	// 先看是不是平台管理员
-	if slice.Contain(roles, models.RolePlatformAdmin) {
+	if slice.Contain(roles, constants.RolePlatformAdmin) {
 		// 平台管理员，可以执行任何操作
 		return username, roles, nil
 	}
@@ -91,7 +91,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	switch action {
 	case "exec":
 		execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
-			return item.Cluster == cluster && item.Role == models.RoleClusterPodExec
+			return item.Cluster == cluster && item.Role == constants.RoleClusterPodExec
 		})
 		if len(execClusters) == 0 {
 			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] Exec权限", username, cluster)
@@ -109,7 +109,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 
 	case "delete", "update", "patch", "create":
 		changeClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
-			return item.Cluster == cluster && item.Role == models.RoleClusterAdmin
+			return item.Cluster == cluster && item.Role == constants.RoleClusterAdmin
 		})
 		if len(changeClusters) == 0 {
 			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 操作权限", username, cluster)
@@ -126,7 +126,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		}
 	default:
 		readClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
-			return item.Cluster == cluster && item.Role == models.RoleClusterReadonly
+			return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
 		})
 		if len(readClusters) == 0 {
 			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 读取权限", username, cluster)

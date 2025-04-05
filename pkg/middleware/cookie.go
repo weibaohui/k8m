@@ -11,7 +11,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
-	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -69,7 +68,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		if err != nil {
 			// 不存在cookie
 
-			if slices.Contains(roles, models.RolePlatformAdmin) {
+			if slices.Contains(roles, constants.RolePlatformAdmin) {
 				// 平台管理员，选一个
 				clusterID = service.ClusterService().FirstClusterID()
 			} else {
@@ -133,7 +132,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		}
 
 		// 如果不是平台管理员，检查是否有权限访问该集群
-		if !slices.Contains(roles, models.RolePlatformAdmin) && !slices.Contains(csts, sc) {
+		if !slices.Contains(roles, constants.RolePlatformAdmin) && !slices.Contains(csts, sc) {
 			c.JSON(512, gin.H{
 				"msg": "无权限访问集群: " + sc,
 			})

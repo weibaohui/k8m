@@ -26,11 +26,11 @@ func GetLoginUser(c *gin.Context) (string, string) {
 	role := c.GetString(constants.JwtUserRole)
 
 	roles := strings.Split(role, ",")
-	role = models.RoleGuest
+	role = constants.RoleGuest
 
 	// 检查是否平台管理员
-	if slice.Contain(roles, models.RolePlatformAdmin) {
-		role = models.RolePlatformAdmin
+	if slice.Contain(roles, constants.RolePlatformAdmin) {
+		role = constants.RolePlatformAdmin
 	}
 	return user, role
 }
@@ -42,11 +42,11 @@ func GetLoginUserWithClusterRoles(c *gin.Context) (string, string, []*models.Clu
 	role := c.GetString(constants.JwtUserRole)
 
 	roles := strings.Split(role, ",")
-	role = models.RoleGuest
+	role = constants.RoleGuest
 
 	// 检查是否平台管理员
-	if slice.Contain(roles, models.RolePlatformAdmin) {
-		role = models.RolePlatformAdmin
+	if slice.Contain(roles, constants.RolePlatformAdmin) {
+		role = constants.RolePlatformAdmin
 	}
 
 	if value, exists := c.Get(constants.JwtClusterUserRoles); exists {
@@ -70,7 +70,7 @@ func GetLoginUserWithClusterRoles(c *gin.Context) (string, string, []*models.Clu
 func IsCurrentUserPlatformAdmin(c *gin.Context) bool {
 	role := c.GetString(constants.JwtUserRole)
 	roles := strings.Split(role, ",")
-	return slice.Contain(roles, models.RolePlatformAdmin)
+	return slice.Contain(roles, constants.RolePlatformAdmin)
 }
 
 func GetContextWithUser(c *gin.Context) context.Context {

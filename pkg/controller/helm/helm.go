@@ -41,7 +41,7 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 	}
 
 	var err error
-	if role == models.RoleClusterReadonly {
+	if role == constants.RoleClusterReadonly {
 		err = fmt.Errorf("非管理员不能%s资源", action)
 	}
 	if err != nil {

@@ -87,7 +87,7 @@ func LoginByPassword(c *gin.Context) {
 			return
 		}
 		// Admin用户不需要2FA验证
-		token, _ := generateToken(req.Username, []string{models.RolePlatformAdmin}, nil)
+		token, _ := generateToken(req.Username, []string{constants.RolePlatformAdmin}, nil)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {

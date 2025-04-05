@@ -110,7 +110,7 @@ func Xterm(c *gin.Context) {
 	roles := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
 	clusterRoles, _ := service.UserService().GetClusterRole(selectedCluster, username, roles)
 
-	if len(clusterRoles) == 0 || !(slice.Contain(clusterRoles, models.RolePlatformAdmin) || slice.Contain(clusterRoles, models.RoleClusterAdmin) || slice.Contain(clusterRoles, models.RoleClusterPodExec)) {
+	if len(clusterRoles) == 0 || !(slice.Contain(clusterRoles, constants.RolePlatformAdmin) || slice.Contain(clusterRoles, constants.RoleClusterAdmin) || slice.Contain(clusterRoles, constants.RoleClusterPodExec)) {
 		amis.WriteJsonError(c, fmt.Errorf("非管理员,且无exec权限，不能执行Exec命令"))
 		return
 	}

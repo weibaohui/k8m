@@ -27,19 +27,6 @@ type User struct {
 
 }
 
-const (
-	// 用户角色两种，平台管理员、普通用户
-	RolePlatformAdmin = "platform_admin" // 平台管理员
-	RoleGuest         = "guest"          // 普通用户，只能登录，约等于游客,无任何集群权限，也看不到集群列表
-
-	// 平台管理员拥有所有权限
-	// 普通用户需要赋予集群角色，
-	// 集群角色三种，集群管理员、集群只读、集群Pod内执行命令
-	RoleClusterAdmin    = "cluster_admin"    // 集群管理员
-	RoleClusterReadonly = "cluster_readonly" // 集群只读权限
-	RoleClusterPodExec  = "cluster_pod_exec" // 集群Pod内执行命令权限
-)
-
 func (c *User) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*User, int64, error) {
 
 	return dao.GenericQuery(params, c, queryFuncs...)

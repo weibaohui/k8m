@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/constants"
 )
 
 func RolePlatformOnly(handler interface{}) gin.HandlerFunc {
@@ -27,7 +27,7 @@ func RolePlatformOnly(handler interface{}) gin.HandlerFunc {
 
 		// 权限检查
 		roles := strings.Split(role, ",")
-		if !slices.Contains(roles, models.RolePlatformAdmin) {
+		if !slices.Contains(roles, constants.RolePlatformAdmin) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Access Denied for your role"})
 			c.Abort()
 			return

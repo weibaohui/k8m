@@ -9,6 +9,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 )
@@ -48,13 +49,13 @@ func Save(c *gin.Context) {
 	if m.ID == 0 {
 		// 新增
 		switch role {
-		case models.RoleClusterAdmin, models.RoleClusterReadonly:
+		case constants.RoleClusterAdmin, constants.RoleClusterReadonly:
 			amis.WriteJsonError(c, fmt.Errorf("非管理员不能新增用户"))
 			return
 		}
 	} else {
 		switch role {
-		case models.RoleClusterAdmin, models.RoleClusterReadonly:
+		case constants.RoleClusterAdmin, constants.RoleClusterReadonly:
 			var originalUser models.User
 			err = dao.DB().Model(&models.User{}).
 				Where("id=?", m.ID).
@@ -101,7 +102,7 @@ func Delete(c *gin.Context) {
 	_, role := amis.GetLoginUser(c)
 
 	switch role {
-	case models.RoleClusterReadonly, models.RoleClusterAdmin:
+	case constants.RoleClusterReadonly, constants.RoleClusterAdmin:
 		// 非平台管理员，不能删除
 		amis.WriteJsonError(c, fmt.Errorf("非管理员不能删除用户"))
 		return
