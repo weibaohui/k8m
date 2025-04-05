@@ -39,6 +39,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			path == "/favicon.ico" ||
 			path == "/auth/login" ||
 			strings.HasPrefix(path, "/assets/") ||
+			strings.HasPrefix(path, "/params/") || // 配置参数
 			strings.HasPrefix(path, "/mgm/") || // 个人中心
 			strings.HasPrefix(path, "/admin/") || // 管理后台
 			strings.HasPrefix(path, "/public/") ||
@@ -61,7 +62,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		//注意，这里的role，可能是一个数组，需要处理一下
+		// 注意，这里的role，可能是一个数组，需要处理一下
 		role := claims[constants.JwtUserRole].(string)
 		cst := claims[constants.JwtClusters].(string)
 		roles := strings.Split(role, ",")

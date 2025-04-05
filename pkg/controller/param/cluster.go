@@ -13,7 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-func OptionList(c *gin.Context) {
+func ClusterOptionList(c *gin.Context) {
 	user, role := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()

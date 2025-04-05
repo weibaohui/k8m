@@ -13,11 +13,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
-	"github.com/weibaohui/k8m/pkg/controller/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
@@ -174,11 +174,11 @@ func main() {
 	params := r.Group("/params", middleware.AuthMiddleware())
 	{
 		// 获取当前登录用户的角色，登录即可
-		params.GET("/user/role", param.Role)
+		params.GET("/user/role", param.UserRole)
 		// 获取某个配置项
 		params.GET("/config/:key", param.Config)
 		// 获取当前登录用户的集群列表
-		params.GET("/cluster/option_list", cluster.OptionList)
+		params.GET("/cluster/option_list", param.ClusterOptionList)
 
 	}
 	api := r.Group("/k8s", middleware.AuthMiddleware())
@@ -441,7 +441,7 @@ func main() {
 		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/save", user.SaveClusterPermission)
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 
-		//管理集群、纳管、切换等
+		// 管理集群、纳管、切换等
 		// k8s cluster
 		admin.GET("/cluster/all", cluster.List)
 		admin.POST("/cluster/scan", cluster.Scan)
