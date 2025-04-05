@@ -17,7 +17,7 @@ func Profile(c *gin.Context) {
 	m := &models.User{}
 
 	m.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为用户是管理员创建的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为用户是管理员创建的，所以不需要CreatedBy字段
 
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.
@@ -31,13 +31,13 @@ func Profile(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-// 列出当前登录用户所拥有的集群权限
+// ListUserPermissions 列出当前登录用户所拥有的集群权限
 func ListUserPermissions(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	m := &models.ClusterUserRole{}
 	m.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Where(m)
 	})
@@ -71,7 +71,7 @@ func UpdatePsw(c *gin.Context) {
 
 	m.Password = base64.StdEncoding.EncodeToString(psw)
 	m.Username = params.UserName // 用户名是从token中获取的，不能使用用户前端传递过来的用户名
-	params.UserName = ""         //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = ""         // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
 	err = dao.DB().Select([]string{"password", "salt"}).Where("username=?", m.Username).Updates(m).Error
 
