@@ -1,12 +1,23 @@
-FROM alpine:3.21
+FROM golang:1.24-alpine  AS golang-builder
 
-ARG PLATFORM="linux/amd64"
+ENV GOPROXY="https://goproxy.io"
+
+WORKDIR /app
+
+ADD . .
+
+RUN apk add upx
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go build -o k8m . && apk add upx && upx -9 k8m
+
+### build final image
+FROM alpine:3.21
 
 WORKDIR /app
 
 ENV TZ=Asia/Shanghai
 
-ADD k8m-${PLATFORM} k8m
+COPY --from=golang-builder /app/k8m .
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
     && apk upgrade && apk add --no-cache curl bash inotify-tools kubectl alpine-conf busybox-extras sqlite tzdata \

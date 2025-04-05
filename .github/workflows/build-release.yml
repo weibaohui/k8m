@@ -34,54 +34,26 @@ jobs:
         name: workspace
         path: ui/dist
 
-    # - name: 设置go环境
-    #   uses: actions/setup-go@v5
-    #   with:
-    #     go-version-file: 'go.mod'
-    #     cache-dependency-path: 'go.sum'
+    - name: 设置go环境
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+        cache-dependency-path: 'go.sum'
 
-    # - name: 安装 UPX
-    #   uses: crazy-max/ghaction-upx@v3
-    #   with:
-    #     install-only: true
+    - name: 安装 UPX
+      uses: crazy-max/ghaction-upx@v3
+      with:
+        install-only: true
 
-    # - name: 编译后端
-    #   run: |
-    #     make build-all
+    - name: 编译后端
+      run: |
+        make build-all
 
-    # - name: 上传二进制
-    #   uses: svenstaro/upload-release-action@v2
-    #   with:
-    #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-    #     file: bin/k8m*
-    #     tag: ${{ github.ref }}
-    #     overwrite: true
-    #     file_glob: true
-
-  build-go-binary:
-    needs: build-frontend
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm64]
-        exclude:
-          - goarch: arm64
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: 从共享下载
-        uses: actions/download-artifact@v4
-        with:
-          name: workspace
-          path: ui/dist
-
-      - uses: wangyoucao577/go-release-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          goversion: 1.24
-          binary_name: "k8m"
-          extra_files: LICENSE README.md
-          executable_compression: 'upx -v -9'
+    - name: 上传二进制
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: bin/k8m*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
