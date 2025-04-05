@@ -1,7 +1,7 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import * as yaml from 'js-yaml';
-import {Button, message} from 'antd';
-import {fetcher} from '@/components/Amis/fetcher';
+import { Button, message } from 'antd';
+import { fetcher } from '@/components/Amis/fetcher';
 
 interface KubeConfigProps {
     data: Record<string, any>;
@@ -69,7 +69,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
         }
 
         if (clusterInfo) {
-            setClusterInfo({...clusterInfo, displayName: newDisplayName});
+            setClusterInfo({ ...clusterInfo, displayName: newDisplayName });
         }
         setIsValid(() => clusterInfo !== null && newDisplayName.trim() !== '' && validateDisplayName(newDisplayName));
     };
@@ -86,7 +86,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
         setLoading(true);
         try {
             const response = await fetcher({
-                url: '/k8s/cluster/kubeconfig/save',
+                url: '/admin/cluster/kubeconfig/save',
                 method: 'post',
                 data: {
                     content: editorContent,
@@ -111,9 +111,9 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
     };
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {error && (
-                <div style={{color: 'red', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px'}}>
+                <div style={{ color: 'red', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>
                     {error}
                 </div>
             )}
@@ -124,7 +124,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                 marginBottom: '12px',
                 border: '1px solid #91caff'
             }}>
-                <div style={{color: '#1677ff'}}>请将kubeconfig文件内容粘贴到下面的编辑窗口</div>
+                <div style={{ color: '#1677ff' }}>请将kubeconfig文件内容粘贴到下面的编辑窗口</div>
             </div>
             <div style={{
                 display: 'flex',
@@ -133,8 +133,8 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                 marginBottom: '12px',
                 gap: '8px'
             }}>
-                <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1}}>
-                    <span style={{color: '#ff4d4f', marginRight: '4px'}}>*</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                    <span style={{ color: '#ff4d4f', marginRight: '4px' }}>*</span>
                     <span>名称:</span>
                     <input
                         type="text"
@@ -150,7 +150,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     />
                 </div>
                 {displayNameError && (
-                    <div style={{color: '#ff4d4f', fontSize: '12px', marginTop: '4px'}}>
+                    <div style={{ color: '#ff4d4f', fontSize: '12px', marginTop: '4px' }}>
                         {displayNameError}
                     </div>
                 )}
@@ -173,9 +173,9 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     <div style={{
                         marginBottom: '12px'
                     }}>
-                        <h4 style={{margin: 0}}>配置信息</h4>
+                        <h4 style={{ margin: 0 }}>配置信息</h4>
                     </div>
-                    <div style={{display: 'grid', gap: '8px'}}>
+                    <div style={{ display: 'grid', gap: '8px' }}>
                         <div>集群名称: {clusterInfo?.clusterName}</div>
                         <div>服务器地址: {clusterInfo?.serverUrl}</div>
                         <div>用户名称: {clusterInfo?.userName}</div>
@@ -183,7 +183,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                     </div>
                 </div>
             )}
-            <div style={{border: '1px solid #d9d9d9', borderRadius: '4px'}}>
+            <div style={{ border: '1px solid #d9d9d9', borderRadius: '4px' }}>
                 <textarea
                     style={{
                         width: '100%',

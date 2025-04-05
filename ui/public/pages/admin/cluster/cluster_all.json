@@ -534,7 +534,7 @@
                   "label": "检测",
                   "level": "link",
                   "actionType": "ajax",
-                  "api": "post:/admin/k8s_gpt/cluster/${cluster_id_base64}/run"
+                  "api": "post:/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
                 },
                 {
                   "type": "button",
@@ -550,7 +550,7 @@
                     "body": [
                       {
                         "type": "k8sGPT",
-                        "api": "/admin/k8s_gpt/cluster/${cluster_id_base64}/result"
+                        "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/result"
                       }
                     ]
                   }

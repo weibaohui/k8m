@@ -1,7 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
-import {useEffect, useState} from 'react';
-import {fetcher} from '../Amis/fetcher';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -38,13 +38,7 @@ const items: () => MenuItem[] = () => {
         navigate(path)
     }
     return [
-        {
-            label: "多集群",
-            title: "多集群",
-            icon: <i className="fa-solid fa-server"></i>,
-            key: "cluster_all",
-            onClick: () => onMenuClick('/cluster/cluster_all')
-        },
+
         {
             label: "命名空间",
             title: "命名空间",
@@ -389,6 +383,13 @@ const items: () => MenuItem[] = () => {
                 icon: <i className="fa-solid fa-wrench"></i>,
                 key: "platform_settings",
                 children: [
+                    {
+                        label: "多集群管理",
+                        title: "多集群管理",
+                        icon: <i className="fa-solid fa-server"></i>,
+                        key: "cluster_all",
+                        onClick: () => onMenuClick('/admin/cluster/cluster_all')
+                    },
                     {
                         label: "参数设置",
                         icon: <i className="fa-solid fa-sliders"></i>,
