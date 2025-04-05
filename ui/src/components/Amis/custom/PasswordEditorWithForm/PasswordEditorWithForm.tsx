@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
-import {replacePlaceholders} from "@/utils/utils.ts";
-import {fetcher} from "@/components/Amis/fetcher.ts";
-import {Button, Input, message} from 'antd';
-import {encrypt} from "@/utils/crypto.ts";
+import { replacePlaceholders } from "@/utils/utils.ts";
+import { fetcher } from "@/components/Amis/fetcher.ts";
+import { Button, Input, message } from 'antd';
+import { encrypt } from "@/utils/crypto.ts";
 
 
 interface PasswordEditorWithFormProps {
@@ -12,9 +12,9 @@ interface PasswordEditorWithFormProps {
 }
 
 const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
-                                                                           api,
-                                                                           data,
-                                                                       }) => {
+    api,
+    data,
+}) => {
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState('');
 
@@ -41,9 +41,9 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
         });
 
         if (response.data?.status !== 0) {
-            message.error(`保存失败:请尝试刷新后重试。 ${response.data?.msg}`);
+            message.error(`密码修改失败:请尝试刷新后重试。 ${response.data?.msg}`);
         } else {
-            message.info('保存成功！');
+            message.info('密码修改成功！');
             setPassword('');
         }
         setLoading(false);
@@ -51,8 +51,8 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
 
     return (
         <>
-            <div style={{width: '100%', height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column'}}>
-                <div style={{padding: '10px', display: 'flex', justifyContent: 'flex-end'}}>
+            <div style={{ width: '100%', height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '10px', display: 'flex', justifyContent: 'flex-end' }}>
                     <Input.Password
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
