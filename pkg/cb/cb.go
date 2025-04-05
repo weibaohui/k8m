@@ -1,7 +1,9 @@
 package cb
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -15,17 +17,29 @@ import (
 func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 	selectedCluster := service.ClusterService().ClusterID(cluster)
 
+	getCallback := kom.Cluster(selectedCluster).Callback().Get()
+	_ = getCallback.Before("*").Register("k8m:get", handleGet)
+
+	describeCallback := kom.Cluster(selectedCluster).Callback().Describe()
+	_ = describeCallback.Before("*").Register("k8m:describe", handleDescribe)
+
+	listCallback := kom.Cluster(selectedCluster).Callback().List()
+	_ = listCallback.Before("*").Register("k8m:list", handleList)
+
+	logsCallback := kom.Cluster(selectedCluster).Callback().Logs()
+	_ = logsCallback.Before("*").Register("k8m:logs", handleLogs)
+
 	deleteCallback := kom.Cluster(selectedCluster).Callback().Delete()
-	_ = deleteCallback.Before("kom:delete").Register("k8m:delete", handleDelete)
+	_ = deleteCallback.Before("*").Register("k8m:delete", handleDelete)
 
 	updateCallback := kom.Cluster(selectedCluster).Callback().Update()
-	_ = updateCallback.Before("kom:update").Register("k8m:update", handleUpdate)
+	_ = updateCallback.Before("*").Register("k8m:update", handleUpdate)
 
 	patchCallback := kom.Cluster(selectedCluster).Callback().Patch()
-	_ = patchCallback.Before("kom:patch").Register("k8m:patch", handlePatch)
+	_ = patchCallback.Before("*").Register("k8m:patch", handlePatch)
 
 	createCallback := kom.Cluster(selectedCluster).Callback().Create()
-	_ = createCallback.Before("kom:create").Register("k8m:create", handleCreate)
+	_ = createCallback.Before("*").Register("k8m:create", handleCreate)
 
 	execCallback := kom.Cluster(selectedCluster).Callback().Exec()
 	_ = execCallback.Before("*").Register("k8m:pod-exec", handleExec)
@@ -40,8 +54,109 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	stmt := k8s.Statement
 	cluster := k8s.ID
 	ctx := stmt.Context
+	ns := stmt.Namespace
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	roles := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+	clusterRolesString := fmt.Sprintf("%s", ctx.Value(constants.JwtClusterUserRoles))
+
+	var err error
+
+	roles, _ := service.UserService().GetClusterRole(cluster, username, roleString)
+
+	// 先看是不是平台管理员
+	if slice.Contain(roles, models.RolePlatformAdmin) {
+		// 平台管理员，可以执行任何操作
+		return username, roles, nil
+	}
+	// 看是否有集群权限
+	var clusterUserRoles []*models.ClusterUserRole
+	err = json.Unmarshal([]byte(clusterRolesString), &clusterUserRoles)
+
+	if err != nil {
+		// 没有集群权限，报错
+		return "", nil, err
+	}
+	if clusterUserRoles != nil && len(clusterUserRoles) == 0 {
+		return "", nil, fmt.Errorf("用户[%s]没有集群授权", username)
+	}
+	if _, ok := slice.FindBy(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+		return item.Cluster == cluster
+	}); !ok {
+		return "", nil, fmt.Errorf("用户[%s]没有集群[%s]访问权限", username, cluster)
+	}
+
+	// 下面都是有集群的访问权限的情况，需要进一步区分是什么类型的操作。
+	// 以及是否有namespace的权限
+
+	// 操作对象为带namespace的情况，那么需要进一步看用户是否有该ns的权限
+	// 如果遍历权限表格，该集群对应的ns为空，说明不限制，如果ns不为空（是一个数组），说明限制了ns，就需要相等才能执行。
+	// 先判断是否有集群、对应的操作权限，再看是否有命名空间的
+	switch action {
+	case "exec":
+		execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+			return item.Cluster == cluster && item.Role == models.RoleClusterPodExec
+		})
+		if len(execClusters) == 0 {
+			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] Exec权限", username, cluster)
+		}
+		if ns != "" {
+			// 具备Exec权限了，那么继续看是否有该ns的权限.
+			// ns为空，或者ns列表中含有当前ns，那么就允许执行。
+			execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
+				return item.Namespaces == "" || slice.Contain(strings.Split(item.Namespaces, ","), ns)
+			})
+			if len(execClustersWithNs) == 0 {
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限", username, cluster, ns)
+			}
+		}
+
+	case "delete", "update", "patch", "create":
+		changeClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+			return item.Cluster == cluster && item.Role == models.RoleClusterAdmin
+		})
+		if len(changeClusters) == 0 {
+			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 操作权限", username, cluster)
+		}
+		if ns != "" {
+			// 具备操作权限了，那么继续看是否有该ns的权限.
+			// ns为空，或者ns列表中含有当前ns，那么就允许执行。
+			changeClustersWithNs := slice.Filter(changeClusters, func(index int, item *models.ClusterUserRole) bool {
+				return item.Namespaces == "" || slice.Contain(strings.Split(item.Namespaces, ","), ns)
+			})
+			if len(changeClustersWithNs) == 0 {
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 权限", username, cluster, action)
+			}
+		}
+	default:
+		readClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+			return item.Cluster == cluster && item.Role == models.RoleClusterReadonly
+		})
+		if len(readClusters) == 0 {
+			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 读取权限", username, cluster)
+		}
+		if ns != "" {
+			// 具备操作权限了，那么继续看是否有该ns的权限.
+			// ns为空，或者ns列表中含有当前ns，那么就允许执行。
+			changeClustersWithNs := slice.Filter(readClusters, func(index int, item *models.ClusterUserRole) bool {
+				return item.Namespaces == "" || slice.Contain(strings.Split(item.Namespaces, ","), ns)
+			})
+			if len(changeClustersWithNs) == 0 {
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 权限", username, cluster, action)
+			}
+		}
+	}
+
+	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s，roleString=%v, operation=%s, gck=[%s], resource=[%s/%s] ",
+		cluster, username, roleString, roles, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
+	klog.V(6).Infof("final error=%v", err)
+	return username, roles, err
+}
+func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
+	stmt := k8s.Statement
+	cluster := k8s.ID
+	ctx := stmt.Context
+	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
+	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
 
 	log := models.OperationLog{
 		Action:       action,
@@ -51,27 +166,8 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		Namespace:    stmt.Namespace,
 		UserName:     username,
 		Group:        stmt.GVK.Group,
-		Role:         roles,
+		Role:         roleString,
 		ActionResult: "success",
-	}
-
-	var err error
-	clusterRoles, _ := service.UserService().GetClusterRole(cluster, username, roles)
-
-	if len(clusterRoles) == 0 {
-		err = fmt.Errorf("非管理员不能%s资源", action)
-	}
-
-	switch action {
-	case "exec":
-		// 只允许具备exec权限的用户，包括管理员和平台管理员、exec权限的用户
-		if !(slice.Contain(clusterRoles, models.RolePlatformAdmin) || slice.Contain(clusterRoles, models.RoleClusterAdmin) || slice.Contain(clusterRoles, models.RoleClusterPodExec)) {
-			err = fmt.Errorf("非管理员,且无exec权限，不能%s资源", action)
-		}
-	case "delete", "update", "patch", "create":
-		if !(slice.Contain(clusterRoles, models.RolePlatformAdmin) || slice.Contain(clusterRoles, models.RoleClusterAdmin)) {
-			err = fmt.Errorf("非管理员不能%s资源", action)
-		}
 	}
 
 	if err != nil {
@@ -81,32 +177,54 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		time.Sleep(1 * time.Second)
 		service.OperationLogService().Add(&log)
 	}()
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s，roles=%v, operation=%s, gck=[%s], resource=[%s/%s] ",
-		cluster, username, roles, clusterRoles, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
-	klog.V(6).Infof("final error=%v", err)
-	return username, clusterRoles, err
-}
 
+}
 func handleDelete(k8s *kom.Kubectl) error {
 	_, _, err := handleCommonLogic(k8s, "delete")
+	saveLog2DB(k8s, "delete", err)
 	return err
 }
 
 func handleUpdate(k8s *kom.Kubectl) error {
 	_, _, err := handleCommonLogic(k8s, "update")
+	saveLog2DB(k8s, "update", err)
 	return err
 }
 
 func handlePatch(k8s *kom.Kubectl) error {
 	_, _, err := handleCommonLogic(k8s, "patch")
+	saveLog2DB(k8s, "patch", err)
 	return err
 }
 
 func handleCreate(k8s *kom.Kubectl) error {
 	_, _, err := handleCommonLogic(k8s, "create")
+	saveLog2DB(k8s, "create", err)
 	return err
 }
 func handleExec(k8s *kom.Kubectl) error {
 	_, _, err := handleCommonLogic(k8s, "exec")
+	saveLog2DB(k8s, "exec", err)
+	return err
+}
+
+func handleList(k8s *kom.Kubectl) error {
+	_, _, err := handleCommonLogic(k8s, "list")
+	saveLog2DB(k8s, "list", err)
+	return err
+}
+func handleDescribe(k8s *kom.Kubectl) error {
+	_, _, err := handleCommonLogic(k8s, "describe")
+	saveLog2DB(k8s, "describe", err)
+	return err
+}
+func handleLogs(k8s *kom.Kubectl) error {
+	_, _, err := handleCommonLogic(k8s, "logs")
+	saveLog2DB(k8s, "logs", err)
+	return err
+}
+func handleGet(k8s *kom.Kubectl) error {
+	_, _, err := handleCommonLogic(k8s, "get")
+	saveLog2DB(k8s, "get", err)
 	return err
 }
