@@ -44,28 +44,13 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
         cache-dependency-path: 'ui/pnpm-lock.yaml'
-    - name: 安装依赖
+    - name: 编译前端
       run: |
         cd ui
         pnpm install
         pnpm build
 
-    # - name: Set up Go
-    #   uses: actions/setup-go@v5
-    #   with:
-    #     go-version-file: 'go.mod'
-    #     cache-dependency-path: 'go.sum'
-
-    # - name: Install UPX
-    #   uses: crazy-max/ghaction-upx@v3
-    #   with:
-    #     install-only: true
-
-    # - name: 安装依赖
-    #   run: |
-    #     make build-linux
-
-    - name: Upload workspace
+    - name: 上传到共享
       uses: actions/upload-artifact@v4
       with:
         name: workspace
@@ -77,17 +62,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Download workspace
+    - name: 从共享下载
       uses: actions/download-artifact@v4
       with:
         name: workspace
         path: ui/dist  # 覆盖当前目录
-
-    - name: print env
-      run: |
-        env
-        ls -l
-        ls -l ui/
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v4
