@@ -240,7 +240,7 @@
                   "name": "cluster",
                   "id": "cluster",
                   "searchable": true,
-                  "source": "/k8s/cluster/option_list",
+                  "source": "/params/cluster/option_list",
                   "value": "${cookie:selectedCluster|url_decode}",
                   "onEvent": {
                     "change": {
