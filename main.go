@@ -177,6 +177,9 @@ func main() {
 		params.GET("/user/role", param.Role)
 		// 获取某个配置项
 		params.GET("/config/:key", param.Config)
+		// 获取当前登录用户的集群列表
+		params.GET("/cluster/option_list", cluster.OptionList)
+
 	}
 	api := r.Group("/k8s", middleware.AuthMiddleware())
 	{
@@ -442,7 +445,6 @@ func main() {
 		// k8s cluster
 		admin.GET("/cluster/all", cluster.List)
 		admin.POST("/cluster/scan", cluster.Scan)
-		admin.GET("/cluster/option_list", cluster.OptionList)
 		admin.GET("/cluster/file/option_list", cluster.FileOptionList)
 		admin.POST("/cluster/reconnect/fileName/:fileName/contextName/:contextName", cluster.Reconnect)
 		admin.POST("/cluster/disconnect/fileName/:fileName/contextName/:contextName", cluster.Disconnect)
