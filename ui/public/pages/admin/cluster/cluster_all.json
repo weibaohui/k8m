@@ -190,6 +190,10 @@
                               {
                                 "name": "cluster",
                                 "label": "集群"
+                              },
+                              {
+                                "name": "namespaces",
+                                "label": "命名空间"
                               }
                             ]
                           }

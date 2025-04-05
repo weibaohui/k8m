@@ -14,7 +14,7 @@ type ClusterUserRole struct {
 	Cluster    string    `gorm:"index" json:"cluster,omitempty"`    // 集群名称
 	Username   string    `gorm:"index" json:"username,omitempty"`   // 用户名
 	Role       string    `gorm:"index" json:"role,omitempty"`       // 角色类型：只读、读写、Exec
-	Namespaces []string  `json:"namespaces,omitempty"`              // Namespaces权限 ，该用户可以访问的Ns
+	Namespaces string    `json:"namespaces,omitempty"`              // Namespaces列表，逗号分割 ，该用户可以访问的Ns
 	CreatedBy  string    `gorm:"index" json:"created_by,omitempty"` // 创建者
 	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"`
