@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	v1 "k8s.io/api/core/v1"
@@ -83,8 +84,9 @@ func (n *nodeService) SetAllocatedStatus(selectedCluster string, item unstructur
 }
 func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 	klog.V(6).Infof("Sync Node Status")
+	ctx := utils2.GetContextWithAdmin()
 	var nodes []v1.Node
-	err := kom.Cluster(selectedCluster).Resource(&v1.Node{}).WithCache(nodeStatusTTL).List(&nodes).Error
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).WithCache(nodeStatusTTL).List(&nodes).Error
 	if err != nil {
 		klog.Errorf("监听Node失败:%v", err)
 	}
@@ -98,8 +100,9 @@ func (n *nodeService) SyncNodeStatus(selectedCluster string) {
 
 func (n *nodeService) CacheIPUsage(selectedCluster string, nodeName string) (ipUsage, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodeIPUsage", nodeName)
+	ctx := utils2.GetContextWithAdmin()
 	return utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, nodeStatusTTL, func() (ipUsage, error) {
-		total, used, available := kom.Cluster(selectedCluster).Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().IPUsage()
+		total, used, available := kom.Cluster(selectedCluster).WithContext(ctx).Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().IPUsage()
 		return ipUsage{
 			Total:     total,
 			Used:      used,
@@ -109,8 +112,9 @@ func (n *nodeService) CacheIPUsage(selectedCluster string, nodeName string) (ipU
 }
 func (n *nodeService) CachePodCount(selectedCluster string, nodeName string) (ipUsage, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodePodCount", nodeName)
+	ctx := utils2.GetContextWithAdmin()
 	return utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, nodeStatusTTL, func() (ipUsage, error) {
-		total, used, available := kom.Cluster(selectedCluster).Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().PodCount()
+		total, used, available := kom.Cluster(selectedCluster).WithContext(ctx).Name(nodeName).WithCache(nodeStatusTTL).Ctl().Node().PodCount()
 		return ipUsage{
 			Total:     total,
 			Used:      used,
@@ -121,8 +125,9 @@ func (n *nodeService) CachePodCount(selectedCluster string, nodeName string) (ip
 
 func (n *nodeService) CacheAllocatedStatus(selectedCluster string, nodeName string) ([]*kom.ResourceUsageRow, error) {
 	cacheKey := fmt.Sprintf("%s/%s", "NodeAllocatedStatus", nodeName)
+	ctx := utils2.GetContextWithAdmin()
 	return utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, nodeStatusTTL, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.Cluster(selectedCluster).Name(nodeName).WithCache(nodeStatusTTL).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
+		tb := kom.Cluster(selectedCluster).WithContext(ctx).Name(nodeName).WithCache(nodeStatusTTL).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
 		return tb, nil
 	})
 }

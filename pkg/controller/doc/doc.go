@@ -16,6 +16,7 @@ func Doc(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	selectedCluster := amis.GetSelectedCluster(c)
+	ctx := amis.GetContextWithUser(c)
 
 	// apiVersion 有可能包含xxx.com/v1 类似，所以需要处理
 	// 前端使用了base64Encode，这里需要反向解析处理
@@ -32,7 +33,7 @@ func Doc(c *gin.Context) {
 		apiVersion = fmt.Sprintf("%s/%s", group, version)
 	}
 
-	docs := kom.Cluster(selectedCluster).Status().Docs()
+	docs := kom.Cluster(selectedCluster).WithContext(ctx).Status().Docs()
 	node := docs.FetchByGVK(apiVersion, kind)
 
 	amis.WriteJsonData(c, gin.H{

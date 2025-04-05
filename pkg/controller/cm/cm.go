@@ -24,7 +24,7 @@ func Import(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	selectedCluster := amis.GetSelectedCluster(c)
-
+	ctx := amis.GetContextWithUser(c)
 	info.FileName = c.PostForm("fileName")
 
 	// 替换FileName中非法字符
@@ -46,7 +46,7 @@ func Import(c *gin.Context) {
 	defer os.Remove(tempFilePath) // 请求结束时删除临时文件
 
 	var cm *v1.ConfigMap
-	err = kom.Cluster(selectedCluster).Resource(&v1.ConfigMap{}).Name(name).Namespace(ns).Get(&cm).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(name).Namespace(ns).Get(&cm).Error
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("获取configmap错误: %v", err))
 		return
@@ -59,7 +59,7 @@ func Import(c *gin.Context) {
 		return
 	}
 	data[info.FileName] = string(bytes)
-	err = kom.Cluster(selectedCluster).Resource(cm).Update(cm).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(cm).Update(cm).Error
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("更新configmap错误: %v", err))
 		return

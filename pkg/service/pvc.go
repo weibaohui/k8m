@@ -5,6 +5,7 @@ import (
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
+	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/kom/kom"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -116,7 +117,8 @@ func (p *pvcService) watchSingleCluster(selectedCluster string) watch.Interface 
 	// watch  命名空间下 pvc 的变更
 	var watcher watch.Interface
 	var pvc corev1.PersistentVolumeClaim
-	err := kom.Cluster(selectedCluster).Resource(&pvc).AllNamespace().Watch(&watcher).Error
+	ctx := utils2.GetContextWithAdmin()
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&pvc).AllNamespace().Watch(&watcher).Error
 	if err != nil {
 		klog.Errorf("%s 创建pvc监听器失败 %v", selectedCluster, err)
 		return nil
@@ -124,8 +126,9 @@ func (p *pvcService) watchSingleCluster(selectedCluster string) watch.Interface 
 	go func() {
 		klog.V(6).Infof("%s start watch pvc", selectedCluster)
 		defer watcher.Stop()
+
 		for event := range watcher.ResultChan() {
-			err = kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pvc)
+			err = kom.Cluster(selectedCluster).WithContext(ctx).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pvc)
 			if err != nil {
 				klog.V(6).Infof("%s 无法将对象转换为 *v1.PersistentVolumeClaim 类型: %v", selectedCluster, err)
 				return

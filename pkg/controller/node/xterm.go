@@ -34,7 +34,7 @@ func CreateNodeShell(c *gin.Context) {
 	}
 
 	var p *v1.Pod
-	err = kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Get(&p).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Get(&p).Error
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -80,7 +80,7 @@ func CreateKubectlShell(c *gin.Context) {
 	}
 
 	var p *v1.Pod
-	err = kom.Cluster(clusterID).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Get(&p).Error
+	err = kom.Cluster(clusterID).WithContext(ctx).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Get(&p).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

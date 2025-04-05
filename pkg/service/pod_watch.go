@@ -6,6 +6,7 @@ import (
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
+	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -367,9 +368,11 @@ func (p *podService) GetUniquePodLabels(selectedCluster string) map[string]strin
 
 func (p *podService) watchSingleCluster(selectedCluster string) watch.Interface {
 	// watch default 命名空间下 Pod资源 的变更
+	ctx := utils2.GetContextWithAdmin()
+
 	var watcher watch.Interface
 	var pod v1.Pod
-	err := kom.Cluster(selectedCluster).Resource(&pod).AllNamespace().Watch(&watcher).Error
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&pod).AllNamespace().Watch(&watcher).Error
 	if err != nil {
 		klog.Errorf("%s 创建Pod监听器失败 %v", selectedCluster, err)
 		return nil
@@ -378,7 +381,7 @@ func (p *podService) watchSingleCluster(selectedCluster string) watch.Interface 
 		klog.V(6).Infof("%s start watch pod", selectedCluster)
 		defer watcher.Stop()
 		for event := range watcher.ResultChan() {
-			err = kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
+			err = kom.Cluster(selectedCluster).WithContext(ctx).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &pod)
 			if err != nil {
 				klog.V(6).Infof("%s 无法将对象转换为 *v1.Pod 类型: %v", selectedCluster, err)
 				return

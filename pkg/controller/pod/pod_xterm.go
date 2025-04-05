@@ -164,7 +164,7 @@ func Xterm(c *gin.Context) {
 	defer conn.Close()
 	klog.V(6).Infof("ws Client connected")
 
-	cluster := kom.Cluster(selectedCluster)
+	cluster := kom.Cluster(selectedCluster).WithContext(ctx)
 
 	// 创建 TTY 终端大小管理队列
 	sizeQueue := &TerminalSizeQueue{}

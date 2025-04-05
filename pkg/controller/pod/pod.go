@@ -35,7 +35,7 @@ func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, op
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	var pods []v1.Pod
-	err := kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -186,7 +186,7 @@ func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, 
 
 	ctx := amis.GetContextWithUser(c)
 	var pods []v1.Pod
-	err := kom.Cluster(selectedCluster).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

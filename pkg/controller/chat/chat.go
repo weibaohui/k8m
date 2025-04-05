@@ -77,6 +77,7 @@ func Event(c *gin.Context) {
 
 // Describe TODO 改为不要传Describe内容，比较大，传个名称过来，从后台Describe一下即可
 func Describe(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
 	var data ResourceData
 	err := c.ShouldBindQuery(&data)
 	if err != nil {
@@ -84,7 +85,7 @@ func Describe(c *gin.Context) {
 		return
 	}
 	var describe []byte
-	kom.Cluster(amis.GetSelectedCluster(c)).GVK(data.Group, data.Version, data.Kind).
+	kom.Cluster(amis.GetSelectedCluster(c)).WithContext(ctx).GVK(data.Group, data.Version, data.Kind).
 		Name(data.Name).
 		Namespace(data.Namespace).
 		Describe(&describe)
