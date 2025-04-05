@@ -88,7 +88,7 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 	params.PerPage = 10000000
 	clusterRole := &models.ClusterUserRole{}
 	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Distinct("cluster").Where(" username = ?", username)
+		return db.Where(" username = ?", username)
 	}
 	items, _, err := clusterRole.List(params, queryFunc)
 	if err != nil {
