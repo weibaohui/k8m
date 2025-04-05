@@ -33,13 +33,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        platform: [linux/arm64, linux/amd64]  # 与 platforms 列表一致
     steps:
-    - name: Prepare
-      run: |
-        platform=${{ matrix.platform }}
-        echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
       with:
@@ -71,6 +65,18 @@ jobs:
       run: |
         make build-linux
 
+  buildImage:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/arm64, linux/amd64]  # 与 platforms 列表一致
+    steps:
+    - name: Prepare
+      run: |
+        platform=${{ matrix.platform }}
+        echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+    - uses: actions/checkout@v4
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v4
 
