@@ -393,25 +393,25 @@ const items: () => MenuItem[] = () => {
                         label: "参数设置",
                         icon: <i className="fa-solid fa-sliders"></i>,
                         key: "system_config",
-                        onClick: () => onMenuClick('/config/config')
+                        onClick: () => onMenuClick('/admin/config/config')
                     },
                     {
                         label: "用户管理",
                         icon: <i className="fa-solid fa-user-gear"></i>,
                         key: "user_management",
-                        onClick: () => onMenuClick('/user/user')
+                        onClick: () => onMenuClick('/admin/user/user')
                     },
                     {
                         label: "用户组管理",
                         icon: <i className="fa-solid fa-users-gear"></i>,
                         key: "user_group_management",
-                        onClick: () => onMenuClick('/user/user_group')
+                        onClick: () => onMenuClick('/admin/user/user_group')
                     },
                     {
                         label: "MCP管理",
                         icon: <i className="fa-solid fa-server"></i>,
                         key: "mcp_management",
-                        onClick: () => onMenuClick('/mcp/mcp')
+                        onClick: () => onMenuClick('/admin/mcp/mcp')
                     }
                 ],
             },

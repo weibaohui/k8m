@@ -34,11 +34,13 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			}
 		}
 
+		// 检查请求路径是否需要跳过集群检测
 		if path == "/" ||
 			path == "/favicon.ico" ||
 			path == "/auth/login" ||
 			strings.HasPrefix(path, "/assets/") ||
 			strings.HasPrefix(path, "/mgm/") || // 个人中心
+			strings.HasPrefix(path, "/admin/") || // 管理后台
 			strings.HasPrefix(path, "/public/") ||
 			strings.Contains(path, "/cluster/file/option_list") ||
 			strings.Contains(path, "/cluster/scan") ||
