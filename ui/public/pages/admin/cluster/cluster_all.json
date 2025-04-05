@@ -77,20 +77,10 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-check-circle  text-primary",
-              "label": "切换",
+              "icon": "fas fa-link  text-primary",
+              "label": "断开",
               "actionType": "ajax",
-              "api": "post:/mgm/cluster/setDefault/fileName/${fileName}/contextName/${contextName}",
-              "onEvent": {
-                "click": {
-                  "actions": [
-                    {
-                      "actionType": "custom",
-                      "script": "window.location.reload();"
-                    }
-                  ]
-                }
-              }
+              "api": "post:/admin/cluster/disconnect/fileName/${fileName}/contextName/${contextName}"
             },
             {
               "type": "button",
@@ -488,12 +478,6 @@
             "label": "集群名称",
             "placeholder": "输入集群名称"
           }
-        },
-        {
-          "name": "current",
-          "label": "当前集群",
-          "type": "tpl",
-          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>当前集群</span><% if (data.clusterConnectStatus !== 'connected') { %> ⚠️ <% } %><% } %>"
         },
         {
           "name": "clusterConnectStatus",

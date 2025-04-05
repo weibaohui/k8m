@@ -217,6 +217,9 @@ func (c *clusterService) Disconnect(fileName string, contextName string) {
 			klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
 		}
 	}
+	// 从kom解除
+	clusterID := cc.ClusterID
+	kom.Clusters().RemoveClusterById(clusterID)
 }
 
 // Scan 扫描集群
