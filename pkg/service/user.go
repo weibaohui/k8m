@@ -41,7 +41,7 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 			}
 		}
 	}
-
+	// 先从jwt字符串中读取，没有再读数据库
 	params := &dao.Params{}
 	params.PerPage = 10000000
 	clusterRole := &models.ClusterUserRole{}
