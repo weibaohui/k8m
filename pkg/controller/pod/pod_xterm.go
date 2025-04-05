@@ -114,6 +114,28 @@ func Xterm(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("非管理员,且无exec权限，不能执行Exec命令"))
 		return
 	}
+	_, _, clusterUserRoles := amis.GetLoginUserWithClusterRoles(c)
+	if clusterUserRoles != nil {
+		// 说明有集群角色
+		execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+			return item.Cluster == selectedCluster && item.Role == constants.RoleClusterPodExec
+		})
+		if len(execClusters) == 0 {
+			amis.WriteJsonError(c, fmt.Errorf("用户[%s]没有集群[%s]Exec权限", username, selectedCluster))
+			return
+		}
+
+		// 具备Exec权限了，那么继续看是否有该ns的权限.
+		// ns为空，或者ns列表中含有当前ns，那么就允许执行。
+		execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
+			return item.Namespaces == "" || utils.AllIn([]string{ns}, strings.Split(item.Namespaces, ","))
+		})
+		if len(execClustersWithNs) == 0 {
+			amis.WriteJsonError(c, fmt.Errorf("用户[%s]没有集群[%s] [%s]Exec权限", username, selectedCluster, ns))
+			return
+		}
+
+	}
 
 	if containerName == "" {
 		amis.WriteJsonError(c, errors.New("container_name is required"))
