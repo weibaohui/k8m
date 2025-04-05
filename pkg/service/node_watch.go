@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/robfig/cron/v3"
+	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -125,7 +126,8 @@ func (n *nodeService) watchSingleCluster(selectedCluster string) watch.Interface
 	// watch Node资源的变更
 	var watcher watch.Interface
 	var node v1.Node
-	err := kom.Cluster(selectedCluster).Resource(&node).Watch(&watcher).Error
+	ctx := utils2.GetContextWithAdmin()
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&node).Watch(&watcher).Error
 	if err != nil {
 		klog.Errorf("%s 创建Node监听器失败 %v", selectedCluster, err)
 		return nil
@@ -134,7 +136,7 @@ func (n *nodeService) watchSingleCluster(selectedCluster string) watch.Interface
 		klog.V(6).Infof("%s start watch node", selectedCluster)
 		defer watcher.Stop()
 		for event := range watcher.ResultChan() {
-			err = kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &node)
+			err = kom.Cluster(selectedCluster).WithContext(ctx).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &node)
 			if err != nil {
 				klog.V(6).Infof("%s 无法将对象转换为 *v1.Node 类型: %v", selectedCluster, err)
 				return

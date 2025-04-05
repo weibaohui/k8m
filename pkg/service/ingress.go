@@ -5,6 +5,7 @@ import (
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
+	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/kom/kom"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -54,7 +55,7 @@ func (p *ingressService) IncreaseIngressCount(selectedCluster string, ingress *n
 func (p *ingressService) ReduceIngressCount(selectedCluster string, ingress *networkingv1.Ingress) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
-	
+
 	// 检查 ingress.Spec.IngressClassName 是否为 nil，避免空指针异常
 	if ingress.Spec.IngressClassName == nil {
 		return
@@ -107,7 +108,8 @@ func (p *ingressService) Watch() {
 func (p *ingressService) watchSingleCluster(selectedCluster string) watch.Interface {
 	var watcher watch.Interface
 	var ingress networkingv1.Ingress
-	err := kom.Cluster(selectedCluster).Resource(&ingress).AllNamespace().Watch(&watcher).Error
+	ctx := utils2.GetContextWithAdmin()
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&ingress).AllNamespace().Watch(&watcher).Error
 	if err != nil {
 		klog.Errorf("%s 创建ingress监听器失败 %v", selectedCluster, err)
 		return nil
@@ -116,7 +118,7 @@ func (p *ingressService) watchSingleCluster(selectedCluster string) watch.Interf
 		klog.V(6).Infof("%s start watch ingress", selectedCluster)
 		defer watcher.Stop()
 		for event := range watcher.ResultChan() {
-			err = kom.Cluster(selectedCluster).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &ingress)
+			err = kom.Cluster(selectedCluster).WithContext(ctx).Tools().ConvertRuntimeObjectToTypedObject(event.Object, &ingress)
 			if err != nil {
 				klog.V(6).Infof("%s 无法将对象转换为 *v1.Ingress 类型: %v", selectedCluster, err)
 				return
