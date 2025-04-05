@@ -97,6 +97,7 @@ func (c *clusterService) SetClusterScanStatus(selectedCluster string, result *an
 	if clusterConfig == nil {
 		return
 	}
+
 	clusterConfig.SetClusterScanStatus(result)
 
 }

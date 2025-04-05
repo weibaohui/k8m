@@ -74,11 +74,11 @@ func ResourceRunAnalysis(c *gin.Context) {
 }
 func ClusterRunAnalysis(c *gin.Context) {
 	cfg := createAnalysisConfig(c)
+	cfg.Context = utils.GetContextWithAdmin()
 	if !service.ClusterService().IsConnected(cfg.ClusterID) {
 		amis.WriteJsonError(c, fmt.Errorf("集群 %s 未连接", cfg.ClusterID))
 		return
 	}
-
 	go func() {
 		cfg.Filters = []string{"Pod", "Service", "Deployment", "ReplicaSet", "PersistentVolumeClaim",
 			"Ingress", "StatefulSet", "CronJob", "Node", "ValidatingWebhookConfiguration",

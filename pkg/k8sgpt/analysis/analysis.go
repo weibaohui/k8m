@@ -64,7 +64,6 @@ func Run(cfg *Analysis) (*ResultWithStatus, error) {
 		return nil, fmt.Errorf("分析选项不能为空")
 	}
 	runner := cfg
-
 	runner.RunAnalysis()
 
 	result, err := runner.ResultWithStatus()
@@ -76,9 +75,8 @@ func Run(cfg *Analysis) (*ResultWithStatus, error) {
 }
 
 func (a *Analysis) RunAnalysis() {
-	var activeFilters []string
 
-	coreAnalyzerMap, analyzerMap := analyzer.GetAnalyzerMap()
+	_, analyzerMap := analyzer.GetAnalyzerMap()
 	openapiSchema := &openapi_v2.Document{}
 	if a.WithDoc {
 		openapiSchema = kom.Cluster(a.ClusterID).Status().OpenAPISchema()
@@ -94,41 +92,19 @@ func (a *Analysis) RunAnalysis() {
 	semaphore := make(chan struct{}, a.MaxConcurrency)
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
-	// if there are no filters selected and no active_filters then run coreAnalyzer
-	if len(a.Filters) == 0 && len(activeFilters) == 0 {
-		for name, item := range coreAnalyzerMap {
-			wg.Add(1)
-			semaphore <- struct{}{}
-			go a.executeAnalyzer(item, name, analyzerConfig, semaphore, &wg, &mutex)
 
-		}
-		wg.Wait()
-		return
-	}
 	// if the filters flag is specified
-	if len(a.Filters) != 0 {
-		for _, filter := range a.Filters {
-			if item, ok := analyzerMap[filter]; ok {
-				semaphore <- struct{}{}
-				wg.Add(1)
-				go a.executeAnalyzer(item, filter, analyzerConfig, semaphore, &wg, &mutex)
-			} else {
-				a.Errors = append(a.Errors, fmt.Sprintf("\"%s\" filter does not exist. Please run k8sgpt filters list.", filter))
-			}
-		}
-		wg.Wait()
-		return
-	}
-
-	// use active_filters
-	for _, filter := range activeFilters {
+	for _, filter := range a.Filters {
 		if item, ok := analyzerMap[filter]; ok {
 			semaphore <- struct{}{}
 			wg.Add(1)
-			go a.executeAnalyzer(item, filter, analyzerConfig, semaphore, &wg, &mutex)
+			a.executeAnalyzer(item, filter, analyzerConfig, semaphore, &wg, &mutex)
+		} else {
+			a.Errors = append(a.Errors, fmt.Sprintf("\"%s\" filter does not exist. Please run k8sgpt filters list.", filter))
 		}
 	}
 	wg.Wait()
+
 }
 
 func (a *Analysis) executeAnalyzer(analyzer common.IAnalyzer, filter string, analyzerConfig common.Analyzer, semaphore chan struct{}, wg *sync.WaitGroup, mutex *sync.Mutex) {
