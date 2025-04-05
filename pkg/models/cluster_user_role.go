@@ -10,13 +10,14 @@ import (
 
 // ClusterUserRole 集群用户权限表
 type ClusterUserRole struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Cluster   string    `gorm:"index" json:"cluster,omitempty"`    // 集群名称
-	Username  string    `gorm:"index" json:"username,omitempty"`   // 用户名
-	Role      string    `gorm:"index" json:"role,omitempty"`       // 角色类型：readonly/admin
-	CreatedBy string    `gorm:"index" json:"created_by,omitempty"` // 创建者
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Cluster    string    `gorm:"index" json:"cluster,omitempty"`    // 集群名称
+	Username   string    `gorm:"index" json:"username,omitempty"`   // 用户名
+	Role       string    `gorm:"index" json:"role,omitempty"`       // 角色类型：只读、读写、Exec
+	Namespaces []string  `json:"namespaces,omitempty"`              // Namespaces权限 ，该用户可以访问的Ns
+	CreatedBy  string    `gorm:"index" json:"created_by,omitempty"` // 创建者
+	CreatedAt  time.Time `json:"created_at,omitempty"`
+	UpdatedAt  time.Time `json:"updated_at,omitempty"`
 }
 
 func (c *ClusterUserRole) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*ClusterUserRole, int64, error) {
