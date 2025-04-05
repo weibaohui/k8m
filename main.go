@@ -425,8 +425,6 @@ func main() {
 
 		// config
 		mgm.GET("/config/:key", config.Config)
-		mgm.GET("/config/all", middleware.RolePlatformOnly(config.GetConfig))
-		mgm.POST("/config/update", middleware.RolePlatformOnly(config.UpdateConfig))
 
 	}
 
@@ -445,6 +443,10 @@ func main() {
 		admin.POST("/user_group/save", user.SaveUserGroup)
 		admin.POST("/user_group/delete/:ids", user.DeleteUserGroup)
 		admin.GET("/user_group/option_list", user.GroupOptionList)
+
+		// 平参数配置
+		admin.GET("/config/all", config.GetConfig)
+		admin.POST("/config/update", config.UpdateConfig)
 	}
 
 	showBootInfo(Version, flag.Init().Port)

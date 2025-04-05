@@ -3,8 +3,8 @@
         {
             "type": "form",
             "mode": "horizontal",
-            "api": "/mgm/config/update",
-            "initApi": "get:/mgm/config/all",
+            "api": "/admin/config/update",
+            "initApi": "get:/admin/config/all",
             "title": "配置管理",
             "body": [
                 {
