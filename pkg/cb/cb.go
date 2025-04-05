@@ -145,7 +145,6 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 
 	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s，roleString=%v, operation=%s, gck=[%s], resource=[%s/%s] ",
 		cluster, username, roleString, roles, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
-	klog.V(6).Infof("final error=%v", err)
 	return username, roles, err
 }
 func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
