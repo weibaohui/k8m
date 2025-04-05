@@ -381,15 +381,6 @@ func main() {
 		// 获取当前登录用户的角色，登录即可
 		mgm.GET("/user/role", user.Role)
 
-		// user 平台管理员可操作，管理用户
-		mgm.GET("/user/list", middleware.RolePlatformOnly(user.List))
-		mgm.POST("/user/save", middleware.RolePlatformOnly(user.Save))
-		mgm.POST("/user/delete/:ids", middleware.RolePlatformOnly(user.Delete))
-		mgm.POST("/user/update_psw/:id", middleware.RolePlatformOnly(user.UpdatePsw))
-		mgm.GET("/user/option_list", middleware.RolePlatformOnly(user.UserOptionList))
-		// 2FA 平台管理员可操作，管理用户
-		mgm.POST("/user/2fa/disable/:id", middleware.RolePlatformOnly(user.Disable2FA))
-
 		// user profile 用户自助操作
 		mgm.GET("/user/profile", profile.Profile)
 		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
@@ -398,12 +389,6 @@ func main() {
 		mgm.POST("/user/profile/2fa/generate", profile.Generate2FASecret)
 		mgm.POST("/user/profile/2fa/disable", profile.Disable2FA)
 		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
-
-		// user_group
-		mgm.GET("/user_group/list", middleware.RolePlatformOnly(user.ListUserGroup))
-		mgm.POST("/user_group/save", middleware.RolePlatformOnly(user.SaveUserGroup))
-		mgm.POST("/user_group/delete/:ids", middleware.RolePlatformOnly(user.DeleteUserGroup))
-		mgm.GET("/user_group/option_list", middleware.RolePlatformOnly(user.GroupOptionList))
 
 		// 集群权限设置
 		mgm.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", middleware.RolePlatformOnly(user.ListClusterPermissions))
@@ -443,6 +428,23 @@ func main() {
 		mgm.GET("/config/all", middleware.RolePlatformOnly(config.GetConfig))
 		mgm.POST("/config/update", middleware.RolePlatformOnly(config.UpdateConfig))
 
+	}
+
+	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
+	{
+		// user 平台管理员可操作，管理用户
+		admin.GET("/user/list", user.List)
+		admin.POST("/user/save", user.Save)
+		admin.POST("/user/delete/:ids", user.Delete)
+		admin.POST("/user/update_psw/:id", user.UpdatePsw)
+		admin.GET("/user/option_list", user.UserOptionList)
+		// 2FA 平台管理员可操作，管理用户
+		admin.POST("/user/2fa/disable/:id", user.Disable2FA)
+		// user_group
+		admin.GET("/user_group/list", user.ListUserGroup)
+		admin.POST("/user_group/save", user.SaveUserGroup)
+		admin.POST("/user_group/delete/:ids", user.DeleteUserGroup)
+		admin.GET("/user_group/option_list", user.GroupOptionList)
 	}
 
 	showBootInfo(Version, flag.Init().Port)

@@ -23,7 +23,7 @@
             "title": "新建用户组  (ESC 关闭)",
             "body": {
               "type": "form",
-              "api": "post:/mgm/user_group/save",
+              "api": "post:/admin/user_group/save",
               "body": [
                 {
                   "type": "input-text",
@@ -90,7 +90,7 @@
         "reload",
         "bulkActions"
       ],
-      "api": "get:/mgm/user_group/list",
+      "api": "get:/admin/user_group/list",
       "columns": [
         {
           "type": "operation",
@@ -105,7 +105,7 @@
                 "title": "编辑用户组",
                 "body": {
                   "type": "form",
-                  "api": "post:/mgm/user_group/save",
+                  "api": "post:/admin/user_group/save",
                   "body": [
                     {
                       "type": "hidden",
@@ -157,7 +157,7 @@
               "icon": "fas fa-trash text-danger",
               "actionType": "ajax",
               "confirmText": "确定删除该用户组？",
-              "api": "delete:/mgm/user_group/delete/${id}"
+              "api": "delete:/admin/user_group/delete/${id}"
             }
           ]
         },
@@ -211,7 +211,7 @@
           "label": "批量删除",
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
-          "api": "/mgm/user_group/delete/${ids}"
+          "api": "/admin/user_group/delete/${ids}"
         }
       ]
     }
