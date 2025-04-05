@@ -49,13 +49,21 @@ func GetLoginUserWithClusterRoles(c *gin.Context) (string, string, []*models.Clu
 		role = models.RolePlatformAdmin
 	}
 
-	clusterRoles := c.GetString(constants.JwtClusterUserRoles)
-	var clusterUserRoles []*models.ClusterUserRole
-	err := json.Unmarshal([]byte(clusterRoles), &clusterUserRoles)
-	if err != nil {
-		return user, role, nil
+	if value, exists := c.Get(constants.JwtClusterUserRoles); exists {
+		switch v := value.(type) {
+		case []*models.ClusterUserRole:
+			return user, role, v
+		case string:
+			var clusterUserRoles []*models.ClusterUserRole
+			if err := json.Unmarshal([]byte(v), &clusterUserRoles); err == nil {
+				return user, role, clusterUserRoles
+			}
+		}
+
 	}
-	return user, role, clusterUserRoles
+
+	return user, role, nil
+
 }
 
 // IsCurrentUserPlatformAdmin 检测当前登录用户是否为平台管理员
@@ -70,5 +78,11 @@ func GetContextWithUser(c *gin.Context) context.Context {
 	ctx := context.WithValue(c.Request.Context(), constants.JwtUserName, user)
 	ctx = context.WithValue(ctx, constants.JwtUserRole, role)
 	ctx = context.WithValue(ctx, constants.JwtClusterUserRoles, clusterRoles)
+	cst := ""
+	for _, clusterRole := range clusterRoles {
+		cst += clusterRole.Cluster + ","
+	}
+	ctx = context.WithValue(ctx, constants.JwtClusters, cst)
+
 	return ctx
 }
