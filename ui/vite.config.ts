@@ -63,6 +63,19 @@ export default defineConfig(({mode}) => {
                         });
                     },
                 },
+                '/admin': {
+                    target: 'http://127.0.0.1:3618',
+                    changeOrigin: true,
+                    configure: (proxy) => {
+                        proxy.on('proxyReq', (proxyReq, req) => {
+                            const originalPath = req.url;
+                            console.log(`Before restoring: ${originalPath}`);
+                            // @ts-expect-error
+                            proxyReq.path = originalPath.replace('%2F%2F', '//');
+                            console.log(`Restored path: ${proxyReq.path}`);
+                        });
+                    },
+                },
                 '/k8s/chat': {
                     target: 'ws://127.0.0.1:3618', // 替换为实际的目标地址
                     ws: true, // 开启 WebSocket 代理
