@@ -1,6 +1,7 @@
 package ns
 
 import (
+	"context"
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -33,6 +34,23 @@ func OptionList(c *gin.Context) {
 	}
 
 	// 没有指定的情况
+
+	if amis.IsCurrentUserPlatformAdmin(c) {
+		// 如果是平台管理员，则看到集群下的全部命名空间
+		nsList, err := getClusterNsList(ctx, selectedCluster)
+		if err != nil {
+			amis.WriteJsonData(c, gin.H{
+				"options": make([]map[string]string, 0),
+			})
+			return
+		}
+		amis.WriteJsonData(c, gin.H{
+			"options": nsList,
+		})
+		return
+	}
+
+	// 不是平台管理员
 	// 先看jwt登录用户中，是否有限制的ns
 	_, _, clusterUserRoles := amis.GetLoginUserWithClusterRoles(c)
 	if clusterUserRoles != nil {
@@ -53,26 +71,25 @@ func OptionList(c *gin.Context) {
 					}
 				}
 			}
+			amis.WriteJsonData(c, gin.H{
+				"options": list,
+			})
+			return
 		} else {
-			// 授权列表中，都没有指定ns，说明不需要按ns进行过滤
-			// 那么读取集群中的ns
-			var ns []v1.Namespace
-			err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Namespace{}).List(&ns).Error
+			// 说明没有限制ns，那么应该读取集群中的ns
+			// 如果是平台管理员，则看到集群下的全部命名空间
+			nsList, err := getClusterNsList(ctx, selectedCluster)
 			if err != nil {
 				amis.WriteJsonData(c, gin.H{
 					"options": make([]map[string]string, 0),
 				})
 				return
 			}
-
-			for _, n := range ns {
-				list = append(list, map[string]string{
-					"label": n.Name,
-					"value": n.Name,
-				})
-			}
+			amis.WriteJsonData(c, gin.H{
+				"options": nsList,
+			})
+			return
 		}
-
 	}
 
 	slice.SortBy(list, func(a, b map[string]string) bool {
@@ -81,4 +98,24 @@ func OptionList(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"options": list,
 	})
+}
+
+func getClusterNsList(ctx context.Context, selectedCluster string) ([]map[string]string, error) {
+	// 那么读取集群中的ns
+	var ns []v1.Namespace
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Namespace{}).List(&ns).Error
+	if err != nil {
+		return nil, err
+	}
+	var list []map[string]string
+	for _, n := range ns {
+		list = append(list, map[string]string{
+			"label": n.Name,
+			"value": n.Name,
+		})
+	}
+	slice.SortBy(list, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
+	return list, nil
 }
