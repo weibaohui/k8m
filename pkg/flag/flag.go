@@ -42,6 +42,7 @@ type Config struct {
 	GitTag            string // git tag, 由编译时自动注入
 	GitRepo           string // git仓库地址, 由编译时自动注入
 	BuildDate         string // 编译时间, 由编译时自动注入
+	EnableAI          bool   // 是否启用AI功能，默认开启
 }
 
 func Init() *Config {
@@ -124,6 +125,8 @@ func (c *Config) InitFlags() {
 
 	// 默认不打印配置
 	defaultPrintConfig := getEnvAsBool("PRINT_CONFIG", false)
+	// 默认开启AI功能
+	defaultEnableAI := getEnvAsBool("ENABLE_AI", true)
 
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
@@ -143,6 +146,7 @@ func (c *Config) InitFlags() {
 	pflag.IntVarP(&c.MCPServerPort, "mcp-server-port", "s", defaultMCPServerPort, "MCP Server 监听端口，默认3619")
 	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")
+	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
 
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {

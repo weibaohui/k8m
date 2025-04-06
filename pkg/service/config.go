@@ -82,6 +82,7 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	}
 
 	cfg.PrintConfig = m.PrintConfig
+	cfg.EnableAI = m.EnableAI
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret
