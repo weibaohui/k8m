@@ -1,5 +1,9 @@
 FROM golang:1.24-alpine  AS golang-builder
-
+ARG VERSION
+ARG GIT_COMMIT
+ARG MODEL
+ARG API_KEY
+ARG API_URL
 ENV GOPROXY="https://goproxy.io"
 
 WORKDIR /app
@@ -8,7 +12,7 @@ ADD . .
 
 RUN apk add upx
 RUN --mount=type=cache,target=/go/pkg/mod \
-    go build -o k8m . && apk add upx && upx -9 k8m
+    go build -ldflags "-s -w  -X main.Version=$VERSION -X main.GitCommit=$GIT_COMMIT -X main.Model=$MODEL -X main.ApiKey=$API_KEY -X main.ApiUrl=$API_URL" -o k8m . && apk add upx && upx -9 k8m
 
 ### build final image
 FROM alpine:3.21
