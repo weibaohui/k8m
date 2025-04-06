@@ -25,6 +25,7 @@ env:
   DOCKERHUB_USERNAME: weibh
   ALIHUB_URL: registry.cn-hangzhou.aliyuncs.com
   ALIHUB_USERNAME: 491923016@qq.com
+  ALIHUB_IMAGE_REPONAME: minik8m
   IMAGE_REPONAME: k8m
 
 jobs:
@@ -113,5 +114,7 @@ jobs:
         tags: |
           ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
           ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ steps.date.outputs.today }}
-          ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
-          ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
+          ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
+          ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_IMAGE_REPONAME }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
+          ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_IMAGE_REPONAME }}/${{ env.IMAGE_REPONAME }}:latest
+          ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_IMAGE_REPONAME }}/${{ env.IMAGE_REPONAME }}:${{ steps.date.outputs.today }}
