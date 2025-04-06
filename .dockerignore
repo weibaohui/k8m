@@ -30,4 +30,4 @@ bin/
 
 /.env
 /.env.dev.local
-.vscode/
+.vscode//.cache/
