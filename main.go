@@ -51,7 +51,8 @@ import (
 var embeddedFiles embed.FS
 var Version string
 var GitCommit string
-
+var GitTag string
+var GitRepo string
 var Model = "Qwen/Qwen2.5-7B-Instruct"
 var ApiKey string
 var ApiUrl string
@@ -64,7 +65,10 @@ func Init() {
 	if err != nil {
 		klog.Errorf("加载数据库内配置信息失败 error: %v", err)
 	}
-
+	cfg.Version = Version
+	cfg.GitCommit = GitCommit
+	cfg.GitTag = GitTag
+	cfg.GitRepo = GitRepo
 	cfg.ShowConfigInfo()
 
 	// 打印版本和 Git commit 信息
