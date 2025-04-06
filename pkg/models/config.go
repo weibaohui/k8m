@@ -22,6 +22,7 @@ type Config struct {
 	SqlitePath        string    `json:"sqlite_path,omitempty"`
 	AnySelect         bool      `json:"any_select,omitempty"`
 	PrintConfig       bool      `json:"print_config,omitempty"`
+	EnableAI          bool      `json:"enable_ai,omitempty"`  // 是否启用AI功能，默认开启
 	CreatedAt         time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
 	UpdatedAt         time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
