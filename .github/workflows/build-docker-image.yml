@@ -1,0 +1,117 @@
+# This is a basic workflow to help you get started with Actions
+
+name: build docker image
+
+# Controls when the action will run.
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [created,published] # 表示在创建新的 Release 时触发
+
+# Allows you to run this workflow manually from the Actions tab
+  # 可以手动触发
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
+
+env:
+  DOCKERHUB_USERNAME: eryajf
+  ALIHUB_URL: registry.cn-hangzhou.aliyuncs.com
+  ALIHUB_USERNAME: eryajf
+  IMAGE_REPONAME: k8m
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: latest
+    - name: 使用 Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+        cache-dependency-path: 'ui/pnpm-lock.yaml'
+    - name: 编译前端
+      run: |
+        cd ui
+        pnpm install
+        pnpm build
+
+    - name: 上传到共享
+      uses: actions/upload-artifact@v4
+      with:
+        name: workspace
+        path: ui/dist
+
+  buildImage:
+    needs: buildx
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: 从共享下载
+      uses: actions/download-artifact@v4
+      with:
+        name: workspace
+        path: ui/dist  # 覆盖当前目录
+
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v4
+
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=today::$(date +'%Y-%m-%d_%H-%M')"
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # 镜像推送到 阿里云仓库
+    - name: Login to the Ali Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.ALIHUB_URL }}
+        username: ${{ env.ALIHUB_USERNAME }}
+        password: ${{ secrets.ALIHUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile.action
+        push: ${{ github.event_name != 'pull_request' }}
+        cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache,mode=max
+        # platforms: linux/amd64,linux/arm64
+        platforms: linux/amd64
+        # 给清单打上多个标签
+        tags: |
+          ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
+          ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ steps.date.outputs.today }}
+          ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
+          ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest

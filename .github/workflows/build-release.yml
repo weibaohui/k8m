@@ -1,0 +1,59 @@
+name: build and push binary to release
+
+on:
+  release:
+    types: [created,published] # 表示在创建新的 Release 时触发
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: latest
+    - name: 使用 Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+        cache-dependency-path: 'ui/pnpm-lock.yaml'
+
+    - name: 编译前端
+      run: |
+        cd ui
+        pnpm install
+        pnpm build
+
+    - name: 上传到共享
+      uses: actions/upload-artifact@v4
+      with:
+        name: workspace
+        path: ui/dist
+
+    - name: 设置go环境
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+        cache-dependency-path: 'go.sum'
+
+    - name: 安装 UPX
+      uses: crazy-max/ghaction-upx@v3
+      with:
+        install-only: true
+
+    - name: 编译后端
+      run: |
+        make build-all
+
+    - name: 上传二进制
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: bin/k8m*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true

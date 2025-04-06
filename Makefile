@@ -31,6 +31,12 @@ PLATFORMS := \
     windows/amd64 \
     windows/arm64
 
+# 定义需要编译的Linux平台和架构
+# 格式为 GOOS/GOARCH
+LINUX_PLATFORMS := \
+    linux/amd64 \
+    linux/arm64 \
+
 # 默认目标
 .PHONY: all
 all: build
@@ -112,14 +118,40 @@ build-all:
 		else \
 			EXT=""; \
 		fi; \
-		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$(VERSION)-$$GOOS-$$GOARCH$$EXT"; \
+		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
 		ZIP_FILE="$(OUTPUT_FILE).zip"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
 		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
 		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
 		echo "打包为 ZIP (最大压缩级别): $$ZIP_FILE"; \
-        (cd $(OUTPUT_DIR) && zip -9 "$(BINARY_NAME)-$(VERSION)-$$GOOS-$$GOARCH.zip" "$(BINARY_NAME)-$(VERSION)-$$GOOS-$$GOARCH$$EXT"); \
+		if [ "$$GOOS" = "windows" ] && [ "$$GOARCH" = "arm64" ]; then \
+			echo "跳过 upx"; \
+		else \
+			upx -9 "$$OUTPUT_FILE"; \
+		fi; \
+        (cd $(OUTPUT_DIR) && zip -9 "$(BINARY_NAME)-$$GOOS-$$GOARCH.zip" "$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"); \
         echo "文件已打包: $$ZIP_FILE"; \
+		rm -f "$$OUTPUT_FILE"; \
+	done
+
+# 为所有指定的平台和架构构建可执行文件
+.PHONY: build-linux
+build-linux:
+	@echo "为所有平台构建可执行文件..."
+	@mkdir -p $(OUTPUT_DIR)
+	@for platform in $(LINUX_PLATFORMS); do \
+		GOOS=$${platform%/*} GOARCH=$${platform#*/}; \
+		echo "构建平台: $$GOOS/$$GOARCH ..."; \
+		if [ "$$GOOS" = "windows" ]; then \
+			EXT=".exe"; \
+		else \
+			EXT=""; \
+		fi; \
+		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
+		echo "输出文件: $$OUTPUT_FILE"; \
+		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
+		upx -9 "$$OUTPUT_FILE"; \
 	done
 
 # 清理生成的可执行文件
@@ -141,6 +173,7 @@ help:
 	@echo "可用的目标:"
 	@echo "  docker      构建容器镜像 (使用 BUILD_TOOL 指定的构建工具，默认为 podman)"
 	@echo "  build       为当前平台构建可执行文件"
+	@echo "  build-linux 为Linux平台构建可执行文件"
 	@echo "  build-all   为所有平台构建可执行文件"
 	@echo "  clean       清理生成的可执行文件"
 	@echo "  run         运行当前平台的可执行文件"
