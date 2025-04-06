@@ -885,7 +885,6 @@
                     "closeOnOutside": false,
                     "position": "left",
                     "title": "健康检查配置",
-                    "size": "lg",
                     "body": {
                       "type": "form",
                       "title": "健康检查配置",
