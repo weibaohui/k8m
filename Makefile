@@ -24,12 +24,13 @@ PLATFORMS := \
     linux/arm64 \
     linux/ppc64le \
     linux/s390x \
-    linux/mips64le \
-    linux/riscv64 \
     darwin/amd64 \
     darwin/arm64 \
     windows/amd64 \
     windows/arm64
+# 这两个不常用，暂时注释掉
+# linux/mips64le \
+# linux/riscv64 \
 
 # 定义需要编译的Linux平台和架构
 # 格式为 GOOS/GOARCH
@@ -127,7 +128,11 @@ build-all:
 		if [ "$$GOOS" = "windows" ] && [ "$$GOARCH" = "arm64" ]; then \
 			echo "跳过 upx"; \
 		else \
-			upx -9 "$$OUTPUT_FILE"; \
+			if [ "$$GOOS" = "darwin" ]; then \
+				upx --force-macos -f -9 "$$OUTPUT_FILE"; \
+			else \
+				upx -9 "$$OUTPUT_FILE"; \
+			fi; \
 		fi; \
         (cd $(OUTPUT_DIR) && zip -9 "$(BINARY_NAME)-$$GOOS-$$GOARCH.zip" "$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"); \
         echo "文件已打包: $$ZIP_FILE"; \
