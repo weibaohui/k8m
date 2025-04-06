@@ -22,9 +22,9 @@ on:
         description: 'Test scenario tags'
 
 env:
-  DOCKERHUB_USERNAME: eryajf
+  DOCKERHUB_USERNAME: weibh
   ALIHUB_URL: registry.cn-hangzhou.aliyuncs.com
-  ALIHUB_USERNAME: eryajf
+  ALIHUB_USERNAME: 491923016@qq.com
   IMAGE_REPONAME: k8m
 
 jobs:
