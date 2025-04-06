@@ -444,6 +444,13 @@ const items: () => MenuItem[] = () => {
 
             ],
         },
+        {
+            label: "关于",
+            title: "关于",
+            icon: <i className="fa-solid fa-circle-info"></i>,
+            key: "about",
+            onClick: () => onMenuClick('/about/about')
+        },
     ];
 }
 

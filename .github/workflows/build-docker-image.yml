@@ -75,7 +75,7 @@ jobs:
 
       - name: Get current date
         id: date
-        run: echo "::set-output name=today::$(date +'%Y-%m-%d_%H-%M')"
+        run: echo "::set-output name=today::$(date +'%Y%m%d-%H%M')"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -127,3 +127,4 @@ jobs:
             MODEL=${{ env.OPENAI_API_MODEL }}
             API_KEY=${{ secrets.OPENAI_API_KEY }}
             API_URL=${{ env.OPENAI_API_URL }}
+            BUILD_DATE=${{ steps.date.outputs.today }}

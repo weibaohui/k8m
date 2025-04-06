@@ -37,10 +37,11 @@ type Config struct {
 	SqlitePath        string // sqlite 数据库路径
 	AnySelect         bool   // 是否开启任意选择，默认开启
 	PrintConfig       bool   // 是否打印配置信息
-	Version           string
-	GitCommit         string
-	GitTag            string
-	GitRepo           string
+	Version           string // 版本号，由编译时自动注入
+	GitCommit         string // git commit, 由编译时自动注入
+	GitTag            string // git tag, 由编译时自动注入
+	GitRepo           string // git仓库地址, 由编译时自动注入
+	BuildDate         string // 编译时间, 由编译时自动注入
 }
 
 func Init() *Config {

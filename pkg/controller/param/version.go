@@ -6,8 +6,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/flag"
 )
 
-// GetVersion 获取版本号
-func GetVersion(c *gin.Context) {
+// Version 获取版本号
+func Version(c *gin.Context) {
 
 	cfg := flag.Init()
 	amis.WriteJsonData(c, gin.H{
@@ -15,5 +15,6 @@ func GetVersion(c *gin.Context) {
 		"gitCommit": cfg.GitCommit,
 		"gitTag":    cfg.GitTag,
 		"gitRepo":   cfg.GitRepo,
+		"buildDate": cfg.BuildDate,
 	})
 }

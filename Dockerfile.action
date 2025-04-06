@@ -6,6 +6,7 @@ ARG API_KEY
 ARG API_URL
 ARG GIT_TAG
 ARG GIT_REPOSITORY
+ARG BUILD_DATE
 ENV GOPROXY="https://goproxy.io"
 
 WORKDIR /app
@@ -14,7 +15,7 @@ ADD . .
 
 RUN apk add upx
 RUN --mount=type=cache,target=/go/pkg/mod \
-    go build -ldflags "-s -w  -X main.Version=$VERSION -X main.GitCommit=$GIT_COMMIT  -X main.GitTag=$GIT_TAG  -X main.GitRepo=$GIT_REPOSITORY  -X main.Model=$MODEL -X main.ApiKey=$API_KEY -X main.ApiUrl=$API_URL" -o k8m . && apk add upx && upx -9 k8m
+    go build -ldflags "-s -w  -X main.Version=$VERSION -X main.GitCommit=$GIT_COMMIT  -X main.GitTag=$GIT_TAG  -X main.GitRepo=$GIT_REPOSITORY  -X main.BuildDate=$BUILD_DATE -X main.Model=$MODEL -X main.ApiKey=$API_KEY -X main.ApiUrl=$API_URL" -o k8m . && apk add upx && upx -9 k8m
 
 ### build final image
 FROM alpine:3.21

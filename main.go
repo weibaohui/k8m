@@ -56,6 +56,7 @@ var GitRepo string
 var Model = "Qwen/Qwen2.5-7B-Instruct"
 var ApiKey string
 var ApiUrl string
+var BuildDate string
 
 func Init() {
 	// 初始化配置
@@ -69,6 +70,7 @@ func Init() {
 	cfg.GitCommit = GitCommit
 	cfg.GitTag = GitTag
 	cfg.GitRepo = GitRepo
+	cfg.BuildDate = BuildDate
 	cfg.ShowConfigInfo()
 
 	// 打印版本和 Git commit 信息
@@ -184,6 +186,8 @@ func main() {
 		params.GET("/cluster/option_list", param.ClusterOptionList)
 		// 获取当前登录用户的集群列表,table列表
 		params.GET("/cluster/all", param.ClusterTableList)
+		// 获取当前软件版本信息
+		params.GET("/version", param.Version)
 	}
 	api := r.Group("/k8s", middleware.AuthMiddleware())
 	{
