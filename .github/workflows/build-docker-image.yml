@@ -25,7 +25,7 @@ env:
   DOCKERHUB_USERNAME: weibh
   ALIHUB_URL: registry.cn-hangzhou.aliyuncs.com
   ALIHUB_USERNAME: 491923016@qq.com
-  IMAGE_REPONAME: k8m
+  IMAGE_REPONAME: minik8m
 
 jobs:
   buildx:
