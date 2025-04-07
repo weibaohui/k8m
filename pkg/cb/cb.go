@@ -70,7 +70,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	clusterUserRoles, ok := ctx.Value(constants.JwtClusterUserRoles).([]*models.ClusterUserRole)
 	if !ok {
 		// 没有集群权限，报错
-		return "", nil, fmt.Errorf("用户[%s]没有集群授权", username)
+		return "", nil, fmt.Errorf("用户[%s]获取集群授权错误，默认阻止", username)
 	}
 
 	if clusterUserRoles != nil && len(clusterUserRoles) == 0 {
