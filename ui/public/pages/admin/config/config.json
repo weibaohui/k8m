@@ -25,6 +25,13 @@
                                             "desc": "调试模式，同步修改所有的debug模式 "
                                         },
                                         {
+                                            "name": "connect_cluster",
+                                            "type": "switch",
+                                            "label": "自动连接集群",
+                                            "value": false,
+                                            "desc": "启动集群是是否自动连接现有集群（如果集群较多，会增加启动时间） "
+                                        },
+                                        {
                                             "name": "print_config",
                                             "type": "switch",
                                             "label": "打印配置",
@@ -35,7 +42,7 @@
                                             "name": "in_cluster",
                                             "type": "switch",
                                             "label": "InCluster模式",
-                                            "value": true,
+                                            "value": false,
                                             "desc": "是否集群内模式 "
                                         },
                                         {
@@ -74,7 +81,7 @@
                                             "name": "enable_ai",
                                             "type": "switch",
                                             "label": "AI功能开关",
-                                            "value": true,
+                                            "value": false,
                                             "desc": "是否启用AI功能，默认开启"
                                         },
                                         {
@@ -102,7 +109,7 @@
                                             "name": "any_select",
                                             "type": "switch",
                                             "label": "任意选择",
-                                            "value": true,
+                                            "value": false,
                                             "desc": "是否开启任意选择，默认开启"
                                         }
                                     ]

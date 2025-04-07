@@ -43,6 +43,7 @@ type Config struct {
 	GitRepo           string // git仓库地址, 由编译时自动注入
 	BuildDate         string // 编译时间, 由编译时自动注入
 	EnableAI          bool   // 是否启用AI功能，默认开启
+	ConnectCluster    bool   // 启动集群是是否自动连接现有集群，默认关闭
 }
 
 func Init() *Config {
@@ -127,6 +128,8 @@ func (c *Config) InitFlags() {
 	defaultPrintConfig := getEnvAsBool("PRINT_CONFIG", false)
 	// 默认开启AI功能
 	defaultEnableAI := getEnvAsBool("ENABLE_AI", true)
+	// 默认关闭启动连接集群
+	defaultConnectCluster := getEnvAsBool("CONNECT_CLUSTER", false)
 
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
@@ -147,7 +150,7 @@ func (c *Config) InitFlags() {
 	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")
 	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
-
+	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动集群是是否自动连接现有集群，默认关闭")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
