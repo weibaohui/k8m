@@ -317,6 +317,154 @@
           "type": "columns-toggler",
           "align": "left"
         },
+        {
+          "type": "button",
+          "label": "新增svc",
+          "actionType": "dialog",
+          "dialog": {
+            "closeOnEsc": true,
+            "closeOnOutside": false,
+            "size": "lg",
+            "position": "left",
+            "title": "新增 svc 参数填写",
+            "body": [
+              {
+                "type": "form",
+                "api": "post:/k8s/service/create",
+                "body": [
+                  {
+                    "type": "group",
+                    "body": [
+                      {
+                        "type": "select",
+                        "label": "命名空间",
+                        "name": "metadata.namespace",
+                        "source": "/k8s/ns/option_list",
+                        "required": true,
+                        "value": "${ls:selectedNs||'default'}",
+                        "description": "选择服务部署的命名空间"
+                      },
+                      {
+                        "type": "input-text",
+                        "label": "服务名称",
+                        "name": "metadata.name",
+                        "required": true,
+                        "validations": {
+                          "maxLength": 63,
+                          "matchRegexp": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                        },
+                        "description": "DNS-1123格式的小写字母、数字和'-'组成"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "input-kv",
+                    "label": "标签设置",
+                    "name": "metadata.labels",
+                    "value": {
+                      "": ""
+                    },
+                    "required": true,
+                    "description": "用于资源分类和选择"
+                  },
+                  {
+                    "type": "select",
+                    "label": "服务类型",
+                    "name": "spec.type",
+                    "options": [
+                      {"label": "ClusterIP", "value": "ClusterIP", "description": "集群内部访问"},
+                      {"label": "NodePort", "value": "NodePort", "description": "节点端口暴露"},
+                      {"label": "LoadBalancer", "value": "LoadBalancer", "description": "云提供商负载均衡"}
+                    ],
+                    "value": "ClusterIP",
+                    "description": "选择服务暴露方式",
+                    "onEvent": {
+                      "change": {
+                        "actions": [
+                          {
+                            "actionType": "reset",
+                            "componentId": "ports-combo" 
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "combo",
+                    "label": "端口配置",
+                    "name": "spec.ports",
+                    "id": "ports-combo",
+                    "multiple": true,
+                    "required": true,
+                    "addButtonText": "添加端口",
+                    "items": [
+                      {
+                        "type": "input-text",
+                        "label": "名称",
+                        "name": "name",
+                        "required": true,
+                        "validations": {
+                          "maxLength": 63,
+                          "matchRegexp": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                        },
+                        "description": "服务端口的名称"
+                      },
+                      {
+                        "type": "select",
+                        "label": "协议类型",
+                        "name": "protocol",
+                        "options": [
+                          {"label": "TCP", "value": "TCP", "description": "TCP协议"},
+                          {"label": "UDP", "value": "UDP", "description": "UDP协议"},
+                          {"label": "SCTP", "value": "SCTP", "description": "SCTP协议"}
+                        ],
+                        "value": "TCP",
+                        "description": "选择协议类型"
+                      },
+                      {
+                        "type": "input-number",
+                        "label": "服务端口",
+                        "name": "port",
+                        "required": true,
+                        "min": 1,
+                        "max": 65535,
+                        "description": "服务暴露的端口"
+                      },
+                      {
+                        "type": "input-number",
+                        "label": "目标端口",
+                        "name": "targetPort",
+                        "required": true,
+                        "min": 1,
+                        "max": 65535,
+                        "description": "Pod监听的端口"
+                      },
+                      {
+                        "type": "input-number",
+                        "label": "节点端口",
+                        "name": "nodePort",
+                        "visibleOn": "typeof spec !== 'undefined' && spec.type === 'NodePort'",
+                        "min": 30000,
+                        "max": 32767,
+                        "description": "节点暴露的端口(30000-32767)"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "input-kv",
+                    "label": "标签选择器",
+                    "name": "spec.selector",
+                    "required": true,
+                    "description": "匹配Pod的标签选择器",
+                    "value": {
+                      "app": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
         "reload",
         "bulkActions"
       ],

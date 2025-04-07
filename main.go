@@ -36,6 +36,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/rs"
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
+	"github.com/weibaohui/k8m/pkg/controller/svc"
 	"github.com/weibaohui/k8m/pkg/controller/template"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
@@ -213,7 +214,7 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove)     // CRD
 		api.POST("/:kind/group/:group/version/:version/batch/remove", dynamic.BatchRemove)            // CRD
 		api.POST("/:kind/group/:group/version/:version/force_remove", dynamic.BatchForceRemove)       // CRD
-		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)       // CRD
+		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)       // CRD       // CRD
 		api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", dynamic.Describe) // CRD
 		api.POST("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                    // CRD
 		api.POST("/:kind/group/:group/version/:version/list/ns/", dynamic.List)                       // CRD
@@ -283,7 +284,8 @@ func main() {
 		api.POST("/deploy/ns/:ns/name/:name/scale/replica/:replica", deploy.Scale)
 		api.GET("/deploy/ns/:ns/name/:name/events/all", deploy.Event)
 		api.GET("/deploy/ns/:ns/name/:name/hpa", deploy.HPA)
-
+		// p8s svc
+		api.POST("/service/create", svc.Create)
 		// k8s node
 		api.POST("/node/drain/name/:name", node.Drain)
 		api.POST("/node/cordon/name/:name", node.Cordon)
@@ -429,6 +431,7 @@ func main() {
 		// 集群管理 ，连接切换等
 		mgm.POST("/cluster/:cluster/reconnect", cluster.Reconnect)
 		mgm.POST("/cluster/:cluster/setDefault", cluster.SetDefault)
+		mgm.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
 
 	}
 
