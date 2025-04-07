@@ -118,7 +118,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 | `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                |
 | `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`   | kubectl shell 镜像地址                                                |
 | `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址                                                   |
-| `SQLITE_PATH`         | `/data/k8m.db`             | 持久化数据库地址，默认sqlite数据库，文件地址/data/k8m.db                             |
+| `SQLITE_PATH`         | `./data/k8m.db`            | 持久化数据库地址，默认sqlite数据库，文件地址./data/k8m.db                            |
 | `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                 |
 | `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                  |
 | `PRINT_CONFIG`         | `"false"`                  | 是否打印配置信息                                                             |

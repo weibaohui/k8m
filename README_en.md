@@ -90,24 +90,24 @@ After logging in, create an API_KEY at [https://cloud.siliconflow.cn/account/ak]
 
 Below is a table of environment variable settings supported by k8m and their functions:
 
-| Environment Variable       | Default Value                | Description                                                        |
-|----------------------------|------------------------------|--------------------------------------------------------------------|
-| `PORT`                     | `3618`                       | Listening port number                                              |
-| `MCP_SERVER_PORT`          | `3619`                       | Listening port number for built-in multi-cluster k8s MCP Server    |
-| `KUBECONFIG`               | `~/.kube/config`             | Path to `kubeconfig` file                                          |
-| `OPENAI_API_KEY`           | `""`                         | API Key for large models                                           |
-| `OPENAI_API_URL`           | `""`                         | API URL for large models                                           |
-| `OPENAI_MODEL`             | `Qwen/Qwen2.5-7B-Instruct`   | Default model name for large models, set to deepseek-ai/DeepSeek-R1-Distill-Qwen-7B if needed |
-| `LOGIN_TYPE`               | `"password"`                | Login method (e.g., `password`, `oauth`, `token`)                  |
-| `ADMIN_USERNAME`           | `"admin"`                   | Administrator username                                             |
-| `ADMIN_PASSWORD`           | `"123456"`                  | Administrator password                                             |
-| `DEBUG`                    | `"false"`                   | Whether to enable `debug` mode                                     |
-| `LOG_V`                    | `"2"`                       | Log output level, same usage as klog                               |
-| `JWT_TOKEN_SECRET`         | `"your-secret-key"`         | Secret used for generating JWT Token                               |
-| `KUBECTL_SHELL_IMAGE`      | `bitnami/kubectl:latest`     | kubectl shell image address                                        |
-| `NODE_SHELL_IMAGE`         | `alpine:latest`              | Node shell image address                                           |
-| `SQLITE_PATH`              | `/data/k8m.db`               | Persistent database address, default sqlite database, file address /data/k8m.db |
-| `IN_CLUSTER`               | `"true"`                    | Whether to automatically register and manage the host cluster, enabled by default |
+| Environment Variable       | Default Value              | Description                                                                                   |
+|----------------------------|----------------------------|-----------------------------------------------------------------------------------------------|
+| `PORT`                     | `3618`                     | Listening port number                                                                         |
+| `MCP_SERVER_PORT`          | `3619`                     | Listening port number for built-in multi-cluster k8s MCP Server                               |
+| `KUBECONFIG`               | `~/.kube/config`           | Path to `kubeconfig` file                                                                     |
+| `OPENAI_API_KEY`           | `""`                       | API Key for large models                                                                      |
+| `OPENAI_API_URL`           | `""`                       | API URL for large models                                                                      |
+| `OPENAI_MODEL`             | `Qwen/Qwen2.5-7B-Instruct` | Default model name for large models, set to deepseek-ai/DeepSeek-R1-Distill-Qwen-7B if needed |
+| `LOGIN_TYPE`               | `"password"`               | Login method (e.g., `password`, `oauth`, `token`)                                             |
+| `ADMIN_USERNAME`           | `"admin"`                  | Administrator username                                                                        |
+| `ADMIN_PASSWORD`           | `"123456"`                 | Administrator password                                                                        |
+| `DEBUG`                    | `"false"`                  | Whether to enable `debug` mode                                                                |
+| `LOG_V`                    | `"2"`                      | Log output level, same usage as klog                                                          |
+| `JWT_TOKEN_SECRET`         | `"your-secret-key"`        | Secret used for generating JWT Token                                                          |
+| `KUBECTL_SHELL_IMAGE`      | `bitnami/kubectl:latest`   | kubectl shell image address                                                                   |
+| `NODE_SHELL_IMAGE`         | `alpine:latest`            | Node shell image address                                                                      |
+| `SQLITE_PATH`              | `./data/k8m.db`            | Persistent database address, default sqlite database, file address ./data/k8m.db              |
+| `IN_CLUSTER`               | `"true"`                   | Whether to automatically register and manage the host cluster, enabled by default             |
 
 These environment variables can be set when running the application, for example:
 
