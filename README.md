@@ -10,6 +10,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 模型交互能力，同时支持接入您自己的私有化大模型。
 
 ### 演示DEMO
+
 [DEMO](http://107.150.119.151:3618)
 用户名密码 demo/demo
 
@@ -121,7 +122,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 | `SQLITE_PATH`         | `./data/k8m.db`            | 持久化数据库地址，默认sqlite数据库，文件地址./data/k8m.db                            |
 | `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                 |
 | `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                  |
-| `PRINT_CONFIG`         | `"false"`                  | 是否打印配置信息                                                             |
+| `PRINT_CONFIG`        | `"false"`                  | 是否打印配置信息                                                          |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
@@ -255,13 +256,6 @@ MCP程序使用3619端口。NodePort使用31919端口。
 }
 ```
 
-#### Claude Desktop
-
-1. 打开Claude Desktop设置面板
-2. 在API配置区域添加MCP Server地址
-3. 启用SSE事件监听功能
-4. 验证连接状态
-
 #### Cursor
 
 1. 进入Cursor设置界面
@@ -283,45 +277,43 @@ MCP程序使用3619端口。NodePort使用31919端口。
 ## 更新日志
 
 **v0.0.75更新**
-1. 分离用户操作界面、平台管理界面。平台管理界面新增一个平台管理菜单。
-1.1 用户多集群切换，保留切换、连接功能:
-![输入图片说明](https://foruda.gitee.com/images/1743904007097350906/c1dd8712_77493.png "屏幕截图")
-1.2 管理员操作多集群，新增断开功能：
-![输入图片说明](https://foruda.gitee.com/images/1743904225916002465/6ee9a422_77493.png "屏幕截图")
-1.3 集群管理新增已授权页面，展示集群下所有的授权用户
-![输入图片说明](https://foruda.gitee.com/images/1743904287185877723/dbc711cb_77493.png "屏幕截图")
-1.4 用户管理新增授权页面，查看某用户所有的授权集群
-![输入图片说明](https://foruda.gitee.com/images/1743904361656769506/de632dca_77493.png "屏幕截图")
-2. 新增权限可设置ns，集群授权后，可补充ns，默认为不限制，填写后，将限制用户活动范围。
-![输入图片说明](https://foruda.gitee.com/images/1743904016110156134/7aa4c81c_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1743904052295697800/8f38845c_77493.png "屏幕截图")
-3. 新增参数配置页面。
-启动后会先加载环境变量、env文件、页面配置，依次覆盖。最终页面配置为准。
-![输入图片说明](https://foruda.gitee.com/images/1743904079152543105/cf923008_77493.png "屏幕截图")
-4. 新增资源、副本数调整页面
-![输入图片说明](https://foruda.gitee.com/images/1743904476260674721/310b0f04_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1743904500139794748/df5c4bed_77493.png "屏幕截图")
 
+1. 分离用户操作界面、平台管理界面。平台管理界面新增一个平台管理菜单。
+   1.1 用户多集群切换，保留切换、连接功能:
+   ![输入图片说明](https://foruda.gitee.com/images/1743904007097350906/c1dd8712_77493.png "屏幕截图")
+   1.2 管理员操作多集群，新增断开功能：
+   ![输入图片说明](https://foruda.gitee.com/images/1743904225916002465/6ee9a422_77493.png "屏幕截图")
+   1.3 集群管理新增已授权页面，展示集群下所有的授权用户
+   ![输入图片说明](https://foruda.gitee.com/images/1743904287185877723/dbc711cb_77493.png "屏幕截图")
+   1.4 用户管理新增授权页面，查看某用户所有的授权集群
+   ![输入图片说明](https://foruda.gitee.com/images/1743904361656769506/de632dca_77493.png "屏幕截图")
+2. 新增权限可设置ns，集群授权后，可补充ns，默认为不限制，填写后，将限制用户活动范围。
+   ![输入图片说明](https://foruda.gitee.com/images/1743904016110156134/7aa4c81c_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1743904052295697800/8f38845c_77493.png "屏幕截图")
+3. 新增参数配置页面。
+   启动后会先加载环境变量、env文件、页面配置，依次覆盖。最终页面配置为准。
+   ![输入图片说明](https://foruda.gitee.com/images/1743904079152543105/cf923008_77493.png "屏幕截图")
+4. 新增资源、副本数调整页面
+   ![输入图片说明](https://foruda.gitee.com/images/1743904476260674721/310b0f04_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1743904500139794748/df5c4bed_77493.png "屏幕截图")
 
 **V0.0.73 更新**
 
 1. 新增Deploy探针管理页面
-![输入图片说明](https://foruda.gitee.com/images/1743686996148531876/a3dc1131_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1743686996148531876/a3dc1131_77493.png "屏幕截图")
 1. 新增MCP多集群不传值时提示，只有一个集群时可以省去集群名称
-![输入图片说明](https://foruda.gitee.com/images/1743687014148809259/e5526f1f_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1743687014148809259/e5526f1f_77493.png "屏幕截图")
 1. 修复未授权用户看到一个默认集群的问题
-
-
 
 **V0.0.72 更新**
 
 1. MCP 大模型调用权限上线，一句话概述：谁使用大模型，就用谁的权限执行MCP
-![输入图片说明](https://foruda.gitee.com/images/1743650492231083539/72855c43_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1743650492231083539/72855c43_77493.png "屏幕截图")
 
 **V0.0.70 更新**
 
 1. 权限管理调整：按集群进行权限隔离
-![输入图片说明](https://foruda.gitee.com/images/1743436163730546653/203d33f7_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1743436163730546653/203d33f7_77493.png "屏幕截图")
 
 **v0.0.67 更新**
 
