@@ -44,7 +44,7 @@ const App = () => {
         </Layout.Header>
         <Layout>
             <Layout.Sider
-                width={160}
+                width={220}
                 collapsed={collapse}
                 collapsible
                 onCollapse={onCollapse}
