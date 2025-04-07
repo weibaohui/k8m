@@ -29,7 +29,7 @@
                                             "type": "switch",
                                             "label": "自动连接集群",
                                             "value": false,
-                                            "desc": "启动集群是是否自动连接现有集群 "
+                                            "desc": "启动集群是是否自动连接现有集群（如果集群较多，会增加启动时间） "
                                         },
                                         {
                                             "name": "print_config",
