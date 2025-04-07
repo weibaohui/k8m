@@ -57,7 +57,7 @@
                                             "type": "input-text",
                                             "label": "SQLite路径",
                                             "value": "./data/k8m.db",
-                                            "desc": "sqlite数据库文件路径，默认/data/k8m.db"
+                                            "desc": "sqlite数据库文件路径，默认./data/k8m.db"
                                         }
                                     ]
                                 }

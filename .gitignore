@@ -25,8 +25,8 @@ bin/
 /ui/dist/
 /ui/.idea/
 
-/data/
-/data/k8m.db
+./data/
+./data/k8m.db
 
 /.env
 /.env.dev.local
