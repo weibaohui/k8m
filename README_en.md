@@ -1,4 +1,7 @@
-## **k8m**
+<div align="center">
+<h1>K8M</h1>
+</div>
+
 
 [English](README_en.md) | [中文](README.md)
 
@@ -23,7 +26,7 @@
 
 **k8m**'s design philosophy is "AI-driven, lightweight and efficient, simplifying complexity," helping developers and operators quickly get started and effortlessly manage Kubernetes clusters.
 
-<img width="600" alt="image" src="https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e" />
+![](https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e)
 
 ## **Run**
 
@@ -51,6 +54,27 @@ Usage of ./k8m:
   -s, --mcp-server-port int              MCP Server listening port, default 3619 (default 3619)
   -v, --v Level                          Log level for klog (default 2)
 ```
+
+You can also directly start it using docker-compose (recommended):
+
+```yaml
+services:
+  k8m:
+    container_name: k8m
+    image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m
+    restart: always
+    ports:
+      - "3618:3618"
+      - "3619:3619"
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./data:/app/data
+```
+
+After startup, access port `3618`, default username: `admin`, default password: `123456`.
+
+If you want to quickly set up an experience through an online environment, you can visit: [k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m), fork the repository after that, and set up the experience.
 
 ## **ChatGPT Configuration Guide**
 
