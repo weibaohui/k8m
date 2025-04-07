@@ -103,6 +103,17 @@ func Init() {
 		service.ClusterService().ScanClustersInDB()
 		service.ClusterService().ScanClustersInDir(cfg.KubeConfig)
 		service.ClusterService().RegisterClustersByPath(cfg.KubeConfig)
+
+		// 启动时是否自动连接集群
+		if cfg.ConnectCluster {
+			// 调用 AllClusters 方法获取所有集群
+			clusters := service.ClusterService().AllClusters()
+			// 遍历集群，进行连接
+			for _, clusterInfo := range clusters {
+				klog.Infof("连接集群:%s", clusterInfo.ClusterID)
+				service.ClusterService().Connect(clusterInfo.ClusterID)
+			}
+		}
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
 		klog.Infof("启动MCP Server, 监听端口: %d", cfg.MCPServerPort)
