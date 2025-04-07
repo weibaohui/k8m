@@ -27,7 +27,7 @@ bin/
 
 ./data/
 ./data/k8m.db
-
 /.env
 /.env.dev.local
 .vscode/
+data/k8m.db
