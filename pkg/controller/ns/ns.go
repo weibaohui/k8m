@@ -14,7 +14,6 @@ import (
 )
 
 func OptionList(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
 	// 处理集群中有限制namespace的情况
@@ -24,7 +23,7 @@ func OptionList(c *gin.Context) {
 	}
 
 	// 处理平台管理员的情况
-	if list, ok := handlePlatformAdmin(c, ctx, selectedCluster); ok {
+	if list, ok := handlePlatformAdmin(c, selectedCluster); ok {
 		sortAndRespond(c, list)
 		return
 	}
@@ -49,8 +48,9 @@ func handleRestrictedNamespace(selectedCluster string) ([]map[string]string, boo
 	return nil, false
 }
 
-func handlePlatformAdmin(c *gin.Context, ctx context.Context, selectedCluster string) ([]map[string]string, bool) {
+func handlePlatformAdmin(c *gin.Context, selectedCluster string) ([]map[string]string, bool) {
 	if amis.IsCurrentUserPlatformAdmin(c) {
+		ctx := amis.GetContextWithUser(c)
 		nsList, err := getClusterNsList(ctx, selectedCluster)
 		if err != nil {
 			return make([]map[string]string, 0), true
@@ -77,7 +77,8 @@ func handleNormalUser(c *gin.Context, selectedCluster string) ([]map[string]stri
 	}
 
 	// 处理没有限制namespace的用户
-	return handleUserWithoutNamespaceRestriction(c, selectedCluster)
+	ctx := amis.GetContextWithUser(c)
+	return handleUserWithoutNamespaceRestriction(ctx, selectedCluster)
 }
 
 func handleUserWithNamespaceRestriction(roles []*models.ClusterUserRole) ([]map[string]string, bool) {
