@@ -1,4 +1,7 @@
-## **k8m**
+<div align="center">
+<h1>K8M</h1>
+</div>
+
 
 [English](README_en.md) | [中文](README.md)
 
@@ -10,6 +13,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 模型交互能力，同时支持接入您自己的私有化大模型。
 
 ### 演示DEMO
+
 [DEMO](http://107.150.119.151:3618)
 用户名密码 demo/demo
 
@@ -33,7 +37,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 **k8m** 的设计理念是“AI驱动，轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
 
-<img width="600" alt="image" src="https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e" />
+![](https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e)
 
 ## **运行**
 
@@ -63,6 +67,27 @@ Usage of ./k8m:
   -s, --mcp-server-port int              MCP Server 监听端口，默认3619 (default 3619)
   -v, --v Level                          klog的日志级别 (default 2)
 ```
+
+也可以直接通过docker-compose(推荐)启动：
+
+```yaml
+services:
+  k8m:
+    container_name: k8m
+    image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m
+    restart: always
+    ports:
+      - "3618:3618"
+      - "3619:3619"
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./data:/app/data
+```
+
+启动之后，访问`3618`端口，默认用户：`admin`，默认密码`123456`。
+
+如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)，FORK仓库之后，拉起体验。
 
 ## **ChatGPT 配置指南**
 
