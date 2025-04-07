@@ -718,6 +718,7 @@
                     "closeOnEsc": true,
                     "closeOnOutside": false,
                     "position": "left",
+                    "size":"lg",
                     "title": "健康检查配置",
                     "body": {
                       "type": "form",
@@ -730,8 +731,8 @@
                           "container_name": "${container_name}",
                           "liveness_type": "${liveness_probe.type}",
                           "readiness_type": "${readiness_probe.type}",
-                          "liveness_probe": "${liveness_probe.type === null ? {} : (liveness_probe.type ? { httpGet: liveness_probe.type == 'httpGet' ? {path: liveness_probe.httpGet.path, port: liveness_probe.httpGet.port, scheme: liveness_probe.httpGet.scheme} : undefined, tcpSocket: liveness_probe.type == 'tcpSocket' ? {port: liveness_probe.tcpSocket.port} : undefined, exec: liveness_probe.type == 'exec' ? {command: liveness_probe.exec.command} : undefined, initialDelaySeconds: liveness_probe.initialDelaySeconds, periodSeconds: liveness_probe.periodSeconds, timeoutSeconds: liveness_probe.timeoutSeconds, failureThreshold: liveness_probe.failureThreshold, successThreshold: liveness_probe.successThreshold } : {})}",
-                          "readiness_probe": "${readiness_probe.type === null ? {} : (readiness_probe.type ? { httpGet: readiness_probe.type == 'httpGet' ? {path: readiness_probe.httpGet.path, port: readiness_probe.httpGet.port, scheme: readiness_probe.httpGet.scheme} : undefined, tcpSocket: readiness_probe.type == 'tcpSocket' ? {port: readiness_probe.tcpSocket.port} : undefined, exec: readiness_probe.type == 'exec' ? {command: readiness_probe.exec.command} : undefined, initialDelaySeconds: readiness_probe.initialDelaySeconds, periodSeconds: readiness_probe.periodSeconds, timeoutSeconds: readiness_probe.timeoutSeconds, failureThreshold: readiness_probe.failureThreshold, successThreshold: readiness_probe.successThreshold } : {})}"
+                          "liveness_probe": "${liveness_probe.type === null ? {} : (liveness_probe.type ? { httpGet: liveness_probe.type == 'httpGet' ? {path: liveness_probe.httpGet.path, port: liveness_probe.httpGet.port, scheme: liveness_probe.httpGet.scheme, httpHeaders: liveness_probe.httpGet.httpHeaders} : undefined, tcpSocket: liveness_probe.type == 'tcpSocket' ? {port: liveness_probe.tcpSocket.port} : undefined, exec: liveness_probe.type == 'exec' ? {command: liveness_probe.exec.command} : undefined, initialDelaySeconds: liveness_probe.initialDelaySeconds, periodSeconds: liveness_probe.periodSeconds, timeoutSeconds: liveness_probe.timeoutSeconds, failureThreshold: liveness_probe.failureThreshold, successThreshold: liveness_probe.successThreshold } : {})}",
+                          "readiness_probe": "${readiness_probe.type === null ? {} : (readiness_probe.type ? { httpGet: readiness_probe.type == 'httpGet' ? {path: readiness_probe.httpGet.path, port: readiness_probe.httpGet.port, scheme: readiness_probe.httpGet.scheme, httpHeaders: readiness_probe.httpGet.httpHeaders} : undefined, tcpSocket: readiness_probe.type == 'tcpSocket' ? {port: readiness_probe.tcpSocket.port} : undefined, exec: readiness_probe.type == 'exec' ? {command: readiness_probe.exec.command} : undefined, initialDelaySeconds: readiness_probe.initialDelaySeconds, periodSeconds: readiness_probe.periodSeconds, timeoutSeconds: readiness_probe.timeoutSeconds, failureThreshold: readiness_probe.failureThreshold, successThreshold: readiness_probe.successThreshold } : {})}"
                         }
                       },
                       "body": [
@@ -823,6 +824,30 @@
                                                   "value": "HTTPS"
                                                 }
                                               ]
+                                            },
+                                            {
+                                              "type": "combo",
+                                              "name": "liveness_probe.httpGet.httpHeaders",
+                                              "label": "HTTP头信息",
+                                              "multiple": true,
+                                              "addable": true,
+                                              "removable": true,
+                                              "items": [
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "name",
+                                                  "label": "头名称",
+                                                  "placeholder": "如: Authorization"
+                                                },
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "value",
+                                                  "label": "头值",
+                                                  "placeholder": "如: Bearer tokenxxxxxxxx"
+                                                }
+                                              ],
+                                              "value": "${liveness_probe?.httpGet?.httpHeaders || []}",
+                                              "description": "可选的自定义HTTP头信息"
                                             }
                                           ]
                                         },
@@ -990,6 +1015,30 @@
                                                   "value": "HTTPS"
                                                 }
                                               ]
+                                            },
+                                            {
+                                              "type": "combo",
+                                              "name": "liveness_probe.httpGet.httpHeaders",
+                                              "label": "HTTP头信息",
+                                              "multiple": true,
+                                              "addable": true,
+                                              "removable": true,
+                                              "items": [
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "name",
+                                                  "label": "头名称",
+                                                  "placeholder": "如: Authorization"
+                                                },
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "value",
+                                                  "label": "头值",
+                                                  "placeholder": "如: Bearer tokenxxxxxxxx"
+                                                }
+                                              ],
+                                              "value": "${liveness_probe?.httpGet?.httpHeaders || []}",
+                                              "description": "可选的自定义HTTP头信息"
                                             }
                                           ]
                                         },
