@@ -125,6 +125,12 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 			}
 		}
 	default:
+		// 读取类的权限，走到这的可能是集群管理员，或者集群只读，exec在前面拦截了。
+		// 如果是集群管理员，那么拥有读取的全部权限。不需要后续处理
+		if slice.Contain(roles, constants.RoleClusterAdmin) {
+			// 集群管理员，可以执行任何读取类的操作
+			return username, roles, nil
+		}
 		readClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 			return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
 		})
