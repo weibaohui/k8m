@@ -103,10 +103,10 @@ func (c *ClusterConfig) GetKubeconfig() string {
 
 // GetClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
 func (c *ClusterConfig) GetClusterID() string {
-	if c.IsInCluster {
-		return "InCluster"
-	}
 	id := fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
+	if c.IsInCluster {
+		id = "InCluster"
+	}
 	if id == "InCluster/InCluster" {
 		id = "InCluster"
 	}
