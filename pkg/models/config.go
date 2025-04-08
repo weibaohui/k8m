@@ -23,7 +23,8 @@ type Config struct {
 	AnySelect         bool      `gorm:"default:true" json:"any_select"`
 	PrintConfig       bool      `json:"print_config"`
 	EnableAI          bool      `gorm:"default:true" json:"enable_ai"` // 是否启用AI功能，默认开启
-	ConnectCluster    bool      `json:"connect_cluster"`               // 启动集群是是否自动连接现有集群，默认关闭
-	CreatedAt         time.Time `json:"created_at,omitempty"`          // Automatically managed by GORM for creation time
-	UpdatedAt         time.Time `json:"updated_at,omitempty"`          // Automatically managed by GORM for update time
+	UseBuiltInModel   bool      `gorm:"default:true" json:"use_built_in_model"`
+	ConnectCluster    bool      `json:"connect_cluster"`      // 启动集群是是否自动连接现有集群，默认关闭
+	CreatedAt         time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
+	UpdatedAt         time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
