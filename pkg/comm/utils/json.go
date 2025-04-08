@@ -2,14 +2,15 @@ package utils
 
 import (
 	"encoding/json"
-	"log"
+
+	"k8s.io/klog/v2"
 )
 
 // ToJSON 将任意结构体转换为格式化的 JSON 字符串
 func ToJSON(v interface{}) string {
 	jsonData, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
-		log.Fatalf("Error converting to JSON: %v", err)
+		klog.V(6).Infof("Error converting to JSON: %v", err)
 	}
 	return string(jsonData)
 }
