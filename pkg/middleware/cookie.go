@@ -64,7 +64,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		var clusterID string
 		allClusters := service.ClusterService().AllClusters()
 		// 检查是否存在名为 "selectedCluster" 的 Cookie
-		sc, err := c.Cookie("selectedCluster")
+		clusterID, err = c.Cookie("selectedCluster")
 		if err != nil {
 			// 不存在cookie
 
@@ -87,58 +87,51 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			// 如果 Cookie 不存在，写入一个默认值
-			c.SetCookie(
-				"selectedCluster",           // Cookie 名称
-				clusterID,                   // Cookie 默认值
-				int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天
-				"/",                         // Cookie 路径
-				"",                          // 域名，默认当前域
-				false,                       // 是否仅 HTTPS
-				false,                       // 是否 HttpOnly
-			)
+
 		}
 		// InCluster模式下，只有一个集群，那么就直接用InCluster
-		if cfg.InCluster && len(allClusters) == 1 && sc != "InCluster" {
+		if cfg.InCluster && len(allClusters) == 1 && clusterID != "InCluster" {
 			// 集群内模式,但是当前cookie不是InCluster,那么给他纠正过来
 			clusterID = "InCluster"
-			c.SetCookie(
-				"selectedCluster",           // Cookie 名称
-				clusterID,                   // Cookie 默认值
-				int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天
-				"/",                         // Cookie 路径
-				"",                          // 域名，默认当前域
-				false,                       // 是否仅 HTTPS
-				false,                       // 是否 HttpOnly
-			)
 		}
 
 		// 如果sc为空，说明没有选择，不能直接使用
-		if sc == "" {
+		if clusterID == "" {
 			c.JSON(512, gin.H{
-				"msg": "请选择集群",
-			})
-			c.Abort()
-			return
-		}
-
-		// 如果设置了sc，但是集群未连接
-		if !service.ClusterService().IsConnected(sc) {
-			c.JSON(512, gin.H{
-				"msg": "集群未连接，请先连接: " + sc,
+				"msg": "未选择集群，请先选择集群",
 			})
 			c.Abort()
 			return
 		}
 
 		// 如果不是平台管理员，检查是否有权限访问该集群
-		if !slices.Contains(roles, constants.RolePlatformAdmin) && !slices.Contains(csts, sc) {
+		if !slices.Contains(roles, constants.RolePlatformAdmin) && !slices.Contains(csts, clusterID) {
 			c.JSON(512, gin.H{
-				"msg": "无权限访问集群: " + sc,
+				"msg": "无权限访问集群: " + clusterID,
 			})
 			c.Abort()
 			return
 		}
+		// 如果设置了sc，但是集群未连接
+		if !service.ClusterService().IsConnected(clusterID) {
+			c.JSON(512, gin.H{
+				"msg": "集群未连接，请先连接集群: " + clusterID,
+			})
+			c.Abort()
+			return
+		}
+
+		// 如果 Cookie 不存在，写入一个默认值
+		c.SetCookie(
+			"selectedCluster",           // Cookie 名称
+			clusterID,                   // Cookie 默认值
+			int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天
+			"/",                         // Cookie 路径
+			"",                          // 域名，默认当前域
+			false,                       // 是否仅 HTTPS
+			false,                       // 是否 HttpOnly
+		)
+
 		// 继续处理下一个中间件或最终路由
 		c.Next()
 	}
