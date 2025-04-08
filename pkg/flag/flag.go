@@ -58,8 +58,12 @@ func Init() *Config {
 func (c *Config) ShowConfigInfo() {
 	// 根据PrintConfig决定是否打印配置信息
 	if c.PrintConfig {
-		klog.Infof("已开启配置信息打印选项.%s:\n %+v\n%s\n", color.RedString("生产环境请务必关闭"), utils.ToJSON(config), color.RedString("生产环境请务必关闭"))
+		klog.Infof("已开启配置信息打印选项.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(config), color.RedString("↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
+		c.ShowConfigCloseMethod()
 	}
+}
+func (c *Config) ShowConfigCloseMethod() {
+	klog.Infof("关闭打印选项方法：\n1. %s\n2. %s \n3. %s  \n", color.RedString("平台管理-参数设置-打印配置，选择关闭"), color.RedString("启动参数 --print-config = false"), color.RedString("env PRINT_CONFIG=false"))
 }
 func loadEnv() {
 	env := os.Getenv("K8M_ENV")
