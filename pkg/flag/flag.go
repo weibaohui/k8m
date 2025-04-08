@@ -58,6 +58,7 @@ func Init() *Config {
 func (c *Config) ShowConfigInfo() {
 	// 根据PrintConfig决定是否打印配置信息
 	if c.PrintConfig {
+		klog.Infof("配置加载顺序:1.启动参数->2.环境变量->3.数据库参数设置（界面配置）,后加载的配置覆盖前面的配置")
 		klog.Infof("已开启配置信息打印选项.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(config), color.RedString("↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
 		c.ShowConfigCloseMethod()
 	}
