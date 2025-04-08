@@ -10,22 +10,22 @@ import (
 )
 
 type aiService struct {
-	model  string
-	apiKey string
-	apiUrl string
+	innerModel  string
+	innerApiKey string
+	innerApiUrl string
 }
 
 func (c *aiService) SetVars(apikey, apiUrl, model string) {
-	c.model = model
-	c.apiUrl = apiUrl
-	c.apiKey = apikey
+	c.innerModel = model
+	c.innerApiUrl = apiUrl
+	c.innerApiKey = apikey
 }
 
 func (c *aiService) DefaultClient() (ai.IAI, error) {
 	apiKey, apiURL, model, enable := c.getChatGPTAuth()
-	c.model = model
-	c.apiUrl = apiURL
-	c.apiKey = apiKey
+	c.innerModel = model
+	c.innerApiUrl = apiURL
+	c.innerApiKey = apiKey
 	if !enable {
 		return nil, fmt.Errorf("ChatGPT功能未开启")
 	}
@@ -39,9 +39,9 @@ func (c *aiService) DefaultClient() (ai.IAI, error) {
 func (c *aiService) openAIClient() (ai.IAI, error) {
 	aiProvider := ai.Provider{
 		Name:        "openai",
-		Model:       c.model,
-		Password:    c.apiKey,
-		BaseURL:     c.apiUrl,
+		Model:       c.innerModel,
+		Password:    c.innerApiKey,
+		BaseURL:     c.innerApiUrl,
 		Temperature: 0.7,
 		TopP:        1,
 		TopK:        0,
@@ -58,35 +58,22 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 func (c *aiService) getChatGPTAuth() (apiKey string, apiURL string, model string, enable bool) {
 
 	cfg := flag.Init()
-	apiKey = cfg.ApiKey
-	apiURL = cfg.ApiURL
-	model = cfg.ApiModel
+	if !cfg.EnableAI {
+		return
+	}
+	if cfg.ApiKey != "" {
+		apiKey = cfg.ApiKey
+	}
+	if cfg.ApiURL != "" {
+		apiURL = cfg.ApiURL
+	}
+	if cfg.ApiModel != "" {
+		model = cfg.ApiModel
+	}
+	enable = cfg.EnableAI
 
-	if apiKey == "" && apiURL == "" {
-		apiKey = c.apiKey
-		apiURL = c.apiUrl
-		klog.V(4).Infof("ChatGPT 配置缺失 , 尝试使用默认配置 key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
-	} else {
-		klog.V(4).Infof("ChatGPT 配置已设置, key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
-	}
-	if apiKey != "" && apiURL != "" {
-		enable = true
-		klog.V(4).Infof("ChatGPT 启用 key:%s,url:%s\n", utils.MaskString(apiKey, 5), apiURL)
-	}
-	if model == "" {
-		// 如果环境变量没设置，保底使用内置的
-		model = c.model
-		klog.V(4).Infof("ChatGPT 默认模型:%s\n", model)
-	}
+	klog.V(4).Infof("ChatGPT 开关= %v\nurl=%s\nkey=%s\nmodel=%s\n", enable, apiURL, utils.MaskString(apiKey, 5), model)
 
-	if model != "" {
-		// model 确实有值，且到这里应该为ENV环境变量的值
-		// 那么model优先使用环境变量的值
-		klog.V(4).Infof("ChatGPT 模型:%s\n", model)
-		c.model = model
-	}
-	c.apiKey = apiKey
-	c.apiUrl = apiURL
 	return
 }
 func (c *aiService) IsEnabled() bool {
