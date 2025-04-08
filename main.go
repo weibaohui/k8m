@@ -54,9 +54,9 @@ var Version string
 var GitCommit string
 var GitTag string
 var GitRepo string
-var Model = "Qwen/Qwen2.5-7B-Instruct"
-var ApiKey string
-var ApiUrl string
+var InnerModel = "Qwen/Qwen2.5-7B-Instruct"
+var InnerApiKey string
+var InnerApiUrl string
 var BuildDate string
 
 func Init() {
@@ -82,7 +82,7 @@ func Init() {
 	}
 
 	// 初始化ChatService
-	service.AIService().SetVars(ApiKey, ApiUrl, Model)
+	service.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
 
 	go func() {
 		// 初始化kom
