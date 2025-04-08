@@ -273,7 +273,7 @@
                       "actions": [
                         {
                           "actionType": "ajax",
-                          "api": "post:/k8s/cluster/setDefault/full_name/${event.data.value|url_encode}"
+                          "api": "post:/mgm/cluster/${event.data.value|base64Encode}/setDefault"
                         },
                         {
                           "actionType": "custom",
@@ -881,7 +881,7 @@
                   "label": "健康检查配置",
                   "actionType": "dialog",
                   "dialog": {
-                    "size":"lg",
+                    "size": "lg",
                     "closeOnEsc": true,
                     "closeOnOutside": false,
                     "position": "left",

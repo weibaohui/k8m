@@ -253,7 +253,7 @@
                       "actions": [
                         {
                           "actionType": "ajax",
-                          "api": "post:/k8s/cluster/setDefault/full_name/${event.data.value|url_encode}"
+                          "api": "post:/mgm/cluster/${event.data.value|base64Encode}/setDefault"
                         },
                         {
                           "actionType": "custom",
@@ -821,7 +821,7 @@
               "closeOnEsc": true,
               "closeOnOutside": true,
               "title": "查看/修改 ${metadata.name}-${key} 文件内容 (ESC 关闭)",
-              "actions":[],
+              "actions": [],
               "body": [
                 {
                   "type": "mEditor",

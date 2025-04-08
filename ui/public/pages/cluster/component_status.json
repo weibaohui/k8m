@@ -217,7 +217,7 @@
                       "actions": [
                         {
                           "actionType": "ajax",
-                          "api": "post:/k8s/cluster/setDefault/full_name/${event.data.value|url_encode}"
+                          "api": "post:/mgm/cluster/${event.data.value|base64Encode}/setDefault"
                         },
                         {
                           "actionType": "custom",
