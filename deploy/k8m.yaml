@@ -152,9 +152,9 @@ spec:
           image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.0.77
           env:
             - name: DEBUG
-              value: "false"
+              value: "true"
             - name: LOG_V
-              value: "2"
+              value: "6"
             - name: IN_CLUSTER
               value: "true"
             - name: KUBECTL_SHELL_IMAGE
