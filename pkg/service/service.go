@@ -24,7 +24,7 @@ var localIngressService = &ingressService{
 	CountList: []*ingressCount{},
 }
 var localUserService = &userService{}
-var localOperationLogService = &operationLogService{}
+var localOperationLogService = NewOperationLogService()
 var localShellLogService = &shellLogService{}
 var localAiService = &aiService{}
 var localMcpService = &mcpService{}
