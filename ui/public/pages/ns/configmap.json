@@ -297,6 +297,63 @@
           "type": "columns-toggler",
           "align": "left"
         },
+        {
+          "type": "button",
+          "label": "新增cm",
+          "actionType": "dialog",
+          "dialog": {
+            "closeOnEsc": true,
+            "closeOnOutside": false,
+            "size": "lg",
+            "position": "left",
+            "title": "新增cm参数填写",
+            "body": [
+              {
+                "type": "form",
+                "api": "post:/k8s/configmap/create",
+                "body": [
+                  {
+                    "type": "group",
+                    "body": [
+                      {
+                        "type": "select",
+                        "label": "命名空间",
+                        "name": "metadata.namespace",
+                        "source": "/k8s/ns/option_list",
+                        "required": true,
+                        "value": "${ls:selectedNs||'default'}",
+                        "description": "选择配置部署的命名空间"
+                      },
+                      {
+                        "type": "input-text",
+                        "label": "名称",
+                        "name": "metadata.name",
+                        "required": true,
+                        "validations": {
+                          "maxLength": 63,
+                          "matchRegexp": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                        },
+                        "description": "小写字母、数字和'-'组成"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "input-kv",
+                    "label": "配置文件",
+                    "valueType": "textarea",
+                    "name": "data",
+                    "required": true,
+                    "addButtonText": "添加配置文件",
+                    "keyPlaceholder": "配置文件名",
+                    "valuePlaceholder": "配置文件内容",
+                    "description": "添加ConfigMap中的键值对",
+                    "valueFormat": "\\n"
+                  }
+                ]
+              }
+            ]
+          }
+        },
         "reload",
         "bulkActions"
       ],
@@ -763,17 +820,16 @@
               "size": "lg",
               "closeOnEsc": true,
               "closeOnOutside": true,
-              "title": "查看 ${metadata.name}-${key} 文件内容 (ESC 关闭)",
+              "title": "查看/修改 ${metadata.name}-${key} 文件内容 (ESC 关闭)",
+              "actions":[],
               "body": [
                 {
-                  "type": "editor",
-                  "name": "yaml",
-                  "size": "xxl",
-                  "allowFullscreen": true,
-                  "placeholder": "loading",
-                  "language": "yaml",
-                  "value": "${value}",
+                  "type": "mEditor",
+                  "text": "${value}",
+                  "componentId": "update_configmap",
+                  "saveApi": "/k8s/configmap/ns/${metadata.namespace}/name/${metadata.name}/${key}/update_configmap",
                   "options": {
+                    "language": "yaml",
                     "wordWrap": "on",
                     "scrollbar": {
                       "vertical": "auto"
