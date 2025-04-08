@@ -23,9 +23,15 @@ func UpdateConfig(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	if config.EnableAI == false {
+		config.AnySelect = false
+	}
+
 	if err := service.ConfigService().UpdateConfig(&config); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	_ = service.ConfigService().UpdateFlagFromDBConfig()
 	amis.WriteJsonOK(c)
 }
