@@ -153,10 +153,16 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		role = roleVal
 	}
 
+	cur := ""
+	if curVal, ok := ctx.Value(constants.JwtClusterUserRoles).(string); ok {
+		cur = curVal
+	}
+
 	// 执行时携带用户名、角色信息
 	newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
-		constants.JwtUserName: username,
-		constants.JwtUserRole: role,
+		constants.JwtUserName:         username,
+		constants.JwtUserRole:         role,
+		constants.JwtClusterUserRoles: cur,
 	}))
 	klog.V(6).Infof("访问MCP 服务器 [%s:%s] 携带信息%s %s", serverName, config.URL, username, role)
 	if err != nil {
