@@ -3,7 +3,6 @@ package user
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -97,7 +96,11 @@ func SaveClusterPermission(c *gin.Context) {
 		return
 	}
 
-	_, _, err = handlePermissionCommonLogic(c, "保存", cluster, userList.Users)
+	_, _, err = handlePermissionCommonLogic(c, "保存", cluster, gin.H{
+		"users":   userList.Users,
+		"role":    role,
+		"cluster": cluster,
+	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -131,7 +134,7 @@ func SaveClusterPermission(c *gin.Context) {
 func DeleteClusterPermission(c *gin.Context) {
 	ids := c.Param("ids")
 
-	_, _, err := handlePermissionCommonLogic(c, "删除", "", ids)
+	_, _, err := handlePermissionCommonLogic(c, "删除", "", gin.H{"ids": ids})
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -163,7 +166,9 @@ func UpdateNamespaces(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	_, _, err = handlePermissionCommonLogic(c, "授权Namespace", nsList.Cluster, utils.ToJSON(nsList))
+	_, _, err = handlePermissionCommonLogic(c, "授权Namespace", nsList.Cluster, gin.H{
+		"request": nsList,
+	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -184,7 +189,7 @@ func UpdateNamespaces(c *gin.Context) {
 }
 
 // TODO 日志记录写一个专门的方法，现在这个不好
-func log2DB(c *gin.Context, action string, clusterName string, params string, err error) {
+func log2DB(c *gin.Context, action string, clusterName string, params gin.H, err error) {
 	username, role := amis.GetLoginUser(c)
 	log := models.OperationLog{
 		Action:       action,
@@ -194,7 +199,6 @@ func log2DB(c *gin.Context, action string, clusterName string, params string, er
 		UserName:     username,
 		Group:        clusterName,
 		Role:         role,
-		Params:       params,
 		ActionResult: "success",
 	}
 
@@ -202,20 +206,15 @@ func log2DB(c *gin.Context, action string, clusterName string, params string, er
 		log.ActionResult = err.Error()
 	}
 
-	go func() {
-		time.Sleep(1 * time.Second)
-		service.OperationLogService().Add(&log)
-	}()
+	service.OperationLogService().Add(&log, params)
 }
-func handlePermissionCommonLogic(c *gin.Context, action string, clusterName string, params string) (string, string, error) {
+func handlePermissionCommonLogic(c *gin.Context, action string, clusterName string, params gin.H) (string, string, error) {
 	username, role := amis.GetLoginUser(c)
 	var err error
 	if !amis.IsCurrentUserPlatformAdmin(c) {
 		err = fmt.Errorf("非平台管理员不能%s权限配置", action)
 	}
-	go func() {
-		log2DB(c, action, clusterName, params, err)
-	}()
+	log2DB(c, action, clusterName, params, err)
 
 	return username, role, err
 }
