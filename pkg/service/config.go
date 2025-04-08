@@ -49,7 +49,8 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		return err
 	}
 	if cfg.PrintConfig {
-		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.%s:\n %+v\n%s\n", color.RedString("生产环境请务必关闭"), utils.ToJSON(m), color.RedString("生产环境请务必关闭"))
+		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(m), color.RedString("↑↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
+		cfg.ShowConfigCloseMethod()
 	}
 
 	cfg.AnySelect = m.AnySelect
