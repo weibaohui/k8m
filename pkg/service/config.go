@@ -57,16 +57,10 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	cfg.Debug = m.Debug
 	cfg.InCluster = m.InCluster
 
-	if m.ApiKey != "" {
-		cfg.ApiKey = m.ApiKey
-	}
-	if m.ApiModel != "" {
-		cfg.ApiModel = m.ApiModel
-	}
-	if m.ApiURL != "" {
-		cfg.ApiURL = m.ApiURL
-	}
-
+	cfg.ApiKey = m.ApiKey
+	cfg.ApiModel = m.ApiModel
+	cfg.ApiURL = m.ApiURL
+	cfg.UseBuiltInModel = m.UseBuiltInModel
 	if m.KubeConfig != "" {
 		cfg.KubeConfig = m.KubeConfig
 	}
