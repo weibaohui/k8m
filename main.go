@@ -432,7 +432,6 @@ func main() {
 		// 集群管理 ，连接切换等
 		mgm.POST("/cluster/:cluster/reconnect", cluster.Reconnect)
 		mgm.POST("/cluster/:cluster/setDefault", cluster.SetDefault)
-		mgm.POST("/cluster/setDefault/full_name/:fileName/:contextName", cluster.SetDefault)
 
 	}
 
