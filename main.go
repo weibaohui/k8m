@@ -340,7 +340,8 @@ func main() {
 
 		// k8s configmap
 		api.POST("/configmap/ns/:ns/name/:name/import", cm.Import)
-
+		api.POST("/configmap/ns/:ns/name/:name/:key/update_configmap", cm.Update)
+		api.POST("/configmap/create", cm.Create)
 		// k8s cronjob
 		api.POST("/cronjob/pause/ns/:ns/name/:name", cronjob.Pause)
 		api.POST("/cronjob/resume/ns/:ns/name/:name", cronjob.Resume)

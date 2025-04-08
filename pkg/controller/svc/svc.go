@@ -1,6 +1,8 @@
 package svc
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
@@ -11,6 +13,9 @@ import (
 
 // Create 创建Service接口
 func Create(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
 	var req struct {
 		Metadata struct {
 			Namespace string            `json:"namespace"`
@@ -34,10 +39,13 @@ func Create(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
-
+	// 判断是否存在同名Service
+	var existingService corev1.Service
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&corev1.Service{}).Name(req.Metadata.Name).Namespace(req.Metadata.Namespace).Get(&existingService).Error
+	if err == nil {
+		amis.WriteJsonError(c, fmt.Errorf("Service %s 已存在", req.Metadata.Name))
+		return
+	}
 	// 转换端口配置
 	var k8sPorts []corev1.ServicePort
 	for _, p := range req.Spec.Ports {
@@ -73,7 +81,7 @@ func Create(c *gin.Context) {
 	}
 
 	// 调用Kubernetes API
-	err := kom.Cluster(selectedCluster).
+	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		Resource(&corev1.Service{}).
 		Namespace(req.Metadata.Namespace).
