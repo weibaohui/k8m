@@ -118,6 +118,18 @@ spec:
     app: k8m
   type: NodePort
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: k8m-pvc
+  namespace: k8m
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -159,5 +171,12 @@ spec:
               protocol: TCP
               name: http-k8m-mcp
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: k8m-data
+              mountPath: /app/data
       restartPolicy: Always
       serviceAccountName: k8m
+      volumes:
+        - name: k8m-data
+          persistentVolumeClaim:
+            claimName: k8m-pvc
