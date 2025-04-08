@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/weibaohui/k8m/pkg/ai"
-	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"k8s.io/klog/v2"
 )
@@ -22,10 +21,7 @@ func (c *aiService) SetVars(apikey, apiUrl, model string) {
 }
 
 func (c *aiService) DefaultClient() (ai.IAI, error) {
-	apiKey, apiURL, model, enable := c.getChatGPTAuth()
-	c.innerModel = model
-	c.innerApiUrl = apiURL
-	c.innerApiKey = apiKey
+	enable := c.IsEnabled()
 	if !enable {
 		return nil, fmt.Errorf("ChatGPT功能未开启")
 	}
@@ -37,15 +33,22 @@ func (c *aiService) DefaultClient() (ai.IAI, error) {
 }
 
 func (c *aiService) openAIClient() (ai.IAI, error) {
+	cfg := flag.Init()
+
 	aiProvider := ai.Provider{
 		Name:        "openai",
-		Model:       c.innerModel,
-		Password:    c.innerApiKey,
-		BaseURL:     c.innerApiUrl,
+		Model:       cfg.ApiModel,
+		Password:    cfg.ApiKey,
+		BaseURL:     cfg.ApiURL,
 		Temperature: 0.7,
 		TopP:        1,
 		TopK:        0,
 		MaxTokens:   1000,
+	}
+	if cfg.EnableAI && cfg.UseBuiltInModel {
+		aiProvider.BaseURL = c.innerApiUrl
+		aiProvider.Password = c.innerApiKey
+		aiProvider.Model = c.innerModel
 	}
 
 	aiClient := ai.NewClient(aiProvider.Name)
@@ -55,29 +58,9 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 	return aiClient, nil
 }
 
-func (c *aiService) getChatGPTAuth() (apiKey string, apiURL string, model string, enable bool) {
-
-	cfg := flag.Init()
-	if !cfg.EnableAI {
-		return
-	}
-	if cfg.ApiKey != "" {
-		apiKey = cfg.ApiKey
-	}
-	if cfg.ApiURL != "" {
-		apiURL = cfg.ApiURL
-	}
-	if cfg.ApiModel != "" {
-		model = cfg.ApiModel
-	}
-	enable = cfg.EnableAI
-
-	klog.V(4).Infof("ChatGPT 开关= %v\nurl=%s\nkey=%s\nmodel=%s\n", enable, apiURL, utils.MaskString(apiKey, 5), model)
-
-	return
-}
 func (c *aiService) IsEnabled() bool {
-	_, _, _, enable := c.getChatGPTAuth()
+	cfg := flag.Init()
+	enable := cfg.EnableAI
 	klog.V(4).Infof("ChatGPT 状态:%v\n", enable)
 	return enable
 }

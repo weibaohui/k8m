@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
@@ -94,10 +93,7 @@ func handleCommonLogic(c *gin.Context, action string, groupName string) (string,
 	if err != nil {
 		log.ActionResult = err.Error()
 	}
-	go func() {
-		time.Sleep(1 * time.Second)
-		service.OperationLogService().Add(&log)
-	}()
+	service.OperationLogService().Add(&log)
 	return username, role, err
 }
 

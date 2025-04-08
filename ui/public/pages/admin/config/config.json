@@ -90,25 +90,35 @@
                       "desc": "是否启用AI功能，默认开启"
                     },
                     {
+                      "name": "use_built_in_model",
+                      "type": "switch",
+                      "label": "内置参数",
+                      "value": true,
+                      "desc": "是否使用k8m内置AI大模型"
+                    },
+                    {
                       "name": "api_url",
                       "type": "input-url",
                       "label": "API地址",
                       "value": "",
-                      "desc": "大模型的自定义API URL（如需使用内置的API，请留空，并重启应用）"
+                      "desc": "大模型的自定义API URL（如需使用内置的API，请留空，并重启应用）",
+                      "visibleOn": "!use_built_in_model"
                     },
                     {
                       "name": "api_model",
                       "type": "input-text",
                       "label": "模型名称",
                       "value": "Qwen/Qwen2.5-7B-Instruct",
-                      "desc": "大模型的自定义模型名称（如需使用内置的API，请留空，并重启应用）"
+                      "desc": "大模型的自定义模型名称（如需使用内置的API，请留空，并重启应用）",
+                      "visibleOn": "!use_built_in_model"
                     },
                     {
                       "name": "api_key",
                       "type": "input-password",
                       "label": "API密钥",
                       "value": "",
-                      "desc": "大模型的自定义API Key（如需使用内置的API，请留空，并重启应用）"
+                      "desc": "大模型的自定义API Key（如需使用内置的API，请留空，并重启应用）",
+                      "visibleOn": "!use_built_in_model"
                     },
                     {
                       "name": "any_select",

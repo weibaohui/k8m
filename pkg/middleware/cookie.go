@@ -90,7 +90,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		}
 		// InCluster模式下，只有一个集群，那么就直接用InCluster
-		if cfg.InCluster && len(allClusters) == 1 && clusterID != "InCluster" {
+		if cfg.InCluster && len(allClusters) == 1 && allClusters[0].ClusterID == "InCluster" && clusterID != "InCluster" {
 			// 集群内模式,但是当前cookie不是InCluster,那么给他纠正过来
 			clusterID = "InCluster"
 		}
