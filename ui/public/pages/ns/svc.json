@@ -273,7 +273,7 @@
                       "actions": [
                         {
                           "actionType": "ajax",
-                          "api": "post:/k8s/cluster/setDefault/full_name/${event.data.value|url_encode}"
+                          "api": "post:/mgm/cluster/${event.data.value|base64Encode}/setDefault"
                         },
                         {
                           "actionType": "custom",
@@ -372,9 +372,21 @@
                     "label": "服务类型",
                     "name": "spec.type",
                     "options": [
-                      {"label": "ClusterIP", "value": "ClusterIP", "description": "集群内部访问"},
-                      {"label": "NodePort", "value": "NodePort", "description": "节点端口暴露"},
-                      {"label": "LoadBalancer", "value": "LoadBalancer", "description": "云提供商负载均衡"}
+                      {
+                        "label": "ClusterIP",
+                        "value": "ClusterIP",
+                        "description": "集群内部访问"
+                      },
+                      {
+                        "label": "NodePort",
+                        "value": "NodePort",
+                        "description": "节点端口暴露"
+                      },
+                      {
+                        "label": "LoadBalancer",
+                        "value": "LoadBalancer",
+                        "description": "云提供商负载均衡"
+                      }
                     ],
                     "value": "ClusterIP",
                     "description": "选择服务暴露方式",
@@ -383,7 +395,7 @@
                         "actions": [
                           {
                             "actionType": "reset",
-                            "componentId": "ports-combo" 
+                            "componentId": "ports-combo"
                           }
                         ]
                       }
@@ -414,9 +426,21 @@
                         "label": "协议类型",
                         "name": "protocol",
                         "options": [
-                          {"label": "TCP", "value": "TCP", "description": "TCP协议"},
-                          {"label": "UDP", "value": "UDP", "description": "UDP协议"},
-                          {"label": "SCTP", "value": "SCTP", "description": "SCTP协议"}
+                          {
+                            "label": "TCP",
+                            "value": "TCP",
+                            "description": "TCP协议"
+                          },
+                          {
+                            "label": "UDP",
+                            "value": "UDP",
+                            "description": "UDP协议"
+                          },
+                          {
+                            "label": "SCTP",
+                            "value": "SCTP",
+                            "description": "SCTP协议"
+                          }
                         ],
                         "value": "TCP",
                         "description": "选择协议类型"
