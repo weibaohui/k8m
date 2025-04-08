@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    types: [created, published] # 表示在创建新的 Release 时触发
+    types: [ created, published ] # 表示在创建新的 Release 时触发
 
   # Allows you to run this workflow manually from the Actions tab
   # 可以手动触发
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18]
+        node-version: [ 18 ]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -109,8 +109,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
-          #platforms: linux/amd64
+          #          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           # 给清单打上多个标签
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
