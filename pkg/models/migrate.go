@@ -100,11 +100,13 @@ func InitConfigTable() error {
 	}
 	if count == 0 {
 		config := &Config{
-			AnySelect:   true,
 			PrintConfig: false,
 			LogV:        2,
 			Port:        3618,
 			Debug:       false,
+			EnableAI:    true,
+			AnySelect:   true,
+			LoginType:   "password",
 		}
 		if err := dao.DB().Create(config).Error; err != nil {
 			klog.Errorf("初始化配置表失败: %v", err)
