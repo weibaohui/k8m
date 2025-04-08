@@ -1,10 +1,13 @@
 package service
 
 import (
+	"github.com/fatih/color"
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
+	"k8s.io/klog"
 )
 
 type configService struct {
@@ -20,6 +23,7 @@ func (s *configService) GetConfig() (*models.Config, error) {
 	if err := s.db.First(&config).Error; err != nil {
 		return nil, err
 	}
+
 	return &config, nil
 }
 
@@ -43,6 +47,9 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	m, err := s.GetConfig()
 	if err != nil {
 		return err
+	}
+	if cfg.PrintConfig {
+		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.%s:\n %+v\n%s\n", color.RedString("生产环境请务必关闭"), utils.ToJSON(m), color.RedString("生产环境请务必关闭"))
 	}
 
 	cfg.AnySelect = m.AnySelect
