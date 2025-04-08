@@ -31,3 +31,4 @@ bin/
 /.env.dev.local
 .vscode/
 data/k8m.db
+dist.zip

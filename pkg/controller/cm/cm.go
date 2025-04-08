@@ -6,12 +6,14 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type info struct {
@@ -67,6 +69,105 @@ func Import(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"value": "/#",
 	})
+}
+
+// Update 更新配置文件
+func Update(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	key := c.Param("key")
+	selectedCluster := amis.GetSelectedCluster(c)
+	ctx := amis.GetContextWithUser(c)
+	// 解析JSON请求体
+	var requestBody struct {
+		Content string `json:"update_configmap"`
+	}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("解析请求体错误: %v", err))
+		return
+	}
+	// 判断content是否==${value}
+	if requestBody.Content == "${value}" {
+		amis.WriteJsonError(c, fmt.Errorf("内容未发生变化或为${value}"))
+		return
+	}
+	var cm *v1.ConfigMap
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(name).Namespace(ns).Get(&cm).Error
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("获取configmap错误: %v", err))
+		return
+	}
+	// 判断对应key是否存在
+	if _, exists := cm.Data[key]; !exists {
+		amis.WriteJsonError(c, fmt.Errorf("文件 %s 不存在", key))
+		return
+	}
+
+	// 更新ConfigMap数据
+	if cm.Data == nil {
+		cm.Data = make(map[string]string)
+	}
+	// 替换\r\n为\n
+	cm.Data[key] = strings.ReplaceAll(requestBody.Content, "\r\n", "\n")
+
+	// 更新到Kubernetes
+	err = kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		Resource(cm).
+		Namespace(ns).
+		Update(cm).Error
+
+	amis.WriteJsonErrorOrOK(c, err)
+}
+
+// Create 创建configmap接口
+func Create(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+	// 解析请求体
+	var requestBody struct {
+		Metadata struct {
+			Namespace string            `json:"namespace"`
+			Name      string            `json:"name"`
+			Labels    map[string]string `json:"labels,omitempty"`
+		} `json:"metadata"`
+		Data map[string]string `json:"data"`
+	}
+
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("解析请求体错误: %v", err))
+		return
+	}
+	// 判断是否存在同名ConfigMap
+	var existingCM v1.ConfigMap
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(requestBody.Metadata.Name).Namespace(requestBody.Metadata.Namespace).Get(&existingCM).Error
+	if err == nil {
+		amis.WriteJsonError(c, fmt.Errorf("ConfigMap %s 已存在", requestBody.Metadata.Name))
+		return
+	}
+	// 替换\r\n为\n
+	for key, value := range requestBody.Data {
+		requestBody.Data[key] = strings.ReplaceAll(value, "\r\n", "\n")
+	}
+
+	// 创建ConfigMap对象
+	cm := &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      requestBody.Metadata.Name,
+			Namespace: requestBody.Metadata.Namespace,
+			Labels:    requestBody.Metadata.Labels,
+		},
+		Data: requestBody.Data,
+	}
+
+	// 创建到Kubernetes
+	err = kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		Resource(cm).
+		Namespace(requestBody.Metadata.Namespace).
+		Create(cm).Error
+
+	amis.WriteJsonErrorOrOK(c, err)
 }
 
 // saveUploadedFile 保存上传文件并返回临时文件路径
