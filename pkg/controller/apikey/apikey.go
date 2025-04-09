@@ -77,15 +77,12 @@ func List(c *gin.Context) {
 }
 
 func Delete(c *gin.Context) {
-	ids := c.Param("ids")
-	username := c.GetString(constants.JwtUserName)
+	id := c.Param("id")
 	params := dao.BuildParams(c)
 
 	apiKey := &models.ApiKey{}
 
-	err := apiKey.Delete(params, ids, func(db *gorm.DB) *gorm.DB {
-		return db.Where("username = ?", username)
-	})
+	err := apiKey.Delete(params, id)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
