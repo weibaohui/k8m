@@ -229,9 +229,12 @@ func main() {
 		api.GET("/:kind/group/:group/version/:version/container_resources_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerResourcesInfo)
 		api.GET("/:kind/group/:group/version/:version/image_pull_secrets/ns/:ns/name/:name", dynamic.ImagePullSecretOptionList)
 		api.GET("/:kind/group/:group/version/:version/container_health_checks/ns/:ns/name/:name/container/:container_name", dynamic.ContainerHealthChecksInfo)
+		api.GET("/:kind/group/:group/version/:version/container_env/ns/:ns/name/:name/container/:container_name", dynamic.ContainerEnvInfo)
+
 		api.POST("/:kind/group/:group/version/:version/update_image/ns/:ns/name/:name", dynamic.UpdateImageTag)
 		api.POST("/:kind/group/:group/version/:version/update_resources/ns/:ns/name/:name", dynamic.UpdateResources)
 		api.POST("/:kind/group/:group/version/:version/update_health_checks/ns/:ns/name/:name", dynamic.UpdateHealthChecks)
+		api.POST("/:kind/group/:group/version/:version/update_env/ns/:ns/name/:name", dynamic.UpdateContainerEnv)
 
 		// 节点亲和性
 		api.POST("/:kind/group/:group/version/:version/update_node_affinity/ns/:ns/name/:name", dynamic.UpdateNodeAffinity)

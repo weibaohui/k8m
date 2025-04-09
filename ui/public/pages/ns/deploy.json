@@ -1305,6 +1305,55 @@
                       ]
                     }
                   }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-list text-primary",
+                  "label": "设置环境变量",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "position": "left",
+                    "size": "lg",
+                    "title": "设置环境变量",
+                    "body": [
+                      {
+                        "type": "page",
+                        "body": [
+                          {
+                            "type": "form",
+                            "title": "设置环境变量",
+                            "name": "resource-edit-form",
+                            "api": "post:/k8s/$kind/group/$group/version/$version/update_env/ns/$metadata.namespace/name/$metadata.name",
+                            "actions": [],
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "container_name",
+                                "label": "容器",
+                                "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.template.spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "service",
+                                "api": "/k8s/$kind/group/$group/version/$version/container_env/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                                "body": [
+                                  {
+                                      "type": "input-kv",
+                                      "name": "envs",
+                                      "draggable": false,
+                                      "value": "${envs}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 }
               ]
             }
