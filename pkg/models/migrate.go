@@ -101,9 +101,6 @@ func InitConfigTable() error {
 	if count == 0 {
 		config := &Config{
 			PrintConfig: false,
-			LogV:        2,
-			Port:        3618,
-			Debug:       false,
 			EnableAI:    true,
 			AnySelect:   true,
 			LoginType:   "password",
