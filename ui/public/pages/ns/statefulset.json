@@ -1315,6 +1315,7 @@
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "position": "left",
+                    "size": "lg",
                     "title": "设置环境变量",
                     "body": [
                       {
