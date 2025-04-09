@@ -2,9 +2,13 @@ package service
 
 import (
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 )
@@ -22,6 +26,22 @@ func (u *userService) List() ([]*models.User, error) {
 		return nil, err
 	}
 	return list, nil
+}
+
+// GetRolesByGroupNames 获取用户的角色
+func (u *userService) GetRolesByGroupNames(groupNames string) ([]string, error) {
+	var ugList []models.UserGroup
+	err := dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(groupNames, ",")).Distinct("role").Find(&ugList).Error
+	if err != nil {
+		return nil, err
+	}
+	// 查询所有的用户组，判断用户组的角色
+	// 形成一个用户组对应的角色列表
+	var roles []string
+	for _, ug := range ugList {
+		roles = append(roles, ug.Role)
+	}
+	return roles, nil
 }
 
 // GetClusterRole 获取用户在指定集群中的角色权限
@@ -97,4 +117,44 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 	}
 
 	return items, nil
+}
+
+// GenerateJWTToken 生成 Token
+func (u *userService) GenerateJWTToken(username string, roles []string, clusters []*models.ClusterUserRole, duration time.Duration) (string, error) {
+	role := constants.JwtUserRole
+	name := constants.JwtUserName
+	cst := constants.JwtClusters
+	cstUserRoles := constants.JwtClusterUserRoles
+
+	var clusterNames []string
+	if clusters != nil {
+		for _, cluster := range clusters {
+			clusterNames = append(clusterNames, cluster.Cluster)
+		}
+	}
+
+	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		name:         username,
+		role:         strings.Join(roles, ","),        // 角色列表
+		cst:          strings.Join(clusterNames, ","), // 集群名称列表
+		cstUserRoles: utils.ToJSON(clusters),          // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
+		"exp":        time.Now().Add(duration).Unix(), // 国企时间
+	})
+	cfg := flag.Init()
+	var jwtSecret = []byte(cfg.JwtTokenSecret)
+	return token.SignedString(jwtSecret)
+}
+
+func (u *userService) GetGroupNames(username string) (string, error) {
+	params := &dao.Params{}
+	user := &models.User{}
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Select("group_names").Where(" username = ?", username)
+	}
+	item, err := user.GetOne(params, queryFunc)
+	if err != nil {
+		return "", err
+	}
+
+	return item.GroupNames, nil
 }

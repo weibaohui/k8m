@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/weibaohui/k8m/pkg/ai"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"k8s.io/klog/v2"
 )
@@ -49,6 +50,12 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 		aiProvider.BaseURL = c.innerApiUrl
 		aiProvider.Password = c.innerApiKey
 		aiProvider.Model = c.innerModel
+	}
+
+	if cfg.Debug {
+		klog.V(4).Infof("ai BaseURL: %v\n", aiProvider.BaseURL)
+		klog.V(4).Infof("ai Model : %v\n", aiProvider.Model)
+		klog.V(4).Infof("ai Key: %v\n", utils.MaskString(aiProvider.Password, 5))
 	}
 
 	aiClient := ai.NewClient(aiProvider.Name)

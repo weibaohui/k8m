@@ -17,6 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
+	"github.com/weibaohui/k8m/pkg/controller/apikey"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
@@ -411,6 +412,11 @@ func main() {
 		mgm.POST("/user/profile/2fa/generate", profile.Generate2FASecret)
 		mgm.POST("/user/profile/2fa/disable", profile.Disable2FA)
 		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
+
+		// API密钥管理
+		mgm.GET("/user/profile/apikeys/list", apikey.List)
+		mgm.POST("/user/profile/apikeys/create", apikey.Create)
+		mgm.POST("/user/profile/apikeys/delete/:id", apikey.Delete)
 
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)

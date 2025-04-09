@@ -37,6 +37,7 @@ func AutoMigrate() error {
 		&UserGroup{},
 		&MCPServerConfig{},
 		&Config{},
+		&ApiKey{},
 	)
 	if err != nil {
 		klog.Errorf("数据库迁移报错: %v", err.Error())
