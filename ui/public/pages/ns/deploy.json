@@ -317,6 +317,103 @@
           "type": "columns-toggler",
           "align": "left"
         },
+        {
+          "type": "button",
+          "label": "新增Deployment",
+          "actionType": "dialog",
+          "dialog": {
+            "closeOnEsc": true,
+            "closeOnOutside": false,
+            "size": "lg",
+            "position": "left",
+            "title": "新增 Deployment 参数填写",
+            "body": [
+              {
+                "type": "form",
+                "api": "post:/k8s/deploy/create",
+                "body": [
+                  {
+                    "type": "group",
+                    "body": [
+                      {
+                        "type": "select",
+                        "label": "命名空间",
+                        "name": "metadata.namespace",
+                        "source": "/k8s/ns/option_list",
+                        "multiple": false,
+                        "required": true,
+                        "value": "${ls:selectedNs||'default'}",
+                        "description": "选择deployment部署的命名空间",
+                        "validations": {
+                          "maxLength": 63,
+                          "matchRegexp": "^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?$"
+                        }
+                      },
+                      {
+                        "type": "input-text",
+                        "label": "名称",
+                        "name": "metadata.name",
+                        "required": true,
+                        "validations": {
+                          "maxLength": 63,
+                          "matchRegexp": "^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+                        },
+                        "description": "允许数字、字母和'-'组成，不能以'-'和数字开头，不能以'-'结尾"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "input-kv",
+                    "label": "标签设置",
+                    "name": "metadata.labels",
+                    "value": {
+                      "project": ""
+                    },
+                    "description": "建议填写project:所属应用组或项目名称，如不需要请删除",
+                    "required": true
+                  },
+                  {
+                    "type": "input-number",
+                    "label": "副本数量",
+                    "name": "spec.replicas",
+                    "required": true,
+                    "value": 0,
+                    "max": 10,
+                    "description": "Pod副本的数量"
+                  },
+                  {
+                    "type": "combo",
+                    "label": "容器设置",
+                    "name": "spec.template.spec.containers",
+                    "multiple": true,
+                    "minLength": 1,
+                    "addButtonText": "添加容器",
+                    "items": [
+                        {
+                            "type": "input-text",
+                            "label": "容器名称",
+                            "name": "name",
+                            "required": true,
+                            "validations": {
+                                "maxLength": 63,
+                                "matchRegexp": "^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+                            },
+                            "description": "允许数字、字母和'-'组成，不能以'-'和数字开头，不能以'-'结尾"
+                        },
+                        {
+                            "type": "input-text",
+                            "label": "镜像",
+                            "name": "image",
+                            "required": true,
+                            "description": "容器镜像的名称"
+                        }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
         "reload",
         "bulkActions"
       ],
