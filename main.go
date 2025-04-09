@@ -287,6 +287,7 @@ func main() {
 		api.POST("/deploy/ns/:ns/name/:name/scale/replica/:replica", deploy.Scale)
 		api.GET("/deploy/ns/:ns/name/:name/events/all", deploy.Event)
 		api.GET("/deploy/ns/:ns/name/:name/hpa", deploy.HPA)
+		api.POST("/deploy/create", deploy.Create)
 		// p8s svc
 		api.POST("/service/create", svc.Create)
 		// k8s node

@@ -9,6 +9,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/util/deployment"
@@ -297,4 +299,81 @@ func HPA(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, hpa)
+}
+
+// 创建deployment
+func Create(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var req struct {
+		Metadata struct {
+			Namespace string            `json:"namespace"`
+			Name      string            `json:"name"`
+			Labels    map[string]string `json:"labels,omitempty"`
+		}
+		Spec struct {
+			Replicas int32 `json:"replicas"`
+			Template struct {
+				Spec struct {
+					Containers []struct {
+						Name  string `json:"name"`
+						Image string `json:"image"`
+					} `json:"containers"`
+				} `json:"spec"`
+			} `json:"template"`
+		}
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 判断是否存在同名Deployment
+	var existingDeployment v1.Deployment
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Name(req.Metadata.Name).Namespace(req.Metadata.Namespace).Get(&existingDeployment).Error
+	if err == nil {
+		amis.WriteJsonError(c, fmt.Errorf("Deployment %s 已存在", req.Metadata.Name))
+		return
+	}
+	req.Metadata.Labels["app"] = req.Metadata.Name
+
+	// 构建Deployment对象
+	deployment := &v1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: req.Metadata.Namespace,
+			Name:      req.Metadata.Name,
+			Labels:    req.Metadata.Labels,
+		},
+	}
+	// 设置标签spec.template.metadata.labels里面的app
+	deployment.Spec.Template.ObjectMeta.Labels = map[string]string{
+		"app": req.Metadata.Name,
+	}
+	// 设置spec.selector.matchLabels里面的app
+	deployment.Spec.Selector = &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"app": req.Metadata.Name,
+		},
+	}
+
+	deployment.Spec.Replicas = &req.Spec.Replicas
+	for _, container := range req.Spec.Template.Spec.Containers {
+		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{
+			Name:  container.Name,
+			Image: container.Image,
+		})
+	}
+
+	// 创建Deployment
+	err = kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		Resource(deployment).
+		Namespace(req.Metadata.Namespace).
+		Create(deployment).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
 }
