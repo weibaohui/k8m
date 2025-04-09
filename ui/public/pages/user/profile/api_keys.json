@@ -1,0 +1,85 @@
+{
+    "type": "page",
+    "title": "API密钥",
+    "remark": {
+        "body": "用户可以创建API密钥用于程序化访问平台，请妥善保管密钥信息。",
+        "icon": "question-mark",
+        "placement": "right",
+        "trigger": "click",
+        "rootClose": true
+    },
+    "body": [
+        {
+            "type": "alert",
+            "level": "info",
+            "body": "<div class='alert alert-info'><p><strong>API密钥使用说明：</strong></p><p>1. API密钥用于程序化访问平台，可用于自动化脚本或第三方工具集成。</p><p>2. 密钥创建后只显示一次，请及时保存。</p><p>3. 如果密钥泄露，请立即删除并重新创建。</p><p>4. 密钥具有与当前用户相同的权限。</p></div>"
+        },
+        {
+            "type": "crud",
+            "id": "apiKeysCRUD",
+            "name": "apiKeysCRUD",
+            "autoFillHeight": true,
+            "api": "get:/mgm/user/profile/apikeys/list",
+            "headerToolbar": [
+                {
+                    "type": "button",
+                    "label": "创建密钥",
+                    "level": "primary",
+                    "actionType": "dialog",
+                    "dialog": {
+                        "title": "创建API密钥",
+                        "body": {
+                            "type": "form",
+                            "api": "post:/mgm/user/profile/apikeys/create",
+                            "body": [
+                                {
+                                    "type": "input-text",
+                                    "name": "description",
+                                    "label": "描述信息",
+                                    "required": true,
+                                    "placeholder": "请输入密钥用途描述"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ],
+            "columns": [
+                {
+                    "name": "id",
+                    "label": "密钥ID",
+                    "width": 280
+                },
+                {
+                    "name": "description",
+                    "label": "描述信息"
+                },
+                {
+                    "name": "created_at",
+                    "label": "创建时间",
+                    "type": "datetime"
+                },
+                {
+                    "name": "last_used_at",
+                    "label": "最后使用时间",
+                    "type": "datetime"
+                },
+                {
+                    "type": "operation",
+                    "label": "操作",
+                    "buttons": [
+                        {
+                            "type": "button",
+                            "label": "删除",
+                            "level": "link",
+                            "className": "text-danger",
+                            "confirmText": "确认要删除该密钥吗？",
+                            "actionType": "ajax",
+                            "api": "delete:/mgm/user/profile/apikeys/delete/${id}"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
