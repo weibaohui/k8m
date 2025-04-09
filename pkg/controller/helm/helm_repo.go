@@ -36,7 +36,7 @@ func AddOrUpdateRepo(c *gin.Context) {
 	}
 
 	var repoEntry repo.Entry
-	if err := c.ShouldBindJSON(&repoEntry); err != nil {
+	if err = c.ShouldBindJSON(&repoEntry); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -47,7 +47,7 @@ func AddOrUpdateRepo(c *gin.Context) {
 		return
 	}
 
-	if err := h.AddOrUpdateRepo(&repoEntry); err != nil {
+	if err = h.AddOrUpdateRepo(&repoEntry); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

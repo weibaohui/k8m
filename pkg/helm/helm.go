@@ -360,9 +360,7 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 		}
 	}
 
-	go func() {
-		_ = c.updateRepoIndex(repoEntry, helmRepo)
-	}()
+	_ = c.updateRepoIndex(repoEntry, helmRepo)
 	klog.V(6).Infof("[%s] helm repository saved to database successfully", repoEntry.Name)
 
 	return nil
@@ -393,7 +391,7 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 	var index repo.IndexFile
 
 	if err = yaml.Unmarshal(file, &index); err == nil {
-		helmRepo.Generated = index.Generated
+		helmRepo.Generated = fmt.Sprintf("%s", index.Generated)
 	}
 
 	// 保存到数据库
