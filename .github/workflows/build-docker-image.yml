@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    types: [ created, published ] # 表示在创建新的 Release 时触发
+    types: [created, published] # 表示在创建新的 Release 时触发
 
   # Allows you to run this workflow manually from the Actions tab
   # 可以手动触发
@@ -28,13 +28,13 @@ env:
   ALIHUB_IMAGE_REPONAME: minik8m
   IMAGE_REPONAME: k8m
   OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
-  API_URL: https://public.chatgpt.k8m.site/v1
+  OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
 jobs:
   buildx:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 18 ]
+        node-version: [18]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
