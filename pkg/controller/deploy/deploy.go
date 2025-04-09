@@ -301,31 +301,7 @@ func HPA(c *gin.Context) {
 	amis.WriteJsonData(c, hpa)
 }
 
-// // 创建deployment
-//
-//	{
-//		"metadata": {
-//			 "namespace": "xyuat",
-//			 "labels": {
-//				  "app": "",
-//				  "project": ""
-//			 },
-//			 "name": "test"
-//		},
-//		"spec": {
-//			 "replicas": 0,
-//			 "template": {
-//				  "spec": {
-//					   "containers": [
-//							{
-//								 "name": "test",
-//								 "image": "test"
-//							}
-//					   ]
-//				  }
-//			 }
-//		}
-//	}
+// 创建deployment
 func Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
@@ -353,7 +329,13 @@ func Create(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
+	// 判断是否存在同名Deployment
+	var existingDeployment v1.Deployment
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Deployment{}).Name(req.Metadata.Name).Namespace(req.Metadata.Namespace).Get(&existingDeployment).Error
+	if err == nil {
+		amis.WriteJsonError(c, fmt.Errorf("Deployment %s 已存在", req.Metadata.Name))
+		return
+	}
 	req.Metadata.Labels["app"] = req.Metadata.Name
 
 	// 构建Deployment对象
@@ -384,7 +366,7 @@ func Create(c *gin.Context) {
 	}
 
 	// 创建Deployment
-	err := kom.Cluster(selectedCluster).
+	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		Resource(deployment).
 		Namespace(req.Metadata.Namespace).
