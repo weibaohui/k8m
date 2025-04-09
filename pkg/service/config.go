@@ -54,38 +54,38 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	}
 
 	cfg.AnySelect = m.AnySelect
-	cfg.Debug = m.Debug
-	cfg.InCluster = m.InCluster
+	// cfg.Debug = m.Debug
+	// cfg.InCluster = m.InCluster
 
 	cfg.ApiKey = m.ApiKey
 	cfg.ApiModel = m.ApiModel
 	cfg.ApiURL = m.ApiURL
 	cfg.UseBuiltInModel = m.UseBuiltInModel
-	if m.KubeConfig != "" {
-		cfg.KubeConfig = m.KubeConfig
-	}
+	// if m.KubeConfig != "" {
+	// 	cfg.KubeConfig = m.KubeConfig
+	// }
 	if m.KubectlShellImage != "" {
 		cfg.KubectlShellImage = m.KubectlShellImage
 	}
 	if m.NodeShellImage != "" {
 		cfg.NodeShellImage = m.NodeShellImage
 	}
-	if m.Port > 0 {
-		cfg.Port = m.Port
-	}
-	if m.SqlitePath != "" {
-		cfg.SqlitePath = m.SqlitePath
-	}
-	if m.MCPServerPort > 0 {
-		cfg.MCPServerPort = m.MCPServerPort
-	}
-	if m.LogV > 0 {
-		cfg.LogV = m.LogV
-	}
+	// if m.Port > 0 {
+	// 	cfg.Port = m.Port
+	// }
+	// if m.SqlitePath != "" {
+	// 	cfg.SqlitePath = m.SqlitePath
+	// }
+	// if m.MCPServerPort > 0 {
+	// 	cfg.MCPServerPort = m.MCPServerPort
+	// }
+	// if m.LogV > 0 {
+	// 	cfg.LogV = m.LogV
+	// }
 
 	cfg.PrintConfig = m.PrintConfig
 	cfg.EnableAI = m.EnableAI
-	cfg.ConnectCluster = m.ConnectCluster
+	// cfg.ConnectCluster = m.ConnectCluster
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret

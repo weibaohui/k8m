@@ -16,66 +16,6 @@
           "type": "anchor-nav",
           "links": [
             {
-              "title": "基本配置",
-              "body": [
-                {
-                  "type": "fieldSet",
-                  "title": "基本配置（重启应用生效）",
-                  "body": [
-                    {
-                      "name": "debug",
-                      "type": "switch",
-                      "label": "调试模式",
-                      "value": false,
-                      "desc": "调试模式，同步修改所有的debug模式 "
-                    },
-                    {
-                      "name": "connect_cluster",
-                      "type": "switch",
-                      "label": "自动连接集群",
-                      "value": false,
-                      "desc": "启动集群是是否自动连接现有集群（如果集群较多，会增加启动时间） "
-                    },
-                    {
-                      "name": "print_config",
-                      "type": "switch",
-                      "label": "打印配置",
-                      "value": false,
-                      "desc": "是否打印配置信息，默认关闭 "
-                    },
-                    {
-                      "name": "in_cluster",
-                      "type": "switch",
-                      "label": "InCluster模式",
-                      "value": false,
-                      "desc": "是否集群内模式 "
-                    },
-                    {
-                      "name": "port",
-                      "type": "input-number",
-                      "label": "服务端口",
-                      "value": 3618,
-                      "desc": "监听端口,默认3618 "
-                    },
-                    {
-                      "name": "log_v",
-                      "type": "input-number",
-                      "label": "日志级别",
-                      "value": 2,
-                      "desc": "klog的日志级别klog.V(2)"
-                    },
-                    {
-                      "name": "sqlite_path",
-                      "type": "input-text",
-                      "label": "SQLite路径",
-                      "value": "./data/k8m.db",
-                      "desc": "sqlite数据库文件路径，默认./data/k8m.db"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
               "title": "AI配置",
               "body": [
                 {
@@ -139,13 +79,6 @@
                   "title": "集群配置",
                   "body": [
                     {
-                      "name": "kube_config",
-                      "type": "input-text",
-                      "label": "kubeconfig路径",
-                      "value": "~/.kube/config",
-                      "desc": "kubeconfig文件路径"
-                    },
-                    {
                       "name": "node_shell_image",
                       "type": "input-text",
                       "label": "节点Shell镜像",
@@ -158,24 +91,6 @@
                       "label": "Kubectl Shell镜像",
                       "value": "bitnami/kubectl:latest",
                       "desc": "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "title": "MCP配置",
-              "body": [
-                {
-                  "type": "fieldSet",
-                  "title": "MCP配置",
-                  "body": [
-                    {
-                      "name": "mcp_server_port",
-                      "type": "input-number",
-                      "label": "MCP服务端口",
-                      "value": 3619,
-                      "desc": "MCP Server 监听端口，默认3619 。（重启应用生效）"
                     }
                   ]
                 }
