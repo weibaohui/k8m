@@ -6,17 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/totp"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
-	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
@@ -28,32 +24,6 @@ type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Code     string `json:"code"`
-}
-
-// 生成 Token
-func generateToken(username string, roles []string, clusters []*models.ClusterUserRole) (string, error) {
-	role := constants.JwtUserRole
-	name := constants.JwtUserName
-	cst := constants.JwtClusters
-	cstUserRoles := constants.JwtClusterUserRoles
-
-	var clusterNames []string
-	if clusters != nil {
-		for _, cluster := range clusters {
-			clusterNames = append(clusterNames, cluster.Cluster)
-		}
-	}
-
-	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		name:         username,
-		role:         strings.Join(roles, ","),              // 角色列表
-		cst:          strings.Join(clusterNames, ","),       // 集群名称列表
-		cstUserRoles: utils.ToJSON(clusters),                // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
-		"exp":        time.Now().Add(24 * time.Hour).Unix(), // 24小时有效
-	})
-	cfg := flag.Init()
-	var jwtSecret = []byte(cfg.JwtTokenSecret)
-	return token.SignedString(jwtSecret)
 }
 
 func LoginByPassword(c *gin.Context) {
@@ -87,7 +57,7 @@ func LoginByPassword(c *gin.Context) {
 			return
 		}
 		// Admin用户不需要2FA验证
-		token, _ := generateToken(req.Username, []string{constants.RolePlatformAdmin}, nil)
+		token, _ := service.UserService().GenerateJWTToken(req.Username, []string{constants.RolePlatformAdmin}, nil, time.Hour*24)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {
@@ -133,23 +103,13 @@ func LoginByPassword(c *gin.Context) {
 						return
 					}
 				}
-				var ugList []models.UserGroup
-				err = dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(v.GroupNames, ",")).Distinct("role").Find(&ugList).Error
-				if err != nil {
-					c.JSON(http.StatusUnauthorized, errorInfo)
-					return
-				}
-				// 查询所有的用户组，判断用户组的角色
-				// 形成一个用户组对应的角色列表
-				var roles []string
-				for _, ug := range ugList {
-					roles = append(roles, ug.Role)
-				}
+
+				roles, _ := service.UserService().GetRolesByGroupNames(v.GroupNames)
 
 				// 查询用户对应的集群
 				clusters, _ := service.UserService().GetClusters(v.Username)
 
-				token, _ := generateToken(v.Username, roles, clusters)
+				token, _ := service.UserService().GenerateJWTToken(v.Username, roles, clusters, 24*time.Hour)
 
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return

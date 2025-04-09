@@ -46,9 +46,8 @@
             ],
             "columns": [
                 {
-                    "name": "id",
-                    "label": "密钥ID",
-                    "width": 280
+                    "name": "key",
+                    "label": "密钥值"
                 },
                 {
                     "name": "description",

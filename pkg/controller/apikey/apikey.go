@@ -1,12 +1,15 @@
 package apikey
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
-	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
@@ -28,7 +31,7 @@ func Create(c *gin.Context) {
 	// 生成API密钥
 	apiKey := &models.ApiKey{
 		Username:    username,
-		Key:         utils.RandNLengthString(32), // 生成32位随机字符串作为密钥
+		Key:         generateAPIKey(username),
 		Description: req.Description,
 	}
 
@@ -39,6 +42,20 @@ func Create(c *gin.Context) {
 	}
 
 	amis.WriteJsonOK(c)
+}
+func generateAPIKey(username string) string {
+	cfg := flag.Init()
+	groupNames, _ := service.UserService().GetGroupNames(username)
+
+	roles, _ := service.UserService().GetRolesByGroupNames(groupNames)
+	if username == cfg.AdminUserName {
+		roles = []string{constants.RolePlatformAdmin}
+	}
+	// 查询用户对应的集群
+	clusters, _ := service.UserService().GetClusters(username)
+	duration := time.Hour * 24 * 365
+	token, _ := service.UserService().GenerateJWTToken(username, roles, clusters, duration)
+	return token
 }
 
 // List 获取API密钥列表

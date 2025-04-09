@@ -11,9 +11,9 @@ import (
 // ApiKey 用户API密钥
 type ApiKey struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Username    string    `gorm:"index;not null" json:"username,omitempty"`  // 所属用户
-	Key         string    `gorm:"uniqueIndex;not null" json:"key,omitempty"` // API密钥值
-	Description string    `json:"description,omitempty"`                     // 描述信息
+	Username    string    `gorm:"index;not null" json:"username,omitempty"` // 所属用户
+	Key         string    `gorm:"type:text" json:"key,omitempty"`           // API密钥值
+	Description string    `json:"description,omitempty"`                    // 描述信息
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`   // Automatically managed by GORM for update time
 	CreatedBy   string    `json:"created_by,omitempty"`   // 创建者
