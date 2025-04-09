@@ -333,6 +333,215 @@ func ContainerInfo(c *gin.Context) {
 
 }
 
+// 获取container的环境变量信息
+func ContainerEnvInfo(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	group := c.Param("group")
+	kind := c.Param("kind")
+	version := c.Param("version")
+	containerName := c.Param("container_name")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var item *unstructured.Unstructured
+	err := kom.Cluster(selectedCluster).WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).
+		Name(name).Get(&item).Error
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 返回格式为
+	envVars, err := getContainerEnvVarsByName(item, containerName)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{
+		"envs": envVars,
+	})
+
+}
+
+type ContainerEnv struct {
+	ContainerName string            `json:"container_name"`
+	Envs          map[string]string `json:"envs"`
+}
+
+// 更新container的环境变量信息
+func UpdateContainerEnv(c *gin.Context) {
+	name := c.Param("name")
+	ns := c.Param("ns")
+	group := c.Param("group")
+	kind := c.Param("kind")
+	version := c.Param("version")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster := amis.GetSelectedCluster(c)
+
+	var info ContainerEnv
+	if err := c.ShouldBindJSON(&info); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	patchData, err := generateEnvPatch(kind, info)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	patchJSON := utils.ToJSON(patchData)
+	var patch interface{}
+	err = kom.Cluster(selectedCluster).
+		WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).Name(name).
+		Patch(&patch, types.StrategicMergePatchType, patchJSON).Error
+	amis.WriteJsonErrorOrOK(c, err)
+}
+
+// 验证环境变量名称是否符合Kubernetes规范
+func isValidEnvVarName(name string) bool {
+	if len(name) == 0 {
+		return false
+	}
+	if name[0] >= '0' && name[0] <= '9' {
+		return false
+	}
+
+	for _, c := range name {
+		if !((c >= 'a' && c <= 'z') ||
+			(c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') ||
+			c == '_' || c == '-' || c == '.') {
+			return false
+		}
+	}
+	return true
+}
+
+func generateEnvPatch(kind string, info ContainerEnv) (map[string]interface{}, error) {
+	// 获取资源路径
+	paths, err := getResourcePaths(kind)
+	if err != nil {
+		return nil, err
+	}
+	// 动态构造 patch 数据
+	patch := make(map[string]interface{})
+	// 验证环境变量名称是否符合规范
+	for key := range info.Envs {
+		if !isValidEnvVarName(key) {
+			return nil, fmt.Errorf("环境变量名'%s'无效: 只能包含字母、数字、_、-或.，且不能以数字开头", key)
+		}
+	}
+
+	current := patch
+
+	// 按层级动态生成嵌套结构
+	for _, path := range paths {
+		if _, exists := current[path]; !exists {
+			current[path] = make(map[string]interface{})
+		}
+		current = current[path].(map[string]interface{})
+	}
+
+	// 构造环境变量数组
+	envArray := make([]map[string]string, 0)
+	for key, value := range info.Envs {
+		// 验证key是否合法
+
+		envArray = append(envArray, map[string]string{
+			"name":  key,
+			"value": value,
+		})
+	}
+	// 如果没有环境变量，设置envarray为nil
+	if len(envArray) == 0 {
+		envArray = nil
+	}
+	// 构造容器数组
+	current["containers"] = []map[string]interface{}{
+		{
+			"name": info.ContainerName,
+			"env":  envArray,
+		},
+	}
+
+	return patch, nil
+}
+
+// 获取container的env信息
+func getContainerEnvVarsByName(item *unstructured.Unstructured, containerName string) (map[string]string, error) {
+	// 获取资源类型
+	kind := item.GetKind()
+
+	// 根据资源类型获取 containers 的路径
+	resourcePaths, err := getResourcePaths(kind)
+	if err != nil {
+		return nil, err
+	}
+	containersPath := append(resourcePaths, "containers")
+
+	// 获取嵌套字段
+	containers, found, err := unstructured.NestedSlice(item.Object, containersPath...)
+	if err != nil {
+		return nil, fmt.Errorf("error getting containers: %w", err)
+	}
+	if !found {
+		return nil, fmt.Errorf("containers field not found")
+	}
+	// 遍历 containers 列表
+	for _, container := range containers {
+		// 断言 container 类型为 map[string]interface{}
+		containerMap, ok := container.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("unexpected container format")
+		}
+		// 获取容器的 name
+		name, _, err := unstructured.NestedString(containerMap, "name")
+		if err != nil {
+			return nil, fmt.Errorf("error getting container name: %w", err)
+		}
+		// 如果 name 匹配目标容器名，则获取其 image
+		if name == containerName {
+			// 获取 env 字段
+			env, found, err := unstructured.NestedSlice(containerMap, "env")
+			if err != nil {
+				return nil, fmt.Errorf("error getting container env: %w", err)
+			}
+			// 如果未找到 env 字段，则返回空列表
+			if !found {
+				return make(map[string]string), nil
+			}
+			// 遍历 env 列表
+			envVars := make(map[string]string)
+			for _, envVar := range env {
+				// 断言 envVar 类型为 map[string]interface{}
+				envVarMap, ok := envVar.(map[string]interface{})
+				if !ok {
+					return nil, fmt.Errorf("unexpected envVar format")
+				}
+				// 获取 envVar 的 name 和 value
+				name, _, err := unstructured.NestedString(envVarMap, "name")
+				if err != nil {
+					return nil, fmt.Errorf("error getting envVar name: %w", err)
+				}
+				value, _, err := unstructured.NestedString(envVarMap, "value")
+				if err != nil {
+					return nil, fmt.Errorf("error getting envVar value: %w", err)
+				}
+				// 将 name 和 value 组合成 map 并添加到结果列表中
+				envVars[name] = value
+			}
+			return envVars, nil
+		}
+	}
+	// 如果未找到匹配的容器名
+	return nil, fmt.Errorf("container with name %q not found", containerName)
+}
+
 // 获取 imagePullSecrets 列表
 func getImagePullSecrets(item *unstructured.Unstructured) ([]string, error) {
 	// 获取资源类型
