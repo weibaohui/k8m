@@ -12,9 +12,15 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
-	"k8s.io/klog/v2"
 )
 
+func decodeUrlSafeBase64(s string) ([]byte, error) {
+	// 补等号
+	if m := len(s) % 4; m != 0 {
+		s += strings.Repeat("=", 4-m)
+	}
+	return base64.URLEncoding.DecodeString(s)
+}
 func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
@@ -50,9 +56,8 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		// 获取clusterID
 		clusterBase64 := c.Param("cluster")
-		clusterIDByte, _ := base64.URLEncoding.DecodeString(clusterBase64)
+		clusterIDByte, _ := decodeUrlSafeBase64(clusterBase64)
 		clusterID := string(clusterIDByte)
-		klog.V(6).Infof("clusterID=%s", clusterID)
 
 		if clusterID == "" {
 			c.JSON(512, gin.H{
@@ -74,7 +79,6 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		cst := claims[constants.JwtClusters].(string)
 		roles := strings.Split(role, ",")
 		csts := strings.Split(cst, ",")
-
 		// 如果不是平台管理员，检查是否有权限访问该集群
 		if !slices.Contains(roles, constants.RolePlatformAdmin) && !slices.Contains(csts, clusterID) {
 			c.JSON(512, gin.H{
