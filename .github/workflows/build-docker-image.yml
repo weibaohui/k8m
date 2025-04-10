@@ -28,7 +28,7 @@ env:
   ALIHUB_IMAGE_REPONAME: minik8m
   IMAGE_REPONAME: k8m
   OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
-  OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
+  OPENAI_API_URL: https://api.siliconflow.cn/v1
 jobs:
   buildx:
     runs-on: ubuntu-latest
