@@ -50,52 +50,14 @@ docker:
 	@$(BUILD_TOOL) buildx build \
            --build-arg VERSION=$(VERSION) \
            --build-arg GIT_COMMIT=$(GIT_COMMIT) \
+           --build-arg GitTag=$(GIT_TAG) \
+           --build-arg GitRepo=$(GIT_REPOSITORY) \
+           --build-arg BuildDate=$(BUILD_DATE) \
            --build-arg MODEL=$(MODEL) \
      	   --build-arg API_KEY=$(API_KEY) \
      	   --build-arg API_URL=$(API_URL) \
      	   --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x,linux/riscv64 \
      	   -t weibh/k8m:$(VERSION) -f Dockerfile . --load
-
-
-.PHONY: pre
-pre:
-	@echo "使用 $(BUILD_TOOL) 构建镜像..."
-	@$(BUILD_TOOL) buildx build \
-           --build-arg VERSION=$(VERSION) \
-           --build-arg GIT_COMMIT=$(GIT_COMMIT) \
-           --build-arg MODEL=$(MODEL) \
-     	   --build-arg API_KEY=$(API_KEY) \
-     	   --build-arg API_URL=$(API_URL) \
-     	   --platform=linux/arm64 \
-     	   -t registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-arm64 --load -f Dockerfile .
-	@$(BUILD_TOOL) buildx build \
-           --build-arg VERSION=$(VERSION) \
-           --build-arg GIT_COMMIT=$(GIT_COMMIT) \
-           --build-arg MODEL=$(MODEL) \
-     	   --build-arg API_KEY=$(API_KEY) \
-     	   --build-arg API_URL=$(API_URL) \
-     	   --platform=linux/amd64 \
-     	   -t registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-amd64 --load -f Dockerfile .
-
-	@echo "创建 manifest 并聚合镜像..."
-	@$(BUILD_TOOL) manifest create registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION) \
-		registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-arm64 \
-		registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)-amd64
-	@$(BUILD_TOOL) manifest push registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
-	@$(BUILD_TOOL) manifest inspect registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
-
-# 为当前平台构建可执行文件
-.PHONY: sync
-sync:
-	@echo "从aliyun同步到docker hub..."
-	@$(BUILD_TOOL) pull --platform=linux/amd64 registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
-	@$(BUILD_TOOL) tag registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION) weibh/k8m:$(VERSION)-amd64
-	@$(BUILD_TOOL) pull --platform=linux/arm64 registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION)
-	@$(BUILD_TOOL) tag registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:$(VERSION) weibh/k8m:$(VERSION)-arm64
-	@$(BUILD_TOOL) manifest create weibh/k8m:$(VERSION) weibh/k8m:$(VERSION)-arm64 weibh/k8m:$(VERSION)-amd64 
-	@$(BUILD_TOOL) push weibh/k8m:$(VERSION)
-	@$(BUILD_TOOL) manifest inspect weibh/k8m:$(VERSION)
-
 
 # 为当前平台构建可执行文件
 .PHONY: build
@@ -103,7 +65,7 @@ build:
 	@echo "构建当前平台可执行文件..."
 	@mkdir -p $(OUTPUT_DIR)
 	@GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) \
-	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" \
+	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) " \
 	    -o "$(OUTPUT_DIR)/$(BINARY_NAME)" .
 
 # 为所有指定的平台和架构构建可执行文件
@@ -122,8 +84,8 @@ build-all:
 		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
 		ZIP_FILE="$(OUTPUT_FILE).zip"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
-		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
-		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
+		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) \" -o $$OUTPUT_FILE ."; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) " -o "$$OUTPUT_FILE" .; \
 		echo "打包为 ZIP (最大压缩级别): $$ZIP_FILE"; \
 		if [ "$$GOOS" = "windows" ] && [ "$$GOARCH" = "arm64" ]; then \
 			echo "跳过 upx"; \
@@ -154,8 +116,8 @@ build-linux:
 		fi; \
 		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
-		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
-		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT) -X main.Model=$(MODEL) -X main.ApiKey=$(API_KEY) -X main.ApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
+		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
 		upx -9 "$$OUTPUT_FILE"; \
 	done
 
