@@ -13,7 +13,7 @@ const FloatingChatGPTButton = () => {
     useEffect(() => {
         const buttonWidth = 30;
         const buttonHeight = 30;
-        const maxX = window.innerWidth - buttonWidth - 200;
+        const maxX = window.innerWidth - buttonWidth - 200 - 60;
         const maxY = window.innerHeight - buttonHeight - 100;
 
         const savedPosition = localStorage.getItem("buttonPosition");
