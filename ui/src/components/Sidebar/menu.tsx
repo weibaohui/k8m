@@ -6,6 +6,7 @@ import {fetcher} from '../Amis/fetcher';
 // 定义用户角色接口
 interface UserRoleResponse {
     role: string;  // 根据实际数据结构调整类型
+    cluster: string;
 }
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -25,6 +26,11 @@ const items: () => MenuItem[] = () => {
                 if (response.data && typeof response.data === 'object') {
                     const role = response.data.data as UserRoleResponse;
                     setUserRole(role.role);
+
+                    const originCluster = localStorage.getItem('cluster') || '';
+                    if (originCluster == "" && role.cluster != "") {
+                        localStorage.setItem('cluster', role.cluster);
+                    }
                     // console.log('User Role:', role.role);
                 }
             } catch (error) {

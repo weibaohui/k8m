@@ -9,15 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/service"
 )
 
 func GetSelectedCluster(c *gin.Context) string {
-	selectedCluster, _ := c.Cookie("selectedCluster")
-	if selectedCluster == "" {
-		selectedCluster = service.ClusterService().FirstClusterID()
-	}
+	selectedCluster := c.GetString("cluster")
 	return selectedCluster
+}
+
+// GetLoginUserClusters 获取当前登录用户可访问集群列表
+func GetLoginUserClusters(c *gin.Context) []string {
+	cs := c.GetString(constants.JwtClusters)
+	return strings.Split(cs, ",")
 }
 
 // GetLoginUser 获取当前登录用户名及其角色

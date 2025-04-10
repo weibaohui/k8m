@@ -1,17 +1,18 @@
 package middleware
 
 import (
+	"encoding/base64"
 	"net/http"
 	"path/filepath"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
+	"k8s.io/klog/v2"
 )
 
 func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
@@ -47,6 +48,20 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		}
 
+		// 获取clusterID
+		clusterBase64 := c.Param("cluster")
+		clusterIDByte, _ := base64.URLEncoding.DecodeString(clusterBase64)
+		clusterID := string(clusterIDByte)
+		klog.V(6).Infof("clusterID=%s", clusterID)
+
+		if clusterID == "" {
+			c.JSON(512, gin.H{
+				"msg": "请先选择集群",
+			})
+			c.Abort()
+			return
+		}
+
 		cfg := flag.Init()
 		claims, err := utils.GetJWTClaims(c, cfg.JwtTokenSecret)
 		if err != nil {
@@ -59,50 +74,6 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		cst := claims[constants.JwtClusters].(string)
 		roles := strings.Split(role, ",")
 		csts := strings.Split(cst, ",")
-		// klog.V(6).Infof("username=%s", username)
-
-		var clusterID string
-		allClusters := service.ClusterService().AllClusters()
-		// 检查是否存在名为 "selectedCluster" 的 Cookie
-		clusterID, err = c.Cookie("selectedCluster")
-		if err != nil {
-			// 不存在cookie
-
-			if slices.Contains(roles, constants.RolePlatformAdmin) {
-				// 平台管理员，选一个
-				clusterID = service.ClusterService().FirstClusterID()
-			} else {
-				// 其他的只能选有权限中的某一个
-				if len(csts) > 0 {
-					clusterID = csts[0]
-				}
-
-			}
-
-			if clusterID == "" {
-				// 没有集群，说明不是管理员，也没有权限，那么就不要访问了
-				c.JSON(512, gin.H{
-					"msg": "无可用集群",
-				})
-				c.Abort()
-				return
-			}
-
-		}
-		// InCluster模式下，只有一个集群，那么就直接用InCluster
-		if cfg.InCluster && len(allClusters) == 1 && allClusters[0].ClusterID == "InCluster" && clusterID != "InCluster" {
-			// 集群内模式,但是当前cookie不是InCluster,那么给他纠正过来
-			clusterID = "InCluster"
-		}
-
-		// 如果sc为空，说明没有选择，不能直接使用
-		if clusterID == "" {
-			c.JSON(512, gin.H{
-				"msg": "未选择集群，请先选择集群",
-			})
-			c.Abort()
-			return
-		}
 
 		// 如果不是平台管理员，检查是否有权限访问该集群
 		if !slices.Contains(roles, constants.RolePlatformAdmin) && !slices.Contains(csts, clusterID) {
@@ -112,7 +83,8 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		// 如果设置了sc，但是集群未连接
+
+		// 如果设置了clusterID，但是集群未连接
 		if !service.ClusterService().IsConnected(clusterID) {
 			c.JSON(512, gin.H{
 				"msg": "集群未连接，请先连接集群: " + clusterID,
@@ -120,17 +92,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
-		// 如果 Cookie 不存在，写入一个默认值
-		c.SetCookie(
-			"selectedCluster",           // Cookie 名称
-			clusterID,                   // Cookie 默认值
-			int(24*time.Hour.Seconds()), // 有效期（秒），这里是 1 天
-			"/",                         // Cookie 路径
-			"",                          // 域名，默认当前域
-			false,                       // 是否仅 HTTPS
-			false,                       // 是否 HttpOnly
-		)
+		c.Set("cluster", clusterID)
 
 		// 继续处理下一个中间件或最终路由
 		c.Next()

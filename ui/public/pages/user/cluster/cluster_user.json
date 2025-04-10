@@ -61,11 +61,13 @@
               "type": "button",
               "icon": "fas fa-check-circle  text-primary",
               "label": "切换",
-              "actionType": "ajax",
-              "api": "post:/mgm/cluster/${cluster_id_base64}/setDefault",
               "onEvent": {
                 "click": {
                   "actions": [
+                    {
+                      "actionType": "custom",
+                      "script": "localStorage.setItem('cluster', event.data.cluster_id)"
+                    },
                     {
                       "actionType": "custom",
                       "script": "window.location.reload();"
@@ -112,7 +114,7 @@
           "name": "current",
           "label": "是否当前集群",
           "type": "tpl",
-          "tpl": "<% if (document.cookie.split('; ').find(row => row.startsWith('selectedCluster='))?.split('=')[1] === encodeURIComponent(data.fileName+'/'+data.contextName)) { %><span class='label label-success'>当前集群</span><% if (data.clusterConnectStatus !== 'connected') { %> ⚠️ <% } %><% } %>"
+          "tpl": "<% if (localStorage.getItem('cluster') === data.cluster_id) { %><span class='label label-success'>当前集群</span><% if (data.clusterConnectStatus !== 'connected') { %> ⚠️ <% } %><% } %>"
         },
         {
           "name": "clusterConnectStatus",
