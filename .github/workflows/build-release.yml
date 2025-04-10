@@ -2,16 +2,16 @@ name: build and push binary to release
 
 on:
   release:
-    types: [created, published] # 表示在创建新的 Release 时触发
+    types: [ created, published ] # 表示在创建新的 Release 时触发
 env:
   OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
-  OPENAI_API_URL: https://api.siliconflow.cn/v1
+  OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
 jobs:
   build-release:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18]
+        node-version: [ 18 ]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
