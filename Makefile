@@ -87,15 +87,6 @@ build-all:
 		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) \" -o $$OUTPUT_FILE ."; \
 		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) " -o "$$OUTPUT_FILE" .; \
 		echo "打包为 ZIP (最大压缩级别): $$ZIP_FILE"; \
-		if [ "$$GOOS" = "windows" ] && [ "$$GOARCH" = "arm64" ]; then \
-			echo "跳过 upx"; \
-		else \
-			if [ "$$GOOS" = "darwin" ]; then \
-				upx --force-macos -f -9 "$$OUTPUT_FILE"; \
-			else \
-				upx -9 "$$OUTPUT_FILE"; \
-			fi; \
-		fi; \
         (cd $(OUTPUT_DIR) && zip -9 "$(BINARY_NAME)-$$GOOS-$$GOARCH.zip" "$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"); \
         echo "文件已打包: $$ZIP_FILE"; \
 		rm -f "$$OUTPUT_FILE"; \
