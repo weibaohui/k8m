@@ -202,7 +202,7 @@ func main() {
 		// 获取当前软件版本信息
 		params.GET("/version", param.Version)
 	}
-	api := r.Group("/k8s", middleware.AuthMiddleware())
+	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
 		// dynamic
 		api.POST("/yaml/apply", dynamic.Apply)
@@ -439,9 +439,8 @@ func main() {
 		mgm.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
 		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
 
-		// 集群管理 ，连接切换等
+		// 集群连接
 		mgm.POST("/cluster/:cluster/reconnect", cluster.Reconnect)
-		mgm.POST("/cluster/:cluster/setDefault", cluster.SetDefault)
 
 	}
 

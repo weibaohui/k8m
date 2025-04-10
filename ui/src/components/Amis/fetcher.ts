@@ -1,12 +1,19 @@
 import {FetcherConfig} from "amis-core/lib/factory";
 import {fetcherResult} from "amis-core/lib/types";
-import { message } from "antd";
+import {message} from "antd";
 import axios from "axios";
 
+function toUrlSafeBase64(str: string) {
+    const base64 = btoa(str); // 标准 Base64
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // 转为 URL-safe
+}
 
 export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Promise<fetcherResult> => {
     const token = localStorage.getItem('token') || '';
-
+    // const cluster = localStorage.getItem('cluster') || '';
+    const originCluster = localStorage.getItem('cluster') || '';
+    const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
+   
     const ajax = axios.create({
         baseURL: '/',
         headers: {
@@ -14,6 +21,23 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
             Authorization: token ? `Bearer ${token}` : ''
         }
     });
+
+    // 请求发送之前的拦截
+    ajax.interceptors.request.use(
+        config => {
+            // 检查URL是否以/k8s开头
+            if (config.url?.startsWith('/k8s')) {
+                // 在/k8s后面插入集群信息
+                const parts = config.url.split('/');
+                parts.splice(2, 0, 'cluster', cluster);
+                config.url = parts.join('/');
+            }
+            return config;
+        },
+        error => {
+            return Promise.reject(error);
+        }
+    );
 
     // 请求发送之前的拦截
     ajax.interceptors.response.use(

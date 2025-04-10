@@ -220,13 +220,13 @@
                   "id": "cluster",
                   "searchable": true,
                   "source": "/params/cluster/option_list",
-                  "value": "${cookie:selectedCluster|url_decode}",
+                  "value": "${ls:cluster}",
                   "onEvent": {
                     "change": {
                       "actions": [
                         {
-                          "actionType": "ajax",
-                          "api": "post:/mgm/cluster/${event.data.value|base64Encode}/setDefault"
+                          "actionType": "custom",
+                          "script": "localStorage.setItem('cluster', event.data.value)"
                         },
                         {
                           "actionType": "custom",

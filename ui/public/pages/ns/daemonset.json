@@ -247,13 +247,13 @@
                   "id": "cluster",
                   "searchable": true,
                   "source": "/params/cluster/option_list",
-                  "value": "${cookie:selectedCluster|url_decode}",
+                  "value": "${ls:cluster}",
                   "onEvent": {
                     "change": {
                       "actions": [
                         {
-                          "actionType": "ajax",
-                          "api": "post:/mgm/cluster/${event.data.value|base64Encode}/setDefault"
+                          "actionType": "custom",
+                          "script": "localStorage.setItem('cluster', event.data.value)"
                         },
                         {
                           "actionType": "custom",
@@ -1296,10 +1296,10 @@
                                 "api": "/k8s/$kind/group/$group/version/$version/container_env/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
                                 "body": [
                                   {
-                                      "type": "input-kv",
-                                      "name": "envs",
-                                      "draggable": false,
-                                      "value": "${envs}"
+                                    "type": "input-kv",
+                                    "name": "envs",
+                                    "draggable": false,
+                                    "value": "${envs}"
                                   }
                                 ]
                               }
