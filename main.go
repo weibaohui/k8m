@@ -202,6 +202,23 @@ func main() {
 		// 获取当前软件版本信息
 		params.GET("/version", param.Version)
 	}
+	ai := r.Group("/ai", middleware.AuthMiddleware())
+	{
+
+		// chatgpt
+		ai.GET("/chat/event", chat.Event)
+		ai.GET("/chat/log", chat.Log)
+		ai.GET("/chat/cron", chat.Cron)
+		ai.GET("/chat/describe", chat.Describe)
+		ai.GET("/chat/resource", chat.Resource)
+		ai.GET("/chat/any_question", chat.AnyQuestion)
+		ai.GET("/chat/any_selection", chat.AnySelection)
+		ai.GET("/chat/example", chat.Example)
+		ai.GET("/chat/example/field", chat.FieldExample)
+		ai.GET("/chat/ws_chatgpt", chat.GPTShell)
+		ai.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
+
+	}
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
 		// dynamic
@@ -364,19 +381,6 @@ func main() {
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
 		api.GET("/doc/kind/:kind/group/:group/version/:version", doc.Doc)
 		api.POST("/doc/detail", doc.Detail)
-
-		// chatgpt
-		api.GET("/chat/event", chat.Event)
-		api.GET("/chat/log", chat.Log)
-		api.GET("/chat/cron", chat.Cron)
-		api.GET("/chat/describe", chat.Describe)
-		api.GET("/chat/resource", chat.Resource)
-		api.GET("/chat/any_question", chat.AnyQuestion)
-		api.GET("/chat/any_selection", chat.AnySelection)
-		api.GET("/chat/example", chat.Example)
-		api.GET("/chat/example/field", chat.FieldExample)
-		api.GET("/chat/ws_chatgpt", chat.GPTShell)
-		api.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
 
 		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.ResourceRunAnalysis)
 		api.POST("/k8s_gpt/cluster/:cluster/run", k8sgpt.ClusterRunAnalysis)

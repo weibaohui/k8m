@@ -45,6 +45,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			path == "/favicon.ico" ||
 			path == "/auth/login" ||
 			strings.HasPrefix(path, "/assets/") ||
+			strings.HasPrefix(path, "/ai/") || // ai 聊天不带cluster
 			strings.HasPrefix(path, "/params/") || // 配置参数
 			strings.HasPrefix(path, "/mgm/") || // 个人中心
 			strings.HasPrefix(path, "/admin/") || // 管理后台
