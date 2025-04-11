@@ -8,11 +8,20 @@ function toUrlSafeBase64(str: string) {
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // 转为 URL-safe
 }
 
-export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Promise<fetcherResult> => {
-    const token = localStorage.getItem('token') || '';
-    // const cluster = localStorage.getItem('cluster') || '';
+function processUrl(url: string): string {
     const originCluster = localStorage.getItem('cluster') || '';
     const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
+    
+    if (url.startsWith('/k8s')) {
+        const parts = url.split('/');
+        parts.splice(2, 0, 'cluster', cluster);
+        return parts.join('/');
+    }
+    return url;
+}
+
+export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Promise<fetcherResult> => {
+    const token = localStorage.getItem('token') || '';
    
     const ajax = axios.create({
         baseURL: '/',
@@ -25,12 +34,8 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
     // 请求发送之前的拦截
     ajax.interceptors.request.use(
         config => {
-            // 检查URL是否以/k8s开头
-            if (config.url?.startsWith('/k8s')) {
-                // 在/k8s后面插入集群信息
-                const parts = config.url.split('/');
-                parts.splice(2, 0, 'cluster', cluster);
-                config.url = parts.join('/');
+            if (config.url) {
+                config.url = processUrl(config.url);
             }
             return config;
         },
