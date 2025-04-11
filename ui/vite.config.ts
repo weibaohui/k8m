@@ -89,22 +89,18 @@ export default defineConfig(({mode}) => {
                         });
                     },
                 },
-                '/k8s/chat': {
+                '/ai/chat': {
                     target: 'ws://127.0.0.1:3618', // 替换为实际的目标地址
                     ws: true, // 开启 WebSocket 代理
                     changeOrigin: true,
                 },
 
-                '/k8s/pod/xterm': {
+                '^/k8s/cluster/[^/]+/pod/xterm': {
                     target: 'ws://127.0.0.1:3618', // 替换为实际的目标地址
                     ws: true, // 开启 WebSocket 代理
                     changeOrigin: true,
                 },
-                '/k8s/node/xterm': {
-                    target: 'ws://127.0.0.1:3618', // 替换为实际的目标地址
-                    ws: true, // 开启 WebSocket 代理
-                    changeOrigin: true,
-                }
+                
             },
         },
         resolve: {

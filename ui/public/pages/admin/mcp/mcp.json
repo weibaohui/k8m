@@ -30,7 +30,7 @@
             "body": [
               {
                 "type": "websocketMarkdownViewer",
-                "url": "/k8s/chat/any_selection",
+                "url": "/ai/chat/any_selection",
                 "params": {
                   "question": "MCP(Model Context Protocol，模型上下文协议) 是一种新的开放标准协议，用来在大模型和数据源之间建立安全双向的链接。MCP 遵循客户端-服务器架构（client-server），其中包含以下几个核心概念：MCP 主机（MCP Hosts）：发起请求的 LLM 应用程序（例如 Claude Desktop、IDE 或 AI 工具）。MCP 客户端（MCP Clients）：在主机程序内部，与 MCP server 保持 1: 1 的连接。MCP 服务器（MCP Servers）：为 MCP client 提供上下文、工具和 prompt 信息。本地资源（Local Resources）：本地计算机中可供 MCP server 安全访问的资源（例如文件、数据库）。远程资源（Remote Resources）：MCP server 可以连接到的远程资源（例如通过 API）。请参考上面的信息，详细解释MCP（Model Context Protocol，模型上下文协议）原理及使用场景、使用方法及注意事项。这里MCP跟k8s没有关系，不用关联。"
                 }

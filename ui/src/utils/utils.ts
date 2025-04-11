@@ -70,3 +70,20 @@ function parseLocalStorageExpression(expression: string): string | null {
     return match ? localStorage.getItem(match[1]) : null;
 }
 
+
+function toUrlSafeBase64(str: string) {
+    const base64 = btoa(str); // 标准 Base64
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // 转为 URL-safe
+}
+
+export function ProcessK8sUrlWithCluster(url: string): string {
+    const originCluster = localStorage.getItem('cluster') || '';
+    const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
+
+    if (url.startsWith('/k8s')) {
+        const parts = url.split('/');
+        parts.splice(2, 0, 'cluster', cluster);
+        return parts.join('/');
+    }
+    return url;
+}

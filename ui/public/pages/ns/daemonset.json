@@ -101,7 +101,7 @@
                           "body": [
                             {
                               "type": "websocketMarkdownViewer",
-                              "url": "/k8s/chat/example/field",
+                              "url": "/ai/chat/example/field",
                               "params": {
                                 "kind": "${kind}",
                                 "group": "${group}",
@@ -177,7 +177,7 @@
             "body": [
               {
                 "type": "websocketMarkdownViewer",
-                "url": "/k8s/chat/example",
+                "url": "/ai/chat/example",
                 "params": {
                   "kind": "${kind}",
                   "group": "${group}",
@@ -423,7 +423,7 @@
                           "body": [
                             {
                               "type": "websocketMarkdownViewer",
-                              "url": "/k8s/chat/describe",
+                              "url": "/ai/chat/describe",
                               "params": {
                                 "kind": "${kind}",
                                 "group": "${group}",
@@ -562,7 +562,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/k8s/chat/example/field",
+                                          "url": "/ai/chat/example/field",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",
@@ -1522,7 +1522,7 @@
                                                           "body": [
                                                             {
                                                               "type": "websocketMarkdownViewer",
-                                                              "url": "/k8s/chat/example/field",
+                                                              "url": "/ai/chat/example/field",
                                                               "params": {
                                                                 "kind": "${kind}",
                                                                 "group": "${group}",
@@ -1708,7 +1708,7 @@
                                     "body": [
                                       {
                                         "type": "websocketMarkdownViewer",
-                                        "url": "/k8s/chat/event",
+                                        "url": "/ai/chat/event",
                                         "params": {
                                           "note": "${note}",
                                           "source": "${source}",
@@ -1955,7 +1955,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/k8s/chat/describe",
+                                                        "url": "/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2098,7 +2098,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/k8s/chat/example/field",
+                                                                    "url": "/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -2220,7 +2220,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/k8s/chat/describe",
+                                                        "url": "/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2363,7 +2363,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/k8s/chat/example/field",
+                                                                    "url": "/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -2508,7 +2508,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/k8s/chat/describe",
+                                                        "url": "/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2651,7 +2651,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/k8s/chat/example/field",
+                                                                    "url": "/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -2789,7 +2789,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/k8s/chat/describe",
+                                                        "url": "/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2932,7 +2932,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/k8s/chat/example/field",
+                                                                    "url": "/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -3093,7 +3093,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/k8s/chat/describe",
+                                                        "url": "/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -3236,7 +3236,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/k8s/chat/example/field",
+                                                                    "url": "/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -3474,7 +3474,7 @@
                                             "body": [
                                               {
                                                 "type": "websocketMarkdownViewer",
-                                                "url": "/k8s/chat/describe",
+                                                "url": "/ai/chat/describe",
                                                 "params": {
                                                   "describe": "${result}",
                                                   "kind": "${kind}",
@@ -3617,7 +3617,7 @@
                                                         "body": [
                                                           {
                                                             "type": "websocketMarkdownViewer",
-                                                            "url": "/k8s/chat/example/field",
+                                                            "url": "/ai/chat/example/field",
                                                             "params": {
                                                               "kind": "${kind}",
                                                               "group": "${group}",
@@ -3773,7 +3773,7 @@
                                             "body": [
                                               {
                                                 "type": "websocketMarkdownViewer",
-                                                "url": "/k8s/chat/describe",
+                                                "url": "/ai/chat/describe",
                                                 "params": {
                                                   "describe": "${result}",
                                                   "kind": "${kind}",
@@ -3916,7 +3916,7 @@
                                                         "body": [
                                                           {
                                                             "type": "websocketMarkdownViewer",
-                                                            "url": "/k8s/chat/example/field",
+                                                            "url": "/ai/chat/example/field",
                                                             "params": {
                                                               "kind": "${kind}",
                                                               "group": "${group}",
@@ -4178,7 +4178,7 @@
                               "body": [
                                 {
                                   "type": "websocketMarkdownViewer",
-                                  "url": "/k8s/chat/any_question",
+                                  "url": "/ai/chat/any_question",
                                   "params": {
                                     "kind": "${kind}",
                                     "group": "${group}",
@@ -4541,7 +4541,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/k8s/chat/any_question",
+                                          "url": "/ai/chat/any_question",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",
@@ -4908,7 +4908,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/k8s/chat/any_question",
+                                          "url": "/ai/chat/any_question",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",
@@ -5208,7 +5208,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/k8s/chat/any_question",
+                                          "url": "/ai/chat/any_question",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",
