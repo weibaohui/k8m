@@ -14,11 +14,9 @@ func Start(version string, port int) {
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
 		username := r.Header.Get(constants.JwtUserName)
 		role := r.Header.Get(constants.JwtUserRole)
-		cur := r.Header.Get(constants.JwtClusterUserRoles)
 		// 发起mcp调用请求时注入用户名、角色信息
 		ctx = context.WithValue(ctx, constants.JwtUserName, username)
 		ctx = context.WithValue(ctx, constants.JwtUserRole, role)
-		ctx = context.WithValue(ctx, constants.JwtClusterUserRoles, cur)
 		return ctx
 	}
 	cfg := metadata.ServerConfig{
