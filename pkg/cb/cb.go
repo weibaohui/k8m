@@ -60,15 +60,14 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	var err error
 
 	roles, _ := service.UserService().GetClusterRole(cluster, username, roleString)
-
 	// 先看是不是平台管理员
 	if slice.Contain(roles, constants.RolePlatformAdmin) {
 		// 平台管理员，可以执行任何操作
 		return username, roles, nil
 	}
+	clusterUserRoles, err := service.UserService().GetClusters(username)
 
-	clusterUserRoles, ok := ctx.Value(constants.JwtClusterUserRoles).([]*models.ClusterUserRole)
-	if !ok {
+	if err != nil || len(clusterUserRoles) == 0 {
 		// 没有集群权限，报错
 		return "", nil, fmt.Errorf("用户[%s]获取集群授权错误，默认阻止", username)
 	}
