@@ -1,15 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import { Terminal } from '@xterm/xterm'
+import React, {useEffect, useRef} from 'react';
+import {Terminal} from '@xterm/xterm'
 import "@xterm/xterm/css/xterm.css";
-import { formatFinalGetUrl } from "@/utils/utils.ts";
-import { AttachAddon } from "@xterm/addon-attach";
-import { FitAddon } from "@xterm/addon-fit";
-import { WebLinksAddon } from "@xterm/addon-web-links";
-import { Unicode11Addon } from "@xterm/addon-unicode11";
-import { SerializeAddon } from "@xterm/addon-serialize";
-import { WebglAddon } from '@xterm/addon-webgl';
-import { SearchAddon } from "@xterm/addon-search";
-import { ClipboardAddon } from '@xterm/addon-clipboard';
+import {formatFinalGetUrl, ProcessK8sUrlWithCluster} from "@/utils/utils.ts";
+import {AttachAddon} from "@xterm/addon-attach";
+import {FitAddon} from "@xterm/addon-fit";
+import {WebLinksAddon} from "@xterm/addon-web-links";
+import {Unicode11Addon} from "@xterm/addon-unicode11";
+import {SerializeAddon} from "@xterm/addon-serialize";
+import {WebglAddon} from '@xterm/addon-webgl';
+import {SearchAddon} from "@xterm/addon-search";
+import {ClipboardAddon} from '@xterm/addon-clipboard';
 
 interface XTermProps {
     url: string;
@@ -20,11 +20,11 @@ interface XTermProps {
 }
 
 const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
-    ({ url, data, params, width, height }, _) => {
-        url = formatFinalGetUrl({ url, data, params });
+    ({url, data, params, width, height}, _) => {
+        url = formatFinalGetUrl({url, data, params});
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
-
+        url = ProcessK8sUrlWithCluster(url)
         const wsRef = useRef<WebSocket | null>(null);
         const terminalRef = useRef<HTMLDivElement | null>(null);
         const fitAddonRef = useRef<FitAddon | null>(null);
@@ -86,8 +86,8 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
             ws.onclose = () => term.write("\x1b[31mDisconnected\x1b[0m\r\n");
             ws.onerror = () => term.write("\x1b[31mError\x1b[0m\r\n");
             // 监听终端大小调整
-            term.onResize(({ cols, rows }) => {
-                const size = JSON.stringify({ cols, rows: rows + 1 });
+            term.onResize(({cols, rows}) => {
+                const size = JSON.stringify({cols, rows: rows + 1});
                 const send = new TextEncoder().encode("\x01" + size);
                 ws.send(send);
             });
@@ -108,7 +108,7 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
 
 
         return (
-            <div ref={terminalRef} style={{ width: width ? width : "100%", height: height ? height : "80vh" }}></div>
+            <div ref={terminalRef} style={{width: width ? width : "100%", height: height ? height : "80vh"}}></div>
         );
     }
 );

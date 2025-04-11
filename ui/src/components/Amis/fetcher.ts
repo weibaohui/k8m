@@ -2,27 +2,12 @@ import {FetcherConfig} from "amis-core/lib/factory";
 import {fetcherResult} from "amis-core/lib/types";
 import {message} from "antd";
 import axios from "axios";
+import {ProcessK8sUrlWithCluster} from "@/utils/utils.ts";
 
-function toUrlSafeBase64(str: string) {
-    const base64 = btoa(str); // 标准 Base64
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // 转为 URL-safe
-}
-
-function processUrl(url: string): string {
-    const originCluster = localStorage.getItem('cluster') || '';
-    const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
-    
-    if (url.startsWith('/k8s')) {
-        const parts = url.split('/');
-        parts.splice(2, 0, 'cluster', cluster);
-        return parts.join('/');
-    }
-    return url;
-}
 
 export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Promise<fetcherResult> => {
     const token = localStorage.getItem('token') || '';
-   
+
     const ajax = axios.create({
         baseURL: '/',
         headers: {
@@ -35,7 +20,7 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
     ajax.interceptors.request.use(
         config => {
             if (config.url) {
-                config.url = processUrl(config.url);
+                config.url = ProcessK8sUrlWithCluster(config.url);
             }
             return config;
         },

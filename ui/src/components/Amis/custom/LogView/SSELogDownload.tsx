@@ -1,6 +1,7 @@
-import { appendQueryParam, replacePlaceholders } from "@/utils/utils.ts";
+import {appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders} from "@/utils/utils.ts";
 import React from "react";
-import { Button } from "antd";
+import {Button} from "antd";
+
 // 定义组件的 props 类型
 interface SSEDownloadProps {
     url: string; // 下载的 URL
@@ -30,7 +31,7 @@ const SSELogDownloadComponent = React.forwardRef((props: SSEDownloadProps, _) =>
     const token = localStorage.getItem('token');
     // 拼接 url token
     finalUrl = finalUrl + (finalUrl.includes('?') ? '&' : '?') + `token=${token}`;
-
+    finalUrl = ProcessK8sUrlWithCluster(finalUrl);
     const handleDownload = () => {
         setDownloading(true); // 设置下载状态为 true，显示提示信息
 
@@ -59,7 +60,7 @@ const SSELogDownloadComponent = React.forwardRef((props: SSEDownloadProps, _) =>
             >
                 下载日志
             </Button>
-        </div >
+        </div>
     );
 });
 
