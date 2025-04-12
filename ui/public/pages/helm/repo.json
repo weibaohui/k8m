@@ -22,7 +22,7 @@
             "title": "新增Helm仓库  (ESC 关闭)",
             "body": {
               "type": "form",
-              "api": "post:/mgm/helm/repo/save",
+              "api": "post:/k8s/helm/repo/save",
               "body": [
                 {
                   "type": "static",
@@ -319,7 +319,7 @@
           "actionType": "ajax",
           "confirmText": "确定要更新索引?更新操作为后台操作，请稍后查看操作结果。",
           "api": {
-            "url": "/mgm/helm/repo/update_index",
+            "url": "/k8s/helm/repo/update_index",
             "method": "post",
             "data": {
               "ids": "${ids}"
@@ -345,7 +345,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/mgm/helm/repo/list",
+      "api": "get:/k8s/helm/repo/list",
       "columns": [
         {
           "type": "operation",
@@ -363,7 +363,7 @@
                 "title": "编辑Helm仓库  (ESC 关闭)",
                 "body": {
                   "type": "form",
-                  "api": "post:/mgm/helm/repo/save",
+                  "api": "post:/k8s/helm/repo/save",
                   "body": [
                     {
                       "type": "hidden",
@@ -726,7 +726,7 @@
               "actionType": "ajax",
               "tooltip": "删除仓库",
               "confirmText": "确定要删除该仓库吗？",
-              "api": "post:/mgm/helm/repo/delete/${id}"
+              "api": "post:/k8s/helm/repo/delete/${id}"
             }
           ],
           "toggled": true

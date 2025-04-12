@@ -79,7 +79,7 @@
           "actionType": "ajax",
           "confirmText": "确定要卸载吗？",
           "api": {
-            "url": "/mgm/helm/release/batch/uninstall",
+            "url": "/k8s/helm/release/batch/uninstall",
             "method": "post",
             "data": {
               "name_list": "${selectedItems | pick:name }",
@@ -106,7 +106,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/mgm/helm/release/list",
+      "api": "get:/k8s/helm/release/list",
       "columns": [
         {
           "type": "operation",
@@ -354,7 +354,7 @@
                         "align": "right"
                       }
                     ],
-                    "api": "get:/mgm/helm/release/ns/${namespace}/name/${name}/history/list",
+                    "api": "get:/k8s/helm/release/ns/${namespace}/name/${name}/history/list",
                     "columns": [
                       {
                         "name": "version",
