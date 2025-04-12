@@ -184,6 +184,7 @@
                   "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
+                    "title": "MCP服务器工具信息 - ${name}",
                     "size": "lg",
                     "body": {
                       "type": "crud",
@@ -224,7 +225,25 @@
                       "columns": [
                         {
                           "name": "name",
-                          "label": "工具名称",
+                          "label": "名称"
+                        },
+                        {
+                          "name": "enabled",
+                          "label": "启用",
+                          "quickEdit": {
+                            "mode": "inline",
+                            "type": "switch",
+                            "onText": "开启",
+                            "offText": "关闭",
+                            "saveImmediately": true,
+                            "resetOnFailed": true
+                          }
+                        },
+                        {
+                          "name": "name",
+                          "label": "详情",
+                          "type": "tpl",
+                          "tpl": "详情",
                           "className": "cursor-pointer",
                           "onEvent": {
                             "click": {
@@ -262,78 +281,12 @@
                               ]
                             }
                           }
-                        },
-                        {
-                          "name": "enabled",
-                          "label": "启用",
-                          "quickEdit": {
-                            "mode": "inline",
-                            "type": "switch",
-                            "onText": "开启",
-                            "offText": "关闭",
-                            "saveImmediately": true,
-                            "resetOnFailed": true
-                          }
                         }
                       ]
                     }
                   }
                 }
               ]
-            }
-          }
-        },
-        {
-          "name": "resources",
-          "label": "资源",
-          "type": "each",
-          "items": {
-            "type": "tag",
-            "label": "${name}"
-          }
-        },
-        {
-          "name": "prompts",
-          "label": "提示",
-          "type": "each",
-          "items": {
-            "type": "tag",
-            "label": "${name}",
-            "className": "cursor-pointer",
-            "onEvent": {
-              "click": {
-                "actions": [
-                  {
-                    "actionType": "drawer",
-                    "drawer": {
-                      "title": "工具信息 - ${name}",
-                      "size": "lg",
-                      "body": {
-                        "type": "form",
-                        "mode": "horizontal",
-                        "body": [
-                          {
-                            "type": "static",
-                            "label": "工具名称",
-                            "value": "${name}"
-                          },
-                          {
-                            "type": "static",
-                            "label": "工具描述",
-                            "value": "${description}"
-                          },
-                          {
-                            "type": "static",
-                            "label": "输入参数",
-                            "value": "${inputSchema.properties}",
-                            "valueType": "json"
-                          }
-                        ]
-                      }
-                    }
-                  }
-                ]
-              }
             }
           }
         },

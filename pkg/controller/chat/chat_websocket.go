@@ -159,7 +159,7 @@ func GPTShell(c *gin.Context) {
 			klog.V(6).Infof("prompt: %s", string(data))
 
 			tools := service.McpService().GetAllEnabledTools()
-			klog.V(6).Infof("GPTShell 对话携带tools %d，\n%s\n", len(tools), utils.ToJSON(tools))
+			klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
 			stream, err := service.ChatService().GetChatStream(string(data), tools...)
 
 			if err != nil {
