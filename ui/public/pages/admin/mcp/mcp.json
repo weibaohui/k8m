@@ -225,7 +225,9 @@
                       "columns": [
                         {
                           "name": "name",
-                          "label": "名称"
+                          "label": "名称",
+                          "type": "tpl",
+                          "tpl": "${name}<br><span class='text-muted'>${description}</span>"
                         },
                         {
                           "name": "enabled",
@@ -243,7 +245,7 @@
                           "name": "name",
                           "label": "详情",
                           "type": "tpl",
-                          "tpl": "详情",
+                          "tpl": "参数",
                           "className": "cursor-pointer",
                           "onEvent": {
                             "click": {
