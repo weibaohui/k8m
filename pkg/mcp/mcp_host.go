@@ -85,6 +85,7 @@ func (m *MCPHost) AddServer(config ServerConfig) error {
 
 // SyncServerCapabilities 同步服务器的工具、资源和提示能力
 func (m *MCPHost) SyncServerCapabilities(ctx context.Context, serverName string) error {
+
 	// 获取服务器能力
 	tools, err := m.GetTools(ctx, serverName)
 	if err != nil {

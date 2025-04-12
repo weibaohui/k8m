@@ -48,7 +48,7 @@
     {
       "type": "crud",
       "api": "/admin/mcp/list",
-      "quickSaveItemApi": "/admin/mcp/save/id/${id}/status/${config.enabled}",
+      "quickSaveItemApi": "/admin/mcp/save/id/${id}/status/${enabled}",
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
@@ -141,25 +141,25 @@
             "url": "/admin/mcp/delete",
             "method": "post",
             "data": {
-              "ids": "${selectedItems | pick:config.id }"
+              "ids": "${selectedItems | pick:id }"
             }
           }
         }
       ],
-      "loadDataOnce": true,
+      "loadDataOnce": false,
       "syncLocation": false,
       "perPage": 10,
       "columns": [
         {
-          "name": "config.name",
+          "name": "name",
           "label": "服务器名称"
         },
         {
-          "name": "config.url",
+          "name": "url",
           "label": "服务器地址"
         },
         {
-          "name": "config.enabled",
+          "name": "enabled",
           "label": "启用",
           "quickEdit": {
             "mode": "inline",
@@ -174,7 +174,7 @@
           "name": "tools",
           "label": "工具",
           "type": "tpl",
-          "tpl": "${COUNT(tools)}",
+          "tpl": "详情",
           "className": "cursor-pointer",
           "onEvent": {
             "click": {
@@ -186,8 +186,9 @@
                     "closeOnOutside": true,
                     "size": "md",
                     "body": {
-                      "type": "table",
-                      "source": "${tools}",
+                      "type": "crud",
+                      "api": "/admin/mcp/server/${name}/tools/list",
+                      "quickSaveItemApi": "/admin/mcp/tool/save/id/${id}/status/${enabled}",
                       "columns": [
                         {
                           "name": "name",
@@ -218,7 +219,7 @@
                                         {
                                           "type": "json",
                                           "label": "输入参数",
-                                          "value": "${inputSchema|json}",
+                                          "value": "${input_schema.properties|json}",
                                           "levelExpand": 3,
                                           "className": "m-1"
                                         }
@@ -228,6 +229,18 @@
                                 }
                               ]
                             }
+                          }
+                        },
+                        {
+                          "name": "enabled",
+                          "label": "启用",
+                          "quickEdit": {
+                            "mode": "inline",
+                            "type": "switch",
+                            "onText": "开启",
+                            "offText": "关闭",
+                            "saveImmediately": true,
+                            "resetOnFailed": true
                           }
                         }
                       ]
@@ -280,7 +293,7 @@
                           {
                             "type": "static",
                             "label": "输入参数",
-                            "value": "${inputSchema}",
+                            "value": "${inputSchema.properties}",
                             "valueType": "json"
                           }
                         ]
@@ -290,15 +303,6 @@
                 ]
               }
             }
-          }
-        },
-        {
-          "name": "initialize_results.serverInfo",
-          "label": "连接状态",
-          "type": "mapping",
-          "map": {
-            "": "<span class='label label-danger'>未连接</span>",
-            "*": "<span class='label label-success'>已连接</span>"
           }
         },
         {
@@ -340,12 +344,6 @@
                   ]
                 }
               }
-            },
-            {
-              "type": "button",
-              "label": "连接",
-              "actionType": "ajax",
-              "api": "post:/admin/mcp/connect/${config.name}"
             }
           ]
         }

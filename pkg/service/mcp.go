@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	mcp2 "github.com/mark3labs/mcp-go/mcp"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/mcp"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -103,4 +104,9 @@ func (m *mcpService) RemoveServerById(server models.MCPServerConfig) {
 func (m *mcpService) UpdateServer(entity models.MCPServerConfig) {
 	m.RemoveServerById(entity)
 	m.AddServer(entity)
+}
+
+func (m *mcpService) GetTools(entity models.MCPServerConfig) ([]mcp2.Tool, error) {
+	ctx := context.Background()
+	return m.Host().GetTools(ctx, entity.Name)
 }

@@ -25,20 +25,20 @@ func init() {
 func AutoMigrate() error {
 
 	// 添加需要迁移的所有模型
-	err := dao.DB().AutoMigrate(
-		&CustomTemplate{},
-		&KubeConfig{},
-		&User{},
-		&ClusterUserRole{},
-		&OperationLog{},
-		&ShellLog{},
-		&HelmRepository{},
-		&HelmChart{},
-		&UserGroup{},
-		&MCPServerConfig{},
-		&Config{},
-		&ApiKey{},
-	)
+	err := dao.DB().AutoMigrate(&CustomTemplate{})
+	err = dao.DB().AutoMigrate(&KubeConfig{})
+	err = dao.DB().AutoMigrate(&User{})
+	err = dao.DB().AutoMigrate(&ClusterUserRole{})
+	err = dao.DB().AutoMigrate(&OperationLog{})
+	err = dao.DB().AutoMigrate(&ShellLog{})
+	err = dao.DB().AutoMigrate(&HelmRepository{})
+	err = dao.DB().AutoMigrate(&HelmChart{})
+	err = dao.DB().AutoMigrate(&UserGroup{})
+	err = dao.DB().AutoMigrate(&MCPServerConfig{})
+	err = dao.DB().AutoMigrate(&MCPTool{})
+	err = dao.DB().AutoMigrate(&Config{})
+	err = dao.DB().AutoMigrate(&ApiKey{})
+
 	if err != nil {
 		klog.Errorf("数据库迁移报错: %v", err.Error())
 	}
