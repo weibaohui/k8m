@@ -201,6 +201,9 @@ func main() {
 		params.GET("/cluster/all", param.ClusterTableList)
 		// 获取当前软件版本信息
 		params.GET("/version", param.Version)
+		// 获取helm 仓库列表
+		params.GET("/helm/repo/option_list", helm.RepoOptionList)
+
 	}
 	ai := r.Group("/ai", middleware.AuthMiddleware())
 	{
@@ -398,6 +401,21 @@ func main() {
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
 
+		api.GET("/helm/release/list", helm.ListRelease)
+		api.GET("/helm/release/ns/:ns/name/:name/history/list", helm.ListReleaseHistory)
+		api.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", helm.InstallRelease)
+		api.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
+		api.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
+		api.POST("/helm/release/upgrade", helm.UpgradeRelease)
+		api.GET("/helm/chart/list", helm.ListChart)
+		api.GET("/helm/repo/:repo/chart/:chart/versions", helm.ChartVersionOptionList)
+		api.GET("/helm/repo/:repo/chart/:chart/version/:version/values", helm.GetChartValue)
+		// helm
+		api.GET("/helm/repo/list", helm.ListRepo)
+		api.POST("/helm/repo/delete/:ids", helm.DeleteRepo)
+		api.POST("/helm/repo/update_index", helm.UpdateReposIndex)
+		api.POST("/helm/repo/save", helm.AddOrUpdateRepo)
+
 	}
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
@@ -425,23 +443,6 @@ func main() {
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
 		mgm.GET("/log/operation/list", log.ListOperation)
-
-		// helm
-		mgm.GET("/helm/repo/list", helm.ListRepo)
-		mgm.POST("/helm/repo/delete/:ids", helm.DeleteRepo)
-		mgm.POST("/helm/repo/update_index", helm.UpdateReposIndex)
-		mgm.POST("/helm/repo/save", helm.AddOrUpdateRepo)
-		mgm.GET("/helm/repo/option_list", helm.RepoOptionList)
-		mgm.GET("/helm/repo/:repo/chart/:chart/versions", helm.ChartVersionOptionList)
-		mgm.GET("/helm/repo/:repo/chart/:chart/version/:version/values", helm.GetChartValue)
-		mgm.GET("/helm/chart/list", helm.ListChart)
-
-		mgm.GET("/helm/release/list", helm.ListRelease)
-		mgm.GET("/helm/release/ns/:ns/name/:name/history/list", helm.ListReleaseHistory)
-		mgm.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", helm.InstallRelease)
-		mgm.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
-		mgm.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
-		mgm.POST("/helm/release/upgrade", helm.UpgradeRelease)
 
 		// 集群连接
 		mgm.POST("/cluster/:cluster/reconnect", cluster.Reconnect)

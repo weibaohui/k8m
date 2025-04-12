@@ -45,7 +45,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
         const fetchVersions = async () => {
             try {
                 const response = await fetcher({
-                    url: `/mgm/helm/repo/${repoName}/chart/${chartName}/versions`,
+                    url: `/k8s/helm/repo/${repoName}/chart/${chartName}/versions`,
                     method: 'get'
                 });
                 // @ts-ignore

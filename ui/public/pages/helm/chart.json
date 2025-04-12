@@ -92,7 +92,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/mgm/helm/chart/list",
+      "api": "get:/k8s/helm/chart/list",
       "columns": [
         {
           "type": "operation",
@@ -139,7 +139,7 @@
                       "label": "版本",
                       "clearable": true,
                       "value": "${latest_version}",
-                      "source": "/mgm/helm/repo/${repository_name}/chart/${name}/versions"
+                      "source": "/k8s/helm/repo/${repository_name}/chart/${name}/versions"
                     },
                     {
                       "type": "static",
@@ -222,7 +222,7 @@
                           },
                           {
                             "type": "service",
-                            "api": "/mgm/helm/repo/${repository_name}/chart/${name}/version/${install_version}/values",
+                            "api": "/k8s/helm/repo/${repository_name}/chart/${name}/version/${install_version}/values",
                             "body": [
                               {
                                 "type": "editor",
@@ -260,7 +260,7 @@
                           ],
                           "api": {
                             "method": "post",
-                            "url": "/mgm/helm/release/${release_name}/repo/${repository_name}/chart/${name}/version/${install_version}/install",
+                            "url": "/k8s/helm/release/${release_name}/repo/${repository_name}/chart/${name}/version/${install_version}/install",
                             "data": {
                               "values": "${values}",
                               "ns": "${ns}"
@@ -328,7 +328,7 @@
             "clearable": true,
             "name": "repository_name",
             "searchable": true,
-            "source": "/mgm/helm/repo/option_list"
+            "source": "/params/helm/repo/option_list"
           }
         }
       ]
