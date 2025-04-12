@@ -1,4 +1,32 @@
 # 配置说明
+该功能可以在系统初始化阶段临时启用一个管理员账户，以方便系统的初始化和配置。
+建议在生产环境中关闭该功能。
+
+## Kubernetes配置
+
+在Kubernetes环境中，可以通过在部署YAML中设置环境变量来配置临时管理员账户：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8m
+spec:
+  template:
+    spec:
+      containers:
+      - name: k8m
+        env:
+        - name: ENABLE_TEMP_ADMIN
+          value: "true"
+        - name: ADMIN_USERNAME
+          value: "admin"
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: k8m-admin-secret
+              key: password
+```
 
 ## 命令行参数配置
 
@@ -91,32 +119,6 @@ $env:ADMIN_PASSWORD="your_secure_password"
 
 # 启动应用
 .\k8m.exe
-```
-
-## Kubernetes配置
-
-在Kubernetes环境中，可以通过在部署YAML中设置环境变量来配置临时管理员账户：
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: k8m
-spec:
-  template:
-    spec:
-      containers:
-      - name: k8m
-        env:
-        - name: ENABLE_TEMP_ADMIN
-          value: "true"
-        - name: ADMIN_USERNAME
-          value: "admin"
-        - name: ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: k8m-admin-secret
-              key: password
 ```
 
 ## 配置优先级
