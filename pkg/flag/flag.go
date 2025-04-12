@@ -29,8 +29,9 @@ type Config struct {
 	LogV              int    // klog的日志级别klog.V(this)
 	InCluster         bool   // 是否集群内模式
 	LoginType         string // password,oauth,token,.. 登录方式，默认为password
-	AdminUserName     string // 管理员用户名
-	AdminPassword     string // 管理员密码
+	EnableTempAdmin   bool   // 是否启用临时管理员账户配置
+	AdminUserName     string // 管理员用户名，启用临时管理员账户配置后生效
+	AdminPassword     string // 管理员密码，启用临时管理员账户配置后生效
 	JwtTokenSecret    string // JWT token secret
 	NodeShellImage    string // nodeShell 镜像
 	KubectlShellImage string // kubectlShell 镜像
@@ -43,7 +44,7 @@ type Config struct {
 	GitRepo           string // git仓库地址, 由编译时自动注入
 	BuildDate         string // 编译时间, 由编译时自动注入
 	EnableAI          bool   // 是否启用AI功能，默认开启
-	ConnectCluster    bool   // 启动集群是是否自动连接现有集群，默认关闭
+	ConnectCluster    bool   // 启动程序后，是否自动连接发现的集群，默认关闭
 	UseBuiltInModel   bool   // 是否使用内置大模型参数，默认开启
 }
 
@@ -138,6 +139,8 @@ func (c *Config) InitFlags() {
 	defaultConnectCluster := getEnvAsBool("CONNECT_CLUSTER", false)
 	// 默认使用内置大模型参数
 	defaultUseBuiltInModel := getEnvAsBool("USE_BUILTIN_MODEL", true)
+	// 默认不启用临时管理员账户配置
+	defaultEnableTempAdmin := getEnvAsBool("ENABLE_TEMP_ADMIN", false)
 
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
@@ -146,8 +149,9 @@ func (c *Config) InitFlags() {
 	pflag.StringVarP(&c.ApiModel, "chatgpt-model", "m", defaultModel, "大模型的自定义模型名称")
 	pflag.StringVarP(&c.KubeConfig, "kubeconfig", "c", defaultKubeConfig, "kubeconfig文件路径")
 	pflag.StringVar(&c.LoginType, "login-type", defaultLoginType, "登录方式，password, oauth, token等,default is password")
-	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "管理员用户名")
-	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "管理员密码")
+	pflag.BoolVar(&c.EnableTempAdmin, "enable-temp-admin", defaultEnableTempAdmin, "是否启用临时管理员账户配置，默认关闭")
+	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "管理员用户名，启用临时管理员账户配置后生效")
+	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "管理员密码，启用临时管理员账户配置后生效")
 	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "登录后生成JWT token 使用的Secret")
 	pflag.StringVar(&c.NodeShellImage, "node-shell-image", defaultNodeShellImage, "NodeShell 镜像。 默认为 alpine:latest，必须包含nsenter命令")
 	pflag.StringVar(&c.KubectlShellImage, "kubectl-shell-image", defaultKubectlShellImage, "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令")
@@ -158,7 +162,7 @@ func (c *Config) InitFlags() {
 	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")
 	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
-	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动集群是是否自动连接现有集群，默认关闭")
+	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动程序后，是否自动连接发现的集群，默认关闭  ")
 	pflag.BoolVar(&c.UseBuiltInModel, "use-builtin-model", defaultUseBuiltInModel, "是否使用内置大模型参数，默认开启")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
