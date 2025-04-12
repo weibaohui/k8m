@@ -184,11 +184,43 @@
                   "drawer": {
                     "closeOnEsc": true,
                     "closeOnOutside": true,
-                    "size": "md",
+                    "size": "lg",
                     "body": {
                       "type": "crud",
-                      "api": "/admin/mcp/server/${name}/tools/list",
+                      "id": "toolsCRUD",
+                      "name": "toolsCRUD",
+                      "autoFillHeight": true,
+                      "api": "get:/admin/mcp/server/${name}/tools/list",
                       "quickSaveItemApi": "/admin/mcp/tool/save/id/${id}/status/${enabled}",
+                      "autoGenerateFilter": {
+                        "columnsNum": 4,
+                        "showBtnToolbar": false
+                      },
+                      "headerToolbar": [
+                        {
+                          "type": "columns-toggler",
+                          "align": "right",
+                          "draggable": true,
+                          "icon": "fas fa-cog",
+                          "overlay": true,
+                          "footerBtnSize": "sm"
+                        },
+                        {
+                          "type": "tpl",
+                          "tpl": "共${count}条",
+                          "align": "right",
+                          "visibleOn": "${count}"
+                        },
+                        {
+                          "type": "columns-toggler",
+                          "align": "left"
+                        },
+                        "reload"
+                      ],
+                      "loadDataOnce": true,
+                      "syncLocation": false,
+                      "initFetch": true,
+                      "perPage": 10,
                       "columns": [
                         {
                           "name": "name",
@@ -219,7 +251,7 @@
                                         {
                                           "type": "json",
                                           "label": "输入参数",
-                                          "value": "${input_schema.properties|json}",
+                                          "value": "${input_schema|toJson|pick:properties}",
                                           "levelExpand": 3,
                                           "className": "m-1"
                                         }

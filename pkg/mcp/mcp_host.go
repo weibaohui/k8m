@@ -9,6 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"k8s.io/klog/v2"
 )
@@ -202,7 +203,7 @@ func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 				Type: openai.ToolTypeFunction,
 				Function: &openai.FunctionDefinition{
 					// 在工具名称中添加服务器标识
-					Name:        buildToolName(tool.Name, serverName),
+					Name:        utils.BuildMCPToolName(tool.Name, serverName),
 					Description: tool.Name,
 					Parameters:  tool.InputSchema,
 				},

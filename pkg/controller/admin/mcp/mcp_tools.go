@@ -13,10 +13,14 @@ func ToolsList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
 	var tool models.MCPTool
-	list, count, err := tool.List(params, func(db *gorm.DB) *gorm.DB {
+	list, _, err := tool.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Order("name asc")
 	})
-	amis.WriteJsonListTotalWithError(c, count, list, err)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonList(c, list)
 }
 
 func ToolQuickSave(c *gin.Context) {

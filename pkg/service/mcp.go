@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	mcp2 "github.com/mark3labs/mcp-go/mcp"
+	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/mcp"
 	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
@@ -109,4 +112,36 @@ func (m *mcpService) UpdateServer(entity models.MCPServerConfig) {
 func (m *mcpService) GetTools(entity models.MCPServerConfig) ([]mcp2.Tool, error) {
 	ctx := context.Background()
 	return m.Host().GetTools(ctx, entity.Name)
+}
+
+func (m *mcpService) GetAllEnabledTools() []openai.Tool {
+
+	var tools []models.MCPTool
+	err := dao.DB().Model(&models.MCPTool{}).Where("enabled = ?", true).Find(&tools).Error
+	if err != nil {
+		return nil
+	}
+	// 从所有可用的MCP服务器收集工具列表
+	var allTools []openai.Tool
+	// 遍历所有服务器获取工具
+	for _, tool := range tools {
+
+		var tis mcp2.ToolInputSchema
+		err := json.Unmarshal([]byte(tool.InputSchema), &tis)
+		if err != nil {
+			continue
+		}
+		allTools = append(allTools, openai.Tool{
+			Type: openai.ToolTypeFunction,
+			Function: &openai.FunctionDefinition{
+				// 在工具名称中添加服务器标识
+				Name:        utils.BuildMCPToolName(tool.Name, tool.ServerName),
+				Description: tool.Name,
+				// 将工具的输入模式转换为紧凑的JSON格式
+				Parameters: tis,
+			},
+		})
+	}
+	return allTools
+
 }

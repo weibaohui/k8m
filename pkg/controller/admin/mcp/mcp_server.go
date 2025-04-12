@@ -70,7 +70,7 @@ func addTools(params *dao.Params, entity models.MCPServerConfig) bool {
 				ServerName:  entity.Name,
 				Name:        tool.Name,
 				Description: tool.Description,
-				InputSchema: utils.ToJSON(tool.InputSchema.Properties),
+				InputSchema: utils.ToJSON(tool.InputSchema),
 				Enabled:     true,
 			}
 			err = mt.Save(params)

@@ -158,11 +158,8 @@ func GPTShell(c *gin.Context) {
 
 			klog.V(6).Infof("prompt: %s", string(data))
 
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-
-			tools := service.McpService().Host().GetAllTools(ctx)
-			cancel()
-			klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
+			tools := service.McpService().GetAllEnabledTools()
+			klog.V(6).Infof("GPTShell 对话携带tools %d，\n%s\n", len(tools), utils.ToJSON(tools))
 			stream, err := service.ChatService().GetChatStream(string(data), tools...)
 
 			if err != nil {
@@ -204,7 +201,6 @@ func GPTShell(c *gin.Context) {
 							ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
 							ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
 							results := service.McpService().Host().ExecTools(ctxInst, mergedCalls)
-							cancel()
 							for _, r := range results {
 								outBuffer.Write([]byte(utils.ToJSON(r)))
 							}
