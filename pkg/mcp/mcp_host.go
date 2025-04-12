@@ -9,6 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"k8s.io/klog/v2"
 )
@@ -30,8 +31,7 @@ type MCPHost struct {
 	// 记录每个服务器的资源能力
 	Resources map[string][]mcp.Resource
 	// 记录每个服务器的提示能力
-	Prompts           map[string][]mcp.Prompt
-	InitializeResults map[string]*mcp.InitializeResult
+	Prompts map[string][]mcp.Prompt
 }
 type MCPServer struct {
 	ServerConfig
@@ -45,11 +45,10 @@ type MCPServer struct {
 // NewMCPHost 创建新的MCP管理器
 func NewMCPHost() *MCPHost {
 	return &MCPHost{
-		configs:           make(map[string]ServerConfig),
-		Tools:             make(map[string][]mcp.Tool),
-		Resources:         make(map[string][]mcp.Resource),
-		Prompts:           make(map[string][]mcp.Prompt),
-		InitializeResults: make(map[string]*mcp.InitializeResult),
+		configs:   make(map[string]ServerConfig),
+		Tools:     make(map[string][]mcp.Tool),
+		Resources: make(map[string][]mcp.Resource),
+		Prompts:   make(map[string][]mcp.Prompt),
 	}
 }
 
@@ -61,12 +60,11 @@ func (m *MCPHost) ListServers() []MCPServer {
 	// 遍历所有配置，转换为MCPServer结构
 	for name, config := range m.configs {
 		server := MCPServer{
-			ServerConfig:      config,
-			Config:            config,
-			Tools:             m.Tools[name],
-			Resources:         m.Resources[name],
-			Prompts:           m.Prompts[name],
-			InitializeResults: m.InitializeResults[name],
+			ServerConfig: config,
+			Config:       config,
+			Tools:        m.Tools[name],
+			Resources:    m.Resources[name],
+			Prompts:      m.Prompts[name],
 		}
 		servers = append(servers, server)
 	}
@@ -88,6 +86,7 @@ func (m *MCPHost) AddServer(config ServerConfig) error {
 
 // SyncServerCapabilities 同步服务器的工具、资源和提示能力
 func (m *MCPHost) SyncServerCapabilities(ctx context.Context, serverName string) error {
+
 	// 获取服务器能力
 	tools, err := m.GetTools(ctx, serverName)
 	if err != nil {
@@ -127,7 +126,7 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 	}
 
 	// 在锁外同步服务器能力
-	if err := m.SyncServerCapabilities(ctx, serverName); err != nil {
+	if err := m.SyncServerCapabilities(context.Background(), serverName); err != nil {
 		return fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
 	}
 
@@ -158,7 +157,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		constants.JwtUserName: username,
 		constants.JwtUserRole: role,
 	}))
-	klog.V(6).Infof("访问MCP 服务器 [%s:%s] 携带信息%s %s", serverName, config.URL, username, role)
+	// klog.V(6).Infof("访问MCP 服务器 [%s:%s] 携带信息%s %s", serverName, config.URL, username, role)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new client for %s: %v", serverName, err)
 	}
@@ -176,16 +175,12 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		Version: "1.0.0",
 	}
 
-	result, err := newCli.Initialize(ctx, initRequest)
+	_, err = newCli.Initialize(ctx, initRequest)
 	if err != nil {
 		newCli.Close()
 		return nil, fmt.Errorf("failed to initialize new client for %s: %v", serverName, err)
 	}
-	go func() {
-		m.mutex.Lock()
-		m.InitializeResults[serverName] = result
-		m.mutex.Unlock()
-	}()
+
 	return newCli, nil
 
 }
@@ -208,7 +203,7 @@ func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 				Type: openai.ToolTypeFunction,
 				Function: &openai.FunctionDefinition{
 					// 在工具名称中添加服务器标识
-					Name:        buildToolName(tool.Name, serverName),
+					Name:        utils.BuildMCPToolName(tool.Name, serverName),
 					Description: tool.Name,
 					Parameters:  tool.InputSchema,
 				},
@@ -274,7 +269,6 @@ func (m *MCPHost) RemoveServer(config ServerConfig) {
 	delete(m.Tools, config.Name)
 	delete(m.Resources, config.Name)
 	delete(m.Prompts, config.Name)
-	delete(m.InitializeResults, config.Name)
 	m.mutex.Unlock()
 }
 

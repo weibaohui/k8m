@@ -1,21 +1,20 @@
 package mcp
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
+	"k8s.io/klog/v2"
 )
 
-func List(c *gin.Context) {
-	servers := service.McpService().Host().ListServers()
-	amis.WriteJsonData(c, servers)
+func ServerList(c *gin.Context) {
+	params := dao.BuildParams(c)
+	var mcpServer models.MCPServerConfig
+	list, count, err := mcpServer.List(params)
+	amis.WriteJsonListTotalWithError(c, count, list, err)
 }
 func Connect(c *gin.Context) {
 	name := c.Param("name")
@@ -28,12 +27,6 @@ func Delete(c *gin.Context) {
 		IDs []int `json:"ids"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "Delete", utils.ToJSON(req.IDs), "")
-	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -55,21 +48,40 @@ func AddOrUpdate(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "AddOrUpdateRepo", entity.Name, entity.URL)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
 
-	err = entity.Save(params)
+	err := entity.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
 	service.McpService().UpdateServer(entity)
+	removeTools(entity)
+	addTools(params, entity)
+
 	amis.WriteJsonErrorOrOK(c, err)
+}
+
+func addTools(params *dao.Params, entity models.MCPServerConfig) bool {
+	// 获取Tools列表
+	if tools, err := service.McpService().GetTools(entity); err == nil {
+		for _, tool := range tools {
+			mt := models.MCPTool{
+				ServerName:  entity.Name,
+				Name:        tool.Name,
+				Description: tool.Description,
+				InputSchema: utils.ToJSON(tool.InputSchema),
+				Enabled:     true,
+			}
+			err = mt.Save(params)
+			if err != nil {
+				klog.V(6).Infof("保存工具失败:[%s/%s] %v\n", entity.Name, tool.Name, err)
+				return true
+			}
+		}
+
+	}
+	return false
 }
 func QuickSave(c *gin.Context) {
 	id := c.Param("id")
@@ -82,12 +94,7 @@ func QuickSave(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	// 检查权限
-	_, _, err = handleCommonLogic(c, "AddOrUpdateRepo", entity.Name, entity.URL)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+
 	if status == "true" {
 		entity.Enabled = true
 	} else {
@@ -99,37 +106,15 @@ func QuickSave(c *gin.Context) {
 		return
 	}
 
+	removeTools(entity)
 	service.McpService().UpdateServer(entity)
+	if status == "true" {
+		addTools(params, entity)
+	}
+
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func handleCommonLogic(c *gin.Context, action string, name, url string) (string, string, error) {
-	ctx := amis.GetContextWithUser(c)
-	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
-
-	log := models.OperationLog{
-		Action:       action,
-		Cluster:      "",
-		Kind:         "MCP",
-		Name:         fmt.Sprintf("%s[%s]", name, url),
-		Namespace:    "",
-		UserName:     username,
-		Group:        "",
-		Role:         role,
-		ActionResult: "success",
-	}
-
-	var err error
-	if role == constants.RoleClusterReadonly {
-		err = fmt.Errorf("非管理员不能%s资源", action)
-	}
-	if err != nil {
-		log.ActionResult = err.Error()
-	}
-	go func() {
-		time.Sleep(1 * time.Second)
-		service.OperationLogService().Add(&log)
-	}()
-	return username, role, err
+func removeTools(entity models.MCPServerConfig) {
+	dao.DB().Where("server_name = ?", entity.Name).Delete(&models.MCPTool{})
 }

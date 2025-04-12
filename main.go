@@ -469,11 +469,13 @@ func main() {
 		admin.POST("/config/update", config.UpdateConfig)
 
 		// mcp
-		admin.GET("/mcp/list", mcp.List)
+		admin.GET("/mcp/list", mcp.ServerList)
+		admin.GET("/mcp/server/:name/tools/list", mcp.ToolsList)
 		admin.POST("/mcp/connect/:name", mcp.Connect)
 		admin.POST("/mcp/delete", mcp.Delete)
 		admin.POST("/mcp/save", mcp.AddOrUpdate)
 		admin.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
+		admin.POST("/mcp/tool/save/id/:id/status/:status", mcp.ToolQuickSave)
 
 		// 集群权限设置
 		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)

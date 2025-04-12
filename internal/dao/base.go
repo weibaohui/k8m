@@ -159,6 +159,47 @@ func GenericDelete[T any](params *Params, model T, ids []int64, queryFuncs ...fu
 	return nil
 }
 
+// GenericBatchSave 是一个通用的批量插入方法，适用于任意模型切片
+func GenericBatchSave[T any](params *Params, models []T, batchSize int, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	// 如果params为nil，创建一个默认的params
+	if params == nil {
+		params = &Params{
+			Queries: make(map[string]interface{}),
+		}
+	}
+
+	// 如果切片为空，直接返回
+	if len(models) == 0 {
+		return nil
+	}
+
+	// 如果未指定批量大小，设置默认值
+	if batchSize <= 0 {
+		batchSize = 100
+	}
+
+	// 为每个模型补全CreatedBy
+	for i := range models {
+		if reflect.ValueOf(&models[i]).Elem().FieldByName("CreatedBy").String() == "" && params.UserName != "" {
+			reflect.ValueOf(&models[i]).Elem().FieldByName("CreatedBy").SetString(params.UserName)
+		}
+	}
+
+	dbQuery := DB().Model(&models[0])
+
+	// 执行自定义查询函数
+	for _, fn := range queryFuncs {
+		dbQuery = fn(dbQuery)
+	}
+
+	// 使用CreateInBatches执行批量插入
+	if err := dbQuery.CreateInBatches(models, batchSize).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // GetTableName 使用 GORM 的 Statement 获取模型对应的表名
 func GetTableName(model interface{}) (string, error) {
 	stmt := &gorm.Statement{DB: DB()}
