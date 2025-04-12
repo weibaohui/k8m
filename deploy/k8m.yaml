@@ -151,20 +151,51 @@ spec:
         - name: k8m
           image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.0.80
           env:
+            # 是否开启debug模式
             - name: DEBUG
               value: "false"
+            # log输出日志级别，同klog用法
             - name: LOG_V
               value: "2"
+            # 监听的端口号
+            - name: PORT
+              value: "3618"
+            # 内置多集群k8s MCP Server监听的端口号
+            - name: MCP_SERVER_PORT
+              value: "3619"
+            # kubeconfig文件路径，会自动扫描识别同级目录下所有的配置文件
+            - name: KUBECONFIG
+              value: "~/.kube/config"
+            # 开启AI功能，默认开启
+            - name: ENABLE_AI
+              value: "true"
+            # 是否启用临时管理员账户配置，默认关闭
+            - name: ENABLE_TEMP_ADMIN
+              value: "false"
+            # 管理员用户名
+            # - name: ADMIN_USERNAME
+            #   value: "admin"
+            # # 管理员密码
+            # - name: ADMIN_PASSWORD
+            #   value: "123456"
+            # kubectl shell镜像地址
+            - name: KUBECTL_SHELL_IMAGE
+              value: "bitnami/kubectl:latest"
+            # Node shell镜像地址
+            - name: NODE_SHELL_IMAGE
+              value: "alpine:latest"
+            # 持久化数据库地址
+            - name: SQLITE_PATH
+              value: "/app/data/k8m.db"
+            # 启动程序后，是否自动连接发现的集群，默认关闭
+            - name: CONNECT_CLUSTER
+              value: "false"
+            # 是否自动注册纳管宿主集群，默认启用
             - name: IN_CLUSTER
               value: "true"
+            # 是否打印配置信息
             - name: PRINT_CONFIG
               value: "false"
-            - name: KUBECTL_SHELL_IMAGE
-              value: bitnami/kubectl:latest
-            - name: NODE_SHELL_IMAGE
-              value: alpine:latest
-            - name: SQLITE_PATH
-              value: /app/data/k8m.db
           ports:
             - containerPort: 3618
               protocol: TCP
