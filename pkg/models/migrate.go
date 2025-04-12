@@ -21,6 +21,7 @@ func init() {
 	_ = AddInnerMCPServer()
 	_ = FixRoleName()
 	_ = InitConfigTable()
+	_ = InitConditionTable()
 }
 func AutoMigrate() error {
 
@@ -145,6 +146,32 @@ func InitConfigTable() error {
 			return err
 		}
 		klog.V(4).Info("成功初始化配置表")
+	}
+
+	return nil
+}
+
+func InitConditionTable() error {
+	var count int64
+	if err := dao.DB().Model(&ConditionReverse{}).Count(&count).Error; err != nil {
+		klog.Errorf("查询翻转指标配置表: %v", err)
+		return err
+	}
+	if count == 0 {
+		// 初始化需要翻转的指标
+		conditions := []ConditionReverse{
+			{Name: "Pressure", Enabled: true},
+			{Name: "Unavailable", Enabled: true},
+			{Name: "Problem", Enabled: true},
+			{Name: "Error", Enabled: true},
+			{Name: "Slow", Enabled: true},
+		}
+		if err := dao.DB().Create(&conditions).Error; err != nil {
+			klog.Errorf("初始化翻转指标配置失败: %v", err)
+			return err
+		}
+
+		klog.V(4).Info("成功初始化翻转指标配置表")
 	}
 
 	return nil
