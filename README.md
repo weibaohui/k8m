@@ -17,6 +17,10 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 [DEMO](http://107.150.119.151:3618)
 用户名密码 demo/demo
 
+### 文档
+
+详细的配置和使用说明请参考[文档](docs/README.md)。
+
 ### 主要特点
 
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
