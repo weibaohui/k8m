@@ -46,10 +46,10 @@ func LoginByPassword(c *gin.Context) {
 	}
 
 	// 验证用户名和密码
-	// 1、从cfg中获取用户名，先判断是不是admin，是进行密码比对
+	// 1、从cfg中获取用户名，先判断是不是admin，是进行密码比对.必须启用临时管理员配置才进行这一步
 	// 2、从DB中获取用户名密码
 
-	if req.Username == cfg.AdminUserName {
+	if req.Username == cfg.AdminUserName && cfg.EnableTempAdmin {
 		// cfg 用户名密码
 		if string(decrypt) != cfg.AdminPassword {
 			// 前端处理登录状态码，不要修改
