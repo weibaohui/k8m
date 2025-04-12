@@ -47,14 +47,16 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 ```shell
 Usage of ./k8m:
-      --admin-password string            管理员密码 (default "123456")
-      --admin-username string            管理员用户名 (default "admin")
-      --any-select                       是否开启任意选择划词解释，默认开启 (default true)
+      --admin-password string            管理员密码，启用临时管理员账户配置后生效 (default "123456")
+      --admin-username string            管理员用户名，启用临时管理员账户配置后生效 (default "admin")      --any-select                       是否开启任意选择划词解释，默认开启 (default true)
       --print-config                     是否打印配置信息 (default false)
   -k, --chatgpt-key string               大模型的自定义API Key (default "sk-xxxxxxx")
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-7B-Instruct")
   -u, --chatgpt-url string               大模型的自定义API URL (default "https://api.siliconflow.cn/v1")
+      --connect-cluster                  启动集群是是否自动连接现有集群，默认关闭
   -d, --debug                            调试模式
+      --enable-ai                        是否启用AI功能，默认开启 (default true)
+      --enable-temp-admin                是否启用临时管理员账户配置，默认关闭
       --in-cluster                       是否自动注册纳管宿主集群，默认启用
       --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
   -c, --kubeconfig string                kubeconfig文件路径 (default "/root/.kube/config")
@@ -65,6 +67,7 @@ Usage of ./k8m:
   -p, --port int                         监听端口 (default 3618)
       --sqlite-path string               sqlite数据库文件路径， (default "./data/k8m.db")
   -s, --mcp-server-port int              MCP Server 监听端口，默认3619 (default 3619)
+      --use-builtin-model                是否使用内置大模型参数，默认开启 (default true)
   -v, --v Level                          klog的日志级别 (default 2)
 ```
 
@@ -87,7 +90,8 @@ services:
 
 启动之后，访问`3618`端口，默认用户：`admin`，默认密码`123456`。
 
-如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)，FORK仓库之后，拉起体验。
+如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
+，FORK仓库之后，拉起体验。
 
 ## **ChatGPT 配置指南**
 
@@ -127,26 +131,30 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 
 以下是k8m支持的环境变量设置参数及其作用的表格：
 
-| 环境变量                  | 默认值                        | 说明                                                                |
-|-----------------------|----------------------------|-------------------------------------------------------------------|
-| `PORT`                | `3618`                     | 监听的端口号                                                            |
-| `MCP_SERVER_PORT`     | `3619`                     | 内置多集群k8s MCP Server监听的端口号                                         |
-| `KUBECONFIG`          | `~/.kube/config`           | `kubeconfig` 文件路径                                                 |
-| `OPENAI_API_KEY`      | `""`                       | 大模型的 API Key                                                      |
-| `OPENAI_API_URL`      | `""`                       | 大模型的 API URL                                                      |
-| `OPENAI_MODEL`        | `Qwen/Qwen2.5-7B-Instruct` | 大模型的默认模型名称，如需DeepSeek，请设置为deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
-| `LOGIN_TYPE`          | `"password"`               | 登录方式（如 `password`, `oauth`, `token`）                              |
-| `ADMIN_USERNAME`      | `"admin"`                  | 管理员用户名                                                            |
-| `ADMIN_PASSWORD`      | `"123456"`                 | 管理员密码                                                             |
-| `DEBUG`               | `"false"`                  | 是否开启 `debug` 模式                                                   |
-| `LOG_V`               | `"2"`                      | log输出日志，同klog用法                                                   |
-| `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                |
-| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`   | kubectl shell 镜像地址                                                |
-| `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址                                                   |
-| `SQLITE_PATH`         | `./data/k8m.db`            | 持久化数据库地址，默认sqlite数据库，文件地址./data/k8m.db                            |
-| `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                 |
-| `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                  |
-| `PRINT_CONFIG`        | `"false"`                  | 是否打印配置信息                                                          |
+| 环境变量                  | 默认值                        | 说明                                                                    |
+|-----------------------|----------------------------|-----------------------------------------------------------------------|
+| `PORT`                | `3618`                     | 监听的端口号                                                                |
+| `MCP_SERVER_PORT`     | `3619`                     | 内置多集群k8s MCP Server监听的端口号                                             |
+| `KUBECONFIG`          | `~/.kube/config`           | `kubeconfig` 文件路径  ，会自动扫描识别同级目录下所有的配置文件                               |
+| `ENABLE_AI`           | `"true"`                   | 开启AI功能，默认开启                                                           |
+| `USE_BUILTIN_MODEL`   | `"true"`                   | 使用内置大模型参数，默认开启                                                        |
+| `OPENAI_API_KEY`      | `""`                       | 自定义 大模型的 API Key                                                      |
+| `OPENAI_API_URL`      | `""`                       | 自定义 大模型的 API URL                                                      |
+| `OPENAI_MODEL`        | `Qwen/Qwen2.5-7B-Instruct` | 自定义 大模型的默认模型名称，如需DeepSeek，请设置为deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
+| `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                      |
+| `LOGIN_TYPE`          | `"password"`               | 登录方式（如 `password`, `oauth`, `token`）                                  |
+| `ENABLE_TEMP_ADMIN`   | `"false"`                  | 是否启用临时管理员账户配置，默认关闭。初次登录、忘记密码时使用                                       |
+| `ADMIN_USERNAME`      | `"admin"`                  | 管理员用户名 ，启用临时管理员账户配置后生效                                                |
+| `ADMIN_PASSWORD`      | `"123456"`                 | 管理员密码，启用临时管理员账户配置后生效                                                  |
+| `DEBUG`               | `"false"`                  | 是否开启 `debug` 模式                                                       |
+| `LOG_V`               | `"2"`                      | log输出日志，同klog用法                                                       |
+| `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                    |
+| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`   | kubectl shell 镜像地址                                                    |
+| `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址                                                       |
+| `SQLITE_PATH`         | `./data/k8m.db`            | 持久化数据库地址，默认sqlite数据库，文件地址./data/k8m.db                                |
+| `CONNECT_CLUSTER`     | `"false"`                  | 启动程序后，是否自动连接发现的集群，默认关闭                                                |
+| `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                     |
+| `PRINT_CONFIG`        | `"false"`                  | 是否打印配置信息                                                              |
 
 这些环境变量可以通过在运行应用程序时设置，例如：
 
