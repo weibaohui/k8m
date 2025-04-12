@@ -1,5 +1,6 @@
-import React, {useMemo} from 'react';
-import {render as renderAmis} from 'amis';
+import React, { useEffect, useMemo, useState } from 'react';
+import { render as renderAmis } from 'amis';
+import { fetcher } from '../fetcher';
 
 // 定义 Props 类型
 interface K8sTextConditionsProps {
@@ -13,29 +14,50 @@ interface K8sTextConditionsProps {
     };
 }
 
-const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextConditionsProps>(({data}, ref) => {
-    const {allNormal, conditionDetails} = useMemo(() => {
+const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextConditionsProps>(({ data }, ref) => {
+    const [reverseConditions, setReverseConditions] = useState<string[]>([]);
+
+    useEffect(() => {
+        fetcher({
+            url: '/params/condition/reverse/list',
+            method: 'get'
+        })
+            .then(response => {
+                if (Array.isArray(response.data?.data)) {
+                    setReverseConditions(response.data.data);
+                }
+            })
+            .catch(error => console.error('获取反转条件列表失败:', error));
+    }, []);
+
+    const { allNormal, conditionDetails } = useMemo(() => {
         const conditions = data.status?.conditions || [];
 
         if (conditions.length === 0) {
-            return {allNormal: true, conditionDetails: ''};
+            return { allNormal: true, conditionDetails: '' };
         }
 
-        const allNormal = conditions.every(condition =>
-            condition.status === 'True' ||
-            (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable")))
-        );
+        const allNormal = conditions.every(condition => {
+            const shouldReverse = reverseConditions.some(rc => condition.type.includes(rc));
+            return shouldReverse ?
+                condition.status === 'False' :
+                condition.status === 'True';
+        });
 
         // 生成 conditions 的 HTML 片段
-        const conditionDetails = conditions.map(condition => (
-            `<p>${condition.type}: <strong>${condition.status === 'True' ||
-            (condition.status === 'False' && (condition.type.includes('Pressure') || condition.type.includes("Unavailable"))) ?
-                '<span class="text-green-500 text-xs">正常</span>' :
-                '<span class="text-red-500 text-xs">异常</span>'}</strong></p>`
-        )).join('');
+        const conditionDetails = conditions.map(condition => {
+            const shouldReverse = reverseConditions.some(rc => condition.type.includes(rc));
+            const isNormal = shouldReverse ?
+                condition.status === 'False' :
+                condition.status === 'True';
 
-        return {allNormal, conditionDetails};
-    }, [data.status?.conditions]);
+            return `<p>${condition.type}: <strong>${isNormal ?
+                '<span class="text-green-500 text-xs">正常</span>' :
+                '<span class="text-red-500 text-xs">异常</span>'}</strong></p>`;
+        }).join('');
+
+        return { allNormal, conditionDetails };
+    }, [data.status?.conditions, reverseConditions]);
     // 确定状态文本和按钮颜色
     const statusText = allNormal ? '就绪' : '未就绪';
     const level = allNormal ? 'primary' : 'danger';
@@ -53,7 +75,7 @@ const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextCond
                     closeOnOutside: true,
                     title: "条件状态 (ESC 关闭)",
                     size: "md",
-                    body: <div dangerouslySetInnerHTML={{__html: conditionDetails}}/>
+                    body: <div dangerouslySetInnerHTML={{ __html: conditionDetails }} />
                 }
             })}
         </span>

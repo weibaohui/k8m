@@ -202,7 +202,10 @@ func main() {
 		// 获取当前软件版本信息
 		params.GET("/version", param.Version)
 		// 获取helm 仓库列表
-		params.GET("/helm/repo/option_list", helm.RepoOptionList)
+		params.GET("/helm/repo/option_list", param.RepoOptionList)
+
+		// 获取翻转显示的指标列表
+		params.GET("/condition/reverse/list", param.Conditions)
 
 	}
 	ai := r.Group("/ai", middleware.AuthMiddleware())
@@ -451,6 +454,13 @@ func main() {
 
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
 	{
+		// condition
+		admin.GET("/condition/list", config.ConditionList)
+		admin.POST("/condition/save", config.ConditionSave)
+		admin.POST("/condition/delete/:ids", config.ConditionDelete)
+		// 指标翻转状态修改
+		admin.POST("/condition/save/id/:id/status/:status", config.ConditionQuickSave)
+
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)
 		admin.POST("/user/save", user.Save)

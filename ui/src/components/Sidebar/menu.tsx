@@ -1,7 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
-import {useEffect, useState} from 'react';
-import {fetcher} from '../Amis/fetcher';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -425,6 +425,12 @@ const items: () => MenuItem[] = () => {
                         icon: <i className="fa-solid fa-server"></i>,
                         key: "mcp_management",
                         onClick: () => onMenuClick('/admin/mcp/mcp')
+                    },
+                    {
+                        label: "指标显示翻转",
+                        icon: <i className="fa-solid fa-arrows-rotate"></i>,
+                        key: "condition_reverse",
+                        onClick: () => onMenuClick('/admin/config/condition')
                     }
                 ],
             },

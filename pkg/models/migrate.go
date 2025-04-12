@@ -24,29 +24,63 @@ func init() {
 }
 func AutoMigrate() error {
 
+	var errs []error
 	// 添加需要迁移的所有模型
-	err := dao.DB().AutoMigrate(&CustomTemplate{})
-	err = dao.DB().AutoMigrate(&KubeConfig{})
-	err = dao.DB().AutoMigrate(&User{})
-	err = dao.DB().AutoMigrate(&ClusterUserRole{})
-	err = dao.DB().AutoMigrate(&OperationLog{})
-	err = dao.DB().AutoMigrate(&ShellLog{})
-	err = dao.DB().AutoMigrate(&HelmRepository{})
-	err = dao.DB().AutoMigrate(&HelmChart{})
-	err = dao.DB().AutoMigrate(&UserGroup{})
-	err = dao.DB().AutoMigrate(&MCPServerConfig{})
-	err = dao.DB().AutoMigrate(&MCPTool{})
-	err = dao.DB().AutoMigrate(&Config{})
-	err = dao.DB().AutoMigrate(&ApiKey{})
 
-	if err != nil {
-		klog.Errorf("数据库迁移报错: %v", err.Error())
+	if err := dao.DB().AutoMigrate(&CustomTemplate{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&KubeConfig{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&User{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&ClusterUserRole{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&OperationLog{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&ShellLog{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&HelmRepository{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&HelmChart{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&UserGroup{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&MCPServerConfig{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&MCPTool{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&Config{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&ApiKey{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&ConditionReverse{}); err != nil {
+		errs = append(errs, err)
 	}
 	// 删除 user 表 name 字段，已弃用
-	err = dao.DB().Migrator().DropColumn(&User{}, "Role")
-	if err != nil {
-		klog.Errorf("数据库迁移 User 表 DropColumn Role 报错: %v", err.Error())
+	if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
+		errs = append(errs, err)
 	}
+
+	// 打印所有非nil的错误
+	for _, err := range errs {
+		if err != nil {
+			klog.Errorf("数据库迁移报错: %v", err.Error())
+		}
+	}
+
 	return nil
 }
 func FixRoleName() error {

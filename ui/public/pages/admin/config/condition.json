@@ -1,0 +1,246 @@
+{
+    "type": "page",
+    "title": "状态指标管理",
+    "body": [
+        {
+            "type": "alert",
+            "level": "success",
+            "body": "<p>在Kubernetes资源的监控状态中，若指标类型（如DiskPressure、Unavailable等）的Status值为False，则代表该指标处于正常健康状态。例如：DiskPressure=False表示磁盘无压力，Unavailable=False表示服务可用。</p><p>应用规则：如果一个资源状态的类型，包含下表中的指标名称，则会翻转显示。</p>"
+        },
+        {
+            "type": "crud",
+            "id": "detailCRUD",
+            "name": "detailCRUD",
+            "autoFillHeight": true,
+            "autoGenerateFilter": {
+                "columnsNum": 4,
+                "showBtnToolbar": false
+            },
+            "headerToolbar": [
+                {
+                    "type": "button",
+                    "icon": "fas fa-plus text-primary",
+                    "actionType": "drawer",
+                    "label": "新建指标",
+                    "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "title": "新建指标  (ESC 关闭)",
+                        "body": {
+                            "type": "form",
+                            "api": "post:/admin/condition/save",
+                            "body": [
+                                {
+                                    "type": "input-text",
+                                    "name": "name",
+                                    "label": "指标名称",
+                                    "required": true,
+                                    "placeholder": "请输入指标名称，包含即为命中。如Pressure、Unavailable等",
+                                    "validateOnChange": true,
+                                    "validations": {
+                                        "minLength": 2,
+                                        "maxLength": 50
+                                    },
+                                    "validationErrors": {
+                                        "minLength": "指标名称至少 2 个字符",
+                                        "maxLength": "指标名称最多 50 个字符"
+                                    }
+                                },
+                                {
+                                    "type": "textarea",
+                                    "name": "description",
+                                    "label": "描述",
+                                    "placeholder": "请输入指标的描述信息",
+                                    "maxLength": 200
+                                }
+                            ],
+                            "submitText": "保存",
+                            "resetText": "重置",
+                            "messages": {
+                                "saveSuccess": "保存成功",
+                                "saveFailed": "保存失败"
+                            },
+                            "onEvent": {
+                                "submitSucc": {
+                                    "actions": [
+                                        {
+                                            "actionType": "reload",
+                                            "componentId": "detailCRUD"
+                                        },
+                                        {
+                                            "actionType": "closeDrawer"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "columns-toggler",
+                    "align": "right",
+                    "draggable": true,
+                    "icon": "fas fa-cog",
+                    "overlay": true,
+                    "footerBtnSize": "sm"
+                },
+                {
+                    "type": "tpl",
+                    "tpl": "共${count}条",
+                    "align": "right",
+                    "visibleOn": "${count}"
+                },
+                {
+                    "type": "columns-toggler",
+                    "align": "left"
+                },
+                "reload",
+                "bulkActions"
+            ],
+            "loadDataOnce": false,
+            "syncLocation": false,
+            "initFetch": true,
+            "perPage": 10,
+            "bulkActions": [
+                {
+                    "label": "批量删除",
+                    "actionType": "ajax",
+                    "confirmText": "确定要批量删除?",
+                    "api": "post:/admin/condition/delete/${ids}"
+                }
+            ],
+            "footerToolbar": [
+                {
+                    "type": "pagination",
+                    "align": "right"
+                },
+                {
+                    "type": "statistics",
+                    "align": "right"
+                },
+                {
+                    "type": "switch-per-page",
+                    "align": "right"
+                }
+            ],
+            "api": "get:/admin/condition/list",
+            "quickSaveItemApi": "/admin/condition/save/id/${id}/status/${enabled}",
+            "columns": [
+                {
+                    "type": "operation",
+                    "label": "操作",
+                    "width": 120,
+                    "buttons": [
+                        {
+                            "type": "button",
+                            "icon": "fas fa-edit text-primary",
+                            "actionType": "drawer",
+                            "tooltip": "编辑指标",
+                            "drawer": {
+                                "closeOnEsc": true,
+                                "closeOnOutside": true,
+                                "title": "编辑指标  (ESC 关闭)",
+                                "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/condition/save",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "id"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "name",
+                                            "label": "指标名称",
+                                            "required": true,
+                                            "placeholder": "请输入指标名称，如Pressure、Unavailable等",
+                                            "validateOnChange": true,
+                                            "validations": {
+                                                "minLength": 2,
+                                                "maxLength": 50
+                                            },
+                                            "validationErrors": {
+                                                "minLength": "指标名称至少 2 个字符",
+                                                "maxLength": "指标名称最多 50 个字符"
+                                            }
+                                        },
+                                        {
+                                            "type": "textarea",
+                                            "name": "description",
+                                            "label": "描述",
+                                            "required": true,
+                                            "placeholder": "请输入指标的描述信息",
+                                            "maxLength": 200
+                                        }
+                                    ],
+                                    "submitText": "保存",
+                                    "resetText": "重置",
+                                    "messages": {
+                                        "saveSuccess": "保存成功",
+                                        "saveFailed": "保存失败"
+                                    },
+                                    "onEvent": {
+                                        "submitSucc": {
+                                            "actions": [
+                                                {
+                                                    "actionType": "reload",
+                                                    "componentId": "detailCRUD"
+                                                },
+                                                {
+                                                    "actionType": "closeDrawer"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "name",
+                    "label": "指标名称",
+                    "type": "text",
+                    "width": "180px",
+                    "sortable": true,
+                    "searchable": {
+                        "type": "input-text",
+                        "name": "name",
+                        "clearable": true,
+                        "label": "指标名称",
+                        "placeholder": "输入指标名称"
+                    }
+                },
+                {
+                    "name": "enabled",
+                    "label": "启用",
+                    "quickEdit": {
+                        "mode": "inline",
+                        "type": "switch",
+                        "onText": "开启",
+                        "offText": "关闭",
+                        "saveImmediately": true,
+                        "resetOnFailed": true
+                    }
+                },
+                {
+                    "name": "description",
+                    "label": "描述",
+                    "type": "text",
+                    "searchable": {
+                        "type": "input-text",
+                        "name": "description",
+                        "clearable": true,
+                        "label": "描述",
+                        "placeholder": "输入描述"
+                    }
+                },
+                {
+                    "name": "created_at",
+                    "label": "创建时间",
+                    "type": "datetime"
+                }
+            ]
+        }
+    ]
+}
