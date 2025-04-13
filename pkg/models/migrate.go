@@ -22,6 +22,7 @@ func init() {
 	_ = FixRoleName()
 	_ = InitConfigTable()
 	_ = InitConditionTable()
+	_ = FixClusterUserRoleName()
 }
 func AutoMigrate() error {
 
@@ -86,10 +87,20 @@ func AutoMigrate() error {
 }
 func FixRoleName() error {
 	// 将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
-	result := dao.DB().Model(&UserGroup{}).Where("role != ?", "platform_admin").Update("role", "guest")
-	if result.Error != nil {
-		klog.Errorf("更新用户组表中角色失败: %v", result.Error)
-		return result.Error
+	err := dao.DB().Model(&UserGroup{}).Where("role != ?", "platform_admin").Update("role", "guest").Error
+	if err != nil {
+		klog.Errorf("更新用户组表中角色失败: %v", err)
+		return err
+	}
+
+	return nil
+}
+func FixClusterUserRoleName() error {
+	// 将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
+	err := dao.DB().Model(&ClusterUserRole{}).Where("role_type == '' or role_type is null").Update("role_type", "user").Error
+	if err != nil {
+		klog.Errorf("更新用户组表中角色失败: %v", err)
+		return err
 	}
 
 	return nil
