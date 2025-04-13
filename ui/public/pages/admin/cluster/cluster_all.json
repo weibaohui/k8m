@@ -96,7 +96,7 @@
                   {
                     "type": "alert",
                     "level": "success",
-                    "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p><p><strong>限制命名空间：</strong>置空表示不限制，可访问该集群下所有的命名空间。如果填写了，那么用户就只能访问指定的命名空间了。</p></div>"
+                    "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p><p><strong>限制命名空间：</strong>置空表示不限制，可访问该集群下所有的命名空间。如果填写了，那么用户就只能访问指定的命名空间了。</p><p><strong>授权类型：</strong>可以为用户、用户组分别授权，当为用户组时，对组内所有用户生效操作。</p></div>"
                   },
                   {
                     "type": "tabs",
@@ -187,10 +187,10 @@
                               "reload",
                               "bulkActions"
                             ],
-                            "loadDataOnce": false,
+                            "loadDataOnce": true,
                             "syncLocation": false,
                             "initFetch": true,
-                            "perPage": 10,
+                            "perPage": 5,
                             "bulkActions": [
                               {
                                 "label": "批量删除",
@@ -235,7 +235,7 @@
                                 }
                               },
                               {
-                                "name": "role_type",
+                                "name": "authorization_type",
                                 "label": "授权类型",
                                 "type": "mapping",
                                 "map": {
@@ -334,7 +334,7 @@
                               "reload",
                               "bulkActions"
                             ],
-                            "loadDataOnce": false,
+                            "loadDataOnce": true,
                             "syncLocation": false,
                             "initFetch": true,
                             "perPage": 10,
@@ -382,7 +382,7 @@
                                 }
                               },
                               {
-                                "name": "role_type",
+                                "name": "authorization_type",
                                 "label": "授权类型",
                                 "type": "mapping",
                                 "map": {
@@ -481,7 +481,7 @@
                               "reload",
                               "bulkActions"
                             ],
-                            "loadDataOnce": false,
+                            "loadDataOnce": true,
                             "syncLocation": false,
                             "initFetch": true,
                             "perPage": 10,
@@ -529,7 +529,7 @@
                                 }
                               },
                               {
-                                "name": "role_type",
+                                "name": "authorization_type",
                                 "label": "授权类型",
                                 "type": "mapping",
                                 "map": {
@@ -598,7 +598,7 @@
                           "reload",
                           "bulkActions"
                         ],
-                        "loadDataOnce": false,
+                        "loadDataOnce": true,
                         "syncLocation": false,
                         "initFetch": true,
                         "perPage": 10,
@@ -637,7 +637,7 @@
                             "placeholder": "-"
                           },
                           {
-                            "name": "role_type",
+                            "name": "authorization_type",
                             "label": "授权类型",
                             "type": "mapping",
                             "map": {
