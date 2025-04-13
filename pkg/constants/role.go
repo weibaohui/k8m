@@ -14,9 +14,10 @@ const (
 	RoleClusterPodExec  = "cluster_pod_exec" // 集群Pod内执行命令权限
 )
 
-type RoleType string
+// ClusterAuthorizationType 集群授权类型
+type ClusterAuthorizationType string
 
 const (
-	RoleTypeUser  RoleType = "user"
-	RoleTypeGroup RoleType = "user_group"
+	RoleTypeUser  ClusterAuthorizationType = "user"
+	RoleTypeGroup ClusterAuthorizationType = "user_group"
 )
