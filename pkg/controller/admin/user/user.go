@@ -9,7 +9,6 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 )
@@ -44,35 +43,6 @@ func Save(c *gin.Context) {
 		return
 	}
 
-	_, role := amis.GetLoginUser(c)
-
-	if m.ID == 0 {
-		// 新增
-		switch role {
-		case constants.RoleClusterAdmin, constants.RoleClusterReadonly:
-			amis.WriteJsonError(c, fmt.Errorf("非管理员不能新增用户"))
-			return
-		}
-	} else {
-		switch role {
-		case constants.RoleClusterAdmin, constants.RoleClusterReadonly:
-			var originalUser models.User
-			err = dao.DB().Model(&models.User{}).
-				Where("id=?", m.ID).
-				Find(&originalUser).Error
-			if err != nil {
-				amis.WriteJsonError(c, fmt.Errorf("无此用户[%d]", m.ID))
-				return
-			}
-
-			// 如需限制不能修改的字段，请在下面赋值。
-			// 用户名、角色不能修改
-			m.Username = originalUser.Username
-			m.GroupNames = originalUser.GroupNames
-		}
-
-	}
-
 	queryFuncs := genQueryFuncs(c, params)
 
 	// 保存的时候需要单独处理
@@ -98,15 +68,6 @@ func Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.User{}
-
-	_, role := amis.GetLoginUser(c)
-
-	switch role {
-	case constants.RoleClusterReadonly, constants.RoleClusterAdmin:
-		// 非平台管理员，不能删除
-		amis.WriteJsonError(c, fmt.Errorf("非管理员不能删除用户"))
-		return
-	}
 
 	queryFuncs := genQueryFuncs(c, params)
 
