@@ -126,13 +126,39 @@
                                   "title": "添加只读用户",
                                   "body": {
                                     "type": "form",
-                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/save",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/user/save",
                                     "body": [
                                       {
                                         "type": "transfer",
                                         "name": "users",
                                         "label": "选择用户",
                                         "source": "get:/admin/user/option_list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "button",
+                                "label": "添加用户组",
+                                "level": "primary",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "添加用户组为只读权限",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_readonly/user_group/save",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "users",
+                                        "label": "选择用户组",
+                                        "source": "get:/admin/user_group/option_list",
                                         "searchable": true,
                                         "selectMode": "list"
                                       }
@@ -206,6 +232,16 @@
                                     "clearable": false
                                   },
                                   "saveImmediately": true
+                                }
+                              },
+                              {
+                                "name": "role_type",
+                                "label": "授权类型",
+                                "type": "mapping",
+                                "map": {
+                                  "user": "<span class='label label-success'>用户</span>",
+                                  "user_group": "<span class='label label-warning'>用户组</span>",
+                                  "*": "<span class='label label-success'>用户</span>"
                                 }
                               }
                             ]
@@ -237,13 +273,39 @@
                                   "title": "添加管理员",
                                   "body": {
                                     "type": "form",
-                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/save",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/user/save",
                                     "body": [
                                       {
                                         "type": "transfer",
                                         "name": "users",
                                         "label": "选择用户",
                                         "source": "get:/admin/user/option_list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "button",
+                                "label": "添加用户组",
+                                "level": "primary",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "添加用户组为只读权限",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_pod_exec/user_group/save",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "users",
+                                        "label": "选择用户组",
+                                        "source": "get:/admin/user_group/option_list",
                                         "searchable": true,
                                         "selectMode": "list"
                                       }
@@ -317,6 +379,16 @@
                                     "clearable": false
                                   },
                                   "saveImmediately": true
+                                }
+                              },
+                              {
+                                "name": "role_type",
+                                "label": "授权类型",
+                                "type": "mapping",
+                                "map": {
+                                  "user": "<span class='label label-success'>用户</span>",
+                                  "user_group": "<span class='label label-warning'>用户组</span>",
+                                  "*": "<span class='label label-success'>用户</span>"
                                 }
                               }
                             ]
@@ -348,13 +420,39 @@
                                   "title": "添加管理员",
                                   "body": {
                                     "type": "form",
-                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/save",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user/save",
                                     "body": [
                                       {
                                         "type": "transfer",
                                         "name": "users",
                                         "label": "选择用户",
                                         "source": "get:/admin/user/option_list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "button",
+                                "label": "添加用户组",
+                                "level": "primary",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "添加用户组为只读权限",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/cluster_permissions/cluster/${cluster_id_base64}/role/cluster_admin/user_group/save",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "users",
+                                        "label": "选择用户组",
+                                        "source": "get:/admin/user_group/option_list",
                                         "searchable": true,
                                         "selectMode": "list"
                                       }
@@ -428,6 +526,16 @@
                                     "clearable": false
                                   },
                                   "saveImmediately": true
+                                }
+                              },
+                              {
+                                "name": "role_type",
+                                "label": "授权类型",
+                                "type": "mapping",
+                                "map": {
+                                  "user": "<span class='label label-success'>用户</span>",
+                                  "user_group": "<span class='label label-warning'>用户组</span>",
+                                  "*": "<span class='label label-success'>用户</span>"
                                 }
                               }
                             ]
@@ -527,6 +635,16 @@
                             "type": "tpl",
                             "tpl": "${namespaces | split:',')}",
                             "placeholder": "-"
+                          },
+                          {
+                            "name": "role_type",
+                            "label": "授权类型",
+                            "type": "mapping",
+                            "map": {
+                              "user": "<span class='label label-success'>用户</span>",
+                              "user_group": "<span class='label label-warning'>用户组</span>",
+                              "*": "<span class='label label-success'>用户</span>"
+                            }
                           }
                         ]
                       }
