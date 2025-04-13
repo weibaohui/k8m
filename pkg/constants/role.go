@@ -18,6 +18,6 @@ const (
 type ClusterAuthorizationType string
 
 const (
-	RoleTypeUser  ClusterAuthorizationType = "user"
-	RoleTypeGroup ClusterAuthorizationType = "user_group"
+	ClusterAuthorizationTypeUser      ClusterAuthorizationType = "user"
+	ClusterAuthorizationTypeUserGroup ClusterAuthorizationType = "user_group"
 )
