@@ -48,7 +48,9 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 
 			fullToolName := toolCall.Function.Name
 			klog.V(6).Infof("Tool Name: %s\n", fullToolName)
-			klog.V(6).Infof("Tool Arguments: %s\n", toolCall.Function.Arguments)
+			arguments := toolCall.Function.Arguments
+			arguments = clean(arguments)
+			klog.V(6).Infof("Tool Arguments: %s\n", arguments)
 
 			result := ToolCallResult{
 				ToolName: fullToolName,
@@ -56,8 +58,9 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 
 			// 解析参数
 			var args map[string]interface{}
-			if toolCall.Function.Arguments != "" && toolCall.Function.Arguments != "{}" && toolCall.Function.Arguments != "null" {
-				if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args); err != nil {
+			if arguments != "" && arguments != "{}" && arguments != "null" {
+
+				if err := json.Unmarshal([]byte(arguments), &args); err != nil {
 					result.Error = fmt.Sprintf("failed to parse tool arguments: %v", err)
 					klog.V(6).Infof("参数解析Error: %s\n", result.Error)
 					results = append(results, result)
@@ -116,4 +119,17 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 		}
 	}
 	return results
+}
+
+func clean(arguments string) string {
+	arguments = strings.TrimSpace(arguments)
+	arguments = strings.ReplaceAll(arguments, "\n", "")
+	arguments = strings.ReplaceAll(arguments, "\t", "")
+	if arguments == "{}}" {
+		arguments = ""
+	}
+	if arguments == "{}" {
+		arguments = ""
+	}
+	return arguments
 }
