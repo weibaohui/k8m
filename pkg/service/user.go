@@ -104,6 +104,9 @@ func (u *userService) GetClusterNames(username string) ([]string, error) {
 
 // GetClusters 获取用户有权限的集群列表
 // username: 用户名
+// 最终结果包含两种情况：
+// 1. 用户授权类型为用户
+// 2. 用户授权类型为用户组,当前用户所在的用户组，如果有授权，那么也提取出来
 func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, error) {
 	params := &dao.Params{}
 	params.PerPage = 10000000
@@ -114,6 +117,20 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 	items, _, err := clusterRole.List(params, queryFunc)
 	if err != nil {
 		return nil, err
+	}
+	// 以上为授权类型为用户的情况
+	// 以下为授权类型为用户组的情况
+	// 先获取用户所在用户组名称，可能多个
+	if groupNames, err := u.GetGroupNames(username); err == nil {
+		goupNameList := strings.Split(groupNames, ",")
+		if len(goupNameList) > 0 {
+			// 查找用户组对应的授权
+			if items2, _, err := clusterRole.List(params, func(db *gorm.DB) *gorm.DB {
+				return db.Where("authorization_type=? and  username in ? ", constants.ClusterAuthorizationTypeUserGroup, goupNameList)
+			}); err == nil {
+				items = append(items, items2...)
+			}
+		}
 	}
 
 	return items, nil
