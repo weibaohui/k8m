@@ -30,7 +30,7 @@ func ListClusterPermissions(c *gin.Context) {
 	m.Role = role
 	queryFuncs := genQueryFuncs(c, params)
 	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
-		return db.Where(m)
+		return db.Where(m).Order("authorization_type desc ,username asc")
 	})
 	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
@@ -42,10 +42,11 @@ func ListClusterPermissions(c *gin.Context) {
 func ListClusterPermissionsByUserName(c *gin.Context) {
 	username := c.Param("username")
 	params := dao.BuildParams(c)
+	params.PerPage = 10000
 	m := &models.ClusterUserRole{}
 	m.Username = username
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where(m)
+		return db.Where(m).Order("authorization_type desc ,username asc")
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -64,7 +65,7 @@ func ListClusterPermissionsByClusterID(c *gin.Context) {
 	m := &models.ClusterUserRole{}
 	m.Cluster = cluster
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where(m).Order("role_type desc ,username asc")
+		return db.Where(m).Order("authorization_type desc ,username asc")
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -75,7 +76,7 @@ func ListClusterPermissionsByClusterID(c *gin.Context) {
 func SaveClusterPermission(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
-	roleType := c.Param("role_type")
+	authorizationType := c.Param("authorization_type")
 	cluster, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -109,16 +110,16 @@ func SaveClusterPermission(c *gin.Context) {
 	}
 	params := dao.BuildParams(c)
 
-	//默认授权类型为用户
-	if roleType == "" {
-		roleType = "user"
+	// 默认授权类型为用户
+	if authorizationType == "" {
+		authorizationType = "user"
 	}
 	for _, username := range strings.Split(userList.Users, ",") {
 		var m models.ClusterUserRole
 		m.Cluster = cluster
 		m.Role = role
 		m.Username = username
-		m.RoleType = constants.RoleType(roleType)
+		m.AuthorizationType = constants.ClusterAuthorizationType(authorizationType)
 		one, err := m.GetOne(params, func(db *gorm.DB) *gorm.DB {
 			return db.Where(m)
 		})
