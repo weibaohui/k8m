@@ -13,3 +13,11 @@ const (
 	RoleClusterReadonly = "cluster_readonly" // 集群只读权限
 	RoleClusterPodExec  = "cluster_pod_exec" // 集群Pod内执行命令权限
 )
+
+// ClusterAuthorizationType 集群授权类型
+type ClusterAuthorizationType string
+
+const (
+	ClusterAuthorizationTypeUser      ClusterAuthorizationType = "user"
+	ClusterAuthorizationTypeUserGroup ClusterAuthorizationType = "user_group"
+)

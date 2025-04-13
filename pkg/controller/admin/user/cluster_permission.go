@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
@@ -29,7 +30,7 @@ func ListClusterPermissions(c *gin.Context) {
 	m.Role = role
 	queryFuncs := genQueryFuncs(c, params)
 	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
-		return db.Where(m)
+		return db.Where(m).Order("authorization_type desc ,username asc")
 	})
 	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
@@ -38,19 +39,16 @@ func ListClusterPermissions(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+
+// ListClusterPermissionsByUserName 列出用户已获得授权的集群
 func ListClusterPermissionsByUserName(c *gin.Context) {
 	username := c.Param("username")
-	params := dao.BuildParams(c)
-	m := &models.ClusterUserRole{}
-	m.Username = username
-	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where(m)
-	})
+	clusters, err := service.UserService().GetClusters(username)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonListWithTotal(c, total, items)
+	amis.WriteJsonList(c, clusters)
 }
 func ListClusterPermissionsByClusterID(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
@@ -63,7 +61,7 @@ func ListClusterPermissionsByClusterID(c *gin.Context) {
 	m := &models.ClusterUserRole{}
 	m.Cluster = cluster
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where(m)
+		return db.Where(m).Order("authorization_type desc ,username asc")
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -74,6 +72,7 @@ func ListClusterPermissionsByClusterID(c *gin.Context) {
 func SaveClusterPermission(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
+	authorizationType := c.Param("authorization_type")
 	cluster, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -107,11 +106,16 @@ func SaveClusterPermission(c *gin.Context) {
 	}
 	params := dao.BuildParams(c)
 
+	// 默认授权类型为用户
+	if authorizationType == "" {
+		authorizationType = "user"
+	}
 	for _, username := range strings.Split(userList.Users, ",") {
 		var m models.ClusterUserRole
 		m.Cluster = cluster
 		m.Role = role
 		m.Username = username
+		m.AuthorizationType = constants.ClusterAuthorizationType(authorizationType)
 		one, err := m.GetOne(params, func(db *gorm.DB) *gorm.DB {
 			return db.Where(m)
 		})
