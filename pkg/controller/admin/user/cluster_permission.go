@@ -39,20 +39,16 @@ func ListClusterPermissions(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+
+// ListClusterPermissionsByUserName 列出用户已获得授权的集群
 func ListClusterPermissionsByUserName(c *gin.Context) {
 	username := c.Param("username")
-	params := dao.BuildParams(c)
-	params.PerPage = 10000
-	m := &models.ClusterUserRole{}
-	m.Username = username
-	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where(m).Order("authorization_type desc ,username asc")
-	})
+	clusters, err := service.UserService().GetClusters(username)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonListWithTotal(c, total, items)
+	amis.WriteJsonList(c, clusters)
 }
 func ListClusterPermissionsByClusterID(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
