@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -45,6 +46,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 	// 处理工具调用
 	if toolCalls != nil {
 		for _, toolCall := range toolCalls {
+			startTime := time.Now()
 
 			fullToolName := toolCall.Function.Name
 			klog.V(6).Infof("Tool Name: %s\n", fullToolName)
@@ -102,10 +104,13 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			}
 			// 执行工具
 			callResult, err := cli.CallTool(ctx, callRequest)
+			// 记录执行日志
+			executeTime := time.Since(startTime).Milliseconds()
 			if err != nil {
 				klog.V(6).Infof("工具执行失败: %v\n", err)
 				result.Error = fmt.Sprintf("工具执行失败: %v", err)
 				results = append(results, result)
+				m.LogToolExecution(ctx, toolName, serverName, args, result, executeTime)
 				continue
 			}
 
@@ -116,6 +121,8 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 				}
 			}
 			results = append(results, result)
+
+			m.LogToolExecution(ctx, toolName, serverName, args, result, executeTime)
 		}
 	}
 	return results

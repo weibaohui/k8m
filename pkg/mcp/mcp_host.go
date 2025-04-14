@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/mark3labs/mcp-go/client"
@@ -11,6 +12,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
@@ -32,6 +34,11 @@ type MCPHost struct {
 	Resources map[string][]mcp.Resource
 	// 记录每个服务器的提示能力
 	Prompts map[string][]mcp.Prompt
+
+	buffer    []*models.MCPToolLog
+	bufferMux sync.Mutex
+	ticker    *time.Ticker
+	stopChan  chan bool
 }
 type MCPServer struct {
 	ServerConfig
@@ -44,12 +51,17 @@ type MCPServer struct {
 
 // NewMCPHost 创建新的MCP管理器
 func NewMCPHost() *MCPHost {
-	return &MCPHost{
+	host := &MCPHost{
 		configs:   make(map[string]ServerConfig),
 		Tools:     make(map[string][]mcp.Tool),
 		Resources: make(map[string][]mcp.Resource),
 		Prompts:   make(map[string][]mcp.Prompt),
+
+		buffer:   make([]*models.MCPToolLog, 0, 100),
+		ticker:   time.NewTicker(2 * time.Second),
+		stopChan: make(chan bool),
 	}
+	return host
 }
 
 func (m *MCPHost) ListServers() []MCPServer {
@@ -142,15 +154,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 		return nil, fmt.Errorf("server config not found: %s", serverName)
 	}
 
-	// 重新连接
-	username := ""
-	if usernameVal, ok := ctx.Value(constants.JwtUserName).(string); ok {
-		username = usernameVal
-	}
-	role := ""
-	if roleVal, ok := ctx.Value(constants.JwtUserRole).(string); ok {
-		role = roleVal
-	}
+	username, role := m.getUserRoleFromMCPCtx(ctx)
 
 	// 执行时携带用户名、角色信息
 	newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
@@ -185,9 +189,22 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSE
 
 }
 
+func (m *MCPHost) getUserRoleFromMCPCtx(ctx context.Context) (string, string) {
+	// 重新连接
+	username := ""
+	if usernameVal, ok := ctx.Value(constants.JwtUserName).(string); ok {
+		username = usernameVal
+	}
+	role := ""
+	if roleVal, ok := ctx.Value(constants.JwtUserRole).(string); ok {
+		role = roleVal
+	}
+	return username, role
+}
+
 // Close 关闭所有连接
 func (m *MCPHost) Close() {
-
+	m.stopChan <- true
 }
 
 func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {

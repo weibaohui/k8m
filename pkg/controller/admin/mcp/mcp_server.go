@@ -118,3 +118,10 @@ func QuickSave(c *gin.Context) {
 func removeTools(entity models.MCPServerConfig) {
 	dao.DB().Where("server_name = ?", entity.Name).Delete(&models.MCPTool{})
 }
+
+func MCPLogList(c *gin.Context) {
+	params := dao.BuildParams(c)
+	var tool models.MCPToolLog
+	list, count, err := tool.List(params)
+	amis.WriteJsonListTotalWithError(c, count, list, err)
+}

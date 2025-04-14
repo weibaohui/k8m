@@ -487,6 +487,7 @@ func main() {
 		admin.POST("/mcp/save", mcp.AddOrUpdate)
 		admin.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
 		admin.POST("/mcp/tool/save/id/:id/status/:status", mcp.ToolQuickSave)
+		admin.GET("/mcp/log/list", mcp.MCPLogList)
 
 		// 集群权限设置
 		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
