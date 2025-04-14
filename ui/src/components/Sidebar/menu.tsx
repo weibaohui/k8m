@@ -427,6 +427,12 @@ const items: () => MenuItem[] = () => {
                         onClick: () => onMenuClick('/admin/mcp/mcp')
                     },
                     {
+                        label: "MCP执行记录",
+                        icon: <i className="fa-solid fa-history"></i>,
+                        key: "mcp_tool_log",
+                        onClick: () => onMenuClick('/admin/mcp/mcp_log')
+                    },
+                    {
                         label: "指标显示翻转",
                         icon: <i className="fa-solid fa-arrows-rotate"></i>,
                         key: "condition_reverse",

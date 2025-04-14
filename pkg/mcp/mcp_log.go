@@ -23,8 +23,17 @@ func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName str
 	}
 
 	username, _ := m.getUserRoleFromMCPCtx(ctx)
-
 	log.CreatedBy = username
+
+	prompt := ""
+	if promptVal, ok := ctx.Value("prompt").(string); ok {
+		prompt = promptVal
+	}
+	log.Prompt = prompt
+	if log.Result == "" && log.Error != "" {
+		log.Result = log.Error
+	}
+
 	dao.DB().Create(log)
 }
 

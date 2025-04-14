@@ -200,6 +200,7 @@ func GPTShell(c *gin.Context) {
 							klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
 							ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
 							ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
+							ctxInst = context.WithValue(ctxInst, "prompt", string(data))
 							results := service.McpService().Host().ExecTools(ctxInst, mergedCalls)
 							for _, r := range results {
 								outBuffer.Write([]byte(utils.ToJSON(r)))
