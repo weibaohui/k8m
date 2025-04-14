@@ -89,6 +89,9 @@ services:
       - "3619:3619"
     environment:
       TZ: Asia/Shanghai
+      ENABLE_TEMP_ADMIN: true
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: 123456
     volumes:
       - ./data:/app/data
 ```
