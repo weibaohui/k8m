@@ -94,20 +94,11 @@ services:
       ENABLE_TEMP_ADMIN: true
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: 123456
-      #启用AI
-      ENABLE_AI: true
-      #关闭内置大模型
-      USE_BUILTIN_MODEL: false
-      # 设置私有化大模型
-      OPENAI_API_KEY: sk-xxxxxxxx
-      OPENAI_API_URL: https://api.siliconflow.cn/v1
-      OPENAI_MODEL: Qwen/Qwen2.5-7B-Instruct
     volumes:
       - ./data:/app/data
 ```
-
 启动之后，访问`3618`端口，默认用户：`admin`，默认密码`123456`。
-
+如需自定义大模型参数、配置私有化大模型，请参考[文档](docs/use-self-hosted-ai.md)。
 如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
 ，FORK仓库之后，拉起体验。
 
