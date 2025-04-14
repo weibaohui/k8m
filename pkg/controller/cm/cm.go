@@ -53,14 +53,17 @@ func Import(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("获取configmap错误: %v", err))
 		return
 	}
-
 	data := cm.Data
 	bytes, err := os.ReadFile(tempFilePath)
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("读取文件错误: %v", err))
 		return
 	}
+	if data == nil {
+		data = make(map[string]string)
+	}
 	data[info.FileName] = string(bytes)
+	cm.Data = data
 	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(cm).Update(cm).Error
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("更新configmap错误: %v", err))
