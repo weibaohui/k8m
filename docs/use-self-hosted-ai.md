@@ -6,7 +6,7 @@ K8M 支持使用自托管大模型，要求接口兼容OpenAI接口。
 
 # 方法一、界面可视化配置
 进入K8M管理后台，点击左侧菜单中的 `平台设置-参数设置` ，进入AI配置页面
-![AI配置页面](./images/use-self-hosted-ai/ai-config.png)
+![AI配置页面](/images/use-self-hosted-ai/ai-config.png)
 
 
 # 方法二、Yaml配置方式
