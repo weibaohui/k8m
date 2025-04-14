@@ -20,7 +20,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 ### 文档
 
 详细的配置和使用说明请参考[文档](docs/README.md)。
-更新日志请参考[更新日志](docs/changelog.md)。
+更新日志请参考[更新日志](changelog.md)。
 
 
 ### 主要特点
