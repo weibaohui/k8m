@@ -1,6 +1,7 @@
-import {message, Modal} from 'antd';
-import {fetcher} from '@/components/Amis/fetcher.ts';
-import {FileNode} from './FileTree';
+import { message, Modal } from 'antd';
+import { fetcher } from '@/components/Amis/fetcher.ts';
+import { FileNode } from './FileTree';
+import { ProcessK8sUrlWithCluster } from '@/utils/utils';
 
 interface FileOperationsProps {
     selectedContainer: string;
@@ -118,7 +119,8 @@ export class FileOperations {
                 type: type || ""
             }).toString();
 
-            const url = `/k8s/file/download?${queryParams}`;
+            let url = `/k8s/file/download?${queryParams}`;
+            url = ProcessK8sUrlWithCluster(url);
             const a = document.createElement('a');
             a.href = url;
             a.click();
@@ -150,7 +152,8 @@ export class FileOperations {
             formData.append('fileName', file.name);
 
             try {
-                const response = await fetch('/k8s/file/upload', {
+                const url = ProcessK8sUrlWithCluster('/k8s/file/upload');
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
