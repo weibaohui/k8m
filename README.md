@@ -10,7 +10,7 @@
 **k8m** 是一款AI驱动的 Mini Kubernetes AI Dashboard 轻量级控制台工具，专为简化集群管理设计。它基于 AMIS 构建，并通过  [
 `kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了
 Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
-模型交互能力，同时支持接入您自己的私有化大模型。
+模型交互能力，同时支持接入您自己的私有化大模型（包括ollama）。
 
 ### 演示DEMO
 
