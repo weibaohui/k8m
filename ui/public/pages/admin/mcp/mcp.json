@@ -193,10 +193,6 @@
                       "autoFillHeight": true,
                       "api": "get:/admin/mcp/server/${name}/tools/list",
                       "quickSaveItemApi": "/admin/mcp/tool/save/id/${id}/status/${enabled}",
-                      "autoGenerateFilter": {
-                        "columnsNum": 4,
-                        "showBtnToolbar": false
-                      },
                       "headerToolbar": [
                         {
                           "type": "columns-toggler",
@@ -226,6 +222,14 @@
                         {
                           "name": "name",
                           "label": "名称",
+                          "sortable": true,
+                          "searchable": {
+                            "type": "input-text",
+                            "name": "name",
+                            "label": "工具名称",
+                            "placeholder": "输入工具名称",
+                            "width": "200px"
+                          },
                           "type": "tpl",
                           "tpl": "${name}<br><span class='text-muted'>${description}</span>"
                         },
