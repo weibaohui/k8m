@@ -48,7 +48,7 @@ func (u *userService) GetRolesByGroupNames(groupNames string) ([]string, error) 
 // cluster: 集群名称
 // username: 用户名
 // jwtUserRole: JWT用户角色,从context传递
-// 返回值：角色列表
+// 返回值：角色列表 [平台角色，集群角色合并了，后续考虑拆开]
 func (u *userService) GetClusterRole(cluster string, username string, jwtUserRoles string) ([]string, error) {
 	// jwtUserRoles可能为一个字符串逗号分隔的角色列表
 	if jwtUserRoles != "" {
