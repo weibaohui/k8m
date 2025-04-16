@@ -175,3 +175,17 @@ func (u *userService) GetGroupNames(username string) (string, error) {
 
 	return item.GroupNames, nil
 }
+
+func (u *userService) GetUserByMCPKey(mcpKey string) (string, error) {
+	params := &dao.Params{}
+	user := &models.McpKey{}
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Select("username").Where(" key = ?", mcpKey)
+	}
+	item, err := user.GetOne(params, queryFunc)
+	if err != nil {
+		return "", err
+	}
+
+	return item.Username, nil
+}

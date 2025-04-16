@@ -465,6 +465,12 @@ const items: () => MenuItem[] = () => {
                     key: "user_profile_api_keys",
                     onClick: () => onMenuClick('/user/profile/api_keys')
                 },
+                {
+                    label: "开放MCP",
+                    icon: <i className="fa-solid fa-share-nodes"></i>,
+                    key: "user_profile_mcp_keys",
+                    onClick: () => onMenuClick('/user/profile/mcp_keys')
+                },
 
             ],
         },
