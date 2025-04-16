@@ -1,98 +1,86 @@
 {
-    "type": "page",
-    "title": "API密钥",
-    "remark": {
-        "body": "用户可以创建API密钥用于程序化访问平台，请妥善保管密钥信息。",
-        "icon": "question-mark",
-        "placement": "right",
-        "trigger": "click",
-        "rootClose": true
+  "type": "page",
+  "title": "开放MCP服务",
+  "remark": {
+    "body": "将k8m内置的MCP开放给其他大模型或软件使用，请妥善保管访问链接信息。该链接将使用您的访问权限",
+    "icon": "question-mark",
+    "placement": "right",
+    "trigger": "click",
+    "rootClose": true
+  },
+  "body": [
+    {
+      "type": "alert",
+      "level": "info",
+      "body": "<div class='alert alert-info'><p><strong>使用说明：</strong></p><p>1. 该访问链接适用于CherryStudio、Cline、Cursor等软件。</p><p>2. 该访问链接将MCP权限绑定到您的权限上。</p></div>"
     },
-    "body": [
+    {
+      "type": "crud",
+      "id": "apiKeysCRUD",
+      "name": "apiKeysCRUD",
+      "autoFillHeight": true,
+      "api": "get:/mgm/user/profile/mcpkeys/list",
+      "headerToolbar": [
         {
-            "type": "alert",
-            "level": "info",
-            "body": "<div class='alert alert-info'><p><strong>API密钥使用说明：</strong></p><p>1. API密钥用于程序化访问平台，可用于自动化脚本或第三方工具集成。</p><p>2. 密钥具有与当前用户相同的权限。</p></div>"
+          "type": "button",
+          "label": "创建链接",
+          "level": "primary",
+          "actionType": "dialog",
+          "dialog": {
+            "title": "创建访问链接",
+            "body": {
+              "type": "form",
+              "api": "post:/mgm/user/profile/mcpkeys/create",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "描述信息",
+                  "required": true,
+                  "placeholder": "请输入访问链接用途描述"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "buttons": [
+            {
+              "type": "button",
+              "label": "删除",
+              "level": "link",
+              "className": "text-danger",
+              "confirmText": "确认要删除该密钥吗？",
+              "actionType": "ajax",
+              "api": "delete:/mgm/user/profile/mcpkeys/delete/${id}"
+            }
+          ]
         },
         {
-            "type": "crud",
-            "id": "apiKeysCRUD",
-            "name": "apiKeysCRUD",
-            "autoFillHeight": true,
-            "api": "get:/mgm/user/profile/apikeys/list",
-            "headerToolbar": [
-                {
-                    "type": "button",
-                    "label": "创建密钥",
-                    "level": "primary",
-                    "actionType": "dialog",
-                    "dialog": {
-                        "title": "创建API密钥",
-                        "body": {
-                            "type": "form",
-                            "api": "post:/mgm/user/profile/apikeys/create",
-                            "body": [
-                                {
-                                    "type": "input-text",
-                                    "name": "description",
-                                    "label": "描述信息",
-                                    "required": true,
-                                    "placeholder": "请输入密钥用途描述"
-                                }
-                            ]
-                        }
-                    }
-                }
-            ],
-            "columns": [
-                {
-                    "type": "operation",
-                    "label": "操作",
-                    "buttons": [
-                        {
-                            "type": "button",
-                            "label": "删除",
-                            "level": "link",
-                            "className": "text-danger",
-                            "confirmText": "确认要删除该密钥吗？",
-                            "actionType": "ajax",
-                            "api": "delete:/mgm/user/profile/apikeys/delete/${id}"
-                        }
-                    ]
-                },
-                {
-                    "name": "description",
-                    "label": "描述信息"
-                },
-                {
-                    "name": "key",
-                    "label": "密钥值",
-                    "type": "control",
-                    "body": [
-                        {
-                            "type": "tpl",
-                            "tpl": "${spec.schedule}"
-                        },
-                        {
-                            "type": "button",
-                            "label": "查",
-                            "level": "link",
-                            "actionType": "dialog",
-                            "dialog": {
-                                "closeOnEsc": true,
-                                "closeOnOutside": true,
-                                "title": "密钥",
-                                "body": "${key}"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "created_at",
-                    "label": "创建时间",
-                    "type": "datetime"
-                }
-            ]
+          "name": "description",
+          "label": "描述信息"
+        },
+        {
+          "name": "key",
+          "label": "访问链接",
+          "type": "control",
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "http://localhost:3619/${key}/sse"
+            }
+          ]
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
         }
-    ]
+      ]
+    }
+  ]
 }
