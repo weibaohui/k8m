@@ -115,7 +115,7 @@ func Xterm(c *gin.Context) {
 		return
 	}
 	_, _, clusterUserRoles := amis.GetLoginUserWithClusterRoles(c)
-	if clusterUserRoles != nil {
+	if clusterUserRoles != nil && !(slice.Contain(clusterRoles, constants.RolePlatformAdmin)) {
 		// 说明有集群角色
 		execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 			return item.Cluster == selectedCluster && item.Role == constants.RoleClusterPodExec
