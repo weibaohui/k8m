@@ -1,4 +1,4 @@
-package mcp
+package main
 
 import (
 	"context"
@@ -12,16 +12,26 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Start(version string, port int) {
+func MCPStart(version string, port int) {
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
 		username := r.Header.Get(constants.JwtUserName)
 		role := r.Header.Get(constants.JwtUserRole)
 		channel := server.GetRouteParam(ctx, "channel")
-		service.UserService().GetUserByMCPKey(channel)
-		klog.V(6).Infof("mcp request, username: %s, role: %s, channel: %s", username, role, channel)
-		// 发起mcp调用请求时注入用户名、角色信息
-		ctx = context.WithValue(ctx, constants.JwtUserName, username)
-		ctx = context.WithValue(ctx, constants.JwtUserRole, role)
+		if channel == "inner" {
+			// 发起mcp调用请求时注入用户名、角色信息
+			ctx = context.WithValue(ctx, constants.JwtUserName, username)
+			ctx = context.WithValue(ctx, constants.JwtUserRole, role)
+			klog.V(6).Infof("mcp inner request, username: %s, role: %s", username, role)
+		} else {
+			if user, err := service.UserService().GetUserByMCPKey(channel); err == nil {
+				ctx = context.WithValue(ctx, constants.JwtUserName, user)
+				if groupNames, err := service.UserService().GetGroupNames(user); err == nil {
+					if roles, err := service.UserService().GetRolesByGroupNames(groupNames); err == nil {
+						ctx = context.WithValue(ctx, constants.JwtUserRole, roles)
+					}
+				}
+			}
+		}
 
 		return ctx
 	}
