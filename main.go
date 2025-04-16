@@ -17,7 +17,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
-	"github.com/weibaohui/k8m/pkg/controller/apikey"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
@@ -39,9 +38,10 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/svc"
 	"github.com/weibaohui/k8m/pkg/controller/template"
+	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
+	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
-	mcp2 "github.com/weibaohui/k8m/pkg/mcp"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/service"
@@ -119,7 +119,7 @@ func Init() {
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
 		klog.Infof("启动MCP Server, 监听端口: %d", cfg.MCPServerPort)
-		mcp2.Start(Version, cfg.MCPServerPort)
+		MCPStart(Version, cfg.MCPServerPort)
 
 	}()
 
@@ -443,10 +443,14 @@ func main() {
 		mgm.POST("/user/profile/apikeys/create", apikey.Create)
 		mgm.POST("/user/profile/apikeys/delete/:id", apikey.Delete)
 
+		// MCP密钥管理
+		mgm.GET("/user/profile/mcpkeys/list", mcpkey.List)
+		mgm.POST("/user/profile/mcpkeys/create", mcpkey.Create)
+		mgm.POST("/user/profile/mcpkeys/delete/:id", mcpkey.Delete)
+
 		// log
 		mgm.GET("/log/shell/list", log.ListShell)
 		mgm.GET("/log/operation/list", log.ListOperation)
-
 		// 集群连接
 		mgm.POST("/cluster/:cluster/reconnect", cluster.Reconnect)
 
