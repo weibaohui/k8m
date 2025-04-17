@@ -1,14 +1,15 @@
 ## MCP Server 使用说明
 k8m 内置MCP 支持平台页面直接使用，也支持其他软件集成。
+内置MCP Server 仅支持SSE协议。
+每一次调用都可以在`平台设置-MCP执行记录`中查看。
+
 ## 第一种：页面直接使用
 登录后，默认在页面右下角有一个对话按钮，点击后即可使用MCP。
 
 ## 第二种：开放MCP
-适合给其CherryStudio、Cursor等其他软件集成使用。
-
+适合给其CherryStudio、Cursor、Cline等其他软件集成使用。
 
 ### 客户端使用
-
 #### 创建MCP访问链接
 登录平台后，在`个人中心--开放MCP`页面，点击`创建链接`按钮，输入描述后，得到一个访问链接。
 形如
@@ -22,11 +23,11 @@ k8m 内置的MCP Server 支持以下权限：
 - 集群只读：只能查看集群信息，不能执行任何操作。
 - Exec命令：可以执行集群内的命令等。
 - 集群管理员：可以执行所有操作，包括集群管理、部署管理、动态资源管理、节点管理、Pod 管理、YAML管理、存储管理、Ingress管理等。
-### 注意
-- 内置MCP Server 仅支持SSE协议。
-- 每一次调用都可以在`平台设置-MCP执行记录`中查看。
-1. 该访问链接适用于CherryStudio、Cline、Cursor等软件。
-2. 该访问链接将MCP权限绑定到您的权限上。
+### 集群访问权限
+MCP开放访问链接将MCP权限绑定到创建用户的权限上。也就是谁开放用谁的权限
+### 集群管理范围
+内置MCP Server 管理范围与k8m 纳管的集群范围一致。
+界面内已连接的集群均可使用。
 
 #### 配置MCP工具
 ##### 配置Cursor
@@ -40,9 +41,22 @@ k8m 内置的MCP Server 支持以下权限：
 ##### 访问记录
 在`个人中心`页面，点击`MCP执行记录`按钮，即可查看MCP调用记录。
 ![MCP访问记录](../images/mcp/run_history.png "屏幕截图")
-### 集群管理范围
-内置MCP Server 管理范围与k8m 纳管的集群范围一致。
-界面内已连接的集群均可使用。
+
+### 通用配置文件
+
+适合MCP工具集成，如Cursor、Claude Desktop、Windsurf等，此外也可以使用这些软件的UI操作界面进行添加。
+
+```json
+{
+  "mcpServers": {
+    "kom": {
+      "type": "sse",
+      "url": "http://IP:9096/sse"
+    }
+  }
+}
+```
+
 
 ### 内置MCP Server 配置说明
 
@@ -99,20 +113,3 @@ k8m 内置的MCP Server 支持以下权限：
 |                            | `get_storageclass_pvc_count`   | 获取StorageClass下的PVC数量                                              |
 |                            | `get_storageclass_pv_count`    | 获取StorageClass下的PV数量                                               |
 | **Ingress管理（1）**       | `set_default_ingressclass`     | 设置默认IngressClass                                                     |
-
-### AI工具集成
-
-#### 通用配置文件
-
-适合MCP工具集成，如Cursor、Claude Desktop、Windsurf等，此外也可以使用这些软件的UI操作界面进行添加。
-
-```json
-{
-  "mcpServers": {
-    "kom": {
-      "type": "sse",
-      "url": "http://IP:9096/sse"
-    }
-  }
-}
-```
