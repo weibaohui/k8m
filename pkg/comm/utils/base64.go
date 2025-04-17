@@ -25,3 +25,11 @@ func MustDecodeBase64(encoded string) string {
 func EncodeBase64(str string) string {
 	return base64.StdEncoding.EncodeToString([]byte(str))
 }
+
+func UrlSafeBase64Decode(s string) ([]byte, error) {
+	// 补等号
+	if m := len(s) % 4; m != 0 {
+		s += strings.Repeat("=", 4-m)
+	}
+	return base64.URLEncoding.DecodeString(s)
+}
