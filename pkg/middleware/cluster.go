@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/base64"
 	"net/http"
 	"path/filepath"
 	"slices"
@@ -14,13 +13,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-func decodeUrlSafeBase64(s string) ([]byte, error) {
-	// 补等号
-	if m := len(s) % 4; m != 0 {
-		s += strings.Repeat("=", 4-m)
-	}
-	return base64.URLEncoding.DecodeString(s)
-}
 func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
@@ -57,7 +49,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		// 获取clusterID
 		clusterBase64 := c.Param("cluster")
-		clusterIDByte, _ := decodeUrlSafeBase64(clusterBase64)
+		clusterIDByte, _ := utils.UrlSafeBase64Decode(clusterBase64)
 		clusterID := string(clusterIDByte)
 
 		if clusterID == "" {
