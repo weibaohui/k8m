@@ -33,7 +33,7 @@ func GetFields(c *gin.Context) {
 
 func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 	ctx := amis.GetContextWithUser(c)
-	clusterID := amis.GetSelectedCluster(c)
+	clusterID := ""
 	clusterIDBase64 := c.Param("cluster") // 路径上传递的集群名称
 	if clusterIDBase64 != "" {
 		if id, err := utils.DecodeBase64(clusterIDBase64); err == nil {
@@ -73,7 +73,17 @@ func ResourceRunAnalysis(c *gin.Context) {
 	amis.WriteJsonData(c, result)
 }
 func ClusterRunAnalysis(c *gin.Context) {
+	userCluster := c.Param("user_cluster")
+	if userCluster != "" {
+		if id, err := utils.UrlSafeBase64Decode(userCluster); err == nil {
+			if string(id) != "" {
+				// 路径中传了集群名称
+				userCluster = string(id)
+			}
+		}
+	}
 	cfg := createAnalysisConfig(c)
+	cfg.ClusterID = userCluster
 	cfg.Context = utils.GetContextWithAdmin()
 	if !service.ClusterService().IsConnected(cfg.ClusterID) {
 		amis.WriteJsonError(c, fmt.Errorf("集群 %s 未连接", cfg.ClusterID))
@@ -95,7 +105,17 @@ func ClusterRunAnalysis(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, "后台执行，请稍后查看")
 }
 func GetClusterRunAnalysisResult(c *gin.Context) {
+	userCluster := c.Param("user_cluster")
+	if userCluster != "" {
+		if id, err := utils.UrlSafeBase64Decode(userCluster); err == nil {
+			if string(id) != "" {
+				// 路径中传了集群名称
+				userCluster = string(id)
+			}
+		}
+	}
 	cfg := createAnalysisConfig(c)
+	cfg.ClusterID = userCluster
 	scanResult := service.ClusterService().GetClusterScanResult(cfg.ClusterID)
 	if scanResult == nil {
 		amis.WriteJsonOKMsg(c, "暂无数据，请先点击执行检查")
