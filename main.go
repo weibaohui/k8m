@@ -389,8 +389,8 @@ func main() {
 		api.POST("/doc/detail", doc.Detail)
 
 		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.ResourceRunAnalysis)
-		api.POST("/k8s_gpt/cluster/:cluster/run", k8sgpt.ClusterRunAnalysis)
-		api.GET("/k8s_gpt/cluster/:cluster/result", k8sgpt.GetClusterRunAnalysisResult)
+		api.POST("/k8s_gpt/cluster/:user_cluster/run", k8sgpt.ClusterRunAnalysis)
+		api.GET("/k8s_gpt/cluster/:user_cluster/result", k8sgpt.GetClusterRunAnalysisResult)
 		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
 
 		// pod 文件浏览上传下载
