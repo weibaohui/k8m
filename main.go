@@ -34,6 +34,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/param"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/controller/rs"
+	"github.com/weibaohui/k8m/pkg/controller/sso"
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/svc"
@@ -182,6 +183,8 @@ func main() {
 			"message": "pong",
 		})
 	})
+	r.GET("/sso", sso.GetAuthCodeURL)
+	r.GET("/callback", sso.HandleCallback)
 
 	auth := r.Group("/auth")
 	{

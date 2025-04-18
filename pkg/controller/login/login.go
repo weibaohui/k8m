@@ -104,13 +104,7 @@ func LoginByPassword(c *gin.Context) {
 					}
 				}
 
-				roles, _ := service.UserService().GetRolesByGroupNames(v.GroupNames)
-
-				// 查询用户对应的集群
-				clusters, _ := service.UserService().GetClusters(v.Username)
-
-				token, _ := service.UserService().GenerateJWTToken(v.Username, roles, clusters, 24*time.Hour)
-
+				token, _ := service.UserService().GenerateJWTTokenByUserName(v.Username, 24*time.Hour)
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return
 			}
