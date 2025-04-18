@@ -1,63 +1,50 @@
 package sso
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
-	"golang.org/x/oauth2"
-)
-
-var (
-	clientID     = "example-app"
-	clientSecret = "example-app-secret"
-	redirectURL  = "http://localhost:3618/callback"
-	issuer       = "http://localhost:5556"
-
-	oauthConfig = &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		RedirectURL:  redirectURL,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  issuer + "/auth",
-			TokenURL: issuer + "/token",
-		},
-		Scopes: []string{"openid", "email", "profile"},
-	}
+	"k8s.io/klog/v2"
 )
 
 // HandleCallback 处理OAuth2回调
 func HandleCallback(c *gin.Context) {
-	code := c.Query("code")
-	if code == "" {
-		c.String(http.StatusBadRequest, "No code in request")
-		return
-	}
+	ctx := c.Request.Context()
+	client, err := NewOIDCClient(ctx, Config{
+		Issuer:       "http://localhost:5556",
+		ClientID:     "example-app",
+		ClientSecret: "example-app-secret",
+		RedirectURL:  "http://localhost:3000/auth/callback",
+		Scopes:       []string{"email", "profile"},
+	})
 
-	// 用授权码换取 token
-	token, err := oauthConfig.Exchange(context.Background(), code)
+	code := c.Query("code")
+	oauth2Token, err := client.OAuth2Config.Exchange(ctx, code)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Token exchange error: %v", err)
 		return
 	}
 
-	// 使用 token 获取 userinfo
-	client := oauthConfig.Client(context.Background(), token)
-	resp, err := client.Get(issuer + "/userinfo")
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Userinfo fetch error: %v", err)
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		c.String(http.StatusInternalServerError, "No id_token in token response")
 		return
 	}
-	defer resp.Body.Close()
 
-	var userInfo map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		c.String(http.StatusInternalServerError, "Decode error: %v", err)
+	idToken, err := client.Verifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Token verify error: %v", err)
+		return
+	}
+
+	var claims map[string]interface{}
+	if err := idToken.Claims(&claims); err != nil {
+		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
 		return
 	}
 
@@ -65,7 +52,7 @@ func HandleCallback(c *gin.Context) {
 	// 	"access_token": token.AccessToken,
 	// 	"user_info":    userInfo,
 	// })
-	username := userInfo["email"].(string)
+	username := claims["email"].(string)
 	service.UserService().CheckAndCreateUser(username, "sso")
 	userLoginToken, _ := service.UserService().GenerateJWTTokenByUserName(username, 24*time.Hour)
 
@@ -88,7 +75,19 @@ func HandleCallback(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
 }
 func GetAuthCodeURL(c *gin.Context) {
-	// 跳转到 Dex 的 /auth
-	url := oauthConfig.AuthCodeURL(utils.RandNLengthString(8), oauth2.AccessTypeOffline)
+	client, err := NewOIDCClient(c.Request.Context(), Config{
+		Issuer:       "http://localhost:5556",
+		ClientID:     "example-app",
+		ClientSecret: "example-app-secret",
+		RedirectURL:  "http://localhost:3000/auth/callback",
+		Scopes:       []string{"email", "profile"},
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	state := utils.RandNLengthString(8)
+	url := client.OAuth2Config.AuthCodeURL(state)
+	klog.Infof("url: %s", url)
 	c.Redirect(http.StatusFound, url)
 }

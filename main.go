@@ -183,12 +183,12 @@ func main() {
 			"message": "pong",
 		})
 	})
-	r.GET("/sso", sso.GetAuthCodeURL)
-	r.GET("/callback", sso.HandleCallback)
 
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", login.LoginByPassword)
+		auth.GET("/sso", sso.GetAuthCodeURL)
+		auth.GET("/callback", sso.HandleCallback)
 	}
 
 	// 公共参数
