@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { render as renderAmis } from 'amis';
-import { fetcher } from '../fetcher';
+import useConditionsStore from '@/store/conditions';
 
 // 定义 Props 类型
 interface K8sTextConditionsProps {
@@ -15,20 +15,13 @@ interface K8sTextConditionsProps {
 }
 
 const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextConditionsProps>(({ data }, ref) => {
-    const [reverseConditions, setReverseConditions] = useState<string[]>([]);
+    const { reverseConditions, initialized, initReverseConditions } = useConditionsStore();
 
     useEffect(() => {
-        fetcher({
-            url: '/params/condition/reverse/list',
-            method: 'get'
-        })
-            .then(response => {
-                if (Array.isArray(response.data?.data)) {
-                    setReverseConditions(response.data.data);
-                }
-            })
-            .catch(error => console.error('获取反转条件列表失败:', error));
-    }, []);
+        if (!initialized) {
+            initReverseConditions();
+        }
+    }, [initialized, initReverseConditions]);
 
     const { allNormal, conditionDetails } = useMemo(() => {
         const conditions = data.status?.conditions || [];
