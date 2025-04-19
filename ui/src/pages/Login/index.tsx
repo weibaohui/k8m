@@ -134,13 +134,17 @@ const Login = () => {
                 </FormItem>
                 {ssoConfigs.length > 0 && (
                     <div style={{ marginTop: 16, textAlign: 'center' }}>
-                        <Space size={[8, 16]} wrap style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', margin: '24px 0' }}>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: '#e8e8e8' }} />
+                            <span style={{ margin: '0 16px', color: '#999', fontSize: '14px' }}>其他登录方式</span>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: '#e8e8e8' }} />
+                        </div>
+                        <Space size={[16, 24]} wrap style={{ display: 'flex', justifyContent: 'center', gap: '24px' }}>
                             {ssoConfigs.map(config => (
                                 <Button
                                     key={config.name}
-                                    icon={config.name.includes('github') ? <GithubOutlined /> : <UserOutlined />}
+                                    style={{ backgroundColor: getRandomColor(), border: 'none' }}
                                     onClick={() => window.location.href = `/auth/${config.type}/${config.name}/sso`}
-                                    style={{ minWidth: '120px' }}
                                 >
                                     {config.name}
                                 </Button>
@@ -154,3 +158,8 @@ const Login = () => {
 }
 
 export default Login
+
+const getRandomColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 70%, 65%)`;
+};
