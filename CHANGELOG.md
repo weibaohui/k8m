@@ -1,11 +1,17 @@
 
 ## 更新日志
+**v0.0.92更新**
+* 新增OIDC单点登录支持
+
+![输入图片说明](https://foruda.gitee.com/images/1745080546954797409/3845a390_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1745080595835207078/ed115dc8_77493.png "屏幕截图")
+
 
 **v0.0.88更新**
 1. 新增MCP执行记录
 ![输入图片说明](https://foruda.gitee.com/images/1744644690534249581/dffdd2b2_77493.png "屏幕截图")
 ![输入图片说明](https://foruda.gitee.com/images/1744644698183429067/6fb8a635_77493.png "屏幕截图")
-2. 新增集群名称前置检测
+1. 新增集群名称前置检测
 在MCP工具执行前，检测集群名称是否正确。
 {
     "tool_name": "restart_deployment@k8m",
@@ -17,7 +23,7 @@
     "result": "",
     "error": "工具执行失败: cluster config/kind-kind-cluster123 not found 集群不存在，请检查集群名称"
 }
-3. 修复Pod文件上传下载功能
+1. 修复Pod文件上传下载功能
 
 
 **v0.0.87更新**
