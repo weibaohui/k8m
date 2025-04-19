@@ -19,7 +19,7 @@ func List(c *gin.Context) {
 
 	queryFuncs := genQueryFuncs(c, params)
 	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
-		return db.Select([]string{"id", "group_names", "two_fa_enabled", "username", "two_fa_type", "two_fa_app_name", "created_at", "updated_at"})
+		return db.Select([]string{"id", "group_names", "two_fa_enabled", "username", "two_fa_type", "two_fa_app_name", "source", "created_at", "updated_at"})
 	})
 	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {

@@ -21,6 +21,7 @@ const Login = () => {
     const navigate = useNavigate()
     const [form] = Form.useForm();
     const [ssoConfigs, setSsoConfigs] = useState<SSOConfig[]>([]);
+    const [loadingSSO, setLoadingSSO] = useState<Record<string, boolean>>({});
 
     // 获取SSO配置
     useEffect(() => {
@@ -144,7 +145,11 @@ const Login = () => {
                                 <Button
                                     key={config.name}
                                     style={{ backgroundColor: getRandomColor(), border: 'none' }}
-                                    onClick={() => window.location.href = `/auth/${config.type}/${config.name}/sso`}
+                                    loading={loadingSSO[config.name]}
+                                    onClick={() => {
+                                        setLoadingSSO(prev => ({ ...prev, [config.name]: true }));
+                                        window.location.href = `/auth/${config.type}/${config.name}/sso`;
+                                    }}
                                 >
                                     {config.name}
                                 </Button>

@@ -1,7 +1,6 @@
 package sso
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -31,7 +30,7 @@ func GetAuthCodeURL(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("use sso name: %s", name)
 	// 从配置文件中读取默认的OIDC客户端配置
-	client, err := getDefaultOIDCClient(c.Request.Context(), name)
+	client, err := getDefaultOIDCClient(c, name)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -46,7 +45,7 @@ func GetAuthCodeURL(c *gin.Context) {
 func HandleCallback(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
-	client, err := getDefaultOIDCClient(c.Request.Context(), name)
+	client, err := getDefaultOIDCClient(c, name)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -100,7 +99,7 @@ func HandleCallback(c *gin.Context) {
 }
 
 // 获取默认OIDC客户端配置
-func getDefaultOIDCClient(ctx context.Context, name string) (*Client, error) {
+func getDefaultOIDCClient(c *gin.Context, name string) (*Client, error) {
 	// 通过name 获取配置
 	var dbConfig *models.SSOConfig
 	err := dao.DB().Where("name = ?", name).First(&dbConfig).Error
@@ -108,7 +107,7 @@ func getDefaultOIDCClient(ctx context.Context, name string) (*Client, error) {
 		return nil, err
 	}
 
-	return NewOIDCClient(ctx, dbConfig)
+	return NewOIDCClient(c, dbConfig)
 
 }
 func GetUsername(claims map[string]interface{}, preferKeys []string) string {
