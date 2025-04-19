@@ -16,6 +16,17 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// GetSSOConfig 获取SSO列表，用于前端展示
+func GetSSOConfig(c *gin.Context) {
+	// 获取所有的SSO配置
+	var ssoConfigs []models.SSOConfig
+	err := dao.DB().Select([]string{"name", "type"}).Where("enabled == true").Find(&ssoConfigs).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, ssoConfigs)
+}
 func GetAuthCodeURL(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("use sso name: %s", name)

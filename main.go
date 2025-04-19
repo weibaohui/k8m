@@ -187,6 +187,7 @@ func main() {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", login.LoginByPassword)
+		auth.GET("/sso/config", sso.GetSSOConfig)
 		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
 		auth.GET("/oidc/:name/callback", sso.HandleCallback)
 	}

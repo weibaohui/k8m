@@ -1,19 +1,38 @@
-import { Form, Input, Button, Checkbox, message } from 'antd'
+import { Form, Input, Button, Checkbox, message, Space } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import {
     UserOutlined,
     LockOutlined,
-    SafetyOutlined
+    SafetyOutlined,
+    GithubOutlined
 } from '@ant-design/icons'
 import styles from './index.module.scss'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { encrypt, decrypt } from '@/utils/crypto'
 
 const FormItem = Form.Item
 
+interface SSOConfig {
+    name: string;
+    type: string;
+}
+
 const Login = () => {
     const navigate = useNavigate()
     const [form] = Form.useForm();
+    const [ssoConfigs, setSsoConfigs] = useState<SSOConfig[]>([]);
+
+    // 获取SSO配置
+    useEffect(() => {
+        fetch('/auth/sso/config')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 0 && Array.isArray(data.data)) {
+                    setSsoConfigs(data.data);
+                }
+            })
+            .catch(() => message.error('获取SSO配置失败'));
+    }, []);
 
     // useEffect 读取 remember 数据
     useEffect(() => {
@@ -113,6 +132,22 @@ const Login = () => {
                 <FormItem>
                     <Button type='primary' block onClick={onSubmit}>登 录</Button>
                 </FormItem>
+                {ssoConfigs.length > 0 && (
+                    <div style={{ marginTop: 16, textAlign: 'center' }}>
+                        <Space size={[8, 16]} wrap style={{ display: 'flex', justifyContent: 'center' }}>
+                            {ssoConfigs.map(config => (
+                                <Button
+                                    key={config.name}
+                                    icon={config.name.includes('github') ? <GithubOutlined /> : <UserOutlined />}
+                                    onClick={() => window.location.href = `/auth/${config.type}/${config.name}/sso`}
+                                    style={{ minWidth: '120px' }}
+                                >
+                                    {config.name}
+                                </Button>
+                            ))}
+                        </Space>
+                    </div>
+                )}
             </Form>
         </div>
     </section>
