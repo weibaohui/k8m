@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/weibaohui/k8m/pkg/models"
 	"golang.org/x/oauth2"
 )
 
@@ -20,10 +21,11 @@ type Client struct {
 	OAuth2Config *oauth2.Config
 	Provider     *oidc.Provider
 	Verifier     *oidc.IDTokenVerifier
+	DBConfig     *models.SSOConfig
 }
 
 // NewOIDCClient  创建一个 OIDC 客户端
-func NewOIDCClient(ctx context.Context, cfg Config) (*Client, error) {
+func NewOIDCClient(ctx context.Context, cfg *models.SSOConfig) (*Client, error) {
 	// 1. 探测 issuer 的元信息
 	provider, err := oidc.NewProvider(ctx, cfg.Issuer)
 	if err != nil {
@@ -40,13 +42,14 @@ func NewOIDCClient(ctx context.Context, cfg Config) (*Client, error) {
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  cfg.RedirectURL,
-		Endpoint:     provider.Endpoint(),                       // 自动使用 /.well-known 配置的接口
-		Scopes:       append([]string{"openid"}, cfg.Scopes...), // openid 是必须的
+		Endpoint:     provider.Endpoint(),                                           // 自动使用 /.well-known 配置的接口
+		Scopes:       append([]string{"openid", "email", "profile"}, cfg.Scopes...), // openid 是必须的
 	}
 
 	return &Client{
 		OAuth2Config: oauth2Config,
 		Provider:     provider,
 		Verifier:     verifier,
+		DBConfig:     cfg,
 	}, nil
 }

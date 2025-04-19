@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -59,17 +60,13 @@ func HandleCallback(c *gin.Context) {
 	}
 
 	var claims map[string]interface{}
-	if err := idToken.Claims(&claims); err != nil {
+	if err = idToken.Claims(&claims); err != nil {
 		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
 		return
 	}
 
-	// c.JSON(http.StatusOK, gin.H{
-	// 	"access_token": token.AccessToken,
-	// 	"user_info":    userInfo,
-	// })
-	username := claims["email"].(string)
-	_ = service.UserService().CheckAndCreateUser(username, "sso")
+	username := GetUsername(claims, strings.Split(client.DBConfig.PreferUserNameKeys, ","))
+	_ = service.UserService().CheckAndCreateUser(username, name)
 	userLoginToken, _ := service.UserService().GenerateJWTTokenByUserName(username, 24*time.Hour)
 
 	// 返回 HTML + JS，用于写入 localStorage
@@ -94,18 +91,35 @@ func HandleCallback(c *gin.Context) {
 // 获取默认OIDC客户端配置
 func getDefaultOIDCClient(ctx context.Context, name string) (*Client, error) {
 	// 通过name 获取配置
-	var sso models.SSOConfig
-	err := dao.DB().Where("name = ?", name).First(&sso).Error
+	var dbConfig *models.SSOConfig
+	err := dao.DB().Where("name = ?", name).First(&dbConfig).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return NewOIDCClient(ctx, Config{
-		Issuer:       sso.Issuer,
-		ClientID:     sso.ClientID,
-		ClientSecret: sso.ClientSecret,
-		RedirectURL:  sso.RedirectURL,
-		Scopes:       []string{"email", "profile"},
-	})
+	return NewOIDCClient(ctx, dbConfig)
 
+}
+func GetUsername(claims map[string]interface{}, preferKeys []string) string {
+	klog.V(6).Infof("claims: %v", claims)
+	klog.V(6).Infof("preferKeys: %v", preferKeys)
+	for _, key := range preferKeys {
+		if val, ok := claims[key].(string); ok && val != "" {
+			return val
+		}
+	}
+	// 默认 fallback 顺序
+	if v, ok := claims["preferred_username"].(string); ok && v != "" {
+		return v
+	}
+	if v, ok := claims["email"].(string); ok && v != "" {
+		return v
+	}
+	if v, ok := claims["name"].(string); ok && v != "" {
+		return v
+	}
+	if v, ok := claims["sub"].(string); ok && v != "" {
+		return v
+	}
+	return "unknown"
 }
