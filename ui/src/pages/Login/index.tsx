@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
     UserOutlined,
     LockOutlined,
-    SafetyOutlined,
-    GithubOutlined
+    SafetyOutlined
 } from '@ant-design/icons'
 import styles from './index.module.scss'
 import { useCallback, useEffect, useState } from 'react'
