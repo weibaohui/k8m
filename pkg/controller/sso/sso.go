@@ -1,28 +1,44 @@
 package sso
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
+func GetAuthCodeURL(c *gin.Context) {
+	name := c.Param("name")
+	klog.V(6).Infof("use sso name: %s", name)
+	// 从配置文件中读取默认的OIDC客户端配置
+	client, err := getDefaultOIDCClient(c.Request.Context(), name)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	state := utils.RandNLengthString(8)
+	url := client.OAuth2Config.AuthCodeURL(state)
+	klog.Infof("url: %s", url)
+	c.Redirect(http.StatusFound, url)
+}
+
 // HandleCallback 处理OAuth2回调
 func HandleCallback(c *gin.Context) {
+	name := c.Param("name")
 	ctx := c.Request.Context()
-	client, err := NewOIDCClient(ctx, Config{
-		Issuer:       "http://localhost:5556",
-		ClientID:     "example-app",
-		ClientSecret: "example-app-secret",
-		RedirectURL:  "http://localhost:3000/auth/callback",
-		Scopes:       []string{"email", "profile"},
-	})
-
+	client, err := getDefaultOIDCClient(c.Request.Context(), name)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	code := c.Query("code")
 	oauth2Token, err := client.OAuth2Config.Exchange(ctx, code)
 	if err != nil {
@@ -53,7 +69,7 @@ func HandleCallback(c *gin.Context) {
 	// 	"user_info":    userInfo,
 	// })
 	username := claims["email"].(string)
-	service.UserService().CheckAndCreateUser(username, "sso")
+	_ = service.UserService().CheckAndCreateUser(username, "sso")
 	userLoginToken, _ := service.UserService().GenerateJWTTokenByUserName(username, 24*time.Hour)
 
 	// 返回 HTML + JS，用于写入 localStorage
@@ -74,20 +90,22 @@ func HandleCallback(c *gin.Context) {
 
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
 }
-func GetAuthCodeURL(c *gin.Context) {
-	client, err := NewOIDCClient(c.Request.Context(), Config{
-		Issuer:       "http://localhost:5556",
-		ClientID:     "example-app",
-		ClientSecret: "example-app-secret",
-		RedirectURL:  "http://localhost:3000/auth/callback",
+
+// 获取默认OIDC客户端配置
+func getDefaultOIDCClient(ctx context.Context, name string) (*Client, error) {
+	// 通过name 获取配置
+	var sso models.SSOConfig
+	err := dao.DB().Where("name = ?", name).First(&sso).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return NewOIDCClient(ctx, Config{
+		Issuer:       sso.Issuer,
+		ClientID:     sso.ClientID,
+		ClientSecret: sso.ClientSecret,
+		RedirectURL:  sso.RedirectURL,
 		Scopes:       []string{"email", "profile"},
 	})
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	state := utils.RandNLengthString(8)
-	url := client.OAuth2Config.AuthCodeURL(state)
-	klog.Infof("url: %s", url)
-	c.Redirect(http.StatusFound, url)
+
 }

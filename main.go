@@ -187,8 +187,8 @@ func main() {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", login.LoginByPassword)
-		auth.GET("/sso", sso.GetAuthCodeURL)
-		auth.GET("/callback", sso.HandleCallback)
+		auth.GET("/:name/sso", sso.GetAuthCodeURL)
+		auth.GET("/:name/callback", sso.HandleCallback)
 	}
 
 	// 公共参数

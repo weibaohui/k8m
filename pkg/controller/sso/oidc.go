@@ -22,7 +22,7 @@ type Client struct {
 	Verifier     *oidc.IDTokenVerifier
 }
 
-// New 创建一个 OIDC 客户端
+// NewOIDCClient  创建一个 OIDC 客户端
 func NewOIDCClient(ctx context.Context, cfg Config) (*Client, error) {
 	// 1. 探测 issuer 的元信息
 	provider, err := oidc.NewProvider(ctx, cfg.Issuer)

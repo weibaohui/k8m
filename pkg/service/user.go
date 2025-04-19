@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"strings"
 	"time"
 
@@ -230,7 +231,7 @@ func (u *userService) CheckAndCreateUser(username, source string) error {
 	}
 	_, err := user.GetOne(params, queryFunc)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 用户不存在，创建新用户
 			newUser := &models.User{
 				Username:  username,
