@@ -1,0 +1,354 @@
+{
+  "type": "page",
+  "title": "SSO配置管理",
+  "body": [
+    {
+      "type": "alert",
+      "level": "info",
+      "body": "<p>SSO（单点登录）配置用于设置外部认证服务，支持OIDC协议。启用后，用户可以通过外部认证服务登录系统。</p>"
+    },
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建配置",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建SSO配置  (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/admin/config/sso/save",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "name",
+                  "label": "配置名称",
+                  "required": true,
+                  "placeholder": "请输入配置名称",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 2,
+                    "maxLength": 50
+                  },
+                  "validationErrors": {
+                    "minLength": "配置名称至少 2 个字符",
+                    "maxLength": "配置名称最多 50 个字符"
+                  }
+                },
+                {
+                  "type": "select",
+                  "name": "type",
+                  "label": "配置类型",
+                  "value": "oidc",
+                  "options": [
+                    {
+                      "label": "OIDC",
+                      "value": "oidc"
+                    }
+                  ]
+                },
+                {
+                  "type": "input-text",
+                  "name": "client_id",
+                  "label": "客户端ID",
+                  "required": true,
+                  "placeholder": "认证服务器分配的客户端ID"
+                },
+                {
+                  "type": "input-text",
+                  "name": "client_secret",
+                  "label": "客户端密钥",
+                  "required": true,
+                  "placeholder": "认证服务器分配的客户端密钥"
+                },
+                {
+                  "type": "input-url",
+                  "name": "issuer",
+                  "label": "认证服务器地址",
+                  "required": true,
+                  "placeholder": "请输入认证服务器地址"
+                },
+                {
+                  "type": "input-text",
+                  "name": "prefer_user_name_keys",
+                  "label": "用户名字段",
+                  "placeholder": "寻找用户名key值",
+                  "description": "如不定义，默认使用preferred_username、email、name、sub顺序寻找用户名"
+                },
+                {
+                  "type": "input-text",
+                  "name": "scopes",
+                  "label": "授权范围",
+                  "placeholder": "输入获取权限范围",
+                  "description": "默认请求openid, email, profile"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "detailCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "post:/admin/config/sso/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/admin/config/sso/list",
+      "quickSaveItemApi": "/admin/config/sso/save/id/${id}/status/${enabled}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑配置",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "编辑SSO配置  (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/config/sso/save",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "name",
+                      "label": "配置名称",
+                      "required": true,
+                      "placeholder": "请输入配置名称",
+                      "validateOnChange": true,
+                      "validations": {
+                        "minLength": 2,
+                        "maxLength": 50
+                      },
+                      "validationErrors": {
+                        "minLength": "配置名称至少 2 个字符",
+                        "maxLength": "配置名称最多 50 个字符"
+                      }
+                    },
+                    {
+                      "type": "select",
+                      "name": "type",
+                      "label": "配置类型",
+                      "value": "oidc",
+                      "options": [
+                        {
+                          "label": "OIDC",
+                          "value": "oidc"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "client_id",
+                      "label": "客户端ID",
+                      "required": true,
+                      "placeholder": "认证服务器分配的客户端ID"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "client_secret",
+                      "label": "客户端密钥",
+                      "required": true,
+                      "placeholder": "认证服务器分配的客户端密钥"
+                    },
+                    {
+                      "type": "input-url",
+                      "name": "issuer",
+                      "label": "认证服务器地址",
+                      "required": true,
+                      "placeholder": "请输入认证服务器地址"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "prefer_user_name_keys",
+                      "label": "用户名字段",
+                      "placeholder": "寻找用户名key值",
+                      "description": "如不定义，默认使用preferred_username、email、name、sub顺序寻找用户名"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "scopes",
+                      "label": "授权范围",
+                      "placeholder": "输入获取权限范围",
+                      "description": "默认请求openid, email, profile"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "name",
+          "label": "配置名称",
+          "type": "text",
+          "width": "180px"
+        },
+        {
+          "name": "callback",
+          "label": "回调地址",
+          "type": "container",
+          "body": [
+            {
+              "type": "button",
+              "label": "点击查看",
+              "actionType": "drawer",
+              "drawer": {
+                "overlay": false,
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "参数查看（ESC 关闭）",
+                "body": [
+                  {
+                    "type": "tpl",
+                    "tpl": "请将下面的地址，填入认证服务器的回调地址中。<p>请注意替换为可访问的IP（域名）、端口</p>"
+                  },
+                  {
+                    "name": "callback",
+                    "label": "回调地址",
+                    "type": "tpl",
+                    "tpl": "http://IP地址:端口/auth/${type}/${name}/callback"
+                  }
+                ],
+                "actions": [
+                  {
+                    "type": "button",
+                    "label": "关闭",
+                    "close": true
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "type",
+          "label": "类型",
+          "type": "text",
+          "width": "100px"
+        },
+        {
+          "name": "enabled",
+          "label": "启用",
+          "quickEdit": {
+            "mode": "inline",
+            "type": "switch",
+            "onText": "开启",
+            "offText": "关闭",
+            "saveImmediately": true,
+            "resetOnFailed": true
+          }
+        },
+        {
+          "name": "issuer",
+          "label": "认证服务器",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}

@@ -437,6 +437,12 @@ const items: () => MenuItem[] = () => {
                         icon: <i className="fa-solid fa-arrows-rotate"></i>,
                         key: "condition_reverse",
                         onClick: () => onMenuClick('/admin/config/condition')
+                    },
+                    {
+                        label: "单点登录",
+                        icon: <i className="fa-solid fa-right-to-bracket"></i>,
+                        key: "sso_config",
+                        onClick: () => onMenuClick('/admin/config/sso_config')
                     }
                 ],
             },

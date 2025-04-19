@@ -34,6 +34,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/param"
 	"github.com/weibaohui/k8m/pkg/controller/pod"
 	"github.com/weibaohui/k8m/pkg/controller/rs"
+	"github.com/weibaohui/k8m/pkg/controller/sso"
 	"github.com/weibaohui/k8m/pkg/controller/storageclass"
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/svc"
@@ -186,6 +187,9 @@ func main() {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", login.LoginByPassword)
+		auth.GET("/sso/config", sso.GetSSOConfig)
+		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
+		auth.GET("/oidc/:name/callback", sso.HandleCallback)
 	}
 
 	// 公共参数
@@ -465,6 +469,10 @@ func main() {
 		// 指标翻转状态修改
 		admin.POST("/condition/save/id/:id/status/:status", config.ConditionQuickSave)
 
+		admin.GET("/config/sso/list", config.SSOConfigList)
+		admin.POST("/config/sso/save", config.SSOConfigSave)
+		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
+		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)
 		admin.POST("/user/save", user.Save)

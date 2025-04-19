@@ -14,7 +14,8 @@ type User struct {
 	Username   string    `gorm:"uniqueIndex;not null" json:"username,omitempty"`
 	Salt       string    `gorm:"not null" json:"salt,omitempty"`
 	Password   string    `gorm:"not null" json:"password,omitempty"`
-	GroupNames string    `json:"group_names"`
+	GroupNames string    `json:"group_names,omitempty"`
+	Source     string    `json:"source,omitempty"` // 来源，如：db, ldap, oauth
 	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"`                             // Automatically managed by GORM for update time
 	CreatedBy  string    `gorm:"index:idx_created_by" json:"created_by,omitempty"` // 创建者

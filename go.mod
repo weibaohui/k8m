@@ -3,6 +3,7 @@ module github.com/weibaohui/k8m
 go 1.24.0
 
 require (
+	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/duke-git/lancet/v2 v2.3.5
 	github.com/fatih/color v1.18.0
 	github.com/gin-contrib/cors v1.7.4
@@ -22,6 +23,7 @@ require (
 	github.com/spf13/pflag v1.0.6
 	github.com/weibaohui/kom v0.2.17
 	golang.org/x/net v0.38.0
+	golang.org/x/oauth2 v0.28.0
 	gorm.io/gorm v1.25.12
 	helm.sh/helm/v3 v3.17.2
 	k8s.io/api v0.32.3
@@ -88,6 +90,7 @@ require (
 	github.com/gin-contrib/sse v1.0.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
@@ -176,7 +179,6 @@ require (
 	golang.org/x/arch v0.15.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/oauth2 v0.28.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/term v0.30.0 // indirect

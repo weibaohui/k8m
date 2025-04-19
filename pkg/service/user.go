@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"strings"
 	"time"
 
@@ -137,6 +138,37 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 }
 
 // GenerateJWTToken 生成 Token
+func (u *userService) GenerateJWTTokenByUserName(username string, duration time.Duration) (string, error) {
+	role := constants.JwtUserRole
+	name := constants.JwtUserName
+	cst := constants.JwtClusters
+	cstUserRoles := constants.JwtClusterUserRoles
+
+	groupNames, _ := u.GetGroupNames(username)
+	roles, _ := u.GetRolesByGroupNames(groupNames)
+	// 查询用户对应的集群
+	clusters, _ := u.GetClusters(username)
+
+	var clusterNames []string
+	if clusters != nil {
+		for _, cluster := range clusters {
+			clusterNames = append(clusterNames, cluster.Cluster)
+		}
+	}
+
+	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		name:         username,
+		role:         strings.Join(roles, ","),        // 角色列表
+		cst:          strings.Join(clusterNames, ","), // 集群名称列表
+		cstUserRoles: utils.ToJSON(clusters),          // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
+		"exp":        time.Now().Add(duration).Unix(), // 国企时间
+	})
+	cfg := flag.Init()
+	var jwtSecret = []byte(cfg.JwtTokenSecret)
+	return token.SignedString(jwtSecret)
+}
+
+// GenerateJWTToken 生成 Token
 func (u *userService) GenerateJWTToken(username string, roles []string, clusters []*models.ClusterUserRole, duration time.Duration) (string, error) {
 	role := constants.JwtUserRole
 	name := constants.JwtUserName
@@ -188,4 +220,28 @@ func (u *userService) GetUserByMCPKey(mcpKey string) (string, error) {
 	}
 
 	return item.Username, nil
+}
+
+// CheckAndCreateUser 检查用户是否存在，如果不存在则创建一个新用户
+func (u *userService) CheckAndCreateUser(username, source string) error {
+	params := &dao.Params{}
+	user := &models.User{}
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Where("username = ?", username)
+	}
+	_, err := user.GetOne(params, queryFunc)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// 用户不存在，创建新用户
+			newUser := &models.User{
+				Username:  username,
+				Source:    source,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+			return newUser.Save(params)
+		}
+		return err
+	}
+	return nil
 }

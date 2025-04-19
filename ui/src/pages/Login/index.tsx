@@ -1,19 +1,39 @@
-import { Form, Input, Button, Checkbox, message } from 'antd'
+import { Form, Input, Button, Checkbox, message, Space } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import {
     UserOutlined,
     LockOutlined,
-    SafetyOutlined
+    SafetyOutlined,
+    GithubOutlined
 } from '@ant-design/icons'
 import styles from './index.module.scss'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { encrypt, decrypt } from '@/utils/crypto'
 
 const FormItem = Form.Item
 
+interface SSOConfig {
+    name: string;
+    type: string;
+}
+
 const Login = () => {
     const navigate = useNavigate()
     const [form] = Form.useForm();
+    const [ssoConfigs, setSsoConfigs] = useState<SSOConfig[]>([]);
+    const [loadingSSO, setLoadingSSO] = useState<Record<string, boolean>>({});
+
+    // 获取SSO配置
+    useEffect(() => {
+        fetch('/auth/sso/config')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 0 && Array.isArray(data.data)) {
+                    setSsoConfigs(data.data);
+                }
+            })
+            .catch(() => message.error('获取SSO配置失败'));
+    }, []);
 
     // useEffect 读取 remember 数据
     useEffect(() => {
@@ -113,9 +133,38 @@ const Login = () => {
                 <FormItem>
                     <Button type='primary' block onClick={onSubmit}>登 录</Button>
                 </FormItem>
+                {ssoConfigs.length > 0 && (
+                    <div style={{ marginTop: 16, textAlign: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', margin: '24px 0' }}>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: '#e8e8e8' }} />
+                            <span style={{ margin: '0 16px', color: '#999', fontSize: '14px' }}>其他登录方式</span>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: '#e8e8e8' }} />
+                        </div>
+                        <Space size={[16, 24]} wrap style={{ display: 'flex', justifyContent: 'center', gap: '24px' }}>
+                            {ssoConfigs.map(config => (
+                                <Button
+                                    key={config.name}
+                                    style={{ backgroundColor: getRandomColor(), border: 'none' }}
+                                    loading={loadingSSO[config.name]}
+                                    onClick={() => {
+                                        setLoadingSSO(prev => ({ ...prev, [config.name]: true }));
+                                        window.location.href = `/auth/${config.type}/${config.name}/sso`;
+                                    }}
+                                >
+                                    {config.name}
+                                </Button>
+                            ))}
+                        </Space>
+                    </div>
+                )}
             </Form>
         </div>
     </section>
 }
 
 export default Login
+
+const getRandomColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 70%, 65%)`;
+};

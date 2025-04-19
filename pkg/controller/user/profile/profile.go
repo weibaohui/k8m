@@ -22,7 +22,7 @@ func Profile(c *gin.Context) {
 
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.
-			Select([]string{"id", "group_names", "two_fa_enabled", "username", "two_fa_type", "two_fa_app_name", "created_at", "updated_at"}).
+			Select([]string{"id", "group_names", "two_fa_enabled", "username", "two_fa_type", "two_fa_app_name", "source", "created_at", "updated_at"}).
 			Where(m)
 	})
 	if err != nil {

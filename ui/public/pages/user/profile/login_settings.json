@@ -157,6 +157,11 @@
           ]
         },
         {
+          "label": "来源",
+          "type": "text",
+          "name": "source"
+        },
+        {
           "name": "created_at",
           "label": "创建时间",
           "type": "datetime"
