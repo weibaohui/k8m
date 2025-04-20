@@ -65,3 +65,24 @@ docker run -p 5556:5556 \
 
 ## 3. 使用
 退出登录，系统自动挑转到登录页面，最下方会增加一个名为`dex-github`的登录方式，点击即可使用OIDC登录
+
+## 🚀相关技术
+### 常见配置项
+| 可配置项 | 示例 | 说明 |
+|---------|------|------|
+| Issuer | https://dex.example.com | 必须，获取元数据基础，需要支持支持 Discovery |
+| ClientID | your-client-id | 必须 |
+| ClientSecret | your-secret | 必须 |
+| RedirectURL | http://localhost:8080/callback | 登录成功跳转地址 |
+| Scopes | openid email profile | 可选，根据业务需要 |
+| DiscoveryMeta | /.well-known/openid-configuration | 自动获取 auth/token 等 |
+
+### OIDC 支持 Discovery 的常见身份提供商：
+
+| 身份提供者 | 是否支持 Discovery | 地址示例 |
+|-----------|------------------|----------|
+| Dex | ✅ | http://localhost:5556/.well-known/openid-configuration |
+| Keycloak | ✅ | https://keycloak.example.com/realms//.well-known/openid-configuration |
+| Auth0 | ✅ | https://.auth0.com/.well-known/openid-configuration |
+| Okta | ✅ | https://.okta.com/oauth2/default/.well-known/openid-configuration |
+| Google | ✅ | https://accounts.google.com/.well-known/openid-configuration |
