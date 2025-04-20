@@ -64,18 +64,22 @@ func (n *nodeService) SetAllocatedStatus(selectedCluster string, item unstructur
 		if row.ResourceType == "cpu" {
 			// 设置或追加 annotations
 			utils.AddOrUpdateAnnotations(&item, map[string]string{
-				"cpu.request":         fmt.Sprintf("%s", row.Request),
-				"cpu.requestFraction": fmt.Sprintf("%s", row.RequestFraction),
-				"cpu.limit":           fmt.Sprintf("%s", row.Limit),
-				"cpu.limitFraction":   fmt.Sprintf("%s", row.LimitFraction),
+				"cpu.request":          fmt.Sprintf("%s", row.Request),
+				"cpu.requestFraction":  fmt.Sprintf("%s", row.RequestFraction),
+				"cpu.limit":            fmt.Sprintf("%s", row.Limit),
+				"cpu.limitFraction":    fmt.Sprintf("%s", row.LimitFraction),
+				"cpu.realtime":         fmt.Sprintf("%s", row.Realtime),
+				"cpu.realtimeFraction": fmt.Sprintf("%s", row.RealtimeFraction),
 			})
 		} else if row.ResourceType == "memory" {
 			// 设置或追加 annotations
 			utils.AddOrUpdateAnnotations(&item, map[string]string{
-				"memory.request":         fmt.Sprintf("%s", row.Request),
-				"memory.requestFraction": fmt.Sprintf("%s", row.RequestFraction),
-				"memory.limit":           fmt.Sprintf("%s", row.Limit),
-				"memory.limitFraction":   fmt.Sprintf("%s", row.LimitFraction),
+				"memory.request":          fmt.Sprintf("%s", row.Request),
+				"memory.requestFraction":  fmt.Sprintf("%s", row.RequestFraction),
+				"memory.limit":            fmt.Sprintf("%s", row.Limit),
+				"memory.limitFraction":    fmt.Sprintf("%s", row.LimitFraction),
+				"memory.realtime":         fmt.Sprintf("%s", row.Realtime),
+				"memory.realtimeFraction": fmt.Sprintf("%s", row.RealtimeFraction),
 			})
 		}
 	}
@@ -127,8 +131,8 @@ func (n *nodeService) CacheAllocatedStatus(selectedCluster string, nodeName stri
 	cacheKey := fmt.Sprintf("%s/%s", "NodeAllocatedStatus", nodeName)
 	ctx := utils2.GetContextWithAdmin()
 	return utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, nodeStatusTTL, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.Cluster(selectedCluster).WithContext(ctx).Name(nodeName).WithCache(nodeStatusTTL).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
-		return tb, nil
+		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(nodeName).WithCache(nodeStatusTTL).Resource(&v1.Node{}).Ctl().Node().ResourceUsageTable()
+		return tb, err
 	})
 }
 func (n *nodeService) RemoveNodeStatusCache(selectedCluster string, nodeName string) {
