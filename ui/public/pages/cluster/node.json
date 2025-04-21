@@ -1110,7 +1110,7 @@
           "name": "realtime",
           "label": "实时用量<br><span class='text-gray-500 text-xs'>CPU(m毫核)/内存(Mi)</span>",
           "type": "tpl",
-          "tpl": "<%= ( data.metadata.annotations && data.metadata.annotations['cpu.realtime'] && Number(data.metadata.annotations['cpu.realtime']) !== 0 ? data.metadata.annotations['cpu.realtime']  : 'N/A') + ' / ' + (data.metadata.annotations && data.metadata.annotations['memory.realtime'] && Number(data.metadata.annotations['memory.realtime']) !== 0? data.metadata.annotations['memory.realtime'] : 'N/A') %>"
+          "tpl": "<%= ( data.metadata.annotations && data.metadata.annotations['cpu.realtime'] && Number(data.metadata.annotations['cpu.realtime']) !== 0 ? data.metadata.annotations['cpu.realtime']  : '') + ' / ' + (data.metadata.annotations && data.metadata.annotations['memory.realtime'] && Number(data.metadata.annotations['memory.realtime']) !== 0? data.metadata.annotations['memory.realtime'] : '') %>"
         },
         {
           "name": "resource",
