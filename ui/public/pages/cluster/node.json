@@ -1151,7 +1151,7 @@
             {
               "type": "progress",
               "label": "realtime",
-              "value": "<%= data.metadata.annotations['cpu.realtimeFraction'] && Number(data.metadata.annotations['cpu.realtimeFraction']) !== 0 ? data.metadata.annotations['cpu.realtimeFraction'] : 100 %>",
+              "value": "<%= data.metadata.annotations['cpu.realtimeFraction'] && Number(data.metadata.annotations['cpu.realtimeFraction']) !== 0 ? data.metadata.annotations['cpu.realtimeFraction'] : 0 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -1204,7 +1204,7 @@
             {
               "type": "progress",
               "label": "realtime",
-              "value": "<%= data.metadata.annotations['memory.realtimeFraction'] && Number(data.metadata.annotations['memory.realtimeFraction']) !== 0 ? data.metadata.annotations['memory.realtimeFraction'] : 100 %>",
+              "value": "<%= data.metadata.annotations['memory.realtimeFraction'] && Number(data.metadata.annotations['memory.realtimeFraction']) !== 0 ? data.metadata.annotations['memory.realtimeFraction'] : 0 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
