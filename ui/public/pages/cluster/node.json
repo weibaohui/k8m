@@ -1131,7 +1131,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.requestFraction']"
             },
             {
               "type": "progress",
@@ -1146,7 +1147,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.limitFraction']"
             },
             {
               "type": "progress",
@@ -1161,7 +1163,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.realtimeFraction']"
             }
           ]
         },
@@ -1184,7 +1187,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.requestFraction']"
             },
             {
               "type": "progress",
@@ -1199,7 +1203,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.limitFraction']"
             },
             {
               "type": "progress",
@@ -1214,7 +1219,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.realtimeFraction']"
             }
           ]
         },
