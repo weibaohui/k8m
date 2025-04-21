@@ -17,23 +17,19 @@ func MCPStart(version string, port int) {
 		username := r.Header.Get(constants.JwtUserName)
 		role := r.Header.Get(constants.JwtUserRole)
 		channel := server.GetRouteParam(ctx, "channel")
+		newCtx := context.Background()
 		if channel == "inner" {
 			// 发起mcp调用请求时注入用户名、角色信息
-			ctx = context.WithValue(ctx, constants.JwtUserName, username)
-			ctx = context.WithValue(ctx, constants.JwtUserRole, role)
+			newCtx = context.WithValue(ctx, constants.JwtUserName, username)
+			ctx = context.WithValue(newCtx, constants.JwtUserRole, role)
 			klog.V(6).Infof("mcp inner request, username: %s, role: %s", username, role)
 		} else {
 			if user, err := service.UserService().GetUserByMCPKey(channel); err == nil {
-				ctx = context.WithValue(ctx, constants.JwtUserName, user)
-				if groupNames, err := service.UserService().GetGroupNames(user); err == nil {
-					if roles, err := service.UserService().GetRolesByGroupNames(groupNames); err == nil {
-						ctx = context.WithValue(ctx, constants.JwtUserRole, roles)
-					}
-				}
+				newCtx = context.WithValue(ctx, constants.JwtUserName, user)
 			}
 		}
 
-		return ctx
+		return newCtx
 	}
 	cfg := metadata.ServerConfig{
 		Name:    "k8m mcp server",
