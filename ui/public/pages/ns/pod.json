@@ -3051,7 +3051,7 @@
           "name": "realtime",
           "label": "实时用量<br><span class='text-gray-500 text-xs'>CPU(m毫核)/内存(Mi)</span>",
           "type": "tpl",
-          "tpl": "<%= ( data.metadata.annotations && data.metadata.annotations['cpu.realtime'] && Number(data.metadata.annotations['cpu.realtime']) !== 0 ? data.metadata.annotations['cpu.realtime']  : 'N/A') + ' / ' + (data.metadata.annotations && data.metadata.annotations['memory.realtime'] && Number(data.metadata.annotations['memory.realtime']) !== 0? data.metadata.annotations['memory.realtime'] : 'N/A') %>"
+          "tpl": "<%= ( data.metadata.annotations && data.metadata.annotations['cpu.realtime'] && Number(data.metadata.annotations['cpu.realtime']) !== 0 ? data.metadata.annotations['cpu.realtime']  : '') + ' / ' + (data.metadata.annotations && data.metadata.annotations['memory.realtime'] && Number(data.metadata.annotations['memory.realtime']) !== 0? data.metadata.annotations['memory.realtime'] : '') %>"
         },
         {
           "name": "资源设定",
@@ -3079,7 +3079,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.requestFraction']"
             },
             {
               "type": "progress",
@@ -3094,12 +3095,13 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.limitFraction']"
             },
             {
               "type": "progress",
               "label": "realtime",
-              "value": "<%= data.metadata.annotations['cpu.realtimeFraction'] && Number(data.metadata.annotations['cpu.realtimeFraction']) !== 0 ? data.metadata.annotations['cpu.realtimeFraction'] : 100 %>",
+              "value": "<%= data.metadata.annotations['cpu.realtimeFraction'] && Number(data.metadata.annotations['cpu.realtimeFraction']) !== 0 ? data.metadata.annotations['cpu.realtimeFraction'] : 0 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -3109,7 +3111,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.realtimeFraction']"
             }
           ]
         },
@@ -3132,7 +3135,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.requestFraction']"
             },
             {
               "type": "progress",
@@ -3147,12 +3151,13 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.limitFraction']"
             },
             {
               "type": "progress",
               "label": "realtime",
-              "value": "<%= data.metadata.annotations['memory.realtimeFraction'] && Number(data.metadata.annotations['memory.realtimeFraction']) !== 0 ? data.metadata.annotations['memory.realtimeFraction'] : 100 %>",
+              "value": "<%= data.metadata.annotations['memory.realtimeFraction'] && Number(data.metadata.annotations['memory.realtimeFraction']) !== 0 ? data.metadata.annotations['memory.realtimeFraction'] : 0 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",
@@ -3162,7 +3167,8 @@
                 "bg-success",
                 "bg-warning",
                 "bg-danger"
-              ]
+              ],
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.realtimeFraction']"
             }
           ]
         },
