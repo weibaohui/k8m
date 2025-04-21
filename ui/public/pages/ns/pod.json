@@ -3048,6 +3048,12 @@
           "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
         },
         {
+          "name": "realtime",
+          "label": "实时用量<br><span class='text-gray-500 text-xs'>CPU(m毫核)/内存(Mi)</span>",
+          "type": "tpl",
+          "tpl": "<%= (data.metadata.annotations['cpu.realtime'] ? data.metadata.annotations['cpu.realtime']  : 'N/A') + ' / ' + (data.metadata.annotations['memory.realtime'] ? data.metadata.annotations['memory.realtime'] : 'N/A') %>"
+        },
+        {
           "name": "资源设定",
           "label": "资源设定<br><span class='text-gray-500 text-xs'>请求<设定<上限</span>",
           "width": "180px",
@@ -3056,7 +3062,7 @@
         },
         {
           "name": "resource",
-          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比</span>",
+          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比<br>实时用量占比</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -3089,12 +3095,27 @@
                 "bg-warning",
                 "bg-danger"
               ]
+            },
+            {
+              "type": "progress",
+              "label": "realtime",
+              "value": "<%= data.metadata.annotations['cpu.realtimeFraction'] && Number(data.metadata.annotations['cpu.realtimeFraction']) !== 0 ? data.metadata.annotations['cpu.realtimeFraction'] : 100 %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
             }
           ]
         },
         {
           "name": "resource",
-          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比</span>",
+          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比<br>实时用量占比</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -3117,6 +3138,21 @@
               "type": "progress",
               "label": "limit",
               "value": "<%= data.metadata.annotations['memory.limitFraction'] && Number(data.metadata.annotations['memory.limitFraction']) !== 0 ? data.metadata.annotations['memory.limitFraction'] : 100 %>",
+              "placeholder": "N/A",
+              "animate": true,
+              "width": "100px",
+              "map": [
+                "bg-success",
+                "bg-success",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+              ]
+            },
+            {
+              "type": "progress",
+              "label": "realtime",
+              "value": "<%= data.metadata.annotations['memory.realtimeFraction'] && Number(data.metadata.annotations['memory.realtimeFraction']) !== 0 ? data.metadata.annotations['memory.realtimeFraction'] : 100 %>",
               "placeholder": "N/A",
               "animate": true,
               "width": "100px",

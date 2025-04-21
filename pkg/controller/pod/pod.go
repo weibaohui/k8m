@@ -219,11 +219,15 @@ func Usage(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster := amis.GetSelectedCluster(c)
 
-	usage := kom.Cluster(selectedCluster).WithContext(ctx).
+	usage, err := kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(name).
 		Ctl().Pod().ResourceUsageTable()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	amis.WriteJsonData(c, usage)
 }
 

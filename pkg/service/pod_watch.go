@@ -43,8 +43,8 @@ func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 	ctx := utils2.GetContextWithAdmin()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodResourceUsage", pod.Namespace, pod.Name, pod.ResourceVersion)
 	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() (*kom.ResourceUsageResult, error) {
-		tb := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
-		return tb, nil
+		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
+		return tb, err
 	})
 	if err != nil {
 		klog.V(6).Infof("get pod resource error %s/%s: %v", pod.Namespace, pod.Name, err)
@@ -75,6 +75,14 @@ func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 					sc.MemoryLimit += quantity.AsApproximateFloat64()
 				}
 			}
+			for name, quantity := range table.Limits {
+				switch name {
+				case "cpu":
+					sc.CPURealtime += quantity.AsApproximateFloat64()
+				case "memory":
+					sc.MemoryRealtime += quantity.AsApproximateFloat64()
+				}
+			}
 		}
 
 		p.CountList = append(p.CountList, sc)
@@ -100,6 +108,14 @@ func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 					sc.MemoryLimit += quantity.AsApproximateFloat64()
 				}
 			}
+			for name, quantity := range table.Realtime {
+				switch name {
+				case "cpu":
+					sc.CPURealtime += quantity.AsApproximateFloat64()
+				case "memory":
+					sc.MemoryRealtime += quantity.AsApproximateFloat64()
+				}
+			}
 		}
 		return
 	}
@@ -121,8 +137,8 @@ func (p *podService) ReducePodCount(selectedCluster string, pod *corev1.Pod) {
 		ctx := utils2.GetContextWithAdmin()
 		cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodResourceUsage", pod.Namespace, pod.Name, pod.ResourceVersion)
 		table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() (*kom.ResourceUsageResult, error) {
-			tb := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
-			return tb, nil
+			tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
+			return tb, err
 		})
 		if err != nil {
 			klog.V(6).Infof("get pod resource error %s/%s: %v", pod.Namespace, pod.Name, err)
@@ -153,6 +169,14 @@ func (p *podService) ReducePodCount(selectedCluster string, pod *corev1.Pod) {
 				sc.MemoryLimit -= quantity.AsApproximateFloat64()
 			}
 		}
+		for name, quantity := range table.Realtime {
+			switch name {
+			case "cpu":
+				sc.CPURealtime -= quantity.AsApproximateFloat64()
+			case "memory":
+				sc.MemoryRealtime -= quantity.AsApproximateFloat64()
+			}
+		}
 	}
 }
 
@@ -165,8 +189,8 @@ func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item unstru
 	ctx := utils2.GetContextWithAdmin()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
-		return tb, nil
+		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		return tb, err
 	})
 	if err != nil {
 		return item
@@ -175,19 +199,23 @@ func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item unstru
 	for _, row := range table {
 		if row.ResourceType == "cpu" {
 			utils.AddOrUpdateAnnotations(&item, map[string]string{
-				"cpu.request":         row.Request,
-				"cpu.requestFraction": row.RequestFraction,
-				"cpu.limit":           row.Limit,
-				"cpu.limitFraction":   row.LimitFraction,
-				"cpu.total":           row.Total,
+				"cpu.request":          row.Request,
+				"cpu.requestFraction":  row.RequestFraction,
+				"cpu.limit":            row.Limit,
+				"cpu.limitFraction":    row.LimitFraction,
+				"cpu.realtime":         row.Realtime,
+				"cpu.realtimeFraction": row.RealtimeFraction,
+				"cpu.total":            row.Total,
 			})
 		} else if row.ResourceType == "memory" {
 			utils.AddOrUpdateAnnotations(&item, map[string]string{
-				"memory.request":         row.Request,
-				"memory.requestFraction": row.RequestFraction,
-				"memory.limit":           row.Limit,
-				"memory.limitFraction":   row.LimitFraction,
-				"memory.total":           row.Total,
+				"memory.request":          row.Request,
+				"memory.requestFraction":  row.RequestFraction,
+				"memory.limit":            row.Limit,
+				"memory.limitFraction":    row.LimitFraction,
+				"memory.realtime":         row.Realtime,
+				"memory.realtimeFraction": row.RealtimeFraction,
+				"memory.total":            row.Total,
 			})
 		}
 	}
@@ -205,10 +233,10 @@ func (p *podService) SetStatusCountOnNamespace(selectedCluster string, item unst
 		utils.AddOrUpdateAnnotations(&item, map[string]string{
 			"cpu.request":     fmt.Sprintf("%.2f", sc.CPURequest),
 			"cpu.limit":       fmt.Sprintf("%.2f", sc.CPULimit),
-			"cpu.realtime":    "-",
+			"cpu.realtime":    fmt.Sprintf("%.2f", sc.CPURealtime),
 			"memory.request":  fmt.Sprintf("%.2f", sc.MemoryRequest/(1024*1024*1024)),
 			"memory.limit":    fmt.Sprintf("%.2f", sc.MemoryLimit/(1024*1024*1024)),
-			"memory.realtime": "-",
+			"memory.realtime": fmt.Sprintf("%.2f", sc.MemoryRealtime/(1024*1024*1024)),
 			"pod.count.total": fmt.Sprintf("%d", sc.PodCount),
 		})
 	}
@@ -231,8 +259,8 @@ func (p *podService) CacheAllocatedStatus(selectedCluster string, item *v1.Pod) 
 	cacheKey := p.CacheKey(item)
 	ctx := utils2.GetContextWithAdmin()
 	_, _ = utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
-		tb := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
-		return tb, nil
+		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		return tb, err
 	})
 
 }
