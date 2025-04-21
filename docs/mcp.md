@@ -7,14 +7,14 @@ k8m 内置MCP 支持平台页面直接使用，也支持其他软件集成。
 登录后，默认在页面右下角有一个对话按钮，点击后即可使用MCP。
 
 ## 第二种：开放MCP
-适合给其CherryStudio、Cursor、Cline等其他软件集成使用。
+适合给其Trae、CherryStudio、Cursor、Cline等其他软件集成使用。
 
 ### 客户端使用
 #### 创建MCP访问链接
 登录平台后，在`个人中心--开放MCP`页面，点击`创建链接`按钮，输入描述后，得到一个访问链接。
 形如
 ```bash
-http://localhost:3619/xyzabcd/sse	
+http://localhost:3619/cc3fuxbq/sse	
 ```
 请将`localhost`替换为MCP Server的IP地址，端口号为3619。 
 ![MCP开放](../images/mcp/open_mcp.png "屏幕截图")
@@ -30,6 +30,19 @@ MCP开放访问链接将MCP权限绑定到创建用户的权限上。也就是�
 界面内已连接的集群均可使用。
 
 #### 配置MCP工具
+##### 配置Trae
+1. 进入Trae设置界面
+2. 找到配置-MCP服务器配置
+   ![](../images/mcp/trae-1.png "屏幕截图")
+
+3. 添加MCP Server的URL，拷贝上面的地址
+      ![](../images/mcp/trae-2.png "屏幕截图")
+4. 点击确定
+5. 查看添加结果
+   ![](../images/mcp/trae-3.png "屏幕截图")
+6. 对话效果
+   ![](../images/mcp/trae-4.png "屏幕截图")
+   ![](../images/mcp/trae-5.png "屏幕截图")
 ##### 配置Cursor
 1. 进入Cursor设置界面
 2. 找到扩展服务配置选项
@@ -44,14 +57,13 @@ MCP开放访问链接将MCP权限绑定到创建用户的权限上。也就是�
 
 ### 通用配置文件
 
-适合MCP工具集成，如Cursor、Claude Desktop、Windsurf等，此外也可以使用这些软件的UI操作界面进行添加。
+适合MCP工具集成，如Trae、Cursor、Claude Desktop、Windsurf等，此外也可以使用这些软件的UI操作界面进行添加。
 
 ```json
 {
   "mcpServers": {
-    "kom": {
-      "type": "sse",
-      "url": "http://IP:9096/sse"
+    "k8m": {
+      "url": "http://localhost:3619/cc3fuxbq/sse"
     }
   }
 }
