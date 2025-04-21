@@ -56,6 +56,9 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	nsList := stmt.NamespaceList
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+	if roleString == "" {
+		roleString = service.UserService().GetPlatformRolesByName(username)
+	}
 
 	var err error
 
