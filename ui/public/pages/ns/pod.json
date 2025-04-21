@@ -3049,7 +3049,7 @@
         },
         {
           "name": "realtime",
-          "label": "实时用量<br>CPU(核)/内存(Mi)",
+          "label": "实时用量<br><span class='text-gray-500 text-xs'>CPU(m毫核)/内存(Mi)</span>",
           "type": "tpl",
           "tpl": "<%= (data.metadata.annotations['cpu.realtime'] ? data.metadata.annotations['cpu.realtime']  : 'N/A') + ' / ' + (data.metadata.annotations['memory.realtime'] ? data.metadata.annotations['memory.realtime'] : 'N/A') %>"
         },

@@ -21,7 +21,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.38.1
 	github.com/spf13/pflag v1.0.6
-	github.com/weibaohui/kom v0.2.19
+	github.com/weibaohui/kom v0.2.20
 	golang.org/x/net v0.38.0
 	golang.org/x/oauth2 v0.28.0
 	gorm.io/gorm v1.25.12
