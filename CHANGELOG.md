@@ -1,5 +1,16 @@
 
 ## 更新日志
+
+
+**v0.0.93更新**
+新增Pod列表、节点列表、Ns列表页面的实时用量展示。
+1. Pod列表展示效果如下：
+![Image](https://github.com/user-attachments/assets/41e0283f-aa6e-432d-a62a-f1d142359929)
+2. 节点展示效果如下：
+![Image](https://github.com/user-attachments/assets/f67b1439-47e7-453e-ba85-51f4715b6bc4)
+3. 命名空间展示效果如下：
+![Image](https://github.com/user-attachments/assets/82e42baf-d688-4376-bbe1-97dde361b9e5)
+
 **v0.0.92更新**
 * 新增OIDC单点登录支持
 
