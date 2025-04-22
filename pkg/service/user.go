@@ -245,3 +245,17 @@ func (u *userService) CheckAndCreateUser(username, source string) error {
 	}
 	return nil
 }
+
+// GetPlatformRolesByName 通过用户名获取用户的平台角色
+func (u *userService) GetPlatformRolesByName(username string) string {
+	cfg := flag.Init()
+	if cfg.EnableTempAdmin && username == cfg.AdminUserName {
+		return constants.RolePlatformAdmin
+	}
+	if names, err := u.GetGroupNames(username); err == nil {
+		if rolesByGroupNames, err := u.GetRolesByGroupNames(names); err == nil {
+			return strings.Join(rolesByGroupNames, ",")
+		}
+	}
+	return ""
+}

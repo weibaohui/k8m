@@ -37,7 +37,7 @@ func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName str
 	dao.DB().Create(log)
 }
 
-func (m *MCPHost) addLog(log *models.MCPToolLog) {
+func (m *MCPHost) AddLog(log *models.MCPToolLog) {
 
 	m.bufferMux.Lock()
 	m.buffer = append(m.buffer, log)
