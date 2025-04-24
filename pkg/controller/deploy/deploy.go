@@ -308,9 +308,10 @@ func Create(c *gin.Context) {
 
 	var req struct {
 		Metadata struct {
-			Namespace string            `json:"namespace"`
-			Name      string            `json:"name"`
-			Labels    map[string]string `json:"labels,omitempty"`
+			Namespace   string            `json:"namespace"`
+			Name        string            `json:"name"`
+			Labels      map[string]string `json:"labels,omitempty"`
+			Annotations map[string]string `json:"annotations,omitempty"`
 		}
 		Spec struct {
 			Replicas int32 `json:"replicas"`
@@ -339,24 +340,34 @@ func Create(c *gin.Context) {
 	// 构建Deployment对象
 	deployment := &v1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: req.Metadata.Namespace,
-			Name:      req.Metadata.Name,
-			Labels:    req.Metadata.Labels,
+			Namespace:   req.Metadata.Namespace,
+			Name:        req.Metadata.Name,
+			Labels:      req.Metadata.Labels,
+			Annotations: req.Metadata.Annotations,
+		},
+		Spec: v1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				// 设置标签spec.template.metadata.labels里面的app和version
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app":     req.Metadata.Name,
+						"version": "v1",
+					},
+				},
+			},
+			// 设置标签spec.template.metadata.labels里面的app和version
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app":     req.Metadata.Name,
+					"version": "v1",
+				},
+			},
+			// 设置副本数
+			Replicas: &req.Spec.Replicas,
 		},
 	}
-	// 设置标签spec.template.metadata.labels里面的app和version
-	deployment.Spec.Template.ObjectMeta.Labels = map[string]string{
-		"app":     req.Metadata.Name,
-		"version": "v1",
-	}
-	// 设置spec.selector.matchLabels里面的app和version
-	deployment.Spec.Selector = &metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			"app":     req.Metadata.Name,
-			"version": "v1",
-		},
-	}
-	deployment.Spec.Replicas = &req.Spec.Replicas
+
+	// 设置容器信息
 	for _, container := range req.Spec.Template.Spec.Containers {
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{
 			Name:  container.Name,
