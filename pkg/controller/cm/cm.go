@@ -159,6 +159,11 @@ func Create(c *gin.Context) {
 			Name:      requestBody.Metadata.Name,
 			Namespace: requestBody.Metadata.Namespace,
 			Labels:    requestBody.Metadata.Labels,
+			Annotations: map[string]string{
+				"currentVersion": "1",
+				"description":    "",
+				"originName":     requestBody.Metadata.Name,
+			},
 		},
 		Data: requestBody.Data,
 	}

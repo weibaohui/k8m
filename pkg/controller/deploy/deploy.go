@@ -342,6 +342,9 @@ func Create(c *gin.Context) {
 			Namespace: req.Metadata.Namespace,
 			Name:      req.Metadata.Name,
 			Labels:    req.Metadata.Labels,
+			Annotations: map[string]string{
+				"description": "",
+			},
 		},
 	}
 	// 设置标签spec.template.metadata.labels里面的app和version
