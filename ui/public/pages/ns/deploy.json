@@ -367,7 +367,7 @@
                     "label": "标签设置",
                     "name": "metadata.labels",
                     "value": {
-                      "project": ""
+                      "version": "v1"
                     },
                     "description": "建议填写project:所属应用组或项目名称，如不需要请删除",
                     "required": true

@@ -336,8 +336,6 @@ func Create(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("Deployment %s 已存在", req.Metadata.Name))
 		return
 	}
-	req.Metadata.Labels["app"] = req.Metadata.Name
-
 	// 构建Deployment对象
 	deployment := &v1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -346,17 +344,18 @@ func Create(c *gin.Context) {
 			Labels:    req.Metadata.Labels,
 		},
 	}
-	// 设置标签spec.template.metadata.labels里面的app
+	// 设置标签spec.template.metadata.labels里面的app和version
 	deployment.Spec.Template.ObjectMeta.Labels = map[string]string{
-		"app": req.Metadata.Name,
+		"app":     req.Metadata.Name,
+		"version": "v1",
 	}
-	// 设置spec.selector.matchLabels里面的app
+	// 设置spec.selector.matchLabels里面的app和version
 	deployment.Spec.Selector = &metav1.LabelSelector{
 		MatchLabels: map[string]string{
-			"app": req.Metadata.Name,
+			"app":     req.Metadata.Name,
+			"version": "v1",
 		},
 	}
-
 	deployment.Spec.Replicas = &req.Spec.Replicas
 	for _, container := range req.Spec.Template.Spec.Containers {
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{
