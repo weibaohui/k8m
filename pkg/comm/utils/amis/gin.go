@@ -3,17 +3,22 @@ package amis
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/kom/kom"
 )
 
-func GetSelectedCluster(c *gin.Context) string {
+func GetSelectedCluster(c *gin.Context) (string, error) {
 	selectedCluster := c.GetString("cluster")
-	return selectedCluster
+	if kom.Cluster(selectedCluster) == nil {
+		return "", fmt.Errorf("cluster %s not found", selectedCluster)
+	}
+	return selectedCluster, nil
 }
 
 // GetLoginUserClusters 获取当前登录用户可访问集群列表

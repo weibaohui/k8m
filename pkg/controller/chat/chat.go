@@ -84,8 +84,13 @@ func Describe(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	cluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	var describe []byte
-	kom.Cluster(amis.GetSelectedCluster(c)).WithContext(ctx).GVK(data.Group, data.Version, data.Kind).
+	kom.Cluster(cluster).WithContext(ctx).GVK(data.Group, data.Version, data.Kind).
 		Name(data.Name).
 		Namespace(data.Namespace).
 		Describe(&describe)

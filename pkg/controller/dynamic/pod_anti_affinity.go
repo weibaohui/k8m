@@ -22,11 +22,15 @@ func ListPodAntiAffinity(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	// 先获取资源中的定义
 	var item unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).
+	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).Name(name).
@@ -80,7 +84,11 @@ func processPodAntiAffinity(c *gin.Context, action string) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var info podAffinity
 
@@ -91,7 +99,7 @@ func processPodAntiAffinity(c *gin.Context, action string) {
 
 	// 先获取资源中的定义
 	var item unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).
+	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).Name(name).

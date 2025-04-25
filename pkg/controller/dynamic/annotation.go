@@ -46,7 +46,11 @@ func UpdateAnnotations(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Annotations map[string]interface{} `json:"annotations"`
@@ -72,7 +76,7 @@ func UpdateAnnotations(c *gin.Context) {
 		return
 	}
 	var obj *unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Name(name).Namespace(ns).
 		CRD(group, version, kind).
 		Get(&obj).Error
@@ -106,10 +110,14 @@ func ListAnnotations(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var obj *unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Name(name).Namespace(ns).
 		CRD(group, version, kind).
 		Get(&obj).Error

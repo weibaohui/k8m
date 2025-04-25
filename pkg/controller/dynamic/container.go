@@ -21,10 +21,14 @@ func ImagePullSecretOptionList(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var item *unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).
 		Name(name).Get(&item).Error
@@ -73,10 +77,14 @@ func ContainerResourcesInfo(c *gin.Context) {
 	version := c.Param("version")
 	containerName := c.Param("container_name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var item *unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).
 		Name(name).Get(&item).Error
@@ -214,7 +222,11 @@ func UpdateResources(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var info resourceInfo
 
@@ -305,10 +317,14 @@ func ContainerInfo(c *gin.Context) {
 	version := c.Param("version")
 	containerName := c.Param("container_name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var item *unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).
 		Name(name).Get(&item).Error
@@ -342,10 +358,14 @@ func ContainerEnvInfo(c *gin.Context) {
 	version := c.Param("version")
 	containerName := c.Param("container_name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var item *unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).
 		Name(name).Get(&item).Error
@@ -379,7 +399,11 @@ func UpdateContainerEnv(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var info ContainerEnv
 	if err := c.ShouldBindJSON(&info); err != nil {
@@ -651,7 +675,11 @@ func UpdateImageTag(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var info imageInfo
 
@@ -729,10 +757,14 @@ func ContainerHealthChecksInfo(c *gin.Context) {
 	version := c.Param("version")
 	containerName := c.Param("container_name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var item *unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		CRD(group, version, kind).
 		Namespace(ns).
 		Name(name).Get(&item).Error
@@ -825,7 +857,11 @@ func UpdateHealthChecks(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var info HealthCheckInfo
 	if err := c.ShouldBindJSON(&info); err != nil {

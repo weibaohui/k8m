@@ -25,7 +25,11 @@ func Import(c *gin.Context) {
 	info := &info{}
 	ns := c.Param("ns")
 	name := c.Param("name")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	ctx := amis.GetContextWithUser(c)
 	info.FileName = c.PostForm("fileName")
 
@@ -79,7 +83,11 @@ func Update(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	key := c.Param("key")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	ctx := amis.GetContextWithUser(c)
 	// 解析JSON请求体
 	var requestBody struct {
@@ -95,7 +103,7 @@ func Update(c *gin.Context) {
 		return
 	}
 	var cm *v1.ConfigMap
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(name).Namespace(ns).Get(&cm).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(name).Namespace(ns).Get(&cm).Error
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("获取configmap错误: %v", err))
 		return
@@ -126,7 +134,11 @@ func Update(c *gin.Context) {
 // Create 创建configmap接口
 func Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	// 解析请求体
 	var requestBody struct {
 		Metadata struct {
@@ -143,7 +155,7 @@ func Create(c *gin.Context) {
 	}
 	// 判断是否存在同名ConfigMap
 	var existingCM v1.ConfigMap
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(requestBody.Metadata.Name).Namespace(requestBody.Metadata.Namespace).Get(&existingCM).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(requestBody.Metadata.Name).Namespace(requestBody.Metadata.Namespace).Get(&existingCM).Error
 	if err == nil {
 		amis.WriteJsonError(c, fmt.Errorf("ConfigMap %s 已存在", requestBody.Metadata.Name))
 		return

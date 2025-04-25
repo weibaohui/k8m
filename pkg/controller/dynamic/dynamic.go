@@ -24,7 +24,11 @@ func List(c *gin.Context) {
 	kind := c.Param("kind")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var nsList []string
 	if strings.Contains(ns, ",") {
@@ -91,7 +95,7 @@ func List(c *gin.Context) {
 	}
 
 	// 执行SQL
-	err := sql.
+	err = sql.
 		FillTotalCount(&total).
 		List(&list).Error
 
@@ -161,7 +165,11 @@ func Event(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	apiVersion := fmt.Sprintf("%s", version)
 	if group != "" {
@@ -171,7 +179,7 @@ func Event(c *gin.Context) {
 	fieldSelector := fmt.Sprintf("regarding.apiVersion=%s,regarding.kind=%s,regarding.name=%s,regarding.namespace=%s", apiVersion, kind, name, ns)
 
 	var eventList []unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).
+	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		RemoveManagedFields().
 		Namespace(ns).
@@ -190,11 +198,15 @@ func Fetch(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var obj *unstructured.Unstructured
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).RemoveManagedFields().Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).RemoveManagedFields().Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -216,11 +228,15 @@ func FetchJson(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var obj *unstructured.Unstructured
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).RemoveManagedFields().Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).RemoveManagedFields().Name(name).Namespace(ns).CRD(group, version, kind).Get(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -235,9 +251,13 @@ func Remove(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
-	err := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
+	err = removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -262,7 +282,11 @@ func BatchRemove(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names      []string `json:"name_list"`
@@ -272,7 +296,6 @@ func BatchRemove(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
@@ -295,7 +318,11 @@ func BatchForceRemove(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names      []string `json:"name_list"`
@@ -305,7 +332,6 @@ func BatchForceRemove(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
@@ -335,7 +361,11 @@ func Save(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -353,7 +383,7 @@ func Save(c *gin.Context) {
 	}
 	obj.SetName(name)
 	obj.SetNamespace(ns)
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Update(&obj).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Update(&obj).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -368,11 +398,15 @@ func Describe(c *gin.Context) {
 	group := c.Param("group")
 	version := c.Param("version")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var result []byte
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Describe(&result).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Describe(&result).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -381,7 +415,11 @@ func Describe(c *gin.Context) {
 }
 
 func UploadFile(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	ctx := amis.GetContextWithUser(c)
 	// 获取上传的文件
@@ -408,7 +446,11 @@ func UploadFile(c *gin.Context) {
 
 func Apply(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -424,7 +466,11 @@ func Apply(c *gin.Context) {
 }
 func Delete(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req yamlRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

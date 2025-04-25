@@ -16,16 +16,24 @@ func Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).Namespace(ns).Name(name).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).Namespace(ns).Name(name).
 		Ctl().Rollout().Restart()
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
 func BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names      []string `json:"name_list"`
@@ -36,7 +44,6 @@ func BatchRestart(c *gin.Context) {
 		return
 	}
 
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
@@ -58,7 +65,11 @@ func BatchRestart(c *gin.Context) {
 
 func BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names      []string `json:"name_list"`
@@ -69,7 +80,6 @@ func BatchStop(c *gin.Context) {
 		return
 	}
 
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
@@ -91,7 +101,11 @@ func BatchStop(c *gin.Context) {
 
 func BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names      []string `json:"name_list"`
@@ -102,7 +116,6 @@ func BatchRestore(c *gin.Context) {
 		return
 	}
 
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
@@ -127,14 +140,18 @@ func Event(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var metas []string
 
 	metas = append(metas, name)
 	var rs *v1.ReplicaSet
 	// 先取rs
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).
 		Namespace(ns).Name(name).Get(&rs).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -187,7 +204,11 @@ func HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	hpa, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ReplicaSet{}).Namespace(ns).Name(name).
 		Ctl().ReplicaSet().HPAList()
 	if err != nil {
