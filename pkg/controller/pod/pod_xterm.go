@@ -72,7 +72,10 @@ func (t *TerminalSizeQueue) Push(cols, rows uint16) {
 }
 
 func removePod(ctx context.Context, selectedCluster string, ns string, podName string) {
-	// 删除Pod
+	if selectedCluster == "" {
+		klog.Errorf("selectedCluster is empty, cannot delete pod %s/%s", ns, podName)
+		return
+	}
 	kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Delete()
 }
 
@@ -145,6 +148,10 @@ func Xterm(c *gin.Context) {
 	// 使用sync.Once确保清理动作只执行一次
 	var cleanupOnce sync.Once
 	cleanup := func() {
+		if selectedCluster == "" {
+			klog.Errorf("清理时发现selectedCluster为空，跳过Pod删除操作")
+			return
+		}
 		if removeAfterExec != "" {
 			removePod(ctx, selectedCluster, ns, podName)
 		}
