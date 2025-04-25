@@ -22,7 +22,6 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 详细的配置和使用说明请参考[文档](docs/README.md)。
 更新日志请参考[更新日志](changelog.md)。
 
-
 ### 主要特点
 
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
@@ -70,6 +69,7 @@ Usage of ./k8m:
       --kubectl-shell-image string       Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令 (default "bitnami/kubectl:latest")
       --log-v int                        klog的日志级别klog.V(2) (default 2)
       --login-type string                登录方式，password, oauth, token等,default is password (default "password")
+      --image-pull-timeout               Node Shell、Kubectl Shell 镜像拉取超时时间。默认为 30 秒
       --node-shell-image string          NodeShell 镜像。 默认为 alpine:latest，必须包含`nsenter`命令 (default "alpine:latest")
   -p, --port int                         监听端口 (default 3618)
       --sqlite-path string               sqlite数据库文件路径， (default "./data/k8m.db")
@@ -97,6 +97,7 @@ services:
     volumes:
       - ./data:/app/data
 ```
+
 启动之后，访问`3618`端口，默认用户：`admin`，默认密码`123456`。
 如需自定义大模型参数、配置私有化大模型，请参考[文档](docs/use-self-hosted-ai.md)。
 如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
@@ -107,17 +108,9 @@ services:
 ### 内置GPT
 
 从v0.0.8版本开始，将内置GPT，无需配置。
-如果您需要使用自己的GPT，请参考以下步骤。
-
-### **环境变量配置**
-
-需要设置环境变量，以启用ChatGPT。
-
-```bash
-export OPENAI_API_KEY="sk-XXXXX"
-export OPENAI_API_URL="https://api.siliconflow.cn/v1"
-export OPENAI_MODEL="Qwen/Qwen2.5-7B-Instruct"
-```
+如果您需要使用自己的GPT，请参考以下文档。
+- [自托管/自定义大模型支持](use-self-hosted-ai.md) - 如何使用自托管的
+- [Ollama配置](ollama.md) - 如何配置使用Ollama大模型。
 
 ### **ChatGPT 状态调试**
 
@@ -160,6 +153,7 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 | `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                    |
 | `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`   | kubectl shell 镜像地址                                                    |
 | `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址                                                       |
+| `IMAGE_PULL_TIMEOUT`  | `30`                       | Node shell、kubectl shell 镜像地址拉取超时时间。默认30秒。                            |
 | `SQLITE_PATH`         | `./data/k8m.db`            | 持久化数据库地址，默认sqlite数据库，文件地址./data/k8m.db                                |
 | `CONNECT_CLUSTER`     | `"false"`                  | 启动程序后，是否自动连接发现的集群，默认关闭                                                |
 | `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                     |
