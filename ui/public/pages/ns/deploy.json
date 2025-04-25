@@ -367,9 +367,9 @@
                     "label": "标签设置",
                     "name": "metadata.labels",
                     "value": {
-                      "project": ""
+                      "version": "v1"
                     },
-                    "description": "建议填写project:所属应用组或项目名称，如不需要请删除",
+                    "description": "建议填写version: v1,如不需要可以删除",
                     "required": true
                   },
                   {
@@ -408,6 +408,14 @@
                         "description": "容器镜像的名称"
                       }
                     ]
+                  },
+                  {
+                    "type": "input-kv",
+                    "label": "注解",
+                    "name": "metadata.annotations",
+                    "value": {
+                      "description": ""
+                    }
                   }
                 ]
               }

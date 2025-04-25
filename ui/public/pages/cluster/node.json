@@ -352,6 +352,20 @@
           }
         }
       ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
       "api": "post:/k8s/$kind/group/$group/version/$version/list",
       "columns": [
         {
