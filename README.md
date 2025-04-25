@@ -220,6 +220,8 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 ## 联系我
 
 微信（大罗马的太阳） 搜索ID：daluomadetaiyang,备注k8m。
+<img width="214" alt="Image" src="https://github.com/user-attachments/assets/166db141-42c5-42c4-9964-8e25cf12d04c" />
+
 
 ## 微信群
 
