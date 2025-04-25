@@ -318,8 +318,9 @@ func Create(c *gin.Context) {
 			Template struct {
 				Spec struct {
 					Containers []struct {
-						Name  string `json:"name"`
-						Image string `json:"image"`
+						Name            string            `json:"name"`
+						Image           string            `json:"image"`
+						ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
 					} `json:"containers"`
 				} `json:"spec"`
 			} `json:"template"`
@@ -370,8 +371,9 @@ func Create(c *gin.Context) {
 	// 设置容器信息
 	for _, container := range req.Spec.Template.Spec.Containers {
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{
-			Name:  container.Name,
-			Image: container.Image,
+			Name:            container.Name,
+			Image:           container.Image,
+			ImagePullPolicy: container.ImagePullPolicy,
 		})
 	}
 
