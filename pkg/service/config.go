@@ -70,6 +70,11 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	if m.NodeShellImage != "" {
 		cfg.NodeShellImage = m.NodeShellImage
 	}
+	// 默认为30秒
+	if m.ImagePullTimeout != 30 {
+		cfg.ImagePullTimeout = m.ImagePullTimeout
+	}
+
 	// if m.Port > 0 {
 	// 	cfg.Port = m.Port
 	// }

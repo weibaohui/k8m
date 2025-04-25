@@ -79,6 +79,11 @@
                   "title": "集群配置",
                   "body": [
                     {
+                      "name": "image_pull_timeout",
+                      "type": "input-number",
+                      "label": "镜像拉取超时时间"
+                    },
+                    {
                       "name": "node_shell_image",
                       "type": "input-text",
                       "label": "节点Shell镜像",

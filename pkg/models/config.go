@@ -19,6 +19,7 @@ type Config struct {
 	JwtTokenSecret    string `json:"jwt_token_secret,omitempty"`
 	NodeShellImage    string `json:"node_shell_image,omitempty"`
 	KubectlShellImage string `json:"kubectl_shell_image,omitempty"`
+	ImagePullTimeout  int    `gorm:"default:30" json:"image_pull_timeout,omitempty"` // 镜像拉取超时时间（秒）
 	// SqlitePath        string    `json:"sqlite_path,omitempty"`
 	AnySelect       bool `gorm:"default:true" json:"any_select"`
 	PrintConfig     bool `json:"print_config"`
