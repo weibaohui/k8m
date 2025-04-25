@@ -405,7 +405,28 @@
                         "label": "镜像",
                         "name": "image",
                         "required": true,
-                        "description": "容器镜像的名称"
+                        "description": "镜像地址"
+                      },
+                      {
+                        "type": "select",
+                        "name": "imagePullPolicy",
+                        "label": "镜像拉取策略",
+                        "required": true,
+                        "value": "Always",
+                        "options": [
+                          {
+                            "label": "始终拉取",
+                            "value": "Always"
+                          },
+                          {
+                            "label": "从不拉取",
+                            "value": "Never"
+                          },
+                          {
+                            "label": "不存在时拉取",
+                            "value": "IfNotPresent"
+                          }
+                        ]
                       }
                     ]
                   },
@@ -4735,7 +4756,7 @@
                           },
                           {
                             "type": "tpl",
-                            "tpl": "<div><div><strong>容忍度规则:</strong> Pod 必须容忍节点上的污点（Taints），才能调度到该节点。容忍度由 key、operator、value 和 effect 组成，其中 key 代表污点键，operator 决定匹配方式，effect 代表污点的影响类型。</div><div><strong>匹配规则:</strong><br>1. key 和 effect 必须与节点上的污点完全一致，否则容忍度无效。<br>2. operator 决定 value 是否必须匹配：当 operator 为 Equal 时，value 也必须与节点污点的 value 一致；当 operator 为 Exists 时，只要 key 存在即可，不关心 value。</div><div><strong>调度行为:</strong> 仅当 Pod 的容忍度与节点污点的 key 和 effect 匹配，并且 value 符合 operator 规则时，Pod 才能调度到该节点，否则调度将被阻止。</div></div>"
+                            "tpl": "<div><div><strong>容忍度规则:</strong> Pod 必须容忍节点上的污点（Taints），才能调度到该节点。容忍度由 key、operator、value 和 effect 组成，其中 key 代表污点键，operator 决定匹配方式，effect 代表污点的影响类型。当 effect 为 NoExecute 时，还可以设置 tolerationSeconds 字段，该字段定义了在节点出现问题后，带有 NoExecute 效应的 Pod 还能在该节点上继续运行的时间（以秒为单位）。</div><div><strong>匹配规则:</strong><br>1. key 和 effect 必须与节点上的污点完全一致，否则容忍度无效。<br>2. operator 决定 value 是否必须匹配：当 operator 为 Equal 时，value 也必须与节点污点的 value 一致；当 operator 为 Exists 时，只要 key 存在即可，不关心 value。</div><div><strong>调度行为:</strong> 仅当 Pod 的容忍度与节点污点的 key 和 effect 匹配，并且 value 符合 operator 规则时，Pod 才能调度到该节点，否则调度将被阻止。</div></div>"
                           }
                         ]
                       },
@@ -4894,7 +4915,13 @@
                                                     "placeholder": "输选择效果"
                                                   },
                                                   "width": "100px"
-                                                },
+                                                },{
+                                                  "type": "input-number",
+                                                  "name": "tolerationSeconds",
+                                                  "label": "容忍时间（秒）",
+                                                  "required": false,
+                                                  "min": 0
+                                                 },
                                                 {
                                                   "name": "names",
                                                   "label": "节点名称",
@@ -4960,6 +4987,12 @@
                                           "value": "NoExecute"
                                         }
                                       ]
+                                    },{
+                                      "type": "input-number",
+                                      "name": "tolerationSeconds",
+                                      "label": "容忍时间（秒）",
+                                      "required": false,
+                                      "min": 0
                                     }
                                   ]
                                 }
@@ -5029,6 +5062,16 @@
                               "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
                               "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
                               "NoExecute": "<span class='label label-danger'>不可执行</span>"
+                            }
+                          },
+                          {
+                            "name": "tolerationSeconds",
+                            "label": "容忍时间（秒）",
+                            "placeholder": "-",
+                            "quickEdit": {
+                              "type": "input-number",
+                              "min": 0,
+                              "saveImmediately": true
                             }
                           }
                         ]
