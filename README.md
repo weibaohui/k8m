@@ -54,6 +54,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 ```shell
 Usage of ./k8m:
+      --enable-temp-admin                是否启用临时管理员账户配置，默认关闭
       --admin-password string            管理员密码，启用临时管理员账户配置后生效 (default "123456")
       --admin-username string            管理员用户名，启用临时管理员账户配置后生效 (default "admin")      --any-select                       是否开启任意选择划词解释，默认开启 (default true)
       --print-config                     是否打印配置信息 (default false)
@@ -63,7 +64,6 @@ Usage of ./k8m:
       --connect-cluster                  启动集群是是否自动连接现有集群，默认关闭
   -d, --debug                            调试模式
       --enable-ai                        是否启用AI功能，默认开启 (default true)
-      --enable-temp-admin                是否启用临时管理员账户配置，默认关闭
       --in-cluster                       是否自动注册纳管宿主集群，默认启用
       --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
   -c, --kubeconfig string                kubeconfig文件路径 (default "/root/.kube/config")
