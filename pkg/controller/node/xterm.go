@@ -3,6 +3,7 @@ package node
 import (
 	"encoding/base64"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -26,7 +27,8 @@ func CreateNodeShell(c *gin.Context) {
 	selectedCluster := amis.GetSelectedCluster(c)
 	name := c.Param("node_name") // NodeName
 	cfg := flag.Init()
-	ns, podName, containerName, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateNodeShell(cfg.NodeShellImage)
+	timeout := cfg.ImagePullTimeout
+	ns, podName, containerName, err := kom.Cluster(selectedCluster).WithContext(ctx).WithCache(time.Duration(timeout) * time.Second).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateNodeShell(cfg.NodeShellImage)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -72,7 +74,8 @@ func CreateKubectlShell(c *gin.Context) {
 
 	kubeconfig := service.ClusterService().GetClusterByID(string(clusterID)).GetKubeconfig()
 	cfg := flag.Init()
-	ns, podName, containerName, err := kom.Cluster(clusterID).WithContext(ctx).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateKubectlShell(kubeconfig, cfg.KubectlShellImage)
+	timeout := cfg.ImagePullTimeout
+	ns, podName, containerName, err := kom.Cluster(clusterID).WithContext(ctx).WithCache(time.Duration(timeout)*time.Second).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateKubectlShell(kubeconfig, cfg.KubectlShellImage)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
