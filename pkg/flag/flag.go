@@ -35,6 +35,7 @@ type Config struct {
 	JwtTokenSecret    string // JWT token secret
 	NodeShellImage    string // nodeShell 镜像
 	KubectlShellImage string // kubectlShell 镜像
+	ImagePullTimeout  int    // 镜像拉取超时时间（秒）
 	SqlitePath        string // sqlite 数据库路径
 	AnySelect         bool   // 是否开启任意选择，默认开启
 	PrintConfig       bool   // 是否打印配置信息
@@ -142,6 +143,9 @@ func (c *Config) InitFlags() {
 	// 默认不启用临时管理员账户配置
 	defaultEnableTempAdmin := getEnvAsBool("ENABLE_TEMP_ADMIN", false)
 
+	// 默认镜像拉取超时时间为30秒
+	defaultImagePullTimeout := getEnvAsInt("IMAGE_PULL_TIMEOUT", 30)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -164,6 +168,7 @@ func (c *Config) InitFlags() {
 	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
 	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动程序后，是否自动连接发现的集群，默认关闭  ")
 	pflag.BoolVar(&c.UseBuiltInModel, "use-builtin-model", defaultUseBuiltInModel, "是否使用内置大模型参数，默认开启")
+	pflag.IntVar(&c.ImagePullTimeout, "image-pull-timeout", defaultImagePullTimeout, "镜像拉取超时时间（秒），默认30秒")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
