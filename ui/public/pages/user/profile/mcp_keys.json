@@ -71,7 +71,7 @@
           "body": [
             {
               "type": "tpl",
-              "tpl": "http://localhost:3619/${key}/sse"
+              "tpl": "<%= 'http://' + window.location.host %>/<%= data.key%>/sse"
             }
           ]
         },
