@@ -221,6 +221,8 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 [La0jin](https://github.com/La0jin):提供在线资源及维护，极大提升了k8m的展示效果
 
+[eryajf](https://github.com/eryajf):为我们提供了非常好用的github actions，为k8m增加了自动化的发版、构建、发布等功能
+
 ## 联系我
 
 微信（大罗马的太阳） 搜索ID：daluomadetaiyang,备注k8m。
