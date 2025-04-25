@@ -69,7 +69,7 @@ func DeleteUserGroup(c *gin.Context) {
 }
 
 func handleCommonLogic(c *gin.Context, action string, groupName string) (string, string, error) {
-	cluster := amis.GetSelectedCluster(c)
+	cluster, _ := amis.GetSelectedCluster(c)
 	ctx := amis.GetContextWithUser(c)
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))

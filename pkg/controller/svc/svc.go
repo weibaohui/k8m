@@ -14,7 +14,11 @@ import (
 // Create 创建Service接口
 func Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Metadata struct {
@@ -41,7 +45,7 @@ func Create(c *gin.Context) {
 	}
 	// 判断是否存在同名Service
 	var existingService corev1.Service
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&corev1.Service{}).Name(req.Metadata.Name).Namespace(req.Metadata.Namespace).Get(&existingService).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&corev1.Service{}).Name(req.Metadata.Name).Namespace(req.Metadata.Namespace).Get(&existingService).Error
 	if err == nil {
 		amis.WriteJsonError(c, fmt.Errorf("Service %s 已存在", req.Metadata.Name))
 		return

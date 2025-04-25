@@ -24,7 +24,11 @@ var WebsocketMessageType = map[int]string{
 
 func CreateNodeShell(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	name := c.Param("node_name") // NodeName
 	cfg := flag.Init()
 	timeout := cfg.ImagePullTimeout

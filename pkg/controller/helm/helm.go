@@ -16,14 +16,18 @@ func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
 	// if namespace == "" {
 	// 	namespace = "default"
 	// }
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return nil, err
+	}
 	restConfig := service.ClusterService().GetClusterByID(selectedCluster).GetRestConfig()
 	h, err := helm.New(restConfig, namespace)
 	return h, err
 }
 
 func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, repoName string) (string, string, error) {
-	cluster := amis.GetSelectedCluster(c)
+	cluster, _ := amis.GetSelectedCluster(c)
 	ctx := amis.GetContextWithUser(c)
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))

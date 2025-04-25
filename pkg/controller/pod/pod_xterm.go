@@ -83,7 +83,11 @@ func cmdLogger(c *gin.Context, cmd string) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Query("container_name")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	cmd = utils.CleanANSISequences(cmd)
 	username, role := amis.GetLoginUser(c)
 	log := models.ShellLog{
@@ -105,10 +109,13 @@ func Xterm(c *gin.Context) {
 	podName := c.Param("pod_name")
 	containerName := c.Query("container_name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	// TODO 转移到kom中，走cb
-	var err error
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 	roles := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
 	clusterRoles, _ := service.UserService().GetClusterRole(selectedCluster, username, roles)

@@ -14,8 +14,11 @@ import (
 
 func CreateResourceQuota(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
-
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	var data struct {
 		Name     string `json:"name"`
 		Metadata struct {
@@ -135,7 +138,7 @@ func CreateResourceQuota(c *gin.Context) {
 		}
 	}
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(quota).
 		Name(data.Name).
 		Namespace(data.Metadata.Namespace).

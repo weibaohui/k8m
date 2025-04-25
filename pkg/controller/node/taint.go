@@ -13,10 +13,14 @@ import (
 func ListTaint(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var node v1.Node
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Get(&node).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -62,10 +66,13 @@ func UpdateTaint(c *gin.Context) {
 func processTaint(c *gin.Context, mode string) error {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		return err
+	}
 
 	var info TaintInfo
-	err := c.ShouldBindJSON(&info)
+	err = c.ShouldBindJSON(&info)
 	if err != nil {
 		return err
 	}

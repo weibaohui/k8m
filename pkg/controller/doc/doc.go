@@ -15,12 +15,15 @@ func Doc(c *gin.Context) {
 	apiVersion := c.Param("api_version")
 	group := c.Param("group")
 	version := c.Param("version")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	ctx := amis.GetContextWithUser(c)
 
 	// apiVersion 有可能包含xxx.com/v1 类似，所以需要处理
 	// 前端使用了base64Encode，这里需要反向解析处理
-	var err error
 	if apiVersion != "" {
 		apiVersion, err = utils.DecodeBase64(apiVersion)
 		if err != nil {

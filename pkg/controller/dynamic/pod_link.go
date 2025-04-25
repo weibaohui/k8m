@@ -60,7 +60,11 @@ func LinksServices(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -81,7 +85,11 @@ func LinksEndpoints(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -104,7 +112,11 @@ func LinksPVC(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -125,7 +137,11 @@ func LinksPV(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -146,7 +162,11 @@ func LinksIngress(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -167,7 +187,11 @@ func LinksEnv(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -188,7 +212,11 @@ func LinksEnvFromPod(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -209,7 +237,11 @@ func LinksConfigMap(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -230,7 +262,11 @@ func LinksSecret(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -251,7 +287,11 @@ func LinksNode(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	pod, err := getPod(selectedCluster, ctx, ns, name, kind)
 
@@ -271,7 +311,11 @@ func LinksPod(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	kind := c.Param("kind")
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	pods, err := getPods(selectedCluster, ctx, ns, name, kind)
 	if err != nil {
 		amis.WriteJsonError(c, err)

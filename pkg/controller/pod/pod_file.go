@@ -32,10 +32,14 @@ type info struct {
 
 // FileList  处理获取文件列表的 HTTP 请求
 func FileList(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	info := &info{}
-	err := c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindBodyWithJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -64,10 +68,14 @@ func FileList(c *gin.Context) {
 
 // ShowFile 处理下载文件的 HTTP 请求
 func ShowFile(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	info := &info{}
-	err := c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindBodyWithJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -112,10 +120,14 @@ func ShowFile(c *gin.Context) {
 	})
 }
 func SaveFile(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	info := &info{}
-	err := c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindBodyWithJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -148,7 +160,11 @@ func SaveFile(c *gin.Context) {
 }
 
 func DownloadFile(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	info := &info{}
 	info.PodName = c.Query("podName")
@@ -164,7 +180,6 @@ func DownloadFile(c *gin.Context) {
 
 	// 从容器中下载文件
 	var fileContent []byte
-	var err error
 	var finalFileName string
 	if c.Query("type") == "tar" {
 		fileContent, err = poder.DownloadTarFile(info.Path)
@@ -189,7 +204,11 @@ func DownloadFile(c *gin.Context) {
 
 // UploadFile 处理上传文件的 HTTP 请求
 func UploadFile(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	info := &info{}
 
@@ -284,10 +303,14 @@ func UploadFile(c *gin.Context) {
 
 }
 func DeleteFile(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	info := &info{}
-	err := c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindBodyWithJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

@@ -13,7 +13,11 @@ import (
 
 func GroupOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	groups := getCrdGroupList(ctx, selectedCluster)
 	var options []map[string]string
@@ -31,7 +35,11 @@ func GroupOptionList(c *gin.Context) {
 
 func KindOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	g := c.Query("spec[group]")
 	if g == "" {
 		// 还没选group
@@ -69,7 +77,11 @@ type CrdTree struct {
 // Deprecated: 废弃，请不要使用
 func CrdGuidTreeThree(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	list, err := getCrdList(ctx, selectedCluster)
 
@@ -147,7 +159,11 @@ func CrdGuidTreeThree(c *gin.Context) {
 // Deprecated: 废弃，请不要使用
 func CrdGuidTree(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	groups := getCrdGroupList(ctx, selectedCluster)
 	var crdTreeList []*CrdTree

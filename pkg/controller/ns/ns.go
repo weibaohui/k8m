@@ -14,7 +14,11 @@ import (
 )
 
 func OptionList(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	// 处理集群中有限制namespace的情况
 	if list, ok := handleRestrictedNamespace(selectedCluster); ok {

@@ -12,9 +12,13 @@ import (
 func SetDefault(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.StorageClass{}).Name(name).
 		Ctl().StorageClass().SetDefault()
 	if err != nil {
@@ -26,10 +30,14 @@ func SetDefault(c *gin.Context) {
 
 func OptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var list []v1.StorageClass
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StorageClass{}).List(&list).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StorageClass{}).List(&list).Error
 	if err != nil {
 		amis.WriteJsonData(c, gin.H{
 			"options": make([]map[string]string, 0),

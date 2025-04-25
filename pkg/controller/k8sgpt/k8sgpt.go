@@ -15,7 +15,11 @@ import (
 )
 
 func GetFields(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	kind := "Deployment"
 	apiDoc := kubernetes.K8sApiReference{

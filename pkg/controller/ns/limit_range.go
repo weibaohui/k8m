@@ -15,7 +15,11 @@ import (
 
 func CreateLimitRange(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var data struct {
 		Name     string `json:"name"`
@@ -69,7 +73,7 @@ func CreateLimitRange(c *gin.Context) {
 						return
 					}
 				}
-				
+
 				if name == "cpu" {
 					value = fmt.Sprintf("%sm", value)
 				}
@@ -93,7 +97,7 @@ func CreateLimitRange(c *gin.Context) {
 						return
 					}
 				}
-				
+
 				if name == "cpu" {
 					value = fmt.Sprintf("%sm", value)
 				}
@@ -118,7 +122,7 @@ func CreateLimitRange(c *gin.Context) {
 					return
 				}
 			}
-			
+
 			if name == "cpu" {
 				value = fmt.Sprintf("%sm", value)
 			}
@@ -142,7 +146,7 @@ func CreateLimitRange(c *gin.Context) {
 					return
 				}
 			}
-			
+
 			if name == "cpu" {
 				value = fmt.Sprintf("%sm", value)
 			}
@@ -160,7 +164,7 @@ func CreateLimitRange(c *gin.Context) {
 		limitRange.Spec.Limits = append(limitRange.Spec.Limits, limitItem)
 	}
 	klog.Infof("limitRange: %v", utils.ToJSON(limitRange))
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(limitRange).
 		Name(data.Name).
 		Namespace(data.Metadata.Namespace).

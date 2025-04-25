@@ -32,10 +32,14 @@ func StreamLogs(c *gin.Context) {
 }
 func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var pods []v1.Pod
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -76,7 +80,11 @@ func WsExec(c *gin.Context) {
 	containerName := c.Param("container_name")
 	cmd := c.Query("cmd")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	if cmd == "" {
 		amis.WriteJsonError(c, fmt.Errorf("执行命令为空"))
@@ -128,7 +136,11 @@ func Exec(c *gin.Context) {
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*5))
 	defer cancel()
@@ -160,7 +172,7 @@ func Exec(c *gin.Context) {
 	}
 
 	var result []byte
-	err := kom.Cluster(selectedCluster).WithContext(ctx).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(podName).Ctl().Pod().
@@ -182,11 +194,15 @@ func Exec(c *gin.Context) {
 
 }
 func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	ctx := amis.GetContextWithUser(c)
 	var pods []v1.Pod
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Namespace(ns).List(&pods, options).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -217,7 +233,11 @@ func Usage(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	usage, err := kom.Cluster(selectedCluster).WithContext(ctx).
 		Resource(&v1.Pod{}).
@@ -232,7 +252,11 @@ func Usage(c *gin.Context) {
 }
 
 func UniqueLabels(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	labels := service.PodService().GetUniquePodLabels(selectedCluster)
 

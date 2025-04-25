@@ -16,25 +16,37 @@ import (
 func Drain(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().Drain()
 	amis.WriteJsonErrorOrOK(c, err)
 }
 func Cordon(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().Cordon()
 	amis.WriteJsonErrorOrOK(c, err)
 }
 func Usage(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	usage, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().ResourceUsageTable()
@@ -48,16 +60,24 @@ func Usage(c *gin.Context) {
 func UnCordon(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
 		Ctl().Node().UnCordon()
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
 func BatchDrain(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names []string `json:"name_list"`
@@ -67,7 +87,6 @@ func BatchDrain(c *gin.Context) {
 		return
 	}
 
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
@@ -87,7 +106,11 @@ func BatchDrain(c *gin.Context) {
 
 func BatchCordon(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names []string `json:"name_list"`
@@ -97,7 +120,6 @@ func BatchCordon(c *gin.Context) {
 		return
 	}
 
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
@@ -117,7 +139,11 @@ func BatchCordon(c *gin.Context) {
 
 func BatchUnCordon(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var req struct {
 		Names []string `json:"name_list"`
@@ -127,7 +153,6 @@ func BatchUnCordon(c *gin.Context) {
 		return
 	}
 
-	var err error
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		x := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).Name(name).
@@ -147,10 +172,14 @@ func BatchUnCordon(c *gin.Context) {
 
 func NameOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var list []unstructured.Unstructured
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
 		WithCache(time.Second * 30).
 		List(&list).Error
 	if err != nil {
@@ -182,7 +211,11 @@ func NameOptionList(c *gin.Context) {
 // AllLabelList 获取所有节点上的标签
 func AllLabelList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	// 先拿到所有的lable列表
 	// 通过lable的kv去匹配node，将node name放入到label 结构体中，方便选择时做出判断
 	labels, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
@@ -234,10 +267,14 @@ func AllLabelList(c *gin.Context) {
 // AllTaintList 获取所有节点上的污点
 func AllTaintList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	var nodeList []*v1.Node
-	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
 		WithCache(time.Second * 30).
 		List(&nodeList).Error
 	if err != nil {
@@ -291,7 +328,11 @@ func AllTaintList(c *gin.Context) {
 	amis.WriteJsonList(c, resultList)
 }
 func UniqueLabels(c *gin.Context) {
-	selectedCluster := amis.GetSelectedCluster(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	labels := service.NodeService().GetUniqueLabels(selectedCluster)
 
