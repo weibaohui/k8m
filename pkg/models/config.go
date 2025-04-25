@@ -5,7 +5,8 @@ import (
 )
 
 type Config struct {
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	ID          uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	ProductName string `json:"product_name,omitempty"` // 产品名称
 	// Port              int       `json:"port,omitempty"`
 	// MCPServerPort     int       `json:"mcp_server_port,omitempty"`
 	// KubeConfig        string    `json:"kube_config,omitempty"`

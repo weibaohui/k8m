@@ -47,6 +47,7 @@ type Config struct {
 	EnableAI          bool   // 是否启用AI功能，默认开启
 	ConnectCluster    bool   // 启动程序后，是否自动连接发现的集群，默认关闭
 	UseBuiltInModel   bool   // 是否使用内置大模型参数，默认开启
+	ProductName       string // 产品名称，默认为K8M
 }
 
 func Init() *Config {
@@ -146,6 +147,9 @@ func (c *Config) InitFlags() {
 	// 默认镜像拉取超时时间为30秒
 	defaultImagePullTimeout := getEnvAsInt("IMAGE_PULL_TIMEOUT", 30)
 
+	// 默认产品名称为K8M
+	defaultProductName := getEnv("PRODUCT_NAME", "K8M")
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -169,6 +173,7 @@ func (c *Config) InitFlags() {
 	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动程序后，是否自动连接发现的集群，默认关闭  ")
 	pflag.BoolVar(&c.UseBuiltInModel, "use-builtin-model", defaultUseBuiltInModel, "是否使用内置大模型参数，默认开启")
 	pflag.IntVar(&c.ImagePullTimeout, "image-pull-timeout", defaultImagePullTimeout, "镜像拉取超时时间（秒），默认30秒")
+	pflag.StringVar(&c.ProductName, "product-name", defaultProductName, "产品名称，默认为K8M")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
