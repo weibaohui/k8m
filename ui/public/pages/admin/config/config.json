@@ -100,6 +100,24 @@
                   ]
                 }
               ]
+            },
+            {
+              "title": "显示设置",
+              "body": [
+                {
+                  "type": "fieldSet",
+                  "title": "显示设置",
+                  "body": [
+                    {
+                      "name": "product_name",
+                      "type": "input-text",
+                      "label": "产品名称",
+                      "value": "K8M",
+                      "desc": "设置产品显示名称"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }

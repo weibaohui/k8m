@@ -4,9 +4,10 @@ import { GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-desig
 import Sidebar from '@/components/Sidebar'
 import Toolbar from '@/components/ToolBar'
 import useStore from '@/store/layout'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styles from './index.module.scss'
 import FloatingChatGPTButton from './FloatingChatGPTButton'
+import { fetcher } from '@/components/Amis/fetcher'
 
 const App = () => {
     const { pathname } = useLocation()
@@ -24,6 +25,24 @@ const App = () => {
             navigate('/login')
         }
     }, [navigate, pathname])
+
+    const [produtcName, setProdutcName] = useState("k8m");
+
+    useEffect(() => {
+        // 从后端获取配置
+        fetcher({
+            url: '/params/config/ProductName',
+            method: 'get'
+        })
+            .then(response => {
+                //@ts-ignore
+                setProdutcName(response.data?.data);
+            })
+            .catch(error => {
+                console.error('Error fetching ProductName config:', error);
+                setProdutcName("k8m");
+            });
+    }, []);
     return <Layout className={styles.container}>
         <Layout.Header style={{
             padding: '0 0',
@@ -31,7 +50,7 @@ const App = () => {
             <div className={styles.navbar}>
                 <div className={styles.logo} onClick={goHome}>
                     <h1>
-                        <span>k8m</span>
+                        <span>{produtcName}</span>
                         <GithubOutlined
                             className='pointer'
                             style={{ marginLeft: '10px', fontSize: '18px' }}

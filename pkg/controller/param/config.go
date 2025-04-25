@@ -16,6 +16,8 @@ func Config(c *gin.Context) {
 	switch key {
 	case "AnySelect":
 		s = fmt.Sprintf("%v", cfg.AnySelect)
+	case "ProductName":
+		s = fmt.Sprintf("%v", cfg.ProductName)
 	}
 	amis.WriteJsonData(c, s)
 }
