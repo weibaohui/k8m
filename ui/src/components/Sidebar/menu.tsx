@@ -229,6 +229,25 @@ const items: () => MenuItem[] = () => {
             ],
         },
         {
+            label: "GatewayAPI",
+            icon: <i className="fa-solid fa-network-wired"></i>,
+            key: "GatewayAPI",
+            children: [
+                {
+                    label: "GatewayClass",
+                    icon: <i className="fa-solid fa-sitemap"></i>,
+                    key: "gatewayapi_gateway_class",
+                    onClick: () => onMenuClick('/gatewayapi/gateway_class')
+                },
+                {
+                    label: "Gateway",
+                    icon: <i className="fa-solid fa-sitemap"></i>,
+                    key: "gatewayapi_gateway",
+                    onClick: () => onMenuClick('/gatewayapi/gateway')
+                },
+            ],
+        },
+        {
             label: "存储",
             icon: <i className="fa-solid fa-memory"></i>,
             key: "storage",

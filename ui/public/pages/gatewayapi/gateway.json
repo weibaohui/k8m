@@ -188,6 +188,26 @@
           }
         },
         {
+          "type": "button",
+          "label": "智检",
+          "level": "link",
+          "icon": "fas fa-walking text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "AI 智能巡检 ${kind} （ESC 关闭）",
+            "body": [
+              {
+                "type": "k8sGPT",
+                "api": "/k8s/k8s_gpt/kind/${kind}/run"
+              }
+            ]
+          }
+        },
+        {
           "label": "创建",
           "icon": "fas fa-dharmachakra text-primary",
           "type": "button",
@@ -742,35 +762,7 @@
           "name": "spec.listeners",
           "label": "监听器",
           "type": "tpl",
-          "tpl": "<% if (data.spec.listeners && data.spec.listeners.length) { %><% data.spec.listeners.forEach(function(listener) { %><div style='display: inline-block; margin-right: 20px; padding: 10px; border: 1px solid #eee; border-radius: 4px;'><% if (listener.name) { %>名称: <%- listener.name %><br><% } %>协议: <%- listener.protocol %><br>端口: <%- listener.port %><br><% if (listener.hostname) { %>主机名: <%- listener.hostname %><br><% } %><% if (listener.tls) { %>TLS模式: <%- listener.tls.mode || 'Terminate' %><br><% } %></div><% }); %><% } %>",
-          "searchable": {
-            "type": "select",
-            "name": "spec.listeners.protocol",
-            "label": "协议",
-            "options": [
-              {
-                "label": "HTTP",
-                "value": "HTTP"
-              },
-              {
-                "label": "HTTPS",
-                "value": "HTTPS"
-              },
-              {
-                "label": "TLS",
-                "value": "TLS"
-              },
-              {
-                "label": "TCP",
-                "value": "TCP"
-              },
-              {
-                "label": "UDP",
-                "value": "UDP"
-              }
-            ],
-            "placeholder": "选择协议"
-          }
+          "tpl": "<% if (data.spec.listeners && data.spec.listeners.length) { %><% data.spec.listeners.forEach(function(listener) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'>名称: <%- listener.name %><br>协议: <%- listener.protocol %><br>端口: <%- listener.port %></div><% }); %><% } %>"
         },
         {
           "name": "metadata.labels",
@@ -857,7 +849,7 @@
         },
         {
           "name": "spec.gatewayClassName",
-          "label": "入口控制器",
+          "label": "网关类名称",
           "type": "text",
           "searchable": {
             "type": "select",
