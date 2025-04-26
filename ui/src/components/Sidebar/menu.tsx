@@ -230,24 +230,24 @@ const items: () => MenuItem[] = () => {
         },
         {
             label: "GatewayAPI",
-            icon: <i className="fa-solid fa-network-wired"></i>,
+            icon: <i className="fa-solid fa-door-closed"></i>,
             key: "GatewayAPI",
             children: [
                 {
                     label: "GatewayClass",
-                    icon: <i className="fa-solid fa-sitemap"></i>,
+                    icon: <i className="fa-solid fa-door-open"></i>,
                     key: "gatewayapi_gateway_class",
                     onClick: () => onMenuClick('/gatewayapi/gateway_class')
                 },
                 {
                     label: "Gateway",
-                    icon: <i className="fa-solid fa-sitemap"></i>,
+                    icon: <i className="fa-solid fa-archway"></i>,
                     key: "gatewayapi_gateway",
                     onClick: () => onMenuClick('/gatewayapi/gateway')
                 },
                 {
                     label: "HTTPRoute",
-                    icon: <i className="fa-solid fa-sitemap"></i>,
+                    icon: <i className="fa-solid fa-route"></i>,
                     key: "gatewayapi_httproute",
                     onClick: () => onMenuClick('/gatewayapi/http_route')
                 },
