@@ -765,6 +765,17 @@
           "tpl": "<% if (data.spec.listeners && data.spec.listeners.length) { %><% data.spec.listeners.forEach(function(listener) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'>名称: <%- listener.name %><br>协议: <%- listener.protocol %><br>端口: <%- listener.port %></div><% }); %><% } %>"
         },
         {
+          "name": "spec.gatewayClassName",
+          "label": "网关类名称",
+          "type": "text",
+          "searchable": {
+            "type": "select",
+            "clearable": true,
+            "searchable": true,
+            "source": "/k8s/gateway_class/option_list"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
@@ -848,15 +859,25 @@
           }
         },
         {
-          "name": "spec.gatewayClassName",
-          "label": "网关类名称",
-          "type": "text",
-          "searchable": {
-            "type": "select",
-            "clearable": true,
-            "searchable": true,
-            "source": "/k8s/gateway_class/option_list"
-          }
+          "name": "status.conditions",
+          "label": "条件",
+          "type": "k8sTextConditions"
+        },
+        {
+          "type": "each",
+          "label": "Listeners",
+          "name": "status.listeners",
+          "items": [
+            {
+              "type": "tpl",
+              "tpl": "<div><strong>名称:</strong> <%= data.name %> </div> <div><strong>已附加路由数:</strong> <%= data.attachedRoutes %> </div> <div><strong>支持的Kinds:</strong> <% for(var i=0; i<data.supportedKinds.length; i++) { %><%= data.supportedKinds[i].kind %><% if(i !== data.supportedKinds.length-1) { %>, <% } %><% } %></div>"
+            },
+            {
+              "name": "conditions",
+              "label": "条件",
+              "type": "k8sTextConditions"
+            }
+          ]
         },
         {
           "name": "metadata.creationTimestamp",

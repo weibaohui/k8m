@@ -5,6 +5,10 @@ import useConditionsStore from '@/store/conditions';
 // 定义 Props 类型
 interface K8sTextConditionsProps {
     data: {
+        conditions?: Array<{
+            type: string;
+            status: string;
+        }>;
         status?: {
             conditions?: Array<{
                 type: string;
@@ -24,7 +28,10 @@ const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextCond
     }, [initialized, initReverseConditions]);
 
     const { allNormal, conditionDetails } = useMemo(() => {
-        const conditions = data.status?.conditions || [];
+        let conditions = data.conditions || [];
+        if (conditions.length == 0) {
+            conditions = data.status?.conditions || [];
+        }
 
         if (conditions.length === 0) {
             return { allNormal: true, conditionDetails: '' };
