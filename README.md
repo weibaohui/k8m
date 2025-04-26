@@ -21,7 +21,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 详细的配置和使用说明请参考[文档](docs/README.md)。
 更新日志请参考[更新日志](changelog.md)。
-
+[开发设计文档](https://deepwiki.com/weibaohui/k8m)
 ### 主要特点
 
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
