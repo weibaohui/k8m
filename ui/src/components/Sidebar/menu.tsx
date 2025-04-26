@@ -245,6 +245,12 @@ const items: () => MenuItem[] = () => {
                     key: "gatewayapi_gateway",
                     onClick: () => onMenuClick('/gatewayapi/gateway')
                 },
+                {
+                    label: "HTTPRoute",
+                    icon: <i className="fa-solid fa-sitemap"></i>,
+                    key: "gatewayapi_httproute",
+                    onClick: () => onMenuClick('/gatewayapi/http_route')
+                },
             ],
         },
         {
