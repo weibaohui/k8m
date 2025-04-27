@@ -626,6 +626,11 @@
                     }
                 },
                 {
+                    "name": "status.parents.conditions",
+                    "label": "条件",
+                    "type": "k8sTextConditions"
+                },
+                {
                     "name": "metadata.labels",
                     "label": "标签",
                     "type": "tpl",

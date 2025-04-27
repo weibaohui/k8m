@@ -865,7 +865,7 @@
         },
         {
           "type": "each",
-          "label": "Listeners",
+          "label": "监听器",
           "name": "status.listeners",
           "items": [
             {
