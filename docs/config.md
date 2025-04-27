@@ -29,7 +29,16 @@ K8M 支持通过以下方式进行配置（优先级从高到低）：
 3. **Web UI 中的数据库配置**
 
 不同方式可根据需求灵活选择。
-
+```mermaid
+flowchart TD
+    A[配置来源] --> |命令行参数| B[配置处理]
+    A --> |环境变量| B
+    A --> |Web UI设置| B
+    B --> |loadEnv| C[数据库配置]
+    B --> |InitFlags| D[运行时配置]
+    D --> |flag.Init| E[配置实例]
+    C --> |UpdateFlagFromDB| E
+```
 ---
 
 ## 服务器配置
