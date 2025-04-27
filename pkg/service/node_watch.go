@@ -19,7 +19,7 @@ type nodeService struct {
 	lock sync.RWMutex
 }
 
-// 定义结构体，
+// NodeLabels 定义结构体，
 type NodeLabels struct {
 	ClusterName string            // 集群名称
 	NodeName    string            // 节点名称

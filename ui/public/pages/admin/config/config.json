@@ -79,8 +79,17 @@
                   "title": "集群配置",
                   "body": [
                     {
+                      "name": "resource_cache_timeout",
+                      "type": "input-number",
+                      "suffix": "秒",
+                      "label": "资源缓存时间",
+                      "value": 60,
+                      "desc": "界面展示实时用量、指标、Pod元数据等资源的缓存时间（单位：秒），默认60秒。时间越短，界面变化越快，但是会增加k8s系统负担。"
+                    },
+                    {
                       "name": "image_pull_timeout",
                       "type": "input-number",
+                      "suffix": "秒",
                       "label": "镜像拉取超时时间"
                     },
                     {
