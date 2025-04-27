@@ -623,7 +623,7 @@
                     "name": "spec.rules",
                     "label": "访问规则",
                     "type": "tpl",
-                    "tpl": "<% if (data.spec.rules && data.spec.rules.length) { %><% data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'><% if (rule.matches && rule.matches.length && rule.backendRefs && rule.backendRefs.length) { %><% rule.matches.forEach(function(match) { %><% rule.backendRefs.forEach(function(backend) { %>路径: <%- match.path && match.path.value ? match.path.value : '/' %> → 服务: <%- backend.name %><% if (backend.port) { %>:<%- backend.port %><% } %><% if (backend.weight) { %> (权重: <%- backend.weight %>)<% } %><br><% }); %><% }); %><% } %></div><% }); %><% } %>",
+                    "tpl": "<% if (data.spec.rules && data.spec.rules.length) { data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'><% if (rule.backendRefs && rule.backendRefs.length) { if (rule.matches && rule.matches.length) { rule.matches.forEach(function(match) { rule.backendRefs.forEach(function(backend) { %>路径: <%- match.path && match.path.value ? match.path.value : '/' %> → 服务: <%- backend.name %><% if (backend.port) { %>:<%- backend.port %><% } %><% if (backend.weight) { %> (权重: <%- backend.weight %>)<% } %><br><% }); }); } else { rule.backendRefs.forEach(function(backend) { %>服务: <%- backend.name %><% if (backend.port) { %>:<%- backend.port %><% } %><% if (backend.weight) { %> (权重: <%- backend.weight %>)<% } %><br><% }); } } %></div><% }); } %>",
                     "searchable": {
                         "type": "input-text",
                         "name": "spec.rules.matches.path.value",
