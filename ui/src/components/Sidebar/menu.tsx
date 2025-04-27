@@ -229,46 +229,46 @@ const items: () => MenuItem[] = () => {
             ],
         },
         {
-            label: "GatewayAPI",
+            label: "网关API",
             icon: <i className="fa-solid fa-door-closed"></i>,
             key: "GatewayAPI",
             children: [
                 {
-                    label: "GatewayClass",
+                    label: "网关类",
                     icon: <i className="fa-solid fa-door-open"></i>,
                     key: "gatewayapi_gateway_class",
                     onClick: () => onMenuClick('/gatewayapi/gateway_class')
                 },
                 {
-                    label: "Gateway",
+                    label: "网关",
                     icon: <i className="fa-solid fa-archway"></i>,
                     key: "gatewayapi_gateway",
                     onClick: () => onMenuClick('/gatewayapi/gateway')
                 },
                 {
-                    label: "HTTPRoute",
+                    label: "HTTP路由",
                     icon: <i className="fa-solid fa-route"></i>,
                     key: "gatewayapi_http_route",
                     onClick: () => onMenuClick('/gatewayapi/http_route')
                 },
                 {
-                    label: "GRPCRoute",
+                    label: "GRPC路由",
                     icon: <i className="fa-solid fa-code-branch"></i>,
                     key: "gatewayapi_grpc_route",
                     onClick: () => onMenuClick('/gatewayapi/grpc_route')
                 },
                 {
-                    label: "TCPRoute",
+                    label: "TCP路由",
                     icon: <i className="fa-solid fa-plug"></i>,
                     key: "gatewayapi_tcp_route",
                     onClick: () => onMenuClick('/gatewayapi/tcp_route')
                 }, {
-                    label: "UDPRoute",
+                    label: "UDP路由",
                     icon: <i className="fa-solid fa-broadcast-tower"></i>,
                     key: "gatewayapi_udp_route",
                     onClick: () => onMenuClick('/gatewayapi/udp_route')
                 }, {
-                    label: "TLSRoute",
+                    label: "TLS路由",
                     icon: <i className="fa-solid fa-shield-alt"></i>,
                     key: "gatewayapi_tls_route",
                     onClick: () => onMenuClick('/gatewayapi/tls_route')
