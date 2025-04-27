@@ -609,7 +609,7 @@
                 },
                 {
                     "name": "spec.parentRefs",
-                    "label": "父级来源",
+                    "label": "父级引用",
                     "type": "tpl",
                     "tpl": "<% if (data.spec.parentRefs && data.spec.parentRefs.length) { %><% data.spec.parentRefs.forEach(function(ref) { %><%- ref.name %> <span class='text-gray-500 text-xs'>(<%- ref.group || '' %>/<%- ref.kind || '' %>)</span><br><% }); %><% } %>"
                 },
@@ -621,7 +621,7 @@
                 },
                 {
                     "name": "spec.rules",
-                    "label": "访问规则",
+                    "label": "后端引用",
                     "type": "tpl",
                     "tpl": "<% if (data.spec.rules && data.spec.rules.length) { data.spec.rules.forEach(function(rule) { %><div style='display: inline-block; margin-right: 20px; padding: 10px;'><% if (rule.backendRefs && rule.backendRefs.length) { if (rule.matches && rule.matches.length) { rule.matches.forEach(function(match) { rule.backendRefs.forEach(function(backend) { %>服务: <%- match.method && match.method.service ? match.method.service : '-' %> 方法: <%- match.method && match.method.method ? match.method.method : '-' %> → 后端: <%- backend.name %><% if (backend.port) { %>:<%- backend.port %><% } %><% if (backend.weight) { %> (权重: <%- backend.weight %>)<% } %><br><% }); }); } else { rule.backendRefs.forEach(function(backend) { %>后端: <%- backend.name %><% if (backend.port) { %>:<%- backend.port %><% } %><% if (backend.weight) { %> (权重: <%- backend.weight %>)<% } %><br><% }); } } %></div><% }); } %>",
                     "searchable": {
