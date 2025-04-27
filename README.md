@@ -20,7 +20,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 ### 文档
 
 - 详细的配置和使用说明请参考[文档](docs/README.md)。
-- 更新日志请参考[更新日志](changelog.md)。
+- 更新日志请参考[更新日志](CHANGELOG.md)。
 - [开发设计文档](https://deepwiki.com/weibaohui/k8m)
 ### 主要特点
 
@@ -225,4 +225,4 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 ## 微信群
 
-![输入图片说明](https://foruda.gitee.com/images/1745201794873471302/cf331037_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1745766546951075807/e3607ea3_77493.png "屏幕截图")
