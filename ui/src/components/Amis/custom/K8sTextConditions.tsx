@@ -12,14 +12,14 @@ interface Condition {
 }
 
 interface K8sTextConditionsProps {
-    name: string;
     data: any;
 }
 
-const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextConditionsProps>(({ name, data }, ref) => {
+const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextConditionsProps>((props, ref) => {
+    //@ts-ignore
+    const { name, data } = props;
+
     const { reverseConditions, initialized, initReverseConditions } = useConditionsStore();
-    console.log(name,);
-    console.log(data,);
     useEffect(() => {
         if (!initialized) {
             initReverseConditions();
