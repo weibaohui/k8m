@@ -1,26 +1,25 @@
 import React, { useEffect, useMemo } from 'react';
 import { render as renderAmis } from 'amis';
-import useConditionsStore from '@/store/conditions';
 
-// 定义 Props 类型
-interface K8sTextConditionsProps {
-    data: {
-        conditions?: Array<{
-            type: string;
-            status: string;
-        }>;
-        status?: {
-            conditions?: Array<{
-                type: string;
-                status: string;
-            }>;
-        };
-    };
+import useConditionsStore from '@/store/conditions';
+import { GetValueByPath } from '@/utils/utils';
+
+interface Condition {
+    reason: any;
+    message: any;
+    type: string;
+    status: string;
 }
 
-const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextConditionsProps>(({ data }, ref) => {
-    const { reverseConditions, initialized, initReverseConditions } = useConditionsStore();
+interface K8sTextConditionsProps {
+    name: string;
+    data: any;
+}
 
+const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextConditionsProps>(({ name, data }, ref) => {
+    const { reverseConditions, initialized, initReverseConditions } = useConditionsStore();
+    console.log(name,);
+    console.log(data,);
     useEffect(() => {
         if (!initialized) {
             initReverseConditions();
@@ -28,10 +27,9 @@ const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextCond
     }, [initialized, initReverseConditions]);
 
     const { allNormal, conditionDetails } = useMemo(() => {
-        let conditions = data.conditions || [];
-        if (conditions.length == 0) {
-            conditions = data.status?.conditions || [];
-        }
+
+        const conditions: Array<Condition> = GetValueByPath(data, name) || [];
+
 
         if (conditions.length === 0) {
             return { allNormal: true, conditionDetails: '' };
@@ -53,7 +51,10 @@ const K8sTextConditionsComponent = React.forwardRef<HTMLSpanElement, K8sTextCond
 
             return `<p>${condition.type}: <strong>${isNormal ?
                 '<span class="text-green-500 text-xs">正常</span>' :
-                '<span class="text-red-500 text-xs">异常</span>'}</strong></p>`;
+                `<span class="text-red-500 text-xs">异常</span>`}</strong>
+                ${condition.message ? `<span class='ml-4 text-gray-500 text-xs'>${condition.message}</span>` : ''}
+                ${condition.reason ? `<span class='ml-4 text-gray-500 text-xs'>${condition.reason}</span>` : ''}
+                </p>`;
         }).join('');
 
         return { allNormal, conditionDetails };

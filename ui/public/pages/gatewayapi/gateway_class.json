@@ -578,9 +578,9 @@
                     "type": "text"
                 },
                 {
-                    "name": "metadata.annotations",
-                    "label": "是否默认",
-                    "tpl": "${metadata.annotations['ingressclass.kubernetes.io/is-default-class']}"
+                    "name": "status.conditions",
+                    "label": "条件",
+                    "type": "k8sTextConditions"
                 },
                 {
                     "name": "metadata.labels",
