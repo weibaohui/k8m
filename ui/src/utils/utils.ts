@@ -87,3 +87,42 @@ export function ProcessK8sUrlWithCluster(url: string): string {
     }
     return url;
 }
+
+// 解析路径,逐层获取值
+// obj: 要解析的对象
+// path: 路径，例如 'a.b.c'
+// 返回值: 路径对应的值，如果路径不存在则返回 undefined
+export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T): T {
+  if (!obj || typeof path !== 'string') return defaultValue as T;
+
+  const keys = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+
+  function traverse(current: any, index: number): any {
+    if (current == null) {
+      return undefined;
+    }
+
+    const key = keys[index];
+
+    if (Array.isArray(current)) {
+      // 当前是数组，批量处理每个元素
+      const results = current.map(item => traverse(item, index));
+      return results.flat(); // 把结果拍平
+    }
+
+    if (index === keys.length - 1) {
+      // 最后一个key
+      return current?.[key];
+    }
+
+    return traverse(current[key], index + 1);
+  }
+
+  const result = traverse(obj, 0);
+
+  // 返回默认值或者实际值
+  if (result === undefined) {
+    return defaultValue as T;
+  }
+  return result;
+}
