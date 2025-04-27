@@ -608,6 +608,12 @@
                     }
                 },
                 {
+                    "name": "spec.parentRefs",
+                    "label": "父级来源",
+                    "type": "tpl",
+                    "tpl": "<% if (data.spec.parentRefs && data.spec.parentRefs.length) { %><% data.spec.parentRefs.forEach(function(ref) { %><%- ref.name %> <span class='text-gray-500 text-xs'>(<%- ref.group || '' %>/<%- ref.kind || '' %>)</span><br><% }); %><% } %>"
+                },
+                {
                     "name": "spec.hostnames",
                     "label": "域名",
                     "type": "tpl",
