@@ -7,6 +7,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
 	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -15,8 +16,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/klog/v2"
 )
-
-var ttl = 2 * time.Minute
 
 // StatusCount 定义结构体，以namespace为key进行统计，累计所有的pod数量，以及cpu、内存用量
 type StatusCount struct {
@@ -31,6 +30,13 @@ type StatusCount struct {
 	MemoryRealtime float64 // 内存实时量
 }
 
+func (p *podService) getTTL() time.Duration {
+	cfg := flag.Init()
+	if cfg.ResourceCacheTimeout > 0 {
+		return time.Duration(cfg.ResourceCacheTimeout) * time.Second
+	}
+	return 1 * time.Minute
+}
 func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 	// 从CountList中看是否有该集群、该namespace的项，有则加1，无则创建为1
 	// 为避免并发操作统计错误，加一个锁
@@ -42,7 +48,7 @@ func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 	})
 	ctx := utils2.GetContextWithAdmin()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodResourceUsage", pod.Namespace, pod.Name, pod.ResourceVersion)
-	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() (*kom.ResourceUsageResult, error) {
+	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() (*kom.ResourceUsageResult, error) {
 		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
 		return tb, err
 	})
@@ -136,7 +142,7 @@ func (p *podService) ReducePodCount(selectedCluster string, pod *corev1.Pod) {
 	if len(h) == 1 {
 		ctx := utils2.GetContextWithAdmin()
 		cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodResourceUsage", pod.Namespace, pod.Name, pod.ResourceVersion)
-		table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() (*kom.ResourceUsageResult, error) {
+		table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() (*kom.ResourceUsageResult, error) {
 			tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
 			return tb, err
 		})
@@ -188,7 +194,7 @@ func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item unstru
 	ns := item.GetNamespace()
 	ctx := utils2.GetContextWithAdmin()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
-	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() ([]*kom.ResourceUsageRow, error) {
 		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, err
 	})
@@ -258,7 +264,7 @@ func (p *podService) CacheAllocatedStatus(selectedCluster string, item *v1.Pod) 
 	ns := item.GetNamespace()
 	cacheKey := p.CacheKey(item)
 	ctx := utils2.GetContextWithAdmin()
-	_, _ = utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, ttl, func() ([]*kom.ResourceUsageRow, error) {
+	_, _ = utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() ([]*kom.ResourceUsageRow, error) {
 		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
 		return tb, err
 	})

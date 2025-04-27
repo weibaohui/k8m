@@ -54,8 +54,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	}
 
 	cfg.AnySelect = m.AnySelect
-	// cfg.Debug = m.Debug
-	// cfg.InCluster = m.InCluster
 
 	cfg.ApiKey = m.ApiKey
 	cfg.ApiModel = m.ApiModel
@@ -78,22 +76,15 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		cfg.ProductName = m.ProductName
 	}
 
-	// if m.Port > 0 {
-	// 	cfg.Port = m.Port
-	// }
-	// if m.SqlitePath != "" {
-	// 	cfg.SqlitePath = m.SqlitePath
-	// }
-	// if m.MCPServerPort > 0 {
-	// 	cfg.MCPServerPort = m.MCPServerPort
-	// }
-	// if m.LogV > 0 {
-	// 	cfg.LogV = m.LogV
-	// }
-
 	cfg.PrintConfig = m.PrintConfig
 	cfg.EnableAI = m.EnableAI
-	// cfg.ConnectCluster = m.ConnectCluster
+
+	if m.ResourceCacheTimeout > 0 {
+		cfg.ResourceCacheTimeout = m.ResourceCacheTimeout
+	}
+	if cfg.ResourceCacheTimeout == 0 {
+		cfg.ResourceCacheTimeout = 60
+	}
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret

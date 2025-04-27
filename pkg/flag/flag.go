@@ -19,35 +19,36 @@ var config *Config
 var once sync.Once
 
 type Config struct {
-	Port              int    // gin 监听端口
-	MCPServerPort     int    // MCPServerPort 监听端口
-	KubeConfig        string // KUBECONFIG文件路径
-	ApiKey            string // OPENAI_API_KEY
-	ApiURL            string // OPENAI_API_URL
-	ApiModel          string // OPENAI_MODEL
-	Debug             bool   // 调试模式，同步修改所有的debug模式
-	LogV              int    // klog的日志级别klog.V(this)
-	InCluster         bool   // 是否集群内模式
-	LoginType         string // password,oauth,token,.. 登录方式，默认为password
-	EnableTempAdmin   bool   // 是否启用临时管理员账户配置
-	AdminUserName     string // 管理员用户名，启用临时管理员账户配置后生效
-	AdminPassword     string // 管理员密码，启用临时管理员账户配置后生效
-	JwtTokenSecret    string // JWT token secret
-	NodeShellImage    string // nodeShell 镜像
-	KubectlShellImage string // kubectlShell 镜像
-	ImagePullTimeout  int    // 镜像拉取超时时间（秒）
-	SqlitePath        string // sqlite 数据库路径
-	AnySelect         bool   // 是否开启任意选择，默认开启
-	PrintConfig       bool   // 是否打印配置信息
-	Version           string // 版本号，由编译时自动注入
-	GitCommit         string // git commit, 由编译时自动注入
-	GitTag            string // git tag, 由编译时自动注入
-	GitRepo           string // git仓库地址, 由编译时自动注入
-	BuildDate         string // 编译时间, 由编译时自动注入
-	EnableAI          bool   // 是否启用AI功能，默认开启
-	ConnectCluster    bool   // 启动程序后，是否自动连接发现的集群，默认关闭
-	UseBuiltInModel   bool   // 是否使用内置大模型参数，默认开启
-	ProductName       string // 产品名称，默认为K8M
+	Port                 int    // gin 监听端口
+	MCPServerPort        int    // MCPServerPort 监听端口
+	KubeConfig           string // KUBECONFIG文件路径
+	ApiKey               string // OPENAI_API_KEY
+	ApiURL               string // OPENAI_API_URL
+	ApiModel             string // OPENAI_MODEL
+	Debug                bool   // 调试模式，同步修改所有的debug模式
+	LogV                 int    // klog的日志级别klog.V(this)
+	InCluster            bool   // 是否集群内模式
+	LoginType            string // password,oauth,token,.. 登录方式，默认为password
+	EnableTempAdmin      bool   // 是否启用临时管理员账户配置
+	AdminUserName        string // 管理员用户名，启用临时管理员账户配置后生效
+	AdminPassword        string // 管理员密码，启用临时管理员账户配置后生效
+	JwtTokenSecret       string // JWT token secret
+	NodeShellImage       string // nodeShell 镜像
+	KubectlShellImage    string // kubectlShell 镜像
+	ImagePullTimeout     int    // 镜像拉取超时时间（秒）
+	SqlitePath           string // sqlite 数据库路径
+	AnySelect            bool   // 是否开启任意选择，默认开启
+	PrintConfig          bool   // 是否打印配置信息
+	Version              string // 版本号，由编译时自动注入
+	GitCommit            string // git commit, 由编译时自动注入
+	GitTag               string // git tag, 由编译时自动注入
+	GitRepo              string // git仓库地址, 由编译时自动注入
+	BuildDate            string // 编译时间, 由编译时自动注入
+	EnableAI             bool   // 是否启用AI功能，默认开启
+	ConnectCluster       bool   // 启动程序后，是否自动连接发现的集群，默认关闭
+	UseBuiltInModel      bool   // 是否使用内置大模型参数，默认开启
+	ProductName          string // 产品名称，默认为K8M
+	ResourceCacheTimeout int    // 资源缓存时间（秒）
 }
 
 func Init() *Config {
@@ -150,6 +151,9 @@ func (c *Config) InitFlags() {
 	// 默认产品名称为K8M
 	defaultProductName := getEnv("PRODUCT_NAME", "K8M")
 
+	// 默认资源缓存时间为60秒
+	defaultResourceCacheTimeout := getEnvAsInt("RESOURCE_CACHE_TIMEOUT", 60)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -174,6 +178,7 @@ func (c *Config) InitFlags() {
 	pflag.BoolVar(&c.UseBuiltInModel, "use-builtin-model", defaultUseBuiltInModel, "是否使用内置大模型参数，默认开启")
 	pflag.IntVar(&c.ImagePullTimeout, "image-pull-timeout", defaultImagePullTimeout, "镜像拉取超时时间（秒），默认30秒")
 	pflag.StringVar(&c.ProductName, "product-name", defaultProductName, "产品名称，默认为K8M")
+	pflag.IntVar(&c.ResourceCacheTimeout, "resource-cache-timeout", defaultResourceCacheTimeout, "资源缓存时间（秒），默认60秒")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
