@@ -253,9 +253,25 @@ const items: () => MenuItem[] = () => {
                 },
                 {
                     label: "GRPCRoute",
-                    icon: <i className="fa-solid fa-route"></i>,
+                    icon: <i className="fa-solid fa-code-branch"></i>,
                     key: "gatewayapi_grpc_route",
                     onClick: () => onMenuClick('/gatewayapi/grpc_route')
+                },
+                {
+                    label: "TCPRoute",
+                    icon: <i className="fa-solid fa-plug"></i>,
+                    key: "gatewayapi_tcp_route",
+                    onClick: () => onMenuClick('/gatewayapi/tcp_route')
+                }, {
+                    label: "UDPRoute",
+                    icon: <i className="fa-solid fa-broadcast-tower"></i>,
+                    key: "gatewayapi_udp_route",
+                    onClick: () => onMenuClick('/gatewayapi/udp_route')
+                }, {
+                    label: "TLSRoute",
+                    icon: <i className="fa-solid fa-shield-alt"></i>,
+                    key: "gatewayapi_tls_route",
+                    onClick: () => onMenuClick('/gatewayapi/tls_route')
                 },
             ],
         },
