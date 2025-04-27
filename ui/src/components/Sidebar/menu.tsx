@@ -248,8 +248,14 @@ const items: () => MenuItem[] = () => {
                 {
                     label: "HTTPRoute",
                     icon: <i className="fa-solid fa-route"></i>,
-                    key: "gatewayapi_httproute",
+                    key: "gatewayapi_http_route",
                     onClick: () => onMenuClick('/gatewayapi/http_route')
+                },
+                {
+                    label: "GRPCRoute",
+                    icon: <i className="fa-solid fa-route"></i>,
+                    key: "gatewayapi_grpc_route",
+                    onClick: () => onMenuClick('/gatewayapi/grpc_route')
                 },
             ],
         },
