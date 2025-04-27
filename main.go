@@ -24,6 +24,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
+	"github.com/weibaohui/k8m/pkg/controller/gatewayapi"
 	"github.com/weibaohui/k8m/pkg/controller/helm"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/k8sgpt"
@@ -386,6 +387,9 @@ func main() {
 		// k8s ingress_class
 		api.POST("/ingress_class/set_default/name/:name", ingressclass.SetDefault)
 		api.GET("/ingress_class/option_list", ingressclass.OptionList)
+
+		// k8s gateway_class
+		api.GET("/gateway_class/option_list", gatewayapi.GatewayClassOptionList)
 
 		// doc
 		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
