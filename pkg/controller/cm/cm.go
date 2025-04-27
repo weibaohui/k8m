@@ -1,6 +1,7 @@
 package cm
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -139,6 +140,7 @@ func Create(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
 	// 解析请求体
 	var requestBody struct {
 		Metadata struct {
@@ -146,13 +148,14 @@ func Create(c *gin.Context) {
 			Name      string            `json:"name"`
 			Labels    map[string]string `json:"labels,omitempty"`
 		} `json:"metadata"`
-		Data map[string]string `json:"data"`
+		Data map[string]interface{} `json:"data"` // 修改为 interface{} 类型
 	}
 
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("解析请求体错误: %v", err))
 		return
 	}
+
 	// 判断是否存在同名ConfigMap
 	var existingCM v1.ConfigMap
 	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.ConfigMap{}).Name(requestBody.Metadata.Name).Namespace(requestBody.Metadata.Namespace).Get(&existingCM).Error
@@ -160,9 +163,25 @@ func Create(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("ConfigMap %s 已存在", requestBody.Metadata.Name))
 		return
 	}
-	// 替换\r\n为\n
+
+	// 处理数据：转换所有值为字符串，并替换\r\n为\n
+	data := make(map[string]string)
 	for key, value := range requestBody.Data {
-		requestBody.Data[key] = strings.ReplaceAll(value, "\r\n", "\n")
+		var strValue string
+		switch v := value.(type) {
+		case string:
+			strValue = v
+		default:
+			// 非字符串类型转换为JSON字符串
+			jsonBytes, err := json.Marshal(v)
+			if err != nil {
+				amis.WriteJsonError(c, fmt.Errorf("转换数据为字符串失败: %v", err))
+				return
+			}
+			strValue = string(jsonBytes)
+		}
+		// 替换换行符
+		data[key] = strings.ReplaceAll(strValue, "\r\n", "\n")
 	}
 
 	// 创建ConfigMap对象
@@ -177,7 +196,7 @@ func Create(c *gin.Context) {
 				"originName":     requestBody.Metadata.Name,
 			},
 		},
-		Data: requestBody.Data,
+		Data: data, // 使用处理后的数据
 	}
 
 	// 创建到Kubernetes
