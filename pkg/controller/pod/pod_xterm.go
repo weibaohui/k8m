@@ -103,6 +103,9 @@ func cmdLogger(c *gin.Context, cmd string) {
 
 }
 
+// Xterm establishes a WebSocket-based interactive terminal session to a Kubernetes pod container with TTY support, command logging, and permission checks.
+// 
+// It validates user exec permissions, upgrades the HTTP connection to WebSocket, and manages bidirectional data streams between the client and the pod's shell. The function supports terminal resizing, command logging, connection keep-alive, and optional pod cleanup after session end. The session is automatically terminated on disconnect, timeout, or interrupt signal.
 func Xterm(c *gin.Context) {
 	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
