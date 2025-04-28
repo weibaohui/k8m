@@ -71,7 +71,7 @@
           "body": [
             {
               "type": "tpl",
-              "tpl": "<%= 'http://' + window.location.hostname + ':3619' %>/<%= data.key %>/sse"
+              "tpl": "<%= window.location.protocol + '//' + window.location.hostname + ':3619' %>/<%= data.key %>/sse"
             }
           ]
         },
