@@ -12,7 +12,7 @@
     {
       "type": "alert",
       "level": "info",
-      "body": "<div class='alert alert-info'><p><strong>使用说明：</strong></p><p>1. 该访问链接适用于CherryStudio、Cline、Cursor等软件。</p><p>2. 该访问链接将MCP权限绑定到您的权限上。</p></div>"
+      "body": "<div class='alert alert-info'><p><strong>使用说明：</strong></p><p>1. 该访问链接适用于CherryStudio、Cline、Cursor等软件。</p><p>2. 该访问链接将MCP权限绑定到您的权限上。</p><p>3. 如果您通过NodePort或网关方式访问，请根据实际情况手动替换链接中的IP和端口号。</p></div>"
     },
     {
       "type": "crud",
@@ -71,7 +71,7 @@
           "body": [
             {
               "type": "tpl",
-              "tpl": "<%= 'http://' + window.location.host %>/<%= data.key%>/sse"
+              "tpl": "<%= 'http://' + window.location.hostname + ':3619' %>/<%= data.key %>/sse"
             }
           ]
         },
