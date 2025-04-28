@@ -200,6 +200,16 @@ func Xterm(c *gin.Context) {
 	defer conn.Close()
 	klog.V(6).Infof("ws Client connected")
 
+	// 创建一个写锁，用于保护WebSocket写操作
+	var writeMutex sync.Mutex
+
+	// 封装写消息的函数，确保写操作的线程安全
+	safeWriteMessage := func(messageType int, data []byte) error {
+		writeMutex.Lock()
+		defer writeMutex.Unlock()
+		return conn.WriteMessage(messageType, data)
+	}
+
 	cluster := kom.Cluster(selectedCluster).WithContext(ctx)
 
 	// 创建 TTY 终端大小管理队列
@@ -225,7 +235,7 @@ func Xterm(c *gin.Context) {
 	exec, err := createExecutor(req.URL(), cluster.RestConfig())
 	if err != nil {
 		klog.Errorf("Failed to create SPDYExecutor: %v", err)
-		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Error creating executor: %v", err)))
+		safeWriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Error creating executor: %v", err)))
 		return
 	}
 
@@ -255,7 +265,7 @@ func Xterm(c *gin.Context) {
 	go func() {
 		defer cleanupOnce.Do(cleanup)
 		for {
-			if err := conn.WriteMessage(websocket.PingMessage, []byte("keepalive")); err != nil {
+			if err := safeWriteMessage(websocket.PingMessage, []byte("keepalive")); err != nil {
 				klog.V(6).Infof("failed to write ping message")
 				cleanupOnce.Do(cleanup)
 				return
@@ -290,7 +300,7 @@ func Xterm(c *gin.Context) {
 				outBuffer.Reset()
 				klog.V(6).Infof("Received stdout (%d bytes): %q", len(data), string(data))
 
-				if err := conn.WriteMessage(websocket.BinaryMessage, data); err != nil {
+				if err := safeWriteMessage(websocket.BinaryMessage, data); err != nil {
 					klog.V(6).Infof("Failed to send stderr message   to xterm.js: %v", err)
 					errorCounter++
 					return
@@ -304,7 +314,7 @@ func Xterm(c *gin.Context) {
 				data := errBuffer.Bytes()
 				errBuffer.Reset()
 				klog.V(6).Infof("Received stderr (%d bytes): %q", len(data), string(data))
-				if err := conn.WriteMessage(websocket.BinaryMessage, data); err != nil {
+				if err := safeWriteMessage(websocket.BinaryMessage, data); err != nil {
 					klog.V(6).Infof("Failed to send stderr message   to xterm.js: %v", err)
 					errorCounter++
 					return
@@ -398,7 +408,7 @@ func Xterm(c *gin.Context) {
 	})
 	if err != nil {
 		klog.Errorf("Failed to execute command in pod: %v", err)
-		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Execution error: %v", err)))
+		safeWriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Execution error: %v", err)))
 		cleanupOnce.Do(cleanup)
 		return
 	}
