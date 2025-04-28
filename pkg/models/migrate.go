@@ -23,6 +23,8 @@ func init() {
 	_ = InitConfigTable()
 	_ = InitConditionTable()
 	_ = FixClusterAuthorizationTypeName()
+	_ = AddInnerAdminUserGroup()
+	_ = AddInnerAdminUser()
 }
 func AutoMigrate() error {
 
@@ -195,6 +197,62 @@ func InitConditionTable() error {
 		}
 
 		klog.V(4).Info("成功初始化翻转指标配置表")
+	}
+
+	return nil
+}
+
+// AddInnerAdminUser 添加内置管理员账户
+func AddInnerAdminUser() error {
+	// 检查是否存在名为k8m的记录
+	var count int64
+	if err := dao.DB().Model(&User{}).Where("username = ?", "k8m").Count(&count).Error; err != nil {
+		klog.Errorf("已存在内置k8m账户: %v", err)
+		return err
+	}
+	// 如果不存在，添加默认的内部MCP服务器配置
+	if count == 0 {
+		config := &User{
+			Username:   "k8m",
+			Salt:       "grfi92rq",
+			Password:   "8RGCXWw6IzgKDPyeFKt6Kw==",
+			GroupNames: "平台管理员组",
+			CreatedBy:  "system",
+		}
+		if err := dao.DB().Create(config).Error; err != nil {
+			klog.Errorf("添加默认平台管理员账户失败: %v", err)
+			return err
+		}
+		klog.V(4).Info("成功添加默认平台管理员账户")
+	} else {
+		klog.V(4).Info("默认平台管理员账户已存在")
+	}
+
+	return nil
+}
+
+// AddInnerAdminUserGroup 添加内置管理员账户组
+func AddInnerAdminUserGroup() error {
+	// 检查是否存在名为 平台管理员组 的内置管理员账户组的记录
+	var count int64
+	if err := dao.DB().Model(&UserGroup{}).Where("group_name = ?", "平台管理员组").Count(&count).Error; err != nil {
+		klog.Errorf("已存在内置 平台管理员组 角色: %v", err)
+		return err
+	}
+	// 如果不存在，添加默认的内部MCP服务器配置
+	if count == 0 {
+		config := &UserGroup{
+			GroupName: "平台管理员组",
+			Role:      "platform_admin",
+			CreatedBy: "system",
+		}
+		if err := dao.DB().Create(config).Error; err != nil {
+			klog.Errorf("添加默认平台管理员组失败: %v", err)
+			return err
+		}
+		klog.V(4).Info("成功添加默认平台管理员组")
+	} else {
+		klog.V(4).Info("默认平台管理员组已存在")
 	}
 
 	return nil

@@ -49,13 +49,16 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 1. **下载**：从 [GitHub](https://github.com/weibaohui/k8m) 下载最新版本。
 2. **运行**：使用 `./k8m` 命令启动,访问[http://127.0.0.1:3618](http://127.0.0.1:3618)。
-3. **参数**：
+3. **登录用户名密码**：
+   - 用户名：`k8m`
+   - 密码：`k8m`
+4. **参数**：
 
 ```shell
 Usage of ./k8m:
       --enable-temp-admin                是否启用临时管理员账户配置，默认关闭
-      --admin-password string            管理员密码，启用临时管理员账户配置后生效 (default "123456")
-      --admin-username string            管理员用户名，启用临时管理员账户配置后生效 (default "admin")      --any-select                       是否开启任意选择划词解释，默认开启 (default true)
+      --admin-password string            管理员密码，启用临时管理员账户配置后生效 
+      --admin-username string            管理员用户名，启用临时管理员账户配置后生效     --any-select                       是否开启任意选择划词解释，默认开启 (default true)
       --print-config                     是否打印配置信息 (default false)
   -k, --chatgpt-key string               大模型的自定义API Key (default "sk-xxxxxxx")
   -m, --chatgpt-model string             大模型的自定义模型名称 (default "Qwen/Qwen2.5-7B-Instruct")
