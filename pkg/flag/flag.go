@@ -105,8 +105,8 @@ func (c *Config) InitFlags() {
 
 	// 默认登录方式为password
 	defaultLoginType := getEnv("LOGIN_TYPE", "password")
-	defaultAdminUserName := getEnv("ADMIN_USERNAME", "admin")
-	defaultAdminPassword := getEnv("ADMIN_PASSWORD", "123456")
+	defaultAdminUserName := getEnv("ADMIN_USERNAME", "")
+	defaultAdminPassword := getEnv("ADMIN_PASSWORD", "")
 
 	// 默认debug为false
 	defaultDebug := getEnvAsBool("DEBUG", false)

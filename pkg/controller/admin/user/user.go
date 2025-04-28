@@ -37,12 +37,6 @@ func Save(c *gin.Context) {
 		return
 	}
 
-	// 用户名不能为admin
-	if m.Username == "admin" {
-		amis.WriteJsonError(c, fmt.Errorf("用户名不能为admin"))
-		return
-	}
-
 	queryFuncs := genQueryFuncs(c, params)
 
 	// 保存的时候需要单独处理
