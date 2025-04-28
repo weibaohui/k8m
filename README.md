@@ -52,6 +52,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 3. **登录用户名密码**：
    - 用户名：`k8m`
    - 密码：`k8m`
+   - 请注意上线后修改用户名密码。
 4. **参数**：
 
 ```shell
