@@ -96,14 +96,11 @@ services:
       - "3619:3619"
     environment:
       TZ: Asia/Shanghai
-      ENABLE_TEMP_ADMIN: true
-      ADMIN_USERNAME: admin
-      ADMIN_PASSWORD: 123456
     volumes:
       - ./data:/app/data
 ```
 
-启动之后，访问`3618`端口，默认用户：`admin`，默认密码`123456`。
+启动之后，访问`3618`端口，默认用户：`k8m`，默认密码`k8m`。
 如需自定义大模型参数、配置私有化大模型，请参考[文档](docs/use-self-hosted-ai.md)。
 如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
 ，FORK仓库之后，拉起体验。
@@ -151,8 +148,8 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 | `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                      |
 | `LOGIN_TYPE`          | `"password"`               | 登录方式（如 `password`, `oauth`, `token`）                                  |
 | `ENABLE_TEMP_ADMIN`   | `"false"`                  | 是否启用临时管理员账户配置，默认关闭。初次登录、忘记密码时使用                                       |
-| `ADMIN_USERNAME`      | `"admin"`                  | 管理员用户名 ，启用临时管理员账户配置后生效                                                |
-| `ADMIN_PASSWORD`      | `"123456"`                 | 管理员密码，启用临时管理员账户配置后生效                                                  |
+| `ADMIN_USERNAME`      | ``                  | 管理员用户名 ，启用临时管理员账户配置后生效                                                |
+| `ADMIN_PASSWORD`      | ``                 | 管理员密码，启用临时管理员账户配置后生效                                                  |
 | `DEBUG`               | `"false"`                  | 是否开启 `debug` 模式                                                       |
 | `LOG_V`               | `"2"`                      | log输出日志，同klog用法                                                       |
 | `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                    |
