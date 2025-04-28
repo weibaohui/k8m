@@ -72,7 +72,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 
 			result.Parameters = args
 
-			var cli *client.SSEMCPClient
+			var cli *client.Client
 			var toolName, serverName string
 			var err error
 			if strings.Contains(fullToolName, "@") {

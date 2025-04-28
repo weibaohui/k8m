@@ -37,7 +37,7 @@ require (
 	sigs.k8s.io/yaml v1.4.0
 )
 
-replace github.com/mark3labs/mcp-go => github.com/weibaohui/mcp-go v0.0.1
+replace github.com/mark3labs/mcp-go => github.com/weibaohui/mcp-go v0.0.5
 
 //replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
 //replace github.com/weibaohui/kom v0.2.5 => github.com/weibaohui/kom main
@@ -161,7 +161,7 @@ require (
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/spf13/cast v1.7.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/cobra v1.9.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect

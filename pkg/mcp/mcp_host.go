@@ -146,7 +146,7 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 }
 
 // GetClient 获取指定服务器的客户端
-func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.SSEMCPClient, error) {
+func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Client, error) {
 
 	// 获取配置信息
 	config, exists := m.configs[serverName]
