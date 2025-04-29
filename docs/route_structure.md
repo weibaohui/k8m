@@ -9,13 +9,6 @@ graph TD
     A --> D[Kubernetes管理路由 /k8s]
     A --> E[系统管理路由 /mgm]
 
-    %% 样式设置
-    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
-    classDef route fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-
-    %% 应用样式
-    class A default;
-    class B,C,D,E route;
 ```
 
 ## 认证路由
@@ -26,13 +19,7 @@ graph TD
     B --> B2[登出 POST /auth/logout]
     B --> B3[刷新令牌 POST /auth/refresh]
 
-    %% 样式设置
-    classDef route fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef endpoint fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    %% 应用样式
-    class B route;
-    class B1,B2,B3 endpoint;
+    
 ```
 
 ## API服务路由
@@ -43,13 +30,7 @@ graph TD
     C --> C2[系统信息 GET /api/info]
     C --> C3[API文档 GET /api/docs]
 
-    %% 样式设置
-    classDef route fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef endpoint fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    %% 应用样式
-    class C route;
-    class C1,C2,C3 endpoint;
+    
 ```
 
 ## Kubernetes管理路由
@@ -73,13 +54,7 @@ graph TD
     %% 文档服务子节点
     D3 --> D3_1[文档详情 POST /k8s/doc/detail]
 
-    %% 样式设置
-    classDef route fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef endpoint fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    %% 应用样式
-    class D,D1,D2,D3 route;
-    class D1_1,D1_2,D1_3,D2_1,D2_2,D2_3,D3_1 endpoint;
+   
 ```
 
 ## 系统管理路由
@@ -102,11 +77,5 @@ graph TD
     E3 --> E3_1[系统日志 GET /mgm/logs]
     E3 --> E3_2[审计日志 GET /mgm/audit]
 
-    %% 样式设置
-    classDef route fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef endpoint fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    %% 应用样式
-    class E,E1,E2,E3 route;
-    class E1_1,E1_2,E2_1,E2_2,E3_1,E3_2 endpoint;
+    
 ```
