@@ -4202,7 +4202,13 @@
           "name": "ready",
           "label": "就绪",
           "type": "tpl",
-          "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
+          "tpl": "${status.readyReplicas||'0'}/${status.replicas}",
+          "searchable": {
+            "type": "input-text",
+            "name": "spec.replicas",
+            "label": "设定副本数",
+            "placeholder": "设定副本数"
+          }
         },
         {
           "name": "metadata.ownerReferences",
