@@ -123,6 +123,12 @@ export default defineConfig(({mode}) => {
                     copy('node_modules/monaco-editor/min/vs/base', 'dist/monacoeditorwork/base', {overwrite: true})
                     copy('node_modules/monaco-editor/min/vs/basic-languages', 'dist/monacoeditorwork/basic-languages', {overwrite: true})
                 }
+            },
+            {
+                name: 'favicon',
+                closeBundle() {
+                    copy('src/assets/favicon.ico', 'dist/favicon.ico', {overwrite: true})
+                }
             }
         ],
 
