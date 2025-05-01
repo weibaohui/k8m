@@ -166,6 +166,10 @@ func main() {
 	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
 	r.StaticFS("/monacoeditorwork", http.FS(monacoFS))
 
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
+		c.Data(http.StatusOK, "image/x-icon", favicon)
+	})
 	// 直接返回 index.html
 	r.GET("/", func(c *gin.Context) {
 		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
@@ -175,10 +179,7 @@ func main() {
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
 	})
-	// 处理 favicon.ico 请求
-	r.GET("/favicon.ico", func(c *gin.Context) {
-		c.Status(http.StatusNoContent)
-	})
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
