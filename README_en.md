@@ -7,6 +7,8 @@
 
 [![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
 
+![Alt](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg "Repobeats analytics image")
+
 **k8m** is an AI-driven Mini Kubernetes AI Dashboard lightweight console tool designed to simplify cluster management. It is built on AMIS and uses [`kom`](https://github.com/weibaohui/kom) as the Kubernetes API client. **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
 
 ### Key Features
