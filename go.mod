@@ -36,7 +36,7 @@ require (
 	sigs.k8s.io/yaml v1.4.0
 )
 
-replace github.com/mark3labs/mcp-go => github.com/weibaohui/mcp-go v0.0.7
+replace github.com/mark3labs/mcp-go => github.com/weibaohui/mcp-go v0.0.5
 
 //replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
 //replace github.com/weibaohui/kom v0.2.5 => github.com/weibaohui/kom main
