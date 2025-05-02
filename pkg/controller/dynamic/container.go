@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 )
 
 func ImagePullSecretOptionList(c *gin.Context) {
@@ -869,7 +869,7 @@ func UpdateHealthChecks(c *gin.Context) {
 		return
 	}
 	patchData, err := generateHealthCheckPatch(kind, info)
-	klog.Info(patchData)
+	klog.V(6).Infof("UpdateHealthChecks Patch JSON :\n%s\n", patchData)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
