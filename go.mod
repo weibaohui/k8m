@@ -21,7 +21,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.39.0
 	github.com/spf13/pflag v1.0.6
-	github.com/weibaohui/kom v0.2.23
+	github.com/weibaohui/kom v0.2.24
 	golang.org/x/net v0.39.0
 	golang.org/x/oauth2 v0.29.0
 	gorm.io/gorm v1.26.0
@@ -36,7 +36,7 @@ require (
 	sigs.k8s.io/yaml v1.4.0
 )
 
-replace github.com/mark3labs/mcp-go => github.com/weibaohui/mcp-go v0.0.5
+replace github.com/mark3labs/mcp-go => github.com/weibaohui/mcp-go v0.0.7
 
 //replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
 //replace github.com/weibaohui/kom v0.2.5 => github.com/weibaohui/kom main
@@ -69,7 +69,7 @@ require (
 	github.com/creack/pty v1.1.21 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dgraph-io/ristretto/v2 v2.1.0 // indirect
+	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v26.1.4+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
