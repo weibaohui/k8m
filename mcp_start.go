@@ -59,10 +59,11 @@ func MCPStart(version string, port int) {
 		parameters := request.Params.Arguments
 		var resultStr string
 		var errStr string
-		resultStr = utils.ToJSON(resultStr)
+		resultStr = utils.ToJSON(result)
 		if result.IsError {
 			errStr = resultStr
 		}
+		
 		resultInfo := mcp3.ToolCallResult{
 			ToolName:   toolName,
 			Parameters: parameters,
