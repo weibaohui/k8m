@@ -283,6 +283,139 @@
           "align": "left"
         },
         "reload",
+        {
+          "type": "button",
+          "label": "资源用量",
+          "actionType": "drawer",
+          "tooltip": "资源用量 kubectl top nodes",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "节点资源用量（ESC 关闭）",
+            "size": "xl",
+            "body": [
+              {
+                "type": "crud",
+                "id": "topNodeCRUD",
+                "name": "topNodeCRUD",
+                "autoFillHeight": true,
+                "autoGenerateFilter": {
+                  "columnsNum": 4,
+                  "showBtnToolbar": false
+                },
+                "headerToolbar": [
+                  {
+                    "type": "columns-toggler",
+                    "align": "right",
+                    "draggable": true,
+                    "icon": "fas fa-cog",
+                    "overlay": true,
+                    "footerBtnSize": "sm"
+                  },
+                  {
+                    "type": "tpl",
+                    "tpl": "共${count}条",
+                    "align": "right",
+                    "visibleOn": "${count}"
+                  },
+                  {
+                    "type": "columns-toggler",
+                    "align": "left"
+                  },
+                  "reload"
+                ],
+                "loadDataOnce": true,
+                "syncLocation": false,
+                "initFetch": true,
+                "perPage": 10,
+                "footerToolbar": [
+                  {
+                    "type": "pagination",
+                    "align": "right"
+                  },
+                  {
+                    "type": "statistics",
+                    "align": "right"
+                  },
+                  {
+                    "type": "switch-per-page",
+                    "align": "right"
+                  }
+                ],
+                "api": "get:/k8s/node/top/list",
+                "columns": [
+                  {
+                    "name": "name",
+                    "label": "节点名称",
+                    "type": "text",
+                    "sortable": true,
+                    "searchable": true
+                  },
+                  {
+                    "name": "cpu",
+                    "label": "cpu（核）",
+                    "type": "text",
+                    "sortable": true
+                  },
+                  {
+                    "name": "cpu_fraction",
+                    "label": "CPU资源<br><span class='text-gray-500 text-xs'>实时用量占比</span>",
+                    "type": "container",
+                    "width": "150px",
+                    "sortable": true,
+                    "body": [
+                      {
+                        "type": "progress",
+                        "label": "realtime",
+                        "value": "<%= data.cpu_fraction && Number(data.cpu_fraction) !== 0 ? data.cpu_fraction : 0 %>",
+                        "placeholder": "N/A",
+                        "animate": true,
+                        "width": "100px",
+                        "map": [
+                          "bg-success",
+                          "bg-success",
+                          "bg-success",
+                          "bg-warning",
+                          "bg-danger"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "memory",
+                    "label": "内存（Mi）",
+                    "type": "text",
+                    "sortable": true
+                  },
+                  {
+                    "name": "memory_fraction",
+                    "label": "内存资源<br><span class='text-gray-500 text-xs'>实时用量占比</span>",
+                    "type": "container",
+                    "width": "150px",
+                    "sortable": true,
+                    "body": [
+                      {
+                        "type": "progress",
+                        "label": "realtime",
+                        "value": "<%= data.memory_fraction && Number(data.memory_fraction) !== 0 ? data.memory_fraction : 0 %>",
+                        "placeholder": "N/A",
+                        "animate": true,
+                        "width": "100px",
+                        "map": [
+                          "bg-success",
+                          "bg-success",
+                          "bg-success",
+                          "bg-warning",
+                          "bg-danger"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
         "bulkActions"
       ],
       "loadDataOnce": false,

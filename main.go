@@ -306,6 +306,8 @@ func main() {
 		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
 		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
 		api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", pod.Xterm)
+		api.GET("/pod/top/ns/:ns/list", pod.TopList)
+
 		// k8s deploy
 		api.POST("/deploy/ns/:ns/name/:name/restart", deploy.Restart)
 		api.POST("/deploy/batch/restart", deploy.BatchRestart)
@@ -334,6 +336,7 @@ func main() {
 		api.GET("/node/labels/list", node.AllLabelList)
 		api.GET("/node/labels/unique_labels", node.UniqueLabels)
 		api.GET("/node/taints/list", node.AllTaintList)
+		api.GET("/node/top/list", node.TopList)
 		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
 		api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", node.CreateKubectlShell)
 

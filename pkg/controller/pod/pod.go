@@ -274,3 +274,39 @@ func UniqueLabels(c *gin.Context) {
 		"options": names,
 	})
 }
+
+// TopList 获取Pod的top信息
+func TopList(c *gin.Context) {
+	ns := c.Param("ns")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	podMetrics, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).
+		Namespace(strings.Split(ns, ",")...).
+		WithCache(time.Second * 30).
+		Ctl().Pod().Top()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 转换为map 前端排序使用，usage.cpu这种前端无法正确排序
+	var result []map[string]string
+	for _, item := range podMetrics {
+		result = append(result, map[string]string{
+			"name":            item.Name,
+			"namespace":       item.Namespace,
+			"cpu":             item.Usage.CPU,
+			"memory":          item.Usage.Memory,
+			"cpu_nano":        fmt.Sprintf("%d", item.Usage.CPUNano),
+			"memory_byte":     fmt.Sprintf("%d", item.Usage.MemoryByte),
+			"cpu_fraction":    item.Usage.CPUFraction,
+			"memory_fraction": item.Usage.MemoryFraction,
+		})
+	}
+	amis.WriteJsonList(c, result)
+}

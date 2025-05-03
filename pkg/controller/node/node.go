@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -82,7 +83,7 @@ func BatchDrain(c *gin.Context) {
 	var req struct {
 		Names []string `json:"name_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -115,7 +116,7 @@ func BatchCordon(c *gin.Context) {
 	var req struct {
 		Names []string `json:"name_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -148,7 +149,7 @@ func BatchUnCordon(c *gin.Context) {
 	var req struct {
 		Names []string `json:"name_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -349,4 +350,36 @@ func UniqueLabels(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"options": names,
 	})
+}
+
+// TopList 获取节点的top信息
+func TopList(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	nodeMetrics, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+		WithCache(time.Second * 30).
+		Ctl().Node().Top()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 转换为map 前端排序使用，usage.cpu这种前端无法正确排序
+	var result []map[string]string
+	for _, item := range nodeMetrics {
+		result = append(result, map[string]string{
+			"name":            item.Name,
+			"cpu":             item.Usage.CPU,
+			"memory":          item.Usage.Memory,
+			"cpu_nano":        fmt.Sprintf("%d", item.Usage.CPUNano),
+			"memory_byte":     fmt.Sprintf("%d", item.Usage.MemoryByte),
+			"cpu_fraction":    item.Usage.CPUFraction,
+			"memory_fraction": item.Usage.MemoryFraction,
+		})
+	}
+	amis.WriteJsonList(c, result)
 }
