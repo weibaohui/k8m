@@ -141,7 +141,8 @@ func Init() {
 
 }
 
-// main 启动并初始化 Kubernetes 管理服务端，配置 Gin 路由、中间件、静态资源和各类 API 分组，最终监听指定端口提供后端与前端 UI 服务。
+// main 启动并初始化 Kubernetes 管理服务端，配置 Gin 路由、中间件、静态资源和各类 API 分组，监听指定端口并提供后端 API 及前端 UI 服务。
+// 包括认证、集群管理、Kubernetes 资源操作、AI 聊天、用户与平台管理等功能模块。
 func main() {
 	Init()
 

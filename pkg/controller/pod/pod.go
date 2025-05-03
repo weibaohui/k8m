@@ -251,6 +251,7 @@ func Usage(c *gin.Context) {
 	amis.WriteJsonData(c, usage)
 }
 
+// UniqueLabels 返回当前集群中所有唯一的 Pod 标签键列表，格式化为前端可用的选项数组。
 func UniqueLabels(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -275,7 +276,7 @@ func UniqueLabels(c *gin.Context) {
 	})
 }
 
-// TopList 获取Pod的top信息
+// TopList 返回指定命名空间下所有 Pod 的资源使用情况（CPU、内存等），支持多命名空间查询，并以便于前端排序的格式输出。
 func TopList(c *gin.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
