@@ -141,6 +141,7 @@ func Init() {
 
 }
 
+// main 启动并初始化 Kubernetes 管理服务端，配置 Gin 路由、中间件、静态资源和各类 API 分组，最终监听指定端口提供后端与前端 UI 服务。
 func main() {
 	Init()
 
@@ -254,6 +255,7 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
 		api.GET("/crd/group/option_list", dynamic.GroupOptionList)
 		api.GET("/crd/kind/option_list", dynamic.KindOptionList)
+		api.GET("/crd/status", dynamic.CRDStatus)
 		// Container 信息
 		api.GET("/:kind/group/:group/version/:version/container_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerInfo)
 		api.GET("/:kind/group/:group/version/:version/container_resources_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerResourcesInfo)

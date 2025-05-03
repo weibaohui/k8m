@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import type { MenuProps } from 'antd';
-import { useEffect, useState } from 'react';
-import { fetcher } from '../Amis/fetcher';
+import {useNavigate} from "react-router-dom";
+import type {MenuProps} from 'antd';
+import {useEffect, useState} from 'react';
+import {fetcher} from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -9,11 +9,16 @@ interface UserRoleResponse {
     cluster: string;
 }
 
+interface GatewayAPIStatus {
+    IsGatewayAPISupported: boolean;
+}
+
 type MenuItem = Required<MenuProps>['items'][number];
 
 const items: () => MenuItem[] = () => {
     const navigate = useNavigate()
     const [userRole, setUserRole] = useState<string>('');
+    const [isGatewayAPISupported, setIsGatewayAPISupported] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchUserRole = async () => {
@@ -31,13 +36,29 @@ const items: () => MenuItem[] = () => {
                     if (originCluster == "" && role.cluster != "") {
                         localStorage.setItem('cluster', role.cluster);
                     }
-                    // console.log('User Role:', role.role);
                 }
             } catch (error) {
                 console.error('Failed to fetch user role:', error);
             }
         };
+
+        const fetchGatewayAPIStatus = async () => {
+            try {
+                const response = await fetcher({
+                    url: '/k8s/crd/status',
+                    method: 'get'
+                });
+                if (response.data && typeof response.data === 'object') {
+                    const status = response.data.data as GatewayAPIStatus;
+                    setIsGatewayAPISupported(status.IsGatewayAPISupported);
+                }
+            } catch (error) {
+                console.error('Failed to fetch Gateway API status:', error);
+            }
+        };
+
         fetchUserRole();
+        fetchGatewayAPIStatus();
     }, []);
 
     const onMenuClick = (path: string) => {
@@ -228,53 +249,57 @@ const items: () => MenuItem[] = () => {
                 },
             ],
         },
-        {
-            label: "网关API",
-            icon: <i className="fa-solid fa-door-closed"></i>,
-            key: "GatewayAPI",
-            children: [
-                {
-                    label: "网关类",
-                    icon: <i className="fa-solid fa-door-open"></i>,
-                    key: "gatewayapi_gateway_class",
-                    onClick: () => onMenuClick('/gatewayapi/gateway_class')
-                },
-                {
-                    label: "网关",
-                    icon: <i className="fa-solid fa-archway"></i>,
-                    key: "gatewayapi_gateway",
-                    onClick: () => onMenuClick('/gatewayapi/gateway')
-                },
-                {
-                    label: "HTTP路由",
-                    icon: <i className="fa-solid fa-route"></i>,
-                    key: "gatewayapi_http_route",
-                    onClick: () => onMenuClick('/gatewayapi/http_route')
-                },
-                {
-                    label: "GRPC路由",
-                    icon: <i className="fa-solid fa-code-branch"></i>,
-                    key: "gatewayapi_grpc_route",
-                    onClick: () => onMenuClick('/gatewayapi/grpc_route')
-                },
-                {
-                    label: "TCP路由",
-                    icon: <i className="fa-solid fa-plug"></i>,
-                    key: "gatewayapi_tcp_route",
-                    onClick: () => onMenuClick('/gatewayapi/tcp_route')
-                }, {
-                    label: "UDP路由",
-                    icon: <i className="fa-solid fa-broadcast-tower"></i>,
-                    key: "gatewayapi_udp_route",
-                    onClick: () => onMenuClick('/gatewayapi/udp_route')
-                }, {
-                    label: "TLS路由",
-                    icon: <i className="fa-solid fa-shield-alt"></i>,
-                    key: "gatewayapi_tls_route",
-                    onClick: () => onMenuClick('/gatewayapi/tls_route')
-                },
-            ],
-        },
+        ...(isGatewayAPISupported ? [
+            {
+                label: "网关API",
+                icon: <i className="fa-solid fa-door-closed"></i>,
+                key: "GatewayAPI",
+                children: [
+                    {
+                        label: "网关类",
+                        icon: <i className="fa-solid fa-door-open"></i>,
+                        key: "gatewayapi_gateway_class",
+                        onClick: () => onMenuClick('/gatewayapi/gateway_class')
+                    },
+                    {
+                        label: "网关",
+                        icon: <i className="fa-solid fa-archway"></i>,
+                        key: "gatewayapi_gateway",
+                        onClick: () => onMenuClick('/gatewayapi/gateway')
+                    },
+                    {
+                        label: "HTTP路由",
+                        icon: <i className="fa-solid fa-route"></i>,
+                        key: "gatewayapi_http_route",
+                        onClick: () => onMenuClick('/gatewayapi/http_route')
+                    },
+                    {
+                        label: "GRPC路由",
+                        icon: <i className="fa-solid fa-code-branch"></i>,
+                        key: "gatewayapi_grpc_route",
+                        onClick: () => onMenuClick('/gatewayapi/grpc_route')
+                    },
+                    {
+                        label: "TCP路由",
+                        icon: <i className="fa-solid fa-plug"></i>,
+                        key: "gatewayapi_tcp_route",
+                        onClick: () => onMenuClick('/gatewayapi/tcp_route')
+                    },
+                    {
+                        label: "UDP路由",
+                        icon: <i className="fa-solid fa-broadcast-tower"></i>,
+                        key: "gatewayapi_udp_route",
+                        onClick: () => onMenuClick('/gatewayapi/udp_route')
+                    },
+                    {
+                        label: "TLS路由",
+                        icon: <i className="fa-solid fa-shield-alt"></i>,
+                        key: "gatewayapi_tls_route",
+                        onClick: () => onMenuClick('/gatewayapi/tls_route')
+                    },
+                ],
+            },
+        ] : []),
         {
             label: "存储",
             icon: <i className="fa-solid fa-memory"></i>,
