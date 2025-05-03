@@ -254,6 +254,7 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
 		api.GET("/crd/group/option_list", dynamic.GroupOptionList)
 		api.GET("/crd/kind/option_list", dynamic.KindOptionList)
+		api.GET("/crd/status", dynamic.CRDStatus)
 		// Container 信息
 		api.GET("/:kind/group/:group/version/:version/container_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerInfo)
 		api.GET("/:kind/group/:group/version/:version/container_resources_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerResourcesInfo)
