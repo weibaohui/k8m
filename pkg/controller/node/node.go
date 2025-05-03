@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -71,6 +72,8 @@ func UnCordon(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
+// BatchDrain 批量驱逐指定的 Kubernetes 节点。
+// 从请求体获取节点名称列表，依次对每个节点执行驱逐操作，若有任一节点驱逐失败，则返回错误，否则返回操作成功。
 func BatchDrain(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -82,7 +85,7 @@ func BatchDrain(c *gin.Context) {
 	var req struct {
 		Names []string `json:"name_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -104,6 +107,8 @@ func BatchDrain(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// BatchCordon 批量将指定的 Kubernetes 节点设置为不可调度（cordon）。
+// 接收包含节点名称列表的 JSON 请求体，逐个节点执行 cordon 操作，若有节点操作失败则返回错误，否则返回操作成功。
 func BatchCordon(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -115,7 +120,7 @@ func BatchCordon(c *gin.Context) {
 	var req struct {
 		Names []string `json:"name_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -137,6 +142,8 @@ func BatchCordon(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// BatchUnCordon 批量解除指定节点的隔离状态（Uncordon），使其重新可调度。
+// 从请求体中读取节点名称列表，对每个节点执行解除隔离操作。若有任一节点操作失败，将返回错误信息，否则返回操作成功。
 func BatchUnCordon(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -148,7 +155,7 @@ func BatchUnCordon(c *gin.Context) {
 	var req struct {
 		Names []string `json:"name_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -327,6 +334,7 @@ func AllTaintList(c *gin.Context) {
 
 	amis.WriteJsonList(c, resultList)
 }
+// UniqueLabels 获取选定集群中所有唯一的节点标签键，并以选项列表形式返回。
 func UniqueLabels(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -349,4 +357,36 @@ func UniqueLabels(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"options": names,
 	})
+}
+
+// TopList 返回所有节点的资源使用率（top指标），包括CPU和内存的用量及其数值化表示，便于前端排序和展示。
+func TopList(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	nodeMetrics, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+		WithCache(time.Second * 30).
+		Ctl().Node().Top()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 转换为map 前端排序使用，usage.cpu这种前端无法正确排序
+	var result []map[string]string
+	for _, item := range nodeMetrics {
+		result = append(result, map[string]string{
+			"name":            item.Name,
+			"cpu":             item.Usage.CPU,
+			"memory":          item.Usage.Memory,
+			"cpu_nano":        fmt.Sprintf("%d", item.Usage.CPUNano),
+			"memory_byte":     fmt.Sprintf("%d", item.Usage.MemoryByte),
+			"cpu_fraction":    item.Usage.CPUFraction,
+			"memory_fraction": item.Usage.MemoryFraction,
+		})
+	}
+	amis.WriteJsonList(c, result)
 }

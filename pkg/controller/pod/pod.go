@@ -251,6 +251,7 @@ func Usage(c *gin.Context) {
 	amis.WriteJsonData(c, usage)
 }
 
+// UniqueLabels 返回当前集群中所有唯一的 Pod 标签键列表，格式化为前端可用的选项数组。
 func UniqueLabels(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -273,4 +274,40 @@ func UniqueLabels(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"options": names,
 	})
+}
+
+// TopList 返回指定命名空间下所有 Pod 的资源使用情况（CPU、内存等），支持多命名空间查询，并以便于前端排序的格式输出。
+func TopList(c *gin.Context) {
+	ns := c.Param("ns")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	podMetrics, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).
+		Namespace(strings.Split(ns, ",")...).
+		WithCache(time.Second * 30).
+		Ctl().Pod().Top()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 转换为map 前端排序使用，usage.cpu这种前端无法正确排序
+	var result []map[string]string
+	for _, item := range podMetrics {
+		result = append(result, map[string]string{
+			"name":            item.Name,
+			"namespace":       item.Namespace,
+			"cpu":             item.Usage.CPU,
+			"memory":          item.Usage.Memory,
+			"cpu_nano":        fmt.Sprintf("%d", item.Usage.CPUNano),
+			"memory_byte":     fmt.Sprintf("%d", item.Usage.MemoryByte),
+			"cpu_fraction":    item.Usage.CPUFraction,
+			"memory_fraction": item.Usage.MemoryFraction,
+		})
+	}
+	amis.WriteJsonList(c, result)
 }
