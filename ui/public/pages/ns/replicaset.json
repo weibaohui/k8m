@@ -1468,21 +1468,13 @@
                                   }
                                 },
                                 {
-                                  "type": "button",
-                                  "icon": "fa fa-terminal text-primary",
-                                  "actionType": "drawer",
                                   "tooltip": "终端",
-                                  "drawer": {
-                                    "closeOnEsc": true,
-                                    "width": "100%",
-                                    "title": "容器终端 (ESC 关闭)",
-                                    "body": [
-                                      {
-                                        "type": "fileExplorer"
-                                      }
-                                    ],
-                                    "actions": []
-                                  }
+                                  "type": "button",
+                                  "level": "link",
+                                  "actionType": "url",
+                                  "icon": "fa fa-terminal text-primary",
+                                  "blank": true,
+                                  "url": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
                                 }
                               ],
                               "toggled": true
