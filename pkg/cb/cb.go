@@ -96,11 +96,19 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	// 先判断是否有集群、对应的操作权限，再看是否有命名空间的
 	switch action {
 	case "exec":
-		changeClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+		manageClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 			return item.Cluster == cluster && item.Role == constants.RoleClusterAdmin
 		})
 		// 没有集群管理员权限，那么就需要进行Exec权限判断了
-		if len(changeClusters) == 0 {
+		// 有集群管理权限，就能有在pod中执行命令的权限
+		if len(manageClusters) == 0 {
+			//如果没有集群管理员权限，那么就必须要有集群只读权限
+			rdOnlyClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+				return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
+			})
+			if len(rdOnlyClusters) == 0 {
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 只读权限", username, cluster)
+			}
 			execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 				return item.Cluster == cluster && item.Role == constants.RoleClusterPodExec
 			})
@@ -108,7 +116,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] Exec权限", username, cluster)
 			}
 			if len(nsList) > 0 {
-				// 具备Exec权限了，那么继续看是否有该ns的权限.
+				// 具备只读+Exec权限了，那么继续看是否有该ns的权限.
 				// ns为空，或者ns列表中含有当前ns，那么就允许执行。
 				execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
 					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
