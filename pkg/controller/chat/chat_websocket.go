@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 
@@ -19,9 +18,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/service"
-	"k8s.io/apimachinery/pkg/util/httpstream"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/klog/v2"
 )
 
@@ -33,6 +29,14 @@ var WebsocketMessageType = map[int]string{
 	websocket.PongMessage:   "pong",
 }
 
+// GPTShell 通过 WebSocket 提供与 ChatGPT 及工具集成的交互式对话终端。
+// 
+// 该函数升级 HTTP 连接为 WebSocket，维持心跳检测，实现双向消息流转：
+// - 前端发送消息后，调用 ChatGPT 并动态集成可用工具，支持流式响应和工具调用结果返回；
+// - 后端将 AI 回复和工具执行结果实时推送给前端；
+// - 自动处理连接异常、心跳超时和资源释放。
+// 
+// 若 AI 服务未启用或参数绑定失败，将返回相应错误信息。
 func GPTShell(c *gin.Context) {
 
 	if !service.AIService().IsEnabled() {
@@ -229,28 +233,10 @@ func GPTShell(c *gin.Context) {
 	select {}
 }
 
-func createExecutor(url *url.URL, config *rest.Config) (remotecommand.Executor, error) {
-
-	exec, err := remotecommand.NewSPDYExecutor(config, "POST", url)
-	if err != nil {
-		return nil, err
-	}
-	// Fallback executor is default, unless feature flag is explicitly disabled.
-	// WebSocketExecutor must be "GET" method as described in RFC 6455 Sec. 4.1 (page 17).
-	websocketExec, err := remotecommand.NewWebSocketExecutor(config, "GET", url.String())
-	if err != nil {
-		return nil, err
-	}
-	exec, err = remotecommand.NewFallbackExecutor(websocketExec, exec, func(err error) bool {
-		return httpstream.IsUpgradeFailure(err) || httpstream.IsHTTPSProxyError(err)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return exec, nil
-}
-
-// MergeToolCalls 合并流式返回的ToolCall数据
+// MergeToolCalls 合并多个分段接收的 ToolCall 数据，生成完整的 ToolCall 切片。
+// 适用于将流式返回的部分 ToolCall 信息按索引聚合为完整的调用记录。
+//
+// 返回合并后的 ToolCall 切片。
 func MergeToolCalls(toolCalls []openai.ToolCall) []openai.ToolCall {
 	mergedCalls := make(map[int]*openai.ToolCall)
 

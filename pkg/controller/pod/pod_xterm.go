@@ -4,31 +4,26 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/httpstream"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/klog/v2"
 )
@@ -103,6 +98,9 @@ func cmdLogger(c *gin.Context, cmd string) {
 
 }
 
+// Xterm 通过 WebSocket 提供与 Kubernetes Pod 容器的交互式终端会话。
+// 支持 xterm.js 前端，处理终端输入输出、窗口大小调整、命令日志记录和连接保活。
+// 会话结束后可根据参数选择性删除目标 Pod。
 func Xterm(c *gin.Context) {
 	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
@@ -115,43 +113,6 @@ func Xterm(c *gin.Context) {
 		return
 	}
 
-	// TODO 转移到kom中，走cb
-	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	roles := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
-	clusterRoles, _ := service.UserService().GetClusterRole(selectedCluster, username, roles)
-
-	if len(clusterRoles) == 0 || !(slice.Contain(clusterRoles, constants.RolePlatformAdmin) || slice.Contain(clusterRoles, constants.RoleClusterAdmin) || slice.Contain(clusterRoles, constants.RoleClusterPodExec)) {
-		amis.WriteJsonError(c, fmt.Errorf("非管理员,且无exec权限，不能执行Exec命令"))
-		return
-	}
-	_, _, clusterUserRoles := amis.GetLoginUserWithClusterRoles(c)
-	if clusterUserRoles != nil && !(slice.Contain(clusterRoles, constants.RolePlatformAdmin)) {
-		// 说明有集群角色
-		execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
-			return item.Cluster == selectedCluster && item.Role == constants.RoleClusterPodExec
-		})
-		if len(execClusters) == 0 {
-			amis.WriteJsonError(c, fmt.Errorf("用户[%s]没有集群[%s]Exec权限", username, selectedCluster))
-			return
-		}
-
-		// 具备Exec权限了，那么继续看是否有该ns的权限.
-		// ns为空，或者ns列表中含有当前ns，那么就允许执行。
-		execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
-			return item.Namespaces == "" || utils.AllIn([]string{ns}, strings.Split(item.Namespaces, ","))
-		})
-		if len(execClustersWithNs) == 0 {
-			amis.WriteJsonError(c, fmt.Errorf("用户[%s]没有集群[%s] [%s]Exec权限", username, selectedCluster, ns))
-			return
-		}
-
-	}
-
-	if containerName == "" {
-		amis.WriteJsonError(c, errors.New("container_name is required"))
-		return
-	}
-
 	// 使用sync.Once确保清理动作只执行一次
 	var cleanupOnce sync.Once
 	cleanup := func() {
@@ -159,14 +120,18 @@ func Xterm(c *gin.Context) {
 			klog.Errorf("清理时发现selectedCluster为空，跳过Pod删除操作")
 			return
 		}
-		if removeAfterExec != "" {
+
+		// strconv.ParseBool 无效值返回 false
+		if ok, _ := strconv.ParseBool(removeAfterExec); ok {
 			removePod(ctx, selectedCluster, ns, podName)
 		}
+
 	}
 	// 确保函数退出时执行清理
 	defer cleanupOnce.Do(cleanup)
 
 	// 设置连接超时
+	// TODO 增加一个开关，用作终端输入超时，多长时间无响应超时
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Hour)
 	defer cancel()
 
@@ -210,34 +175,8 @@ func Xterm(c *gin.Context) {
 		return conn.WriteMessage(messageType, data)
 	}
 
-	cluster := kom.Cluster(selectedCluster).WithContext(ctx)
-
 	// 创建 TTY 终端大小管理队列
 	sizeQueue := &TerminalSizeQueue{}
-
-	// 定义 Kubernetes Exec 请求
-	req := cluster.Client().CoreV1().RESTClient().
-		Post().
-		Resource("pods").
-		Namespace(ns).
-		Name(podName).
-		SubResource("exec").
-		Param("container", containerName).
-		Param("command", "/bin/sh").
-		Param("command", "-c").
-		Param("command", "TERM=xterm-256color; export TERM; [ -x /bin/bash ] && ([ -x /usr/bin/script ] && /usr/bin/script -q -c '/bin/bash' /dev/null || exec /bin/bash) || exec /bin/sh").
-		Param("tty", "true").
-		Param("stdin", "true").
-		Param("stdout", "true").
-		Param("stderr", "true")
-
-	// 创建 WebSocket -> Pod 交互的 Executor
-	exec, err := createExecutor(req.URL(), cluster.RestConfig())
-	if err != nil {
-		klog.Errorf("Failed to create SPDYExecutor: %v", err)
-		safeWriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Error creating executor: %v", err)))
-		return
-	}
 
 	// 用于传输数据
 	// var inBuffer SafeBuffer
@@ -398,14 +337,20 @@ func Xterm(c *gin.Context) {
 		}
 	}()
 
-	// 执行命令
-	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
+	opt := &remotecommand.StreamOptions{
 		Stdin:             inReader,
 		Stdout:            &outBuffer,
 		Stderr:            &errBuffer,
 		Tty:               true,
 		TerminalSizeQueue: sizeQueue, // 传递 TTY 尺寸管理队列
-	})
+	}
+
+	// 执行命令，打开终端
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).
+		Name(podName).Namespace(ns).Ctl().Pod().
+		Command("/bin/sh", "-c", "TERM=xterm-256color; export TERM; [ -x /bin/bash ] && ([ -x /usr/bin/script ] && /usr/bin/script -q -c '/bin/bash' /dev/null || exec /bin/bash) || exec /bin/sh").
+		ContainerName(containerName).
+		StreamExecuteWithOptions(opt).Error
 	if err != nil {
 		klog.Errorf("Failed to execute command in pod: %v", err)
 		safeWriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Execution error: %v", err)))
@@ -423,25 +368,4 @@ func Xterm(c *gin.Context) {
 	klog.V(6).Infof("closing conn...")
 	connectionClosed = true
 	cleanupOnce.Do(cleanup)
-}
-
-func createExecutor(url *url.URL, config *rest.Config) (remotecommand.Executor, error) {
-
-	exec, err := remotecommand.NewSPDYExecutor(config, "POST", url)
-	if err != nil {
-		return nil, err
-	}
-	// Fallback executor is default, unless feature flag is explicitly disabled.
-	// WebSocketExecutor must be "GET" method as described in RFC 6455 Sec. 4.1 (page 17).
-	websocketExec, err := remotecommand.NewWebSocketExecutor(config, "GET", url.String())
-	if err != nil {
-		return nil, err
-	}
-	exec, err = remotecommand.NewFallbackExecutor(websocketExec, exec, func(err error) bool {
-		return httpstream.IsUpgradeFailure(err) || httpstream.IsHTTPSProxyError(err)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return exec, nil
 }
