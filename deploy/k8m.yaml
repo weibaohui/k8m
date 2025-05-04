@@ -171,13 +171,13 @@ spec:
               value: "true"
             # 是否启用临时管理员账户配置，默认关闭
             - name: ENABLE_TEMP_ADMIN
-              value: "true"
+              value: "false"
             #管理员用户名
             - name: ADMIN_USERNAME
               value: "admin"
             # 管理员密码
             - name: ADMIN_PASSWORD
-              value: "123456"
+              value: "admin888"
             # kubectl shell镜像地址
             - name: KUBECTL_SHELL_IMAGE
               value: "bitnami/kubectl:latest"
