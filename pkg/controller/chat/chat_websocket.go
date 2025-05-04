@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 
@@ -19,9 +18,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/service"
-	"k8s.io/apimachinery/pkg/util/httpstream"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/klog/v2"
 )
 
@@ -227,27 +223,6 @@ func GPTShell(c *gin.Context) {
 	}()
 	waiter.Wait()
 	select {}
-}
-
-func createExecutor(url *url.URL, config *rest.Config) (remotecommand.Executor, error) {
-
-	exec, err := remotecommand.NewSPDYExecutor(config, "POST", url)
-	if err != nil {
-		return nil, err
-	}
-	// Fallback executor is default, unless feature flag is explicitly disabled.
-	// WebSocketExecutor must be "GET" method as described in RFC 6455 Sec. 4.1 (page 17).
-	websocketExec, err := remotecommand.NewWebSocketExecutor(config, "GET", url.String())
-	if err != nil {
-		return nil, err
-	}
-	exec, err = remotecommand.NewFallbackExecutor(websocketExec, exec, func(err error) bool {
-		return httpstream.IsUpgradeFailure(err) || httpstream.IsHTTPSProxyError(err)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return exec, nil
 }
 
 // MergeToolCalls 合并流式返回的ToolCall数据
