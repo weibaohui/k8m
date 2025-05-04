@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -119,10 +120,12 @@ func Xterm(c *gin.Context) {
 			klog.Errorf("清理时发现selectedCluster为空，跳过Pod删除操作")
 			return
 		}
-		removeAfterExec = strings.ToLower(removeAfterExec)
-		if removeAfterExec == "true" || removeAfterExec == "1" || removeAfterExec == "on" {
+
+		// strconv.ParseBool 无效值返回 false
+		if ok, _ := strconv.ParseBool(removeAfterExec); ok {
 			removePod(ctx, selectedCluster, ns, podName)
 		}
+
 	}
 	// 确保函数退出时执行清理
 	defer cleanupOnce.Do(cleanup)
