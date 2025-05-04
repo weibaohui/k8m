@@ -97,6 +97,9 @@ func cmdLogger(c *gin.Context, cmd string) {
 
 }
 
+// Xterm 通过 WebSocket 提供与 Kubernetes Pod 容器的交互式终端会话。
+// 支持终端输入输出流转、窗口大小调整、命令日志记录、连接保活和会话结束后可选的 Pod 删除。
+// 该函数会自动处理连接超时、异常关闭和资源清理。
 func Xterm(c *gin.Context) {
 	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")

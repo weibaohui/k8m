@@ -29,6 +29,9 @@ var WebsocketMessageType = map[int]string{
 	websocket.PongMessage:   "pong",
 }
 
+// GPTShell 通过 WebSocket 提供与 ChatGPT 及工具调用集成的实时对话接口。
+// 
+// 该函数升级 HTTP 连接为 WebSocket，支持双向消息流，实现与前端的实时交互。用户可发送消息给 ChatGPT，支持工具调用，自动合并和执行工具调用结果，并将响应流式返回客户端。内置心跳检测和连接管理，确保会话稳定性。
 func GPTShell(c *gin.Context) {
 
 	if !service.AIService().IsEnabled() {
@@ -225,7 +228,8 @@ func GPTShell(c *gin.Context) {
 	select {}
 }
 
-// MergeToolCalls 合并流式返回的ToolCall数据
+// MergeToolCalls 合并由ChatGPT流式返回的多个部分ToolCall，生成完整的ToolCall切片。
+// 若同一Index的ToolCall被拆分为多段返回，将其各字段合并为一个完整对象后返回。
 func MergeToolCalls(toolCalls []openai.ToolCall) []openai.ToolCall {
 	mergedCalls := make(map[int]*openai.ToolCall)
 

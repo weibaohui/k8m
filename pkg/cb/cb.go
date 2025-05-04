@@ -49,6 +49,8 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 	return nil
 }
 
+// handleCommonLogic 根据用户在指定集群上的角色和命名空间权限，校验其是否有执行指定 Kubernetes 操作（如读取、变更、exec 等）的权限。
+// 若权限校验通过，返回用户名和角色列表，否则返回相应的错误信息。
 func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error) {
 	stmt := k8s.Statement
 	cluster := k8s.ID
