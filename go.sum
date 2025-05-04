@@ -1220,8 +1220,8 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/weibaohui/kom v0.2.29 h1:h7MXiJqejTdeZ7kNUfD4XIXnig57xil3WMKZm4zhXc8=
-github.com/weibaohui/kom v0.2.29/go.mod h1:VNDFPrCHN5GaaWz5n0XL3H7xgWjZONTtomex841qZLw=
+github.com/weibaohui/kom v0.2.30 h1:Ck9Fkg5+wE4LEgqTvYeeF9BZgXvsxOU0JnPC4Bc4Wzs=
+github.com/weibaohui/kom v0.2.30/go.mod h1:VNDFPrCHN5GaaWz5n0XL3H7xgWjZONTtomex841qZLw=
 github.com/weibaohui/mcp-go v0.0.5 h1:uiHCF0vVtO99Cu3NIMOwE2+Rq5fCjAp4vUZmsC8oURY=
 github.com/weibaohui/mcp-go v0.0.5/go.mod h1:rXqOudj/djTORU/ThxYx8fqEVj/5pvTuuebQ2RC7uk4=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=

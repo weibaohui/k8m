@@ -54,6 +54,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	cluster := k8s.ID
 	ctx := stmt.Context
 	nsList := stmt.NamespaceList
+	nsList = append(nsList, stmt.Namespace)
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
 	if roleString == "" {
@@ -92,20 +93,26 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	// 先判断是否有集群、对应的操作权限，再看是否有命名空间的
 	switch action {
 	case "exec":
-		execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
-			return item.Cluster == cluster && item.Role == constants.RoleClusterPodExec
+		changeClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+			return item.Cluster == cluster && item.Role == constants.RoleClusterAdmin
 		})
-		if len(execClusters) == 0 {
-			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] Exec权限", username, cluster)
-		}
-		if len(nsList) > 0 {
-			// 具备Exec权限了，那么继续看是否有该ns的权限.
-			// ns为空，或者ns列表中含有当前ns，那么就允许执行。
-			execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
-				return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
+		// 没有集群管理员权限，那么就需要进行Exec权限判断了
+		if len(changeClusters) == 0 {
+			execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
+				return item.Cluster == cluster && item.Role == constants.RoleClusterPodExec
 			})
-			if len(execClustersWithNs) == 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限", username, cluster, strings.Join(nsList, ","))
+			if len(execClusters) == 0 {
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] Exec权限", username, cluster)
+			}
+			if len(nsList) > 0 {
+				// 具备Exec权限了，那么继续看是否有该ns的权限.
+				// ns为空，或者ns列表中含有当前ns，那么就允许执行。
+				execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
+					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
+				})
+				if len(execClustersWithNs) == 0 {
+					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限", username, cluster, strings.Join(nsList, ","))
+				}
 			}
 		}
 
