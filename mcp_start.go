@@ -9,30 +9,22 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/flag"
 	mcp3 "github.com/weibaohui/k8m/pkg/mcp"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/metadata"
-	"k8s.io/klog/v2"
 )
 
 func MCPStart(version string, port int) {
-	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
-		username := r.Header.Get(constants.JwtUserName)
-		role := r.Header.Get(constants.JwtUserRole)
-		channel := server.GetRouteParam(ctx, "channel")
-		newCtx := context.Background()
-		if channel == "inner" {
-			// 发起mcp调用请求时注入用户名、角色信息
-			newCtx = context.WithValue(ctx, constants.JwtUserName, username)
-			ctx = context.WithValue(newCtx, constants.JwtUserRole, role)
-			klog.V(6).Infof("mcp inner request, username: %s, role: %s", username, role)
-		} else {
-			if user, err := service.UserService().GetUserByMCPKey(channel); err == nil {
-				newCtx = context.WithValue(ctx, constants.JwtUserName, user)
-			}
-		}
+	cfg := flag.Init()
 
+	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
+		auth := r.Header.Get("Authorization")
+		newCtx := context.Background()
+		if username, err := utils.GetUsernameFromToken(auth, cfg.JwtTokenSecret); err == nil {
+			newCtx = context.WithValue(newCtx, constants.JwtUserName, username)
+		}
 		return newCtx
 	}
 
@@ -63,7 +55,7 @@ func MCPStart(version string, port int) {
 		if result.IsError {
 			errStr = resultStr
 		}
-		
+
 		resultInfo := mcp3.ToolCallResult{
 			ToolName:   toolName,
 			Parameters: parameters,
@@ -76,7 +68,7 @@ func MCPStart(version string, port int) {
 		OnError:         []server.OnErrorHookFunc{errFn},
 		OnAfterCallTool: []server.OnAfterCallToolFunc{actFn},
 	}
-	cfg := metadata.ServerConfig{
+	sc := metadata.ServerConfig{
 		Name:    "k8m mcp server",
 		Version: version,
 		Port:    port,
@@ -87,11 +79,9 @@ func MCPStart(version string, port int) {
 			server.WithHooks(hooks),
 		},
 		SSEOption: []server.SSEOption{
-			server.WithSSEPattern("/:channel/sse"),
 			server.WithSSEContextFunc(ctxFn),
 		},
-		AuthKey:     constants.JwtUserName,
-		AuthRoleKey: constants.JwtUserRole,
+		AuthKey: constants.JwtUserName,
 	}
-	mcp.RunMCPServerWithOption(&cfg)
+	mcp.RunMCPServerWithOption(&sc)
 }
