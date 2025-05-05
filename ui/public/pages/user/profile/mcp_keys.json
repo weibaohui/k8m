@@ -2,7 +2,7 @@
   "type": "page",
   "title": "开放MCP服务",
   "remark": {
-    "body": "将k8m内置的MCP开放给其他大模型或软件使用，请妥善保管访问链接信息。该链接将使用您的访问权限",
+    "body": "将k8m内置的MCP开放给其他大模型或软件使用，请妥善保管认证Token。该Token将使用您的访问权限",
     "icon": "question-mark",
     "placement": "right",
     "trigger": "click",
@@ -10,9 +10,16 @@
   },
   "body": [
     {
-      "type": "alert",
-      "level": "info",
-      "body": "<div class='alert alert-info'><p><strong>使用说明：</strong></p><p>1. 该访问链接适用于CherryStudio、Cline、Cursor等软件。</p><p>2. 该访问链接将MCP权限绑定到您的权限上。</p><p>3. 如果您通过NodePort或网关方式访问，请根据实际情况手动替换链接中的IP和端口号。</p></div>"
+      "type": "button",
+      "label": "查看使用说明",
+      "level": "link",
+      "className": "text-info",
+      "actionType": "dialog",
+      "dialog": {
+        "title": "MCP服务使用说明",
+        "size": "lg",
+        "body": "<div><p><strong>1. 适用工具和软件</strong></p><ul style='margin-left:20px'><li>CherryStudio - AI开发助手</li><li>Cline - 命令行工具</li><li>Cursor - AI编程工具</li><li>其他支持自定义MCP接入的软件</li></ul><p><strong>2. 访问地址</strong></p><ul style='margin-left:20px'><li>统一访问地址：<code><%= window.location.protocol + '//' + window.location.hostname + ':3619' %>/mcp/sse</code></li><li>如使用NodePort方式访问，请将域名替换为集群节点IP，端口替换为NodePort端口</li><li>如使用网关方式访问，请将域名和端口替换为网关地址</li></ul><p><strong>3. 认证方式说明</strong></p><ul style='margin-left:20px'><li>使用Bearer Token认证</li><li>在HTTP请求头中添加：<code>Authorization: Bearer {AUTH_TOKEN}</code></li><li>AUTH_TOKEN即为表格中显示的认证Token</li><li>每个Token具有独立的访问权限，跟您的访问权限进行了绑定，请勿分享给他人</li><li>建议定期更换Token以确保安全性</li></ul></div>"
+      }
     },
     {
       "type": "crud",
@@ -23,11 +30,11 @@
       "headerToolbar": [
         {
           "type": "button",
-          "label": "创建链接",
+          "label": "创建Token",
           "level": "primary",
           "actionType": "dialog",
           "dialog": {
-            "title": "创建访问链接",
+            "title": "创建访问Token",
             "body": {
               "type": "form",
               "api": "post:/mgm/user/profile/mcpkeys/create",
@@ -65,13 +72,24 @@
           "label": "描述信息"
         },
         {
-          "name": "key",
-          "label": "访问链接",
+          "name": "jwt",
+          "label": "Auth认证",
           "type": "control",
+          "width": "150px",
           "body": [
             {
-              "type": "tpl",
-              "tpl": "<%= window.location.protocol + '//' + window.location.hostname + ':3619' %>/<%= data.key %>/sse"
+              "type": "button",
+              "label": "${jwt|truncate:30}",
+              "level": "link",
+              "actionType": "dialog",
+              "dialog": {
+                "title": "Auth认证详情",
+                "body": {
+                  "type": "tpl",
+                  "tpl": "${jwt}",
+                  "className": "break-all"
+                }
+              }
             }
           ]
         },

@@ -1,12 +1,15 @@
 package mcpkey
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
@@ -25,10 +28,17 @@ func Create(c *gin.Context) {
 	// 从JWT中获取用户信息
 	username := c.GetString(constants.JwtUserName)
 
+	jwt, err := service.UserService().GenerateJWTTokenOnlyUserName(username, time.Hour*24*365*10)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
 	// 生成MCP密钥
 	mcpKey := &models.McpKey{
 		Username:    username,
 		Key:         utils.RandNLengthString(8),
+		Jwt:         jwt,
 		Description: req.Description,
 	}
 

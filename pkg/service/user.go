@@ -137,7 +137,7 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 	return items, nil
 }
 
-// GenerateJWTToken 生成 Token
+// GenerateJWTTokenByUserName  生成 Token
 func (u *userService) GenerateJWTTokenByUserName(username string, duration time.Duration) (string, error) {
 	role := constants.JwtUserRole
 	name := constants.JwtUserName
@@ -162,6 +162,19 @@ func (u *userService) GenerateJWTTokenByUserName(username string, duration time.
 		cst:          strings.Join(clusterNames, ","), // 集群名称列表
 		cstUserRoles: utils.ToJSON(clusters),          // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
 		"exp":        time.Now().Add(duration).Unix(), // 国企时间
+	})
+	cfg := flag.Init()
+	var jwtSecret = []byte(cfg.JwtTokenSecret)
+	return token.SignedString(jwtSecret)
+}
+
+// GenerateJWTTokenOnlyUserName  生成 Token，仅包含Username
+func (u *userService) GenerateJWTTokenOnlyUserName(username string, duration time.Duration) (string, error) {
+	name := constants.JwtUserName
+
+	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		name:  username,
+		"exp": time.Now().Add(duration).Unix(),
 	})
 	cfg := flag.Init()
 	var jwtSecret = []byte(cfg.JwtTokenSecret)
