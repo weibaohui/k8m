@@ -161,7 +161,7 @@ func (u *userService) GenerateJWTTokenByUserName(username string, duration time.
 		role:         strings.Join(roles, ","),        // 角色列表
 		cst:          strings.Join(clusterNames, ","), // 集群名称列表
 		cstUserRoles: utils.ToJSON(clusters),          // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
-		"exp":        time.Now().Add(duration).Unix(), // 国企时间
+		"exp":        time.Now().Add(duration).Unix(),
 	})
 	cfg := flag.Init()
 	var jwtSecret = []byte(cfg.JwtTokenSecret)
