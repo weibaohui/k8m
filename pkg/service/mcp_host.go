@@ -456,6 +456,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 	return results
 }
 
+// clean 移除参数字符串中的多余空白字符、换行和制表符，并将空的 JSON 对象格式（"{}" 或 "{}}"）标准化为空字符串。
 func clean(arguments string) string {
 	arguments = strings.TrimSpace(arguments)
 	arguments = strings.ReplaceAll(arguments, "\n", "")
