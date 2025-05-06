@@ -188,6 +188,12 @@ spec:
             - containerPort: 3618
               protocol: TCP
               name: http-k8m
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3618
+            initialDelaySeconds: 30
+            periodSeconds: 10
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: k8m-data

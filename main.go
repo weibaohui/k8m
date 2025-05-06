@@ -140,10 +140,7 @@ func Init() {
 
 }
 
-// main 启动并初始化 Kubernetes 管理服务端，配置 Gin 路由、中间件、静态资源和各类 API 分组，监听指定端口并提供后端 API 及前端 UI 服务。
-// main 是程序的入口函数，初始化并启动 Kubernetes 管理平台后端服务。
-// 包括加载配置、初始化 AI 服务、注册集群、设置 Gin 路由与中间件、挂载静态 UI 资源、以及注册认证、集群管理、Kubernetes 资源操作、AI 聊天、用户与平台管理等各类 RESTful API。
-// 启动后提供集群资源管理、用户认证、AI 辅助、平台运维等一站式能力，并通过内嵌静态文件服务前端页面。
+// main 启动并运行 Kubernetes 管理服务，初始化配置、注册集群、启动资源监控，配置 Gin 路由及中间件，挂载前端静态资源，并提供认证、集群管理、Kubernetes 资源操作、AI 聊天、用户与平台管理等 HTTP API 接口。
 func main() {
 	Init()
 
@@ -193,6 +190,9 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
+	})
+	r.GET("/healthz", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
 	auth := r.Group("/auth")
