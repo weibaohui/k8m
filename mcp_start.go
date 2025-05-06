@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	mcp2 "github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -15,7 +16,8 @@ import (
 	"github.com/weibaohui/kom/mcp/metadata"
 )
 
-func MCPStart(version string, port int) {
+// createServerConfig 创建MCP服务器配置
+func createServerConfig(basePath string) *metadata.ServerConfig {
 	cfg := flag.Init()
 
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
@@ -43,6 +45,7 @@ func MCPStart(version string, port int) {
 			host.LogToolExecution(ctx, toolName, serverName, parameters, resultInfo, 1)
 		}
 	}
+
 	var actFn = func(ctx context.Context, id any, request *mcp2.CallToolRequest, result *mcp2.CallToolResult) {
 		host := service.McpService().Host()
 		toolName := request.Params.Name
@@ -63,14 +66,15 @@ func MCPStart(version string, port int) {
 		}
 		host.LogToolExecution(ctx, toolName, serverName, parameters, resultInfo, 1)
 	}
+
 	hooks := &server.Hooks{
 		OnError:         []server.OnErrorHookFunc{errFn},
 		OnAfterCallTool: []server.OnAfterCallToolFunc{actFn},
 	}
-	sc := metadata.ServerConfig{
+
+	return &metadata.ServerConfig{
 		Name:    "k8m mcp server",
-		Version: version,
-		Port:    port,
+		Version: cfg.Version,
 		ServerOptions: []server.ServerOption{
 			server.WithResourceCapabilities(false, false),
 			server.WithPromptCapabilities(false),
@@ -78,9 +82,21 @@ func MCPStart(version string, port int) {
 			server.WithHooks(hooks),
 		},
 		SSEOption: []server.SSEOption{
+			server.WithBasePath(basePath),
 			server.WithSSEContextFunc(ctxFn),
 		},
 		AuthKey: constants.JwtUserName,
 	}
-	mcp.RunMCPServerWithOption(&sc)
+}
+
+// GetMcpSSEServer 获取MCP SSE服务器
+func GetMcpSSEServer(basePath string) *server.SSEServer {
+	sc := createServerConfig(basePath)
+	return mcp.GetMCPSSEServerWithOption(sc)
+}
+func adapt(fn func() http.Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		handler := fn()
+		handler.ServeHTTP(c.Writer, c.Request)
+	}
 }
