@@ -59,10 +59,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	nsList := stmt.NamespaceList
 	nsList = append(nsList, stmt.Namespace)
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
-	if roleString == "" {
-		roleString = service.UserService().GetPlatformRolesByName(username)
-	}
+	roleString := service.UserService().GetPlatformRolesByName(username)
 
 	var err error
 
@@ -102,7 +99,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		// 没有集群管理员权限，那么就需要进行Exec权限判断了
 		// 有集群管理权限，就能有在pod中执行命令的权限
 		if len(manageClusters) == 0 {
-			//如果没有集群管理员权限，那么就必须要有集群只读权限
+			// 如果没有集群管理员权限，那么就必须要有集群只读权限
 			rdOnlyClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 				return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
 			})

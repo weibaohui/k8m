@@ -9,27 +9,26 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/mcp"
 	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
 type mcpService struct {
-	host *mcp.MCPHost
+	host *MCPHost
 }
 
 func (m *mcpService) Init() {
 	if m.host == nil {
-		m.host = mcp.NewMCPHost()
+		m.host = NewMCPHost()
 	}
 	m.Start()
 }
-func (m *mcpService) Host() *mcp.MCPHost {
+func (m *mcpService) Host() *MCPHost {
 	return m.host
 }
 func (m *mcpService) AddServer(server models.MCPServerConfig) {
 	// 将server转换为mcp.ServerConfig
-	serverConfig := mcp.ServerConfig{
+	serverConfig := ServerConfig{
 		ID:      server.ID,
 		Name:    server.Name,
 		URL:     server.URL,
@@ -56,7 +55,7 @@ func (m *mcpService) AddServer(server models.MCPServerConfig) {
 func (m *mcpService) AddServers(servers []models.MCPServerConfig) {
 	for _, server := range servers {
 		// 将server转换为mcp.ServerConfig
-		serverConfig := mcp.ServerConfig{
+		serverConfig := ServerConfig{
 			ID:      server.ID,
 			Name:    server.Name,
 			URL:     server.URL,
@@ -83,7 +82,7 @@ func (m *mcpService) AddServers(servers []models.MCPServerConfig) {
 }
 func (m *mcpService) RemoveServer(server models.MCPServerConfig) {
 	// 将server转换为mcp.ServerConfig
-	serverConfig := mcp.ServerConfig{
+	serverConfig := ServerConfig{
 		Name:    server.Name,
 		URL:     server.URL,
 		Enabled: server.Enabled,

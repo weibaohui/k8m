@@ -137,7 +137,7 @@ func AddInnerMCPServer() error {
 	if count == 0 {
 		config := &MCPServerConfig{
 			Name:      "k8m",
-			URL:       fmt.Sprintf("http://localhost:%d/inner/sse", cfg.MCPServerPort),
+			URL:       fmt.Sprintf("http://localhost:%d/sse", cfg.MCPServerPort),
 			Enabled:   true,
 			CreatedBy: "system",
 		}
@@ -148,7 +148,9 @@ func AddInnerMCPServer() error {
 		klog.V(4).Info("成功添加内部MCP服务器配置")
 	} else {
 		klog.V(4).Info("内部MCP服务器配置已存在")
-		dao.DB().Model(&MCPServerConfig{}).Select("url").Where("name =?", "k8m").Update("url", fmt.Sprintf("http://localhost:%d/inner/sse", cfg.MCPServerPort))
+		dao.DB().Model(&MCPServerConfig{}).Select("url").
+			Where("name =?", "k8m").
+			Update("url", fmt.Sprintf("http://localhost:%d/sse", cfg.MCPServerPort))
 	}
 
 	return nil

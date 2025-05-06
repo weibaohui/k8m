@@ -10,7 +10,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
-	mcp3 "github.com/weibaohui/k8m/pkg/mcp"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/metadata"
@@ -35,7 +34,7 @@ func MCPStart(version string, port int) {
 			toolName := request.Params.Name
 			serverName := host.GetServerNameByToolName(toolName)
 			parameters := request.Params.Arguments
-			resultInfo := mcp3.ToolCallResult{
+			resultInfo := service.MCPToolCallResult{
 				ToolName:   toolName,
 				Parameters: parameters,
 				Result:     errStr,
@@ -56,7 +55,7 @@ func MCPStart(version string, port int) {
 			errStr = resultStr
 		}
 
-		resultInfo := mcp3.ToolCallResult{
+		resultInfo := service.MCPToolCallResult{
 			ToolName:   toolName,
 			Parameters: parameters,
 			Result:     resultStr,
