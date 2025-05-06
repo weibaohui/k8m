@@ -89,6 +89,9 @@ func GetJwtMapClaimsFromToken(authToken string, jwtTokenSecret string) (jwt.MapC
 	if !ok {
 		return nil, fmt.Errorf("invalid JWT claims")
 	}
-
+	// 主动检查有效期
+	if err := claims.Valid(); err != nil {
+		return nil, err
+	}
 	return claims, nil
 }

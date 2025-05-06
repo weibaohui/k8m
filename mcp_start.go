@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	mcp2 "github.com/mark3labs/mcp-go/mcp"
@@ -14,6 +15,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/metadata"
+	"k8s.io/klog/v2"
 )
 
 // createServerConfig 根据指定的 basePath 创建并返回 MCP 服务器的配置。
@@ -23,9 +25,15 @@ func createServerConfig(basePath string) *metadata.ServerConfig {
 
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
 		auth := r.Header.Get("Authorization")
+		// 处理 Bearer 前缀
+		if strings.HasPrefix(auth, "Bearer ") {
+			auth = strings.TrimPrefix(auth, "Bearer ")
+		}
 		newCtx := context.Background()
 		if username, err := utils.GetUsernameFromToken(auth, cfg.JwtTokenSecret); err == nil {
 			newCtx = context.WithValue(newCtx, constants.JwtUserName, username)
+		} else {
+			klog.V(4).Infof("Failed to extract username from token: %v", err)
 		}
 		return newCtx
 	}
