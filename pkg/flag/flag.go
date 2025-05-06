@@ -20,7 +20,6 @@ var once sync.Once
 
 type Config struct {
 	Port                 int    // gin 监听端口
-	MCPServerPort        int    // MCPServerPort 监听端口
 	KubeConfig           string // KUBECONFIG文件路径
 	ApiKey               string // OPENAI_API_KEY
 	ApiURL               string // OPENAI_API_URL
@@ -128,9 +127,6 @@ func (c *Config) InitFlags() {
 	// sqlite数据库文件路径
 	defaultSqlitePath := getEnv("SQLITE_PATH", "./data/k8m.db")
 
-	// MCPServerPort
-	defaultMCPServerPort := getEnvAsInt("MCP_SERVER_PORT", 3619)
-
 	// 默认开启任意选择
 	defaultAnySelect := getEnvAsBool("ANY_SELECT", true)
 
@@ -170,7 +166,6 @@ func (c *Config) InitFlags() {
 	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
 	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认./data/k8m.db")
 	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认启用")
-	pflag.IntVarP(&c.MCPServerPort, "mcp-server-port", "s", defaultMCPServerPort, "MCP Server 监听端口，默认3619")
 	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")
 	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
