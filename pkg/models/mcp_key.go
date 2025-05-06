@@ -19,6 +19,7 @@ type McpKey struct {
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`   // Automatically managed by GORM for update time
 	CreatedBy   string    `json:"created_by,omitempty"`   // 创建者
 	LastUsedAt  time.Time `json:"last_used_at,omitempty"` // 最后使用时间
+	Jwt         string    `gorm:"type:text" json:"jwt"`   //  JWT
 }
 
 func (c *McpKey) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*McpKey, int64, error) {

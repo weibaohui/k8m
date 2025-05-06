@@ -125,6 +125,7 @@ func FixClusterName() error {
 	}
 	return nil
 }
+// AddInnerMCPServer 检查并初始化名为 "k8m" 的内部 MCP 服务器配置，不存在则创建，已存在则更新其 URL。
 func AddInnerMCPServer() error {
 	// 检查是否存在名为k8m的记录
 	var count int64
@@ -137,7 +138,7 @@ func AddInnerMCPServer() error {
 	if count == 0 {
 		config := &MCPServerConfig{
 			Name:      "k8m",
-			URL:       fmt.Sprintf("http://localhost:%d/inner/sse", cfg.MCPServerPort),
+			URL:       fmt.Sprintf("http://localhost:%d/mcp/k8m/sse", cfg.Port),
 			Enabled:   true,
 			CreatedBy: "system",
 		}
@@ -148,7 +149,9 @@ func AddInnerMCPServer() error {
 		klog.V(4).Info("成功添加内部MCP服务器配置")
 	} else {
 		klog.V(4).Info("内部MCP服务器配置已存在")
-		dao.DB().Model(&MCPServerConfig{}).Select("url").Where("name =?", "k8m").Update("url", fmt.Sprintf("http://localhost:%d/inner/sse", cfg.MCPServerPort))
+		dao.DB().Model(&MCPServerConfig{}).Select("url").
+			Where("name =?", "k8m").
+			Update("url", fmt.Sprintf("http://localhost:%d/mcp/k8m/sse", cfg.Port))
 	}
 
 	return nil

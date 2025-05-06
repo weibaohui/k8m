@@ -62,6 +62,7 @@ var InnerApiKey string
 var InnerApiUrl string
 var BuildDate string
 
+// Init 完成服务的初始化，包括加载配置、设置版本信息、初始化 AI 服务、注册集群及其回调，并启动资源监控。
 func Init() {
 	// 初始化配置
 	cfg := flag.Init()
@@ -120,8 +121,6 @@ func Init() {
 		}
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
-		klog.Infof("启动MCP Server, 监听端口: %d", cfg.MCPServerPort)
-		MCPStart(Version, cfg.MCPServerPort)
 
 	}()
 
@@ -141,7 +140,6 @@ func Init() {
 
 }
 
-// main 启动并初始化 Kubernetes 管理服务端，配置 Gin 路由、中间件、静态资源和各类 API 分组，监听指定端口并提供后端 API 及前端 UI 服务。
 // main 启动并运行 Kubernetes 管理服务，初始化配置、注册集群、启动资源监控，配置 Gin 路由及中间件，挂载前端静态资源，并提供认证、集群管理、Kubernetes 资源操作、AI 聊天、用户与平台管理等 HTTP API 接口。
 func main() {
 	Init()
@@ -172,6 +170,12 @@ func main() {
 		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	})
+
+	// MCP Server
+	sseServer := GetMcpSSEServer("/mcp/k8m/")
+	r.GET("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
+	r.POST("/mcp/k8m/message", adapt(sseServer.MessageHandler))
+
 	// 直接返回 index.html
 	r.GET("/", func(c *gin.Context) {
 		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配

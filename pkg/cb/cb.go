@@ -51,18 +51,32 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 
 // handleCommonLogic 根据用户在指定集群上的角色和命名空间权限，校验其是否有执行指定 Kubernetes 操作（如读取、变更、Exec 等）的权限。
 // 返回用户名、角色列表和权限校验错误（如无权限则返回错误）。
-// 平台管理员拥有所有权限；集群管理员拥有全部操作权限；特定操作（如 Exec、只读）需对应角色和命名空间权限。
+// handleCommonLogic 根据用户在平台和集群中的角色，校验其对指定 Kubernetes 集群和命名空间的操作权限。
+// 平台管理员拥有所有权限，集群管理员拥有全部操作权限，特定操作（如 Exec、只读）需具备对应角色及命名空间权限。
+// 若为内部监听（如 node watch），则跳过权限校验。
+// 返回用户名、角色列表及权限校验错误（如无权限或未授权）。
+// 
+// 参数：
+//   k8s: 封装了操作上下文的 Kubectl 实例。
+//   action: 待校验的操作类型（如 exec、delete、update、patch、create、读取类操作等）。
+// 
+// 返回：
+//   用户名、角色列表，以及权限不足或异常时的错误信息。
 func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error) {
 	stmt := k8s.Statement
 	cluster := k8s.ID
 	ctx := stmt.Context
 	nsList := stmt.NamespaceList
 	nsList = append(nsList, stmt.Namespace)
-	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
-	if roleString == "" {
-		roleString = service.UserService().GetPlatformRolesByName(username)
+
+	// 内部监听增加一个认证机制，不用做权限校验
+	// 比如node watch
+	if constants.RolePlatformAdmin == ctx.Value(constants.RolePlatformAdmin) {
+		return constants.RolePlatformAdmin, []string{constants.RolePlatformAdmin}, nil
 	}
+
+	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
+	roleString := service.UserService().GetPlatformRolesByName(username)
 
 	var err error
 
@@ -102,7 +116,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		// 没有集群管理员权限，那么就需要进行Exec权限判断了
 		// 有集群管理权限，就能有在pod中执行命令的权限
 		if len(manageClusters) == 0 {
-			//如果没有集群管理员权限，那么就必须要有集群只读权限
+			// 如果没有集群管理员权限，那么就必须要有集群只读权限
 			rdOnlyClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 				return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
 			})

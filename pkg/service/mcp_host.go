@@ -1,8 +1,10 @@
-package mcp
+package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -10,6 +12,8 @@ import (
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
+	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/ai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -154,12 +158,11 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Cli
 		return nil, fmt.Errorf("server config not found: %s", serverName)
 	}
 
-	username, role := m.getUserRoleFromMCPCtx(ctx)
-
+	username, _ := m.getUserRoleFromMCPCtx(ctx)
+	jwt, err := UserService().GenerateJWTTokenOnlyUserName(username, time.Hour*1)
 	// 执行时携带用户名、角色信息
 	newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
-		constants.JwtUserName: username,
-		constants.JwtUserRole: role,
+		"Authorization": jwt,
 	}))
 	// klog.V(6).Infof("访问MCP 服务器 [%s:%s] 携带信息%s %s", serverName, config.URL, username, role)
 	if err != nil {
@@ -310,4 +313,161 @@ func (m *MCPHost) GetServerNameByToolName(toolName string) string {
 		}
 	}
 	return ""
+}
+
+// LogToolExecution 记录工具执行日志
+func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName string, parameters interface{}, result MCPToolCallResult, executeTime int64) {
+
+	log := &models.MCPToolLog{
+		ToolName:    toolName,
+		ServerName:  serverName,
+		Parameters:  utils.ToJSON(parameters),
+		Result:      result.Result,
+		ExecuteTime: executeTime,
+		CreatedAt:   time.Now(),
+		Error:       result.Error,
+	}
+
+	username, _ := m.getUserRoleFromMCPCtx(ctx)
+	log.CreatedBy = username
+
+	prompt := ""
+	if promptVal, ok := ctx.Value("prompt").(string); ok {
+		prompt = promptVal
+	}
+	log.Prompt = prompt
+	if log.Result == "" && log.Error != "" {
+		log.Result = log.Error
+	}
+
+	dao.DB().Create(log)
+}
+
+// MCPToolCallResult 存储工具调用的结果
+type MCPToolCallResult struct {
+	ToolName   string                 `json:"tool_name"`
+	Parameters map[string]interface{} `json:"parameters"`
+	Result     string                 `json:"result"`
+	Error      string                 `json:"error,omitempty"`
+}
+
+func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai ai.IAI, prompt string) (string, []MCPToolCallResult, error) {
+
+	// 创建带有工具的聊天完成请求
+	tools := m.GetAllTools(ctx)
+	ai.SetTools(tools)
+	toolCalls, content, err := ai.GetCompletionWithTools(ctx, prompt)
+	if err != nil {
+		return "", nil, err
+	}
+
+	results := m.ExecTools(ctx, toolCalls)
+
+	return content, results, nil
+
+}
+
+func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []MCPToolCallResult {
+	// 存储所有工具调用的结果
+	var results []MCPToolCallResult
+
+	// 处理工具调用
+	if toolCalls != nil {
+		for _, toolCall := range toolCalls {
+			startTime := time.Now()
+
+			fullToolName := toolCall.Function.Name
+			klog.V(6).Infof("Tool Name: %s\n", fullToolName)
+			arguments := toolCall.Function.Arguments
+			arguments = clean(arguments)
+			klog.V(6).Infof("Tool Arguments: %s\n", arguments)
+
+			result := MCPToolCallResult{
+				ToolName: fullToolName,
+			}
+
+			// 解析参数
+			var args map[string]interface{}
+			if arguments != "" && arguments != "{}" && arguments != "null" {
+
+				if err := json.Unmarshal([]byte(arguments), &args); err != nil {
+					result.Error = fmt.Sprintf("failed to parse tool arguments: %v", err)
+					klog.V(6).Infof("参数解析Error: %s\n", result.Error)
+					results = append(results, result)
+					continue
+				}
+			}
+
+			result.Parameters = args
+
+			var cli *client.Client
+			var toolName, serverName string
+			var err error
+			if strings.Contains(fullToolName, "@") {
+				// 如果识别的ToolName包含@，则解析ToolName
+				toolName, serverName, _ = utils.ParseMCPToolName(fullToolName)
+			} else {
+				toolName = fullToolName
+				serverName = m.GetServerNameByToolName(toolName)
+			}
+			klog.V(6).Infof("解析ToolName: %s, ServerName: %s\n", toolName, serverName)
+			if serverName == "" {
+				// 解析失败，尝试直接用toolName
+				result.Error = fmt.Sprintf("根据Tool名称 %s 解析MCP Server 名称失败: %v", fullToolName, err)
+				results = append(results, result)
+				continue
+			}
+			klog.V(6).Infof("解析ToolName: %s, ServerName: %s\n", toolName, serverName)
+			// 执行工具调用
+			callRequest := mcp.CallToolRequest{}
+			callRequest.Params.Name = toolName
+			callRequest.Params.Arguments = args
+			klog.V(6).Infof("执行工具调用: %s\n", utils.ToJSON(callRequest))
+			cli, err = m.GetClient(ctx, serverName)
+
+			if err != nil {
+				klog.V(6).Infof("获取MCP Client 失败: %v\n", err)
+				result.Error = fmt.Sprintf("获取MCP Client 失败: %v", err)
+				results = append(results, result)
+				continue
+			}
+			// 执行工具
+			callResult, err := cli.CallTool(ctx, callRequest)
+			_ = cli.Close()
+			// 记录执行日志
+			executeTime := time.Since(startTime).Milliseconds()
+			if err != nil {
+				klog.V(6).Infof("工具执行失败: %v\n", err)
+				result.Error = fmt.Sprintf("工具执行失败: %v", err)
+				results = append(results, result)
+				m.LogToolExecution(ctx, toolName, serverName, args, result, executeTime)
+				continue
+			}
+
+			// 处理工具执行结果
+			if len(callResult.Content) > 0 {
+				if textContent, ok := callResult.Content[0].(mcp.TextContent); ok {
+					result.Result = textContent.Text
+				}
+			}
+			results = append(results, result)
+
+			m.LogToolExecution(ctx, toolName, serverName, args, result, executeTime)
+		}
+	}
+	return results
+}
+
+// clean 移除参数字符串中的多余空白字符、换行和制表符，并将空的 JSON 对象格式（"{}" 或 "{}}"）标准化为空字符串。
+func clean(arguments string) string {
+	arguments = strings.TrimSpace(arguments)
+	arguments = strings.ReplaceAll(arguments, "\n", "")
+	arguments = strings.ReplaceAll(arguments, "\t", "")
+	if arguments == "{}}" {
+		arguments = ""
+	}
+	if arguments == "{}" {
+		arguments = ""
+	}
+	return arguments
 }

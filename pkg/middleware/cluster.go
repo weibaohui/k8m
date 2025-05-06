@@ -13,6 +13,12 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
+// EnsureSelectedClusterMiddleware 返回一个 Gin 中间件，用于强制校验请求是否已选择并有权限访问指定集群。
+// 对于静态文件和部分白名单路径会直接跳过校验。其余请求将：
+// 1. 校验 URL 中的集群参数是否存在且有效；
+// 2. 校验用户 JWT 是否有效，并判断用户是否有访问该集群的权限（非平台管理员需在授权集群列表中）；
+// 3. 校验目标集群是否已连接。
+// 校验不通过时将中止请求并返回相应的错误信息。
 func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
@@ -35,6 +41,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		// 检查请求路径是否需要跳过集群检测
 		if path == "/" ||
 			path == "/favicon.ico" ||
+			strings.HasPrefix(path, "/mcp/") ||
 			strings.HasPrefix(path, "/auth/") ||
 			strings.HasPrefix(path, "/assets/") ||
 			strings.HasPrefix(path, "/ai/") || // ai 聊天不带cluster

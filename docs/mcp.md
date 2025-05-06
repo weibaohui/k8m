@@ -14,9 +14,9 @@ k8m 内置MCP 支持平台页面直接使用，也支持其他软件集成。
 登录平台后，在`个人中心--开放MCP`页面，点击`创建链接`按钮，输入描述后，得到一个访问链接。
 形如
 ```bash
-http://localhost:3619/cc3fuxbq/sse	
+http://localhost:3618/mcp/k8m/sse	
 ```
-请将`localhost`替换为MCP Server的IP地址，端口号为3619。 
+请将`localhost`替换为MCP Server的IP地址。 
 ![MCP开放](../images/mcp/open_mcp.png "屏幕截图")
 
 k8m 内置的MCP Server 支持以下权限：
@@ -63,7 +63,7 @@ MCP开放访问链接将MCP权限绑定到创建用户的权限上。也就是�
 {
   "mcpServers": {
     "k8m": {
-      "url": "http://localhost:3619/cc3fuxbq/sse"
+      "url": "http://localhost:3618/mcp/k8m/sse"
     }
   }
 }

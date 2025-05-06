@@ -80,7 +80,6 @@ Usage of ./k8m:
       --node-shell-image string          NodeShell 镜像。 默认为 alpine:latest，必须包含`nsenter`命令 (default "alpine:latest")
   -p, --port int                         监听端口 (default 3618)
       --sqlite-path string               sqlite数据库文件路径， (default "./data/k8m.db")
-  -s, --mcp-server-port int              MCP Server 监听端口，默认3619 (default 3619)
       --use-builtin-model                是否使用内置大模型参数，默认开启 (default true)
   -v, --v Level                          klog的日志级别 (default 2)
 ```
@@ -95,7 +94,6 @@ services:
     restart: always
     ports:
       - "3618:3618"
-      - "3619:3619"
     environment:
       TZ: Asia/Shanghai
     volumes:
@@ -140,7 +138,6 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 | 环境变量                  | 默认值                        | 说明                                                                    |
 |-----------------------|----------------------------|-----------------------------------------------------------------------|
 | `PORT`                | `3618`                     | 监听的端口号                                                                |
-| `MCP_SERVER_PORT`     | `3619`                     | 内置多集群k8s MCP Server监听的端口号                                             |
 | `KUBECONFIG`          | `~/.kube/config`           | `kubeconfig` 文件路径  ，会自动扫描识别同级目录下所有的配置文件                               |
 | `ENABLE_AI`           | `"true"`                   | 开启AI功能，默认开启                                                           |
 | `USE_BUILTIN_MODEL`   | `"true"`                   | 使用内置大模型参数，默认开启                                                        |
