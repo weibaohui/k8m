@@ -424,6 +424,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			callRequest.Params.Arguments = args
 			klog.V(6).Infof("执行工具调用: %s\n", utils.ToJSON(callRequest))
 			cli, err = m.GetClient(ctx, serverName)
+
 			if err != nil {
 				klog.V(6).Infof("获取MCP Client 失败: %v\n", err)
 				result.Error = fmt.Sprintf("获取MCP Client 失败: %v", err)
@@ -432,6 +433,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			}
 			// 执行工具
 			callResult, err := cli.CallTool(ctx, callRequest)
+			_ = cli.Close()
 			// 记录执行日志
 			executeTime := time.Since(startTime).Milliseconds()
 			if err != nil {
