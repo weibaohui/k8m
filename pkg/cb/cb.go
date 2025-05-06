@@ -58,6 +58,13 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	ctx := stmt.Context
 	nsList := stmt.NamespaceList
 	nsList = append(nsList, stmt.Namespace)
+
+	// 内部监听增加一个认证机制，不用做权限校验
+	// 比如node watch
+	if constants.RolePlatformAdmin == ctx.Value(constants.RolePlatformAdmin) {
+		return constants.RolePlatformAdmin, []string{constants.RolePlatformAdmin}, nil
+	}
+
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 	roleString := service.UserService().GetPlatformRolesByName(username)
 
