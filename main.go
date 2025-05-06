@@ -187,6 +187,9 @@ func main() {
 			"message": "pong",
 		})
 	})
+	r.GET("/healthz", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	auth := r.Group("/auth")
 	{
