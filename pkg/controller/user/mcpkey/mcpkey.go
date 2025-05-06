@@ -13,7 +13,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// Create 创建MCP密钥
+// Create 处理创建新的MCP密钥的HTTP请求。
+// 从请求中解析描述信息，获取当前用户，生成有效期为10年的JWT令牌，并创建包含该信息的MCP密钥记录保存到数据库。
+// 失败时返回JSON格式的错误响应，成功时返回操作成功的JSON响应。
 func Create(c *gin.Context) {
 	params := dao.BuildParams(c)
 

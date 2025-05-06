@@ -62,6 +62,7 @@ var InnerApiKey string
 var InnerApiUrl string
 var BuildDate string
 
+// Init 完成服务的初始化，包括加载配置、设置版本信息、初始化 AI 服务、注册集群及其回调，并启动资源监控。
 func Init() {
 	// 初始化配置
 	cfg := flag.Init()
@@ -140,7 +141,9 @@ func Init() {
 }
 
 // main 启动并初始化 Kubernetes 管理服务端，配置 Gin 路由、中间件、静态资源和各类 API 分组，监听指定端口并提供后端 API 及前端 UI 服务。
-// 包括认证、集群管理、Kubernetes 资源操作、AI 聊天、用户与平台管理等功能模块。
+// main 是程序的入口函数，初始化并启动 Kubernetes 管理平台后端服务。
+// 包括加载配置、初始化 AI 服务、注册集群、设置 Gin 路由与中间件、挂载静态 UI 资源、以及注册认证、集群管理、Kubernetes 资源操作、AI 聊天、用户与平台管理等各类 RESTful API。
+// 启动后提供集群资源管理、用户认证、AI 辅助、平台运维等一站式能力，并通过内嵌静态文件服务前端页面。
 func main() {
 	Init()
 

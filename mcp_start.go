@@ -16,7 +16,8 @@ import (
 	"github.com/weibaohui/kom/mcp/metadata"
 )
 
-// createServerConfig 创建MCP服务器配置
+// createServerConfig 根据指定的 basePath 创建并返回 MCP 服务器的配置。
+// 配置包括 JWT 用户名提取的上下文函数、工具调用错误和成功后的日志钩子、服务器选项及 SSE 相关设置。
 func createServerConfig(basePath string) *metadata.ServerConfig {
 	cfg := flag.Init()
 
@@ -89,11 +90,12 @@ func createServerConfig(basePath string) *metadata.ServerConfig {
 	}
 }
 
-// GetMcpSSEServer 获取MCP SSE服务器
+// GetMcpSSEServer 根据指定的基础路径创建并返回一个配置好的MCP SSE服务器实例。
 func GetMcpSSEServer(basePath string) *server.SSEServer {
 	sc := createServerConfig(basePath)
 	return mcp.GetMCPSSEServerWithOption(sc)
 }
+// adapt 将标准的 http.Handler 适配为 Gin 框架可用的处理函数。
 func adapt(fn func() http.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		handler := fn()
