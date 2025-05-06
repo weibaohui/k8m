@@ -15,13 +15,13 @@ require (
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/mark3labs/mcp-go v0.17.0
+	github.com/mark3labs/mcp-go v0.25.0
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.39.0
 	github.com/spf13/pflag v1.0.6
-	github.com/weibaohui/kom v0.2.30
+	github.com/weibaohui/kom v0.2.32
 	golang.org/x/net v0.39.0
 	golang.org/x/oauth2 v0.29.0
 	gorm.io/gorm v1.26.0
@@ -35,8 +35,6 @@ require (
 	sigs.k8s.io/gateway-api v1.3.0
 	sigs.k8s.io/yaml v1.4.0
 )
-
-replace github.com/mark3labs/mcp-go => github.com/weibaohui/mcp-go v0.0.5
 
 //replace github.com/weibaohui/kom v0.1.20 => github.com/weibaohui/kom main
 //replace github.com/weibaohui/kom v0.2.29 => github.com/weibaohui/kom v0.2.30-0.20250504082828-c0893145fefa
