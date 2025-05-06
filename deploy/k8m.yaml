@@ -87,10 +87,6 @@ spec:
       protocol: TCP
       port: 3618
       targetPort: 3618
-    - name: http-k8m-mcp
-      protocol: TCP
-      port: 3619
-      targetPort: 3619
   selector:
     app: k8m
   type: ClusterIP
@@ -109,11 +105,6 @@ spec:
       port: 3618
       targetPort: 3618
       nodePort: 31999
-    - name: http-k8m-mcp
-      protocol: TCP
-      port: 3619
-      targetPort: 3619
-      nodePort: 31919
   selector:
     app: k8m
   type: NodePort
@@ -160,9 +151,6 @@ spec:
             # 监听的端口号
             - name: PORT
               value: "3618"
-            # 内置多集群k8s MCP Server监听的端口号
-            - name: MCP_SERVER_PORT
-              value: "3619"
             # kubeconfig文件路径，会自动扫描识别同级目录下所有的配置文件
             - name: KUBECONFIG
               value: "~/.kube/config"
@@ -200,9 +188,6 @@ spec:
             - containerPort: 3618
               protocol: TCP
               name: http-k8m
-            - containerPort: 3619
-              protocol: TCP
-              name: http-k8m-mcp
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: k8m-data

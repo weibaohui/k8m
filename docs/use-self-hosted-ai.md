@@ -20,7 +20,6 @@ services:
     restart: always
     ports:
       - "3618:3618"
-      - "3619:3619"
     environment:
       TZ: Asia/Shanghai
       ENABLE_TEMP_ADMIN: true
@@ -80,9 +79,6 @@ spec:
             - containerPort: 3618
               protocol: TCP
               name: http-k8m
-            - containerPort: 3619
-              protocol: TCP
-              name: http-k8m-mcp
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: k8m-data

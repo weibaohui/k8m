@@ -53,7 +53,6 @@ Usage of ./k8m:
       --node-shell-image string          NodeShell image. Default is alpine:latest, must contain `nsenter` command (default "alpine:latest")
   -p, --port int                         Listening port (default 3618)
       --sqlite-path string               Path to sqlite database file (default "./data/k8m.db")
-  -s, --mcp-server-port int              MCP Server listening port, default 3619 (default 3619)
   -v, --v Level                          Log level for klog (default 2)
 ```
 
@@ -67,7 +66,6 @@ services:
     restart: always
     ports:
       - "3618:3618"
-      - "3619:3619"
     environment:
       TZ: Asia/Shanghai
     volumes:
@@ -119,7 +117,6 @@ Below is a table of environment variable settings supported by k8m and their fun
 | Environment Variable       | Default Value              | Description                                                                                   |
 |----------------------------|----------------------------|-----------------------------------------------------------------------------------------------|
 | `PORT`                     | `3618`                     | Listening port number                                                                         |
-| `MCP_SERVER_PORT`          | `3619`                     | Listening port number for built-in multi-cluster k8s MCP Server                               |
 | `KUBECONFIG`               | `~/.kube/config`           | Path to `kubeconfig` file                                                                     |
 | `OPENAI_API_KEY`           | `""`                       | API Key for large models                                                                      |
 | `OPENAI_API_URL`           | `""`                       | API URL for large models                                                                      |
@@ -208,7 +205,7 @@ Suitable for MCP tool integration like Cursor, Claude Desktop, Windsurf, etc. Yo
 #### Cursor
 1. Enter Cursor settings interface
 2. Find extension service configuration
-3. Add MCP Server URL (e.g. http://localhost:3619/sse)
+3. Add MCP Server URL (e.g. http://localhost:3618/mcp/k8m/sse)
 
 #### Windsurf
 1. Access configuration center
@@ -223,8 +220,7 @@ Suitable for MCP tool integration like Cursor, Claude Desktop, Windsurf, etc. Yo
 
 ### Service Endpoint, Can be Developed for Use by Other AI Tools
 
-MCP program uses port 3619. NodePort uses port 31919.
-If started in binary mode, the access address is http://ip:3619/sse
+If started in binary mode, the access address is http://ip:3618/mcp/k8m/sse
 If started in cluster mode, the access address is http://nodeIP:31919/sse
 
 ### Cluster Management Scope
