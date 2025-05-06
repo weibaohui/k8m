@@ -35,6 +35,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		// 检查请求路径是否需要跳过集群检测
 		if path == "/" ||
 			path == "/favicon.ico" ||
+			strings.HasPrefix(path, "/mcp/") ||
 			strings.HasPrefix(path, "/auth/") ||
 			strings.HasPrefix(path, "/assets/") ||
 			strings.HasPrefix(path, "/ai/") || // ai 聊天不带cluster
