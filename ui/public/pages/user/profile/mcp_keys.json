@@ -18,7 +18,7 @@
       "dialog": {
         "title": "MCP服务使用说明",
         "size": "lg",
-        "body": "<div><p><strong>1. 适用工具和软件</strong></p><ul style='margin-left:20px'><li>CherryStudio - AI开发助手</li><li>Cline - 命令行工具</li><li>Cursor - AI编程工具</li><li>其他支持自定义MCP接入的软件</li></ul><p><strong>2. 访问地址</strong></p><ul style='margin-left:20px'><li>统一访问地址：<code><%= window.location.protocol + '//' + window.location.hostname + ':3619' %>/sse</code></li><li>如使用NodePort方式访问，请将域名替换为集群节点IP，端口替换为NodePort端口</li><li>如使用网关方式访问，请将域名和端口替换为网关地址</li><li>如您不能确定访问方式，可联系系统管理员</li></ul><p><strong>3. 认证方式说明</strong></p><ul style='margin-left:20px'><li>使用Bearer Token认证</li><li>在HTTP请求头中添加：<code>Authorization: Bearer {AUTH_TOKEN}</code></li><li>AUTH_TOKEN即为表格中显示的认证Token</li><li>每个Token具有独立的访问权限，跟您的访问权限进行了绑定，请勿分享给他人</li><li>建议定期更换Token以确保安全性</li></ul></div>"
+        "body": "<div><p><strong>1. 适用工具和软件</strong></p><ul style='margin-left:20px'><li>CherryStudio - AI开发助手</li><li>Cline - 命令行工具</li><li>Cursor - AI编程工具</li><li>其他支持自定义MCP接入的软件</li></ul><p><strong>2. 访问地址</strong></p><ul style='margin-left:20px'><li>统一访问地址：<code><%= window.location.protocol + '//' + window.location.hostname + ':3618' %>/mcp/k8m/sse</code></li><li>如使用NodePort方式访问，请将域名替换为集群节点IP，端口替换为NodePort端口</li><li>如使用网关方式访问，请将域名和端口替换为网关地址</li><li>如您不能确定访问方式，可联系系统管理员</li></ul><p><strong>3. 认证方式说明</strong></p><ul style='margin-left:20px'><li>使用Bearer Token认证</li><li>在HTTP请求头中添加：<code>Authorization: Bearer {AUTH_TOKEN}</code></li><li>AUTH_TOKEN即为表格中显示的认证Token</li><li>每个Token具有独立的访问权限，跟您的访问权限进行了绑定，请勿分享给他人</li><li>建议定期更换Token以确保安全性</li></ul></div>"
       }
     },
     {
