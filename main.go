@@ -120,8 +120,6 @@ func Init() {
 		}
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
-		klog.Infof("启动MCP Server, 监听端口: %d", cfg.MCPServerPort)
-		MCPStart(Version, cfg.MCPServerPort)
 
 	}()
 
@@ -172,6 +170,12 @@ func main() {
 		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	})
+
+	// MCP Server
+	sseServer := GetMcpSSEServer("/mcp/k8m/")
+	r.GET("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
+	r.POST("mcp/k8m/message", adapt(sseServer.MessageHandler))
+
 	// 直接返回 index.html
 	r.GET("/", func(c *gin.Context) {
 		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
