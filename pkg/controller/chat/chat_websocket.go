@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"sync"
@@ -30,12 +29,12 @@ var WebsocketMessageType = map[int]string{
 }
 
 // GPTShell 通过 WebSocket 提供与 ChatGPT 及工具集成的交互式对话终端。
-// 
+//
 // 该函数升级 HTTP 连接为 WebSocket，维持心跳检测，实现双向消息流转：
 // - 前端发送消息后，调用 ChatGPT 并动态集成可用工具，支持流式响应和工具调用结果返回；
 // - 后端将 AI 回复和工具执行结果实时推送给前端；
 // - 自动处理连接异常、心跳超时和资源释放。
-// 
+//
 // 若 AI 服务未启用或参数绑定失败，将返回相应错误信息。
 func GPTShell(c *gin.Context) {
 
@@ -74,6 +73,16 @@ func GPTShell(c *gin.Context) {
 	defer conn.Close()
 	klog.V(6).Infof("ws Client connected")
 
+	// 创建一个写锁，用于保护WebSocket写操作
+	var writeMutex sync.Mutex
+
+	// 封装写消息的函数，确保写操作的线程安全
+	safeWriteMessage := func(messageType int, data []byte) error {
+		writeMutex.Lock()
+		defer writeMutex.Unlock()
+		return conn.WriteMessage(messageType, data)
+	}
+
 	var outBuffer xterm.SafeBuffer
 	defer func() {
 		if err := conn.Close(); err != nil {
@@ -93,7 +102,7 @@ func GPTShell(c *gin.Context) {
 	})
 	go func() {
 		for {
-			if err := conn.WriteMessage(websocket.PingMessage, []byte("keepalive")); err != nil {
+			if err := safeWriteMessage(websocket.PingMessage, []byte("keepalive")); err != nil {
 				klog.V(6).Infof("failed to write ping message")
 				return
 			}
@@ -125,7 +134,7 @@ func GPTShell(c *gin.Context) {
 				outBuffer.Reset()
 				klog.V(6).Infof("Received stdout (%d bytes): %q", len(data), string(data))
 
-				if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
+				if err := safeWriteMessage(websocket.TextMessage, data); err != nil {
 					klog.V(6).Infof("Failed to send stderr message   to xterm.js: %v", err)
 					errorCounter++
 					return
@@ -167,13 +176,13 @@ func GPTShell(c *gin.Context) {
 			stream, err := service.ChatService().GetChatStream(string(data), tools...)
 
 			if err != nil {
-				klog.V(6).Infof(fmt.Sprintf("failed to write %v bytes to tty: %s", len(dataBuffer), err))
+				klog.V(6).Infof("failed to write %v bytes to tty: %s", len(dataBuffer), err)
 				continue
 			}
 			var toolCallBuffer []openai.ToolCall
 			for {
-				response, err := stream.Recv()
-				if err != nil {
+				response, recvErr := stream.Recv()
+				if recvErr != nil {
 					if err == io.EOF {
 						break
 					}
@@ -188,7 +197,7 @@ func GPTShell(c *gin.Context) {
 						// 大模型选择了执行工具
 						// 解析当前的ToolCalls
 						var currentCalls []openai.ToolCall
-						if err := json.Unmarshal([]byte(utils.ToJSON(choice.Delta.ToolCalls)), &currentCalls); err == nil {
+						if err = json.Unmarshal([]byte(utils.ToJSON(choice.Delta.ToolCalls)), &currentCalls); err == nil {
 							toolCallBuffer = append(toolCallBuffer, currentCalls...)
 						}
 
