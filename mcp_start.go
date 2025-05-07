@@ -14,13 +14,12 @@ import (
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
-	"github.com/weibaohui/kom/mcp/metadata"
 	"k8s.io/klog/v2"
 )
 
 // createServerConfig 根据指定的 basePath 创建并返回 MCP 服务器的配置。
 // 配置包括 JWT 用户名提取的上下文函数、工具调用错误和成功后的日志钩子、服务器选项及 SSE 相关设置。
-func createServerConfig(basePath string) *metadata.ServerConfig {
+func createServerConfig(basePath string) *mcp.ServerConfig {
 	cfg := flag.Init()
 
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
@@ -29,11 +28,13 @@ func createServerConfig(basePath string) *metadata.ServerConfig {
 		if strings.HasPrefix(auth, "Bearer ") {
 			auth = strings.TrimPrefix(auth, "Bearer ")
 		}
+		klog.V(6).Infof("Authorization: %v", auth)
 		newCtx := context.Background()
 		if username, err := utils.GetUsernameFromToken(auth, cfg.JwtTokenSecret); err == nil {
+			klog.V(6).Infof("Extracted username from token: %v", username)
 			newCtx = context.WithValue(newCtx, constants.JwtUserName, username)
 		} else {
-			klog.V(4).Infof("Failed to extract username from token: %v", err)
+			klog.V(6).Infof("Failed to extract username from token: %v", err)
 		}
 		return newCtx
 	}
@@ -83,7 +84,7 @@ func createServerConfig(basePath string) *metadata.ServerConfig {
 		OnAfterCallTool: []server.OnAfterCallToolFunc{actFn},
 	}
 
-	return &metadata.ServerConfig{
+	return &mcp.ServerConfig{
 		Name:    "k8m mcp server",
 		Version: cfg.Version,
 		ServerOptions: []server.ServerOption{
