@@ -56,6 +56,8 @@ func createServerConfig(basePath string) *metadata.ServerConfig {
 	}
 
 	var actFn = func(ctx context.Context, id any, request *mcp2.CallToolRequest, result *mcp2.CallToolResult) {
+		// 记录工具调用请求
+		klog.V(6).Infof("CallToolRequest: %v", utils.ToJSON(request))
 		host := service.McpService().Host()
 		toolName := request.Params.Name
 		serverName := host.GetServerNameByToolName(toolName)
@@ -103,6 +105,7 @@ func GetMcpSSEServer(basePath string) *server.SSEServer {
 	sc := createServerConfig(basePath)
 	return mcp.GetMCPSSEServerWithOption(sc)
 }
+
 // adapt 将标准的 http.Handler 适配为 Gin 框架可用的处理函数。
 func adapt(fn func() http.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
