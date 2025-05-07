@@ -183,7 +183,7 @@ func GPTShell(c *gin.Context) {
 			for {
 				response, recvErr := stream.Recv()
 				if recvErr != nil {
-					if err == io.EOF {
+					if recvErr == io.EOF {
 						break
 					}
 					klog.V(6).Infof("stream Recv error:%v", err)
