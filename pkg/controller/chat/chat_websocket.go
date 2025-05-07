@@ -186,7 +186,7 @@ func GPTShell(c *gin.Context) {
 					if recvErr == io.EOF {
 						break
 					}
-					klog.V(6).Infof("stream Recv error:%v", err)
+					klog.V(6).Infof("stream Recv error:%v", recvErr)
 					// 处理其他错误
 					continue
 				}
