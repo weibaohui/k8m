@@ -1,51 +1,69 @@
 {
-    "type": "page",
-    "title": "关于",
-    "body": [
+  "type": "page",
+  "title": "关于",
+  "body": [
+    {
+      "type": "card",
+      "body": [
         {
-            "type": "card",
-            "body": [
-                {
-                    "type": "form",
-                    "mode": "horizontal",
-                    "labelWidth": 150,
-                    "static": true,
-                    "wrapWithPanel": false,
-                    "initApi": "/params/version",
-                    "controls": [
-                        {
-                            "type": "static",
-                            "name": "version",
-                            "label": "版本号",
-                            "disabled": true
-                        },
-                        {
-                            "type": "text",
-                            "name": "buildDate",
-                            "label": "编译时间",
-                            "disabled": true
-                        },
-                        {
-                            "type": "text",
-                            "name": "gitCommit",
-                            "label": "Git提交",
-                            "disabled": true
-                        },
-                        {
-                            "type": "text",
-                            "name": "gitTag",
-                            "label": "Git标签",
-                            "disabled": true
-                        },
-                        {
-                            "type": "text",
-                            "name": "gitRepo",
-                            "label": "Git仓库",
-                            "disabled": true
-                        }
-                    ]
-                }
-            ]
+          "type": "form",
+          "mode": "horizontal",
+          "labelWidth": 150,
+          "static": true,
+          "wrapWithPanel": false,
+          "initApi": "/params/version",
+          "controls": [
+            {
+              "type": "static",
+              "name": "version",
+              "label": "版本号",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "buildDate",
+              "label": "编译时间",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "gitCommit",
+              "label": "Git提交",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "gitTag",
+              "label": "Git标签",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "gitRepo",
+              "label": "Git仓库",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "goVersion",
+              "label": "go版本",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "compiler",
+              "label": "编译器",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "platform",
+              "label": "平台",
+              "disabled": true
+            }
+          ]
         }
-    ]
+      ]
+    }
+  ]
 }
