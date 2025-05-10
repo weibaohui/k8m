@@ -160,6 +160,9 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Cli
 
 	username, _ := m.getUserRoleFromMCPCtx(ctx)
 	jwt, err := UserService().GenerateJWTTokenOnlyUserName(username, time.Hour*1)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate JWT token for %s: %v", serverName, err)
+	}
 	// 执行时携带用户名、角色信息
 	newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
 		"Authorization": jwt,
