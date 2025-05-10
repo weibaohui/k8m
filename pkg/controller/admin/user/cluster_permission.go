@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -11,7 +12,9 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
+	"github.com/weibaohui/kom/kom"
 	"gorm.io/gorm"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog/v2"
 )
 
@@ -68,6 +71,40 @@ func ListClusterPermissionsByClusterID(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
+}
+
+// ListClusterNamespaceListByClusterID 列出集群下的namespace 命名空间列表
+func ListClusterNamespaceListByClusterID(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	clusterBase64 := c.Param("cluster")
+	cluster, err := utils.DecodeBase64(clusterBase64)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var list []*v1.Namespace
+	err = kom.Cluster(cluster).WithContext(ctx).Resource(&v1.Namespace{}).List(&list).Error
+
+	if err != nil {
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
+	var names []map[string]string
+	for _, n := range list {
+		names = append(names, map[string]string{
+			"label": n.Name,
+			"value": n.Name,
+		})
+	}
+	slice.SortBy(names, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
+	amis.WriteJsonData(c, gin.H{
+		"options": names,
+	})
+
 }
 func SaveClusterPermission(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
@@ -158,10 +195,7 @@ func DeleteClusterPermission(c *gin.Context) {
 func UpdateNamespaces(c *gin.Context) {
 	id := c.Param("id")
 	type requestBody struct {
-		Namespaces []string `json:"namespaces"`
-		Username   string   `json:"username"`
-		Cluster    string   `json:"cluster"`
-		Role       string   `json:"role"`
+		Namespaces string `json:"namespaces"`
 	}
 	var nsList requestBody
 
@@ -170,18 +204,11 @@ func UpdateNamespaces(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	_, _, err = handlePermissionCommonLogic(c, "授权Namespace", nsList.Cluster, gin.H{
-		"request": nsList,
-	})
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
 
 	params := dao.BuildParams(c)
 	m := &models.ClusterUserRole{}
 	m.ID = utils.ToUInt(id)
-	m.Namespaces = strings.Join(nsList.Namespaces, ",")
+	m.Namespaces = nsList.Namespaces
 	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
 		return db.Select("namespaces")
 	})
