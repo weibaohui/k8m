@@ -427,7 +427,8 @@ func main() {
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
 		// Pod 端口转发
-		api.POST("/pod/port_forward/ns/:ns/name/:name/podPort/:podPort/localPort/:localPort", pod.PortForward)
+		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", pod.StartPortForward)
+		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", pod.StopPortForward)
 		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
 
 		api.GET("/helm/release/list", helm.ListRelease)
