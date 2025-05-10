@@ -154,6 +154,7 @@ func main() {
 	r.Use(cors.Default())
 	r.Use(gzip.Gzip(gzip.BestCompression))
 	r.Use(middleware.SetCacheHeaders())
+	r.Use(middleware.AuthMiddleware())
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
 
 	r.MaxMultipartMemory = 100 << 20 // 100 MiB

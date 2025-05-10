@@ -22,7 +22,7 @@ const Router = () => {
             <Route path='/PodExec' element={<PodExec/>}></Route>
             <Route path='/PodLog' element={<PodLog/>}></Route>
             <Route path='/' element={<Layout/>}>
-                <Route path='/' element={<Navigate to="/cluster/node"/>}></Route>
+                <Route path='/' element={<Navigate to="/user/cluster/cluster_user"/>}></Route>
                 <Route path='/*' element={
                     lazyLoad(
                         lazy(

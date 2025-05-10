@@ -14,11 +14,25 @@ import (
 // AuthMiddleware 登录校验
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 获取请求路径
+		path := c.Request.URL.Path
+		// 检查请求路径是否需要跳过登录检测
+		if path == "/" ||
+			path == "/favicon.ico" ||
+			strings.HasPrefix(path, "/auth/") ||
+			strings.HasPrefix(path, "/assets/") ||
+			strings.HasPrefix(path, "/public/") {
+			c.Next()
+			return
+
+		}
+
 		cfg := flag.Init()
 		claims, err := utils.GetJWTClaims(c, cfg.JwtTokenSecret)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 			c.Abort()
+
 			return
 		}
 
