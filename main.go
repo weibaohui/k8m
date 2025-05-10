@@ -140,7 +140,7 @@ func Init() {
 
 }
 
-// main 启动并运行 Kubernetes 管理服务，初始化配置、注册集群、启动资源监控，配置 Gin 路由及中间件，挂载前端静态资源，并提供认证、集群管理、Kubernetes 资源操作、AI 聊天、用户与平台管理等 HTTP API 接口。
+// main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与连接、资源监控启动，并通过 Gin 框架配置路由和中间件，挂载前端静态资源，提供认证、集群与 Kubernetes 资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。
 func main() {
 	Init()
 
@@ -526,8 +526,9 @@ func main() {
 
 		// 集群权限设置
 		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
-		admin.GET("/cluster_permissions/user/:username/list", user.ListClusterPermissionsByUserName)    // 列出指定用户拥有的集群权限
-		admin.GET("/cluster_permissions/cluster/:cluster/list", user.ListClusterPermissionsByClusterID) // 列出指定集群下所有授权情况
+		admin.GET("/cluster_permissions/user/:username/list", user.ListClusterPermissionsByUserName)         // 列出指定用户拥有的集群权限
+		admin.GET("/cluster_permissions/cluster/:cluster/list", user.ListClusterPermissionsByClusterID)      // 列出指定集群下所有授权情况
+		admin.GET("/cluster_permissions/cluster/:cluster/ns/list", user.ListClusterNamespaceListByClusterID) // 列出指定集群下所有授权情况
 		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/:role_type/save", user.SaveClusterPermission)
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 		admin.POST("/cluster_permissions/update_namespaces/:id", user.UpdateNamespaces)
