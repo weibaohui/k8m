@@ -1,73 +1,81 @@
-
 ## 更新日志
+
 **v0.0.96更新**
+
 1. 修复MCP调用记录问题
 2. 调整新增deploy标签功能
 3. 优化开放MCP调用页面显示完整访问路径
 4. 新增拉取镜像超时时间配置
 5. 新增指标等资源缓存超时时间
 
+**v0.0.106
+新增端口转发功能
+![输入图片说明](https://foruda.gitee.com/images/1746886285039073315/cd86c8c8_77493.png "在这里输入图片标题")
+![输入图片说明](https://foruda.gitee.com/images/1746886307306899637/c6bae855_77493.png "iShot_2025-05-10_22.09.49.png")
+
 **v0.0.93更新**
 新增Pod列表、节点列表、Ns列表页面的实时用量展示。
+
 1. Pod列表展示效果如下：
-![Image](https://github.com/user-attachments/assets/41e0283f-aa6e-432d-a62a-f1d142359929)
+   ![Image](https://github.com/user-attachments/assets/41e0283f-aa6e-432d-a62a-f1d142359929)
 2. 节点展示效果如下：
-![Image](https://github.com/user-attachments/assets/f67b1439-47e7-453e-ba85-51f4715b6bc4)
+   ![Image](https://github.com/user-attachments/assets/f67b1439-47e7-453e-ba85-51f4715b6bc4)
 3. 命名空间展示效果如下：
-![Image](https://github.com/user-attachments/assets/82e42baf-d688-4376-bbe1-97dde361b9e5)
+   ![Image](https://github.com/user-attachments/assets/82e42baf-d688-4376-bbe1-97dde361b9e5)
 
 **v0.0.92更新**
+
 * 新增OIDC单点登录支持
 
 ![输入图片说明](https://foruda.gitee.com/images/1745080546954797409/3845a390_77493.png "屏幕截图")
 ![输入图片说明](https://foruda.gitee.com/images/1745080595835207078/ed115dc8_77493.png "屏幕截图")
 
-
 **v0.0.88更新**
+
 1. 新增MCP执行记录
-![输入图片说明](https://foruda.gitee.com/images/1744644690534249581/dffdd2b2_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1744644698183429067/6fb8a635_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1744644690534249581/dffdd2b2_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1744644698183429067/6fb8a635_77493.png "屏幕截图")
 1. 新增集群名称前置检测
-在MCP工具执行前，检测集群名称是否正确。
-{
-    "tool_name": "restart_deployment@k8m",
-    "parameters": {
-        "cluster": "config/kind-kind-cluster123",
-        "name": "k8m",
-        "namespace": "k8m"
-    },
-    "result": "",
-    "error": "工具执行失败: cluster config/kind-kind-cluster123 not found 集群不存在，请检查集群名称"
-}
+   在MCP工具执行前，检测集群名称是否正确。
+   {
+   "tool_name": "restart_deployment@k8m",
+   "parameters": {
+   "cluster": "config/kind-kind-cluster123",
+   "name": "k8m",
+   "namespace": "k8m"
+   },
+   "result": "",
+   "error": "工具执行失败: cluster config/kind-kind-cluster123 not found 集群不存在，请检查集群名称"
+   }
 1. 修复Pod文件上传下载功能
 
-
 **v0.0.87更新**
-1.  集群授权支持对用户组进行授权
-集群授权：
-![输入图片说明](https://foruda.gitee.com/images/1744554238488470925/351bbc00_77493.png "屏幕截图")
-用户管理视角，看用户有哪些集群权限：
-![](https://foruda.gitee.com/images/1744554316927031816/24a3c6ce_77493.png "屏幕截图")
-集群管理视角，看某集群下已授权用户：
-![输入图片说明](https://foruda.gitee.com/images/1744554384827407363/e3d0136b_77493.png "屏幕截图")
-用户视角，看自己有哪些已获得授权的集群列表：
-![输入图片说明](https://foruda.gitee.com/images/1744554435367667674/1af1bd5e_77493.png "屏幕截图")
 
+1. 集群授权支持对用户组进行授权
+   集群授权：
+   ![输入图片说明](https://foruda.gitee.com/images/1744554238488470925/351bbc00_77493.png "屏幕截图")
+   用户管理视角，看用户有哪些集群权限：
+   ![](https://foruda.gitee.com/images/1744554316927031816/24a3c6ce_77493.png "屏幕截图")
+   集群管理视角，看某集群下已授权用户：
+   ![输入图片说明](https://foruda.gitee.com/images/1744554384827407363/e3d0136b_77493.png "屏幕截图")
+   用户视角，看自己有哪些已获得授权的集群列表：
+   ![输入图片说明](https://foruda.gitee.com/images/1744554435367667674/1af1bd5e_77493.png "屏幕截图")
 
 **v0.0.86更新**
+
 1. 资源状态翻转
-新增状态指标翻转，将压力、问题等表述的状态，翻转显示为正常
-![输入图片说明](https://foruda.gitee.com/images/1744466360319112414/5554605f_77493.png "屏幕截图")
-![输入图片说明](https://foruda.gitee.com/images/1744466344472247290/484335b8_77493.png "屏幕截图")
+   新增状态指标翻转，将压力、问题等表述的状态，翻转显示为正常
+   ![输入图片说明](https://foruda.gitee.com/images/1744466360319112414/5554605f_77493.png "屏幕截图")
+   ![输入图片说明](https://foruda.gitee.com/images/1744466344472247290/484335b8_77493.png "屏幕截图")
 2. 新增MCP工具的独立开关
-约束每一个工具，控制大模型可使用tools的范围，屏蔽高危操作，减低大模型交互负担。
-![输入图片说明](https://foruda.gitee.com/images/1744466440407504939/108fd6d9_77493.png "屏幕截图")
+   约束每一个工具，控制大模型可使用tools的范围，屏蔽高危操作，减低大模型交互负担。
+   ![输入图片说明](https://foruda.gitee.com/images/1744466440407504939/108fd6d9_77493.png "屏幕截图")
 3. 新增临时管理员账户配置开关
-开启后，可通过启动参数、环境变量设置平台管理员用户名密码。增加正常管理员后，可关闭临时管理员。
-该功能默认不生效，也就是不设置开启，只能使用数据库用户名密码登录。确保安全。
-建议生产环境非必要不要启用。
+   开启后，可通过启动参数、环境变量设置平台管理员用户名密码。增加正常管理员后，可关闭临时管理员。
+   该功能默认不生效，也就是不设置开启，只能使用数据库用户名密码登录。确保安全。
+   建议生产环境非必要不要启用。
 4. 新增集群自动连接开关
-开启后，会自动连接已注册的集群。
+   开启后，会自动连接已注册的集群。
 
 **v0.0.75更新**
 
