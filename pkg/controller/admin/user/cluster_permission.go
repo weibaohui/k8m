@@ -53,7 +53,9 @@ func ListClusterPermissionsByUserName(c *gin.Context) {
 	}
 	amis.WriteJsonList(c, clusters)
 }
-// ListClusterPermissionsByClusterID 根据指定的集群ID，列出该集群下所有用户的角色权限信息。
+// ListClusterPermissionsByClusterID 根据指定的集群ID，列出该集群下所有用户的权限角色列表。
+// 集群ID通过base64解码后用于查询，结果按授权类型降序、用户名升序排序，并返回总数和详细列表。
+// 若解码或查询出错，则返回JSON格式的错误信息。
 func ListClusterPermissionsByClusterID(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	cluster, err := utils.DecodeBase64(clusterBase64)
@@ -74,8 +76,8 @@ func ListClusterPermissionsByClusterID(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-// ListClusterNamespaceListByClusterID 返回指定集群下的所有 Kubernetes 命名空间名称列表，格式为 label-value 对。
-// 如果查询失败，则返回空的 options 列表。
+// ListClusterNamespaceListByClusterID 根据集群ID列出该集群下的所有命名空间名称，并以标签-值对形式返回。
+// 如果查询失败，则返回空的命名空间选项列表。
 func ListClusterNamespaceListByClusterID(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	clusterBase64 := c.Param("cluster")
@@ -108,8 +110,8 @@ func ListClusterNamespaceListByClusterID(c *gin.Context) {
 	})
 
 }
-// SaveClusterPermission 为指定集群和角色批量添加用户权限。
-// 解码集群标识，解析请求体中的用户名列表，对每个用户在数据库中添加权限条目（如不存在），并返回操作结果。用户名列表不能为空。授权类型默认为"user"。
+// SaveClusterPermission 批量为指定集群添加用户角色权限。
+// 解码集群标识，读取角色和授权类型参数，解析包含用户列表的请求体，校验输入后，依次为每个用户添加权限条目（如不存在则新增），最后返回操作结果。
 func SaveClusterPermission(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
@@ -196,7 +198,7 @@ func DeleteClusterPermission(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// UpdateNamespaces 更新指定集群用户角色的命名空间信息。
+// UpdateNamespaces 根据请求体更新指定集群用户角色的命名空间字段。
 func UpdateNamespaces(c *gin.Context) {
 	id := c.Param("id")
 	type requestBody struct {
