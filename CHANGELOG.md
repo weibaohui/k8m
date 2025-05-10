@@ -2,8 +2,8 @@
 
 **v0.0.106
 新增端口转发功能
-![输入图片说明](https://foruda.gitee.com/images/1746886285039073315/cd86c8c8_77493.png "在这里输入图片标题")
-![输入图片说明](https://foruda.gitee.com/images/1746886307306899637/c6bae855_77493.png "iShot_2025-05-10_22.09.49.png")
+1. ![输入图片说明](https://foruda.gitee.com/images/1746886285039073315/cd86c8c8_77493.png "在这里输入图片标题")
+2. ![输入图片说明](https://foruda.gitee.com/images/1746886307306899637/c6bae855_77493.png "iShot_2025-05-10_22.09.49.png")
 
 **v0.0.96更新**
 
