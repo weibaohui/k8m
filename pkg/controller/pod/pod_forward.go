@@ -2,6 +2,7 @@ package pod
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -37,11 +38,33 @@ func StartPortForward(c *gin.Context) {
 	localPort := c.Param("local_port")
 	podPort := c.Param("pod_port")
 	containerName := c.Param("container_name")
+
+	// 验证podPort是否为有效的整数
+	if _, err := strconv.Atoi(podPort); err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("无效的容器组端口号: %s", podPort))
+		return
+	}
+
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	// 前端是界面点选而来
+	// // 检查pod是否存在
+	// var pod v1.Pod
+	// err = kom.Cluster(selectedCluster).WithContext(ctx).
+	// 	Resource(&v1.Pod{}).
+	// 	Namespace(ns).
+	// 	Name(name).
+	// 	Get(&pod).Error
+	//
+	// if err != nil {
+	// 	amis.WriteJsonError(c, err)
+	// 	return
+	// }
+
 	stopCh := make(chan struct{})
 	key := getMapKey(selectedCluster, ns, name, containerName, podPort)
 
