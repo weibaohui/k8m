@@ -426,6 +426,9 @@ func main() {
 		// Pod 资源使用情况
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
+		// Pod 端口转发
+		api.POST("/pod/port_forward/ns/:ns/name/:name/podPort/:podPort/localPort/:localPort", pod.PortForward)
+		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
 
 		api.GET("/helm/release/list", helm.ListRelease)
 		api.GET("/helm/release/ns/:ns/name/:name/history/list", helm.ListReleaseHistory)
