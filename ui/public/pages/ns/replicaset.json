@@ -1475,6 +1475,135 @@
                                   "icon": "fa fa-terminal text-primary",
                                   "blank": true,
                                   "url": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+                                },
+                                {
+                                  "type": "button",
+                                  "icon": "fas fa-binoculars text-primary",
+                                  "actionType": "drawer",
+                                  "tooltip": "端口",
+                                  "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "xl",
+                                    "title": "${metadata.name} 端口 (ESC 关闭)",
+                                    "body": [
+                                      {
+                                        "type": "crud",
+                                        "id": "detailPortList",
+                                        "name": "detailPortList",
+                                        "headerToolbar": [
+                                          "reload",
+                                          {
+                                            "type": "pagination",
+                                            "align": "right"
+                                          },
+                                          {
+                                            "type": "statistics",
+                                            "align": "right"
+                                          },
+                                          {
+                                            "type": "switch-per-page",
+                                            "align": "right"
+                                          }
+                                        ],
+                                        "loadDataOnce": true,
+                                        "syncLocation": false,
+                                        "perPage": 10,
+                                        "api": "get:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/port/list",
+                                        "columns": [
+                                          {
+                                            "type": "operation",
+                                            "label": "操作",
+                                            "buttons": [
+                                              {
+                                                "type": "button",
+                                                "icon": "fas fa-random text-primary",
+                                                "label": "转发",
+                                                "actionType": "dialog",
+                                                "dialog": {
+                                                  "title": "端口转发",
+                                                  "body": [
+                                                    {
+                                                      "type": "form",
+                                                      "api": "post:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/container/${container_name}/pod_port/${pod_port}/local_port/${local_port}/start",
+                                                      "body": [
+                                                        {
+                                                          "type": "switch",
+                                                          "name": "specify_port",
+                                                          "label": "指定端口"
+                                                        },
+                                                        {
+                                                          "type": "input-number",
+                                                          "name": "local_port",
+                                                          "label": "转发端口",
+                                                          "visibleOn": "this.specify_port == true",
+                                                          "min": 1,
+                                                          "max": 65535
+                                                        }
+                                                      ],
+                                                      "onEvent": {
+                                                        "submitSucc": {
+                                                          "actions": [
+                                                            {
+                                                              "actionType": "reload",
+                                                              "componentId": "detailPortList"
+                                                            },
+                                                            {
+                                                              "actionType": "closeDrawer"
+                                                            }
+                                                          ]
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "type": "button",
+                                                "actionType": "ajax",
+                                                "icon": "fas fa-stop text-primary",
+                                                "label": "关闭",
+                                                "api": "post:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/container/${container_name}/pod_port/${pod_port}/stop",
+                                                "onEvent": {
+                                                  "success": {
+                                                    "actions": [
+                                                      {
+                                                        "actionType": "reload",
+                                                        "componentId": "detailPortList"
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            ],
+                                            "toggled": true
+                                          },
+                                          {
+                                            "name": "container_name",
+                                            "label": "容器名称",
+                                            "type": "text"
+                                          },
+                                          {
+                                            "name": "pod_port",
+                                            "label": "Pod端口",
+                                            "type": "tpl",
+                                            "tpl": "${port_name ? port_name +':': ''}${pod_port ? pod_port : ''}${protocol ?'['+ protocol+']' : ''}"
+                                          },
+                                          {
+                                            "name": "local_port",
+                                            "label": "访问端口",
+                                            "type": "tpl",
+                                            "tpl": "${local_port ? `${local_port} <a href='http://127.0.0.1:${local_port}' target='_blank'>http</a> <a href='https://127.0.0.1:${local_port}' target='_blank'>https</a>` : ''}"
+                                          },
+                                          {
+                                            "name": "status",
+                                            "label": "状态",
+                                            "type": "text"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
                                 }
                               ],
                               "toggled": true

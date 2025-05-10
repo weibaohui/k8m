@@ -18,6 +18,16 @@ func RandNDigitInt(n int) int {
 	return rng.Intn(_max-_min+1) + _min
 }
 
+// RandInt generates a random number between min and max
+func RandInt(min, max int) int {
+	if min > max {
+		min, max = max, min
+	}
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// 生成指定范围内的随机数
+	return rng.Intn(max-min+1) + min
+}
+
 // RandNLengthString generates a random string of specified length using the default charset
 func RandNLengthString(n int) string {
 	if n <= 0 {
