@@ -20,7 +20,7 @@ type chatService struct {
 	MaxIterations int `json:"max_iterations"` // 最大对话论数
 }
 
-func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, error) {
+func (c *chatService) GetChatStream(ctx context.Context, chat string) (*openai.ChatCompletionStream, error) {
 
 	client, err := AIService().DefaultClient()
 
@@ -33,7 +33,7 @@ func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, 
 
 	client.SetTools(tools)
 
-	stream, err := client.GetStreamCompletionWithTools(context.TODO(), chat)
+	stream, err := client.GetStreamCompletionWithTools(ctx, chat)
 
 	if err != nil {
 		klog.V(6).Infof("ChatCompletion error: %v\n", err)
@@ -64,12 +64,7 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 	// currChatContent tracks chat content that needs to be sent
 	// to the LLM in each iteration of  the agentic loop below
 	var currChatContent []any
-
-	history := client.GetHistory()
-	klog.V(6).Infof("GPTShell 对话携带历史记录 %d", len(history))
-	for _, h := range history {
-		currChatContent = append(currChatContent, h)
-	}
+	 
 	// Set the initial message to start the conversation
 	currChatContent = append(currChatContent, chat)
 
@@ -83,7 +78,7 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 			return nil
 		}
 		klog.V(6).Infof("Sending to LLM: %v", utils.ToJSON(currChatContent))
-		stream, err := client.GetStreamCompletionWithTools(context.TODO(), currChatContent)
+		stream, err := client.GetStreamCompletionWithTools(ctxInst, currChatContent)
 		// Clear our "response" now that we sent the last response
 		if err != nil {
 			klog.V(6).Infof("ChatCompletion error: %v\n", err)
@@ -148,7 +143,7 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 		}
 		respAll := strings.Join(respBuffer, "")
 		if strings.TrimSpace(respAll) != "" {
-			client.SaveAIHistory(respAll)
+			client.SaveAIHistory(ctxInst, respAll)
 		}
 		respBuffer = []string{}
 		err = stream.Close()
