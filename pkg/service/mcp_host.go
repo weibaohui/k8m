@@ -319,7 +319,7 @@ func (m *MCPHost) GetServerNameByToolName(toolName string) string {
 }
 
 // LogToolExecution 记录工具执行日志
-func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName string, parameters interface{}, result MCPToolCallResult, executeTime int64) {
+func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName string, parameters interface{}, result models.MCPToolCallResult, executeTime int64) {
 
 	log := &models.MCPToolLog{
 		ToolName:    toolName,
@@ -346,15 +346,7 @@ func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName str
 	dao.DB().Create(log)
 }
 
-// MCPToolCallResult 存储工具调用的结果
-type MCPToolCallResult struct {
-	ToolName   string                 `json:"tool_name"`
-	Parameters map[string]interface{} `json:"parameters"`
-	Result     string                 `json:"result"`
-	Error      string                 `json:"error,omitempty"`
-}
-
-func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai ai.IAI, prompt string) (string, []MCPToolCallResult, error) {
+func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai ai.IAI, prompt string) (string, []models.MCPToolCallResult, error) {
 
 	// 创建带有工具的聊天完成请求
 	tools := m.GetAllTools(ctx)
@@ -370,9 +362,9 @@ func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai ai.IAI, prompt strin
 
 }
 
-func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []MCPToolCallResult {
+func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []models.MCPToolCallResult {
 	// 存储所有工具调用的结果
-	var results []MCPToolCallResult
+	var results []models.MCPToolCallResult
 
 	// 处理工具调用
 	if toolCalls != nil {
@@ -385,7 +377,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			arguments = clean(arguments)
 			klog.V(6).Infof("Tool Arguments: %s\n", arguments)
 
-			result := MCPToolCallResult{
+			result := models.MCPToolCallResult{
 				ToolName: fullToolName,
 			}
 
