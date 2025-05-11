@@ -36,7 +36,7 @@ func (c *aiService) DefaultClient() (ai.IAI, error) {
 func (c *aiService) openAIClient() (ai.IAI, error) {
 	cfg := flag.Init()
 
-	aiProvider := ai.Provider{
+	aiProvider := ai.AIProvider{
 		Name:        "openai",
 		Model:       cfg.ApiModel,
 		Password:    cfg.ApiKey,
@@ -45,6 +45,7 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 		TopP:        1,
 		TopK:        0,
 		MaxTokens:   1000,
+		MaxHistory:  10,
 	}
 	if cfg.EnableAI && cfg.UseBuiltInModel {
 		aiProvider.BaseURL = c.innerApiUrl
@@ -58,7 +59,7 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 		klog.V(4).Infof("ai Key: %v\n", utils.MaskString(aiProvider.Password, 5))
 	}
 
-	aiClient := ai.NewClient(aiProvider.Name)
+	aiClient := ai.NewAIClient(aiProvider.Name)
 	if err := aiClient.Configure(&aiProvider); err != nil {
 		return nil, err
 	}
