@@ -182,25 +182,38 @@ func (c *OpenAIClient) fillChatHistory(contents ...any) {
 				Role:    openai.ChatMessageRoleUser,
 				Content: utils.ToJSON(item),
 			})
-		case []interface{}:
-			// 处理[]interface{}类型的内容，如果只有一个元素则直接提取
-			if len(item) == 1 {
-				klog.V(2).Infof("Adding single item from array to history: %v", item[0])
+		case []string:
+			klog.V(2).Infof("Adding string array to history: %v", item)
+			for _, m := range item {
 				c.history = append(c.history, openai.ChatCompletionMessage{
 					Role:    openai.ChatMessageRoleUser,
-					Content: utils.ToJSON(item[0]),
+					Content: m,
 				})
-			} else {
-				klog.V(2).Infof("Adding array content to history: %v", item)
+			}
+		case []models.MCPToolCallResult:
+			klog.V(2).Infof("Adding MCPToolCallResult array to history: %v", item)
+			for _, m := range item {
 				c.history = append(c.history, openai.ChatCompletionMessage{
 					Role:    openai.ChatMessageRoleUser,
-					Content: utils.ToJSON(item),
+					Content: utils.ToJSON(m),
+				})
+			}
+		case []interface{}:
+			for _, m := range item {
+				c.history = append(c.history, openai.ChatCompletionMessage{
+					Role:    openai.ChatMessageRoleUser,
+					Content: utils.ToJSON(m),
 				})
 			}
 		default:
 			klog.Warningf("Unhandled content type in Send: %T", item)
-
 		}
+	}
+
+	// 保留最后 maxHistory 条（含系统提示）
+	if c.maxHistory > 0 && int32(len(c.history)) > c.maxHistory {
+		keep := c.history[len(c.history)-int(c.maxHistory):]
+		c.history = keep
 	}
 
 	system := slice.Filter(c.history, func(index int, item openai.ChatCompletionMessage) bool {
@@ -249,7 +262,14 @@ func (c *OpenAIClient) fillChatHistory(contents ...any) {
 		// 将系统消息插入到历史记录最前面
 		c.history = append([]openai.ChatCompletionMessage{sysMsg}, c.history...)
 	}
+
 }
+
 func (c *OpenAIClient) SaveAIHistory(contents string) {
 	c.fillChatHistory(contents)
+}
+
+func (c *OpenAIClient) GetHistory() []openai.ChatCompletionMessage {
+	return c.history
+
 }
