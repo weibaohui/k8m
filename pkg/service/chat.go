@@ -45,6 +45,11 @@ func (c *chatService) GetChatStream(chat string) (*openai.ChatCompletionStream, 
 }
 func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Writer) error {
 
+	username, role := amis.GetLoginUser(ctx)
+	klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
+	ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
+	ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
+
 	client, err := AIService().DefaultClient()
 
 	if err != nil {
@@ -60,8 +65,13 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 	// to the LLM in each iteration of  the agentic loop below
 	var currChatContent []any
 
+	history := client.GetHistory()
+	klog.V(6).Infof("GPTShell 对话携带历史记录 %d", len(history))
+	for _, h := range history {
+		currChatContent = append(currChatContent, h)
+	}
 	// Set the initial message to start the conversation
-	currChatContent = []any{chat}
+	currChatContent = append(currChatContent, chat)
 
 	currentIteration := 0
 	maxIterations := c.MaxIterations
@@ -82,6 +92,7 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 		currChatContent = nil
 
 		var toolCallBuffer []openai.ToolCall
+		var respBuffer []string
 		for {
 			response, recvErr := stream.Recv()
 			if recvErr != nil {
@@ -111,10 +122,7 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 						klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
 
 						// 使用合并后的ToolCalls执行操作
-						username, role := amis.GetLoginUser(ctx)
-						klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
-						ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
-						ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
+
 						results := McpService().Host().ExecTools(ctxInst, mergedCalls)
 						for _, r := range results {
 							currChatContent = append(currChatContent, gin.H{
@@ -134,12 +142,15 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 			// 发送数据给客户端
 			// 写入outBuffer
 			content := response.Choices[0].Delta.Content
-			if strings.TrimSpace(content) != "" {
-				client.SaveAIHistory(content)
-			}
+			respBuffer = append(respBuffer, content)
+
 			_, _ = writer.Write([]byte(content))
 		}
-
+		respAll := strings.Join(respBuffer, "")
+		if strings.TrimSpace(respAll) != "" {
+			client.SaveAIHistory(respAll)
+		}
+		respBuffer = []string{}
 		err = stream.Close()
 		if err != nil {
 			klog.V(6).Infof("stream close error:%v", err)
@@ -196,7 +207,11 @@ func MergeToolCalls(toolCalls []openai.ToolCall) []openai.ToolCall {
 	mergedCalls := make(map[int]*openai.ToolCall)
 
 	for _, call := range toolCalls {
-		if existing, ok := mergedCalls[*call.Index]; ok {
+		if call.Index == nil {
+			continue
+		}
+		idx := *call.Index
+		if existing, ok := mergedCalls[idx]; ok {
 			// 合并现有数据
 			if call.ID != "" {
 				existing.ID = call.ID
@@ -212,7 +227,8 @@ func MergeToolCalls(toolCalls []openai.ToolCall) []openai.ToolCall {
 			}
 		} else {
 			// 创建新的ToolCall
-			mergedCalls[*call.Index] = &call
+			copyCall := call
+			mergedCalls[idx] = &copyCall
 		}
 	}
 
