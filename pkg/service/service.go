@@ -3,7 +3,9 @@ package service
 var localPodService = &podService{
 	podLabels: make(map[string][]*PodLabels),
 }
-var localChatService = &chatService{}
+var localChatService = &chatService{
+	MaxIterations: 10,
+}
 var localNodeService = &nodeService{
 	nodeLabels: make(map[string][]*NodeLabels),
 }
