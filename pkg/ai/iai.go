@@ -30,6 +30,7 @@ type IAI interface {
 	Close()
 	SetTools(tools []openai.Tool)
 	SaveAIHistory(content string)
+	GetHistory() []openai.ChatCompletionMessage
 }
 
 type nopCloser struct{}
