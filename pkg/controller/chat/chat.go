@@ -1,11 +1,13 @@
 package chat
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
@@ -54,8 +56,14 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 		return
 	}
 
+	username, role := amis.GetLoginUser(c)
+	klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
+	ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
+	ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
+
 	prompt := promptFunc(data)
-	stream, err := service.ChatService().GetChatStream(prompt)
+
+	stream, err := service.ChatService().GetChatStream(ctxInst, prompt)
 	if err != nil {
 		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
 		return
