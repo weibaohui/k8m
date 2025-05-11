@@ -22,13 +22,14 @@ import (
 
 type IAI interface {
 	Configure(config IAIConfig) error
-	GetCompletion(ctx context.Context, prompt string) (string, error)
-	GetCompletionWithTools(ctx context.Context, prompt string) ([]openai.ToolCall, string, error)
-	GetStreamCompletion(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
-	GetStreamCompletionWithTools(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
+	GetCompletion(ctx context.Context, contents ...any) (string, error)
+	GetCompletionWithTools(ctx context.Context, contents ...any) ([]openai.ToolCall, string, error)
+	GetStreamCompletion(ctx context.Context, contents ...any) (*openai.ChatCompletionStream, error)
+	GetStreamCompletionWithTools(ctx context.Context, contents ...any) (*openai.ChatCompletionStream, error)
 	GetName() string
 	Close()
 	SetTools(tools []openai.Tool)
+	SaveAIHistory(content string)
 }
 
 type nopCloser struct{}
@@ -47,23 +48,24 @@ type IAIConfig interface {
 	GetTopP() float32
 	GetTopK() int32
 	GetMaxTokens() int
+	GetMaxHistory() int32
 	GetProviderId() string
 	GetCompartmentId() string
 	GetOrganizationId() string
 	GetCustomHeaders() []http.Header
 }
 
-func NewClient(provider string) IAI {
+func NewAIClient(provider string) IAI {
 	// default client
 	return &OpenAIClient{}
 }
 
 type Configuration struct {
-	Providers       []Provider
+	Providers       []AIProvider
 	DefaultProvider string
 }
 
-type Provider struct {
+type AIProvider struct {
 	Name           string
 	Model          string
 	Password       string
@@ -78,67 +80,71 @@ type Provider struct {
 	CompartmentId  string
 	TopP           float32
 	TopK           int32
+	MaxHistory     int32
 	MaxTokens      int
 	OrganizationId string
 	CustomHeaders  []http.Header
 }
 
-func (p *Provider) GetBaseURL() string {
+func (p *AIProvider) GetBaseURL() string {
 	return p.BaseURL
 }
 
-func (p *Provider) GetProxyEndpoint() string {
+func (p *AIProvider) GetProxyEndpoint() string {
 	return p.ProxyEndpoint
 }
 
-func (p *Provider) GetEndpointName() string {
+func (p *AIProvider) GetEndpointName() string {
 	return p.EndpointName
 }
 
-func (p *Provider) GetTopP() float32 {
+func (p *AIProvider) GetTopP() float32 {
 	return p.TopP
 }
 
-func (p *Provider) GetTopK() int32 {
+func (p *AIProvider) GetTopK() int32 {
 	return p.TopK
 }
 
-func (p *Provider) GetMaxTokens() int {
+func (p *AIProvider) GetMaxTokens() int {
 	return p.MaxTokens
 }
+func (p *AIProvider) GetMaxHistory() int32 {
+	return p.MaxHistory
+}
 
-func (p *Provider) GetPassword() string {
+func (p *AIProvider) GetPassword() string {
 	return p.Password
 }
 
-func (p *Provider) GetModel() string {
+func (p *AIProvider) GetModel() string {
 	return p.Model
 }
 
-func (p *Provider) GetEngine() string {
+func (p *AIProvider) GetEngine() string {
 	return p.Engine
 }
-func (p *Provider) GetTemperature() float32 {
+func (p *AIProvider) GetTemperature() float32 {
 	return p.Temperature
 }
 
-func (p *Provider) GetProviderRegion() string {
+func (p *AIProvider) GetProviderRegion() string {
 	return p.ProviderRegion
 }
 
-func (p *Provider) GetProviderId() string {
+func (p *AIProvider) GetProviderId() string {
 	return p.ProviderId
 }
 
-func (p *Provider) GetCompartmentId() string {
+func (p *AIProvider) GetCompartmentId() string {
 	return p.CompartmentId
 }
 
-func (p *Provider) GetOrganizationId() string {
+func (p *AIProvider) GetOrganizationId() string {
 	return p.OrganizationId
 }
 
-func (p *Provider) GetCustomHeaders() []http.Header {
+func (p *AIProvider) GetCustomHeaders() []http.Header {
 	return p.CustomHeaders
 }
 
