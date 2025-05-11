@@ -16,6 +16,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/mark3labs/mcp-go v0.26.0
+	github.com/openai/openai-go v0.1.0-beta.10
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/robfig/cron/v3 v3.0.1
@@ -158,6 +159,10 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/cobra v1.9.1 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
