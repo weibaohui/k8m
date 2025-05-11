@@ -29,8 +29,8 @@ type IAI interface {
 	GetName() string
 	Close()
 	SetTools(tools []openai.Tool)
-	SaveAIHistory(content string)
-	GetHistory() []openai.ChatCompletionMessage
+	SaveAIHistory(ctx context.Context, content string)
+	GetHistory(ctx context.Context) []openai.ChatCompletionMessage
 }
 
 type nopCloser struct{}
