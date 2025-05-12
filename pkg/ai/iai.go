@@ -56,17 +56,17 @@ type IAIConfig interface {
 	GetCustomHeaders() []http.Header
 }
 
-func NewAIClient(provider string) IAI {
+func NewClient(provider string) IAI {
 	// default client
 	return &OpenAIClient{}
 }
 
 type Configuration struct {
-	Providers       []AIProvider
+	Providers       []Provider
 	DefaultProvider string
 }
 
-type AIProvider struct {
+type Provider struct {
 	Name           string
 	Model          string
 	Password       string
@@ -87,65 +87,65 @@ type AIProvider struct {
 	CustomHeaders  []http.Header
 }
 
-func (p *AIProvider) GetBaseURL() string {
+func (p *Provider) GetBaseURL() string {
 	return p.BaseURL
 }
 
-func (p *AIProvider) GetProxyEndpoint() string {
+func (p *Provider) GetProxyEndpoint() string {
 	return p.ProxyEndpoint
 }
 
-func (p *AIProvider) GetEndpointName() string {
+func (p *Provider) GetEndpointName() string {
 	return p.EndpointName
 }
 
-func (p *AIProvider) GetTopP() float32 {
+func (p *Provider) GetTopP() float32 {
 	return p.TopP
 }
 
-func (p *AIProvider) GetTopK() int32 {
+func (p *Provider) GetTopK() int32 {
 	return p.TopK
 }
 
-func (p *AIProvider) GetMaxTokens() int {
+func (p *Provider) GetMaxTokens() int {
 	return p.MaxTokens
 }
-func (p *AIProvider) GetMaxHistory() int32 {
+func (p *Provider) GetMaxHistory() int32 {
 	return p.MaxHistory
 }
 
-func (p *AIProvider) GetPassword() string {
+func (p *Provider) GetPassword() string {
 	return p.Password
 }
 
-func (p *AIProvider) GetModel() string {
+func (p *Provider) GetModel() string {
 	return p.Model
 }
 
-func (p *AIProvider) GetEngine() string {
+func (p *Provider) GetEngine() string {
 	return p.Engine
 }
-func (p *AIProvider) GetTemperature() float32 {
+func (p *Provider) GetTemperature() float32 {
 	return p.Temperature
 }
 
-func (p *AIProvider) GetProviderRegion() string {
+func (p *Provider) GetProviderRegion() string {
 	return p.ProviderRegion
 }
 
-func (p *AIProvider) GetProviderId() string {
+func (p *Provider) GetProviderId() string {
 	return p.ProviderId
 }
 
-func (p *AIProvider) GetCompartmentId() string {
+func (p *Provider) GetCompartmentId() string {
 	return p.CompartmentId
 }
 
-func (p *AIProvider) GetOrganizationId() string {
+func (p *Provider) GetOrganizationId() string {
 	return p.OrganizationId
 }
 
-func (p *AIProvider) GetCustomHeaders() []http.Header {
+func (p *Provider) GetCustomHeaders() []http.Header {
 	return p.CustomHeaders
 }
 
