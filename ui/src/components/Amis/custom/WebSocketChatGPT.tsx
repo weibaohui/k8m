@@ -11,6 +11,7 @@ import {
     UserOutlined
 } from "@ant-design/icons";
 import { Bubble, BubbleProps, Prompts, PromptsProps, Sender, Welcome } from "@ant-design/x";
+import { Modal } from "antd";
 
 interface WebSocketChatGPTProps {
     url: string;
@@ -23,6 +24,12 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
+
+        let historyUrl = '/ai/chat/ws_chatgpt/history'
+        historyUrl = historyUrl + (historyUrl.includes('?') ? '&' : '?') + `token=${token}`;
+
+        let historyResetUrl = '/ai/chat/ws_chatgpt/history/reset'
+        historyResetUrl = historyResetUrl + (historyResetUrl.includes('?') ? '&' : '?') + `token=${token}`;
 
         const [messages, setMessages] = useState<{ role: "user" | "ai"; content: string }[]>([]);
         const [status, setStatus] = useState<string>("Disconnected");
@@ -219,20 +226,64 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                     <Flex vertical gap="middle" className="mt-20 mb-20">
                         {
                             messages.length > 0 && <>
-                                <Button
-                                    onClick={() => {
-                                        setMessages([]);
-                                    }}
-                                    icon={<PlusOutlined />}
-                                    style={{
-                                        width: '100px',
-                                        backgroundImage: 'linear-gradient(97deg, #f2f9fe 0%, #f7f3ff 100%)',
-                                        borderStartStartRadius: 4,
-                                        borderStartEndRadius: 4,
-                                    }}
-                                >
-                                    新会话
-                                </Button>
+
+                                <Space size="small">
+                                    <Button
+                                        onClick={() => {
+                                            setMessages([]);
+                                        }}
+                                        icon={<PlusOutlined />}
+                                        style={{
+                                            width: '100px',
+                                            backgroundImage: 'linear-gradient(97deg, #f2f9fe 0%, #f7f3ff 100%)',
+                                            borderStartStartRadius: 4,
+                                            borderStartEndRadius: 4,
+                                        }}
+                                    >
+                                        新会话
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            fetch(historyUrl)
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    const itemCount = data.data ? data.data.length : 0;
+                                                    Modal.success({
+                                                        content: `对话历史包含 ${itemCount} 条记录。`,
+                                                    });
+                                                });
+                                        }}
+                                        icon={<InfoCircleOutlined />}
+                                        style={{
+                                            width: '100px',
+                                            backgroundImage: 'linear-gradient(97deg, #f2f9fe 0%, #f7f3ff 100%)',
+                                            borderStartStartRadius: 4,
+                                            borderStartEndRadius: 4,
+                                        }}
+                                    >
+                                        对话历史
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            fetch(historyResetUrl)
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    Modal.success({
+                                                        content: '对话历史已清空。',
+                                                    });
+                                                });
+                                        }}
+                                        icon={<InfoCircleOutlined />}
+                                        style={{
+                                            width: '100px',
+                                            backgroundImage: 'linear-gradient(97deg, #f2f9fe 0%, #f7f3ff 100%)',
+                                            borderStartStartRadius: 4,
+                                            borderStartEndRadius: 4,
+                                        }}
+                                    >
+                                        清空历史
+                                    </Button>
+                                </Space>
                             </>
                         }
 
