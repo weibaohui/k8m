@@ -61,6 +61,34 @@
                       "visibleOn": "!use_built_in_model"
                     },
                     {
+                      "name": "temperature",
+                      "type": "input-number",
+                      "precision": 2,
+                      "step": 0.01,
+                      "label": "模型温度",
+                      "value": "0.7",
+                      "desc": "temperature,控制大模型输出的随机程度",
+                      "visibleOn": "!use_built_in_model"
+                    },
+                    {
+                      "name": "top_p",
+                      "type": "input-number",
+                      "precision": 2,
+                      "step": 0.01,
+                      "label": "核采样",
+                      "value": "1",
+                      "desc": "top_p,越大词汇量越大，输出越多样",
+                      "visibleOn": "!use_built_in_model"
+                    },
+                    {
+                      "name": "max_history",
+                      "type": "input-number",
+                      "label": "上下文记忆",
+                      "value": "10",
+                      "desc": "适当的记忆量有助于提升回答精度",
+                      "visibleOn": "!use_built_in_model"
+                    },
+                    {
                       "name": "any_select",
                       "type": "switch",
                       "label": "任意选择",
