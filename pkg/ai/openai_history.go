@@ -129,7 +129,7 @@ func (c *OpenAIClient) GetStreamCompletionWithTools(ctx context.Context, content
 		Tools:    c.tools,
 		Stream:   true,
 	})
-	klog.V(6).Infof("GetStreamCompletionWithTools history length: %d", len(c.GetHistory(ctx)))
+	klog.V(6).Infof("GetStreamCompletionWithTools 携带 history length: %d", len(c.GetHistory(ctx)))
 	klog.V(8).Infof("GetStreamCompletionWithTools c.history: %v", utils.ToJSON(c.GetHistory(ctx)))
 	return stream, err
 }
