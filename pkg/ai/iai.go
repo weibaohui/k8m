@@ -31,6 +31,7 @@ type IAI interface {
 	SetTools(tools []openai.Tool)
 	SaveAIHistory(ctx context.Context, content string)
 	GetHistory(ctx context.Context) []openai.ChatCompletionMessage
+	ClearHistory(ctx context.Context) error
 }
 
 type nopCloser struct{}
