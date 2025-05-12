@@ -98,9 +98,11 @@ func (c *OpenAIClient) GetCompletionWithTools(ctx context.Context, contents ...a
 	c.fillChatHistory(ctx, contents)
 	resp, err := c.client.CreateChatCompletion(ctx,
 		openai.ChatCompletionRequest{
-			Model:    c.model,
-			Messages: c.GetHistory(ctx),
-			Tools:    c.tools,
+			Model:       c.model,
+			Messages:    c.GetHistory(ctx),
+			Temperature: c.temperature,
+			TopP:        c.topP,
+			Tools:       c.tools,
 		})
 	if err != nil {
 		return nil, "", err
@@ -111,9 +113,11 @@ func (c *OpenAIClient) GetCompletionWithTools(ctx context.Context, contents ...a
 func (c *OpenAIClient) GetStreamCompletion(ctx context.Context, contents ...any) (*openai.ChatCompletionStream, error) {
 	c.fillChatHistory(ctx, contents)
 	stream, err := c.client.CreateChatCompletionStream(ctx, openai.ChatCompletionRequest{
-		Model:    c.model,
-		Messages: c.GetHistory(ctx),
-		Stream:   true,
+		Model:       c.model,
+		Messages:    c.GetHistory(ctx),
+		Temperature: c.temperature,
+		TopP:        c.topP,
+		Stream:      true,
 	})
 	return stream, err
 }
@@ -125,7 +129,8 @@ func (c *OpenAIClient) GetStreamCompletionWithTools(ctx context.Context, content
 		Tools:    c.tools,
 		Stream:   true,
 	})
-	klog.V(2).Infof("GetStreamCompletionWithTools c.history: %v", utils.ToJSON(c.GetHistory(ctx)))
+	klog.V(6).Infof("GetStreamCompletionWithTools history length: %d", len(c.GetHistory(ctx)))
+	klog.V(8).Infof("GetStreamCompletionWithTools c.history: %v", utils.ToJSON(c.GetHistory(ctx)))
 	return stream, err
 }
 
