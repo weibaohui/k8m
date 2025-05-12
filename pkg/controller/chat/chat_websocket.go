@@ -2,20 +2,14 @@ package chat
 
 import (
 	"bytes"
-	"context"
-	"encoding/json"
-	"io"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/sashabaranov/go-openai"
-	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
@@ -171,109 +165,16 @@ func GPTShell(c *gin.Context) {
 
 			klog.V(6).Infof("prompt: %s", string(data))
 
-			tools := service.McpService().GetAllEnabledTools()
-			klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
-			stream, err := service.ChatService().GetChatStream(string(data), tools...)
+			err = service.ChatService().RunOneRound(c, string(data), &outBuffer)
 
 			if err != nil {
 				klog.V(6).Infof("failed to write %v bytes to tty: %s", len(dataBuffer), err)
 				continue
 			}
-			var toolCallBuffer []openai.ToolCall
-			for {
-				response, recvErr := stream.Recv()
-				if recvErr != nil {
-					if recvErr == io.EOF {
-						break
-					}
-					klog.V(6).Infof("stream Recv error:%v", recvErr)
-					// 处理其他错误
-					continue
-				}
 
-				// 设置了工具
-				if len(tools) > 0 {
-					for _, choice := range response.Choices {
-						// 大模型选择了执行工具
-						// 解析当前的ToolCalls
-						var currentCalls []openai.ToolCall
-						if err = json.Unmarshal([]byte(utils.ToJSON(choice.Delta.ToolCalls)), &currentCalls); err == nil {
-							toolCallBuffer = append(toolCallBuffer, currentCalls...)
-						}
-
-						// 当收到空的ToolCalls时，表示一个完整的ToolCall已经接收完成
-						if len(choice.Delta.ToolCalls) == 0 && len(toolCallBuffer) > 0 {
-							// 合并并处理完整的ToolCall
-							mergedCalls := MergeToolCalls(toolCallBuffer)
-
-							klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
-
-							// 使用合并后的ToolCalls执行操作
-							username, role := amis.GetLoginUser(c)
-							klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
-							ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
-							ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
-							ctxInst = context.WithValue(ctxInst, "prompt", string(data))
-							results := service.McpService().Host().ExecTools(ctxInst, mergedCalls)
-							for _, r := range results {
-								outBuffer.Write([]byte(utils.ToJSON(r)))
-							}
-							// 清空缓冲区
-							toolCallBuffer = nil
-						}
-					}
-
-				}
-
-				// 发送数据给客户端
-				// 写入outBuffer
-				outBuffer.Write([]byte(response.Choices[0].Delta.Content))
-			}
-
-			err = stream.Close()
-			if err != nil {
-				klog.V(6).Infof("stream close error:%v", err)
-			}
-			klog.V(6).Infof("stream close ")
 		}
 
 	}()
 	waiter.Wait()
 	select {}
-}
-
-// MergeToolCalls 合并多个分段接收的 ToolCall 数据，生成完整的 ToolCall 切片。
-// 适用于将流式返回的部分 ToolCall 信息按索引聚合为完整的调用记录。
-//
-// 返回合并后的 ToolCall 切片。
-func MergeToolCalls(toolCalls []openai.ToolCall) []openai.ToolCall {
-	mergedCalls := make(map[int]*openai.ToolCall)
-
-	for _, call := range toolCalls {
-		if existing, ok := mergedCalls[*call.Index]; ok {
-			// 合并现有数据
-			if call.ID != "" {
-				existing.ID = call.ID
-			}
-			if call.Type != "" {
-				existing.Type = call.Type
-			}
-			if call.Function.Name != "" {
-				existing.Function.Name = call.Function.Name
-			}
-			if call.Function.Arguments != "" {
-				existing.Function.Arguments += call.Function.Arguments
-			}
-		} else {
-			// 创建新的ToolCall
-			mergedCalls[*call.Index] = &call
-		}
-	}
-
-	// 转换为切片
-	result := make([]openai.ToolCall, 0, len(mergedCalls))
-	for _, call := range mergedCalls {
-		result = append(result, *call)
-	}
-	return result
 }

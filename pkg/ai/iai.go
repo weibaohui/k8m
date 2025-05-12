@@ -22,13 +22,15 @@ import (
 
 type IAI interface {
 	Configure(config IAIConfig) error
-	GetCompletion(ctx context.Context, prompt string) (string, error)
-	GetCompletionWithTools(ctx context.Context, prompt string) ([]openai.ToolCall, string, error)
-	GetStreamCompletion(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
-	GetStreamCompletionWithTools(ctx context.Context, prompt string) (*openai.ChatCompletionStream, error)
+	GetCompletion(ctx context.Context, contents ...any) (string, error)
+	GetCompletionWithTools(ctx context.Context, contents ...any) ([]openai.ToolCall, string, error)
+	GetStreamCompletion(ctx context.Context, contents ...any) (*openai.ChatCompletionStream, error)
+	GetStreamCompletionWithTools(ctx context.Context, contents ...any) (*openai.ChatCompletionStream, error)
 	GetName() string
 	Close()
 	SetTools(tools []openai.Tool)
+	SaveAIHistory(ctx context.Context, content string)
+	GetHistory(ctx context.Context) []openai.ChatCompletionMessage
 }
 
 type nopCloser struct{}
@@ -47,6 +49,7 @@ type IAIConfig interface {
 	GetTopP() float32
 	GetTopK() int32
 	GetMaxTokens() int
+	GetMaxHistory() int32
 	GetProviderId() string
 	GetCompartmentId() string
 	GetOrganizationId() string
@@ -78,6 +81,7 @@ type Provider struct {
 	CompartmentId  string
 	TopP           float32
 	TopK           int32
+	MaxHistory     int32
 	MaxTokens      int
 	OrganizationId string
 	CustomHeaders  []http.Header
@@ -105,6 +109,9 @@ func (p *Provider) GetTopK() int32 {
 
 func (p *Provider) GetMaxTokens() int {
 	return p.MaxTokens
+}
+func (p *Provider) GetMaxHistory() int32 {
+	return p.MaxHistory
 }
 
 func (p *Provider) GetPassword() string {

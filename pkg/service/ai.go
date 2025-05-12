@@ -21,15 +21,22 @@ func (c *aiService) SetVars(apikey, apiUrl, model string) {
 	c.innerApiKey = apikey
 }
 
+var local ai.IAI
+
 func (c *aiService) DefaultClient() (ai.IAI, error) {
 	enable := c.IsEnabled()
 	if !enable {
 		return nil, fmt.Errorf("ChatGPT功能未开启")
 	}
 
-	client, err := c.openAIClient()
+	if local != nil {
+		return local, nil
+	}
 
-	return client, err
+	if client, err := c.openAIClient(); err == nil {
+		local = client
+	}
+	return local, nil
 
 }
 
@@ -43,6 +50,7 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 		BaseURL:     cfg.ApiURL,
 		Temperature: 0.7,
 		TopP:        1,
+		MaxHistory:  10,
 		TopK:        0,
 		MaxTokens:   1000,
 	}
@@ -50,6 +58,19 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 		aiProvider.BaseURL = c.innerApiUrl
 		aiProvider.Password = c.innerApiKey
 		aiProvider.Model = c.innerModel
+	}
+
+	// Temperature: 0.7,
+	// 	TopP:        1,
+	// 		MaxHistory:  10,
+	if cfg.Temperature > 0 {
+		aiProvider.Temperature = cfg.Temperature
+	}
+	if cfg.TopP > 0 {
+		aiProvider.TopP = cfg.TopP
+	}
+	if cfg.MaxHistory > 0 {
+		aiProvider.MaxHistory = cfg.MaxHistory
 	}
 
 	if cfg.Debug {

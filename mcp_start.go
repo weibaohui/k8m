@@ -12,6 +12,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
 	"k8s.io/klog/v2"
@@ -46,7 +47,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 			toolName := request.Params.Name
 			serverName := host.GetServerNameByToolName(toolName)
 			parameters := request.Params.Arguments
-			resultInfo := service.MCPToolCallResult{
+			resultInfo := models.MCPToolCallResult{
 				ToolName:   toolName,
 				Parameters: parameters,
 				Result:     errStr,
@@ -70,7 +71,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 			errStr = resultStr
 		}
 
-		resultInfo := service.MCPToolCallResult{
+		resultInfo := models.MCPToolCallResult{
 			ToolName:   toolName,
 			Parameters: parameters,
 			Result:     resultStr,

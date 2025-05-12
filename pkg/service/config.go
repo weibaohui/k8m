@@ -23,6 +23,15 @@ func (s *configService) GetConfig() (*models.Config, error) {
 	if err := s.db.First(&config).Error; err != nil {
 		return nil, err
 	}
+	if config.Temperature == 0 {
+		config.Temperature = 0.7
+	}
+	if config.TopP == 0 {
+		config.TopP = 1
+	}
+	if config.MaxHistory == 0 {
+		config.MaxHistory = 10
+	}
 
 	return &config, nil
 }
@@ -84,6 +93,15 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	}
 	if cfg.ResourceCacheTimeout == 0 {
 		cfg.ResourceCacheTimeout = 60
+	}
+	if m.Temperature > 0 {
+		cfg.Temperature = m.Temperature
+	}
+	if m.TopP > 0 {
+		cfg.TopP = m.TopP
+	}
+	if m.MaxHistory > 0 {
+		cfg.MaxHistory = m.MaxHistory
 	}
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理
