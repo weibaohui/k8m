@@ -267,7 +267,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                         onClick={() => {
                                             fetch(historyResetUrl)
                                                 .then(response => response.json())
-                                                .then(data => {
+                                                .then(_ => {
                                                     Modal.success({
                                                         content: '对话历史已清空。',
                                                     });
