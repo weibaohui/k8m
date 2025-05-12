@@ -61,7 +61,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		if clusterID == "" {
 			c.JSON(512, gin.H{
-				"msg": "请先选择集群",
+				"msg": "未指定集群，请先切换集群",
 			})
 			c.Abort()
 			return
