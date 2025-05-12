@@ -22,7 +22,9 @@ var (
 	dbErr      error
 )
 
-// connDB 返回数据库连接的单例
+// connDB 初始化并返回全局唯一的 GORM 数据库连接实例。
+// 若数据库文件不存在，则自动创建所需目录和文件，并设置最大连接数为 1。
+// 返回数据库连接实例和初始化过程中遇到的错误。
 func connDB() (*gorm.DB, error) {
 	once.Do(func() {
 		customLogger := logger.New(
@@ -63,7 +65,12 @@ func connDB() (*gorm.DB, error) {
 			return
 		}
 		klog.V(4).Infof("已连接数据库[%s].", cfg.SqlitePath)
-
+		s, err := db.DB()
+		if err != nil {
+			dbErr = err
+			return
+		}
+		s.SetMaxOpenConns(1)
 		dbInstance = db
 	})
 
