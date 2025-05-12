@@ -238,6 +238,8 @@ func main() {
 		ai.GET("/chat/example", chat.Example)
 		ai.GET("/chat/example/field", chat.FieldExample)
 		ai.GET("/chat/ws_chatgpt", chat.GPTShell)
+		ai.GET("/chat/ws_chatgpt/history", chat.History)
+		ai.GET("/chat/ws_chatgpt/history/reset", chat.Reset)
 		ai.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
 
 	}
