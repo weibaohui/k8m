@@ -63,7 +63,12 @@ func connDB() (*gorm.DB, error) {
 			return
 		}
 		klog.V(4).Infof("已连接数据库[%s].", cfg.SqlitePath)
-
+		s, err := db.DB()
+		if err != nil {
+			dbErr = err
+			return
+		}
+		s.SetMaxOpenConns(1)
 		dbInstance = db
 	})
 
