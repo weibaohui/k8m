@@ -64,7 +64,7 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 	// currChatContent tracks chat content that needs to be sent
 	// to the LLM in each iteration of  the agentic loop below
 	var currChatContent []any
-	 
+
 	// Set the initial message to start the conversation
 	currChatContent = append(currChatContent, chat)
 
@@ -78,7 +78,7 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 			return nil
 		}
 		klog.V(6).Infof("Sending to LLM: %v", utils.ToJSON(currChatContent))
-		stream, err := client.GetStreamCompletionWithTools(ctxInst, currChatContent)
+		stream, err := client.GetStreamCompletionWithTools(ctxInst, currChatContent...)
 		// Clear our "response" now that we sent the last response
 		if err != nil {
 			klog.V(6).Infof("ChatCompletion error: %v\n", err)

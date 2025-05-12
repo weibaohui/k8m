@@ -58,7 +58,7 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 
 	username, role := amis.GetLoginUser(c)
 	klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
-	ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
+	ctxInst := context.WithValue(c.Request.Context(), constants.JwtUserName, username)
 	ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
 
 	prompt := promptFunc(data)

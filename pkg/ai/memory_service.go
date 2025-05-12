@@ -27,7 +27,11 @@ func NewMemoryService() *memoryService {
 func (m *memoryService) GetUserHistory(username string) []openai.ChatCompletionMessage {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	return m.storage[username]
+	history := m.storage[username]
+	// 返回副本，避免外部修改
+	copied := make([]openai.ChatCompletionMessage, len(history))
+	copy(copied, history)
+	return copied
 }
 
 // AppendUserHistory 向指定用户追加一条历史记录

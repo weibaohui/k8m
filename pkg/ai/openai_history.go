@@ -156,17 +156,23 @@ func (t *OpenAIHeaderTransport) RoundTrip(req *http.Request) (*http.Response, er
 }
 
 func (c *OpenAIClient) SaveAIHistory(ctx context.Context, contents string) {
-	username := ctx.Value(constants.JwtUserName).(string)
-	c.memory.AppendUserHistory(username, openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleAssistant,
-		Content: contents,
-	})
-
+	val := ctx.Value(constants.JwtUserName)
+	if username, ok := val.(string); ok {
+		c.memory.AppendUserHistory(username, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleAssistant,
+			Content: contents,
+		})
+	} else {
+		klog.Warningf("SaveAIHistory content but user not found: %s", contents)
+	}
 }
 
 func (c *OpenAIClient) GetHistory(ctx context.Context) []openai.ChatCompletionMessage {
-	username := ctx.Value(constants.JwtUserName).(string)
-	return c.memory.GetUserHistory(username)
+	val := ctx.Value(constants.JwtUserName)
+	if username, ok := val.(string); ok {
+		return c.memory.GetUserHistory(username)
+	}
+	return make([]openai.ChatCompletionMessage, 0)
 
 }
 
