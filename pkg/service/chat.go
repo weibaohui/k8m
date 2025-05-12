@@ -12,7 +12,6 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"k8s.io/klog/v2"
 )
 
@@ -43,12 +42,9 @@ func (c *chatService) GetChatStream(ctx context.Context, chat string) (*openai.C
 	return stream, nil
 
 }
-func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Writer) error {
+func (c *chatService) RunOneRound(gc *gin.Context, chat string, writer io.Writer) error {
 
-	username, role := amis.GetLoginUser(ctx)
-	klog.V(6).Infof("执行工具调用 user,role: %s %s", username, role)
-	ctxInst := context.WithValue(context.Background(), constants.JwtUserName, username)
-	ctxInst = context.WithValue(ctxInst, constants.JwtUserRole, role)
+	ctxInst := amis.GetContextWithUser(gc)
 
 	client, err := AIService().DefaultClient()
 
@@ -161,7 +157,8 @@ func (c *chatService) RunOneRound(ctx *gin.Context, chat string, writer io.Write
 	}
 	return nil
 }
-func (c *chatService) Chat(chat string) string {
+func (c *chatService) Chat(ctx *gin.Context, chat string) string {
+	ctxInst := amis.GetContextWithUser(ctx)
 	client, err := AIService().DefaultClient()
 
 	if err != nil {
@@ -169,7 +166,7 @@ func (c *chatService) Chat(chat string) string {
 		return ""
 	}
 
-	result, err := client.GetCompletion(context.TODO(), chat)
+	result, err := client.GetCompletion(ctxInst, chat)
 	if err != nil {
 		klog.V(2).Infof("ChatCompletion error: %v\n", err)
 		return ""

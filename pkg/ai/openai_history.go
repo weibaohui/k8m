@@ -181,6 +181,13 @@ func (c *OpenAIClient) GetHistory(ctx context.Context) []openai.ChatCompletionMe
 
 }
 
+func (c *OpenAIClient) ClearHistory(ctx context.Context) error {
+	val := ctx.Value(constants.JwtUserName)
+	if username, ok := val.(string); ok {
+		c.memory.ClearUserHistory(username)
+	}
+	return nil
+}
 func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
 
 	history := c.GetHistory(ctx)
