@@ -19,6 +19,9 @@ type Config struct {
 	PrintConfig          bool      `json:"print_config"`
 	EnableAI             bool      `gorm:"default:true" json:"enable_ai"` // 是否启用AI功能，默认开启
 	UseBuiltInModel      bool      `gorm:"default:true" json:"use_built_in_model"`
+	Temperature          float32   `json:"temperature"`                                        // 模型温度
+	TopP                 float32   `json:"top_p"`                                              //  模型topP参数
+	MaxHistory           int32     `json:"max_history"`                                        //  模型对话上下文历史记录数
 	ResourceCacheTimeout int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"` // 资源缓存时间（秒）
 	CreatedAt            time.Time `json:"created_at,omitempty"`                               // Automatically managed by GORM for creation time
 	UpdatedAt            time.Time `json:"updated_at,omitempty"`                               // Automatically managed by GORM for update time
