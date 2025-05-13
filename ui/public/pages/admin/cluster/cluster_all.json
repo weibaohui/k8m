@@ -540,37 +540,6 @@
                                 "label": "集群"
                               },
                               {
-                                "name": "namespaces",
-                                "label": "限制命名空间",
-                                "type": "tpl",
-                                "tpl": "${namespaces | split:',')}",
-                                "placeholder": "-"
-                              },
-                              {
-                                "type": "button",
-                                "label": "选择命名空间",
-                                "actionType": "dialog",
-                                "dialog": {
-                                  "closeOnEsc": true,
-                                  "closeOnOutside": true,
-                                  "size": "lg",
-                                  "title": "选择限制命名空间",
-                                  "body": {
-                                    "type": "form",
-                                    "api": "post:/admin/cluster_permissions/update_namespaces/$id",
-                                    "body": [
-                                      {
-                                        "type": "transfer",
-                                        "name": "namespaces",
-                                        "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
-                                        "searchable": true,
-                                        "selectMode": "list"
-                                      }
-                                    ]
-                                  }
-                                }
-                              },
-                              {
                                 "name": "authorization_type",
                                 "label": "授权类型",
                                 "type": "mapping",
