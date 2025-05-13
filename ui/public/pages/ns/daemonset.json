@@ -1299,7 +1299,11 @@
                                     "type": "input-kv",
                                     "name": "envs",
                                     "draggable": false,
-                                    "value": "${envs}"
+                                    "value": "${envs}",
+                                    "valueSchema": {
+                                      "type": "textarea",
+                                      "minRows": 1
+                                    }
                                   }
                                 ]
                               }
