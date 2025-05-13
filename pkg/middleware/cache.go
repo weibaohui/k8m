@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func SetCacheHeaders() gin.HandlerFunc {
 
 		// 设置缓存时间为1小时（3600秒）
 		maxAge := 3600 * 6
-		c.Header("Cache-Control", "public, max-age="+string(maxAge))
+		c.Header("Cache-Control", "public, max-age="+strconv.Itoa(maxAge))
 		// 设置Expires头，为当前时间加上缓存时间
 		expires := time.Now().Add(time.Second * time.Duration(maxAge)).Format(http.TimeFormat)
 		c.Header("Expires", expires)
