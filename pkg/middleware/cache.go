@@ -24,7 +24,7 @@ func SetCacheHeaders() gin.HandlerFunc {
 		}
 		if ext != "" {
 			// 常见的静态文件后缀
-			staticExts := []string{".json", ".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".map"}
+			staticExts := []string{".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".map"}
 			if !slices.Contains(staticExts, ext) {
 				// 静态文件请求，直接跳过集群检测
 				c.Next()
