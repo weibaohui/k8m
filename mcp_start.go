@@ -15,6 +15,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
+	"github.com/weibaohui/kom/mcp/tools"
 	"k8s.io/klog/v2"
 )
 
@@ -102,10 +103,55 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 	}
 }
 
+func SaveYamlTemplateTool() mcp2.Tool {
+	return mcp2.NewTool(
+		"save_k8s_yaml_template",
+		mcp2.WithDescription("保存Yaml为模版"),
+		mcp2.WithString("cluster", mcp2.Description("模板适配集群（可为空）")),
+		mcp2.WithString("yaml", mcp2.Required(), mcp2.Description("yaml模板内容，文本类型")),
+		mcp2.WithString("name", mcp2.Description("模板名称")),
+	)
+}
+func SaveYamlTemplateToolHandler(ctx context.Context, request mcp2.CallToolRequest) (*mcp2.CallToolResult, error) {
+	username, ok := ctx.Value(constants.JwtUserName).(string)
+	if !ok {
+		username = ""
+	}
+
+	cluster := ""
+	if clusterVal, ok := request.Params.Arguments["cluster"].(string); ok {
+		cluster = clusterVal
+	}
+	yaml := ""
+	if yamlVal, ok := request.Params.Arguments["yaml"].(string); ok {
+		yaml = yamlVal
+	}
+	name := ""
+	if nameVal, ok := request.Params.Arguments["name"].(string); ok {
+		name = nameVal
+	}
+
+	ct := models.CustomTemplate{
+		Name:      name,
+		Content:   yaml,
+		Kind:      "",
+		Cluster:   cluster,
+		IsGlobal:  false,
+		CreatedBy: username,
+	}
+	err := ct.Save(nil)
+	if err != nil {
+		return nil, err
+	}
+	return tools.TextResult("保存成功", nil)
+}
+
 // GetMcpSSEServer 根据指定的基础路径创建并返回一个配置好的MCP SSE服务器实例。
 func GetMcpSSEServer(basePath string) *server.SSEServer {
 	sc := createServerConfig(basePath)
-	return mcp.GetMCPSSEServerWithOption(sc)
+	serv := mcp.GetMCPServerWithOption(sc)
+	serv.AddTool(SaveYamlTemplateTool(), SaveYamlTemplateToolHandler)
+	return mcp.GetMCPSSEServerWithServerAndOption(serv, sc)
 }
 
 // adapt 将标准的 http.Handler 适配为 Gin 框架可用的处理函数。
