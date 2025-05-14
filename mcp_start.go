@@ -15,11 +15,13 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
+	"github.com/weibaohui/kom/mcp/tools"
 	"k8s.io/klog/v2"
 )
 
 // createServerConfig 根据指定的 basePath 创建并返回 MCP 服务器的配置。
-// 配置包括 JWT 用户名提取的上下文函数、工具调用错误和成功后的日志钩子、服务器选项及 SSE 相关设置。
+// createServerConfig 返回一个配置了 JWT 用户名提取、工具调用日志钩子及相关服务器和 SSE 选项的 MCP 服务器配置。
+// 配置包括从 HTTP Authorization 头部提取并解析 JWT 用户名的上下文函数，工具调用错误和成功后的日志记录钩子，以及基础路径和认证键等服务器参数。
 func createServerConfig(basePath string) *mcp.ServerConfig {
 	cfg := flag.Init()
 
@@ -102,10 +104,57 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 	}
 }
 
-// GetMcpSSEServer 根据指定的基础路径创建并返回一个配置好的MCP SSE服务器实例。
+// SaveYamlTemplateTool 返回一个用于保存 Kubernetes YAML 模板的 MCP 工具定义。
+func SaveYamlTemplateTool() mcp2.Tool {
+	return mcp2.NewTool(
+		"save_k8s_yaml_template",
+		mcp2.WithDescription("保存Yaml为模版"),
+		mcp2.WithString("cluster", mcp2.Description("模板适配集群（可为空）")),
+		mcp2.WithString("yaml", mcp2.Required(), mcp2.Description("yaml模板内容，文本类型")),
+		mcp2.WithString("name", mcp2.Description("模板名称")),
+	)
+}
+// 成功时返回“保存成功”的文本结果，失败时返回错误。
+func SaveYamlTemplateToolHandler(ctx context.Context, request mcp2.CallToolRequest) (*mcp2.CallToolResult, error) {
+	username, ok := ctx.Value(constants.JwtUserName).(string)
+	if !ok {
+		username = ""
+	}
+
+	cluster := ""
+	if clusterVal, ok := request.Params.Arguments["cluster"].(string); ok {
+		cluster = clusterVal
+	}
+	yaml := ""
+	if yamlVal, ok := request.Params.Arguments["yaml"].(string); ok {
+		yaml = yamlVal
+	}
+	name := ""
+	if nameVal, ok := request.Params.Arguments["name"].(string); ok {
+		name = nameVal
+	}
+
+	ct := models.CustomTemplate{
+		Name:      name,
+		Content:   yaml,
+		Kind:      "",
+		Cluster:   cluster,
+		IsGlobal:  false,
+		CreatedBy: username,
+	}
+	err := ct.Save(nil)
+	if err != nil {
+		return nil, err
+	}
+	return tools.TextResult("保存成功", nil)
+}
+
+// GetMcpSSEServer 创建并返回一个集成了“保存K8s YAML模板”工具的MCP SSE服务器实例，支持基于JWT的用户身份提取与Gin框架适配。
 func GetMcpSSEServer(basePath string) *server.SSEServer {
 	sc := createServerConfig(basePath)
-	return mcp.GetMCPSSEServerWithOption(sc)
+	serv := mcp.GetMCPServerWithOption(sc)
+	serv.AddTool(SaveYamlTemplateTool(), SaveYamlTemplateToolHandler)
+	return mcp.GetMCPSSEServerWithServerAndOption(serv, sc)
 }
 
 // adapt 将标准的 http.Handler 适配为 Gin 框架可用的处理函数。
