@@ -6,7 +6,7 @@
 
 - [OIDC单点登录](oidc.md) - 如何配置使用OIDC单点登录。
 - [MCP配置](mcp.md) - 如何配置使用MCP。包括开放给其他软件使用方法。
-- [Github Copilot 配置MCP](mcp.md) - 如何配置使用MCP。包括开放给其他软件使用方法。
+- [Github Copilot 配置MCP](mcp-github-copilot.md) - 如何配置使用MCP。包括开放给其他软件使用方法。
 - [Ollama配置](ollama.md) - 如何配置使用Ollama大模型。
 - [自托管/自定义大模型支持](use-self-hosted-ai.md) - 如何使用自托管的AI，包括自定义大模型的配置方法。
 - [管理员账户配置](temp-admin-config.md) - 临时管理员账户的设置方法和注意事项。
