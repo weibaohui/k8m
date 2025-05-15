@@ -3,7 +3,7 @@
 1. 切换到Agent模式
    ![1](../images/mcp/github-copilot/github-copilot-1.png)
    ![1](../images/mcp/github-copilot/github-copilot-2.png)
-2. 选择添加工多工具
+2. 选择添加更多工具
    ![1](../images/mcp/github-copilot/github-copilot-3.png)
 3. 选择添加MCP服务器
    ![1](../images/mcp/github-copilot/github-copilot-4.png)
