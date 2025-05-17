@@ -177,6 +177,9 @@ func main() {
 	r.GET("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
 	r.POST("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
 	r.POST("/mcp/k8m/message", adapt(sseServer.MessageHandler))
+	r.GET("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
+	r.POST("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
+	r.POST("/mcp/k8m/:key/message", adapt(sseServer.MessageHandler))
 
 	// 直接返回 index.html
 	r.GET("/", func(c *gin.Context) {
