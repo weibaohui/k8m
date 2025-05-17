@@ -32,11 +32,13 @@
       "headerToolbar": [
         {
           "type": "button",
-          "label": "创建Token",
+          "label": "创建密钥",
           "level": "primary",
           "actionType": "dialog",
           "dialog": {
-            "title": "创建访问Token",
+            "title": "创建访问密钥",
+            "closeOnEsc": true,
+            "closeOnOutside": true,
             "body": {
               "type": "form",
               "api": "post:/mgm/user/profile/mcpkeys/create",
@@ -70,8 +72,14 @@
           ]
         },
         {
+          "name": "key",
+          "label": "密钥ID",
+          "type": "tpl",
+          "tpl": "${key|truncate:6}"
+        },
+        {
           "name": "visit",
-          "label": "访问方式",
+          "label": "使用方法",
           "type": "control",
           "width": "150px",
           "body": [
