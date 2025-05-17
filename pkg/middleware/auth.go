@@ -19,6 +19,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// 检查请求路径是否需要跳过登录检测
 		if path == "/" ||
 			path == "/favicon.ico" ||
+			strings.HasPrefix(path, "/mcp/") ||
 			strings.HasPrefix(path, "/auth/") ||
 			strings.HasPrefix(path, "/assets/") ||
 			strings.HasPrefix(path, "/public/") {
