@@ -55,13 +55,15 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 // 平台管理员拥有所有权限，集群管理员拥有全部操作权限，特定操作（如 Exec、只读）需具备对应角色及命名空间权限。
 // 若为内部监听（如 node watch），则跳过权限校验。
 // 返回用户名、角色列表及权限校验错误（如无权限或未授权）。
-// 
+//
 // 参数：
-//   k8s: 封装了操作上下文的 Kubectl 实例。
-//   action: 待校验的操作类型（如 exec、delete、update、patch、create、读取类操作等）。
-// 
+//
+//	k8s: 封装了操作上下文的 Kubectl 实例。
+//	action: 待校验的操作类型（如 exec、delete、update、patch、create、读取类操作等）。
+//
 // 返回：
-//   用户名、角色列表，以及权限不足或异常时的错误信息。
+//
+//	用户名、角色列表，以及权限不足或异常时的错误信息。
 func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error) {
 	stmt := k8s.Statement
 	cluster := k8s.ID
@@ -76,6 +78,11 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	}
 
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
+
+	if username == "" {
+		return "", nil, fmt.Errorf("用户为空%v，默认阻止", nil)
+	}
+
 	roleString := service.UserService().GetPlatformRolesByName(username)
 
 	var err error
