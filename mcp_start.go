@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	mcp2 "github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -26,13 +27,22 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 	cfg := flag.Init()
 
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
+		newCtx := context.Background()
+
+		key := extractKey(r.URL.Path)
+		if key != "" {
+			if username, err := service.UserService().GetUserByMCPKey(key); err == nil {
+				newCtx = context.WithValue(newCtx, constants.JwtUserName, username)
+				return newCtx
+			}
+		}
+
 		auth := r.Header.Get("Authorization")
 		// 处理 Bearer 前缀
 		if strings.HasPrefix(auth, "Bearer ") {
 			auth = strings.TrimPrefix(auth, "Bearer ")
 		}
 		klog.V(6).Infof("Authorization: %v", auth)
-		newCtx := context.Background()
 		if username, err := utils.GetUsernameFromToken(auth, cfg.JwtTokenSecret); err == nil {
 			klog.V(6).Infof("Extracted username from token: %v", username)
 			newCtx = context.WithValue(newCtx, constants.JwtUserName, username)
@@ -97,7 +107,14 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 			server.WithHooks(hooks),
 		},
 		SSEOption: []server.SSEOption{
-			server.WithBasePath(basePath),
+			server.WithDynamicBasePath(func(r *http.Request, sessionID string) string {
+				key := extractKey(r.URL.Path)
+				if key == "" {
+					return basePath
+				}
+				return basePath + "/" + key
+			}),
+			server.WithStaticBasePath(basePath),
 			server.WithSSEContextFunc(ctxFn),
 		},
 		AuthKey: constants.JwtUserName,
@@ -114,26 +131,39 @@ func SaveYamlTemplateTool() mcp2.Tool {
 		mcp2.WithString("name", mcp2.Description("模板名称")),
 	)
 }
-// 成功时返回“保存成功”的文本结果，失败时返回错误。
+
+// SaveYamlTemplateToolHandler 处理保存 Kubernetes YAML 模板的工具调用请求。
+// 该函数从上下文中提取用户名，从请求参数中提取集群信息、YAML 内容和模板名称，
+// 然后创建一个自定义模板对象并保存到存储中。如果保存成功，返回包含成功消息的调用结果；
+// 若保存失败，则返回错误。
 func SaveYamlTemplateToolHandler(ctx context.Context, request mcp2.CallToolRequest) (*mcp2.CallToolResult, error) {
+	// 从上下文中提取 JWT 用户名
 	username, ok := ctx.Value(constants.JwtUserName).(string)
+	// 若提取失败，将用户名置为空字符串
 	if !ok {
 		username = ""
 	}
 
+	// 初始化集群信息为空字符串
 	cluster := ""
+	// 尝试从请求参数中提取集群信息
 	if clusterVal, ok := request.Params.Arguments["cluster"].(string); ok {
 		cluster = clusterVal
 	}
+	// 初始化 YAML 内容为空字符串
 	yaml := ""
+	// 尝试从请求参数中提取 YAML 内容
 	if yamlVal, ok := request.Params.Arguments["yaml"].(string); ok {
 		yaml = yamlVal
 	}
+	// 初始化模板名称为空字符串
 	name := ""
+	// 尝试从请求参数中提取模板名称
 	if nameVal, ok := request.Params.Arguments["name"].(string); ok {
 		name = nameVal
 	}
 
+	// 创建自定义模板对象
 	ct := models.CustomTemplate{
 		Name:      name,
 		Content:   yaml,
@@ -142,10 +172,13 @@ func SaveYamlTemplateToolHandler(ctx context.Context, request mcp2.CallToolReque
 		IsGlobal:  false,
 		CreatedBy: username,
 	}
+	// 保存自定义模板对象
 	err := ct.Save(nil)
+	// 若保存失败，返回错误
 	if err != nil {
 		return nil, err
 	}
+	// 若保存成功，返回包含成功消息的调用结果
 	return tools.TextResult("保存成功", nil)
 }
 
@@ -163,4 +196,14 @@ func adapt(fn func() http.Handler) gin.HandlerFunc {
 		handler := fn()
 		handler.ServeHTTP(c.Writer, c.Request)
 	}
+}
+
+// 手动提取路径中 key（/mcp/k8m/:key/sse）
+func extractKey(path string) string {
+	parts := strings.Split(path, "/")
+	endpoints := []string{"sse", "message"}
+	if len(parts) >= 5 && parts[1] == "mcp" && parts[2] == "k8m" && slice.Contain(endpoints, parts[4]) {
+		return parts[3]
+	}
+	return ""
 }
