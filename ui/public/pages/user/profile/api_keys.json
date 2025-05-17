@@ -27,6 +27,8 @@
                     "level": "primary",
                     "actionType": "dialog",
                     "dialog": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
                         "title": "创建API密钥",
                         "body": {
                             "type": "form",
@@ -69,10 +71,6 @@
                     "label": "密钥值",
                     "type": "control",
                     "body": [
-                        {
-                            "type": "tpl",
-                            "tpl": "${spec.schedule}"
-                        },
                         {
                             "type": "button",
                             "label": "查",
