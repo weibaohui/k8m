@@ -24,6 +24,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - 详细的配置和使用说明请参考[文档](docs/README.md)。
 - 更新日志请参考[更新日志](CHANGELOG.md)。
 - [开发设计文档](https://deepwiki.com/weibaohui/k8m)
+
 ### 主要特点
 
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
@@ -49,12 +50,12 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 ## **运行**
 
-1. **下载**：从 [GitHub](https://github.com/weibaohui/k8m) 下载最新版本。
+1. **下载**：从 [GitHub release](https://github.com/weibaohui/k8m/releases) 下载最新版本。
 2. **运行**：使用 `./k8m` 命令启动,访问[http://127.0.0.1:3618](http://127.0.0.1:3618)。
 3. **登录用户名密码**：
-   - 用户名：`k8m`
-   - 密码：`k8m`
-   - 请注意上线后修改用户名密码、启用两步验证。
+    - 用户名：`k8m`
+    - 密码：`k8m`
+    - 请注意上线后修改用户名密码、启用两步验证。
 4. **参数**：
 
 ```shell
@@ -111,6 +112,7 @@ services:
 
 从v0.0.8版本开始，将内置GPT，无需配置。
 如果您需要使用自己的GPT，请参考以下文档。
+
 - [自托管/自定义大模型支持](use-self-hosted-ai.md) - 如何使用自托管的
 - [Ollama配置](ollama.md) - 如何配置使用Ollama大模型。
 
@@ -147,8 +149,8 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 | `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                      |
 | `LOGIN_TYPE`          | `"password"`               | 登录方式（如 `password`, `oauth`, `token`）                                  |
 | `ENABLE_TEMP_ADMIN`   | `"false"`                  | 是否启用临时管理员账户配置，默认关闭。初次登录、忘记密码时使用                                       |
-| `ADMIN_USERNAME`      | ``                  | 管理员用户名 ，启用临时管理员账户配置后生效                                                |
-| `ADMIN_PASSWORD`      | ``                 | 管理员密码，启用临时管理员账户配置后生效                                                  |
+| `ADMIN_USERNAME`      | ``                         | 管理员用户名 ，启用临时管理员账户配置后生效                                                |
+| `ADMIN_PASSWORD`      | ``                         | 管理员密码，启用临时管理员账户配置后生效                                                  |
 | `DEBUG`               | `"false"`                  | 是否开启 `debug` 模式                                                       |
 | `LOG_V`               | `"2"`                      | log输出日志，同klog用法                                                       |
 | `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                    |
@@ -222,7 +224,6 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 微信（大罗马的太阳） 搜索ID：daluomadetaiyang,备注k8m。
 <br><img width="214" alt="Image" src="https://github.com/user-attachments/assets/166db141-42c5-42c4-9964-8e25cf12d04c" />
-
 
 ## 微信群
 
