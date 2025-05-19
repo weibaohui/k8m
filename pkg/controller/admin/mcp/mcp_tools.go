@@ -10,11 +10,12 @@ import (
 )
 
 func ToolsList(c *gin.Context) {
+	name := c.Param("name")
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
 	var tool models.MCPTool
 	list, _, err := tool.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Order("name asc")
+		return db.Where("server_name=?", name).Order("name asc")
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
