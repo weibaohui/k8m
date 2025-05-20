@@ -58,7 +58,7 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 
 	prompt := promptFunc(data)
 
-	stream, err := service.ChatService().GetChatStream(ctxInst, prompt)
+	stream, err := service.ChatService().GetChatStreamWithoutHistory(ctxInst, prompt)
 	if err != nil {
 		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
 		return

@@ -41,9 +41,42 @@ func (c *chatService) GetChatStream(ctx context.Context, chat string) (*openai.C
 	return stream, nil
 
 }
-func (c *chatService) RunOneRound(gc *gin.Context, chat string, writer io.Writer) error {
+func (c *chatService) GetChatStreamWithoutHistory(ctx context.Context, chat string) (*openai.ChatCompletionStream, error) {
+
+	client, err := AIService().DefaultClient()
+
+	if err != nil {
+		klog.V(6).Infof("获取AI服务错误 : %v\n", err)
+		return nil, fmt.Errorf("获取AI服务错误 : %v", err)
+	}
+
+	err = client.ClearHistory(ctx)
+	if err != nil {
+		klog.V(6).Infof("AI服务执行前清空历史失败 : %v\n", err)
+		return nil, fmt.Errorf("AI服务执行前清空历史失败 : %v", err)
+	}
+
+	tools := McpService().GetAllEnabledTools()
+	klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
+
+	client.SetTools(tools)
+
+	stream, err := client.GetStreamCompletionWithTools(ctx, chat)
+
+	if err != nil {
+		klog.V(6).Infof("ChatCompletion error: %v\n", err)
+		return nil, err
+	}
+	err = client.ClearHistory(ctx)
+	if err != nil {
+		klog.V(6).Infof("AI服务执行后清空历史失败 : %v\n", err)
+		return nil, fmt.Errorf("AI服务执行后清空历史失败 : %v", err)
+	}
+	return stream, nil
+
+}
+func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Writer) error {
 	cfg := flag.Init()
-	ctxInst := amis.GetContextWithUser(gc)
 
 	client, err := AIService().DefaultClient()
 
@@ -73,7 +106,7 @@ func (c *chatService) RunOneRound(gc *gin.Context, chat string, writer io.Writer
 			return nil
 		}
 		klog.V(6).Infof("Sending to LLM: %v", utils.ToJSON(currChatContent))
-		stream, err := client.GetStreamCompletionWithTools(ctxInst, currChatContent...)
+		stream, err := client.GetStreamCompletionWithTools(ctx, currChatContent...)
 		// Clear our "response" now that we sent the last response
 		if err != nil {
 			klog.V(6).Infof("ChatCompletion error: %v\n", err)
@@ -113,7 +146,7 @@ func (c *chatService) RunOneRound(gc *gin.Context, chat string, writer io.Writer
 
 						// 使用合并后的ToolCalls执行操作
 
-						results := McpService().Host().ExecTools(ctxInst, mergedCalls)
+						results := McpService().Host().ExecTools(ctx, mergedCalls)
 						for _, r := range results {
 							currChatContent = append(currChatContent, gin.H{
 								"type": "执行结果",
@@ -138,7 +171,7 @@ func (c *chatService) RunOneRound(gc *gin.Context, chat string, writer io.Writer
 		}
 		respAll := strings.Join(respBuffer, "")
 		if strings.TrimSpace(respAll) != "" {
-			client.SaveAIHistory(ctxInst, respAll)
+			client.SaveAIHistory(ctx, respAll)
 		}
 		respBuffer = []string{}
 		err = stream.Close()
