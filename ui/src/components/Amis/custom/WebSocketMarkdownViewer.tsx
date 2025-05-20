@@ -1,17 +1,16 @@
-import React, {useEffect, useRef, useState} from "react";
-import {render as amisRender} from "amis";
-import {formatFinalGetUrl} from "@/utils/utils";
+import React, { useEffect, useRef, useState } from "react";
+import { render as amisRender } from "amis";
+import { formatFinalGetUrl } from "@/utils/utils";
 
 interface WebSocketMarkdownViewerProps {
     url: string;
     params: Record<string, string>;
     data: Record<string, any>;
-    width?: string;
 }
 
 const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({url, data, params}, _) => {
-        url = formatFinalGetUrl({url, data, params});
+    ({ url, data, params }, _) => {
+        url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
@@ -59,7 +58,7 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
         return (
             <>
                 <div>
-                    <p style={{display: "none"}}>WebSocket Status: {status}</p>
+                    <p style={{ display: "none" }}>WebSocket Status: {status}</p>
                     <div
                         style={{
                             backgroundColor: "#f5f5f5",
