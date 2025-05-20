@@ -209,7 +209,7 @@ func getEnvAsInt(key string, defaultValue int) int {
 	return defaultValue
 }
 
-// getEnvAsBool 获取环境变量的布尔值，支持 "true"/"false"（大小写不敏感）和 "1"/"0"，否则返回默认值
+// getEnvAsBool 返回指定环境变量的布尔值，支持 "true"/"false"（不区分大小写）和 "1"/"0"，若未设置或解析失败则返回默认值。
 func getEnvAsBool(key string, defaultValue bool) bool {
 	if value, exists := os.LookupEnv(key); exists {
 		if boolValue, err := strconv.ParseBool(value); err == nil {
@@ -219,7 +219,7 @@ func getEnvAsBool(key string, defaultValue bool) bool {
 	return defaultValue
 }
 
-// getEnvAsInt32 读取环境变量，如果不存在则返回默认值
+// getEnvAsInt32 返回指定环境变量的 int32 类型值，不存在或解析失败时返回默认值。
 func getEnvAsInt32(key string, defaultValue int32) int32 {
 	if value, exists := os.LookupEnv(key); exists {
 		if intValue, err := strconv.ParseInt(value, 10, 32); err == nil {
