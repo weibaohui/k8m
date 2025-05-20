@@ -6,11 +6,10 @@ interface WebSocketMarkdownViewerProps {
     url: string;
     params: Record<string, string>;
     data: Record<string, any>;
-    width?: string;
 }
 
 const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({ url, data, params, width }, _) => {
+    ({ url, data, params }, _) => {
         url = formatFinalGetUrl({ url, data, params });
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
@@ -58,7 +57,7 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
 
         return (
             <>
-                <div style={{ width: width || "90vh" }}>
+                <div>
                     <p style={{ display: "none" }}>WebSocket Status: {status}</p>
                     <div
                         style={{

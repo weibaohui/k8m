@@ -146,6 +146,7 @@ func GPTShell(c *gin.Context) {
 
 	// chatgpt << ws
 	go func() {
+		ctxInst := amis.GetContextWithUser(c)
 		for {
 			// data processing
 			messageType, data, err := conn.ReadMessage()
@@ -165,7 +166,7 @@ func GPTShell(c *gin.Context) {
 
 			klog.V(6).Infof("prompt: %s", string(data))
 
-			err = service.ChatService().RunOneRound(c, string(data), &outBuffer)
+			err = service.ChatService().RunOneRound(ctxInst, string(data), &outBuffer)
 
 			if err != nil {
 				klog.V(6).Infof("failed to write %v bytes to tty: %s", len(dataBuffer), err)
