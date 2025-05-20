@@ -26,6 +26,14 @@ func (c *chatService) getChatStreamBase(ctx context.Context, chat string, clearH
 		klog.V(6).Infof("获取AI服务错误 : %v\n", err)
 		return nil, fmt.Errorf("获取AI服务错误 : %v", err)
 	}
+	defer func() {
+		if clearHistory {
+			err = client.ClearHistory(ctx)
+			if err != nil {
+				klog.V(6).Infof("AI服务执行后清空历史失败 : %v\n", err)
+			}
+		}
+	}()
 	if clearHistory {
 		err = client.ClearHistory(ctx)
 		if err != nil {
@@ -33,6 +41,7 @@ func (c *chatService) getChatStreamBase(ctx context.Context, chat string, clearH
 			return nil, fmt.Errorf("AI服务执行前清空历史失败 : %v", err)
 		}
 	}
+
 	tools := McpService().GetAllEnabledTools()
 	klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
 	client.SetTools(tools)
@@ -40,13 +49,6 @@ func (c *chatService) getChatStreamBase(ctx context.Context, chat string, clearH
 	if err != nil {
 		klog.V(6).Infof("ChatCompletion error: %v\n", err)
 		return nil, err
-	}
-	if clearHistory {
-		err = client.ClearHistory(ctx)
-		if err != nil {
-			klog.V(6).Infof("AI服务执行后清空历史失败 : %v\n", err)
-			return nil, fmt.Errorf("AI服务执行后清空历史失败 : %v", err)
-		}
 	}
 	return stream, nil
 }
