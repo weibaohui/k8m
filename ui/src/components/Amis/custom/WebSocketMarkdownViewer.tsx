@@ -10,7 +10,7 @@ interface WebSocketMarkdownViewerProps {
 }
 
 const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({url, data, params, width}, _) => {
+    ({url, data, params}, _) => {
         url = formatFinalGetUrl({url, data, params});
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
