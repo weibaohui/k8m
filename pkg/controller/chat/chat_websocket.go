@@ -146,6 +146,7 @@ func GPTShell(c *gin.Context) {
 
 	// chatgpt << ws
 	go func() {
+		ctxInst := amis.GetContextWithUser(c)
 		for {
 			// data processing
 			messageType, data, err := conn.ReadMessage()
@@ -164,7 +165,6 @@ func GPTShell(c *gin.Context) {
 			klog.V(6).Infof("received %s (type: %v) message of size %v byte(s) from web ui with key sequence: %v  [%s]", dataType, messageType, dataLength, dataBuffer, string(dataBuffer))
 
 			klog.V(6).Infof("prompt: %s", string(data))
-			ctxInst := amis.GetContextWithUser(c)
 
 			err = service.ChatService().RunOneRound(ctxInst, string(data), &outBuffer)
 
