@@ -89,6 +89,14 @@
                       "visibleOn": "!use_built_in_model"
                     },
                     {
+                      "name": "max_iterations",
+                      "type": "input-number",
+                      "label": "自动对话轮数",
+                      "value": "10",
+                      "desc": "适当提升有助于提升回答完整度",
+                      "visibleOn": "!use_built_in_model"
+                    },
+                    {
                       "name": "any_select",
                       "type": "switch",
                       "label": "任意选择",
