@@ -93,7 +93,7 @@
                 "closeOnOutside": true,
                 "size": "lg",
                 "title": "访问方式",
-                "body": "<div><p><strong>方式一: 动态地址</strong></p><ul style='margin-left:20px'><code><%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/mcp/k8m/<%= data.key%>/sse</code></ul><p><strong>方式二：静态地址+Header</strong></p><ul style='margin-left:20px'><p><code><%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/mcp/k8m/sse</code></p><li>在HTTP请求头中添加Header：<br><code>Authorization: Bearer <%=data.jwt%></code></li></ul></div>"
+                "body": "<div><p><strong>方式一: 动态地址</strong></p><ul style='margin-left:20px'><code><%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/mcp/k8m/<%= data.key%>/sse</code></ul><p><strong>方式二：静态地址+Header</strong></p><ul style='margin-left:20px'><p><code><%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/mcp/k8m/sse</code></p><li>在HTTP请求头中添加Header：<br><code>Authorization: Bearer <%=data.jwt%></code></li></ul><p><strong>示例配置（JSON）</strong></p><pre style='background:#f8f8f8;border:1px solid #ccc;padding:10px;border-radius:4px;'><code>{\n  \"mcpServers\": {\n    \"k8m\": {\n      \"url\": \"<%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/mcp/k8m/<%= data.key %>/sse\"\n    }\n  }\n}</code></pre></div>"
               }
             }
           ]
