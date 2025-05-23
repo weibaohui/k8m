@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
@@ -54,6 +55,8 @@ func Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	// 清除用户的缓存
+	service.UserService().ClearCacheByKey(m.Username)
 	amis.WriteJsonData(c, gin.H{
 		"id": m.ID,
 	})
@@ -70,6 +73,8 @@ func Delete(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	// 清除用户的缓存
+	service.UserService().ClearCacheByKey(m.Username)
 	amis.WriteJsonOK(c)
 }
 func UpdatePsw(c *gin.Context) {

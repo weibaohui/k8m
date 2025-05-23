@@ -16,7 +16,7 @@ func GetOrSetCache[T any](cache *ristretto.Cache[string, any], cacheKey string, 
 	}
 	// 检查缓存是否命中
 	if v, found := cache.Get(cacheKey); found {
-		klog.V(5).Infof("cache hit cacheKey= %s", cacheKey)
+		klog.V(8).Infof("k8m cache hit cacheKey= %s", cacheKey)
 		return v.(T), nil
 	}
 

@@ -2,7 +2,9 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -15,6 +17,31 @@ import (
 )
 
 type userService struct {
+	cacheKeys sync.Map // 用于存储所有使用过的缓存key
+}
+
+// addCacheKey 添加缓存key到列表中（并发安全）
+func (u *userService) addCacheKey(key string) {
+	u.cacheKeys.Store(key, struct{}{})
+}
+
+// getCacheKeys 获取所有缓存key（并发安全）
+func (u *userService) getCacheKeys() []string {
+	var keys []string
+	u.cacheKeys.Range(func(key, value interface{}) bool {
+		if k, ok := key.(string); ok {
+			keys = append(keys, k)
+		}
+		return true
+	})
+	return keys
+}
+
+// formatCacheKey 格式化缓存key并添加到列表中（并发安全）
+func (u *userService) formatCacheKey(format string, a ...interface{}) string {
+	key := fmt.Sprintf(format, a...)
+	u.addCacheKey(key)
+	return key
 }
 
 func (u *userService) List() ([]*models.User, error) {
@@ -31,18 +58,26 @@ func (u *userService) List() ([]*models.User, error) {
 
 // GetRolesByGroupNames 获取用户的角色
 func (u *userService) GetRolesByGroupNames(groupNames string) ([]string, error) {
-	var ugList []models.UserGroup
-	err := dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(groupNames, ",")).Distinct("role").Find(&ugList).Error
-	if err != nil {
-		return nil, err
+	if groupNames == "" {
+		return nil, nil
 	}
-	// 查询所有的用户组，判断用户组的角色
-	// 形成一个用户组对应的角色列表
-	var roles []string
-	for _, ug := range ugList {
-		roles = append(roles, ug.Role)
-	}
-	return roles, nil
+
+	cacheKey := u.formatCacheKey("user:roles:%s", groupNames)
+
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
+		var ugList []models.UserGroup
+		err := dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(groupNames, ",")).Distinct("role").Find(&ugList).Error
+		if err != nil {
+			return nil, err
+		}
+		var roles []string
+		for _, ug := range ugList {
+			roles = append(roles, ug.Role)
+		}
+		return roles, nil
+	})
+
+	return result, err
 }
 
 // GetClusterRole 获取用户在指定集群中的角色权限
@@ -51,7 +86,7 @@ func (u *userService) GetRolesByGroupNames(groupNames string) ([]string, error) 
 // jwtUserRole: JWT用户角色,从context传递
 // 返回值：角色列表 [平台角色，集群角色合并了，后续考虑拆开]
 func (u *userService) GetClusterRole(cluster string, username string, jwtUserRoles string) ([]string, error) {
-	// jwtUserRoles可能为一个字符串逗号分隔的角色列表
+	// jwtUserRoles的检查逻辑保持不变
 	if jwtUserRoles != "" {
 		roles := strings.SplitSeq(jwtUserRoles, ",")
 		for role := range roles {
@@ -63,44 +98,54 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 			}
 		}
 	}
-	// 先从jwt字符串中读取，没有再读数据库
-	params := &dao.Params{}
-	params.PerPage = 10000000
-	clusterRole := &models.ClusterUserRole{}
-	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Distinct("role").Where("cluster = ? AND username = ?", cluster, username)
-	}
-	items, _, err := clusterRole.List(params, queryFunc)
-	if err != nil {
-		return []string{}, err
-	}
-	var roles []string
-	for _, item := range items {
-		roles = append(roles, item.Role)
-	}
 
-	return roles, nil
+	cacheKey := u.formatCacheKey("user:clusterrole:%s:%s", username, cluster)
+
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
+		params := &dao.Params{}
+		params.PerPage = 10000000
+		clusterRole := &models.ClusterUserRole{}
+		queryFunc := func(db *gorm.DB) *gorm.DB {
+			return db.Distinct("role").Where("cluster = ? AND username = ?", cluster, username)
+		}
+		items, _, err := clusterRole.List(params, queryFunc)
+		if err != nil {
+			return []string{}, err
+		}
+		var roles []string
+		for _, item := range items {
+			roles = append(roles, item.Role)
+		}
+		return roles, nil
+	})
+
+	return result, err
 }
 
 // GetClusterNames 获取用户有权限的集群名称数组
 // username: 用户名
 func (u *userService) GetClusterNames(username string) ([]string, error) {
-	params := &dao.Params{}
-	params.PerPage = 10000000
-	clusterRole := &models.ClusterUserRole{}
-	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Distinct("cluster").Where(" username = ?", username)
-	}
-	items, _, err := clusterRole.List(params, queryFunc)
-	if err != nil {
-		return []string{}, err
-	}
-	var clusters []string
-	for _, item := range items {
-		clusters = append(clusters, item.Cluster)
-	}
+	cacheKey := u.formatCacheKey("user:clusternames:%s", username)
 
-	return clusters, nil
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
+		params := &dao.Params{}
+		params.PerPage = 10000000
+		clusterRole := &models.ClusterUserRole{}
+		queryFunc := func(db *gorm.DB) *gorm.DB {
+			return db.Distinct("cluster").Where(" username = ?", username)
+		}
+		items, _, err := clusterRole.List(params, queryFunc)
+		if err != nil {
+			return []string{}, err
+		}
+		var clusters []string
+		for _, item := range items {
+			clusters = append(clusters, item.Cluster)
+		}
+		return clusters, nil
+	})
+
+	return result, err
 }
 
 // GetClusters 获取用户有权限的集群列表
@@ -109,32 +154,38 @@ func (u *userService) GetClusterNames(username string) ([]string, error) {
 // 1. 用户授权类型为用户
 // 2. 用户授权类型为用户组,当前用户所在的用户组，如果有授权，那么也提取出来
 func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, error) {
-	params := &dao.Params{}
-	params.PerPage = 10000000
-	clusterRole := &models.ClusterUserRole{}
-	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Where(" username = ?", username)
-	}
-	items, _, err := clusterRole.List(params, queryFunc)
-	if err != nil {
-		return nil, err
-	}
-	// 以上为授权类型为用户的情况
-	// 以下为授权类型为用户组的情况
-	// 先获取用户所在用户组名称，可能多个
-	if groupNames, err := u.GetGroupNames(username); err == nil {
-		goupNameList := strings.Split(groupNames, ",")
-		if len(goupNameList) > 0 {
-			// 查找用户组对应的授权
-			if items2, _, err := clusterRole.List(params, func(db *gorm.DB) *gorm.DB {
-				return db.Where("authorization_type=? and  username in ? ", constants.ClusterAuthorizationTypeUserGroup, goupNameList)
-			}); err == nil {
-				items = append(items, items2...)
+	cacheKey := u.formatCacheKey("user:clusters:%s", username)
+
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]*models.ClusterUserRole, error) {
+		params := &dao.Params{}
+		params.PerPage = 10000000
+		clusterRole := &models.ClusterUserRole{}
+		queryFunc := func(db *gorm.DB) *gorm.DB {
+			return db.Where(" username = ?", username)
+		}
+		items, _, err := clusterRole.List(params, queryFunc)
+		if err != nil {
+			return nil, err
+		}
+
+		// 以上为授权类型为用户的情况
+		// 以下为授权类型为用户组的情况
+		// 先获取用户所在用户组名称，可能多个
+		if groupNames, err := u.GetGroupNames(username); err == nil {
+			goupNameList := strings.Split(groupNames, ",")
+			if len(goupNameList) > 0 {
+				// 查找用户组对应的授权
+				if items2, _, err := clusterRole.List(params, func(db *gorm.DB) *gorm.DB {
+					return db.Where("authorization_type=? and  username in ? ", constants.ClusterAuthorizationTypeUserGroup, goupNameList)
+				}); err == nil {
+					items = append(items, items2...)
+				}
 			}
 		}
-	}
+		return items, nil
+	})
 
-	return items, nil
+	return result, err
 }
 
 // GenerateJWTTokenByUserName  生成 Token
@@ -150,10 +201,9 @@ func (u *userService) GenerateJWTTokenByUserName(username string, duration time.
 	clusters, _ := u.GetClusters(username)
 
 	var clusterNames []string
-	if clusters != nil {
-		for _, cluster := range clusters {
-			clusterNames = append(clusterNames, cluster.Cluster)
-		}
+
+	for _, cluster := range clusters {
+		clusterNames = append(clusterNames, cluster.Cluster)
 	}
 
 	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -189,10 +239,9 @@ func (u *userService) GenerateJWTToken(username string, roles []string, clusters
 	cstUserRoles := constants.JwtClusterUserRoles
 
 	var clusterNames []string
-	if clusters != nil {
-		for _, cluster := range clusters {
-			clusterNames = append(clusterNames, cluster.Cluster)
-		}
+
+	for _, cluster := range clusters {
+		clusterNames = append(clusterNames, cluster.Cluster)
 	}
 
 	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -207,18 +256,24 @@ func (u *userService) GenerateJWTToken(username string, roles []string, clusters
 	return token.SignedString(jwtSecret)
 }
 
+// GetGroupNames 获取用户所在的用户组
 func (u *userService) GetGroupNames(username string) (string, error) {
-	params := &dao.Params{}
-	user := &models.User{}
-	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Select("group_names").Where(" username = ?", username)
-	}
-	item, err := user.GetOne(params, queryFunc)
-	if err != nil {
-		return "", err
-	}
+	cacheKey := u.formatCacheKey("user:groupnames:%s", username)
 
-	return item.GroupNames, nil
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() (string, error) {
+		params := &dao.Params{}
+		user := &models.User{}
+		queryFunc := func(db *gorm.DB) *gorm.DB {
+			return db.Select("group_names").Where(" username = ?", username)
+		}
+		item, err := user.GetOne(params, queryFunc)
+		if err != nil {
+			return "", err
+		}
+		return item.GroupNames, nil
+	})
+
+	return result, err
 }
 
 func (u *userService) GetUserByMCPKey(mcpKey string) (string, error) {
@@ -271,4 +326,14 @@ func (u *userService) GetPlatformRolesByName(username string) string {
 		}
 	}
 	return ""
+}
+
+// ClearCacheByKey 清除指定关键字的所有相关缓存
+func (u *userService) ClearCacheByKey(cacheKey string) {
+	// 遍历所有已使用的缓存key
+	for _, key := range u.getCacheKeys() {
+		if strings.Contains(key, cacheKey) {
+			utils.ClearCacheByKey(CacheService().CacheInstance(), key)
+		}
+	}
 }

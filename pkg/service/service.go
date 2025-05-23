@@ -1,5 +1,7 @@
 package service
 
+import "sync"
+
 var localPodService = &podService{
 	podLabels: make(map[string][]*PodLabels),
 }
@@ -23,7 +25,9 @@ var localPVService = &pvService{
 var localIngressService = &ingressService{
 	CountList: []*ingressCount{},
 }
-var localUserService = &userService{}
+var localUserService = &userService{
+	cacheKeys: sync.Map{},
+}
 var localOperationLogService = NewOperationLogService()
 var localShellLogService = &shellLogService{}
 var localAiService = &aiService{}

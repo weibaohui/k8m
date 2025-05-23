@@ -53,6 +53,7 @@ func ListClusterPermissionsByUserName(c *gin.Context) {
 	}
 	amis.WriteJsonList(c, clusters)
 }
+
 // ListClusterPermissionsByClusterID 根据指定的集群ID，列出该集群下所有用户的权限角色列表。
 // 集群ID通过base64解码后用于查询，结果按授权类型降序、用户名升序排序，并返回总数和详细列表。
 // 若解码或查询出错，则返回JSON格式的错误信息。
@@ -110,6 +111,7 @@ func ListClusterNamespaceListByClusterID(c *gin.Context) {
 	})
 
 }
+
 // SaveClusterPermission 批量为指定集群添加用户角色权限。
 // 解码集群标识，读取角色和授权类型参数，解析包含用户列表的请求体，校验输入后，依次为每个用户添加权限条目（如不存在则新增），最后返回操作结果。
 func SaveClusterPermission(c *gin.Context) {
@@ -174,7 +176,7 @@ func SaveClusterPermission(c *gin.Context) {
 
 		// 如果存在该集群下的用户条目，则跳过，不做处理
 	}
-
+	service.UserService().ClearCacheByKey("cluster")
 	amis.WriteJsonOK(c)
 }
 
@@ -195,6 +197,8 @@ func DeleteClusterPermission(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	service.UserService().ClearCacheByKey("cluster")
+
 	amis.WriteJsonOK(c)
 }
 
@@ -223,6 +227,8 @@ func UpdateNamespaces(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	service.UserService().ClearCacheByKey("cluster")
+
 	amis.WriteJsonOK(c)
 }
 
