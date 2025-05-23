@@ -43,7 +43,8 @@ func SaveUserGroup(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
+	// 清除用户组的缓存
+	service.UserService().ClearCacheByKey(m.GroupName)
 	amis.WriteJsonData(c, gin.H{
 		"id": m.ID,
 	})
@@ -65,6 +66,8 @@ func DeleteUserGroup(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	// 清除用户组的缓存
+	service.UserService().ClearCacheByKey(m.GroupName)
 	amis.WriteJsonOK(c)
 }
 
