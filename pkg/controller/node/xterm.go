@@ -12,6 +12,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
 )
 
 var WebsocketMessageType = map[int]string{
@@ -32,6 +33,7 @@ func CreateNodeShell(c *gin.Context) {
 	name := c.Param("node_name") // NodeName
 	cfg := flag.Init()
 	timeout := cfg.ImagePullTimeout
+	klog.V(6).Infof("CreateNodeShell timeout: %v", timeout)
 	ns, podName, containerName, err := kom.Cluster(selectedCluster).WithContext(ctx).WithCache(time.Duration(timeout) * time.Second).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateNodeShell(cfg.NodeShellImage)
 
 	if err != nil {
@@ -79,6 +81,7 @@ func CreateKubectlShell(c *gin.Context) {
 	kubeconfig := service.ClusterService().GetClusterByID(string(clusterID)).GetKubeconfig()
 	cfg := flag.Init()
 	timeout := cfg.ImagePullTimeout
+	klog.V(6).Infof("CreateKubectlShell timeout: %v", timeout)
 	ns, podName, containerName, err := kom.Cluster(clusterID).WithContext(ctx).WithCache(time.Duration(timeout)*time.Second).Resource(&v1.Node{}).Name(name).Ctl().Node().CreateKubectlShell(kubeconfig, cfg.KubectlShellImage)
 
 	if err != nil {

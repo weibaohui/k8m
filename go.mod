@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/coreos/go-oidc/v3 v3.14.1
+	github.com/dgraph-io/ristretto/v2 v2.2.0
 	github.com/duke-git/lancet/v2 v2.3.5
 	github.com/fatih/color v1.18.0
 	github.com/gin-contrib/cors v1.7.5
@@ -21,7 +22,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.39.1
 	github.com/spf13/pflag v1.0.6
-	github.com/weibaohui/kom v0.2.39
+	github.com/weibaohui/kom v0.2.41
 	golang.org/x/net v0.40.0
 	golang.org/x/oauth2 v0.30.0
 	gorm.io/gorm v1.26.1
@@ -67,7 +68,6 @@ require (
 	github.com/creack/pty v1.1.21 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v26.1.4+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
