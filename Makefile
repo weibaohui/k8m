@@ -35,8 +35,7 @@ PLATFORMS := \
 # 定义需要编译的Linux平台和架构
 # 格式为 GOOS/GOARCH
 LINUX_PLATFORMS := \
-    linux/amd64 \
-    linux/arm64 \
+    linux/arm64
 
 # 默认目标
 .PHONY: all
