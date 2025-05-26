@@ -23,51 +23,12 @@ var (
 	dbErr      error
 )
 
-// ConnMysql 通过配置连接MySQL数据库，主要用于数据迁移
-func ConnMysql() *gorm.DB {
-	cfg := flag.Init()
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&collation=%s&%s",
-		cfg.MysqlUser,
-		cfg.MysqlPassword,
-		cfg.MysqlHost,
-		cfg.MysqlPort,
-		cfg.MysqlDatabase,
-		cfg.MysqlCharset,
-		cfg.MysqlCollation,
-		cfg.MysqlQuery,
-	)
-
-	// 隐藏密码
-	showDsn := fmt.Sprintf("%s:******@tcp(%s:%d)/%s?charset=%s&collation=%s&%s",
-		cfg.MysqlUser,
-		cfg.MysqlHost,
-		cfg.MysqlPort,
-		cfg.MysqlDatabase,
-		cfg.MysqlCharset,
-		cfg.MysqlCollation,
-		cfg.MysqlQuery,
-	)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		// 禁用外键(指定外键时不会在mysql创建真实的外键约束)
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
-	if err != nil {
-		klog.Errorf("初始化mysql数据库异常: %v", err)
-	}
-	// 开启mysql日志
-	if cfg.MysqlLogMode {
-		db.Debug()
-	}
-
-	klog.V(2).Infof("初始化mysql数据库完成! dsn: %s", showDsn)
-	return db
-}
-
 // connDB 初始化并返回全局唯一的 GORM 数据库连接实例。
 // 若数据库文件不存在，则自动创建所需目录和文件，并设置最大连接数为 1。
 // 返回数据库连接实例和初始化过程中遇到的错误。
 func connDB() (*gorm.DB, error) {
 	once.Do(func() {
+
 		customLogger := logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -94,6 +55,7 @@ func connDB() (*gorm.DB, error) {
 					return
 				}
 			}
+
 			db, err := gorm.Open(sqlite.Open(cfg.SqlitePath), &gorm.Config{
 				Logger: customLogger,
 			})
