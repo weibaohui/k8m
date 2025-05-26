@@ -19,33 +19,22 @@ var config *Config
 var once sync.Once
 
 type Config struct {
-	Port              int    // gin 监听端口
-	KubeConfig        string // KUBECONFIG文件路径
-	ApiKey            string // OPENAI_API_KEY
-	ApiURL            string // OPENAI_API_URL
-	ApiModel          string // OPENAI_MODEL
-	Debug             bool   // 调试模式，同步修改所有的debug模式
-	LogV              int    // klog的日志级别klog.V(this)
-	InCluster         bool   // 是否集群内模式
-	LoginType         string // password,oauth,token,.. 登录方式，默认为password
-	EnableTempAdmin   bool   // 是否启用临时管理员账户配置
-	AdminUserName     string // 管理员用户名，启用临时管理员账户配置后生效
-	AdminPassword     string // 管理员密码，启用临时管理员账户配置后生效
-	JwtTokenSecret    string // JWT token secret
-	NodeShellImage    string // nodeShell 镜像
-	KubectlShellImage string // kubectlShell 镜像
-	ImagePullTimeout  int    // 镜像拉取超时时间（秒）
-	SqlitePath        string // sqlite 数据库路径
-	// MySQL 配置
-	MysqlHost            string  // mysql 主机
-	MysqlPort            int     // mysql 端口
-	MysqlUser            string  // mysql 用户名
-	MysqlPassword        string  // mysql 密码
-	MysqlDatabase        string  // mysql 数据库名
-	MysqlCharset         string  // mysql 字符集
-	MysqlCollation       string  // mysql 排序规则
-	MysqlQuery           string  // mysql 额外参数
-	MysqlLogMode         bool    // mysql 日志模式
+	Port                 int     // gin 监听端口
+	KubeConfig           string  // KUBECONFIG文件路径
+	ApiKey               string  // OPENAI_API_KEY
+	ApiURL               string  // OPENAI_API_URL
+	ApiModel             string  // OPENAI_MODEL
+	Debug                bool    // 调试模式，同步修改所有的debug模式
+	LogV                 int     // klog的日志级别klog.V(this)
+	InCluster            bool    // 是否集群内模式
+	LoginType            string  // password,oauth,token,.. 登录方式，默认为password
+	EnableTempAdmin      bool    // 是否启用临时管理员账户配置
+	AdminUserName        string  // 管理员用户名，启用临时管理员账户配置后生效
+	AdminPassword        string  // 管理员密码，启用临时管理员账户配置后生效
+	JwtTokenSecret       string  // JWT token secret
+	NodeShellImage       string  // nodeShell 镜像
+	KubectlShellImage    string  // kubectlShell 镜像
+	ImagePullTimeout     int     // 镜像拉取超时时间（秒）
 	PrintConfig          bool    // 是否打印配置信息
 	Version              string  // 版本号，由编译时自动注入
 	GitCommit            string  // git commit, 由编译时自动注入
@@ -61,8 +50,28 @@ type Config struct {
 	TopP                 float32 //  模型topP参数
 	MaxIterations        int32   //  模型自动对话的最大轮数
 	MaxHistory           int32   //  模型对话上下文历史记录数
-	DBDriver             string  // 数据库驱动类型: sqlite、mysql、postgresql等
 	AnySelect            bool    // 是否开启任意选择，默认开启
+	DBDriver             string  // 数据库驱动类型: sqlite、mysql、postgresql等
+	SqlitePath           string  // sqlite 数据库路径
+	// MySQL 配置
+	MysqlHost      string // mysql 主机
+	MysqlPort      int    // mysql 端口
+	MysqlUser      string // mysql 用户名
+	MysqlPassword  string // mysql 密码
+	MysqlDatabase  string // mysql 数据库名
+	MysqlCharset   string // mysql 字符集
+	MysqlCollation string // mysql 排序规则
+	MysqlQuery     string // mysql 额外参数
+	MysqlLogMode   bool   // mysql 日志模式
+	// PostgreSQL 配置
+	PgHost     string // postgres 主机
+	PgPort     int    // postgres 端口
+	PgUser     string // postgres 用户名
+	PgPassword string // postgres 密码
+	PgDatabase string // postgres 数据库名
+	PgSSLMode  string // postgres sslmode
+	PgTimeZone string // postgres 时区
+	PgLogMode  bool   // postgres 日志模式
 }
 
 func Init() *Config {
@@ -87,7 +96,7 @@ func (c *Config) ShowConfigCloseMethod() {
 }
 func loadEnv() {
 	env := os.Getenv("K8M_ENV")
-	if "" == env {
+	if env == "" {
 		// 默认开发环境加载".env.dev.local"
 		env = "dev"
 	}
@@ -179,6 +188,16 @@ func (c *Config) InitFlags() {
 	defaultMysqlQuery := getEnv("MYSQL_QUERY", "parseTime=True&loc=Local")
 	defaultMysqlLogMode := getEnvAsBool("MYSQL_LOGMODE", false)
 
+	// PostgreSQL 配置默认值
+	defaultPgHost := getEnv("PG_HOST", "127.0.0.1")
+	defaultPgPort := getEnvAsInt("PG_PORT", 5432)
+	defaultPgUser := getEnv("PG_USER", "postgres")
+	defaultPgPassword := getEnv("PG_PASSWORD", "")
+	defaultPgDatabase := getEnv("PG_DATABASE", "k8m")
+	defaultPgSSLMode := getEnv("PG_SSLMODE", "disable")
+	defaultPgTimeZone := getEnv("PG_TIMEZONE", "Asia/Shanghai")
+	defaultPgLogMode := getEnvAsBool("PG_LOGMODE", false)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -213,6 +232,14 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.MysqlCollation, "mysql-collation", defaultMysqlCollation, "MySQL排序规则")
 	pflag.StringVar(&c.MysqlQuery, "mysql-query", defaultMysqlQuery, "MySQL连接额外参数")
 	pflag.BoolVar(&c.MysqlLogMode, "mysql-logmode", defaultMysqlLogMode, "MySQL日志模式")
+	pflag.StringVar(&c.PgHost, "pg-host", defaultPgHost, "PostgreSQL主机地址")
+	pflag.IntVar(&c.PgPort, "pg-port", defaultPgPort, "PostgreSQL端口")
+	pflag.StringVar(&c.PgUser, "pg-user", defaultPgUser, "PostgreSQL用户名")
+	pflag.StringVar(&c.PgPassword, "pg-password", defaultPgPassword, "PostgreSQL密码")
+	pflag.StringVar(&c.PgDatabase, "pg-database", defaultPgDatabase, "PostgreSQL数据库名")
+	pflag.StringVar(&c.PgSSLMode, "pg-sslmode", defaultPgSSLMode, "PostgreSQL SSL模式")
+	pflag.StringVar(&c.PgTimeZone, "pg-timezone", defaultPgTimeZone, "PostgreSQL时区")
+	pflag.BoolVar(&c.PgLogMode, "pg-logmode", defaultPgLogMode, "PostgreSQL日志模式")
 	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {

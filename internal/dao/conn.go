@@ -11,6 +11,7 @@ import (
 	"github.com/glebarez/sqlite"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"k8s.io/klog/v2"
@@ -44,6 +45,9 @@ func connDB() (*gorm.DB, error) {
 			return
 		} else if cfg.DBDriver == "mysql" {
 			dbInstance, dbErr = openMysqlDB(cfg, customLogger)
+			return
+		} else if cfg.DBDriver == "postgres" {
+			dbInstance, dbErr = openPostgresDB(cfg, customLogger)
 			return
 		}
 	})
@@ -115,6 +119,40 @@ func openMysqlDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, err
 		db = db.Debug()
 	}
 	klog.V(2).Infof("初始化mysql数据库完成! dsn: %s", showDsn)
+	return db, nil
+}
+
+// openPostgresDB 负责初始化并返回postgres数据库连接实例。
+func openPostgresDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, error) {
+	// 构建 PostgreSQL DSN
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=%s",
+		cfg.PgHost,
+		cfg.PgUser,
+		cfg.PgPassword,
+		cfg.PgDatabase,
+		cfg.PgPort,
+		cfg.PgSSLMode,
+		cfg.PgTimeZone,
+	)
+	showDsn := fmt.Sprintf("host=%s user=%s password=****** dbname=%s port=%d sslmode=%s TimeZone=%s",
+		cfg.PgHost,
+		cfg.PgUser,
+		cfg.PgDatabase,
+		cfg.PgPort,
+		cfg.PgSSLMode,
+		cfg.PgTimeZone,
+	)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: customLogger,
+	})
+	if err != nil {
+		klog.Errorf("初始化postgres数据库异常: %v", err)
+		return nil, err
+	}
+	if cfg.PgLogMode {
+		db = db.Debug()
+	}
+	klog.V(2).Infof("初始化postgres数据库完成! dsn: %s", showDsn)
 	return db, nil
 }
 
