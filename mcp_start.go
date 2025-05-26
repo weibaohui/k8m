@@ -29,12 +29,17 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 	var ctxFn = func(ctx context.Context, r *http.Request) context.Context {
 		newCtx := context.Background()
 
-		key := extractKey(r.URL.Path)
-		if key != "" {
-			if username, err := service.UserService().GetUserByMCPKey(key); err == nil {
+		mcpKey := extractKey(r.URL.Path)
+		if mcpKey != "" {
+			username, err := service.UserService().GetUserByMCPKey(mcpKey)
+			if err != nil {
+				klog.V(6).Infof("Failed to extract username from mcpKey: %v", err)
+			}
+			if username != "" {
 				newCtx = context.WithValue(newCtx, constants.JwtUserName, username)
 				return newCtx
 			}
+
 		}
 
 		auth := r.Header.Get("Authorization")

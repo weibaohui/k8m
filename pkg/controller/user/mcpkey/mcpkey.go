@@ -39,7 +39,7 @@ func Create(c *gin.Context) {
 	// 生成MCP密钥
 	mcpKey := &models.McpKey{
 		Username:    username,
-		Key:         utils.RandNLengthString(8),
+		McpKey:      utils.RandNLengthString(8),
 		Jwt:         jwt,
 		Description: req.Description,
 	}

@@ -280,7 +280,7 @@ func (u *userService) GetUserByMCPKey(mcpKey string) (string, error) {
 	params := &dao.Params{}
 	user := &models.McpKey{}
 	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Select("username").Where(" key = ?", mcpKey)
+		return db.Select("username").Where(" mcp_key = ?", mcpKey)
 	}
 	item, err := user.GetOne(params, queryFunc)
 	if err != nil {

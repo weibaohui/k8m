@@ -35,8 +35,6 @@ type Config struct {
 	NodeShellImage       string  // nodeShell 镜像
 	KubectlShellImage    string  // kubectlShell 镜像
 	ImagePullTimeout     int     // 镜像拉取超时时间（秒）
-	SqlitePath           string  // sqlite 数据库路径
-	AnySelect            bool    // 是否开启任意选择，默认开启
 	PrintConfig          bool    // 是否打印配置信息
 	Version              string  // 版本号，由编译时自动注入
 	GitCommit            string  // git commit, 由编译时自动注入
@@ -52,6 +50,28 @@ type Config struct {
 	TopP                 float32 //  模型topP参数
 	MaxIterations        int32   //  模型自动对话的最大轮数
 	MaxHistory           int32   //  模型对话上下文历史记录数
+	AnySelect            bool    // 是否开启任意选择，默认开启
+	DBDriver             string  // 数据库驱动类型: sqlite、mysql、postgresql等
+	SqlitePath           string  // sqlite 数据库路径
+	// MySQL 配置
+	MysqlHost      string // mysql 主机
+	MysqlPort      int    // mysql 端口
+	MysqlUser      string // mysql 用户名
+	MysqlPassword  string // mysql 密码
+	MysqlDatabase  string // mysql 数据库名
+	MysqlCharset   string // mysql 字符集
+	MysqlCollation string // mysql 排序规则
+	MysqlQuery     string // mysql 额外参数
+	MysqlLogMode   bool   // mysql 日志模式
+	// PostgreSQL 配置
+	PgHost     string // postgres 主机
+	PgPort     int    // postgres 端口
+	PgUser     string // postgres 用户名
+	PgPassword string // postgres 密码
+	PgDatabase string // postgres 数据库名
+	PgSSLMode  string // postgres sslmode
+	PgTimeZone string // postgres 时区
+	PgLogMode  bool   // postgres 日志模式
 }
 
 func Init() *Config {
@@ -76,7 +96,7 @@ func (c *Config) ShowConfigCloseMethod() {
 }
 func loadEnv() {
 	env := os.Getenv("K8M_ENV")
-	if "" == env {
+	if env == "" {
 		// 默认开发环境加载".env.dev.local"
 		env = "dev"
 	}
@@ -157,6 +177,27 @@ func (c *Config) InitFlags() {
 	// 默认模型自动对话的最大轮数为10
 	defaultMaxIterations := getEnvAsInt32("MAX_ITERATIONS", 10)
 
+	// MySQL 配置默认值
+	defaultMysqlHost := getEnv("MYSQL_HOST", "127.0.0.1")
+	defaultMysqlPort := getEnvAsInt("MYSQL_PORT", 3306)
+	defaultMysqlUser := getEnv("MYSQL_USER", "root")
+	defaultMysqlPassword := getEnv("MYSQL_PASSWORD", "")
+	defaultMysqlDatabase := getEnv("MYSQL_DATABASE", "k8m")
+	defaultMysqlCharset := getEnv("MYSQL_CHARSET", "utf8mb4")
+	defaultMysqlCollation := getEnv("MYSQL_COLLATION", "utf8mb4_general_ci")
+	defaultMysqlQuery := getEnv("MYSQL_QUERY", "parseTime=True&loc=Local")
+	defaultMysqlLogMode := getEnvAsBool("MYSQL_LOGMODE", false)
+
+	// PostgreSQL 配置默认值
+	defaultPgHost := getEnv("PG_HOST", "127.0.0.1")
+	defaultPgPort := getEnvAsInt("PG_PORT", 5432)
+	defaultPgUser := getEnv("PG_USER", "postgres")
+	defaultPgPassword := getEnv("PG_PASSWORD", "")
+	defaultPgDatabase := getEnv("PG_DATABASE", "k8m")
+	defaultPgSSLMode := getEnv("PG_SSLMODE", "disable")
+	defaultPgTimeZone := getEnv("PG_TIMEZONE", "Asia/Shanghai")
+	defaultPgLogMode := getEnvAsBool("PG_LOGMODE", false)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -182,6 +223,24 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.ProductName, "product-name", defaultProductName, "产品名称，默认为K8M")
 	pflag.IntVar(&c.ResourceCacheTimeout, "resource-cache-timeout", defaultResourceCacheTimeout, "资源缓存时间（秒），默认60秒")
 	pflag.Int32Var(&c.MaxIterations, "max-iterations", defaultMaxIterations, "模型自动对话的最大轮数，默认10轮")
+	pflag.StringVar(&c.MysqlHost, "mysql-host", defaultMysqlHost, "MySQL主机地址")
+	pflag.IntVar(&c.MysqlPort, "mysql-port", defaultMysqlPort, "MySQL端口")
+	pflag.StringVar(&c.MysqlUser, "mysql-user", defaultMysqlUser, "MySQL用户名")
+	pflag.StringVar(&c.MysqlPassword, "mysql-password", defaultMysqlPassword, "MySQL密码")
+	pflag.StringVar(&c.MysqlDatabase, "mysql-database", defaultMysqlDatabase, "MySQL数据库名")
+	pflag.StringVar(&c.MysqlCharset, "mysql-charset", defaultMysqlCharset, "MySQL字符集")
+	pflag.StringVar(&c.MysqlCollation, "mysql-collation", defaultMysqlCollation, "MySQL排序规则")
+	pflag.StringVar(&c.MysqlQuery, "mysql-query", defaultMysqlQuery, "MySQL连接额外参数")
+	pflag.BoolVar(&c.MysqlLogMode, "mysql-logmode", defaultMysqlLogMode, "MySQL日志模式")
+	pflag.StringVar(&c.PgHost, "pg-host", defaultPgHost, "PostgreSQL主机地址")
+	pflag.IntVar(&c.PgPort, "pg-port", defaultPgPort, "PostgreSQL端口")
+	pflag.StringVar(&c.PgUser, "pg-user", defaultPgUser, "PostgreSQL用户名")
+	pflag.StringVar(&c.PgPassword, "pg-password", defaultPgPassword, "PostgreSQL密码")
+	pflag.StringVar(&c.PgDatabase, "pg-database", defaultPgDatabase, "PostgreSQL数据库名")
+	pflag.StringVar(&c.PgSSLMode, "pg-sslmode", defaultPgSSLMode, "PostgreSQL SSL模式")
+	pflag.StringVar(&c.PgTimeZone, "pg-timezone", defaultPgTimeZone, "PostgreSQL时区")
+	pflag.BoolVar(&c.PgLogMode, "pg-logmode", defaultPgLogMode, "PostgreSQL日志模式")
+	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值

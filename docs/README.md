@@ -4,6 +4,7 @@
 
 ## 文档列表
 
+- [数据库配置说明](database.md) - 如何配置数据库连接。
 - [OIDC单点登录](oidc.md) - 如何配置使用OIDC单点登录。
 - [MCP配置](mcp.md) - 如何配置使用MCP。包括开放给其他软件使用方法。
 - [Github Copilot 配置MCP](mcp-github-copilot.md) - 如何配置使用MCP。包括开放给其他软件使用方法。
