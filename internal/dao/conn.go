@@ -46,7 +46,7 @@ func connDB() (*gorm.DB, error) {
 		} else if cfg.DBDriver == "mysql" {
 			dbInstance, dbErr = openMysqlDB(cfg, customLogger)
 			return
-		} else if cfg.DBDriver == "postgres" {
+		} else if cfg.DBDriver == "postgresql" {
 			dbInstance, dbErr = openPostgresDB(cfg, customLogger)
 			return
 		}
