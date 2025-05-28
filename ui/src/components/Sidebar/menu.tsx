@@ -1,7 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
-import {useEffect, useState} from 'react';
-import {fetcher} from '../Amis/fetcher';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -532,7 +532,7 @@ const items: () => MenuItem[] = () => {
                     onClick: () => onMenuClick('/user/profile/login_settings')
                 },
                 {
-                    label: "集群权限",
+                    label: "我的集群",
                     icon: <i className="fa-solid fa-server"></i>,
                     key: "user_profile_clusters",
                     onClick: () => onMenuClick('/user/profile/my_clusters')

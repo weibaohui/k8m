@@ -67,7 +67,7 @@ const Toolbar = () => {
         },
         {
             key: "user_profile_clusters",
-            label: "集群权限",
+            label: "我的集群",
             icon: <i className="fa-solid fa-server"></i>,
             onClick: () => navigate('/user/profile/my_clusters')
         },

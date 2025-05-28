@@ -18,6 +18,27 @@
       "type": "crud",
       "id": "myClustersCRUD",
       "name": "myClustersCRUD",
+      "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload"
+      ],
       "autoFillHeight": true,
       "api": "get:/mgm/user/profile/cluster/permissions/list",
       "columns": [
