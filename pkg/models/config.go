@@ -19,6 +19,7 @@ type Config struct {
 	PrintConfig          bool      `json:"print_config"`
 	EnableAI             bool      `gorm:"default:true" json:"enable_ai"` // 是否启用AI功能，默认开启
 	UseBuiltInModel      bool      `gorm:"default:true" json:"use_built_in_model"`
+	NoThink              bool      `gorm:"default:false" json:"no_think,omitempty"`            // 是否关闭AI思考过程输出，true 时不显示思考过程，建议生产环境开启
 	Temperature          float32   `json:"temperature"`                                        // 模型温度
 	TopP                 float32   `json:"top_p"`                                              //  模型topP参数
 	MaxIterations        int32     `json:"max_iterations"`                                     //  模型自动对话的最大轮数

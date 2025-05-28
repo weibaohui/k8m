@@ -102,6 +102,13 @@
                       "label": "任意选择",
                       "value": false,
                       "desc": "是否开启任意选择，默认开启"
+                    },
+                    {
+                      "name": "no_think",
+                      "type": "switch",
+                      "label": "关闭思考",
+                      "value": false,
+                      "desc": "关闭思考后，大模型每次回答都直接输出结果"
                     }
                   ]
                 }

@@ -72,6 +72,7 @@ type Config struct {
 	PgSSLMode  string // postgres sslmode
 	PgTimeZone string // postgres 时区
 	PgLogMode  bool   // postgres 日志模式
+	NoThink    bool   // AI 是否关闭思考过程输出，true 时不显示思考过程，建议生产环境开启
 }
 
 func Init() *Config {
@@ -88,6 +89,7 @@ func (c *Config) ShowConfigInfo() {
 	if c.PrintConfig {
 		klog.Infof("配置加载顺序:1.启动参数->2.环境变量->3.数据库参数设置（界面配置）,后加载的配置覆盖前面的配置")
 		klog.Infof("已开启配置信息打印选项.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(config), color.RedString("↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
+		klog.Infof("AI关闭思考过程输出(no_think): %v", c.NoThink)
 		c.ShowConfigCloseMethod()
 	}
 }
@@ -198,6 +200,9 @@ func (c *Config) InitFlags() {
 	defaultPgTimeZone := getEnv("PG_TIMEZONE", "Asia/Shanghai")
 	defaultPgLogMode := getEnvAsBool("PG_LOGMODE", false)
 
+	// 默认AI关闭思考过程输出为false
+	defaultNoThink := getEnvAsBool("NO_THINK", false)
+
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
 	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
@@ -240,6 +245,7 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.PgSSLMode, "pg-sslmode", defaultPgSSLMode, "PostgreSQL SSL模式")
 	pflag.StringVar(&c.PgTimeZone, "pg-timezone", defaultPgTimeZone, "PostgreSQL时区")
 	pflag.BoolVar(&c.PgLogMode, "pg-logmode", defaultPgLogMode, "PostgreSQL日志模式")
+	pflag.BoolVar(&c.NoThink, "no-think", defaultNoThink, "AI是否关闭思考过程输出，true时不显示思考过程，建议生产环境开启")
 	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
 	// 检查是否设置了 --v 参数
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
