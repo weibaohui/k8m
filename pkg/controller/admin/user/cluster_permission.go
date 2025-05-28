@@ -140,11 +140,6 @@ func SaveClusterPermission(c *gin.Context) {
 		return
 	}
 
-	_, _, err = handlePermissionCommonLogic(c, "保存", cluster, gin.H{
-		"users":   userList.Users,
-		"role":    role,
-		"cluster": cluster,
-	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -183,16 +178,11 @@ func SaveClusterPermission(c *gin.Context) {
 func DeleteClusterPermission(c *gin.Context) {
 	ids := c.Param("ids")
 
-	_, _, err := handlePermissionCommonLogic(c, "删除", "", gin.H{"ids": ids})
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
 	params := dao.BuildParams(c)
+	params.UserName = "" // 避免增加CreatedBy字段,因为用户是管理员创建的，所以不需要CreatedBy字段
 	m := &models.ClusterUserRole{}
 
-	err = m.Delete(params, ids)
+	err := m.Delete(params, ids)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -251,14 +241,4 @@ func log2DB(c *gin.Context, action string, clusterName string, params gin.H, err
 	}
 
 	service.OperationLogService().Add(&log, params)
-}
-func handlePermissionCommonLogic(c *gin.Context, action string, clusterName string, params gin.H) (string, string, error) {
-	username, role := amis.GetLoginUser(c)
-	var err error
-	if !amis.IsCurrentUserPlatformAdmin(c) {
-		err = fmt.Errorf("非平台管理员不能%s权限配置", action)
-	}
-	log2DB(c, action, clusterName, params, err)
-
-	return username, role, err
 }
