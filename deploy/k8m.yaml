@@ -121,6 +121,17 @@ spec:
     requests:
       storage: 1Gi
 ---
+# kubectl create secret generic admin-passwd-secret --from-literal=username=admin --from-literal=password=admin888 -n k8m
+apiVersion: v1
+data:
+  password: YWRtaW44ODg=
+  username: YWRtaW4=
+kind: Secret
+metadata:
+  name: admin-passwd-secret
+  namespace: k8m
+type: Opaque
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -162,10 +173,16 @@ spec:
             #   value: "true"
             # #管理员用户名
             # - name: ADMIN_USERNAME
-            #   value: "admin"
+            #   valueFrom: 
+            #     secretKeyRef:
+            #       name: admin-passwd-secret
+            #       key: username
             # # 管理员密码
             # - name: ADMIN_PASSWORD
-            #   value: "admin888"
+            #   valueFrom: 
+            #     secretKeyRef:
+            #       name: admin-passwd-secret
+            #       key: password
             # kubectl shell镜像地址
             - name: KUBECTL_SHELL_IMAGE
               value: "bitnami/kubectl:latest"
