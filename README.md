@@ -42,6 +42,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - **CRD 管理**：可自动发现并管理 CRD 资源，提高工作效率。
 - **Helm 市场**：支持Helm自由添加仓库，一键安装、卸载、升级 Helm 应用。
 - **跨平台支持**：兼容 Linux、macOS 和 Windows，并支持 x86、ARM 等多种架构，确保多平台无缝运行。
+- **多数据库支持**：支持SQLite、MySql、PostgreSql等多种数据库。
 - **完全开源**：开放所有源码，无任何限制，可自由定制和扩展，可商业使用。
 
 **k8m** 的设计理念是“AI驱动，轻便高效，化繁为简”，它帮助开发者和运维人员快速上手，轻松管理 Kubernetes 集群。
@@ -102,7 +103,8 @@ services:
 ```
 
 启动之后，访问`3618`端口，默认用户：`k8m`，默认密码`k8m`。
-如需自定义大模型参数、配置私有化大模型，请参考[文档](docs/use-self-hosted-ai.md)。
+如需自定义大模型参数、配置私有化大模型，请参考[自托管/自定义大模型支持](docs/use-self-hosted-ai.md) 和 [Ollama配置](docs/ollama.md)。
+详细的配置选项说明请参考[配置选项说明](docs/config.md)。
 如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
 ，FORK仓库之后，拉起体验。
 
@@ -135,26 +137,45 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 
 ## **k8m 支持环境变量设置**
 
-以下是k8m支持的环境变量设置参数及其作用的表格：
+k8m 支持通过环境变量和命令行参数灵活配置，主要参数如下：
 
 | 环境变量                  | 默认值                        | 说明                                                                    |
 |-----------------------|----------------------------|-----------------------------------------------------------------------|
 | `PORT`                | `3618`                     | 监听的端口号                                                                |
-| `KUBECONFIG`          | `~/.kube/config`           | `kubeconfig` 文件路径  ，会自动扫描识别同级目录下所有的配置文件                               |
+| `KUBECONFIG`          | `~/.kube/config`           | `kubeconfig` 文件路径，会自动扫描识别同级目录下所有的配置文件                               |
 | `ENABLE_AI`           | `"true"`                   | 开启AI功能，默认开启                                                           |
 | `USE_BUILTIN_MODEL`   | `"true"`                   | 使用内置大模型参数，默认开启                                                        |
-| `OPENAI_API_KEY`      | `""`                       | 自定义 大模型的 API Key                                                      |
-| `OPENAI_API_URL`      | `""`                       | 自定义 大模型的 API URL                                                      |
-| `OPENAI_MODEL`        | `Qwen/Qwen2.5-7B-Instruct` | 自定义 大模型的默认模型名称，如需DeepSeek，请设置为deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
+| `OPENAI_API_KEY`      | `""`                       | 自定义大模型的 API Key                                                      |
+| `OPENAI_API_URL`      | `""`                       | 自定义大模型的 API URL                                                      |
+| `OPENAI_MODEL`        | `Qwen/Qwen2.5-7B-Instruct` | 自定义大模型的默认模型名称，如需DeepSeek，请设置为 deepseek-ai/DeepSeek-R1-Distill-Qwen-7B |
 | `ANY_SELECT`          | `"true"`                   | 是否开启任意选择划词解释，默认开启 (default true)                                      |
 | `LOGIN_TYPE`          | `"password"`               | 登录方式（如 `password`, `oauth`, `token`）                                  |
 | `ENABLE_TEMP_ADMIN`   | `"false"`                  | 是否启用临时管理员账户配置，默认关闭。初次登录、忘记密码时使用                                       |
-| `ADMIN_USERNAME`      | ``                         | 管理员用户名 ，启用临时管理员账户配置后生效                                                |
-| `ADMIN_PASSWORD`      | ``                         | 管理员密码，启用临时管理员账户配置后生效                                                  |
+| `ADMIN_USERNAME`      |                            | 管理员用户名，启用临时管理员账户配置后生效                                                |
+| `ADMIN_PASSWORD`      |                            | 管理员密码，启用临时管理员账户配置后生效                                                  |
 | `DEBUG`               | `"false"`                  | 是否开启 `debug` 模式                                                       |
 | `LOG_V`               | `"2"`                      | log输出日志，同klog用法                                                       |
 | `JWT_TOKEN_SECRET`    | `"your-secret-key"`        | 用于 JWT Token 生成的密钥                                                    |
 | `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest`   | kubectl shell 镜像地址                                                    |
+| `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址                                                       |
+| `IMAGE_PULL_TIMEOUT`  | `30`                       | Node shell、kubectl shell 镜像拉取超时时间（秒）                            |
+| `SQLITE_PATH`         | `./data/k8m.db`            | 持久化数据库地址，默认sqlite数据库，文件地址./data/k8m.db                                |
+| `CONNECT_CLUSTER`     | `"false"`                  | 启动程序后，是否自动连接发现的集群，默认关闭                                                |
+| `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用                                                     |
+| `PRINT_CONFIG`        | `"false"`                  | 是否打印配置信息                                                              |
+
+详细参数说明和更多配置方式请参考 [docs/config.md](docs/config.md)。
+
+这些环境变量可以通过在运行应用程序时设置，例如：
+
+```sh
+export PORT=8080
+export OPENAI_API_KEY="your-api-key"
+export GIN_MODE="release"
+./k8m
+```
+
+**注意：环境变量会被启动参数覆盖。**
 | `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址                                                       |
 | `IMAGE_PULL_TIMEOUT`  | `30`                       | Node shell、kubectl shell 镜像地址拉取超时时间。默认30秒。                            |
 | `SQLITE_PATH`         | `./data/k8m.db`            | 持久化数据库地址，默认sqlite数据库，文件地址./data/k8m.db                                |
