@@ -85,6 +85,7 @@ func (u *userService) GetRolesByGroupNames(groupNames string) ([]string, error) 
 // username: 用户名
 // jwtUserRole: JWT用户角色,从context传递
 // 返回值：角色列表 [平台角色，集群角色合并了，后续考虑拆开]
+// 包含用户本身的集群角色、以及所在用户组的集群角色
 func (u *userService) GetClusterRole(cluster string, username string, jwtUserRoles string) ([]string, error) {
 	// jwtUserRoles的检查逻辑保持不变
 	if jwtUserRoles != "" {
@@ -102,11 +103,19 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 	cacheKey := u.formatCacheKey("user:clusterrole:%s:%s", username, cluster)
 
 	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
+		// 查找用户本身、用户所在组，两个层面的集群权限。先形成查询名称的列表
+		var unionNames []string
+		if groupNames, err := u.GetGroupNames(username); err == nil {
+			unionNames = append(unionNames, strings.Split(groupNames, ",")...)
+		}
+		unionNames = append(unionNames, username)
+
+		// 查找用户本身、用户所在组，两个层面的集群权限。
 		params := &dao.Params{}
 		params.PerPage = 10000000
 		clusterRole := &models.ClusterUserRole{}
 		queryFunc := func(db *gorm.DB) *gorm.DB {
-			return db.Distinct("role").Where("cluster = ? AND username = ?", cluster, username)
+			return db.Distinct("role").Where("cluster = ? AND username in ?", cluster, unionNames)
 		}
 		items, _, err := clusterRole.List(params, queryFunc)
 		if err != nil {
