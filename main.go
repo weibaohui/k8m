@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -147,9 +148,11 @@ func main() {
 	r := gin.Default()
 
 	cfg := flag.Init()
-	if !cfg.Debug {
-		// debug 模式可以崩溃
-		r.Use(middleware.CustomRecovery())
+	r.Use(middleware.CustomRecovery())
+
+	if cfg.Debug {
+		// Debug 模式 注册 pprof 路由
+		pprof.Register(r)
 	}
 	r.Use(cors.Default())
 	r.Use(gzip.Gzip(gzip.BestCompression))

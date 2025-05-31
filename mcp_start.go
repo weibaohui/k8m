@@ -149,24 +149,12 @@ func SaveYamlTemplateToolHandler(ctx context.Context, request mcp2.CallToolReque
 		username = ""
 	}
 
-	// 初始化集群信息为空字符串
-	cluster := ""
 	// 尝试从请求参数中提取集群信息
-	if clusterVal, ok := request.Params.Arguments["cluster"].(string); ok {
-		cluster = clusterVal
-	}
-	// 初始化 YAML 内容为空字符串
-	yaml := ""
+	cluster := request.GetString("cluster", "")
 	// 尝试从请求参数中提取 YAML 内容
-	if yamlVal, ok := request.Params.Arguments["yaml"].(string); ok {
-		yaml = yamlVal
-	}
-	// 初始化模板名称为空字符串
-	name := ""
+	yaml := request.GetString("yaml", "")
 	// 尝试从请求参数中提取模板名称
-	if nameVal, ok := request.Params.Arguments["name"].(string); ok {
-		name = nameVal
-	}
+	name := request.GetString("name", "")
 
 	// 创建自定义模板对象
 	ct := models.CustomTemplate{
