@@ -58,8 +58,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 
 	cfg.AnySelect = m.AnySelect
 	cfg.UseBuiltInModel = m.UseBuiltInModel
-	klog.V(6).Infof("m.UseBuiltInModel: %v", m.UseBuiltInModel)
-	klog.V(6).Infof("cfg.UseBuiltInModel: %v", cfg.UseBuiltInModel)
 	if !m.UseBuiltInModel {
 		// 不使用内置模型，从数据库中加载配置
 		modelConfig := &models.AIModelConfig{
@@ -122,5 +120,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(m), color.RedString("↑↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
 		cfg.ShowConfigCloseMethod()
 	}
+	_ = AIService().ResetDefaultClient()
 	return nil
 }
