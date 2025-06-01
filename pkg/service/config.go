@@ -23,12 +23,7 @@ func (s *configService) GetConfig() (*models.Config, error) {
 	if err := s.db.First(&config).Error; err != nil {
 		return nil, err
 	}
-	if config.Temperature == 0 {
-		config.Temperature = 0.7
-	}
-	if config.TopP == 0 {
-		config.TopP = 1
-	}
+
 	if config.MaxHistory == 0 {
 		config.MaxHistory = 10
 	}
@@ -60,17 +55,32 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	if err != nil {
 		return err
 	}
-	if cfg.PrintConfig {
-		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(m), color.RedString("↑↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
-		cfg.ShowConfigCloseMethod()
-	}
 
 	cfg.AnySelect = m.AnySelect
-
-	cfg.ApiKey = m.ApiKey
-	cfg.ApiModel = m.ApiModel
-	cfg.ApiURL = m.ApiURL
 	cfg.UseBuiltInModel = m.UseBuiltInModel
+	klog.V(6).Infof("m.UseBuiltInModel: %v", m.UseBuiltInModel)
+	klog.V(6).Infof("cfg.UseBuiltInModel: %v", cfg.UseBuiltInModel)
+	if !m.UseBuiltInModel {
+		// 不使用内置模型，从数据库中加载配置
+		modelConfig := &models.AIModelConfig{
+			ID: m.ModelID,
+		}
+		modelConfig, err = modelConfig.GetOne(nil)
+		if err != nil {
+			return err
+		}
+		cfg.ApiKey = modelConfig.ApiKey
+		cfg.ApiModel = modelConfig.ApiModel
+		cfg.ApiURL = modelConfig.ApiURL
+		cfg.NoThink = modelConfig.NoThink
+		if modelConfig.Temperature > 0 {
+			cfg.Temperature = modelConfig.Temperature
+		}
+		if modelConfig.TopP > 0 {
+			cfg.TopP = modelConfig.TopP
+		}
+	}
+
 	// if m.KubeConfig != "" {
 	// 	cfg.KubeConfig = m.KubeConfig
 	// }
@@ -90,19 +100,13 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 
 	cfg.PrintConfig = m.PrintConfig
 	cfg.EnableAI = m.EnableAI
-	cfg.NoThink = m.NoThink
 	if m.ResourceCacheTimeout > 0 {
 		cfg.ResourceCacheTimeout = m.ResourceCacheTimeout
 	}
 	if cfg.ResourceCacheTimeout == 0 {
 		cfg.ResourceCacheTimeout = 60
 	}
-	if m.Temperature > 0 {
-		cfg.Temperature = m.Temperature
-	}
-	if m.TopP > 0 {
-		cfg.TopP = m.TopP
-	}
+
 	if m.MaxHistory > 0 {
 		cfg.MaxHistory = m.MaxHistory
 	}
@@ -114,6 +118,9 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	// cfg.JwtTokenSecret = m.JwtTokenSecret
 	// LoginType 暂不启用，因为就一种password
 	// cfg.LoginType = m.LoginType
-
+	if cfg.PrintConfig {
+		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(m), color.RedString("↑↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
+		cfg.ShowConfigCloseMethod()
+	}
 	return nil
 }

@@ -238,10 +238,14 @@
           ]
         },
         {
+          "name": "id",
+          "label": "ID",
+          "type": "text"
+        },
+        {
           "name": "api_model",
           "label": "模型名称",
-          "type": "text",
-          "width": "180px"
+          "type": "text"
         },
         {
           "name": "api_key",
