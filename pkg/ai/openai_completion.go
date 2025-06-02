@@ -12,7 +12,7 @@ import (
 
 func (c *OpenAIClient) checkNoThink(contents ...any) []any {
 	cfg := flag.Init()
-	if cfg.NoThink {
+	if !cfg.Think {
 		for i := range contents {
 			if txt, ok := contents[i].(string); ok {
 				if strings.Contains(txt, "/no_think") {

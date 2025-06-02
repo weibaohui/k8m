@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -59,6 +61,10 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	cfg.AnySelect = m.AnySelect
 	cfg.UseBuiltInModel = m.UseBuiltInModel
 	if !m.UseBuiltInModel {
+		if m.ModelID == 0 {
+			klog.Errorf("UpdateFlagFromDBConfig 未指定有效的模型ID")
+			return fmt.Errorf("未指定有效的模型ID")
+		}
 		// 不使用内置模型，从数据库中加载配置
 		modelConfig := &models.AIModelConfig{
 			ID: m.ModelID,
@@ -70,7 +76,7 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		cfg.ApiKey = modelConfig.ApiKey
 		cfg.ApiModel = modelConfig.ApiModel
 		cfg.ApiURL = modelConfig.ApiURL
-		cfg.NoThink = modelConfig.NoThink
+		cfg.Think = modelConfig.Think
 		if modelConfig.Temperature > 0 {
 			cfg.Temperature = modelConfig.Temperature
 		}

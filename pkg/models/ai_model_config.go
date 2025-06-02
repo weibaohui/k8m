@@ -18,10 +18,12 @@ type AIModelConfig struct {
 	ApiModel    string    `json:"api_model"`
 	Temperature float32   `json:"temperature"`
 	TopP        float32   `json:"top_p"`
-	NoThink     bool      `json:"no_think"`
+	Think       bool      `json:"think"` // 是否关闭思考模式
 	Description string    `json:"description,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at,omitempty"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty"`
+	CreatedBy   string    `json:"created_by,omitempty"` // 创建者
+
 }
 
 func (c *AIModelConfig) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*AIModelConfig, int64, error) {
