@@ -256,7 +256,8 @@
         {
           "name": "api_key",
           "label": "API Key",
-          "type": "text"
+          "type": "tpl",
+          "tpl": "${api_key|truncate:6}"
         },
         {
           "name": "api_url",
