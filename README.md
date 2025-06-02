@@ -23,7 +23,11 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 - 详细的配置和使用说明请参考[文档](docs/README.md)。
 - 更新日志请参考[更新日志](CHANGELOG.md)。
-- [开发设计文档](https://deepwiki.com/weibaohui/k8m)
+- 如需自定义大模型参数、配置私有化大模型，请参考[自托管/自定义大模型支持](docs/use-self-hosted-ai.md)
+  和 [Ollama配置](docs/ollama.md)。
+- 详细的配置选项说明请参考[配置选项说明](docs/config.md)。
+- 数据库配置请参考[数据库配置说明](docs/database.md)。
+- DeepWiki 文档：[开发设计文档](https://deepwiki.com/weibaohui/k8m)
 
 ### 主要特点
 
@@ -98,14 +102,6 @@ services:
 启动之后，访问`3618`端口，默认用户：`k8m`，默认密码`k8m`。
 如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
 
-## **其他配置**
-
-- 详细使用指南请参考[使用指南](docs/README.md)。
-- 如需自定义大模型参数、配置私有化大模型，请参考[自托管/自定义大模型支持](docs/use-self-hosted-ai.md)
-  和 [Ollama配置](docs/ollama.md)。
-- 详细的配置选项说明请参考[配置选项说明](docs/config.md)。
-- 数据库配置请参考[数据库配置说明](docs/database.md)。
-
 ## **ChatGPT 配置指南**
 
 ### 内置GPT
@@ -171,7 +167,7 @@ export GIN_MODE="release"
 | `CONNECT_CLUSTER`     | `"false"`                  | 启动程序后，是否自动连接发现的集群，默认关闭 |
 | `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用 |
 | `PRINT_CONFIG`        | `"false"`                  | 是否打印配置信息 |
- 
+
 ## 容器化k8s集群方式运行
 
 使用[KinD](https://kind.sigs.k8s.io/docs/user/quick-start/)、[MiniKube](https://minikube.sigs.k8s.io/docs/start/)
