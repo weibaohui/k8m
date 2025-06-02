@@ -6,7 +6,7 @@
     - [目录](#目录)
     - [配置概览](#配置概览)
     - [服务器配置](#服务器配置)
-    - [AI 集成配置](#ai-集成配置)
+    - [AI集成配置](#ai-集成配置)
     - [认证配置](#认证配置)
     - [Kubernetes 连接配置](#kubernetes-连接配置)
     - [日志与调试配置](#日志与调试配置)
@@ -103,6 +103,14 @@ flowchart TD
 
 ## 数据库配置
 
+### 数据库选择
+
+K8M 支持使用 sqlite、 mysql、postgresql 三种数据库。
+
+| 配置项   | 命令行参数         | 环境变量        | 默认值      | 描述                        |
+|-------|---------------|-------------|----------|---------------------------|
+| 数据库类型 | `--db-driver` | `DB_DRIVER` | `sqlite` | sqlite 、 mysql、postgresql |
+
 ### SQLite
 
 | 配置项        | 命令行参数           | 环境变量          | 默认值             | 描述             |
@@ -169,19 +177,57 @@ flowchart TD
 
 ## 配置方式
 
+下面以`KUBECONFIG`参数为例给出使用配置
+
 ### 命令行参数
 
-- 命令行参数优先级最高，通常在启动时提供。
-- 启动时，可以根据需要传递特定配置项。
+```shell
+./k8m --port 8080 --kubeconfig /root/.kube/config
+```
 
 ### 环境变量
 
 - 环境变量适合容器化部署，或作为系统级配置。
-- 例如，`KUBECONFIG` 可通过环境变量来指定 kubeconfig 文件路径。
+
+```shell
+export KUBECONFIG="/root/.kube/config"
+./k8m
+```
+
+### yaml 方式配置
+
+```shell
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8m
+  namespace: k8m
+  labels:
+    app: k8m
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8m
+  template:
+    metadata:
+      labels:
+        app: k8m
+    spec:
+      containers:
+        - name: k8m
+          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.0.123
+          env:
+            # kubeconfig文件路径，会自动扫描识别同级目录下所有的配置文件
+            - name: KUBECONFIG
+              value: "~/.kube/config"
+```
 
 ### Web UI配置
 
 - 可以在 Web UI 中配置并动态调整数据库配置、AI 集成选项、集群设置等。
-- 适合在生产环境中动态管理配置。
+- 如下AI模型管理
+  ![AI模型添加](/images/use-self-hosted-ai/ai_model_config.png)
+
 
  
