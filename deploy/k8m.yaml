@@ -151,7 +151,7 @@ spec:
     spec:
       containers:
         - name: k8m
-          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.0.123
+          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.0.124
           env:
             # 是否开启debug模式
             - name: DEBUG
@@ -173,13 +173,13 @@ spec:
             #   value: "true"
             # #管理员用户名
             # - name: ADMIN_USERNAME
-            #   valueFrom: 
+            #   valueFrom:
             #     secretKeyRef:
             #       name: admin-passwd-secret
             #       key: username
             # # 管理员密码
             # - name: ADMIN_PASSWORD
-            #   valueFrom: 
+            #   valueFrom:
             #     secretKeyRef:
             #       name: admin-passwd-secret
             #       key: password
