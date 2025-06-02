@@ -312,6 +312,6 @@ func MigrateAIModel() error {
 	}
 
 	// 更新config表，记录ModelID
-	dao.DB().Model(&Config{}).Where("id = ?", 1).Update("model_id", model.ID)
+	dao.DB().Model(&Config{}).Update("model_id", model.ID)
 	return nil
 }
