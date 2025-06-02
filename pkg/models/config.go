@@ -2,6 +2,10 @@ package models
 
 import (
 	"time"
+
+	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"gorm.io/gorm"
 )
 
 type Config struct {
@@ -22,4 +26,20 @@ type Config struct {
 	ModelID              uint      `json:"model_id"`
 	CreatedAt            time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
 	UpdatedAt            time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+}
+
+func (c *Config) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*Config, int64, error) {
+	return dao.GenericQuery(params, c, queryFuncs...)
+}
+
+func (c *Config) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericSave(params, c, queryFuncs...)
+}
+
+func (c *Config) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericDelete(params, c, utils.ToInt64Slice(ids), queryFuncs...)
+}
+
+func (c *Config) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*Config, error) {
+	return dao.GenericGetOne(params, c, queryFuncs...)
 }
