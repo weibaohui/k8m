@@ -189,7 +189,7 @@ func (c *Config) InitFlags() {
 	defaultMysqlQuery := getEnv("MYSQL_QUERY", "parseTime=True&loc=Local")
 	defaultMysqlLogMode := getEnvAsBool("MYSQL_LOGMODE", false)
 
-	// PostgreSQL 配置默认值
+	// Postgres 配置默认值
 	defaultPgHost := getEnv("PG_HOST", "127.0.0.1")
 	defaultPgPort := getEnvAsInt("PG_PORT", 5432)
 	defaultPgUser := getEnv("PG_USER", "postgres")
@@ -202,31 +202,43 @@ func (c *Config) InitFlags() {
 	// 默认AI关闭思考过程输出为false
 	defaultThink := getEnvAsBool("THINK", false)
 
+	// 参数配置
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
-	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
-	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "大模型的自定义API URL")
-	pflag.StringVarP(&c.ApiModel, "chatgpt-model", "m", defaultModel, "大模型的自定义模型名称")
-	pflag.StringVarP(&c.KubeConfig, "kubeconfig", "c", defaultKubeConfig, "kubeconfig文件路径")
+	pflag.StringVar(&c.ProductName, "product-name", defaultProductName, "产品名称，默认为K8M")
+
 	pflag.StringVar(&c.LoginType, "login-type", defaultLoginType, "登录方式，password, oauth, token等,default is password")
+	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "登录后生成JWT token 使用的Secret")
+
+	// 临时管理员账户配置
 	pflag.BoolVar(&c.EnableTempAdmin, "enable-temp-admin", defaultEnableTempAdmin, "是否启用临时管理员账户配置，默认关闭")
 	pflag.StringVar(&c.AdminUserName, "admin-username", defaultAdminUserName, "管理员用户名，启用临时管理员账户配置后生效")
 	pflag.StringVar(&c.AdminPassword, "admin-password", defaultAdminPassword, "管理员密码，启用临时管理员账户配置后生效")
-	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "登录后生成JWT token 使用的Secret")
+
+	// k8s 集群配置
+	pflag.StringVarP(&c.KubeConfig, "kubeconfig", "c", defaultKubeConfig, "kubeconfig文件路径")
 	pflag.StringVar(&c.NodeShellImage, "node-shell-image", defaultNodeShellImage, "NodeShell 镜像。 默认为 alpine:latest，必须包含nsenter命令")
 	pflag.StringVar(&c.KubectlShellImage, "kubectl-shell-image", defaultKubectlShellImage, "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令")
-	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
-	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认./data/k8m.db")
-	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认启用")
-	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
-	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")
-	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
-	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动程序后，是否自动连接发现的集群，默认关闭  ")
-	pflag.BoolVar(&c.UseBuiltInModel, "use-builtin-model", defaultUseBuiltInModel, "是否使用内置大模型参数，默认开启")
 	pflag.IntVar(&c.ImagePullTimeout, "image-pull-timeout", defaultImagePullTimeout, "镜像拉取超时时间（秒），默认30秒")
-	pflag.StringVar(&c.ProductName, "product-name", defaultProductName, "产品名称，默认为K8M")
+	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认启用")
+	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动程序后，是否自动连接发现的集群，默认关闭  ")
 	pflag.IntVar(&c.ResourceCacheTimeout, "resource-cache-timeout", defaultResourceCacheTimeout, "资源缓存时间（秒），默认60秒")
+
+	// AI配置
+	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
+	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
+	pflag.BoolVar(&c.Think, "think", defaultThink, "AI是否开启思考过程输出，true时显示思考过程，建议生产环境开启")
 	pflag.Int32Var(&c.MaxIterations, "max-iterations", defaultMaxIterations, "模型自动对话的最大轮数，默认10轮")
+	pflag.BoolVar(&c.UseBuiltInModel, "use-builtin-model", defaultUseBuiltInModel, "是否使用内置大模型参数，默认开启")
+	pflag.StringVarP(&c.ApiKey, "chatgpt-key", "k", defaultApiKey, "大模型的自定义API Key")
+	pflag.StringVarP(&c.ApiURL, "chatgpt-url", "u", defaultApiURL, "大模型的自定义API URL")
+	pflag.StringVarP(&c.ApiModel, "chatgpt-model", "m", defaultModel, "大模型的自定义模型名称")
+
+	// 数据库配置
+	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
+	// 数据库-sqlite
+	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认./data/k8m.db")
+	// 数据库-mysql
 	pflag.StringVar(&c.MysqlHost, "mysql-host", defaultMysqlHost, "MySQL主机地址")
 	pflag.IntVar(&c.MysqlPort, "mysql-port", defaultMysqlPort, "MySQL端口")
 	pflag.StringVar(&c.MysqlUser, "mysql-user", defaultMysqlUser, "MySQL用户名")
@@ -236,6 +248,7 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.MysqlCollation, "mysql-collation", defaultMysqlCollation, "MySQL排序规则")
 	pflag.StringVar(&c.MysqlQuery, "mysql-query", defaultMysqlQuery, "MySQL连接额外参数")
 	pflag.BoolVar(&c.MysqlLogMode, "mysql-logmode", defaultMysqlLogMode, "MySQL日志模式")
+	// 数据库-postgresql
 	pflag.StringVar(&c.PgHost, "pg-host", defaultPgHost, "PostgreSQL主机地址")
 	pflag.IntVar(&c.PgPort, "pg-port", defaultPgPort, "PostgreSQL端口")
 	pflag.StringVar(&c.PgUser, "pg-user", defaultPgUser, "PostgreSQL用户名")
@@ -244,9 +257,12 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.PgSSLMode, "pg-sslmode", defaultPgSSLMode, "PostgreSQL SSL模式")
 	pflag.StringVar(&c.PgTimeZone, "pg-timezone", defaultPgTimeZone, "PostgreSQL时区")
 	pflag.BoolVar(&c.PgLogMode, "pg-logmode", defaultPgLogMode, "PostgreSQL日志模式")
-	pflag.BoolVar(&c.Think, "think", defaultThink, "AI是否开启思考过程输出，true时显示思考过程，建议生产环境开启")
-	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
+
+	// 其他配置-打印配置信息
+	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")
+
 	// 检查是否设置了 --v 参数
+	pflag.IntVar(&c.LogV, "log-v", 2, "klog的日志级别klog.V(2)")
 	if vFlag := pflag.Lookup("v"); vFlag == nil || vFlag.Value.String() == "0" {
 		// 如果没有设置，手动将 --v 设置为 环境变量值
 		_ = flag.Set("v", defaultLogV)
