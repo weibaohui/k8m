@@ -25,6 +25,7 @@ func init() {
 	_ = FixClusterAuthorizationTypeName()
 	_ = AddInnerAdminUserGroup()
 	_ = AddInnerAdminUser()
+	_ = MigrateAIModel()
 }
 func AutoMigrate() error {
 
@@ -272,5 +273,45 @@ func AddInnerAdminUserGroup() error {
 		klog.V(4).Info("默认平台管理员组已存在")
 	}
 
+	return nil
+}
+
+func MigrateAIModel() error {
+	// 将旧表 config 中的 AI 配置字段批量搬迁到新表 ai_model_configs
+	// 先看AIModelConfigs是否有数据，如果有数据，则停止迁移
+	model := &AIModelConfig{}
+	_, count, err := model.List(nil)
+	if err != nil {
+		klog.Errorf("查询新表 ai_model_configs 失败: %v", err)
+	}
+	if count > 0 {
+		klog.V(4).Info("新表 ai_model_configs 已有数据，不再进行迁移")
+		// 不需要进行迁移
+		return nil
+	}
+
+	row := dao.DB().Raw("select api_key,api_model,api_url,temperature,top_p from configs limit 1").Row()
+
+	err = row.Scan(&model.ApiKey, &model.ApiModel, &model.ApiURL, &model.Temperature, &model.TopP)
+	if err != nil {
+		klog.Errorf("查询旧表 config 失败: %v", err)
+		return err
+	}
+
+	// 检查这几个 字段是否为空，如果为空，则不进行迁移
+	if model.ApiKey == "" && model.ApiModel == "" && model.ApiURL == "" {
+		klog.V(4).Info("旧表 config 中的 AI 配置字段为空，不再进行迁移")
+		// 不需要进行迁移
+		return nil
+	}
+
+	err = model.Save(nil)
+	if err != nil {
+		klog.Errorf("保存新表 ai_model_configs 失败: %v", err)
+		return err
+	}
+
+	// 更新config表，记录ModelID
+	dao.DB().Model(&Config{}).Where("id = ?", 1).Update("model_id", model.ID)
 	return nil
 }
