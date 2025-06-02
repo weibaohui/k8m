@@ -10,9 +10,9 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func (c *OpenAIClient) checkNoThink(contents ...any) []any {
+func (c *OpenAIClient) processThinkFlag(contents ...any) []any {
 	cfg := flag.Init()
-	if cfg.NoThink {
+	if !cfg.Think {
 		for i := range contents {
 			if txt, ok := contents[i].(string); ok {
 				if strings.Contains(txt, "/no_think") {
@@ -27,7 +27,7 @@ func (c *OpenAIClient) checkNoThink(contents ...any) []any {
 }
 
 func (c *OpenAIClient) GetCompletion(ctx context.Context, contents ...any) (string, error) {
-	contents = c.checkNoThink(contents...)
+	contents = c.processThinkFlag(contents...)
 	c.fillChatHistory(ctx, contents)
 
 	// Create a completion request
@@ -42,7 +42,7 @@ func (c *OpenAIClient) GetCompletion(ctx context.Context, contents ...any) (stri
 	return resp.Choices[0].Message.Content, nil
 }
 func (c *OpenAIClient) GetCompletionWithTools(ctx context.Context, contents ...any) ([]openai.ToolCall, string, error) {
-	contents = c.checkNoThink(contents...)
+	contents = c.processThinkFlag(contents...)
 
 	// Create a completion request
 	c.fillChatHistory(ctx, contents)
@@ -61,7 +61,7 @@ func (c *OpenAIClient) GetCompletionWithTools(ctx context.Context, contents ...a
 }
 
 func (c *OpenAIClient) GetStreamCompletion(ctx context.Context, contents ...any) (*openai.ChatCompletionStream, error) {
-	contents = c.checkNoThink(contents...)
+	contents = c.processThinkFlag(contents...)
 
 	c.fillChatHistory(ctx, contents)
 	stream, err := c.client.CreateChatCompletionStream(ctx, openai.ChatCompletionRequest{
@@ -74,7 +74,7 @@ func (c *OpenAIClient) GetStreamCompletion(ctx context.Context, contents ...any)
 	return stream, err
 }
 func (c *OpenAIClient) GetStreamCompletionWithTools(ctx context.Context, contents ...any) (*openai.ChatCompletionStream, error) {
-	contents = c.checkNoThink(contents...)
+	contents = c.processThinkFlag(contents...)
 
 	c.fillChatHistory(ctx, contents)
 	stream, err := c.client.CreateChatCompletionStream(ctx, openai.ChatCompletionRequest{

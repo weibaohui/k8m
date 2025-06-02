@@ -37,47 +37,29 @@
                       "desc": "是否使用k8m内置AI大模型"
                     },
                     {
-                      "name": "api_url",
-                      "type": "input-url",
-                      "label": "API地址",
-                      "value": "",
-                      "desc": "大模型的自定义API URL（如需使用内置的API，请留空，并重启应用）",
-                      "visibleOn": "!use_built_in_model"
-                    },
-                    {
-                      "name": "api_model",
-                      "type": "input-text",
-                      "label": "模型名称",
-                      "value": "Qwen/Qwen2.5-7B-Instruct",
-                      "desc": "大模型的自定义模型名称（如需使用内置的API，请留空，并重启应用）",
-                      "visibleOn": "!use_built_in_model"
-                    },
-                    {
-                      "name": "api_key",
-                      "type": "input-password",
-                      "label": "API密钥",
-                      "value": "",
-                      "desc": "大模型的自定义API Key（如需使用内置的API，请留空，并重启应用）",
-                      "visibleOn": "!use_built_in_model"
-                    },
-                    {
-                      "name": "temperature",
-                      "type": "input-number",
-                      "precision": 2,
-                      "step": 0.01,
-                      "label": "模型温度",
-                      "value": "0.7",
-                      "desc": "temperature,控制大模型输出的随机程度",
-                      "visibleOn": "!use_built_in_model"
-                    },
-                    {
-                      "name": "top_p",
-                      "type": "input-number",
-                      "precision": 2,
-                      "step": 0.01,
-                      "label": "核采样",
-                      "value": "1",
-                      "desc": "top_p,越大词汇量越大，输出越多样",
+                      "label": "默认模型",
+                      "type": "select",
+                      "name": "model_id",
+                      "searchable": true,
+                      "selectMode": "table",
+                      "initFetch": true,
+                      "valueField": "id",
+                      "labelField": "api_model",
+                      "source": "get:/admin/ai/model/list",
+                      "columns": [
+                        {
+                          "name": "id",
+                          "label": "ID"
+                        },
+                        {
+                          "name": "api_model",
+                          "label": "模型名称"
+                        },
+                        {
+                          "name": "api_url",
+                          "label": "模型地址"
+                        }
+                      ],
                       "visibleOn": "!use_built_in_model"
                     },
                     {
@@ -85,16 +67,14 @@
                       "type": "input-number",
                       "label": "上下文记忆",
                       "value": "10",
-                      "desc": "适当的记忆量有助于提升回答精度",
-                      "visibleOn": "!use_built_in_model"
+                      "desc": "适当的记忆量有助于提升回答精度"
                     },
                     {
                       "name": "max_iterations",
                       "type": "input-number",
                       "label": "自动对话轮数",
                       "value": "10",
-                      "desc": "适当提升有助于提升回答完整度",
-                      "visibleOn": "!use_built_in_model"
+                      "desc": "适当提升有助于提升回答完整度"
                     },
                     {
                       "name": "any_select",
@@ -102,13 +82,6 @@
                       "label": "任意选择",
                       "value": false,
                       "desc": "是否开启任意选择，默认开启"
-                    },
-                    {
-                      "name": "no_think",
-                      "type": "switch",
-                      "label": "关闭思考",
-                      "value": false,
-                      "desc": "关闭思考后，大模型每次回答都直接输出结果"
                     }
                   ]
                 }

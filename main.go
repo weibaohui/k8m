@@ -501,10 +501,12 @@ func main() {
 		// 指标翻转状态修改
 		admin.POST("/condition/save/id/:id/status/:status", config.ConditionQuickSave)
 
+		// SSO 配置
 		admin.GET("/config/sso/list", config.SSOConfigList)
 		admin.POST("/config/sso/save", config.SSOConfigSave)
 		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
 		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
+
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)
 		admin.POST("/user/save", user.Save)
@@ -519,9 +521,12 @@ func main() {
 		admin.POST("/user_group/delete/:ids", user.DeleteUserGroup)
 		admin.GET("/user_group/option_list", user.GroupOptionList)
 
-		// 平参数配置
+		// 平台参数配置
 		admin.GET("/config/all", config.GetConfig)
 		admin.POST("/config/update", config.UpdateConfig)
+
+		// 大模型列表管理
+		config.RegisterAIModelConfigRoutes(admin)
 
 		// mcp
 		admin.GET("/mcp/list", mcp.ServerList)

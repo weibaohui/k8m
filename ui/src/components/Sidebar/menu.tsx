@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import type { MenuProps } from 'antd';
-import { useEffect, useState } from 'react';
-import { fetcher } from '../Amis/fetcher';
+import {useNavigate} from "react-router-dom";
+import type {MenuProps} from 'antd';
+import {useEffect, useState} from 'react';
+import {fetcher} from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -479,6 +479,12 @@ const items: () => MenuItem[] = () => {
                         icon: <i className="fa-solid fa-sliders"></i>,
                         key: "system_config",
                         onClick: () => onMenuClick('/admin/config/config')
+                    },
+                    {
+                        label: "AI模型配置",
+                        icon: <i className="fa-solid fa-sliders"></i>,
+                        key: "ai_model_config",
+                        onClick: () => onMenuClick('/admin/config/ai_model_config')
                     },
                     {
                         label: "用户管理",

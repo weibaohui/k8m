@@ -37,7 +37,17 @@ func (c *aiService) DefaultClient() (ai.IAI, error) {
 		local = client
 	}
 	return local, nil
+}
 
+// ResetDefaultClient 重置 local ，适用于切换
+func (c *aiService) ResetDefaultClient() error {
+	enable := c.IsEnabled()
+	if !enable {
+		return fmt.Errorf("ChatGPT功能未开启")
+	}
+	local = nil
+	klog.V(6).Infof("AI DefaultClient Reset ")
+	return nil
 }
 
 func (c *aiService) openAIClient() (ai.IAI, error) {
