@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders } from "@/utils/utils.ts";
 import AnsiToHtml from 'ansi-to-html';
-import { Modal, Input } from 'antd';
+import { Modal, Input, Alert } from 'antd';
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -217,6 +217,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                 okText="确定"
                 cancelText="取消"
             >
+
                 <Input
                     ref={inputRef}
                     value={filterCommand}
@@ -225,6 +226,11 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                     placeholder="请输入grep命令"
                 />
                 {filterError && <div style={{ color: 'red', marginTop: '8px' }}>{filterError}</div>}
+                <Alert
+                    message="参数说明：-A n 表示匹配后显示后面 n 行，-B m 表示匹配前显示前面 m 行，-i 表示忽略大小写。"
+                    type="success"
+                    style={{ marginBottom: 12 }}
+                />
             </Modal>
             {/* 过滤结果提示及关闭按钮 */}
             {filteredLines && (
