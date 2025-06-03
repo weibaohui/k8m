@@ -107,7 +107,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
-    // 监听键盘事件，Ctrl+F 弹窗，ESC 关闭弹窗
+    // 监听键盘事件，Ctrl+F 弹窗
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ctrl+F 打开过滤弹窗
@@ -115,11 +115,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                 e.preventDefault();
                 setFilterModalVisible(true);
             }
-            // ESC 关闭过滤弹窗
-            if (e.key === 'Escape' && filterModalVisible) {
-                setFilterModalVisible(false);
-                setFilterError('');
-            }
+
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => {
@@ -159,6 +155,12 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         return { result, keyword };
     }
 
+    // 打开过滤弹窗时，输入框默认填充为 grep 
+    useEffect(() => {
+        if (filterModalVisible) {
+            setFilterCommand('grep ');
+        }
+    }, [filterModalVisible]);
     // 新增：过滤命令输入错误提示
     const [filterError, setFilterError] = useState<string>('');
 
