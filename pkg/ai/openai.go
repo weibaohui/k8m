@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/sashabaranov/go-openai"
+	"k8s.io/klog/v2"
 )
 
 const openAIClientName = "openai"
@@ -71,6 +72,9 @@ func (c *OpenAIClient) Configure(config IAIConfig) error {
 			return err
 		}
 		transport.Proxy = http.ProxyURL(proxyUrl)
+	} else {
+		klog.V(6).Info("openai client using default proxy from environment")
+		transport.Proxy = http.ProxyFromEnvironment
 	}
 
 	if orgId != "" {
@@ -89,6 +93,7 @@ func (c *OpenAIClient) Configure(config IAIConfig) error {
 	if client == nil {
 		return errors.New("error creating OpenAI client")
 	}
+
 	c.client = client
 	c.model = config.GetModel()
 	c.temperature = config.GetTemperature()
