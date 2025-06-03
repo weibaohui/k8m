@@ -125,16 +125,18 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
     /**
      * 解析grep命令并过滤日志
-     * 支持grep xxx -A n -B m
+     * 支持grep xxx -A n -B m -i
      * 返回过滤后的行和关键字
      */
-    function filterLinesByCommand(command: string, lines: string[]): { result: string[], keyword: string } {
+    function filterLinesByCommand(command: string, lines: string[]): { result: string[], keyword: string, ignoreCase: boolean } {
         // 简单解析命令
-        const grepMatch = command.match(/grep\s+([^\s]+)(.*)/);
-        if (!grepMatch) return { result: [], keyword: '' };
+        const grepMatch = command.match(/grep\s+([^-\s]+)(.*)/);
+        if (!grepMatch) return { result: [], keyword: '', ignoreCase: false };
         const keyword = grepMatch[1];
         const options = grepMatch[2] || '';
         let after = 0, before = 0;
+        let ignoreCase = false;
+        if (/\s-i(\s|$)/.test(options)) ignoreCase = true;
         const afterMatch = options.match(/-A\s*(\d+)/);
         const beforeMatch = options.match(/-B\s*(\d+)/);
         if (afterMatch) after = parseInt(afterMatch[1]);
@@ -142,7 +144,13 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         // 过滤逻辑
         const result: string[] = [];
         lines.forEach((line, idx) => {
-            if (line.includes(keyword)) {
+            let match = false;
+            if (ignoreCase) {
+                match = line.toLowerCase().includes(keyword.toLowerCase());
+            } else {
+                match = line.includes(keyword);
+            }
+            if (match) {
                 const start = Math.max(0, idx - before);
                 const end = Math.min(lines.length, idx + after + 1);
                 for (let i = start; i < end; i++) {
@@ -152,7 +160,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                 }
             }
         });
-        return { result, keyword };
+        return { result, keyword, ignoreCase };
     }
 
     // 打开过滤弹窗时，输入框默认填充为 grep 
@@ -167,21 +175,24 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     // 确认过滤命令，执行过滤
     const handleFilterOk = () => {
         // 检查命令是否合法（不能只有grep或无关键字）
-        const grepMatch = filterCommand.match(/grep\s+([^\s]+)(.*)/);
+        const grepMatch = filterCommand.match(/grep\s+([^-\s]+)(.*)/);
         if (!grepMatch || !grepMatch[1] || grepMatch[1].trim() === '' || filterCommand.trim() === 'grep') {
             setFilterError('请输入有效的grep命令，例如：grep 关键字');
             return;
         }
         setFilterError('');
-        const { result, keyword } = filterLinesByCommand(filterCommand, lines);
+        const { result, keyword, ignoreCase } = filterLinesByCommand(filterCommand, lines);
         setFilteredLines(result);
         setFilterResult(result);
         setFilterKeyword(keyword);
+        setIgnoreCaseFilter(ignoreCase);
         setFilterModalVisible(false);
     };
 
     // 新增：保存当前过滤关键字
     const [filterKeyword, setFilterKeyword] = useState<string>('');
+    // 新增：保存是否忽略大小写
+    const [ignoreCaseFilter, setIgnoreCaseFilter] = useState<boolean>(false);
 
     // 取消过滤
     const handleFilterCancel = () => {
@@ -229,7 +240,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                     // 关键字高亮（仅过滤时生效）
                     if (filteredLines && filterKeyword) {
                         // 使用正则替换所有关键字为黄色背景
-                        const reg = new RegExp(filterKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), 'g');
+                        const reg = new RegExp(filterKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), ignoreCaseFilter ? 'gi' : 'g');
                         html = html.replace(reg, '<span style="background:yellow;color:black;">' + filterKeyword + '</span>');
                     }
                     return (
