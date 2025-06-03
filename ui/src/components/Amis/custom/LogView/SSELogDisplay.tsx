@@ -166,7 +166,8 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     // 打开过滤弹窗时，输入框默认填充为 grep 
     useEffect(() => {
         if (filterModalVisible) {
-            // 不再重置 filterCommand，保留上次输入内容
+            // 如果当前输入为空，自动填充为 'grep '
+            setFilterCommand(cmd => (cmd && cmd.trim() !== '' ? cmd : 'grep '));
             setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [filterModalVisible]);
