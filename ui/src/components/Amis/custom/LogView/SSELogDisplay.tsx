@@ -91,7 +91,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [filterCommand, setFilterCommand] = useState('');
     const [filteredLines, setFilteredLines] = useState<string[] | null>(null);
-    const [filterResult, setFilterResult] = useState<string[]>([]);
     const inputRef = useRef<any>(null);
 
     // 监听ctrl+f快捷键，弹出命令行输入框
@@ -185,7 +184,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         setFilterError('');
         const { result, keyword, ignoreCase } = filterLinesByCommand(filterCommand, lines);
         setFilteredLines(result);
-        setFilterResult(result);
         setFilterKeyword(keyword);
         setIgnoreCaseFilter(ignoreCase);
         setFilterModalVisible(false);
@@ -204,7 +202,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const handleCloseFilter = () => {
         setFilteredLines(null);
         setFilterCommand('');
-        setFilterResult([]);
     };
 
     return (
