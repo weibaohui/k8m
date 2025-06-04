@@ -82,7 +82,7 @@
                                 "closeOnOutside": true,
                                 "size": "lg",
                                 "title": "使用示例",
-                                "body": "<div><p><strong>例：获取节点列表</strong></p><ul ><p><code><%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/k8s/cluster/:clusterID（base64）/Node/group//version/v1/list</code></p><li>在HTTP请求头中添加Header：<br><code>Authorization: Bearer <%=data.key%></code></li></ul></div>"
+                                "body": "<div><p><code><a target='_blank' href='/swagger/index.html'>API 文档</a></code></p>在HTTP请求头中添加Header：<br><code>Authorization: Bearer <%=data.key%></code></div>"
                             }
                         }
                     ]

@@ -1,0 +1,36 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx",
+        "title": "k8m API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/admin/cluster/file/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取文件类型的集群选项",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

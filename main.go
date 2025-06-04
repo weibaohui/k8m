@@ -12,6 +12,8 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
@@ -48,6 +50,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/service"
+	_ "github.com/weibaohui/k8m/swagger"
 	"github.com/weibaohui/kom/callbacks"
 	"k8s.io/klog/v2"
 )
@@ -183,6 +186,14 @@ func main() {
 	r.GET("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
 	r.POST("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
 	r.POST("/mcp/k8m/:key/message", adapt(sseServer.MessageHandler))
+
+	// @title           k8m API
+	// @version         1.0
+	// @securityDefinitions.apikey BearerAuth
+	// @in header
+	// @name Authorization
+	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 直接返回 index.html
 	r.GET("/", func(c *gin.Context) {
