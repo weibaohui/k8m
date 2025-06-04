@@ -8,6 +8,10 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
+// @Summary 获取文件类型的集群选项
+// @Security BearerAuth
+// @Success 200   {object} string
+// @Router /admin/cluster/file/option_list [get]
 func FileOptionList(c *gin.Context) {
 	clusters := service.ClusterService().AllClusters()
 

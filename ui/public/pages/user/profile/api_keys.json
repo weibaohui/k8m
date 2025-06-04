@@ -80,8 +80,9 @@
                             "dialog": {
                                 "closeOnEsc": true,
                                 "closeOnOutside": true,
-                                "title": "密钥",
-                                "body": "${key}"
+                                "size": "lg",
+                                "title": "使用示例",
+                                "body": "<div><p><code><a target='_blank' href='/swagger/index.html'>API 文档</a></code></p>在HTTP请求头中添加Header：<br><code>Authorization: Bearer <%=data.key%></code></div>"
                             }
                         }
                     ]

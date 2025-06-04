@@ -36,6 +36,18 @@ export default defineConfig(({mode}) => {
                             console.log(`Restored path: ${proxyReq.path}`);
                         });
                     },
+                }, '/swagger': {
+                    target: 'http://127.0.0.1:3618',
+                    changeOrigin: true,
+                    configure: (proxy) => {
+                        proxy.on('proxyReq', (proxyReq, req) => {
+                            const originalPath = req.url;
+                            console.log(`Before restoring: ${originalPath}`);
+                            // @ts-expect-error
+                            proxyReq.path = originalPath.replace('%2F%2F', '//');
+                            console.log(`Restored path: ${proxyReq.path}`);
+                        });
+                    },
                 },
                 '/k8s': {
                     target: 'http://127.0.0.1:3618',
@@ -100,7 +112,7 @@ export default defineConfig(({mode}) => {
                     ws: true, // 开启 WebSocket 代理
                     changeOrigin: true,
                 },
-                
+
             },
         },
         resolve: {

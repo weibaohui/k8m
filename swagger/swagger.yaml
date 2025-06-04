@@ -1,0 +1,22 @@
+info:
+  contact: {}
+  description: 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx
+  title: k8m API
+  version: "1.0"
+paths:
+  /admin/cluster/file/option_list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取文件类型的集群选项
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

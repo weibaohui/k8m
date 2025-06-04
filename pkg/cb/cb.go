@@ -120,10 +120,12 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		manageClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 			return item.Cluster == cluster && item.Role == constants.RoleClusterAdmin
 		})
+		// 对于给定的cluster这个集群，
 		// 没有集群管理员权限，那么就需要进行Exec权限判断了
 		// 有集群管理权限，就能有在pod中执行命令的权限
+
 		if len(manageClusters) == 0 {
-			// 如果没有集群管理员权限，那么就必须要有集群只读权限
+			// 如果没有集群管理员权限，那么就必须要有集群只读+exec权限
 			rdOnlyClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 				return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
 			})
@@ -140,6 +142,17 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 				// 具备只读+Exec权限了，那么继续看是否有该ns的权限.
 				// ns为空，或者ns列表中含有当前ns，那么就允许执行。
 				execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
+					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
+				})
+				if len(execClustersWithNs) == 0 {
+					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限", username, cluster, strings.Join(nsList, ","))
+				}
+			}
+		} else {
+			//  有集群权限，那么继续看是否有该ns的权限.
+			if len(nsList) > 0 {
+				// ns为空，或者ns列表中含有当前ns，那么就允许执行。
+				execClustersWithNs := slice.Filter(manageClusters, func(index int, item *models.ClusterUserRole) bool {
 					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 				})
 				if len(execClustersWithNs) == 0 {
@@ -167,16 +180,13 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		}
 	default:
 		// 读取类的权限，走到这的可能是集群管理员，或者集群只读，exec在前面拦截了。
-		// 如果是集群管理员，那么拥有读取的全部权限。不需要后续处理
-		if slice.Contain(roles, constants.RoleClusterAdmin) {
-			// 集群管理员，可以执行任何读取类的操作
-			return username, roles, nil
-		}
+
+		// 必须得有集群只读或者集群管理员权限
 		readClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
-			return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
+			return item.Cluster == cluster && (item.Role == constants.RoleClusterReadonly || item.Role == constants.RoleClusterAdmin)
 		})
 		if len(readClusters) == 0 {
-			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 读取权限", username, cluster)
+			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 读取/管理员 权限", username, cluster)
 		}
 		if len(nsList) > 0 {
 			// 具备操作权限了，那么继续看是否有该ns的权限.
