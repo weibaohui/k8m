@@ -44,6 +44,7 @@ func GetLoginUser(c *gin.Context) (string, string) {
 
 // GetLoginUserWithClusterRoles 获取当前登录用户名及其角色,已经授权的集群角色
 // 返回值: 用户名, 角色, 集群角色列表
+// Deprecated: 请使用UserService
 func GetLoginUserWithClusterRoles(c *gin.Context) (string, string, []*models.ClusterUserRole) {
 	user := c.GetString(constants.JwtUserName)
 	role := c.GetString(constants.JwtUserRole)

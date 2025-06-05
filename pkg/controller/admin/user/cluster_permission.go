@@ -222,6 +222,36 @@ func UpdateNamespaces(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// UpdateBlacklistNamespaces 根据请求体更新指定集群用户角色的命名空间字段。
+func UpdateBlacklistNamespaces(c *gin.Context) {
+	id := c.Param("id")
+	type requestBody struct {
+		BlacklistNamespaces string `json:"blacklist_namespaces"`
+	}
+	var nsList requestBody
+
+	err := c.ShouldBindJSON(&nsList)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	params := dao.BuildParams(c)
+	m := &models.ClusterUserRole{}
+	m.ID = utils.ToUInt(id)
+	m.BlacklistNamespaces = nsList.BlacklistNamespaces
+	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
+		return db.Select("blacklist_namespaces")
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	service.UserService().ClearCacheByKey("cluster")
+
+	amis.WriteJsonOK(c)
+}
+
 // TODO 日志记录写一个专门的方法，现在这个不好
 func log2DB(c *gin.Context, action string, clusterName string, params gin.H, err error) {
 	username, role := amis.GetLoginUser(c)

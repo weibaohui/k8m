@@ -96,7 +96,7 @@
                   {
                     "type": "alert",
                     "level": "success",
-                    "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除、Exec等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p><p><strong>限制命名空间：</strong>置空表示不限制，可访问该集群下所有的命名空间。如果填写了，那么用户就只能访问指定的命名空间了。</p><p><strong>授权类型：</strong>可以为用户、用户组分别授权，当为用户组时，对组内所有用户生效操作。</p></div>"
+                    "body": "<div class='alert alert-info'><p><strong>普通用户需要授权，不授权看不到任何集群。请小心设置权限，避免交叉。授权规则如下：</strong></p><p><strong>集群管理员：</strong>可以管理和操作所有集群资源，包括创建、修改、删除、Exec等操作。</p><p><strong>集群只读：</strong>仅可查看集群资源信息，无法进行修改操作。</p><p><strong>Exec权限：</strong>具有进入容器内，执行命令的权限</p><p><strong>白名单命名空间：</strong>置空表示不限制，可访问该集群下所有的命名空间。如果填写了，那么用户就只能访问指定的命名空间了。</p><p><strong>黑名单命名空间：</strong>置空表示不限制，如果填写了，那么用户将不能访问该命名空间。黑名单可否定白名单。黑名单权限最高。</p><p><strong>授权类型：</strong>可以为用户、用户组分别授权，当为用户组时，对组内所有用户生效操作。</p></div>"
                   },
                   {
                     "type": "tabs",
@@ -219,14 +219,14 @@
                               },
                               {
                                 "name": "namespaces",
-                                "label": "限制命名空间",
+                                "label": "命名空间白名单",
                                 "type": "tpl",
                                 "tpl": "${namespaces | split:',')}",
                                 "placeholder": "-"
                               },
                               {
                                 "type": "button",
-                                "label": "选择命名空间",
+                                "label": "命名空间白名单",
                                 "actionType": "dialog",
                                 "dialog": {
                                   "closeOnEsc": true,
@@ -240,6 +240,37 @@
                                       {
                                         "type": "transfer",
                                         "name": "namespaces",
+                                        "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "name": "blacklist_namespaces",
+                                "label": "命名空间黑名单",
+                                "type": "tpl",
+                                "tpl": "${blacklist_namespaces | split:',')}",
+                                "placeholder": "-"
+                              },
+                              {
+                                "type": "button",
+                                "label": "命名空间黑名单",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "选择命名空间黑名单",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/cluster_permissions/update_blacklist_namespaces/$id",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "blacklist_namespaces",
                                         "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
                                         "searchable": true,
                                         "selectMode": "list"
@@ -380,14 +411,14 @@
                               },
                               {
                                 "name": "namespaces",
-                                "label": "限制命名空间",
+                                "label": "命名空间白名单",
                                 "type": "tpl",
                                 "tpl": "${namespaces | split:',')}",
                                 "placeholder": "-"
                               },
                               {
                                 "type": "button",
-                                "label": "选择命名空间",
+                                "label": "命名空间白名单",
                                 "actionType": "dialog",
                                 "dialog": {
                                   "closeOnEsc": true,
@@ -401,6 +432,37 @@
                                       {
                                         "type": "transfer",
                                         "name": "namespaces",
+                                        "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "name": "blacklist_namespaces",
+                                "label": "命名空间黑名单",
+                                "type": "tpl",
+                                "tpl": "${blacklist_namespaces | split:',')}",
+                                "placeholder": "-"
+                              },
+                              {
+                                "type": "button",
+                                "label": "命名空间黑名单",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "选择命名空间黑名单",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/cluster_permissions/update_blacklist_namespaces/$id",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "blacklist_namespaces",
                                         "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
                                         "searchable": true,
                                         "selectMode": "list"
@@ -541,14 +603,14 @@
                               },
                               {
                                 "name": "namespaces",
-                                "label": "限制命名空间",
+                                "label": "命名空间白名单",
                                 "type": "tpl",
                                 "tpl": "${namespaces | split:',')}",
                                 "placeholder": "-"
                               },
                               {
                                 "type": "button",
-                                "label": "选择命名空间",
+                                "label": "命名空间白名单",
                                 "actionType": "dialog",
                                 "dialog": {
                                   "closeOnEsc": true,
@@ -562,6 +624,37 @@
                                       {
                                         "type": "transfer",
                                         "name": "namespaces",
+                                        "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "name": "blacklist_namespaces",
+                                "label": "命名空间黑名单",
+                                "type": "tpl",
+                                "tpl": "${blacklist_namespaces | split:',')}",
+                                "placeholder": "-"
+                              },
+                              {
+                                "type": "button",
+                                "label": "命名空间黑名单",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "选择命名空间黑名单",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/cluster_permissions/update_blacklist_namespaces/$id",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "blacklist_namespaces",
                                         "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
                                         "searchable": true,
                                         "selectMode": "list"
@@ -603,7 +696,7 @@
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "title": "$clusterName 已授权用户列表  (ESC 关闭)",
-                    "size": "lg",
+                    "size": "xl",
                     "body": [
                       {
                         "type": "alert",
@@ -673,9 +766,16 @@
                           },
                           {
                             "name": "namespaces",
-                            "label": "限制命名空间",
+                            "label": "白名单命名空间",
                             "type": "tpl",
                             "tpl": "${namespaces | split:',')}",
+                            "placeholder": "-"
+                          },
+                          {
+                            "name": "blacklist_namespaces",
+                            "label": "黑名单命名空间",
+                            "type": "tpl",
+                            "tpl": "${blacklist_namespaces | split:',')}",
                             "placeholder": "-"
                           },
                           {
