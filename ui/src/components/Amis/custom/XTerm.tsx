@@ -50,7 +50,7 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
                 return;
             }
 
-            const ws = new WebSocket(url);
+            const ws = new WebSocket(`ws://${location.host}` + url);
             wsRef.current = ws;
             // 添加插件
             const attachAddon = new AttachAddon(ws);
