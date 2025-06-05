@@ -696,7 +696,7 @@
                     "closeOnEsc": true,
                     "closeOnOutside": true,
                     "title": "$clusterName 已授权用户列表  (ESC 关闭)",
-                    "size": "lg",
+                    "size": "xl",
                     "body": [
                       {
                         "type": "alert",
@@ -766,9 +766,16 @@
                           },
                           {
                             "name": "namespaces",
-                            "label": "限制命名空间",
+                            "label": "白名单命名空间",
                             "type": "tpl",
                             "tpl": "${namespaces | split:',')}",
+                            "placeholder": "-"
+                          },
+                          {
+                            "name": "blacklist_namespaces",
+                            "label": "黑名单命名空间",
+                            "type": "tpl",
+                            "tpl": "${blacklist_namespaces | split:',')}",
                             "placeholder": "-"
                           },
                           {
