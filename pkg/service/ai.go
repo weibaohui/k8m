@@ -102,3 +102,19 @@ func (c *aiService) IsEnabled() bool {
 	klog.V(4).Infof("ChatGPT 状态:%v\n", enable)
 	return enable
 }
+
+func (c *aiService) TestClient(url string, key string, model string) (ai.IAI, error) {
+	klog.V(6).Infof("TestClient url:%v key:%v model:%v\n", url, utils.MaskString(key, 5), model)
+	aiProvider := ai.Provider{
+		Name:     "test",
+		Model:    model,
+		Password: key,
+		BaseURL:  url,
+	}
+
+	aiClient := ai.NewClient(aiProvider.Name)
+	if err := aiClient.Configure(&aiProvider); err != nil {
+		return nil, err
+	}
+	return aiClient, nil
+}

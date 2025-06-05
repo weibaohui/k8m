@@ -7,6 +7,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -25,6 +26,7 @@ func RegisterAIModelConfigRoutes(r *gin.RouterGroup) {
 	r.POST("/ai/model/save", ctrl.Save)
 	r.POST("/ai/model/delete/:ids", ctrl.Delete)
 	r.POST("/ai/model/id/:id/think/:status", ctrl.QuickSave)
+	r.POST("/ai/model/test/id/:id", ctrl.TestConnection)
 
 }
 
@@ -47,6 +49,35 @@ func (m *AIModelConfigController) QuickSave(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonErrorOrOK(c, err)
+}
+func (m *AIModelConfigController) TestConnection(c *gin.Context) {
+	id := c.Param("id")
+
+	var entity models.AIModelConfig
+	entity.ID = utils.ToUInt(id)
+
+	err := dao.DB().Model(&entity).First(&entity).Error
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	client, err := service.AIService().TestClient(entity.ApiURL, entity.ApiKey, entity.ApiModel)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	ctx := amis.GetContextWithUser(c)
+	completion, err := client.GetCompletion(ctx, "你是谁？")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	if completion != "" {
+		amis.WriteJsonOKMsg(c, "测试返回成功:"+completion)
+		return
+	}
+	amis.WriteJsonError(c, fmt.Errorf("测试失败"))
 }
 
 // Save 创建或更新AI模型配置

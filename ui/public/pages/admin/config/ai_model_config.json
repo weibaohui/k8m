@@ -154,6 +154,13 @@
           "buttons": [
             {
               "type": "button",
+              "icon": "fas fa-vial text-info",
+              "tooltip": "测试联通性",
+              "actionType": "ajax",
+              "api": "post:/admin/ai/model/test/id/${id}"
+            },
+            {
+              "type": "button",
               "icon": "fas fa-edit text-primary",
               "actionType": "drawer",
               "tooltip": "编辑配置",
