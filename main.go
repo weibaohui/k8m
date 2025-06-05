@@ -151,7 +151,11 @@ func main() {
 	r := gin.Default()
 
 	cfg := flag.Init()
-	r.Use(middleware.CustomRecovery())
+
+	// 开启Recovery中间件
+	if !cfg.Debug {
+		r.Use(middleware.CustomRecovery())
+	}
 
 	if cfg.Debug {
 		// Debug 模式 注册 pprof 路由
