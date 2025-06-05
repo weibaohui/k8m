@@ -557,6 +557,7 @@ func main() {
 		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/:authorization_type/save", user.SaveClusterPermission)
 		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
 		admin.POST("/cluster_permissions/update_namespaces/:id", user.UpdateNamespaces)
+		admin.POST("/cluster_permissions/update_blacklist_namespaces/:id", user.UpdateBlacklistNamespaces)
 
 		// 管理集群、纳管\解除纳管\扫描
 		admin.POST("/cluster/scan", cluster.Scan)

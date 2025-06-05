@@ -219,14 +219,14 @@
                               },
                               {
                                 "name": "namespaces",
-                                "label": "限制命名空间",
+                                "label": "命名空间白名单",
                                 "type": "tpl",
                                 "tpl": "${namespaces | split:',')}",
                                 "placeholder": "-"
                               },
                               {
                                 "type": "button",
-                                "label": "选择命名空间",
+                                "label": "命名空间白名单",
                                 "actionType": "dialog",
                                 "dialog": {
                                   "closeOnEsc": true,
@@ -240,6 +240,37 @@
                                       {
                                         "type": "transfer",
                                         "name": "namespaces",
+                                        "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
+                                        "searchable": true,
+                                        "selectMode": "list"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "name": "blacklist_namespaces",
+                                "label": "命名空间黑名单",
+                                "type": "tpl",
+                                "tpl": "${blacklist_namespaces | split:',')}",
+                                "placeholder": "-"
+                              },
+                              {
+                                "type": "button",
+                                "label": "命名空间黑名单",
+                                "actionType": "dialog",
+                                "dialog": {
+                                  "closeOnEsc": true,
+                                  "closeOnOutside": true,
+                                  "size": "lg",
+                                  "title": "选择命名空间黑名单",
+                                  "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/cluster_permissions/update_blacklist_namespaces/$id",
+                                    "body": [
+                                      {
+                                        "type": "transfer",
+                                        "name": "blacklist_namespaces",
                                         "source": "get:/admin/cluster_permissions/cluster/${cluster_id_base64}/ns/list",
                                         "searchable": true,
                                         "selectMode": "list"
