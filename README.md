@@ -164,11 +164,6 @@ export GIN_MODE="release"
 ```
 
 其他参数请参考 [docs/readme.md](docs/README.md)。
-| `NODE_SHELL_IMAGE`    | `alpine:latest`            | Node shell 镜像地址 |
-| `IMAGE_PULL_TIMEOUT`  | `30`                       | Node shell、kubectl shell 镜像地址拉取超时时间。默认30秒。 |
-| `CONNECT_CLUSTER`     | `"false"`                  | 启动程序后，是否自动连接发现的集群，默认关闭 |
-| `IN_CLUSTER`          | `"true"`                   | 是否自动注册纳管宿主集群，默认启用 |
-| `PRINT_CONFIG`        | `"false"`                  | 是否打印配置信息 |
 
 ## 容器化k8s集群方式运行
 
