@@ -3,6 +3,7 @@ package lua
 import (
 	"time"
 
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/kom/kom"
 	lua "github.com/yuin/gopher-lua"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -28,7 +29,9 @@ func gvkFunc(L *lua.LState) int {
 	kind := L.CheckString(4)
 	klog.V(6).Infof("执行GVK查询: %s/%s/%s", group, version, kind)
 	// 确保每次 GVK 查询，返回新的 LuaKubectl 实例链，避免嵌套调用时混乱
-	newObj := &LuaKubectl{obj.k.GVK(group, version, kind).RemoveManagedFields()}
+
+	ctx := utils.GetContextWithAdmin()
+	newObj := &LuaKubectl{obj.k.GVK(group, version, kind).WithContext(ctx).RemoveManagedFields()}
 	newUd := L.NewUserData()
 	newUd.Value = newObj
 	L.SetMetatable(newUd, L.GetTypeMetatable("kubectl"))
@@ -52,7 +55,8 @@ func withLabelSelectorFunc(L *lua.LState) int {
 	if selector != "" {
 		obj.k = obj.k.WithLabelSelector(selector)
 	}
-
+	L.Push(ud)
+	L.Push(lua.LNil)
 	return 2
 }
 
@@ -69,6 +73,8 @@ func withNameFunc(L *lua.LState) int {
 	if name != "" {
 		obj.k = obj.k.Name(name)
 	}
+	L.Push(ud)
+	L.Push(lua.LNil)
 	return 2
 }
 
@@ -85,6 +91,8 @@ func withNamespaceFunc(L *lua.LState) int {
 	if name != "" {
 		obj.k = obj.k.Namespace(name)
 	}
+	L.Push(ud)
+	L.Push(lua.LNil)
 	return 2
 }
 
@@ -103,6 +111,8 @@ func withCacheFunc(L *lua.LState) int {
 		dur := time.Duration(int64(timeSeconds)) * time.Second
 		obj.k = obj.k.WithCache(dur)
 	}
+	L.Push(ud)
+	L.Push(lua.LNil)
 	return 2
 }
 
@@ -116,11 +126,14 @@ func withAllNamespaceFunc(L *lua.LState) int {
 	}
 
 	obj.k = obj.k.AllNamespace()
+	L.Push(ud)
+	L.Push(lua.LNil)
 	return 2
 }
 
 // 实现 kubectl:List() 方法
 func listResource(L *lua.LState) int {
+	klog.V(6).Infof("执行List查询")
 	ud := L.CheckUserData(1)
 	obj, ok := ud.Value.(*LuaKubectl)
 	if !ok {
@@ -139,7 +152,6 @@ func listResource(L *lua.LState) int {
 
 	// 转换为 Lua 表
 	table := toLValue(L, result)
-
 	// 返回查询结果
 	L.Push(table)
 	L.Push(lua.LNil)

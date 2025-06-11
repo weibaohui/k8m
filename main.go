@@ -126,6 +126,7 @@ func Init() {
 		}
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
+		lua.NewLuaInspection("default").Start()
 
 	}()
 
@@ -573,8 +574,6 @@ func main() {
 		admin.POST("/cluster/:cluster/disconnect", cluster.Disconnect)
 
 	}
-
-	lua.NewLuaInspection("default").Start()
 
 	showBootInfo(Version, flag.Init().Port)
 	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))

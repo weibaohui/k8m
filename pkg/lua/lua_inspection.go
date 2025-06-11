@@ -28,7 +28,8 @@ func NewLuaInspection(cluster string) *Inspection {
 func (p *Inspection) registerKubectlFunc() {
 	p.lua.SetGlobal("log", p.lua.NewFunction(logFunc))
 
-	k := kom.Cluster(p.Cluster)
+	k := kom.DefaultCluster()
+
 	ud := p.lua.NewUserData()
 	ud.Value = &LuaKubectl{k}
 	p.lua.SetGlobal("kubectl", ud)
