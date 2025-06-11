@@ -47,6 +47,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/service"
@@ -572,6 +573,8 @@ func main() {
 		admin.POST("/cluster/:cluster/disconnect", cluster.Disconnect)
 
 	}
+
+	lua.NewLuaInspection("default").Start()
 
 	showBootInfo(Version, flag.Init().Port)
 	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))

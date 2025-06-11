@@ -69,9 +69,6 @@ func withNameFunc(L *lua.LState) int {
 	if name != "" {
 		obj.k = obj.k.Name(name)
 	}
-	// 支持链式调用，返回自身和 nil
-	L.Push(ud)
-	L.Push(lua.LNil)
 	return 2
 }
 
@@ -88,9 +85,6 @@ func withNamespaceFunc(L *lua.LState) int {
 	if name != "" {
 		obj.k = obj.k.Namespace(name)
 	}
-	// 支持链式调用，返回自身和 nil
-	L.Push(ud)
-	L.Push(lua.LNil)
 	return 2
 }
 
@@ -109,9 +103,6 @@ func withCacheFunc(L *lua.LState) int {
 		dur := time.Duration(int64(timeSeconds)) * time.Second
 		obj.k = obj.k.WithCache(dur)
 	}
-	// 支持链式调用，返回自身和 nil
-	L.Push(ud)
-	L.Push(lua.LNil)
 	return 2
 }
 
@@ -125,9 +116,6 @@ func withAllNamespaceFunc(L *lua.LState) int {
 	}
 
 	obj.k = obj.k.AllNamespace()
-	// 支持链式调用，返回自身和 nil
-	L.Push(ud)
-	L.Push(lua.LNil)
 	return 2
 }
 
