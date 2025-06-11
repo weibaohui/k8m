@@ -2,7 +2,6 @@ package lua
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	lua "github.com/yuin/gopher-lua"
@@ -58,7 +57,7 @@ func lValueToGoValue(val lua.LValue) interface{} {
 		}
 		return mp
 	default:
-		fmt.Println("[lValueToGoValue] unknown type:", reflect.TypeOf(val))
+		klog.V(6).Infof("[lValueToGoValue] unknown type: %v", reflect.TypeOf(val))
 		return nil
 	}
 }
@@ -76,7 +75,27 @@ func toLValue(L *lua.LState, v interface{}) lua.LValue {
 		return lua.LString(val)
 	case float64:
 		return lua.LNumber(val)
+	case float32:
+		return lua.LNumber(val)
+	case int:
+		return lua.LNumber(val)
 	case int64:
+		return lua.LNumber(val)
+	case int32:
+		return lua.LNumber(val)
+	case int16:
+		return lua.LNumber(val)
+	case int8:
+		return lua.LNumber(val)
+	case uint:
+		return lua.LNumber(val)
+	case uint64:
+		return lua.LNumber(val)
+	case uint32:
+		return lua.LNumber(val)
+	case uint16:
+		return lua.LNumber(val)
+	case uint8:
 		return lua.LNumber(val)
 	case bool:
 		return lua.LBool(val)
@@ -95,7 +114,7 @@ func toLValue(L *lua.LState, v interface{}) lua.LValue {
 	case nil:
 		return lua.LNil
 	default:
-		fmt.Println("[toLValue] unknown type:", reflect.TypeOf(v))
+		klog.V(6).Infof("[toLValue] unknown type: %v", reflect.TypeOf(v))
 		return lua.LNil
 	}
 }
