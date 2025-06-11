@@ -219,4 +219,4 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 ## 微信群
 
-![输入图片说明](https://foruda.gitee.com/images/1749030782660211627/7c0fb11e_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1749651093705366543/65185242_77493.png "屏幕截图")
