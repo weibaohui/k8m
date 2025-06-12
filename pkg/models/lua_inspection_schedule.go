@@ -16,7 +16,7 @@ type InspectionSchedule struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Name        string    `json:"name"`        // 巡检任务名称
 	Description string    `json:"description"` // 巡检任务描述
-	Clusters    []string  `json:"clusters"`    // 目标集群列表
+	Clusters    string    `json:"clusters"`    // 目标集群列表
 	Cron        string    `json:"cron"`        // cron表达式，定时周期
 	Enabled     bool      `json:"enabled"`     // 是否启用该任务
 	CreatedAt   time.Time `json:"created_at,omitempty"`
