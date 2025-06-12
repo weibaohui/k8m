@@ -86,6 +86,7 @@ func (p *Inspection) runLuaCheck(check models.LuaScript) CheckResult {
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
+	defer func() { os.Stdout = origStdout }()
 
 	var events []CheckEvent
 	p.registerCheckEvent(&events, check)
@@ -96,6 +97,7 @@ func (p *Inspection) runLuaCheck(check models.LuaScript) CheckResult {
 	os.Stdout = origStdout
 
 	_, _ = buf.ReadFrom(r)
+	_ = r.Close() // 读取完立即关闭
 	output := buf.String()
 	end := time.Now()
 
