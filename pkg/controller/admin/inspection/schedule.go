@@ -1,10 +1,14 @@
 package inspection
 
 import (
+	"context"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
@@ -68,4 +72,25 @@ func QuickSave(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonErrorOrOK(c, err)
+}
+
+func Start(c *gin.Context) {
+	id := c.Param("id")
+	m := &models.InspectionSchedule{
+		ID: utils.ToUInt(id),
+	}
+
+	one, err := m.GetOne(nil)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	func() {
+		clusters := strings.Split(one.Clusters, ",")
+		for _, cluster := range clusters {
+			_, _ = lua.StartInspection(context.Background(), &one.ID, cluster)
+		}
+	}()
+
+	amis.WriteJsonOKMsg(c, "巡检开始，请稍后刷新查看结果")
 }
