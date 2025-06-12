@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"gorm.io/gorm"
@@ -10,12 +12,17 @@ import (
 // 包含脚本名称、描述、分组、版本、类型和脚本内容等信息
 // 用于存储和管理自定义 Lua 脚本
 type LuaScript struct {
-	Name        string `gorm:"primaryKey;size:128" json:"name"` // 脚本名称，主键
-	Description string `json:"description"`                     // 脚本描述
-	Group       string `json:"group"`                           // 分组
-	Version     string `json:"version"`                         // 版本
-	Kind        string `json:"kind"`                            // 类型
-	Script      string `gorm:"type:text" json:"script"`         // 脚本内容
+	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Name        string    `gorm:"primaryKey;size:128" json:"name"` // 脚本名称，主键
+	Description string    `json:"description"`                     // 脚本描述
+	Group       string    `json:"group"`                           // 分组
+	Version     string    `json:"version"`                         // 版本
+	Kind        string    `json:"kind"`                            // 类型
+	Script      string    `gorm:"type:text" json:"script"`         // 脚本内容
+	CreatedAt   time.Time `json:"created_at,omitempty"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	CreatedBy   string    `json:"created_by,omitempty"` // 创建者
+
 }
 
 // List 返回符合条件的 LuaScript 列表及总数
