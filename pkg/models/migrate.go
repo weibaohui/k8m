@@ -86,6 +86,18 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&AIModelConfig{}); err != nil {
 		errs = append(errs, err)
 	}
+	if err := dao.DB().AutoMigrate(&InspectionCheckEvent{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionRecord{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionSchedule{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionScriptResult{}); err != nil {
+		errs = append(errs, err)
+	}
 	// 删除 user 表 name 字段，已弃用
 	if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
 		errs = append(errs, err)

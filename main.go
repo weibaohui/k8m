@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -126,8 +127,7 @@ func Init() {
 		}
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
-		lua.NewLuaInspection("default").Start()
-
+		lua.StartInspection(context.Background(), nil, "default")
 	}()
 
 	// 启动watch
