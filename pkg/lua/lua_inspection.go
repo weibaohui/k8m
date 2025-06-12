@@ -83,7 +83,7 @@ func (p *Inspection) Start() []CheckResult {
 	return results
 }
 
-func (p *Inspection) runLuaCheck(check models.LuaScript) CheckResult {
+func (p *Inspection) runLuaCheck(check models.InspectionLuaScript) CheckResult {
 	var buf bytes.Buffer
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -114,7 +114,7 @@ func (p *Inspection) runLuaCheck(check models.LuaScript) CheckResult {
 }
 
 // 注册 check_event 到 Lua，自动补充上下文
-func (p *Inspection) registerCheckEvent(events *[]CheckEvent, check models.LuaScript) {
+func (p *Inspection) registerCheckEvent(events *[]CheckEvent, check models.InspectionLuaScript) {
 	p.lua.SetGlobal("check_event", p.lua.NewFunction(func(L *lua.LState) int {
 		status := L.CheckString(1)
 		msg := L.CheckString(2)

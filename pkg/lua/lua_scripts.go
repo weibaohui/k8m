@@ -3,7 +3,7 @@ package lua
 import "github.com/weibaohui/k8m/pkg/models"
 
 // 检查脚本列表
-var luaScripts []models.LuaScript = []models.LuaScript{
+var luaScripts []models.InspectionLuaScript = []models.InspectionLuaScript{
 	{
 		Name:        "Service Selector 检查",
 		Description: "检查每个 Service 的 selector 是否有对应 Pod",
