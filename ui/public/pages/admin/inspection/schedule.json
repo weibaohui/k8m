@@ -225,7 +225,7 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-plus text-primary",
+              "icon": "fas fa-history text-primary",
               "actionType": "drawer",
               "tooltip": "巡检历史",
               "drawer": {
