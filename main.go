@@ -528,6 +528,7 @@ func main() {
 		admin.POST("/inspection/schedule/save", inspection.Save)
 		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
+		admin.POST("/inspection/schedule/start/id/:id", inspection.Start)
 
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)
