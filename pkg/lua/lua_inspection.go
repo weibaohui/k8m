@@ -31,7 +31,7 @@ func (p *Inspection) registerKubectlFunc() {
 	k := kom.DefaultCluster()
 
 	ud := p.lua.NewUserData()
-	ud.Value = &LuaKubectl{k}
+	ud.Value = &Kubectl{k}
 	p.lua.SetGlobal("kubectl", ud)
 
 	// 设置元方法

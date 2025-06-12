@@ -10,14 +10,14 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type LuaKubectl struct {
+type Kubectl struct {
 	k *kom.Kubectl
 }
 
 // 实现 kubectl:GVK(group, version, kind) 方法
 func gvkFunc(L *lua.LState) int {
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
@@ -31,7 +31,7 @@ func gvkFunc(L *lua.LState) int {
 	// 确保每次 GVK 查询，返回新的 LuaKubectl 实例链，避免嵌套调用时混乱
 
 	ctx := utils.GetContextWithAdmin()
-	newObj := &LuaKubectl{obj.k.GVK(group, version, kind).WithContext(ctx).RemoveManagedFields()}
+	newObj := &Kubectl{obj.k.GVK(group, version, kind).WithContext(ctx).RemoveManagedFields()}
 	newUd := L.NewUserData()
 	newUd.Value = newObj
 	L.SetMetatable(newUd, L.GetTypeMetatable("kubectl"))
@@ -44,7 +44,7 @@ func gvkFunc(L *lua.LState) int {
 // 实现 kubectl:WithLabelSelector(selector) 方法
 func withLabelSelectorFunc(L *lua.LState) int {
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
@@ -63,7 +63,7 @@ func withLabelSelectorFunc(L *lua.LState) int {
 // 实现 kubectl:WithLabelSelector(selector) 方法
 func withNameFunc(L *lua.LState) int {
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
@@ -81,7 +81,7 @@ func withNameFunc(L *lua.LState) int {
 // 实现 kubectl:Namespace(ns) 方法
 func withNamespaceFunc(L *lua.LState) int {
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
@@ -100,7 +100,7 @@ func withNamespaceFunc(L *lua.LState) int {
 // 该方法用于设置缓存时间，参数t为缓存时长（单位：秒）
 func withCacheFunc(L *lua.LState) int {
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
@@ -119,7 +119,7 @@ func withCacheFunc(L *lua.LState) int {
 // 实现 kubectl:AllNamespace() 方法
 func withAllNamespaceFunc(L *lua.LState) int {
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
@@ -135,7 +135,7 @@ func withAllNamespaceFunc(L *lua.LState) int {
 func listResource(L *lua.LState) int {
 	klog.V(6).Infof("执行List查询")
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
@@ -162,7 +162,7 @@ func listResource(L *lua.LState) int {
 // 用于获取单个资源，返回 Lua 表和错误信息
 func getResource(L *lua.LState) int {
 	ud := L.CheckUserData(1)
-	obj, ok := ud.Value.(*LuaKubectl)
+	obj, ok := ud.Value.(*Kubectl)
 	if !ok {
 		L.ArgError(1, "expected kubectl")
 		return 0
