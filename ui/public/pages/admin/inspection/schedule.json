@@ -1,0 +1,219 @@
+{
+  "type": "page",
+  "title": "定时巡检任务管理",
+  "body": [
+    {
+      "type": "alert",
+      "level": "info",
+      "body": "<p>定时巡检任务用于自动化巡检集群资源，支持多集群、定时执行。可配置任务名称、描述、目标集群、cron表达式等。</p>"
+    },
+    {
+      "type": "crud",
+      "id": "scheduleCRUD",
+      "name": "scheduleCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建任务",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建定时巡检任务 (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/admin/inspection/schedule/save",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "name",
+                  "label": "任务名称",
+                  "required": true,
+                  "placeholder": "请输入任务名称",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 2,
+                    "maxLength": 50
+                  },
+                  "validationErrors": {
+                    "minLength": "任务名称至少 2 个字符",
+                    "maxLength": "任务名称最多 50 个字符"
+                  }
+                },
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "任务描述",
+                  "placeholder": "请输入任务描述"
+                },
+                {
+                  "type": "select",
+                  "name": "clusters",
+                  "label": "目标集群",
+                  "multiple": true,
+                  "source": "/admin/cluster/list",
+                  "labelField": "name",
+                  "valueField": "id",
+                  "placeholder": "请选择目标集群"
+                },
+                {
+                  "type": "input-text",
+                  "name": "cron",
+                  "label": "Cron表达式",
+                  "required": true,
+                  "placeholder": "请输入cron表达式"
+                },
+                {
+                  "type": "switch",
+                  "name": "enabled",
+                  "label": "是否启用",
+                  "onText": "启用",
+                  "offText": "禁用",
+                  "value": true
+                },
+                {
+                  "type": "input-text",
+                  "name": "created_by",
+                  "label": "创建人",
+                  "placeholder": "请输入创建人"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    { "actionType": "reload", "componentId": "scheduleCRUD" },
+                    { "actionType": "closeDrawer" }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "post:/admin/inspection/schedule/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        { "type": "pagination", "align": "right" },
+        { "type": "statistics", "align": "right" },
+        { "type": "switch-per-page", "align": "right" }
+      ],
+      "api": "get:/admin/inspection/schedule/list",
+      "quickSaveItemApi": "/admin/inspection/schedule/save/id/${id}/status/${enabled}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑任务",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "编辑定时巡检任务 (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/inspection/schedule/save",
+                  "body": [
+                    { "type": "hidden", "name": "id" },
+                    {
+                      "type": "input-text",
+                      "name": "name",
+                      "label": "任务名称",
+                      "required": true,
+                      "placeholder": "请输入任务名称",
+                      "validateOnChange": true,
+                      "validations": { "minLength": 2, "maxLength": 50 },
+                      "validationErrors": { "minLength": "任务名称至少 2 个字符", "maxLength": "任务名称最多 50 个字符" }
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "description",
+                      "label": "任务描述",
+                      "placeholder": "请输入任务描述"
+                    },
+                    {
+                      "type": "select",
+                      "name": "clusters",
+                      "label": "目标集群",
+                      "multiple": true,
+                      "source": "/admin/cluster/list",
+                      "labelField": "name",
+                      "valueField": "id",
+                      "placeholder": "请选择目标集群"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "cron",
+                      "label": "Cron表达式",
+                      "required": true,
+                      "placeholder": "请输入cron表达式"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "enabled",
+                      "label": "是否启用",
+                      "onText": "启用",
+                      "offText": "禁用"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "created_by",
+                      "label": "创建人",
+                      "placeholder": "请输入创建人"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": { "saveSuccess": "保存成功", "saveFailed": "保存失败" },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        { "actionType": "reload", "componentId": "scheduleCRUD" },
+                        { "actionType": "closeDrawer" }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        { "name": "name", "label": "任务名称", "type": "text", "width": "180px" },
+        { "name": "description", "label": "描述", "type": "text", "width": "200px" },
+        { "name": "clusters", "label": "目标集群", "type": "json", "width": "180px" },
+        { "name": "cron", "label": "Cron表达式", "type": "text", "width": "160px" },
+        { "name": "enabled", "label": "启用", "quickEdit": { "mode": "inline", "type": "switch", "onText": "开启", "offText": "关闭", "saveImmediately": true, "resetOnFailed": true } },
+        { "name": "created_by", "label": "创建人", "type": "text", "width": "120px" },
+        { "name": "created_at", "label": "创建时间", "type": "datetime" }
+      ]
+    }
+  ]
+}
