@@ -216,6 +216,12 @@
                   }
                 }
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-play text-primary",
+              "actionType": "ajax",
+              "api": "post:/admin/inspection/schedule/start/id/$id"
             }
           ]
         },
