@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// CheckEvent 用于记录每次检测的详细信息，包括检测状态、消息、额外上下文、脚本名称、资源类型、描述、命名空间和资源名。
+// InspectionCheckEvent  用于记录每次检测的详细信息，包括检测状态、消息、额外上下文、脚本名称、资源类型、描述、命名空间和资源名。
 type InspectionCheckEvent struct {
 	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	RecordID   uint      `json:"record_id"`                        // 关联的巡检执行记录ID
@@ -22,7 +22,6 @@ type InspectionCheckEvent struct {
 	Name       string    `json:"name"`                             // 资源名称
 	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	CreatedBy  string    `json:"created_by,omitempty"` // 创建者
 }
 
 // List 返回符合条件的 InspectionCheckEvent 列表及总数

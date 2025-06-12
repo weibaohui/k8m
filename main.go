@@ -525,6 +525,7 @@ func main() {
 
 		// 集群巡检配置
 		admin.GET("/inspection/schedule/list", inspection.List)
+		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
 		admin.POST("/inspection/schedule/save", inspection.Save)
 		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)

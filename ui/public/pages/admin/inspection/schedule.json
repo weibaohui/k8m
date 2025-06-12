@@ -222,6 +222,68 @@
               "icon": "fas fa-play text-primary",
               "actionType": "ajax",
               "api": "post:/admin/inspection/schedule/start/id/$id"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-plus text-primary",
+              "actionType": "drawer",
+              "tooltip": "巡检历史",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "查看巡检历史 (ESC 关闭)",
+                "body": {
+                  "type": "crud",
+                  "id": "toolsCRUD",
+                  "name": "toolsCRUD",
+                  "autoFillHeight": true,
+                  "api": "get:/admin/inspection/schedule/id/$id/record/list",
+                  "headerToolbar": [
+                    {
+                      "type": "columns-toggler",
+                      "align": "right",
+                      "draggable": true,
+                      "icon": "fas fa-cog",
+                      "overlay": true,
+                      "footerBtnSize": "sm"
+                    },
+                    {
+                      "type": "tpl",
+                      "tpl": "共${count}条",
+                      "align": "right",
+                      "visibleOn": "${count}"
+                    },
+                    {
+                      "type": "columns-toggler",
+                      "align": "left"
+                    },
+                    "reload"
+                  ],
+                  "loadDataOnce": true,
+                  "syncLocation": false,
+                  "initFetch": true,
+                  "perPage": 10,
+                  "columns": [
+                    {
+                      "name": "cluster",
+                      "label": "集群"
+                    },
+                    {
+                      "name": "trigger_type",
+                      "label": "触发类型"
+                    },
+                    {
+                      "name": "status",
+                      "label": "状态"
+                    },
+                    {
+                      "name": "start_time",
+                      "label": "开始时间"
+                    }
+                  ]
+                }
+              }
             }
           ]
         },

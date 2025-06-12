@@ -25,7 +25,6 @@ type InspectionRecord struct {
 	EndTime      *time.Time `json:"end_time,omitempty"`
 	CreatedAt    time.Time  `json:"created_at,omitempty"`
 	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	CreatedBy    string     `json:"created_by,omitempty"` // 创建者
 }
 
 // InspectionScriptResult 记录每个巡检脚本的执行结果，关联到 InspectionRecord
@@ -45,7 +44,6 @@ type InspectionScriptResult struct {
 	ErrorMsg   string    `json:"error_msg,omitempty"` // 错误信息
 	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	CreatedBy  string    `json:"created_by,omitempty"` // 创建者
 }
 
 // List 返回符合条件的 InspectionRecord 列表及总数

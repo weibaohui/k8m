@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/models"
+	"gorm.io/gorm"
 )
 
 func List(c *gin.Context) {
@@ -17,6 +18,22 @@ func List(c *gin.Context) {
 	m := &models.InspectionSchedule{}
 
 	items, total, err := m.List(params)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonListWithTotal(c, total, items)
+}
+func RecordList(c *gin.Context) {
+	params := dao.BuildParams(c)
+	id := c.Param("id")
+	m := &models.InspectionRecord{
+		ScheduleID: utils.UintPtr(utils.ToUInt(id)),
+	}
+
+	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where(m)
+	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

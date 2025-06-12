@@ -21,7 +21,6 @@ type InspectionSchedule struct {
 	Enabled     bool      `json:"enabled"`     // 是否启用该任务
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	CreatedBy   string    `json:"created_by,omitempty"` // 创建者
 }
 
 // List 返回符合条件的 InspectionSchedule 列表及总数
