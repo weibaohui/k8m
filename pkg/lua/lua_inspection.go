@@ -131,14 +131,14 @@ func (p *Inspection) registerCheckEvent(events *[]CheckEvent, check models.LuaSc
 			namespace, _ = v.(string)
 		}
 		*events = append(*events, CheckEvent{
-			Name:            name,
-			Namespace:       namespace,
-			Status:          status,
-			Msg:             msg,
-			Extra:           extra,
-			CheckScriptName: check.Name,        // 检测脚本名称
-			Kind:            check.Kind,        // 检查的资源类型
-			CheckDesc:       check.Description, // 检查脚本内容描述
+			Name:       name,
+			Namespace:  namespace,
+			Status:     status,
+			Msg:        msg,
+			Extra:      extra,
+			ScriptName: check.Name,        // 检测脚本名称
+			Kind:       check.Kind,        // 检查的资源类型
+			CheckDesc:  check.Description, // 检查脚本内容描述
 		})
 		return 0
 	}))
