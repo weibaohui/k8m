@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -19,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
+	"github.com/weibaohui/k8m/pkg/controller/admin/inspection"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
@@ -48,7 +48,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
-	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/service"
@@ -127,7 +126,7 @@ func Init() {
 		}
 		// 打印集群连接信息
 		klog.Infof("处理%d个集群，其中%d个集群已连接", len(service.ClusterService().AllClusters()), len(service.ClusterService().ConnectedClusters()))
-		lua.StartInspection(context.Background(), nil, "default")
+
 	}()
 
 	// 启动watch
@@ -523,6 +522,12 @@ func main() {
 		admin.POST("/config/sso/save", config.SSOConfigSave)
 		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
 		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
+
+		// 集群巡检配置
+		admin.GET("/inspection/schedule/list", inspection.List)
+		admin.POST("/inspection/schedule/save", inspection.Save)
+		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
+		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
 
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)
