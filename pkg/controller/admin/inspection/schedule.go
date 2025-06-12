@@ -40,6 +40,22 @@ func RecordList(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+func EventList(c *gin.Context) {
+	params := dao.BuildParams(c)
+	id := c.Param("id")
+	m := &models.InspectionCheckEvent{
+		RecordID: utils.ToUInt(id),
+	}
+
+	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where(m)
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonListWithTotal(c, total, items)
+}
 func Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.InspectionSchedule{}

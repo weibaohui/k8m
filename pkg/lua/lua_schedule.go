@@ -26,6 +26,8 @@ func StartInspection(ctx context.Context, scheduleID *uint, cluster string) (*mo
 	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果sheduleID 不为空，
 	// 从数据库中读取sheduleName
+	// TODO 记录完成后，统计巡检结果，存入记录表
+	// TODO 更新到巡检计划表，最后巡检结果，最后巡检时间
 	var scheduleName string
 	if scheduleID != nil {
 		schedule := &models.InspectionSchedule{}

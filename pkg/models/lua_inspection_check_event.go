@@ -15,10 +15,10 @@ type InspectionCheckEvent struct {
 	Status     string    `json:"status"`                           // 检查状态（如“正常”、“失败”）
 	Msg        string    `json:"msg"`                              // 检查消息
 	Extra      string    `gorm:"type:text" json:"extra,omitempty"` // 额外上下文
-	ScriptName string    `json:"scriptName"`                       // 检测脚本名称
+	ScriptName string    `json:"script_name"`                      // 检测脚本名称
 	Kind       string    `json:"kind"`                             // 检查的资源类型
-	CheckDesc  string    `json:"checkDesc"`                        // 检查脚本内容描述
-	Namespace  string    `json:"ns"`                               // 资源命名空间
+	CheckDesc  string    `json:"check_desc"`                       // 检查脚本内容描述
+	Namespace  string    `json:"namespace"`                        // 资源命名空间
 	Name       string    `json:"name"`                             // 资源名称
 	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
