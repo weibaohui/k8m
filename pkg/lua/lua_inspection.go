@@ -48,7 +48,7 @@ func (p *Inspection) registerKubectlFunc() {
 	}))
 	p.lua.SetMetatable(ud, mt)
 }
-func (p *Inspection) Start() {
+func (p *Inspection) Start() []CheckResult {
 	// 初始化 Lua 状态
 	defer p.lua.Close()
 
@@ -79,6 +79,8 @@ func (p *Inspection) Start() {
 			fmt.Println("无结构化检测事件（未调用 check_event）")
 		}
 	}
+
+	return results
 }
 
 func (p *Inspection) runLuaCheck(check models.LuaScript) CheckResult {
