@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { render as amisRender } from "amis";
-import { formatFinalGetUrl } from "@/utils/utils";
+import React, {useEffect, useRef, useState} from "react";
+import {render as amisRender} from "amis";
+import {formatFinalGetUrl} from "@/utils/utils";
 
 interface WebSocketMarkdownViewerProps {
     url: string;
@@ -9,8 +9,8 @@ interface WebSocketMarkdownViewerProps {
 }
 
 const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSocketMarkdownViewerProps>(
-    ({ url, data, params }, _) => {
-        url = formatFinalGetUrl({ url, data, params });
+    ({url, data, params}, _) => {
+        url = formatFinalGetUrl({url, data, params});
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
@@ -23,6 +23,10 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
         useEffect(() => {
             if (wsRef.current) {
                 wsRef.current.close();
+            }
+            if (!url.startsWith("ws")) {
+                const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+                url = protocol + location.host + url
             }
             const ws = new WebSocket(url);
             wsRef.current = ws;
@@ -58,7 +62,7 @@ const WebSocketMarkdownViewerComponent = React.forwardRef<HTMLDivElement, WebSoc
         return (
             <>
                 <div>
-                    <p style={{ display: "none" }}>WebSocket Status: {status}</p>
+                    <p style={{display: "none"}}>WebSocket Status: {status}</p>
                     <div
                         style={{
                             backgroundColor: "#f5f5f5",

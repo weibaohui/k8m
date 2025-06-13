@@ -24,6 +24,10 @@ const WebSocketViewerComponent = React.forwardRef<HTMLDivElement, WebSocketViewe
             if (wsRef.current) {
                 wsRef.current.close();
             }
+            if (!url.startsWith("ws")) {
+                const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+                url = protocol + location.host + url
+            }
             const ws = new WebSocket(url);
             wsRef.current = ws;
 
