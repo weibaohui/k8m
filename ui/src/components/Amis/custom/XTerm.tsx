@@ -30,8 +30,6 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
         const fitAddonRef = useRef<FitAddon | null>(null);
 
 
-        // const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-
         useEffect(() => {
 
             const term = new Terminal({
@@ -50,7 +48,12 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
                 return;
             }
 
-            const ws = new WebSocket(`ws://${location.host}` + url);
+
+            if (!url.startsWith("ws")) {
+                const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+                url = protocol + location.host + url
+            }
+            const ws = new WebSocket(url);
             wsRef.current = ws;
             // 添加插件
             const attachAddon = new AttachAddon(ws);
