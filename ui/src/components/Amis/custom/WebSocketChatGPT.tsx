@@ -43,11 +43,12 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
             if (wsRef.current) {
                 wsRef.current.close();
             }
-            if (!url.startsWith("ws")) {
+            let finalUrl = url;
+            if (!finalUrl.startsWith("ws")) {
                 const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-                url = protocol + location.host + url
+                finalUrl = protocol + location.host + finalUrl;
             }
-            const ws = new WebSocket(url);
+            const ws = new WebSocket(finalUrl);
             wsRef.current = ws;
 
             ws.onopen = () => setStatus("Connected");
