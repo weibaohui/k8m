@@ -28,7 +28,7 @@ const TriggerTypeCron = "cron"
 // scheduleID: 可选，定时任务ID（手动触发时为nil）
 // cluster: 目标集群
 // triggerType: 触发类型（manual/cron）
-func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string) (*models.InspectionRecord, error) {
+func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
 	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果scheduleID 不为空，
 	// 从数据库中读取scheduleName
@@ -45,10 +45,6 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		scheduleName = schedule.Name
 	}
 
-	var triggerType = TriggerTypeManual
-	if scheduleID != nil {
-		triggerType = TriggerTypeCron
-	}
 	record := &models.InspectionRecord{
 		ScheduleID:   scheduleID,
 		ScheduleName: scheduleName,
@@ -113,6 +109,8 @@ func InitClusterInspection() {
 		localCron = cron.New()
 		localCron.Start()
 		klog.V(6).Infof("集群巡检启动")
+		sb := ScheduleBackground{}
+		sb.StartFromDB()
 	})
 }
 
@@ -138,7 +136,7 @@ func (s *ScheduleBackground) StartFromDB() {
 			cur := schedule
 			entryID, err := localCron.AddFunc(cur.Cron, func() {
 				for _, cluster := range strings.Split(cur.Clusters, ",") {
-					_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster)
+					_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)
 				}
 			})
 			if err != nil {
@@ -192,7 +190,7 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 
 		entryID, err := localCron.AddFunc(cur.Cron, func() {
 			for _, cluster := range strings.Split(cur.Clusters, ",") {
-				_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster)
+				_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)
 			}
 		})
 		if err != nil {

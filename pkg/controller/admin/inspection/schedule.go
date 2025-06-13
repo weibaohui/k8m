@@ -145,7 +145,7 @@ func Start(c *gin.Context) {
 		sb := lua.ScheduleBackground{}
 		clusters := strings.Split(one.Clusters, ",")
 		for _, cluster := range clusters {
-			_, _ = sb.RunByCluster(context.Background(), &one.ID, cluster)
+			_, _ = sb.RunByCluster(context.Background(), &one.ID, cluster, lua.TriggerTypeManual)
 		}
 	}()
 
