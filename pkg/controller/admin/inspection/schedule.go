@@ -70,6 +70,10 @@ func Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	sb := lua.ScheduleBackground{}
+	sb.Add(m.ID)
+
 	amis.WriteJsonOK(c)
 }
 func Delete(c *gin.Context) {
@@ -82,7 +86,12 @@ func Delete(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
+	// 清除定时 任务
+	intIds := utils.ToInt64Slice(ids)
+	for _, id := range intIds {
+		sb := lua.ScheduleBackground{}
+		sb.Remove(uint(id))
+	}
 	amis.WriteJsonOK(c)
 }
 
@@ -104,6 +113,15 @@ func QuickSave(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	// 存储后，按照开关状态确定执行cron
+	sb := lua.ScheduleBackground{}
+	if entity.Enabled {
+		sb.Add(entity.ID)
+	} else {
+		sb.Remove(entity.ID)
+	}
+
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
@@ -119,9 +137,10 @@ func Start(c *gin.Context) {
 		return
 	}
 	func() {
+		sb := lua.ScheduleBackground{}
 		clusters := strings.Split(one.Clusters, ",")
 		for _, cluster := range clusters {
-			_, _ = lua.StartInspection(context.Background(), &one.ID, cluster)
+			_, _ = sb.RunByCluster(context.Background(), &one.ID, cluster)
 		}
 	}()
 
