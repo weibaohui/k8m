@@ -26,6 +26,8 @@ func List(c *gin.Context) {
 }
 func RecordList(c *gin.Context) {
 	params := dao.BuildParams(c)
+	params.PerPage = 10000
+
 	id := c.Param("id")
 	m := &models.InspectionRecord{
 		ScheduleID: utils.UintPtr(utils.ToUInt(id)),
@@ -42,6 +44,7 @@ func RecordList(c *gin.Context) {
 }
 func EventList(c *gin.Context) {
 	params := dao.BuildParams(c)
+	params.PerPage = 10000
 	id := c.Param("id")
 	m := &models.InspectionCheckEvent{
 		RecordID: utils.ToUInt(id),

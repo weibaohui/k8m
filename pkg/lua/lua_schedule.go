@@ -64,6 +64,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 
 	var scriptResults []models.InspectionScriptResult
 	var checkEvents []models.InspectionCheckEvent
+	var errorCount int
 	for _, res := range results {
 		scriptResults = append(scriptResults, models.InspectionScriptResult{
 			RecordID:   record.ID,
@@ -85,6 +86,9 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 				Namespace:  e.Namespace,
 				Name:       e.Name,
 			})
+			if e.Status == "错误" || e.Status == "error" || e.Status == "失败" {
+				errorCount += 1
+			}
 		}
 	}
 	// 保存脚本运行中产生的事件记录
@@ -92,12 +96,16 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	// 保存脚本本身执行结果
 	_ = dao.GenericBatchSave(nil, scriptResults, 100)
 
+	// 统计错误数
+
 	//  更新执行记录
 	endTime := time.Now()
 	record.Status = "success"
 	record.EndTime = &endTime
+	record.ErrorCount = errorCount
 	_ = record.Save(nil)
 
+	klog.V(6).Infof("集群巡检完成。集群巡检记录ID=%d", record.ID)
 	return record, nil
 }
 

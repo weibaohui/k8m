@@ -25,6 +25,7 @@ type InspectionRecord struct {
 	EndTime      *time.Time `json:"end_time,omitempty"`
 	CreatedAt    time.Time  `json:"created_at,omitempty"`
 	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ErrorCount   int        `json:"error_count"`
 }
 
 // InspectionScriptResult 记录每个巡检脚本的执行结果，关联到 InspectionRecord

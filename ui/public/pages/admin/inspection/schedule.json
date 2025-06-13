@@ -318,7 +318,21 @@
                                 },
                                 {
                                   "name": "status",
-                                  "label": "状态"
+                                  "label": "状态",
+                                  "searchable": {
+                                    "type": "select",
+                                    "clearable": true,
+                                    "options": [
+                                      {
+                                        "label": "通过",
+                                        "value": "通过"
+                                      },
+                                      {
+                                        "label": "失败",
+                                        "value": "失败"
+                                      }
+                                    ]
+                                  }
                                 },
                                 {
                                   "name": "name",
@@ -357,6 +371,10 @@
                     {
                       "name": "start_time",
                       "label": "开始时间"
+                    },
+                    {
+                      "name": "error_count",
+                      "label": "错误数量"
                     }
                   ]
                 }
