@@ -135,9 +135,10 @@ func (s *ScheduleBackground) StartFromDB() {
 			klog.V(6).Infof("注册定时任务: %s", schedule.Cron)
 			// 注册定时任务
 			// 遍历集群
-			entryID, err := localCron.AddFunc(schedule.Cron, func() {
-				for _, cluster := range strings.Split(schedule.Clusters, ",") {
-					_, _ = s.RunByCluster(context.Background(), &schedule.ID, cluster)
+			cur := schedule
+			entryID, err := localCron.AddFunc(cur.Cron, func() {
+				for _, cluster := range strings.Split(cur.Clusters, ",") {
+					_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster)
 				}
 			})
 			if err != nil {
@@ -187,9 +188,11 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 		klog.V(6).Infof("注册定时任务: %s", item.Cron)
 		// 注册定时任务
 		// 遍历集群
-		entryID, err := localCron.AddFunc(item.Cron, func() {
-			for _, cluster := range strings.Split(item.Clusters, ",") {
-				_, _ = s.RunByCluster(context.Background(), &item.ID, cluster)
+		cur := item
+
+		entryID, err := localCron.AddFunc(cur.Cron, func() {
+			for _, cluster := range strings.Split(cur.Clusters, ",") {
+				_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster)
 			}
 		})
 		if err != nil {
