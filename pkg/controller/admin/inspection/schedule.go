@@ -71,8 +71,13 @@ func Save(c *gin.Context) {
 		return
 	}
 
+	// 存储后，按照开关状态确定执行cron
 	sb := lua.ScheduleBackground{}
-	sb.Add(m.ID)
+	if m.Enabled {
+		sb.Add(m.ID)
+	} else {
+		sb.Remove(m.ID)
+	}
 
 	amis.WriteJsonOK(c)
 }
