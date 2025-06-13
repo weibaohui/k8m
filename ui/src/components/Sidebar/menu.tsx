@@ -487,6 +487,12 @@ const items: () => MenuItem[] = () => {
                         onClick: () => onMenuClick('/admin/inspection/schedule')
                     },
                     {
+                        label: "集群巡检规则",
+                        icon: <i className="fa-solid fa-clipboard-check"></i>,
+                        key: "script_management",
+                        onClick: () => onMenuClick('/admin/inspection/script')
+                    },
+                    {
                         label: "AI模型配置",
                         icon: <i className="fa-solid fa-sliders"></i>,
                         key: "ai_model_config",
