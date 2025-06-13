@@ -380,7 +380,7 @@
           "name": "clusters",
           "label": "目标集群",
           "type": "tpl",
-          "tpl": "${clusters | split:',')}"
+          "tpl": "${clusters | split:','}"
         },
         {
           "name": "cron",
