@@ -3,13 +3,20 @@ package lua
 import (
 	"context"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 
+	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/models"
+	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
+
+type ScheduleBackground struct {
+}
 
 // TriggerTypeManual 表示手动触发
 const TriggerTypeManual = "manual"
@@ -17,15 +24,14 @@ const TriggerTypeManual = "manual"
 // TriggerTypeCron 表示定时触发
 const TriggerTypeCron = "cron"
 
-// StartInspection 启动一次巡检任务，并记录执行及每个脚本的结果到数据库
+// RunByCluster 启动一次巡检任务，并记录执行及每个脚本的结果到数据库
 // scheduleID: 可选，定时任务ID（手动触发时为nil）
 // cluster: 目标集群
 // triggerType: 触发类型（manual/cron）
-// createdBy: 发起人
-func StartInspection(ctx context.Context, scheduleID *uint, cluster string) (*models.InspectionRecord, error) {
+func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string) (*models.InspectionRecord, error) {
 	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
-	// 如果sheduleID 不为空，
-	// 从数据库中读取sheduleName
+	// 如果scheduleID 不为空，
+	// 从数据库中读取scheduleName
 	// TODO 记录完成后，统计巡检结果，存入记录表
 	// TODO 更新到巡检计划表，最后巡检结果，最后巡检时间
 	var scheduleName string
@@ -97,4 +103,103 @@ func StartInspection(ctx context.Context, scheduleID *uint, cluster string) (*mo
 	_ = record.Save(nil)
 
 	return record, nil
+}
+
+var localCron *cron.Cron
+var once sync.Once
+
+func InitClusterInspection() {
+	once.Do(func() {
+		localCron = cron.New()
+		localCron.Start()
+		klog.V(6).Infof("集群巡检启动")
+	})
+}
+
+// StartFromDB  后台自动执行调度
+func (s *ScheduleBackground) StartFromDB() {
+
+	// 1、读取数据库中的定义，然后创建
+	sch := models.InspectionSchedule{}
+
+	list, _, err := sch.List(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("enabled is true")
+	})
+	if err != nil {
+		klog.Errorf("读取定时任务失败%v", err)
+		return
+	}
+	var count int
+	for _, schedule := range list {
+		if schedule.Cron != "" {
+			klog.V(6).Infof("注册定时任务: %s", schedule.Cron)
+			// 注册定时任务
+			// 遍历集群
+			entryID, err := localCron.AddFunc(schedule.Cron, func() {
+				for _, cluster := range strings.Split(schedule.Clusters, ",") {
+					_, _ = s.RunByCluster(context.Background(), &schedule.ID, cluster)
+				}
+			})
+			if err != nil {
+				klog.Errorf("定时任务注册失败%v", err)
+				return
+			}
+			// 更新EntryID
+			schedule.CronRunID = entryID
+			_ = schedule.Save(nil)
+			count += 1
+		}
+	}
+	klog.V(6).Infof("启动集群巡检任务完成，共启动%d个", count)
+}
+func (s *ScheduleBackground) Remove(scheduleID uint) {
+	sch := models.InspectionSchedule{}
+	sch.ID = scheduleID
+	item, err := sch.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db
+	})
+	if err != nil {
+		klog.Errorf("读取定时任务[id=%d]失败  %v", scheduleID, err)
+		return
+	}
+	if item.CronRunID != 0 {
+		localCron.Remove(item.CronRunID)
+	}
+	klog.V(6).Infof("删除集群定时巡检任务[id=%d]", scheduleID)
+
+}
+func (s *ScheduleBackground) Add(scheduleID uint) {
+	// 1、读取数据库中的定义，然后创建
+	sch := models.InspectionSchedule{}
+	sch.ID = scheduleID
+	item, err := sch.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("enabled is true")
+	})
+	if err != nil {
+		klog.Errorf("读取定时任务[id=%d]失败  %v", scheduleID, err)
+		return
+	}
+	// 先清除，再添加执行
+	if item.CronRunID != 0 {
+		localCron.Remove(item.CronRunID)
+	}
+	if item.Cron != "" {
+		klog.V(6).Infof("注册定时任务: %s", item.Cron)
+		// 注册定时任务
+		// 遍历集群
+		entryID, err := localCron.AddFunc(item.Cron, func() {
+			for _, cluster := range strings.Split(item.Clusters, ",") {
+				_, _ = s.RunByCluster(context.Background(), &item.ID, cluster)
+			}
+		})
+		if err != nil {
+			klog.Errorf("定时任务注册失败%v", err)
+			return
+		}
+		// 更新EntryID
+		item.CronRunID = entryID
+		_ = item.Save(nil)
+	}
+	klog.V(6).Infof("启动集群定时巡检任务[id=%d]", scheduleID)
+
 }
