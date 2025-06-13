@@ -537,6 +537,11 @@ func main() {
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
 		admin.POST("/inspection/schedule/start/id/:id", inspection.Start)
 
+		// 集群巡检脚本
+		admin.GET("/inspection/script/list", inspection.LuaScriptList)
+		admin.POST("/inspection/script/delete/:ids", inspection.LuaScriptDelete)
+		admin.POST("/inspection/script/save", inspection.LuaScriptSave)
+
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)
 		admin.POST("/user/save", user.Save)
