@@ -19,7 +19,7 @@ type InspectionLuaScript struct {
 	Version     string    `json:"version"`                 // 版本
 	Kind        string    `json:"kind"`                    // 类型
 	Script      string    `gorm:"type:text" json:"script"` // 脚本内容
-	CreatedAt   time.Time `json:"created_at,omitempty"`
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 	CreatedBy   string    `json:"created_by,omitempty"` // 创建者
 

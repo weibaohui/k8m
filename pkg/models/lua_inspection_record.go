@@ -23,7 +23,7 @@ type InspectionRecord struct {
 	Status       string     `json:"status"`                                       // 执行状态（pending/running/success/failed）
 	StartTime    time.Time  `json:"start_time"`
 	EndTime      *time.Time `json:"end_time,omitempty"`
-	CreatedAt    time.Time  `json:"created_at,omitempty"`
+	CreatedAt    time.Time  `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 	ErrorCount   int        `json:"error_count"`
 }
@@ -43,7 +43,7 @@ type InspectionScriptResult struct {
 	EndTime    time.Time `json:"end_time"`
 	Output     string    `json:"output"`              // 脚本标准输出
 	ErrorMsg   string    `json:"error_msg,omitempty"` // 错误信息
-	CreatedAt  time.Time `json:"created_at,omitempty"`
+	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 

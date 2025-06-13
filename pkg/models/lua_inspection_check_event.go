@@ -20,7 +20,7 @@ type InspectionCheckEvent struct {
 	CheckDesc  string    `json:"check_desc"`                       // 检查脚本内容描述
 	Namespace  string    `json:"namespace"`                        // 资源命名空间
 	Name       string    `json:"name"`                             // 资源名称
-	CreatedAt  time.Time `json:"created_at,omitempty"`
+	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 

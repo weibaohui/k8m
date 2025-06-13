@@ -20,7 +20,7 @@ type InspectionSchedule struct {
 	Clusters    string       `json:"clusters"`    // 目标集群列表
 	Cron        string       `json:"cron"`        // cron表达式，定时周期
 	Enabled     bool         `json:"enabled"`     // 是否启用该任务
-	CreatedAt   time.Time    `json:"created_at,omitempty"`
+	CreatedAt   time.Time    `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time    `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 	CronRunID   cron.EntryID `json:"cron_run_id"`          // cron 运行ID，可用于删除
 }
