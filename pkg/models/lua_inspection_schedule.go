@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"gorm.io/gorm"
@@ -13,14 +14,15 @@ import (
 // 字段涵盖任务名称、描述、目标集群、cron表达式、启用状态、创建人和创建时间
 // 可结合数据库或配置管理进行持久化
 type InspectionSchedule struct {
-	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name        string    `json:"name"`        // 巡检任务名称
-	Description string    `json:"description"` // 巡检任务描述
-	Clusters    string    `json:"clusters"`    // 目标集群列表
-	Cron        string    `json:"cron"`        // cron表达式，定时周期
-	Enabled     bool      `json:"enabled"`     // 是否启用该任务
-	CreatedAt   time.Time `json:"created_at,omitempty"`
-	UpdatedAt   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ID          uint         `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Name        string       `json:"name"`        // 巡检任务名称
+	Description string       `json:"description"` // 巡检任务描述
+	Clusters    string       `json:"clusters"`    // 目标集群列表
+	Cron        string       `json:"cron"`        // cron表达式，定时周期
+	Enabled     bool         `json:"enabled"`     // 是否启用该任务
+	CreatedAt   time.Time    `json:"created_at,omitempty"`
+	UpdatedAt   time.Time    `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	CronRunID   cron.EntryID `json:"cron_run_id"`          // cron 运行ID，可用于删除
 }
 
 // List 返回符合条件的 InspectionSchedule 列表及总数
