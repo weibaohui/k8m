@@ -380,7 +380,12 @@
                                   "name": "event_status",
                                   "label": "状态",
                                   "type": "mapping",
-                                  "searchable": true,
+                                  "searchable": {
+                                    "type": "select",
+                                    "clearable": true,
+                                    "searchable": true,
+                                    "source": "/admin/inspection/event/status/option_list"
+                                  },
                                   "map": {
                                     "通过": "<span class='label label-success'>通过</span>",
                                     "失败": "<span class='label label-warning'>失败</span>",

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -80,6 +81,33 @@ func EventList(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+
+func EventStatusOptionList(c *gin.Context) {
+	m := &models.InspectionCheckEvent{}
+	events, _, err := m.List(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Distinct("event_status")
+	})
+	if err != nil {
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
+	var names []map[string]string
+	for _, n := range events {
+		names = append(names, map[string]string{
+			"label": n.EventStatus,
+			"value": n.EventStatus,
+		})
+	}
+	slice.SortBy(names, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
+	amis.WriteJsonData(c, gin.H{
+		"options": names,
+	})
+}
+
 func Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.InspectionSchedule{}
