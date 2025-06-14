@@ -21,10 +21,6 @@ func Summary(c *gin.Context) {
 	params.PerPage = 100000
 	// 1. 获取scheduleID参数
 	scheduleID := c.Param("id")
-	if scheduleID == "" {
-		amis.WriteJsonError(c, fmt.Errorf("缺少scheduleID参数"))
-		return
-	}
 
 	// 新增：解析时间范围参数
 	var startTime, endTime time.Time
@@ -49,7 +45,10 @@ func Summary(c *gin.Context) {
 	// 2. 查询所有该scheduleID下的InspectionRecord，收集recordIDs和集群
 	recordModel := &models.InspectionRecord{}
 	records, _, err := recordModel.List(params, func(db *gorm.DB) *gorm.DB {
-		query := db.Where("schedule_id = ?", scheduleID)
+		query := db
+		if scheduleID != "" {
+			query = query.Where("schedule_id = ?", scheduleID)
+		}
 		if !startTime.IsZero() {
 			query = query.Where("created_at >= ?", startTime)
 		}
