@@ -538,6 +538,7 @@ func main() {
 		admin.GET("/inspection/script/list", inspection.LuaScriptList)
 		admin.POST("/inspection/script/delete/:ids", inspection.LuaScriptDelete)
 		admin.POST("/inspection/script/save", inspection.LuaScriptSave)
+		admin.POST("/inspection/script/load", inspection.LuaScriptLoad)
 
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)

@@ -87,7 +87,6 @@ func Save(c *gin.Context) {
 func Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
-
 	// 清除定时 任务
 	intIds := utils.ToInt64Slice(ids)
 	for _, id := range intIds {

@@ -15,12 +15,12 @@
           "type": "button",
           "icon": "fas fa-plus text-primary",
           "actionType": "drawer",
-          "label": "新建脚本",
+          "label": "新建规则",
           "drawer": {
             "closeOnEsc": true,
             "closeOnOutside": true,
             "size": "xl",
-            "title": "新建脚本 (ESC 关闭)",
+            "title": "新建规则 (ESC 关闭)",
             "body": {
               "type": "form",
               "api": "post:/admin/inspection/script/save",
@@ -28,24 +28,24 @@
                 {
                   "type": "input-text",
                   "name": "name",
-                  "label": "脚本名称",
+                  "label": "规则名称",
                   "required": true,
-                  "placeholder": "请输入脚本名称",
+                  "placeholder": "请输入规则名称",
                   "validateOnChange": true,
                   "validations": {
                     "minLength": 2,
                     "maxLength": 128
                   },
                   "validationErrors": {
-                    "minLength": "脚本名称至少 2 个字符",
-                    "maxLength": "脚本名称最多 128 个字符"
+                    "minLength": "规则名称至少 2 个字符",
+                    "maxLength": "规则名称最多 128 个字符"
                   }
                 },
                 {
                   "type": "input-text",
                   "name": "description",
-                  "label": "脚本描述",
-                  "placeholder": "请输入脚本描述"
+                  "label": "规则描述",
+                  "placeholder": "请输入规则描述"
                 },
                 {
                   "type": "input-text",
@@ -68,8 +68,8 @@
                 {
                   "type": "textarea",
                   "name": "script",
-                  "label": "脚本内容",
-                  "placeholder": "请输入脚本内容"
+                  "label": "规则内容",
+                  "placeholder": "请输入规则内容"
                 }
               ],
               "submitText": "保存",
@@ -95,7 +95,14 @@
           }
         },
         "reload",
-        "bulkActions"
+        "bulkActions",
+        {
+          "type": "button",
+          "label": "加载内置规则",
+          "actionType": "ajax",
+          "confirmText": "该操作将先删除所有自定义规则，然后重新加载内置规则，是否执行?",
+          "api": "post:/admin/inspection/script/load"
+        }
       ],
       "loadDataOnce": false,
       "syncLocation": false,
@@ -134,12 +141,12 @@
               "type": "button",
               "icon": "fas fa-edit text-primary",
               "actionType": "drawer",
-              "tooltip": "编辑脚本",
+              "tooltip": "编辑规则",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
                 "size": "xl",
-                "title": "编辑脚本 (ESC 关闭)",
+                "title": "编辑规则 (ESC 关闭)",
                 "body": {
                   "type": "form",
                   "api": "post:/admin/inspection/script/save",
@@ -155,24 +162,24 @@
                     {
                       "type": "input-text",
                       "name": "name",
-                      "label": "脚本名称",
+                      "label": "规则名称",
                       "required": true,
-                      "placeholder": "请输入脚本名称",
+                      "placeholder": "请输入规则名称",
                       "validateOnChange": true,
                       "validations": {
                         "minLength": 2,
                         "maxLength": 128
                       },
                       "validationErrors": {
-                        "minLength": "脚本名称至少 2 个字符",
-                        "maxLength": "脚本名称最多 128 个字符"
+                        "minLength": "规则名称至少 2 个字符",
+                        "maxLength": "规则名称最多 128 个字符"
                       }
                     },
                     {
                       "type": "input-text",
                       "name": "description",
-                      "label": "脚本描述",
-                      "placeholder": "请输入脚本描述"
+                      "label": "规则描述",
+                      "placeholder": "请输入规则描述"
                     },
                     {
                       "type": "input-text",
@@ -195,8 +202,8 @@
                     {
                       "type": "textarea",
                       "name": "script",
-                      "label": "脚本内容",
-                      "placeholder": "请输入脚本内容"
+                      "label": "规则内容",
+                      "placeholder": "请输入规则内容"
                     }
                   ],
                   "submitText": "保存",
@@ -225,13 +232,13 @@
         },
         {
           "name": "name",
-          "label": "脚本名称",
+          "label": "规则名称",
           "type": "text",
           "width": "180px"
         },
         {
           "name": "description",
-          "label": "脚本描述",
+          "label": "规则描述",
           "type": "text",
           "width": "200px"
         },
@@ -255,8 +262,8 @@
           "label": "来源",
           "type": "mapping",
           "map": {
-            "Builtin": "系统脚本",
-            "Custom": "用户脚本"
+            "Builtin": "系统规则",
+            "Custom": "用户规则"
           }
         },
         {

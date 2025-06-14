@@ -118,13 +118,18 @@ func AutoMigrate() error {
 	return nil
 }
 func AddBuiltinLuaScripts() error {
-	// 删除后，重新插入内置脚本
-	err := dao.DB().Model(&InspectionLuaScript{}).Where("script_type == ?", constants.LuaScriptTypeBuiltin).Delete(&InspectionLuaScript{}).Error
-	if err != nil {
-		klog.Errorf("删除内置巡检脚本失败: %v", err)
+
+	// 检查是否存在内置规则，如果没有，那么新加入
+	var count int64
+	if err := dao.DB().Model(&InspectionLuaScript{}).Where("script_type = ?", constants.LuaScriptTypeBuiltin).Count(&count).Error; err != nil {
+		klog.Errorf("统计内置巡检脚本失败: %v", err)
 		return err
 	}
-	err = dao.DB().Model(&InspectionLuaScript{}).CreateInBatches(BuiltinLuaScripts, 100).Error
+	if count > 0 {
+		return nil
+	}
+	//不存在，则插入
+	err := dao.DB().Model(&InspectionLuaScript{}).CreateInBatches(BuiltinLuaScripts, 100).Error
 	if err != nil {
 		klog.Errorf("插入内置巡检脚本失败: %v", err)
 		return err
