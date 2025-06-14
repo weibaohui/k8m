@@ -25,7 +25,7 @@ func Summary(c *gin.Context) {
 	// 2. 查询所有该scheduleID下的InspectionRecord，收集recordIDs和集群
 	recordModel := &models.InspectionRecord{}
 	records, _, err := recordModel.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where("schedule_id = ?", scheduleID)
+		return db.Where("schedule_id = ?", scheduleID).Order("id desc")
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -55,7 +55,7 @@ func Summary(c *gin.Context) {
 	// 4. 聚合统计
 
 	totalClusters := len(clusterSet)
-	totalRuns := len(records) // 巡检计划执行次数
+	totalRuns := len(records)                        // 巡检计划执行次数
 	clusterKindMap := map[string]map[string]int{}    // cluster -> kind -> count
 	clusterKindErrMap := map[string]map[string]int{} // cluster -> kind -> error count
 	for _, e := range events {
@@ -64,15 +64,17 @@ func Summary(c *gin.Context) {
 			clusterKindErrMap[e.Cluster] = map[string]int{}
 		}
 		clusterKindMap[e.Cluster][e.Kind]++
-		if e.EventStatus != "正常" {
+		if !isEventStatusPass(e.EventStatus) {
 			clusterKindErrMap[e.Cluster][e.Kind]++
+
 		}
+
 	}
 
 	// 5. 构建返回结构
 	result := gin.H{
 		"total_clusters": totalClusters,
-		"total_runs": totalRuns, // 新增字段：执行次数
+		"total_runs":     totalRuns, // 新增字段：执行次数
 		"clusters":       []gin.H{},
 	}
 	// 统计每个集群的执行次数
@@ -91,10 +93,47 @@ func Summary(c *gin.Context) {
 			})
 		}
 		result["clusters"] = append(result["clusters"].([]gin.H), gin.H{
-			"cluster": cluster,
+			"cluster":   cluster,
 			"run_count": clusterRunCount[cluster], // 新增字段：该集群执行次数
-			"kinds":   kindArr,
+			"kinds":     kindArr,
 		})
 	}
+	// 新增：统计最新一次执行情况
+	var latestRun gin.H
+	if len(records) > 0 {
+		latestRecord := records[0]
+		kindStatus := map[string]map[string]int{} // kind -> status -> count
+		for _, e := range events {
+			if e.RecordID == latestRecord.ID {
+				if _, ok := kindStatus[e.Kind]; !ok {
+					kindStatus[e.Kind] = map[string]int{"pass": 0, "fail": 0}
+				}
+				if isEventStatusPass(e.EventStatus) {
+					kindStatus[e.Kind]["pass"]++
+				} else {
+					kindStatus[e.Kind]["fail"]++
+				}
+			}
+		}
+		var kindArr []gin.H
+		for kind, statusMap := range kindStatus {
+			kindArr = append(kindArr, gin.H{
+				"kind":         kind,
+				"normal_count": statusMap["pass"],
+				"error_count":  statusMap["fail"],
+			})
+		}
+		latestRun = gin.H{
+			"record_id": latestRecord.ID,
+			"run_time":  latestRecord.CreatedAt,
+			"kinds":     kindArr,
+		}
+		result["latest_run"] = latestRun
+	}
 	amis.WriteJsonData(c, result)
+}
+
+// isEventStatusPass 判断巡检事件状态是否为通过
+func isEventStatusPass(status string) bool {
+	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
 }

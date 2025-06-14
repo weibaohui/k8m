@@ -286,7 +286,7 @@
               "icon": "fas fa-chart-pie text-primary",
               "actionType": "drawer",
               "drawer": {
-                "title": "汇总结果",
+                "title": "汇总信息",
                 "closeOnEsc": true,
                 "closeOnOutside": true,
                 "size": "lg",
@@ -296,35 +296,73 @@
                   "body": [
                     {
                       "type": "tpl",
-                      "tpl": "共 ${total_clusters} 个集群，执行 ${total_runs} 次"
+                      "tpl": "<b>总执行次数：</b> ${total_runs}"
+                    },
+                    {
+                      "type": "tpl",
+                      "tpl": "<b>总集群数：</b> ${total_clusters}"
+                    },
+                    {
+                      "type": "tpl",
+                      "tpl": "<b>最后一次执行：</b>"
+                    },
+                    {
+                      "type": "panel",
+                      "body": [
+                        {
+                          "type": "tpl",
+                          "tpl": "<b>执行时间：</b> ${latest_run.run_time}"
+                        },
+                        {
+                          "type": "tpl",
+                          "tpl": "<b>记录ID：</b> ${latest_run.record_id}"
+                        },
+                        {
+                          "type": "table",
+                          "title": "资源类型明细",
+                          "source": "${latest_run.kinds}",
+                          "columns": [
+                            {"name": "kind", "label": "资源类型"},
+                            {"name": "normal_count", "label": "正常数"},
+                            {"name": "error_count", "label": "异常数"}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tpl",
+                      "tpl": "<b>各集群明细：</b>"
                     },
                     {
                       "type": "each",
                       "name": "clusters",
-                      "items": {
-                        "type": "panel",
-                        "title": "集群：${cluster}  (执行${run_count}次)",
-                        "body": [
-                          {
-                            "type": "table",
-                            "source": "${kinds}",
-                            "columns": [
-                              {
-                                "name": "kind",
-                                "label": "资源类型"
-                              },
-                              {
-                                "name": "count",
-                                "label": "总数"
-                              },
-                              {
-                                "name": "error_count",
-                                "label": "异常数"
-                              }
-                            ]
-                          }
-                        ]
-                      }
+                      "items": [
+                        {
+                          "type": "panel",
+                          "title": "集群：${cluster}  (执行${run_count}次)",
+                          "body": [
+                            {
+                              "type": "table",
+                              "source": "${kinds}",
+                              "columns": [
+                                {
+                                  "name": "kind",
+                                  "label": "资源类型"
+                                },
+                                {
+                                  "name": "count",
+                                  "label": "总数"
+                                },
+                                {
+                                  "name": "error_count",
+                                  "label": "异常数"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {}
+                      ]
                     }
                   ]
                 }
