@@ -401,7 +401,35 @@
                                 },
                                 {
                                   "name": "msg",
-                                  "label": "消息"
+                                  "label": "消息",
+                                  "type": "control",
+                                  "body": [
+                                    {
+                                      "type": "tpl",
+                                      "tpl": "${msg}"
+                                    },
+                                    {
+                                      "type": "button",
+                                      "label": "AI释义",
+                                      "level": "link",
+                                      "actionType": "drawer",
+                                      "drawer": {
+                                        "closeOnEsc": true,
+                                        "closeOnOutside": true,
+                                        "size": "lg",
+                                        "title": "AI释义",
+                                        "body": [
+                                          {
+                                            "type": "websocketMarkdownViewer",
+                                            "url": "/ai/chat/any_selection",
+                                            "params": {
+                                              "question": "请详细解读下面的集群巡检结果所代表的含义：${msg}。"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
                                 },
                                 {
                                   "name": "script_name",
