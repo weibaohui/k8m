@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -42,7 +43,7 @@ func Summary(c *gin.Context) {
 		}
 	}
 
-	// 2. 查询所有该scheduleID下的InspectionRecord，收集recordIDs和集群
+	// 2. 查询所有该scheduleID下的InspectionRecord
 	recordModel := &models.InspectionRecord{}
 	records, _, err := recordModel.List(params, func(db *gorm.DB) *gorm.DB {
 		query := db
@@ -65,17 +66,21 @@ func Summary(c *gin.Context) {
 		amis.WriteJsonData(c, gin.H{"summary": "无执行记录"})
 		return
 	}
-	recordIDs := make([]uint, 0, len(records))
+	tempScheduleIDs := make([]*uint, 0, 20)
 	clusterSet := map[string]struct{}{}
 	for _, r := range records {
-		recordIDs = append(recordIDs, r.ID)
+		tempScheduleIDs = append(tempScheduleIDs, r.ScheduleID)
 		clusterSet[r.Cluster] = struct{}{}
 	}
 
+	// 对ScheduleID进行去重
+	tempScheduleIDs = slice.UniqueBy(tempScheduleIDs, func(item *uint) uint {
+		return *item
+	})
 	// 3. 查询所有相关InspectionCheckEvent
 	eventModel := &models.InspectionCheckEvent{}
 	events, _, err := eventModel.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where("record_id in ?", recordIDs)
+		return db.Where("schedule_id in ?", tempScheduleIDs)
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
