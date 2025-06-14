@@ -25,6 +25,11 @@
               "api": "post:/admin/inspection/schedule/save",
               "body": [
                 {
+                  "type": "alert",
+                  "level": "success",
+                  "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1日凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
+                },
+                {
                   "type": "input-text",
                   "name": "name",
                   "label": "任务名称",
@@ -144,6 +149,11 @@
                   "type": "form",
                   "api": "post:/admin/inspection/schedule/save",
                   "body": [
+                    {
+                      "type": "alert",
+                      "level": "success",
+                      "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1日凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
+                    },
                     {
                       "type": "hidden",
                       "name": "id"
