@@ -1,8 +1,10 @@
 package inspection
 
 import (
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -54,6 +56,39 @@ func LuaScriptDelete(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
+func LuaScriptOptionList(c *gin.Context) {
+	m := models.InspectionLuaScript{}
+	params := dao.BuildParams(c)
+	params.PerPage = 100000
+	list, _, err := m.List(params)
+
+	if err != nil {
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
+	var scripts []map[string]string
+	for _, n := range list {
+		klog.V(6).Infof("script n \n%s\n", utils.ToJSON(n))
+		scripts = append(scripts, map[string]string{
+			"label":       n.Name,
+			"value":       n.ScriptCode,
+			"script_code": n.ScriptCode,
+			"name":        n.Name,
+			"description": n.Description,
+		})
+	}
+	slice.SortBy(scripts, func(a, b map[string]string) bool {
+		return a["label"] < b["label"]
+	})
+	amis.WriteJsonData(c, gin.H{
+		"options": scripts,
+	})
+
+}
+
 func LuaScriptLoad(c *gin.Context) {
 	// 删除后，重新插入内置脚本
 	err := dao.DB().Model(&models.InspectionLuaScript{}).Where("script_type == ?", constants.LuaScriptTypeBuiltin).Delete(&models.InspectionLuaScript{}).Error

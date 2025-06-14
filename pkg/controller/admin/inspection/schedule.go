@@ -173,3 +173,29 @@ func Start(c *gin.Context) {
 
 	amis.WriteJsonOKMsg(c, "巡检开始，请稍后刷新查看结果")
 }
+func UpdateScriptCode(c *gin.Context) {
+	id := c.Param("id")
+	type requestBody struct {
+		ScriptCodes string `json:"script_codes"`
+	}
+	var codes requestBody
+
+	err := c.ShouldBindJSON(&codes)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	params := dao.BuildParams(c)
+	m := &models.InspectionSchedule{}
+	m.ID = utils.ToUInt(id)
+	m.ScriptCodes = codes.ScriptCodes
+	err = m.Save(params, func(db *gorm.DB) *gorm.DB {
+		return db.Select("script_codes")
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}

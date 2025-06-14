@@ -525,7 +525,7 @@ func main() {
 		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
 		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
 
-		// 集群巡检配置
+		// 集群巡检计划配置
 		admin.GET("/inspection/schedule/list", inspection.List)
 		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
 		admin.GET("inspection/schedule/record/id/:id/event/list", inspection.EventList)
@@ -533,12 +533,14 @@ func main() {
 		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
 		admin.POST("/inspection/schedule/start/id/:id", inspection.Start)
+		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
 
 		// 集群巡检脚本
 		admin.GET("/inspection/script/list", inspection.LuaScriptList)
 		admin.POST("/inspection/script/delete/:ids", inspection.LuaScriptDelete)
 		admin.POST("/inspection/script/save", inspection.LuaScriptSave)
 		admin.POST("/inspection/script/load", inspection.LuaScriptLoad)
+		admin.GET("/inspection/script/option_list", inspection.LuaScriptOptionList)
 
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)

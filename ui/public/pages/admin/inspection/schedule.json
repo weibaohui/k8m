@@ -229,6 +229,52 @@
             },
             {
               "type": "button",
+              "icon": "fas fa-list text-primary",
+              "tooltip": "管理规则",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "选择巡检计划要执行的规则",
+                "body": {
+                  "type": "form",
+                  "wrapWithPanel": false,
+                  "labelWidth": "0",
+                  "style": {
+                    "height": "500px"
+                  },
+                  "api": "post:/admin/inspection/schedule/id/$id/update_script_code",
+                  "body": [
+                    {
+                      "type": "transfer",
+                      "name": "script_codes",
+                      "source": "get:/admin/inspection/script/option_list",
+                      "searchable": true,
+                      "statistics": true,
+                      "resultListModeFollowSelect": true,
+                      "selectMode": "table",
+                      "columns": [
+                        {
+                          "name": "script_code",
+                          "label": "规则编码"
+                        },
+                        {
+                          "name": "name",
+                          "label": "规则名称"
+                        },
+                        {
+                          "name": "description",
+                          "label": "规则描述"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "button",
               "icon": "fas fa-play text-primary",
               "actionType": "ajax",
               "tooltip": "立即执行",
