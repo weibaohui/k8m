@@ -27,7 +27,7 @@
                 {
                   "type": "alert",
                   "level": "success",
-                  "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1日凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
+                  "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
                 },
                 {
                   "type": "input-text",
@@ -152,7 +152,7 @@
                     {
                       "type": "alert",
                       "level": "success",
-                      "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1日凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
+                      "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
                     },
                     {
                       "type": "hidden",
@@ -282,10 +282,53 @@
             },
             {
               "type": "button",
-              "label": "汇总",
-              "actionType": "ajax",
-              "confirmText": "汇总?",
-              "api": "post:/admin/inspection/schedule/id/$id/summary"
+              "tooltip": "巡检结果汇总",
+              "icon": "fas fa-chart-pie text-primary",
+              "actionType": "drawer",
+              "drawer": {
+                "title": "汇总结果",
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "body": {
+                  "type": "service",
+                  "api": "post:/admin/inspection/schedule/id/$id/summary",
+                  "body": [
+                    {
+                      "type": "tpl",
+                      "tpl": "共 ${total_clusters} 个集群"
+                    },
+                    {
+                      "type": "each",
+                      "name": "clusters",
+                      "items": {
+                        "type": "panel",
+                        "title": "集群：${cluster}",
+                        "body": [
+                          {
+                            "type": "table",
+                            "source": "${kinds}",
+                            "columns": [
+                              {
+                                "name": "kind",
+                                "label": "资源类型"
+                              },
+                              {
+                                "name": "count",
+                                "label": "总数"
+                              },
+                              {
+                                "name": "error_count",
+                                "label": "异常数"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
             },
             {
               "type": "button",
