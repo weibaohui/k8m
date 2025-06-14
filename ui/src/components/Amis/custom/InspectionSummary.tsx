@@ -2,26 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { fetcher } from '@/components/Amis/fetcher';
 import { Alert, Button, Card, DatePicker, Form, Spin, Table } from "antd";
 import dayjs from 'dayjs';
+import { replacePlaceholders } from '@/utils/utils';
 
 
 interface InspectionSummaryComponentProps {
-    id: string;
+    schedule_id: string;
+    data: Record<string, any>;
+
 }
 
 /**
  * InspectionSummaryComponent 组件
  * 使用antd控件，动态根据表单参数从API获取数据并展示amis风格页面，使用fetcher封装请求
  */
-const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSummaryComponentProps>(({ id }, _) => {
+const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSummaryComponentProps>(({ schedule_id, data }, _) => {
     // 表单状态
     const [form] = Form.useForm();
     const [startTime, setStartTime] = useState(() => dayjs().startOf('day'));
     const [endTime, setEndTime] = useState(() => dayjs().add(1, 'day').startOf('day'));
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<any>({});
+    const [summaryData, setSummaryData] = useState<any>({});
     const [error, setError] = useState<string | null>(null);
-    if (id === undefined) {
-        id = ""
+
+    schedule_id = replacePlaceholders(schedule_id, data);
+
+    if (schedule_id === undefined) {
+        schedule_id = ""
     }
     // 查询API，使用fetcher
     const fetchSummary = (values?: any) => {
@@ -29,19 +35,19 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         setError(null);
         const sTime = (values?.startTime || startTime).format('YYYY-MM-DDTHH:mm:ss') + 'Z';
         const eTime = (values?.endTime || endTime).format('YYYY-MM-DDTHH:mm:ss') + 'Z';
-        const url = `/admin/inspection/schedule/id/${id}/summary/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
+        const url = `/admin/inspection/schedule/id/${schedule_id}/summary/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
         fetcher({ url, method: 'post' })
             .then((response: any) => {
                 if (response?.data?.data) {
-                    setData(response.data.data);
+                    setSummaryData(response.data.data);
                 } else {
-                    setData({});
+                    setSummaryData({});
                     setError('未获取到数据');
                 }
             })
             .catch((err: any) => {
                 setError(err.message || '未知错误');
-                setData({});
+                setSummaryData({});
             })
             .finally(() => {
                 setLoading(false);
@@ -52,7 +58,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         fetchSummary();
     }, []);
 
-    const { total_runs, total_clusters, latest_run = {}, clusters = [] } = data || {};
+    const { total_runs, total_clusters, latest_run = {}, clusters = [] } = summaryData || {};
 
     // antd表格列定义
     const latestRunColumns = [
