@@ -231,6 +231,7 @@
               "type": "button",
               "icon": "fas fa-play text-primary",
               "actionType": "ajax",
+              "tooltip": "立即执行",
               "api": "post:/admin/inspection/schedule/start/id/$id"
             },
             {
