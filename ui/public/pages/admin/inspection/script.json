@@ -75,7 +75,7 @@
                   "type": "input-text",
                   "name": "script_code",
                   "label": "规则代码",
-                  "placeholder": "请输入规则代码,全局唯一编码",
+                  "placeholder": "请输入规则代码,全局唯一编码，巡检计划使用该规则代码",
                   "required": true
                 }
               ],
@@ -216,7 +216,7 @@
                       "type": "input-text",
                       "name": "script_code",
                       "label": "规则代码",
-                      "placeholder": "请输入规则代码,全局唯一编码",
+                      "placeholder": "请输入规则代码，全局唯一编码，巡检计划使用该规则代码",
                       "required": true
                     }
                   ],
