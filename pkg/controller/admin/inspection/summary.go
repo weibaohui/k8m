@@ -2,6 +2,7 @@ package inspection
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -12,6 +13,9 @@ import (
 
 // Summary 汇总指定scheduleID下的巡检执行信息
 // 展示涉及集群数、每个集群涉及的Kind数量、每个Kind检查次数及错误数
+// Summary 统计巡检计划执行情况，支持按时间范围过滤
+// @param start_time 可选，起始时间（格式：2006-01-02T15:04:05Z07:00）
+// @param end_time 可选，结束时间（格式：2006-01-02T15:04:05Z07:00）
 func Summary(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 100000
@@ -22,10 +26,37 @@ func Summary(c *gin.Context) {
 		return
 	}
 
+	// 新增：解析时间范围参数
+	var startTime, endTime time.Time
+	var err error
+	startTimeStr := c.Query("start_time")
+	endTimeStr := c.Query("end_time")
+	if startTimeStr != "" {
+		startTime, err = time.Parse(time.RFC3339, startTimeStr)
+		if err != nil {
+			amis.WriteJsonError(c, fmt.Errorf("start_time 格式错误，应为 RFC3339"))
+			return
+		}
+	}
+	if endTimeStr != "" {
+		endTime, err = time.Parse(time.RFC3339, endTimeStr)
+		if err != nil {
+			amis.WriteJsonError(c, fmt.Errorf("end_time 格式错误，应为 RFC3339"))
+			return
+		}
+	}
+
 	// 2. 查询所有该scheduleID下的InspectionRecord，收集recordIDs和集群
 	recordModel := &models.InspectionRecord{}
 	records, _, err := recordModel.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where("schedule_id = ?", scheduleID).Order("id desc")
+		query := db.Where("schedule_id = ?", scheduleID)
+		if !startTime.IsZero() {
+			query = query.Where("created_at >= ?", startTime)
+		}
+		if !endTime.IsZero() {
+			query = query.Where("created_at <= ?", endTime)
+		}
+		return query.Order("id desc")
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
