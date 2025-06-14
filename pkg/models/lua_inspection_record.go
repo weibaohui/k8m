@@ -45,6 +45,7 @@ type InspectionScriptResult struct {
 	ErrorMsg   string    `json:"error_msg,omitempty"` // 错误信息
 	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	Cluster    string    `json:"cluster"`              // 目标集群
 }
 
 // List 返回符合条件的 InspectionRecord 列表及总数

@@ -74,6 +74,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 			StartTime:  res.StartTime,
 			EndTime:    res.EndTime,
 			StdOutput:  res.LuaRunOutput,
+			Cluster:    cluster,
 		}
 		if res.LuaRunError != nil {
 			result.ErrorMsg = res.LuaRunError.Error()
