@@ -70,6 +70,13 @@
                   "name": "script",
                   "label": "规则内容",
                   "placeholder": "请输入规则内容"
+                },
+                {
+                  "type": "input-text",
+                  "name": "script_code",
+                  "label": "规则代码",
+                  "placeholder": "请输入规则代码,全局唯一编码",
+                  "required": true
                 }
               ],
               "submitText": "保存",
@@ -204,6 +211,13 @@
                       "name": "script",
                       "label": "规则内容",
                       "placeholder": "请输入规则内容"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "script_code",
+                      "label": "规则代码",
+                      "placeholder": "请输入规则代码,全局唯一编码",
+                      "required": true
                     }
                   ],
                   "submitText": "保存",

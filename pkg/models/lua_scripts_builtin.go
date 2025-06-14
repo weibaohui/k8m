@@ -16,6 +16,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Version:     "v1",
 		Kind:        "Service",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Service_001",
 		Script: `
 			local svcs, err = kubectl:GVK("", "v1", "Service"):AllNamespace(""):List()
 			if not err and svcs then
@@ -54,6 +55,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Version:     "v1",
 		Kind:        "ConfigMap",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_ConfigMap_002",
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -114,6 +116,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Version:     "v1",
 		Kind:        "ConfigMap",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_ConfigMap_003",
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -150,6 +153,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Version:     "v1",
 		Kind:        "ConfigMap",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_ConfigMap_004",
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -191,6 +195,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Version:     "v1",
 		Kind:        "Deployment",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Deployment_005",
 		Script: `
 			local deployments, err = kubectl:GVK("apps", "v1", "Deployment"):Cache(10):AllNamespace(""):List()
 			if err then
