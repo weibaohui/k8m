@@ -387,12 +387,16 @@
                                   }
                                 },
                                 {
-                                  "name": "name",
-                                  "label": "名称"
+                                  "name": "cluster",
+                                  "label": "集群"
                                 },
                                 {
                                   "name": "namespace",
                                   "label": "命名空间"
+                                },
+                                {
+                                  "name": "name",
+                                  "label": "名称"
                                 },
                                 {
                                   "name": "msg",
@@ -489,6 +493,10 @@
                                   {
                                     "name": "script_name",
                                     "label": "规则名称"
+                                  },
+                                  {
+                                    "name": "cluster",
+                                    "label": "集群"
                                   },
                                   {
                                     "name": "std_output",
