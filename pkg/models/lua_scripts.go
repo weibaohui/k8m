@@ -46,3 +46,32 @@ func (c *InspectionLuaScript) Delete(params *dao.Params, ids string, queryFuncs 
 func (c *InspectionLuaScript) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*InspectionLuaScript, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
 }
+
+// InspectionLuaScriptBuiltinVersion 用于记录内置脚本的版本号
+// 只会有一条记录，key 固定为 builtin_lua_scripts
+// 用于判断是否需要更新内置脚本
+type InspectionLuaScriptBuiltinVersion struct {
+	Key       string    `gorm:"primaryKey;size:64" json:"key"` // 固定为 builtin_lua_scripts
+	Version   string    `json:"version"`                       // 版本号
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// GetBuiltinLuaScriptsVersion 获取数据库中记录的内置脚本版本
+func GetBuiltinLuaScriptsVersion(db *gorm.DB) (string, error) {
+	record := &InspectionLuaScriptBuiltinVersion{}
+	err := db.First(record, "key = ?", "builtin_lua_scripts").Error
+	if err != nil {
+		return "", err
+	}
+	return record.Version, nil
+}
+
+// SetBuiltinLuaScriptsVersion 设置数据库中内置脚本的版本号
+func SetBuiltinLuaScriptsVersion(db *gorm.DB, version string) error {
+	record := &InspectionLuaScriptBuiltinVersion{
+		Key:       "builtin_lua_scripts",
+		Version:   version,
+		UpdatedAt: time.Now(),
+	}
+	return db.Save(record).Error
+}

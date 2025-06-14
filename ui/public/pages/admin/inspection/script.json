@@ -98,7 +98,7 @@
         "bulkActions",
         {
           "type": "button",
-          "label": "加载内置规则",
+          "label": "重置内置规则",
           "actionType": "ajax",
           "confirmText": "该操作将先删除所有自定义规则，然后重新加载内置规则，是否执行?",
           "api": "post:/admin/inspection/script/load"
