@@ -140,14 +140,11 @@ func Init() {
 			service.PVService().Watch()
 			service.IngressService().Watch()
 			service.McpService().Start()
+			// 启动集群巡检
+			lua.InitClusterInspection()
 		})
-
 	}()
 
-	// 启动集群巡检
-	go func() {
-		lua.InitClusterInspection()
-	}()
 }
 
 // main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与资源监控，配置 Gin 路由和中间件，挂载前端静态资源，并提供认证、集群与资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。

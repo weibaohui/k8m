@@ -94,6 +94,24 @@ func Delete(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	// 查询到需清除的执行记录
+	var records []*models.InspectionRecord
+	if err = dao.DB().Model(&records).Where("schedule_id in (?)", ids).Find(&records).Error; err == nil {
+		recordIds := make([]uint, len(records))
+		for i, record := range records {
+			recordIds[i] = record.ID
+		}
+		// 先清除检测历史事件
+		events := &models.InspectionCheckEvent{}
+		dao.DB().Model(&events).Where("record_id in (?)", recordIds).Delete(&events)
+		scriptResult := models.InspectionScriptResult{}
+		dao.DB().Model(&scriptResult).Where("record_id in (?)", recordIds).Delete(&scriptResult)
+
+		// 再清除执行记录
+		dao.DB().Model(&records).Where("schedule_id in (?)", ids).Delete(&records)
+	}
+
 	// 清除定时 任务
 	intIds := utils.ToInt64Slice(ids)
 	for _, id := range intIds {
