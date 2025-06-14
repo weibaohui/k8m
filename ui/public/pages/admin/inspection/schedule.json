@@ -329,9 +329,9 @@
                       "buttons": [
                         {
                           "type": "button",
-                          "icon": "fas fa-list text-primary",
+                          "icon": "fas fa-exclamation-circle text-primary",
                           "actionType": "drawer",
-                          "tooltip": "巡检明细",
+                          "label": "事件明细",
                           "drawer": {
                             "closeOnEsc": true,
                             "closeOnOutside": true,
@@ -437,6 +437,104 @@
                                 }
                               ]
                             }
+                          }
+                        },
+                        {
+                          "type": "button",
+                          "icon": "fas fa-file-alt text-primary",
+                          "actionType": "drawer",
+                          "label": "运行输出",
+                          "drawer": {
+                            "closeOnEsc": true,
+                            "closeOnOutside": true,
+                            "size": "xl",
+                            "title": "查看脚本执行输出内容 (ESC 关闭)",
+                            "body": [
+                              {
+                                "type": "alert",
+                                "level": "info",
+                                "body": "<strong>注意：</strong>该页面展示内容为对应规则脚本（lua）在运行时的标准输出、错误输出。"
+                              },
+                              {
+                                "type": "crud",
+                                "id": "scriptOutputCRUD",
+                                "name": "scriptOutputCRUD",
+                                "autoFillHeight": true,
+                                "api": "get:/admin/inspection/schedule/record/id/$id/output/list",
+                                "headerToolbar": [
+                                  {
+                                    "type": "columns-toggler",
+                                    "align": "right",
+                                    "draggable": true,
+                                    "icon": "fas fa-cog",
+                                    "overlay": true,
+                                    "footerBtnSize": "sm"
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "共${count}条",
+                                    "align": "right",
+                                    "visibleOn": "${count}"
+                                  },
+                                  {
+                                    "type": "columns-toggler",
+                                    "align": "left"
+                                  },
+                                  "reload"
+                                ],
+                                "loadDataOnce": true,
+                                "syncLocation": false,
+                                "initFetch": true,
+                                "perPage": 10,
+                                "columns": [
+                                  {
+                                    "name": "script_name",
+                                    "label": "规则名称"
+                                  },
+                                  {
+                                    "name": "std_output",
+                                    "label": "标准输出"
+                                  },
+                                  {
+                                    "name": "error_msg",
+                                    "label": "错误输出",
+                                    "type": "control",
+                                    "body": [
+                                      {
+                                        "type": "tpl",
+                                        "tpl": "${error_msg?error_msg:''}"
+                                      },
+                                      {
+                                        "type": "button",
+                                        "label": "查",
+                                        "level": "link",
+                                        "actionType": "drawer",
+                                        "drawer": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "size": "lg",
+                                          "title": "AI释义",
+                                          "body": [
+                                            {
+                                              "type": "websocketMarkdownViewer",
+                                              "url": "/ai/chat/any_selection",
+                                              "params": {
+                                                "question": "请详细解读下面的集群巡检结果所代表的含义：${error_msg}。"
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        "visibleOn": "${error_msg}"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "script_name",
+                                    "label": "脚本名称"
+                                  }
+                                ]
+                              }
+                            ]
                           }
                         }
                       ]

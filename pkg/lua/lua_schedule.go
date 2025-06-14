@@ -29,6 +29,7 @@ const TriggerTypeCron = "cron"
 // cluster: 目标集群
 // triggerType: 触发类型（manual/cron）
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
+
 	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果scheduleID 不为空，
 	// 从数据库中读取scheduleName
@@ -63,20 +64,23 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	inspection := NewLuaInspection(schedule, cluster)
 	results := inspection.Start()
 
-	var scriptResults []models.InspectionScriptResult
-	var checkEvents []models.InspectionCheckEvent
+	var scriptResults []*models.InspectionScriptResult
+	var checkEvents []*models.InspectionCheckEvent
 	var errorCount int
 	for _, res := range results {
-		scriptResults = append(scriptResults, models.InspectionScriptResult{
+		result := models.InspectionScriptResult{
 			RecordID:   record.ID,
 			ScriptName: res.Name,
 			StartTime:  res.StartTime,
 			EndTime:    res.EndTime,
-			Output:     res.LuaRunOutput,
-			ErrorMsg:   fmt.Sprintf("%v", res.LuaRunError),
-		})
+			StdOutput:  res.LuaRunOutput,
+		}
+		if res.LuaRunError != nil {
+			result.ErrorMsg = res.LuaRunError.Error()
+		}
+		scriptResults = append(scriptResults, &result)
 		for _, e := range res.Events {
-			checkEvents = append(checkEvents, models.InspectionCheckEvent{
+			checkEvents = append(checkEvents, &models.InspectionCheckEvent{
 				RecordID:   record.ID,
 				Status:     e.Status,
 				Msg:        e.Msg,
