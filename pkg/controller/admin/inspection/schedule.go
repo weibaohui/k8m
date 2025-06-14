@@ -108,7 +108,7 @@ func Delete(c *gin.Context) {
 		dao.DB().Model(&scriptResult).Where("record_id in (?)", recordIds).Delete(&scriptResult)
 
 		// 再清除执行记录
-		dao.DB().Model(&records).Where("schedule_id in (?)", ids).Delete(&records)
+		dao.DB().Model(&records).Where("schedule_id in (?)", intIds).Delete(&records)
 	}
 
 	// 删除计划

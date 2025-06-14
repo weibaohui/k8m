@@ -91,7 +91,7 @@ func LuaScriptOptionList(c *gin.Context) {
 
 func LuaScriptLoad(c *gin.Context) {
 	// 删除后，重新插入内置脚本
-	err := dao.DB().Model(&models.InspectionLuaScript{}).Where("script_type == ?", constants.LuaScriptTypeBuiltin).Delete(&models.InspectionLuaScript{}).Error
+	err := dao.DB().Model(&models.InspectionLuaScript{}).Where("script_type = ?", constants.LuaScriptTypeBuiltin).Delete(&models.InspectionLuaScript{}).Error
 	if err != nil {
 		klog.Errorf("删除内置巡检脚本失败: %v", err)
 		amis.WriteJsonError(c, err)
