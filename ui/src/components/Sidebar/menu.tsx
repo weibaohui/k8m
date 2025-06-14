@@ -481,17 +481,26 @@ const items: () => MenuItem[] = () => {
                         onClick: () => onMenuClick('/admin/config/config')
                     },
                     {
-                        label: "集群巡检",
+                        label: "集群巡检设置",
                         icon: <i className="fa-solid fa-stethoscope"></i>,
-                        key: "inspection_schedule",
-                        onClick: () => onMenuClick('/admin/inspection/schedule')
+                        key: "inspection_settings",
+                        children: [
+                            {
+                                label: "巡检计划",
+                                icon: <i className="fa-solid fa-stethoscope"></i>,
+                                key: "inspection_schedule",
+                                onClick: () => onMenuClick('/admin/inspection/schedule'),
+
+                            },
+                            {
+                                label: "巡检规则",
+                                icon: <i className="fa-solid fa-clipboard-check"></i>,
+                                key: "script_management",
+                                onClick: () => onMenuClick('/admin/inspection/script')
+                            },
+                        ]
                     },
-                    {
-                        label: "集群巡检规则",
-                        icon: <i className="fa-solid fa-clipboard-check"></i>,
-                        key: "script_management",
-                        onClick: () => onMenuClick('/admin/inspection/script')
-                    },
+
                     {
                         label: "AI模型配置",
                         icon: <i className="fa-solid fa-sliders"></i>,
