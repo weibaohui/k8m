@@ -61,7 +61,7 @@ func EventList(c *gin.Context) {
 }
 func Save(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := &models.InspectionSchedule{}
+	m := models.InspectionSchedule{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)
