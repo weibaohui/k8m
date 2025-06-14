@@ -18,6 +18,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Service_001",
 		Script: `
+			-- 检查每个 Service 的 selector 是否有对应 Pod，Pod 查询限定在 Service 所在的 namespace
 			local svcs, err = kubectl:GVK("", "v1", "Service"):AllNamespace(""):List()
 			if not err and svcs then
 				for _, svc in ipairs(svcs) do
@@ -30,7 +31,8 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 							end
 							labelSelector = labelSelector .. k .. "=" .. v
 						end
-						local pods, err = kubectl:GVK("", "v1", "Pod"):Cache(10):WithLabelSelector(labelSelector):List()
+						-- 这里使用 Namespace(svc.metadata.namespace) 保证只查找与 Service 相同命名空间下的 Pod
+						local pods, err = kubectl:GVK("", "v1", "Pod"):Namespace(svc.metadata.namespace):Cache(10):WithLabelSelector(labelSelector):List()
 						local count = 0
 						if not err and pods then
 							for _, _ in pairs(pods) do count = count + 1 end
