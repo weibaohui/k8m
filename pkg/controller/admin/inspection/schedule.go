@@ -87,17 +87,17 @@ func Save(c *gin.Context) {
 func Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
-	m := &models.InspectionSchedule{}
 
-	err := m.Delete(params, ids)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
+	// 清除定时 任务
+	intIds := utils.ToInt64Slice(ids)
+	for _, id := range intIds {
+		sb := lua.ScheduleBackground{}
+		sb.Remove(uint(id))
 	}
 
 	// 查询到需清除的执行记录
 	var records []*models.InspectionRecord
-	if err = dao.DB().Model(&records).Where("schedule_id in (?)", ids).Find(&records).Error; err == nil {
+	if err := dao.DB().Model(&records).Where("schedule_id in (?)", ids).Find(&records).Error; err == nil {
 		recordIds := make([]uint, len(records))
 		for i, record := range records {
 			recordIds[i] = record.ID
@@ -112,12 +112,14 @@ func Delete(c *gin.Context) {
 		dao.DB().Model(&records).Where("schedule_id in (?)", ids).Delete(&records)
 	}
 
-	// 清除定时 任务
-	intIds := utils.ToInt64Slice(ids)
-	for _, id := range intIds {
-		sb := lua.ScheduleBackground{}
-		sb.Remove(uint(id))
+	// 删除计划
+	m := &models.InspectionSchedule{}
+	err := m.Delete(params, ids)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
+
 	amis.WriteJsonOK(c)
 }
 
