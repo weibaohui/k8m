@@ -46,12 +46,6 @@
                   }
                 },
                 {
-                  "type": "input-text",
-                  "name": "description",
-                  "label": "任务描述",
-                  "placeholder": "请输入任务描述"
-                },
-                {
                   "type": "select",
                   "name": "clusters",
                   "label": "目标集群",
@@ -75,6 +69,12 @@
                   "onText": "启用",
                   "offText": "禁用",
                   "value": true
+                },
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "计划描述",
+                  "placeholder": "请输入计划描述"
                 }
               ],
               "submitText": "保存",
@@ -140,11 +140,11 @@
               "type": "button",
               "icon": "fas fa-edit text-primary",
               "actionType": "drawer",
-              "tooltip": "编辑任务",
+              "tooltip": "编辑计划",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
-                "title": "编辑定时巡检任务 (ESC 关闭)",
+                "title": "编辑巡检计划 (ESC 关闭)",
                 "body": {
                   "type": "form",
                   "api": "post:/admin/inspection/schedule/save",
@@ -161,24 +161,18 @@
                     {
                       "type": "input-text",
                       "name": "name",
-                      "label": "任务名称",
+                      "label": "计划名称",
                       "required": true,
-                      "placeholder": "请输入任务名称",
+                      "placeholder": "请输入计划名称",
                       "validateOnChange": true,
                       "validations": {
                         "minLength": 2,
                         "maxLength": 50
                       },
                       "validationErrors": {
-                        "minLength": "任务名称至少 2 个字符",
-                        "maxLength": "任务名称最多 50 个字符"
+                        "minLength": "计划名称至少 2 个字符",
+                        "maxLength": "计划名称最多 50 个字符"
                       }
-                    },
-                    {
-                      "type": "input-text",
-                      "name": "description",
-                      "label": "任务描述",
-                      "placeholder": "请输入任务描述"
                     },
                     {
                       "type": "select",
@@ -203,6 +197,12 @@
                       "label": "是否启用",
                       "onText": "启用",
                       "offText": "禁用"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "description",
+                      "label": "计划描述",
+                      "placeholder": "请输入计划描述"
                     }
                   ],
                   "submitText": "保存",
@@ -230,7 +230,7 @@
             {
               "type": "button",
               "icon": "fas fa-list text-primary",
-              "tooltip": "管理规则",
+              "tooltip": "执行规则",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
@@ -565,13 +565,18 @@
                       "label": "状态"
                     },
                     {
+                      "name": "error_count",
+                      "label": "错误数量"
+                    },
+                    {
                       "name": "start_time",
                       "label": "开始时间",
                       "type": "datetime"
                     },
                     {
-                      "name": "error_count",
-                      "label": "错误数量"
+                      "name": "end_time",
+                      "label": "结束时间",
+                      "type": "datetime"
                     }
                   ]
                 }
@@ -581,15 +586,9 @@
         },
         {
           "name": "name",
-          "label": "任务名称",
+          "label": "计划名称",
           "type": "text",
           "width": "180px"
-        },
-        {
-          "name": "description",
-          "label": "描述",
-          "type": "text",
-          "width": "200px"
         },
         {
           "name": "clusters",
@@ -628,6 +627,11 @@
               }
             }
           ]
+        },
+        {
+          "name": "last_run_time",
+          "label": "最后运行",
+          "type": "datetime"
         },
         {
           "name": "enabled",

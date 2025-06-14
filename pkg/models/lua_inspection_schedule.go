@@ -24,6 +24,7 @@ type InspectionSchedule struct {
 	CreatedAt   time.Time    `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time    `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 	CronRunID   cron.EntryID `json:"cron_run_id"`          // cron 运行ID，可用于删除
+	LastRunTime *time.Time   `json:"last_run_time"`        // 上次运行时间
 }
 
 // List 返回符合条件的 InspectionSchedule 列表及总数

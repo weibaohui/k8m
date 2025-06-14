@@ -113,6 +113,12 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	_ = record.Save(nil)
 
 	klog.V(6).Infof("集群巡检完成。集群巡检记录ID=%d", record.ID)
+
+	// 更新集群巡检计划运行结果
+	schedule.LastRunTime = &endTime
+	_ = schedule.Save(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Select("last_run_time")
+	})
 	return record, nil
 }
 
