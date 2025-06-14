@@ -2,8 +2,37 @@
     "type": "page",
     "body": [
         {
+            "type": "form",
+            "mode": "inline",
+            "wrapWithPanel": false,
+            "target": "service-summary",
+            "controls": [
+                {
+                    "type": "datetime",
+                    "name": "start_time",
+                    "label": "起始时间",
+                    "format": "YYYY-MM-DDTHH:mm:ssZ",
+                    "inputFormat": "YYYY-MM-DD HH:mm:ss",
+                    "value": "+0days"
+                },
+                {
+                    "type": "datetime",
+                    "name": "end_time",
+                    "label": "结束时间",
+                    "format": "YYYY-MM-DDTHH:mm:ssZ",
+                    "inputFormat": "YYYY-MM-DD HH:mm:ss",
+                    "value": "+1days"
+                },
+                {
+                    "type": "submit",
+                    "label": "查询"
+                }
+            ]
+        },
+        {
             "type": "service",
-            "api": "post:/admin/inspection/schedule/id/$id/summary",
+            "name": "service-summary",
+            "api": "post:/admin/inspection/schedule/id/$id/summary/start_time/$start_time/end_time/$end_time",
             "body": [
                 {
                     "type": "tpl",
@@ -64,8 +93,7 @@
                                     ]
                                 }
                             ]
-                        },
-                        {}
+                        }
                     ]
                 }
             ]

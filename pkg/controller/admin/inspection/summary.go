@@ -25,8 +25,8 @@ func Summary(c *gin.Context) {
 	// 新增：解析时间范围参数
 	var startTime, endTime time.Time
 	var err error
-	startTimeStr := c.Query("start_time")
-	endTimeStr := c.Query("end_time")
+	startTimeStr := c.Param("start_time")
+	endTimeStr := c.Param("end_time")
 	if startTimeStr != "" {
 		startTime, err = time.Parse(time.RFC3339, startTimeStr)
 		if err != nil {
