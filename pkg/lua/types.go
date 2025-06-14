@@ -14,7 +14,6 @@ type CheckEvent struct {
 	CheckDesc  string                 `json:"checkDesc"`  // 检查脚本内容描述
 	Namespace  string                 `json:"ns"`         // 资源命名空间
 	Name       string                 `json:"name"`       // 资源名称
-	Cluster    string                 `json:"cluster"`    // 检查集群
 }
 
 type CheckResult struct {

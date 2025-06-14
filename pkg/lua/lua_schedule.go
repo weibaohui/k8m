@@ -90,7 +90,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 				CheckDesc:  e.CheckDesc,
 				Namespace:  e.Namespace,
 				Name:       e.Name,
-				Cluster:    e.Cluster,
+				Cluster:    cluster,
 			})
 			if e.Status == "错误" || e.Status == "error" || e.Status == "失败" {
 				errorCount += 1
