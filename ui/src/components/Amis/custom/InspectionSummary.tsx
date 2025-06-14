@@ -28,11 +28,15 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
     const [summaryData, setSummaryData] = useState<any>({});
     const [error, setError] = useState<string | null>(null);
 
+    let realScheduleId = ""
     // 处理 schedule_id 占位符
-    const realScheduleId = replacePlaceholders(schedule_id, data) || "";
+    if (schedule_id !== undefined) {
+        // 处理 schedule_id 占位符
+        realScheduleId = replacePlaceholders(schedule_id, data) || "";
+    }
 
     // 查询API，使用fetcher
-    const fetchSummary = useCallback((params?: {startTime?: Dayjs, endTime?: Dayjs}) => {
+    const fetchSummary = useCallback((params?: { startTime?: Dayjs, endTime?: Dayjs }) => {
         setLoading(true);
         setError(null);
         const sTime = (params?.startTime || startTime).format('YYYY-MM-DDTHH:mm:ss') + 'Z';
@@ -54,12 +58,12 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
             .finally(() => {
                 setLoading(false);
             });
-    }, [realScheduleId, startTime, endTime]);
+    }, [startTime, endTime]);
 
     // 外部参数变化自动刷新
     useEffect(() => {
         fetchSummary();
-    }, [realScheduleId, startTime, endTime, fetchSummary]);
+    }, [startTime, endTime, fetchSummary]);
 
     // antd表格列定义
     const latestRunColumns = [
@@ -73,7 +77,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         { title: '异常数', dataIndex: 'error_count', key: 'error_count' }
     ];
 
-    const { total_runs, total_clusters, latest_run = {}, clusters = [] } = summaryData || {};
+    const { total_runs, total_clusters, latest_run = {}, clusters = [], total_schedules } = summaryData || {};
 
     return (
         <div>
@@ -88,10 +92,10 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                         fetchSummary(values);
                     }}
                 >
-                    <Form.Item label="起始时间" name="startTime" rules={[{ required: true, message: '请选择起始时间' }]}> 
+                    <Form.Item label="起始时间" name="startTime" rules={[{ required: true, message: '请选择起始时间' }]}>
                         <DatePicker showTime format="YYYY-MM-DD HH:mm" value={startTime} allowClear={false} />
                     </Form.Item>
-                    <Form.Item label="结束时间" name="endTime" rules={[{ required: true, message: '请选择结束时间' }]}> 
+                    <Form.Item label="结束时间" name="endTime" rules={[{ required: true, message: '请选择结束时间' }]}>
                         <DatePicker showTime format="YYYY-MM-DD HH:mm" value={endTime} allowClear={false} />
                     </Form.Item>
                     <Form.Item>
@@ -105,6 +109,12 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     <Space>
                         <Text strong>总执行次数：</Text> <Text>{total_runs ?? '-'}</Text>
                         <Text strong>总集群数：</Text> <Text>{total_clusters ?? '-'}</Text>
+                        {/* 新增：运行巡检计划数 */}
+                        {total_schedules !== undefined && (
+                            <>
+                                <Text strong>运行巡检计划数：</Text> <Text>{total_schedules}</Text>
+                            </>
+                        )}
                     </Space>
                 </Card>
                 {latest_run && latest_run.record_id && (

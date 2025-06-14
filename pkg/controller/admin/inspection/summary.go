@@ -85,7 +85,8 @@ func Summary(c *gin.Context) {
 	// 4. 聚合统计
 
 	totalClusters := len(clusterSet)
-	totalRuns := len(records)                        // 巡检计划执行次数
+	totalRuns := len(records) // 巡检计划执行次数
+
 	clusterKindMap := map[string]map[string]int{}    // cluster -> kind -> count
 	clusterKindErrMap := map[string]map[string]int{} // cluster -> kind -> error count
 	for _, e := range events {
@@ -106,6 +107,12 @@ func Summary(c *gin.Context) {
 		"total_clusters": totalClusters,
 		"total_runs":     totalRuns, // 新增字段：执行次数
 		"clusters":       []gin.H{},
+	}
+	// 新增：如果 scheduleID 为空，增加运行巡检计划数
+	if scheduleID == "" {
+		var count int64
+		dao.DB().Model(&models.InspectionRecord{}).Distinct("schedule_id").Count(&count)
+		result["total_schedules"] = count
 	}
 	// 统计每个集群的执行次数
 	clusterRunCount := map[string]int{}
