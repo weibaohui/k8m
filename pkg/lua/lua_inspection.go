@@ -5,22 +5,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/kom/kom"
 	lua "github.com/yuin/gopher-lua"
+	"gorm.io/gorm"
 )
 
 type Inspection struct {
-	Cluster string // 集群名称
-	lua     *lua.LState
+	Cluster  string // 集群名称
+	lua      *lua.LState
+	Schedule *models.InspectionSchedule // 巡检计划ID
 }
 
-func NewLuaInspection(cluster string) *Inspection {
+func NewLuaInspection(schedule *models.InspectionSchedule, cluster string) *Inspection {
 	instance := &Inspection{
-		Cluster: cluster,
-		lua:     lua.NewState(),
+		Cluster:  cluster,
+		Schedule: schedule,
+		lua:      lua.NewState(),
 	}
 	instance.registerKubectlFunc()
 	return instance
@@ -54,9 +58,13 @@ func (p *Inspection) Start() []CheckResult {
 
 	// 执行所有 Lua 检查脚本并收集结果
 	var results []CheckResult
+
 	// 从数据库读取内置检查脚本
 	script := models.InspectionLuaScript{}
-	list, _, err := script.List(nil)
+
+	list, _, err := script.List(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("script_code in ?", strings.Split(p.Schedule.ScriptCodes, ","))
+	})
 	if err != nil {
 		fmt.Println("无法从数据库读取检查脚本:", err)
 		return results

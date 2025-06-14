@@ -32,19 +32,20 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果scheduleID 不为空，
 	// 从数据库中读取scheduleName
-	// TODO 记录完成后，统计巡检结果，存入记录表
 	// TODO 更新到巡检计划表，最后巡检结果，最后巡检时间
 	var scheduleName string
-	if scheduleID != nil {
-		schedule := &models.InspectionSchedule{}
-		schedule.ID = *scheduleID
-		schedule, err := schedule.GetOne(nil)
-		if err != nil {
-			return nil, fmt.Errorf("根据ID获取巡检任务失败: %w", err)
-		}
-		scheduleName = schedule.Name
+	if scheduleID == nil {
+		return nil, fmt.Errorf("参数错误，scheduleID不能为空")
 	}
+	schedule := &models.InspectionSchedule{}
+	schedule.ID = *scheduleID
+	schedule, err := schedule.GetOne(nil)
+	if err != nil {
+		return nil, fmt.Errorf("根据ID获取巡检计划失败: %w", err)
+	}
+	scheduleName = schedule.Name
 
+	// 创建一条执行记录
 	record := &models.InspectionRecord{
 		ScheduleID:   scheduleID,
 		ScheduleName: scheduleName,
@@ -55,11 +56,11 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	}
 
 	if err := record.Save(nil); err != nil {
-		return nil, fmt.Errorf("保存巡检执行记录失败: %w", err)
+		return nil, fmt.Errorf("保存巡检计划执行记录失败: %w", err)
 	}
 
 	// 执行所有巡检脚本
-	inspection := NewLuaInspection(cluster)
+	inspection := NewLuaInspection(schedule, cluster)
 	results := inspection.Start()
 
 	var scriptResults []models.InspectionScriptResult

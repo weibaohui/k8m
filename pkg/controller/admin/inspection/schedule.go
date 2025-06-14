@@ -2,9 +2,11 @@ package inspection
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -68,6 +70,14 @@ func Save(c *gin.Context) {
 		return
 	}
 
+	// 检测cron表达式是否正确
+	parser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
+	// 尝试解析
+	_, err = parser.Parse(m.Cron)
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("cron表达式错误: %w", err))
+		return
+	}
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
