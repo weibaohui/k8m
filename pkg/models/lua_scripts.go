@@ -5,6 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"gorm.io/gorm"
 )
 
@@ -12,16 +13,17 @@ import (
 // 包含脚本名称、描述、分组、版本、类型和脚本内容等信息
 // 用于存储和管理自定义 Lua 脚本
 type InspectionLuaScript struct {
-	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name        string    `json:"name"`                    // 脚本名称，主键
-	Description string    `json:"description"`             // 脚本描述
-	Group       string    `json:"group"`                   // 分组
-	Version     string    `json:"version"`                 // 版本
-	Kind        string    `json:"kind"`                    // 类型
-	Script      string    `gorm:"type:text" json:"script"` // 脚本内容
-	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	CreatedBy   string    `json:"created_by,omitempty"` // 创建者
+	ID          uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Name        string                  `json:"name"`                    // 脚本名称，主键
+	Description string                  `json:"description"`             // 脚本描述
+	Group       string                  `json:"group"`                   // 分组
+	Version     string                  `json:"version"`                 // 版本
+	Kind        string                  `json:"kind"`                    // 类型
+	ScriptType  constants.LuaScriptType `json:"script_type"`             // 脚本类型 内置/自定义
+	Script      string                  `gorm:"type:text" json:"script"` // 脚本内容
+	CreatedAt   time.Time               `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt   time.Time               `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	CreatedBy   string                  `json:"created_by,omitempty"` // 创建者
 
 }
 

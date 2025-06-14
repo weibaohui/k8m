@@ -1,6 +1,9 @@
 package lua
 
-import "github.com/weibaohui/k8m/pkg/models"
+import (
+	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/models"
+)
 
 // 检查脚本列表
 var luaScripts []models.InspectionLuaScript = []models.InspectionLuaScript{
@@ -10,6 +13,7 @@ var luaScripts []models.InspectionLuaScript = []models.InspectionLuaScript{
 		Group:       "",
 		Version:     "v1",
 		Kind:        "Service",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
 		Script: `
 			local svcs, err = kubectl:GVK("", "v1", "Service"):AllNamespace(""):List()
 			if not err and svcs then
@@ -47,6 +51,7 @@ var luaScripts []models.InspectionLuaScript = []models.InspectionLuaScript{
 		Group:       "",
 		Version:     "v1",
 		Kind:        "ConfigMap",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -106,6 +111,7 @@ var luaScripts []models.InspectionLuaScript = []models.InspectionLuaScript{
 		Group:       "",
 		Version:     "v1",
 		Kind:        "ConfigMap",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -141,6 +147,7 @@ var luaScripts []models.InspectionLuaScript = []models.InspectionLuaScript{
 		Group:       "",
 		Version:     "v1",
 		Kind:        "ConfigMap",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -181,6 +188,7 @@ var luaScripts []models.InspectionLuaScript = []models.InspectionLuaScript{
 		Group:       "apps",
 		Version:     "v1",
 		Kind:        "Deployment",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
 		Script: `
 			local deployments, err = kubectl:GVK("apps", "v1", "Deployment"):Cache(10):AllNamespace(""):List()
 			if err then
