@@ -282,6 +282,13 @@
             },
             {
               "type": "button",
+              "label": "汇总",
+              "actionType": "ajax",
+              "confirmText": "汇总?",
+              "api": "post:/admin/inspection/schedule/id/$id/summary"
+            },
+            {
+              "type": "button",
               "icon": "fas fa-history text-primary",
               "actionType": "drawer",
               "tooltip": "巡检历史",
