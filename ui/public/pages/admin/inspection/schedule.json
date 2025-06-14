@@ -460,7 +460,34 @@
         {
           "name": "cron",
           "label": "Cron表达式",
-          "type": "text"
+          "type": "control",
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "${cron}"
+            },
+            {
+              "type": "button",
+              "label": "查",
+              "level": "link",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "AI释义: ${cron}",
+                "body": [
+                  {
+                    "type": "websocketMarkdownViewer",
+                    "url": "/ai/chat/cron",
+                    "params": {
+                      "cron": "${cron}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "enabled",

@@ -4,7 +4,6 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
-	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -71,7 +70,6 @@ func LuaScriptOptionList(c *gin.Context) {
 	}
 	var scripts []map[string]string
 	for _, n := range list {
-		klog.V(6).Infof("script n \n%s\n", utils.ToJSON(n))
 		scripts = append(scripts, map[string]string{
 			"label":       n.Name,
 			"value":       n.ScriptCode,
