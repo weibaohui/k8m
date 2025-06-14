@@ -149,6 +149,10 @@
                       "name": "id"
                     },
                     {
+                      "type": "hidden",
+                      "name": "script_type"
+                    },
+                    {
                       "type": "input-text",
                       "name": "name",
                       "label": "脚本名称",
@@ -245,6 +249,15 @@
           "name": "kind",
           "label": "类型",
           "type": "text"
+        },
+        {
+          "name": "script_type",
+          "label": "来源",
+          "type": "mapping",
+          "map": {
+            "Builtin": "系统脚本",
+            "Custom": "用户脚本"
+          }
         },
         {
           "name": "created_at",

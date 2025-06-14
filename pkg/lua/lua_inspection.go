@@ -54,8 +54,15 @@ func (p *Inspection) Start() []CheckResult {
 
 	// 执行所有 Lua 检查脚本并收集结果
 	var results []CheckResult
-	for _, check := range luaScripts {
-		result := p.runLuaCheck(check)
+	// 从数据库读取内置检查脚本
+	script := models.InspectionLuaScript{}
+	list, _, err := script.List(nil)
+	if err != nil {
+		fmt.Println("无法从数据库读取检查脚本:", err)
+		return results
+	}
+	for _, item := range list {
+		result := p.runLuaCheck(item)
 		results = append(results, result)
 	}
 
@@ -83,7 +90,7 @@ func (p *Inspection) Start() []CheckResult {
 	return results
 }
 
-func (p *Inspection) runLuaCheck(check models.InspectionLuaScript) CheckResult {
+func (p *Inspection) runLuaCheck(item *models.InspectionLuaScript) CheckResult {
 	var buf bytes.Buffer
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -91,10 +98,10 @@ func (p *Inspection) runLuaCheck(check models.InspectionLuaScript) CheckResult {
 	defer func() { os.Stdout = origStdout }()
 
 	var events []CheckEvent
-	p.registerCheckEvent(&events, check)
+	p.registerCheckEvent(&events, item)
 
 	start := time.Now()
-	err := p.lua.DoString(check.Script)
+	err := p.lua.DoString(item.Script)
 	_ = w.Close()
 	os.Stdout = origStdout
 
@@ -104,7 +111,7 @@ func (p *Inspection) runLuaCheck(check models.InspectionLuaScript) CheckResult {
 	end := time.Now()
 
 	return CheckResult{
-		Name:         check.Name,
+		Name:         item.Name,
 		StartTime:    start,
 		EndTime:      end,
 		LuaRunOutput: output,
@@ -114,7 +121,7 @@ func (p *Inspection) runLuaCheck(check models.InspectionLuaScript) CheckResult {
 }
 
 // 注册 check_event 到 Lua，自动补充上下文
-func (p *Inspection) registerCheckEvent(events *[]CheckEvent, check models.InspectionLuaScript) {
+func (p *Inspection) registerCheckEvent(events *[]CheckEvent, item *models.InspectionLuaScript) {
 	p.lua.SetGlobal("check_event", p.lua.NewFunction(func(L *lua.LState) int {
 		status := L.CheckString(1)
 		msg := L.CheckString(2)
@@ -138,9 +145,9 @@ func (p *Inspection) registerCheckEvent(events *[]CheckEvent, check models.Inspe
 			Status:     status,
 			Msg:        msg,
 			Extra:      extra,
-			ScriptName: check.Name,        // 检测脚本名称
-			Kind:       check.Kind,        // 检查的资源类型
-			CheckDesc:  check.Description, // 检查脚本内容描述
+			ScriptName: item.Name,        // 检测脚本名称
+			Kind:       item.Kind,        // 检查的资源类型
+			CheckDesc:  item.Description, // 检查脚本内容描述
 		})
 		return 0
 	}))

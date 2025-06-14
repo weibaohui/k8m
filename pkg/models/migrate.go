@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -26,6 +27,7 @@ func init() {
 	_ = AddInnerAdminUserGroup()
 	_ = AddInnerAdminUser()
 	_ = MigrateAIModel()
+	_ = AddBuiltinLuaScripts()
 }
 func AutoMigrate() error {
 
@@ -113,6 +115,20 @@ func AutoMigrate() error {
 		}
 	}
 
+	return nil
+}
+func AddBuiltinLuaScripts() error {
+	// 删除后，重新插入内置脚本
+	err := dao.DB().Model(&InspectionLuaScript{}).Where("script_type == ?", constants.LuaScriptTypeBuiltin).Delete(&InspectionLuaScript{}).Error
+	if err != nil {
+		klog.Errorf("删除内置巡检脚本失败: %v", err)
+		return err
+	}
+	err = dao.DB().Model(&InspectionLuaScript{}).CreateInBatches(BuiltinLuaScripts, 100).Error
+	if err != nil {
+		klog.Errorf("插入内置巡检脚本失败: %v", err)
+		return err
+	}
 	return nil
 }
 func FixRoleName() error {
