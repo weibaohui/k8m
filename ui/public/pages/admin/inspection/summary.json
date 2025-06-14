@@ -2,6 +2,9 @@
     "type": "page",
     "body": [
         {
+            "type": "inspectionSummary"
+        },
+        {
             "type": "form",
             "mode": "inline",
             "wrapWithPanel": false,
