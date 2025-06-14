@@ -486,6 +486,13 @@ const items: () => MenuItem[] = () => {
                         key: "inspection_settings",
                         children: [
                             {
+                                label: "巡检汇总",
+                                icon: <i className="fa-solid fa-clipboard-list"></i>,
+                                key: "inspection_summary",
+                                onClick: () => onMenuClick('/admin/inspection/summary'),
+
+                            },
+                            {
                                 label: "巡检计划",
                                 icon: <i className="fa-solid fa-stethoscope"></i>,
                                 key: "inspection_schedule",
