@@ -296,14 +296,14 @@
                   "body": [
                     {
                       "type": "tpl",
-                      "tpl": "共 ${total_clusters} 个集群"
+                      "tpl": "共 ${total_clusters} 个集群，执行 ${total_runs} 次"
                     },
                     {
                       "type": "each",
                       "name": "clusters",
                       "items": {
                         "type": "panel",
-                        "title": "集群：${cluster}",
+                        "title": "集群：${cluster}  (执行${run_count}次)",
                         "body": [
                           {
                             "type": "table",

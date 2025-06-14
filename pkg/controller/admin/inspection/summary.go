@@ -55,6 +55,7 @@ func Summary(c *gin.Context) {
 	// 4. 聚合统计
 
 	totalClusters := len(clusterSet)
+	totalRuns := len(records) // 巡检计划执行次数
 	clusterKindMap := map[string]map[string]int{}    // cluster -> kind -> count
 	clusterKindErrMap := map[string]map[string]int{} // cluster -> kind -> error count
 	for _, e := range events {
@@ -71,7 +72,13 @@ func Summary(c *gin.Context) {
 	// 5. 构建返回结构
 	result := gin.H{
 		"total_clusters": totalClusters,
+		"total_runs": totalRuns, // 新增字段：执行次数
 		"clusters":       []gin.H{},
+	}
+	// 统计每个集群的执行次数
+	clusterRunCount := map[string]int{}
+	for _, r := range records {
+		clusterRunCount[r.Cluster]++
 	}
 	for cluster, kindMap := range clusterKindMap {
 		var kindArr []gin.H
@@ -85,6 +92,7 @@ func Summary(c *gin.Context) {
 		}
 		result["clusters"] = append(result["clusters"].([]gin.H), gin.H{
 			"cluster": cluster,
+			"run_count": clusterRunCount[cluster], // 新增字段：该集群执行次数
 			"kinds":   kindArr,
 		})
 	}
