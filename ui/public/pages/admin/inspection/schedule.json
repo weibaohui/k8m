@@ -296,35 +296,28 @@
                   "body": [
                     {
                       "type": "tpl",
-                      "tpl": "<b>总执行次数：</b> ${total_runs}"
-                    },
-                    {
-                      "type": "tpl",
-                      "tpl": "<b>总集群数：</b> ${total_clusters}"
-                    },
-                    {
-                      "type": "tpl",
-                      "tpl": "<b>最后一次执行：</b>"
+                      "tpl": "<b>总执行次数：</b> ${total_runs}  <b>总集群数：</b> ${total_clusters}  "
                     },
                     {
                       "type": "panel",
+                      "title": "最后一次执行 <b>记录ID：</b> ${latest_run.record_id} <b>执行时间：</b> ${latest_run.run_time}",
                       "body": [
                         {
-                          "type": "tpl",
-                          "tpl": "<b>执行时间：</b> ${latest_run.run_time}"
-                        },
-                        {
-                          "type": "tpl",
-                          "tpl": "<b>记录ID：</b> ${latest_run.record_id}"
-                        },
-                        {
                           "type": "table",
-                          "title": "资源类型明细",
                           "source": "${latest_run.kinds}",
                           "columns": [
-                            {"name": "kind", "label": "资源类型"},
-                            {"name": "normal_count", "label": "正常数"},
-                            {"name": "error_count", "label": "异常数"}
+                            {
+                              "name": "kind",
+                              "label": "资源类型"
+                            },
+                            {
+                              "name": "normal_count",
+                              "label": "正常数"
+                            },
+                            {
+                              "name": "error_count",
+                              "label": "异常数"
+                            }
                           ]
                         }
                       ]
