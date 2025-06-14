@@ -18,6 +18,7 @@ type InspectionCheckEvent struct {
 	ScriptName string    `json:"script_name"`                      // 检测脚本名称
 	Kind       string    `json:"kind"`                             // 检查的资源类型
 	CheckDesc  string    `json:"check_desc"`                       // 检查脚本内容描述
+	Cluster    string    `json:"cluster"`                          // 检查集群
 	Namespace  string    `json:"namespace"`                        // 资源命名空间
 	Name       string    `json:"name"`                             // 资源名称
 	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
