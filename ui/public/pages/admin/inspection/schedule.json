@@ -329,9 +329,8 @@
                       "buttons": [
                         {
                           "type": "button",
-                          "icon": "fas fa-exclamation-circle text-primary",
                           "actionType": "drawer",
-                          "label": "事件明细",
+                          "label": "查看明细",
                           "drawer": {
                             "closeOnEsc": true,
                             "closeOnOutside": true,
@@ -342,6 +341,10 @@
                               "id": "checkEventCRUD",
                               "name": "checkEventCRUD",
                               "autoFillHeight": true,
+                              "autoGenerateFilter": {
+                                "columnsNum": 4,
+                                "showBtnToolbar": false
+                              },
                               "api": "get:/admin/inspection/schedule/record/id/$id/event/list",
                               "headerToolbar": [
                                 {
@@ -376,19 +379,11 @@
                                 {
                                   "name": "status",
                                   "label": "状态",
-                                  "searchable": {
-                                    "type": "select",
-                                    "clearable": true,
-                                    "options": [
-                                      {
-                                        "label": "通过",
-                                        "value": "通过"
-                                      },
-                                      {
-                                        "label": "失败",
-                                        "value": "失败"
-                                      }
-                                    ]
+                                  "type": "mapping",
+                                  "map": {
+                                    "通过": "<span class='label label-success'>通过</span>",
+                                    "失败": "<span class='label label-warning'>失败</span>",
+                                    "*": "<span class='label label-warning'>${status}</span>"
                                   }
                                 },
                                 {
@@ -434,6 +429,11 @@
                                 {
                                   "name": "script_name",
                                   "label": "脚本名称"
+                                },
+                                {
+                                  "name": "created_at",
+                                  "label": "创建时间",
+                                  "type": "datetime"
                                 }
                               ]
                             }
@@ -441,7 +441,6 @@
                         },
                         {
                           "type": "button",
-                          "icon": "fas fa-file-alt text-primary",
                           "actionType": "drawer",
                           "label": "运行输出",
                           "drawer": {
@@ -529,8 +528,14 @@
                                     ]
                                   },
                                   {
-                                    "name": "script_name",
-                                    "label": "脚本名称"
+                                    "name": "start_time",
+                                    "label": "开始时间",
+                                    "type": "datetime"
+                                  },
+                                  {
+                                    "name": "end_time",
+                                    "label": "结束时间",
+                                    "type": "datetime"
                                   }
                                 ]
                               }
@@ -553,7 +558,8 @@
                     },
                     {
                       "name": "start_time",
-                      "label": "开始时间"
+                      "label": "开始时间",
+                      "type": "datetime"
                     },
                     {
                       "name": "error_count",
