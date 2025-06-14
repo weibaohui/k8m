@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
@@ -12,6 +13,8 @@ import (
 // Summary 汇总指定scheduleID下的巡检执行信息
 // 展示涉及集群数、每个集群涉及的Kind数量、每个Kind检查次数及错误数
 func Summary(c *gin.Context) {
+	params := dao.BuildParams(c)
+	params.PerPage = 100000
 	// 1. 获取scheduleID参数
 	scheduleID := c.Param("id")
 	if scheduleID == "" {
@@ -21,7 +24,7 @@ func Summary(c *gin.Context) {
 
 	// 2. 查询所有该scheduleID下的InspectionRecord，收集recordIDs和集群
 	recordModel := &models.InspectionRecord{}
-	records, _, err := recordModel.List(nil, func(db *gorm.DB) *gorm.DB {
+	records, _, err := recordModel.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Where("schedule_id = ?", scheduleID)
 	})
 	if err != nil {
@@ -41,7 +44,7 @@ func Summary(c *gin.Context) {
 
 	// 3. 查询所有相关InspectionCheckEvent
 	eventModel := &models.InspectionCheckEvent{}
-	events, _, err := eventModel.List(nil, func(db *gorm.DB) *gorm.DB {
+	events, _, err := eventModel.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Where("record_id in ?", recordIDs)
 	})
 	if err != nil {
