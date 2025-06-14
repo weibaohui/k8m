@@ -529,6 +529,7 @@ func main() {
 		admin.GET("/inspection/schedule/list", inspection.List)
 		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
 		admin.GET("inspection/schedule/record/id/:id/event/list", inspection.EventList)
+		admin.GET("inspection/schedule/record/id/:id/output/list", inspection.OutputList)
 		admin.POST("/inspection/schedule/save", inspection.Save)
 		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
