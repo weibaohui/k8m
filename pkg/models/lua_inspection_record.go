@@ -44,8 +44,9 @@ type InspectionScriptResult struct {
 	StdOutput  string    `json:"StdOutput"`           // 脚本标准输出
 	ErrorMsg   string    `json:"error_msg,omitempty"` // 错误信息
 	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	Cluster    string    `json:"cluster"`              // 目标集群
+	UpdatedAt  time.Time `json:"updated_at,omitempty"`  // Automatically managed by GORM for update time
+	Cluster    string    `json:"cluster"`               // 目标集群
+	ScheduleID *uint     `json:"schedule_id,omitempty"` // 巡检计划ID
 }
 
 // List 返回符合条件的 InspectionRecord 列表及总数

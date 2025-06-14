@@ -10,19 +10,20 @@ import (
 
 // InspectionCheckEvent  用于记录每次检测的详细信息，包括检测状态、消息、额外上下文、脚本名称、资源类型、描述、命名空间和资源名。
 type InspectionCheckEvent struct {
-	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	RecordID   uint      `json:"record_id"`                        // 关联的巡检执行记录ID
-	Status     string    `json:"status"`                           // 检查状态（如“正常”、“失败”）
-	Msg        string    `json:"msg"`                              // 检查消息
-	Extra      string    `gorm:"type:text" json:"extra,omitempty"` // 额外上下文
-	ScriptName string    `json:"script_name"`                      // 检测脚本名称
-	Kind       string    `json:"kind"`                             // 检查的资源类型
-	CheckDesc  string    `json:"check_desc"`                       // 检查脚本内容描述
-	Cluster    string    `json:"cluster"`                          // 检查集群
-	Namespace  string    `json:"namespace"`                        // 资源命名空间
-	Name       string    `json:"name"`                             // 资源名称
-	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	RecordID    uint      `json:"record_id"`                        // 关联的巡检执行记录ID
+	EventStatus string    `json:"event_status"`                     // 事件状态（如“正常”、“失败”）
+	EventMsg    string    `json:"event_msg"`                        // 事件消息
+	Extra       string    `gorm:"type:text" json:"extra,omitempty"` // 额外上下文
+	ScriptName  string    `json:"script_name"`                      // 检测脚本名称
+	Kind        string    `json:"kind"`                             // 检查的资源类型
+	CheckDesc   string    `json:"check_desc"`                       // 检查脚本内容描述
+	Cluster     string    `json:"cluster"`                          // 检查集群
+	Namespace   string    `json:"namespace"`                        // 资源命名空间
+	Name        string    `json:"name"`                             // 资源名称
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty"`  // Automatically managed by GORM for update time
+	ScheduleID  *uint     `json:"schedule_id,omitempty"` // 关联的定时任务ID
 }
 
 // List 返回符合条件的 InspectionCheckEvent 列表及总数

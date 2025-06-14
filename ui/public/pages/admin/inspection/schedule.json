@@ -377,13 +377,14 @@
                                   "label": "类型"
                                 },
                                 {
-                                  "name": "status",
+                                  "name": "event_status",
                                   "label": "状态",
                                   "type": "mapping",
+                                  "searchable": true,
                                   "map": {
                                     "通过": "<span class='label label-success'>通过</span>",
                                     "失败": "<span class='label label-warning'>失败</span>",
-                                    "*": "<span class='label label-warning'>${status}</span>"
+                                    "*": "<span class='label label-warning'>${event_status}</span>"
                                   }
                                 },
                                 {
@@ -399,13 +400,13 @@
                                   "label": "名称"
                                 },
                                 {
-                                  "name": "msg",
+                                  "name": "event_msg",
                                   "label": "消息",
                                   "type": "control",
                                   "body": [
                                     {
                                       "type": "tpl",
-                                      "tpl": "${msg}"
+                                      "tpl": "${event_msg}"
                                     },
                                     {
                                       "type": "button",
@@ -422,7 +423,7 @@
                                             "type": "websocketMarkdownViewer",
                                             "url": "/ai/chat/any_selection",
                                             "params": {
-                                              "question": "请详细解读下面的集群巡检结果所代表的含义：${msg}。"
+                                              "question": "请详细解读下面的集群巡检结果所代表的含义：${event_msg}。"
                                             }
                                           }
                                         ]
@@ -634,6 +635,10 @@
           "type": "datetime"
         },
         {
+          "name": "error_count",
+          "label": "错误"
+        },
+        {
           "name": "enabled",
           "label": "启用",
           "quickEdit": {
@@ -644,11 +649,6 @@
             "saveImmediately": true,
             "resetOnFailed": true
           }
-        },
-        {
-          "name": "created_by",
-          "label": "创建人",
-          "type": "text"
         },
         {
           "name": "created_at",

@@ -70,6 +70,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	for _, res := range results {
 		result := models.InspectionScriptResult{
 			RecordID:   record.ID,
+			ScheduleID: scheduleID,
 			ScriptName: res.Name,
 			StartTime:  res.StartTime,
 			EndTime:    res.EndTime,
@@ -82,16 +83,17 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		scriptResults = append(scriptResults, &result)
 		for _, e := range res.Events {
 			checkEvents = append(checkEvents, &models.InspectionCheckEvent{
-				RecordID:   record.ID,
-				Status:     e.Status,
-				Msg:        e.Msg,
-				Extra:      utils.ToJSON(e.Extra),
-				ScriptName: e.ScriptName,
-				Kind:       e.Kind,
-				CheckDesc:  e.CheckDesc,
-				Namespace:  e.Namespace,
-				Name:       e.Name,
-				Cluster:    cluster,
+				RecordID:    record.ID,
+				ScheduleID:  scheduleID,
+				EventStatus: e.Status,
+				EventMsg:    e.Msg,
+				Extra:       utils.ToJSON(e.Extra),
+				ScriptName:  e.ScriptName,
+				Kind:        e.Kind,
+				CheckDesc:   e.CheckDesc,
+				Namespace:   e.Namespace,
+				Name:        e.Name,
+				Cluster:     cluster,
 			})
 			if e.Status == "错误" || e.Status == "error" || e.Status == "失败" {
 				errorCount += 1
@@ -110,14 +112,16 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	record.Status = "success"
 	record.EndTime = &endTime
 	record.ErrorCount = errorCount
+
 	_ = record.Save(nil)
 
 	klog.V(6).Infof("集群巡检完成。集群巡检记录ID=%d", record.ID)
 
 	// 更新集群巡检计划运行结果
 	schedule.LastRunTime = &endTime
+	schedule.ErrorCount = errorCount
 	_ = schedule.Save(nil, func(db *gorm.DB) *gorm.DB {
-		return db.Select("last_run_time")
+		return db.Select("last_run_time", "error_count")
 	})
 	return record, nil
 }
