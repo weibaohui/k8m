@@ -17,13 +17,13 @@ type AIModelConfigController struct {
 }
 
 // RegisterAIModelConfigRoutes 注册路由
-func RegisterAIModelConfigRoutes(r *gin.RouterGroup) {
+func RegisterAIModelConfigRoutes(admin *gin.RouterGroup) {
 	ctrl := &AIModelConfigController{}
-	r.GET("/ai/model/list", ctrl.List)
-	r.POST("/ai/model/save", ctrl.Save)
-	r.POST("/ai/model/delete/:ids", ctrl.Delete)
-	r.POST("/ai/model/id/:id/think/:status", ctrl.QuickSave)
-	r.POST("/ai/model/test/id/:id", ctrl.TestConnection)
+	admin.GET("/ai/model/list", ctrl.List)
+	admin.POST("/ai/model/save", ctrl.Save)
+	admin.POST("/ai/model/delete/:ids", ctrl.Delete)
+	admin.POST("/ai/model/id/:id/think/:status", ctrl.QuickSave)
+	admin.POST("/ai/model/test/id/:id", ctrl.TestConnection)
 
 }
 
