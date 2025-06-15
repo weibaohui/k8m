@@ -1,6 +1,6 @@
 info:
   contact: {}
-  description: 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx
+  description: 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。
   title: k8m API
   version: "1.0"
 paths:
