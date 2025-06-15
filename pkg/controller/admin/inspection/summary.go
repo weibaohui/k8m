@@ -166,9 +166,10 @@ func Summary(c *gin.Context) {
 			})
 		}
 		latestRun = gin.H{
-			"record_id": latestRecord.ID,
-			"run_time":  latestRecord.CreatedAt,
-			"kinds":     kindArr,
+			"record_id":   latestRecord.ID,
+			"schedule_id": latestRecord.ScheduleID,
+			"run_time":    latestRecord.CreatedAt,
+			"kinds":       kindArr,
 		}
 		result["latest_run"] = latestRun
 	}

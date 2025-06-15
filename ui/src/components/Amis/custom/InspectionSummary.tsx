@@ -154,8 +154,9 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     </Space>
                 </Card>
                 {latest_run && latest_run.record_id && (
-                    <Card title={<span>最后一次执行 <b>记录ID：</b>{latest_run.record_id}
-                        <b>执行时间：</b>{latest_run.run_time}</span>} style={{marginBottom: 16}}>
+                    <Card title={<>
+                        <span>最后一次执行 <b>计划ID：</b>{latest_run.schedule_id}</span><span><b>记录ID：</b>{latest_run.record_id}</span><span><b>执行时间：</b>{latest_run.run_time}</span></>}
+                          style={{marginBottom: 16}}>
                         <Table
                             columns={latestRunColumns}
                             dataSource={latest_run.kinds || []}
