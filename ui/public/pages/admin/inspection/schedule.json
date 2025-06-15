@@ -629,6 +629,12 @@
           "tpl": "${clusters | split:','}"
         },
         {
+          "name": "script_codes",
+          "label": "规则数",
+          "type": "tpl",
+          "tpl": "${script_codes | split:','|count}"
+        },
+        {
           "name": "cron",
           "label": "Cron表达式",
           "type": "control",
