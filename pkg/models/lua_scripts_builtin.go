@@ -205,7 +205,6 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Deployment_005",
 		Script: `
-
 			local doc, err = kubectl:GVK("apps", "v1", "Deployment"):Cache(10):Doc("spec.replicas")
 			if err then
 				print( "获取 Deployment Doc 失败".. tostring(err))

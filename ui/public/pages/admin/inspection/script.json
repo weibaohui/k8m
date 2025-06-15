@@ -251,6 +251,11 @@
           "width": "180px"
         },
         {
+          "name": "script_code",
+          "label": "规则编码",
+          "type": "text"
+        },
+        {
           "name": "description",
           "label": "规则描述",
           "type": "text",
