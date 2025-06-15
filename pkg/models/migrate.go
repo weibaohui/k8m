@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -26,6 +27,7 @@ func init() {
 	_ = AddInnerAdminUserGroup()
 	_ = AddInnerAdminUser()
 	_ = MigrateAIModel()
+	_ = AddBuiltinLuaScripts()
 }
 func AutoMigrate() error {
 
@@ -86,6 +88,24 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&AIModelConfig{}); err != nil {
 		errs = append(errs, err)
 	}
+	if err := dao.DB().AutoMigrate(&InspectionCheckEvent{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionRecord{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionSchedule{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionScriptResult{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionLuaScript{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&InspectionLuaScriptBuiltinVersion{}); err != nil {
+		errs = append(errs, err)
+	}
 	// 删除 user 表 name 字段，已弃用
 	if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
 		errs = append(errs, err)
@@ -98,6 +118,34 @@ func AutoMigrate() error {
 		}
 	}
 
+	return nil
+}
+func AddBuiltinLuaScripts() error {
+	// 检查数据库中记录的内置脚本版本
+	db := dao.DB()
+	version, err := GetBuiltinLuaScriptsVersion(db)
+	if err == nil {
+		// 有记录，判断是否需要更新
+		if version == BuiltinLuaScriptsVersion {
+			// 版本一致，无需更新
+			return nil
+		}
+	}
+	// 版本不一致或无记录，先删除所有内置脚本
+	if err := db.Where("script_type = ?", constants.LuaScriptTypeBuiltin).Delete(&InspectionLuaScript{}).Error; err != nil {
+		klog.Errorf("删除旧内置巡检脚本失败: %v", err)
+		return err
+	}
+	// 插入最新内置脚本
+	if err := db.CreateInBatches(BuiltinLuaScripts, 100).Error; err != nil {
+		klog.Errorf("插入内置巡检脚本失败: %v", err)
+		return err
+	}
+	// 更新版本号
+	if err := SetBuiltinLuaScriptsVersion(db, BuiltinLuaScriptsVersion); err != nil {
+		klog.Errorf("更新内置脚本版本号失败: %v", err)
+		return err
+	}
 	return nil
 }
 func FixRoleName() error {

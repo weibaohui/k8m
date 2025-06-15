@@ -18,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
+	"github.com/weibaohui/k8m/pkg/controller/admin/inspection"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
@@ -47,6 +48,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/service"
@@ -138,8 +140,9 @@ func Init() {
 			service.PVService().Watch()
 			service.IngressService().Watch()
 			service.McpService().Start()
+			// 启动集群巡检
+			lua.InitClusterInspection()
 		})
-
 	}()
 
 }
@@ -521,6 +524,27 @@ func main() {
 		admin.POST("/config/sso/save", config.SSOConfigSave)
 		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
 		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
+
+		// 集群巡检计划配置
+		admin.GET("/inspection/schedule/list", inspection.List)
+		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
+		admin.GET("inspection/schedule/record/id/:id/event/list", inspection.EventList)
+		admin.GET("inspection/schedule/record/id/:id/output/list", inspection.OutputList)
+		admin.POST("/inspection/schedule/save", inspection.Save)
+		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
+		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
+		admin.POST("/inspection/schedule/start/id/:id", inspection.Start)
+		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
+		admin.POST("/inspection/schedule/id/:id/summary", inspection.SummaryBySchedule)
+		admin.POST("/inspection/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", inspection.SummaryBySchedule)
+
+		// 集群巡检脚本
+		admin.GET("/inspection/script/list", inspection.LuaScriptList)
+		admin.POST("/inspection/script/delete/:ids", inspection.LuaScriptDelete)
+		admin.POST("/inspection/script/save", inspection.LuaScriptSave)
+		admin.POST("/inspection/script/load", inspection.LuaScriptLoad)
+		admin.GET("/inspection/script/option_list", inspection.LuaScriptOptionList)
+		admin.GET("/inspection/event/status/option_list", inspection.EventStatusOptionList)
 
 		// user 平台管理员可操作，管理用户
 		admin.GET("/user/list", user.List)

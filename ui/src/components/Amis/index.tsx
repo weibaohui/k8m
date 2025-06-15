@@ -1,7 +1,7 @@
-import {registerFilter, registerRenderer, render as renderAmis, Schema} from 'amis'
-import {AlertComponent, ToastComponent} from 'amis-ui'
+import { registerFilter, registerRenderer, render as renderAmis, Schema } from 'amis'
+import { AlertComponent, ToastComponent } from 'amis-ui'
 import axios from 'axios'
-import {fetcher} from "@/components/Amis/fetcher";
+import { fetcher } from "@/components/Amis/fetcher";
 import k8sTextConditionsComponent from "@/components/Amis/custom/K8sTextConditions.tsx";
 import NodeRolesComponent from '@/components/Amis/custom/NodeRoles.tsx';
 import AutoConvertMemory from "@/components/Amis/custom/AutoConvertMemory.ts";
@@ -32,50 +32,56 @@ import HPAMetricsComponent from '@/components/Amis/custom/HPAMetrics';
 import HPABehaviorComponent from '@/components/Amis/custom/HPABehavior';
 import HelmUpdateRelease from '@/components/Amis/custom/Helm/HelmUpdateRealease.tsx';
 import K8sGPTComponent from '@/components/Amis/custom/K8sGPT';
+import InspectionSummaryComponent from '@/components/Amis/custom/InspectionSummary.tsx'
+import InspectionEventListComponent from '@/components/Amis/custom/InspectionEventList.tsx'
 // 注册自定义组件
-registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
-registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
+registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
+registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
 // @ts-ignore
-registerRenderer({type: 'k8sAge', component: K8sAgeComponent})
+registerRenderer({ type: 'k8sAge', component: K8sAgeComponent })
 // @ts-ignore
-registerRenderer({type: 'k8sPodReady', component: K8sPodReadyComponent})
+registerRenderer({ type: 'k8sPodReady', component: K8sPodReadyComponent })
 // @ts-ignore
-registerRenderer({type: 'highlightHtml', component: HighlightHtmlComponent})
+registerRenderer({ type: 'highlightHtml', component: HighlightHtmlComponent })
 // @ts-ignore
-registerRenderer({type: 'webSocketMarkdownViewer', component: WebSocketMarkdownViewerComponent})
+registerRenderer({ type: 'webSocketMarkdownViewer', component: WebSocketMarkdownViewerComponent })
 // @ts-ignore
-registerRenderer({type: 'podLogViewer', component: PodLogViewerComponent})
+registerRenderer({ type: 'podLogViewer', component: PodLogViewerComponent })
 // @ts-ignore
-registerRenderer({type: 'podsLogViewer', component: PodsLogViewerComponent})
+registerRenderer({ type: 'podsLogViewer', component: PodsLogViewerComponent })
 // @ts-ignore
-registerRenderer({type: 'websocketViewer', component: WebSocketViewerComponent})
+registerRenderer({ type: 'websocketViewer', component: WebSocketViewerComponent })
 // @ts-ignore
-registerRenderer({type: 'xterm', component: XTermComponent})
+registerRenderer({ type: 'xterm', component: XTermComponent })
 // @ts-ignore
-registerRenderer({type: 'chatgpt', component: WebSocketChatGPT})
+registerRenderer({ type: 'chatgpt', component: WebSocketChatGPT })
 // @ts-ignore
-registerRenderer({type: 'mEditor', component: MonacoEditorWithForm})
+registerRenderer({ type: 'mEditor', component: MonacoEditorWithForm })
 // @ts-ignore
-registerRenderer({type: 'historyRecord', component: HistoryRecordsComponent})
+registerRenderer({ type: 'historyRecord', component: HistoryRecordsComponent })
 
 // @ts-ignore
-registerRenderer({type: 'diffEditor', component: DiffEditorComponent})
+registerRenderer({ type: 'diffEditor', component: DiffEditorComponent })
 // @ts-ignore
-registerRenderer({type: 'deploymentRevisionDiffEditor', component: DeploymentRevisionDiffEditor})
+registerRenderer({ type: 'deploymentRevisionDiffEditor', component: DeploymentRevisionDiffEditor })
 //@ts-ignore
-registerRenderer({type: 'kubeConfigEditor', component: KubeConfigEditorComponent})
+registerRenderer({ type: 'kubeConfigEditor', component: KubeConfigEditorComponent })
 //@ts-ignore
-registerRenderer({type: 'passwordEditor', component: PasswordEditorWithForm})
+registerRenderer({ type: 'passwordEditor', component: PasswordEditorWithForm })
 //@ts-ignore
-registerRenderer({type: 'k8sPodStatus', component: K8sPodStatusComponent})
+registerRenderer({ type: 'k8sPodStatus', component: K8sPodStatusComponent })
 //@ts-ignore
-registerRenderer({type: 'hpaMetrics', component: HPAMetricsComponent})
+registerRenderer({ type: 'hpaMetrics', component: HPAMetricsComponent })
 //@ts-ignore
-registerRenderer({type: 'hpaBehavior', component: HPABehaviorComponent})
+registerRenderer({ type: 'hpaBehavior', component: HPABehaviorComponent })
 //@ts-ignore
-registerRenderer({type: 'helmUpdateRelease', component: HelmUpdateRelease})
+registerRenderer({ type: 'helmUpdateRelease', component: HelmUpdateRelease })
 //@ts-ignore
-registerRenderer({type: 'k8sGPT', component: K8sGPTComponent})
+registerRenderer({ type: 'k8sGPT', component: K8sGPTComponent })
+//@ts-ignore
+registerRenderer({ type: 'inspectionSummary', component: InspectionSummaryComponent })
+//@ts-ignore
+registerRenderer({ type: 'inspectionEventList', component: InspectionEventListComponent })
 
 
 // 注册过滤器
@@ -92,13 +98,13 @@ interface Props {
 }
 
 
-const Amis = ({schema}: Props) => {
+const Amis = ({ schema }: Props) => {
     const theme = 'cxd';
     const locale = 'zh-CN';
 
 
     return <>
-        <GlobalTextSelector/>
+        <GlobalTextSelector />
 
         <ToastComponent
             theme={theme}
@@ -106,7 +112,7 @@ const Amis = ({schema}: Props) => {
             position={'top-center'}
             locale={locale}
         />
-        <AlertComponent theme={theme} key="alert" locale={locale}/>
+        <AlertComponent theme={theme} key="alert" locale={locale} />
         {
 
             renderAmis(schema,

@@ -1,0 +1,579 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "scheduleCRUD",
+      "name": "scheduleCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建巡检计划",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建定时巡检计划 (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/admin/inspection/schedule/save",
+              "body": [
+                {
+                  "type": "alert",
+                  "level": "success",
+                  "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
+                },
+                {
+                  "type": "input-text",
+                  "name": "name",
+                  "label": "任务名称",
+                  "required": true,
+                  "placeholder": "请输入任务名称",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 2,
+                    "maxLength": 50
+                  },
+                  "validationErrors": {
+                    "minLength": "任务名称至少 2 个字符",
+                    "maxLength": "任务名称最多 50 个字符"
+                  }
+                },
+                {
+                  "type": "select",
+                  "name": "clusters",
+                  "label": "目标集群",
+                  "multiple": true,
+                  "source": "/params/cluster/option_list",
+                  "labelField": "label",
+                  "valueField": "value",
+                  "placeholder": "请选择目标集群"
+                },
+                {
+                  "type": "input-text",
+                  "name": "cron",
+                  "label": "Cron表达式",
+                  "required": true,
+                  "placeholder": "请输入cron表达式"
+                },
+                {
+                  "type": "switch",
+                  "name": "enabled",
+                  "label": "是否启用",
+                  "onText": "启用",
+                  "offText": "禁用",
+                  "value": true
+                },
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "计划描述",
+                  "placeholder": "请输入计划描述"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "scheduleCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "post:/admin/inspection/schedule/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/admin/inspection/schedule/list",
+      "quickSaveItemApi": "/admin/inspection/schedule/save/id/${id}/status/${enabled}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑计划",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "编辑巡检计划 (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/inspection/schedule/save",
+                  "body": [
+                    {
+                      "type": "alert",
+                      "level": "success",
+                      "body": "<div class='alert alert-info'><p><strong>Cron表达式示例：</strong></p><ul><li>每5分钟执行一次：<code>*/5 * * * *</code></li><li>每天凌晨1点执行：<code>0 1 * * *</code></li><li>每周一凌晨2点执行：<code>0 2 * * 1</code></li><li>每月1凌晨3点执行：<code>0 3 1 * *</code></li><li>工作日每天8点执行：<code>0 8 * * 1-5</code></li></ul><p style='margin-top:8px;'><strong>格式说明：</strong><br><code>* * * * *</code> 依次代表：分钟 小时 日 月 星期</p></div>"
+                    },
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "name",
+                      "label": "计划名称",
+                      "required": true,
+                      "placeholder": "请输入计划名称",
+                      "validateOnChange": true,
+                      "validations": {
+                        "minLength": 2,
+                        "maxLength": 50
+                      },
+                      "validationErrors": {
+                        "minLength": "计划名称至少 2 个字符",
+                        "maxLength": "计划名称最多 50 个字符"
+                      }
+                    },
+                    {
+                      "type": "select",
+                      "name": "clusters",
+                      "label": "目标集群",
+                      "multiple": true,
+                      "source": "/params/cluster/option_list",
+                      "labelField": "label",
+                      "valueField": "value",
+                      "placeholder": "请选择目标集群"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "cron",
+                      "label": "Cron表达式",
+                      "required": true,
+                      "placeholder": "请输入cron表达式"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "enabled",
+                      "label": "是否启用",
+                      "onText": "启用",
+                      "offText": "禁用"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "description",
+                      "label": "计划描述",
+                      "placeholder": "请输入计划描述"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "scheduleCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-list text-primary",
+              "tooltip": "执行规则",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "选择巡检计划要执行的规则",
+                "body": {
+                  "type": "form",
+                  "wrapWithPanel": false,
+                  "labelWidth": "0",
+                  "style": {
+                    "height": "500px"
+                  },
+                  "api": "post:/admin/inspection/schedule/id/$id/update_script_code",
+                  "body": [
+                    {
+                      "type": "transfer",
+                      "name": "script_codes",
+                      "source": "get:/admin/inspection/script/option_list",
+                      "searchable": true,
+                      "statistics": true,
+                      "resultListModeFollowSelect": true,
+                      "selectMode": "table",
+                      "columns": [
+                        {
+                          "name": "script_code",
+                          "label": "规则编码"
+                        },
+                        {
+                          "name": "name",
+                          "label": "规则名称"
+                        },
+                        {
+                          "name": "description",
+                          "label": "规则描述"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-play text-primary",
+              "actionType": "ajax",
+              "tooltip": "立即执行",
+              "api": "post:/admin/inspection/schedule/start/id/$id"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-history text-primary",
+              "actionType": "drawer",
+              "tooltip": "巡检历史记录",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "查看巡检历史记录 (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "crud",
+                    "id": "recordCRUD",
+                    "name": "recordCRUD",
+                    "autoFillHeight": true,
+                    "api": "get:/admin/inspection/schedule/id/$id/record/list",
+                    "headerToolbar": [
+                      {
+                        "type": "columns-toggler",
+                        "align": "right",
+                        "draggable": true,
+                        "icon": "fas fa-cog",
+                        "overlay": true,
+                        "footerBtnSize": "sm"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "共${count}条",
+                        "align": "right",
+                        "visibleOn": "${count}"
+                      },
+                      {
+                        "type": "columns-toggler",
+                        "align": "left"
+                      },
+                      "reload"
+                    ],
+                    "loadDataOnce": true,
+                    "syncLocation": false,
+                    "initFetch": true,
+                    "perPage": 10,
+                    "columns": [
+                      {
+                        "type": "operation",
+                        "label": "操作",
+                        "width": 120,
+                        "buttons": [
+                          {
+                            "type": "button",
+                            "actionType": "drawer",
+                            "label": "查看明细",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "xl",
+                              "title": "查看巡检明细 (ESC 关闭)",
+                              "body": [
+                                {
+                                  "type": "inspectionEventList",
+                                  "record_id": "${id}"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "button",
+                            "actionType": "drawer",
+                            "label": "运行输出",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "xl",
+                              "title": "查看脚本执行输出内容 (ESC 关闭)",
+                              "body": [
+                                {
+                                  "type": "alert",
+                                  "level": "info",
+                                  "body": "<strong>注意：</strong>该页面展示内容为对应规则脚本（lua）在运行时的标准输出、错误输出。"
+                                },
+                                {
+                                  "type": "crud",
+                                  "id": "scriptOutputCRUD",
+                                  "name": "scriptOutputCRUD",
+                                  "autoFillHeight": true,
+                                  "api": "get:/admin/inspection/schedule/record/id/$id/output/list",
+                                  "headerToolbar": [
+                                    {
+                                      "type": "columns-toggler",
+                                      "align": "right",
+                                      "draggable": true,
+                                      "icon": "fas fa-cog",
+                                      "overlay": true,
+                                      "footerBtnSize": "sm"
+                                    },
+                                    {
+                                      "type": "tpl",
+                                      "tpl": "共${count}条",
+                                      "align": "right",
+                                      "visibleOn": "${count}"
+                                    },
+                                    {
+                                      "type": "columns-toggler",
+                                      "align": "left"
+                                    },
+                                    "reload"
+                                  ],
+                                  "loadDataOnce": true,
+                                  "syncLocation": false,
+                                  "initFetch": true,
+                                  "perPage": 10,
+                                  "columns": [
+                                    {
+                                      "name": "script_name",
+                                      "label": "规则名称"
+                                    },
+                                    {
+                                      "name": "cluster",
+                                      "label": "集群"
+                                    },
+                                    {
+                                      "name": "std_output",
+                                      "label": "标准输出"
+                                    },
+                                    {
+                                      "name": "error_msg",
+                                      "label": "错误输出",
+                                      "type": "control",
+                                      "body": [
+                                        {
+                                          "type": "tpl",
+                                          "tpl": "${error_msg?error_msg:''}"
+                                        },
+                                        {
+                                          "type": "button",
+                                          "label": "查",
+                                          "level": "link",
+                                          "actionType": "drawer",
+                                          "drawer": {
+                                            "closeOnEsc": true,
+                                            "closeOnOutside": true,
+                                            "size": "lg",
+                                            "title": "AI释义",
+                                            "body": [
+                                              {
+                                                "type": "websocketMarkdownViewer",
+                                                "url": "/ai/chat/any_selection",
+                                                "params": {
+                                                  "question": "请详细解读下面的集群巡检结果所代表的含义：${error_msg}。"
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          "visibleOn": "${error_msg}"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "start_time",
+                                      "label": "开始时间",
+                                      "type": "datetime"
+                                    },
+                                    {
+                                      "name": "end_time",
+                                      "label": "结束时间",
+                                      "type": "datetime"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "name": "id",
+                        "label": "ID",
+                        "type": "text"
+                      },
+                      {
+                        "name": "cluster",
+                        "label": "集群"
+                      },
+                      {
+                        "name": "trigger_type",
+                        "label": "触发类型"
+                      },
+                      {
+                        "name": "status",
+                        "label": "状态"
+                      },
+                      {
+                        "name": "error_count",
+                        "label": "错误数量"
+                      },
+                      {
+                        "name": "start_time",
+                        "label": "开始时间",
+                        "type": "datetime"
+                      },
+                      {
+                        "name": "end_time",
+                        "label": "结束时间",
+                        "type": "datetime"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "id",
+          "label": "ID",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "label": "计划名称",
+          "type": "text",
+          "width": "180px"
+        },
+        {
+          "name": "clusters",
+          "label": "目标集群",
+          "type": "tpl",
+          "tpl": "${clusters | split:','}"
+        },
+        {
+          "name": "script_codes",
+          "label": "规则数",
+          "type": "tpl",
+          "tpl": "${script_codes | split:','|count}"
+        },
+        {
+          "name": "cron",
+          "label": "Cron表达式",
+          "type": "control",
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "${cron}"
+            },
+            {
+              "type": "button",
+              "label": "查",
+              "level": "link",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "AI释义: ${cron}",
+                "body": [
+                  {
+                    "type": "websocketMarkdownViewer",
+                    "url": "/ai/chat/cron",
+                    "params": {
+                      "cron": "${cron}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "last_run_time",
+          "label": "最后运行",
+          "type": "datetime"
+        },
+        {
+          "name": "error_count",
+          "label": "错误"
+        },
+        {
+          "name": "enabled",
+          "label": "启用",
+          "quickEdit": {
+            "mode": "inline",
+            "type": "switch",
+            "onText": "开启",
+            "offText": "关闭",
+            "saveImmediately": true,
+            "resetOnFailed": true
+          }
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}

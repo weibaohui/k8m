@@ -164,7 +164,8 @@ func GenericBatchSave[T any](params *Params, models []T, batchSize int, queryFun
 	// 如果params为nil，创建一个默认的params
 	if params == nil {
 		params = &Params{
-			Queries: make(map[string]interface{}),
+			Queries:  make(map[string]interface{}),
+			UserName: "",
 		}
 	}
 
@@ -180,8 +181,10 @@ func GenericBatchSave[T any](params *Params, models []T, batchSize int, queryFun
 
 	// 为每个模型补全CreatedBy
 	for i := range models {
-		if reflect.ValueOf(&models[i]).Elem().FieldByName("CreatedBy").String() == "" && params.UserName != "" {
-			reflect.ValueOf(&models[i]).Elem().FieldByName("CreatedBy").SetString(params.UserName)
+		if params.UserName != "" {
+			if reflect.ValueOf(&models[i]).Elem().FieldByName("CreatedBy").String() == "" {
+				reflect.ValueOf(&models[i]).Elem().FieldByName("CreatedBy").SetString(params.UserName)
+			}
 		}
 	}
 

@@ -1,0 +1,296 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "scriptCRUD",
+      "name": "scriptCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建规则",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "xl",
+            "title": "新建规则 (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/admin/inspection/script/save",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "name",
+                  "label": "规则名称",
+                  "required": true,
+                  "placeholder": "请输入规则名称",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 2,
+                    "maxLength": 128
+                  },
+                  "validationErrors": {
+                    "minLength": "规则名称至少 2 个字符",
+                    "maxLength": "规则名称最多 128 个字符"
+                  }
+                },
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "规则描述",
+                  "placeholder": "请输入规则描述"
+                },
+                {
+                  "type": "input-text",
+                  "name": "group",
+                  "label": "分组",
+                  "placeholder": "请输入分组"
+                },
+                {
+                  "type": "input-text",
+                  "name": "version",
+                  "label": "版本",
+                  "placeholder": "请输入版本"
+                },
+                {
+                  "type": "input-text",
+                  "name": "kind",
+                  "label": "类型",
+                  "placeholder": "请输入类型"
+                },
+                {
+                  "type": "editor",
+                  "name": "script",
+                  "label": "规则内容",
+                  "language": "lua"
+                },
+                {
+                  "type": "input-text",
+                  "name": "script_code",
+                  "label": "规则代码",
+                  "placeholder": "请输入规则代码,全局唯一编码，巡检计划使用该规则代码",
+                  "required": true
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "scriptCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "reload",
+        "bulkActions",
+        {
+          "type": "button",
+          "label": "重置内置规则",
+          "actionType": "ajax",
+          "confirmText": "该操作将先删除所有自定义规则，然后重新加载内置规则，是否执行?",
+          "api": "post:/admin/inspection/script/load"
+        }
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "post:/admin/inspection/script/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/admin/inspection/script/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑规则",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "编辑规则 (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/inspection/script/save",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "hidden",
+                      "name": "script_type"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "name",
+                      "label": "规则名称",
+                      "required": true,
+                      "placeholder": "请输入规则名称",
+                      "validateOnChange": true,
+                      "validations": {
+                        "minLength": 2,
+                        "maxLength": 128
+                      },
+                      "validationErrors": {
+                        "minLength": "规则名称至少 2 个字符",
+                        "maxLength": "规则名称最多 128 个字符"
+                      }
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "description",
+                      "label": "规则描述",
+                      "placeholder": "请输入规则描述"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "group",
+                      "label": "分组",
+                      "placeholder": "请输入分组"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "version",
+                      "label": "版本",
+                      "placeholder": "请输入版本"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "kind",
+                      "label": "类型",
+                      "placeholder": "请输入类型"
+                    },
+                    {
+                      "type": "editor",
+                      "name": "script",
+                      "label": "规则内容",
+                      "language": "lua"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "script_code",
+                      "label": "规则代码",
+                      "placeholder": "请输入规则代码，全局唯一编码，巡检计划使用该规则代码",
+                      "required": true
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "scriptCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "name",
+          "label": "规则名称",
+          "type": "text",
+          "width": "180px"
+        },
+        {
+          "name": "script_code",
+          "label": "规则编码",
+          "type": "text"
+        },
+        {
+          "name": "description",
+          "label": "规则描述",
+          "type": "text",
+          "width": "200px"
+        },
+        {
+          "name": "group",
+          "label": "分组",
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "label": "版本",
+          "type": "text"
+        },
+        {
+          "name": "kind",
+          "label": "类型",
+          "type": "text"
+        },
+        {
+          "name": "script_type",
+          "label": "来源",
+          "type": "mapping",
+          "map": {
+            "Builtin": "系统规则",
+            "Custom": "用户规则"
+          }
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}

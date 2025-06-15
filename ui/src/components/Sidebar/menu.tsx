@@ -1,7 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
-import {useEffect, useState} from 'react';
-import {fetcher} from '../Amis/fetcher';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -480,6 +480,34 @@ const items: () => MenuItem[] = () => {
                         key: "system_config",
                         onClick: () => onMenuClick('/admin/config/config')
                     },
+                    {
+                        label: "集群巡检设置",
+                        icon: <i className="fa-solid fa-stethoscope"></i>,
+                        key: "inspection_settings",
+                        children: [
+                            {
+                                label: "巡检汇总",
+                                icon: <i className="fa-solid fa-clipboard-list"></i>,
+                                key: "inspection_summary",
+                                onClick: () => onMenuClick('/admin/inspection/summary'),
+
+                            },
+                            {
+                                label: "巡检计划",
+                                icon: <i className="fa-solid fa-stethoscope"></i>,
+                                key: "inspection_schedule",
+                                onClick: () => onMenuClick('/admin/inspection/schedule'),
+
+                            },
+                            {
+                                label: "巡检规则",
+                                icon: <i className="fa-solid fa-clipboard-check"></i>,
+                                key: "script_management",
+                                onClick: () => onMenuClick('/admin/inspection/script')
+                            },
+                        ]
+                    },
+
                     {
                         label: "AI模型配置",
                         icon: <i className="fa-solid fa-sliders"></i>,
