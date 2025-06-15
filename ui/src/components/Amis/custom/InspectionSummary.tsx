@@ -3,6 +3,7 @@ import {Alert, Button, Card, DatePicker, Form, Spin, Table, Typography, Space} f
 import dayjs, {Dayjs} from 'dayjs';
 import {fetcher} from '@/components/Amis/fetcher';
 import {replacePlaceholders} from '@/utils/utils';
+import {Dropdown, Menu} from "antd";
 
 const {Title, Text} = Typography;
 
@@ -82,6 +83,27 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
 
     const {total_runs, total_clusters, latest_run = {}, clusters = [], total_schedules} = summaryData || {};
 
+    // 时间快捷选项
+    const quickRanges = [
+        {label: "1月", value: {start: dayjs().subtract(1, 'month').startOf('day'), end: dayjs().endOf('day')}},
+        {label: "1周", value: {start: dayjs().subtract(7, 'day').startOf('day'), end: dayjs().endOf('day')}},
+        {label: "2天", value: {start: dayjs().subtract(2, 'day').startOf('day'), end: dayjs().endOf('day')}},
+        {label: "1天", value: {start: dayjs().subtract(1, 'day').startOf('day'), end: dayjs().endOf('day')}},
+        {label: "6小时", value: {start: dayjs().subtract(6, 'hour'), end: dayjs()}},
+        {label: "1小时", value: {start: dayjs().subtract(1, 'hour'), end: dayjs()}},
+    ];
+    const quickMenu = (
+        <Menu>
+            {quickRanges.map((item, idx) => (
+                <Menu.Item key={idx} onClick={() => {
+                    setStartTime(item.value.start);
+                    setEndTime(item.value.end);
+                    form.setFieldsValue({startTime: item.value.start, endTime: item.value.end});
+                }}>{item.label}</Menu.Item>
+            ))}
+        </Menu>
+    );
+
     return (
         <div>
             <Card style={{marginBottom: 16}}>
@@ -103,6 +125,11 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit" loading={loading}>查询</Button>
+                    </Form.Item>
+                    <Form.Item>
+                        <Dropdown overlay={quickMenu} placement="bottomLeft">
+                            <Button>最近</Button>
+                        </Dropdown>
                     </Form.Item>
                 </Form>
             </Card>
