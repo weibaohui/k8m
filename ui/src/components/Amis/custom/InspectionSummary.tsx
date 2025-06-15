@@ -158,6 +158,9 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                         title={
                             <span>
                                 <span style={{ marginRight: 8 }}>
+                                    <b>最后执行信息</b>
+                                </span>
+                                <span style={{ marginRight: 8 }}>
                                     <b>计划ID：</b>
                                     <Tag color="blue">{latest_run.schedule_id ?? '-'}</Tag>
                                 </span>
@@ -167,7 +170,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                                 </span>
                                 <span>
                                     <b>执行时间：</b>
-                                    <Tag color="volcano">{latest_run.run_time}</Tag>
+                                    <Tag color="volcano">{latest_run.run_time ? dayjs(latest_run.run_time).format('YYYY-MM-DD HH:mm:ss') : '-'}</Tag>
                                 </span>
                             </span>
                         }
