@@ -23,7 +23,7 @@ func SSOConfigList(c *gin.Context) {
 
 func SSOConfigSave(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := &models.SSOConfig{}
+	m := models.SSOConfig{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)

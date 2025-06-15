@@ -27,7 +27,7 @@ func ListUserGroup(c *gin.Context) {
 func SaveUserGroup(c *gin.Context) {
 
 	params := dao.BuildParams(c)
-	m := &models.UserGroup{}
+	m := models.UserGroup{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)
