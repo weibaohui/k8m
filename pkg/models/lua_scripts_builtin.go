@@ -18,6 +18,12 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Service_001",
 		Script: `
+		    -- 获取Selector 定义文档
+			local doc, err = kubectl:GVK("", "v1", "Service"):Cache(10):Doc("spec.selector")
+			if err then
+				print( "获取 Service Doc 失败".. tostring(err))
+				return
+			end
 			-- 检查每个 Service 的 selector 是否有对应 Pod，Pod 查询限定在 Service 所在的 namespace
 			local svcs, err = kubectl:GVK("", "v1", "Service"):AllNamespace(""):List()
 			if not err and svcs then
@@ -38,9 +44,9 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 							for _, _ in pairs(pods) do count = count + 1 end
 						end
 						if count > 0 then
-							check_event("正常", "Service " .. svc.metadata.name .. " selector 正常, 关联 Pod 数: " .. count, {name=svc.metadata.name, selector=labelSelector, podCount=count, namespace=svc.metadata.namespace})
+							check_event("正常", "Service " .. svc.metadata.name .. " selector 正常, 关联 Pod 数: " .. count .. "spec.selector定义" .. doc, {name=svc.metadata.name, selector=labelSelector, podCount=count, namespace=svc.metadata.namespace})
 						else
-							check_event("失败", "Service " .. svc.metadata.name .. " selector " .. labelSelector .. " 应该至少一个pod, 但是现在没有", {name=svc.metadata.name, selector=labelSelector, namespace=svc.metadata.namespace})
+							check_event("失败", "Service " .. svc.metadata.name .. " selector " .. labelSelector .. " 应该至少一个pod, 但是现在没有。" .. "spec.selector定义" .. doc, {name=svc.metadata.name, selector=labelSelector, namespace=svc.metadata.namespace})
 						end
 					end
 				end
@@ -199,6 +205,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Deployment_005",
 		Script: `
+
+			local doc, err = kubectl:GVK("apps", "v1", "Deployment"):Cache(10):Doc("spec.replicas")
+			if err then
+				print( "获取 Deployment Doc 失败".. tostring(err))
+				return
+			end
+			print("Deployment Doc 获取成功: " .. doc)
 			local deployments, err = kubectl:GVK("apps", "v1", "Deployment"):Cache(10):AllNamespace(""):List()
 			if err then
 				print( "获取 Deployment 失败".. tostring(err))
