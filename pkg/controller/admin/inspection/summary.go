@@ -12,6 +12,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 // SummaryBySchedule 汇总指定scheduleID下的巡检执行信息
@@ -28,6 +29,7 @@ func SummaryBySchedule(c *gin.Context) {
 	// 新增：解析时间范围参数
 	var startTime, endTime time.Time
 	var err error
+	var cluster string
 	startTimeStr := c.Param("start_time")
 	endTimeStr := c.Param("end_time")
 	if startTimeStr != "" {
@@ -45,10 +47,24 @@ func SummaryBySchedule(c *gin.Context) {
 		}
 	}
 
+	// 获取cluster参数
+	clusterBase64 := c.Param("cluster")
+	klog.V(6).Infof("clusterBase64=%s ", clusterBase64)
+
+	if clusterDecode, err := utils.UrlSafeBase64Decode(clusterBase64); err == nil {
+		klog.V(6).Infof("cluster=%s ", cluster)
+		cluster = string(clusterDecode)
+	} else {
+		klog.V(6).Infof("cluster=%s,%v ", cluster, err)
+	}
+
 	// 2. 查询所有该scheduleID下的InspectionRecord
 	recordModel := &models.InspectionRecord{}
 	records, _, err := recordModel.List(params, func(db *gorm.DB) *gorm.DB {
 		query := db
+		if cluster != "" {
+			query = query.Where("cluster = ?", cluster)
+		}
 		if scheduleID != "" {
 			query = query.Where("schedule_id = ?", scheduleID)
 		}
@@ -82,7 +98,11 @@ func SummaryBySchedule(c *gin.Context) {
 	// 3. 查询所有相关InspectionCheckEvent
 	eventModel := &models.InspectionCheckEvent{}
 	events, _, err := eventModel.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where("schedule_id in ?", tempScheduleIDs)
+		db = db.Where("schedule_id in ?", tempScheduleIDs)
+		if cluster != "" {
+			db = db.Where("cluster = ?", cluster)
+		}
+		return db
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -143,144 +163,6 @@ func SummaryBySchedule(c *gin.Context) {
 		})
 	}
 	// 新增：统计最新一次执行情况
-	var latestRun gin.H
-	if len(records) > 0 {
-		latestRecord := records[0]
-		kindStatus := map[string]map[string]int{} // kind -> status -> count
-		for _, e := range events {
-			if e.RecordID == latestRecord.ID {
-				if _, ok := kindStatus[e.Kind]; !ok {
-					kindStatus[e.Kind] = map[string]int{"pass": 0, "fail": 0}
-				}
-				if e.EventStatus == string(constants.LuaEventStatusNormal) {
-					kindStatus[e.Kind]["pass"]++
-				} else {
-					kindStatus[e.Kind]["fail"]++
-				}
-			}
-		}
-		var kindArr []gin.H
-		for kind, statusMap := range kindStatus {
-			kindArr = append(kindArr, gin.H{
-				"kind":         kind,
-				"normal_count": statusMap["pass"],
-				"error_count":  statusMap["fail"],
-			})
-		}
-		latestRun = gin.H{
-			"record_id":   latestRecord.ID,
-			"schedule_id": latestRecord.ScheduleID,
-			"run_time":    latestRecord.CreatedAt,
-			"kinds":       kindArr,
-		}
-		result["latest_run"] = latestRun
-	}
-	amis.WriteJsonData(c, result)
-}
-
-// SummaryByCluster 汇总指定集群下的巡检执行信息
-// 展示涉及Kind数量、每个Kind检查次数及错误数
-// 支持按时间范围过滤
-// @param cluster 必填，集群名称
-// @param start_time 可选，起始时间（格式：2006-01-02T15:04:05Z07:00）
-// @param end_time 可选，结束时间（格式：2006-01-02T15:04:05Z07:00）
-func SummaryByCluster(c *gin.Context) {
-	params := dao.BuildParams(c)
-	params.PerPage = 100000
-	var err error
-
-	// 1. 获取cluster参数
-	clusterBase64 := c.Param("cluster")
-	cluster, err := utils.DecodeBase64(clusterBase64)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	if cluster == "" {
-		amis.WriteJsonError(c, fmt.Errorf("cluster 参数不能为空"))
-		return
-	}
-
-	// 解析时间范围参数
-	var startTime, endTime time.Time
-	startTimeStr := c.Param("start_time")
-	endTimeStr := c.Param("end_time")
-	if startTimeStr != "" {
-		startTime, err = time.Parse(time.RFC3339, startTimeStr)
-		if err != nil {
-			amis.WriteJsonError(c, fmt.Errorf("start_time 格式错误，应为 RFC3339"))
-			return
-		}
-	}
-	if endTimeStr != "" {
-		endTime, err = time.Parse(time.RFC3339, endTimeStr)
-		if err != nil {
-			amis.WriteJsonError(c, fmt.Errorf("end_time 格式错误，应为 RFC3339"))
-			return
-		}
-	}
-
-	// 2. 查询该集群下的InspectionRecord
-	recordModel := &models.InspectionRecord{}
-	records, _, err := recordModel.List(params, func(db *gorm.DB) *gorm.DB {
-		query := db.Where("cluster = ?", cluster)
-		if !startTime.IsZero() {
-			query = query.Where("created_at >= ?", startTime)
-		}
-		if !endTime.IsZero() {
-			query = query.Where("created_at <= ?", endTime)
-		}
-		return query.Order("id desc")
-	})
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	if len(records) == 0 {
-		amis.WriteJsonData(c, gin.H{"summary": "无执行记录"})
-		return
-	}
-
-	// 3. 查询所有相关InspectionCheckEvent
-	recordIDs := make([]uint, 0, len(records))
-	for _, r := range records {
-		recordIDs = append(recordIDs, r.ID)
-	}
-	eventModel := &models.InspectionCheckEvent{}
-	events, _, err := eventModel.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Where("record_id in ?", recordIDs)
-	})
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	// 4. 聚合统计
-	totalRuns := len(records)
-	kindMap := map[string]int{}    // kind -> count
-	kindErrMap := map[string]int{} // kind -> error count
-	for _, e := range events {
-		kindMap[e.Kind]++
-		if e.EventStatus != string(constants.LuaEventStatusNormal) {
-			kindErrMap[e.Kind]++
-		}
-	}
-
-	// 5. 构建返回结构
-	result := gin.H{
-		"cluster":    cluster,
-		"total_runs": totalRuns,
-		"kinds":      []gin.H{},
-	}
-	for kind, count := range kindMap {
-		errCount := kindErrMap[kind]
-		result["kinds"] = append(result["kinds"].([]gin.H), gin.H{
-			"kind":        kind,
-			"count":       count,
-			"error_count": errCount,
-		})
-	}
-	// 统计最新一次执行情况
 	var latestRun gin.H
 	if len(records) > 0 {
 		latestRecord := records[0]

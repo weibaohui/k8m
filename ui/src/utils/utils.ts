@@ -71,7 +71,7 @@ function parseLocalStorageExpression(expression: string): string | null {
 }
 
 
-function toUrlSafeBase64(str: string) {
+export function toUrlSafeBase64(str: string) {
     const base64 = btoa(str); // 标准 Base64
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // 转为 URL-safe
 }
@@ -93,36 +93,36 @@ export function ProcessK8sUrlWithCluster(url: string): string {
 // path: 路径，例如 'a.b.c'
 // 返回值: 路径对应的值，如果路径不存在则返回 undefined
 export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T): T {
-  if (!obj || typeof path !== 'string') return defaultValue as T;
+    if (!obj || typeof path !== 'string') return defaultValue as T;
 
-  const keys = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+    const keys = path.replace(/\[(\d+)\]/g, '.$1').split('.');
 
-  function traverse(current: any, index: number): any {
-    if (current == null) {
-      return undefined;
+    function traverse(current: any, index: number): any {
+        if (current == null) {
+            return undefined;
+        }
+
+        const key = keys[index];
+
+        if (Array.isArray(current)) {
+            // 当前是数组，批量处理每个元素
+            const results = current.map(item => traverse(item, index));
+            return results.flat(); // 把结果拍平
+        }
+
+        if (index === keys.length - 1) {
+            // 最后一个key
+            return current?.[key];
+        }
+
+        return traverse(current[key], index + 1);
     }
 
-    const key = keys[index];
+    const result = traverse(obj, 0);
 
-    if (Array.isArray(current)) {
-      // 当前是数组，批量处理每个元素
-      const results = current.map(item => traverse(item, index));
-      return results.flat(); // 把结果拍平
+    // 返回默认值或者实际值
+    if (result === undefined) {
+        return defaultValue as T;
     }
-
-    if (index === keys.length - 1) {
-      // 最后一个key
-      return current?.[key];
-    }
-
-    return traverse(current[key], index + 1);
-  }
-
-  const result = traverse(obj, 0);
-
-  // 返回默认值或者实际值
-  if (result === undefined) {
-    return defaultValue as T;
-  }
-  return result;
+    return result;
 }
