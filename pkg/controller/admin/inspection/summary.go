@@ -16,10 +16,7 @@ import (
 )
 
 // SummaryBySchedule 汇总指定scheduleID下的巡检执行信息
-// 展示涉及集群数、每个集群涉及的Kind数量、每个Kind检查次数及错误数
 // SummaryBySchedule 统计巡检计划执行情况，支持按时间范围过滤
-// @param start_time 可选，起始时间（格式：2006-01-02T15:04:05Z07:00）
-// @param end_time 可选，结束时间（格式：2006-01-02T15:04:05Z07:00）
 func SummaryBySchedule(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 100000000
