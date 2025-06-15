@@ -128,6 +128,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     </Form.Item>
                     <Form.Item>
                         <Dropdown.Button
+                            icon={<DownOutlined />}
                             menu={quickMenuProps}
                             placement="bottomLeft"
                             onClick={() => form.submit()}
