@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Alert,
     Card,
@@ -14,32 +14,24 @@ import {
     Drawer,
     Select
 } from "antd";
-import dayjs, {Dayjs} from 'dayjs';
-import {fetcher} from '@/components/Amis/fetcher';
-import {replacePlaceholders, toUrlSafeBase64} from '@/utils/utils';
-import {DownOutlined} from '@ant-design/icons';
+import dayjs, { Dayjs } from 'dayjs';
+import { fetcher } from '@/components/Amis/fetcher';
+import { replacePlaceholders, toUrlSafeBase64 } from '@/utils/utils';
+import { DownOutlined } from '@ant-design/icons';
 import InspectionEventListComponent from './InspectionEventList';
-import {useClusterOptions} from './useClusterOptions';
+import { useClusterOptions } from './useClusterOptions';
 
-const {Title, Text} = Typography;
+const { Title, Text } = Typography;
 
 interface InspectionSummaryComponentProps {
     schedule_id: string;
     data: Record<string, any>;
 }
 
-/**
- * InspectionSummaryComponent 组件
- * 优化：
- * 1. 结构更清晰，表单与数据展示分离
- * 2. 代码风格统一，类型更严格
- * 3. 错误与加载提示更友好
- * 4. 支持外部 schedule_id、data 变化自动刷新
- */
 const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSummaryComponentProps>(({
-                                                                                                          schedule_id,
-                                                                                                          data
-                                                                                                      }, _) => {
+    schedule_id,
+    data
+}, _) => {
     // 表单状态
     const [form] = Form.useForm();
     const [startTime, setStartTime] = useState<Dayjs>(() => dayjs().startOf('day'));
@@ -49,7 +41,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
     const [error, setError] = useState<string | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerRecordId, setDrawerRecordId] = useState<number | null>(null);
-    const {options: clusterOptions, loading: clusterLoading} = useClusterOptions();
+    const { options: clusterOptions, loading: clusterLoading } = useClusterOptions();
     const [cluster, setCluster] = useState<string | undefined>(undefined);
 
 
@@ -77,7 +69,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         }
         url = `/admin/inspection/schedule/id/${realScheduleId}/summary/cluster/${clusterBase64}/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
 
-        fetcher({url, method: 'post'})
+        fetcher({ url, method: 'post' })
             .then((response: any) => {
                 if (response?.data?.data) {
                     setSummaryData(response.data.data);
@@ -107,48 +99,35 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
 
     // antd表格列定义
     const latestRunColumns = [
-        {title: '资源类型', dataIndex: 'kind', key: 'kind'},
-        {
-            title: '正常数', dataIndex: 'normal_count', key: 'normal_count',
-            render: (text: any, _: any) => (
-                <span style={{color: '#52c41a', cursor: 'pointer'}}
-                      onClick={() => {
-                          setDrawerRecordId(latest_run.record_id);
-                          setDrawerDefaultStatus('正常');
-                          setDrawerOpen(true);
-                      }}
-                >{text}</span>
-            )
-        },
+        { title: '资源类型', dataIndex: 'kind', key: 'kind' },
         {
             title: '异常数', dataIndex: 'error_count', key: 'error_count',
             render: (text: any, _: any) => (
-                <span style={{color: '#ff4d4f', cursor: 'pointer'}}
-                      onClick={() => {
-                          setDrawerRecordId(latest_run.record_id);
-                          setDrawerDefaultStatus('失败');
-                          setDrawerOpen(true);
-                      }}
+                <span style={{ color: '#ff4d4f', cursor: 'pointer' }}
+                    onClick={() => {
+                        setDrawerRecordId(latest_run.record_id);
+                        setDrawerDefaultStatus('失败');
+                        setDrawerOpen(true);
+                    }}
                 >{text}</span>
             )
         }
     ];
     const clusterColumns = [
-        {title: '资源类型', dataIndex: 'kind', key: 'kind'},
-        {title: '总数', dataIndex: 'count', key: 'count'},
-        {title: '异常数', dataIndex: 'error_count', key: 'error_count'}
+        { title: '资源类型', dataIndex: 'kind', key: 'kind' },
+        { title: '异常数', dataIndex: 'error_count', key: 'error_count' }
     ];
 
-    const {total_runs, total_clusters, latest_run = {}, clusters = [], total_schedules} = summaryData || {};
+    const { total_runs, total_clusters, latest_run = {}, clusters = [], total_schedules } = summaryData || {};
 
     // 时间快捷选项
     const quickRanges = [
-        {label: "1月", value: {start: dayjs().subtract(1, 'month').startOf('day'), end: dayjs().endOf('day')}},
-        {label: "1周", value: {start: dayjs().subtract(7, 'day').startOf('day'), end: dayjs().endOf('day')}},
-        {label: "2天", value: {start: dayjs().subtract(2, 'day').startOf('day'), end: dayjs().endOf('day')}},
-        {label: "1天", value: {start: dayjs().subtract(1, 'day').startOf('day'), end: dayjs().endOf('day')}},
-        {label: "6小时", value: {start: dayjs().subtract(6, 'hour'), end: dayjs()}},
-        {label: "1小时", value: {start: dayjs().subtract(1, 'hour'), end: dayjs()}},
+        { label: "1月", value: { start: dayjs().subtract(1, 'month').startOf('day'), end: dayjs().endOf('day') } },
+        { label: "1周", value: { start: dayjs().subtract(7, 'day').startOf('day'), end: dayjs().endOf('day') } },
+        { label: "2天", value: { start: dayjs().subtract(2, 'day').startOf('day'), end: dayjs().endOf('day') } },
+        { label: "1天", value: { start: dayjs().subtract(1, 'day').startOf('day'), end: dayjs().endOf('day') } },
+        { label: "6小时", value: { start: dayjs().subtract(6, 'hour'), end: dayjs() } },
+        { label: "1小时", value: { start: dayjs().subtract(1, 'hour'), end: dayjs() } },
     ];
     const quickMenuProps: MenuProps = {
         items: quickRanges.map((item, idx) => ({
@@ -160,19 +139,19 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
             const range = quickRanges[idx];
             setStartTime(range.value.start);
             setEndTime(range.value.end);
-            form.setFieldsValue({startTime: range.value.start, endTime: range.value.end});
-            fetchSummary({startTime: range.value.start, endTime: range.value.end});
+            form.setFieldsValue({ startTime: range.value.start, endTime: range.value.end });
+            fetchSummary({ startTime: range.value.start, endTime: range.value.end });
         },
     };
 
 
     return (
         <div>
-            <Card style={{marginBottom: 16}}>
+            <Card style={{ marginBottom: 16 }}>
                 <Form
                     form={form}
                     layout="inline"
-                    initialValues={{startTime, endTime, cluster}}
+                    initialValues={{ startTime, endTime, cluster }}
                     onFinish={values => {
                         setStartTime(values.startTime);
                         setEndTime(values.endTime);
@@ -180,15 +159,15 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                         fetchSummary(values);
                     }}
                 >
-                    <Form.Item label="起始时间" name="startTime" rules={[{required: true, message: '请选择起始时间'}]}>
-                        <DatePicker showTime format="YYYY-MM-DD HH:mm" value={startTime} allowClear={false}/>
+                    <Form.Item label="起始时间" name="startTime" rules={[{ required: true, message: '请选择起始时间' }]}>
+                        <DatePicker showTime format="YYYY-MM-DD HH:mm" value={startTime} allowClear={false} />
                     </Form.Item>
-                    <Form.Item label="结束时间" name="endTime" rules={[{required: true, message: '请选择结束时间'}]}>
-                        <DatePicker showTime format="YYYY-MM-DD HH:mm" value={endTime} allowClear={false}/>
+                    <Form.Item label="结束时间" name="endTime" rules={[{ required: true, message: '请选择结束时间' }]}>
+                        <DatePicker showTime format="YYYY-MM-DD HH:mm" value={endTime} allowClear={false} />
                     </Form.Item>
                     <Form.Item label="集群" name="cluster" initialValue={cluster || ''}>
                         <Select
-                            style={{minWidth: 220}}
+                            style={{ minWidth: 220 }}
                             loading={clusterLoading}
                             allowClear
                             placeholder="全部集群"
@@ -205,7 +184,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     </Form.Item>
                     <Form.Item>
                         <Dropdown.Button
-                            icon={<DownOutlined/>}
+                            icon={<DownOutlined />}
                             menu={quickMenuProps}
                             placement="bottomLeft"
                             onClick={() => form.submit()}
@@ -217,9 +196,9 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     </Form.Item>
                 </Form>
             </Card>
-            {error && <Alert type="error" message={error} style={{marginBottom: 8}} showIcon/>}
+            {error && <Alert type="error" message={error} style={{ marginBottom: 8 }} showIcon />}
             <Spin spinning={loading} tip="加载中...">
-                <Card style={{marginBottom: 16}}>
+                <Card style={{ marginBottom: 16 }}>
                     <Space>
                         <Text strong>总执行次数：</Text> <Text>{total_runs ?? '-'}</Text>
                         <Text strong>总集群数：</Text> <Text>{total_clusters ?? '-'}</Text>
@@ -234,19 +213,19 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     <Card
                         title={
                             <span>
-                                <span style={{marginRight: 8}}>
+                                <span style={{ marginRight: 8 }}>
                                     <b>最后执行信息</b>
                                 </span>
-                                <span style={{marginRight: 8}}>
+                                <span style={{ marginRight: 8 }}>
                                     <b>计划ID：</b>
                                     <Tag color="blue">{latest_run.schedule_id ?? '-'}</Tag>
                                 </span>
-                                <span style={{marginRight: 8, cursor: 'pointer'}}
-                                      onClick={() => {
-                                          setDrawerRecordId(latest_run.record_id);
-                                          setDrawerDefaultStatus('全部');
-                                          setDrawerOpen(true);
-                                      }}
+                                <span style={{ marginRight: 8, cursor: 'pointer' }}
+                                    onClick={() => {
+                                        setDrawerRecordId(latest_run.record_id);
+                                        setDrawerDefaultStatus('全部');
+                                        setDrawerOpen(true);
+                                    }}
                                 >
                                     <b>记录ID：</b>
                                     <Tag color="green">{latest_run.record_id}</Tag>
@@ -258,7 +237,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                                 </span>
                             </span>
                         }
-                        style={{marginBottom: 16}}
+                        style={{ marginBottom: 16 }}
                     >
                         <Table
                             columns={latestRunColumns}
@@ -269,11 +248,11 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                         />
                     </Card>
                 )}
-                <Title level={5} style={{margin: '16px 0 8px 0'}}>汇总数据：</Title>
+                <Title level={5} style={{ margin: '16px 0 8px 0' }}>汇总数据：</Title>
                 {clusters.length === 0 && <Text type="secondary">暂无集群数据</Text>}
                 {clusters.map((cluster: any, idx: number) => (
                     <Card key={idx} title={<span>集群：{cluster.cluster} (执行{cluster.run_count}次)</span>}
-                          style={{marginBottom: 16}}>
+                        style={{ marginBottom: 16 }}>
                         <Table
                             columns={clusterColumns}
                             dataSource={cluster.kinds || []}
@@ -292,7 +271,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                 destroyOnClose
             >
                 {drawerRecordId &&
-                    <InspectionEventListComponent record_id={`${drawerRecordId}`} defaultStatus={drawerDefaultStatus}/>}
+                    <InspectionEventListComponent record_id={`${drawerRecordId}`} />}
             </Drawer>
         </div>
     );

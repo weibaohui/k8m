@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, List, Space, Tag, Typography, Alert, Card, Spin, Segmented } from 'antd';
+import { Button, List, Space, Tag, Typography, Alert, Card, Spin } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { fetcher } from '@/components/Amis/fetcher';
@@ -11,7 +11,6 @@ const { Title } = Typography;
 interface InspectionEventListComponentProps {
     record_id: string;
     data?: Record<string, any>;
-    defaultStatus?: '全部' | '正常' | '失败';
 }
 
 const statusColorMap: Record<string, string> = {
@@ -21,12 +20,11 @@ const statusColorMap: Record<string, string> = {
 };
 
 const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> = (props) => {
-    const { record_id: initialRecordId, data, defaultStatus } = props;
+    const { record_id: initialRecordId, data } = props;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [eventData, setEventData] = useState<any[]>([]);
     const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
-    const [filterStatus, setFilterStatus] = useState<'全部' | '正常' | '失败'>(defaultStatus || '全部');
 
     const record_id = replacePlaceholders(initialRecordId, data!) || "";
 
@@ -60,17 +58,11 @@ const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> 
         }));
     };
 
-    const filteredData = filterStatus === '全部' ? eventData : eventData.filter(item => item.event_status === filterStatus);
+    const filteredData = eventData.filter(item => item.event_status === '失败');
 
     return (
         <Card>
-            <Title level={5} >事件明细（共 {filteredData.length} 条）</Title>
-            <Segmented
-                options={['全部', '正常', '失败']}
-                value={filterStatus}
-                onChange={setFilterStatus}
-                style={{ marginBottom: 16 }}
-            />
+            <Title level={5} >异常事件明细（共 {filteredData.length} 条）</Title>
             {error && <Alert type="error" message={error} style={{ marginBottom: 8 }} showIcon />}
             <Spin spinning={loading} tip="加载中...">
                 <List
