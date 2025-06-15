@@ -66,10 +66,10 @@
                   "placeholder": "请输入类型"
                 },
                 {
-                  "type": "textarea",
+                  "type": "editor",
                   "name": "script",
                   "label": "规则内容",
-                  "placeholder": "请输入规则内容"
+                  "language": "lua"
                 },
                 {
                   "type": "input-text",
@@ -207,10 +207,10 @@
                       "placeholder": "请输入类型"
                     },
                     {
-                      "type": "textarea",
+                      "type": "editor",
                       "name": "script",
                       "label": "规则内容",
-                      "placeholder": "请输入规则内容"
+                      "language": "lua"
                     },
                     {
                       "type": "input-text",
