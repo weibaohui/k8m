@@ -147,6 +147,35 @@ end
 - 支持自定义缓存、标签、命名空间等多条件组合。
 - 适合用于自定义资源检测、合规性校验、批量查询等场景。
 
----
+## 五、AI Prompt：让大模型帮你生成检测规则
 
-如需扩展更多方法，请参考 `pkg/lua/lua_kubectl.go` 文件源码。
+如果你不会编写 Lua 检测脚本，可以通过向大模型（如 ChatGPT、Copilot、通义千问等）提问，自动生成所需的规则脚本。你可以参考以下 Prompt 模板：
+
+**通用 Prompt 模板：**
+
+
+请帮我用 Lua 语言，基于如下链式 API，编写一个 Kubernetes 资源检测脚本：
+-- 入口对象为 kubectl，支持 GVK、Namespace、AllNamespace、WithLabelSelector、List、Get、Doc、check_event 等方法。
+-- 目标：检测所有命名空间下副本数不一致的 Deployment，正常情况下应该是deployment.spec.replicas == deployment.status.replicas。
+
+要求：
+1、返回完整 Lua 代码。
+2、检测到异常时，必须调用 check_event("失败", "描述信息", {name=资源名, namespace=命名空间})这样的方法。
+
+如果你需要检测特定资源的副本数一致性
+以下是你可以参考示例脚本（Deployment 副本数一致性检测脚本）：
+```lua
+local deployments, err = kubectl:GVK("apps", "v1", "Deployment"):Cache(360):AllNamespace():List()
+if err then
+    print("获取 Deployment 失败" .. tostring(err))
+    return
+end
+for _, deploy in ipairs(deployments) do
+    local specReplicas = deploy.spec and deploy.spec.replicas or 1
+    local statusReplicas = deploy.status and deploy.status.replicas or 0
+    if specReplicas ~= statusReplicas then
+        check_event("失败", "副本数不一致", {name=deploy.metadata.name, namespace=deploy.metadata.namespace})
+    end
+end
+print("Deployment 副本数一致性检测完成")
+```
