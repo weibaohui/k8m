@@ -80,9 +80,9 @@ const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) 
             method: 'get',
         })
             .then((res: any) => {
-                if (res?.data?.rows) {
-                    setData(res.data.rows);
-                    setCount(res.data.count || res.data.rows.length);
+                if (res?.data?.data?.rows) {
+                    setData(res.data.data.rows);
+                    setCount(res.data.data.count || res.data.data.rows.length);
                 } else {
                     setData([]);
                     setCount(0);
