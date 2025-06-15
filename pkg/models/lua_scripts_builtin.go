@@ -868,4 +868,94 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			print("ReplicaSet 合规性检查完成")
 		`,
 	},
+	{
+		Name:        "Security ServiceAccount 默认账户使用检测",
+		Description: "检测 default ServiceAccount 是否被 Pod 使用。",
+		Group:       "core",
+		Version:     "v1",
+		Kind:        "ServiceAccount",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Security_SA_023",
+		Script: `
+			local sas, err = kubectl:GVK("", "v1", "ServiceAccount"):AllNamespace(""):List()
+			if err then print("获取 ServiceAccount 失败: " .. tostring(err)) return end
+			for _, sa in ipairs(sas) do
+				if sa.metadata and sa.metadata.name == "default" then
+					local pods, err = kubectl:GVK("", "v1", "Pod"):Namespace(sa.metadata.namespace):List()
+					if not err and pods then
+						local defaultSAUsers = {}
+						for _, pod in ipairs(pods) do
+							if pod.spec and pod.spec.serviceAccountName == "default" then
+								table.insert(defaultSAUsers, pod.metadata.name)
+							end
+						end
+						if #defaultSAUsers > 0 then
+							check_event("失败", "Default service account 被以下 Pod 使用: " .. table.concat(defaultSAUsers, ", "), {namespace=sa.metadata.namespace, name=sa.metadata.name})
+						end
+					end
+				end
+			end
+			print("Security ServiceAccount 检查完成")
+		`,
+	},
+	{
+		Name:        "Security RoleBinding 通配符检测",
+		Description: "检测 RoleBinding 关联的 Role 是否包含通配符权限。",
+		Group:       "rbac.authorization.k8s.io",
+		Version:     "v1",
+		Kind:        "RoleBinding",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Security_RoleBinding_024",
+		Script: `
+			local rbs, err = kubectl:GVK("rbac.authorization.k8s.io", "v1", "RoleBinding"):AllNamespace(""):List()
+			if err then print("获取 RoleBinding 失败: " .. tostring(err)) return end
+			for _, rb in ipairs(rbs) do
+				if rb.roleRef and rb.roleRef.kind == "Role" and rb.roleRef.name then
+					local role, err = kubectl:GVK("rbac.authorization.k8s.io", "v1", "Role"):Namespace(rb.metadata.namespace):Name(rb.roleRef.name):Get()
+					if not err and role and role.rules then
+						for _, rule in ipairs(role.rules) do
+							local function containsWildcard(arr)
+								if not arr then return false end
+								for _, v in ipairs(arr) do if v == "*" then return true end end
+								return false
+							end
+							if containsWildcard(rule.verbs) or containsWildcard(rule.resources) then
+								check_event("失败", "RoleBinding '" .. rb.metadata.name .. "' 关联的 Role '" .. role.metadata.name .. "' 存在通配符权限", {namespace=rb.metadata.namespace, name=rb.metadata.name, role=role.metadata.name})
+							end
+						end
+					end
+				end
+			end
+			print("Security RoleBinding 检查完成")
+		`,
+	},
+	{
+		Name:        "Security Pod 安全上下文检测",
+		Description: "检测 Pod 是否存在特权容器或缺少安全上下文。",
+		Group:       "core",
+		Version:     "v1",
+		Kind:        "Pod",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Security_Pod_025",
+		Script: `
+			local pods, err = kubectl:GVK("", "v1", "Pod"):AllNamespace(""):List()
+			if err then print("获取 Pod 失败: " .. tostring(err)) return end
+			for _, pod in ipairs(pods) do
+				local hasPrivileged = false
+				if pod.spec and pod.spec.containers then
+					for _, c in ipairs(pod.spec.containers) do
+						if c.securityContext and c.securityContext.privileged == true then
+							hasPrivileged = true
+							check_event("失败", "容器 " .. c.name .. " 以特权模式运行，存在安全风险", {namespace=pod.metadata.namespace, name=pod.metadata.name, container=c.name})
+							break
+						end
+					end
+				end
+				if not hasPrivileged and (not pod.spec or not pod.spec.securityContext) then
+					check_event("失败", "Pod " .. pod.metadata.name .. " 未定义安全上下文，存在安全风险", {namespace=pod.metadata.namespace, name=pod.metadata.name})
+				end
+			end
+			print("Security Pod 安全上下文检查完成")
+		`,
+	},
 }
