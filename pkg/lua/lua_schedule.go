@@ -10,6 +10,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -97,7 +98,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 			if !s.IsEventStatusPass(e.Status) {
 				errorCount += 1
 			} else {
-				ce.EventStatus = "正常"
+				ce.EventStatus = string(constants.LuaEventStatusNormal) // 统一状态描述为正常
 			}
 			checkEvents = append(checkEvents, ce)
 
@@ -142,6 +143,7 @@ func InitClusterInspection() {
 	})
 }
 
+// 入库前将状态描述文字统一为正常、失败两种
 func (s *ScheduleBackground) IsEventStatusPass(status string) bool {
 	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
 }

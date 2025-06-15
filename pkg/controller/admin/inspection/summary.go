@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 )
@@ -100,7 +101,7 @@ func Summary(c *gin.Context) {
 			clusterKindErrMap[e.Cluster] = map[string]int{}
 		}
 		clusterKindMap[e.Cluster][e.Kind]++
-		if e.EventStatus != "正常" {
+		if e.EventStatus != string(constants.LuaEventStatusNormal) {
 			clusterKindErrMap[e.Cluster][e.Kind]++
 
 		}
@@ -150,7 +151,7 @@ func Summary(c *gin.Context) {
 				if _, ok := kindStatus[e.Kind]; !ok {
 					kindStatus[e.Kind] = map[string]int{"pass": 0, "fail": 0}
 				}
-				if e.EventStatus == "正常" {
+				if e.EventStatus == string(constants.LuaEventStatusNormal) {
 					kindStatus[e.Kind]["pass"]++
 				} else {
 					kindStatus[e.Kind]["fail"]++

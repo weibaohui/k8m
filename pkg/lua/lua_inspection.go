@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/kom/kom"
 	lua "github.com/yuin/gopher-lua"
@@ -85,7 +86,7 @@ func (p *Inspection) Start() []CheckResult {
 		if len(res.Events) > 0 {
 			fmt.Println("结构化检测失败事件:")
 			for _, evt := range res.Events {
-				if evt.Status != "正常" {
+				if evt.Status != string(constants.LuaEventStatusNormal) {
 					b, _ := json.Marshal(evt)
 					fmt.Println(string(b))
 				}
