@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Tag, Typography, Spin, Alert } from 'antd';
+import { Button, List, Space, Tag, Typography, Alert, Card, Spin } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { fetcher } from '@/components/Amis/fetcher';
+import WebSocketMarkdownViewerComponent from './WebSocketMarkdownViewer';
 
 const { Title } = Typography;
 
@@ -15,61 +17,12 @@ const statusColorMap: Record<string, string> = {
     '警告': 'orange',
 };
 
-const columns = [
-    {
-        title: '状态',
-        dataIndex: 'event_status',
-        key: 'event_status',
-        render: (status: string) => <Tag color={statusColorMap[status] || 'default'}>{status}</Tag>,
-    },
-    {
-        title: '消息',
-        dataIndex: 'event_msg',
-        key: 'event_msg',
-    },
-    {
-        title: '资源类型',
-        dataIndex: 'kind',
-        key: 'kind',
-    },
-    {
-        title: '命名空间',
-        dataIndex: 'namespace',
-        key: 'namespace',
-    },
-    {
-        title: '名称',
-        dataIndex: 'name',
-        key: 'name',
-    },
-    {
-        title: '脚本',
-        dataIndex: 'script_name',
-        key: 'script_name',
-    },
-    {
-        title: '检查描述',
-        dataIndex: 'check_desc',
-        key: 'check_desc',
-    },
-    {
-        title: '集群',
-        dataIndex: 'cluster',
-        key: 'cluster',
-    },
-    {
-        title: '创建时间',
-        dataIndex: 'created_at',
-        key: 'created_at',
-        render: (t: string) => dayjs(t).format('YYYY-MM-DD HH:mm:ss'),
-    },
-];
-
 const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [data, setData] = useState<any[]>([]);
     const [count, setCount] = useState<number>(0);
+    const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         if (!record_id) return;
@@ -97,18 +50,68 @@ const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) 
             .finally(() => setLoading(false));
     }, [record_id]);
 
+    const toggleExplanation = (itemKey: string) => {
+        setExpandedItems(prev => ({
+            ...prev,
+            [itemKey]: !prev[itemKey]
+        }));
+    };
+
     return (
         <Card style={{ marginTop: 24 }}>
             <Title level={5} style={{ marginBottom: 16 }}>事件明细（共 {count} 条）</Title>
             {error && <Alert type="error" message={error} style={{ marginBottom: 8 }} showIcon />}
             <Spin spinning={loading} tip="加载中...">
-                <Table
-                    columns={columns}
+                <List
                     dataSource={data}
-                    rowKey="id"
-                    size="small"
-                    pagination={{ pageSize: 20 }}
-                    scroll={{ x: 'max-content' }}
+                    renderItem={item => {
+                        const itemKey = `${item.kind}-${item.name}-${item.id}`;
+                        return (
+                            <List.Item>
+                                <div style={{ width: '100%' }}>
+                                    <Space style={{ marginBottom: 8 }}>
+                                        <Tag color={statusColorMap[item.event_status] || 'default'}>
+                                            {item.event_status}
+                                        </Tag>
+                                        <Typography.Text strong>{item.kind}: {item.name}</Typography.Text>
+                                        <Tag color="blue">{item.namespace}</Tag>
+                                        <Tag color="purple">{item.script_name}</Tag>
+                                        <Tag color="geekblue">{item.cluster}</Tag>
+                                        <Tag color="default">{item.created_at ? dayjs(item.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</Tag>
+                                    </Space>
+                                    <Alert
+                                        message={item.event_msg}
+                                        description={item.check_desc}
+                                        type={item.event_status === '失败' ? 'error' : (item.event_status === '警告' ? 'warning' : 'success')}
+                                        showIcon
+                                        action={
+                                            <Button
+                                                icon={<QuestionCircleOutlined />}
+                                                onClick={() => toggleExplanation(itemKey)}
+                                                type="link"
+                                            >
+                                                AI解释
+                                            </Button>
+                                        }
+                                    />
+                                    {expandedItems[itemKey] && (
+                                        <div style={{ marginTop: 8, marginBottom: 16 }}>
+                                            <WebSocketMarkdownViewerComponent
+                                                url="/ai/chat/k8s_gpt/resource"
+                                                params={{
+                                                    kind: item.kind,
+                                                    name: item.name,
+                                                    data: item.event_msg,
+                                                    field: item.check_desc
+                                                }}
+                                                data={{}}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </List.Item>
+                        );
+                    }}
                 />
             </Spin>
         </Card>
