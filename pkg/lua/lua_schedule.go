@@ -33,7 +33,6 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果scheduleID 不为空，
 	// 从数据库中读取scheduleName
-	// TODO 更新到巡检计划表，最后巡检结果，最后巡检时间
 	var scheduleName string
 	if scheduleID == nil {
 		return nil, fmt.Errorf("参数错误，scheduleID不能为空")
@@ -82,7 +81,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		}
 		scriptResults = append(scriptResults, &result)
 		for _, e := range res.Events {
-			checkEvents = append(checkEvents, &models.InspectionCheckEvent{
+			ce := &models.InspectionCheckEvent{
 				RecordID:    record.ID,
 				ScheduleID:  scheduleID,
 				EventStatus: e.Status,
@@ -94,10 +93,14 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 				Namespace:   e.Namespace,
 				Name:        e.Name,
 				Cluster:     cluster,
-			})
-			if e.Status == "错误" || e.Status == "error" || e.Status == "失败" {
-				errorCount += 1
 			}
+			if !s.IsEventStatusPass(e.Status) {
+				errorCount += 1
+			} else {
+				ce.EventStatus = "正常"
+			}
+			checkEvents = append(checkEvents, ce)
+
 		}
 	}
 	// 保存脚本运行中产生的事件记录
@@ -137,6 +140,10 @@ func InitClusterInspection() {
 		sb := ScheduleBackground{}
 		sb.StartFromDB()
 	})
+}
+
+func (s *ScheduleBackground) IsEventStatusPass(status string) bool {
+	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
 }
 
 // StartFromDB  后台自动执行调度

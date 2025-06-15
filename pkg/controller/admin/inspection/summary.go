@@ -100,7 +100,7 @@ func Summary(c *gin.Context) {
 			clusterKindErrMap[e.Cluster] = map[string]int{}
 		}
 		clusterKindMap[e.Cluster][e.Kind]++
-		if !isEventStatusPass(e.EventStatus) {
+		if e.EventStatus != "正常" {
 			clusterKindErrMap[e.Cluster][e.Kind]++
 
 		}
@@ -150,7 +150,7 @@ func Summary(c *gin.Context) {
 				if _, ok := kindStatus[e.Kind]; !ok {
 					kindStatus[e.Kind] = map[string]int{"pass": 0, "fail": 0}
 				}
-				if isEventStatusPass(e.EventStatus) {
+				if e.EventStatus == "正常" {
 					kindStatus[e.Kind]["pass"]++
 				} else {
 					kindStatus[e.Kind]["fail"]++
@@ -174,9 +174,4 @@ func Summary(c *gin.Context) {
 		result["latest_run"] = latestRun
 	}
 	amis.WriteJsonData(c, result)
-}
-
-// isEventStatusPass 判断巡检事件状态是否为通过
-func isEventStatusPass(status string) bool {
-	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
 }
