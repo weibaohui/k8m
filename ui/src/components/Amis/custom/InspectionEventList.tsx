@@ -67,21 +67,20 @@ const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) 
                     renderItem={item => {
                         const itemKey = `${item.kind}-${item.name}-${item.id}`;
                         return (
-                            <List.Item>
-                                <div style={{ width: '100%' }}>
-                                    <Space style={{ marginBottom: 8 }}>
-                                        <Tag color={statusColorMap[item.event_status] || 'default'}>
-                                            {item.event_status}
-                                        </Tag>
-                                        <Typography.Text strong>{item.kind}: {item.name}</Typography.Text>
+                            <List.Item style={{ padding: '24px 0', borderBottom: '1px solid #f0f0f0', display: 'block' }}>
+                                <Space direction="vertical" style={{ width: '100%' }} size={8}>
+                                    <Space wrap>
+                                        <Tag color={statusColorMap[item.event_status] || 'default'}>{item.event_status}</Tag>
+                                        <Typography.Text strong>{item.kind}:</Typography.Text>
+                                        <Typography.Text>{item.name}</Typography.Text>
                                         <Tag color="blue">{item.namespace}</Tag>
                                         <Tag color="purple">{item.script_name}</Tag>
                                         <Tag color="geekblue">{item.cluster}</Tag>
                                         <Tag color="default">{item.created_at ? dayjs(item.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</Tag>
                                     </Space>
                                     <Alert
-                                        message={item.event_msg}
-                                        description={item.check_desc}
+                                        style={{ margin: '8px 0', background: item.event_status === '失败' ? '#fff1f0' : undefined }}
+                                        message={<span style={{ fontWeight: 500 }}>{item.event_msg}</span>}
                                         type={item.event_status === '失败' ? 'error' : (item.event_status === '警告' ? 'warning' : 'success')}
                                         showIcon
                                         action={
@@ -89,13 +88,14 @@ const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) 
                                                 icon={<QuestionCircleOutlined />}
                                                 onClick={() => toggleExplanation(itemKey)}
                                                 type="link"
+                                                style={{ padding: 0 }}
                                             >
                                                 AI解释
                                             </Button>
                                         }
                                     />
                                     {expandedItems[itemKey] && (
-                                        <div style={{ marginTop: 8, marginBottom: 16 }}>
+                                        <div style={{ marginTop: 8, marginBottom: 8 }}>
                                             <WebSocketMarkdownViewerComponent
                                                 url="/ai/chat/k8s_gpt/resource"
                                                 params={{
@@ -108,7 +108,7 @@ const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) 
                                             />
                                         </div>
                                     )}
-                                </div>
+                                </Space>
                             </List.Item>
                         );
                     }}
