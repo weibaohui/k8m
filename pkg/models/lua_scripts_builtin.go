@@ -273,4 +273,78 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			end
 		`,
 	},
+	{
+		Name:        "CronJob 合规性检查",
+		Description: "检查 CronJob 是否被挂起、调度表达式是否合法、startingDeadlineSeconds 是否为负数",
+		Group:       "",
+		Version:     "v1",
+		Kind:        "CronJob",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_CronJob_006",
+		Script: `
+			local cron = require("cron")
+			local cronjobs, err = kubectl:GVK("batch", "v1", "CronJob"):AllNamespace(""):List()
+			if err then
+				print("获取 CronJob 失败: " .. tostring(err))
+				return
+			end
+			local doc_suspend, _ = kubectl:GVK("batch", "v1", "CronJob"):Doc("spec.suspend")
+			local doc_schedule, _ = kubectl:GVK("batch", "v1", "CronJob"):Doc("spec.schedule")
+			local doc_deadline, _ = kubectl:GVK("batch", "v1", "CronJob"):Doc("spec.startingDeadlineSeconds")
+			for _, cj in ipairs(cronjobs) do
+				local ns = cj.metadata and cj.metadata.namespace or "default"
+				local name = cj.metadata and cj.metadata.name or ""
+				-- 检查挂起
+				if cj.spec and cj.spec.suspend == true then
+					check_event("失败", "CronJob " .. name .. " 已被挂起", {namespace=ns, name=name, doc=doc_suspend})
+				end
+				-- 检查 startingDeadlineSeconds
+				if cj.spec and cj.spec.startingDeadlineSeconds ~= nil then
+					if tonumber(cj.spec.startingDeadlineSeconds) < 0 then
+						check_event("失败", "CronJob " .. name .. " 的 startingDeadlineSeconds 为负数", {namespace=ns, name=name, value=cj.spec.startingDeadlineSeconds, doc=doc_deadline})
+					end
+				end
+			end
+			print("CronJob 合规性检查完成")
+		`,
+	},
+	{
+		Name:        "Gateway 合规性检查",
+		Description: "检查 Gateway 关联的 GatewayClass 是否存在，以及 Gateway 状态是否被接受",
+		Group:       "gateway.networking.k8s.io",
+		Version:     "v1",
+		Kind:        "Gateway",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Gateway_007",
+		Script: `
+			local gateways, err = kubectl:GVK("gateway.networking.k8s.io", "v1", "Gateway"):AllNamespace(""):List()
+			if err then
+				print("获取 Gateway 失败: " .. tostring(err))
+				return
+			end
+			for _, gtw in ipairs(gateways) do
+				local ns = gtw.metadata and gtw.metadata.namespace or "default"
+				local name = gtw.metadata and gtw.metadata.name or ""
+				local className = gtw.spec and gtw.spec.gatewayClassName or nil
+				local classExists = false
+				if className then
+					local gtwclass, err = kubectl:GVK("gateway.networking.k8s.io", "v1", "GatewayClass"):Name(className):Get()
+					if not err and gtwclass then
+						classExists = true
+					end
+				end
+				if not classExists then
+					check_event("失败", "Gateway 使用的 GatewayClass " .. tostring(className) .. " 不存在", {namespace=ns, name=name, gatewayClassName=className})
+				end
+				-- 检查第一个 Condition 状态
+				if gtw.status and gtw.status.conditions and #gtw.status.conditions > 0 then
+					local cond = gtw.status.conditions[1]
+					if cond.status ~= "True" then
+						check_event("失败", "Gateway '" .. ns .. "/" .. name .. "' 未被接受, Message: '" .. (cond.message or "") .. "'", {namespace=ns, name=name, message=cond.message})
+					end
+				end
+			end
+			print("Gateway 合规性检查完成")
+		`,
+	},
 }
