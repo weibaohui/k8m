@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func List(c *gin.Context) {
+func (a *AdminClusterPermission) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 
@@ -29,7 +29,7 @@ func List(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
-func Save(c *gin.Context) {
+func (a *AdminClusterPermission) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.User{}
 	err := c.ShouldBindJSON(&m)
@@ -61,7 +61,7 @@ func Save(c *gin.Context) {
 		"id": m.ID,
 	})
 }
-func Delete(c *gin.Context) {
+func (a *AdminClusterPermission) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.User{}
@@ -77,7 +77,7 @@ func Delete(c *gin.Context) {
 	service.UserService().ClearCacheByKey(m.Username)
 	amis.WriteJsonOK(c)
 }
-func UpdatePsw(c *gin.Context) {
+func (a *AdminClusterPermission) UpdatePsw(c *gin.Context) {
 
 	id := c.Param("id")
 	params := dao.BuildParams(c)
@@ -126,7 +126,7 @@ func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB
 	return queryFuncs
 }
 
-func UserOptionList(c *gin.Context) {
+func (a *AdminClusterPermission) UserOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {

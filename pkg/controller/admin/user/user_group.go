@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ListUserGroup(c *gin.Context) {
+func (a *AdminClusterPermission) ListUserGroup(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 
@@ -24,7 +24,7 @@ func ListUserGroup(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
-func SaveUserGroup(c *gin.Context) {
+func (a *AdminClusterPermission) SaveUserGroup(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.UserGroup{}
@@ -49,7 +49,7 @@ func SaveUserGroup(c *gin.Context) {
 		"id": m.ID,
 	})
 }
-func DeleteUserGroup(c *gin.Context) {
+func (a *AdminClusterPermission) DeleteUserGroup(c *gin.Context) {
 	ids := c.Param("ids")
 
 	_, _, err := handleCommonLogic(c, "删除", ids)
@@ -100,7 +100,7 @@ func handleCommonLogic(c *gin.Context, action string, groupName string) (string,
 	return username, role, err
 }
 
-func GroupOptionList(c *gin.Context) {
+func (a *AdminClusterPermission) GroupOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {

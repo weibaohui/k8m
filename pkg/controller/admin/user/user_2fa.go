@@ -12,7 +12,7 @@ import (
 )
 
 // Disable2FA 禁用2FA
-func Disable2FA(c *gin.Context) {
+func (a *AdminClusterPermission) Disable2FA(c *gin.Context) {
 	params := dao.BuildParams(c)
 	userID := c.Param("id")
 

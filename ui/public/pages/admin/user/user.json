@@ -285,7 +285,7 @@
                         "label": "批量删除",
                         "actionType": "ajax",
                         "confirmText": "确定要批量删除?",
-                        "api": "post:/admin/cluster_permissions/${ids}"
+                        "api": "post:/admin/cluster_permissions/delete/${ids}"
                       }
                     ],
                     "columns": [
