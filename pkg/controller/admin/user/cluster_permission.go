@@ -18,6 +18,24 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type AdminClusterPermission struct{}
+
+// AdminClusterPermission 用于集群权限相关接口
+// 路由注册函数
+func RegisterClusterPermissionRoutes(admin *gin.RouterGroup) {
+	ctrl := &AdminClusterPermission{}
+	//  cluster_permissions 集群授权
+	admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", ctrl.ListClusterPermissions)
+	admin.GET("/cluster_permissions/user/:username/list", ctrl.ListClusterPermissionsByUserName)         // 列出指定用户拥有的集群权限
+	admin.GET("/cluster_permissions/cluster/:cluster/list", ctrl.ListClusterPermissionsByClusterID)      // 列出指定集群下所有授权情况
+	admin.GET("/cluster_permissions/cluster/:cluster/ns/list", ctrl.ListClusterNamespaceListByClusterID) // 列出指定集群下所有授权情况
+	admin.POST("/cluster_permissions/cluster/:cluster/role/:role/:authorization_type/save", ctrl.SaveClusterPermission)
+	admin.POST("/cluster_permissions/delete/:ids", ctrl.DeleteClusterPermission)
+	admin.POST("/cluster_permissions/update_namespaces/:id", ctrl.UpdateNamespaces)
+	admin.POST("/cluster_permissions/update_blacklist_namespaces/:id", ctrl.UpdateBlacklistNamespaces)
+
+}
+
 // @Summary 获取指定集群指定角色的用户权限列表
 // @Security BearerAuth
 // @Param cluster path string true "集群ID(base64)"

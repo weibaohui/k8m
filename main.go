@@ -554,8 +554,12 @@ func main() {
 		config.RegisterAIModelConfigRoutes(admin)
 		mcp.RegisterMCPServerRoutes(admin)
 		mcp.RegisterMCPToolRoutes(admin)
+		// 集群授权相关
 		user.RegisterClusterPermissionRoutes(admin)
-
+		// 用户管理相关
+		user.RegisterAdminUserRoutes(admin)
+		// 用户组管理相关
+		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
 		admin.POST("/cluster/scan", cluster.Scan)
 		admin.GET("/cluster/file/option_list", cluster.FileOptionList)
