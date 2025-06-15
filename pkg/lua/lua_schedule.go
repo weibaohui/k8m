@@ -95,10 +95,11 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 				Name:        e.Name,
 				Cluster:     cluster,
 			}
-			if !s.IsEventStatusPass(e.Status) {
-				errorCount += 1
-			} else {
+			if s.IsEventStatusPass(e.Status) {
 				ce.EventStatus = string(constants.LuaEventStatusNormal) // 统一状态描述为正常
+			} else {
+				errorCount += 1
+				ce.EventStatus = string(constants.LuaEventStatusFailed)
 			}
 			checkEvents = append(checkEvents, ce)
 

@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {Button, List, Space, Tag, Typography, Alert, Card, Spin} from 'antd';
-import {QuestionCircleOutlined} from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Button, List, Space, Tag, Typography, Alert, Card, Spin, Segmented } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import {fetcher} from '@/components/Amis/fetcher';
+import { fetcher } from '@/components/Amis/fetcher';
 import WebSocketMarkdownViewerComponent from './WebSocketMarkdownViewer';
-import {replacePlaceholders} from "@/utils/utils.ts";
+import { replacePlaceholders } from "@/utils/utils.ts";
 
-const {Title} = Typography;
+const { Title } = Typography;
 
 interface InspectionEventListComponentProps {
     record_id: string;
@@ -20,12 +20,12 @@ const statusColorMap: Record<string, string> = {
     '警告': 'orange',
 };
 
-const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> = ({record_id, data}) => {
+const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> = ({ record_id, data }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [eventData, setEventData] = useState<any[]>([]);
-    const [count, setCount] = useState<number>(0);
     const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+    const [filterStatus, setFilterStatus] = useState<'全部' | '正常' | '失败'>('全部');
 
     record_id = replacePlaceholders(record_id, data!) || "";
 
@@ -40,17 +40,14 @@ const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> 
             .then((res: any) => {
                 if (res?.data?.data?.rows) {
                     setEventData(res.data.data.rows);
-                    setCount(res.data.data.count || res.data.data.rows.length);
                 } else {
                     setEventData([]);
-                    setCount(0);
                     setError('未获取到事件数据');
                 }
             })
             .catch((err: any) => {
                 setError(err.message || '未知错误');
                 setEventData([]);
-                setCount(0);
             })
             .finally(() => setLoading(false));
     }, [record_id]);
@@ -62,18 +59,26 @@ const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> 
         }));
     };
 
+    const filteredData = filterStatus === '全部' ? eventData : eventData.filter(item => item.event_status === filterStatus);
+
     return (
-        <Card style={{marginTop: 24}}>
-            <Title level={5} style={{marginBottom: 16}}>事件明细（共 {count} 条）</Title>
-            {error && <Alert type="error" message={error} style={{marginBottom: 8}} showIcon/>}
+        <Card>
+            <Title level={5} >事件明细（共 {filteredData.length} 条）</Title>
+            <Segmented
+                options={['全部', '正常', '失败']}
+                value={filterStatus}
+                onChange={setFilterStatus}
+                style={{ marginBottom: 16 }}
+            />
+            {error && <Alert type="error" message={error} style={{ marginBottom: 8 }} showIcon />}
             <Spin spinning={loading} tip="加载中...">
                 <List
-                    dataSource={eventData}
+                    dataSource={filteredData}
                     renderItem={item => {
                         const itemKey = `${item.kind}-${item.name}-${item.id}`;
                         return (
-                            <List.Item style={{padding: '24px 0', borderBottom: '1px solid #f0f0f0', display: 'block'}}>
-                                <Space direction="vertical" style={{width: '100%'}} size={8}>
+                            <List.Item style={{ padding: '24px 0', borderBottom: '1px solid #f0f0f0', display: 'block' }}>
+                                <Space direction="vertical" style={{ width: '100%' }} size={8}>
                                     <Space wrap>
                                         <Tag
                                             color={statusColorMap[item.event_status] || 'default'}>{item.event_status}</Tag>
@@ -88,16 +93,16 @@ const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> 
                                             margin: '8px 0',
                                             background: item.event_status === '失败' ? '#fff1f0' : undefined
                                         }}
-                                        message={<span style={{fontWeight: 500}}>{item.event_msg}</span>}
+                                        message={<span style={{ fontWeight: 500 }}>{item.event_msg}</span>}
                                         type={item.event_status === '失败' ? 'error' : (item.event_status === '警告' ? 'warning' : 'success')}
                                         showIcon
                                         action={
                                             item.event_status !== '正常' && (
                                                 <Button
-                                                    icon={<QuestionCircleOutlined/>}
+                                                    icon={<QuestionCircleOutlined />}
                                                     onClick={() => toggleExplanation(itemKey)}
                                                     type="link"
-                                                    style={{padding: 0}}
+                                                    style={{ padding: 0 }}
                                                 >
                                                     AI解释
                                                 </Button>
@@ -105,7 +110,7 @@ const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> 
                                         }
                                     />
                                     {expandedItems[itemKey] && (
-                                        <div style={{marginTop: 8, marginBottom: 8}}>
+                                        <div style={{ marginTop: 8, marginBottom: 8 }}>
                                             <WebSocketMarkdownViewerComponent
                                                 url="/ai/chat/k8s_gpt/resource"
                                                 params={{
