@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Alert, Card, DatePicker, Form, Spin, Table, Typography, Space, Dropdown, MenuProps, Tag } from "antd";
+import { Alert, Card, DatePicker, Form, Spin, Table, Typography, Space, Dropdown, MenuProps, Tag, Drawer } from "antd";
 import dayjs, { Dayjs } from 'dayjs';
 import { fetcher } from '@/components/Amis/fetcher';
 import { replacePlaceholders } from '@/utils/utils';
 import { DownOutlined } from '@ant-design/icons';
+import InspectionEventList from './InspectionEventList';
 
 const { Title, Text } = Typography;
 
@@ -31,6 +32,8 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
     const [loading, setLoading] = useState(false);
     const [summaryData, setSummaryData] = useState<any>({});
     const [error, setError] = useState<string | null>(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [drawerRecordId, setDrawerRecordId] = useState<number | null>(null);
 
     let realScheduleId = ""
     // 处理 schedule_id 占位符
@@ -164,7 +167,12 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                                     <b>计划ID：</b>
                                     <Tag color="blue">{latest_run.schedule_id ?? '-'}</Tag>
                                 </span>
-                                <span style={{ marginRight: 8 }}>
+                                <span style={{ marginRight: 8, cursor: 'pointer' }}
+                                    onClick={() => {
+                                        setDrawerRecordId(latest_run.record_id);
+                                        setDrawerOpen(true);
+                                    }}
+                                >
                                     <b>记录ID：</b>
                                     <Tag color="green">{latest_run.record_id}</Tag>
                                 </span>
@@ -200,6 +208,15 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     </Card>
                 ))}
             </Spin>
+            <Drawer
+                title="事件明细"
+                width={900}
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                destroyOnClose
+            >
+                {drawerRecordId && <InspectionEventList record_id={drawerRecordId} />}
+            </Drawer>
         </div>
     );
 });
