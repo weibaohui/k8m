@@ -43,9 +43,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 						if not err and pods then
 							for _, _ in pairs(pods) do count = count + 1 end
 						end
-						if count > 0 then
-							check_event("正常", "Service " .. svc.metadata.name .. " selector 正常, 关联 Pod 数: " .. count .. "spec.selector定义" .. doc, {name=svc.metadata.name, selector=labelSelector, podCount=count, namespace=svc.metadata.namespace})
-						else
+						if count = 0 then
 							check_event("失败", "Service " .. svc.metadata.name .. " selector " .. labelSelector .. " 应该至少一个pod, 但是现在没有。" .. "spec.selector定义" .. doc, {name=svc.metadata.name, selector=labelSelector, namespace=svc.metadata.namespace})
 						end
 					end
@@ -254,9 +252,6 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 						local missingReplicas = specReplicas - readyReplicas
 						check_event("失败", "缺少 " .. missingReplicas .. " 个副本，建议检查 Pod 状态和资源限制", {namespace=deploymentNamespace, name=deploymentName, missingReplicas=missingReplicas})
 					end
-				else
-					check_event("正常", "[正常] Deployment " .. deploymentNamespace .. "/" .. deploymentName ..
-						" 副本数正常: " .. specReplicas .. "/" .. readyReplicas, {namespace=deploymentNamespace, name=deploymentName, specReplicas=specReplicas, readyReplicas=readyReplicas})
 				end
 				if deployment.status and deployment.status.conditions then
 					for _, condition in ipairs(deployment.status.conditions) do
@@ -462,9 +457,6 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 									all_ok = false
 									check_event("失败", ref.kind .. " " .. hpa.metadata.namespace .. "/" .. ref.name .. " 的容器未配置 requests 或 limits", {namespace=hpa.metadata.namespace, name=hpa.metadata.name, kind=ref.kind, refname=ref.name, container=c.name})
 								end
-							end
-							if all_ok then
-								check_event("正常", ref.kind .. " " .. hpa.metadata.namespace .. "/" .. ref.name .. " 的所有容器资源配置齐全", {namespace=hpa.metadata.namespace, name=hpa.metadata.name, kind=ref.kind, refname=ref.name})
 							end
 						end
 					end
