@@ -146,7 +146,6 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                     <Space>
                         <Text strong>总执行次数：</Text> <Text>{total_runs ?? '-'}</Text>
                         <Text strong>总集群数：</Text> <Text>{total_clusters ?? '-'}</Text>
-                        {/* 新增：运行巡检计划数 */}
                         {total_schedules !== undefined && (
                             <>
                                 <Text strong>运行巡检计划数：</Text> <Text>{total_schedules}</Text>
