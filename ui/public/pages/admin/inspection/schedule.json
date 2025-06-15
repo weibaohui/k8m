@@ -300,12 +300,12 @@
               "type": "button",
               "icon": "fas fa-history text-primary",
               "actionType": "drawer",
-              "tooltip": "巡检历史",
+              "tooltip": "巡检历史记录",
               "drawer": {
                 "closeOnEsc": true,
                 "closeOnOutside": true,
                 "size": "xl",
-                "title": "查看巡检历史 (ESC 关闭)",
+                "title": "查看巡检历史记录 (ESC 关闭)",
                 "body": {
                   "type": "crud",
                   "id": "recordCRUD",
@@ -575,6 +575,11 @@
                       ]
                     },
                     {
+                      "name": "id",
+                      "label": "ID",
+                      "type": "text"
+                    },
+                    {
                       "name": "cluster",
                       "label": "集群"
                     },
@@ -605,6 +610,11 @@
               }
             }
           ]
+        },
+        {
+          "name": "id",
+          "label": "ID",
+          "type": "text"
         },
         {
           "name": "name",
