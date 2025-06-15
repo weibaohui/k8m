@@ -535,8 +535,8 @@ func main() {
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
 		admin.POST("/inspection/schedule/start/id/:id", inspection.Start)
 		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
-		admin.POST("/inspection/schedule/id/:id/summary", inspection.Summary)
-		admin.POST("/inspection/schedule/id/:id/summary/start_time/:start_time/end_time/:end_time", inspection.Summary)
+		admin.POST("/inspection/schedule/id/:id/summary", inspection.SummaryBySchedule)
+		admin.POST("/inspection/schedule/id/:id/summary/start_time/:start_time/end_time/:end_time", inspection.SummaryBySchedule)
 
 		// 集群巡检脚本
 		admin.GET("/inspection/script/list", inspection.LuaScriptList)
