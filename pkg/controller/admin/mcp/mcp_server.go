@@ -10,19 +10,47 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func ServerList(c *gin.Context) {
+type MCPServerController struct {
+}
+
+// RegisterMCPServerRoutes 注册路由
+func RegisterMCPServerRoutes(admin *gin.RouterGroup) {
+	ctrl := &MCPServerController{}
+	admin.GET("/mcp/list", ctrl.ServerList)
+	admin.POST("/mcp/connect/:name", ctrl.Connect)
+	admin.POST("/mcp/delete", ctrl.Delete)
+	admin.POST("/mcp/save", ctrl.AddOrUpdate)
+	admin.POST("/mcp/save/id/:id/status/:status", ctrl.QuickSave)
+	admin.GET("/mcp/log/list", ctrl.MCPLogList)
+}
+
+// @Summary 获取MCP服务器列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/mcp/list [get]
+func (m *MCPServerController) ServerList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	var mcpServer models.MCPServerConfig
 	list, count, err := mcpServer.List(params)
 	amis.WriteJsonListTotalWithError(c, count, list, err)
 }
-func Connect(c *gin.Context) {
+
+// @Summary 连接指定MCP服务器
+// @Security BearerAuth
+// @Param name path string true "MCP服务器名称"
+// @Success 200 {object} string
+// @Router /admin/mcp/connect/{name} [post]
+func (m *MCPServerController) Connect(c *gin.Context) {
 	name := c.Param("name")
 	err := service.McpService().Host().ConnectServer(c.Request.Context(), name)
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func Delete(c *gin.Context) {
+// @Summary 删除MCP服务器
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/mcp/delete [post]
+func (m *MCPServerController) Delete(c *gin.Context) {
 	var req struct {
 		IDs []int `json:"ids"`
 	}
@@ -40,7 +68,12 @@ func Delete(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func AddOrUpdate(c *gin.Context) {
+
+// @Summary 创建或更新MCP服务器
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/mcp/save [post]
+func (m *MCPServerController) AddOrUpdate(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var entity models.MCPServerConfig
@@ -62,28 +95,13 @@ func AddOrUpdate(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func addTools(params *dao.Params, entity models.MCPServerConfig) bool {
-	// 获取Tools列表
-	if tools, err := service.McpService().GetTools(entity); err == nil {
-		for _, tool := range tools {
-			mt := models.MCPTool{
-				ServerName:  entity.Name,
-				Name:        tool.Name,
-				Description: tool.Description,
-				InputSchema: utils.ToJSON(tool.InputSchema),
-				Enabled:     true,
-			}
-			err = mt.Save(params)
-			if err != nil {
-				klog.V(6).Infof("保存工具失败:[%s/%s] %v\n", entity.Name, tool.Name, err)
-				return true
-			}
-		}
-
-	}
-	return false
-}
-func QuickSave(c *gin.Context) {
+// @Summary 快速保存MCP服务器状态
+// @Security BearerAuth
+// @Param id path int true "服务器ID"
+// @Param status path string true "状态，例如：true、false"
+// @Success 200 {object} string
+// @Router /admin/mcp/save/id/{id}/status/{status} [post]
+func (m *MCPServerController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 	params := dao.BuildParams(c)
@@ -115,13 +133,39 @@ func QuickSave(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func removeTools(entity models.MCPServerConfig) {
-	dao.DB().Where("server_name = ?", entity.Name).Delete(&models.MCPTool{})
-}
-
-func MCPLogList(c *gin.Context) {
+// @Summary 获取MCP服务器日志列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/mcp/log/list [get]
+func (m *MCPServerController) MCPLogList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	var tool models.MCPToolLog
 	list, count, err := tool.List(params)
 	amis.WriteJsonListTotalWithError(c, count, list, err)
+}
+
+func addTools(params *dao.Params, entity models.MCPServerConfig) bool {
+	// 获取Tools列表
+	if tools, err := service.McpService().GetTools(entity); err == nil {
+		for _, tool := range tools {
+			mt := models.MCPTool{
+				ServerName:  entity.Name,
+				Name:        tool.Name,
+				Description: tool.Description,
+				InputSchema: utils.ToJSON(tool.InputSchema),
+				Enabled:     true,
+			}
+			err = mt.Save(params)
+			if err != nil {
+				klog.V(6).Infof("保存工具失败:[%s/%s] %v\n", entity.Name, tool.Name, err)
+				return true
+			}
+		}
+
+	}
+	return false
+}
+
+func removeTools(entity models.MCPServerConfig) {
+	dao.DB().Where("server_name = ?", entity.Name).Delete(&models.MCPTool{})
 }

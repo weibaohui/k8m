@@ -199,7 +199,7 @@ func main() {
 	// @securityDefinitions.apikey BearerAuth
 	// @in header
 	// @name Authorization
-	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx
+	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 直接返回 index.html
@@ -546,47 +546,20 @@ func main() {
 		admin.GET("/inspection/script/option_list", inspection.LuaScriptOptionList)
 		admin.GET("/inspection/event/status/option_list", inspection.EventStatusOptionList)
 
-		// user 平台管理员可操作，管理用户
-		admin.GET("/user/list", user.List)
-		admin.POST("/user/save", user.Save)
-		admin.POST("/user/delete/:ids", user.Delete)
-		admin.POST("/user/update_psw/:id", user.UpdatePsw)
-		admin.GET("/user/option_list", user.UserOptionList)
-		// 2FA 平台管理员可操作，管理用户
-		admin.POST("/user/2fa/disable/:id", user.Disable2FA)
-		// user_group
-		admin.GET("/user_group/list", user.ListUserGroup)
-		admin.POST("/user_group/save", user.SaveUserGroup)
-		admin.POST("/user_group/delete/:ids", user.DeleteUserGroup)
-		admin.GET("/user_group/option_list", user.GroupOptionList)
-
 		// 平台参数配置
 		admin.GET("/config/all", config.GetConfig)
 		admin.POST("/config/update", config.UpdateConfig)
 
 		// 大模型列表管理
 		config.RegisterAIModelConfigRoutes(admin)
-
-		// mcp
-		admin.GET("/mcp/list", mcp.ServerList)
-		admin.GET("/mcp/server/:name/tools/list", mcp.ToolsList)
-		admin.POST("/mcp/connect/:name", mcp.Connect)
-		admin.POST("/mcp/delete", mcp.Delete)
-		admin.POST("/mcp/save", mcp.AddOrUpdate)
-		admin.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
-		admin.POST("/mcp/tool/save/id/:id/status/:status", mcp.ToolQuickSave)
-		admin.GET("/mcp/log/list", mcp.MCPLogList)
-
-		// 集群权限设置
-		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
-		admin.GET("/cluster_permissions/user/:username/list", user.ListClusterPermissionsByUserName)         // 列出指定用户拥有的集群权限
-		admin.GET("/cluster_permissions/cluster/:cluster/list", user.ListClusterPermissionsByClusterID)      // 列出指定集群下所有授权情况
-		admin.GET("/cluster_permissions/cluster/:cluster/ns/list", user.ListClusterNamespaceListByClusterID) // 列出指定集群下所有授权情况
-		admin.POST("/cluster_permissions/cluster/:cluster/role/:role/:authorization_type/save", user.SaveClusterPermission)
-		admin.POST("/cluster_permissions/:ids", user.DeleteClusterPermission)
-		admin.POST("/cluster_permissions/update_namespaces/:id", user.UpdateNamespaces)
-		admin.POST("/cluster_permissions/update_blacklist_namespaces/:id", user.UpdateBlacklistNamespaces)
-
+		mcp.RegisterMCPServerRoutes(admin)
+		mcp.RegisterMCPToolRoutes(admin)
+		// 集群授权相关
+		user.RegisterClusterPermissionRoutes(admin)
+		// 用户管理相关
+		user.RegisterAdminUserRoutes(admin)
+		// 用户组管理相关
+		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
 		admin.POST("/cluster/scan", cluster.Scan)
 		admin.GET("/cluster/file/option_list", cluster.FileOptionList)

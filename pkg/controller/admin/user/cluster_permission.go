@@ -18,7 +18,31 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func ListClusterPermissions(c *gin.Context) {
+type AdminClusterPermission struct{}
+
+// AdminClusterPermission 用于集群权限相关接口
+// 路由注册函数
+func RegisterClusterPermissionRoutes(admin *gin.RouterGroup) {
+	ctrl := &AdminClusterPermission{}
+	//  cluster_permissions 集群授权
+	admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", ctrl.ListClusterPermissions)
+	admin.GET("/cluster_permissions/user/:username/list", ctrl.ListClusterPermissionsByUserName)         // 列出指定用户拥有的集群权限
+	admin.GET("/cluster_permissions/cluster/:cluster/list", ctrl.ListClusterPermissionsByClusterID)      // 列出指定集群下所有授权情况
+	admin.GET("/cluster_permissions/cluster/:cluster/ns/list", ctrl.ListClusterNamespaceListByClusterID) // 列出指定集群下所有授权情况
+	admin.POST("/cluster_permissions/cluster/:cluster/role/:role/:authorization_type/save", ctrl.SaveClusterPermission)
+	admin.POST("/cluster_permissions/delete/:ids", ctrl.DeleteClusterPermission)
+	admin.POST("/cluster_permissions/update_namespaces/:id", ctrl.UpdateNamespaces)
+	admin.POST("/cluster_permissions/update_blacklist_namespaces/:id", ctrl.UpdateBlacklistNamespaces)
+
+}
+
+// @Summary 获取指定集群指定角色的用户权限列表
+// @Security BearerAuth
+// @Param cluster path string true "集群ID(base64)"
+// @Param role path string true "角色"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/cluster/{cluster}/role/{role}/user/list [get]
+func (a *AdminClusterPermission) ListClusterPermissions(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
 	cluster, err := utils.DecodeBase64(clusterBase64)
@@ -43,8 +67,12 @@ func ListClusterPermissions(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-// ListClusterPermissionsByUserName 列出用户已获得授权的集群
-func ListClusterPermissionsByUserName(c *gin.Context) {
+// @Summary 获取指定用户已获得授权的集群
+// @Security BearerAuth
+// @Param username path string true "用户名"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/user/{username}/list [get]
+func (a *AdminClusterPermission) ListClusterPermissionsByUserName(c *gin.Context) {
 	username := c.Param("username")
 	clusters, err := service.UserService().GetClusters(username)
 	if err != nil {
@@ -54,10 +82,12 @@ func ListClusterPermissionsByUserName(c *gin.Context) {
 	amis.WriteJsonList(c, clusters)
 }
 
-// ListClusterPermissionsByClusterID 根据指定的集群ID，列出该集群下所有用户的权限角色列表。
-// 集群ID通过base64解码后用于查询，结果按授权类型降序、用户名升序排序，并返回总数和详细列表。
-// 若解码或查询出错，则返回JSON格式的错误信息。
-func ListClusterPermissionsByClusterID(c *gin.Context) {
+// @Summary 获取指定集群下所有用户的权限角色列表
+// @Security BearerAuth
+// @Param cluster path string true "集群ID(base64)"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/cluster/{cluster}/list [get]
+func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	cluster, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {
@@ -77,9 +107,12 @@ func ListClusterPermissionsByClusterID(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-// ListClusterNamespaceListByClusterID 根据集群ID列出该集群下的所有命名空间名称，并以标签-值对形式返回。
-// 如果查询失败，则返回空的命名空间选项列表。
-func ListClusterNamespaceListByClusterID(c *gin.Context) {
+// @Summary 获取指定集群下所有命名空间名称
+// @Security BearerAuth
+// @Param cluster path string true "集群ID(base64)"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/cluster/{cluster}/ns/list [get]
+func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	clusterBase64 := c.Param("cluster")
 	cluster, err := utils.DecodeBase64(clusterBase64)
@@ -112,9 +145,14 @@ func ListClusterNamespaceListByClusterID(c *gin.Context) {
 
 }
 
-// SaveClusterPermission 批量为指定集群添加用户角色权限。
-// 解码集群标识，读取角色和授权类型参数，解析包含用户列表的请求体，校验输入后，依次为每个用户添加权限条目（如不存在则新增），最后返回操作结果。
-func SaveClusterPermission(c *gin.Context) {
+// @Summary 批量为指定集群添加用户角色权限
+// @Security BearerAuth
+// @Param cluster path string true "集群ID(base64)"
+// @Param role path string true "角色"
+// @Param authorization_type path string true "授权类型"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/cluster/{cluster}/role/{role}/{authorization_type}/save [post]
+func (a *AdminClusterPermission) SaveClusterPermission(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
 	authorizationType := c.Param("authorization_type")
@@ -140,10 +178,6 @@ func SaveClusterPermission(c *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
 	params := dao.BuildParams(c)
 
 	// 默认授权类型为用户
@@ -175,7 +209,12 @@ func SaveClusterPermission(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func DeleteClusterPermission(c *gin.Context) {
+// @Summary 删除集群权限
+// @Security BearerAuth
+// @Param ids path string true "权限ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/delete/{ids} [post]
+func (a *AdminClusterPermission) DeleteClusterPermission(c *gin.Context) {
 	ids := c.Param("ids")
 
 	params := dao.BuildParams(c)
@@ -192,8 +231,12 @@ func DeleteClusterPermission(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// UpdateNamespaces 根据请求体更新指定集群用户角色的命名空间字段。
-func UpdateNamespaces(c *gin.Context) {
+// @Summary 更新指定集群用户角色的命名空间字段
+// @Security BearerAuth
+// @Param id path int true "权限ID"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/update_namespaces/{id} [post]
+func (a *AdminClusterPermission) UpdateNamespaces(c *gin.Context) {
 	id := c.Param("id")
 	type requestBody struct {
 		Namespaces string `json:"namespaces"`
@@ -222,8 +265,12 @@ func UpdateNamespaces(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// UpdateBlacklistNamespaces 根据请求体更新指定集群用户角色的命名空间字段。
-func UpdateBlacklistNamespaces(c *gin.Context) {
+// @Summary 更新指定集群用户角色的黑名单命名空间字段
+// @Security BearerAuth
+// @Param id path int true "权限ID"
+// @Success 200 {object} string
+// @Router /admin/cluster_permissions/update_blacklist_namespaces/{id} [post]
+func (a *AdminClusterPermission) UpdateBlacklistNamespaces(c *gin.Context) {
 	id := c.Param("id")
 	type requestBody struct {
 		BlacklistNamespaces string `json:"blacklist_namespaces"`
@@ -250,25 +297,4 @@ func UpdateBlacklistNamespaces(c *gin.Context) {
 	service.UserService().ClearCacheByKey("cluster")
 
 	amis.WriteJsonOK(c)
-}
-
-// TODO 日志记录写一个专门的方法，现在这个不好
-func log2DB(c *gin.Context, action string, clusterName string, params gin.H, err error) {
-	username, role := amis.GetLoginUser(c)
-	log := models.OperationLog{
-		Action:       action,
-		Cluster:      clusterName,
-		Kind:         "ClusterPermission",
-		Name:         clusterName,
-		UserName:     username,
-		Group:        clusterName,
-		Role:         role,
-		ActionResult: "success",
-	}
-
-	if err != nil {
-		log.ActionResult = err.Error()
-	}
-
-	service.OperationLogService().Add(&log, params)
 }

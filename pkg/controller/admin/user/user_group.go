@@ -1,19 +1,35 @@
 package user
 
 import (
-	"fmt"
-
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
-func ListUserGroup(c *gin.Context) {
+type AdminUserGroupController struct {
+}
+
+// AdminUserGroupController 用于用户组相关接口
+// 路由注册函数
+func RegisterAdminUserGroupRoutes(admin *gin.RouterGroup) {
+
+	ctrl := AdminUserGroupController{}
+	admin.GET("/user_group/list", ctrl.ListUserGroup)
+	admin.POST("/user_group/save", ctrl.SaveUserGroup)
+	admin.POST("/user_group/delete/:ids", ctrl.DeleteUserGroup)
+	admin.GET("/user_group/option_list", ctrl.GroupOptionList)
+}
+
+// @Summary 获取用户组列表
+// @Description 获取所有用户组信息
+// @Security BearerAuth
+// @Success 200 {object} []models.UserGroup
+// @Router /admin/user_group/list [get]
+func (a *AdminUserGroupController) ListUserGroup(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 
@@ -24,7 +40,15 @@ func ListUserGroup(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
-func SaveUserGroup(c *gin.Context) {
+
+// @Summary 保存用户组
+// @Description 新增或更新用户组信息
+// @Security BearerAuth
+// @Accept json
+// @Param data body models.UserGroup true "用户组信息"
+// @Success 200 {object} map[string]interface{}
+// @Router /admin/user_group/save [post]
+func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.UserGroup{}
@@ -33,11 +57,7 @@ func SaveUserGroup(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	_, _, err = handleCommonLogic(c, "保存", m.GroupName)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -49,19 +69,20 @@ func SaveUserGroup(c *gin.Context) {
 		"id": m.ID,
 	})
 }
-func DeleteUserGroup(c *gin.Context) {
-	ids := c.Param("ids")
 
-	_, _, err := handleCommonLogic(c, "删除", ids)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+// @Summary 删除用户组
+// @Description 根据ID批量删除用户组
+// @Security BearerAuth
+// @Param ids path string true "用户组ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/user_group/delete/{ids} [post]
+func (a *AdminUserGroupController) DeleteUserGroup(c *gin.Context) {
+	ids := c.Param("ids")
 
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 
-	err = m.Delete(params, ids)
+	err := m.Delete(params, ids)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -71,36 +92,12 @@ func DeleteUserGroup(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func handleCommonLogic(c *gin.Context, action string, groupName string) (string, string, error) {
-	cluster, _ := amis.GetSelectedCluster(c)
-	ctx := amis.GetContextWithUser(c)
-	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
-
-	log := models.OperationLog{
-		Action:       action,
-		Cluster:      cluster,
-		Kind:         "UserGroup",
-		Name:         groupName,
-		Namespace:    groupName,
-		UserName:     username,
-		Group:        groupName,
-		Role:         role,
-		ActionResult: "success",
-	}
-
-	var err error
-	if !amis.IsCurrentUserPlatformAdmin(c) {
-		err = fmt.Errorf("非平台管理员不能%s资源", action)
-	}
-	if err != nil {
-		log.ActionResult = err.Error()
-	}
-	service.OperationLogService().Add(&log)
-	return username, role, err
-}
-
-func GroupOptionList(c *gin.Context) {
+// @Summary 用户组选项列表
+// @Description 获取所有用户组的选项（仅ID和名称）
+// @Security BearerAuth
+// @Success 200 {object} []map[string]string
+// @Router /admin/user_group/option_list [get]
+func (a *AdminUserGroupController) GroupOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {

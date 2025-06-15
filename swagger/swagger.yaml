@@ -1,9 +1,140 @@
+definitions:
+  models.User:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        description: 创建者
+        type: string
+      group_names:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      salt:
+        type: string
+      source:
+        description: 来源，如：db, ldap, oauth
+        type: string
+      two_fa_app_name:
+        description: 2FA应用名称，用于提醒用户使用的是哪个软件
+        type: string
+      two_fa_backup_codes:
+        description: 备用恢复码，逗号分隔
+        type: string
+      two_fa_enabled:
+        description: 2FA相关字段
+        type: boolean
+      two_fa_secret:
+        description: 2FA密钥
+        type: string
+      two_fa_type:
+        description: 2FA类型：如 'totp', 'sms', 'email'
+        type: string
+      updated_at:
+        description: Automatically managed by GORM for update time
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserGroup:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      group_name:
+        type: string
+      id:
+        type: integer
+      role:
+        description: 管理员/只读
+        type: string
+      updated_at:
+        type: string
+    type: object
 info:
   contact: {}
-  description: 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx
+  description: 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。
   title: k8m API
   version: "1.0"
 paths:
+  /admin/ai/model/delete/{ids}:
+    post:
+      parameters:
+      - description: 模型ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除AI模型配置
+  /admin/ai/model/id/{id}/think/{status}:
+    post:
+      parameters:
+      - description: 模型ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速保存AI模型思考状态
+  /admin/ai/model/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取AI模型配置列表
+  /admin/ai/model/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建或更新AI模型配置
+  /admin/ai/model/test/id/{id}:
+    post:
+      parameters:
+      - description: 模型ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 测试AI模型连接
   /admin/cluster/file/option_list:
     get:
       responses:
@@ -14,6 +145,422 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取文件类型的集群选项
+  /admin/cluster_permissions/cluster/{cluster}/list:
+    get:
+      parameters:
+      - description: 集群ID(base64)
+        in: path
+        name: cluster
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取指定集群下所有用户的权限角色列表
+  /admin/cluster_permissions/cluster/{cluster}/ns/list:
+    get:
+      parameters:
+      - description: 集群ID(base64)
+        in: path
+        name: cluster
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取指定集群下所有命名空间名称
+  /admin/cluster_permissions/cluster/{cluster}/role/{role}/{authorization_type}/save:
+    post:
+      parameters:
+      - description: 集群ID(base64)
+        in: path
+        name: cluster
+        required: true
+        type: string
+      - description: 角色
+        in: path
+        name: role
+        required: true
+        type: string
+      - description: 授权类型
+        in: path
+        name: authorization_type
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量为指定集群添加用户角色权限
+  /admin/cluster_permissions/cluster/{cluster}/role/{role}/user/list:
+    get:
+      parameters:
+      - description: 集群ID(base64)
+        in: path
+        name: cluster
+        required: true
+        type: string
+      - description: 角色
+        in: path
+        name: role
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取指定集群指定角色的用户权限列表
+  /admin/cluster_permissions/delete/{ids}:
+    post:
+      parameters:
+      - description: 权限ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除集群权限
+  /admin/cluster_permissions/update_blacklist_namespaces/{id}:
+    post:
+      parameters:
+      - description: 权限ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新指定集群用户角色的黑名单命名空间字段
+  /admin/cluster_permissions/update_namespaces/{id}:
+    post:
+      parameters:
+      - description: 权限ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新指定集群用户角色的命名空间字段
+  /admin/cluster_permissions/user/{username}/list:
+    get:
+      parameters:
+      - description: 用户名
+        in: path
+        name: username
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取指定用户已获得授权的集群
+  /admin/mcp/connect/{name}:
+    post:
+      parameters:
+      - description: MCP服务器名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 连接指定MCP服务器
+  /admin/mcp/delete:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除MCP服务器
+  /admin/mcp/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取MCP服务器列表
+  /admin/mcp/log/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取MCP服务器日志列表
+  /admin/mcp/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建或更新MCP服务器
+  /admin/mcp/save/id/{id}/status/{status}:
+    post:
+      parameters:
+      - description: 服务器ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速保存MCP服务器状态
+  /admin/mcp/server/{name}/tools/list:
+    get:
+      parameters:
+      - description: MCP服务器名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取指定MCP服务器的工具列表
+  /admin/mcp/tool/save/id/{id}/status/{status}:
+    post:
+      parameters:
+      - description: 工具ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速保存MCP工具状态
+  /admin/user/2fa/disable/{id}:
+    post:
+      description: 禁用指定用户的二步验证
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 禁用用户2FA
+  /admin/user/delete/{ids}:
+    post:
+      description: 根据ID批量删除用户
+      parameters:
+      - description: 用户ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除用户
+  /admin/user/list:
+    get:
+      description: 获取所有用户信息
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 获取用户列表
+  /admin/user/save:
+    post:
+      consumes:
+      - application/json
+      description: 新增或更新用户信息
+      parameters:
+      - description: 用户信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 保存用户
+  /admin/user/update_psw/{id}:
+    post:
+      consumes:
+      - application/json
+      description: 根据ID更新用户密码
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 新密码信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新用户密码
+  /admin/user_group/delete/{ids}:
+    post:
+      description: 根据ID批量删除用户组
+      parameters:
+      - description: 用户组ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除用户组
+  /admin/user_group/list:
+    get:
+      description: 获取所有用户组信息
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserGroup'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 获取用户组列表
+  /admin/user_group/option_list:
+    get:
+      description: 获取所有用户组的选项（仅ID和名称）
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                type: string
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 用户组选项列表
+  /admin/user_group/save:
+    post:
+      consumes:
+      - application/json
+      description: 新增或更新用户组信息
+      parameters:
+      - description: 用户组信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserGroup'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 保存用户组
 securityDefinitions:
   BearerAuth:
     in: header
