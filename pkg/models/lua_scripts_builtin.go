@@ -373,4 +373,105 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			print("GatewayClass 合规性检查完成")
 		`,
 	},
+	{
+		Name:        "HPA Condition 检查",
+		Description: "检查 HorizontalPodAutoscaler 的 Condition 状态，ScalingLimited 为 True 或其他 Condition 为 False 时报警。",
+		Group:       "autoscaling",
+		Version:     "v2",
+		Kind:        "HorizontalPodAutoscaler",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_HPA_Condition_009",
+		Script: `
+			local hpas, err = kubectl:GVK("autoscaling", "v2", "HorizontalPodAutoscaler"):AllNamespace(""):List()
+			if err then print("获取 HPA 失败: " .. tostring(err)) return end
+			for _, hpa in ipairs(hpas) do
+				if hpa.status and hpa.status.conditions then
+					for _, cond in ipairs(hpa.status.conditions) do
+						if cond.type == "ScalingLimited" and cond.status == "True" then
+							check_event("失败", cond.message or "ScalingLimited condition True", {namespace=hpa.metadata.namespace, name=hpa.metadata.name, type=cond.type})
+						elseif cond.status == "False" then
+							check_event("失败", cond.message or (cond.type .. " condition False"), {namespace=hpa.metadata.namespace, name=hpa.metadata.name, type=cond.type})
+						end
+					end
+				end
+			end
+			print("HPA Condition 检查完成")
+		`,
+	},
+	{
+		Name:        "HPA ScaleTargetRef 存在性检查",
+		Description: "检查 HorizontalPodAutoscaler 的 ScaleTargetRef 指向的对象是否存在。",
+		Group:       "autoscaling",
+		Version:     "v2",
+		Kind:        "HorizontalPodAutoscaler",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_HPA_ScaleTargetRef_010",
+		Script: `
+			local hpas, err = kubectl:GVK("autoscaling", "v2", "HorizontalPodAutoscaler"):AllNamespace(""):List()
+			if err then print("获取 HPA 失败: " .. tostring(err)) return end
+			for _, hpa in ipairs(hpas) do
+				if hpa.spec and hpa.spec.scaleTargetRef then
+					local ref = hpa.spec.scaleTargetRef
+					local exists = false
+					if ref.kind == "Deployment" then
+						exists = kubectl:GVK("apps", "v1", "Deployment"):Namespace(hpa.metadata.namespace):Name(ref.name):Exists()
+					elseif ref.kind == "ReplicaSet" then
+						exists = kubectl:GVK("apps", "v1", "ReplicaSet"):Namespace(hpa.metadata.namespace):Name(ref.name):Exists()
+					elseif ref.kind == "StatefulSet" then
+						exists = kubectl:GVK("apps", "v1", "StatefulSet"):Namespace(hpa.metadata.namespace):Name(ref.name):Exists()
+					elseif ref.kind == "ReplicationController" then
+						exists = kubectl:GVK("", "v1", "ReplicationController"):Namespace(hpa.metadata.namespace):Name(ref.name):Exists()
+					else
+						check_event("失败", "HorizontalPodAutoscaler 使用了不支持的 ScaleTargetRef Kind: " .. tostring(ref.kind), {namespace=hpa.metadata.namespace, name=hpa.metadata.name, kind=ref.kind})
+					end
+					if not exists then
+						check_event("失败", "HorizontalPodAutoscaler 的 ScaleTargetRef " .. ref.kind .. "/" .. ref.name .. " 不存在", {namespace=hpa.metadata.namespace, name=hpa.metadata.name, kind=ref.kind, refname=ref.name})
+					end
+				end
+			end
+			print("HPA ScaleTargetRef 存在性检查完成")
+		`,
+	},
+	{
+		Name:        "HPA 资源配置检查",
+		Description: "检查 HPA 关联对象的 Pod 模板中所有容器是否配置了 requests 和 limits。",
+		Group:       "autoscaling",
+		Version:     "v2",
+		Kind:        "HorizontalPodAutoscaler",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_HPA_Resource_011",
+		Script: `
+			local hpas, err = kubectl:GVK("autoscaling", "v2", "HorizontalPodAutoscaler"):AllNamespace(""):List()
+			if err then print("获取 HPA 失败: " .. tostring(err)) return end
+			for _, hpa in ipairs(hpas) do
+				if hpa.spec and hpa.spec.scaleTargetRef then
+					local ref = hpa.spec.scaleTargetRef
+					local gvk_map = {
+						Deployment = {group="apps", version="v1", kind="Deployment"},
+						ReplicaSet = {group="apps", version="v1", kind="ReplicaSet"},
+						StatefulSet = {group="apps", version="v1", kind="StatefulSet"},
+						ReplicationController = {group="", version="v1", kind="ReplicationController"},
+					}
+					local gvk = gvk_map[ref.kind]
+					if gvk then
+						local target, err = kubectl:GVK(gvk.group, gvk.version, gvk.kind):Namespace(hpa.metadata.namespace):Name(ref.name):Get()
+						if not err and target and target.spec and target.spec.template and target.spec.template.spec and target.spec.template.spec.containers then
+							local containers = target.spec.template.spec.containers
+							local all_ok = true
+							for _, c in ipairs(containers) do
+								if not c.resources or not c.resources.requests or not c.resources.limits then
+									all_ok = false
+									check_event("失败", ref.kind .. " " .. hpa.metadata.namespace .. "/" .. ref.name .. " 的容器未配置 requests 或 limits", {namespace=hpa.metadata.namespace, name=hpa.metadata.name, kind=ref.kind, refname=ref.name, container=c.name})
+								end
+							end
+							if all_ok then
+								check_event("正常", ref.kind .. " " .. hpa.metadata.namespace .. "/" .. ref.name .. " 的所有容器资源配置齐全", {namespace=hpa.metadata.namespace, name=hpa.metadata.name, kind=ref.kind, refname=ref.name})
+							end
+						end
+					end
+				end
+			end
+			print("HPA 资源配置检查完成")
+		`,
+	},
 }
