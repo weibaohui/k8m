@@ -8,11 +8,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/kom/kom"
 	lua "github.com/yuin/gopher-lua"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 type Inspection struct {
@@ -58,13 +61,19 @@ func (p *Inspection) Start() []CheckResult {
 	// 初始化 Lua 状态
 	defer p.lua.Close()
 
+	params := &dao.Params{
+		PerPage: 10000000,
+	}
+
+	klog.V(6).Infof("p.Schedule.ScriptCodes: %v", utils.ToJSON(p.Schedule.ScriptCodes))
+
 	// 执行所有 Lua 检查脚本并收集结果
 	var results []CheckResult
 
 	// 从数据库读取内置检查脚本
 	script := models.InspectionLuaScript{}
 
-	list, _, err := script.List(nil, func(db *gorm.DB) *gorm.DB {
+	list, _, err := script.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Where("script_code in ?", strings.Split(p.Schedule.ScriptCodes, ","))
 	})
 	if err != nil {
