@@ -103,6 +103,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
             setStartTime(range.value.start);
             setEndTime(range.value.end);
             form.setFieldsValue({ startTime: range.value.start, endTime: range.value.end });
+            fetchSummary({ startTime: range.value.start, endTime: range.value.end });
         },
     };
 
@@ -126,17 +127,15 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                         <DatePicker showTime format="YYYY-MM-DD HH:mm" value={endTime} allowClear={false} />
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" loading={loading}>查询</Button>
-                    </Form.Item>
-                    <Form.Item>
-                        <Dropdown menu={quickMenuProps} placement="bottomLeft">
-                            <Button>
-                                <Space>
-                                    最近时间
-                                    <DownOutlined />
-                                </Space>
-                            </Button>
-                        </Dropdown>
+                        <Dropdown.Button
+                            menu={quickMenuProps}
+                            placement="bottomLeft"
+                            onClick={() => form.submit()}
+                            type="primary"
+                            loading={loading}
+                        >
+                            查询
+                        </Dropdown.Button>
                     </Form.Item>
                 </Form>
             </Card>
