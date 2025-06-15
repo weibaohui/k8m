@@ -18,35 +18,17 @@ type AdminUserGroupController struct {
 func RegisterAdminUserGroupRoutes(admin *gin.RouterGroup) {
 
 	ctrl := AdminUserGroupController{}
-	// @Summary 获取用户组列表
-	// @Description 获取所有用户组信息
-	// @Security BearerAuth
-	// @Success 200 {object} []models.UserGroup
-	// @Router /admin/user_group/list [get]
 	admin.GET("/user_group/list", ctrl.ListUserGroup)
-	// @Summary 保存用户组
-	// @Description 新增或更新用户组信息
-	// @Security BearerAuth
-	// @Accept json
-	// @Param data body models.UserGroup true "用户组信息"
-	// @Success 200 {object} map[string]interface{}
-	// @Router /admin/user_group/save [post]
 	admin.POST("/user_group/save", ctrl.SaveUserGroup)
-	// @Summary 删除用户组
-	// @Description 根据ID批量删除用户组
-	// @Security BearerAuth
-	// @Param ids path string true "用户组ID，多个用逗号分隔"
-	// @Success 200 {object} string
-	// @Router /admin/user_group/delete/{ids} [post]
 	admin.POST("/user_group/delete/:ids", ctrl.DeleteUserGroup)
-	// @Summary 用户组选项列表
-	// @Description 获取所有用户组的选项（仅ID和名称）
-	// @Security BearerAuth
-	// @Success 200 {object} []map[string]string
-	// @Router /admin/user_group/option_list [get]
 	admin.GET("/user_group/option_list", ctrl.GroupOptionList)
-
 }
+
+// @Summary 获取用户组列表
+// @Description 获取所有用户组信息
+// @Security BearerAuth
+// @Success 200 {object} []models.UserGroup
+// @Router /admin/user_group/list [get]
 func (a *AdminUserGroupController) ListUserGroup(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
@@ -58,6 +40,14 @@ func (a *AdminUserGroupController) ListUserGroup(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+
+// @Summary 保存用户组
+// @Description 新增或更新用户组信息
+// @Security BearerAuth
+// @Accept json
+// @Param data body models.UserGroup true "用户组信息"
+// @Success 200 {object} map[string]interface{}
+// @Router /admin/user_group/save [post]
 func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 
 	params := dao.BuildParams(c)
@@ -79,6 +69,13 @@ func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 		"id": m.ID,
 	})
 }
+
+// @Summary 删除用户组
+// @Description 根据ID批量删除用户组
+// @Security BearerAuth
+// @Param ids path string true "用户组ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/user_group/delete/{ids} [post]
 func (a *AdminUserGroupController) DeleteUserGroup(c *gin.Context) {
 	ids := c.Param("ids")
 
@@ -95,6 +92,11 @@ func (a *AdminUserGroupController) DeleteUserGroup(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 用户组选项列表
+// @Description 获取所有用户组的选项（仅ID和名称）
+// @Security BearerAuth
+// @Success 200 {object} []map[string]string
+// @Router /admin/user_group/option_list [get]
 func (a *AdminUserGroupController) GroupOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
