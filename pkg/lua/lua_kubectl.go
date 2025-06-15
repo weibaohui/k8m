@@ -185,3 +185,35 @@ func getResource(L *lua.LState) int {
 	L.Push(lua.LNil)
 	return 2
 }
+
+// 实现 kubectl:Doc('spec.replicas') 方法
+// 用于获取某个字段的解释，返回 Lua 表和错误信息
+func getDoc(L *lua.LState) int {
+	ud := L.CheckUserData(1)
+	obj, ok := ud.Value.(*Kubectl)
+	if !ok {
+		L.ArgError(1, "expected kubectl")
+		return 0
+	}
+
+	field := L.CheckString(2)
+	if field != "" {
+		obj.k = obj.k.DocField(field)
+	}
+	// 查询单个资源
+	var result []byte
+	err := obj.k.Doc(&result).Error
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	// 转换为 Lua 表
+	table := toLValue(L, string(result))
+
+	// 返回查询结果
+	L.Push(table)
+	L.Push(lua.LNil)
+	return 2
+}

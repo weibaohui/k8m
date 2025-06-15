@@ -49,6 +49,7 @@ func (p *Inspection) registerKubectlFunc() {
 		"AllNamespace":      withAllNamespaceFunc,
 		"Cache":             withCacheFunc,
 		"List":              listResource,
+		"Doc":               getDoc,
 		"Get":               getResource,
 	}))
 	p.lua.SetMetatable(ud, mt)
