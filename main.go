@@ -566,17 +566,8 @@ func main() {
 
 		// 大模型列表管理
 		config.RegisterAIModelConfigRoutes(admin)
-
-		// mcp
-		admin.GET("/mcp/list", mcp.ServerList)
-		admin.GET("/mcp/server/:name/tools/list", mcp.ToolsList)
-		admin.POST("/mcp/connect/:name", mcp.Connect)
-		admin.POST("/mcp/delete", mcp.Delete)
-		admin.POST("/mcp/save", mcp.AddOrUpdate)
-		admin.POST("/mcp/save/id/:id/status/:status", mcp.QuickSave)
-		admin.POST("/mcp/tool/save/id/:id/status/:status", mcp.ToolQuickSave)
-		admin.GET("/mcp/log/list", mcp.MCPLogList)
-
+		mcp.RegisterMCPServerRoutes(admin)
+		mcp.RegisterMCPToolRoutes(admin)
 		// 集群权限设置
 		admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", user.ListClusterPermissions)
 		admin.GET("/cluster_permissions/user/:username/list", user.ListClusterPermissionsByUserName)         // 列出指定用户拥有的集群权限
