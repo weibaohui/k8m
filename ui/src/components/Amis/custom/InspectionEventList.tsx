@@ -72,9 +72,7 @@ const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) 
                                     <Space wrap>
                                         <Tag color={statusColorMap[item.event_status] || 'default'}>{item.event_status}</Tag>
                                         <Typography.Text strong>{item.kind}:</Typography.Text>
-                                        <Typography.Text>{item.name}</Typography.Text>
-                                        <Tag color="blue">{item.namespace}</Tag>
-                                        <Tag color="purple">{item.script_name}</Tag>
+                                        <Typography.Text>{item.namespace}/{item.name}</Typography.Text>
                                         <Tag color="geekblue">{item.cluster}</Tag>
                                         <Tag color="default">{item.created_at ? dayjs(item.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</Tag>
                                     </Space>
@@ -84,14 +82,16 @@ const InspectionEventList: React.FC<InspectionEventListProps> = ({ record_id }) 
                                         type={item.event_status === '失败' ? 'error' : (item.event_status === '警告' ? 'warning' : 'success')}
                                         showIcon
                                         action={
-                                            <Button
-                                                icon={<QuestionCircleOutlined />}
-                                                onClick={() => toggleExplanation(itemKey)}
-                                                type="link"
-                                                style={{ padding: 0 }}
-                                            >
-                                                AI解释
-                                            </Button>
+                                            item.event_status !== '正常' && (
+                                                <Button
+                                                    icon={<QuestionCircleOutlined />}
+                                                    onClick={() => toggleExplanation(itemKey)}
+                                                    type="link"
+                                                    style={{ padding: 0 }}
+                                                >
+                                                    AI解释
+                                                </Button>
+                                            )
                                         }
                                     />
                                     {expandedItems[itemKey] && (
