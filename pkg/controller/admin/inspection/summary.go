@@ -22,7 +22,7 @@ import (
 // @param end_time 可选，结束时间（格式：2006-01-02T15:04:05Z07:00）
 func SummaryBySchedule(c *gin.Context) {
 	params := dao.BuildParams(c)
-	params.PerPage = 100000
+	params.PerPage = 100000000
 	// 1. 获取scheduleID参数
 	scheduleID := c.Param("id")
 
@@ -98,11 +98,20 @@ func SummaryBySchedule(c *gin.Context) {
 	// 3. 查询所有相关InspectionCheckEvent
 	eventModel := &models.InspectionCheckEvent{}
 	events, _, err := eventModel.List(params, func(db *gorm.DB) *gorm.DB {
-		db = db.Where("schedule_id in ?", tempScheduleIDs)
+		query := db
 		if cluster != "" {
-			db = db.Where("cluster = ?", cluster)
+			query = query.Where("cluster = ?", cluster)
 		}
-		return db
+		if scheduleID != "" {
+			query = query.Where("schedule_id in ?", tempScheduleIDs)
+		}
+		if !startTime.IsZero() {
+			query = query.Where("created_at >= ?", startTime)
+		}
+		if !endTime.IsZero() {
+			query = query.Where("created_at <= ?", endTime)
+		}
+		return query.Order("id desc")
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
