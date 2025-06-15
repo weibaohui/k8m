@@ -958,4 +958,154 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			print("Security Pod 安全上下文检查完成")
 		`,
 	},
+	{
+		Name:        "StatefulSet 合规性检查",
+		Description: "检测 StatefulSet 关联的 Service、StorageClass 是否存在及 Pod 状态。",
+		Group:       "apps",
+		Version:     "v1",
+		Kind:        "StatefulSet",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_StatefulSet_026",
+		Script: `
+			local stss, err = kubectl:GVK("apps", "v1", "StatefulSet"):AllNamespace(""):List()
+			if err then print("获取 StatefulSet 失败: " .. tostring(err)) return end
+			for _, sts in ipairs(stss) do
+				if sts.spec and sts.spec.serviceName then
+					local svc, err = kubectl:GVK("", "v1", "Service"):Namespace(sts.metadata.namespace):Name(sts.spec.serviceName):Get()
+					if err or not svc then
+						check_event("失败", "StatefulSet 使用的 Service '" .. sts.metadata.namespace .. "/" .. sts.spec.serviceName .. "' 不存在", {namespace=sts.metadata.namespace, name=sts.metadata.name, service=sts.spec.serviceName})
+					end
+				end
+				if sts.spec and sts.spec.volumeClaimTemplates then
+					for _, vct in ipairs(sts.spec.volumeClaimTemplates) do
+						if vct.spec and vct.spec.storageClassName then
+							local sc, err = kubectl:GVK("storage.k8s.io", "v1", "StorageClass"):Name(vct.spec.storageClassName):Get()
+							if err or not sc then
+								check_event("失败", "StatefulSet 使用的 StorageClass '" .. vct.spec.storageClassName .. "' 不存在", {namespace=sts.metadata.namespace, name=sts.metadata.name, storageClass=vct.spec.storageClassName})
+							end
+						end
+					end
+				end
+				if sts.spec and sts.spec.replicas and sts.status and sts.status.availableReplicas and sts.spec.replicas ~= sts.status.availableReplicas then
+					for i = 0, sts.spec.replicas - 1 do
+						local podName = sts.metadata.name .. "-" .. tostring(i)
+						local pod, err = kubectl:GVK("", "v1", "Pod"):Namespace(sts.metadata.namespace):Name(podName):Get()
+						if err or not pod then
+							if i == 0 then
+								local events, err = kubectl:GVK("", "v1", "Event"):Namespace(sts.metadata.namespace):WithFieldSelector("involvedObject.name=" .. sts.metadata.name):List()
+								if not err and events and events.items then
+									for _, evt in ipairs(events.items) do
+										if evt.type ~= "Normal" and evt.message and evt.message ~= "" then
+											check_event("失败", evt.message, {namespace=sts.metadata.namespace, name=sts.metadata.name})
+										end
+									end
+								end
+							end
+							break
+						end
+						if pod.status and pod.status.phase ~= "Running" then
+							check_event("失败", "StatefulSet 的 Pod '" .. pod.metadata.name .. "' 不在 Running 状态", {namespace=sts.metadata.namespace, name=sts.metadata.name, pod=pod.metadata.name, phase=pod.status.phase})
+							break
+						end
+					end
+				end
+			end
+			print("StatefulSet 合规性检查完成")
+		`,
+	},
+	{
+		Name:        "StorageClass 合规性检查",
+		Description: "检测 StorageClass 是否使用了已废弃的 provisioner，及是否存在多个默认 StorageClass。",
+		Group:       "storage.k8s.io",
+		Version:     "v1",
+		Kind:        "StorageClass",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_StorageClass_027",
+		Script: `
+			local scs, err = kubectl:GVK("storage.k8s.io", "v1", "StorageClass"):AllNamespace(""):List()
+			if err then print("获取 StorageClass 失败: " .. tostring(err)) return end
+			local defaultCount = 0
+			for _, sc in ipairs(scs) do
+				if sc.provisioner == "kubernetes.io/no-provisioner" then
+					check_event("失败", "StorageClass '" .. sc.metadata.name .. "' 使用了已废弃的 provisioner 'kubernetes.io/no-provisioner'", {name=sc.metadata.name})
+				end
+				if sc.metadata.annotations and sc.metadata.annotations["storageclass.kubernetes.io/is-default-class"] == "true" then
+					defaultCount = defaultCount + 1
+				end
+			end
+			if defaultCount > 1 then
+				check_event("失败", "存在多个默认 StorageClass (" .. tostring(defaultCount) .. ")，可能导致混淆", {})
+			end
+			print("StorageClass 合规性检查完成")
+		`,
+	},
+	{
+		Name:        "PersistentVolume 合规性检查",
+		Description: "检测 PV 是否为 Released/Failed 状态，及容量小于 1Gi。",
+		Group:       "core",
+		Version:     "v1",
+		Kind:        "PersistentVolume",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_PV_028",
+		Script: `
+			local pvs, err = kubectl:GVK("", "v1", "PersistentVolume"):AllNamespace(""):List()
+			if err then print("获取 PersistentVolume 失败: " .. tostring(err)) return end
+			for _, pv in ipairs(pvs) do
+				if pv.status and pv.status.phase == "Released" then
+					check_event("失败", "PersistentVolume '" .. pv.metadata.name .. "' 处于 Released 状态，应及时清理", {name=pv.metadata.name})
+				end
+				if pv.status and pv.status.phase == "Failed" then
+					check_event("失败", "PersistentVolume '" .. pv.metadata.name .. "' 处于 Failed 状态", {name=pv.metadata.name})
+				end
+				if pv.spec and pv.spec.capacity and pv.spec.capacity.storage then
+					local function parseGi(val)
+						local n = tonumber(val:match("%d+"))
+						if val:find("Gi") then return n end
+						if val:find("Mi") then return n and n/1024 or 0 end
+						return 0
+					end
+					if parseGi(pv.spec.capacity.storage) < 1 then
+						check_event("失败", "PersistentVolume '" .. pv.metadata.name .. "' 容量过小 (" .. pv.spec.capacity.storage .. ")", {name=pv.metadata.name, capacity=pv.spec.capacity.storage})
+					end
+				end
+			end
+			print("PersistentVolume 合规性检查完成")
+		`,
+	},
+	{
+		Name:        "PersistentVolumeClaim 合规性检查",
+		Description: "检测 PVC Pending/Lost 状态、容量小于 1Gi、无 StorageClass。",
+		Group:       "core",
+		Version:     "v1",
+		Kind:        "PersistentVolumeClaim",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_PVC_029",
+		Script: `
+			local pvcs, err = kubectl:GVK("", "v1", "PersistentVolumeClaim"):AllNamespace(""):List()
+			if err then print("获取 PVC 失败: " .. tostring(err)) return end
+			for _, pvc in ipairs(pvcs) do
+				if pvc.status and pvc.status.phase == "Pending" then
+					check_event("失败", "PersistentVolumeClaim '" .. pvc.metadata.name .. "' 处于 Pending 状态", {namespace=pvc.metadata.namespace, name=pvc.metadata.name})
+				elseif pvc.status and pvc.status.phase == "Lost" then
+					check_event("失败", "PersistentVolumeClaim '" .. pvc.metadata.name .. "' 处于 Lost 状态", {namespace=pvc.metadata.namespace, name=pvc.metadata.name})
+				else
+					if pvc.spec and pvc.spec.resources and pvc.spec.resources.requests and pvc.spec.resources.requests.storage then
+						local function parseGi(val)
+							local n = tonumber(val:match("%d+"))
+							if val:find("Gi") then return n end
+							if val:find("Mi") then return n and n/1024 or 0 end
+							return 0
+						end
+						if parseGi(pvc.spec.resources.requests.storage) < 1 then
+							check_event("失败", "PersistentVolumeClaim '" .. pvc.metadata.name .. "' 容量过小 (" .. pvc.spec.resources.requests.storage .. ")", {namespace=pvc.metadata.namespace, name=pvc.metadata.name, capacity=pvc.spec.resources.requests.storage})
+						end
+					end
+					if (not pvc.spec or not pvc.spec.storageClassName) and (not pvc.spec or not pvc.spec.volumeName or pvc.spec.volumeName == "") then
+						check_event("失败", "PersistentVolumeClaim '" .. pvc.metadata.name .. "' 未指定 StorageClass", {namespace=pvc.metadata.namespace, name=pvc.metadata.name})
+					end
+				end
+			end
+			print("PersistentVolumeClaim 合规性检查完成")
+		`,
+	},
 }
