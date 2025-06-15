@@ -41,7 +41,7 @@ type InspectionScriptResult struct {
 	ScriptDesc string    `json:"script_desc"` // 脚本描述
 	StartTime  time.Time `json:"start_time"`
 	EndTime    time.Time `json:"end_time"`
-	StdOutput  string    `json:"StdOutput"`           // 脚本标准输出
+	StdOutput  string    `json:"std_output"`          // 脚本标准输出
 	ErrorMsg   string    `json:"error_msg,omitempty"` // 错误信息
 	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"`  // Automatically managed by GORM for update time

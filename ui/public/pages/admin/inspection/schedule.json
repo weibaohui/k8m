@@ -134,7 +134,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 100,
+          "width": 120,
           "buttons": [
             {
               "type": "button",
@@ -279,22 +279,6 @@
               "actionType": "ajax",
               "tooltip": "立即执行",
               "api": "post:/admin/inspection/schedule/start/id/$id"
-            },
-            {
-              "type": "button",
-              "tooltip": "巡检结果汇总",
-              "icon": "fas fa-chart-pie text-primary",
-              "actionType": "drawer",
-              "drawer": {
-                "title": "汇总信息",
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "size": "lg",
-                "body": {
-                  "type": "inspectionSummary",
-                  "schedule_id": "${id}"
-                }
-              }
             },
             {
               "type": "button",
