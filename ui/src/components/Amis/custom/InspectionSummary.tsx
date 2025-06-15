@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Alert, Button, Card, DatePicker, Form, Spin, Table, Typography, Space, MenuProps } from "antd";
+import { Alert, Button, Card, DatePicker, Form, Spin, Table, Typography, Space, Dropdown, MenuProps } from "antd";
 import dayjs, { Dayjs } from 'dayjs';
 import { fetcher } from '@/components/Amis/fetcher';
 import { replacePlaceholders } from '@/utils/utils';
-import { Dropdown, Menu } from "antd";
-import { DownOutlined, UserOutlined } from '@ant-design/icons';
+import { DownOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
@@ -84,9 +83,6 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
 
     const { total_runs, total_clusters, latest_run = {}, clusters = [], total_schedules } = summaryData || {};
 
-    const handleMenuClick: MenuProps['onClick'] = (e) => {
-        console.log('click', e);
-    };
     // 时间快捷选项
     const quickRanges = [
         { label: "1月", value: { start: dayjs().subtract(1, 'month').startOf('day'), end: dayjs().endOf('day') } },
@@ -96,48 +92,20 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         { label: "6小时", value: { start: dayjs().subtract(6, 'hour'), end: dayjs() } },
         { label: "1小时", value: { start: dayjs().subtract(1, 'hour'), end: dayjs() } },
     ];
-    const quickMenu = (
-        <Menu>
-            {quickRanges.map((item, idx) => (
-                <Menu.Item key={idx} onClick={() => {
-                    setStartTime(item.value.start);
-                    setEndTime(item.value.end);
-                    form.setFieldsValue({ startTime: item.value.start, endTime: item.value.end });
-                }}>{item.label}</Menu.Item>
-            ))}
-        </Menu>
-    );
-
-
-    const items: MenuProps['items'] = [
-        {
-            label: '1st menu item',
-            key: '1',
-            icon: <UserOutlined />,
+    const quickMenuProps: MenuProps = {
+        items: quickRanges.map((item, idx) => ({
+            key: idx.toString(),
+            label: item.label,
+        })),
+        onClick: (info) => {
+            const idx = Number(info.key);
+            const range = quickRanges[idx];
+            setStartTime(range.value.start);
+            setEndTime(range.value.end);
+            form.setFieldsValue({ startTime: range.value.start, endTime: range.value.end });
         },
-        {
-            label: '2nd menu item',
-            key: '2',
-            icon: <UserOutlined />,
-        },
-        {
-            label: '3rd menu item',
-            key: '3',
-            icon: <UserOutlined />,
-            danger: true,
-        },
-        {
-            label: '4rd menu item',
-            key: '4',
-            icon: <UserOutlined />,
-            danger: true,
-            disabled: true,
-        },
-    ];
-    const menuProps = {
-        items,
-        onClick: handleMenuClick,
     };
+
     return (
         <div>
             <Card style={{ marginBottom: 16 }}>
@@ -161,10 +129,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                         <Button type="primary" htmlType="submit" loading={loading}>查询</Button>
                     </Form.Item>
                     <Form.Item>
-                        <Dropdown overlay={quickMenu} placement="bottomLeft">
-                            <Button>最近</Button>
-                        </Dropdown>
-                        <Dropdown menu={menuProps}>
+                        <Dropdown menu={quickMenuProps} placement="bottomLeft">
                             <Button>
                                 <Space>
                                     最近时间
