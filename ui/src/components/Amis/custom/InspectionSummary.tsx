@@ -34,6 +34,9 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
     const [error, setError] = useState<string | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerRecordId, setDrawerRecordId] = useState<number | null>(null);
+    // 记录当前弹窗的过滤类型
+    type DrawerStatus = '全部' | '正常' | '失败';
+    const [drawerDefaultStatus, setDrawerDefaultStatus] = useState<DrawerStatus>('失败');
 
     let realScheduleId = ""
     // 处理 schedule_id 占位符
@@ -77,10 +80,11 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         { title: '资源类型', dataIndex: 'kind', key: 'kind' },
         {
             title: '正常数', dataIndex: 'normal_count', key: 'normal_count',
-            render: (text: any, record: any) => (
+            render: (text: any, _: any) => (
                 <span style={{ color: '#52c41a', cursor: 'pointer' }}
                     onClick={() => {
                         setDrawerRecordId(latest_run.record_id);
+                        setDrawerDefaultStatus('正常');
                         setDrawerOpen(true);
                     }}
                 >{text}</span>
@@ -88,10 +92,11 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         },
         {
             title: '异常数', dataIndex: 'error_count', key: 'error_count',
-            render: (text: any, record: any) => (
+            render: (text: any, _: any) => (
                 <span style={{ color: '#ff4d4f', cursor: 'pointer' }}
                     onClick={() => {
                         setDrawerRecordId(latest_run.record_id);
+                        setDrawerDefaultStatus('失败');
                         setDrawerOpen(true);
                     }}
                 >{text}</span>
@@ -190,6 +195,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                                 <span style={{ marginRight: 8, cursor: 'pointer' }}
                                     onClick={() => {
                                         setDrawerRecordId(latest_run.record_id);
+                                        setDrawerDefaultStatus('全部');
                                         setDrawerOpen(true);
                                     }}
                                 >
@@ -236,7 +242,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                 onClose={() => setDrawerOpen(false)}
                 destroyOnClose
             >
-                {drawerRecordId && <InspectionEventListComponent record_id={`${drawerRecordId}`} />}
+                {drawerRecordId && <InspectionEventListComponent record_id={`${drawerRecordId}`} defaultStatus={drawerDefaultStatus} />}
             </Drawer>
         </div>
     );

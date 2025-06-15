@@ -11,7 +11,7 @@ const { Title } = Typography;
 interface InspectionEventListComponentProps {
     record_id: string;
     data?: Record<string, any>;
-
+    defaultStatus?: '全部' | '正常' | '失败';
 }
 
 const statusColorMap: Record<string, string> = {
@@ -20,14 +20,15 @@ const statusColorMap: Record<string, string> = {
     '警告': 'orange',
 };
 
-const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> = ({ record_id, data }) => {
+const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> = (props) => {
+    const { record_id: initialRecordId, data, defaultStatus } = props;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [eventData, setEventData] = useState<any[]>([]);
     const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
-    const [filterStatus, setFilterStatus] = useState<'全部' | '正常' | '失败'>('全部');
+    const [filterStatus, setFilterStatus] = useState<'全部' | '正常' | '失败'>(defaultStatus || '全部');
 
-    record_id = replacePlaceholders(record_id, data!) || "";
+    const record_id = replacePlaceholders(initialRecordId, data!) || "";
 
     useEffect(() => {
         if (!record_id) return;
