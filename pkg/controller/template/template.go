@@ -20,7 +20,7 @@ func ListTemplate(c *gin.Context) {
 }
 func SaveTemplate(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := &models.CustomTemplate{}
+	m := models.CustomTemplate{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)

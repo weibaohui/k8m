@@ -23,7 +23,7 @@ func LuaScriptList(c *gin.Context) {
 }
 func LuaScriptSave(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := &models.InspectionLuaScript{}
+	m := models.InspectionLuaScript{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)

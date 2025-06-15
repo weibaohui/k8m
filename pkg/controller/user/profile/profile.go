@@ -45,8 +45,8 @@ func ListUserPermissions(c *gin.Context) {
 
 func UpdatePsw(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := &models.User{}
-	err := c.ShouldBindJSON(m)
+	m := models.User{}
+	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

@@ -31,7 +31,7 @@ func List(c *gin.Context) {
 }
 func Save(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := &models.User{}
+	m := models.User{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -81,8 +81,8 @@ func UpdatePsw(c *gin.Context) {
 
 	id := c.Param("id")
 	params := dao.BuildParams(c)
-	m := &models.User{}
-	err := c.ShouldBindJSON(m)
+	m := models.User{}
+	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

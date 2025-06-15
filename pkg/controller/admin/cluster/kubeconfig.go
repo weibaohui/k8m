@@ -15,7 +15,7 @@ import (
 func SaveKubeConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
-	m := &models.KubeConfig{}
+	m := models.KubeConfig{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -77,7 +77,7 @@ func SaveKubeConfig(c *gin.Context) {
 func RemoveKubeConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
-	m := &models.KubeConfig{}
+	m := models.KubeConfig{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)

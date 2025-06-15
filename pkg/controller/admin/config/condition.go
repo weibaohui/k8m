@@ -22,7 +22,7 @@ func ConditionList(c *gin.Context) {
 
 func ConditionSave(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := &models.ConditionReverse{}
+	m := models.ConditionReverse{}
 	err := c.ShouldBindJSON(&m)
 	if err != nil {
 		amis.WriteJsonError(c, err)
