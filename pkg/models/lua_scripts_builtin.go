@@ -748,7 +748,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 	{
 		Name:        "Node 合规性检查",
 		Description: "检查 Node 的 Condition 状态，非 Ready/EtcdIsVoter 且状态异常时报警。",
-		Group:       "core",
+		Group:       "",
 		Version:     "v1",
 		Kind:        "Node",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
@@ -774,6 +774,75 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 				end
 			end
 			print("Node 合规性检查完成")
+		`,
+	},
+	{
+		Name:        "Pod 合规性检查",
+		Description: "检查 Pod 的 Pending、调度失败、CrashLoopBackOff、终止异常、ReadinessProbe 失败等状态。",
+		Group:       "",
+		Version:     "v1",
+		Kind:        "Pod",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Pod_020",
+		Script: `
+			local pods, err = kubectl:GVK("", "v1", "Pod"):AllNamespace(""):List()
+			if err then print("获取 Pod 失败: " .. tostring(err)) return end
+			for _, pod in ipairs(pods) do
+				if pod.status and pod.status.phase == "Pending" and pod.status.conditions then
+					for _, cond in ipairs(pod.status.conditions) do
+						if cond.type == "PodScheduled" and cond.reason == "Unschedulable" and cond.message and cond.message ~= "" then
+							check_event("失败", cond.message, {namespace=pod.metadata.namespace, name=pod.metadata.name})
+						end
+					end
+				end
+				local function check_container_statuses(statuses, phase)
+					if not statuses then return end
+					for _, cs in ipairs(statuses) do
+						if cs.state and cs.state.waiting then
+							if cs.state.waiting.reason == "CrashLoopBackOff" and cs.lastState and cs.lastState.terminated then
+								check_event("失败", "CrashLoopBackOff: 上次终止原因 " .. (cs.lastState.terminated.reason or "") .. " 容器=" .. cs.name .. " pod=" .. pod.metadata.name, {namespace=pod.metadata.namespace, name=pod.metadata.name, container=cs.name})
+							elseif cs.state.waiting.reason and (cs.state.waiting.reason == "ImagePullBackOff" or cs.state.waiting.reason == "ErrImagePull" or cs.state.waiting.reason == "CreateContainerConfigError" or cs.state.waiting.reason == "CreateContainerError" or cs.state.waiting.reason == "RunContainerError" or cs.state.waiting.reason == "InvalidImageName") then
+								check_event("失败", cs.state.waiting.message or (cs.state.waiting.reason .. " 容器=" .. cs.name .. " pod=" .. pod.metadata.name), {namespace=pod.metadata.namespace, name=pod.metadata.name, container=cs.name})
+							end
+						elseif cs.state and cs.state.terminated and cs.state.terminated.exitCode and cs.state.terminated.exitCode ~= 0 then
+							check_event("失败", "终止异常: " .. (cs.state.terminated.reason or "Unknown") .. " exitCode=" .. tostring(cs.state.terminated.exitCode) .. " 容器=" .. cs.name .. " pod=" .. pod.metadata.name, {namespace=pod.metadata.namespace, name=pod.metadata.name, container=cs.name, exitCode=cs.state.terminated.exitCode})
+						elseif cs.ready == false and phase == "Running" then
+							check_event("失败", "容器未就绪: " .. cs.name .. " pod=" .. pod.metadata.name, {namespace=pod.metadata.namespace, name=pod.metadata.name, container=cs.name})
+						end
+					end
+				end
+				if pod.status then
+					check_container_statuses(pod.status.initContainerStatuses, pod.status.phase)
+					check_container_statuses(pod.status.containerStatuses, pod.status.phase)
+				end
+			end
+			print("Pod 合规性检查完成")
+		`,
+	},
+	{
+		Name:        "PVC 合规性检查",
+		Description: "检查 PVC Pending 状态下的 ProvisioningFailed 事件。",
+		Group:       "",
+		Version:     "v1",
+		Kind:        "PersistentVolumeClaim",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_PVC_021",
+		Script: `
+			local pvcs, err = kubectl:GVK("", "v1", "PersistentVolumeClaim"):AllNamespace(""):List()
+			if err then print("获取 PVC 失败: " .. tostring(err)) return end
+			for _, pvc in ipairs(pvcs) do
+				if pvc.status and pvc.status.phase == "Pending" then
+					local events, err = kubectl:GVK("", "v1", "Event"):Namespace(pvc.metadata.namespace):WithFieldSelector("involvedObject.name=" .. pvc.metadata.name):List()
+					if not err and events and events.items then
+						for _, evt in ipairs(events.items) do
+							if evt.reason == "ProvisioningFailed" and evt.message and evt.message ~= "" then
+								check_event("失败", evt.message, {namespace=pvc.metadata.namespace, name=pvc.metadata.name})
+							end
+						end
+					end
+				end
+			end
+			print("PVC 合规性检查完成")
 		`,
 	},
 }
