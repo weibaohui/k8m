@@ -27,6 +27,12 @@ func RegisterAIModelConfigRoutes(admin *gin.RouterGroup) {
 
 }
 
+// @Summary 快速保存AI模型思考状态
+// @Security BearerAuth
+// @Param id path int true "模型ID"
+// @Param status path string true "状态，例如：true、false"
+// @Success 200 {object} string
+// @Router /admin/ai/model/id/{id}/think/{status} [post]
 func (m *AIModelConfigController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
@@ -47,6 +53,12 @@ func (m *AIModelConfigController) QuickSave(c *gin.Context) {
 	}
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 测试AI模型连接
+// @Security BearerAuth
+// @Param id path int true "模型ID"
+// @Success 200 {object} string
+// @Router /admin/ai/model/test/id/{id} [post]
 func (m *AIModelConfigController) TestConnection(c *gin.Context) {
 	id := c.Param("id")
 
@@ -77,7 +89,10 @@ func (m *AIModelConfigController) TestConnection(c *gin.Context) {
 	amis.WriteJsonError(c, fmt.Errorf("测试失败"))
 }
 
-// Save 创建或更新AI模型配置
+// @Summary 创建或更新AI模型配置
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/ai/model/save [post]
 func (m *AIModelConfigController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 
@@ -110,7 +125,10 @@ func (m *AIModelConfigController) Save(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// List 获取API密钥列表
+// @Summary 获取AI模型配置列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/ai/model/list [get]
 func (m *AIModelConfigController) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 
@@ -123,6 +141,11 @@ func (m *AIModelConfigController) List(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
+// @Summary 删除AI模型配置
+// @Security BearerAuth
+// @Param ids path string true "模型ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/ai/model/delete/{ids} [post]
 func (m *AIModelConfigController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
