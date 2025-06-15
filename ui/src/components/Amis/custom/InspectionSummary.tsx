@@ -11,6 +11,7 @@ const { Title, Text } = Typography;
 interface InspectionSummaryComponentProps {
     schedule_id: string;
     data: Record<string, any>;
+    cluster?: string; // 新增 cluster 字段
 }
 
 /**
@@ -23,7 +24,8 @@ interface InspectionSummaryComponentProps {
  */
 const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSummaryComponentProps>(({
     schedule_id,
-    data
+    data,
+    cluster // 解构 cluster
 }, _) => {
     // 表单状态
     const [form] = Form.useForm();
@@ -51,7 +53,12 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         setError(null);
         const sTime = (params?.startTime || startTime).format('YYYY-MM-DDTHH:mm:ss') + 'Z';
         const eTime = (params?.endTime || endTime).format('YYYY-MM-DDTHH:mm:ss') + 'Z';
-        const url = `/admin/inspection/schedule/id/${realScheduleId}/summary/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
+        let url = '';
+        if (cluster) {
+            url = `/admin/inspection/cluster/${cluster}/summary/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
+        } else {
+            url = `/admin/inspection/schedule/id/${realScheduleId}/summary/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
+        }
         fetcher({ url, method: 'post' })
             .then((response: any) => {
                 if (response?.data?.data) {
@@ -68,7 +75,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
             .finally(() => {
                 setLoading(false);
             });
-    }, [startTime, endTime]);
+    }, [startTime, endTime, cluster, realScheduleId]);
 
     // 外部参数变化自动刷新
     useEffect(() => {
