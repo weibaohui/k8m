@@ -6,22 +6,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
-	"gorm.io/gorm"
-
-	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 )
 
 // AIModelConfigController 用于管理AI模型配置
 
 type AIModelConfigController struct {
-	DB *gorm.DB
 }
 
 // RegisterAIModelConfigRoutes 注册路由
 func RegisterAIModelConfigRoutes(r *gin.RouterGroup) {
-	ctrl := &AIModelConfigController{DB: dao.DB()}
+	ctrl := &AIModelConfigController{}
 	r.GET("/ai/model/list", ctrl.List)
 	r.POST("/ai/model/save", ctrl.Save)
 	r.POST("/ai/model/delete/:ids", ctrl.Delete)
