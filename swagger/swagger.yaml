@@ -4,6 +4,79 @@ info:
   title: k8m API
   version: "1.0"
 paths:
+  /admin/ai/model/delete/{ids}:
+    post:
+      parameters:
+      - description: 模型ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除AI模型配置
+  /admin/ai/model/id/{id}/think/{status}:
+    post:
+      parameters:
+      - description: 模型ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速保存AI模型思考状态
+  /admin/ai/model/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取AI模型配置列表
+  /admin/ai/model/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建或更新AI模型配置
+  /admin/ai/model/test/id/{id}:
+    post:
+      parameters:
+      - description: 模型ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 测试AI模型连接
   /admin/cluster/file/option_list:
     get:
       responses:
@@ -14,6 +87,120 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取文件类型的集群选项
+  /admin/mcp/connect/{name}:
+    post:
+      parameters:
+      - description: MCP服务器名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 连接指定MCP服务器
+  /admin/mcp/delete:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除MCP服务器
+  /admin/mcp/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取MCP服务器列表
+  /admin/mcp/log/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取MCP服务器日志列表
+  /admin/mcp/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建或更新MCP服务器
+  /admin/mcp/save/id/{id}/status/{status}:
+    post:
+      parameters:
+      - description: 服务器ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速保存MCP服务器状态
+  /admin/mcp/server/{name}/tools/list:
+    get:
+      parameters:
+      - description: MCP服务器名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取指定MCP服务器的工具列表
+  /admin/mcp/tool/save/id/{id}/status/{status}:
+    post:
+      parameters:
+      - description: 工具ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速保存MCP工具状态
 securityDefinitions:
   BearerAuth:
     in: header
