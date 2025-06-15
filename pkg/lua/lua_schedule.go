@@ -143,6 +143,8 @@ func InitClusterInspection() {
 	})
 }
 
+// IsEventStatusPass 判断事件状态是否为通过
+// 这里的通过状态包括：正常、pass、ok、success、通过
 // 入库前将状态描述文字统一为正常、失败两种
 func (s *ScheduleBackground) IsEventStatusPass(status string) bool {
 	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
