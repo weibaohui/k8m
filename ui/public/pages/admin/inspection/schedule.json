@@ -306,307 +306,204 @@
                 "closeOnOutside": true,
                 "size": "xl",
                 "title": "查看巡检历史记录 (ESC 关闭)",
-                "body": {
-                  "type": "crud",
-                  "id": "recordCRUD",
-                  "name": "recordCRUD",
-                  "autoFillHeight": true,
-                  "api": "get:/admin/inspection/schedule/id/$id/record/list",
-                  "headerToolbar": [
-                    {
-                      "type": "columns-toggler",
-                      "align": "right",
-                      "draggable": true,
-                      "icon": "fas fa-cog",
-                      "overlay": true,
-                      "footerBtnSize": "sm"
-                    },
-                    {
-                      "type": "tpl",
-                      "tpl": "共${count}条",
-                      "align": "right",
-                      "visibleOn": "${count}"
-                    },
-                    {
-                      "type": "columns-toggler",
-                      "align": "left"
-                    },
-                    "reload"
-                  ],
-                  "loadDataOnce": true,
-                  "syncLocation": false,
-                  "initFetch": true,
-                  "perPage": 10,
-                  "columns": [
-                    {
-                      "type": "operation",
-                      "label": "操作",
-                      "width": 120,
-                      "buttons": [
-                        {
-                          "type": "button",
-                          "actionType": "drawer",
-                          "label": "查看明细",
-                          "drawer": {
-                            "closeOnEsc": true,
-                            "closeOnOutside": true,
-                            "size": "xl",
-                            "title": "查看巡检明细 (ESC 关闭)",
-                            "body": {
-                              "type": "crud",
-                              "id": "checkEventCRUD",
-                              "name": "checkEventCRUD",
-                              "autoFillHeight": true,
-                              "autoGenerateFilter": {
-                                "columnsNum": 4,
-                                "showBtnToolbar": false
-                              },
-                              "api": "get:/admin/inspection/schedule/record/id/$id/event/list",
-                              "headerToolbar": [
+                "body": [
+                  {
+                    "type": "crud",
+                    "id": "recordCRUD",
+                    "name": "recordCRUD",
+                    "autoFillHeight": true,
+                    "api": "get:/admin/inspection/schedule/id/$id/record/list",
+                    "headerToolbar": [
+                      {
+                        "type": "columns-toggler",
+                        "align": "right",
+                        "draggable": true,
+                        "icon": "fas fa-cog",
+                        "overlay": true,
+                        "footerBtnSize": "sm"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "共${count}条",
+                        "align": "right",
+                        "visibleOn": "${count}"
+                      },
+                      {
+                        "type": "columns-toggler",
+                        "align": "left"
+                      },
+                      "reload"
+                    ],
+                    "loadDataOnce": true,
+                    "syncLocation": false,
+                    "initFetch": true,
+                    "perPage": 10,
+                    "columns": [
+                      {
+                        "type": "operation",
+                        "label": "操作",
+                        "width": 120,
+                        "buttons": [
+                          {
+                            "type": "button",
+                            "actionType": "drawer",
+                            "label": "查看明细",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "xl",
+                              "title": "查看巡检明细 (ESC 关闭)",
+                              "body": [
                                 {
-                                  "type": "columns-toggler",
-                                  "align": "right",
-                                  "draggable": true,
-                                  "icon": "fas fa-cog",
-                                  "overlay": true,
-                                  "footerBtnSize": "sm"
+                                  "type": "inspectionEventList",
+                                  "record_id": "${id}"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "button",
+                            "actionType": "drawer",
+                            "label": "运行输出",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "xl",
+                              "title": "查看脚本执行输出内容 (ESC 关闭)",
+                              "body": [
+                                {
+                                  "type": "alert",
+                                  "level": "info",
+                                  "body": "<strong>注意：</strong>该页面展示内容为对应规则脚本（lua）在运行时的标准输出、错误输出。"
                                 },
                                 {
-                                  "type": "tpl",
-                                  "tpl": "共${count}条",
-                                  "align": "right",
-                                  "visibleOn": "${count}"
-                                },
-                                {
-                                  "type": "columns-toggler",
-                                  "align": "left"
-                                },
-                                "reload"
-                              ],
-                              "loadDataOnce": true,
-                              "syncLocation": false,
-                              "initFetch": true,
-                              "perPage": 10,
-                              "columns": [
-                                {
-                                  "name": "kind",
-                                  "label": "类型"
-                                },
-                                {
-                                  "name": "event_status",
-                                  "label": "状态",
-                                  "type": "mapping",
-                                  "searchable": {
-                                    "type": "select",
-                                    "clearable": true,
-                                    "searchable": true,
-                                    "source": "/admin/inspection/event/status/option_list"
-                                  },
-                                  "map": {
-                                    "通过": "<span class='label label-success'>通过</span>",
-                                    "失败": "<span class='label label-warning'>失败</span>",
-                                    "*": "<span class='label label-warning'>${event_status}</span>"
-                                  }
-                                },
-                                {
-                                  "name": "cluster",
-                                  "label": "集群"
-                                },
-                                {
-                                  "name": "namespace",
-                                  "label": "命名空间"
-                                },
-                                {
-                                  "name": "name",
-                                  "label": "名称"
-                                },
-                                {
-                                  "name": "event_msg",
-                                  "label": "消息",
-                                  "type": "control",
-                                  "body": [
+                                  "type": "crud",
+                                  "id": "scriptOutputCRUD",
+                                  "name": "scriptOutputCRUD",
+                                  "autoFillHeight": true,
+                                  "api": "get:/admin/inspection/schedule/record/id/$id/output/list",
+                                  "headerToolbar": [
                                     {
-                                      "type": "tpl",
-                                      "tpl": "${event_msg}"
+                                      "type": "columns-toggler",
+                                      "align": "right",
+                                      "draggable": true,
+                                      "icon": "fas fa-cog",
+                                      "overlay": true,
+                                      "footerBtnSize": "sm"
                                     },
                                     {
-                                      "type": "button",
-                                      "label": "AI释义",
-                                      "level": "link",
-                                      "actionType": "drawer",
-                                      "drawer": {
-                                        "closeOnEsc": true,
-                                        "closeOnOutside": true,
-                                        "size": "lg",
-                                        "title": "AI释义",
-                                        "body": [
-                                          {
-                                            "type": "websocketMarkdownViewer",
-                                            "url": "/ai/chat/any_selection",
-                                            "params": {
-                                              "question": "请详细解读下面的集群巡检结果所代表的含义：${event_msg}。"
-                                            }
-                                          }
-                                        ]
-                                      }
+                                      "type": "tpl",
+                                      "tpl": "共${count}条",
+                                      "align": "right",
+                                      "visibleOn": "${count}"
+                                    },
+                                    {
+                                      "type": "columns-toggler",
+                                      "align": "left"
+                                    },
+                                    "reload"
+                                  ],
+                                  "loadDataOnce": true,
+                                  "syncLocation": false,
+                                  "initFetch": true,
+                                  "perPage": 10,
+                                  "columns": [
+                                    {
+                                      "name": "script_name",
+                                      "label": "规则名称"
+                                    },
+                                    {
+                                      "name": "cluster",
+                                      "label": "集群"
+                                    },
+                                    {
+                                      "name": "std_output",
+                                      "label": "标准输出"
+                                    },
+                                    {
+                                      "name": "error_msg",
+                                      "label": "错误输出",
+                                      "type": "control",
+                                      "body": [
+                                        {
+                                          "type": "tpl",
+                                          "tpl": "${error_msg?error_msg:''}"
+                                        },
+                                        {
+                                          "type": "button",
+                                          "label": "查",
+                                          "level": "link",
+                                          "actionType": "drawer",
+                                          "drawer": {
+                                            "closeOnEsc": true,
+                                            "closeOnOutside": true,
+                                            "size": "lg",
+                                            "title": "AI释义",
+                                            "body": [
+                                              {
+                                                "type": "websocketMarkdownViewer",
+                                                "url": "/ai/chat/any_selection",
+                                                "params": {
+                                                  "question": "请详细解读下面的集群巡检结果所代表的含义：${error_msg}。"
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          "visibleOn": "${error_msg}"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "start_time",
+                                      "label": "开始时间",
+                                      "type": "datetime"
+                                    },
+                                    {
+                                      "name": "end_time",
+                                      "label": "结束时间",
+                                      "type": "datetime"
                                     }
                                   ]
-                                },
-                                {
-                                  "name": "script_name",
-                                  "label": "脚本名称"
-                                },
-                                {
-                                  "name": "created_at",
-                                  "label": "创建时间",
-                                  "type": "datetime"
                                 }
                               ]
                             }
                           }
-                        },
-                        {
-                          "type": "button",
-                          "actionType": "drawer",
-                          "label": "运行输出",
-                          "drawer": {
-                            "closeOnEsc": true,
-                            "closeOnOutside": true,
-                            "size": "xl",
-                            "title": "查看脚本执行输出内容 (ESC 关闭)",
-                            "body": [
-                              {
-                                "type": "alert",
-                                "level": "info",
-                                "body": "<strong>注意：</strong>该页面展示内容为对应规则脚本（lua）在运行时的标准输出、错误输出。"
-                              },
-                              {
-                                "type": "crud",
-                                "id": "scriptOutputCRUD",
-                                "name": "scriptOutputCRUD",
-                                "autoFillHeight": true,
-                                "api": "get:/admin/inspection/schedule/record/id/$id/output/list",
-                                "headerToolbar": [
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "right",
-                                    "draggable": true,
-                                    "icon": "fas fa-cog",
-                                    "overlay": true,
-                                    "footerBtnSize": "sm"
-                                  },
-                                  {
-                                    "type": "tpl",
-                                    "tpl": "共${count}条",
-                                    "align": "right",
-                                    "visibleOn": "${count}"
-                                  },
-                                  {
-                                    "type": "columns-toggler",
-                                    "align": "left"
-                                  },
-                                  "reload"
-                                ],
-                                "loadDataOnce": true,
-                                "syncLocation": false,
-                                "initFetch": true,
-                                "perPage": 10,
-                                "columns": [
-                                  {
-                                    "name": "script_name",
-                                    "label": "规则名称"
-                                  },
-                                  {
-                                    "name": "cluster",
-                                    "label": "集群"
-                                  },
-                                  {
-                                    "name": "std_output",
-                                    "label": "标准输出"
-                                  },
-                                  {
-                                    "name": "error_msg",
-                                    "label": "错误输出",
-                                    "type": "control",
-                                    "body": [
-                                      {
-                                        "type": "tpl",
-                                        "tpl": "${error_msg?error_msg:''}"
-                                      },
-                                      {
-                                        "type": "button",
-                                        "label": "查",
-                                        "level": "link",
-                                        "actionType": "drawer",
-                                        "drawer": {
-                                          "closeOnEsc": true,
-                                          "closeOnOutside": true,
-                                          "size": "lg",
-                                          "title": "AI释义",
-                                          "body": [
-                                            {
-                                              "type": "websocketMarkdownViewer",
-                                              "url": "/ai/chat/any_selection",
-                                              "params": {
-                                                "question": "请详细解读下面的集群巡检结果所代表的含义：${error_msg}。"
-                                              }
-                                            }
-                                          ]
-                                        },
-                                        "visibleOn": "${error_msg}"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "name": "start_time",
-                                    "label": "开始时间",
-                                    "type": "datetime"
-                                  },
-                                  {
-                                    "name": "end_time",
-                                    "label": "结束时间",
-                                    "type": "datetime"
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "name": "id",
-                      "label": "ID",
-                      "type": "text"
-                    },
-                    {
-                      "name": "cluster",
-                      "label": "集群"
-                    },
-                    {
-                      "name": "trigger_type",
-                      "label": "触发类型"
-                    },
-                    {
-                      "name": "status",
-                      "label": "状态"
-                    },
-                    {
-                      "name": "error_count",
-                      "label": "错误数量"
-                    },
-                    {
-                      "name": "start_time",
-                      "label": "开始时间",
-                      "type": "datetime"
-                    },
-                    {
-                      "name": "end_time",
-                      "label": "结束时间",
-                      "type": "datetime"
-                    }
-                  ]
-                }
+                        ]
+                      },
+                      {
+                        "name": "id",
+                        "label": "ID",
+                        "type": "text"
+                      },
+                      {
+                        "name": "cluster",
+                        "label": "集群"
+                      },
+                      {
+                        "name": "trigger_type",
+                        "label": "触发类型"
+                      },
+                      {
+                        "name": "status",
+                        "label": "状态"
+                      },
+                      {
+                        "name": "error_count",
+                        "label": "错误数量"
+                      },
+                      {
+                        "name": "start_time",
+                        "label": "开始时间",
+                        "type": "datetime"
+                      },
+                      {
+                        "name": "end_time",
+                        "label": "结束时间",
+                        "type": "datetime"
+                      }
+                    ]
+                  }
+                ]
               }
             }
           ]

@@ -32,7 +32,8 @@ import HPAMetricsComponent from '@/components/Amis/custom/HPAMetrics';
 import HPABehaviorComponent from '@/components/Amis/custom/HPABehavior';
 import HelmUpdateRelease from '@/components/Amis/custom/Helm/HelmUpdateRealease.tsx';
 import K8sGPTComponent from '@/components/Amis/custom/K8sGPT';
-import InspectionSummaryComponent from '@/components/Amis/custom/InspectionSummary'
+import InspectionSummaryComponent from '@/components/Amis/custom/InspectionSummary.tsx'
+import InspectionEventListComponent from '@/components/Amis/custom/InspectionEventList.tsx'
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
@@ -79,6 +80,8 @@ registerRenderer({ type: 'helmUpdateRelease', component: HelmUpdateRelease })
 registerRenderer({ type: 'k8sGPT', component: K8sGPTComponent })
 //@ts-ignore
 registerRenderer({ type: 'inspectionSummary', component: InspectionSummaryComponent })
+//@ts-ignore
+registerRenderer({ type: 'inspectionEventList', component: InspectionEventListComponent })
 
 
 // 注册过滤器
