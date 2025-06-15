@@ -134,7 +134,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 120,
+          "width": 100,
           "buttons": [
             {
               "type": "button",
