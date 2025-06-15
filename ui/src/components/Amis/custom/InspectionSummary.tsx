@@ -45,9 +45,6 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
     const [cluster, setCluster] = useState<string | undefined>(undefined);
 
 
-    // 记录当前弹窗的过滤类型
-    type DrawerStatus = '全部' | '正常' | '失败';
-    const [drawerDefaultStatus, setDrawerDefaultStatus] = useState<DrawerStatus>('失败');
 
     let realScheduleId = ""
     // 处理 schedule_id 占位符
@@ -106,7 +103,6 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                 <span style={{ color: '#ff4d4f', cursor: 'pointer' }}
                     onClick={() => {
                         setDrawerRecordId(latest_run.record_id);
-                        setDrawerDefaultStatus('失败');
                         setDrawerOpen(true);
                     }}
                 >{text}</span>
@@ -223,7 +219,6 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
                                 <span style={{ marginRight: 8, cursor: 'pointer' }}
                                     onClick={() => {
                                         setDrawerRecordId(latest_run.record_id);
-                                        setDrawerDefaultStatus('全部');
                                         setDrawerOpen(true);
                                     }}
                                 >
