@@ -201,6 +201,33 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 首选建议通过修改环境变量方式进行修改。 例如增加deploy.yaml中的env参数
 
+
+### 开发调试
+如果你想在本地开发调试，请先执行一次本地前端构建，自动生成dist目录。因为本项目采用了二进制嵌入，没有dist前端会报错。
+#### 第一步编译前端
+```bash 
+cd ui
+pnpm run build
+```
+
+#### 编译调试后端
+```bash
+air
+#或者
+go run main.go 
+# 监听localhost:3618端口
+```
+
+#### 前端热加载
+```bash
+cd ui
+pnpm run dev
+#Vite服务会监听在localhost:3000端口
+#Vite转发后端访问到3618端口
+```
+访问http://localhost:3000
+
+
 ### HELP & SUPPORT
 
 如果你有任何进一步的问题或需要额外的帮助，请随时与我联系！
