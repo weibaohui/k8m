@@ -1,5 +1,7 @@
 package webhooksender
 
+import "fmt"
+
 // WebhookReceiver represents a user-defined webhook endpoint.
 type WebhookReceiver struct {
 	ID            uint
@@ -26,4 +28,21 @@ func NewFeishuReceiver(targetURL, signSecret string) *WebhookReceiver {
 		SignAlgo:      "feishu",
 		SignHeaderKey: "", // 飞书不需要 header 签名，是 URL 参数
 	}
+}
+
+// 校验 WebhookReceiver 配置合法性
+func (r *WebhookReceiver) Validate() error {
+	if r.Platform == "" {
+		return fmt.Errorf("platform is required")
+	}
+	if r.TargetURL == "" {
+		return fmt.Errorf("target url is required")
+	}
+	if r.Method == "" {
+		return fmt.Errorf("http method is required")
+	}
+	if r.Template == "" {
+		return fmt.Errorf("template is required")
+	}
+	return nil
 }

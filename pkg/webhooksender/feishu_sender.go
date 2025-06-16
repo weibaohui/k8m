@@ -37,13 +37,14 @@ func (f *FeishuSender) Send(event *InspectionCheckEvent, receiver *WebhookReceiv
 	// Add Feishu signature if enabled
 	finalURL := receiver.TargetURL
 	if receiver.SignAlgo == "feishu" && receiver.SignSecret != "" {
-		timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-		stringToSign := timestamp + "\n" + receiver.SignSecret
-		h := hmac.New(sha256.New, []byte(receiver.SignSecret))
-		h.Write([]byte(stringToSign))
-		signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
+		timestamp := time.Now().Unix()
+		timestampStr := strconv.FormatInt(timestamp, 10)
+		signature, err := GenSign(receiver.SignSecret, timestamp)
+		if err != nil {
+			return nil, err
+		}
 		params := url.Values{}
-		params.Set("timestamp", timestamp)
+		params.Set("timestamp", timestampStr)
 		params.Set("sign", signature)
 		finalURL = fmt.Sprintf("%s?%s", finalURL, params.Encode())
 	}
@@ -74,4 +75,16 @@ func (f *FeishuSender) Send(event *InspectionCheckEvent, receiver *WebhookReceiv
 		StatusCode: resp.StatusCode,
 		RespBody:   string(respBody),
 	}, nil
+}
+func GenSign(secret string, timestamp int64) (string, error) {
+	// timestamp + key 做sha256, 再进行base64 encode
+	stringToSign := fmt.Sprintf("%v", timestamp) + "\n" + secret
+	var data []byte
+	h := hmac.New(sha256.New, []byte(stringToSign))
+	_, err := h.Write(data)
+	if err != nil {
+		return "", err
+	}
+	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	return signature, nil
 }

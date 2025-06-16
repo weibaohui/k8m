@@ -1,5 +1,9 @@
 package webhooksender
 
+import (
+	"fmt"
+)
+
 // SendResult holds the result of a webhook send attempt.
 type SendResult struct {
 	Status     string // success / failed
@@ -22,9 +26,10 @@ func RegisterSender(platform string, sender Sender) {
 }
 
 // GetSender returns the appropriate sender.
-func GetSender(platform string) Sender {
+// 若找不到平台，返回 nil 并建议调用方处理异常
+func GetSender(platform string) (Sender, error) {
 	if s, ok := senderRegistry[platform]; ok {
-		return s
+		return s, nil
 	}
-	return &DefaultSender{}
+	return nil, fmt.Errorf("webhook sender for platform '%s' not found", platform)
 }

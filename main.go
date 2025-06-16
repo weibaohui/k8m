@@ -537,6 +537,7 @@ func main() {
 		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
 		admin.POST("/inspection/schedule/id/:id/summary", inspection.SummaryBySchedule)
 		admin.POST("/inspection/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", inspection.SummaryBySchedule)
+		admin.POST("/inspection/test_send", inspection.Push)
 
 		// 集群巡检脚本
 		admin.GET("/inspection/script/list", inspection.LuaScriptList)
