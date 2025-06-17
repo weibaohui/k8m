@@ -203,3 +203,63 @@ func SummaryBySchedule(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, result)
 }
+
+// SummaryByRecord 汇总指定巡检记录的规则总数与失败数
+func SummaryByRecord(c *gin.Context) {
+	recordIDStr := c.Param("id")
+	if recordIDStr == "" {
+		amis.WriteJsonError(c, fmt.Errorf("缺少 record_id 参数"))
+		return
+	}
+	recordID := utils.ToUInt(recordIDStr)
+	if recordID == 0 {
+		amis.WriteJsonError(c, fmt.Errorf("record_id 参数无效"))
+		return
+	}
+
+	// 1. 查询 InspectionRecord
+	recordModel := &models.InspectionRecord{}
+	record, err := recordModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", recordID)
+	})
+	if err != nil || record == nil || record.ID == 0 {
+		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检记录: %v", err))
+		return
+	}
+	if record.ScheduleID == nil {
+		amis.WriteJsonError(c, fmt.Errorf("该巡检记录未关联巡检计划"))
+		return
+	}
+
+	// 2. 查询 InspectionSchedule
+	scheduleModel := &models.InspectionSchedule{}
+	schedule, err := scheduleModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", *record.ScheduleID)
+	})
+	if err != nil || schedule == nil || schedule.ID == 0 {
+		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检计划: %v", err))
+		return
+	}
+
+	// 3. 统计规则数
+	scriptCodes := utils.SplitAndTrim(schedule.ScriptCodes, ",")
+	totalRules := len(scriptCodes)
+
+	// 4. 统计失败数
+	eventModel := &models.InspectionCheckEvent{}
+	failCount := 0
+	events, _, err := eventModel.List(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("record_id = ? AND event_status = ?", recordID, "失败")
+	})
+	if err == nil {
+		failCount = len(events)
+	}
+
+	result := gin.H{
+		"record_id":   recordID,
+		"schedule_id": record.ScheduleID,
+		"total_rules": totalRules,
+		"failed_rules": failCount,
+	}
+	amis.WriteJsonData(c, result)
+}
