@@ -528,8 +528,9 @@ func main() {
 		// 集群巡检计划配置
 		admin.GET("/inspection/schedule/list", inspection.List)
 		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
-		admin.GET("inspection/schedule/record/id/:id/event/list", inspection.EventList)
-		admin.GET("inspection/schedule/record/id/:id/output/list", inspection.OutputList)
+		admin.GET("/inspection/schedule/record/id/:id/event/list", inspection.EventList)
+		admin.POST("/inspection/schedule/record/id/:id/summary", inspection.SummaryByRecord)
+		admin.GET("/inspection/schedule/record/id/:id/output/list", inspection.OutputList)
 		admin.POST("/inspection/schedule/save", inspection.Save)
 		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)

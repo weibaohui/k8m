@@ -1,6 +1,7 @@
 package inspection
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -217,51 +219,11 @@ func SummaryByRecord(c *gin.Context) {
 		return
 	}
 
-	// 1. 查询 InspectionRecord
-	recordModel := &models.InspectionRecord{}
-	record, err := recordModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
-		return db.Where("id = ?", recordID)
-	})
+	sb := lua.ScheduleBackground{}
+	summary, err := sb.SummaryByAI(context.Background(), &recordID)
 	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检记录: %v", err))
+		amis.WriteJsonError(c, err)
 		return
 	}
-
-	if record.ScheduleID == nil {
-		amis.WriteJsonError(c, fmt.Errorf("该巡检记录未关联巡检计划"))
-		return
-	}
-
-	// 2. 查询 InspectionSchedule
-	scheduleModel := &models.InspectionSchedule{}
-	schedule, err := scheduleModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
-		return db.Where("id = ?", *record.ScheduleID)
-	})
-	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检计划: %v", err))
-		return
-	}
-
-	// 3. 统计规则数
-	scriptCodes := utils.SplitAndTrim(schedule.ScriptCodes, ",")
-	totalRules := len(scriptCodes)
-
-	// 4. 统计失败数
-	eventModel := &models.InspectionCheckEvent{}
-	failCount := 0
-	events, _, err := eventModel.List(nil, func(db *gorm.DB) *gorm.DB {
-		return db.Where("record_id = ? AND event_status = ?", recordID, constants.LuaEventStatusFailed)
-	})
-	if err == nil {
-		failCount = len(events)
-	}
-
-	result := gin.H{
-		"record_id":    recordID,
-		"schedule_id":  record.ScheduleID,
-		"total_rules":  totalRules,
-		"failed_rules": failCount,
-		"failed_list":  events,
-	}
-	amis.WriteJsonData(c, result)
+	amis.WriteJsonData(c, summary)
 }

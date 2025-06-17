@@ -337,6 +337,13 @@
                         "buttons": [
                           {
                             "type": "button",
+                            "icon": "fas fa-play text-primary",
+                            "actionType": "ajax",
+                            "tooltip": "执行总结",
+                            "api": "post:/admin/inspection/schedule/record/id/$id/summary"
+                          },
+                          {
+                            "type": "button",
                             "actionType": "drawer",
                             "label": "查看明细",
                             "drawer": {

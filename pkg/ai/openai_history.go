@@ -11,36 +11,35 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func (c *OpenAIClient) SaveAIHistory(ctx context.Context, contents string) {
+// getUsernameFromContext 从 context.Context 提取 JwtUserName 字段的用户名，若获取失败则返回默认用户名
+func getUsernameFromContext(ctx context.Context) string {
 	val := ctx.Value(constants.JwtUserName)
-	if username, ok := val.(string); ok {
-		c.memory.AppendUserHistory(username, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleAssistant,
-			Content: contents,
-		})
-	} else {
-		klog.Warningf("SaveAIHistory content but user not found: %s", contents)
+	username, ok := val.(string)
+	if !ok || username == "" {
+		return "default_user"
 	}
+	return username
+}
+
+func (c *OpenAIClient) SaveAIHistory(ctx context.Context, contents string) {
+	username := getUsernameFromContext(ctx)
+	c.memory.AppendUserHistory(username, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleAssistant,
+		Content: contents,
+	})
 }
 
 func (c *OpenAIClient) GetHistory(ctx context.Context) []openai.ChatCompletionMessage {
-	val := ctx.Value(constants.JwtUserName)
-	if username, ok := val.(string); ok {
-		return c.memory.GetUserHistory(username)
-	}
-	return make([]openai.ChatCompletionMessage, 0)
-
+	username := getUsernameFromContext(ctx)
+	return c.memory.GetUserHistory(username)
 }
 
 func (c *OpenAIClient) ClearHistory(ctx context.Context) error {
-	val := ctx.Value(constants.JwtUserName)
-	if username, ok := val.(string); ok {
-		c.memory.ClearUserHistory(username)
-	}
+	username := getUsernameFromContext(ctx)
+	c.memory.ClearUserHistory(username)
 	return nil
 }
 func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
-
 	history := c.GetHistory(ctx)
 	for _, content := range contents {
 		switch item := content.(type) {
@@ -106,7 +105,7 @@ func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
 		// 将系统消息插入到历史记录最前面
 		history = append([]openai.ChatCompletionMessage{sysMsg}, history...)
 	}
-	username := ctx.Value(constants.JwtUserName).(string)
+	username := getUsernameFromContext(ctx)
 	c.memory.SetUserHistory(username, history)
 
 }
