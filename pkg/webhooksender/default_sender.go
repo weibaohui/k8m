@@ -5,7 +5,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"html/template"
 	"io"
 	"net/http"
 	"time"
@@ -18,17 +17,9 @@ func (d *DefaultSender) Name() string {
 	return "default"
 }
 
-func (d *DefaultSender) Send(event *InspectionCheckEvent, receiver *WebhookReceiver) (*SendResult, error) {
-	tmpl, err := template.New("payload").Parse(receiver.Template)
-	if err != nil {
-		return nil, err
-	}
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, event); err != nil {
-		return nil, err
-	}
+func (d *DefaultSender) Send(msg string, receiver *WebhookReceiver) (*SendResult, error) {
 
-	req, err := http.NewRequest(receiver.Method, receiver.TargetURL, bytes.NewReader(buf.Bytes()))
+	req, err := http.NewRequest(receiver.Method, receiver.TargetURL, bytes.NewReader([]byte(msg)))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +30,7 @@ func (d *DefaultSender) Send(event *InspectionCheckEvent, receiver *WebhookRecei
 
 	if receiver.SignAlgo == "hmac-sha256" && receiver.SignSecret != "" {
 		h := hmac.New(sha256.New, []byte(receiver.SignSecret))
-		h.Write(buf.Bytes())
+		h.Write([]byte(msg))
 		signature := hex.EncodeToString(h.Sum(nil))
 		req.Header.Set(receiver.SignHeaderKey, signature)
 	}

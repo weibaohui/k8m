@@ -14,7 +14,7 @@ type SendResult struct {
 // Sender defines the webhook adapter interface.
 type Sender interface {
 	Name() string
-	Send(event *InspectionCheckEvent, receiver *WebhookReceiver) (*SendResult, error)
+	Send(msg string, receiver *WebhookReceiver) (*SendResult, error)
 }
 
 // senderRegistry holds all registered senders.

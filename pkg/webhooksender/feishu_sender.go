@@ -5,8 +5,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"net/url"
@@ -21,18 +21,7 @@ func (f *FeishuSender) Name() string {
 	return "feishu"
 }
 
-func (f *FeishuSender) Send(event *InspectionCheckEvent, receiver *WebhookReceiver) (*SendResult, error) {
-	// Render content
-	tmpl, err := template.New("payload").Parse(receiver.Template)
-	if err != nil {
-		return nil, err
-	}
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, event); err != nil {
-		return nil, err
-	}
-
-	body := buf.Bytes()
+func (f *FeishuSender) Send(msg string, receiver *WebhookReceiver) (*SendResult, error) {
 
 	// Add Feishu signature if enabled
 	finalURL := receiver.TargetURL
@@ -48,8 +37,17 @@ func (f *FeishuSender) Send(event *InspectionCheckEvent, receiver *WebhookReceiv
 		params.Set("sign", signature)
 		finalURL = fmt.Sprintf("%s?%s", finalURL, params.Encode())
 	}
-
-	req, err := http.NewRequest("POST", finalURL, bytes.NewReader(body))
+	payload := map[string]interface{}{
+		"msg_type": "text",
+		"content": map[string]string{
+			"text": msg,
+		},
+	}
+	msgBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("POST", finalURL, bytes.NewReader(msgBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +56,7 @@ func (f *FeishuSender) Send(event *InspectionCheckEvent, receiver *WebhookReceiv
 		req.Header.Set(k, v)
 	}
 
-	client := &http.Client{Timeout: 5 * time.Second}
+	client := &http.Client{Timeout: 60 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return &SendResult{Status: "failed"}, err

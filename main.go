@@ -530,6 +530,7 @@ func main() {
 		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
 		admin.GET("/inspection/schedule/record/id/:id/event/list", inspection.EventList)
 		admin.POST("/inspection/schedule/record/id/:id/summary", inspection.SummaryByRecord)
+		admin.POST("/inspection/schedule/record/id/:id/push", inspection.Push)
 		admin.GET("/inspection/schedule/record/id/:id/output/list", inspection.OutputList)
 		admin.POST("/inspection/schedule/save", inspection.Save)
 		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
@@ -538,7 +539,6 @@ func main() {
 		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
 		admin.POST("/inspection/schedule/id/:id/summary", inspection.SummaryBySchedule)
 		admin.POST("/inspection/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", inspection.SummaryBySchedule)
-		admin.POST("/inspection/test_send", inspection.Push)
 
 		// 集群巡检脚本
 		admin.GET("/inspection/script/list", inspection.LuaScriptList)

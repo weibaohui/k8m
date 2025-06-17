@@ -282,13 +282,6 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-bell text-primary",
-              "actionType": "ajax",
-              "tooltip": "测试webhook",
-              "api": "post:/admin/inspection/test_send"
-            },
-            {
-              "type": "button",
               "icon": "fas fa-history text-primary",
               "actionType": "drawer",
               "tooltip": "巡检历史记录",
@@ -464,6 +457,13 @@
                                 }
                               ]
                             }
+                          },
+                          {
+                            "type": "button",
+                            "icon": "fas fa-bell text-primary",
+                            "actionType": "ajax",
+                            "tooltip": "测试webhook",
+                            "api": "post:/admin/inspection/schedule/record/id/$id/push"
                           }
                         ]
                       },

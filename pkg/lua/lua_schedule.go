@@ -129,8 +129,8 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		return db.Select("last_run_time", "error_count")
 	})
 
-	_, _ = s.SummaryByAI(context.Background(), record.ID)
-
+	// TODO 记录发送结果
+	_, _ = s.SummaryAndPushToHooksByRecordID(context.Background(), record.ID)
 	return record, nil
 }
 

@@ -7,7 +7,7 @@ import (
 )
 
 // PushEvent sends the event to a list of receivers (并发推送)
-func PushEvent(event *InspectionCheckEvent, receivers []*WebhookReceiver) []SendResult {
+func PushEvent(msg string, receivers []*WebhookReceiver) []SendResult {
 	results := make([]SendResult, len(receivers))
 	var wg sync.WaitGroup
 	for i, r := range receivers {
@@ -20,7 +20,7 @@ func PushEvent(event *InspectionCheckEvent, receivers []*WebhookReceiver) []Send
 				results[idx] = SendResult{Status: "failed", RespBody: err.Error()}
 				return
 			}
-			res, err := sender.Send(event, receiver)
+			res, err := sender.Send(msg, receiver)
 			if err != nil {
 				results[idx] = SendResult{Status: "failed", RespBody: err.Error()}
 			} else {

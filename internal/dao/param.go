@@ -18,6 +18,14 @@ type Params struct {
 
 }
 
+// BuildDefaultParams 从 gin.Context 中获取默认的分页和排序参数
+func BuildDefaultParams() *Params {
+	// 返回 Params 结构体
+	return &Params{
+		PerPage: 1000000,
+	}
+}
+
 // BuildParams 从 gin.Context 中获取分页和排序参数
 func BuildParams(c *gin.Context) *Params {
 	// 获取排序字段，默认为 "id"

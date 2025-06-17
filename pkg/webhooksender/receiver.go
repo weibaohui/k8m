@@ -4,8 +4,6 @@ import "fmt"
 
 // WebhookReceiver represents a user-defined webhook endpoint.
 type WebhookReceiver struct {
-	ID            uint
-	UserID        uint
 	Platform      string
 	TargetURL     string
 	Method        string

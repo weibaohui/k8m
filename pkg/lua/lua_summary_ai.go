@@ -13,7 +13,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint) (string, error) {
+// SummaryByAI
+// 参数：format 自定义格式
+func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint, format string) (string, error) {
 
 	// 1. 查询 InspectionRecord
 	recordModel := &models.InspectionRecord{}
@@ -47,6 +49,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint) (st
 	events, _, err := eventModel.List(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("record_id = ? AND event_status = ?", recordID, constants.LuaEventStatusFailed)
 	})
+
 	if err == nil {
 		failCount = len(events)
 	}
@@ -61,27 +64,38 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint) (st
 		"failed_list":  events,
 	}
 	summary := ""
-	if service.AIService().IsEnabled() {
-		prompt := `下面是k8s集群巡检记录，请你进行总结，字数控制在200字以内。
-		请按下面的格式给出汇总：
+
+	defaultFormat := `
+	请按下面的格式给出汇总：
 		检测集群：xxx名称
 		执行规则数：x个
 		问题数：x个
 		时间：月日时间
 		总结：简短汇总
-		
+	`
+	if format != "" {
+		defaultFormat = format
+	}
+	if service.AIService().IsEnabled() {
+		prompt := `下面是k8s集群巡检记录，请你进行总结，字数控制在200字以内。
+		%s
 		要求：
 		1、仅做汇总，不要解释
 		2、不需要解决方案。
 		3、可以合理使用表情符号。
 		以下是JSON格式的巡检结果：
-		` + utils.ToJSON(result)
+		%s
+		`
+		prompt = fmt.Sprintf(prompt, defaultFormat, utils.ToJSON(result))
 		summary = service.ChatService().ChatWithCtx(ctx, prompt)
 
 	} else {
 		summary = "AI功能未开启"
 	}
 	record.AISummary = summary
-	dao.DB().Model(&record).Select("ai_summary").Updates(record)
+	err = dao.DB().Model(&record).Select("ai_summary").Updates(record).Error
+	if err != nil {
+		return "", fmt.Errorf("<UNK>: %v", err)
+	}
 	return summary, nil
 }
