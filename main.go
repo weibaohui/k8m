@@ -506,7 +506,7 @@ func main() {
 		mgm.GET("/log/shell/list", log.ListShell)
 		mgm.GET("/log/operation/list", log.ListOperation)
 		// 集群连接
-		mgm.POST("/cluster/:cluster/reconnect", cluster.Reconnect)
+		cluster.RegisterUserClusterRoutes(mgm)
 
 	}
 
@@ -561,12 +561,7 @@ func main() {
 		// 用户组管理相关
 		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
-		admin.POST("/cluster/scan", cluster.Scan)
-		admin.GET("/cluster/file/option_list", cluster.FileOptionList)
-		admin.POST("/cluster/kubeconfig/save", cluster.SaveKubeConfig)
-		admin.POST("/cluster/kubeconfig/remove", cluster.RemoveKubeConfig)
-		// 断开集群，断开后所有人都不可用
-		admin.POST("/cluster/:cluster/disconnect", cluster.Disconnect)
+		cluster.RegisterAdminClusterRoutes(admin)
 
 	}
 

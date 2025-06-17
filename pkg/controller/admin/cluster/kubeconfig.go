@@ -12,7 +12,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func SaveKubeConfig(c *gin.Context) {
+func (a *AdminClusterController) SaveKubeConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.KubeConfig{}
@@ -74,7 +74,7 @@ func SaveKubeConfig(c *gin.Context) {
 	// 初始化本项目中的回调
 	amis.WriteJsonOK(c)
 }
-func RemoveKubeConfig(c *gin.Context) {
+func (a *AdminClusterController) RemoveKubeConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.KubeConfig{}

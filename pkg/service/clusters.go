@@ -185,8 +185,8 @@ func (c *clusterService) Connect(clusterID string) {
 	klog.V(4).Infof("连接集群 %s 开始", clusterID)
 	// 先清除原来的状态
 	cc := c.GetClusterByID(clusterID)
-	if cc != nil {
-		klog.V(4).Infof("Connect 发现原集群，清理集群 %s  原始信息", clusterID)
+	if cc != nil && !(cc.ClusterConnectStatus == constants.ClusterConnectStatusConnected || cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting) {
+		klog.V(4).Infof("Connect 发现原集群,非连接中，非已连接状态，清理集群 %s  原始信息", clusterID)
 		cc.ServerVersion = ""
 		cc.restConfig = nil
 		cc.Err = ""
