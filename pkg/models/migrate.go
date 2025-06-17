@@ -190,10 +190,9 @@ func AddInnerMCPServer() error {
 	// 如果不存在，添加默认的内部MCP服务器配置
 	if count == 0 {
 		config := &MCPServerConfig{
-			Name:      "k8m",
-			URL:       fmt.Sprintf("http://localhost:%d/mcp/k8m/sse", cfg.Port),
-			Enabled:   false,
-			CreatedBy: "system",
+			Name:    "k8m",
+			URL:     fmt.Sprintf("http://localhost:%d/mcp/k8m/sse", cfg.Port),
+			Enabled: false,
 		}
 		if err := dao.DB().Create(config).Error; err != nil {
 			klog.Errorf("添加内部MCP服务器配置失败: %v", err)
@@ -283,7 +282,6 @@ func AddInnerAdminUser() error {
 			Salt:       "grfi92rq",
 			Password:   "8RGCXWw6IzgKDPyeFKt6Kw==",
 			GroupNames: "平台管理员组",
-			CreatedBy:  "system",
 		}
 		if err := dao.DB().Create(config).Error; err != nil {
 			klog.Errorf("添加默认平台管理员账户失败: %v", err)
@@ -310,7 +308,6 @@ func AddInnerAdminUserGroup() error {
 		config := &UserGroup{
 			GroupName: "平台管理员组",
 			Role:      "platform_admin",
-			CreatedBy: "system",
 		}
 		if err := dao.DB().Create(config).Error; err != nil {
 			klog.Errorf("添加默认平台管理员组失败: %v", err)

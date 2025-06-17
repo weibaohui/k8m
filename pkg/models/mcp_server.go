@@ -16,7 +16,6 @@ type MCPServerConfig struct {
 	Enabled   bool      `gorm:"default:false" json:"enabled,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	CreatedBy string    `gorm:"index" json:"created_by,omitempty"`
 }
 
 func (c *MCPServerConfig) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*MCPServerConfig, int64, error) {

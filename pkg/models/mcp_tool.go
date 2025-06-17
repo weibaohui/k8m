@@ -18,7 +18,6 @@ type MCPTool struct {
 	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`      // 是否启用
 	CreatedAt   time.Time `json:"created_at,omitempty"`                       // 创建时间
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`                       // 更新时间
-	CreatedBy   string    `json:"created_by,omitempty"`                       // 创建者
 }
 
 func (c *MCPTool) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*MCPTool, int64, error) {

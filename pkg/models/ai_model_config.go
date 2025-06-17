@@ -22,8 +22,6 @@ type AIModelConfig struct {
 	Description string    `json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
-	CreatedBy   string    `json:"created_by,omitempty"` // 创建者
-
 }
 
 func (c *AIModelConfig) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*AIModelConfig, int64, error) {
