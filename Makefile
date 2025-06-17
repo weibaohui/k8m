@@ -16,6 +16,10 @@ MODEL ?= "Qwen/Qwen2.5-7B-Instruct"
 
 # 获取当前 Git commit 的简短哈希
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD)
+GIT_TAG ?= "main" 
+GIT_REPOSITORY ?= "https://github.com/weibaohui/k8m" 
+BUILD_DATE ?= $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+
 
 # 定义需要编译的平台和架构
 # 格式为 GOOS/GOARCH
@@ -90,6 +94,8 @@ build-all:
         echo "文件已打包: $$ZIP_FILE"; \
 		rm -f "$$OUTPUT_FILE"; \
 	done
+
+
 
 # 为所有指定的平台和架构构建可执行文件
 .PHONY: build-linux

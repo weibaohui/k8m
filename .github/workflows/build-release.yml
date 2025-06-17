@@ -2,7 +2,7 @@ name: build and push binary to release
 
 on:
   release:
-    types: [ created, published ] # 表示在创建新的 Release 时触发
+    types: [created, published] # 表示在创建新的 Release 时触发
 env:
   OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
   OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 18 ]
+        node-version: [18]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -47,9 +47,12 @@ jobs:
         with:
           install-only: true
 
+      - name: Set build time variable
+        run: echo "BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+
       - name: 编译后端
         run: |
-          make build-all VERSION=${{ env.GITHUB_REF_NAME }} MODEL=${{ env.OPENAI_API_MODEL }} API_KEY=${{ secrets.OPENAI_API_KEY }} API_URL=${{ env.OPENAI_API_URL }}
+          make build-all GIT_COMMIT=${{ github.sha }} GIT_TAG=${{ github.ref_name }} GIT_REPOSITORY=${{ github.repository }} BUILD_DATE=${{ env.BUILD_TIME }} VERSION=${{ env.GITHUB_REF_NAME }} MODEL=${{ env.OPENAI_API_MODEL }} API_KEY=${{ secrets.OPENAI_API_KEY }} API_URL=${{ env.OPENAI_API_URL }}
 
       - name: 上传二进制
         uses: svenstaro/upload-release-action@v2
