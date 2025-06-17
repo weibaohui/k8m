@@ -222,10 +222,11 @@ func SummaryByRecord(c *gin.Context) {
 	record, err := recordModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", recordID)
 	})
-	if err != nil || record == nil || record.ID == 0 {
+	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检记录: %v", err))
 		return
 	}
+
 	if record.ScheduleID == nil {
 		amis.WriteJsonError(c, fmt.Errorf("该巡检记录未关联巡检计划"))
 		return
@@ -236,7 +237,7 @@ func SummaryByRecord(c *gin.Context) {
 	schedule, err := scheduleModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", *record.ScheduleID)
 	})
-	if err != nil || schedule == nil || schedule.ID == 0 {
+	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检计划: %v", err))
 		return
 	}
@@ -249,17 +250,18 @@ func SummaryByRecord(c *gin.Context) {
 	eventModel := &models.InspectionCheckEvent{}
 	failCount := 0
 	events, _, err := eventModel.List(nil, func(db *gorm.DB) *gorm.DB {
-		return db.Where("record_id = ? AND event_status = ?", recordID, "失败")
+		return db.Where("record_id = ? AND event_status = ?", recordID, constants.LuaEventStatusFailed)
 	})
 	if err == nil {
 		failCount = len(events)
 	}
 
 	result := gin.H{
-		"record_id":   recordID,
-		"schedule_id": record.ScheduleID,
-		"total_rules": totalRules,
+		"record_id":    recordID,
+		"schedule_id":  record.ScheduleID,
+		"total_rules":  totalRules,
 		"failed_rules": failCount,
+		"failed_list":  events,
 	}
 	amis.WriteJsonData(c, result)
 }
