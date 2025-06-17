@@ -128,7 +128,9 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	_ = schedule.Save(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Select("last_run_time", "error_count")
 	})
-	
+
+	_, _ = s.SummaryByAI(context.Background(), record.ID)
+
 	return record, nil
 }
 

@@ -220,7 +220,7 @@ func SummaryByRecord(c *gin.Context) {
 	}
 
 	sb := lua.ScheduleBackground{}
-	summary, err := sb.SummaryByAI(context.Background(), &recordID)
+	summary, err := sb.SummaryByAI(context.Background(), recordID)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

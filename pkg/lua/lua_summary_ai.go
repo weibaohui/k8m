@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -12,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID *uint) (string, error) {
+func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint) (string, error) {
 
 	// 1. 查询 InspectionRecord
 	recordModel := &models.InspectionRecord{}
@@ -59,6 +60,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID *uint) (s
 		"failed_rules": failCount,
 		"failed_list":  events,
 	}
+	summary := ""
 	if service.AIService().IsEnabled() {
 		prompt := `下面是k8s集群巡检记录，请你进行总结，字数控制在200字以内。
 		请按下面的格式给出汇总：
@@ -74,8 +76,12 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID *uint) (s
 		3、可以合理使用表情符号。
 		以下是JSON格式的巡检结果：
 		` + utils.ToJSON(result)
-		summary := service.ChatService().ChatWithCtx(ctx, prompt)
-		return summary, nil
+		summary = service.ChatService().ChatWithCtx(ctx, prompt)
+
+	} else {
+		summary = "AI功能未开启"
 	}
-	return "", nil
+	record.AISummary = summary
+	dao.DB().Model(&record).Select("ai_summary").Updates(record)
+	return summary, nil
 }

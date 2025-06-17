@@ -337,9 +337,8 @@
                         "buttons": [
                           {
                             "type": "button",
-                            "icon": "fas fa-play text-primary",
                             "actionType": "ajax",
-                            "tooltip": "执行总结",
+                            "label": "AI总结",
                             "api": "post:/admin/inspection/schedule/record/id/$id/summary"
                           },
                           {
@@ -488,6 +487,11 @@
                       {
                         "name": "error_count",
                         "label": "错误数量"
+                      },
+                      {
+                        "name": "ai_summary",
+                        "label": "AI总结",
+                        "width": "250px"
                       },
                       {
                         "name": "start_time",
