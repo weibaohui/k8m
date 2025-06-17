@@ -21,7 +21,6 @@ type SSOConfig struct {
 	Scopes             string    `gorm:"type:text;" json:"scopes,omitempty"`                // 授权范围
 	CreatedAt          time.Time `json:"created_at,omitempty"`                              // 创建时间
 	UpdatedAt          time.Time `json:"updated_at,omitempty"`                              // 更新时间
-	CreatedBy          string    `json:"created_by,omitempty"`
 }
 
 // List 列出所有记录
