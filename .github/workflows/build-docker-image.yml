@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    types: [ created, published ] # 表示在创建新的 Release 时触发
+    types: [created, published] # 表示在创建新的 Release 时触发
 
   # Allows you to run this workflow manually from the Actions tab
   # 可以手动触发
@@ -29,12 +29,13 @@ env:
   IMAGE_REPONAME: k8m
   OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
   OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
+
 jobs:
   buildx:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 18 ]
+        node-version: [18]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -93,6 +94,14 @@ jobs:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 镜像推送到 ghcr 仓库
+      - name: Login to the ghcr Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
       # 镜像推送到 阿里云仓库
       - name: Login to the Ali Registry
         uses: docker/login-action@v2
@@ -119,6 +128,9 @@ jobs:
             ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_IMAGE_REPONAME }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
             ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_IMAGE_REPONAME }}/${{ env.IMAGE_REPONAME }}:latest
             ${{ env.ALIHUB_URL }}/${{ env.ALIHUB_IMAGE_REPONAME }}/${{ env.IMAGE_REPONAME }}:${{ steps.date.outputs.today }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_REPONAME }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_REPONAME }}:${{ steps.date.outputs.today }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_REPONAME }}:${{ env.GITHUB_REF_NAME }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             GIT_TAG=${{ github.ref_name }}
