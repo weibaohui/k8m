@@ -3,6 +3,7 @@ package lua
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -10,11 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint) ([]webhooksender.SendResult, error) {
-
+func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhooks string) ([]webhooksender.SendResult, error) {
 	// 查询webhooks
 	hookModel := &models.WebhookReceiver{}
-	hooks, _, err := hookModel.List(dao.BuildDefaultParams())
+	hooks, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
+		return db.Where("id in ?", strings.Split(webhooks, ","))
+	})
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}

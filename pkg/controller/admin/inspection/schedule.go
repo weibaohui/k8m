@@ -220,7 +220,7 @@ func Start(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	func() {
+	go func() {
 		sb := lua.ScheduleBackground{}
 		clusters := strings.Split(one.Clusters, ",")
 		for _, cluster := range clusters {
