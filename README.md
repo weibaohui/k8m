@@ -247,4 +247,4 @@ pnpm run dev
 
 ## 微信群
 
-![输入图片说明](https://foruda.gitee.com/images/1749651093705366543/65185242_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1750260119732715094/a1ed9e5b_77493.png "屏幕截图")
