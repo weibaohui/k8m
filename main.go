@@ -539,14 +539,12 @@ func main() {
 		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
 		admin.POST("/inspection/schedule/id/:id/summary", inspection.SummaryBySchedule)
 		admin.POST("/inspection/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", inspection.SummaryBySchedule)
-
-		// 集群巡检脚本
-		admin.GET("/inspection/script/list", inspection.LuaScriptList)
-		admin.POST("/inspection/script/delete/:ids", inspection.LuaScriptDelete)
-		admin.POST("/inspection/script/save", inspection.LuaScriptSave)
-		admin.POST("/inspection/script/load", inspection.LuaScriptLoad)
-		admin.GET("/inspection/script/option_list", inspection.LuaScriptOptionList)
 		admin.GET("/inspection/event/status/option_list", inspection.EventStatusOptionList)
+
+		// 集群巡检脚本lua脚本管理
+		inspection.RegisterAdminLuaScriptRoutes(admin)
+		// 集群巡检webhook管理
+		inspection.RegisterAdminWebhookRoutes(admin)
 
 		// 平台参数配置
 		admin.GET("/config/all", config.GetConfig)
