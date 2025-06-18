@@ -6,6 +6,7 @@
             "id": "recordCRUD",
             "name": "recordCRUD",
             "autoFillHeight": true,
+            "autoGenerateFilter": true,
             "api": "get:/admin/inspection/record/list",
             "headerToolbar": [
                 {
@@ -186,7 +187,8 @@
                     "name": "schedule_id",
                     "label": "计划ID",
                     "type": "text",
-                    "width": "100px"
+                    "width": "100px",
+                    "searchable": true
                 },
                 {
                     "name": "cluster",
