@@ -254,7 +254,7 @@
             {
               "type": "button",
               "icon": "fas fa-list text-primary",
-              "tooltip": "执行规则",
+              "tooltip": "管理规则",
               "actionType": "drawer",
               "drawer": {
                 "closeOnEsc": true,
@@ -342,7 +342,7 @@
                       },
                       "reload"
                     ],
-                    "loadDataOnce": true,
+                    "loadDataOnce": false,
                     "syncLocation": false,
                     "initFetch": true,
                     "perPage": 10,
@@ -484,9 +484,8 @@
                           },
                           {
                             "type": "button",
-                            "icon": "fas fa-bell text-primary",
                             "actionType": "ajax",
-                            "tooltip": "测试webhook",
+                            "label": "发送webhook",
                             "api": "post:/admin/inspection/schedule/record/id/$id/push"
                           }
                         ]

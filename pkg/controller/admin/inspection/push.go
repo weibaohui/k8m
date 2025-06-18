@@ -2,6 +2,7 @@ package inspection
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -34,10 +35,21 @@ func Push(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检记录: %v", err))
 		return
 	}
+	// 2. 查询 Schedule，查找webhook
+	schedule := &models.InspectionSchedule{}
+	schedule, err = schedule.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", record.ScheduleID)
+	})
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("未找到对应的巡检计划: %v", err))
+		return
+	}
 
-	// 查询webhooks
+	// 3. 查询webhooks
 	hookModel := &models.WebhookReceiver{}
-	hooks, _, err := hookModel.List(dao.BuildDefaultParams())
+	hooks, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
+		return db.Where("id in ?", strings.Split(schedule.Webhooks, ","))
+	})
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("查询webhooks失败: %v", err))
 		return

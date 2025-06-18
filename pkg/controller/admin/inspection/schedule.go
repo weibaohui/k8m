@@ -29,11 +29,11 @@ func List(c *gin.Context) {
 }
 func RecordList(c *gin.Context) {
 	params := dao.BuildParams(c)
-	params.PerPage = 10000
 
+	m := &models.InspectionRecord{}
 	id := c.Param("id")
-	m := &models.InspectionRecord{
-		ScheduleID: utils.UintPtr(utils.ToUInt(id)),
+	if id != "" {
+		m.ScheduleID = utils.UintPtr(utils.ToUInt(id))
 	}
 
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
