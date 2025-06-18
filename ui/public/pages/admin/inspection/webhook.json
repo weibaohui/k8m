@@ -22,72 +22,113 @@
                         "size": "md",
                         "title": "新建Webhook (ESC 关闭)",
                         "body": {
-                            "type": "form",
-                            "api": "post:/admin/inspection/webhook/save",
-                            "body": [
+                            "type": "tabs",
+                            "tabs": [
                                 {
-                                    "type": "input-text",
-                                    "name": "platform",
-                                    "label": "平台",
-                                    "placeholder": "如 feishu, dingtalk"
-                                },
-                                {
-                                    "type": "input-text",
-                                    "name": "target_url",
-                                    "label": "目标URL",
-                                    "required": true,
-                                    "placeholder": "请输入Webhook地址"
-                                },
-                                {
-                                    "type": "input-text",
-                                    "name": "method",
-                                    "label": "请求方法",
-                                    "placeholder": "如 POST, GET"
-                                },
-                                {
-                                    "type": "input-text",
-                                    "name": "sign_secret",
-                                    "label": "签名密钥",
-                                    "placeholder": "如有签名需求请填写"
-                                },
-                                {
-                                    "type": "input-text",
-                                    "name": "sign_algo",
-                                    "label": "签名算法",
-                                    "placeholder": "如 hmac-sha256, feishu"
-                                },
-                                {
-                                    "type": "input-text",
-                                    "name": "sign_header_key",
-                                    "label": "签名Header键",
-                                    "placeholder": "如 X-Signature"
-                                },
-                                {
-                                    "type": "editor",
-                                    "name": "template",
-                                    "label": "消息模板",
-                                    "language": "json"
-                                }
-                            ],
-                            "submitText": "保存",
-                            "resetText": "重置",
-                            "messages": {
-                                "saveSuccess": "保存成功",
-                                "saveFailed": "保存失败"
-                            },
-                            "onEvent": {
-                                "submitSucc": {
-                                    "actions": [
+                                    "title": "飞书",
+                                    "key": "feishu",
+                                    "body": [
                                         {
-                                            "actionType": "reload",
-                                            "componentId": "webhookCRUD"
+                                            "type": "form",
+                                            "api": "post:/admin/inspection/webhook/save",
+                                            "wrapWithPanel": false,
+                                            "body": [
+                                                {
+                                                    "type": "hidden",
+                                                    "name": "id"
+                                                },
+                                                {
+                                                    "type": "hidden",
+                                                    "name": "platform",
+                                                    "value": "feishu"
+                                                },
+                                                {
+                                                    "type": "input-url",
+                                                    "name": "target_url",
+                                                    "label": "飞书URL",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "type": "input-text",
+                                                    "name": "sign_secret",
+                                                    "label": "飞书签名密钥"
+                                                },
+                                                {
+                                                    "type": "editor",
+                                                    "name": "template",
+                                                    "label": "消息模板",
+                                                    "language": "json",
+                                                    "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
+                                                }
+                                            ],
+                                            "submitText": "保存",
+                                            "resetText": "重置",
+                                            "messages": {
+                                                "saveSuccess": "保存成功",
+                                                "saveFailed": "保存失败"
+                                            },
+                                            "onEvent": {
+                                                "submitSucc": {
+                                                    "actions": [
+                                                        {
+                                                            "actionType": "reload",
+                                                            "componentId": "webhookCRUD"
+                                                        },
+                                                        {
+                                                            "actionType": "closeDrawer"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "钉钉",
+                                    "key": "dingtalk",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "platform",
+                                            "value": "dingtalk"
                                         },
                                         {
-                                            "actionType": "closeDrawer"
+                                            "type": "static",
+                                            "value": "钉钉专用表单，后续补充"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "企业微信",
+                                    "key": "wechat",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "platform",
+                                            "value": "wechat"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "value": "企业微信专用表单，后续补充"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "其他",
+                                    "key": "other",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "platform",
+                                            "value": "other"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "value": "其他平台专用表单，后续补充"
                                         }
                                     ]
                                 }
-                            }
+                            ]
                         }
                     }
                 },
@@ -210,6 +251,13 @@
                                     }
                                 }
                             }
+                        },
+                        {
+                            "type": "button",
+                            "tooltip": "测试",
+                            "icon": "fas fa-play text-success",
+                            "actionType": "ajax",
+                            "api": "post:/admin/inspection/webhook/id/${id}/test"
                         }
                     ]
                 },
@@ -227,6 +275,11 @@
                 {
                     "name": "sign_secret",
                     "label": "签名校验",
+                    "type": "text"
+                },
+                {
+                    "name": "template",
+                    "label": "消息模板",
                     "type": "text"
                 },
                 {

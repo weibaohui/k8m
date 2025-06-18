@@ -1,10 +1,14 @@
 package inspection
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/webhooksender"
 )
 
 type AdminWebhookController struct {
@@ -15,6 +19,33 @@ func RegisterAdminWebhookRoutes(admin *gin.RouterGroup) {
 	admin.GET("/inspection/webhook/list", ctrl.WebhookList)
 	admin.POST("/inspection/webhook/delete/:ids", ctrl.WebhookDelete)
 	admin.POST("/inspection/webhook/save", ctrl.WebhookSave)
+	admin.POST("/inspection/webhook/id/:id/test", ctrl.WebhookTest)
+}
+
+func (s *AdminWebhookController) WebhookTest(c *gin.Context) {
+	id := c.Param("id")
+	params := dao.BuildParams(c)
+	m := &models.WebhookReceiver{
+		ID: utils.ToUInt(id),
+	}
+	m, err := m.GetOne(params)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	if m.Platform == "feishu" {
+		receiver := webhooksender.NewFeishuReceiver(m.TargetURL, m.SignSecret)
+		rets := webhooksender.PushEvent("test", []*webhooksender.WebhookReceiver{
+			receiver,
+		})
+		if len(rets) > 0 {
+			amis.WriteJsonOKMsg(c, rets[0].RespBody)
+			return
+		}
+
+	}
+
+	amis.WriteJsonError(c, fmt.Errorf("unsupported platform: %s", m.Platform))
 }
 
 func (s *AdminWebhookController) WebhookList(c *gin.Context) {
