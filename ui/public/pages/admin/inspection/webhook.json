@@ -43,6 +43,13 @@
                                                     "value": "feishu"
                                                 },
                                                 {
+                                                    "type": "input-text",
+                                                    "name": "name",
+                                                    "label": "名称",
+                                                    "required": true,
+                                                    "placeholder": "如 飞书群, 钉钉群"
+                                                },
+                                                {
                                                     "type": "input-url",
                                                     "name": "target_url",
                                                     "label": "飞书URL",
@@ -51,7 +58,8 @@
                                                 {
                                                     "type": "input-text",
                                                     "name": "sign_secret",
-                                                    "label": "飞书签名密钥"
+                                                    "label": "飞书签名密钥",
+                                                    "required": true
                                                 },
                                                 {
                                                     "type": "editor",
@@ -188,12 +196,19 @@
                                         },
                                         {
                                             "type": "input-text",
+                                            "name": "name",
+                                            "label": "名称",
+                                            "placeholder": "如 飞书群, 钉钉群",
+                                            "required": true
+                                        },
+                                        {
+                                            "type": "input-text",
                                             "name": "platform",
                                             "label": "平台",
                                             "placeholder": "如 feishu, dingtalk"
                                         },
                                         {
-                                            "type": "input-text",
+                                            "type": "input-url",
                                             "name": "target_url",
                                             "label": "目标URL",
                                             "required": true,
@@ -262,9 +277,16 @@
                     ]
                 },
                 {
+                    "name": "name",
+                    "label": "名称",
+                    "type": "text",
+                    "width": "100px"
+                },
+                {
                     "name": "platform",
                     "label": "平台",
-                    "type": "text"
+                    "type": "text",
+                    "width": "100px"
                 },
                 {
                     "name": "target_url",

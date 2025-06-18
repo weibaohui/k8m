@@ -10,6 +10,7 @@ import (
 
 type WebhookReceiver struct {
 	ID            uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Name          string    `json:"name,omitempty"`     // webhook名称
 	Platform      string    `json:"platform,omitempty"` // feishu,dingtalk
 	TargetURL     string    `json:"target_url,omitempty"`
 	Method        string    `json:"method,omitempty"`
