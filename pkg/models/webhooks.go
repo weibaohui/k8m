@@ -17,8 +17,8 @@ type WebhookReceiver struct {
 	SignSecret    string    `json:"sign_secret,omitempty"`
 	SignAlgo      string    `json:"sign_algo,omitempty"`       // e.g. "hmac-sha256", "feishu"
 	SignHeaderKey string    `json:"sign_header_key,omitempty"` // e.g. "X-Signature" or unused
-	CreatedAt     time.Time `json:"created_at,omitempty"`      // 创建时间
-	UpdatedAt     time.Time `json:"updated_at,omitempty"`
+	CreatedAt     time.Time `json:"created_at,omitempty"`
+	UpdatedAt     time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 
 func (c *WebhookReceiver) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*WebhookReceiver, int64, error) {

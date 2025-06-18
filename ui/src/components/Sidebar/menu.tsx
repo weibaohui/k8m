@@ -505,6 +505,12 @@ const items: () => MenuItem[] = () => {
                                 key: "script_management",
                                 onClick: () => onMenuClick('/admin/inspection/script')
                             },
+                            {
+                                label: "webhook管理",
+                                icon: <i className="fa-solid fa-bell-concierge"></i>,
+                                key: "webhook_management",
+                                onClick: () => onMenuClick('/admin/inspection/webhook')
+                            },
                         ]
                     },
 
