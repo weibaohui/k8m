@@ -1,0 +1,315 @@
+{
+    "type": "page",
+    "body": [
+        {
+            "type": "crud",
+            "id": "webhookCRUD",
+            "name": "webhookCRUD",
+            "autoFillHeight": true,
+            "autoGenerateFilter": {
+                "columnsNum": 4,
+                "showBtnToolbar": false
+            },
+            "headerToolbar": [
+                {
+                    "type": "button",
+                    "icon": "fas fa-plus text-primary",
+                    "actionType": "drawer",
+                    "label": "新建Webhook",
+                    "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "size": "md",
+                        "title": "新建Webhook (ESC 关闭)",
+                        "body": {
+                            "type": "tabs",
+                            "tabs": [
+                                {
+                                    "title": "飞书",
+                                    "key": "feishu",
+                                    "body": [
+                                        {
+                                            "type": "form",
+                                            "api": "post:/admin/inspection/webhook/save",
+                                            "wrapWithPanel": false,
+                                            "body": [
+                                                {
+                                                    "type": "hidden",
+                                                    "name": "id"
+                                                },
+                                                {
+                                                    "type": "hidden",
+                                                    "name": "platform",
+                                                    "value": "feishu"
+                                                },
+                                                {
+                                                    "type": "input-text",
+                                                    "name": "name",
+                                                    "label": "名称",
+                                                    "required": true,
+                                                    "placeholder": "如 飞书群, 钉钉群"
+                                                },
+                                                {
+                                                    "type": "input-url",
+                                                    "name": "target_url",
+                                                    "label": "飞书URL",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "type": "input-text",
+                                                    "name": "sign_secret",
+                                                    "label": "飞书签名密钥",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "type": "editor",
+                                                    "name": "template",
+                                                    "label": "消息模板",
+                                                    "language": "json",
+                                                    "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
+                                                }
+                                            ],
+                                            "submitText": "保存",
+                                            "resetText": "重置",
+                                            "messages": {
+                                                "saveSuccess": "保存成功",
+                                                "saveFailed": "保存失败"
+                                            },
+                                            "onEvent": {
+                                                "submitSucc": {
+                                                    "actions": [
+                                                        {
+                                                            "actionType": "reload",
+                                                            "componentId": "webhookCRUD"
+                                                        },
+                                                        {
+                                                            "actionType": "closeDrawer"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "钉钉",
+                                    "key": "dingtalk",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "platform",
+                                            "value": "dingtalk"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "value": "钉钉专用表单，后续补充"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "企业微信",
+                                    "key": "wechat",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "platform",
+                                            "value": "wechat"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "value": "企业微信专用表单，后续补充"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "其他",
+                                    "key": "other",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "platform",
+                                            "value": "other"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "value": "其他平台专用表单，后续补充"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "reload",
+                "bulkActions"
+            ],
+            "loadDataOnce": false,
+            "syncLocation": false,
+            "initFetch": true,
+            "perPage": 10,
+            "bulkActions": [
+                {
+                    "label": "批量删除",
+                    "actionType": "ajax",
+                    "confirmText": "确定要批量删除?",
+                    "api": "post:/admin/inspection/webhook/delete/${ids}"
+                }
+            ],
+            "footerToolbar": [
+                {
+                    "type": "pagination",
+                    "align": "right"
+                },
+                {
+                    "type": "statistics",
+                    "align": "right"
+                },
+                {
+                    "type": "switch-per-page",
+                    "align": "right"
+                }
+            ],
+            "api": "get:/admin/inspection/webhook/list",
+            "columns": [
+                {
+                    "type": "operation",
+                    "label": "操作",
+                    "width": 120,
+                    "buttons": [
+                        {
+                            "type": "button",
+                            "icon": "fas fa-edit text-primary",
+                            "actionType": "drawer",
+                            "tooltip": "编辑Webhook",
+                            "drawer": {
+                                "closeOnEsc": true,
+                                "closeOnOutside": true,
+                                "size": "md",
+                                "title": "编辑Webhook (ESC 关闭)",
+                                "body": {
+                                    "type": "form",
+                                    "api": "post:/admin/inspection/webhook/save",
+                                    "body": [
+                                        {
+                                            "type": "hidden",
+                                            "name": "id"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "name",
+                                            "label": "名称",
+                                            "placeholder": "如 飞书群, 钉钉群",
+                                            "required": true
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "platform",
+                                            "label": "平台",
+                                            "placeholder": "如 feishu, dingtalk"
+                                        },
+                                        {
+                                            "type": "input-url",
+                                            "name": "target_url",
+                                            "label": "目标URL",
+                                            "required": true,
+                                            "placeholder": "请输入Webhook地址"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "method",
+                                            "label": "请求方法",
+                                            "placeholder": "如 POST, GET"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "sign_secret",
+                                            "label": "签名密钥",
+                                            "placeholder": "如有签名需求请填写"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "sign_algo",
+                                            "label": "签名算法",
+                                            "placeholder": "如 hmac-sha256, feishu"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "sign_header_key",
+                                            "label": "签名Header键",
+                                            "placeholder": "如 X-Signature"
+                                        },
+                                        {
+                                            "type": "editor",
+                                            "name": "template",
+                                            "label": "消息模板",
+                                            "language": "json"
+                                        }
+                                    ],
+                                    "submitText": "保存",
+                                    "resetText": "重置",
+                                    "messages": {
+                                        "saveSuccess": "保存成功",
+                                        "saveFailed": "保存失败"
+                                    },
+                                    "onEvent": {
+                                        "submitSucc": {
+                                            "actions": [
+                                                {
+                                                    "actionType": "reload",
+                                                    "componentId": "webhookCRUD"
+                                                },
+                                                {
+                                                    "actionType": "closeDrawer"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "type": "button",
+                            "tooltip": "测试",
+                            "icon": "fas fa-play text-success",
+                            "actionType": "ajax",
+                            "api": "post:/admin/inspection/webhook/id/${id}/test"
+                        }
+                    ]
+                },
+                {
+                    "name": "name",
+                    "label": "名称",
+                    "type": "text",
+                    "width": "100px"
+                },
+                {
+                    "name": "platform",
+                    "label": "平台",
+                    "type": "text",
+                    "width": "100px"
+                },
+                {
+                    "name": "target_url",
+                    "label": "目标URL",
+                    "type": "text",
+                    "width": "300px"
+                },
+                {
+                    "name": "sign_secret",
+                    "label": "签名校验",
+                    "type": "text"
+                },
+                {
+                    "name": "template",
+                    "label": "消息模板",
+                    "type": "text"
+                },
+                {
+                    "name": "created_at",
+                    "label": "创建时间",
+                    "type": "datetime"
+                }
+            ]
+        }
+    ]
+}

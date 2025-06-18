@@ -10,7 +10,20 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func LuaScriptList(c *gin.Context) {
+type AdminLuaScriptController struct {
+}
+
+func RegisterAdminLuaScriptRoutes(admin *gin.RouterGroup) {
+	ctrl := &AdminLuaScriptController{}
+	admin.GET("/inspection/script/list", ctrl.LuaScriptList)
+	admin.POST("/inspection/script/delete/:ids", ctrl.LuaScriptDelete)
+	admin.POST("/inspection/script/save", ctrl.LuaScriptSave)
+	admin.POST("/inspection/script/load", ctrl.LuaScriptLoad)
+	admin.GET("/inspection/script/option_list", ctrl.LuaScriptOptionList)
+
+}
+
+func (s *AdminLuaScriptController) LuaScriptList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.InspectionLuaScript{}
 
@@ -21,7 +34,7 @@ func LuaScriptList(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
-func LuaScriptSave(c *gin.Context) {
+func (s *AdminLuaScriptController) LuaScriptSave(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.InspectionLuaScript{}
 	err := c.ShouldBindJSON(&m)
@@ -41,7 +54,7 @@ func LuaScriptSave(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
-func LuaScriptDelete(c *gin.Context) {
+func (s *AdminLuaScriptController) LuaScriptDelete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	params.UserName = ""
@@ -56,7 +69,7 @@ func LuaScriptDelete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func LuaScriptOptionList(c *gin.Context) {
+func (s *AdminLuaScriptController) LuaScriptOptionList(c *gin.Context) {
 	m := models.InspectionLuaScript{}
 	params := dao.BuildParams(c)
 	params.PerPage = 100000
@@ -87,7 +100,7 @@ func LuaScriptOptionList(c *gin.Context) {
 
 }
 
-func LuaScriptLoad(c *gin.Context) {
+func (s *AdminLuaScriptController) LuaScriptLoad(c *gin.Context) {
 	// 删除后，重新插入内置脚本
 	err := dao.DB().Model(&models.InspectionLuaScript{}).Where("script_type = ?", constants.LuaScriptTypeBuiltin).Delete(&models.InspectionLuaScript{}).Error
 	if err != nil {

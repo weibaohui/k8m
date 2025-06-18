@@ -500,10 +500,22 @@ const items: () => MenuItem[] = () => {
 
                             },
                             {
+                                label: "巡检记录",
+                                icon: <i className="fa-solid fa-clipboard-list"></i>,
+                                key: "inspection_record",
+                                onClick: () => onMenuClick('/admin/inspection/record')
+                            },
+                            {
                                 label: "巡检规则",
                                 icon: <i className="fa-solid fa-clipboard-check"></i>,
                                 key: "script_management",
                                 onClick: () => onMenuClick('/admin/inspection/script')
+                            },
+                            {
+                                label: "webhook管理",
+                                icon: <i className="fa-solid fa-bell-concierge"></i>,
+                                key: "webhook_management",
+                                onClick: () => onMenuClick('/admin/inspection/webhook')
                             },
                         ]
                     },

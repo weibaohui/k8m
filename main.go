@@ -528,8 +528,11 @@ func main() {
 		// 集群巡检计划配置
 		admin.GET("/inspection/schedule/list", inspection.List)
 		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
-		admin.GET("inspection/schedule/record/id/:id/event/list", inspection.EventList)
-		admin.GET("inspection/schedule/record/id/:id/output/list", inspection.OutputList)
+		admin.GET("/inspection/record/list", inspection.RecordList)
+		admin.GET("/inspection/schedule/record/id/:id/event/list", inspection.EventList)
+		admin.POST("/inspection/schedule/record/id/:id/summary", inspection.SummaryByRecord)
+		admin.POST("/inspection/schedule/record/id/:id/push", inspection.Push)
+		admin.GET("/inspection/schedule/record/id/:id/output/list", inspection.OutputList)
 		admin.POST("/inspection/schedule/save", inspection.Save)
 		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
 		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
@@ -537,14 +540,12 @@ func main() {
 		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
 		admin.POST("/inspection/schedule/id/:id/summary", inspection.SummaryBySchedule)
 		admin.POST("/inspection/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", inspection.SummaryBySchedule)
-
-		// 集群巡检脚本
-		admin.GET("/inspection/script/list", inspection.LuaScriptList)
-		admin.POST("/inspection/script/delete/:ids", inspection.LuaScriptDelete)
-		admin.POST("/inspection/script/save", inspection.LuaScriptSave)
-		admin.POST("/inspection/script/load", inspection.LuaScriptLoad)
-		admin.GET("/inspection/script/option_list", inspection.LuaScriptOptionList)
 		admin.GET("/inspection/event/status/option_list", inspection.EventStatusOptionList)
+
+		// 集群巡检脚本lua脚本管理
+		inspection.RegisterAdminLuaScriptRoutes(admin)
+		// 集群巡检webhook管理
+		inspection.RegisterAdminWebhookRoutes(admin)
 
 		// 平台参数配置
 		admin.GET("/config/all", config.GetConfig)

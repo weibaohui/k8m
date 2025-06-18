@@ -128,6 +128,9 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	_ = schedule.Save(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Select("last_run_time", "error_count")
 	})
+
+	// TODO 记录发送结果
+	_, _ = s.SummaryAndPushToHooksByRecordID(context.Background(), record.ID, schedule.Webhooks)
 	return record, nil
 }
 

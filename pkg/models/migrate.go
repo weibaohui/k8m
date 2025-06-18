@@ -106,6 +106,9 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&InspectionLuaScriptBuiltinVersion{}); err != nil {
 		errs = append(errs, err)
 	}
+	if err := dao.DB().AutoMigrate(&WebhookReceiver{}); err != nil {
+		errs = append(errs, err)
+	}
 	// 删除 user 表 name 字段，已弃用
 	if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
 		errs = append(errs, err)

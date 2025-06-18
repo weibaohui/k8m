@@ -18,6 +18,7 @@ type InspectionSchedule struct {
 	Name        string       `json:"name"`                          // 巡检任务名称
 	Description string       `json:"description"`                   // 巡检任务描述
 	Clusters    string       `json:"clusters"`                      // 目标集群列表
+	Webhooks    string       `json:"webhooks"`                      // webhook列表
 	Cron        string       `json:"cron"`                          // cron表达式，定时周期
 	ScriptCodes string       `gorm:"type:text" json:"script_codes"` // 每个脚本唯一标识码
 	Enabled     bool         `json:"enabled"`                       // 是否启用该任务

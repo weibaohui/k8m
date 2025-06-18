@@ -26,6 +26,7 @@ type InspectionRecord struct {
 	CreatedAt    time.Time  `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 	ErrorCount   int        `json:"error_count"`
+	AISummary    string     `json:"ai_summary,omitempty"` // AI生成的巡检总结
 }
 
 // InspectionScriptResult 记录每个巡检脚本的执行结果，关联到 InspectionRecord

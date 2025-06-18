@@ -1,6 +1,7 @@
 package inspection
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -202,4 +204,26 @@ func SummaryBySchedule(c *gin.Context) {
 		result["latest_run"] = latestRun
 	}
 	amis.WriteJsonData(c, result)
+}
+
+// SummaryByRecord 汇总指定巡检记录的规则总数与失败数
+func SummaryByRecord(c *gin.Context) {
+	recordIDStr := c.Param("id")
+	if recordIDStr == "" {
+		amis.WriteJsonError(c, fmt.Errorf("缺少 record_id 参数"))
+		return
+	}
+	recordID := utils.ToUInt(recordIDStr)
+	if recordID == 0 {
+		amis.WriteJsonError(c, fmt.Errorf("record_id 参数无效"))
+		return
+	}
+
+	sb := lua.ScheduleBackground{}
+	summary, err := sb.SummaryByAI(context.Background(), recordID, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, summary)
 }

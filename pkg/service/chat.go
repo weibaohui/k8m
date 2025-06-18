@@ -176,6 +176,9 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 }
 func (c *chatService) Chat(ctx *gin.Context, chat string) string {
 	ctxInst := amis.GetContextWithUser(ctx)
+	return c.ChatWithCtx(ctxInst, chat)
+}
+func (c *chatService) ChatWithCtx(ctx context.Context, chat string) string {
 	client, err := AIService().DefaultClient()
 
 	if err != nil {
@@ -183,7 +186,7 @@ func (c *chatService) Chat(ctx *gin.Context, chat string) string {
 		return ""
 	}
 
-	result, err := client.GetCompletion(ctxInst, chat)
+	result, err := client.GetCompletion(ctx, chat)
 	if err != nil {
 		klog.V(2).Infof("ChatCompletion error: %v\n", err)
 		return ""
