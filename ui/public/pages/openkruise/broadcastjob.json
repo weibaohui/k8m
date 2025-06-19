@@ -1,0 +1,1429 @@
+{
+  "type": "page",
+  "data": {
+    "ns": "${ls:selectedNs||'default'}",
+    "kind": "BroadcastJob",
+    "group": "apps.kruise.io",
+    "version": "v1alpha1"
+  },
+  "body": [
+    {
+      "type": "container",
+      "className": "floating-toolbar",
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "${kind}",
+          "className": "mr-2"
+        },
+        {
+          "type": "button",
+          "label": "属性文档",
+          "level": "link",
+          "icon": "fas fa-book-open text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind} 属性文档（ESC 关闭）",
+            "body": [
+              {
+                "type": "page",
+                "asideResizor": true,
+                "asideSticky": false,
+                "aside": [
+                  {
+                    "type": "input-tree",
+                    "name": "tree",
+                    "initiallyOpen": false,
+                    "unfoldedLevel": 1,
+                    "searchable": true,
+                    "showOutline": true,
+                    "showIcon": true,
+                    "searchConfig": {
+                      "sticky": true
+                    },
+                    "heightAuto": true,
+                    "inputClassName": "no-border no-padder mt-1",
+                    "source": "get:/k8s/doc/kind/$kind/group/$group/version/$version",
+                    "onEvent": {
+                      "change": {
+                        "actions": [
+                          {
+                            "componentId": "basic",
+                            "actionType": "reload",
+                            "data": {
+                              "description": "${event.data.item.description}",
+                              "id": "${event.data.item.id}",
+                              "full_id": "${event.data.item.full_id}",
+                              "type": "${event.data.item.type}"
+                            }
+                          },
+                          {
+                            "componentId": "detail",
+                            "actionType": "reload",
+                            "data": {
+                              "description": "${event.data.item.description}",
+                              "id": "${event.data.item.id}",
+                              "full_id": "${event.data.item.full_id}",
+                              "type": "${event.data.item.type}"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "service",
+                    "id": "basic",
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<br><strong>属性：</strong> ${id}",
+                        "visibleOn": "${id}"
+                      },
+                      {
+                        "type": "button",
+                        "label": "示例",
+                        "level": "link",
+                        "icon": "fas fa-lightbulb text-warning",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "overlay": false,
+                          "closeOnEsc": true,
+                          "closeOnOutside": true,
+                          "size": "lg",
+                          "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                          "body": [
+                            {
+                              "type": "websocketMarkdownViewer",
+                              "url": "/ai/chat/example/field",
+                              "params": {
+                                "kind": "${kind}",
+                                "group": "${group}",
+                                "version": "${version}",
+                                "field": "${full_id}"
+                              }
+                            }
+                          ]
+                        },
+                        "visibleOn": "${id}"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                        "visibleOn": "${type}"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<br><strong>描述：</strong> ${description}",
+                        "visibleOn": "${description}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "service",
+                    "id": "detail",
+                    "api": "post:/k8s/doc/detail",
+                    "body": [
+                      {
+                        "type": "divider",
+                        "title": "描述翻译",
+                        "titlePosition": "center",
+                        "visibleOn": "${translate}"
+                      },
+                      {
+                        "type": "markdown",
+                        "value": "${translate|raw}",
+                        "options": {
+                          "linkify": true,
+                          "html": true,
+                          "breaks": true
+                        },
+                        "visibleOn": "${translate}"
+                      },
+                      {
+                        "type": "container",
+                        "body": [
+                          {
+                            "type": "tpl",
+                            "tpl": "<div style='height:80vh'>&nbsp</div>"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "button",
+          "label": "指南",
+          "level": "link",
+          "icon": "fas fa-lightbulb text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind} 参考样例（ESC 关闭）",
+            "body": [
+              {
+                "type": "websocketMarkdownViewer",
+                "url": "/ai/chat/example",
+                "params": {
+                  "kind": "${kind}",
+                  "group": "${group}",
+                  "version": "${version}"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "创建",
+          "icon": "fas fa-dharmachakra text-primary",
+          "type": "button",
+          "level": "link",
+          "actionType": "url",
+          "blank": true,
+          "url": "/#/apply/apply?kind=${kind}"
+        }
+      ]
+    },
+    {
+      "type": "container",
+      "className": "floating-toolbar-right",
+      "body": [
+        {
+          "type": "wrapper",
+          "body": [
+            {
+              "type": "form",
+              "mode": "inline",
+              "wrapWithPanel": false,
+              "body": [
+                {
+                  "label": "命名空间",
+                  "type": "select",
+                  "multiple": true,
+                  "maxTagCount": 1,
+                  "name": "ns",
+                  "id": "ns",
+                  "searchable": true,
+                  "checkAll": true,
+                  "source": "/k8s/ns/option_list",
+                  "value": "${ls:selectedNs||'default'}",
+                  "onEvent": {
+                    "change": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD",
+                          "data": {
+                            "ns": "${ns}"
+                          }
+                        },
+                        {
+                          "actionType": "custom",
+                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "label": "集群",
+                  "type": "select",
+                  "multiple": false,
+                  "name": "cluster",
+                  "id": "cluster",
+                  "searchable": true,
+                  "source": "/params/cluster/option_list",
+                  "value": "${ls:cluster}",
+                  "onEvent": {
+                    "change": {
+                      "actions": [
+                        {
+                          "actionType": "custom",
+                          "script": "localStorage.setItem('cluster', event.data.value)"
+                        },
+                        {
+                          "actionType": "custom",
+                          "script": "window.location.reload();"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/version/$version/batch/remove",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        },
+        {
+          "label": "强制删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量强制删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/version/$version/force_remove",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "post:/k8s/$kind/group/$group/version/$version/list/ns/${ns}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 180,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-eye text-primary",
+              "actionType": "drawer",
+              "tooltip": "资源描述",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "service",
+                    "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                    "body": [
+                      {
+                        "type": "button",
+                        "label": "AI解读",
+                        "icon": "fas fa-brain text-primary",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "closeOnEsc": true,
+                          "closeOnOutside": true,
+                          "size": "xl",
+                          "title": "AI解读  (ESC 关闭)",
+                          "body": [
+                            {
+                              "type": "websocketMarkdownViewer",
+                              "url": "/ai/chat/describe",
+                              "params": {
+                                "kind": "${kind}",
+                                "group": "${group}",
+                                "version": "${version}",
+                                "name": "${metadata.name}",
+                                "namespace": "${metadata.namespace}"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "highlightHtml",
+                        "keywords": [
+                          "Error",
+                          "Warning"
+                        ],
+                        "html": "${result}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fa fa-edit text-primary",
+              "tooltip": "Yaml编辑",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "Yaml管理",
+                "body": [
+                  {
+                    "type": "tabs",
+                    "tabsMode": "tiled",
+                    "tabs": [
+                      {
+                        "title": "查看编辑",
+                        "body": [
+                          {
+                            "type": "service",
+                            "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                            "body": [
+                              {
+                                "type": "mEditor",
+                                "text": "${yaml}",
+                                "componentId": "yaml",
+                                "saveApi": "/k8s/${kind}/group/${group}/version/${version}/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                "options": {
+                                  "language": "yaml",
+                                  "wordWrap": "on",
+                                  "scrollbar": {
+                                    "vertical": "auto"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "title": "文档",
+                        "body": [
+                          {
+                            "type": "page",
+                            "asideResizor": true,
+                            "asideSticky": false,
+                            "aside": [
+                              {
+                                "type": "input-tree",
+                                "name": "tree",
+                                "initiallyOpen": false,
+                                "unfoldedLevel": 1,
+                                "searchable": true,
+                                "showOutline": true,
+                                "showIcon": true,
+                                "searchConfig": {
+                                  "sticky": true
+                                },
+                                "heightAuto": true,
+                                "inputClassName": "no-border no-padder mt-1",
+                                "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                "onEvent": {
+                                  "change": {
+                                    "actions": [
+                                      {
+                                        "componentId": "basic",
+                                        "actionType": "reload",
+                                        "data": {
+                                          "description": "${event.data.item.description}",
+                                          "id": "${event.data.item.id}",
+                                          "full_id": "${event.data.item.full_id}",
+                                          "type": "${event.data.item.type}"
+                                        }
+                                      },
+                                      {
+                                        "componentId": "detail",
+                                        "actionType": "reload",
+                                        "data": {
+                                          "description": "${event.data.item.description}",
+                                          "id": "${event.data.item.id}",
+                                          "full_id": "${event.data.item.full_id}",
+                                          "type": "${event.data.item.type}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ],
+                            "body": [
+                              {
+                                "type": "service",
+                                "id": "basic",
+                                "body": [
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<br><strong>属性：</strong> ${id}",
+                                    "visibleOn": "${id}"
+                                  },
+                                  {
+                                    "type": "button",
+                                    "label": "示例",
+                                    "level": "link",
+                                    "icon": "fas fa-lightbulb text-warning",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/ai/chat/example/field",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "field": "${full_id}"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "visibleOn": "${id}"
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                                    "visibleOn": "${type}"
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<br><strong>描述：</strong> ${description}",
+                                    "visibleOn": "${description}"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "service",
+                                "id": "detail",
+                                "api": "post:/k8s/doc/detail",
+                                "body": [
+                                  {
+                                    "type": "divider",
+                                    "title": "描述翻译",
+                                    "titlePosition": "center",
+                                    "visibleOn": "${translate}"
+                                  },
+                                  {
+                                    "type": "markdown",
+                                    "value": "${translate|raw}",
+                                    "options": {
+                                      "linkify": true,
+                                      "html": true,
+                                      "breaks": true
+                                    },
+                                    "visibleOn": "${translate}"
+                                  },
+                                  {
+                                    "type": "container",
+                                    "body": [
+                                      {
+                                        "type": "tpl",
+                                        "tpl": "<div style='height:80vh'>&nbsp</div>"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "actions": []
+              }
+            },
+            {
+              "tooltip": "容器列表",
+              "icon": "fa-brands fa-docker text-primary",
+              "type": "button",
+              "level": "link",
+              "actionType": "url",
+              "blank": false,
+              "url": "/#/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-calendar-alt text-primary",
+              "tooltip": "查看事件",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "查看事件   (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "crud",
+                    "id": "detailEvent",
+                    "name": "detailEvent",
+                    "headerToolbar": [
+                      "reload",
+                      {
+                        "type": "pagination",
+                        "align": "right"
+                      },
+                      {
+                        "type": "statistics",
+                        "align": "right"
+                      },
+                      {
+                        "type": "switch-per-page",
+                        "align": "right"
+                      }
+                    ],
+                    "loadDataOnce": true,
+                    "syncLocation": false,
+                    "perPage": 10,
+                    "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
+                    "columns": [
+                      {
+                        "type": "operation",
+                        "label": "操作",
+                        "buttons": [
+                          {
+                            "type": "button",
+                            "icon": "fas fa-brain text-primary",
+                            "label": "AI问诊",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "AI 查询",
+                              "body": [
+                                {
+                                  "type": "websocketMarkdownViewer",
+                                  "url": "/ai/chat/event",
+                                  "params": {
+                                    "note": "${note}",
+                                    "source": "${source}",
+                                    "reason": "${reason}",
+                                    "reportingController": "${reportingController}",
+                                    "type": "${type}",
+                                    "regardingKind": "${kind}"
+                                  }
+                                }
+                              ]
+                            },
+                            "visibleOn": "type === 'Warning'"
+                          }
+                        ],
+                        "toggled": true
+                      },
+                      {
+                        "name": "type",
+                        "label": "类型",
+                        "filterable": {
+                          "options": [
+                            {
+                              "label": "正常 ",
+                              "value": "Normal"
+                            },
+                            {
+                              "label": "告警 ",
+                              "value": "Warning"
+                            }
+                          ]
+                        },
+                        "type": "mapping",
+                        "map": {
+                          "Normal": "<span class='label label-success'>正常</span>",
+                          "Warning": "<span class='label label-danger'>告警</span>"
+                        }
+                      },
+                      {
+                        "name": "reason",
+                        "label": "原因",
+                        "type": "text"
+                      },
+                      {
+                        "name": "field",
+                        "label": "关联字段",
+                        "type": "tpl",
+                        "tpl": "${regarding.fieldPath}"
+                      },
+                      {
+                        "name": "source",
+                        "label": "事件来源",
+                        "type": "tpl",
+                        "tpl": "${reportingController} ${reportingInstance}"
+                      },
+                      {
+                        "name": "note",
+                        "label": "说明",
+                        "type": "text",
+                        "searchable": true
+                      },
+                      {
+                        "name": "metadata.creationTimestamp",
+                        "label": "存在时长",
+                        "type": "k8sAge"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "dropdown-button",
+              "level": "link",
+              "buttons": [
+                {
+                  "type": "button",
+                  "icon": "fas fa-wrench text-primary",
+                  "label": "更新镜像",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "position": "left",
+                    "title": "编辑",
+                    "body": [
+                      {
+                        "type": "page",
+                        "body": [
+                          {
+                            "type": "panel",
+                            "title": "当前运行镜像",
+                            "body": {
+                              "name": "spec.template.spec.containers",
+                              "type": "each",
+                              "items": {
+                                "type": "tpl",
+                                "tpl": "<div style='margin-bottom: 10px;'>容器：<strong class='text-green-500 font-black'>${name}</strong><br>镜像： ${image|simpleImageName}</div>"
+                              }
+                            }
+                          },
+                          {
+                            "type": "form",
+                            "title": "更新镜像",
+                            "name": "sample-edit-form",
+                            "api": "post:/k8s/$kind/group/$group/version/$version/update_image/ns/$metadata.namespace/name/$metadata.name",
+                            "actions": [],
+                            "body": [
+                              {
+                                "label": "镜像拉取密钥",
+                                "type": "select",
+                                "multiple": true,
+                                "maxTagCount": 1,
+                                "name": "image_pull_secrets",
+                                "id": "image_pull_secrets",
+                                "searchable": true,
+                                "clearable": true,
+                                "noResultsText": "未设置密钥",
+                                "checkAll": true,
+                                "source": "/k8s/$kind/group/$group/version/$version/image_pull_secrets/ns/$metadata.namespace/name/$metadata.name"
+                              },
+                              {
+                                "type": "select",
+                                "name": "container_name",
+                                "label": "容器",
+                                "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.template.spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "service",
+                                "api": "/k8s/$kind/group/$group/version/$version/container_info/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                                "body": [
+                                  {
+                                    "type": "input-text",
+                                    "name": "image",
+                                    "label": "镜像名称",
+                                    "required": true
+                                  },
+                                  {
+                                    "type": "input-text",
+                                    "name": "tag",
+                                    "label": "版本标签",
+                                    "required": true
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.namespace",
+          "label": "命名空间",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "metadata.name",
+          "label": "名称",
+          "type": "text",
+          "width": "180px",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.name",
+            "clearable": true,
+            "label": "名称",
+            "placeholder": "输入名称"
+          }
+        },
+        {
+          "name": "status.conditions",
+          "label": "条件",
+          "type": "k8sTextConditions"
+        },
+        {
+          "label": "状态",
+          "type": "tpl",
+          "tpl": "<span class='label ${status.failed > 0 ? \"label-danger\" : (status.succeeded === spec.completions ? \"label-success\" : \"label-warning\") }'>${status.failed > 0 ? \"失败\" : (status.succeeded === spec.completions ? \"已完成\" : \"进行中\")}</span>"
+        },
+        {
+          "label": "进度",
+          "type": "progress",
+          "mode": "line",
+          "value": "${spec.completions && spec.completions > 0 ? ROUND((status.succeeded / spec.completions), 2) * 100 : 0}",
+          "striped": true,
+          "animate": true,
+          "width": "150px"
+        },
+        {
+          "name": "status.startTime",
+          "label": "启动时间",
+          "type": "tpl",
+          "tpl": "${status.startTime|k8sDate}"
+        },
+        {
+          "name": "metadata.ownerReferences",
+          "label": "所有者",
+          "type": "tpl",
+          "tpl": "${metadata.ownerReferences ? metadata.ownerReferences[0].name : ''}"
+        },
+        {
+          "name": "spec.template.spec.containers",
+          "label": "容器",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
+          }
+        },
+        {
+          "name": "metadata.labels",
+          "label": "标签",
+          "type": "tpl",
+          "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : '<i class=\"fa fa-tags text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 标签 (ESC 关闭)",
+                    "name": "dialog_labels",
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "body": [
+                      {
+                        "type": "form",
+                        "mode": "horizontal",
+                        "labelWidth": 0,
+                        "api": "post:/k8s/$kind/group/$group/version/$version/update_labels/ns/$metadata.namespace/name/$metadata.name",
+                        "body": [
+                          {
+                            "type": "input-kv",
+                            "name": "labels",
+                            "draggable": false,
+                            "value": "${metadata.labels}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "metadata.annotations",
+          "label": "注解",
+          "type": "tpl",
+          "tpl": "${metadata.annotations|filterAnnotations|showAnnotationIcon|isTrue:'<i class=\"fa fa-note-sticky text-primary\"></i>':'<i class=\"fa fa-note-sticky text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 注解 (ESC 关闭)",
+                    "name": "dialog_annotations",
+                    "body": [
+                      {
+                        "type": "form",
+                        "mode": "horizontal",
+                        "labelWidth": 0,
+                        "api": "post:/k8s/$kind/group/$group/version/$version/update_annotations/ns/$metadata.namespace/name/$metadata.name",
+                        "initApi": "get:/k8s/$kind/group/$group/version/$version/annotations/ns/$metadata.namespace/name/$metadata.name",
+                        "body": [
+                          {
+                            "type": "input-kv",
+                            "name": "annotations",
+                            "draggable": false,
+                            "value": "${annotations}"
+                          }
+                        ]
+                      }
+                    ],
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "spec.template.spec.tolerations",
+          "label": "容忍度",
+          "type": "tpl",
+          "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa-solid fa-exclamation-triangle text-primary\"></i>' : '<i class=\"fa-solid fa-exclamation-triangle text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 容忍度 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "panel",
+                        "title": "调度规则：如何使用 容忍度",
+                        "body": [
+                          {
+                            "type": "button",
+                            "label": "什么是容忍度",
+                            "level": "link",
+                            "icon": "fas fa-question-circle text-primary",
+                            "actionType": "drawer",
+                            "drawer": {
+                              "overlay": false,
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "什么是容忍度（ESC 关闭）",
+                              "body": [
+                                {
+                                  "type": "websocketMarkdownViewer",
+                                  "url": "/ai/chat/any_question",
+                                  "params": {
+                                    "kind": "${kind}",
+                                    "group": "${group}",
+                                    "version": "${version}",
+                                    "question": "什么是容忍度"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "tpl",
+                            "tpl": "<div><div><strong>容忍度规则:</strong> Pod 必须容忍节点上的污点（Taints），才能调度到该节点。容忍度由 key、operator、value 和 effect 组成，其中 key 代表污点键，operator 决定匹配方式，effect 代表污点的影响类型。</div><div><strong>匹配规则:</strong><br>1. key 和 effect 必须与节点上的污点完全一致，否则容忍度无效。<br>2. operator 决定 value 是否必须匹配：当 operator 为 Equal 时，value 也必须与节点污点的 value 一致；当 operator 为 Exists 时，只要 key 存在即可，不关心 value。</div><div><strong>调度行为:</strong> 仅当 Pod 的容忍度与节点污点的 key 和 effect 匹配，并且 value 符合 operator 规则时，Pod 才能调度到该节点，否则调度将被阻止。</div></div>"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "crud",
+                        "api": "/k8s/$kind/group/$group/version/$version/list_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                        "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                        "headerToolbar": [],
+                        "showIndex": true,
+                        "columns": [
+                          {
+                            "name": "key",
+                            "label": "键"
+                          },
+                          {
+                            "name": "operator",
+                            "label": "操作符",
+                            "placeholder": "-",
+                            "type": "mapping",
+                            "map": {
+                              "Equal": "<span class='label label-success'>等于</span>",
+                              "Exists": "<span class='label label-success'>存在</span>"
+                            }
+                          },
+                          {
+                            "name": "value",
+                            "label": "值",
+                            "placeholder": "-"
+                          },
+                          {
+                            "name": "effect",
+                            "label": "效果",
+                            "type": "mapping",
+                            "map": {
+                              "NoSchedule": "<span class='label label-warning'>禁止调度</span>",
+                              "PreferNoSchedule": "<span class='label label-danger'>优先不调度</span>",
+                              "NoExecute": "<span class='label label-danger'>不可执行</span>"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "spec.template.spec.affinity",
+          "label": "亲和性",
+          "type": "tpl",
+          "tpl": "${spec.template.spec.affinity ? '<i class=\"fa-solid fa-sitemap text-primary\"></i>' : '<i class=\"fa-solid fa-sitemap text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "${metadata.name} 亲和性 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "tabs",
+                        "swipeable": true,
+                        "tabs": [
+                          {
+                            "title": "节点亲和性",
+                            "tab": [
+                              {
+                                "type": "panel",
+                                "title": "调度规则：如何使用 NodeAffinity",
+                                "body": [
+                                  {
+                                    "type": "button",
+                                    "label": "什么是节点亲和性",
+                                    "level": "link",
+                                    "icon": "fas fa-question-circle text-primary",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "什么是节点亲和性（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/ai/chat/any_question",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "question": "什么是节点亲和性"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<div><div><strong>节点规则:</strong> 节点必须匹配 `nodeAffinity` 中定义的规则，如节点上必须有标签（例如 `kubernetes.io/hostname`）。</div><div><strong>标签筛选:</strong>当操作符为存在、不存在时，不能填写筛选值。当为其他类型时，按定义过滤。</div></div>"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "divider",
+                                "title": "节点标签 必须满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "crud",
+                                "api": "/k8s/$kind/group/$group/version/$version/list_node_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_node_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "headerToolbar": [],
+                                "showIndex": true,
+                                "columns": [
+                                  {
+                                    "name": "key",
+                                    "label": "键",
+                                    "width": "250px"
+                                  },
+                                  {
+                                    "name": "operator",
+                                    "label": "操作符",
+                                    "type": "mapping",
+                                    "map": {
+                                      "In": "<span class='label label-success'>包含</span>",
+                                      "NotIn": "<span class='label label-warning'>不包含</span>",
+                                      "Exists": "<span class='label label-info'>存在</span>",
+                                      "DoesNotExist": "<span class='label label-info'>不存在</span>"
+                                    },
+                                    "placeholder": "-",
+                                    "width": "100px"
+                                  },
+                                  {
+                                    "name": "values",
+                                    "label": "值",
+                                    "type": "each",
+                                    "items": {
+                                      "type": "tpl",
+                                      "tpl": "${item}<br>"
+                                    },
+                                    "placeholder": "-"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "wrapper",
+                                "className": "h-10",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "divider",
+                                "title": "节点标签 优先满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "name": "spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution",
+                                "visibleOn": "${spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "type": "each",
+                                "items": {
+                                  "type": "table",
+                                  "source": "${item.preference.matchExpressions}",
+                                  "columns": [
+                                    {
+                                      "name": "key",
+                                      "label": "键",
+                                      "width": "250px"
+                                    },
+                                    {
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "type": "mapping",
+                                      "map": {
+                                        "In": "<span class='label label-success'>包含</span>",
+                                        "NotIn": "<span class='label label-warning'>不包含</span>",
+                                        "Exists": "<span class='label label-info'>存在</span>"
+                                      },
+                                      "placeholder": "-",
+                                      "width": "50px"
+                                    },
+                                    {
+                                      "name": "values",
+                                      "label": "值",
+                                      "type": "each",
+                                      "items": {
+                                        "type": "tpl",
+                                        "tpl": "${item}<br>"
+                                      },
+                                      "placeholder": "-"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "title": "Pod亲和性",
+                            "tab": [
+                              {
+                                "type": "panel",
+                                "title": "调度规则：如何使用 PodAffinity 和 TopologyKey",
+                                "body": [
+                                  {
+                                    "type": "button",
+                                    "label": "什么是Pod亲和性",
+                                    "level": "link",
+                                    "icon": "fas fa-question-circle text-primary",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "什么是Pod亲和性（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/ai/chat/any_question",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "question": "什么是Pod亲和性"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<div><div><strong>1、节点规则:</strong> 节点必须要有拓扑键同名的（如 topology.kubernetes.io/zone）标签。</div><div><strong>2、Pod标签:</strong> 节点上的 Pod 必须带有满足 labelSelector 中定义的标签（如 app=myapp）。</div><div>筛选出满足以上两条规则的节点，k8s将Pod调度到该节点上。</div></div>"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 必须满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "crud",
+                                "api": "/k8s/$kind/group/$group/version/$version/list_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "showIndex": true,
+                                "headerToolbar": [],
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "wrapper",
+                                "className": "h-10",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 优先满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "table",
+                                "visibleOn": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "source": "${spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${podAffinityTerm.labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text",
+                                    "value": "${podAffinityTerm.topologyKey|raw}"
+                                  },
+                                  {
+                                    "name": "weight",
+                                    "label": "权重",
+                                    "type": "text",
+                                    "value": "${weight}"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "title": "Pod反亲和性",
+                            "tab": [
+                              {
+                                "type": "panel",
+                                "title": "调度规则：如何使用 PodAntiAffinity 和 TopologyKey",
+                                "body": [
+                                  {
+                                    "type": "button",
+                                    "label": "什么是Pod反亲和性",
+                                    "level": "link",
+                                    "icon": "fas fa-question-circle text-primary",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "什么是Pod反亲和性（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/ai/chat/any_question",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "question": "什么是Pod反亲和性"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<div><div><strong>1、节点规则:</strong> 节点必须要有拓扑键同名的（如 topology.kubernetes.io/zone）标签。</div><div><strong>2、Pod标签:</strong> 节点上的 Pod 标签满足 labelSelector 中定义的标签（如 app=myapp），那么该节点排除。</div><div><strong></strong> 从带有拓扑键的主机列表中，但是排除运行某些pod的节点。例如，若一个节点已经有了某个特定标签的 Pod，新的 Pod 将避免调度到该节点。</div></div>"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 必须满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "crud",
+                                "api": "/k8s/$kind/group/$group/version/$version/list_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                "showIndex": true,
+                                "headerToolbar": [],
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "wrapper",
+                                "className": "h-10",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "divider",
+                                "title": "Pod标签 优先满足",
+                                "titlePosition": "left",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}"
+                              },
+                              {
+                                "type": "table",
+                                "visibleOn": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "source": "${spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution}",
+                                "columns": [
+                                  {
+                                    "type": "json",
+                                    "label": "标签",
+                                    "source": "${podAffinityTerm.labelSelector.matchLabels}",
+                                    "levelExpand": 1
+                                  },
+                                  {
+                                    "name": "topologyKey",
+                                    "label": "拓扑键",
+                                    "type": "text",
+                                    "value": "${podAffinityTerm.topologyKey|raw}"
+                                  },
+                                  {
+                                    "name": "weight",
+                                    "label": "权重",
+                                    "type": "text",
+                                    "value": "${weight}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "存在时长",
+          "type": "k8sAge"
+        }
+      ]
+    }
+  ]
+}

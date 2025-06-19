@@ -176,7 +176,21 @@ const items: () => MenuItem[] = () => {
                     icon: <i className="fa-solid fa-database"></i>,
                     key: "Advanced-StatefulSet",
                     onClick: () => onMenuClick('/openkruise/statefulset')
-                }
+                },
+                {
+                    label: "高级守护进程集",
+                    title: "高级守护进程集",
+                    icon: <i className="fa-solid fa-database"></i>,
+                    key: "Advanced-DaemonSet",
+                    onClick: () => onMenuClick('/openkruise/daemonset')
+                },
+                {
+                    label: "广播作业",
+                    title: "广播作业",
+                    icon: <i className="fa-solid fa-database"></i>,
+                    key: "broadcast-job",
+                    onClick: () => onMenuClick('/openkruise/broadcastjob')
+                },
             ],
         },
         {
