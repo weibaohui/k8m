@@ -165,6 +165,21 @@ const items: () => MenuItem[] = () => {
             ],
         },
         {
+            label: "OpenKruise",
+            title: "OpenKruise",
+            icon: <i className="fa-solid fa-cube"></i>,
+            key: "OpenKruise-workload",
+            children: [
+                {
+                    label: "高级有状态集",
+                    title: "高级有状态集",
+                    icon: <i className="fa-solid fa-database"></i>,
+                    key: "Advanced-StatefulSet",
+                    onClick: () => onMenuClick('/openkruise/statefulset')
+                }
+            ],
+        },
+        {
             label: "Helm应用",
             title: "Helm应用",
             icon: <i className="fab fa-app-store"></i>,
