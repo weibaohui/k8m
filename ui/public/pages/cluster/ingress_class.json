@@ -1,9 +1,8 @@
 {
   "type": "page",
   "data": {
-    "ns": "${ls:selectedNs||'default'}",
-    "kind": "Gateway",
-    "group": "gateway.networking.k8s.io",
+    "kind": "IngressClass",
+    "group": "networking.k8s.io",
     "version": "v1"
   },
   "body": [
@@ -204,41 +203,15 @@
       "body": [
         {
           "type": "wrapper",
+          "style": {
+            "display": "inline-flex"
+          },
           "body": [
             {
               "type": "form",
               "mode": "inline",
               "wrapWithPanel": false,
               "body": [
-                {
-                  "label": "命名空间",
-                  "type": "select",
-                  "multiple": true,
-                  "maxTagCount": 1,
-                  "name": "ns",
-                  "id": "ns",
-                  "searchable": true,
-                  "checkAll": true,
-                  "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
-                  "onEvent": {
-                    "change": {
-                      "actions": [
-                        {
-                          "actionType": "reload",
-                          "componentId": "detailCRUD",
-                          "data": {
-                            "ns": "${ns}"
-                          }
-                        },
-                        {
-                          "actionType": "custom",
-                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
-                        }
-                      ]
-                    }
-                  }
-                },
                 {
                   "label": "集群",
                   "type": "select",
@@ -302,7 +275,6 @@
       ],
       "loadDataOnce": false,
       "syncLocation": false,
-      "initFetch": true,
       "perPage": 10,
       "bulkActions": [
         {
@@ -332,21 +304,7 @@
           }
         }
       ],
-      "footerToolbar": [
-        {
-          "type": "pagination",
-          "align": "right"
-        },
-        {
-          "type": "statistics",
-          "align": "right"
-        },
-        {
-          "type": "switch-per-page",
-          "align": "right"
-        }
-      ],
-      "api": "post:/k8s/$kind/group/$group/version/$version/list/ns/${ns}",
+      "api": "post:/k8s/$kind/group/$group/version/$version/list",
       "columns": [
         {
           "type": "operation",
@@ -591,138 +549,16 @@
               "level": "link",
               "buttons": [
                 {
-                  "type": "button",
-                  "icon": "fas fa-calendar-alt text-primary",
-                  "label": "查看事件",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "size": "xl",
-                    "title": "查看事件   (ESC 关闭)",
-                    "body": [
-                      {
-                        "type": "crud",
-                        "id": "detailEvent",
-                        "name": "detailEvent",
-                        "headerToolbar": [
-                          "reload",
-                          {
-                            "type": "pagination",
-                            "align": "right"
-                          },
-                          {
-                            "type": "statistics",
-                            "align": "right"
-                          },
-                          {
-                            "type": "switch-per-page",
-                            "align": "right"
-                          }
-                        ],
-                        "loadDataOnce": true,
-                        "syncLocation": false,
-                        "perPage": 10,
-                        "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name/event",
-                        "columns": [
-                          {
-                            "type": "operation",
-                            "label": "操作",
-                            "buttons": [
-                              {
-                                "type": "button",
-                                "icon": "fas fa-brain text-primary",
-                                "label": "AI问诊",
-                                "actionType": "drawer",
-                                "drawer": {
-                                  "closeOnEsc": true,
-                                  "closeOnOutside": true,
-                                  "size": "lg",
-                                  "title": "AI 查询",
-                                  "body": [
-                                    {
-                                      "type": "websocketMarkdownViewer",
-                                      "url": "/ai/chat/event",
-                                      "params": {
-                                        "note": "${note}",
-                                        "source": "${source}",
-                                        "reason": "${reason}",
-                                        "reportingController": "${reportingController}",
-                                        "type": "${type}",
-                                        "regardingKind": "${kind}"
-                                      }
-                                    }
-                                  ]
-                                },
-                                "visibleOn": "type === 'Warning'"
-                              }
-                            ],
-                            "toggled": true
-                          },
-                          {
-                            "name": "type",
-                            "label": "类型",
-                            "filterable": {
-                              "options": [
-                                {
-                                  "label": "正常 ",
-                                  "value": "Normal"
-                                },
-                                {
-                                  "label": "告警 ",
-                                  "value": "Warning"
-                                }
-                              ]
-                            },
-                            "type": "mapping",
-                            "map": {
-                              "Normal": "<span class='label label-success'>正常</span>",
-                              "Warning": "<span class='label label-danger'>告警</span>"
-                            }
-                          },
-                          {
-                            "name": "reason",
-                            "label": "原因",
-                            "type": "text"
-                          },
-                          {
-                            "name": "field",
-                            "label": "关联字段",
-                            "type": "tpl",
-                            "tpl": "${regarding.fieldPath}"
-                          },
-                          {
-                            "name": "source",
-                            "label": "事件来源",
-                            "type": "tpl",
-                            "tpl": "${reportingController} ${reportingInstance}"
-                          },
-                          {
-                            "name": "note",
-                            "label": "说明",
-                            "type": "text",
-                            "searchable": true
-                          },
-                          {
-                            "name": "metadata.creationTimestamp",
-                            "label": "存在时长",
-                            "type": "k8sAge"
-                          }
-                        ]
-                      }
-                    ]
-                  }
+                  "label": "设为默认",
+                  "actionType": "ajax",
+                  "icon": "fas fa-star text-primary",
+                  "confirmText": "确定要设为默认?",
+                  "api": "post:/k8s/ingress_class/set_default/name/${metadata.name}"
                 }
               ]
             }
           ],
           "toggled": true
-        },
-        {
-          "name": "metadata.namespace",
-          "label": "命名空间",
-          "type": "text",
-          "sortable": true
         },
         {
           "name": "metadata.name",
@@ -739,38 +575,27 @@
           }
         },
         {
-          "name": "spec.listeners",
-          "label": "监听器",
-          "type": "tpl",
-          "tpl": "<% if (data.spec.listeners && data.spec.listeners.length) { %><% data.spec.listeners.forEach(function(listener) { %><div style='display: inline-block; margin-right: 20px; padding: 10px; border: 1px solid #eee; border-radius: 4px;'><% if (listener.name) { %>名称: <%- listener.name %><br><% } %>协议: <%- listener.protocol %><br>端口: <%- listener.port %><br><% if (listener.hostname) { %>主机名: <%- listener.hostname %><br><% } %><% if (listener.tls) { %>TLS模式: <%- listener.tls.mode || 'Terminate' %><br><% } %></div><% }); %><% } %>",
-          "searchable": {
-            "type": "select",
-            "name": "spec.listeners.protocol",
-            "label": "协议",
-            "options": [
-              {
-                "label": "HTTP",
-                "value": "HTTP"
-              },
-              {
-                "label": "HTTPS",
-                "value": "HTTPS"
-              },
-              {
-                "label": "TLS",
-                "value": "TLS"
-              },
-              {
-                "label": "TCP",
-                "value": "TCP"
-              },
-              {
-                "label": "UDP",
-                "value": "UDP"
-              }
-            ],
-            "placeholder": "选择协议"
-          }
+          "name": "ingress_count",
+          "label": "Ingress数量",
+          "type": "container",
+          "body": [
+            {
+              "type": "link",
+              "body": "${metadata.annotations['ingress.count']||'-'}",
+              "blank": false,
+              "href": "/#/ns/ing?spec[ingressClassName]=${metadata.name}"
+            }
+          ]
+        },
+        {
+          "name": "spec.controller",
+          "label": "控制器名称",
+          "type": "text"
+        },
+        {
+          "name": "metadata.annotations",
+          "label": "是否默认",
+          "tpl": "${metadata.annotations['ingressclass.kubernetes.io/is-default-class']}"
         },
         {
           "name": "metadata.labels",
@@ -853,17 +678,6 @@
           },
           "style": {
             "cursor": "pointer"
-          }
-        },
-        {
-          "name": "spec.gatewayClassName",
-          "label": "入口控制器",
-          "type": "text",
-          "searchable": {
-            "type": "select",
-            "clearable": true,
-            "searchable": true,
-            "source": "/k8s/gateway_class/option_list"
           }
         },
         {
