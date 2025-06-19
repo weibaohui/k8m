@@ -185,6 +185,13 @@ const items: () => MenuItem[] = () => {
                     onClick: () => onMenuClick('/openkruise/daemonset')
                 },
                 {
+                    label: "高级定时任务",
+                    title: "高级定时任务",
+                    icon: <i className="fa-solid fa-database"></i>,
+                    key: "Advanced-CronJob",
+                    onClick: () => onMenuClick('/openkruise/cronjob')
+                },
+                {
                     label: "广播作业",
                     title: "广播作业",
                     icon: <i className="fa-solid fa-database"></i>,
