@@ -1448,7 +1448,7 @@
                           "loadDataOnce": true,
                           "syncLocation": false,
                           "perPage": 10,
-                          "api": "get:/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pod",
+                          "api": "get:/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pod",
                           "columns": [
                             {
                               "type": "operation",
