@@ -2425,7 +2425,7 @@
                                 "headerToolbar": [
                                   "reload"
                                 ],
-                                "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/ingress",
+                                "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/ingress",
                                 "columns": [
                                   {
                                     "type": "operation",
@@ -2690,7 +2690,7 @@
                                 "headerToolbar": [
                                   "reload"
                                 ],
-                                "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/services",
+                                "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/services",
                                 "columns": [
                                   {
                                     "type": "operation",
@@ -2978,7 +2978,7 @@
                                 "headerToolbar": [
                                   "reload"
                                 ],
-                                "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/endpoints",
+                                "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/endpoints",
                                 "columns": [
                                   {
                                     "type": "operation",
@@ -3259,7 +3259,7 @@
                                 "headerToolbar": [
                                   "reload"
                                 ],
-                                "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pvc",
+                                "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pvc",
                                 "columns": [
                                   {
                                     "type": "operation",
@@ -3563,7 +3563,7 @@
                                 "headerToolbar": [
                                   "reload"
                                 ],
-                                "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pv",
+                                "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pv",
                                 "columns": [
                                   {
                                     "type": "operation",
@@ -3905,7 +3905,7 @@
                           }
                         ],
                         "loadDataOnce": true,
-                        "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/envFromPod",
+                        "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/envFromPod",
                         "columns": [
                           {
                             "name": "containerName",
@@ -3944,7 +3944,7 @@
                         "headerToolbar": [
                           "reload"
                         ],
-                        "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/configmap",
+                        "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/configmap",
                         "columns": [
                           {
                             "type": "operation",
@@ -4243,7 +4243,7 @@
                           "reload"
                         ],
                         "type": "crud",
-                        "api": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/secret",
+                        "api": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/secret",
                         "columns": [
                           {
                             "type": "operation",
