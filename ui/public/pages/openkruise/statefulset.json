@@ -2288,7 +2288,7 @@
                       "body": [
                         {
                           "type": "podsLogViewer",
-                          "url": "/k8s/${kind}/group//version/v1/ns/${metadata.namespace}/name/${metadata.name}/links/pod"
+                          "url": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pod"
                         }
                       ]
                     },
