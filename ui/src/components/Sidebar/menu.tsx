@@ -1,7 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
-import {useEffect, useState} from 'react';
-import {fetcher} from '../Amis/fetcher';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -197,8 +197,8 @@ const items: () => MenuItem[] = () => {
                         onClick: () => onMenuClick('/openkruise/cronjob')
                     },
                     {
-                        label: "广播作业",
-                        title: "广播作业",
+                        label: "广播作业任务",
+                        title: "广播作业任务",
                         icon: <i className="fa-solid fa-database"></i>,
                         key: "broadcast-job",
                         onClick: () => onMenuClick('/openkruise/broadcastjob')
