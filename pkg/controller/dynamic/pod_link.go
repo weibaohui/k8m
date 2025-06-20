@@ -22,10 +22,8 @@ func getPod(selectedCluster string, ctx context.Context, ns string, name string,
 		Name(name).
 		WithCache(linkCacheTTL)
 	pod, err = kk.Ctl().CRD().ManagedPod()
-	if err != nil {
-		return nil, err
-	}
-	if pod != nil {
+	 
+	if err == nil && pod != nil {
 		return pod, nil
 	}
 	switch kind {
@@ -51,10 +49,8 @@ func getPods(selectedCluster string, ctx context.Context, ns string, name string
 		Name(name).
 		WithCache(linkCacheTTL)
 	pods, err = kk.Ctl().CRD().ManagedPods()
-	if err != nil {
-		return nil, err
-	}
-	if len(pods) != 0 {
+
+	if err == nil && len(pods) != 0 {
 		return pods, nil
 	}
 	switch kind {
