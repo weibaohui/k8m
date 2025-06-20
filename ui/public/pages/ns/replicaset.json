@@ -1862,7 +1862,7 @@
                               "align": "right"
                             }
                           ],
-                          "api": "get:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/hpa",
+                          "api": "get:/k8s/replicaset/ns/$metadata.namespace/name/$metadata.name/hpa",
                           "columns": [
                             {
                               "type": "operation",

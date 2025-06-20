@@ -1999,7 +1999,7 @@
                               "align": "right"
                             }
                           ],
-                          "api": "get:/k8s/deploy/ns/$metadata.namespace/name/$metadata.name/hpa",
+                          "api": "get:/k8s/statefuset/ns/$metadata.namespace/name/$metadata.name/hpa",
                           "columns": [
                             {
                               "type": "operation",
