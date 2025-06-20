@@ -176,6 +176,12 @@ const items: () => MenuItem[] = () => {
                 key: "OpenKruise-workload",
                 children: [
                     {
+                        label: "克隆集",
+                        title: "克隆集",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "Advanced-StatefulSet",
+                        onClick: () => onMenuClick('/openkruise/cloneset')
+                    }, {
                         label: "高级有状态集",
                         title: "高级有状态集",
                         icon: <i className="fa-solid fa-database"></i>,
