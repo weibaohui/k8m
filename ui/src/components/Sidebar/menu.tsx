@@ -9,8 +9,9 @@ interface UserRoleResponse {
     cluster: string;
 }
 
-interface GatewayAPIStatus {
+interface CRDSupportedStatus {
     IsGatewayAPISupported: boolean;
+    IsOpenKruiseSupported: boolean;
 }
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -19,6 +20,7 @@ const items: () => MenuItem[] = () => {
     const navigate = useNavigate()
     const [userRole, setUserRole] = useState<string>('');
     const [isGatewayAPISupported, setIsGatewayAPISupported] = useState<boolean>(false);
+    const [isOpenKruiseSupported, setIsOpenKruiseSupported] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchUserRole = async () => {
@@ -42,23 +44,25 @@ const items: () => MenuItem[] = () => {
             }
         };
 
-        const fetchGatewayAPIStatus = async () => {
+        const fetchCRDSupportedStatus = async () => {
             try {
                 const response = await fetcher({
                     url: '/k8s/crd/status',
                     method: 'get'
                 });
                 if (response.data && typeof response.data === 'object') {
-                    const status = response.data.data as GatewayAPIStatus;
+                    const status = response.data.data as CRDSupportedStatus;
                     setIsGatewayAPISupported(status.IsGatewayAPISupported);
+                    setIsOpenKruiseSupported(status.IsOpenKruiseSupported);
                 }
             } catch (error) {
                 console.error('Failed to fetch Gateway API status:', error);
             }
         };
 
+
         fetchUserRole();
-        fetchGatewayAPIStatus();
+        fetchCRDSupportedStatus();
     }, []);
 
     const onMenuClick = (path: string) => {
@@ -164,6 +168,51 @@ const items: () => MenuItem[] = () => {
                 }
             ],
         },
+        ...(isOpenKruiseSupported ? [
+            {
+                label: "OpenKruise",
+                title: "OpenKruise",
+                icon: <i className="fa-solid fa-cube"></i>,
+                key: "OpenKruise-workload",
+                children: [
+                    {
+                        label: "克隆集",
+                        title: "克隆集",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "Advanced-StatefulSet",
+                        onClick: () => onMenuClick('/openkruise/cloneset')
+                    }, {
+                        label: "高级有状态集",
+                        title: "高级有状态集",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "Advanced-StatefulSet",
+                        onClick: () => onMenuClick('/openkruise/statefulset')
+                    },
+                    {
+                        label: "高级守护进程集",
+                        title: "高级守护进程集",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "Advanced-DaemonSet",
+                        onClick: () => onMenuClick('/openkruise/daemonset')
+                    },
+                    {
+                        label: "高级定时任务",
+                        title: "高级定时任务",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "Advanced-CronJob",
+                        onClick: () => onMenuClick('/openkruise/cronjob')
+                    },
+                    {
+                        label: "广播作业任务",
+                        title: "广播作业任务",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "broadcast-job",
+                        onClick: () => onMenuClick('/openkruise/broadcastjob')
+                    },
+                ],
+            },
+        ] : []),
+
         {
             label: "Helm应用",
             title: "Helm应用",

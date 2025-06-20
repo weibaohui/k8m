@@ -484,6 +484,28 @@ func Delete(c *gin.Context) {
 	})
 }
 
+func HPA(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	hpa, err := kom.Cluster(selectedCluster).WithContext(ctx).
+		CRD(group, version, kind).Namespace(ns).Name(name).
+		Ctl().CRD().HPAList()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, hpa)
+}
+
 // 递归解析 JSON 数据
 //
 //	queryConditions := parseNestedJSON("", jsonData)

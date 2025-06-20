@@ -2,9 +2,9 @@
   "type": "page",
   "data": {
     "ns": "${ls:selectedNs||'default'}",
-    "kind": "Pod",
-    "group": "",
-    "version": "v1"
+    "kind": "StatefulSet",
+    "group": "apps.kruise.io",
+    "version": "v1beta1"
   },
   "body": [
     {
@@ -296,8 +296,7 @@
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
-        "showBtnToolbar": false,
-        "defaultCollapsed": false
+        "showBtnToolbar": false
       },
       "headerToolbar": [
         {
@@ -319,146 +318,6 @@
           "align": "left"
         },
         "reload",
-        {
-          "type": "button",
-          "label": "资源用量",
-          "actionType": "drawer",
-          "tooltip": "资源用量 kubectl top pods -n xx",
-          "drawer": {
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "title": "容器组资源用量（ESC 关闭）",
-            "size": "xl",
-            "body": [
-              {
-                "type": "crud",
-                "id": "topPodCRUD",
-                "name": "topPodCRUD",
-                "autoFillHeight": true,
-                "autoGenerateFilter": {
-                  "columnsNum": 4,
-                  "showBtnToolbar": false
-                },
-                "headerToolbar": [
-                  {
-                    "type": "columns-toggler",
-                    "align": "right",
-                    "draggable": true,
-                    "icon": "fas fa-cog",
-                    "overlay": true,
-                    "footerBtnSize": "sm"
-                  },
-                  {
-                    "type": "tpl",
-                    "tpl": "共${count}条",
-                    "align": "right",
-                    "visibleOn": "${count}"
-                  },
-                  {
-                    "type": "columns-toggler",
-                    "align": "left"
-                  },
-                  "reload"
-                ],
-                "loadDataOnce": true,
-                "syncLocation": false,
-                "initFetch": true,
-                "perPage": 10,
-                "footerToolbar": [
-                  {
-                    "type": "pagination",
-                    "align": "right"
-                  },
-                  {
-                    "type": "statistics",
-                    "align": "right"
-                  },
-                  {
-                    "type": "switch-per-page",
-                    "align": "right"
-                  }
-                ],
-                "api": "get:/k8s/pod/top/ns/${ls:selectedNs||'default'}/list",
-                "columns": [
-                  {
-                    "name": "namespace",
-                    "label": "命名空间",
-                    "type": "text",
-                    "sortable": true,
-                    "searchable": true
-                  },
-                  {
-                    "name": "name",
-                    "label": "名称",
-                    "type": "text",
-                    "sortable": true,
-                    "searchable": true
-                  },
-                  {
-                    "name": "cpu",
-                    "label": "cpu（核）",
-                    "type": "text",
-                    "sortable": true
-                  },
-                  {
-                    "name": "cpu_fraction",
-                    "label": "CPU资源<br><span class='text-gray-500 text-xs'>实时用量占比</span>",
-                    "type": "container",
-                    "width": "150px",
-                    "sortable": true,
-                    "body": [
-                      {
-                        "type": "progress",
-                        "label": "realtime",
-                        "value": "<%= data.cpu_fraction && Number(data.cpu_fraction) !== 0 ? data.cpu_fraction : 0 %>",
-                        "placeholder": "N/A",
-                        "animate": true,
-                        "width": "100px",
-                        "map": [
-                          "bg-success",
-                          "bg-success",
-                          "bg-success",
-                          "bg-warning",
-                          "bg-danger"
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "name": "memory",
-                    "label": "内存（Mi）",
-                    "type": "text",
-                    "sortable": true
-                  },
-                  {
-                    "name": "memory_fraction",
-                    "label": "内存资源<br><span class='text-gray-500 text-xs'>实时用量占比</span>",
-                    "type": "container",
-                    "width": "150px",
-                    "sortable": true,
-                    "body": [
-                      {
-                        "type": "progress",
-                        "label": "realtime",
-                        "value": "<%= data.memory_fraction && Number(data.memory_fraction) !== 0 ? data.memory_fraction : 0 %>",
-                        "placeholder": "N/A",
-                        "animate": true,
-                        "width": "100px",
-                        "map": [
-                          "bg-success",
-                          "bg-success",
-                          "bg-success",
-                          "bg-warning",
-                          "bg-danger"
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        },
         "bulkActions"
       ],
       "loadDataOnce": false,
@@ -491,6 +350,48 @@
               "ns_list": "${selectedItems | pick:metadata.namespace }"
             }
           }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "重启",
+          "confirmText": "确定要批量重启?",
+          "api": {
+            "url": "/k8s/statefulset/batch/restart",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "停止",
+          "confirmText": "确定要批量停止?",
+          "api": {
+            "url": "/k8s/statefulset/batch/stop",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "恢复",
+          "confirmText": "确定要批量恢复?",
+          "api": {
+            "url": "/k8s/statefulset/batch/restore",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
         }
       ],
       "footerToolbar": [
@@ -512,7 +413,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 100,
+          "width": 120,
           "buttons": [
             {
               "type": "button",
@@ -748,151 +649,717 @@
               }
             },
             {
-              "tooltip": "终端",
-              "type": "button",
+              "type": "dropdown-button",
               "level": "link",
-              "actionType": "url",
-              "icon": "fa fa-terminal text-primary",
-              "blank": true,
-              "url": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
-            },
-            {
-              "tooltip": "日志",
-              "icon": "fa fa-list text-primary",
-              "type": "button",
-              "level": "link",
-              "actionType": "url",
-              "blank": true,
-              "url": "/#/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
-            },
-            {
-              "type": "button",
-              "icon": "fas fa-binoculars text-primary",
-              "actionType": "drawer",
-              "tooltip": "端口",
-              "drawer": {
-                "closeOnEsc": true,
-                "closeOnOutside": true,
-                "size": "xl",
-                "title": "${metadata.name} 端口 (ESC 关闭)",
-                "body": [
-                  {
-                    "type": "crud",
-                    "id": "detailPortList",
-                    "name": "detailPortList",
-                    "headerToolbar": [
-                      "reload",
+              "buttons": [
+                {
+                  "type": "button",
+                  "icon": "fas fa-wrench text-primary",
+                  "label": "更新镜像",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "position": "left",
+                    "title": "编辑",
+                    "body": [
                       {
-                        "type": "pagination",
-                        "align": "right"
-                      },
-                      {
-                        "type": "statistics",
-                        "align": "right"
-                      },
-                      {
-                        "type": "switch-per-page",
-                        "align": "right"
-                      }
-                    ],
-                    "loadDataOnce": true,
-                    "syncLocation": false,
-                    "perPage": 10,
-                    "api": "get:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/port/list",
-                    "columns": [
-                      {
-                        "type": "operation",
-                        "label": "操作",
-                        "buttons": [
+                        "type": "page",
+                        "body": [
                           {
-                            "type": "button",
-                            "icon": "fas fa-random text-primary",
-                            "label": "转发",
-                            "actionType": "dialog",
-                            "dialog": {
-                              "title": "端口转发",
-                              "body": [
-                                {
-                                  "type": "form",
-                                  "api": "post:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/container/${container_name}/pod_port/${pod_port}/local_port/${local_port}/start",
-                                  "body": [
-                                    {
-                                      "type": "switch",
-                                      "name": "specify_port",
-                                      "label": "指定端口"
-                                    },
-                                    {
-                                      "type": "input-number",
-                                      "name": "local_port",
-                                      "label": "转发端口",
-                                      "visibleOn": "this.specify_port == true",
-                                      "min": 1,
-                                      "max": 65535
-                                    }
-                                  ],
-                                  "onEvent": {
-                                    "submitSucc": {
-                                      "actions": [
-                                        {
-                                          "actionType": "reload",
-                                          "componentId": "detailPortList"
-                                        },
-                                        {
-                                          "actionType": "closeDrawer"
-                                        }
-                                      ]
-                                    }
-                                  }
-                                }
-                              ]
+                            "type": "panel",
+                            "title": "当前运行镜像",
+                            "body": {
+                              "name": "spec.template.spec.containers",
+                              "type": "each",
+                              "items": {
+                                "type": "tpl",
+                                "tpl": "<div style='margin-bottom: 10px;'>容器：<strong class='text-green-500 font-black'>${name}</strong><br>镜像： ${image|simpleImageName}</div>"
+                              }
                             }
                           },
                           {
-                            "type": "button",
-                            "actionType": "ajax",
-                            "icon": "fas fa-stop text-primary",
-                            "label": "关闭",
-                            "api": "post:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/container/${container_name}/pod_port/${pod_port}/stop",
-                            "onEvent": {
-                              "success": {
-                                "actions": [
+                            "type": "form",
+                            "title": "更新镜像",
+                            "name": "sample-edit-form",
+                            "api": "post:/k8s/$kind/group/$group/version/$version/update_image/ns/$metadata.namespace/name/$metadata.name",
+                            "actions": [],
+                            "body": [
+                              {
+                                "label": "镜像拉取密钥",
+                                "type": "select",
+                                "multiple": true,
+                                "maxTagCount": 1,
+                                "name": "image_pull_secrets",
+                                "id": "image_pull_secrets",
+                                "searchable": true,
+                                "clearable": true,
+                                "noResultsText": "未设置密钥",
+                                "checkAll": true,
+                                "source": "/k8s/$kind/group/$group/version/$version/image_pull_secrets/ns/$metadata.namespace/name/$metadata.name"
+                              },
+                              {
+                                "type": "select",
+                                "name": "container_name",
+                                "label": "容器",
+                                "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.template.spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "service",
+                                "api": "/k8s/$kind/group/$group/version/$version/container_info/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                                "body": [
                                   {
-                                    "actionType": "reload",
-                                    "componentId": "detailPortList"
+                                    "type": "input-text",
+                                    "name": "image",
+                                    "label": "镜像名称",
+                                    "required": true
+                                  },
+                                  {
+                                    "type": "input-text",
+                                    "name": "tag",
+                                    "label": "版本标签",
+                                    "required": true
+                                  },
+                                  {
+                                    "type": "select",
+                                    "name": "image_pull_policy",
+                                    "label": "镜像拉取策略",
+                                    "required": true,
+                                    "options": [
+                                      {
+                                        "label": "始终拉取",
+                                        "value": "Always"
+                                      },
+                                      {
+                                        "label": "从不拉取",
+                                        "value": "Never"
+                                      },
+                                      {
+                                        "label": "不存在时拉取",
+                                        "value": "IfNotPresent"
+                                      }
+                                    ]
                                   }
                                 ]
                               }
-                            }
+                            ]
                           }
-                        ],
-                        "toggled": true
-                      },
-                      {
-                        "name": "container_name",
-                        "label": "容器名称",
-                        "type": "text"
-                      },
-                      {
-                        "name": "pod_port",
-                        "label": "Pod端口",
-                        "type": "tpl",
-                        "tpl": "${port_name ? port_name +':': ''}${pod_port ? pod_port : ''}${protocol ?'['+ protocol+']' : ''}"
-                      },
-                      {
-                        "name": "local_port",
-                        "label": "访问端口",
-                        "type": "tpl",
-                        "tpl": "${local_port ? `${local_port} <a href='http://127.0.0.1:${local_port}' target='_blank'>http</a> <a href='https://127.0.0.1:${local_port}' target='_blank'>https</a>` : ''}"
-                      },
-                      {
-                        "name": "status",
-                        "label": "状态",
-                        "type": "text"
+                        ]
                       }
                     ]
                   }
-                ]
-              }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-plus-circle text-primary",
+                  "level": "link",
+                  "actionType": "dialog",
+                  "label": "扩缩容",
+                  "dialog": {
+                    "title": "扩缩容",
+                    "body": {
+                      "type": "form",
+                      "api": {
+                        "url": "/k8s/statefulset/ns/$metadata.namespace/name/$metadata.name/scale/replica/${spec.replicas}",
+                        "method": "post",
+                        "data": {}
+                      },
+                      "body": [
+                        {
+                          "type": "input-number",
+                          "name": "spec.replicas",
+                          "label": "副本"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-memory text-primary",
+                  "label": "调整资源限制",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "position": "left",
+                    "title": "编辑资源限制",
+                    "body": [
+                      {
+                        "type": "page",
+                        "body": [
+                          {
+                            "type": "panel",
+                            "title": "当前容器资源",
+                            "body": {
+                              "name": "spec.template.spec.containers",
+                              "type": "each",
+                              "items": {
+                                "type": "tpl",
+                                "tpl": "<div style='margin-bottom: 10px;'>容器：<strong class='text-green-500 font-black'>${name}</strong><br>CPU请求/限制：${resources.requests.cpu|default:'未设置'}/${resources.limits.cpu|default:'未设置'}<br>内存请求/限制：${resources.requests.memory|default:'未设置'}/${resources.limits.memory|default:'未设置'}</div>"
+                              }
+                            }
+                          },
+                          {
+                            "type": "form",
+                            "title": "更新资源限制",
+                            "name": "resource-edit-form",
+                            "api": "post:/k8s/$kind/group/$group/version/$version/update_resources/ns/$metadata.namespace/name/$metadata.name",
+                            "actions": [],
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "container_name",
+                                "label": "容器",
+                                "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.template.spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "service",
+                                "api": "/k8s/$kind/group/$group/version/$version/container_resources_info/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                                "body": [
+                                  {
+                                    "type": "group",
+                                    "body": [
+                                      {
+                                        "type": "panel",
+                                        "title": "CPU设置",
+                                        "body": [
+                                          {
+                                            "type": "input-text",
+                                            "name": "request_cpu",
+                                            "label": "CPU请求",
+                                            "placeholder": "如: 500m 或 0.5",
+                                            "description": "容器启动时请求的CPU资源"
+                                          },
+                                          {
+                                            "type": "input-text",
+                                            "name": "limit_cpu",
+                                            "label": "CPU限制",
+                                            "placeholder": "如: 1 或 1000m",
+                                            "description": "容器最大可使用的CPU资源"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "panel",
+                                        "title": "内存设置",
+                                        "body": [
+                                          {
+                                            "type": "input-text",
+                                            "name": "request_memory",
+                                            "label": "内存请求",
+                                            "placeholder": "如: 512Mi 或 1Gi",
+                                            "description": "容器启动时请求的内存资源"
+                                          },
+                                          {
+                                            "type": "input-text",
+                                            "name": "limit_memory",
+                                            "label": "内存限制",
+                                            "placeholder": "如: 1Gi 或 2Gi",
+                                            "description": "容器最大可使用的内存资源"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-check-circle text-primary",
+                  "label": "健康检查配置",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": false,
+                    "position": "left",
+                    "size": "lg",
+                    "title": "健康检查配置",
+                    "body": {
+                      "type": "form",
+                      "title": "健康检查配置",
+                      "name": "health-check-form",
+                      "api": {
+                        "method": "post",
+                        "url": "/k8s/$kind/group/$group/version/$version/update_health_checks/ns/$metadata.namespace/name/$metadata.name",
+                        "data": {
+                          "container_name": "${container_name}",
+                          "liveness_type": "${liveness_probe.type}",
+                          "readiness_type": "${readiness_probe.type}",
+                          "liveness_probe": "${liveness_probe.type === null ? {} : (liveness_probe.type ? { httpGet: liveness_probe.type == 'httpGet' ? {path: liveness_probe.httpGet.path, port: liveness_probe.httpGet.port, scheme: liveness_probe.httpGet.scheme, httpHeaders: liveness_probe.httpGet.httpHeaders} : undefined, tcpSocket: liveness_probe.type == 'tcpSocket' ? {port: liveness_probe.tcpSocket.port} : undefined, exec: liveness_probe.type == 'exec' ? {command: liveness_probe.exec.command} : undefined, initialDelaySeconds: liveness_probe.initialDelaySeconds, periodSeconds: liveness_probe.periodSeconds, timeoutSeconds: liveness_probe.timeoutSeconds, failureThreshold: liveness_probe.failureThreshold, successThreshold: liveness_probe.successThreshold } : {})}",
+                          "readiness_probe": "${readiness_probe.type === null ? {} : (readiness_probe.type ? { httpGet: readiness_probe.type == 'httpGet' ? {path: readiness_probe.httpGet.path, port: readiness_probe.httpGet.port, scheme: readiness_probe.httpGet.scheme, httpHeaders: readiness_probe.httpGet.httpHeaders} : undefined, tcpSocket: readiness_probe.type == 'tcpSocket' ? {port: readiness_probe.tcpSocket.port} : undefined, exec: readiness_probe.type == 'exec' ? {command: readiness_probe.exec.command} : undefined, initialDelaySeconds: readiness_probe.initialDelaySeconds, periodSeconds: readiness_probe.periodSeconds, timeoutSeconds: readiness_probe.timeoutSeconds, failureThreshold: readiness_probe.failureThreshold, successThreshold: readiness_probe.successThreshold } : {})}"
+                        }
+                      },
+                      "body": [
+                        {
+                          "type": "select",
+                          "name": "container_name",
+                          "label": "容器",
+                          "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                          "value": "${spec.template.spec.containers[0].name}",
+                          "required": true
+                        },
+                        {
+                          "type": "service",
+                          "api": "/k8s/$kind/group/$group/version/$version/container_health_checks/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                          "adaptor": "return {\n  status: payload.status,\n  data: payload.data || {\n    container_name: '',\n    liveness_probe: null,\n    readiness_probe: null\n  }\n};",
+                          "body": [
+                            {
+                              "type": "tabs",
+                              "tabs": [
+                                {
+                                  "title": "存活探针",
+                                  "body": [
+                                    {
+                                      "type": "select",
+                                      "name": "liveness_probe.type",
+                                      "label": "探针类型",
+                                      "value": "${liveness_probe ? (liveness_probe.httpGet ? 'httpGet' : liveness_probe.tcpSocket ? 'tcpSocket' : liveness_probe.exec ? 'exec' : null) : null}",
+                                      "options": [
+                                        {
+                                          "label": "HTTP请求",
+                                          "value": "httpGet"
+                                        },
+                                        {
+                                          "label": "TCP端口检查",
+                                          "value": "tcpSocket"
+                                        },
+                                        {
+                                          "label": "执行命令",
+                                          "value": "exec"
+                                        },
+                                        {
+                                          "label": "不设置",
+                                          "value": null
+                                        }
+                                      ],
+                                      "mode": "inline",
+                                      "clearable": true
+                                    },
+                                    {
+                                      "type": "container",
+                                      "visibleOn": "${liveness_probe && liveness_probe.type !== null }",
+                                      "body": [
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "HTTP请求设置",
+                                          "visibleOn": "${liveness_probe.type == 'httpGet'}",
+                                          "body": [
+                                            {
+                                              "type": "input-text",
+                                              "name": "liveness_probe.httpGet.path",
+                                              "label": "HTTP路径",
+                                              "value": "${liveness_probe?.httpGet?.path || ''}",
+                                              "placeholder": "健康检查路径，如：/healthz",
+                                              "required": true
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "liveness_probe.httpGet.port",
+                                              "label": "端口",
+                                              "value": "${liveness_probe?.httpGet?.port || ''}",
+                                              "placeholder": "健康检查端口号",
+                                              "required": true,
+                                              "min": 1,
+                                              "max": 65535
+                                            },
+                                            {
+                                              "type": "select",
+                                              "name": "liveness_probe.httpGet.scheme",
+                                              "label": "协议",
+                                              "value": "${liveness_probe?.httpGet?.scheme || 'HTTP'}",
+                                              "required": true,
+                                              "options": [
+                                                {
+                                                  "label": "HTTP",
+                                                  "value": "HTTP"
+                                                },
+                                                {
+                                                  "label": "HTTPS",
+                                                  "value": "HTTPS"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "combo",
+                                              "name": "liveness_probe.httpGet.httpHeaders",
+                                              "label": "HTTP头信息",
+                                              "multiple": true,
+                                              "addable": true,
+                                              "removable": true,
+                                              "items": [
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "name",
+                                                  "label": "头名称",
+                                                  "placeholder": "如: Authorization"
+                                                },
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "value",
+                                                  "label": "头值",
+                                                  "placeholder": "如: Bearer tokenxxxxxxxx"
+                                                }
+                                              ],
+                                              "value": "${liveness_probe?.httpGet?.httpHeaders || []}",
+                                              "description": "可选的自定义HTTP头信息"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "TCP端口检查设置",
+                                          "visibleOn": "${liveness_probe.type == 'tcpSocket'}",
+                                          "body": [
+                                            {
+                                              "type": "input-number",
+                                              "name": "liveness_probe.tcpSocket.port",
+                                              "label": "TCP端口",
+                                              "value": "${liveness_probe?.tcpSocket?.port || ''}",
+                                              "placeholder": "需要检查的TCP端口号",
+                                              "required": true,
+                                              "min": 1,
+                                              "max": 65535
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "执行命令设置",
+                                          "visibleOn": "${liveness_probe.type == 'exec'}",
+                                          "body": [
+                                            {
+                                              "type": "input-array",
+                                              "name": "liveness_probe.exec.command",
+                                              "label": "执行命令",
+                                              "items": {
+                                                "type": "input-text",
+                                                "placeholder": "请输入命令"
+                                              },
+                                              "value": "${liveness_probe?.exec?.command?.length > 0 ? liveness_probe.exec.command : ['/bin/bash', '-c', 'ps -ef']}",
+                                              "pipeIn": "return Array.isArray(value) ? value : (value ? [value] : ['/bin/bash', '-c', ''])",
+                                              "addButtonText": "添加参数"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "通用参数设置",
+                                          "body": [
+                                            {
+                                              "type": "input-number",
+                                              "name": "liveness_probe.initialDelaySeconds",
+                                              "label": "初始延迟秒数",
+                                              "value": "${liveness_probe?.initialDelaySeconds || 30}",
+                                              "min": 1,
+                                              "placeholder": "容器启动后等待多少秒开始探测",
+                                              "required": true
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "liveness_probe.periodSeconds",
+                                              "label": "检测周期秒数",
+                                              "value": "${liveness_probe?.periodSeconds || 10}",
+                                              "min": 1,
+                                              "placeholder": "每次探测间隔多少秒",
+                                              "required": true
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "liveness_probe.timeoutSeconds",
+                                              "label": "超时秒数",
+                                              "value": "${liveness_probe?.timeoutSeconds || 5}",
+                                              "min": 1,
+                                              "placeholder": "探测超时时间（秒）",
+                                              "required": true
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "liveness_probe.failureThreshold",
+                                              "label": "失败阈值",
+                                              "value": "${liveness_probe?.failureThreshold || 3}",
+                                              "min": 1,
+                                              "required": true,
+                                              "placeholder": "连续失败多少次标记为不健康"
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "liveness_probe.successThreshold",
+                                              "label": "成功阈值",
+                                              "value": "${liveness_probe?.successThreshold || 1}",
+                                              "required": true,
+                                              "min": 1,
+                                              "max": 1,
+                                              "placeholder": "连续成功多少次标记为健康"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "title": "就绪探针",
+                                  "body": [
+                                    {
+                                      "type": "select",
+                                      "name": "readiness_probe.type",
+                                      "label": "探针类型",
+                                      "value": "${readiness_probe ? (readiness_probe.httpGet ? 'httpGet' : readiness_probe.tcpSocket ? 'tcpSocket' : readiness_probe.exec ? 'exec' : null) : null}",
+                                      "options": [
+                                        {
+                                          "label": "HTTP请求",
+                                          "value": "httpGet"
+                                        },
+                                        {
+                                          "label": "TCP端口检查",
+                                          "value": "tcpSocket"
+                                        },
+                                        {
+                                          "label": "执行命令",
+                                          "value": "exec"
+                                        },
+                                        {
+                                          "label": "不设置",
+                                          "value": null
+                                        }
+                                      ],
+                                      "mode": "inline",
+                                      "clearable": true
+                                    },
+                                    {
+                                      "type": "container",
+                                      "visibleOn": "${readiness_probe && readiness_probe.type !== null }",
+                                      "body": [
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "HTTP请求设置",
+                                          "visibleOn": "${readiness_probe.type == 'httpGet'}",
+                                          "body": [
+                                            {
+                                              "type": "input-text",
+                                              "name": "readiness_probe.httpGet.path",
+                                              "label": "HTTP路径",
+                                              "value": "${readiness_probe?.httpGet?.path || ''}",
+                                              "placeholder": "就绪检查路径，如：/ready",
+                                              "required": true
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "readiness_probe.httpGet.port",
+                                              "label": "端口",
+                                              "value": "${readiness_probe?.httpGet?.port || ''}",
+                                              "placeholder": "就绪检查端口号",
+                                              "required": true,
+                                              "min": 1,
+                                              "max": 65535
+                                            },
+                                            {
+                                              "type": "select",
+                                              "name": "readiness_probe.httpGet.scheme",
+                                              "label": "协议",
+                                              "value": "${readiness_probe?.httpGet?.scheme || 'HTTP'}",
+                                              "required": true,
+                                              "options": [
+                                                {
+                                                  "label": "HTTP",
+                                                  "value": "HTTP"
+                                                },
+                                                {
+                                                  "label": "HTTPS",
+                                                  "value": "HTTPS"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "combo",
+                                              "name": "liveness_probe.httpGet.httpHeaders",
+                                              "label": "HTTP头信息",
+                                              "multiple": true,
+                                              "addable": true,
+                                              "removable": true,
+                                              "items": [
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "name",
+                                                  "label": "头名称",
+                                                  "placeholder": "如: Authorization"
+                                                },
+                                                {
+                                                  "type": "input-text",
+                                                  "name": "value",
+                                                  "label": "头值",
+                                                  "placeholder": "如: Bearer tokenxxxxxxxx"
+                                                }
+                                              ],
+                                              "value": "${liveness_probe?.httpGet?.httpHeaders || []}",
+                                              "description": "可选的自定义HTTP头信息"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "TCP端口检查设置",
+                                          "visibleOn": "${readiness_probe.type == 'tcpSocket'}",
+                                          "body": [
+                                            {
+                                              "type": "input-number",
+                                              "name": "readiness_probe.tcpSocket.port",
+                                              "label": "TCP端口",
+                                              "value": "${readiness_probe?.tcpSocket?.port || ''}",
+                                              "placeholder": "需要检查的TCP端口号",
+                                              "required": true,
+                                              "min": 1,
+                                              "max": 65535
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "执行命令设置",
+                                          "visibleOn": "${readiness_probe.type == 'exec'}",
+                                          "body": [
+                                            {
+                                              "type": "input-array",
+                                              "name": "readiness_probe.exec.command",
+                                              "label": "执行命令",
+                                              "items": {
+                                                "type": "input-text",
+                                                "placeholder": "请输入命令"
+                                              },
+                                              "value": "${readiness_probe?.exec?.command?.length > 0 ? readiness_probe.exec.command : ['/bin/bash', '-c', 'ps -ef']}",
+                                              "pipeIn": "return Array.isArray(value) ? value : (value ? [value] : ['/bin/bash', '-c', ''])",
+                                              "addButtonText": "添加参数"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "fieldSet",
+                                          "title": "通用参数设置",
+                                          "body": [
+                                            {
+                                              "type": "input-number",
+                                              "name": "readiness_probe.initialDelaySeconds",
+                                              "label": "初始延迟秒数",
+                                              "value": "${readiness_probe?.initialDelaySeconds || 30}",
+                                              "required": true,
+                                              "min": 1,
+                                              "placeholder": "容器启动后等待多少秒开始探测"
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "readiness_probe.periodSeconds",
+                                              "label": "检测周期秒数",
+                                              "value": "${readiness_probe?.periodSeconds || 10}",
+                                              "required": true,
+                                              "min": 1,
+                                              "placeholder": "每次探测间隔多少秒"
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "readiness_probe.timeoutSeconds",
+                                              "label": "超时秒数",
+                                              "value": "${readiness_probe?.timeoutSeconds || 5}",
+                                              "min": 1,
+                                              "placeholder": "探测超时时间（秒）"
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "readiness_probe.failureThreshold",
+                                              "label": "失败阈值",
+                                              "value": "${readiness_probe?.failureThreshold || 3}",
+                                              "required": true,
+                                              "min": 1,
+                                              "placeholder": "连续失败多少次标记为不健康"
+                                            },
+                                            {
+                                              "type": "input-number",
+                                              "name": "readiness_probe.successThreshold",
+                                              "label": "成功阈值",
+                                              "value": "${readiness_probe?.successThreshold || 1}",
+                                              "required": true,
+                                              "min": 1,
+                                              "placeholder": "连续成功多少次标记为健康"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "button",
+                  "icon": "fas fa-list text-primary",
+                  "label": "设置环境变量",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "position": "left",
+                    "size": "lg",
+                    "title": "设置环境变量",
+                    "body": [
+                      {
+                        "type": "page",
+                        "body": [
+                          {
+                            "type": "form",
+                            "title": "设置环境变量",
+                            "name": "resource-edit-form",
+                            "api": "post:/k8s/$kind/group/$group/version/$version/update_env/ns/$metadata.namespace/name/$metadata.name",
+                            "actions": [],
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "container_name",
+                                "label": "容器",
+                                "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                                "value": "${spec.template.spec.containers[0].name}",
+                                "required": true
+                              },
+                              {
+                                "type": "service",
+                                "api": "/k8s/$kind/group/$group/version/$version/container_env/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
+                                "body": [
+                                  {
+                                    "type": "input-kv",
+                                    "name": "envs",
+                                    "draggable": false,
+                                    "value": "${envs}",
+                                    "valueSchema": {
+                                      "type": "textarea",
+                                      "minRows": 1
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           ],
           "toggled": true
@@ -901,16 +1368,7 @@
           "name": "metadata.namespace",
           "label": "命名空间",
           "type": "text",
-          "sortable": true,
-          "searchable": {
-            "name": "metadata.namespace",
-            "clearable": true,
-            "label": "命名空间",
-            "placeholder": "输入命名空间",
-            "type": "select",
-            "searchable": true,
-            "source": "/k8s/ns/option_list"
-          }
+          "sortable": true
         },
         {
           "name": "metadata.name",
@@ -936,6 +1394,446 @@
                 "body": {
                   "type": "tabs",
                   "tabs": [
+                    {
+                      "title": "容器组",
+                      "body": [
+                        {
+                          "type": "crud",
+                          "id": "detailEvent",
+                          "name": "detailEvent",
+                          "headerToolbar": [
+                            "reload",
+                            {
+                              "type": "pagination",
+                              "align": "right"
+                            },
+                            {
+                              "type": "statistics",
+                              "align": "right"
+                            },
+                            {
+                              "type": "switch-per-page",
+                              "align": "right"
+                            },
+                            "bulkActions"
+                          ],
+                          "bulkActions": [
+                            {
+                              "label": "批量删除",
+                              "actionType": "ajax",
+                              "confirmText": "确定要批量删除?",
+                              "api": {
+                                "url": "/k8s/Pod/group//version/v1/batch/remove",
+                                "method": "post",
+                                "data": {
+                                  "name_list": "${selectedItems | pick:metadata.name }",
+                                  "ns_list": "${selectedItems | pick:metadata.namespace }"
+                                }
+                              }
+                            },
+                            {
+                              "label": "强制删除",
+                              "actionType": "ajax",
+                              "confirmText": "确定要批量强制删除?",
+                              "api": {
+                                "url": "/k8s/Pod/group//version/v1/force_remove",
+                                "method": "post",
+                                "data": {
+                                  "name_list": "${selectedItems | pick:metadata.name }",
+                                  "ns_list": "${selectedItems | pick:metadata.namespace }"
+                                }
+                              }
+                            }
+                          ],
+                          "loadDataOnce": true,
+                          "syncLocation": false,
+                          "perPage": 10,
+                          "api": "get:/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pod",
+                          "columns": [
+                            {
+                              "type": "operation",
+                              "label": "操作",
+                              "buttons": [
+                                {
+                                  "type": "button",
+                                  "actionType": "drawer",
+                                  "icon": "fa fa-edit text-primary",
+                                  "tooltip": "编辑",
+                                  "style": {
+                                    "border": "None"
+                                  },
+                                  "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "lg",
+                                    "title": "Yaml管理",
+                                    "body": [
+                                      {
+                                        "type": "tabs",
+                                        "tabsMode": "tiled",
+                                        "tabs": [
+                                          {
+                                            "title": "查看编辑",
+                                            "body": [
+                                              {
+                                                "type": "service",
+                                                "api": "get:/k8s/Pod/group//version/v1/ns/$metadata.namespace/name/$metadata.name",
+                                                "body": [
+                                                  {
+                                                    "type": "mEditor",
+                                                    "text": "${yaml}",
+                                                    "componentId": "yaml",
+                                                    "saveApi": "/k8s/Pod/group//version/v1/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                    "options": {
+                                                      "language": "yaml",
+                                                      "wordWrap": "on",
+                                                      "scrollbar": {
+                                                        "vertical": "auto"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "title": "文档",
+                                            "body": [
+                                              {
+                                                "type": "page",
+                                                "asideResizor": true,
+                                                "asideSticky": false,
+                                                "aside": [
+                                                  {
+                                                    "type": "input-tree",
+                                                    "name": "tree",
+                                                    "initiallyOpen": false,
+                                                    "unfoldedLevel": 1,
+                                                    "searchable": true,
+                                                    "showOutline": true,
+                                                    "showIcon": true,
+                                                    "searchConfig": {
+                                                      "sticky": true
+                                                    },
+                                                    "heightAuto": true,
+                                                    "inputClassName": "no-border no-padder mt-1",
+                                                    "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                                    "onEvent": {
+                                                      "change": {
+                                                        "actions": [
+                                                          {
+                                                            "componentId": "basic",
+                                                            "actionType": "reload",
+                                                            "data": {
+                                                              "description": "${event.data.item.description}",
+                                                              "id": "${event.data.item.id}",
+                                                              "full_id": "${event.data.item.full_id}",
+                                                              "type": "${event.data.item.type}"
+                                                            }
+                                                          },
+                                                          {
+                                                            "componentId": "detail",
+                                                            "actionType": "reload",
+                                                            "data": {
+                                                              "description": "${event.data.item.description}",
+                                                              "id": "${event.data.item.id}",
+                                                              "full_id": "${event.data.item.full_id}",
+                                                              "type": "${event.data.item.type}"
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                ],
+                                                "body": [
+                                                  {
+                                                    "type": "service",
+                                                    "id": "basic",
+                                                    "body": [
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>属性：</strong> ${id}",
+                                                        "visibleOn": "${id}"
+                                                      },
+                                                      {
+                                                        "type": "button",
+                                                        "label": "示例",
+                                                        "level": "link",
+                                                        "icon": "fas fa-lightbulb text-warning",
+                                                        "actionType": "drawer",
+                                                        "drawer": {
+                                                          "overlay": false,
+                                                          "closeOnEsc": true,
+                                                          "closeOnOutside": true,
+                                                          "size": "lg",
+                                                          "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                                          "body": [
+                                                            {
+                                                              "type": "websocketMarkdownViewer",
+                                                              "url": "/ai/chat/example/field",
+                                                              "params": {
+                                                                "kind": "${kind}",
+                                                                "group": "${group}",
+                                                                "version": "${version}",
+                                                                "field": "${full_id}"
+                                                              }
+                                                            }
+                                                          ]
+                                                        },
+                                                        "visibleOn": "${id}"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                                                        "visibleOn": "${type}"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>描述：</strong> ${description}",
+                                                        "visibleOn": "${description}"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "service",
+                                                    "id": "detail",
+                                                    "api": "post:/k8s/doc/detail",
+                                                    "body": [
+                                                      {
+                                                        "type": "divider",
+                                                        "title": "描述翻译",
+                                                        "titlePosition": "center",
+                                                        "visibleOn": "${translate}"
+                                                      },
+                                                      {
+                                                        "type": "markdown",
+                                                        "value": "${translate|raw}",
+                                                        "options": {
+                                                          "linkify": true,
+                                                          "html": true,
+                                                          "breaks": true
+                                                        },
+                                                        "visibleOn": "${translate}"
+                                                      },
+                                                      {
+                                                        "type": "container",
+                                                        "body": [
+                                                          {
+                                                            "type": "tpl",
+                                                            "tpl": "<div style='height:80vh'>&nbsp</div>"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "actions": []
+                                  }
+                                },
+                                {
+                                  "tooltip": "终端",
+                                  "type": "button",
+                                  "level": "link",
+                                  "actionType": "url",
+                                  "icon": "fa fa-terminal text-primary",
+                                  "blank": true,
+                                  "url": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+                                },
+                                {
+                                  "type": "button",
+                                  "icon": "fas fa-binoculars text-primary",
+                                  "actionType": "drawer",
+                                  "tooltip": "端口",
+                                  "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "xl",
+                                    "title": "${metadata.name} 端口 (ESC 关闭)",
+                                    "body": [
+                                      {
+                                        "type": "crud",
+                                        "id": "detailPortList",
+                                        "name": "detailPortList",
+                                        "headerToolbar": [
+                                          "reload",
+                                          {
+                                            "type": "pagination",
+                                            "align": "right"
+                                          },
+                                          {
+                                            "type": "statistics",
+                                            "align": "right"
+                                          },
+                                          {
+                                            "type": "switch-per-page",
+                                            "align": "right"
+                                          }
+                                        ],
+                                        "loadDataOnce": true,
+                                        "syncLocation": false,
+                                        "perPage": 10,
+                                        "api": "get:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/port/list",
+                                        "columns": [
+                                          {
+                                            "type": "operation",
+                                            "label": "操作",
+                                            "buttons": [
+                                              {
+                                                "type": "button",
+                                                "icon": "fas fa-random text-primary",
+                                                "label": "转发",
+                                                "actionType": "dialog",
+                                                "dialog": {
+                                                  "title": "端口转发",
+                                                  "body": [
+                                                    {
+                                                      "type": "form",
+                                                      "api": "post:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/container/${container_name}/pod_port/${pod_port}/local_port/${local_port}/start",
+                                                      "body": [
+                                                        {
+                                                          "type": "switch",
+                                                          "name": "specify_port",
+                                                          "label": "指定端口"
+                                                        },
+                                                        {
+                                                          "type": "input-number",
+                                                          "name": "local_port",
+                                                          "label": "转发端口",
+                                                          "visibleOn": "this.specify_port == true",
+                                                          "min": 1,
+                                                          "max": 65535
+                                                        }
+                                                      ],
+                                                      "onEvent": {
+                                                        "submitSucc": {
+                                                          "actions": [
+                                                            {
+                                                              "actionType": "reload",
+                                                              "componentId": "detailPortList"
+                                                            },
+                                                            {
+                                                              "actionType": "closeDrawer"
+                                                            }
+                                                          ]
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "type": "button",
+                                                "actionType": "ajax",
+                                                "icon": "fas fa-stop text-primary",
+                                                "label": "关闭",
+                                                "api": "post:/k8s/pod/port_forward/ns/$metadata.namespace/name/$metadata.name/container/${container_name}/pod_port/${pod_port}/stop",
+                                                "onEvent": {
+                                                  "success": {
+                                                    "actions": [
+                                                      {
+                                                        "actionType": "reload",
+                                                        "componentId": "detailPortList"
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            ],
+                                            "toggled": true
+                                          },
+                                          {
+                                            "name": "container_name",
+                                            "label": "容器名称",
+                                            "type": "text"
+                                          },
+                                          {
+                                            "name": "pod_port",
+                                            "label": "Pod端口",
+                                            "type": "tpl",
+                                            "tpl": "${port_name ? port_name +':': ''}${pod_port ? pod_port : ''}${protocol ?'['+ protocol+']' : ''}"
+                                          },
+                                          {
+                                            "name": "local_port",
+                                            "label": "访问端口",
+                                            "type": "tpl",
+                                            "tpl": "${local_port ? `${local_port} <a href='http://127.0.0.1:${local_port}' target='_blank'>http</a> <a href='https://127.0.0.1:${local_port}' target='_blank'>https</a>` : ''}"
+                                          },
+                                          {
+                                            "name": "status",
+                                            "label": "状态",
+                                            "type": "text"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              ],
+                              "toggled": true
+                            },
+                            {
+                              "name": "metadata.namespace",
+                              "label": "命名空间",
+                              "type": "text"
+                            },
+                            {
+                              "name": "metadata.name",
+                              "label": "名称",
+                              "type": "text",
+                              "width": "180px"
+                            },
+                            {
+                              "name": "ready",
+                              "label": "就绪",
+                              "type": "k8sPodReady"
+                            },
+                            {
+                              "name": "status.phase",
+                              "label": "状态",
+                              "type": "k8sPodStatus"
+                            },
+                            {
+                              "name": "status.podIP",
+                              "label": "容器组IP",
+                              "type": "text"
+                            },
+                            {
+                              "name": "spec.containers",
+                              "label": "容器镜像<br><span class='text-gray-500 text-xs'>容器名称=>镜像:版本</span>",
+                              "width": "150px",
+                              "type": "each",
+                              "items": {
+                                "type": "tpl",
+                                "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>=>${image|simpleImageName}</div>"
+                              }
+                            },
+                            {
+                              "name": "status.containerStatuses",
+                              "label": "重启次数",
+                              "type": "tpl",
+                              "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
+                            },
+                            {
+                              "name": "spec.nodeName",
+                              "label": "所在节点",
+                              "type": "text"
+                            },
+                            {
+                              "name": "metadata.creationTimestamp",
+                              "label": "存在时长",
+                              "type": "k8sAge"
+                            }
+                          ]
+                        }
+                      ]
+                    },
                     {
                       "title": "事件",
                       "body": [
@@ -1051,13 +1949,346 @@
                       ]
                     },
                     {
+                      "title": "容器伸缩",
+                      "body": [
+                        {
+                          "type": "crud",
+                          "id": "detailCRUD",
+                          "name": "detailCRUD",
+                          "autoFillHeight": true,
+                          "autoGenerateFilter": {
+                            "columnsNum": 4,
+                            "showBtnToolbar": false
+                          },
+                          "headerToolbar": [
+                            {
+                              "type": "columns-toggler",
+                              "align": "right",
+                              "draggable": true,
+                              "icon": "fas fa-cog",
+                              "overlay": true,
+                              "footerBtnSize": "sm"
+                            },
+                            {
+                              "type": "tpl",
+                              "tpl": "共${count}条",
+                              "align": "right",
+                              "visibleOn": "${count}"
+                            },
+                            {
+                              "type": "columns-toggler",
+                              "align": "left"
+                            },
+                            "reload",
+                            "bulkActions"
+                          ],
+                          "loadDataOnce": true,
+                          "initFetch": true,
+                          "perPage": 10,
+                          "footerToolbar": [
+                            {
+                              "type": "pagination",
+                              "align": "right"
+                            },
+                            {
+                              "type": "statistics",
+                              "align": "right"
+                            },
+                            {
+                              "type": "switch-per-page",
+                              "align": "right"
+                            }
+                          ],
+                          "api": "get:/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/hpa",
+                          "columns": [
+                            {
+                              "type": "operation",
+                              "label": "操作",
+                              "width": 120,
+                              "buttons": [
+                                {
+                                  "type": "button",
+                                  "icon": "fas fa-eye text-primary",
+                                  "actionType": "drawer",
+                                  "tooltip": "资源描述",
+                                  "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "xl",
+                                    "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                                    "body": [
+                                      {
+                                        "type": "service",
+                                        "api": "post:/k8s/HorizontalPodAutoscaler/group/autoscaling/version/v2/describe/ns/$metadata.namespace/name/$metadata.name",
+                                        "body": [
+                                          {
+                                            "type": "button",
+                                            "label": "AI解读",
+                                            "icon": "fas fa-brain text-primary",
+                                            "actionType": "drawer",
+                                            "drawer": {
+                                              "closeOnEsc": true,
+                                              "closeOnOutside": true,
+                                              "size": "xl",
+                                              "title": "AI解读  (ESC 关闭)",
+                                              "body": [
+                                                {
+                                                  "type": "websocketMarkdownViewer",
+                                                  "url": "/ai/chat/describe",
+                                                  "params": {
+                                                    "kind": "${kind}",
+                                                    "group": "${group}",
+                                                    "version": "${version}",
+                                                    "name": "${metadata.name}",
+                                                    "namespace": "${metadata.namespace}"
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          {
+                                            "type": "highlightHtml",
+                                            "keywords": [
+                                              "Error",
+                                              "Warning"
+                                            ],
+                                            "html": "${result}"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "type": "button",
+                                  "icon": "fa fa-edit text-primary",
+                                  "tooltip": "Yaml编辑",
+                                  "actionType": "drawer",
+                                  "drawer": {
+                                    "closeOnEsc": true,
+                                    "closeOnOutside": true,
+                                    "size": "lg",
+                                    "title": "Yaml管理",
+                                    "body": [
+                                      {
+                                        "type": "tabs",
+                                        "tabsMode": "tiled",
+                                        "tabs": [
+                                          {
+                                            "title": "查看编辑",
+                                            "body": [
+                                              {
+                                                "type": "service",
+                                                "api": "get:/k8s/HorizontalPodAutoscaler/group/autoscaling/version/v2/ns/$metadata.namespace/name/$metadata.name",
+                                                "body": [
+                                                  {
+                                                    "type": "mEditor",
+                                                    "text": "${yaml}",
+                                                    "componentId": "yaml",
+                                                    "saveApi": "/k8s/HorizontalPodAutoscaler/group/autoscaling/version/v2/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                                    "options": {
+                                                      "language": "yaml",
+                                                      "wordWrap": "on",
+                                                      "scrollbar": {
+                                                        "vertical": "auto"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "title": "文档",
+                                            "body": [
+                                              {
+                                                "type": "page",
+                                                "asideResizor": true,
+                                                "asideSticky": false,
+                                                "aside": [
+                                                  {
+                                                    "type": "input-tree",
+                                                    "name": "tree",
+                                                    "initiallyOpen": false,
+                                                    "unfoldedLevel": 1,
+                                                    "searchable": true,
+                                                    "showOutline": true,
+                                                    "showIcon": true,
+                                                    "searchConfig": {
+                                                      "sticky": true
+                                                    },
+                                                    "heightAuto": true,
+                                                    "inputClassName": "no-border no-padder mt-1",
+                                                    "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                                    "onEvent": {
+                                                      "change": {
+                                                        "actions": [
+                                                          {
+                                                            "componentId": "basic",
+                                                            "actionType": "reload",
+                                                            "data": {
+                                                              "description": "${event.data.item.description}",
+                                                              "id": "${event.data.item.id}",
+                                                              "full_id": "${event.data.item.full_id}",
+                                                              "type": "${event.data.item.type}"
+                                                            }
+                                                          },
+                                                          {
+                                                            "componentId": "detail",
+                                                            "actionType": "reload",
+                                                            "data": {
+                                                              "description": "${event.data.item.description}",
+                                                              "id": "${event.data.item.id}",
+                                                              "full_id": "${event.data.item.full_id}",
+                                                              "type": "${event.data.item.type}"
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                ],
+                                                "body": [
+                                                  {
+                                                    "type": "service",
+                                                    "id": "basic",
+                                                    "body": [
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>属性：</strong> ${id}",
+                                                        "visibleOn": "${id}"
+                                                      },
+                                                      {
+                                                        "type": "button",
+                                                        "label": "示例",
+                                                        "level": "link",
+                                                        "icon": "fas fa-lightbulb text-warning",
+                                                        "actionType": "drawer",
+                                                        "drawer": {
+                                                          "overlay": false,
+                                                          "closeOnEsc": true,
+                                                          "closeOnOutside": true,
+                                                          "size": "lg",
+                                                          "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                                          "body": [
+                                                            {
+                                                              "type": "websocketMarkdownViewer",
+                                                              "url": "/ai/chat/example/field",
+                                                              "params": {
+                                                                "kind": "${kind}",
+                                                                "group": "${group}",
+                                                                "version": "${version}",
+                                                                "field": "${full_id}"
+                                                              }
+                                                            }
+                                                          ]
+                                                        },
+                                                        "visibleOn": "${id}"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                                                        "visibleOn": "${type}"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "<br><strong>描述：</strong> ${description}",
+                                                        "visibleOn": "${description}"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "service",
+                                                    "id": "detail",
+                                                    "api": "post:/k8s/doc/detail",
+                                                    "body": [
+                                                      {
+                                                        "type": "divider",
+                                                        "title": "描述翻译",
+                                                        "titlePosition": "center",
+                                                        "visibleOn": "${translate}"
+                                                      },
+                                                      {
+                                                        "type": "markdown",
+                                                        "value": "${translate|raw}",
+                                                        "options": {
+                                                          "linkify": true,
+                                                          "html": true,
+                                                          "breaks": true
+                                                        },
+                                                        "visibleOn": "${translate}"
+                                                      },
+                                                      {
+                                                        "type": "container",
+                                                        "body": [
+                                                          {
+                                                            "type": "tpl",
+                                                            "tpl": "<div style='height:80vh'>&nbsp</div>"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "actions": []
+                                  }
+                                }
+                              ],
+                              "toggled": true
+                            },
+                            {
+                              "name": "metadata.namespace",
+                              "label": "命名空间",
+                              "type": "text"
+                            },
+                            {
+                              "name": "metadata.name",
+                              "label": "名称",
+                              "type": "text",
+                              "width": "180px"
+                            },
+                            {
+                              "name": "副本数范围",
+                              "label": "副本数范围",
+                              "width": "150px",
+                              "type": "tpl",
+                              "tpl": "<% var minReplicas = data.spec.minReplicas || 'N/A'; var maxReplicas = data.spec.maxReplicas || 'N/A'; %><%= minReplicas %> ≦ 副本数 ≦ <%= maxReplicas %>"
+                            },
+                            {
+                              "label": "指标<br><span class='text-gray-500 text-xs'>指标名称 / 阈值 / 当前值</span>",
+                              "type": "hpaMetrics"
+                            },
+                            {
+                              "type": "tpl",
+                              "tpl": "<%= data.status.currentReplicas !== null ? data.status.currentReplicas : 'N/A' %> / <%= data.status.desiredReplicas !== null ? data.status.desiredReplicas : 'N/A' %>",
+                              "label": "实例数<br><span class='text-gray-500 text-xs'>当前/预期</span>"
+                            },
+                            {
+                              "name": "status.conditions",
+                              "label": "条件",
+                              "type": "k8sTextConditions"
+                            },
+                            {
+                              "name": "metadata.creationTimestamp",
+                              "label": "存在时长",
+                              "type": "k8sAge"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
                       "title": "日志",
                       "body": [
                         {
-                          "type": "podLogViewer",
-                          "url": "/k8s/pod/logs/sse/ns/${metadata.namespace}/pod_name/${metadata.name}/container/${containerName}",
-                          "name": "${metadata.name}",
-                          "namespace": "${metadata.namespace}"
+                          "type": "podsLogViewer",
+                          "url": "/k8s/${kind}/group/${group}/version/${version}/ns/${metadata.namespace}/name/${metadata.name}/links/pod"
                         }
                       ]
                     },
@@ -3218,220 +4449,8 @@
         {
           "name": "ready",
           "label": "就绪",
-          "type": "k8sPodReady"
-        },
-        {
-          "name": "status.phase",
-          "label": "状态",
-          "type": "k8sPodStatus",
-          "searchable": {
-            "type": "select",
-            "clearable": true,
-            "name": "status.phase",
-            "label": "状态",
-            "placeholder": "选择状态",
-            "options": [
-              {
-                "label": "运行中",
-                "value": "Running"
-              },
-              {
-                "label": "调度中",
-                "value": "Pending"
-              },
-              {
-                "label": "成功完成",
-                "value": "Succeeded"
-              },
-              {
-                "label": "失败",
-                "value": "Failed"
-              },
-              {
-                "label": "未知",
-                "value": "Unknown"
-              }
-            ]
-          }
-        },
-        {
-          "name": "status.podIP",
-          "label": "容器组IP",
-          "type": "text",
-          "searchable": true,
-          "sortable": true
-        },
-        {
-          "name": "status.qosClass",
-          "label": "保障等级",
-          "type": "mapping",
-          "map": {
-            "Guaranteed": "<span class='label label-success'>保证型</span>",
-            "Burstable": "<span class='label label-warning'>可突增型</span>",
-            "BestEffort": "<span class='label label-danger'>尽力型</span>"
-          },
-          "searchable": {
-            "type": "select",
-            "clearable": true,
-            "name": "status.qosClass",
-            "label": "保障等级",
-            "placeholder": "选择保障等级",
-            "options": [
-              {
-                "label": "保证型",
-                "value": "Guaranteed"
-              },
-              {
-                "label": "可突增型",
-                "value": "Burstable"
-              },
-              {
-                "label": "尽力型",
-                "value": "BestEffort"
-              }
-            ]
-          }
-        },
-        {
-          "name": "spec.containers",
-          "label": "容器镜像<br><span class='text-gray-500 text-xs'>容器名称=>镜像:版本</span>",
-          "width": "150px",
-          "type": "each",
-          "items": {
-            "type": "tpl",
-            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>=>${image|simpleImageName}</div>"
-          }
-        },
-        {
-          "name": "status.containerStatuses",
-          "label": "重启次数",
           "type": "tpl",
-          "tpl": "${status.containerStatuses|pick:restartCount | map  | sum }"
-        },
-        {
-          "name": "realtime",
-          "label": "实时用量<br><span class='text-gray-500 text-xs'>CPU(m毫核)/内存(Mi)</span>",
-          "type": "tpl",
-          "tpl": "<%= ( data.metadata.annotations && data.metadata.annotations['cpu.realtime'] && Number(data.metadata.annotations['cpu.realtime']) !== 0 ? data.metadata.annotations['cpu.realtime']  : '') + ' / ' + (data.metadata.annotations && data.metadata.annotations['memory.realtime'] && Number(data.metadata.annotations['memory.realtime']) !== 0? data.metadata.annotations['memory.realtime'] : '') %>"
-        },
-        {
-          "name": "资源设定",
-          "label": "资源设定<br><span class='text-gray-500 text-xs'>请求<设定<上限</span>",
-          "width": "180px",
-          "type": "tpl",
-          "tpl": "<% for (var i = 0; i < data.spec.containers.length; i++) { %><% var container = data.spec.containers[i]; var requests = container?.resources?.requests || {}; var limits = container?.resources?.limits || {}; var cpuRequest = requests.cpu || null; var cpuLimit = limits.cpu || null; var memoryRequest = requests.memory || null; var memoryLimit = limits.memory || null; %><% if (cpuRequest || cpuLimit || memoryRequest || memoryLimit) { %><strong>容器：<%= container.name || '未知' %></strong><br><% if (cpuRequest || cpuLimit) { %><strong class='text-blue-500 font-black'><%= cpuRequest || '0' %> ≦处理器≦ <%= cpuLimit || '♾️' %></strong><br><% } %><% if (memoryRequest || memoryLimit) { %><strong class='text-green-500 font-black'><%= memoryRequest || '0' %> ≦内存≦ <%= memoryLimit || '♾️' %></strong><br><% } %><% if (i < data.spec.containers.length - 1) { %><br><% } %><% } %><% } %>"
-        },
-        {
-          "name": "resource",
-          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比<br>实时用量占比</span>",
-          "type": "container",
-          "width": "150px",
-          "body": [
-            {
-              "type": "progress",
-              "label": "request",
-              "value": "<%= data.metadata.annotations['cpu.requestFraction'] && Number(data.metadata.annotations['cpu.requestFraction']) !== 0 ? data.metadata.annotations['cpu.requestFraction'] : 100 %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.requestFraction']"
-            },
-            {
-              "type": "progress",
-              "label": "limit",
-              "value": "<%= data.metadata.annotations['cpu.limitFraction'] && Number(data.metadata.annotations['cpu.limitFraction']) !== 0 ? data.metadata.annotations['cpu.limitFraction'] : 100 %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.limitFraction']"
-            },
-            {
-              "type": "progress",
-              "label": "realtime",
-              "value": "<%= data.metadata.annotations['cpu.realtimeFraction'] && Number(data.metadata.annotations['cpu.realtimeFraction']) !== 0 ? data.metadata.annotations['cpu.realtimeFraction'] : 0 %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.realtimeFraction']"
-            }
-          ]
-        },
-        {
-          "name": "resource",
-          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比<br>实时用量占比</span>",
-          "type": "container",
-          "width": "150px",
-          "body": [
-            {
-              "type": "progress",
-              "label": "request",
-              "value": "<%= data.metadata.annotations['memory.requestFraction'] && Number(data.metadata.annotations['memory.requestFraction']) !== 0 ? data.metadata.annotations['memory.requestFraction'] : 100 %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.requestFraction']"
-            },
-            {
-              "type": "progress",
-              "label": "limit",
-              "value": "<%= data.metadata.annotations['memory.limitFraction'] && Number(data.metadata.annotations['memory.limitFraction']) !== 0 ? data.metadata.annotations['memory.limitFraction'] : 100 %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.limitFraction']"
-            },
-            {
-              "type": "progress",
-              "label": "realtime",
-              "value": "<%= data.metadata.annotations['memory.realtimeFraction'] && Number(data.metadata.annotations['memory.realtimeFraction']) !== 0 ? data.metadata.annotations['memory.realtimeFraction'] : 0 %>",
-              "placeholder": "N/A",
-              "animate": true,
-              "width": "100px",
-              "map": [
-                "bg-success",
-                "bg-success",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-              ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.realtimeFraction']"
-            }
-          ]
+          "tpl": "${status.readyReplicas||'0'}/${status.replicas}"
         },
         {
           "name": "metadata.labels",
@@ -3472,13 +4491,6 @@
           },
           "style": {
             "cursor": "pointer"
-          },
-          "searchable": {
-            "type": "input-text",
-            "name": "metadata.labels",
-            "clearable": true,
-            "label": "模糊标签",
-            "placeholder": "模糊搜索label标签中的k、v"
           }
         },
         {
@@ -3524,15 +4536,10 @@
           }
         },
         {
-          "name": "status.conditions",
-          "label": "条件",
-          "type": "k8sTextConditions"
-        },
-        {
-          "name": "spec.tolerations",
+          "name": "spec.template.spec.tolerations",
           "label": "容忍度",
           "type": "tpl",
-          "tpl": "${spec.tolerations ? '<i class=\"fa-solid fa-exclamation-triangle text-primary\"></i>' : '<i class=\"fa-solid fa-exclamation-triangle text-secondary\"></i>'}",
+          "tpl": "${spec.template.spec.tolerations ? '<i class=\"fa-solid fa-exclamation-triangle text-primary\"></i>' : '<i class=\"fa-solid fa-exclamation-triangle text-secondary\"></i>'}",
           "onEvent": {
             "click": {
               "actions": [
@@ -3584,9 +4591,247 @@
                         "type": "crud",
                         "api": "/k8s/$kind/group/$group/version/$version/list_tolerations/ns/$metadata.namespace/name/$metadata.name",
                         "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_tolerations/ns/$metadata.namespace/name/$metadata.name",
-                        "headerToolbar": [],
+                        "headerToolbar": [
+                          {
+                            "type": "button",
+                            "label": "新增规则",
+                            "actionType": "dialog",
+                            "dialog": {
+                              "closeOnEsc": true,
+                              "closeOnOutside": true,
+                              "size": "lg",
+                              "title": "新增",
+                              "body": [
+                                {
+                                  "type": "form",
+                                  "mode": "horizontal",
+                                  "id": "toleration_add_form",
+                                  "api": "/k8s/$kind/group/$group/version/$version/add_tolerations/ns/$metadata.namespace/name/$metadata.name",
+                                  "body": [
+                                    {
+                                      "type": "input-text",
+                                      "name": "key",
+                                      "label": "键",
+                                      "required": true,
+                                      "addOn": {
+                                        "type": "button",
+                                        "icon": "fa fa-filter",
+                                        "label": "污点速选",
+                                        "actionType": "dialog",
+                                        "dialog": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "size": "xl",
+                                          "title": "从已有节点上选择污点（ESC 关闭）",
+                                          "body": [
+                                            {
+                                              "type": "crud",
+                                              "api": "get:/k8s/node/taints/list",
+                                              "onEvent": {
+                                                "rowClick": {
+                                                  "actions": [
+                                                    {
+                                                      "actionType": "setValue",
+                                                      "componentId": "toleration_add_form",
+                                                      "args": {
+                                                        "value": {
+                                                          "key": "${event.data.item.key}",
+                                                          "value": "${event.data.item.value}",
+                                                          "effect": "${event.data.item.effect}"
+                                                        }
+                                                      }
+                                                    },
+                                                    {
+                                                      "actionType": "closeDialog"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "autoFillHeight": true,
+                                              "autoGenerateFilter": {
+                                                "columnsNum": 4,
+                                                "showBtnToolbar": false,
+                                                "defaultCollapsed": false
+                                              },
+                                              "selectable": true,
+                                              "primaryField": "key",
+                                              "loadDataOnce": true,
+                                              "initFetch": true,
+                                              "perPage": 5,
+                                              "headerToolbar": [
+                                                {
+                                                  "type": "columns-toggler",
+                                                  "align": "right",
+                                                  "draggable": true,
+                                                  "icon": "fas fa-cog",
+                                                  "overlay": true,
+                                                  "footerBtnSize": "sm"
+                                                },
+                                                {
+                                                  "type": "tpl",
+                                                  "tpl": "共${count}条",
+                                                  "align": "right",
+                                                  "visibleOn": "${count}"
+                                                },
+                                                {
+                                                  "type": "columns-toggler",
+                                                  "align": "left"
+                                                },
+                                                "reload"
+                                              ],
+                                              "footerToolbar": [
+                                                {
+                                                  "type": "pagination",
+                                                  "align": "right"
+                                                },
+                                                {
+                                                  "type": "statistics",
+                                                  "align": "right"
+                                                },
+                                                {
+                                                  "type": "switch-per-page",
+                                                  "align": "right"
+                                                }
+                                              ],
+                                              "columns": [
+                                                {
+                                                  "name": "key",
+                                                  "label": "键",
+                                                  "searchable": {
+                                                    "type": "input-text",
+                                                    "name": "key",
+                                                    "clearable": true,
+                                                    "label": "标签键",
+                                                    "placeholder": "输入键名称"
+                                                  },
+                                                  "width": "100px"
+                                                },
+                                                {
+                                                  "name": "value",
+                                                  "label": "值",
+                                                  "searchable": {
+                                                    "type": "input-text",
+                                                    "name": "value",
+                                                    "clearable": true,
+                                                    "label": "标签值",
+                                                    "placeholder": "输入值名称"
+                                                  },
+                                                  "width": "100px"
+                                                },
+                                                {
+                                                  "name": "effect",
+                                                  "label": "效果",
+                                                  "searchable": {
+                                                    "type": "select",
+                                                    "options": [
+                                                      {
+                                                        "label": "禁止调度",
+                                                        "value": "NoSchedule"
+                                                      },
+                                                      {
+                                                        "label": "优先不调度",
+                                                        "value": "PreferNoSchedule"
+                                                      },
+                                                      {
+                                                        "label": "不可执行",
+                                                        "value": "NoExecute"
+                                                      }
+                                                    ],
+                                                    "name": "effect",
+                                                    "clearable": true,
+                                                    "placeholder": "输选择效果"
+                                                  },
+                                                  "width": "100px"
+                                                },
+                                                {
+                                                  "name": "names",
+                                                  "label": "节点名称",
+                                                  "type": "tpl",
+                                                  "tpl": "${names|join:','},",
+                                                  "width": "200px",
+                                                  "searchable": true
+                                                },
+                                                {
+                                                  "name": "ips",
+                                                  "label": "节点IP",
+                                                  "type": "tpl",
+                                                  "tpl": "${ips|join:','},",
+                                                  "width": "200px",
+                                                  "searchable": true
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "type": "select",
+                                      "name": "operator",
+                                      "label": "操作符",
+                                      "required": true,
+                                      "value": "Equal",
+                                      "options": [
+                                        {
+                                          "label": "等于",
+                                          "value": "Equal"
+                                        },
+                                        {
+                                          "label": "存在",
+                                          "value": "Exists"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "value",
+                                      "type": "input-text",
+                                      "label": "值",
+                                      "visibleOn": "${operator === 'Equal'}"
+                                    },
+                                    {
+                                      "name": "effect",
+                                      "label": "效果",
+                                      "required": true,
+                                      "value": "NoSchedule",
+                                      "type": "select",
+                                      "options": [
+                                        {
+                                          "label": "禁止调度",
+                                          "value": "NoSchedule"
+                                        },
+                                        {
+                                          "label": "优先不调度",
+                                          "value": "PreferNoSchedule"
+                                        },
+                                        {
+                                          "label": "不可执行",
+                                          "value": "NoExecute"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ],
                         "showIndex": true,
                         "columns": [
+                          {
+                            "type": "operation",
+                            "label": "操作",
+                            "width": 120,
+                            "buttons": [
+                              {
+                                "type": "button",
+                                "icon": "fas fa-trash text-primary",
+                                "actionType": "ajax",
+                                "tooltip": "删除",
+                                "api": "/k8s/$kind/group/$group/version/$version/delete_tolerations/ns/$metadata.namespace/name/$metadata.name"
+                              }
+                            ],
+                            "toggled": true
+                          },
                           {
                             "name": "key",
                             "label": "键"
@@ -3599,12 +4844,30 @@
                             "map": {
                               "Equal": "<span class='label label-success'>等于</span>",
                               "Exists": "<span class='label label-success'>存在</span>"
+                            },
+                            "quickEdit": {
+                              "type": "select",
+                              "options": [
+                                {
+                                  "label": "等于",
+                                  "value": "Equal"
+                                },
+                                {
+                                  "label": "存在",
+                                  "value": "Exists"
+                                }
+                              ],
+                              "saveImmediately": true
                             }
                           },
                           {
                             "name": "value",
                             "label": "值",
-                            "placeholder": "-"
+                            "placeholder": "-",
+                            "quickEdit": {
+                              "type": "input-text",
+                              "saveImmediately": true
+                            }
                           },
                           {
                             "name": "effect",
@@ -3629,7 +4892,7 @@
           }
         },
         {
-          "name": "spec.affinity",
+          "name": "spec.template.spec.affinity",
           "label": "亲和性",
           "type": "tpl",
           "tpl": "${spec.template.spec.affinity ? '<i class=\"fa-solid fa-sitemap text-primary\"></i>' : '<i class=\"fa-solid fa-sitemap text-secondary\"></i>'}",
@@ -3697,9 +4960,212 @@
                                 "type": "crud",
                                 "api": "/k8s/$kind/group/$group/version/$version/list_node_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "quickSaveItemApi": "/k8s/$kind/group/$group/version/$version/update_node_affinity/ns/$metadata.namespace/name/$metadata.name",
-                                "headerToolbar": [],
+                                "headerToolbar": [
+                                  {
+                                    "type": "button",
+                                    "label": "新增规则",
+                                    "actionType": "dialog",
+                                    "dialog": {
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "新增",
+                                      "body": [
+                                        {
+                                          "type": "form",
+                                          "mode": "horizontal",
+                                          "id": "affinity_add_form",
+                                          "api": "/k8s/$kind/group/$group/version/$version/add_node_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                          "body": [
+                                            {
+                                              "type": "input-text",
+                                              "name": "key",
+                                              "label": "键",
+                                              "required": true,
+                                              "addOn": {
+                                                "type": "button",
+                                                "icon": "fa fa-filter",
+                                                "label": "速选",
+                                                "actionType": "dialog",
+                                                "dialog": {
+                                                  "closeOnEsc": true,
+                                                  "closeOnOutside": true,
+                                                  "size": "xl",
+                                                  "title": "从已有节点上选择标签（ESC 关闭）",
+                                                  "body": [
+                                                    {
+                                                      "type": "crud",
+                                                      "api": "get:/k8s/node/labels/list",
+                                                      "onEvent": {
+                                                        "rowClick": {
+                                                          "actions": [
+                                                            {
+                                                              "actionType": "setValue",
+                                                              "componentId": "affinity_add_form",
+                                                              "args": {
+                                                                "value": {
+                                                                  "key": "${event.data.item.key}",
+                                                                  "values": "${event.data.item.value|asArray}"
+                                                                }
+                                                              }
+                                                            },
+                                                            {
+                                                              "actionType": "closeDialog"
+                                                            }
+                                                          ]
+                                                        }
+                                                      },
+                                                      "autoFillHeight": true,
+                                                      "autoGenerateFilter": {
+                                                        "columnsNum": 4,
+                                                        "showBtnToolbar": false,
+                                                        "defaultCollapsed": false
+                                                      },
+                                                      "selectable": true,
+                                                      "primaryField": "key",
+                                                      "loadDataOnce": true,
+                                                      "initFetch": true,
+                                                      "perPage": 5,
+                                                      "headerToolbar": [
+                                                        {
+                                                          "type": "columns-toggler",
+                                                          "align": "right",
+                                                          "draggable": true,
+                                                          "icon": "fas fa-cog",
+                                                          "overlay": true,
+                                                          "footerBtnSize": "sm"
+                                                        },
+                                                        {
+                                                          "type": "tpl",
+                                                          "tpl": "共${count}条",
+                                                          "align": "right",
+                                                          "visibleOn": "${count}"
+                                                        },
+                                                        {
+                                                          "type": "columns-toggler",
+                                                          "align": "left"
+                                                        },
+                                                        "reload"
+                                                      ],
+                                                      "footerToolbar": [
+                                                        {
+                                                          "type": "pagination",
+                                                          "align": "right"
+                                                        },
+                                                        {
+                                                          "type": "statistics",
+                                                          "align": "right"
+                                                        },
+                                                        {
+                                                          "type": "switch-per-page",
+                                                          "align": "right"
+                                                        }
+                                                      ],
+                                                      "columns": [
+                                                        {
+                                                          "name": "key",
+                                                          "label": "键",
+                                                          "searchable": {
+                                                            "type": "input-text",
+                                                            "name": "key",
+                                                            "clearable": true,
+                                                            "label": "标签键",
+                                                            "placeholder": "输入键名称"
+                                                          },
+                                                          "width": "100px"
+                                                        },
+                                                        {
+                                                          "name": "value",
+                                                          "label": "值",
+                                                          "searchable": {
+                                                            "type": "input-text",
+                                                            "name": "value",
+                                                            "clearable": true,
+                                                            "label": "标签值",
+                                                            "placeholder": "输入值名称"
+                                                          },
+                                                          "width": "100px"
+                                                        },
+                                                        {
+                                                          "name": "names",
+                                                          "label": "节点名称",
+                                                          "type": "tpl",
+                                                          "tpl": "${names|join:','},",
+                                                          "width": "200px",
+                                                          "searchable": true
+                                                        },
+                                                        {
+                                                          "name": "ips",
+                                                          "label": "节点IP",
+                                                          "type": "tpl",
+                                                          "tpl": "${ips|join:','},",
+                                                          "width": "200px",
+                                                          "searchable": true
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            {
+                                              "type": "select",
+                                              "name": "operator",
+                                              "label": "操作符",
+                                              "required": true,
+                                              "value": "In",
+                                              "options": [
+                                                {
+                                                  "label": "包含",
+                                                  "value": "In"
+                                                },
+                                                {
+                                                  "label": "不包含",
+                                                  "value": "NotIn"
+                                                },
+                                                {
+                                                  "label": "存在",
+                                                  "value": "Exists"
+                                                },
+                                                {
+                                                  "label": "不存在",
+                                                  "value": "DoesNotExist"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "values",
+                                              "type": "input-array",
+                                              "label": "值",
+                                              "inline": true,
+                                              "items": {
+                                                "type": "input-text",
+                                                "clearable": false
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ],
                                 "showIndex": true,
                                 "columns": [
+                                  {
+                                    "type": "operation",
+                                    "label": "操作",
+                                    "width": 120,
+                                    "buttons": [
+                                      {
+                                        "type": "button",
+                                        "icon": "fas fa-trash text-primary",
+                                        "actionType": "ajax",
+                                        "tooltip": "删除",
+                                        "api": "/k8s/$kind/group/$group/version/$version/delete_node_affinity/ns/$metadata.namespace/name/$metadata.name"
+                                      }
+                                    ],
+                                    "toggled": true
+                                  },
                                   {
                                     "name": "key",
                                     "label": "键",
@@ -3716,7 +5182,29 @@
                                       "DoesNotExist": "<span class='label label-info'>不存在</span>"
                                     },
                                     "placeholder": "-",
-                                    "width": "100px"
+                                    "width": "100px",
+                                    "quickEdit": {
+                                      "type": "select",
+                                      "options": [
+                                        {
+                                          "label": "包含",
+                                          "value": "In"
+                                        },
+                                        {
+                                          "label": "不包含",
+                                          "value": "NotIn"
+                                        },
+                                        {
+                                          "label": "存在",
+                                          "value": "Exists"
+                                        },
+                                        {
+                                          "label": "不存在",
+                                          "value": "DoesNotExist"
+                                        }
+                                      ],
+                                      "saveImmediately": true
+                                    }
                                   },
                                   {
                                     "name": "values",
@@ -3726,7 +5214,16 @@
                                       "type": "tpl",
                                       "tpl": "${item}<br>"
                                     },
-                                    "placeholder": "-"
+                                    "placeholder": "-",
+                                    "quickEdit": {
+                                      "type": "input-array",
+                                      "inline": true,
+                                      "items": {
+                                        "type": "input-text",
+                                        "clearable": false
+                                      },
+                                      "saveImmediately": true
+                                    }
                                   }
                                 ]
                               },
@@ -3830,8 +5327,206 @@
                                 "type": "crud",
                                 "api": "/k8s/$kind/group/$group/version/$version/list_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "showIndex": true,
-                                "headerToolbar": [],
+                                "headerToolbar": [
+                                  {
+                                    "type": "button",
+                                    "label": "新增规则",
+                                    "actionType": "dialog",
+                                    "dialog": {
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "新增",
+                                      "body": {
+                                        "type": "form",
+                                        "id": "pod_affinity_form_add",
+                                        "api": "post:/k8s/$kind/group/$group/version/$version/add_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                        "body": [
+                                          {
+                                            "name": "labelSelector.matchLabels",
+                                            "label": "Pod标签",
+                                            "type": "input-kv",
+                                            "draggable": false
+                                          },
+                                          {
+                                            "name": "topologyKey",
+                                            "label": "节点拓扑键",
+                                            "type": "input-text",
+                                            "required": true,
+                                            "addOn": {
+                                              "type": "button",
+                                              "icon": "fa fa-filter",
+                                              "label": "速选",
+                                              "actionType": "dialog",
+                                              "dialog": {
+                                                "closeOnEsc": true,
+                                                "closeOnOutside": true,
+                                                "size": "xl",
+                                                "title": "从已有节点上选择标签（ESC 关闭）",
+                                                "body": [
+                                                  {
+                                                    "type": "crud",
+                                                    "api": "get:/k8s/node/labels/list",
+                                                    "onEvent": {
+                                                      "rowClick": {
+                                                        "actions": [
+                                                          {
+                                                            "actionType": "setValue",
+                                                            "componentId": "pod_affinity_form_add",
+                                                            "args": {
+                                                              "value": {
+                                                                "topologyKey": "${event.data.item.key}"
+                                                              }
+                                                            }
+                                                          },
+                                                          {
+                                                            "actionType": "closeDialog"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "autoFillHeight": true,
+                                                    "autoGenerateFilter": {
+                                                      "columnsNum": 4,
+                                                      "showBtnToolbar": false,
+                                                      "defaultCollapsed": false
+                                                    },
+                                                    "selectable": true,
+                                                    "primaryField": "key",
+                                                    "loadDataOnce": true,
+                                                    "initFetch": true,
+                                                    "perPage": 5,
+                                                    "headerToolbar": [
+                                                      {
+                                                        "type": "columns-toggler",
+                                                        "align": "right",
+                                                        "draggable": true,
+                                                        "icon": "fas fa-cog",
+                                                        "overlay": true,
+                                                        "footerBtnSize": "sm"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "共${count}条",
+                                                        "align": "right",
+                                                        "visibleOn": "${count}"
+                                                      },
+                                                      {
+                                                        "type": "columns-toggler",
+                                                        "align": "left"
+                                                      },
+                                                      "reload"
+                                                    ],
+                                                    "footerToolbar": [
+                                                      {
+                                                        "type": "pagination",
+                                                        "align": "right"
+                                                      },
+                                                      {
+                                                        "type": "statistics",
+                                                        "align": "right"
+                                                      },
+                                                      {
+                                                        "type": "switch-per-page",
+                                                        "align": "right"
+                                                      }
+                                                    ],
+                                                    "columns": [
+                                                      {
+                                                        "name": "key",
+                                                        "label": "键",
+                                                        "searchable": {
+                                                          "type": "input-text",
+                                                          "name": "key",
+                                                          "clearable": true,
+                                                          "label": "标签键",
+                                                          "placeholder": "输入键名称"
+                                                        },
+                                                        "width": "100px"
+                                                      },
+                                                      {
+                                                        "name": "value",
+                                                        "label": "值",
+                                                        "searchable": {
+                                                          "type": "input-text",
+                                                          "name": "value",
+                                                          "clearable": true,
+                                                          "label": "标签值",
+                                                          "placeholder": "输入值名称"
+                                                        },
+                                                        "width": "100px"
+                                                      },
+                                                      {
+                                                        "name": "names",
+                                                        "label": "节点名称",
+                                                        "type": "tpl",
+                                                        "tpl": "${names|join:','},",
+                                                        "width": "200px",
+                                                        "searchable": true
+                                                      },
+                                                      {
+                                                        "name": "ips",
+                                                        "label": "节点IP",
+                                                        "type": "tpl",
+                                                        "tpl": "${ips|join:','},",
+                                                        "width": "200px",
+                                                        "searchable": true
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ],
                                 "columns": [
+                                  {
+                                    "type": "operation",
+                                    "label": "操作",
+                                    "width": 120,
+                                    "buttons": [
+                                      {
+                                        "type": "button",
+                                        "icon": "fas fa-trash text-primary",
+                                        "actionType": "ajax",
+                                        "tooltip": "删除",
+                                        "api": "/k8s/$kind/group/$group/version/$version/delete_pod_affinity/ns/$metadata.namespace/name/$metadata.name"
+                                      },
+                                      {
+                                        "icon": "fa fa-edit text-primary",
+                                        "type": "button",
+                                        "actionType": "dialog",
+                                        "dialog": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "title": "修改",
+                                          "body": {
+                                            "type": "form",
+                                            "api": "post:/k8s/$kind/group/$group/version/$version/update_pod_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                            "body": [
+                                              {
+                                                "name": "labelSelector.matchLabels",
+                                                "label": "Pod标签选择器",
+                                                "type": "input-kv",
+                                                "draggable": false,
+                                                "required": true
+                                              },
+                                              {
+                                                "name": "topologyKey",
+                                                "label": "节点拓扑键",
+                                                "type": "static"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "toggled": true
+                                  },
                                   {
                                     "type": "json",
                                     "label": "标签",
@@ -3932,8 +5627,208 @@
                                 "type": "crud",
                                 "api": "/k8s/$kind/group/$group/version/$version/list_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name",
                                 "showIndex": true,
-                                "headerToolbar": [],
+                                "headerToolbar": [
+                                  {
+                                    "type": "button",
+                                    "label": "新增规则",
+                                    "actionType": "dialog",
+                                    "dialog": {
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "新增",
+                                      "body": {
+                                        "type": "form",
+                                        "id": "add_pod_affinity_form",
+                                        "api": "post:/k8s/$kind/group/$group/version/$version/add_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                        "body": [
+                                          {
+                                            "name": "labelSelector.matchLabels",
+                                            "label": "Pod标签",
+                                            "type": "input-kv",
+                                            "draggable": false
+                                          },
+                                          {
+                                            "name": "topologyKey",
+                                            "label": "节点拓扑键",
+                                            "type": "input-text",
+                                            "required": true,
+                                            "addOn": {
+                                              "type": "button",
+                                              "icon": "fa fa-filter",
+                                              "label": "速选",
+                                              "actionType": "dialog",
+                                              "dialog": {
+                                                "closeOnEsc": true,
+                                                "closeOnOutside": true,
+                                                "size": "xl",
+                                                "title": "从已有节点上选择标签（ESC 关闭）",
+                                                "body": [
+                                                  {
+                                                    "type": "crud",
+                                                    "api": "get:/k8s/node/labels/list",
+                                                    "onEvent": {
+                                                      "rowClick": {
+                                                        "actions": [
+                                                          {
+                                                            "actionType": "setValue",
+                                                            "componentId": "add_pod_affinity_form",
+                                                            "args": {
+                                                              "value": {
+                                                                "topologyKey": "${event.data.item.key}"
+                                                              }
+                                                            }
+                                                          },
+                                                          {
+                                                            "actionType": "closeDialog"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "autoFillHeight": true,
+                                                    "autoGenerateFilter": {
+                                                      "columnsNum": 4,
+                                                      "showBtnToolbar": false,
+                                                      "defaultCollapsed": false
+                                                    },
+                                                    "selectable": true,
+                                                    "primaryField": "key",
+                                                    "loadDataOnce": true,
+                                                    "initFetch": true,
+                                                    "perPage": 5,
+                                                    "headerToolbar": [
+                                                      {
+                                                        "type": "columns-toggler",
+                                                        "align": "right",
+                                                        "draggable": true,
+                                                        "icon": "fas fa-cog",
+                                                        "overlay": true,
+                                                        "footerBtnSize": "sm"
+                                                      },
+                                                      {
+                                                        "type": "tpl",
+                                                        "tpl": "共${count}条",
+                                                        "align": "right",
+                                                        "visibleOn": "${count}"
+                                                      },
+                                                      {
+                                                        "type": "columns-toggler",
+                                                        "align": "left"
+                                                      },
+                                                      "reload"
+                                                    ],
+                                                    "footerToolbar": [
+                                                      {
+                                                        "type": "pagination",
+                                                        "align": "right"
+                                                      },
+                                                      {
+                                                        "type": "statistics",
+                                                        "align": "right"
+                                                      },
+                                                      {
+                                                        "type": "switch-per-page",
+                                                        "align": "right"
+                                                      }
+                                                    ],
+                                                    "columns": [
+                                                      {
+                                                        "name": "key",
+                                                        "label": "键",
+                                                        "searchable": {
+                                                          "type": "input-text",
+                                                          "name": "key",
+                                                          "clearable": true,
+                                                          "label": "标签键",
+                                                          "placeholder": "输入键名称"
+                                                        },
+                                                        "width": "100px"
+                                                      },
+                                                      {
+                                                        "name": "value",
+                                                        "label": "值",
+                                                        "searchable": {
+                                                          "type": "input-text",
+                                                          "name": "value",
+                                                          "clearable": true,
+                                                          "label": "标签值",
+                                                          "placeholder": "输入值名称"
+                                                        },
+                                                        "width": "100px"
+                                                      },
+                                                      {
+                                                        "name": "names",
+                                                        "label": "节点名称",
+                                                        "type": "tpl",
+                                                        "tpl": "${names|join:','},",
+                                                        "width": "200px",
+                                                        "searchable": true
+                                                      },
+                                                      {
+                                                        "name": "ips",
+                                                        "label": "节点IP",
+                                                        "type": "tpl",
+                                                        "tpl": "${ips|join:','},",
+                                                        "width": "200px",
+                                                        "searchable": true
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ],
                                 "columns": [
+                                  {
+                                    "type": "operation",
+                                    "label": "操作",
+                                    "width": 120,
+                                    "buttons": [
+                                      {
+                                        "type": "button",
+                                        "icon": "fas fa-trash text-primary",
+                                        "actionType": "ajax",
+                                        "tooltip": "删除",
+                                        "api": "/k8s/$kind/group/$group/version/$version/delete_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name"
+                                      },
+                                      {
+                                        "icon": "fa fa-edit text-primary",
+                                        "type": "button",
+                                        "actionType": "dialog",
+                                        "dialog": {
+                                          "closeOnEsc": true,
+                                          "closeOnOutside": true,
+                                          "title": "修改",
+                                          "body": {
+                                            "type": "form",
+                                            "id": "edit-pod-anti-affinity",
+                                            "api": "post:/k8s/$kind/group/$group/version/$version/update_pod_anti_affinity/ns/$metadata.namespace/name/$metadata.name",
+                                            "body": [
+                                              {
+                                                "name": "labelSelector.matchLabels",
+                                                "label": "Pod标签选择器",
+                                                "type": "input-kv",
+                                                "draggable": false,
+                                                "required": true
+                                              },
+                                              {
+                                                "name": "topologyKey",
+                                                "label": "节点拓扑键",
+                                                "type": "static",
+                                                "required": true
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "toggled": true
+                                  },
                                   {
                                     "type": "json",
                                     "label": "标签",
@@ -3998,57 +5893,36 @@
           }
         },
         {
-          "name": "spec.hostNetwork",
-          "label": "网络类型",
-          "width": "150px",
-          "sortable": true,
-          "type": "tpl",
-          "tpl": "<% if (data.spec.hostNetwork) { %><span class='label label-danger'>主机网络</span><% } else { %><span class='label label-success'>容器网络</span><% } %>"
+          "name": "spec.template.spec.containers",
+          "label": "容器",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong class='text-green-500 font-black'>${name}</strong>: ${image|simpleImageName}</div>"
+          }
         },
         {
-          "name": "spec.nodeName",
-          "label": "所在节点",
-          "type": "text",
-          "searchable": {
-            "type": "select",
-            "clearable": true,
-            "searchable": true,
-            "source": "/k8s/node/name/option_list"
-          },
-          "width": "150px",
-          "sortable": true
+          "type": "progress",
+          "mode": "line",
+          "value": "${ROUND((status.readyReplicas / spec.replicas),2) * 100}",
+          "striped": true,
+          "label": "当前状态",
+          "animate": true,
+          "width": "150px"
+        },
+        {
+          "name": "spec.updateStrategy.type",
+          "label": "策略",
+          "type": "mapping",
+          "map": {
+            "RollingUpdate": "<span class='label label-primary'>滚动更新</span>",
+            "OnDelete": "<span class='label label-warning'>删除时触发</span>"
+          }
         },
         {
           "name": "metadata.creationTimestamp",
           "label": "存在时长",
           "type": "k8sAge"
-        },
-        {
-          "name": "metadata.ownerReferences.name",
-          "label": "所有者",
-          "type": "text",
-          "searchable": true,
-          "visibleOn": "1==2"
-        },
-        {
-          "name": "unique_labels",
-          "label": "精确标签",
-          "visibleOn": "1==2",
-          "searchable": {
-            "type": "select",
-            "clearable": true,
-            "searchable": true,
-            "source": "/k8s/pod/labels/unique_labels",
-            "creatable": true,
-            "addControls": [
-              {
-                "type": "text",
-                "name": "label",
-                "label": "自定义标签",
-                "placeholder": "k=v,如果不写等号，则只搜索k"
-              }
-            ]
-          }
         }
       ]
     }
