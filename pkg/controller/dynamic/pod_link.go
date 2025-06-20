@@ -22,7 +22,7 @@ func getPod(selectedCluster string, ctx context.Context, ns string, name string,
 		Name(name).
 		WithCache(linkCacheTTL)
 	pod, err = kk.Ctl().CRD().ManagedPod()
-	 
+
 	if err == nil && pod != nil {
 		return pod, nil
 	}
