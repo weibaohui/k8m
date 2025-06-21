@@ -1,10 +1,12 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+
 	"gorm.io/gorm"
 )
 
@@ -68,6 +70,18 @@ func (c *InspectionRecord) Delete(params *dao.Params, ids string, queryFuncs ...
 // GetOne 获取单个 InspectionRecord
 func (c *InspectionRecord) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*InspectionRecord, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
+}
+
+// GetAISummaryById 获取 InspectionRecord 的AISummary
+func (c *InspectionRecord) GetAISummaryById(recordID uint) (string, error) {
+	record := &InspectionRecord{}
+	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", recordID)
+	})
+	if err != nil {
+		return "", fmt.Errorf("未找到对应的巡检记录: %d", recordID)
+	}
+	return record.AISummary, nil
 }
 
 // List 返回符合条件的 InspectionScriptResult 列表及总数

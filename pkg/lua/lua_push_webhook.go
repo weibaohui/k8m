@@ -3,20 +3,15 @@ package lua
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
-	"gorm.io/gorm"
 )
 
 func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhook.SendResult, error) {
 	// 查询webhooks
-	hookModel := &models.WebhookReceiver{}
-	receivers, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
-		return db.Where("id in ?", strings.Split(webhookIDs, ","))
-	})
+	receiver := &models.WebhookReceiver{}
+	receivers, err := receiver.ListByRecordID(recordID)
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
@@ -43,25 +38,19 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 
 func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhook.SendResult, error) {
 
-	// 1. 查询 InspectionRecord
-	record := &models.InspectionRecord{}
-	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
-		return db.Where("id = ?", recordID)
-	})
-	if err != nil {
-		return nil, fmt.Errorf("未找到对应的巡检记录: %v", err)
-	}
-
 	// 查询webhooks
-	hookModel := &models.WebhookReceiver{}
-	receivers, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
-		return db.Where("id in ?", strings.Split(webhookIDs, ","))
-	})
+	receiver := &models.WebhookReceiver{}
+	receivers, err := receiver.ListByRecordID(recordID)
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
+	record := &models.InspectionRecord{}
+	summary, err := record.GetAISummaryById(recordID)
+	if err != nil {
+		return nil, fmt.Errorf("获取巡检记录id=%d的AI总结失败", recordID)
+	}
 
-	results := webhook.PushMsgToAllTargets(record.AISummary, receivers)
+	results := webhook.PushMsgToAllTargets(summary, receivers)
 
 	return results, nil
 }
