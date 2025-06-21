@@ -223,6 +223,13 @@ const items: () => MenuItem[] = () => {
                         key: "workload-spread",
                         onClick: () => onMenuClick('/openkruise/workloadspread')
                     },
+                    {
+                        label: "联合部署",
+                        title: "联合部署",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "united-deployment",
+                        onClick: () => onMenuClick('/openkruise/uniteddeployment')
+                    },
                 ],
             },
         ] : []),
