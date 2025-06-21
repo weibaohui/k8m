@@ -1,4 +1,4 @@
-package webhooksender
+package webhook
 
 // RegisterAllSenders 集中注册所有平台 Sender
 func RegisterAllSenders() {

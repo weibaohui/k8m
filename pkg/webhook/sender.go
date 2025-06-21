@@ -1,4 +1,4 @@
-package webhooksender
+package webhook
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type SendResult struct {
 // Sender defines the webhook adapter interface.
 type Sender interface {
 	Name() string
-	Send(msg string, receiver *WebhookReceiver) (*SendResult, error)
+	Send(msg string, receiver *Receiver) (*SendResult, error)
 }
 
 // senderRegistry holds all registered senders.
@@ -25,9 +25,9 @@ func RegisterSender(platform string, sender Sender) {
 	senderRegistry[platform] = sender
 }
 
-// GetSender returns the appropriate sender.
+// getSender returns the appropriate sender.
 // 若找不到平台，返回 nil 并建议调用方处理异常
-func GetSender(platform string) (Sender, error) {
+func getSender(platform string) (Sender, error) {
 	if s, ok := senderRegistry[platform]; ok {
 		return s, nil
 	}

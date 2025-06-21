@@ -11,11 +11,10 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
-// SummaryByAI
-// 参数：format 自定义格式
-func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint, format string) (string, error) {
+func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error) {
 
 	// 1. 查询 InspectionRecord
 	recordModel := &models.InspectionRecord{}
@@ -23,11 +22,11 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint, for
 		return db.Where("id = ?", recordID)
 	})
 	if err != nil {
-		return "", fmt.Errorf("未找到对应的巡检记录: %v", err)
+		return nil, fmt.Errorf("未找到对应的巡检记录: %v", err)
 	}
 
 	if record.ScheduleID == nil {
-		return "", fmt.Errorf("该巡检记录未关联巡检计划")
+		return nil, fmt.Errorf("该巡检记录未关联巡检计划")
 	}
 
 	// 2. 查询 InspectionSchedule
@@ -36,7 +35,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint, for
 		return db.Where("id = ?", *record.ScheduleID)
 	})
 	if err != nil {
-		return "", fmt.Errorf("未找到对应的巡检计划: %v", err)
+		return nil, fmt.Errorf("未找到对应的巡检计划: %v", err)
 	}
 
 	// 3. 统计规则数
@@ -63,8 +62,13 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint, for
 		"failed_rules": failCount,
 		"failed_list":  events,
 	}
-	summary := ""
+	return result, nil
+}
 
+// SummaryByAI
+// 参数：format 自定义格式
+func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any, format string) (string, error) {
+	summary := ""
 	defaultFormat := `
 	请按下面的格式给出汇总：
 		检测集群：xxx名称
@@ -74,6 +78,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint, for
 		总结：简短汇总
 	`
 	if format != "" {
+		klog.V(6).Infof("使用自定义Prompt %s", format)
 		defaultFormat = format
 	}
 	if service.AIService().IsEnabled() {
@@ -86,16 +91,29 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, recordID uint, for
 		以下是JSON格式的巡检结果：
 		%s
 		`
-		prompt = fmt.Sprintf(prompt, defaultFormat, utils.ToJSON(result))
+		prompt = fmt.Sprintf(prompt, defaultFormat, utils.ToJSON(msg))
 		summary = service.ChatService().ChatWithCtx(ctx, prompt)
 
 	} else {
 		summary = "AI功能未开启"
 	}
+
+	return summary, nil
+}
+
+func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string) error {
+	recordModel := &models.InspectionRecord{}
+	record, err := recordModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", id)
+	})
+	if err != nil {
+		return fmt.Errorf("未找到对应的巡检记录: %v", err)
+	}
+
 	record.AISummary = summary
 	err = dao.DB().Model(&record).Select("ai_summary").Updates(record).Error
 	if err != nil {
-		return "", fmt.Errorf("<UNK>: %v", err)
+		return fmt.Errorf("保存巡检记录的AI总结失败: %v", err)
 	}
-	return summary, nil
+	return nil
 }

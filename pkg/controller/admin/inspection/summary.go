@@ -19,7 +19,7 @@ import (
 
 // SummaryBySchedule 汇总指定scheduleID下的巡检执行信息
 // SummaryBySchedule 统计巡检计划执行情况，支持按时间范围过滤
-func SummaryBySchedule(c *gin.Context) {
+func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 100000000
 	// 1. 获取scheduleID参数
@@ -206,8 +206,8 @@ func SummaryBySchedule(c *gin.Context) {
 	amis.WriteJsonData(c, result)
 }
 
-// SummaryByRecord 汇总指定巡检记录的规则总数与失败数
-func SummaryByRecord(c *gin.Context) {
+// SummaryByRecordID 汇总指定巡检记录的规则总数与失败数
+func (s *AdminScheduleController) SummaryByRecordID(c *gin.Context) {
 	recordIDStr := c.Param("id")
 	if recordIDStr == "" {
 		amis.WriteJsonError(c, fmt.Errorf("缺少 record_id 参数"))
@@ -220,7 +220,17 @@ func SummaryByRecord(c *gin.Context) {
 	}
 
 	sb := lua.ScheduleBackground{}
-	summary, err := sb.SummaryByAI(context.Background(), recordID, "")
+	msg, err := sb.GetSummaryMsg(recordID)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	summary, err := sb.SummaryByAI(context.Background(), msg, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	err = sb.SaveSummaryBack(recordID, summary)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

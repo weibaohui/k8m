@@ -1,9 +1,13 @@
-package webhooksender
+package webhook
 
-import "fmt"
+import (
+	"fmt"
 
-// WebhookReceiver represents a user-defined webhook endpoint.
-type WebhookReceiver struct {
+	"github.com/weibaohui/k8m/pkg/models"
+)
+
+// Receiver represents a user-defined webhook endpoint.
+type Receiver struct {
 	Platform      string
 	TargetURL     string
 	Method        string
@@ -14,22 +18,22 @@ type WebhookReceiver struct {
 	SignHeaderKey string // e.g. "X-Signature" or unused
 }
 
-// NewFeishuReceiver 快捷创建飞书 WebhookReceiver
-func NewFeishuReceiver(targetURL, signSecret string) *WebhookReceiver {
-	return &WebhookReceiver{
+// NewFeishuReceiver 快捷创建飞书 Receiver
+func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
+	return &Receiver{
 		Platform:      "feishu",
 		TargetURL:     targetURL,
 		Method:        "POST",
 		Headers:       map[string]string{},
-		Template:      `{"msg_type":"text","content":{"text":"{{.ScriptName}} 检查{{.Name}} 状态: {{.EventStatus}}, 信息: {{.EventMsg}}"}}`,
+		Template:      `{"msg_type":"text","content":{"text":"%s"}}`,
 		SignSecret:    signSecret,
 		SignAlgo:      "feishu",
 		SignHeaderKey: "", // 飞书不需要 header 签名，是 URL 参数
 	}
 }
 
-// 校验 WebhookReceiver 配置合法性
-func (r *WebhookReceiver) Validate() error {
+// Validate 校验 Receiver 配置合法性
+func (r *Receiver) Validate() error {
 	if r.Platform == "" {
 		return fmt.Errorf("platform is required")
 	}
@@ -41,6 +45,14 @@ func (r *WebhookReceiver) Validate() error {
 	}
 	if r.Template == "" {
 		return fmt.Errorf("template is required")
+	}
+	return nil
+}
+
+func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
+	if receiver.Platform == "feishu" {
+		rr := NewFeishuReceiver(receiver.TargetURL, receiver.SignSecret)
+		return rr
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-package webhooksender
+package webhook
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ func (d *DefaultSender) Name() string {
 	return "default"
 }
 
-func (d *DefaultSender) Send(msg string, receiver *WebhookReceiver) (*SendResult, error) {
+func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
 
 	req, err := http.NewRequest(receiver.Method, receiver.TargetURL, bytes.NewReader([]byte(msg)))
 	if err != nil {

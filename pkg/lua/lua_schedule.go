@@ -130,7 +130,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	})
 
 	// TODO 记录发送结果
-	_, _ = s.SummaryAndPushToHooksByRecordID(context.Background(), record.ID, schedule.Webhooks)
+	_, _ = s.SummaryAndPushToHooksByRecordID(context.Background(), record.ID)
 	return record, nil
 }
 

@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import type { MenuProps } from 'antd';
-import { useEffect, useState } from 'react';
-import { fetcher } from '../Amis/fetcher';
+import {useNavigate} from "react-router-dom";
+import type {MenuProps} from 'antd';
+import {useEffect, useState} from 'react';
+import {fetcher} from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -179,7 +179,7 @@ const items: () => MenuItem[] = () => {
                         label: "克隆集",
                         title: "克隆集",
                         icon: <i className="fa-solid fa-database"></i>,
-                        key: "Advanced-StatefulSet",
+                        key: "Advanced-CloneSet",
                         onClick: () => onMenuClick('/openkruise/cloneset')
                     }, {
                         label: "高级有状态集",
