@@ -1,7 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
-import {useEffect, useState} from 'react';
-import {fetcher} from '../Amis/fetcher';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -179,27 +179,27 @@ const items: () => MenuItem[] = () => {
                         label: "克隆集",
                         title: "克隆集",
                         icon: <i className="fa-solid fa-database"></i>,
-                        key: "Advanced-CloneSet",
+                        key: "advanced-cloneset",
                         onClick: () => onMenuClick('/openkruise/cloneset')
                     }, {
                         label: "高级有状态集",
                         title: "高级有状态集",
                         icon: <i className="fa-solid fa-database"></i>,
-                        key: "Advanced-StatefulSet",
+                        key: "advanced-statefulset",
                         onClick: () => onMenuClick('/openkruise/statefulset')
                     },
                     {
                         label: "高级守护进程集",
                         title: "高级守护进程集",
                         icon: <i className="fa-solid fa-database"></i>,
-                        key: "Advanced-DaemonSet",
+                        key: "advanced-daemonSet",
                         onClick: () => onMenuClick('/openkruise/daemonset')
                     },
                     {
                         label: "高级定时任务",
                         title: "高级定时任务",
                         icon: <i className="fa-solid fa-database"></i>,
-                        key: "Advanced-CronJob",
+                        key: "advanced-cronJob",
                         onClick: () => onMenuClick('/openkruise/cronjob')
                     },
                     {
@@ -208,6 +208,13 @@ const items: () => MenuItem[] = () => {
                         icon: <i className="fa-solid fa-database"></i>,
                         key: "broadcast-job",
                         onClick: () => onMenuClick('/openkruise/broadcastjob')
+                    },
+                    {
+                        label: "边车集",
+                        title: "边车集",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "sidecarset",
+                        onClick: () => onMenuClick('/openkruise/sidecarset')
                     },
                 ],
             },
