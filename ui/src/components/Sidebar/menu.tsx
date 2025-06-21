@@ -216,6 +216,13 @@ const items: () => MenuItem[] = () => {
                         key: "sidecarset",
                         onClick: () => onMenuClick('/openkruise/sidecarset')
                     },
+                    {
+                        label: "工作负载分布",
+                        title: "工作负载分布",
+                        icon: <i className="fa-solid fa-database"></i>,
+                        key: "workload-spread",
+                        onClick: () => onMenuClick('/openkruise/workloadspread')
+                    },
                 ],
             },
         ] : []),
