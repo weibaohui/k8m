@@ -64,7 +64,7 @@ func ConditionQuickSave(c *gin.Context) {
 	} else {
 		entity.Enabled = false
 	}
-	err := dao.DB().Model(&entity).Select("Enabled").Updates(entity).Error
+	err := dao.DB().Model(&entity).Select("Disabled").Updates(entity).Error
 
 	if err != nil {
 		amis.WriteJsonError(c, err)

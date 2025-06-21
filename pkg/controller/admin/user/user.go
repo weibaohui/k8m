@@ -24,6 +24,7 @@ func RegisterAdminUserRoutes(admin *gin.RouterGroup) {
 	ctrl := AdminUserController{}
 	// user 平台管理员可操作，管理用户
 	admin.GET("/user/list", ctrl.List)
+	admin.POST("/user/save/id/:id/status/:disabled", ctrl.UserStatusQuickSave)
 	admin.POST("/user/save", ctrl.Save)
 	admin.POST("/user/delete/:ids", ctrl.Delete)
 	admin.POST("/user/update_psw/:id", ctrl.UpdatePsw)
@@ -44,7 +45,7 @@ func (a *AdminUserController) List(c *gin.Context) {
 
 	queryFuncs := genQueryFuncs(c, params)
 	queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
-		return db.Select([]string{"id", "group_names", "two_fa_enabled", "username", "two_fa_type", "two_fa_app_name", "source", "created_at", "updated_at"})
+		return db.Select([]string{"id", "group_names", "two_fa_enabled", "username", "two_fa_type", "two_fa_app_name", "source", "created_at", "updated_at", "disabled"})
 	})
 	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
@@ -246,4 +247,25 @@ func (a *AdminUserController) Disable2FA(c *gin.Context) {
 	}
 
 	amis.WriteJsonOK(c)
+}
+
+func (a *AdminUserController) UserStatusQuickSave(c *gin.Context) {
+	id := c.Param("id")
+	disabled := c.Param("disabled")
+
+	var entity models.User
+	entity.ID = utils.ToUInt(id)
+
+	if disabled == "true" {
+		entity.Disabled = true
+	} else {
+		entity.Disabled = false
+	}
+	err := dao.DB().Model(&entity).Select("disabled").Updates(entity).Error
+
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonErrorOrOK(c, err)
 }

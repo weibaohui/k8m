@@ -278,15 +278,28 @@ func (u *userService) GetGroupNames(username string) (string, error) {
 
 func (u *userService) GetUserByMCPKey(mcpKey string) (string, error) {
 	params := &dao.Params{}
-	user := &models.McpKey{}
+	m := &models.McpKey{}
 	queryFunc := func(db *gorm.DB) *gorm.DB {
 		return db.Select("username").Where(" mcp_key = ?", mcpKey)
 	}
-	item, err := user.GetOne(params, queryFunc)
+	item, err := m.GetOne(params, queryFunc)
 	if err != nil {
 		return "", err
 	}
 
+	if item.Username == "" {
+		return "", errors.New("username is empty")
+	}
+
+	// 检测用户是否被禁用
+	user := &models.User{}
+	disabled, err := user.IsDisabled(item.Username)
+	if err != nil {
+		return "", err
+	}
+	if disabled {
+		return "", fmt.Errorf("用户[%s]被禁用", item.Username)
+	}
 	return item.Username, nil
 }
 

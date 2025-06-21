@@ -23,7 +23,7 @@ type User struct {
 	TwoFASecret      string    `gorm:"size:100" json:"two_fa_secret,omitempty"`       // 2FA密钥
 	TwoFABackupCodes string    `gorm:"size:500" json:"two_fa_backup_codes,omitempty"` // 备用恢复码，逗号分隔
 	TwoFAAppName     string    `gorm:"size:100" json:"two_fa_app_name,omitempty"`     // 2FA应用名称，用于提醒用户使用的是哪个软件
-
+	Disabled         bool      `gorm:"default:false" json:"disabled,omitempty"`       // 是否启用
 }
 
 func (c *User) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*User, int64, error) {
@@ -41,4 +41,14 @@ func (c *User) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm.D
 
 func (c *User) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*User, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
+}
+ 
+func (c *User) IsDisabled(username string) (bool, error) {
+	var user User
+	err := dao.DB().Model(c).Select("disabled").Where("username = ?", username).First(&user).Error
+	if err != nil {
+		return false, err
+	}
+
+	return user.Disabled, nil
 }
