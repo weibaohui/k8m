@@ -126,6 +126,12 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("cron表达式错误: %w", err))
 		return
 	}
+
+	// 保存webhookNames
+	receiver := models.WebhookReceiver{}
+	if names, err := receiver.GetNamesByIds(m.Webhooks); err == nil {
+		m.WebhookNames = strings.Join(names, ",")
+	}
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)

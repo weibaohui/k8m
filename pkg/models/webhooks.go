@@ -66,3 +66,17 @@ func (c *WebhookReceiver) ListByRecordID(recordID uint) ([]*WebhookReceiver, err
 	}
 	return receivers, nil
 }
+func (c *WebhookReceiver) GetNamesByIds(ids string) ([]string, error) {
+
+	receivers, _, err := c.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
+		return db.Select("name").Where("id in ?", strings.Split(ids, ","))
+	})
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, receiver := range receivers {
+		names = append(names, receiver.Name)
+	}
+	return names, nil
+}

@@ -375,6 +375,12 @@
           ]
         },
         {
+          "name": "webhook_names",
+          "label": "webhook",
+          "type": "tpl",
+          "tpl": "${webhook_names | split:','}"
+        },
+        {
           "name": "last_run_time",
           "label": "最后运行",
           "type": "datetime"
