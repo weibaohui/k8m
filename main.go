@@ -526,23 +526,10 @@ func main() {
 		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
 		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
 
-		// 集群巡检计划配置
-		admin.GET("/inspection/schedule/list", inspection.List)
-		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
-		admin.GET("/inspection/record/list", inspection.RecordList)
-		admin.GET("/inspection/schedule/record/id/:id/event/list", inspection.EventList)
-		admin.POST("/inspection/schedule/record/id/:id/summary", inspection.SummaryByRecordID)
-		admin.POST("/inspection/schedule/record/id/:id/push", inspection.Push)
-		admin.GET("/inspection/schedule/record/id/:id/output/list", inspection.OutputList)
-		admin.POST("/inspection/schedule/save", inspection.Save)
-		admin.POST("/inspection/schedule/delete/:ids", inspection.Delete)
-		admin.POST("/inspection/schedule/save/id/:id/status/:enabled", inspection.QuickSave)
-		admin.POST("/inspection/schedule/start/id/:id", inspection.Start)
-		admin.POST("/inspection/schedule/id/:id/update_script_code", inspection.UpdateScriptCode)
-		admin.POST("/inspection/schedule/id/:id/summary", inspection.SummaryBySchedule)
-		admin.POST("/inspection/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", inspection.SummaryBySchedule)
-		admin.GET("/inspection/event/status/option_list", inspection.EventStatusOptionList)
-
+		// 集群巡检定时任务
+		inspection.RegisterAdminScheduleRoutes(admin)
+		// 集群巡检记录
+		inspection.RegisterAdminRecordRoutes(admin)
 		// 集群巡检脚本lua脚本管理
 		inspection.RegisterAdminLuaScriptRoutes(admin)
 		// 集群巡检webhook管理
