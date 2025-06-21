@@ -113,7 +113,7 @@ func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string) error {
 	record.AISummary = summary
 	err = dao.DB().Model(&record).Select("ai_summary").Updates(record).Error
 	if err != nil {
-		return fmt.Errorf("<UNK>: %v", err)
+		return fmt.Errorf("保存巡检记录的AI总结失败: %v", err)
 	}
 	return nil
 }

@@ -57,6 +57,12 @@ func (c *WebhookReceiver) ListByRecordID(recordID uint) ([]*WebhookReceiver, err
 		return nil, err
 
 	}
+
+	// 检查 webhooks 字段是否为空
+	if strings.TrimSpace(schedule.Webhooks) == "" {
+		return []*WebhookReceiver{}, nil
+	}
+	
 	receiver := &WebhookReceiver{}
 	receivers, _, err := receiver.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
 		return db.Where("id in ?", strings.Split(schedule.Webhooks, ","))

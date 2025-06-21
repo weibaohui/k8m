@@ -8,7 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/webhook"
 )
 
-func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhook.SendResult, error) {
+func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint) ([]*webhook.SendResult, error) {
 	// 查询webhooks
 	receiver := &models.WebhookReceiver{}
 	receivers, err := receiver.ListByRecordID(recordID)
@@ -36,7 +36,7 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 	return results, nil
 }
 
-func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhook.SendResult, error) {
+func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.SendResult, error) {
 
 	// 查询webhooks
 	receiver := &models.WebhookReceiver{}
