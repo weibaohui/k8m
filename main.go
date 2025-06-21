@@ -531,7 +531,7 @@ func main() {
 		admin.GET("/inspection/schedule/id/:id/record/list", inspection.RecordList)
 		admin.GET("/inspection/record/list", inspection.RecordList)
 		admin.GET("/inspection/schedule/record/id/:id/event/list", inspection.EventList)
-		admin.POST("/inspection/schedule/record/id/:id/summary", inspection.SummaryByRecord)
+		admin.POST("/inspection/schedule/record/id/:id/summary", inspection.SummaryByRecordID)
 		admin.POST("/inspection/schedule/record/id/:id/push", inspection.Push)
 		admin.GET("/inspection/schedule/record/id/:id/output/list", inspection.OutputList)
 		admin.POST("/inspection/schedule/save", inspection.Save)

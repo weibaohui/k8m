@@ -1,4 +1,4 @@
-package webhookpipe
+package webhook
 
 import (
 	"github.com/weibaohui/k8m/pkg/models"

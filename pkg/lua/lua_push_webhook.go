@@ -7,11 +7,11 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/webhookpipe"
+	"github.com/weibaohui/k8m/pkg/webhook"
 	"gorm.io/gorm"
 )
 
-func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhookpipe.SendResult, error) {
+func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhook.SendResult, error) {
 	// 查询webhooks
 	hookModel := &models.WebhookReceiver{}
 	receivers, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
@@ -21,12 +21,12 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
 
-	msg, err := s.GetSummaryMsg(ctx, recordID)
+	msg, err := s.GetSummaryMsg(recordID)
 	if err != nil {
 		return nil, err
 	}
 
-	var results []*webhookpipe.SendResult
+	var results []*webhook.SendResult
 	for _, receiver := range receivers {
 		AISummary, err := s.SummaryByAI(ctx, msg, receiver.Template)
 		if err != nil {
@@ -34,14 +34,14 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 		}
 		_ = s.SaveSummaryBack(recordID, AISummary)
 
-		ret := webhookpipe.PushMsgToSingleTarget(AISummary, receiver)
+		ret := webhook.PushMsgToSingleTarget(AISummary, receiver)
 		results = append(results, ret)
 
 	}
 	return results, nil
 }
 
-func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhookpipe.SendResult, error) {
+func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhook.SendResult, error) {
 
 	// 1. 查询 InspectionRecord
 	record := &models.InspectionRecord{}
@@ -61,7 +61,7 @@ func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
 
-	results := webhookpipe.PushMsgToAllTargets(record.AISummary, receivers)
+	results := webhook.PushMsgToAllTargets(record.AISummary, receivers)
 
 	return results, nil
 }

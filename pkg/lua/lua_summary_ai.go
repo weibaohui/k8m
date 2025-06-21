@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *ScheduleBackground) GetSummaryMsg(ctx context.Context, recordID uint) (map[string]any, error) {
+func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error) {
 
 	// 1. 查询 InspectionRecord
 	recordModel := &models.InspectionRecord{}

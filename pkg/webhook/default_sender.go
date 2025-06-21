@@ -1,4 +1,4 @@
-package webhookpipe
+package webhook
 
 import (
 	"bytes"
