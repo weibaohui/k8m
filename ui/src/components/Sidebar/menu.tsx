@@ -237,6 +237,13 @@ const items: () => MenuItem[] = () => {
                         key: "container_recreate_request",
                         onClick: () => onMenuClick('/openkruise/container_recreate_request')
                     },
+                    {
+                        label: "镜像拉取作业",
+                        title: "镜像拉取作业",
+                        icon: <i className="fa-solid fa-cloud-arrow-down"></i>,
+                        key: "imagepulljob",
+                        onClick: () => onMenuClick('/openkruise/imagepulljob')
+                    },
                 ],
             },
         ] : []),
