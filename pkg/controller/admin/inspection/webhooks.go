@@ -9,7 +9,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/webhooksender"
+	"github.com/weibaohui/k8m/pkg/webhookpipe"
 )
 
 type AdminWebhookController struct {
@@ -63,18 +63,12 @@ func (s *AdminWebhookController) WebhookTest(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	if m.Platform == "feishu" {
-		receiver := webhooksender.NewFeishuReceiver(m.TargetURL, m.SignSecret)
-		rets := webhooksender.PushEvent("test", []*webhooksender.WebhookReceiver{
-			receiver,
-		})
-		if len(rets) > 0 {
-			amis.WriteJsonOKMsg(c, rets[0].RespBody)
-			return
-		}
-
+	ret := webhookpipe.PushMsgToSingleTarget("test", m)
+	if ret != nil {
+		amis.WriteJsonOKMsg(c, ret.RespBody)
+		return
 	}
-
+	 
 	amis.WriteJsonError(c, fmt.Errorf("unsupported platform: %s", m.Platform))
 }
 

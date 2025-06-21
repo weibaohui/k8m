@@ -1,4 +1,4 @@
-package webhooksender
+package webhookpipe
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ func (f *FeishuSender) Name() string {
 	return "feishu"
 }
 
-func (f *FeishuSender) Send(msg string, receiver *WebhookReceiver) (*SendResult, error) {
+func (f *FeishuSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
 
 	// Add Feishu signature if enabled
 	finalURL := receiver.TargetURL

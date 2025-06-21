@@ -7,39 +7,41 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/webhooksender"
+	"github.com/weibaohui/k8m/pkg/webhookpipe"
 	"gorm.io/gorm"
 )
 
-func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhooks string) ([]*webhooksender.SendResult, error) {
+func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhookpipe.SendResult, error) {
 	// 查询webhooks
 	hookModel := &models.WebhookReceiver{}
-	hooks, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
-		return db.Where("id in ?", strings.Split(webhooks, ","))
+	receivers, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
+		return db.Where("id in ?", strings.Split(webhookIDs, ","))
 	})
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
 
-	var results []*webhooksender.SendResult
-	for _, hook := range hooks {
-		if hook.Platform == "feishu" {
-			AISummary, err := s.SummaryByAI(ctx, recordID, hook.Template)
-			if err != nil {
-				continue
-			}
-			receiver := webhooksender.NewFeishuReceiver(hook.TargetURL, hook.SignSecret)
-			ret := webhooksender.PushEvent(AISummary, []*webhooksender.WebhookReceiver{
-				receiver,
-			})
-			results = append(results, ret...)
-		}
+	msg, err := s.GetSummaryMsg(ctx, recordID)
+	if err != nil {
+		return nil, err
 	}
 
+	var results []*webhookpipe.SendResult
+	for _, receiver := range receivers {
+		AISummary, err := s.SummaryByAI(ctx, msg, receiver.Template)
+		if err != nil {
+			AISummary += err.Error()
+		}
+		_ = s.SaveSummaryBack(recordID, AISummary)
+
+		ret := webhookpipe.PushMsgToSingleTarget(AISummary, receiver)
+		results = append(results, ret)
+
+	}
 	return results, nil
 }
 
-func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint, webhooks string) ([]*webhooksender.SendResult, error) {
+func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint, webhookIDs string) ([]*webhookpipe.SendResult, error) {
 
 	// 1. 查询 InspectionRecord
 	record := &models.InspectionRecord{}
@@ -52,14 +54,14 @@ func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID
 
 	// 查询webhooks
 	hookModel := &models.WebhookReceiver{}
-	hooks, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
-		return db.Where("id in ?", strings.Split(webhooks, ","))
+	receivers, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
+		return db.Where("id in ?", strings.Split(webhookIDs, ","))
 	})
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
 
-	results := webhooksender.PushMsgToAllReceiver(record.AISummary, hooks)
+	results := webhookpipe.PushMsgToAllTargets(record.AISummary, receivers)
 
 	return results, nil
 }
