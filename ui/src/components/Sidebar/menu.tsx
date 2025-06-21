@@ -230,6 +230,13 @@ const items: () => MenuItem[] = () => {
                         key: "united-deployment",
                         onClick: () => onMenuClick('/openkruise/uniteddeployment')
                     },
+                    {
+                        label: "容器重建请求",
+                        title: "容器重建请求",
+                        icon: <i className="fa-solid fa-recycle"></i>,
+                        key: "container_recreate_request",
+                        onClick: () => onMenuClick('/openkruise/container_recreate_request')
+                    },
                 ],
             },
         ] : []),
