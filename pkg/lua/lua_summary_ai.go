@@ -11,6 +11,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error) {
@@ -77,6 +78,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 		总结：简短汇总
 	`
 	if format != "" {
+		klog.V(6).Infof("使用自定义Prompt %s", format)
 		defaultFormat = format
 	}
 	if service.AIService().IsEnabled() {
