@@ -28,7 +28,7 @@ func NewFeishuReceiver(targetURL, signSecret string) *WebhookReceiver {
 	}
 }
 
-// 校验 WebhookReceiver 配置合法性
+// Validate 校验 WebhookReceiver 配置合法性
 func (r *WebhookReceiver) Validate() error {
 	if r.Platform == "" {
 		return fmt.Errorf("platform is required")

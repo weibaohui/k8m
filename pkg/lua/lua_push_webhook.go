@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhooks string) ([]webhooksender.SendResult, error) {
+func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint, webhooks string) ([]*webhooksender.SendResult, error) {
 	// 查询webhooks
 	hookModel := &models.WebhookReceiver{}
 	hooks, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
@@ -21,7 +21,7 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
 
-	var results []webhooksender.SendResult
+	var results []*webhooksender.SendResult
 	for _, hook := range hooks {
 		if hook.Platform == "feishu" {
 			AISummary, err := s.SummaryByAI(ctx, recordID, hook.Template)
@@ -39,7 +39,7 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 	return results, nil
 }
 
-func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint) ([]webhooksender.SendResult, error) {
+func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID uint, webhooks string) ([]*webhooksender.SendResult, error) {
 
 	// 1. 查询 InspectionRecord
 	record := &models.InspectionRecord{}
@@ -52,20 +52,14 @@ func (s *ScheduleBackground) PushToHooksByRecordID(ctx context.Context, recordID
 
 	// 查询webhooks
 	hookModel := &models.WebhookReceiver{}
-	hooks, _, err := hookModel.List(dao.BuildDefaultParams())
+	hooks, _, err := hookModel.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
+		return db.Where("id in ?", strings.Split(webhooks, ","))
+	})
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
-	var results []webhooksender.SendResult
-	for _, hook := range hooks {
-		if hook.Platform == "feishu" {
-			receiver := webhooksender.NewFeishuReceiver(hook.TargetURL, hook.SignSecret)
-			ret := webhooksender.PushEvent(record.AISummary, []*webhooksender.WebhookReceiver{
-				receiver,
-			})
-			results = append(results, ret...)
-		}
-	}
+
+	results := webhooksender.PushMsgToAllReceiver(record.AISummary, hooks)
 
 	return results, nil
 }
