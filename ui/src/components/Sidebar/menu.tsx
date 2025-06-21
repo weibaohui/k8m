@@ -178,55 +178,55 @@ const items: () => MenuItem[] = () => {
                     {
                         label: "克隆集",
                         title: "克隆集",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-clone"></i>,
                         key: "advanced-cloneset",
                         onClick: () => onMenuClick('/openkruise/cloneset')
                     }, {
                         label: "高级有状态集",
                         title: "高级有状态集",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-layer-group"></i>,
                         key: "advanced-statefulset",
                         onClick: () => onMenuClick('/openkruise/statefulset')
                     },
                     {
                         label: "高级守护进程集",
                         title: "高级守护进程集",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-shield-halved"></i>,
                         key: "advanced-daemonSet",
                         onClick: () => onMenuClick('/openkruise/daemonset')
                     },
                     {
                         label: "高级定时任务",
                         title: "高级定时任务",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-clock"></i>,
                         key: "advanced-cronJob",
                         onClick: () => onMenuClick('/openkruise/cronjob')
                     },
                     {
                         label: "广播作业任务",
                         title: "广播作业任务",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-broadcast-tower"></i>,
                         key: "broadcast-job",
                         onClick: () => onMenuClick('/openkruise/broadcastjob')
                     },
                     {
                         label: "边车集",
                         title: "边车集",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-car-side"></i>,
                         key: "sidecarset",
                         onClick: () => onMenuClick('/openkruise/sidecarset')
                     },
                     {
                         label: "工作负载分布",
                         title: "工作负载分布",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-arrows-split-up-and-left"></i>,
                         key: "workload-spread",
                         onClick: () => onMenuClick('/openkruise/workloadspread')
                     },
                     {
                         label: "联合部署",
                         title: "联合部署",
-                        icon: <i className="fa-solid fa-database"></i>,
+                        icon: <i className="fa-solid fa-object-group"></i>,
                         key: "united-deployment",
                         onClick: () => onMenuClick('/openkruise/uniteddeployment')
                     },
