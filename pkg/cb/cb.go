@@ -142,30 +142,30 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 				// 具备只读+Exec权限了，那么继续看是否有该ns的权限.
 				// ns为空，或者ns列表中含有当前ns，那么就允许执行。
 
-				//首先看是否在ns黑名单中，在的话阻止
+				// 首先看是否在ns黑名单中，在的话阻止
 				execClustersWithBNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
 					return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 				})
 				if len(execClustersWithBNs) > 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 				}
 				execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
 					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 				})
 				if len(execClustersWithNs) == 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限", username, cluster, strings.Join(nsList, ","))
+					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 				}
 			}
 		} else {
 			//  有集群权限，那么继续看是否有该ns的权限.
 			if len(nsList) > 0 {
 
-				//首先看是否在ns黑名单中，在的话阻止
+				// 首先看是否在ns黑名单中，在的话阻止
 				execClustersWithBNs := slice.Filter(manageClusters, func(index int, item *models.ClusterUserRole) bool {
 					return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 				})
 				if len(execClustersWithBNs) > 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 				}
 
 				// ns为空，或者ns列表中含有当前ns，那么就允许执行。
@@ -173,7 +173,7 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 				})
 				if len(execClustersWithNs) == 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限", username, cluster, strings.Join(nsList, ","))
+					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 				}
 			}
 		}
@@ -189,19 +189,19 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 			// 具备操作权限了，那么继续看是否有该ns的权限.
 			// ns为空，或者ns列表中含有当前ns，那么就允许执行。
 
-			//首先看是否在ns黑名单中，在的话阻止
+			// 首先看是否在ns黑名单中，在的话阻止
 			execClustersWithBNs := slice.Filter(changeClusters, func(index int, item *models.ClusterUserRole) bool {
 				return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 			})
 			if len(execClustersWithBNs) > 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限-命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 			}
 
 			changeClustersWithNs := slice.Filter(changeClusters, func(index int, item *models.ClusterUserRole) bool {
 				return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 			})
 			if len(changeClustersWithNs) == 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限", username, cluster, strings.Join(nsList, ","))
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 			}
 		}
 	default:
@@ -218,19 +218,19 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 			// 具备操作权限了，那么继续看是否有该ns的权限.
 			// ns为空，或者ns列表中含有当前ns，那么就允许执行。
 
-			//首先看是否在ns黑名单中，在的话阻止
+			// 首先看是否在ns黑名单中，在的话阻止
 			execClustersWithBNs := slice.Filter(readClusters, func(index int, item *models.ClusterUserRole) bool {
 				return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 			})
 			if len(execClustersWithBNs) > 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限-命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 			}
 
 			readClustersWithNs := slice.Filter(readClusters, func(index int, item *models.ClusterUserRole) bool {
 				return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 			})
 			if len(readClustersWithNs) == 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限", username, cluster, strings.Join(nsList, ","))
+				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 			}
 		}
 	}

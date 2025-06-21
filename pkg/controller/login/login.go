@@ -28,7 +28,7 @@ type LoginRequest struct {
 
 func LoginByPassword(c *gin.Context) {
 	var req LoginRequest
-	errorInfo := gin.H{"message": "用户名或密码错误"}
+	errorInfo := gin.H{"message": "用户名密码错误或用户被禁用"}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		klog.Errorf("LoginByPassword %v", err.Error())
 		c.JSON(http.StatusUnauthorized, errorInfo)
@@ -70,6 +70,13 @@ func LoginByPassword(c *gin.Context) {
 		}
 		for _, v := range list {
 			if v.Username == req.Username {
+
+				if v.Disabled {
+					klog.Errorf("用户[%s]被禁用", v.Username)
+					c.JSON(http.StatusUnauthorized, errorInfo)
+					return
+				}
+
 				// password base64解密
 				// 前端密码解密的值，加上盐值，重新计算
 				decryptPsw, err := utils.AesEncrypt([]byte(fmt.Sprintf("%s%s", string(decrypt), v.Salt)))

@@ -120,6 +120,7 @@
         }
       ],
       "api": "get:/admin/user/list",
+      "quickSaveItemApi": "/admin/user/save/id/${id}/status/${disabled}",
       "columns": [
         {
           "type": "operation",
@@ -380,6 +381,16 @@
               }
             }
           ]
+        },
+        {
+          "name": "disabled",
+          "label": "禁用",
+          "quickEdit": {
+            "mode": "inline",
+            "type": "switch",
+            "saveImmediately": true,
+            "resetOnFailed": true
+          }
         },
         {
           "label": "来源",
