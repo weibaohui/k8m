@@ -1,6 +1,10 @@
 package webhooksender
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/weibaohui/k8m/pkg/models"
+)
 
 // WebhookReceiver represents a user-defined webhook endpoint.
 type WebhookReceiver struct {
@@ -21,7 +25,7 @@ func NewFeishuReceiver(targetURL, signSecret string) *WebhookReceiver {
 		TargetURL:     targetURL,
 		Method:        "POST",
 		Headers:       map[string]string{},
-		Template:      `{"msg_type":"text","content":{"text":"{{.ScriptName}} 检查{{.Name}} 状态: {{.EventStatus}}, 信息: {{.EventMsg}}"}}`,
+		Template:      `{"msg_type":"text","content":{"text":"%s"}}`,
 		SignSecret:    signSecret,
 		SignAlgo:      "feishu",
 		SignHeaderKey: "", // 飞书不需要 header 签名，是 URL 参数
@@ -41,6 +45,14 @@ func (r *WebhookReceiver) Validate() error {
 	}
 	if r.Template == "" {
 		return fmt.Errorf("template is required")
+	}
+	return nil
+}
+
+func GetReceiver(receiver *models.WebhookReceiver) *WebhookReceiver {
+	if receiver.Platform == "feishu" {
+		rr := NewFeishuReceiver(receiver.TargetURL, receiver.SignSecret)
+		return rr
 	}
 	return nil
 }
