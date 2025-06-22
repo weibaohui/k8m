@@ -264,6 +264,13 @@ const items: () => MenuItem[] = () => {
                         key: "PodUnavailableBudget",
                         onClick: () => onMenuClick('/openkruise/PodUnavailableBudget')
                     },
+                    {
+                        label: "资源分发",
+                        title: "资源分发",
+                        icon: <i className="fa-solid fa-share-nodes"></i>,
+                        key: "ResourceDistribution",
+                        onClick: () => onMenuClick('/openkruise/ResourceDistribution')
+                    },
 
                 ],
             },

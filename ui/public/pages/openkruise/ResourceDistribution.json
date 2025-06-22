@@ -1,0 +1,660 @@
+{
+  "type": "page",
+  "data": {
+    "kind": "ResourceDistribution",
+    "group": "apps.kruise.io",
+    "version": "v1alpha1"
+  },
+  "body": [
+    {
+      "type": "container",
+      "className": "floating-toolbar",
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "${kind}",
+          "className": "mr-2"
+        },
+        {
+          "type": "button",
+          "label": "属性文档",
+          "level": "link",
+          "icon": "fas fa-book-open text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind} 属性文档（ESC 关闭）",
+            "body": [
+              {
+                "type": "page",
+                "asideResizor": true,
+                "asideSticky": false,
+                "aside": [
+                  {
+                    "type": "input-tree",
+                    "name": "tree",
+                    "initiallyOpen": false,
+                    "unfoldedLevel": 1,
+                    "searchable": true,
+                    "showOutline": true,
+                    "showIcon": true,
+                    "searchConfig": {
+                      "sticky": true
+                    },
+                    "heightAuto": true,
+                    "inputClassName": "no-border no-padder mt-1",
+                    "source": "get:/k8s/doc/kind/$kind/group/$group/version/$version",
+                    "onEvent": {
+                      "change": {
+                        "actions": [
+                          {
+                            "componentId": "basic",
+                            "actionType": "reload",
+                            "data": {
+                              "description": "${event.data.item.description}",
+                              "id": "${event.data.item.id}",
+                              "full_id": "${event.data.item.full_id}",
+                              "type": "${event.data.item.type}"
+                            }
+                          },
+                          {
+                            "componentId": "detail",
+                            "actionType": "reload",
+                            "data": {
+                              "description": "${event.data.item.description}",
+                              "id": "${event.data.item.id}",
+                              "full_id": "${event.data.item.full_id}",
+                              "type": "${event.data.item.type}"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "service",
+                    "id": "basic",
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<br><strong>属性：</strong> ${id}",
+                        "visibleOn": "${id}"
+                      },
+                      {
+                        "type": "button",
+                        "label": "示例",
+                        "level": "link",
+                        "icon": "fas fa-lightbulb text-warning",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "overlay": false,
+                          "closeOnEsc": true,
+                          "closeOnOutside": true,
+                          "size": "lg",
+                          "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                          "body": [
+                            {
+                              "type": "websocketMarkdownViewer",
+                              "url": "/ai/chat/example/field",
+                              "params": {
+                                "kind": "${kind}",
+                                "group": "${group}",
+                                "version": "${version}",
+                                "field": "${full_id}"
+                              }
+                            }
+                          ]
+                        },
+                        "visibleOn": "${id}"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                        "visibleOn": "${type}"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<br><strong>描述：</strong> ${description}",
+                        "visibleOn": "${description}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "service",
+                    "id": "detail",
+                    "api": "post:/k8s/doc/detail",
+                    "body": [
+                      {
+                        "type": "divider",
+                        "title": "描述翻译",
+                        "titlePosition": "center",
+                        "visibleOn": "${translate}"
+                      },
+                      {
+                        "type": "markdown",
+                        "value": "${translate|raw}",
+                        "options": {
+                          "linkify": true,
+                          "html": true,
+                          "breaks": true
+                        },
+                        "visibleOn": "${translate}"
+                      },
+                      {
+                        "type": "container",
+                        "body": [
+                          {
+                            "type": "tpl",
+                            "tpl": "<div style='height:80vh'>&nbsp</div>"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "button",
+          "label": "指南",
+          "level": "link",
+          "icon": "fas fa-lightbulb text-primary",
+          "actionType": "drawer",
+          "drawer": {
+            "overlay": false,
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "${kind} 参考样例（ESC 关闭）",
+            "body": [
+              {
+                "type": "websocketMarkdownViewer",
+                "url": "/ai/chat/example",
+                "params": {
+                  "kind": "${kind}",
+                  "group": "${group}",
+                  "version": "${version}"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "创建",
+          "icon": "fas fa-dharmachakra text-primary",
+          "type": "button",
+          "level": "link",
+          "actionType": "url",
+          "blank": true,
+          "url": "/#/apply/apply?kind=${kind}"
+        }
+      ]
+    },
+    {
+      "type": "container",
+      "className": "floating-toolbar-right",
+      "body": [
+        {
+          "type": "wrapper",
+          "style": {
+            "display": "inline-flex"
+          },
+          "body": [
+            {
+              "type": "form",
+              "mode": "inline",
+              "wrapWithPanel": false,
+              "body": [
+                {
+                  "label": "集群",
+                  "type": "select",
+                  "multiple": false,
+                  "name": "cluster",
+                  "id": "cluster",
+                  "searchable": true,
+                  "source": "/params/cluster/option_list",
+                  "value": "${ls:cluster}",
+                  "onEvent": {
+                    "change": {
+                      "actions": [
+                        {
+                          "actionType": "custom",
+                          "script": "localStorage.setItem('cluster', event.data.value)"
+                        },
+                        {
+                          "actionType": "custom",
+                          "script": "window.location.reload();"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/version/$version/batch/remove",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        },
+        {
+          "label": "强制删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量强制删除?",
+          "api": {
+            "url": "/k8s/$kind/group/$group/version/$version/force_remove",
+            "method": "post",
+            "data": {
+              "name_list": "${selectedItems | pick:metadata.name }",
+              "ns_list": "${selectedItems | pick:metadata.namespace }"
+            }
+          }
+        }
+      ],
+      "api": "post:/k8s/$kind/group/$group/version/$version/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-eye text-primary",
+              "actionType": "drawer",
+              "tooltip": "资源描述",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "Describe: ${metadata.name}  (ESC 关闭)",
+                "body": [
+                  {
+                    "type": "service",
+                    "api": "post:/k8s/$kind/group/$group/version/$version/describe/ns/$metadata.namespace/name/$metadata.name",
+                    "body": [
+                      {
+                        "type": "button",
+                        "label": "AI解读",
+                        "icon": "fas fa-brain text-primary",
+                        "actionType": "drawer",
+                        "drawer": {
+                          "closeOnEsc": true,
+                          "closeOnOutside": true,
+                          "size": "xl",
+                          "title": "AI解读  (ESC 关闭)",
+                          "body": [
+                            {
+                              "type": "websocketMarkdownViewer",
+                              "url": "/ai/chat/describe",
+                              "params": {
+                                "kind": "${kind}",
+                                "group": "${group}",
+                                "version": "${version}",
+                                "name": "${metadata.name}",
+                                "namespace": "${metadata.namespace}"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "highlightHtml",
+                        "keywords": [
+                          "Error",
+                          "Warning"
+                        ],
+                        "html": "${result}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fa fa-edit text-primary",
+              "tooltip": "Yaml编辑",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "Yaml管理",
+                "body": [
+                  {
+                    "type": "tabs",
+                    "tabsMode": "tiled",
+                    "tabs": [
+                      {
+                        "title": "查看编辑",
+                        "body": [
+                          {
+                            "type": "service",
+                            "api": "get:/k8s/$kind/group/$group/version/$version/ns/$metadata.namespace/name/$metadata.name",
+                            "body": [
+                              {
+                                "type": "mEditor",
+                                "text": "${yaml}",
+                                "componentId": "yaml",
+                                "saveApi": "/k8s/${kind}/group/${group}/version/${version}/update/ns/${metadata.namespace}/name/${metadata.name}",
+                                "options": {
+                                  "language": "yaml",
+                                  "wordWrap": "on",
+                                  "scrollbar": {
+                                    "vertical": "auto"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "title": "文档",
+                        "body": [
+                          {
+                            "type": "page",
+                            "asideResizor": true,
+                            "asideSticky": false,
+                            "aside": [
+                              {
+                                "type": "input-tree",
+                                "name": "tree",
+                                "initiallyOpen": false,
+                                "unfoldedLevel": 1,
+                                "searchable": true,
+                                "showOutline": true,
+                                "showIcon": true,
+                                "searchConfig": {
+                                  "sticky": true
+                                },
+                                "heightAuto": true,
+                                "inputClassName": "no-border no-padder mt-1",
+                                "source": "get:/k8s/doc/gvk/${apiVersion|base64Encode}/$kind",
+                                "onEvent": {
+                                  "change": {
+                                    "actions": [
+                                      {
+                                        "componentId": "basic",
+                                        "actionType": "reload",
+                                        "data": {
+                                          "description": "${event.data.item.description}",
+                                          "id": "${event.data.item.id}",
+                                          "full_id": "${event.data.item.full_id}",
+                                          "type": "${event.data.item.type}"
+                                        }
+                                      },
+                                      {
+                                        "componentId": "detail",
+                                        "actionType": "reload",
+                                        "data": {
+                                          "description": "${event.data.item.description}",
+                                          "id": "${event.data.item.id}",
+                                          "full_id": "${event.data.item.full_id}",
+                                          "type": "${event.data.item.type}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ],
+                            "body": [
+                              {
+                                "type": "service",
+                                "id": "basic",
+                                "body": [
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<br><strong>属性：</strong> ${id}",
+                                    "visibleOn": "${id}"
+                                  },
+                                  {
+                                    "type": "button",
+                                    "label": "示例",
+                                    "level": "link",
+                                    "icon": "fas fa-lightbulb text-warning",
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                      "overlay": false,
+                                      "closeOnEsc": true,
+                                      "closeOnOutside": true,
+                                      "size": "lg",
+                                      "title": "${kind}-${id} 参考样例（ESC 关闭）",
+                                      "body": [
+                                        {
+                                          "type": "websocketMarkdownViewer",
+                                          "url": "/ai/chat/example/field",
+                                          "params": {
+                                            "kind": "${kind}",
+                                            "group": "${group}",
+                                            "version": "${version}",
+                                            "field": "${full_id}"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "visibleOn": "${id}"
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<br><strong>类型：</strong> <span class='label label-primary'>${type}</span>",
+                                    "visibleOn": "${type}"
+                                  },
+                                  {
+                                    "type": "tpl",
+                                    "tpl": "<br><strong>描述：</strong> ${description}",
+                                    "visibleOn": "${description}"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "service",
+                                "id": "detail",
+                                "api": "post:/k8s/doc/detail",
+                                "body": [
+                                  {
+                                    "type": "divider",
+                                    "title": "描述翻译",
+                                    "titlePosition": "center",
+                                    "visibleOn": "${translate}"
+                                  },
+                                  {
+                                    "type": "markdown",
+                                    "value": "${translate|raw}",
+                                    "options": {
+                                      "linkify": true,
+                                      "html": true,
+                                      "breaks": true
+                                    },
+                                    "visibleOn": "${translate}"
+                                  },
+                                  {
+                                    "type": "container",
+                                    "body": [
+                                      {
+                                        "type": "tpl",
+                                        "tpl": "<div style='height:80vh'>&nbsp</div>"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "actions": []
+              }
+            }
+          ],
+          "toggled": true
+        },
+        {
+          "name": "metadata.name",
+          "label": "名称",
+          "type": "text",
+          "width": "180px",
+          "sortable": true,
+          "searchable": {
+            "type": "input-text",
+            "name": "metadata.name",
+            "clearable": true,
+            "label": "名称",
+            "placeholder": "输入名称"
+          }
+        },
+        {
+          "name": "metadata.labels",
+          "label": "标签",
+          "type": "tpl",
+          "tpl": "${metadata.labels ? '<i class=\"fa fa-tags text-primary\"></i>' : '<i class=\"fa fa-tags text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 标签 (ESC 关闭)",
+                    "name": "dialog_labels",
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "body": [
+                      {
+                        "type": "form",
+                        "mode": "horizontal",
+                        "labelWidth": 0,
+                        "api": "post:/k8s/$kind/group/$group/version/$version/update_labels/ns/$metadata.namespace/name/$metadata.name",
+                        "body": [
+                          {
+                            "type": "input-kv",
+                            "name": "labels",
+                            "draggable": false,
+                            "value": "${metadata.labels}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "metadata.annotations",
+          "label": "注解",
+          "type": "tpl",
+          "tpl": "${metadata.annotations|filterAnnotations|showAnnotationIcon|isTrue:'<i class=\"fa fa-note-sticky text-primary\"></i>':'<i class=\"fa fa-note-sticky text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 注解 (ESC 关闭)",
+                    "name": "dialog_annotations",
+                    "body": [
+                      {
+                        "type": "form",
+                        "mode": "horizontal",
+                        "labelWidth": 0,
+                        "api": "post:/k8s/$kind/group/$group/version/$version/update_annotations/ns/$metadata.namespace/name/$metadata.name",
+                        "initApi": "get:/k8s/$kind/group/$group/version/$version/annotations/ns/$metadata.namespace/name/$metadata.name",
+                        "body": [
+                          {
+                            "type": "input-kv",
+                            "name": "annotations",
+                            "draggable": false,
+                            "value": "${annotations}"
+                          }
+                        ]
+                      }
+                    ],
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "status.conditions",
+          "label": "条件",
+          "type": "k8sTextConditions"
+        },
+        {
+          "name": "metadata.creationTimestamp",
+          "label": "存在时长",
+          "type": "k8sAge"
+        }
+      ]
+    }
+  ]
+}
