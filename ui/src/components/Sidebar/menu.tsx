@@ -257,6 +257,14 @@ const items: () => MenuItem[] = () => {
                         key: "podprobemarker",
                         onClick: () => onMenuClick('/openkruise/podprobemarker')
                     },
+                    {
+                        label: "Pod不可用预算",
+                        title: "Pod不可用预算",
+                        icon: <i className="fa-solid fa-circle-exclamation"></i>,
+                        key: "PodUnavailableBudget",
+                        onClick: () => onMenuClick('/openkruise/PodUnavailableBudget')
+                    },
+
                 ],
             },
         ] : []),
