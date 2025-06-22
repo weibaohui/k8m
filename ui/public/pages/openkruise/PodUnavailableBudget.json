@@ -2,7 +2,7 @@
   "type": "page",
   "data": {
     "ns": "${ls:selectedNs||'default'}",
-    "kind": "ImagePullJob",
+    "kind": "PodUnavailableBudget",
     "group": "apps.kruise.io",
     "version": "v1alpha1"
   },
@@ -610,80 +610,16 @@
           }
         },
         {
-          "name": "spec.image",
-          "label": "镜像",
-          "type": "text",
-          "sortable": true
-        },
-        {
-          "name": "spec.selector",
-          "label": "节点选择器",
+          "label": "目标",
+          "width": "150px",
           "type": "tpl",
-          "tpl": "<i class='fa fa-sitemap text-primary'></i>",
-          "onEvent": {
-            "click": {
-              "actions": [
-                {
-                  "actionType": "dialog",
-                  "dialog": {
-                    "title": "${metadata.name} 节点选择器 (ESC 关闭)",
-                    "name": "dialog_annotations",
-                    "body": [
-                      {
-                        "type": "tpl",
-                        "tpl": "<strong>节点名称</strong>",
-                        "visibleOn": "${spec.selector.names}"
-                      },
-                      {
-                        "type": "each",
-                        "label": "节点名称",
-                        "name": "spec.selector.names",
-                        "items": {
-                          "type": "tpl",
-                          "tpl": "${item}<br>"
-                        },
-                        "visibleOn": "${spec.selector.names}"
-                      },
-                      {
-                        "type": "tpl",
-                        "tpl": "<strong>节点标签</strong>",
-                        "visibleOn": "${spec.selector.matchLabels}"
-                      },
-                      {
-                        "type": "json",
-                        "label": "节点标签",
-                        "source": "${spec.selector.matchLabels}",
-                        "levelExpand": 1,
-                        "visibleOn": "${spec.selector.matchLabels}"
-                      },
-                      {
-                        "type": "tpl",
-                        "tpl": "<strong>Pod所在节点</strong>",
-                        "visibleOn": "${spec.podSelector.matchLabels}"
-                      },
-                      {
-                        "type": "json",
-                        "label": "Pod所在节点",
-                        "source": "${spec.podSelector.matchLabels}",
-                        "levelExpand": 1,
-                        "visibleOn": "${spec.podSelector.matchLabels}"
-                      }
-                    ],
-                    "size": "lg",
-                    "closeOnEsc": true,
-                    "closeOnOutside": true
-                  }
-                }
-              ]
-            }
-          },
-          "style": {
-            "cursor": "pointer"
-          }
+          "tpl": "[<%= data.spec.targetRef.kind %>]<%= data.spec.targetRef.name %>"
         },
         {
-          "name": "spec.parallelism",
-          "label": "并发数"
+          "name": "状态",
+          "label": "副本可用策略<br><span class='text-gray-500 text-xs'>(两者互斥，优先使用最大不可用)</span>",
+          "type": "tpl",
+          "tpl": "<span style='margin-right: 8px;'><strong>最大不可用:</strong> ${spec.maxUnavailable}</span><span style='margin-right: 8px;'><strong>最小可用:</strong> ${spec.minAvailable}</span>"
         },
         {
           "name": "metadata.labels",
@@ -767,12 +703,6 @@
           "style": {
             "cursor": "pointer"
           }
-        },
-        {
-          "name": "状态",
-          "label": "状态",
-          "type": "tpl",
-          "tpl": "<span style='margin-right: 2px;'><strong>运:</strong>${status.active}</span><span style='margin-right: 2px;'><strong>完:</strong>${status.succeeded}</span><span style='margin-right: 2px;'><strong>败:</strong>${status.failed}</span><span><strong>总:</strong>${status.desired}</span><br><span>${status.message}</span>"
         },
         {
           "name": "metadata.creationTimestamp",

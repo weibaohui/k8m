@@ -1,8 +1,7 @@
 {
   "type": "page",
   "data": {
-    "ns": "${ls:selectedNs||'default'}",
-    "kind": "ImagePullJob",
+    "kind": "ResourceDistribution",
     "group": "apps.kruise.io",
     "version": "v1alpha1"
   },
@@ -204,41 +203,15 @@
       "body": [
         {
           "type": "wrapper",
+          "style": {
+            "display": "inline-flex"
+          },
           "body": [
             {
               "type": "form",
               "mode": "inline",
               "wrapWithPanel": false,
               "body": [
-                {
-                  "label": "命名空间",
-                  "type": "select",
-                  "multiple": true,
-                  "maxTagCount": 1,
-                  "name": "ns",
-                  "id": "ns",
-                  "searchable": true,
-                  "checkAll": true,
-                  "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
-                  "onEvent": {
-                    "change": {
-                      "actions": [
-                        {
-                          "actionType": "reload",
-                          "componentId": "detailCRUD",
-                          "data": {
-                            "ns": "${ns}"
-                          }
-                        },
-                        {
-                          "actionType": "custom",
-                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
-                        }
-                      ]
-                    }
-                  }
-                },
                 {
                   "label": "集群",
                   "type": "select",
@@ -302,7 +275,6 @@
       ],
       "loadDataOnce": false,
       "syncLocation": false,
-      "initFetch": true,
       "perPage": 10,
       "bulkActions": [
         {
@@ -332,21 +304,7 @@
           }
         }
       ],
-      "footerToolbar": [
-        {
-          "type": "pagination",
-          "align": "right"
-        },
-        {
-          "type": "statistics",
-          "align": "right"
-        },
-        {
-          "type": "switch-per-page",
-          "align": "right"
-        }
-      ],
-      "api": "post:/k8s/$kind/group/$group/version/$version/list/ns/${ns}",
+      "api": "post:/k8s/$kind/group/$group/version/$version/list",
       "columns": [
         {
           "type": "operation",
@@ -590,12 +548,6 @@
           "toggled": true
         },
         {
-          "name": "metadata.namespace",
-          "label": "命名空间",
-          "type": "text",
-          "sortable": true
-        },
-        {
           "name": "metadata.name",
           "label": "名称",
           "type": "text",
@@ -608,82 +560,6 @@
             "label": "名称",
             "placeholder": "输入名称"
           }
-        },
-        {
-          "name": "spec.image",
-          "label": "镜像",
-          "type": "text",
-          "sortable": true
-        },
-        {
-          "name": "spec.selector",
-          "label": "节点选择器",
-          "type": "tpl",
-          "tpl": "<i class='fa fa-sitemap text-primary'></i>",
-          "onEvent": {
-            "click": {
-              "actions": [
-                {
-                  "actionType": "dialog",
-                  "dialog": {
-                    "title": "${metadata.name} 节点选择器 (ESC 关闭)",
-                    "name": "dialog_annotations",
-                    "body": [
-                      {
-                        "type": "tpl",
-                        "tpl": "<strong>节点名称</strong>",
-                        "visibleOn": "${spec.selector.names}"
-                      },
-                      {
-                        "type": "each",
-                        "label": "节点名称",
-                        "name": "spec.selector.names",
-                        "items": {
-                          "type": "tpl",
-                          "tpl": "${item}<br>"
-                        },
-                        "visibleOn": "${spec.selector.names}"
-                      },
-                      {
-                        "type": "tpl",
-                        "tpl": "<strong>节点标签</strong>",
-                        "visibleOn": "${spec.selector.matchLabels}"
-                      },
-                      {
-                        "type": "json",
-                        "label": "节点标签",
-                        "source": "${spec.selector.matchLabels}",
-                        "levelExpand": 1,
-                        "visibleOn": "${spec.selector.matchLabels}"
-                      },
-                      {
-                        "type": "tpl",
-                        "tpl": "<strong>Pod所在节点</strong>",
-                        "visibleOn": "${spec.podSelector.matchLabels}"
-                      },
-                      {
-                        "type": "json",
-                        "label": "Pod所在节点",
-                        "source": "${spec.podSelector.matchLabels}",
-                        "levelExpand": 1,
-                        "visibleOn": "${spec.podSelector.matchLabels}"
-                      }
-                    ],
-                    "size": "lg",
-                    "closeOnEsc": true,
-                    "closeOnOutside": true
-                  }
-                }
-              ]
-            }
-          },
-          "style": {
-            "cursor": "pointer"
-          }
-        },
-        {
-          "name": "spec.parallelism",
-          "label": "并发数"
         },
         {
           "name": "metadata.labels",
@@ -769,10 +645,9 @@
           }
         },
         {
-          "name": "状态",
-          "label": "状态",
-          "type": "tpl",
-          "tpl": "<span style='margin-right: 2px;'><strong>运:</strong>${status.active}</span><span style='margin-right: 2px;'><strong>完:</strong>${status.succeeded}</span><span style='margin-right: 2px;'><strong>败:</strong>${status.failed}</span><span><strong>总:</strong>${status.desired}</span><br><span>${status.message}</span>"
+          "name": "status.conditions",
+          "label": "条件",
+          "type": "k8sTextConditions"
         },
         {
           "name": "metadata.creationTimestamp",

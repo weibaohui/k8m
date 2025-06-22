@@ -2,7 +2,7 @@
   "type": "page",
   "data": {
     "ns": "${ls:selectedNs||'default'}",
-    "kind": "ImagePullJob",
+    "kind": "PersistentPodState",
     "group": "apps.kruise.io",
     "version": "v1alpha1"
   },
@@ -610,13 +610,13 @@
           }
         },
         {
-          "name": "spec.image",
-          "label": "镜像",
-          "type": "text",
-          "sortable": true
+          "label": "目标",
+          "width": "150px",
+          "type": "tpl",
+          "tpl": "[<%= data.spec.targetRef.kind %>]<%= data.spec.targetRef.name %>"
         },
         {
-          "name": "spec.selector",
+          "name": "spec.requiredPersistentTopology.nodeTopologyKeys",
           "label": "节点选择器",
           "type": "tpl",
           "tpl": "<i class='fa fa-sitemap text-primary'></i>",
@@ -626,47 +626,47 @@
                 {
                   "actionType": "dialog",
                   "dialog": {
-                    "title": "${metadata.name} 节点选择器 (ESC 关闭)",
+                    "title": "${metadata.name} 节点拓扑键 (ESC 关闭)",
                     "name": "dialog_annotations",
                     "body": [
                       {
                         "type": "tpl",
-                        "tpl": "<strong>节点名称</strong>",
-                        "visibleOn": "${spec.selector.names}"
-                      },
-                      {
-                        "type": "each",
-                        "label": "节点名称",
-                        "name": "spec.selector.names",
-                        "items": {
-                          "type": "tpl",
-                          "tpl": "${item}<br>"
-                        },
-                        "visibleOn": "${spec.selector.names}"
-                      },
-                      {
-                        "type": "tpl",
-                        "tpl": "<strong>节点标签</strong>",
-                        "visibleOn": "${spec.selector.matchLabels}"
+                        "tpl": "<strong>强制分布节点标签</strong>",
+                        "visibleOn": "Array.isArray(spec.requiredPersistentTopology?.nodeTopologyKeys) && spec.requiredPersistentTopology.nodeTopologyKeys.length > 0"
                       },
                       {
                         "type": "json",
                         "label": "节点标签",
-                        "source": "${spec.selector.matchLabels}",
+                        "source": "${spec.requiredPersistentTopology.nodeTopologyKeys}",
                         "levelExpand": 1,
-                        "visibleOn": "${spec.selector.matchLabels}"
+                        "visibleOn": "Array.isArray(spec.requiredPersistentTopology?.nodeTopologyKeys) && spec.requiredPersistentTopology.nodeTopologyKeys.length > 0"
                       },
                       {
-                        "type": "tpl",
-                        "tpl": "<strong>Pod所在节点</strong>",
-                        "visibleOn": "${spec.podSelector.matchLabels}"
-                      },
-                      {
-                        "type": "json",
-                        "label": "Pod所在节点",
-                        "source": "${spec.podSelector.matchLabels}",
-                        "levelExpand": 1,
-                        "visibleOn": "${spec.podSelector.matchLabels}"
+                        "type": "container",
+                        "body": [
+                          {
+                            "type": "tpl",
+                            "tpl": "<strong>优先分布节点标签</strong>",
+                            "visibleOn": "Array.isArray(spec.preferredPersistentTopology) && spec.preferredPersistentTopology.length > 0"
+                          },
+                          {
+                            "type": "each",
+                            "name": "spec.preferredPersistentTopology",
+                            "visibleOn": "Array.isArray(spec.preferredPersistentTopology) && spec.preferredPersistentTopology.length > 0",
+                            "items": {
+                              "type": "panel",
+                              "title": "权重：${weight}",
+                              "body": [
+                                {
+                                  "type": "json",
+                                  "label": "节点标签",
+                                  "source": "${preference.nodeTopologyKeys}",
+                                  "levelExpand": 1
+                                }
+                              ]
+                            }
+                          }
+                        ]
                       }
                     ],
                     "size": "lg",
@@ -680,10 +680,6 @@
           "style": {
             "cursor": "pointer"
           }
-        },
-        {
-          "name": "spec.parallelism",
-          "label": "并发数"
         },
         {
           "name": "metadata.labels",
@@ -767,12 +763,6 @@
           "style": {
             "cursor": "pointer"
           }
-        },
-        {
-          "name": "状态",
-          "label": "状态",
-          "type": "tpl",
-          "tpl": "<span style='margin-right: 2px;'><strong>运:</strong>${status.active}</span><span style='margin-right: 2px;'><strong>完:</strong>${status.succeeded}</span><span style='margin-right: 2px;'><strong>败:</strong>${status.failed}</span><span><strong>总:</strong>${status.desired}</span><br><span>${status.message}</span>"
         },
         {
           "name": "metadata.creationTimestamp",
