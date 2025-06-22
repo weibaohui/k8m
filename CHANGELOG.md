@@ -1,4 +1,32 @@
 ## 更新日志
+**v0.0.133**
+增加对OpenKruise的支持：
+advancedcronjobs.apps.kruise.io                
+broadcastjobs.apps.kruise.io                   
+clonesets.apps.kruise.io                       
+containerrecreaterequests.apps.kruise.io       
+daemonsets.apps.kruise.io                      
+imagelistpulljobs.apps.kruise.io               
+imagepulljobs.apps.kruise.io                   
+nodeimages.apps.kruise.io                      
+nodepodprobes.apps.kruise.io                   
+persistentpodstates.apps.kruise.io             
+podprobemarkers.apps.kruise.io                 
+podunavailablebudgets.policy.kruise.io         
+resourcedistributions.apps.kruise.io           
+sidecarsets.apps.kruise.io                     
+statefulsets.apps.kruise.io                    
+uniteddeployments.apps.kruise.io               
+workloadspreads.apps.kruise.io                 
+
+**v0.0.132**
+支持用户禁用，禁用后不可登录、不可API访问、不可MCP访问
+
+**v0.0.130**
+增加自定义规则巡检功能。
+支持使用lua脚本编写自定义规则。
+支持设置webhook接收通知。
+支持AI总结巡检结果。 
 
 **v0.0.128**
 新增命名空间黑白名单管控
