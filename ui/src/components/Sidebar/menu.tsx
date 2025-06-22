@@ -244,6 +244,13 @@ const items: () => MenuItem[] = () => {
                         key: "imagepulljob",
                         onClick: () => onMenuClick('/openkruise/imagepulljob')
                     },
+                    {
+                        label: "持久化状态",
+                        title: "持久化状态",
+                        icon: <i className="fa-solid fa-cloud-arrow-down"></i>,
+                        key: "persistentpodstate",
+                        onClick: () => onMenuClick('/openkruise/persistentpodstate')
+                    },
                 ],
             },
         ] : []),
