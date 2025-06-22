@@ -350,34 +350,6 @@
               "ns_list": "${selectedItems | pick:metadata.namespace }"
             }
           }
-        },
-        {
-          "type": "button",
-          "actionType": "ajax",
-          "label": "暂停",
-          "confirmText": "确定要批量暂停?",
-          "api": {
-            "url": "/k8s/cronjob/batch/pause",
-            "method": "post",
-            "data": {
-              "name_list": "${selectedItems | pick:metadata.name }",
-              "ns_list": "${selectedItems | pick:metadata.namespace }"
-            }
-          }
-        },
-        {
-          "type": "button",
-          "actionType": "ajax",
-          "label": "恢复",
-          "confirmText": "确定要批量恢复?",
-          "api": {
-            "url": "/k8s/cronjob/batch/resume",
-            "method": "post",
-            "data": {
-              "name_list": "${selectedItems | pick:metadata.name }",
-              "ns_list": "${selectedItems | pick:metadata.namespace }"
-            }
-          }
         }
       ],
       "footerToolbar": [
@@ -640,105 +612,6 @@
               "buttons": [
                 {
                   "type": "button",
-                  "icon": "fas fa-wrench text-primary",
-                  "label": "更新镜像",
-                  "actionType": "dialog",
-                  "dialog": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "position": "left",
-                    "title": "编辑",
-                    "body": [
-                      {
-                        "type": "page",
-                        "body": [
-                          {
-                            "type": "panel",
-                            "title": "当前运行镜像",
-                            "body": {
-                              "name": "spec.jobTemplate.spec.template.spec.containers",
-                              "type": "each",
-                              "items": {
-                                "type": "tpl",
-                                "tpl": "<div style='margin-bottom: 10px;'>容器：<strong class='text-green-500 font-black'>${name}</strong><br>镜像： ${image|simpleImageName}</div>"
-                              }
-                            }
-                          },
-                          {
-                            "type": "form",
-                            "title": "更新镜像",
-                            "name": "sample-edit-form",
-                            "api": "post:/k8s/$kind/group/$group/version/$version/update_image/ns/$metadata.namespace/name/$metadata.name",
-                            "actions": [],
-                            "body": [
-                              {
-                                "label": "镜像拉取密钥",
-                                "type": "select",
-                                "multiple": true,
-                                "maxTagCount": 1,
-                                "name": "image_pull_secrets",
-                                "id": "image_pull_secrets",
-                                "searchable": true,
-                                "clearable": true,
-                                "noResultsText": "未设置密钥",
-                                "checkAll": true,
-                                "source": "/k8s/$kind/group/$group/version/$version/image_pull_secrets/ns/$metadata.namespace/name/$metadata.name"
-                              },
-                              {
-                                "type": "select",
-                                "name": "container_name",
-                                "label": "容器",
-                                "source": "${spec.jobTemplate.spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
-                                "value": "${spec.jobTemplate.spec.template.spec.containers[0].name}",
-                                "required": true
-                              },
-                              {
-                                "type": "service",
-                                "api": "/k8s/$kind/group/$group/version/$version/container_info/ns/$metadata.namespace/name/$metadata.name/container/${container_name}",
-                                "body": [
-                                  {
-                                    "type": "input-text",
-                                    "name": "image",
-                                    "label": "镜像名称",
-                                    "required": true
-                                  },
-                                  {
-                                    "type": "input-text",
-                                    "name": "tag",
-                                    "label": "版本标签",
-                                    "required": true
-                                  },
-                                  {
-                                    "type": "select",
-                                    "name": "image_pull_policy",
-                                    "label": "镜像拉取策略",
-                                    "required": true,
-                                    "options": [
-                                      {
-                                        "label": "始终拉取",
-                                        "value": "Always"
-                                      },
-                                      {
-                                        "label": "从不拉取",
-                                        "value": "Never"
-                                      },
-                                      {
-                                        "label": "不存在时拉取",
-                                        "value": "IfNotPresent"
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "button",
                   "icon": "fas fa-calendar-alt text-primary",
                   "label": "查看事件",
                   "actionType": "drawer",
@@ -953,7 +826,7 @@
           "tpl": "成功保留: ${spec.successfulJobsHistoryLimit || 0} <br/> 失败保留: ${spec.failedJobsHistoryLimit || 0}"
         },
         {
-          "name": "spec.jobTemplate.spec.template.spec.containers",
+          "name": "spec.template.broadcastJobTemplate.spec.template.spec.containers",
           "label": "容器",
           "type": "each",
           "items": {
