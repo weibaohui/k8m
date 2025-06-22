@@ -40,7 +40,12 @@ func ImagePullSecretOptionList(c *gin.Context) {
 		return
 	}
 	imagePullSecrets, _ := getImagePullSecrets(item)
-
+	if len(imagePullSecrets) == 0 {
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
 	// 从Secret中寻找镜像拉取密钥
 	// 获取list
 	var secretsList []*v1.Secret
@@ -50,6 +55,12 @@ func ImagePullSecretOptionList(c *gin.Context) {
 		Where(fmt.Sprintf("type = '%s' or type = '%s' ", v1.SecretTypeDockerConfigJson, v1.SecretTypeDockercfg)).
 		List(&secretsList).Error
 	if err != nil {
+		amis.WriteJsonData(c, gin.H{
+			"options": make([]map[string]string, 0),
+		})
+		return
+	}
+	if len(secretsList) == 0 {
 		amis.WriteJsonData(c, gin.H{
 			"options": make([]map[string]string, 0),
 		})
@@ -945,6 +956,8 @@ func generateHealthCheckPatch(kind string, info HealthCheckInfo) (map[string]int
 // 返回资源类型对应的路径
 func getResourcePaths(kind string) ([]string, error) {
 	switch kind {
+	case "CloneSet":
+		return []string{"spec", "template", "spec"}, nil
 	case "Deployment", "DaemonSet", "StatefulSet", "ReplicaSet", "Job":
 		return []string{"spec", "template", "spec"}, nil
 	case "CronJob":

@@ -8,6 +8,7 @@ import (
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
+	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
@@ -484,6 +485,27 @@ func Delete(c *gin.Context) {
 	})
 }
 
+func Scale(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	replica := c.Param("replica")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	r := utils2.ToInt32(replica)
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		CRD(group, version, kind).
+		Namespace(ns).Name(name).
+		Ctl().Scaler().Scale(r)
+	amis.WriteJsonErrorOrOK(c, err)
+}
 func HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
