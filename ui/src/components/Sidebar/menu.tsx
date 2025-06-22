@@ -247,9 +247,15 @@ const items: () => MenuItem[] = () => {
                     {
                         label: "持久化状态",
                         title: "持久化状态",
-                        icon: <i className="fa-solid fa-cloud-arrow-down"></i>,
+                        icon: <i className="fa-solid fa-database"></i>,
                         key: "persistentpodstate",
                         onClick: () => onMenuClick('/openkruise/persistentpodstate')
+                    }, {
+                        label: "Pod探测标记",
+                        title: "Pod探测标记",
+                        icon: <i className="fa-solid fa-magnifying-glass"></i>,
+                        key: "podprobemarker",
+                        onClick: () => onMenuClick('/openkruise/podprobemarker')
                     },
                 ],
             },
