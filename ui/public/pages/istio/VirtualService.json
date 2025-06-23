@@ -610,6 +610,18 @@
           }
         },
         {
+          "name": "spec.hosts",
+          "label": "主机",
+          "type": "tpl",
+          "tpl": "<% if (data.spec && data.spec.hosts && data.spec.hosts.length) { %><%= data.spec.hosts.join('<br/>') %><% } else { %>-<% } %>"
+        },
+        {
+          "name": "spec.http.fault",
+          "label": "故障注入",
+          "type": "tpl",
+          "tpl": "${spec.http && spec.http[0] && spec.http[0].fault ? (spec.http[0].fault.abort ? '终止：' + spec.http[0].fault.abort.httpStatus + ' (' + spec.http[0].fault.abort.percentage.value + '%)' : (spec.http[0].fault.delay ? '延迟：' + spec.http[0].fault.delay.fixedDelay + ' (' + spec.http[0].fault.delay.percentage.value + '%)' : '无')) : '无'}"
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
