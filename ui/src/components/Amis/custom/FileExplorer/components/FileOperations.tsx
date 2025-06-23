@@ -152,7 +152,7 @@ export class FileOperations {
             formData.append('fileName', file.name);
 
             try {
-                const url = ProcessK8sUrlWithCluster('/k8s/file/upload');
+                const url = ProcessK8sUrlWithCluster('/k8m/api/k8s/file/upload');
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {

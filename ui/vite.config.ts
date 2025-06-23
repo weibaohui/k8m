@@ -8,7 +8,7 @@ export default defineConfig(({mode}) => {
     console.log('current mode', mode)
 
     return {
-        base: '/',
+        base: '/k8m/ui',
         server: {
             port: 3000,
             open: true,
