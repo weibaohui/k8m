@@ -555,8 +555,8 @@ func main() {
 
 	}
 
-	showBootInfo(Version, flag.Init().Port)
-	err := r.Run(fmt.Sprintf(":%d", flag.Init().Port))
+	showBootInfo(Version,  cfg.Port)
+	err := r.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
 	if err != nil {
 		klog.Fatalf("Error %v", err)
 	}
