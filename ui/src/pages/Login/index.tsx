@@ -24,7 +24,7 @@ const Login = () => {
 
     // 获取SSO配置
     useEffect(() => {
-        fetch('/auth/sso/config')
+        fetch('/k8m/api/auth/sso/config')
             .then(res => res.json())
             .then(data => {
                 if (data.status === 0 && Array.isArray(data.data)) {
@@ -57,7 +57,7 @@ const Login = () => {
         form.validateFields().then(async (values) => {
             try {
                 const encryptedPassword = encrypt(values.password);
-                const res = await fetch('/auth/login', {
+                const res = await fetch('/k8m/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -147,7 +147,7 @@ const Login = () => {
                                     loading={loadingSSO[config.name]}
                                     onClick={() => {
                                         setLoadingSSO(prev => ({ ...prev, [config.name]: true }));
-                                        window.location.href = `/auth/${config.type}/${config.name}/sso`;
+                                        window.location.href = `/k8m/ui/auth/${config.type}/${config.name}/sso`;
                                     }}
                                 >
                                     {config.name}

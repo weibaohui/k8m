@@ -172,27 +172,30 @@ func main() {
 
 	r.MaxMultipartMemory = 100 << 20 // 100 MiB
 
+	baseUIURL := "/k8m/ui"
+
 	// 挂载子目录
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
-	r.StaticFS("/public/pages", http.FS(pagesFS))
+	r.StaticFS(baseUIURL+"/public/pages", http.FS(pagesFS))
 	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
-	r.StaticFS("/assets", http.FS(assetsFS))
+	r.StaticFS(baseUIURL+"/assets", http.FS(assetsFS))
 	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
-	r.StaticFS("/monacoeditorwork", http.FS(monacoFS))
+	r.StaticFS(baseUIURL+"/monacoeditorwork", http.FS(monacoFS))
 
-	r.GET("/favicon.ico", func(c *gin.Context) {
+	r.GET(baseUIURL+"/favicon.ico", func(c *gin.Context) {
 		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	})
 
+	baseURL := "/k8m/api"
 	// MCP Server
-	sseServer := GetMcpSSEServer("/mcp/k8m/")
-	r.GET("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/message", adapt(sseServer.MessageHandler))
-	r.GET("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/message", adapt(sseServer.MessageHandler))
+	sseServer := GetMcpSSEServer(baseURL + "/mcp/k8m/")
+	r.GET(baseURL+"/mcp/k8m/sse", adapt(sseServer.SSEHandler))
+	r.POST(baseURL+"/mcp/k8m/sse", adapt(sseServer.SSEHandler))
+	r.POST(baseURL+"/mcp/k8m/message", adapt(sseServer.MessageHandler))
+	r.GET(baseURL+"/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
+	r.POST(baseURL+"/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
+	r.POST(baseURL+"/mcp/k8m/:key/message", adapt(sseServer.MessageHandler))
 
 	// @title           k8m API
 	// @version         1.0
@@ -200,10 +203,10 @@ func main() {
 	// @in header
 	// @name Authorization
 	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET(baseUIURL+"/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 直接返回 index.html
-	r.GET("/", func(c *gin.Context) {
+	r.GET(baseUIURL+"/", func(c *gin.Context) {
 		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Internal Server Error")
@@ -212,7 +215,12 @@ func main() {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
 	})
 
-	r.GET("/ping", func(c *gin.Context) {
+	// 添加重定向规则
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, baseUIURL+"/")
+	})
+
+	r.GET(baseURL+"/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
@@ -221,7 +229,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	auth := r.Group("/auth")
+	auth := r.Group(baseURL + "/auth")
 	{
 		auth.POST("/login", login.LoginByPassword)
 		auth.GET("/sso/config", sso.GetSSOConfig)
@@ -230,7 +238,7 @@ func main() {
 	}
 
 	// 公共参数
-	params := r.Group("/params", middleware.AuthMiddleware())
+	params := r.Group(baseURL+"/params", middleware.AuthMiddleware())
 	{
 		// 获取当前登录用户的角色，登录即可
 		params.GET("/user/role", param.UserRole)
@@ -249,7 +257,7 @@ func main() {
 		params.GET("/condition/reverse/list", param.Conditions)
 
 	}
-	ai := r.Group("/ai", middleware.AuthMiddleware())
+	ai := r.Group(baseURL+"/ai", middleware.AuthMiddleware())
 	{
 
 		// chatgpt
@@ -268,7 +276,7 @@ func main() {
 		ai.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
 
 	}
-	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
+	api := r.Group(baseURL+"/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
 		// dynamic
 		api.POST("/yaml/apply", dynamic.Apply)
@@ -477,7 +485,7 @@ func main() {
 
 	}
 
-	mgm := r.Group("/mgm", middleware.AuthMiddleware())
+	mgm := r.Group(baseURL+"/mgm", middleware.AuthMiddleware())
 	{
 
 		mgm.GET("/custom/template/kind/list", template.ListKind)
@@ -512,7 +520,7 @@ func main() {
 
 	}
 
-	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
+	admin := r.Group(baseURL+"/admin", middleware.PlatformAuthMiddleware())
 	{
 		// condition
 		admin.GET("/condition/list", config.ConditionList)
@@ -555,7 +563,7 @@ func main() {
 
 	}
 
-	showBootInfo(Version,  cfg.Port)
+	showBootInfo(Version, cfg.Port)
 	err := r.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
 	if err != nil {
 		klog.Fatalf("Error %v", err)
