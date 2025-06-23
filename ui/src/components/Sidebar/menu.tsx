@@ -284,98 +284,98 @@ const items: () => MenuItem[] = () => {
                 children: [
                     {
                         label: "VirtualService",
-                        title: "VirtualService",
+                        title: "虚拟服务",
                         icon: <i className="fa-solid fa-route"></i>,
                         key: "isito-VirtualService",
                         onClick: () => onMenuClick('/istio/VirtualService')
                     },
                     {
                         label: "DestinationRule",
-                        title: "DestinationRule",
+                        title: "目标规则",
                         icon: <i className="fa-solid fa-location-dot"></i>,
                         key: "istio-DestinationRule",
                         onClick: () => onMenuClick('/istio/DestinationRule')
                     },
                     {
                         label: "EnvoyFilter",
-                        title: "EnvoyFilter",
+                        title: "Envoy过滤器",
                         icon: <i className="fa-solid fa-filter"></i>,
                         key: "istio-EnvoyFilter",
                         onClick: () => onMenuClick('/istio/EnvoyFilter')
                     },
                     {
                         label: "Gateway",
-                        title: "Gateway",
+                        title: "网关",
                         icon: <i className="fa-solid fa-network-wired"></i>,
                         key: "istio-Gateway",
                         onClick: () => onMenuClick('/istio/Gateway')
                     },
                     {
                         label: "PeerAuthentication",
-                        title: "PeerAuthentication",
+                        title: "对等认证",
                         icon: <i className="fa-solid fa-user-shield"></i>,
                         key: "istio-PeerAuthentication",
                         onClick: () => onMenuClick('/istio/PeerAuthentication')
                     },
                     {
                         label: "ProxyConfig",
-                        title: "ProxyConfig",
+                        title: "代理配置",
                         icon: <i className="fa-solid fa-gears"></i>,
                         key: "istio-ProxyConfig",
                         onClick: () => onMenuClick('/istio/ProxyConfig')
                     },
                     {
                         label: "RequestAuthentication",
-                        title: "RequestAuthentication",
+                        title: "请求认证",
                         icon: <i className="fa-solid fa-key"></i>,
                         key: "istio-RequestAuthentication",
                         onClick: () => onMenuClick('/istio/RequestAuthentication')
                     },
                     {
                         label: "ServiceEntry",
-                        title: "ServiceEntry",
+                        title: "服务入口",
                         icon: <i className="fa-solid fa-door-open"></i>,
                         key: "istio-ServiceEntry",
                         onClick: () => onMenuClick('/istio/ServiceEntry')
                     },
                     {
                         label: "Sidecar",
-                        title: "Sidecar",
+                        title: "边车",
                         icon: <i className="fa-solid fa-car-side"></i>,
                         key: "istio-Sidecar",
                         onClick: () => onMenuClick('/istio/Sidecar')
                     },
                     {
                         label: "Telemetry",
-                        title: "Telemetry",
+                        title: "遥测",
                         icon: <i className="fa-solid fa-chart-line"></i>,
                         key: "istio-Telemetry",
                         onClick: () => onMenuClick('/istio/Telemetry')
                     },
                     {
                         label: "AuthorizationPolicy",
-                        title: "AuthorizationPolicy",
+                        title: "授权策略",
                         icon: <i className="fa-solid fa-user-lock"></i>,
                         key: "istio-AuthorizationPolicy",
                         onClick: () => onMenuClick('/istio/AuthorizationPolicy')
                     },
                     {
                         label: "WasmPlugin",
-                        title: "WasmPlugin",
+                        title: "Wasm插件",
                         icon: <i className="fa-solid fa-puzzle-piece"></i>,
                         key: "istio-WasmPlugin",
                         onClick: () => onMenuClick('/istio/WasmPlugin')
                     },
                     {
                         label: "WorkloadEntry",
-                        title: "WorkloadEntry",
+                        title: "工作负载条目",
                         icon: <i className="fa-solid fa-server"></i>,
                         key: "istio-WorkloadEntry",
                         onClick: () => onMenuClick('/istio/WorkloadEntry')
                     },
                     {
                         label: "WorkloadGroup",
-                        title: "WorkloadGroup",
+                        title: "工作负载组",
                         icon: <i className="fa-solid fa-people-group"></i>,
                         key: "istio-WorkloadGroup",
                         onClick: () => onMenuClick('/istio/WorkloadGroup')
