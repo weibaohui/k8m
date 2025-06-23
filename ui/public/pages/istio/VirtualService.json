@@ -616,6 +616,12 @@
           "tpl": "<% if (data.spec && data.spec.hosts && data.spec.hosts.length) { %><%= data.spec.hosts.join('<br/>') %><% } else { %>-<% } %>"
         },
         {
+          "name": "spec.gateways",
+          "label": "网关",
+          "type": "tpl",
+          "tpl": "<% if (data.spec && data.spec.gateways && data.spec.gateways.length) { %><%= data.spec.gateways.join('<br/>') %><% } else { %>-<% } %>"
+        },
+        {
           "name": "spec.http.fault",
           "label": "故障注入",
           "type": "tpl",
