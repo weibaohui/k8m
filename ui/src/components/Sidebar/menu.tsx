@@ -288,8 +288,98 @@ const items: () => MenuItem[] = () => {
                         icon: <i className="fa-solid fa-route"></i>,
                         key: "isito-VirtualService",
                         onClick: () => onMenuClick('/istio/VirtualService')
+                    },
+                    {
+                        label: "DestinationRule",
+                        title: "DestinationRule",
+                        icon: <i className="fa-solid fa-location-dot"></i>,
+                        key: "istio-DestinationRule",
+                        onClick: () => onMenuClick('/istio/DestinationRule')
+                    },
+                    {
+                        label: "EnvoyFilter",
+                        title: "EnvoyFilter",
+                        icon: <i className="fa-solid fa-filter"></i>,
+                        key: "istio-EnvoyFilter",
+                        onClick: () => onMenuClick('/istio/EnvoyFilter')
+                    },
+                    {
+                        label: "Gateway",
+                        title: "Gateway",
+                        icon: <i className="fa-solid fa-network-wired"></i>,
+                        key: "istio-Gateway",
+                        onClick: () => onMenuClick('/istio/Gateway')
+                    },
+                    {
+                        label: "PeerAuthentication",
+                        title: "PeerAuthentication",
+                        icon: <i className="fa-solid fa-user-shield"></i>,
+                        key: "istio-PeerAuthentication",
+                        onClick: () => onMenuClick('/istio/PeerAuthentication')
+                    },
+                    {
+                        label: "ProxyConfig",
+                        title: "ProxyConfig",
+                        icon: <i className="fa-solid fa-gears"></i>,
+                        key: "istio-ProxyConfig",
+                        onClick: () => onMenuClick('/istio/ProxyConfig')
+                    },
+                    {
+                        label: "RequestAuthentication",
+                        title: "RequestAuthentication",
+                        icon: <i className="fa-solid fa-key"></i>,
+                        key: "istio-RequestAuthentication",
+                        onClick: () => onMenuClick('/istio/RequestAuthentication')
+                    },
+                    {
+                        label: "ServiceEntry",
+                        title: "ServiceEntry",
+                        icon: <i className="fa-solid fa-door-open"></i>,
+                        key: "istio-ServiceEntry",
+                        onClick: () => onMenuClick('/istio/ServiceEntry')
+                    },
+                    {
+                        label: "Sidecar",
+                        title: "Sidecar",
+                        icon: <i className="fa-solid fa-car-side"></i>,
+                        key: "istio-Sidecar",
+                        onClick: () => onMenuClick('/istio/Sidecar')
+                    },
+                    {
+                        label: "Telemetry",
+                        title: "Telemetry",
+                        icon: <i className="fa-solid fa-chart-line"></i>,
+                        key: "istio-Telemetry",
+                        onClick: () => onMenuClick('/istio/Telemetry')
+                    },
+                    {
+                        label: "AuthorizationPolicy",
+                        title: "AuthorizationPolicy",
+                        icon: <i className="fa-solid fa-user-lock"></i>,
+                        key: "istio-AuthorizationPolicy",
+                        onClick: () => onMenuClick('/istio/AuthorizationPolicy')
+                    },
+                    {
+                        label: "WasmPlugin",
+                        title: "WasmPlugin",
+                        icon: <i className="fa-solid fa-puzzle-piece"></i>,
+                        key: "istio-WasmPlugin",
+                        onClick: () => onMenuClick('/istio/WasmPlugin')
+                    },
+                    {
+                        label: "WorkloadEntry",
+                        title: "WorkloadEntry",
+                        icon: <i className="fa-solid fa-server"></i>,
+                        key: "istio-WorkloadEntry",
+                        onClick: () => onMenuClick('/istio/WorkloadEntry')
+                    },
+                    {
+                        label: "WorkloadGroup",
+                        title: "WorkloadGroup",
+                        icon: <i className="fa-solid fa-people-group"></i>,
+                        key: "istio-WorkloadGroup",
+                        onClick: () => onMenuClick('/istio/WorkloadGroup')
                     }
-
                 ],
             },
         ] : []),
