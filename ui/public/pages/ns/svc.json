@@ -955,6 +955,12 @@
           }
         },
         {
+          "name": "status.loadBalancer.ingress",
+          "label": "外部地址",
+          "type": "tpl",
+          "tpl": "<% if (data.status && data.status.loadBalancer && data.status.loadBalancer.ingress && data.status.loadBalancer.ingress.length) { %><%= data.status.loadBalancer.ingress.map(i => i.hostname || (i.ip + (i.ipMode ? ' (' + i.ipMode + ')' : ''))).join('<br/>') %><% } else { %>-<% } %>"
+        },
+        {
           "name": "spec.ports",
           "label": "访问端口<br><span class='text-gray-500 text-xs'>访问端口[:节点端口]/协议 => 容器端口</span>",
           "type": "each",
