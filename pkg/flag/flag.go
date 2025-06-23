@@ -20,6 +20,7 @@ var once sync.Once
 
 type Config struct {
 	Port                 int     // gin 监听端口
+	Host                 string  // gin 监听地址
 	KubeConfig           string  // KUBECONFIG文件路径
 	ApiKey               string  // OPENAI_API_KEY
 	ApiURL               string  // OPENAI_API_URL
@@ -119,6 +120,9 @@ func (c *Config) InitFlags() {
 	// 默认端口为3618
 	defaultPort := getEnvAsInt("PORT", 3618)
 
+	// 默认监听地址为0.0.0.0
+	defaultHost := getEnv("HOST", "0.0.0.0")
+
 	// 默认kubeconfig为~/.kube/config
 	defaultKubeConfig := getEnv("KUBECONFIG", filepath.Join(homedir.HomeDir(), ".kube", "config"))
 
@@ -205,6 +209,8 @@ func (c *Config) InitFlags() {
 	// 参数配置
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
+	pflag.StringVarP(&c.Host, "host", "h", defaultHost, "监听地址,默认0.0.0.0")
+
 	pflag.StringVar(&c.ProductName, "product-name", defaultProductName, "产品名称，默认为K8M")
 
 	pflag.StringVar(&c.LoginType, "login-type", defaultLoginType, "登录方式，password, oauth, token等,default is password")
