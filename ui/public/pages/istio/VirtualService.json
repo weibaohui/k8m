@@ -622,6 +622,12 @@
           "tpl": "<% if (data.spec && data.spec.gateways && data.spec.gateways.length) { %><%= data.spec.gateways.join('<br/>') %><% } else { %>-<% } %>"
         },
         {
+          "name": "spec.http.route",
+          "label": "流量分配",
+          "type": "tpl",
+          "tpl": "<% if (data.spec && data.spec.http && data.spec.http.length) { data.spec.http.forEach(function(item) { if(item.match && item.match.length && item.route && item.route.length) { item.match.forEach(function(m) { if(m.uri && m.uri.prefix) { %><div><b><%= m.uri.prefix %></b> =&gt; <% item.route.forEach(function(r, idx) { %><%= r.destination.host %><% if(r.destination.subset){ %>:<%= r.destination.subset %><% } %> <%= r.weight %>%<% if(idx < item.route.length-1){ %>, <% } %><% }); %></div><% } }); } }); } else { %>-<% } %>"
+        },
+        {
           "name": "spec.http.fault",
           "label": "故障注入",
           "type": "tpl",
