@@ -2,7 +2,7 @@
   "type": "page",
   "data": {
     "ns": "${ls:selectedNs||'default'}",
-    "kind": "VirtualService",
+    "kind": "EnvoyFilter",
     "group": "networking.istio.io",
     "version": "v1"
   },
