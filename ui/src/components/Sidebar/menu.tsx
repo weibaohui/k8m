@@ -275,6 +275,24 @@ const items: () => MenuItem[] = () => {
                 ],
             },
         ] : []),
+        ...(isOpenKruiseSupported ? [
+            {
+                label: "Istio",
+                title: "Istio",
+                icon: <i className="fa-solid fa-cube"></i>,
+                key: "istio",
+                children: [
+                    {
+                        label: "VirtualService",
+                        title: "VirtualService",
+                        icon: <i className="fa-solid fa-route"></i>,
+                        key: "isito-VirtualService",
+                        onClick: () => onMenuClick('/istio/VirtualService')
+                    }
+
+                ],
+            },
+        ] : []),
 
         {
             label: "Helm应用",
