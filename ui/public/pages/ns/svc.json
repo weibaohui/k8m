@@ -958,7 +958,7 @@
           "name": "status.loadBalancer.ingress",
           "label": "外部地址",
           "type": "tpl",
-          "tpl": "<% if (data.status && data.status.loadBalancer && data.status.loadBalancer.ingress && data.status.loadBalancer.ingress.length) { %><%= data.status.loadBalancer.ingress.map(i => i.hostname || (i.ip + (i.ipMode ? ' (' + i.ipMode + ')' : ''))).join('<br/>') %><% } else { %>-<% } %>"
+          "tpl": "<% if (data.status && data.status.loadBalancer && data.status.loadBalancer.ingress && data.status.loadBalancer.ingress.length) { %><%= data.status.loadBalancer.ingress.map(i => i.hostname || i.ip).join('<br/>') %><% } else { %>-<% } %>"
         },
         {
           "name": "spec.ports",
