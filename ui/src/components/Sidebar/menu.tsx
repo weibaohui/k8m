@@ -12,6 +12,7 @@ interface UserRoleResponse {
 interface CRDSupportedStatus {
     IsGatewayAPISupported: boolean;
     IsOpenKruiseSupported: boolean;
+    IsIstioSupported: boolean;
 }
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -21,6 +22,7 @@ const items: () => MenuItem[] = () => {
     const [userRole, setUserRole] = useState<string>('');
     const [isGatewayAPISupported, setIsGatewayAPISupported] = useState<boolean>(false);
     const [isOpenKruiseSupported, setIsOpenKruiseSupported] = useState<boolean>(false);
+    const [isIstioSupported, setIsIstioSupported] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchUserRole = async () => {
@@ -54,6 +56,7 @@ const items: () => MenuItem[] = () => {
                     const status = response.data.data as CRDSupportedStatus;
                     setIsGatewayAPISupported(status.IsGatewayAPISupported);
                     setIsOpenKruiseSupported(status.IsOpenKruiseSupported);
+                    setIsIstioSupported(status.IsIstioSupported);
                 }
             } catch (error) {
                 console.error('Failed to fetch Gateway API status:', error);
@@ -275,7 +278,7 @@ const items: () => MenuItem[] = () => {
                 ],
             },
         ] : []),
-        ...(isOpenKruiseSupported ? [
+        ...(isIstioSupported ? [
             {
                 label: "Istio",
                 title: "Istio",

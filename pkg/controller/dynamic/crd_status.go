@@ -16,5 +16,6 @@ func CRDStatus(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"IsGatewayAPISupported": kom.Cluster(selectedCluster).Status().IsGatewayAPISupported(),
 		"IsOpenKruiseSupported": kom.Cluster(selectedCluster).Status().IsCRDSupportedByName("daemonsets.apps.kruise.io"),
+		"IsIstioSupported":      kom.Cluster(selectedCluster).Status().IsCRDSupportedByName("sidecars.networking.istio.io"),
 	})
 }
