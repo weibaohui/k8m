@@ -616,22 +616,25 @@
           "tpl": "<% if (data.spec && data.spec.hosts && data.spec.hosts.length) { %><%= data.spec.hosts.join('<br/>') %><% } else { %>-<% } %>"
         },
         {
-          "name": "spec.gateways",
-          "label": "网关",
-          "type": "tpl",
-          "tpl": "<% if (data.spec && data.spec.gateways && data.spec.gateways.length) { %><%= data.spec.gateways.join('<br/>') %><% } else { %>-<% } %>"
-        },
-        {
           "name": "spec.http.route",
           "label": "流量分配",
+          "width": "250px",
           "type": "tpl",
-          "tpl": "<% if (data.spec && data.spec.http && data.spec.http.length) { data.spec.http.forEach(function(item) { if(item.match && item.match.length && item.route && item.route.length) { item.match.forEach(function(m) { if(m.uri && m.uri.prefix) { %><div><b><%= m.uri.prefix %></b> =&gt; <% item.route.forEach(function(r, idx) { %><%= r.destination.host %><% if(r.destination.subset){ %>:<%= r.destination.subset %><% } %> <%= r.weight %>%<% if(idx < item.route.length-1){ %>, <% } %><% }); %></div><% } }); } }); } else { %>-<% } %>"
+          "tpl": "<% if (data.spec && data.spec.http && data.spec.http.length) { data.spec.http.forEach(function(item) { if(item.match && item.match.length && item.route && item.route.length) { item.match.forEach(function(m) { if(m.uri && m.uri.prefix) { %><div><b><%= m.uri.prefix %></b> =&gt; <% item.route.forEach(function(r, idx) { %><%= r.destination.host %><% if(r.destination.subset){ %>:<%= r.destination.subset %><% } %> <%= r.weight %><% if(idx < item.route.length-1){ %>, <% } %><% }); %></div><% } }); } }); } else { %>-<% } %>"
         },
         {
           "name": "spec.http.fault",
           "label": "故障注入",
+          "width": "250px",
           "type": "tpl",
           "tpl": "<% if (data.spec && data.spec.http && data.spec.http.length) { data.spec.http.forEach(function(item, idx) { if (item.fault) { if (item.fault.abort) { %><div><span style='color:#e74c3c;'>终止</span>：<%= item.fault.abort.httpStatus %> (<%= item.fault.abort.percentage.value %>%)</div><% } if (item.fault.delay) { %><div><span style='color:#f39c12;'>延迟</span>：<%= item.fault.delay.fixedDelay %> (<%= item.fault.delay.percentage.value %>%)</div><% } } }); } else { %>-<% } %>"
+        },
+        {
+          "name": "spec.gateways",
+          "label": "网关",
+          "width": "250px",
+          "type": "tpl",
+          "tpl": "<% if (data.spec && data.spec.gateways && data.spec.gateways.length) { %><%= data.spec.gateways.join('<br/>') %><% } else { %>-<% } %>"
         },
         {
           "name": "metadata.labels",
