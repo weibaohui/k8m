@@ -80,12 +80,13 @@ export function ProcessK8sUrlWithCluster(url: string): string {
     const originCluster = localStorage.getItem('cluster') || '';
     const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
 
-    if (url.startsWith('/k8m/api/k8s')) {
+    if (url.startsWith('/k8s')) {
         const parts = url.split('/');
         parts.splice(2, 0, 'cluster', cluster);
         return parts.join('/');
     }
-    return url;
+
+    return '/k8m/api' + url;
 }
 
 // 解析路径,逐层获取值

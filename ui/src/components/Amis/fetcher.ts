@@ -9,7 +9,7 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
     const token = localStorage.getItem('token') || '';
 
     const ajax = axios.create({
-        baseURL: '/k8m/api',
+        baseURL: '/',
         headers: {
             ...config?.headers,
             Authorization: token ? `Bearer ${token}` : ''
