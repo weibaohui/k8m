@@ -220,6 +220,10 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, baseUIURL+"/")
 	})
 
+	r.GET("/k8m/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, baseUIURL+"/")
+	})
+
 	r.GET(baseURL+"/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
