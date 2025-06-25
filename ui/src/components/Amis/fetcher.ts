@@ -35,12 +35,12 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
         error => {
             if (error.response && error.response.status === 401) {
                 // 如果是401，跳转到登录页面
-                window.location.href = '/#/login';
+                window.location.href = '/k8m/ui/#/login';
             }
             if (error.response && error.response.status === 512) {
                 var cluster = error.response.data.msg;
                 message.info(`${cluster}。如有疑问请联系管理员。`)
-                window.location.href = '/#/user/cluster/cluster_user';
+                window.location.href = '/k8m/ui/#/user/cluster/cluster_user';
             }
             if (error.response && error.response.status === 403) {
                 message.error(`权限不足，请联系管理员。`)

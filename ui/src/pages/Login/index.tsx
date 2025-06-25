@@ -147,7 +147,7 @@ const Login = () => {
                                     loading={loadingSSO[config.name]}
                                     onClick={() => {
                                         setLoadingSSO(prev => ({ ...prev, [config.name]: true }));
-                                        window.location.href = `/auth/${config.type}/${config.name}/sso`;
+                                        window.location.href = `/k8m/ui/auth/${config.type}/${config.name}/sso`;
                                     }}
                                 >
                                     {config.name}

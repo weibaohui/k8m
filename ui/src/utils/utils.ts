@@ -79,14 +79,19 @@ export function toUrlSafeBase64(str: string) {
 export function ProcessK8sUrlWithCluster(url: string): string {
     const originCluster = localStorage.getItem('cluster') || '';
     const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
+    const baseURI = '/k8m/api'
 
     if (url.startsWith('/k8s')) {
         const parts = url.split('/');
         parts.splice(2, 0, 'cluster', cluster);
+        return baseURI + parts.join('/');
+    } else if (url.startsWith(baseURI + '/k8s')) {
+        const parts = url.split('/');
+        parts.splice(4, 0, 'cluster', cluster);
         return parts.join('/');
     }
 
-    return '/k8m/api' + url;
+    return baseURI + url;
 }
 
 // 解析路径,逐层获取值
