@@ -2,12 +2,15 @@ package param
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/service"
+	"github.com/weibaohui/kom/kom"
 )
 
 func ClusterOptionList(c *gin.Context) {
@@ -68,6 +71,16 @@ func ClusterTableList(c *gin.Context) {
 		clusters = slice.Filter(clusters, func(index int, cluster *service.ClusterConfig) bool {
 			return slice.Contain(userCluster, cluster.GetClusterID())
 		})
+	}
+	// 增加cluster.NotAfter
+	for _, cluster := range clusters {
+		cacheKey := fmt.Sprintf("%s/kubeconfig/not_after", cluster.ClusterID)
+		notAfter, err := utils.GetOrSetCache(kom.Cluster(cluster.ClusterID).ClusterCache(), cacheKey, 24*time.Hour, func() (time.Time, error) {
+			return cluster.GetNotAfter(), nil
+		})
+		if err == nil {
+			cluster.NotAfter = notAfter
+		}
 	}
 	amis.WriteJsonData(c, clusters)
 }

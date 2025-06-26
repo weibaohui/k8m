@@ -61,6 +61,7 @@ type ClusterConfig struct {
 	Source                  ClusterConfigSource            `json:"source,omitempty"`                 // 配置文件来源
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
+	NotAfter                time.Time                      `json:"not_after,omitempty"`
 }
 type ClusterConfigSource string
 
@@ -151,6 +152,26 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 		}
 	}
 	return nil
+}
+
+// GetNotAfter 获取集群配置过期时间
+func (c *ClusterConfig) GetNotAfter() time.Time {
+	config, err := clientcmd.Load(c.kubeConfig)
+	if err != nil {
+		klog.V(8).Infof("设置NotAfter, 解析文件[%s]失败: %v", c.ClusterID, err)
+		return time.Time{}
+	}
+	authInfo, exists := config.AuthInfos[config.Contexts[config.CurrentContext].AuthInfo]
+	if !exists {
+		klog.V(8).Infof("设置NotAfter, current context not found")
+		return time.Time{}
+	}
+	cert, err := utils.ParseCertificate(authInfo.ClientCertificateData)
+	if err != nil {
+		klog.V(8).Infof("设置NotAfter,  [%s]解析证书:%s 失败: %v", c.ClusterID, authInfo.ClientCertificateData, err)
+		return time.Time{}
+	}
+	return cert.NotAfter
 }
 
 // IsConnected 判断集群是否连接
