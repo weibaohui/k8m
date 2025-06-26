@@ -227,6 +227,7 @@ func main() {
 		auth.GET("/sso/config", sso.GetSSOConfig)
 		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
 		auth.GET("/oidc/:name/callback", sso.HandleCallback)
+		r.GET("/auth/ldap/config", sso.GetLdapEnabled)
 	}
 
 	// 公共参数
@@ -555,7 +556,7 @@ func main() {
 
 	}
 
-	showBootInfo(Version,  cfg.Port)
+	showBootInfo(Version, cfg.Port)
 	err := r.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
 	if err != nil {
 		klog.Fatalf("Error %v", err)

@@ -74,6 +74,18 @@ type Config struct {
 	PgTimeZone string // postgres 时区
 	PgLogMode  bool   // postgres 日志模式
 	Think      bool   // AI 是否开启思考过程输出，true 时显示思考过程，建议生产环境开启
+	// LDAP配置
+	LDAP_ENABLED         bool   // 是否使用SSL连接LDAP服务器
+	LDAP_HOST            string // LDAP服务器地址
+	LDAP_PORT            string // LDAP服务器端口
+	LDAP_USERNAME        string // LDAP用户名
+	LDAP_PASSWORD        string // LDAP密码
+	LDAP_BASEDN          string // LDAP基础DN
+	LDAP_BINDUSERDN      string // LDAP绑定用户DN
+	LDAP_ANONYMOUSQUERY  int    // 是否允许匿名查询LDAP
+	LDAP_USERFIELD       string // LDAP用户字段
+	LDAP_LOGIN2AUTHCLOSE bool   // LDAP登录后是否关闭认证
+
 }
 
 func Init() *Config {
@@ -202,6 +214,17 @@ func (c *Config) InitFlags() {
 	defaultPgSSLMode := getEnv("PG_SSLMODE", "disable")
 	defaultPgTimeZone := getEnv("PG_TIMEZONE", "Asia/Shanghai")
 	defaultPgLogMode := getEnvAsBool("PG_LOGMODE", false)
+	// ldap 配置默认值
+	ldapEnabled := getEnvAsBool("LDAP_ENABLED", false)
+	ldapHost := getEnv("LDAP_HOST", "")
+	ldapPort := getEnv("LDAP_PORT", "389")
+	ldapUsername := getEnv("LDAP_USERNAME", "")
+	ldapPassword := getEnv("LDAP_PASSWORD", "")
+	ldapBasedn := getEnv("LDAP_BASEDN", "")
+	ldapBindUserDN := getEnv("LDAP_BINDUSERDN", "")
+	ldapAnonymousQuery := getEnvAsInt("LDAP_ANONYMOUSQUERY", 0)
+	ldapUserField := getEnv("LDAP_USERFIELD", "sAMAccountName")
+	ldapLogin2AuthClose := getEnvAsBool("LDAP_LOGIN2AUTHCLOSE", true)
 
 	// 默认AI关闭思考过程输出为false
 	defaultThink := getEnvAsBool("THINK", false)
@@ -263,6 +286,18 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.PgSSLMode, "pg-sslmode", defaultPgSSLMode, "PostgreSQL SSL模式")
 	pflag.StringVar(&c.PgTimeZone, "pg-timezone", defaultPgTimeZone, "PostgreSQL时区")
 	pflag.BoolVar(&c.PgLogMode, "pg-logmode", defaultPgLogMode, "PostgreSQL日志模式")
+
+	//ldap配置
+	pflag.BoolVar(&c.LDAP_ENABLED, "ldap-enabled", ldapEnabled, "是否使用启用LDAP登录")
+	pflag.StringVar(&c.LDAP_HOST, "ldap-host", ldapHost, "LDAP服务器地址")
+	pflag.StringVar(&c.LDAP_PORT, "ldap-port", ldapPort, "LDAP服务器端口")
+	pflag.StringVar(&c.LDAP_USERNAME, "ldap-username", ldapUsername, "LDAP用户名")
+	pflag.StringVar(&c.LDAP_PASSWORD, "ldap-password", ldapPassword, "LDAP密码")
+	pflag.StringVar(&c.LDAP_BASEDN, "ldap-basedn", ldapBasedn, "LDAP基础DN")
+	pflag.StringVar(&c.LDAP_BINDUSERDN, "ldap-binduserdn", ldapBindUserDN, "LDAP绑定用户DN")
+	pflag.IntVar(&c.LDAP_ANONYMOUSQUERY, "ldap-anonymousquery", ldapAnonymousQuery, "是否允许匿名查询LDAP，0表示不允许，1表示允许")
+	pflag.StringVar(&c.LDAP_USERFIELD, "ldap-userfield", ldapUserField, "LDAP用户字段，默认为sAMAccountName")
+	pflag.BoolVar(&c.LDAP_LOGIN2AUTHCLOSE, "ldap-login2authclose", ldapLogin2AuthClose, "LDAP登录后是否关闭认证，默认开启")
 
 	// 其他配置-打印配置信息
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")

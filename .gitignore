@@ -24,6 +24,7 @@ bin/
 /ui/node_modules/
 /ui/dist/
 /ui/.idea/
+/ui/package-lock.json
 
 ./data/
 ./data/k8m.db

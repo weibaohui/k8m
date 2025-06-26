@@ -3,6 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/go-ldap/ldap/v3"
+	"go.uber.org/zap"
+	"k8s.io/klog/v2"
 	"strings"
 	"sync"
 	"time"
@@ -349,4 +352,80 @@ func (u *userService) ClearCacheByKey(cacheKey string) {
 			utils.ClearCacheByKey(CacheService().CacheInstance(), key)
 		}
 	}
+}
+
+var conn *ldap.Conn
+
+// ldap连接
+func (u *userService) ldapConnection(cfg *flag.Config) (err error) {
+	conn, err = ldap.Dial("tcp", cfg.LDAP_HOST+":"+cfg.LDAP_PORT)
+	if err != nil {
+		klog.Errorf("无法连接到ldap服务器。", zap.Error(err))
+		return
+	}
+
+	//设置超时时间
+	conn.SetTimeout(5 * time.Second)
+	return
+}
+
+// ldap搜索
+func (u *userService) searchRequest(username string, cfg *flag.Config) (userInfo *ldap.Entry, err error) {
+	var (
+		cur              *ldap.SearchResult
+		ldapFieldsFilter = []string{
+			"dn",
+		}
+	)
+	err = conn.Bind(cfg.LDAP_BINDUSERDN, cfg.LDAP_PASSWORD)
+	if err != nil {
+		klog.Errorf("用户或密码错误。", zap.Error(err))
+		return
+	}
+
+	sql := ldap.NewSearchRequest(
+		cfg.LDAP_BASEDN,
+		ldap.ScopeWholeSubtree,
+		ldap.DerefAlways,
+		0,
+		0,
+		false,
+		fmt.Sprintf("(%v=%v)", cfg.LDAP_USERFIELD, username),
+		ldapFieldsFilter,
+		nil)
+
+	if cur, err = conn.Search(sql); err != nil {
+		klog.Errorf("在Ldap搜索用户失败", zap.Error(err))
+		return
+	}
+
+	if len(cur.Entries) == 0 {
+		klog.Errorf("未查询到对应的用户信息")
+		return
+	}
+
+	userInfo = cur.Entries[0]
+
+	return
+}
+
+// 登录ldap
+func (u *userService) LoginWithLdap(username string, password string, cfg *flag.Config) (userInfo *ldap.Entry, err error) {
+	err = u.ldapConnection(cfg)
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+
+	userInfo, err = u.searchRequest(username, cfg)
+	if err != nil {
+		return
+	}
+
+	err = conn.Bind(userInfo.DN, password)
+
+	if err != nil {
+		return nil, errors.New("用户或密码不正确。")
+	}
+	return
 }

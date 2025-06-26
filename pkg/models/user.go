@@ -11,7 +11,7 @@ import (
 // User 用户导入User
 type User struct {
 	ID               uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Username         string    `gorm:"uniqueIndex;not null" json:"username,omitempty"`
+	Username         string    `gorm:"type:varchar(255);uniqueIndex;not null" json:"username,omitempty"`
 	Salt             string    `gorm:"not null" json:"salt,omitempty"`
 	Password         string    `gorm:"not null" json:"password,omitempty"`
 	GroupNames       string    `json:"group_names,omitempty"`
@@ -42,7 +42,7 @@ func (c *User) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm.D
 func (c *User) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*User, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
 }
- 
+
 func (c *User) IsDisabled(username string) (bool, error) {
 	var user User
 	err := dao.DB().Model(c).Select("disabled").Where("username = ?", username).First(&user).Error
