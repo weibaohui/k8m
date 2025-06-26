@@ -61,7 +61,7 @@ type ClusterConfig struct {
 	Source                  ClusterConfigSource            `json:"source,omitempty"`                 // 配置文件来源
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
-	NotAfter                time.Time                      `json:"not_after,omitempty"`
+	NotAfter                *time.Time                     `json:"not_after,omitempty"`
 }
 type ClusterConfigSource string
 
