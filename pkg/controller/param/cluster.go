@@ -75,7 +75,7 @@ func ClusterTableList(c *gin.Context) {
 	// 增加cluster.NotAfter
 	configs := service.ClusterService().ConnectedClusters() // 优化：移到循环外部
 	for _, cluster := range clusters {
-		if slice.ContainBy(configs, func(item *service.ClusterConfig) bool {
+		if !cluster.IsInCluster && slice.ContainBy(configs, func(item *service.ClusterConfig) bool {
 			return item.ClusterID == cluster.ClusterID
 		}) {
 			cacheKey := fmt.Sprintf("%s/kubeconfig/not_after", cluster.ClusterID)
