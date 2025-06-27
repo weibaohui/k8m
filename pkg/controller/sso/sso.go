@@ -139,6 +139,6 @@ func GetUsername(claims map[string]interface{}, preferKeys []string) string {
 func GetLdapEnabled(c *gin.Context) {
 	cfg := flag.Init()
 	amis.WriteJsonData(c, gin.H{
-		"enabled": cfg.LDAP_ENABLED,
+		"enabled": cfg.LdapEnabled,
 	})
 }

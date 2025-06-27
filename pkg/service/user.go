@@ -355,13 +355,13 @@ func (u *userService) ClearCacheByKey(cacheKey string) {
 
 // ldap连接
 func (u *userService) ldapConnection(cfg *flag.Config) (*ldap.Conn, error) {
-	conn, err := ldap.Dial("tcp", cfg.LDAP_HOST+":"+cfg.LDAP_PORT)
+	conn, err := ldap.Dial("tcp", cfg.LdapHost+":"+cfg.LdapPort)
 	if err != nil {
 		klog.Errorf("无法连接到ldap服务器: %v", err)
 		return nil, err
 	}
 
-	//设置超时时间
+	// 设置超时时间
 	conn.SetTimeout(5 * time.Second)
 	return conn, nil
 }
@@ -374,20 +374,20 @@ func (u *userService) searchRequest(conn *ldap.Conn, username string, cfg *flag.
 			"dn",
 		}
 	)
-	err := conn.Bind(cfg.LDAP_BINDUSERDN, cfg.LDAP_PASSWORD)
+	err := conn.Bind(cfg.LdapBindUserDN, cfg.LdapPassword)
 	if err != nil {
 		klog.Errorf("LDAP绑定失败: %v", err)
 		return nil, errors.New("LDAP认证失败")
 	}
 
 	sql := ldap.NewSearchRequest(
-		cfg.LDAP_BASEDN,
+		cfg.LdapBaseDN,
 		ldap.ScopeWholeSubtree,
 		ldap.DerefAlways,
 		0,
 		0,
 		false,
-		fmt.Sprintf("(%v=%v)", cfg.LDAP_USERFIELD, username),
+		fmt.Sprintf("(%v=%v)", cfg.LdapUserField, username),
 		ldapFieldsFilter,
 		nil)
 
