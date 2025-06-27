@@ -5,11 +5,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
-	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -56,6 +57,8 @@ func LoginByPassword(c *gin.Context) {
 	// LDAP登录判断
 	if req.LoginType == 1 {
 		if err := handleLDAPLogin(c, req.Username, string(decrypt), req.Code, cfg); err != nil {
+			// 前端处理登录状态码，不要修改
+			c.JSON(http.StatusUnauthorized, errorInfo)
 			return
 		}
 		return
