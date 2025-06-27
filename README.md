@@ -17,6 +17,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 ### 演示DEMO
 
 [DEMO](http://107.150.119.151:3618)
+[DEMO-InCluster模式](http://107.150.119.151:31999)
 用户名密码 demo/demo
 
 ### 文档
