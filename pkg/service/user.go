@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap/v3"
-	"go.uber.org/zap"
 	"k8s.io/klog/v2"
 	"strings"
 	"sync"
@@ -354,33 +353,31 @@ func (u *userService) ClearCacheByKey(cacheKey string) {
 	}
 }
 
-var conn *ldap.Conn
-
 // ldap连接
-func (u *userService) ldapConnection(cfg *flag.Config) (err error) {
-	conn, err = ldap.Dial("tcp", cfg.LDAP_HOST+":"+cfg.LDAP_PORT)
+func (u *userService) ldapConnection(cfg *flag.Config) (*ldap.Conn, error) {
+	conn, err := ldap.Dial("tcp", cfg.LDAP_HOST+":"+cfg.LDAP_PORT)
 	if err != nil {
-		klog.Errorf("无法连接到ldap服务器。", zap.Error(err))
-		return
+		klog.Errorf("无法连接到ldap服务器: %v", err)
+		return nil, err
 	}
 
 	//设置超时时间
 	conn.SetTimeout(5 * time.Second)
-	return
+	return conn, nil
 }
 
 // ldap搜索
-func (u *userService) searchRequest(username string, cfg *flag.Config) (userInfo *ldap.Entry, err error) {
+func (u *userService) searchRequest(conn *ldap.Conn, username string, cfg *flag.Config) (*ldap.Entry, error) {
 	var (
 		cur              *ldap.SearchResult
 		ldapFieldsFilter = []string{
 			"dn",
 		}
 	)
-	err = conn.Bind(cfg.LDAP_BINDUSERDN, cfg.LDAP_PASSWORD)
+	err := conn.Bind(cfg.LDAP_BINDUSERDN, cfg.LDAP_PASSWORD)
 	if err != nil {
-		klog.Errorf("用户或密码错误。", zap.Error(err))
-		return
+		klog.Errorf("LDAP绑定失败: %v", err)
+		return nil, errors.New("LDAP认证失败")
 	}
 
 	sql := ldap.NewSearchRequest(
@@ -394,38 +391,41 @@ func (u *userService) searchRequest(username string, cfg *flag.Config) (userInfo
 		ldapFieldsFilter,
 		nil)
 
-	if cur, err = conn.Search(sql); err != nil {
-		klog.Errorf("在Ldap搜索用户失败", zap.Error(err))
-		return
+	cur, err = conn.Search(sql)
+	if err != nil {
+		klog.Errorf("LDAP搜索用户失败: %v", err)
+		return nil, errors.New("用户搜索失败")
 	}
 
 	if len(cur.Entries) == 0 {
-		klog.Errorf("未查询到对应的用户信息")
-		return
+		klog.Errorf("LDAP中未找到用户: %s", username)
+		return nil, errors.New("用户不存在")
 	}
 
-	userInfo = cur.Entries[0]
-
-	return
+	return cur.Entries[0], nil
 }
 
 // 登录ldap
-func (u *userService) LoginWithLdap(username string, password string, cfg *flag.Config) (userInfo *ldap.Entry, err error) {
-	err = u.ldapConnection(cfg)
+func (u *userService) LoginWithLdap(username string, password string, cfg *flag.Config) (*ldap.Entry, error) {
+	// 创建新连接
+	conn, err := u.ldapConnection(cfg)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer conn.Close()
 
-	userInfo, err = u.searchRequest(username, cfg)
+	// 使用连接进行搜索
+	userInfo, err := u.searchRequest(conn, username, cfg)
 	if err != nil {
-		return
+		return nil, err
 	}
 
+	// 验证用户密码
 	err = conn.Bind(userInfo.DN, password)
-
 	if err != nil {
-		return nil, errors.New("用户或密码不正确。")
+		klog.Errorf("LDAP用户密码验证失败: %s", username)
+		return nil, errors.New("用户或密码不正确")
 	}
-	return
+
+	return userInfo, nil
 }
