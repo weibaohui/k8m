@@ -185,6 +185,12 @@
           "label": "集群版本",
           "type": "text",
           "sortable": true
+        },
+        {
+          "name": "not_after",
+          "label": "集群配置过期时间",
+          "type": "text",
+          "sortable": true
         }
       ]
     }
