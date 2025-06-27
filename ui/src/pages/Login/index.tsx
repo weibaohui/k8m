@@ -21,6 +21,8 @@ const Login = () => {
     const [form] = Form.useForm();
     const [ssoConfigs, setSsoConfigs] = useState<SSOConfig[]>([]);
     const [loadingSSO, setLoadingSSO] = useState<Record<string, boolean>>({});
+    const [isLdap, setIsLdap] = useState(false);
+    const [ldapEnabled, setLdapEnabled] = useState(false);
 
     // 获取SSO配置
     useEffect(() => {
@@ -32,6 +34,18 @@ const Login = () => {
                 }
             })
             .catch(() => message.error('获取SSO配置失败'));
+    }, []);
+
+    // 获取LDAP配置
+    useEffect(() => {
+        fetch('/auth/ldap/config')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 0) {
+                    setLdapEnabled(data.data.enabled);
+                }
+            })
+            .catch(() => message.error('获取LDAP配置失败'));
     }, []);
 
     // useEffect 读取 remember 数据
@@ -65,7 +79,8 @@ const Login = () => {
                     body: JSON.stringify({
                         username: values.username,
                         password: encryptedPassword,  // 发送加密后的密码
-                        code: values.code // 添加2FA验证码
+                        code: values.code, // 添加2FA验证码
+                        loginType: isLdap ? 1 : 0 // 0: 普通登录, 1: LDAP登录
                     }),
                 });
                 const data = await res.json();
@@ -93,7 +108,7 @@ const Login = () => {
                 message.error('网络错误');
             }
         });
-    }, [navigate, form]);
+    }, [navigate, form,isLdap]);
 
     return <section className={styles.login}>
         <div className={styles.content}>
@@ -126,9 +141,16 @@ const Login = () => {
                         placeholder='请输入2FA验证码，未开启可不填'
                     />
                 </FormItem>
-                <FormItem name='remember' valuePropName='checked'>
-                    <Checkbox>记住</Checkbox>
-                </FormItem>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '24px', alignItems: 'center' }}>
+                    <FormItem name='remember' valuePropName='checked' style={{ marginBottom: 0 }}>
+                        <Checkbox>记住</Checkbox>
+                    </FormItem>
+                    {ldapEnabled && (
+                        <FormItem name='ldap' valuePropName='checked' style={{ marginBottom: 0 }}>
+                            <Checkbox onChange={(e) => setIsLdap(e.target.checked)}>LDAP登录</Checkbox>
+                        </FormItem>
+                    )}
+                </div>
                 <FormItem>
                     <Button type='primary' block onClick={onSubmit}>登 录</Button>
                 </FormItem>

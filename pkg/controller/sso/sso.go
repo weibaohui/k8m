@@ -2,6 +2,7 @@ package sso
 
 import (
 	"fmt"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"net/http"
 	"strings"
 	"time"
@@ -132,4 +133,12 @@ func GetUsername(claims map[string]interface{}, preferKeys []string) string {
 		return v
 	}
 	return "unknown"
+}
+
+// 获取ldap开关状态
+func GetLdapEnabled(c *gin.Context) {
+	cfg := flag.Init()
+	amis.WriteJsonData(c, gin.H{
+		"enabled": cfg.LdapEnabled,
+	})
 }

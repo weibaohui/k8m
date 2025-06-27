@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/go-ldap/ldap/v3"
+	"k8s.io/klog/v2"
 	"strings"
 	"sync"
 	"time"
@@ -349,4 +351,81 @@ func (u *userService) ClearCacheByKey(cacheKey string) {
 			utils.ClearCacheByKey(CacheService().CacheInstance(), key)
 		}
 	}
+}
+
+// ldap连接
+func (u *userService) ldapConnection(cfg *flag.Config) (*ldap.Conn, error) {
+	conn, err := ldap.Dial("tcp", cfg.LdapHost+":"+cfg.LdapPort)
+	if err != nil {
+		klog.Errorf("无法连接到ldap服务器: %v", err)
+		return nil, err
+	}
+
+	// 设置超时时间
+	conn.SetTimeout(5 * time.Second)
+	return conn, nil
+}
+
+// ldap搜索
+func (u *userService) searchRequest(conn *ldap.Conn, username string, cfg *flag.Config) (*ldap.Entry, error) {
+	var (
+		cur              *ldap.SearchResult
+		ldapFieldsFilter = []string{
+			"dn",
+		}
+	)
+	err := conn.Bind(cfg.LdapBindUserDN, cfg.LdapPassword)
+	if err != nil {
+		klog.Errorf("LDAP绑定失败: %v", err)
+		return nil, errors.New("LDAP认证失败")
+	}
+
+	sql := ldap.NewSearchRequest(
+		cfg.LdapBaseDN,
+		ldap.ScopeWholeSubtree,
+		ldap.DerefAlways,
+		0,
+		0,
+		false,
+		fmt.Sprintf("(%v=%v)", cfg.LdapUserField, username),
+		ldapFieldsFilter,
+		nil)
+
+	cur, err = conn.Search(sql)
+	if err != nil {
+		klog.Errorf("LDAP搜索用户失败: %v", err)
+		return nil, errors.New("用户搜索失败")
+	}
+
+	if len(cur.Entries) == 0 {
+		klog.Errorf("LDAP中未找到用户: %s", username)
+		return nil, errors.New("用户不存在")
+	}
+
+	return cur.Entries[0], nil
+}
+
+// 登录ldap
+func (u *userService) LoginWithLdap(username string, password string, cfg *flag.Config) (*ldap.Entry, error) {
+	// 创建新连接
+	conn, err := u.ldapConnection(cfg)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	// 使用连接进行搜索
+	userInfo, err := u.searchRequest(conn, username, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	// 验证用户密码
+	err = conn.Bind(userInfo.DN, password)
+	if err != nil {
+		klog.Errorf("LDAP用户密码验证失败: %s", username)
+		return nil, errors.New("用户或密码不正确")
+	}
+
+	return userInfo, nil
 }
