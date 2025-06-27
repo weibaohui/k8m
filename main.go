@@ -227,7 +227,7 @@ func main() {
 		auth.GET("/sso/config", sso.GetSSOConfig)
 		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
 		auth.GET("/oidc/:name/callback", sso.HandleCallback)
-		r.GET("/auth/ldap/config", sso.GetLdapEnabled)
+		auth.GET("/ldap/config", sso.GetLdapEnabled)
 	}
 
 	// 公共参数
