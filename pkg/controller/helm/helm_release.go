@@ -2,12 +2,13 @@ package helm
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"helm.sh/helm/v3/pkg/release"
+	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
@@ -39,11 +40,20 @@ func ListRelease(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	slice.SortBy(list, func(i, j *release.Release) bool {
-		return i.Info.LastDeployed.After(j.Info.LastDeployed)
+	slice.SortBy(list, func(i, j *models.Release) bool {
+
+		it, err := time.Parse("2006-01-02 15:04:05.000000 -0700 MST", i.Updated)
+		if err != nil {
+			return false
+		}
+		jt, err := time.Parse("2006-01-02 15:04:05.000000 -0700 MST", j.Updated)
+		if err != nil {
+			return false
+		}
+		return it.Before(jt)
 	})
 	if list == nil {
-		list = make([]*release.Release, 0)
+		list = make([]*models.Release, 0)
 	}
 	amis.WriteJsonData(c, list)
 }
@@ -82,11 +92,12 @@ func InstallRelease(c *gin.Context) {
 	if releaseName == "" {
 		releaseName = fmt.Sprintf("%s-%d", chartName, utils.RandNDigitInt(8))
 	}
-	go func() {
-		if err := h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values); err != nil {
-			klog.Errorf("install %s/%s error %v", req.Namespace, releaseName, err)
-		}
-	}()
+	err = h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values)
+	if err != nil {
+		klog.Errorf("install %s/%s error %v", req.Namespace, releaseName, err)
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	amis.WriteJsonOKMsg(c, "正在安装中，界面显示可能有延迟")
 }

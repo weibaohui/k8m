@@ -38,7 +38,7 @@ type Helm interface {
 	GetChartValue(repoName, chartName, version string) (string, error)
 	GetChartVersions(repoName string, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)
-	GetReleaseList() ([]*release.Release, error)
+	GetReleaseList() ([]*models.Release, error)
 }
 
 type Client struct {
@@ -107,7 +107,7 @@ func (c *Client) GetReleaseHistory(releaseName string) ([]*release.Release, erro
 	klog.V(6).Infof(" history releases: %d", len(releases))
 	return releases, nil
 }
-func (c *Client) GetReleaseList() ([]*release.Release, error) {
+func (c *Client) GetReleaseList() ([]*models.Release, error) {
 	// 创建 List 对象
 	listAction := action.NewList(c.ac)
 	listAction.AllNamespaces = true
@@ -115,13 +115,14 @@ func (c *Client) GetReleaseList() ([]*release.Release, error) {
 	listAction.StateMask = action.ListDeployed | action.ListUninstalled | action.ListFailed | action.ListSuperseded | action.ListUninstalling | action.ListPendingInstall | action.ListPendingUpgrade | action.ListPendingRollback | action.ListUnknown
 	listAction.All = true
 
-	// 获取 Release 列表
-	releases, err := listAction.Run()
-	if err != nil {
-		klog.V(6).Infof("Failed to list releases: %v", err)
-		return nil, err
-	}
-	return releases, nil
+	// // 获取 Release 列表
+	// releases, err := listAction.Run()
+	// if err != nil {
+	// 	klog.V(6).Infof("Failed to list releases: %v", err)
+	// 	return nil, err
+	// }
+	// return releases, nil
+	return nil, nil
 }
 
 // InstallRelease install release
