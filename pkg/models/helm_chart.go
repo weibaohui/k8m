@@ -30,6 +30,10 @@ func (c *HelmChart) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.
 	return dao.GenericQuery(params, c, queryFuncs...)
 }
 
+// BatchSave 批量保存 InspectionCheckEvent 实例
+func (c *HelmChart) BatchSave(params *dao.Params, events []*HelmChart, batchSize int, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericBatchSave(params, events, batchSize, queryFuncs...)
+}
 func (c *HelmChart) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericSave(params, c, queryFuncs...)
 }
@@ -40,4 +44,22 @@ func (c *HelmChart) Delete(params *dao.Params, ids string, queryFuncs ...func(*g
 
 func (c *HelmChart) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*HelmChart, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
+}
+
+type Release struct {
+	Name        string `json:"name"`
+	Namespace   string `json:"namespace"`
+	Revision    string `json:"revision"`
+	Updated     string `json:"updated"`
+	Status      string `json:"status"`
+	Chart       string `json:"chart"`
+	AppVersion  string `json:"app_version"`
+	Description string `json:"description"`
+}
+type ReleaseHistory struct {
+	Revision   int    `json:"revision"`
+	Updated    string `json:"updated"`
+	Status     string `json:"status"`
+	Chart      string `json:"chart"`
+	AppVersion string `json:"app_version"`
 }
