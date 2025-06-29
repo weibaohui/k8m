@@ -163,7 +163,7 @@ func FixRoleName() error {
 }
 func FixClusterAuthorizationTypeName() error {
 	// 将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
-	err := dao.DB().Model(&ClusterUserRole{}).Where("authorization_type == '' or authorization_type is null").Update("authorization_type", "user").Error
+	err := dao.DB().Model(&ClusterUserRole{}).Where("authorization_type = '' or authorization_type is null").Update("authorization_type", "user").Error
 	if err != nil {
 		klog.Errorf("更新用户组表中角色失败: %v", err)
 		return err
