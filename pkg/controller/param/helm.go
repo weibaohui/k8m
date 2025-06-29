@@ -11,6 +11,7 @@ import (
 
 func RepoOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
+	params.OrderBy = "name"
 	m := &models.HelmRepository{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Distinct("name")
