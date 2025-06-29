@@ -120,7 +120,7 @@ func openMysqlDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, err
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("get sql.DB error: %v", err)
+		return nil, err
 	}
 
 	sqlDB.SetMaxOpenConns(20)
@@ -162,7 +162,7 @@ func openPostgresDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, 
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("get sql.DB error: %v", err)
+		return nil, err
 	}
 
 	sqlDB.SetMaxOpenConns(20)
