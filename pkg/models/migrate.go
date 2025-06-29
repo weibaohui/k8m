@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -111,7 +112,11 @@ func AutoMigrate() error {
 	}
 	// 删除 user 表 name 字段，已弃用
 	if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
-		errs = append(errs, err)
+		// 判断是不是check that column/key exists
+		// 不存在，不用删除，那么不用报错误
+		if !strings.Contains(err.Error(), "check that column/key exists") {
+			errs = append(errs, err)
+		}
 	}
 
 	// 打印所有非nil的错误

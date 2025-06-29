@@ -11,13 +11,13 @@ import (
 // MCPTool MCP工具配置
 type MCPTool struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ServerName  string    `json:"server_name,omitempty"`                      // mcp server id，唯一
-	Name        string    `gorm:"uniqueIndex;not null" json:"name,omitempty"` // 工具名称，唯一
-	Description string    `gorm:"type:text" json:"description,omitempty"`     // 工具描述
-	InputSchema string    `gorm:"type:text" json:"input_schema,omitempty"`    // 输入模式，JSON格式
-	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`      // 是否启用
-	CreatedAt   time.Time `json:"created_at,omitempty"`                       // 创建时间
-	UpdatedAt   time.Time `json:"updated_at,omitempty"`                       // 更新时间
+	ServerName  string    `json:"server_name,omitempty"`                                        // mcp server id，唯一
+	Name        string    `gorm:"uniqueIndex;not null;type:varchar(255)" json:"name,omitempty"` // 工具名称，唯一
+	Description string    `gorm:"type:text" json:"description,omitempty"`                       // 工具描述
+	InputSchema string    `gorm:"type:text" json:"input_schema,omitempty"`                      // 输入模式，JSON格式
+	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`                        // 是否启用
+	CreatedAt   time.Time `json:"created_at,omitempty"`                                         // 创建时间
+	UpdatedAt   time.Time `json:"updated_at,omitempty"`                                         // 更新时间
 }
 
 func (c *MCPTool) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*MCPTool, int64, error) {

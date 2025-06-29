@@ -420,7 +420,7 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 			Description:    ct.Description,
 			Home:           ct.Home,
 			Icon:           ct.Icon,
-			Keywords:       ct.Keywords,
+			Keywords:       strings.Join(ct.Keywords, ","),
 			KubeVersion:    ct.KubeVersion,
 			AppVersion:     ct.AppVersion,
 			Deprecated:     ct.Deprecated,

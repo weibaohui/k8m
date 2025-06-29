@@ -59,7 +59,7 @@ type InspectionLuaScriptBuiltinVersion struct {
 // GetBuiltinLuaScriptsVersion 获取数据库中记录的内置脚本版本
 func GetBuiltinLuaScriptsVersion(db *gorm.DB) (string, error) {
 	record := &InspectionLuaScriptBuiltinVersion{}
-	err := db.First(record, "key = ?", "builtin_lua_scripts").Error
+	err := db.First(record, "`key` = ?", "builtin_lua_scripts").Error
 	if err != nil {
 		return "", err
 	}
