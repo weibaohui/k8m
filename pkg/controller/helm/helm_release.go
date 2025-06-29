@@ -21,7 +21,7 @@ func ListReleaseHistory(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	history, err := h.GetReleaseHistory(releaseName)
+	history, err := h.GetReleaseHistory(ns, releaseName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -119,11 +119,60 @@ func UninstallRelease(c *gin.Context) {
 		return
 	}
 
-	if err := h.UninstallRelease(releaseName, ""); err != nil {
+	if err := h.UninstallRelease(ns, releaseName); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	amis.WriteJsonOK(c)
+}
+
+// GetReleaseNote 获取ReleaseNote
+func GetReleaseNote(c *gin.Context) {
+	releaseName := c.Param("name")
+	ns := c.Param("ns")
+
+	h, err := getHelm(c, ns)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	note, err := h.GetReleaseNote(ns, releaseName)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOKMsg(c, note)
+}
+
+// GetReleaseValues 获取安装yaml
+func GetReleaseValues(c *gin.Context) {
+	releaseName := c.Param("name")
+	ns := c.Param("ns")
+	revision := c.Param("revision")
+
+	h, err := getHelm(c, ns)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	ret := ""
+	if releaseName == "" {
+		ret, err = h.GetReleaseValues(ns, releaseName)
+		if err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+	} else {
+		ret, err = h.GetReleaseValuesWithRevision(ns, releaseName, revision)
+		if err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+	}
+
+	amis.WriteJsonOKMsg(c, ret)
 }
 
 func BatchUninstallRelease(c *gin.Context) {

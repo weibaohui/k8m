@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"gorm.io/gorm"
-	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/klog/v2"
 
@@ -179,16 +178,24 @@ func getHomeDir() string {
 	return home
 }
 
-func (h *HelmCmd) GetReleaseHistory(releaseName string) ([]*release.Release, error) {
-	out, err := h.runAndLog([]string{"history", releaseName, "-o", "json"}, "")
+func (h *HelmCmd) GetReleaseHistory(namespace string, releaseName string) ([]*models.ReleaseHistory, error) {
+	out, err := h.runAndLog([]string{"history", releaseName, "-n", namespace, "-o", "json"}, "")
 	if err != nil {
 		return nil, fmt.Errorf("helm history failed: %v, output: %s", err, string(out))
 	}
-	var releases []*release.Release
+	var releases []*models.ReleaseHistory
 	if err := json.Unmarshal(out, &releases); err != nil {
 		return nil, fmt.Errorf("unmarshal helm history output failed: %v, output: %s", err, string(out))
 	}
 	return releases, nil
+}
+
+func (h *HelmCmd) UninstallRelease(namespace string, releaseName string) error {
+	out, err := h.runAndLog([]string{"uninstall", releaseName, "-n", namespace}, "")
+	if err != nil {
+		return fmt.Errorf("helm uninstall failed: %v, output: %s", err, string(out))
+	}
+	return nil
 }
 
 func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error {
@@ -206,15 +213,6 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 	}
 	return nil
 }
-
-func (h *HelmCmd) UninstallRelease(namespace string, releaseName string) error {
-	out, err := h.runAndLog([]string{"uninstall", releaseName, "-n", namespace}, "")
-	if err != nil {
-		return fmt.Errorf("helm uninstall failed: %v, output: %s", err, string(out))
-	}
-	return nil
-}
-
 func (h *HelmCmd) UpgradeRelease(releaseName, repoName, targetVersion string, values ...string) error {
 	chartRef := fmt.Sprintf("%s/%s", repoName, releaseName)
 	args := []string{"upgrade", releaseName, chartRef, "--version", targetVersion}
@@ -304,4 +302,25 @@ func (h *HelmCmd) GetReleaseList() ([]*models.Release, error) {
 		return nil, fmt.Errorf("unmarshal helm list output failed: %v, output: %s", err, string(out))
 	}
 	return releases, nil
+}
+func (h *HelmCmd) GetReleaseNote(ns string, name string) (string, error) {
+	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns, "-o", "json"}, "")
+	if err != nil {
+		return "", fmt.Errorf("helm get  notes failed: %v, output: %s", err, string(out))
+	}
+	return string(out), nil
+}
+func (h *HelmCmd) GetReleaseValues(ns string, name string) (string, error) {
+	out, err := h.runAndLog([]string{"get", "values", name, "-n", ns, "-o", "json"}, "")
+	if err != nil {
+		return "", fmt.Errorf("helm get values failed: %v, output: %s", err, string(out))
+	}
+	return string(out), nil
+}
+func (h *HelmCmd) GetReleaseValuesWithRevision(ns string, name string, revision string) (string, error) {
+	out, err := h.runAndLog([]string{"get", "values", name, "-n", ns, "--revision", revision, "-o", "json"}, "")
+	if err != nil {
+		return "", fmt.Errorf("helm get values failed: %v, output: %s", err, string(out))
+	}
+	return string(out), nil
 }

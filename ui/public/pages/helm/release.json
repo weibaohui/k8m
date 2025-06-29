@@ -344,17 +344,22 @@
                     "api": "get:/k8s/helm/release/ns/${namespace}/name/${name}/history/list",
                     "columns": [
                       {
-                        "name": "version",
+                        "name": "revision",
                         "label": "变更版本",
                         "type": "text"
                       },
                       {
-                        "name": "chart.metadata.version",
+                        "name": "chart",
+                        "label": "chart包",
+                        "type": "text"
+                      },
+                      {
+                        "name": "app_version",
                         "label": "应用版本",
                         "type": "text"
                       },
                       {
-                        "name": "info.status",
+                        "name": "status",
                         "label": "状态",
                         "type": "mapping",
                         "map": {
@@ -408,12 +413,7 @@
                         ]
                       },
                       {
-                        "name": "info.first_deployed",
-                        "label": "安装时间",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "info.last_deployed",
+                        "name": "updated",
                         "label": "最后更新",
                         "type": "k8sAge"
                       }

@@ -47,11 +47,19 @@ func (c *HelmChart) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gor
 }
 
 type Release struct {
-	Name       string `json:"name"`
-	Namespace  string `json:"namespace"`
-	Revision   string `json:"revision"`
+	Name        string `json:"name"`
+	Namespace   string `json:"namespace"`
+	Revision    string `json:"revision"`
+	Updated     string `json:"updated"`
+	Status      string `json:"status"`
+	Chart       string `json:"chart"`
+	AppVersion  string `json:"app_version"`
+	Description string `json:"description"`
+}
+type ReleaseHistory struct {
+	Revision   int    `json:"revision"`
 	Updated    string `json:"updated"`
 	Status     string `json:"status"`
-	Chart      string `json:"chart"` // 修改为 string 类型
+	Chart      string `json:"chart"`
 	AppVersion string `json:"app_version"`
 }
