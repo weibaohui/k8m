@@ -41,7 +41,10 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
 	fmt.Printf("[helm-cmd] exec: %s\n", cmdStr)
 	// cmd := exec.Command(h.HelmBin, args...)
+
 	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd.Env = []string{fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir)}
+
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
 	}
@@ -82,9 +85,6 @@ func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	}
 
 	// 3. helm repo add
-	// 设置 HELM_CACHE_HOME 环境变量，保证 index 文件写入到指定目录
-
-	os.Setenv("HELM_CACHE_HOME", h.repoCacheDir)
 	args := []string{"repo", "add", repoEntry.Name, repoEntry.URL}
 	if repoEntry.Username != "" {
 		args = append(args, "--username", repoEntry.Username)
