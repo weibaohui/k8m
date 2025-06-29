@@ -30,6 +30,10 @@ func (c *HelmChart) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.
 	return dao.GenericQuery(params, c, queryFuncs...)
 }
 
+// BatchSave 批量保存 InspectionCheckEvent 实例
+func (c *HelmChart) BatchSave(params *dao.Params, events []*HelmChart, batchSize int, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericBatchSave(params, events, batchSize, queryFuncs...)
+}
 func (c *HelmChart) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericSave(params, c, queryFuncs...)
 }

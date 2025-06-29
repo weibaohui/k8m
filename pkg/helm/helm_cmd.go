@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -15,7 +16,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 )
 
 // HelmCmd 通过调用 helm 二进制命令实现 Helm 接口
@@ -36,11 +37,24 @@ func NewHelmCmd(helmBin string) *HelmCmd {
 	return &HelmCmd{HelmBin: helmBin, repoCacheDir: repoCacheDir}
 }
 
-func (h *HelmCmd) runAndLog(cmd *exec.Cmd) ([]byte, error) {
-	fmt.Printf("[helm-cmd] exec: %s\n", strings.Join(cmd.Args, " "))
-	out, err := cmd.CombinedOutput()
-	fmt.Printf("[helm-cmd] result: %s\n", string(out))
-	return out, err
+func (h *HelmCmd) runAndLog(args ...string) ([]byte, error) {
+	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
+	cmd := exec.Command("sh", "-c", cmdStr)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	fmt.Printf("[helm-cmd] exec: %s\n", cmdStr)
+	err := cmd.Run()
+
+	if stdout.Len() > 0 {
+		fmt.Printf("[helm-cmd] stdout: %s\n", stdout.String())
+	}
+	if stderr.Len() > 0 {
+		fmt.Printf("[helm-cmd] stderr: %s\n", stderr.String())
+	}
+
+	return stdout.Bytes(), err
 }
 
 func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
@@ -68,7 +82,6 @@ func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	// 设置 HELM_CACHE_HOME 环境变量，保证 index 文件写入到指定目录
 
 	os.Setenv("HELM_CACHE_HOME", h.repoCacheDir)
-
 	args := []string{"repo", "add", repoEntry.Name, repoEntry.URL}
 	if repoEntry.Username != "" {
 		args = append(args, "--username", repoEntry.Username)
@@ -76,9 +89,7 @@ func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	if repoEntry.Password != "" {
 		args = append(args, "--password", repoEntry.Password)
 	}
-	cmd := exec.Command(h.HelmBin, args...)
-	cmd.Env = append(os.Environ(), "HELM_CACHE_HOME="+h.repoCacheDir)
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog(args...)
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return fmt.Errorf("helm repo add failed: %v, output: %s", err, string(out))
 	}
@@ -91,9 +102,7 @@ func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 
 func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmRepository) (error, bool) {
 	// 4. helm repo update
-	cmd := exec.Command(h.HelmBin, "repo", "update", repoEntry.Name)
-	cmd.Env = append(os.Environ(), "HELM_CACHE_HOME="+h.repoCacheDir)
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog("repo", "update", repoEntry.Name)
 	if err != nil {
 		return fmt.Errorf("helm repo update failed: %v, output: %s", err, string(out)), true
 	}
@@ -106,6 +115,7 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 		return nil, true // 不阻断主流程
 	}
 	var index repo.IndexFile
+
 	if err := yaml.Unmarshal(indexData, &index); err != nil {
 		fmt.Printf("[helm-cmd] warn: unmarshal repo index file failed: %v\n", err)
 		return nil, true
@@ -166,8 +176,7 @@ func getHomeDir() string {
 }
 
 func (h *HelmCmd) GetReleaseHistory(releaseName string) ([]*release.Release, error) {
-	cmd := exec.Command(h.HelmBin, "history", releaseName, "-o", "json")
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog("history", releaseName, "-o", "json")
 	if err != nil {
 		return nil, fmt.Errorf("helm history failed: %v, output: %s", err, string(out))
 	}
@@ -181,18 +190,29 @@ func (h *HelmCmd) GetReleaseHistory(releaseName string) ([]*release.Release, err
 func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error {
 	chartRef := fmt.Sprintf("%s/%s", repoName, chartName)
 	args := []string{"install", releaseName, chartRef, "--namespace", namespace, "--version", version, "--create-namespace"}
+	klog.Infof("安装参数 %d =\n %s", len(values), values)
 	if len(values) > 0 && values[0] != "" {
 		args = append(args, "-f", "-")
-		cmd := exec.Command(h.HelmBin, args...)
+		cmdStr := h.HelmBin + " " + strings.Join(args, " ")
+		cmd := exec.Command("sh", "-c", cmdStr)
 		cmd.Stdin = strings.NewReader(values[0])
-		out, err := h.runAndLog(cmd)
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		fmt.Printf("[helm-cmd] exec: %s\n", cmdStr)
+		err := cmd.Run()
+		if stdout.Len() > 0 {
+			fmt.Printf("[helm-cmd] stdout: %s\n", stdout.String())
+		}
+		if stderr.Len() > 0 {
+			fmt.Printf("[helm-cmd] stderr: %s\n", stderr.String())
+		}
 		if err != nil {
-			return fmt.Errorf("helm install failed: %v, output: %s", err, string(out))
+			return fmt.Errorf("helm install failed: %v, output: %s", err, stdout.String()+stderr.String())
 		}
 		return nil
 	}
-	cmd := exec.Command(h.HelmBin, args...)
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog(args...)
 	if err != nil {
 		return fmt.Errorf("helm install failed: %v, output: %s", err, string(out))
 	}
@@ -200,8 +220,7 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 }
 
 func (h *HelmCmd) UninstallRelease(releaseName string) error {
-	cmd := exec.Command(h.HelmBin, "uninstall", releaseName)
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog("uninstall", releaseName)
 	if err != nil {
 		return fmt.Errorf("helm uninstall failed: %v, output: %s", err, string(out))
 	}
@@ -213,16 +232,26 @@ func (h *HelmCmd) UpgradeRelease(releaseName, repoName, targetVersion string, va
 	args := []string{"upgrade", releaseName, chartRef, "--version", targetVersion}
 	if len(values) > 0 && values[0] != "" {
 		args = append(args, "-f", "-")
-		cmd := exec.Command(h.HelmBin, args...)
+		cmdStr := h.HelmBin + " " + strings.Join(args, " ")
+		cmd := exec.Command("sh", "-c", cmdStr)
 		cmd.Stdin = strings.NewReader(values[0])
-		out, err := h.runAndLog(cmd)
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		fmt.Printf("[helm-cmd] exec: %s\n", cmdStr)
+		err := cmd.Run()
+		if stdout.Len() > 0 {
+			fmt.Printf("[helm-cmd] stdout: %s\n", stdout.String())
+		}
+		if stderr.Len() > 0 {
+			fmt.Printf("[helm-cmd] stderr: %s\n", stderr.String())
+		}
 		if err != nil {
-			return fmt.Errorf("helm upgrade failed: %v, output: %s", err, string(out))
+			return fmt.Errorf("helm upgrade failed: %v, output: %s", err, stdout.String()+stderr.String())
 		}
 		return nil
 	}
-	cmd := exec.Command(h.HelmBin, args...)
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog(args...)
 	if err != nil {
 		return fmt.Errorf("helm upgrade failed: %v, output: %s", err, string(out))
 	}
@@ -230,11 +259,9 @@ func (h *HelmCmd) UpgradeRelease(releaseName, repoName, targetVersion string, va
 }
 
 func (h *HelmCmd) GetChartValue(repoName, chartName, version string) (string, error) {
-	// helm show values repo/chart --version x.x.x
 	chartRef := fmt.Sprintf("%s/%s", repoName, chartName)
 	args := []string{"show", "values", chartRef, "--version", version}
-	cmd := exec.Command(h.HelmBin, args...)
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog(args...)
 	if err != nil {
 		return "", fmt.Errorf("helm show values failed: %v, output: %s", err, string(out))
 	}
@@ -242,11 +269,9 @@ func (h *HelmCmd) GetChartValue(repoName, chartName, version string) (string, er
 }
 
 func (h *HelmCmd) GetChartVersions(repoName string, chartName string) ([]string, error) {
-	// helm search repo repo/chart -o json
 	chartRef := fmt.Sprintf("%s/%s", repoName, chartName)
-	args := []string{"search", "repo", chartRef, "-o", "json"}
-	cmd := exec.Command(h.HelmBin, args...)
-	out, err := h.runAndLog(cmd)
+	args := []string{"search", "repo", chartRef, "-o", "json", "--versions", "2>/dev/null"}
+	out, err := h.runAndLog(args...)
 	if err != nil {
 		return nil, fmt.Errorf("helm search repo failed: %v, output: %s", err, string(out))
 	}
@@ -260,6 +285,7 @@ func (h *HelmCmd) GetChartVersions(repoName string, chartName string) ([]string,
 	for _, r := range result {
 		versions = append(versions, r.Version)
 	}
+	klog.Infof("helm search result: %v", versions)
 	return versions, nil
 }
 
@@ -297,8 +323,7 @@ func (h *HelmCmd) UpdateReposIndex(ids string) {
 }
 
 func (h *HelmCmd) GetReleaseList() ([]*release.Release, error) {
-	cmd := exec.Command(h.HelmBin, "list", "-A", "-o", "json")
-	out, err := h.runAndLog(cmd)
+	out, err := h.runAndLog("list", "-A", "-o", "json")
 	if err != nil {
 		return nil, fmt.Errorf("helm list failed: %v, output: %s", err, string(out))
 	}

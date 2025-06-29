@@ -23,6 +23,7 @@ func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
 	// }
 	// restConfig := service.ClusterService().GetClusterByID(selectedCluster).GetRestConfig()
 	// h, err := helm.New(restConfig, namespace)
+	// return h, err
 	cmd := helm.NewHelmCmd("helm")
 	return cmd, nil
 }
