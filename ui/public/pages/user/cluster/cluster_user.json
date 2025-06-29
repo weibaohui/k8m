@@ -188,7 +188,7 @@
         },
         {
           "name": "not_after",
-          "label": "集群配置过期时间",
+          "label": "证书有效期",
           "type": "text",
           "sortable": true
         }

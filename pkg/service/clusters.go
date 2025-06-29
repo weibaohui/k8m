@@ -154,8 +154,8 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 	return nil
 }
 
-// GetNotAfter 获取集群配置过期时间
-func (c *ClusterConfig) GetNotAfter() time.Time {
+// GetCertificateExpiry 获取集群证书的过期时间
+func (c *ClusterConfig) GetCertificateExpiry() time.Time {
 	config, err := clientcmd.Load(c.kubeConfig)
 	if err != nil {
 		klog.V(8).Infof("设置NotAfter, 解析文件[%s]失败: %v", c.ClusterID, err)
@@ -171,7 +171,7 @@ func (c *ClusterConfig) GetNotAfter() time.Time {
 		klog.V(8).Infof("设置NotAfter,  [%s]解析证书:%s 失败: %v", c.ClusterID, authInfo.ClientCertificateData, err)
 		return time.Time{}
 	}
-	return cert.NotAfter
+	return cert.NotAfter.Local()
 }
 
 // IsConnected 判断集群是否连接

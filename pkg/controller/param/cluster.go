@@ -80,7 +80,7 @@ func ClusterTableList(c *gin.Context) {
 		}) {
 			cacheKey := fmt.Sprintf("%s/kubeconfig/not_after", cluster.ClusterID)
 			if notAfter, err := utils.GetOrSetCache(kom.Cluster(cluster.ClusterID).ClusterCache(), cacheKey, 24*time.Hour, func() (time.Time, error) {
-				return cluster.GetNotAfter(), nil
+				return cluster.GetCertificateExpiry(), nil
 			}); err == nil {
 				cluster.NotAfter = &notAfter
 			}
