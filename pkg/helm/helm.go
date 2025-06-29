@@ -25,6 +25,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// Helm 接口支持多种实现：
+// 1. Client（基于 Helm SDK）
+// 2. HelmCmd（基于 helm 二进制命令行）
+// 可根据实际需求选择实现。
 type Helm interface {
 	AddOrUpdateRepo(repoEntry *repo.Entry) error
 	GetReleaseHistory(releaseName string) ([]*release.Release, error)
