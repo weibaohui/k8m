@@ -118,6 +118,14 @@ func openMysqlDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, err
 	if cfg.MysqlLogMode {
 		db = db.Debug()
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(20)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(time.Minute * 5)
 	klog.V(2).Infof("初始化mysql数据库完成! dsn: %s", showDsn)
 	return db, nil
 }
@@ -152,6 +160,14 @@ func openPostgresDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, 
 	if cfg.PgLogMode {
 		db = db.Debug()
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(20)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(time.Minute * 5)
 	klog.V(2).Infof("初始化postgres数据库完成! dsn: %s", showDsn)
 	return db, nil
 }

@@ -360,9 +360,12 @@ func (c *Client) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 		}
 	}
 
-	_ = c.updateRepoIndex(repoEntry, helmRepo)
+	err := c.updateRepoIndex(repoEntry, helmRepo)
+	if err != nil {
+		klog.V(6).Infof("update repo info error: %v", err)
+		return err
+	}
 	klog.V(6).Infof("[%s] helm repository saved to database successfully", repoEntry.Name)
-
 	return nil
 }
 
@@ -420,7 +423,7 @@ func (c *Client) updateRepoIndex(repoEntry *repo.Entry, helmRepo *models.HelmRep
 			Description:    ct.Description,
 			Home:           ct.Home,
 			Icon:           ct.Icon,
-			Keywords:       ct.Keywords,
+			Keywords:       strings.Join(ct.Keywords, ","),
 			KubeVersion:    ct.KubeVersion,
 			AppVersion:     ct.AppVersion,
 			Deprecated:     ct.Deprecated,
@@ -465,7 +468,10 @@ func (c *Client) UpdateReposIndex(ids string) {
 			InsecureSkipTLSverify: item.InsecureSkipTLSverify,
 			PassCredentialsAll:    item.PassCredentialsAll,
 		}
-		_ = c.updateRepoIndex(repoEntry, item)
+		err = c.updateRepoIndex(repoEntry, item)
+		if err != nil {
+			klog.V(6).Infof("update helm repository info error: %v", err)
+		}
 
 	}
 
