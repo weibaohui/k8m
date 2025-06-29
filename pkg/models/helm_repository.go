@@ -19,7 +19,7 @@ type HelmRepository struct {
 	Password              string    `gorm:"-;comment:密码（临时字段，存储时需加密）" json:"password,omitempty"`
 	EncryptedSecret       string    `gorm:"comment:加密后的凭据" json:"encrypted_secret,omitempty"`
 	IsActive              bool      `gorm:"default:true" json:"is_active,omitempty"` // 是否启用
-	Content               string    `gorm:"type:text" json:"content,omitempty"`      // 模板内容，支持大文本存储
+	Content               string    `json:"content,omitempty"`                       // 模板内容，支持大文本存储
 	Generated             string    `json:"generated,omitempty"`                     // repo 索引文件创建时间
 	CertFile              string    `json:"certFile,omitempty"`
 	KeyFile               string    `json:"keyFile,omitempty"`
