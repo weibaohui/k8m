@@ -96,18 +96,18 @@ func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return fmt.Errorf("helm repo add failed: %v, output: %s", err, string(out))
 	}
-	err2, done := h.updateRepoByName(repoEntry, helmRepo)
-	if done {
-		return err2
+	_, err = h.updateRepoByName(repoEntry, helmRepo)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmRepository) (error, bool) {
+func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmRepository) (bool, error) {
 	// 4. helm repo update
 	out, err := h.runAndLog([]string{"repo", "update", repoEntry.Name}, "")
 	if err != nil {
-		return fmt.Errorf("helm repo update failed: %v, output: %s", err, string(out)), true
+		return false, fmt.Errorf("helm repo update failed: %v, output: %s", err, string(out))
 	}
 
 	// 5. helm repo index 文件分析，记录所有chart到数据库
@@ -115,13 +115,13 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 	indexData, err := os.ReadFile(cachePath)
 	if err != nil {
 		fmt.Printf("[helm-cmd] warn: read repo index file failed: %v\n", err)
-		return nil, true // 不阻断主流程
+		return true, nil // 不阻断主流程
 	}
 	var index repo.IndexFile
 
 	if err := yaml.Unmarshal(indexData, &index); err != nil {
 		fmt.Printf("[helm-cmd] warn: unmarshal repo index file failed: %v\n", err)
-		return nil, true
+		return true, nil
 	}
 	// 清空数据库中对应的chart repo
 	dao.DB().Where("repository_name = ?", repoEntry.Name).Delete(models.HelmChart{})
@@ -170,7 +170,7 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 			}
 		}
 	}
-	return nil, false
+	return false, nil
 }
 
 func getHomeDir() string {
