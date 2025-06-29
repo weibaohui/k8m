@@ -130,35 +130,22 @@
                   },
                   "controls": [
                     {
-                      "type": "static-image",
-                      "name": "chart.metadata.icon",
-                      "thumbMode": "contain",
-                      "thumbRatio": "1:1",
-                      "width": "100px",
-                      "height": "100px"
-                    },
-                    {
-                      "label": "应用信息",
-                      "type": "tpl",
-                      "tpl": " <a href=${chart.metadata.home} target=_blank>主页</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=${chart.metadata.sources} target=_blank>源码</a>"
-                    },
-                    {
                       "name": "name",
                       "label": "应用实例",
                       "type": "tpl",
                       "tpl": "${namespace}/${name}"
                     },
                     {
-                      "name": "info.status",
+                      "name": "status",
                       "label": "实例状态",
                       "type": "container",
                       "body": [
                         {
                           "type": "tpl",
-                          "tpl": "<span class='label label-success'>${chart.metadata.version}</span>&nbsp;&nbsp;&nbsp;&nbsp;"
+                          "tpl": "<span class='label label-success'>${chart}</span>&nbsp;&nbsp;&nbsp;&nbsp;"
                         },
                         {
-                          "name": "info.status",
+                          "name": "status",
                           "label": "状态",
                           "type": "mapping",
                           "map": {
@@ -286,12 +273,12 @@
           "sortable": true
         },
         {
-          "name": "chart.metadata.name",
+          "name": "chart",
           "label": "chart包",
           "type": "text"
         },
         {
-          "name": "chart.metadata.version",
+          "name": "app_version",
           "label": "应用版本",
           "type": "text"
         },
@@ -445,7 +432,7 @@
           ]
         },
         {
-          "name": "info.status",
+          "name": "status",
           "label": "状态",
           "type": "mapping",
           "map": {
@@ -462,12 +449,7 @@
           }
         },
         {
-          "name": "info.first_deployed",
-          "label": "安装时间",
-          "type": "datetime"
-        },
-        {
-          "name": "info.last_deployed",
+          "name": "updated",
           "label": "最后更新",
           "type": "k8sAge"
         }
