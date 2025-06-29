@@ -124,7 +124,7 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 		return true, nil
 	}
 	// 清空数据库中对应的chart repo
-	dao.DB().Where("repository_name = ?", repoEntry.Name).Delete(models.HelmChart{})
+	dao.DB().Where("repository_id = ?", helmRepo.ID).Delete(models.HelmChart{})
 	for chartName, versionList := range index.Entries {
 		if len(versionList) == 0 {
 			continue
