@@ -207,8 +207,8 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 	return nil
 }
 
-func (h *HelmCmd) UninstallRelease(releaseName string) error {
-	out, err := h.runAndLog([]string{"uninstall", releaseName}, "")
+func (h *HelmCmd) UninstallRelease(namespace string, releaseName string) error {
+	out, err := h.runAndLog([]string{"uninstall", releaseName, "-n", namespace}, "")
 	if err != nil {
 		return fmt.Errorf("helm uninstall failed: %v, output: %s", err, string(out))
 	}

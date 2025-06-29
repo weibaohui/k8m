@@ -119,7 +119,7 @@ func UninstallRelease(c *gin.Context) {
 		return
 	}
 
-	if err := h.UninstallRelease(releaseName); err != nil {
+	if err := h.UninstallRelease(releaseName, ""); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -150,7 +150,7 @@ func BatchUninstallRelease(c *gin.Context) {
 			amis.WriteJsonError(c, err)
 			return
 		}
-		x := h.UninstallRelease(name)
+		x := h.UninstallRelease(ns, name)
 		if x != nil {
 			klog.V(6).Infof("batch remove %s/%s error %v", ns, name, x)
 			err = x

@@ -33,7 +33,7 @@ type Helm interface {
 	AddOrUpdateRepo(repoEntry *repo.Entry) error
 	GetReleaseHistory(releaseName string) ([]*release.Release, error)
 	InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error
-	UninstallRelease(releaseName string) error
+	UninstallRelease(namespace string, releaseName string) error
 	UpgradeRelease(releaseName, repoName, targetVersion string, values ...string) error
 	GetChartValue(repoName, chartName, version string) (string, error)
 	GetChartVersions(repoName string, chartName string) ([]string, error)
@@ -265,7 +265,7 @@ func GetValuesYaml(c *chart.Chart) string {
 }
 
 // UninstallRelease uninstall release which deployed
-func (c *Client) UninstallRelease(releaseName string) error {
+func (c *Client) UninstallRelease(releaseName string, name string) error {
 	// use HELM_NAMESPACE find release
 	uc := action.NewUninstall(c.ac)
 
