@@ -286,7 +286,7 @@ func (h *HelmCmd) UpdateReposIndex(ids string) {
 			InsecureSkipTLSverify: item.InsecureSkipTLSverify,
 			PassCredentialsAll:    item.PassCredentialsAll,
 		}
-		h.updateRepoByName(repoEntry, item)
+		_, _ = h.updateRepoByName(repoEntry, item)
 
 	}
 
