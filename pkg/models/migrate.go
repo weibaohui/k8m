@@ -56,6 +56,11 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&HelmRepository{}); err != nil {
 		errs = append(errs, err)
 	}
+	// MYSQL 下需要单独处理 content字段为LONGTEXT，pg、sqlite不需要处理
+	if dao.DB().Migrator().HasTable(&HelmRepository{}) && dao.DB().Dialector.Name() == "mysql" {
+		dao.DB().Exec("ALTER TABLE helm_repositories MODIFY COLUMN content LONGTEXT")
+	}
+
 	if err := dao.DB().AutoMigrate(&HelmChart{}); err != nil {
 		errs = append(errs, err)
 	}
@@ -111,11 +116,13 @@ func AutoMigrate() error {
 		errs = append(errs, err)
 	}
 	// 删除 user 表 name 字段，已弃用
-	if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
-		// 判断是不是check that column/key exists
-		// 不存在，不用删除，那么不用报错误
-		if !strings.Contains(err.Error(), "check that column/key exists") {
-			errs = append(errs, err)
+	if dao.DB().Migrator().HasColumn(&User{}, "Role") {
+		if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
+			// 判断是不是check that column/key exists
+			// 不存在，不用删除，那么不用报错误
+			if !strings.Contains(err.Error(), "check that column/key exists") {
+				errs = append(errs, err)
+			}
 		}
 	}
 
@@ -343,12 +350,19 @@ func MigrateAIModel() error {
 		return nil
 	}
 
+	if !dao.DB().Migrator().HasColumn(&Config{}, "api_key") {
+		// 不需要进行迁移
+		klog.Infof("参数表config 无老版本API_KEY相关配置,无需进行迁移")
+		return nil
+	}
+
 	row := dao.DB().Raw("select api_key,api_model,api_url,temperature,top_p from configs limit 1").Row()
 
 	err = row.Scan(&model.ApiKey, &model.ApiModel, &model.ApiURL, &model.Temperature, &model.TopP)
 	if err != nil {
-		klog.Errorf("查询旧表 config 失败: %v", err)
-		return err
+		// 不需要进行迁移
+		klog.Infof("查询旧表 config 失败: %v,不再进行迁移", err)
+		return nil
 	}
 
 	// 检查这几个 字段是否为空，如果为空，则不进行迁移
