@@ -37,12 +37,23 @@ func NewHelmCmd(helmBin string, cluster string, config string) *HelmCmd {
 	repoCacheDir := fmt.Sprintf("%s/.cache/helm", homeDir)
 
 	// 将kubeconfig 字符串 存放到临时目录
-	
+	// 每次都固定格式，<cluster_name>-kubeconfig.yaml
+	// 替换cluster中的/为|
+
+	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, strings.ReplaceAll(cluster, "/", "|"))
+	// 确保目录存在,并写入 kubeconfig 文件
+	if err := os.MkdirAll(repoCacheDir, 0755); err != nil {
+		fmt.Printf("[helm-cmd] warn: create repo cache dir failed: %v\n", err)
+	}
+	if err := os.WriteFile(kubeconfigPath, []byte(config), 0644); err != nil {
+		fmt.Printf("[helm-cmd] warn: write kubeconfig to file failed: %v\n", err)
+	}
 	h := &HelmCmd{
-		HelmBin:      helmBin,
-		repoCacheDir: repoCacheDir,
-		cluster:      cluster,
-		kubeconfig:   config,
+		HelmBin:        helmBin,
+		repoCacheDir:   repoCacheDir,
+		cluster:        cluster,
+		kubeconfig:     config,
+		kubeconfigPath: kubeconfigPath,
 	}
 	return h
 }
