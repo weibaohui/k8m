@@ -192,6 +192,10 @@ func (h *HelmCmd) GetReleaseHistory(namespace string, releaseName string) ([]*mo
 
 func (h *HelmCmd) UninstallRelease(namespace string, releaseName string) error {
 	out, err := h.runAndLog([]string{"uninstall", releaseName, "-n", namespace}, "")
+	// 删除数据库HelmRelease
+	if err == nil {
+		_ = models.DeleteHelmReleaseByNsAndReleaseName(namespace, releaseName) // 忽略错误
+	}
 	if err != nil {
 		return fmt.Errorf("helm uninstall failed: %v, output: %s", err, string(out))
 	}
@@ -207,20 +211,43 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 		args = append(args, "-f", "-")
 		stdin = values[0]
 	}
-	_, err := h.runAndLog(args, stdin)
-	if err != nil {
-		return err
+	ob, _ := h.runAndLog(args, stdin)
+
+	// 安装成功后记录到数据库
+	release := &models.HelmRelease{
+		ReleaseName:  releaseName,
+		RepoName:     repoName,
+		Namespace:    namespace,
+		ChartName:    chartName,
+		ChartVersion: version,
+		Values:       stdin,
+		Status:       "installed",
+		Result:       string(ob),
 	}
+
+	_ = release.Save(nil) // 忽略错误，防止影响主流程
+
 	return nil
 }
 func (h *HelmCmd) UpgradeRelease(ns, name string, values ...string) error {
-	args := []string{"upgrade", name}
+	// helm upgrade <release-name> <chart-path-or-name>
+	hr, err := models.GetHelmReleaseByNsAndReleaseName(ns, name)
+	if err != nil {
+		return fmt.Errorf("get repoName from db failed: %v", err)
+	}
+	args := []string{"upgrade", name, fmt.Sprintf("%s/%s", hr.RepoName, hr.ChartName), "--namespace", ns, "--version", hr.ChartVersion}
 	stdin := ""
 	if len(values) > 0 && values[0] != "" {
 		args = append(args, "-f", "-")
 		stdin = values[0]
 	}
 	out, err := h.runAndLog(args, stdin)
+
+	// 更新values、result
+	hr.Result = string(out)
+	hr.Values = stdin
+	_ = hr.Save(nil) // 忽略错误，防止影响主流程
+
 	if err != nil {
 		return fmt.Errorf("helm upgrade failed: %v, output: %s", err, string(out))
 	}
