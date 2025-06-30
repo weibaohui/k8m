@@ -1,4 +1,4 @@
-import { registerFilter, registerRenderer, render as renderAmis, Schema } from 'amis'
+import { register, registerFilter, registerRenderer, render as renderAmis, Schema } from 'amis'
 import { AlertComponent, ToastComponent } from 'amis-ui'
 import axios from 'axios'
 import { fetcher } from "@/components/Amis/fetcher";
@@ -31,6 +31,7 @@ import K8sPodStatusComponent from "@/components/Amis/custom/K8sPodStatus.tsx";
 import HPAMetricsComponent from '@/components/Amis/custom/HPAMetrics';
 import HPABehaviorComponent from '@/components/Amis/custom/HPABehavior';
 import HelmUpdateRelease from '@/components/Amis/custom/Helm/HelmUpdateRealease.tsx';
+import HelmViewRelease from '@/components/Amis/custom/Helm/HelmViewRelease.tsx';
 import K8sGPTComponent from '@/components/Amis/custom/K8sGPT';
 import InspectionSummaryComponent from '@/components/Amis/custom/InspectionSummary.tsx'
 import InspectionEventListComponent from '@/components/Amis/custom/InspectionEventList.tsx'
@@ -76,6 +77,9 @@ registerRenderer({ type: 'hpaMetrics', component: HPAMetricsComponent })
 registerRenderer({ type: 'hpaBehavior', component: HPABehaviorComponent })
 //@ts-ignore
 registerRenderer({ type: 'helmUpdateRelease', component: HelmUpdateRelease })
+//@ts-ignore
+registerRenderer({ type: 'helmViewRelease', component: HelmViewRelease })
+
 //@ts-ignore
 registerRenderer({ type: 'k8sGPT', component: K8sGPTComponent })
 //@ts-ignore

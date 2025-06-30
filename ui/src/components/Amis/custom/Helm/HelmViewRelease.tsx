@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Col, Form, Row, Typography, message } from 'antd';
+import { Col, Form, Row, Typography, message } from 'antd';
 import Editor from '@monaco-editor/react';
 import { fetcher } from '@/components/Amis/fetcher';
 
-interface HelmUpdateReleaseProps {
+interface HelmViewReleaseProps {
     releaseName: string;
     repoName: string;
     chart: {
@@ -15,28 +15,16 @@ interface HelmUpdateReleaseProps {
     data: Record<string, any>
 }
 
-const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleaseProps>(({ data }, _) => {
+const HelmViewRelease = React.forwardRef<HTMLSpanElement, HelmViewReleaseProps>(({ data }, _) => {
     const [values, setValues] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [clusterInfo, setClusterInfo] = useState('');
 
-    useEffect(() => {
-        const originCluster = localStorage.getItem('cluster') || '';
-        setClusterInfo(originCluster ? originCluster : '未选择集群');
-    }, []);
     let chartName = data.chart
     let releaseName = data.name
     let namespace = data.namespace
     let revision = data.revision
 
-
-
-
-
     useEffect(() => {
-
         const fetchValues = async () => {
-
             try {
                 const response = await fetcher({
                     url: `/k8s/helm/release/ns/${namespace}/name/${releaseName}/revision/${revision}/values`,
@@ -51,51 +39,12 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
         fetchValues();
     }, [releaseName, revision]);
 
-
-    const handleSubmit = async () => {
-
-        setLoading(true);
-        try {
-            await fetcher({
-                url: '/k8s/helm/release/upgrade',
-                method: 'post',
-                data: {
-                    values,
-                    name: releaseName,
-                    namespace: namespace
-                }
-            });
-            message.success('更新成功');
-        } catch (error) {
-            message.error('更新失败');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <div>
             <Form layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-
-                <Form.Item label="更新操作">
-                    <Button
-                        type="primary"
-                        onClick={handleSubmit}
-                        loading={loading}
-                        style={{ marginRight: 16 }}
-                    >
-                        提交更新
-                    </Button>
-
-
-                </Form.Item>
                 <Form.Item label="基本信息">
                     <Row justify={'start'}>
-                        <Col span={8}>
-                            <Form.Item label="所属集群" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-                                <Typography.Text ellipsis={{ tooltip: true }}>{clusterInfo}</Typography.Text>
-                            </Form.Item>
-                        </Col>
+
                         <Col span={6}>
                             <Form.Item label="发布名称" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
                                 <Typography.Text ellipsis={{ tooltip: true }}>{namespace}/{releaseName}</Typography.Text>
@@ -108,16 +57,12 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                         </Col>
                     </Row>
                 </Form.Item>
-
-
                 <Form.Item label="安装参数">
-                    <div style={{ border: '1px solid #d9d9d9', borderRadius: '4px' }}
-                    >
+                    <div style={{ border: '1px solid #d9d9d9', borderRadius: '4px' }}>
                         <Editor
                             height="calc(100vh - 200px)"
                             language="yaml"
                             value={values}
-                            onChange={(value) => setValues(value || '')}
                             options={{
                                 minimap: { enabled: false },
                                 scrollBeyondLastLine: false,
@@ -130,14 +75,10 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
                             }}
                         />
                     </div>
-
                 </Form.Item>
-
-
             </Form>
         </div>
     );
 });
 
-
-export default HelmUpdateRelease;
+export default HelmViewRelease;
