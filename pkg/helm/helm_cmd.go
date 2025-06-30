@@ -43,7 +43,7 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 	// cmd := exec.Command(h.HelmBin, args...)
 
 	cmd := exec.Command("sh", "-c", cmdStr)
-	cmd.Env = []string{fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir)}
+	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir))
 
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
