@@ -143,7 +143,9 @@ func GetReleaseNote(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonOKMsg(c, note)
+	amis.WriteJsonData(c, gin.H{
+		"note": note,
+	})
 }
 
 // GetReleaseValues 获取安装yaml

@@ -230,12 +230,14 @@
                       "type": "page",
                       "body": {
                         "type": "service",
-                        "api": "/amis/api/mock2/page/initData",
-                        "body": {
-                          "type": "panel",
-                          "title": "$title",
-                          "body": "现在是：${date}"
-                        }
+                        "api": "post:/k8s/helm/release/ns/${namespace}/name/${name}/revision/${revision}/notes",
+                        "body": [
+                          {
+                            "type": "tpl",
+                            "tpl": "<pre>${note | raw}</pre>",
+                            "htmlEscape": false
+                          }
+                        ]
                       }
                     }
                   ]

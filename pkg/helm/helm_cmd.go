@@ -357,14 +357,14 @@ func (h *HelmCmd) GetReleaseList() ([]*models.Release, error) {
 	return releases, nil
 }
 func (h *HelmCmd) GetReleaseNote(ns string, name string) (string, error) {
-	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns, "-o", "json"}, "")
+	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns}, "")
 	if err != nil {
 		return "", fmt.Errorf("helm get  notes failed: %v, output: %s", err, string(out))
 	}
 	return string(out), nil
 }
 func (h *HelmCmd) GetReleaseNoteWithRevision(ns string, name string, revision string) (string, error) {
-	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns, "--revision", revision, "-o", "json"}, "")
+	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns, "--revision", revision}, "")
 	if err != nil {
 		return "", fmt.Errorf("helm get  notes failed: %v, output: %s", err, string(out))
 	}
