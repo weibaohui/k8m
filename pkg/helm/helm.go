@@ -41,7 +41,7 @@ type Helm interface {
 	GetReleaseHistory(namespace string, releaseName string) ([]*models.ReleaseHistory, error)
 	InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(namespace string, releaseName string) error
-	UpgradeRelease(releaseName, repoName, targetVersion string, values ...string) error
+	UpgradeRelease(ns string, name string, values ...string) error
 	GetChartValue(repoName, chartName, version string) (string, error)
 	GetChartVersions(repoName string, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)

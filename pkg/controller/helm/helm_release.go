@@ -158,7 +158,7 @@ func GetReleaseValues(c *gin.Context) {
 	}
 
 	ret := ""
-	if releaseName == "" {
+	if revision == "" {
 		ret, err = h.GetReleaseValues(ns, releaseName)
 		if err != nil {
 			amis.WriteJsonError(c, err)
@@ -172,7 +172,7 @@ func GetReleaseValues(c *gin.Context) {
 		}
 	}
 
-	amis.WriteJsonOKMsg(c, ret)
+	amis.WriteJsonData(c, ret)
 }
 
 func BatchUninstallRelease(c *gin.Context) {
@@ -213,11 +213,9 @@ func BatchUninstallRelease(c *gin.Context) {
 func UpgradeRelease(c *gin.Context) {
 
 	var req struct {
-		ReleaseName string `json:"release_name,omitempty"`
-		RepoName    string `json:"repo_name,omitempty"`
-		Version     string `json:"version,omitempty"`
-		Values      string `json:"values,omitempty"`
-		Namespace   string `json:"namespace,omitempty"`
+		Name      string `json:"name,omitempty"`
+		Namespace string `json:"namespace,omitempty"`
+		Values    string `json:"values,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -226,7 +224,7 @@ func UpgradeRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "UpgradeRelease", req.ReleaseName, req.Namespace, req.RepoName)
+	_, _, err := handleCommonLogic(c, "UpgradeRelease", req.Name, req.Namespace, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -239,7 +237,7 @@ func UpgradeRelease(c *gin.Context) {
 		return
 	}
 
-	if err := h.UpgradeRelease(req.ReleaseName, req.RepoName, req.Version, req.Values); err != nil {
+	if err := h.UpgradeRelease(req.Namespace, req.Name, req.Values); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

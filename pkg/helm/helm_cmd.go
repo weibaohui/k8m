@@ -213,9 +213,8 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 	}
 	return nil
 }
-func (h *HelmCmd) UpgradeRelease(releaseName, repoName, targetVersion string, values ...string) error {
-	chartRef := fmt.Sprintf("%s/%s", repoName, releaseName)
-	args := []string{"upgrade", releaseName, chartRef, "--version", targetVersion}
+func (h *HelmCmd) UpgradeRelease(ns, name string, values ...string) error {
+	args := []string{"upgrade", name}
 	stdin := ""
 	if len(values) > 0 && values[0] != "" {
 		args = append(args, "-f", "-")
@@ -311,14 +310,14 @@ func (h *HelmCmd) GetReleaseNote(ns string, name string) (string, error) {
 	return string(out), nil
 }
 func (h *HelmCmd) GetReleaseValues(ns string, name string) (string, error) {
-	out, err := h.runAndLog([]string{"get", "values", name, "-n", ns, "-o", "json"}, "")
+	out, err := h.runAndLog([]string{"get", "values", name, "-n", ns, "--all", "-o", "yaml"}, "")
 	if err != nil {
 		return "", fmt.Errorf("helm get values failed: %v, output: %s", err, string(out))
 	}
 	return string(out), nil
 }
 func (h *HelmCmd) GetReleaseValuesWithRevision(ns string, name string, revision string) (string, error) {
-	out, err := h.runAndLog([]string{"get", "values", name, "-n", ns, "--revision", revision, "-o", "json"}, "")
+	out, err := h.runAndLog([]string{"get", "values", name, "-n", ns, "--revision", revision, "-o", "yaml"}, "")
 	if err != nil {
 		return "", fmt.Errorf("helm get values failed: %v, output: %s", err, string(out))
 	}
