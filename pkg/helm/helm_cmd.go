@@ -83,7 +83,7 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 	}
 	if stderr.Len() > 0 {
 		klog.V(6).Infof("[helm-cmd] stderr: %s\n", stderr.String())
-		err = fmt.Errorf(stderr.String())
+		err = fmt.Errorf("%s", stderr.String())
 	}
 	return stdout.Bytes(), err
 }
