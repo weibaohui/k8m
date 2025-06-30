@@ -225,12 +225,17 @@
                       ]
                     },
                     {
-                      "name": "info.notes",
+                      "name": "notes",
                       "label": "安装结果",
-                      "type": "tpl",
-                      "tpl": "${info.notes}",
-                      "style": {
-                        "whiteSpace": "pre-wrap"
+                      "type": "page",
+                      "body": {
+                        "type": "service",
+                        "api": "/amis/api/mock2/page/initData",
+                        "body": {
+                          "type": "panel",
+                          "title": "$title",
+                          "body": "现在是：${date}"
+                        }
                       }
                     }
                   ]

@@ -130,6 +130,7 @@ func UninstallRelease(c *gin.Context) {
 func GetReleaseNote(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
+	revision := c.Param("revision")
 
 	h, err := getHelm(c, ns)
 	if err != nil {
@@ -137,7 +138,7 @@ func GetReleaseNote(c *gin.Context) {
 		return
 	}
 
-	note, err := h.GetReleaseNote(ns, releaseName)
+	note, err := h.GetReleaseNoteWithRevision(ns, releaseName, revision)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

@@ -16,6 +16,7 @@ type Helm interface {
 	UpdateReposIndex(ids string)
 	GetReleaseList() ([]*models.Release, error)
 	GetReleaseNote(ns string, name string) (string, error)
+	GetReleaseNoteWithRevision(ns string, name string, revision string) (string, error)
 	GetReleaseValues(ns string, name string) (string, error)
 	GetReleaseValuesWithRevision(ns string, name string, revision string) (string, error)
 }

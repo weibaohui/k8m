@@ -363,6 +363,13 @@ func (h *HelmCmd) GetReleaseNote(ns string, name string) (string, error) {
 	}
 	return string(out), nil
 }
+func (h *HelmCmd) GetReleaseNoteWithRevision(ns string, name string, revision string) (string, error) {
+	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns, "--revision", revision, "-o", "json"}, "")
+	if err != nil {
+		return "", fmt.Errorf("helm get  notes failed: %v, output: %s", err, string(out))
+	}
+	return string(out), nil
+}
 func (h *HelmCmd) GetReleaseValues(ns string, name string) (string, error) {
 	out, err := h.runAndLog([]string{"get", "values", name, "-n", ns, "--all", "-o", "yaml"}, "")
 	if err != nil {

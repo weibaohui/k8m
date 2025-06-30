@@ -466,6 +466,7 @@ func main() {
 		api.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", helm.InstallRelease)
 		api.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
 		api.POST("/helm/release/ns/:ns/name/:name/revision/:revision/values", helm.GetReleaseValues)
+		api.POST("/helm/release/ns/:ns/name/:name/revision/:revision/notes", helm.GetReleaseNote)
 		api.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
 		api.POST("/helm/release/upgrade", helm.UpgradeRelease)
 		api.GET("/helm/chart/list", helm.ListChart)
