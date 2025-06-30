@@ -20,6 +20,7 @@ type HelmRelease struct {
 	Result       string    `json:"result,omitempty"`                          // 描述
 	CreatedAt    time.Time `json:"created_at,omitempty"`
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	Cluster      string    `json:"cluster,omitempty"`
 }
 
 func (r *HelmRelease) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*HelmRelease, int64, error) {
@@ -39,9 +40,9 @@ func (r *HelmRelease) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *g
 }
 
 // GetHelmReleaseByNsAndReleaseName 通过namespace和releaseName获取repo名称
-func GetHelmReleaseByNsAndReleaseName(namespace, releaseName string) (*HelmRelease, error) {
+func GetHelmReleaseByNsAndReleaseName(namespace, releaseName, cluster string) (*HelmRelease, error) {
 	r := &HelmRelease{}
-	db := dao.DB().Where("namespace = ? AND release_name = ?", namespace, releaseName)
+	db := dao.DB().Where("namespace = ? AND release_name = ? AND cluster = ? ", namespace, releaseName, cluster)
 	err := db.First(r).Error
 	if err != nil {
 		return nil, err
@@ -50,6 +51,6 @@ func GetHelmReleaseByNsAndReleaseName(namespace, releaseName string) (*HelmRelea
 }
 
 // DeleteHelmReleaseByNsAndReleaseName 删除指定namespace和releaseName的HelmRelease记录
-func DeleteHelmReleaseByNsAndReleaseName(namespace, releaseName string) error {
-	return dao.DB().Where("namespace = ? AND release_name = ?", namespace, releaseName).Delete(&HelmRelease{}).Error
+func DeleteHelmReleaseByNsAndReleaseName(namespace, releaseName, cluster string) error {
+	return dao.DB().Where("namespace = ? AND release_name = ? AND cluster =? ", namespace, releaseName, cluster).Delete(&HelmRelease{}).Error
 }

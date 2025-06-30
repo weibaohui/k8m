@@ -22,28 +22,43 @@ import (
 // 注意：部分方法需解析 helm 命令输出，部分功能可能与 SDK 实现略有差异
 
 type HelmCmd struct {
-	HelmBin      string // helm 二进制路径，默认 "helm"
-	repoCacheDir string
+	HelmBin        string // helm 二进制路径，默认 "helm"
+	repoCacheDir   string
+	cluster        string
+	kubeconfig     string
+	kubeconfigPath string
 }
 
-func NewHelmCmd(helmBin string) *HelmCmd {
+func NewHelmCmd(helmBin string, cluster string, config string) *HelmCmd {
 	if helmBin == "" {
 		helmBin = "helm"
 	}
 	homeDir := getHomeDir()
 	repoCacheDir := fmt.Sprintf("%s/.cache/helm", homeDir)
 
-	return &HelmCmd{HelmBin: helmBin, repoCacheDir: repoCacheDir}
+	// 将kubeconfig 字符串 存放到临时目录
+	
+	h := &HelmCmd{
+		HelmBin:      helmBin,
+		repoCacheDir: repoCacheDir,
+		cluster:      cluster,
+		kubeconfig:   config,
+	}
+	return h
 }
 
 // runAndLog 执行 helm 命令并输出日志，支持 shell 特性和可选 stdin
 func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
+
 	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
 	fmt.Printf("[helm-cmd] exec: %s\n", cmdStr)
 	// cmd := exec.Command(h.HelmBin, args...)
 
 	cmd := exec.Command("sh", "-c", cmdStr)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir))
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir),
+		fmt.Sprintf("%s=%s", "KUBECONFIG", h.kubeconfigPath),
+	)
 
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
@@ -194,7 +209,7 @@ func (h *HelmCmd) UninstallRelease(namespace string, releaseName string) error {
 	out, err := h.runAndLog([]string{"uninstall", releaseName, "-n", namespace}, "")
 	// 删除数据库HelmRelease
 	if err == nil {
-		_ = models.DeleteHelmReleaseByNsAndReleaseName(namespace, releaseName) // 忽略错误
+		_ = models.DeleteHelmReleaseByNsAndReleaseName(namespace, releaseName, h.cluster) // 忽略错误
 	}
 	if err != nil {
 		return fmt.Errorf("helm uninstall failed: %v, output: %s", err, string(out))
@@ -215,6 +230,7 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 
 	// 安装成功后记录到数据库
 	release := &models.HelmRelease{
+		Cluster:      h.cluster,
 		ReleaseName:  releaseName,
 		RepoName:     repoName,
 		Namespace:    namespace,
@@ -231,7 +247,7 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 }
 func (h *HelmCmd) UpgradeRelease(ns, name string, values ...string) error {
 	// helm upgrade <release-name> <chart-path-or-name>
-	hr, err := models.GetHelmReleaseByNsAndReleaseName(ns, name)
+	hr, err := models.GetHelmReleaseByNsAndReleaseName(ns, name, h.cluster)
 	if err != nil {
 		return fmt.Errorf("get repoName from db failed: %v", err)
 	}

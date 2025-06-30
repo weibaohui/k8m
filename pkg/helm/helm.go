@@ -4,7 +4,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	"helm.sh/helm/v3/pkg/repo"
 )
- 
+
 type Helm interface {
 	AddOrUpdateRepo(repoEntry *repo.Entry) error
 	GetReleaseHistory(namespace string, releaseName string) ([]*models.ReleaseHistory, error)

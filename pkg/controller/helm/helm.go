@@ -13,18 +13,17 @@ import (
 )
 
 func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
-	// if namespace == "" {
-	// 	namespace = "default"
-	// }
-	// selectedCluster, err := amis.GetSelectedCluster(c)
-	// if err != nil {
-	// 	amis.WriteJsonError(c, err)
-	// 	return nil, err
-	// }
-	// restConfig := service.ClusterService().GetClusterByID(selectedCluster).GetRestConfig()
-	// h, err := helm.New(restConfig, namespace)
+	if namespace == "" {
+		namespace = "default"
+	}
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return nil, err
+	}
+	kubeConfig := service.ClusterService().GetClusterByID(selectedCluster).GetKubeconfig()
 	// return h, err
-	cmd := helm.NewHelmCmd("helm")
+	cmd := helm.NewHelmCmd("helm", selectedCluster, kubeConfig)
 	return cmd, nil
 }
 
