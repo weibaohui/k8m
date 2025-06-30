@@ -43,10 +43,10 @@ func NewHelmCmd(helmBin string, cluster string, config string) *HelmCmd {
 	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, strings.ReplaceAll(cluster, "/", "|"))
 	// 确保目录存在,并写入 kubeconfig 文件
 	if err := os.MkdirAll(repoCacheDir, 0755); err != nil {
-		fmt.Printf("[helm-cmd] warn: create repo cache dir failed: %v\n", err)
+		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
 	}
 	if err := os.WriteFile(kubeconfigPath, []byte(config), 0644); err != nil {
-		fmt.Printf("[helm-cmd] warn: write kubeconfig to file failed: %v\n", err)
+		klog.V(6).Infof("[helm-cmd] warn: write kubeconfig to file failed: %v", err)
 	}
 	h := &HelmCmd{
 		HelmBin:        helmBin,
@@ -62,7 +62,7 @@ func NewHelmCmd(helmBin string, cluster string, config string) *HelmCmd {
 func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 
 	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
-	fmt.Printf("[helm-cmd] exec: %s\n", cmdStr)
+	klog.V(6).Infof("[helm-cmd] exec: %s\n", cmdStr)
 	// cmd := exec.Command(h.HelmBin, args...)
 
 	cmd := exec.Command("sh", "-c", cmdStr)
@@ -79,10 +79,10 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if stdout.Len() > 0 {
-		fmt.Printf("[helm-cmd] stdout: %s\n", stdout.String())
+		klog.V(6).Infof("[helm-cmd] stdout: %s\n", stdout.String())
 	}
 	if stderr.Len() > 0 {
-		fmt.Printf("[helm-cmd] stderr: %s\n", stderr.String())
+		klog.V(6).Infof("[helm-cmd] stderr: %s\n", stderr.String())
 		err = fmt.Errorf(stderr.String())
 	}
 	return stdout.Bytes(), err
@@ -140,13 +140,13 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 	cachePath := fmt.Sprintf("%s/repository/%s-index.yaml", h.repoCacheDir, repoEntry.Name)
 	indexData, err := os.ReadFile(cachePath)
 	if err != nil {
-		fmt.Printf("[helm-cmd] warn: read repo index file failed: %v\n", err)
+		klog.V(6).Infof("[helm-cmd] warn: read repo index file failed: %v\n", err)
 		return true, nil // 不阻断主流程
 	}
 	var index repo.IndexFile
 
 	if err := yaml.Unmarshal(indexData, &index); err != nil {
-		fmt.Printf("[helm-cmd] warn: unmarshal repo index file failed: %v\n", err)
+		klog.V(6).Infof("[helm-cmd] warn: unmarshal repo index file failed: %v\n", err)
 		return true, nil
 	}
 	// 清空数据库中对应的chart repo
@@ -192,7 +192,7 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 			}
 			err = m.Save(nil)
 			if err != nil {
-				fmt.Printf("[helm-cmd] warn: save helm chart to database error: %v\n", err)
+				klog.V(6).Infof("[helm-cmd] warn: save helm chart to database error: %v\n", err)
 			}
 		}
 	}
