@@ -49,7 +49,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
             }
         };
         fetchValues();
-    }, [releaseName, revision]);
+    }, [namespace, releaseName, revision]);
 
 
     const handleSubmit = async () => {

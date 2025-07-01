@@ -37,7 +37,7 @@ const HelmViewRelease = React.forwardRef<HTMLSpanElement, HelmViewReleaseProps>(
             }
         };
         fetchValues();
-    }, [releaseName, revision]);
+    }, [namespace, releaseName, revision]);
 
     return (
         <div>
