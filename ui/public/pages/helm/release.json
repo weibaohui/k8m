@@ -121,6 +121,7 @@
                 "title": "${name} 详情 （ESC 关闭）",
                 "size": "lg",
                 "closeOnEsc": true,
+                "closeOnOutside": true,
                 "body": {
                   "type": "form",
                   "mode": "horizontal",
@@ -206,6 +207,7 @@
                           "drawer": {
                             "overlay": false,
                             "closeOnEsc": true,
+                            "closeOnOutside": true,
                             "size": "xl",
                             "title": "更新${name}（ESC 关闭）",
                             "body": [
@@ -294,6 +296,7 @@
               "actionType": "drawer",
               "drawer": {
                 "overlay": false,
+                "closeOnOutside": true,
                 "closeOnEsc": true,
                 "size": "xl",
                 "title": "${name} 变更历史（ESC 关闭）",
