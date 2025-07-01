@@ -10,10 +10,16 @@ interface HelmViewReleaseProps {
 const HelmViewRelease = React.forwardRef<HTMLSpanElement, HelmViewReleaseProps>(({ data }, _) => {
     const [values, setValues] = useState('');
 
-    let chartName = data.chart
-    let releaseName = data.name
-    let namespace = data.namespace
-    let revision = data.revision
+    let chartName = data.chart || ''
+    let releaseName = data.name || ''
+    let namespace = data.namespace || 'default'
+    let revision = data.revision || ''
+
+    if (!releaseName || !namespace) {
+        message.error('缺少必要的 Release 信息');
+        return null;
+    }
+
 
     useEffect(() => {
         const fetchValues = async () => {

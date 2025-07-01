@@ -16,12 +16,16 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
         const originCluster = localStorage.getItem('cluster') || '';
         setClusterInfo(originCluster ? originCluster : '未选择集群');
     }, []);
-    let chartName = data.chart
-    let releaseName = data.name
-    let namespace = data.namespace
-    let revision = data.revision
 
+    let chartName = data.chart || ''
+    let releaseName = data.name || ''
+    let namespace = data.namespace || 'default'
+    let revision = data.revision || ''
 
+    if (!releaseName || !namespace) {
+        message.error('缺少必要的 Release 信息');
+        return null;
+    }
 
 
 
