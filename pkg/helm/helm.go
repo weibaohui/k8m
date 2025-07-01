@@ -7,16 +7,16 @@ import (
 
 type Helm interface {
 	AddOrUpdateRepo(repoEntry *repo.Entry) error
-	GetReleaseHistory(namespace string, releaseName string) ([]*models.ReleaseHistory, error)
-	InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error
-	UninstallRelease(namespace string, releaseName string) error
-	UpgradeRelease(ns string, name string, values ...string) error
+	GetReleaseHistory(ns, releaseName string) ([]*models.ReleaseHistory, error)
+	InstallRelease(ns, releaseName, repoName, chartName, version string, values ...string) error
+	UninstallRelease(ns, releaseName string) error
+	UpgradeRelease(ns, name string, values ...string) error
 	GetChartValue(repoName, chartName, version string) (string, error)
-	GetChartVersions(repoName string, chartName string) ([]string, error)
+	GetChartVersions(repoName, chartName string) ([]string, error)
 	UpdateReposIndex(ids string)
 	GetReleaseList() ([]*models.Release, error)
-	GetReleaseNote(ns string, name string) (string, error)
-	GetReleaseNoteWithRevision(ns string, name string, revision string) (string, error)
-	GetReleaseValues(ns string, name string) (string, error)
-	GetReleaseValuesWithRevision(ns string, name string, revision string) (string, error)
+	GetReleaseNote(ns, name string) (string, error)
+	GetReleaseNoteWithRevision(ns, name, revision string) (string, error)
+	GetReleaseValues(ns, name string) (string, error)
+	GetReleaseValuesWithRevision(ns, name, revision string) (string, error)
 }

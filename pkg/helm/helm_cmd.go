@@ -2,6 +2,7 @@ package helm
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -54,7 +55,8 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 	// 每次都固定格式，<cluster_name>-kubeconfig.yaml
 	// 替换cluster中的/为|
 
-	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, strings.ReplaceAll(clusterID, "/", "|"))
+	encodedClusterID := base64.URLEncoding.EncodeToString([]byte(clusterID))
+	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, encodedClusterID)
 	// 确保目录存在,并写入 kubeconfig 文件
 	if err := os.MkdirAll(repoCacheDir, 0755); err != nil {
 		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
@@ -280,7 +282,6 @@ func (h *HelmCmd) UninstallRelease(namespace string, releaseName string) error {
 func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, version string, values ...string) error {
 	chartRef := fmt.Sprintf("%s/%s", repoName, chartName)
 	args := []string{"install", releaseName, chartRef, "--namespace", namespace, "--version", version, "--create-namespace"}
-	klog.Infof("安装参数 %d =\n %s", len(values), values)
 	stdin := ""
 	if len(values) > 0 && values[0] != "" {
 		args = append(args, "-f", "-")
