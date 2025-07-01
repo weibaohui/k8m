@@ -4,14 +4,6 @@ import Editor from '@monaco-editor/react';
 import { fetcher } from '@/components/Amis/fetcher';
 
 interface HelmUpdateReleaseProps {
-    releaseName: string;
-    repoName: string;
-    chart: {
-        metadata: {
-            name: string;
-            version: string;
-        };
-    };
     data: Record<string, any>
 }
 
