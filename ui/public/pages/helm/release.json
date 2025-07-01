@@ -232,7 +232,7 @@
                       "type": "page",
                       "body": {
                         "type": "service",
-                        "api": "post:/k8s/helm/release/ns/${namespace}/name/${name}/revision/${revision}/notes",
+                        "api": "/k8s/helm/release/ns/${namespace}/name/${name}/revision/${revision}/notes",
                         "body": [
                           {
                             "type": "tpl",

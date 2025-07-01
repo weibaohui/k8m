@@ -20,10 +20,9 @@ const HelmViewRelease = React.forwardRef<HTMLSpanElement, HelmViewReleaseProps>(
             try {
                 const response = await fetcher({
                     url: `/k8s/helm/release/ns/${namespace}/name/${releaseName}/revision/${revision}/values`,
-                    method: 'post'
+                    method: 'get'
                 });
-                // @ts-ignore
-                setValues(response.data?.data || '');
+                setValues((response.data as any)?.data || '');
             } catch (error) {
                 message.error('获取参数值失败');
             }
