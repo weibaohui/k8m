@@ -20,7 +20,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 ADD reload.sh /app/reload.sh
 RUN chmod +x /app/reload.sh
 
-RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+RUN export VERIFY_CHECKSUM=false&&curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 RUN helm version
 
 
