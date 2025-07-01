@@ -121,6 +121,7 @@
                 "title": "${name} 详情 （ESC 关闭）",
                 "size": "lg",
                 "closeOnEsc": true,
+                "closeOnOutside": true,
                 "body": {
                   "type": "form",
                   "mode": "horizontal",
@@ -130,35 +131,22 @@
                   },
                   "controls": [
                     {
-                      "type": "static-image",
-                      "name": "chart.metadata.icon",
-                      "thumbMode": "contain",
-                      "thumbRatio": "1:1",
-                      "width": "100px",
-                      "height": "100px"
-                    },
-                    {
-                      "label": "应用信息",
-                      "type": "tpl",
-                      "tpl": " <a href=${chart.metadata.home} target=_blank>主页</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=${chart.metadata.sources} target=_blank>源码</a>"
-                    },
-                    {
                       "name": "name",
                       "label": "应用实例",
                       "type": "tpl",
                       "tpl": "${namespace}/${name}"
                     },
                     {
-                      "name": "info.status",
+                      "name": "status",
                       "label": "实例状态",
                       "type": "container",
                       "body": [
                         {
                           "type": "tpl",
-                          "tpl": "<span class='label label-success'>${chart.metadata.version}</span>&nbsp;&nbsp;&nbsp;&nbsp;"
+                          "tpl": "<span class='label label-success'>${chart}</span>&nbsp;&nbsp;&nbsp;&nbsp;"
                         },
                         {
-                          "name": "info.status",
+                          "name": "status",
                           "label": "状态",
                           "type": "mapping",
                           "map": {
@@ -193,13 +181,7 @@
                             "title": "参数查看（ESC 关闭）",
                             "body": [
                               {
-                                "type": "diffEditor",
-                                "originalValue": "${chart.values}",
-                                "modifiedValue": "${config}",
-                                "originalLabel": "默认参数",
-                                "modifiedLabel": "用户指定参数",
-                                "readOnly": true,
-                                "language": "yaml"
+                                "type": "helmViewRelease"
                               }
                             ],
                             "actions": [
@@ -225,6 +207,7 @@
                           "drawer": {
                             "overlay": false,
                             "closeOnEsc": true,
+                            "closeOnOutside": true,
                             "size": "xl",
                             "title": "更新${name}（ESC 关闭）",
                             "body": [
@@ -244,12 +227,19 @@
                       ]
                     },
                     {
-                      "name": "info.notes",
+                      "name": "notes",
                       "label": "安装结果",
-                      "type": "tpl",
-                      "tpl": "${info.notes}",
-                      "style": {
-                        "whiteSpace": "pre-wrap"
+                      "type": "page",
+                      "body": {
+                        "type": "service",
+                        "api": "/k8s/helm/release/ns/${namespace}/name/${name}/revision/${revision}/notes",
+                        "body": [
+                          {
+                            "type": "tpl",
+                            "tpl": "<pre>${note | raw}</pre>",
+                            "htmlEscape": false
+                          }
+                        ]
                       }
                     }
                   ]
@@ -286,12 +276,12 @@
           "sortable": true
         },
         {
-          "name": "chart.metadata.name",
+          "name": "chart",
           "label": "chart包",
           "type": "text"
         },
         {
-          "name": "chart.metadata.version",
+          "name": "app_version",
           "label": "应用版本",
           "type": "text"
         },
@@ -306,6 +296,7 @@
               "actionType": "drawer",
               "drawer": {
                 "overlay": false,
+                "closeOnOutside": true,
                 "closeOnEsc": true,
                 "size": "xl",
                 "title": "${name} 变更历史（ESC 关闭）",
@@ -357,17 +348,22 @@
                     "api": "get:/k8s/helm/release/ns/${namespace}/name/${name}/history/list",
                     "columns": [
                       {
-                        "name": "version",
+                        "name": "revision",
                         "label": "变更版本",
                         "type": "text"
                       },
                       {
-                        "name": "chart.metadata.version",
+                        "name": "chart",
+                        "label": "chart包",
+                        "type": "text"
+                      },
+                      {
+                        "name": "app_version",
                         "label": "应用版本",
                         "type": "text"
                       },
                       {
-                        "name": "info.status",
+                        "name": "status",
                         "label": "状态",
                         "type": "mapping",
                         "map": {
@@ -400,13 +396,7 @@
                               "title": "参数查看（ESC 关闭）",
                               "body": [
                                 {
-                                  "type": "diffEditor",
-                                  "originalValue": "${chart.values}",
-                                  "modifiedValue": "${config}",
-                                  "originalLabel": "默认参数",
-                                  "modifiedLabel": "用户指定参数",
-                                  "readOnly": true,
-                                  "language": "yaml"
+                                  "type": "helmViewRelease"
                                 }
                               ],
                               "actions": [
@@ -421,12 +411,7 @@
                         ]
                       },
                       {
-                        "name": "info.first_deployed",
-                        "label": "安装时间",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "info.last_deployed",
+                        "name": "updated",
                         "label": "最后更新",
                         "type": "k8sAge"
                       }
@@ -445,7 +430,7 @@
           ]
         },
         {
-          "name": "info.status",
+          "name": "status",
           "label": "状态",
           "type": "mapping",
           "map": {
@@ -462,12 +447,7 @@
           }
         },
         {
-          "name": "info.first_deployed",
-          "label": "安装时间",
-          "type": "datetime"
-        },
-        {
-          "name": "info.last_deployed",
+          "name": "updated",
           "label": "最后更新",
           "type": "k8sAge"
         }

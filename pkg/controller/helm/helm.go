@@ -13,17 +13,19 @@ import (
 )
 
 func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
-	// if namespace == "" {
-	// 	namespace = "default"
-	// }
+	if namespace == "" {
+		namespace = "default"
+	}
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return nil, err
 	}
-	restConfig := service.ClusterService().GetClusterByID(selectedCluster).GetRestConfig()
-	h, err := helm.New(restConfig, namespace)
-	return h, err
+	cluster := service.ClusterService().GetClusterByID(selectedCluster)
+
+	// return h, err
+	cmd := helm.NewHelmCmd("helm", selectedCluster, cluster)
+	return cmd, nil
 }
 
 func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, repoName string) (string, string, error) {

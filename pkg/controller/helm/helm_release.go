@@ -2,12 +2,13 @@ package helm
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"helm.sh/helm/v3/pkg/release"
+	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
@@ -20,7 +21,7 @@ func ListReleaseHistory(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	history, err := h.GetReleaseHistory(releaseName)
+	history, err := h.GetReleaseHistory(ns, releaseName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -39,11 +40,20 @@ func ListRelease(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	slice.SortBy(list, func(i, j *release.Release) bool {
-		return i.Info.LastDeployed.After(j.Info.LastDeployed)
+	slice.SortBy(list, func(i, j *models.Release) bool {
+
+		it, err := time.Parse("2006-01-02 15:04:05.000000 -0700 MST", i.Updated)
+		if err != nil {
+			return false
+		}
+		jt, err := time.Parse("2006-01-02 15:04:05.000000 -0700 MST", j.Updated)
+		if err != nil {
+			return false
+		}
+		return it.Before(jt)
 	})
 	if list == nil {
-		list = make([]*release.Release, 0)
+		list = make([]*models.Release, 0)
 	}
 	amis.WriteJsonData(c, list)
 }
@@ -82,11 +92,12 @@ func InstallRelease(c *gin.Context) {
 	if releaseName == "" {
 		releaseName = fmt.Sprintf("%s-%d", chartName, utils.RandNDigitInt(8))
 	}
-	go func() {
-		if err := h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values); err != nil {
-			klog.Errorf("install %s/%s error %v", req.Namespace, releaseName, err)
-		}
-	}()
+	err = h.InstallRelease(req.Namespace, releaseName, repoName, chartName, version, req.Values)
+	if err != nil {
+		klog.Errorf("install %s/%s error %v", req.Namespace, releaseName, err)
+		amis.WriteJsonError(c, err)
+		return
+	}
 
 	amis.WriteJsonOKMsg(c, "正在安装中，界面显示可能有延迟")
 }
@@ -108,11 +119,63 @@ func UninstallRelease(c *gin.Context) {
 		return
 	}
 
-	if err := h.UninstallRelease(releaseName); err != nil {
+	if err := h.UninstallRelease(ns, releaseName); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	amis.WriteJsonOK(c)
+}
+
+// GetReleaseNote 获取ReleaseNote
+func GetReleaseNote(c *gin.Context) {
+	releaseName := c.Param("name")
+	ns := c.Param("ns")
+	revision := c.Param("revision")
+
+	h, err := getHelm(c, ns)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	note, err := h.GetReleaseNoteWithRevision(ns, releaseName, revision)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{
+		"note": note,
+	})
+}
+
+// GetReleaseValues 获取安装yaml
+func GetReleaseValues(c *gin.Context) {
+	releaseName := c.Param("name")
+	ns := c.Param("ns")
+	revision := c.Param("revision")
+
+	h, err := getHelm(c, ns)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	ret := ""
+	if revision == "" {
+		ret, err = h.GetReleaseValues(ns, releaseName)
+		if err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+	} else {
+		ret, err = h.GetReleaseValuesWithRevision(ns, releaseName, revision)
+		if err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+	}
+
+	amis.WriteJsonData(c, ret)
 }
 
 func BatchUninstallRelease(c *gin.Context) {
@@ -139,7 +202,7 @@ func BatchUninstallRelease(c *gin.Context) {
 			amis.WriteJsonError(c, err)
 			return
 		}
-		x := h.UninstallRelease(name)
+		x := h.UninstallRelease(ns, name)
 		if x != nil {
 			klog.V(6).Infof("batch remove %s/%s error %v", ns, name, x)
 			err = x
@@ -153,11 +216,9 @@ func BatchUninstallRelease(c *gin.Context) {
 func UpgradeRelease(c *gin.Context) {
 
 	var req struct {
-		ReleaseName string `json:"release_name,omitempty"`
-		RepoName    string `json:"repo_name,omitempty"`
-		Version     string `json:"version,omitempty"`
-		Values      string `json:"values,omitempty"`
-		Namespace   string `json:"namespace,omitempty"`
+		Name      string `json:"name,omitempty"`
+		Namespace string `json:"namespace,omitempty"`
+		Values    string `json:"values,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -166,7 +227,7 @@ func UpgradeRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "UpgradeRelease", req.ReleaseName, req.Namespace, req.RepoName)
+	_, _, err := handleCommonLogic(c, "UpgradeRelease", req.Name, req.Namespace, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -179,7 +240,7 @@ func UpgradeRelease(c *gin.Context) {
 		return
 	}
 
-	if err := h.UpgradeRelease(req.ReleaseName, req.RepoName, req.Version, req.Values); err != nil {
+	if err := h.UpgradeRelease(req.Namespace, req.Name, req.Values); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

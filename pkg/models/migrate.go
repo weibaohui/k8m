@@ -64,6 +64,9 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&HelmChart{}); err != nil {
 		errs = append(errs, err)
 	}
+	if err := dao.DB().AutoMigrate(&HelmRelease{}); err != nil {
+		errs = append(errs, err)
+	}
 	if err := dao.DB().AutoMigrate(&UserGroup{}); err != nil {
 		errs = append(errs, err)
 	}

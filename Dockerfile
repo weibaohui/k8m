@@ -13,12 +13,17 @@ RUN CGO_ENABLED=0  go build -ldflags "-s -w  -X main.Version=$VERSION -X main.Gi
 FROM alpine:latest
 
 WORKDIR /app
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk add --no-cache curl bash inotify-tools kubectl
+COPY --from=builder /app/k8m /app/k8m
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk upgrade && apk add --no-cache curl bash inotify-tools alpine-conf busybox-extras tzdata   tar gzip\
+    && apk del alpine-conf && rm -rf /var/cache/* && chmod +x k8m
 ADD reload.sh /app/reload.sh
 RUN chmod +x /app/reload.sh
 
-COPY --from=builder /app/k8m /app/k8m
+RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+RUN helm version
+
+
 #k8m Server
 EXPOSE 3618
 ENTRYPOINT ["/app/reload.sh","k8m","/app"]
