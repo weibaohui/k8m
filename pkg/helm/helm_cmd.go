@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/klog/v2"
@@ -23,37 +24,48 @@ import (
 
 type HelmCmd struct {
 	HelmBin        string // helm 二进制路径，默认 "helm"
-	repoCacheDir   string
-	cluster        string
+	repoCacheDir   string //
+	clusterID      string
 	kubeconfig     string
 	kubeconfigPath string
+	token          string
+	caFile         string
+	apiServer      string
+	cluster        *service.ClusterConfig
 }
 
-func NewHelmCmd(helmBin string, cluster string, config string) *HelmCmd {
+func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig) *HelmCmd {
+
 	if helmBin == "" {
 		helmBin = "helm"
 	}
 	homeDir := getHomeDir()
 	repoCacheDir := fmt.Sprintf("%s/.cache/helm", homeDir)
 
+	h := &HelmCmd{
+		HelmBin:      helmBin,
+		repoCacheDir: repoCacheDir,
+		clusterID:    clusterID,
+		cluster:      cluster,
+	}
+
 	// 将kubeconfig 字符串 存放到临时目录
 	// 每次都固定格式，<cluster_name>-kubeconfig.yaml
 	// 替换cluster中的/为|
 
-	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, strings.ReplaceAll(cluster, "/", "|"))
+	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, strings.ReplaceAll(clusterID, "/", "|"))
 	// 确保目录存在,并写入 kubeconfig 文件
 	if err := os.MkdirAll(repoCacheDir, 0755); err != nil {
 		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
 	}
-	if err := os.WriteFile(kubeconfigPath, []byte(config), 0644); err != nil {
+	kubeconfig := cluster.GetKubeconfig()
+	if err := os.WriteFile(kubeconfigPath, []byte(kubeconfig), 0644); err != nil {
 		klog.V(6).Infof("[helm-cmd] warn: write kubeconfig to file failed: %v", err)
 	}
-	h := &HelmCmd{
-		HelmBin:        helmBin,
-		repoCacheDir:   repoCacheDir,
-		cluster:        cluster,
-		kubeconfig:     config,
-		kubeconfigPath: kubeconfigPath,
+	h.kubeconfigPath = kubeconfigPath
+
+	if cluster.IsInCluster {
+		h.fillK8sToken()
 	}
 	return h
 }
@@ -61,15 +73,44 @@ func NewHelmCmd(helmBin string, cluster string, config string) *HelmCmd {
 // runAndLog 执行 helm 命令并输出日志，支持 shell 特性和可选 stdin
 func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 
+	if h.cluster.IsInCluster {
+		// 如果在集群内，应该是在第一个参数后，增加三个参数，
+		// helm list \
+		// --kube-token "$TOKEN" \
+		// --kube-apiserver "$API_SERVER" \
+		// --kube-ca-file "$CA_CERT" \
+		// --namespace default
+		// --kubeconfig "$KUBECONFIG"
+		// args ="list  -A"
+		// 构造访问集群所需的参数
+		accessArgs := []string{
+			"--kube-token", h.token,
+			"--kube-apiserver", h.apiServer,
+			"--kube-ca-file", h.caFile,
+		}
+		if len(args) > 1 {
+			// 拆分参数，插入访问参数到第一个参数后
+			head := args[:1]
+			tail := args[1:]
+			args = append(append(head, accessArgs...), tail...)
+		} else {
+			// 参数只有一个，直接追加访问参数
+			args = append(args, accessArgs...)
+		}
+	}
+
 	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
 	klog.V(6).Infof("[helm-cmd] exec: %s\n", cmdStr)
-	// cmd := exec.Command(h.HelmBin, args...)
 
 	cmd := exec.Command("sh", "-c", cmdStr)
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir),
-		fmt.Sprintf("%s=%s", "KUBECONFIG", h.kubeconfigPath),
-	)
+
+	if !h.cluster.IsInCluster {
+		// 不在集群内
+		cmd.Env = append(os.Environ(),
+			fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir),
+			fmt.Sprintf("%s=%s", "KUBECONFIG", h.kubeconfigPath),
+		)
+	}
 
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
@@ -220,7 +261,7 @@ func (h *HelmCmd) UninstallRelease(namespace string, releaseName string) error {
 	out, err := h.runAndLog([]string{"uninstall", releaseName, "-n", namespace}, "")
 	// 删除数据库HelmRelease
 	if err == nil {
-		_ = models.DeleteHelmReleaseByNsAndReleaseName(namespace, releaseName, h.cluster) // 忽略错误
+		_ = models.DeleteHelmReleaseByNsAndReleaseName(namespace, releaseName, h.clusterID) // 忽略错误
 	}
 	if err != nil {
 		return fmt.Errorf("helm uninstall failed: %v, output: %s", err, string(out))
@@ -241,7 +282,7 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 
 	// 安装成功后记录到数据库
 	release := &models.HelmRelease{
-		Cluster:      h.cluster,
+		Cluster:      h.clusterID,
 		ReleaseName:  releaseName,
 		RepoName:     repoName,
 		Namespace:    namespace,
@@ -258,7 +299,7 @@ func (h *HelmCmd) InstallRelease(namespace, releaseName, repoName, chartName, ve
 }
 func (h *HelmCmd) UpgradeRelease(ns, name string, values ...string) error {
 	// helm upgrade <release-name> <chart-path-or-name>
-	hr, err := models.GetHelmReleaseByNsAndReleaseName(ns, name, h.cluster)
+	hr, err := models.GetHelmReleaseByNsAndReleaseName(ns, name, h.clusterID)
 	if err != nil {
 		return fmt.Errorf("get repoName from db failed: %v", err)
 	}
@@ -383,4 +424,31 @@ func (h *HelmCmd) GetReleaseValuesWithRevision(ns string, name string, revision 
 		return "", fmt.Errorf("helm get values failed: %v, output: %s", err, string(out))
 	}
 	return string(out), nil
+}
+
+// InCluster 模式填充参数
+func (h *HelmCmd) fillK8sToken() {
+	// 获取 ServiceAccount token
+	tokenBytes, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/token")
+	if err != nil {
+		klog.V(6).Infof("failed to read token: %v", err)
+	}
+	token := strings.TrimSpace(string(tokenBytes))
+
+	// 获取 CA 证书路径
+	caFile := "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+	// 获取 API Server 地址
+	host := os.Getenv("KUBERNETES_SERVICE_HOST")
+	port := os.Getenv("KUBERNETES_SERVICE_PORT")
+	apiServer := fmt.Sprintf("https://%s:%s", host, port)
+
+	// "helm", "list",
+	// 	"--kube-token", token,
+	// 	"--kube-apiserver", apiServer,
+	// 	"--kube-ca-file", caFile,
+	// 	"--namespace", "default",
+	h.token = token
+	h.caFile = caFile
+	h.apiServer = apiServer
 }

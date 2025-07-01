@@ -21,9 +21,10 @@ func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
 		amis.WriteJsonError(c, err)
 		return nil, err
 	}
-	kubeConfig := service.ClusterService().GetClusterByID(selectedCluster).GetKubeconfig()
+	cluster := service.ClusterService().GetClusterByID(selectedCluster)
+
 	// return h, err
-	cmd := helm.NewHelmCmd("helm", selectedCluster, kubeConfig)
+	cmd := helm.NewHelmCmd("helm", selectedCluster, cluster)
 	return cmd, nil
 }
 
