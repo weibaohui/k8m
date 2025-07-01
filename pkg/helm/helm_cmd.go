@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
@@ -237,6 +238,13 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 			}
 		}
 	}
+
+	if !index.Generated.IsZero() {
+		// 更新索引时间
+		helmRepo.Generated = index.Generated.Format(time.DateTime)
+		_ = helmRepo.Save(nil)
+	}
+
 	return false, nil
 }
 

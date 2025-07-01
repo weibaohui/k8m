@@ -17,10 +17,10 @@ type HelmRelease struct {
 	ChartVersion string    `json:"chart_version,omitempty"`                   // Chart 版本
 	Values       string    `json:"values,omitempty"`                          // values.yaml 内容
 	Status       string    `json:"status,omitempty"`                          // 安装状态
-	Result       string    `json:"result,omitempty"`                          // 描述
+	Cluster      string    `json:"cluster,omitempty"`
+	Result       string    `json:"result,omitempty"` // 描述
 	CreatedAt    time.Time `json:"created_at,omitempty"`
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
-	Cluster      string    `json:"cluster,omitempty"`
 }
 
 func (r *HelmRelease) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*HelmRelease, int64, error) {
