@@ -53,8 +53,6 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 
 	// 将kubeconfig 字符串 存放到临时目录
 	// 每次都固定格式，<cluster_name>-kubeconfig.yaml
-	// 替换cluster中的/为|
-
 	encodedClusterID := base64.URLEncoding.EncodeToString([]byte(clusterID))
 	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, encodedClusterID)
 	// 确保目录存在,并写入 kubeconfig 文件
@@ -77,31 +75,17 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 
 	if h.cluster.IsInCluster {
-		// 如果在集群内，应该是在第一个参数后，增加三个参数，
-		// helm list \
-		// --kube-token "$TOKEN" \
-		// --kube-apiserver "$API_SERVER" \
-		// --kube-ca-file "$CA_CERT" \
-		// --namespace default
-		// --kubeconfig "$KUBECONFIG"
-		// args ="list  -A"
-		// 构造访问集群所需的参数
 		accessArgs := []string{
 			"--kube-token", h.token,
 			"--kube-apiserver", h.apiServer,
 			"--kube-ca-file", h.caFile,
 		}
-		if len(args) > 1 {
-			// 拆分参数，插入访问参数到第一个参数后
-			head := args[:1]
-			tail := args[1:]
-			args = append(append(head, accessArgs...), tail...)
-		} else {
-			// 参数只有一个，直接追加访问参数
-			args = append(args, accessArgs...)
-		}
+		// 参数只有一个，直接追加访问参数
+		args = append(args, accessArgs...)
 	}
-
+	// 最后一个参数都加上 2>/dev/null
+	args = append(args, "2>/dev/null")
+	
 	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
 	klog.V(6).Infof("[helm-cmd] exec: %s\n", cmdStr)
 
@@ -343,7 +327,7 @@ func (h *HelmCmd) GetChartValue(repoName, chartName, version string) (string, er
 
 func (h *HelmCmd) GetChartVersions(repoName string, chartName string) ([]string, error) {
 	chartRef := fmt.Sprintf("%s/%s", repoName, chartName)
-	args := []string{"search", "repo", chartRef, "-o", "json", "--versions", "2>/dev/null"}
+	args := []string{"search", "repo", chartRef, "-o", "json", "--versions"}
 	out, err := h.runAndLog(args, "")
 	if err != nil {
 		return nil, fmt.Errorf("helm search repo failed: %v, output: %s", err, string(out))
