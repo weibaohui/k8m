@@ -18,14 +18,16 @@ func AuthMiddleware() gin.HandlerFunc {
 		path := c.Request.URL.Path
 		// 检查请求路径是否需要跳过登录检测
 		if path == "/" ||
+			path == "/k8m/ui/" ||
 			path == "/favicon.ico" ||
+			path == "/k8m/ui/favicon.ico" ||
 			path == "/healthz" ||
-			strings.HasPrefix(path, "/swagger/") ||
-			strings.HasPrefix(path, "/debug/") ||
-			strings.HasPrefix(path, "/mcp/") ||
-			strings.HasPrefix(path, "/auth/") ||
-			strings.HasPrefix(path, "/assets/") ||
-			strings.HasPrefix(path, "/public/") {
+			strings.HasPrefix(path, "/k8m/ui/swagger/") ||
+			strings.HasPrefix(path, "/k8m/api/debug/") ||
+			strings.HasPrefix(path, "/k8m/api/mcp/") ||
+			strings.HasPrefix(path, "/k8m/api/auth/") ||
+			strings.HasPrefix(path, "/k8m/ui/assets/") ||
+			strings.HasPrefix(path, "/k8m/ui/public/") {
 			c.Next()
 			return
 
