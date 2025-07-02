@@ -121,20 +121,6 @@
                       "label": "Kubectl Shell镜像",
                       "value": "bitnami/kubectl:latest",
                       "desc": "Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令"
-                    },
-                    {
-                      "name": "helm_cache_path",
-                      "type": "input-text",
-                      "label": "Helm缓存路径",
-                      "value": "/tmp/helm-cache",
-                      "desc": "Helm 本地缓存目录，默认为 /tmp/helm-cache"
-                    },
-                    {
-                      "name": "helm_update_cron",
-                      "type": "input-text",
-                      "label": "Helm仓库定时更新",
-                      "value": "0 */6 * * *",
-                      "desc": "Helm 仓库定时更新的 cron 表达式，默认为每6小时更新一次"
                     }
                   ]
                 }
