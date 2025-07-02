@@ -117,6 +117,8 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	if m.MaxIterations > 0 {
 		cfg.MaxIterations = m.MaxIterations
 	}
+	cfg.HelmCachePath = m.HelmCachePath
+	cfg.HelmUpdateCron = m.HelmUpdateCron
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret

@@ -85,7 +85,8 @@ type Config struct {
 	LdapAnonymousQuery  int    // 是否允许匿名查询LDAP
 	LdapUserField       string // LDAP用户字段
 	LdapLogin2AuthClose bool   // LDAP登录后是否关闭认证
-
+	HelmCachePath       string // Helm缓存路径
+	HelmUpdateCron      string // Helm更新定时执行 cron 表达式
 }
 
 func Init() *Config {

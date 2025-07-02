@@ -24,8 +24,10 @@ type Config struct {
 	MaxHistory           int32     `json:"max_history"`                                        //  模型对话上下文历史记录数
 	ResourceCacheTimeout int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"` // 资源缓存时间（秒）
 	ModelID              uint      `json:"model_id"`
-	CreatedAt            time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
-	UpdatedAt            time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	HelmCachePath        string    `json:"helm_cache_path,omitempty" gorm:"type:varchar(255)"` // Helm 缓存路径
+	HelmUpdateCron       string    `json:"helm_update_cron,omitempty" gorm:"type:varchar(64)"` // Helm 更新定时执行 cron 表达式
+	CreatedAt            time.Time `json:"created_at,omitempty"`                               // Automatically managed by GORM for creation time
+	UpdatedAt            time.Time `json:"updated_at,omitempty"`                               // Automatically managed by GORM for update time
 }
 
 func (c *Config) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*Config, int64, error) {
