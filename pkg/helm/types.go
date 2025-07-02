@@ -121,3 +121,7 @@ type Maintainer struct {
 	// URL is an optional URL to an address for the named maintainer
 	URL string `json:"url,omitempty"`
 }
+type RepoVO struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}

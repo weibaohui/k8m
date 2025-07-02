@@ -396,6 +396,18 @@ func (h *HelmCmd) GetReleaseList() ([]*models.Release, error) {
 	}
 	return releases, nil
 }
+
+func (h *HelmCmd) GetRepoList() ([]*RepoVO, error) {
+	out, err := h.runAndLog([]string{"repo", "list", "-o", "json"}, "")
+	if err != nil {
+		return nil, fmt.Errorf("helm repo list failed: %v, output: %s", err, string(out))
+	}
+	var list []*RepoVO
+	if err := json.Unmarshal(out, &list); err != nil {
+		return nil, fmt.Errorf("unmarshal helm repo list output failed: %v, output: %s", err, string(out))
+	}
+	return list, nil
+}
 func (h *HelmCmd) GetReleaseNote(ns string, name string) (string, error) {
 	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns}, "")
 	if err != nil {
@@ -458,4 +470,29 @@ func (h *HelmCmd) fillK8sToken() {
 	h.token = token
 	h.caFile = caFile
 	h.apiServer = apiServer
+}
+
+// ReAddMissingRepo 重新添加丢失的Repo，比如在容器环境中重启了。
+func (h *HelmCmd) ReAddMissingRepo() {
+	m := models.HelmRepository{}
+	list, _, err := m.List(nil)
+	if err != nil {
+		klog.V(6).Infof("get helm repository list error: %v", err)
+		return
+	}
+	repoList, err := h.GetRepoList()
+	if err != nil {
+		klog.V(6).Infof("get helm repository list error: %v", err)
+		return
+	}
+	var repos []string
+	for _, vo := range repoList {
+		repos = append(repos, vo.Name)
+	}
+	for _, item := range list {
+		if !slice.Contain(repos, item.Name) {
+			klog.V(6).Infof("helm repository adding %s", item.Name)
+			_ = h.AddOrUpdateRepo(item)
+		}
+	}
 }

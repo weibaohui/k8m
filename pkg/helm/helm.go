@@ -22,6 +22,7 @@ type Helm interface {
 	GetReleaseValues(ns, name string) (string, error)
 	GetReleaseValuesWithRevision(ns, name, revision string) (string, error)
 	RemoveRepo(repoName string) error
+	GetRepoList() ([]*RepoVO, error)
 }
 
 func StartUpdateHelmRepoInBackground() {
@@ -31,6 +32,7 @@ func StartUpdateHelmRepoInBackground() {
 	inst := cron.New()
 	_, err := inst.AddFunc(cn, func() {
 		h := NewBackgroundHelmCmd("helm")
+		h.ReAddMissingRepo()
 		h.UpdateAllReposIndex()
 	})
 	if err != nil {
