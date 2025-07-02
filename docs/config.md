@@ -175,6 +175,15 @@ K8M 支持使用 sqlite、 mysql、postgresql 三种数据库。
 
 ---
 
+## HELM配置
+
+| 配置项  | 命令行参数                | 环境变量               | 默认值               | 描述                   |
+|------|----------------------|--------------------|-------------------|----------------------|
+| 缓存路径 | `--helm-cache-path`  | `HELM_CACHE_PATH`  | `/tmp/helm-cache` | HELM 缓存路径            |
+| 定时更新 | `--helm-update-cron` | `HELM_UPDATE_CRON` | `0 */6 * * *`     | HELM Repo index 定时更新 |
+
+---
+
 ## 配置方式
 
 下面以`KUBECONFIG`参数为例给出使用配置
