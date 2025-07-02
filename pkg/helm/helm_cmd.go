@@ -440,7 +440,7 @@ func (h *HelmCmd) GetReleaseValuesWithRevision(ns string, name string, revision 
 func (h *HelmCmd) RemoveRepo(repoName string) error {
 	out, err := h.runAndLog([]string{"repo", "remove", repoName}, "")
 	if err != nil {
-		return fmt.Errorf("helm get values failed: %v, output: %s", err, string(out))
+		return fmt.Errorf("helm remove repo failed: %v, output: %s", err, string(out))
 	}
 	return nil
 }
