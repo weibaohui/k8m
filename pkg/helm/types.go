@@ -4,17 +4,6 @@ import (
 	"time"
 )
 
-type Entry struct {
-	Name                  string `json:"name"`
-	URL                   string `json:"url"`
-	Username              string `json:"username"`
-	Password              string `json:"password"`
-	CertFile              string `json:"certFile"`
-	KeyFile               string `json:"keyFile"`
-	CAFile                string `json:"caFile"`
-	InsecureSkipTLSverify bool   `json:"insecure_skip_tls_verify"`
-	PassCredentialsAll    bool   `json:"pass_credentials_all"`
-}
 type IndexFile struct {
 	// This is used ONLY for validation against chartmuseum's index files and is discarded after validation.
 	ServerInfo map[string]interface{}   `json:"serverInfo,omitempty"`

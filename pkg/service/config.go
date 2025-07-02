@@ -117,9 +117,15 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	if m.MaxIterations > 0 {
 		cfg.MaxIterations = m.MaxIterations
 	}
-	cfg.HelmCachePath = m.HelmCachePath
-	cfg.HelmUpdateCron = m.HelmUpdateCron
 
+	cfg.HelmCachePath = m.HelmCachePath
+	if m.HelmCachePath == "" {
+		cfg.HelmCachePath = "/tmp/helm-cache"
+	}
+	cfg.HelmUpdateCron = m.HelmUpdateCron
+	if m.HelmUpdateCron == "" {
+		cfg.HelmUpdateCron = "0 */6 * * *"
+	}
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret
 	// LoginType 暂不启用，因为就一种password

@@ -1,11 +1,14 @@
 package helm
 
 import (
+	"github.com/robfig/cron/v3"
+	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
+	"k8s.io/klog/v2"
 )
 
 type Helm interface {
-	AddOrUpdateRepo(repoEntry *Entry) error
+	AddOrUpdateRepo(repo *models.HelmRepository) error
 	GetReleaseHistory(ns, releaseName string) ([]*models.ReleaseHistory, error)
 	InstallRelease(ns, releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(ns, releaseName string) error
@@ -18,4 +21,21 @@ type Helm interface {
 	GetReleaseNoteWithRevision(ns, name, revision string) (string, error)
 	GetReleaseValues(ns, name string) (string, error)
 	GetReleaseValuesWithRevision(ns, name, revision string) (string, error)
+	RemoveRepo(repoName string) error
+}
+
+func StartUpdateHelmRepoInBackground() {
+	cfg := flag.Init()
+	cn := cfg.HelmUpdateCron
+
+	inst := cron.New()
+	_, err := inst.AddFunc(cn, func() {
+		h := NewBackgroundHelmCmd("helm")
+		h.UpdateAllReposIndex()
+	})
+	if err != nil {
+		klog.Errorf("新增Helm更新定时任务失败: %v", err)
+	}
+	inst.Start()
+	klog.V(6).Infof("新增 Helm 更新定时任务 %s", cn)
 }

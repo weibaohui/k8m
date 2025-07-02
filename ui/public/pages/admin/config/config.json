@@ -126,8 +126,8 @@
                       "name": "helm_cache_path",
                       "type": "input-text",
                       "label": "Helm缓存路径",
-                      "value": "/helm-cache",
-                      "desc": "Helm 本地缓存目录，默认为 /helm-cache"
+                      "value": "/tmp/helm-cache",
+                      "desc": "Helm 本地缓存目录，默认为 /tmp/helm-cache"
                     },
                     {
                       "name": "helm_update_cron",
