@@ -1,4 +1,12 @@
 ## 更新日志
+**v0.0.137**
+修复HELM管理问题
+新增定时更新HELM仓库功能
+新增HELM仓库修复功能
+
+**v0.0.135**
+增加Ldap登录
+
 **v0.0.133**
 增加对OpenKruise的支持：
 advancedcronjobs.apps.kruise.io                
