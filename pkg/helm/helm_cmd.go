@@ -53,8 +53,6 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 
 	// 将kubeconfig 字符串 存放到临时目录
 	// 每次都固定格式，<cluster_name>-kubeconfig.yaml
-	// 替换cluster中的/为|
-
 	encodedClusterID := base64.URLEncoding.EncodeToString([]byte(clusterID))
 	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, encodedClusterID)
 	// 确保目录存在,并写入 kubeconfig 文件
