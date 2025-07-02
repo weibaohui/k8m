@@ -315,6 +315,14 @@
       ],
       "bulkActions": [
         {
+          "type": "button",
+          "icon": "fas fa-trash text-danger",
+          "actionType": "ajax",
+          "tooltip": "删除仓库",
+          "confirmText": "确定要删除该仓库吗？",
+          "api": "post:/k8s/helm/repo/delete/${ids}"
+        },
+        {
           "label": "更新索引",
           "actionType": "ajax",
           "confirmText": "确定要更新索引?更新操作为后台操作，请稍后查看操作结果。",
@@ -719,14 +727,6 @@
                   }
                 }
               }
-            },
-            {
-              "type": "button",
-              "icon": "fas fa-trash text-danger",
-              "actionType": "ajax",
-              "tooltip": "删除仓库",
-              "confirmText": "确定要删除该仓库吗？",
-              "api": "post:/k8s/helm/repo/delete/${id}"
             }
           ],
           "toggled": true

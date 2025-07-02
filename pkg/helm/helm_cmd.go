@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
-	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/klog/v2"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -28,7 +28,6 @@ type HelmCmd struct {
 	HelmBin        string // helm 二进制路径，默认 "helm"
 	repoCacheDir   string //
 	clusterID      string
-	kubeconfig     string
 	kubeconfigPath string
 	token          string
 	caFile         string
@@ -36,29 +35,48 @@ type HelmCmd struct {
 	cluster        *service.ClusterConfig
 }
 
+// NewBackgroundHelmCmd 独立后台执行Helm命令
+func NewBackgroundHelmCmd(helmBin string) *HelmCmd {
+	if helmBin == "" {
+		helmBin = "helm"
+	}
+
+	cfg := flag.Init()
+
+	h := &HelmCmd{
+		HelmBin:      helmBin,
+		repoCacheDir: cfg.HelmCachePath,
+	}
+
+	// 确保目录存在
+	if err := os.MkdirAll(h.repoCacheDir, 0755); err != nil {
+		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
+	}
+	return h
+}
 func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig) *HelmCmd {
 
 	if helmBin == "" {
 		helmBin = "helm"
 	}
-	homeDir := getHomeDir()
-	repoCacheDir := fmt.Sprintf("%s/.cache/helm", homeDir)
+
+	cfg := flag.Init()
 
 	h := &HelmCmd{
 		HelmBin:      helmBin,
-		repoCacheDir: repoCacheDir,
+		repoCacheDir: cfg.HelmCachePath,
 		clusterID:    clusterID,
 		cluster:      cluster,
 	}
 
+	// 确保目录存在
+	if err := os.MkdirAll(h.repoCacheDir, 0755); err != nil {
+		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
+	}
 	// 将kubeconfig 字符串 存放到临时目录
 	// 每次都固定格式，<cluster_name>-kubeconfig.yaml
 	encodedClusterID := base64.URLEncoding.EncodeToString([]byte(clusterID))
-	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", repoCacheDir, encodedClusterID)
-	// 确保目录存在,并写入 kubeconfig 文件
-	if err := os.MkdirAll(repoCacheDir, 0755); err != nil {
-		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
-	}
+	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", h.repoCacheDir, encodedClusterID)
 	kubeconfig := cluster.GetKubeconfig()
 	if err := os.WriteFile(kubeconfigPath, []byte(kubeconfig), 0644); err != nil {
 		klog.V(6).Infof("[helm-cmd] warn: write kubeconfig to file failed: %v", err)
@@ -74,7 +92,7 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 // runAndLog 执行 helm 命令并输出日志，支持 shell 特性和可选 stdin
 func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 
-	if h.cluster.IsInCluster {
+	if h.cluster != nil && h.cluster.IsInCluster {
 		accessArgs := []string{
 			"--kube-token", h.token,
 			"--kube-apiserver", h.apiServer,
@@ -85,16 +103,18 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 	}
 	// 最后一个参数都加上 2>/dev/null
 	args = append(args, "2>/dev/null")
-	
+
 	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
 	klog.V(6).Infof("[helm-cmd] exec: %s\n", cmdStr)
 
 	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir),
+	)
 
-	if !h.cluster.IsInCluster {
+	if h.cluster != nil && !h.cluster.IsInCluster {
 		// 不在集群内
-		cmd.Env = append(os.Environ(),
-			fmt.Sprintf("%s=%s", "HELM_CACHE_HOME", h.repoCacheDir),
+		cmd.Env = append(cmd.Env,
 			fmt.Sprintf("%s=%s", "KUBECONFIG", h.kubeconfigPath),
 		)
 	}
@@ -117,17 +137,10 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 }
 
 // AddOrUpdateRepo 添加或更新 Helm 仓库
-func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
+func (h *HelmCmd) AddOrUpdateRepo(helmRepo *models.HelmRepository) error {
 	// 1. 先执行数据库操作，保存 HelmRepository 信息
 	// 2. 再执行 helm repo add/update
 
-	// 创建HelmRepository对象
-	helmRepo := &models.HelmRepository{
-		Name:     repoEntry.Name,
-		URL:      repoEntry.URL,
-		Username: repoEntry.Username,
-		Password: repoEntry.Password,
-	}
 	// 判断该名称、URL的仓库是否存在
 	if id, err := helmRepo.GetIDByNameAndURL(nil); err == nil && id > 0 {
 		helmRepo.ID = id
@@ -139,39 +152,39 @@ func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	}
 
 	// 3. helm repo add
-	args := []string{"repo", "add", repoEntry.Name, repoEntry.URL}
-	if repoEntry.Username != "" {
-		args = append(args, "--username", repoEntry.Username)
+	args := []string{"repo", "add", helmRepo.Name, helmRepo.URL}
+	if helmRepo.Username != "" {
+		args = append(args, "--username", helmRepo.Username)
 	}
-	if repoEntry.Password != "" {
-		args = append(args, "--password", repoEntry.Password)
+	if helmRepo.Password != "" {
+		args = append(args, "--password", helmRepo.Password)
 	}
 	out, err := h.runAndLog(args, "")
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return fmt.Errorf("helm repo add failed: %v, output: %s", err, string(out))
 	}
-	_, err = h.updateRepoByName(repoEntry, helmRepo)
+	_, err = h.updateRepoByName(helmRepo)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmRepository) (bool, error) {
+func (h *HelmCmd) updateRepoByName(helmRepo *models.HelmRepository) (bool, error) {
 	// 4. helm repo update
-	out, err := h.runAndLog([]string{"repo", "update", repoEntry.Name}, "")
+	out, err := h.runAndLog([]string{"repo", "update", helmRepo.Name}, "")
 	if err != nil {
 		return false, fmt.Errorf("helm repo update failed: %v, output: %s", err, string(out))
 	}
 
 	// 5. helm repo index 文件分析，记录所有chart到数据库
-	cachePath := fmt.Sprintf("%s/repository/%s-index.yaml", h.repoCacheDir, repoEntry.Name)
+	cachePath := fmt.Sprintf("%s/repository/%s-index.yaml", h.repoCacheDir, helmRepo.Name)
 	indexData, err := os.ReadFile(cachePath)
 	if err != nil {
 		klog.V(6).Infof("[helm-cmd] warn: read repo index file failed: %v\n", err)
 		return true, nil // 不阻断主流程
 	}
-	var index repo.IndexFile
+	var index IndexFile
 
 	if err := yaml.Unmarshal(indexData, &index); err != nil {
 		klog.V(6).Infof("[helm-cmd] warn: unmarshal repo index file failed: %v\n", err)
@@ -183,7 +196,7 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 		if len(versionList) == 0 {
 			continue
 		}
-		slice.SortBy(versionList, func(a *repo.ChartVersion, b *repo.ChartVersion) bool {
+		slice.SortBy(versionList, func(a *ChartVersion, b *ChartVersion) bool {
 			return a.Created.After(b.Created)
 		})
 		ct := versionList[0]
@@ -232,11 +245,6 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 	}
 
 	return false, nil
-}
-
-func getHomeDir() string {
-	home, _ := os.UserHomeDir()
-	return home
 }
 
 func (h *HelmCmd) GetReleaseHistory(namespace string, releaseName string) ([]*models.ReleaseHistory, error) {
@@ -361,22 +369,20 @@ func (h *HelmCmd) UpdateReposIndex(ids string) {
 	// 遍历ids，更新每个repo的index
 
 	for _, item := range list {
-
-		repoEntry := &repo.Entry{
-			Name:                  item.Name,
-			URL:                   item.URL,
-			Username:              item.Username,
-			Password:              item.Password,
-			CAFile:                item.CAFile,
-			CertFile:              item.CertFile,
-			KeyFile:               item.KeyFile,
-			InsecureSkipTLSverify: item.InsecureSkipTLSverify,
-			PassCredentialsAll:    item.PassCredentialsAll,
-		}
-		_, _ = h.updateRepoByName(repoEntry, item)
-
+		_, _ = h.updateRepoByName(item)
 	}
 
+}
+func (h *HelmCmd) UpdateAllReposIndex() {
+	m := models.HelmRepository{}
+	list, _, err := m.List(nil)
+	if err != nil {
+		klog.V(6).Infof("get helm repository list error: %v", err)
+		return
+	}
+	for _, item := range list {
+		_, _ = h.updateRepoByName(item)
+	}
 }
 
 func (h *HelmCmd) GetReleaseList() ([]*models.Release, error) {
@@ -389,6 +395,18 @@ func (h *HelmCmd) GetReleaseList() ([]*models.Release, error) {
 		return nil, fmt.Errorf("unmarshal helm list output failed: %v, output: %s", err, string(out))
 	}
 	return releases, nil
+}
+
+func (h *HelmCmd) GetRepoList() ([]*RepoVO, error) {
+	out, err := h.runAndLog([]string{"repo", "list", "-o", "json"}, "")
+	if err != nil {
+		return nil, fmt.Errorf("helm repo list failed: %v, output: %s", err, string(out))
+	}
+	var list []*RepoVO
+	if err := json.Unmarshal(out, &list); err != nil {
+		return nil, fmt.Errorf("unmarshal helm repo list output failed: %v, output: %s", err, string(out))
+	}
+	return list, nil
 }
 func (h *HelmCmd) GetReleaseNote(ns string, name string) (string, error) {
 	out, err := h.runAndLog([]string{"get", "notes", name, "-n", ns}, "")
@@ -419,6 +437,14 @@ func (h *HelmCmd) GetReleaseValuesWithRevision(ns string, name string, revision 
 	return string(out), nil
 }
 
+func (h *HelmCmd) RemoveRepo(repoName string) error {
+	out, err := h.runAndLog([]string{"repo", "remove", repoName}, "")
+	if err != nil {
+		return fmt.Errorf("helm remove repo failed: %v, output: %s", err, string(out))
+	}
+	return nil
+}
+
 // InCluster 模式填充参数
 func (h *HelmCmd) fillK8sToken() {
 	// 获取 ServiceAccount token
@@ -444,4 +470,29 @@ func (h *HelmCmd) fillK8sToken() {
 	h.token = token
 	h.caFile = caFile
 	h.apiServer = apiServer
+}
+
+// ReAddMissingRepo 重新添加丢失的Repo，比如在容器环境中重启了。
+func (h *HelmCmd) ReAddMissingRepo() {
+	m := models.HelmRepository{}
+	list, _, err := m.List(nil)
+	if err != nil {
+		klog.V(6).Infof("get helm repository list error: %v", err)
+		return
+	}
+	repoList, err := h.GetRepoList()
+	if err != nil {
+		klog.V(6).Infof("get helm repository list error: %v", err)
+		return
+	}
+	var repos []string
+	for _, vo := range repoList {
+		repos = append(repos, vo.Name)
+	}
+	for _, item := range list {
+		if !slice.Contain(repos, item.Name) {
+			klog.V(6).Infof("helm repository adding %s", item.Name)
+			_ = h.AddOrUpdateRepo(item)
+		}
+	}
 }

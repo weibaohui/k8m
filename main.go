@@ -48,6 +48,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
+	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
@@ -142,6 +143,8 @@ func Init() {
 			service.McpService().Start()
 			// 启动集群巡检
 			lua.InitClusterInspection()
+			// 启动helm 更新repo定时任务
+			helm2.StartUpdateHelmRepoInBackground()
 		})
 	}()
 

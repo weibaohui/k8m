@@ -49,7 +49,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 - **API开放**:支持创建API KEY，从第三方外部访问，提供swagger接口管理页面。
 - **集群巡检支持**：支持定时巡检、自定义巡检规则，支持lua脚本规则。
 - **CRD 管理**：可自动发现并管理 CRD 资源，提高工作效率。
-- **Helm 市场**：支持Helm自由添加仓库，一键安装、卸载、升级 Helm 应用。
+- **Helm 市场**：支持Helm自由添加仓库，一键安装、卸载、升级 Helm 应用，支持自动更新。
 - **跨平台支持**：兼容 Linux、macOS 和 Windows，并支持 x86、ARM 等多种架构，确保多平台无缝运行。
 - **多数据库支持**：支持SQLite、MySql、PostgreSql等多种数据库。
 - **完全开源**：开放所有源码，无任何限制，可自由定制和扩展，可商业使用。
@@ -203,16 +203,19 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 首选建议通过修改环境变量方式进行修改。 例如增加deploy.yaml中的env参数
 
-
 ## 开发调试
+
 如果你想在本地开发调试，请先执行一次本地前端构建，自动生成dist目录。因为本项目采用了二进制嵌入，没有dist前端会报错。
+
 #### 第一步编译前端
+
 ```bash 
 cd ui
 pnpm run build
 ```
 
 #### 编译调试后端
+
 ```bash
 air
 #或者
@@ -221,14 +224,15 @@ go run main.go
 ```
 
 #### 前端热加载
+
 ```bash
 cd ui
 pnpm run dev
 #Vite服务会监听在localhost:3000端口
 #Vite转发后端访问到3618端口
 ```
-访问http://localhost:3000
 
+访问http://localhost:3000
 
 ### HELP & SUPPORT
 
