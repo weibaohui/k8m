@@ -12,7 +12,6 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
-	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/klog/v2"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -85,7 +84,7 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 	}
 	// 最后一个参数都加上 2>/dev/null
 	args = append(args, "2>/dev/null")
-	
+
 	cmdStr := h.HelmBin + " " + strings.Join(args, " ")
 	klog.V(6).Infof("[helm-cmd] exec: %s\n", cmdStr)
 
@@ -117,7 +116,7 @@ func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
 }
 
 // AddOrUpdateRepo 添加或更新 Helm 仓库
-func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
+func (h *HelmCmd) AddOrUpdateRepo(repoEntry *Entry) error {
 	// 1. 先执行数据库操作，保存 HelmRepository 信息
 	// 2. 再执行 helm repo add/update
 
@@ -157,7 +156,7 @@ func (h *HelmCmd) AddOrUpdateRepo(repoEntry *repo.Entry) error {
 	return nil
 }
 
-func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmRepository) (bool, error) {
+func (h *HelmCmd) updateRepoByName(repoEntry *Entry, helmRepo *models.HelmRepository) (bool, error) {
 	// 4. helm repo update
 	out, err := h.runAndLog([]string{"repo", "update", repoEntry.Name}, "")
 	if err != nil {
@@ -171,7 +170,7 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 		klog.V(6).Infof("[helm-cmd] warn: read repo index file failed: %v\n", err)
 		return true, nil // 不阻断主流程
 	}
-	var index repo.IndexFile
+	var index IndexFile
 
 	if err := yaml.Unmarshal(indexData, &index); err != nil {
 		klog.V(6).Infof("[helm-cmd] warn: unmarshal repo index file failed: %v\n", err)
@@ -183,7 +182,7 @@ func (h *HelmCmd) updateRepoByName(repoEntry *repo.Entry, helmRepo *models.HelmR
 		if len(versionList) == 0 {
 			continue
 		}
-		slice.SortBy(versionList, func(a *repo.ChartVersion, b *repo.ChartVersion) bool {
+		slice.SortBy(versionList, func(a *ChartVersion, b *ChartVersion) bool {
 			return a.Created.After(b.Created)
 		})
 		ct := versionList[0]
@@ -362,7 +361,7 @@ func (h *HelmCmd) UpdateReposIndex(ids string) {
 
 	for _, item := range list {
 
-		repoEntry := &repo.Entry{
+		repoEntry := &Entry{
 			Name:                  item.Name,
 			URL:                   item.URL,
 			Username:              item.Username,

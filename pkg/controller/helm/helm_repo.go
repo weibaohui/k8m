@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
-	"helm.sh/helm/v3/pkg/repo"
 )
 
 func ListRepo(c *gin.Context) {
@@ -35,7 +35,7 @@ func AddOrUpdateRepo(c *gin.Context) {
 		return
 	}
 
-	var repoEntry repo.Entry
+	var repoEntry helm.Entry
 	if err = c.ShouldBindJSON(&repoEntry); err != nil {
 		amis.WriteJsonError(c, err)
 		return

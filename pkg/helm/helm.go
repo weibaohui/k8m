@@ -2,11 +2,10 @@ package helm
 
 import (
 	"github.com/weibaohui/k8m/pkg/models"
-	"helm.sh/helm/v3/pkg/repo"
 )
 
 type Helm interface {
-	AddOrUpdateRepo(repoEntry *repo.Entry) error
+	AddOrUpdateRepo(repoEntry *Entry) error
 	GetReleaseHistory(ns, releaseName string) ([]*models.ReleaseHistory, error)
 	InstallRelease(ns, releaseName, repoName, chartName, version string, values ...string) error
 	UninstallRelease(ns, releaseName string) error
