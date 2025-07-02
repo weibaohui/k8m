@@ -29,6 +29,14 @@ func StartUpdateHelmRepoInBackground() {
 	cfg := flag.Init()
 	cn := cfg.HelmUpdateCron
 
+	if cn == "" {
+		klog.V(6).Infof(" HelmUpdateCron 表达式 为空，跳过定时任务")
+		return
+	}
+	if _, err := cron.ParseStandard(cfg.HelmUpdateCron); err != nil {
+		klog.Errorf("非法的 HelmUpdateCron 表达式 %q: %v", cfg.HelmUpdateCron, err)
+		return
+	}
 	inst := cron.New()
 	_, err := inst.AddFunc(cn, func() {
 		h := NewBackgroundHelmCmd("helm")
