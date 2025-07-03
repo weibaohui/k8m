@@ -609,6 +609,12 @@
             "placeholder": "输入名称"
           }
         },
+        {},
+        {
+          "name": "spec.host",
+          "label": "主机",
+          "type": "text"
+        },
         {
           "name": "metadata.labels",
           "label": "标签",
