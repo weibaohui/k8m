@@ -609,11 +609,63 @@
             "placeholder": "输入名称"
           }
         },
-        {},
         {
           "name": "spec.host",
           "label": "主机",
           "type": "text"
+        },
+        {
+          "name": "spec.workloadSelector",
+          "label": "负载选择器",
+          "type": "tpl",
+          "tpl": "${spec.workloadSelector ? '<i class=\"fa fa-sitemap text-primary\"></i>' : '<i class=\"fa fa-sitemap text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 容器组选择器 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "json",
+                        "source": "${spec.workloadSelector.matchLabels}",
+                        "levelExpand": 1
+                      }
+                    ],
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
+          "name": "spec.subsets",
+          "label": "Subset名称",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div style='margin-bottom: 10px;'><strong>${name}</strong></div>"
+          }
+        },
+        {
+          "name": "spec.trafficPolicy.loadBalancer.simple",
+          "label": "负载均衡算法",
+          "type": "mapping",
+          "map": {
+            "ROUND_ROBIN": "<span class='label label-success'>轮询</span>",
+            "LEAST_CONN": "<span class='label label-warning'>最少连接</span>",
+            "RANDOM": "<span class='label label-warning'>随机</span>",
+            "PASSTHROUGH": "<span class='label label-warning'>直通</span>",
+            "LEAST_REQUEST": "<span class='label label-warning'>最少请求</span>",
+            "*": "<span class='label label-success'>${spec.trafficPolicy.loadBalancer.simple}</span>"
+          }
         },
         {
           "name": "metadata.labels",
