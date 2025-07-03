@@ -610,6 +610,47 @@
           }
         },
         {
+          "name": "spec.servers",
+          "label": "服务器",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div><strong>${port.number}/${port.protocol}</strong> ${hosts|join}</div>"
+          },
+          "width": "340px"
+        },
+        {
+          "name": "spec.selector",
+          "label": "负载选择器",
+          "type": "tpl",
+          "tpl": "${spec.selector ? '<i class=\"fa fa-sitemap text-primary\"></i>' : '<i class=\"fa fa-sitemap text-secondary\"></i>'}",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "${metadata.name} 容器组选择器 (ESC 关闭)",
+                    "body": [
+                      {
+                        "type": "json",
+                        "source": "${spec.selector}",
+                        "levelExpand": 1
+                      }
+                    ],
+                    "size": "lg",
+                    "closeOnEsc": true,
+                    "closeOnOutside": true
+                  }
+                }
+              ]
+            }
+          },
+          "style": {
+            "cursor": "pointer"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
