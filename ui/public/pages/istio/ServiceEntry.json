@@ -610,6 +610,50 @@
           }
         },
         {
+          "name": "spec.hosts",
+          "label": "服务器",
+          "type": "tpl",
+          "tpl": "${spec.hosts|join}"
+        },
+        {
+          "name": "spec.endpoints",
+          "label": "端点",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div><strong>${address}</strong></div>"
+          }
+        },
+        {
+          "name": "spec.ports",
+          "label": "端口",
+          "type": "each",
+          "items": {
+            "type": "tpl",
+            "tpl": "<div><strong>${number}/${protocol}</strong></div>"
+          }
+        },
+        {
+          "name": "spec.resolution",
+          "label": "解析模式",
+          "type": "mapping",
+          "map": {
+            "NONE": "<span class='label label-info'>无</span>",
+            "STATIC": "<span class='label label-primary'>静态</span>",
+            "DNS": "<span class='label label-primary'>DNS</span>",
+            "DNS_ROUND_ROBIN": "<span class='label label-primary'>DNS轮询</span>"
+          }
+        },
+        {
+          "name": "spec.location",
+          "label": "网格内外",
+          "type": "mapping",
+          "map": {
+            "MESH_EXTERNAL": "<span class='label label-success'>网格外</span>",
+            "MESH_INTERNAL": "<span class='label label-warning'>网格内</span>"
+          }
+        },
+        {
           "name": "metadata.labels",
           "label": "标签",
           "type": "tpl",
