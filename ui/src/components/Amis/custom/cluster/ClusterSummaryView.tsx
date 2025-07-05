@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { fetcher } from '@/components/Amis/fetcher';
-import { message, Card, Progress, Row, Col, Avatar } from "antd";
+import { message, Card, Progress, Row, Col, Avatar, Statistic } from "antd";
 import { Node } from "@/store/node.ts";
+import CountUp from 'react-countup';
+import type { StatisticProps } from 'antd';
 
+const formatter: StatisticProps['formatter'] = (value) => (
+    <CountUp end={value as number} separator="," />
+);
 interface ClusterSummaryViewProps {
     data: Record<string, any>
 }
@@ -219,7 +224,10 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                                                     {item.Resource?.[0]?.toUpperCase() || '?'}
                                                 </Avatar>
                                                 <div>
-                                                    <div style={{ fontSize: 18, fontWeight: 600 }}>{item.Count}</div>
+                                                    <div style={{ fontSize: 18, fontWeight: 600 }}>
+                                                        <Statistic value={item.Count} formatter={formatter} />
+                                                    </div>
+
                                                     <div style={{ fontSize: 14, color: '#888' }}>{item.Resource}({item.Version})</div>
                                                 </div>
                                             </div>
