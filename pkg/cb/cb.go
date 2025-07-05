@@ -69,7 +69,9 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	cluster := k8s.ID
 	ctx := stmt.Context
 	nsList := stmt.NamespaceList
-	nsList = append(nsList, stmt.Namespace)
+	if stmt.Namespace != "" {
+		nsList = append(nsList, stmt.Namespace)
+	}
 
 	// 内部监听增加一个认证机制，不用做权限校验
 	// 比如node watch
