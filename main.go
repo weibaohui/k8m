@@ -22,6 +22,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
+	"github.com/weibaohui/k8m/pkg/controller/cluster_status"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
 	"github.com/weibaohui/k8m/pkg/controller/deploy"
@@ -274,6 +275,8 @@ func main() {
 	}
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
+		// cluster
+		api.GET("/status/resource_count/cache_seconds/:cache", cluster_status.ClusterResourceCount)
 		// dynamic
 		api.POST("/yaml/apply", dynamic.Apply)
 		api.POST("/yaml/upload", dynamic.UploadFile)
