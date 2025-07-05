@@ -1,5 +1,6 @@
 # OIDC使用说明
 当前支持标准的OIDC服务器，如您已有OAuth2服务器，建议使用[Dex](https://github.com/dexidp/dex)进行转接。
+**注意：** 目前已开启Groups角色映射功能，OIDC登录的用户在OIDC服务器中配置Groups角色后，登录时会以OIDC中的角色为准，覆盖k8m界面中给用户设置的角色。
 下面以本地localhost运行Dex、本地运行localhost的K8m，进行说明。
 ## 1. OIDC服务器
 如您有自己的OIDC服务器，可跳过本步骤。如没有，可参考下面的方式，运行一个简单的OIDC服务器
