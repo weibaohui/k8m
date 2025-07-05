@@ -188,7 +188,7 @@ func (p *podService) ReducePodCount(selectedCluster string, pod *corev1.Pod) {
 
 // SetAllocatedStatusOnPod 设置节点的分配状态
 // pod 资源状态一般不会变化，变化了version也会变
-func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item unstructured.Unstructured) unstructured.Unstructured {
+func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item *unstructured.Unstructured) *unstructured.Unstructured {
 	podName := item.GetName()
 	version := item.GetResourceVersion()
 	ns := item.GetNamespace()
@@ -204,7 +204,7 @@ func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item unstru
 
 	for _, row := range table {
 		if row.ResourceType == "cpu" {
-			utils.AddOrUpdateAnnotations(&item, map[string]string{
+			utils.AddOrUpdateAnnotations(item, map[string]string{
 				"cpu.request":          row.Request,
 				"cpu.requestFraction":  row.RequestFraction,
 				"cpu.limit":            row.Limit,
@@ -214,7 +214,7 @@ func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item unstru
 				"cpu.total":            row.Total,
 			})
 		} else if row.ResourceType == "memory" {
-			utils.AddOrUpdateAnnotations(&item, map[string]string{
+			utils.AddOrUpdateAnnotations(item, map[string]string{
 				"memory.request":          row.Request,
 				"memory.requestFraction":  row.RequestFraction,
 				"memory.limit":            row.Limit,
@@ -228,7 +228,7 @@ func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item unstru
 	return item
 }
 
-func (p *podService) SetStatusCountOnNamespace(selectedCluster string, item unstructured.Unstructured) unstructured.Unstructured {
+func (p *podService) SetStatusCountOnNamespace(selectedCluster string, item *unstructured.Unstructured) *unstructured.Unstructured {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	h := slice.Filter(p.CountList, func(index int, cc *StatusCount) bool {
@@ -236,7 +236,7 @@ func (p *podService) SetStatusCountOnNamespace(selectedCluster string, item unst
 	})
 	if len(h) == 1 {
 		sc := h[0]
-		utils.AddOrUpdateAnnotations(&item, map[string]string{
+		utils.AddOrUpdateAnnotations(item, map[string]string{
 			"cpu.request":     fmt.Sprintf("%.2f", sc.CPURequest),
 			"cpu.limit":       fmt.Sprintf("%.2f", sc.CPULimit),
 			"cpu.realtime":    fmt.Sprintf("%.2f", sc.CPURealtime),
