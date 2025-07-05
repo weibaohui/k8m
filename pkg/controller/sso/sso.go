@@ -78,7 +78,6 @@ func HandleCallback(c *gin.Context) {
 	}
 	// test
 	// claims["groups"] = []string{"CRM开发组", "b", "c", "d"}
-	klog.V(6).Infof("claims:=\n%s\n", utils.ToJSON(claims))
 
 	username := GetUsername(claims, strings.Split(client.DBConfig.PreferUserNameKeys, ","))
 	groups := GetUserGroups(claims)
