@@ -4,6 +4,7 @@ import { message, Card, Progress, Row, Col, Avatar, Statistic, Select, Space, Sp
 import { Node } from "@/store/node.ts";
 import CountUp from 'react-countup';
 import type { StatisticProps } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 
 const formatter: StatisticProps['formatter'] = (value) => (
     <CountUp end={value as number} separator="," />
@@ -69,9 +70,9 @@ function parseMemory(str: string) {
 
 const refreshOptions = [
     { label: '不自动刷新', value: 0 },
-    { label: '10秒', value: 10000 },
     { label: '30秒', value: 30000 },
     { label: '60秒', value: 60000 },
+    { label: '180秒', value: 180000 },
 ];
 
 const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewProps>(({ data }, _) => {
@@ -204,7 +205,11 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
     if (!summary) return null;
 
     return (
-        <Spin spinning={loading} tip="数据加载中...">
+        <Spin
+            spinning={loading}
+            style={{ background: 'transparent' }}
+            indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />}
+        >
             <Row justify="end" style={{ marginBottom: 16 }}>
                 <Col>
                     <Space>
