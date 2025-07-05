@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {fetcher} from '@/components/Amis/fetcher';
-import {message, Card, Progress, Row, Col} from "antd";
-import {Node} from "@/store/node.ts";
+import React, { useEffect, useState } from 'react';
+import { fetcher } from '@/components/Amis/fetcher';
+import { message, Card, Progress, Row, Col, Avatar } from "antd";
+import { Node } from "@/store/node.ts";
 
 interface ClusterSummaryViewProps {
     data: Record<string, any>
@@ -62,8 +62,9 @@ function parseMemory(str: string) {
     return parseFloat(str);
 }
 
-const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewProps>(({data}, _) => {
+const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewProps>(({ data }, _) => {
     const [summary, setSummary] = useState<ResourceSummary | null>(null);
+    const [resourceGroups, setResourceGroups] = useState<Record<string, ResourceCount[]>>({});
 
     useEffect(() => {
         const fetchValues = async () => {
@@ -143,10 +144,15 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                 const response = await fetcher({
                     url: `/k8s/status/resource_count/cache_seconds/60`,
                     method: 'get',
-
                 });
                 let counts = response.data?.data as Array<ResourceCount>;
-                console.log(counts)
+                // 按 group 分组
+                const groups: Record<string, ResourceCount[]> = {};
+                counts?.forEach(item => {
+                    if (!groups[item.Group]) groups[item.Group] = [];
+                    groups[item.Group].push(item);
+                });
+                setResourceGroups(groups);
             } catch (error) {
                 message.error('获取参数值失败');
             }
@@ -156,46 +162,75 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
 
     if (!summary) return null;
 
-
     return (
-        <Row gutter={[16, 16]}>
-            <Col span={12}>
-                <Card title="CPU （cores）">
-                    <div>请求: {summary.cpu.request.toFixed(2)} / 上限: {summary.cpu.limit.toFixed(2)} /
-                        共计: {summary.cpu.total.toFixed(2)} / 实时: {summary.cpu.realtime.toFixed(2)} /
-                        可用: {summary.cpu.available.toFixed(2)} </div>
-                    <div style={{margin: '8px 0'}}>
-                        <span style={{color: '#1677ff'}}>请求 {summary.cpu.requestFraction}%</span>
-                        <Progress size="small" percent={parseFloat(summary.cpu.requestFraction)}
-                                  strokeColor="#1677ff" showInfo={false}/>
-                        <span style={{color: '#fa8c16'}}>上限 {summary.cpu.limitFraction}%</span>
-                        <Progress size="small" percent={parseFloat(summary.cpu.limitFraction)}
-                                  strokeColor="#fa8c16" showInfo={false}/>
-                        <span style={{color: '#52c41a'}}>实时 {summary.cpu.realtimeFraction}%</span>
-                        <Progress size="small" percent={parseFloat(summary.cpu.realtimeFraction)}
-                                  strokeColor="#52c41a" showInfo={false}/>
-                    </div>
-                </Card>
-            </Col>
-            <Col span={12}>
-                <Card title="内存 （GiB）">
-                    <div>请求: {summary.memory.request.toFixed(2)} / 上限: {summary.memory.limit.toFixed(2)} /
-                        共计: {summary.memory.total.toFixed(2)} / 实时: {summary.memory.realtime.toFixed(2)} /
-                        可用: {summary.memory.available.toFixed(2)} </div>
-                    <div style={{margin: '8px 0'}}>
-                        <span style={{color: '#1677ff'}}>请求 {summary.memory.requestFraction}%</span>
-                        <Progress size="small" percent={parseFloat(summary.memory.requestFraction)}
-                                  strokeColor="#1677ff" showInfo={false}/>
-                        <span style={{color: '#fa8c16'}}>上限 {summary.memory.limitFraction}%</span>
-                        <Progress size="small" percent={parseFloat(summary.memory.limitFraction)}
-                                  strokeColor="#fa8c16" showInfo={false}/>
-                        <span style={{color: '#52c41a'}}>实时 {summary.memory.realtimeFraction}%</span>
-                        <Progress size="small" percent={parseFloat(summary.memory.realtimeFraction)} showInfo={false}
-                                  strokeColor="#52c41a"/>
-                    </div>
-                </Card>
-            </Col>
-        </Row>
+        <>
+            <Row gutter={[16, 16]}>
+                <Col span={12}>
+                    <Card title="CPU （cores）">
+                        <div>请求: {summary.cpu.request.toFixed(2)} / 上限: {summary.cpu.limit.toFixed(2)} /
+                            共计: {summary.cpu.total.toFixed(2)} / 实时: {summary.cpu.realtime.toFixed(2)} /
+                            可用: {summary.cpu.available.toFixed(2)} </div>
+                        <div style={{ margin: '8px 0' }}>
+                            <span style={{ color: '#1677ff' }}>请求 {summary.cpu.requestFraction}%</span>
+                            <Progress size="small" percent={parseFloat(summary.cpu.requestFraction)}
+                                strokeColor="#1677ff" showInfo={false} />
+                            <span style={{ color: '#fa8c16' }}>上限 {summary.cpu.limitFraction}%</span>
+                            <Progress size="small" percent={parseFloat(summary.cpu.limitFraction)}
+                                strokeColor="#fa8c16" showInfo={false} />
+                            <span style={{ color: '#52c41a' }}>实时 {summary.cpu.realtimeFraction}%</span>
+                            <Progress size="small" percent={parseFloat(summary.cpu.realtimeFraction)}
+                                strokeColor="#52c41a" showInfo={false} />
+                        </div>
+                    </Card>
+                </Col>
+                <Col span={12}>
+                    <Card title="内存 （GiB）">
+                        <div>请求: {summary.memory.request.toFixed(2)} / 上限: {summary.memory.limit.toFixed(2)} /
+                            共计: {summary.memory.total.toFixed(2)} / 实时: {summary.memory.realtime.toFixed(2)} /
+                            可用: {summary.memory.available.toFixed(2)} </div>
+                        <div style={{ margin: '8px 0' }}>
+                            <span style={{ color: '#1677ff' }}>请求 {summary.memory.requestFraction}%</span>
+                            <Progress size="small" percent={parseFloat(summary.memory.requestFraction)}
+                                strokeColor="#1677ff" showInfo={false} />
+                            <span style={{ color: '#fa8c16' }}>上限 {summary.memory.limitFraction}%</span>
+                            <Progress size="small" percent={parseFloat(summary.memory.limitFraction)}
+                                strokeColor="#fa8c16" showInfo={false} />
+                            <span style={{ color: '#52c41a' }}>实时 {summary.memory.realtimeFraction}%</span>
+                            <Progress size="small" percent={parseFloat(summary.memory.realtimeFraction)} showInfo={false}
+                                strokeColor="#52c41a" />
+                        </div>
+                    </Card>
+                </Col>
+            </Row>
+            {/* ResourceCount 分组展示 */}
+            <div style={{ marginTop: 24 }}>
+                {Object.entries(resourceGroups)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([group, items]: [string, ResourceCount[]], groupIdx) => (
+                        <Card key={group} title={group} style={{ marginBottom: 16 }}>
+                            <Row gutter={[16, 16]}>
+                                {items.sort((a, b) => a.Resource.localeCompare(b.Resource)).map((item: ResourceCount) => {
+                                    const colors = ['#1677ff', '#fa8c16', '#52c41a', '#eb2f96', '#13c2c2', '#722ed1'];
+                                    const color = colors[groupIdx % colors.length];
+                                    return (
+                                        <Col key={item.Resource} span={6}>
+                                            <div style={{ display: 'flex', alignItems: 'center', background: '#f6f8fa', borderRadius: 8, padding: 12 }}>
+                                                <Avatar style={{ backgroundColor: color, verticalAlign: 'middle', marginRight: 12 }} size="large">
+                                                    {item.Resource?.[0]?.toUpperCase() || '?'}
+                                                </Avatar>
+                                                <div>
+                                                    <div style={{ fontSize: 18, fontWeight: 600 }}>{item.Count}</div>
+                                                    <div style={{ fontSize: 14, color: '#888' }}>{item.Resource}</div>
+                                                </div>
+                                            </div>
+                                        </Col>
+                                    );
+                                })}
+                            </Row>
+                        </Card>
+                    ))}
+            </div>
+        </>
     );
 });
 
