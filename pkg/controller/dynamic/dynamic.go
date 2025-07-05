@@ -104,7 +104,7 @@ func List(c *gin.Context) {
 	amis.WriteJsonListTotalWithError(c, total, list, err)
 }
 
-// FillList 定制填充list []unstructured.Unstructured列表
+// FillList 定制填充list []*unstructured.Unstructured列表
 func FillList(selectedCluster string, kind string, list []*unstructured.Unstructured) []*unstructured.Unstructured {
 	switch kind {
 	case "Node":
@@ -179,7 +179,7 @@ func Event(c *gin.Context) {
 
 	fieldSelector := fmt.Sprintf("regarding.apiVersion=%s,regarding.kind=%s,regarding.name=%s,regarding.namespace=%s", apiVersion, kind, name, ns)
 
-	var eventList []unstructured.Unstructured
+	var eventList []*unstructured.Unstructured
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		RemoveManagedFields().
@@ -377,8 +377,11 @@ func Save(c *gin.Context) {
 	yamlStr := req.Yaml
 
 	// 解析 Yaml 到 Unstructured 对象
-	var obj unstructured.Unstructured
-	if err := yaml.Unmarshal([]byte(yamlStr), &obj.Object); err != nil {
+	var obj *unstructured.Unstructured
+	obj = &unstructured.Unstructured{
+		Object: make(map[string]interface{}),
+	}
+	if err = yaml.Unmarshal([]byte(yamlStr), obj.Object); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

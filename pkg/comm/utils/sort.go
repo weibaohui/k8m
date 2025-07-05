@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func SortByLastTimestamp(items []unstructured.Unstructured) []unstructured.Unstructured {
+func SortByLastTimestamp(items []*unstructured.Unstructured) []*unstructured.Unstructured {
 	sort.Slice(items, func(i, j int) bool {
 		tsI, foundI, _ := unstructured.NestedString(items[i].Object, "lastTimestamp")
 		tsJ, foundJ, _ := unstructured.NestedString(items[j].Object, "lastTimestamp")

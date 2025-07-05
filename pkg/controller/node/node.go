@@ -185,7 +185,7 @@ func NameOptionList(c *gin.Context) {
 		return
 	}
 
-	var list []unstructured.Unstructured
+	var list []*unstructured.Unstructured
 	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
 		WithCache(time.Second * 30).
 		List(&list).Error
@@ -334,6 +334,7 @@ func AllTaintList(c *gin.Context) {
 
 	amis.WriteJsonList(c, resultList)
 }
+
 // UniqueLabels 获取选定集群中所有唯一的节点标签键，并以选项列表形式返回。
 func UniqueLabels(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
