@@ -75,6 +75,7 @@ func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *
 
 	return results, total, nil
 }
+
 func GenericGetOne[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *gorm.DB) (T, error) {
 	// 如果params为nil，创建一个默认的params
 	if params == nil {
@@ -97,6 +98,12 @@ func GenericGetOne[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) 
 
 	err := dbQuery.Limit(1).First(model).Error
 	return model, err
+}
+
+// GenericUpdateColumn 更新某个列
+func GenericUpdateColumn[T any](model T, columnName string, value any) error {
+	err := DB().Model(model).Update(columnName, value).Error
+	return err
 }
 
 // GenericSave 是一个通用保存方法，适用于任意模型

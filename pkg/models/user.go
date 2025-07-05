@@ -31,6 +31,9 @@ func (c *User) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (
 	return dao.GenericQuery(params, c, queryFuncs...)
 }
 
+func (c *User) UpdateColumn(columnName string, value any) error {
+	return dao.GenericUpdateColumn(c, columnName, value)
+}
 func (c *User) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericSave(params, c, queryFuncs...)
 }

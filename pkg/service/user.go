@@ -332,7 +332,7 @@ func (u *userService) CheckAndCreateUser(username, source, groups string) error 
 	// 数据库中已存在用户，检查是否需要更新用户组
 	if groups != "" && du.GroupNames != groups {
 		// 如果用户组更新了，那么更新数据库
-		err = dao.DB().Model(du).Update("group_names", groups).Error
+		err = du.UpdateColumn("group_names", groups)
 		if err != nil {
 			klog.V(6).Infof("更新%s用户组出错%v", username, err)
 			return err
