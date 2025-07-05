@@ -1,7 +1,7 @@
-import {useNavigate} from "react-router-dom";
-import type {MenuProps} from 'antd';
-import {useEffect, useState} from 'react';
-import {fetcher} from '../Amis/fetcher';
+import { useNavigate } from "react-router-dom";
+import type { MenuProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetcher } from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -82,7 +82,7 @@ const items: () => MenuItem[] = () => {
         {
             label: "集群总览",
             title: "集群总览",
-            icon: <i className="fa-solid fa-border-style"></i>,
+            icon: <i className="fa-solid fa-chart-pie"></i>,
             key: "cluster_summary",
             onClick: () => onMenuClick('/cluster/summary_view')
         },
