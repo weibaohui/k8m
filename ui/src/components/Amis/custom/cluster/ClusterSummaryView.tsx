@@ -220,7 +220,7 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                                                 </Avatar>
                                                 <div>
                                                     <div style={{ fontSize: 18, fontWeight: 600 }}>{item.Count}</div>
-                                                    <div style={{ fontSize: 14, color: '#888' }}>{item.Resource}</div>
+                                                    <div style={{ fontSize: 14, color: '#888' }}>{item.Resource}({item.Version})</div>
                                                 </div>
                                             </div>
                                         </Col>
