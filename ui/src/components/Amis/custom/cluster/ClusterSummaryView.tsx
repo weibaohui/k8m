@@ -14,6 +14,9 @@ interface ResourceSummary {
         realtime: number;
         total: number;
         available: number;
+        requestFraction: string; // 百分比字符串
+        limitFraction: string; // 上限百分比字符串
+        realtimeFraction: string; // 实时百分比字符串
     };
     memory: {
         request: number;
@@ -21,6 +24,9 @@ interface ResourceSummary {
         realtime: number;
         total: number;
         available: number;
+        requestFraction: string; // 请求百分比字符串
+        limitFraction: string; // 上限百分比字符串
+        realtimeFraction: string; // 实时百分比字符串
     };
     pod: {
         used: number;
@@ -92,14 +98,20 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                         limit: cpuLimit,
                         realtime: cpuRealtime,
                         total: cpuTotal,
-                        available: (cpuTotal || cpuLimit) - cpuRealtime
+                        available: (cpuTotal || cpuLimit) - cpuRealtime,
+                        requestFraction: cpuTotal > 0 ? ((cpuRequest / cpuTotal * 100).toFixed(2)) : '0.00',
+                        limitFraction: cpuTotal > 0 ? ((cpuLimit / cpuTotal * 100).toFixed(2)) : '0.00',
+                        realtimeFraction: cpuTotal > 0 ? ((cpuRealtime / cpuTotal * 100).toFixed(2)) : '0.00'
                     },
                     memory: {
                         request: memoryRequest,
                         limit: memoryLimit,
                         realtime: memoryRealtime,
                         total: memoryTotal,
-                        available: (memoryTotal || memoryLimit) - memoryRealtime
+                        available: (memoryTotal || memoryLimit) - memoryRealtime,
+                        requestFraction: memoryTotal > 0 ? ((memoryRequest / memoryTotal * 100).toFixed(2)) : '0.00',
+                        limitFraction: memoryTotal > 0 ? ((memoryLimit / memoryTotal * 100).toFixed(2)) : '0.00',
+                        realtimeFraction: memoryTotal > 0 ? ((memoryRealtime / memoryTotal * 100).toFixed(2)) : '0.00'
                     },
                     pod: {
                         used: podUsed,
@@ -128,14 +140,14 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                     <div>请求: {summary.cpu.request.toFixed(2)}  / 上限: {summary.cpu.limit.toFixed(2)} /
                         共计: {summary.cpu.total.toFixed(2)} / 实时: {summary.cpu.realtime.toFixed(2)} / 可用: {summary.cpu.available.toFixed(2)} </div>
                     <div style={{ margin: '8px 0' }}>
-                        <span style={{ color: '#1677ff' }}>请求 {((summary.cpu.request / summary.cpu.total * 100).toFixed(2))}%</span>
-                        <Progress size="small" percent={summary.cpu.request / summary.cpu.total * 100}
+                        <span style={{ color: '#1677ff' }}>请求 {summary.cpu.requestFraction}%</span>
+                        <Progress size="small" percent={parseFloat(summary.cpu.requestFraction)}
                             strokeColor="#1677ff" showInfo={false} />
-                        <span style={{ color: '#fa8c16' }}>上限 {((summary.cpu.limit / summary.cpu.total * 100).toFixed(2))}%</span>
-                        <Progress size="small" percent={summary.cpu.limit / summary.cpu.total * 100}
+                        <span style={{ color: '#fa8c16' }}>上限 {summary.cpu.limitFraction}%</span>
+                        <Progress size="small" percent={parseFloat(summary.cpu.limitFraction)}
                             strokeColor="#fa8c16" showInfo={false} />
-                        <span style={{ color: '#52c41a' }}>实时 {((summary.cpu.realtime / summary.cpu.total * 100).toFixed(2))}%</span>
-                        <Progress size="small" percent={summary.cpu.realtime / summary.cpu.total * 100}
+                        <span style={{ color: '#52c41a' }}>实时 {summary.cpu.realtimeFraction}%</span>
+                        <Progress size="small" percent={parseFloat(summary.cpu.realtimeFraction)}
                             strokeColor="#52c41a" showInfo={false} />
                     </div>
                 </Card>
@@ -145,14 +157,14 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                     <div>请求: {summary.memory.request.toFixed(2)}  / 上限: {summary.memory.limit.toFixed(2)} /
                         共计: {summary.memory.total.toFixed(2)} / 实时: {summary.memory.realtime.toFixed(2)} / 可用: {summary.memory.available.toFixed(2)} </div>
                     <div style={{ margin: '8px 0' }}>
-                        <span style={{ color: '#1677ff' }}>请求 {((summary.memory.request / summary.memory.total * 100).toFixed(2))}%</span>
-                        <Progress size="small" percent={summary.memory.request / summary.memory.total * 100} showInfo={false}
-                            strokeColor="#1677ff" />
-                        <span style={{ color: '#fa8c16' }}>上限 {((summary.memory.limit / summary.memory.total * 100).toFixed(2))}%</span>
-                        <Progress size="small" percent={summary.memory.limit / summary.memory.total * 100} showInfo={false}
-                            strokeColor="#fa8c16" />
-                        <span style={{ color: '#52c41a' }}>实时 {((summary.memory.realtime / summary.memory.total * 100).toFixed(2))}%</span>
-                        <Progress size="small" percent={summary.memory.realtime / summary.memory.total * 100} showInfo={false}
+                        <span style={{ color: '#1677ff' }}>请求 {summary.memory.requestFraction}%</span>
+                        <Progress size="small" percent={parseFloat(summary.memory.requestFraction)}
+                            strokeColor="#1677ff" showInfo={false} />
+                        <span style={{ color: '#fa8c16' }}>上限 {summary.memory.limitFraction}%</span>
+                        <Progress size="small" percent={parseFloat(summary.memory.limitFraction)}
+                            strokeColor="#fa8c16" showInfo={false} />
+                        <span style={{ color: '#52c41a' }}>实时 {summary.memory.realtimeFraction}%</span>
+                        <Progress size="small" percent={parseFloat(summary.memory.realtimeFraction)} showInfo={false}
                             strokeColor="#52c41a" />
                     </div>
                 </Card>
