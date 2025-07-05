@@ -48,7 +48,6 @@ func NewOIDCClient(c *gin.Context, cfg *models.SSOConfig) (*Client, error) {
 		scheme = "https"
 	}
 	host := c.Request.Host
-	// todo 界面显示
 	redirectURL = fmt.Sprintf("%s://%s/auth/%s/%s/callback", scheme, host, cfg.Type, cfg.Name)
 
 	oauth2Config := &oauth2.Config{

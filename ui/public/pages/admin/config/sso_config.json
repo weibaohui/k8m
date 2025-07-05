@@ -31,6 +31,12 @@
               "api": "post:/admin/config/sso/save",
               "body": [
                 {
+                  "type": "static",
+                  "label": "回调地址",
+                  "tpl": "<%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/auth/<%= data.type %>/<%= data.name %>/callback",
+                  "description": "请将此地址填写到认证服务器的回调地址配置中"
+                },
+                {
                   "type": "input-text",
                   "name": "name",
                   "label": "配置名称",
@@ -187,6 +193,12 @@
                     {
                       "type": "hidden",
                       "name": "id"
+                    },
+                    {
+                      "type": "static",
+                      "label": "回调地址",
+                      "tpl": "<%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/auth/<%= data.type %>/<%= data.name %>/callback",
+                      "description": "请将此地址填写到认证服务器的回调地址配置中"
                     },
                     {
                       "type": "input-text",
