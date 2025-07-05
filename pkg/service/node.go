@@ -27,14 +27,14 @@ func (n *nodeService) getTTL() time.Duration {
 	return 1 * time.Minute
 }
 
-func (n *nodeService) SetIPUsage(selectedCluster string, item unstructured.Unstructured) unstructured.Unstructured {
+func (n *nodeService) SetIPUsage(selectedCluster string, item *unstructured.Unstructured) *unstructured.Unstructured {
 	nodeName := item.GetName()
 	u, err := n.CacheIPUsage(selectedCluster, nodeName)
 	if err != nil {
 		return item
 	}
 	// 设置或追加 annotations
-	utils.AddOrUpdateAnnotations(&item, map[string]string{
+	utils.AddOrUpdateAnnotations(item, map[string]string{
 		"ip.usage.total":     fmt.Sprintf("%d", u.Total),
 		"ip.usage.used":      fmt.Sprintf("%d", u.Used),
 		"ip.usage.available": fmt.Sprintf("%d", u.Available),
@@ -42,14 +42,14 @@ func (n *nodeService) SetIPUsage(selectedCluster string, item unstructured.Unstr
 
 	return item
 }
-func (n *nodeService) SetPodCount(selectedCluster string, item unstructured.Unstructured) unstructured.Unstructured {
+func (n *nodeService) SetPodCount(selectedCluster string, item *unstructured.Unstructured) *unstructured.Unstructured {
 	nodeName := item.GetName()
 	u, err := n.CachePodCount(selectedCluster, nodeName)
 	if err != nil {
 		return item
 	}
 	// 设置或追加 annotations
-	utils.AddOrUpdateAnnotations(&item, map[string]string{
+	utils.AddOrUpdateAnnotations(item, map[string]string{
 		"pod.count.total":     fmt.Sprintf("%d", u.Total),
 		"pod.count.used":      fmt.Sprintf("%d", u.Used),
 		"pod.count.available": fmt.Sprintf("%d", u.Available),
@@ -59,7 +59,7 @@ func (n *nodeService) SetPodCount(selectedCluster string, item unstructured.Unst
 }
 
 // SetAllocatedStatus 设置节点的分配状态
-func (n *nodeService) SetAllocatedStatus(selectedCluster string, item unstructured.Unstructured) unstructured.Unstructured {
+func (n *nodeService) SetAllocatedStatus(selectedCluster string, item *unstructured.Unstructured) *unstructured.Unstructured {
 	name := item.GetName()
 	table, err := n.CacheAllocatedStatus(selectedCluster, name)
 	if err != nil {
@@ -68,7 +68,7 @@ func (n *nodeService) SetAllocatedStatus(selectedCluster string, item unstructur
 	for _, row := range table {
 		if row.ResourceType == "cpu" {
 			// 设置或追加 annotations
-			utils.AddOrUpdateAnnotations(&item, map[string]string{
+			utils.AddOrUpdateAnnotations(item, map[string]string{
 				"cpu.request":          fmt.Sprintf("%s", row.Request),
 				"cpu.requestFraction":  fmt.Sprintf("%s", row.RequestFraction),
 				"cpu.limit":            fmt.Sprintf("%s", row.Limit),
@@ -78,7 +78,7 @@ func (n *nodeService) SetAllocatedStatus(selectedCluster string, item unstructur
 			})
 		} else if row.ResourceType == "memory" {
 			// 设置或追加 annotations
-			utils.AddOrUpdateAnnotations(&item, map[string]string{
+			utils.AddOrUpdateAnnotations(item, map[string]string{
 				"memory.request":          fmt.Sprintf("%s", row.Request),
 				"memory.requestFraction":  fmt.Sprintf("%s", row.RequestFraction),
 				"memory.limit":            fmt.Sprintf("%s", row.Limit),

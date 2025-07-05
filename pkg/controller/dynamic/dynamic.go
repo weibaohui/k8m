@@ -46,7 +46,7 @@ func List(c *gin.Context) {
 	}
 
 	var total int64
-	var list []unstructured.Unstructured
+	var list []*unstructured.Unstructured
 	sql := kom.Cluster(selectedCluster).WithContext(ctx).
 		RemoveManagedFields().
 		Namespace(nsList...).
@@ -104,17 +104,17 @@ func List(c *gin.Context) {
 	amis.WriteJsonListTotalWithError(c, total, list, err)
 }
 
-// FillList 定制填充list []unstructured.Unstructured列表
-func FillList(selectedCluster string, kind string, list []unstructured.Unstructured) []unstructured.Unstructured {
+// FillList 定制填充list []*unstructured.Unstructured列表
+func FillList(selectedCluster string, kind string, list []*unstructured.Unstructured) []*unstructured.Unstructured {
 	switch kind {
 	case "Node":
 		if service.ClusterService().GetNodeStatusAggregated(selectedCluster) {
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
-				item = service.NodeService().SetIPUsage(selectedCluster, item)
-				item = service.NodeService().SetPodCount(selectedCluster, item)
-				item = service.NodeService().SetAllocatedStatus(selectedCluster, item)
+				service.NodeService().SetIPUsage(selectedCluster, item)
+				service.NodeService().SetPodCount(selectedCluster, item)
+				service.NodeService().SetAllocatedStatus(selectedCluster, item)
 			}
 		}
 	case "Pod":
@@ -122,7 +122,7 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
-				item = service.PodService().SetAllocatedStatusOnPod(selectedCluster, item)
+				service.PodService().SetAllocatedStatusOnPod(selectedCluster, item)
 			}
 		}
 	case "Namespace":
@@ -130,7 +130,7 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
-				item = service.PodService().SetStatusCountOnNamespace(selectedCluster, item)
+				service.PodService().SetStatusCountOnNamespace(selectedCluster, item)
 			}
 		}
 	case "StorageClass":
@@ -138,14 +138,14 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
-				item = service.StorageClassService().SetPVCCount(selectedCluster, item)
+				service.StorageClassService().SetPVCCount(selectedCluster, item)
 			}
 		}
 		if service.ClusterService().GetPVStatusAggregated(selectedCluster) {
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
-				item = service.StorageClassService().SetPVCount(selectedCluster, item)
+				service.StorageClassService().SetPVCount(selectedCluster, item)
 			}
 		}
 	case "IngressClass":
@@ -153,7 +153,7 @@ func FillList(selectedCluster string, kind string, list []unstructured.Unstructu
 			// 已缓存聚合状态，可以填充
 			for i := range list {
 				item := list[i]
-				item = service.IngressClassService().SetIngressCount(selectedCluster, item)
+				service.IngressClassService().SetIngressCount(selectedCluster, item)
 			}
 		}
 	}
@@ -179,7 +179,7 @@ func Event(c *gin.Context) {
 
 	fieldSelector := fmt.Sprintf("regarding.apiVersion=%s,regarding.kind=%s,regarding.name=%s,regarding.namespace=%s", apiVersion, kind, name, ns)
 
-	var eventList []unstructured.Unstructured
+	var eventList []*unstructured.Unstructured
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		RemoveManagedFields().
@@ -377,8 +377,11 @@ func Save(c *gin.Context) {
 	yamlStr := req.Yaml
 
 	// 解析 Yaml 到 Unstructured 对象
-	var obj unstructured.Unstructured
-	if err := yaml.Unmarshal([]byte(yamlStr), &obj.Object); err != nil {
+	var obj *unstructured.Unstructured
+	obj = &unstructured.Unstructured{
+		Object: make(map[string]interface{}),
+	}
+	if err = yaml.Unmarshal([]byte(yamlStr), obj.Object); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

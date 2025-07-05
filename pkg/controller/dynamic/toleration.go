@@ -35,7 +35,7 @@ func ListTolerations(c *gin.Context) {
 	}
 
 	// 先获取资源中的定义
-	var item unstructured.Unstructured
+	var item *unstructured.Unstructured
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -109,7 +109,7 @@ func processTolerations(c *gin.Context, action string) {
 	}
 
 	// 先获取资源中的定义
-	var item unstructured.Unstructured
+	var item *unstructured.Unstructured
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -120,7 +120,7 @@ func processTolerations(c *gin.Context, action string) {
 		return
 	}
 
-	originalTolerations, err := getTolerationList(kind, &item, action, info)
+	originalTolerations, err := getTolerationList(kind, item, action, info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

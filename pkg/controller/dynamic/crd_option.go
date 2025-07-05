@@ -212,8 +212,8 @@ func getCrdGroupList(ctx context.Context, selectedCluster string) []string {
 	return groups
 }
 
-func getCrdList(ctx context.Context, selectedCluster string) ([]unstructured.Unstructured, error) {
-	var list []unstructured.Unstructured
+func getCrdList(ctx context.Context, selectedCluster string) ([]*unstructured.Unstructured, error) {
+	var list []*unstructured.Unstructured
 	err := kom.Cluster(selectedCluster).WithContext(ctx).GVK(
 		"apiextensions.k8s.io",
 		"v1",
@@ -223,7 +223,7 @@ func getCrdList(ctx context.Context, selectedCluster string) ([]unstructured.Uns
 	return list, err
 }
 func getCrdKindListByGroup(ctx context.Context, selectedCluster string, group string) []string {
-	var list []unstructured.Unstructured
+	var list []*unstructured.Unstructured
 	err := kom.Cluster(selectedCluster).WithContext(ctx).GVK(
 		"apiextensions.k8s.io",
 		"v1",

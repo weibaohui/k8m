@@ -173,7 +173,7 @@ func Event(c *gin.Context) {
 
 	klog.V(6).Infof("meta names = %s", metas)
 
-	var eventList []unstructured.Unstructured
+	var eventList []*unstructured.Unstructured
 
 	sql := kom.Cluster(selectedCluster).
 		WithContext(ctx).
