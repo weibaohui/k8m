@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetcher } from '@/components/Amis/fetcher';
-import { message, Card, Progress, Row, Col, Avatar, Statistic } from "antd";
+import { message, Card, Progress, Row, Col, Avatar, Statistic, Select, Space, Spin } from "antd";
 import { Node } from "@/store/node.ts";
 import CountUp from 'react-countup';
 import type { StatisticProps } from 'antd';
@@ -67,108 +67,157 @@ function parseMemory(str: string) {
     return parseFloat(str);
 }
 
+const refreshOptions = [
+    { label: '不自动刷新', value: 0 },
+    { label: '10秒', value: 10000 },
+    { label: '30秒', value: 30000 },
+    { label: '60秒', value: 60000 },
+];
+
 const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewProps>(({ data }, _) => {
     const [summary, setSummary] = useState<ResourceSummary | null>(null);
     const [resourceGroups, setResourceGroups] = useState<Record<string, ResourceCount[]>>({});
+    const [refreshInterval, setRefreshInterval] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(false);
+    const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
+    // 数据获取函数
+    const fetchAll = async () => {
+        setLoading(true);
+        try {
+            await Promise.all([fetchValues(), fetchResource()]);
+        } finally {
+            setLoading(false);
+        }
+    };
+    const fetchValues = async () => {
+        try {
+            const response = await fetcher({
+                url: `/k8s/Node/group//version/v1/list`,
+                method: 'post',
+                data: {
+                    page: 1,
+                    perPage: 100000
+                }
+            });
+            //@ts-ignore
+            const nodes = response.data?.data?.rows as Array<Node>;
+            // 汇总
+            let cpuRequest = 0, cpuLimit = 0, cpuRealtime = 0, cpuTotal = 0;
+            let memoryRequest = 0, memoryLimit = 0, memoryRealtime = 0, memoryTotal = 0;
+            let podUsed = 0, podTotal = 0;
+            let ipUsed = 0, ipTotal = 0;
+            nodes.forEach(n => {
+                const a = n.metadata.annotations || {};
+
+                cpuRequest += parseCpu(a["cpu.request"]);
+                cpuLimit += parseCpu(a["cpu.limit"]);
+                cpuRealtime += parseCpu(a["cpu.realtime"]);
+                cpuTotal += parseCpu(n.status?.capacity?.cpu || "");
+                memoryRequest += parseMemory(a["memory.request"]);
+                memoryLimit += parseMemory(a["memory.limit"]);
+                memoryRealtime += parseMemory(a["memory.realtime"]);
+                memoryTotal += parseMemory(n.status?.capacity?.memory || "");
+                podUsed += parseInt(a["pod.count.used"] || "0");
+                podTotal += parseInt(a["pod.count.total"] || "0");
+                ipUsed += parseInt(a["ip.usage.used"] || "0");
+                ipTotal += parseInt(a["ip.usage.total"] || "0");
+            });
+            setSummary({
+                cpu: {
+                    request: cpuRequest,
+                    limit: cpuLimit,
+                    realtime: cpuRealtime,
+                    total: cpuTotal,
+                    available: (cpuTotal || cpuLimit) - cpuRealtime,
+                    requestFraction: cpuTotal > 0 ? ((cpuRequest / cpuTotal * 100).toFixed(2)) : '0.00',
+                    limitFraction: cpuTotal > 0 ? ((cpuLimit / cpuTotal * 100).toFixed(2)) : '0.00',
+                    realtimeFraction: cpuTotal > 0 ? ((cpuRealtime / cpuTotal * 100).toFixed(2)) : '0.00'
+                },
+                memory: {
+                    request: memoryRequest,
+                    limit: memoryLimit,
+                    realtime: memoryRealtime,
+                    total: memoryTotal,
+                    available: (memoryTotal || memoryLimit) - memoryRealtime,
+                    requestFraction: memoryTotal > 0 ? ((memoryRequest / memoryTotal * 100).toFixed(2)) : '0.00',
+                    limitFraction: memoryTotal > 0 ? ((memoryLimit / memoryTotal * 100).toFixed(2)) : '0.00',
+                    realtimeFraction: memoryTotal > 0 ? ((memoryRealtime / memoryTotal * 100).toFixed(2)) : '0.00'
+                },
+                pod: {
+                    used: podUsed,
+                    total: podTotal,
+                    available: podTotal - podUsed
+                },
+                ip: {
+                    used: ipUsed,
+                    total: ipTotal,
+                    available: ipTotal - ipUsed
+                }
+            });
+        } catch (error) {
+            message.error('获取参数值失败');
+        }
+    };
+    const fetchResource = async () => {
+        try {
+            const response = await fetcher({
+                url: `/k8s/status/resource_count/cache_seconds/60`,
+                method: 'get',
+            });
+            let counts = response.data?.data as Array<ResourceCount>;
+            // 按 group 分组
+            const groups: Record<string, ResourceCount[]> = {};
+            counts?.forEach(item => {
+                if (!groups[item.Group]) groups[item.Group] = [];
+                groups[item.Group].push(item);
+            });
+            setResourceGroups(groups);
+        } catch (error) {
+            message.error('获取参数值失败');
+        }
+    };
+    // 首次和依赖变化时获取
     useEffect(() => {
-        const fetchValues = async () => {
-            try {
-                const response = await fetcher({
-                    url: `/k8s/Node/group//version/v1/list`,
-                    method: 'post',
-                    data: {
-                        page: 1,
-                        perPage: 100000
-                    }
-                });
-                //@ts-ignore
-                const nodes = response.data?.data?.rows as Array<Node>;
-                // 汇总
-                let cpuRequest = 0, cpuLimit = 0, cpuRealtime = 0, cpuTotal = 0;
-                let memoryRequest = 0, memoryLimit = 0, memoryRealtime = 0, memoryTotal = 0;
-                let podUsed = 0, podTotal = 0;
-                let ipUsed = 0, ipTotal = 0;
-                nodes.forEach(n => {
-                    const a = n.metadata.annotations || {};
+        fetchAll();
+    }, [data]);
 
-                    cpuRequest += parseCpu(a["cpu.request"]);
-                    cpuLimit += parseCpu(a["cpu.limit"]);
-                    cpuRealtime += parseCpu(a["cpu.realtime"]);
-                    cpuTotal += parseCpu(n.status?.capacity?.cpu || "");
-                    memoryRequest += parseMemory(a["memory.request"]);
-                    memoryLimit += parseMemory(a["memory.limit"]);
-                    memoryRealtime += parseMemory(a["memory.realtime"]);
-                    memoryTotal += parseMemory(n.status?.capacity?.memory || "");
-                    podUsed += parseInt(a["pod.count.used"] || "0");
-                    podTotal += parseInt(a["pod.count.total"] || "0");
-                    ipUsed += parseInt(a["ip.usage.used"] || "0");
-                    ipTotal += parseInt(a["ip.usage.total"] || "0");
-                });
-                setSummary({
-                    cpu: {
-                        request: cpuRequest,
-                        limit: cpuLimit,
-                        realtime: cpuRealtime,
-                        total: cpuTotal,
-                        available: (cpuTotal || cpuLimit) - cpuRealtime,
-                        requestFraction: cpuTotal > 0 ? ((cpuRequest / cpuTotal * 100).toFixed(2)) : '0.00',
-                        limitFraction: cpuTotal > 0 ? ((cpuLimit / cpuTotal * 100).toFixed(2)) : '0.00',
-                        realtimeFraction: cpuTotal > 0 ? ((cpuRealtime / cpuTotal * 100).toFixed(2)) : '0.00'
-                    },
-                    memory: {
-                        request: memoryRequest,
-                        limit: memoryLimit,
-                        realtime: memoryRealtime,
-                        total: memoryTotal,
-                        available: (memoryTotal || memoryLimit) - memoryRealtime,
-                        requestFraction: memoryTotal > 0 ? ((memoryRequest / memoryTotal * 100).toFixed(2)) : '0.00',
-                        limitFraction: memoryTotal > 0 ? ((memoryLimit / memoryTotal * 100).toFixed(2)) : '0.00',
-                        realtimeFraction: memoryTotal > 0 ? ((memoryRealtime / memoryTotal * 100).toFixed(2)) : '0.00'
-                    },
-                    pod: {
-                        used: podUsed,
-                        total: podTotal,
-                        available: podTotal - podUsed
-                    },
-                    ip: {
-                        used: ipUsed,
-                        total: ipTotal,
-                        available: ipTotal - ipUsed
-                    }
-                });
-            } catch (error) {
-                message.error('获取参数值失败');
+    // 自动刷新逻辑
+    useEffect(() => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        if (refreshInterval > 0) {
+            intervalRef.current = setInterval(() => {
+                fetchAll();
+            }, refreshInterval);
+        }
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
             }
         };
-        fetchValues();
-    }, [data]);
-    useEffect(() => {
-        const fetchResource = async () => {
-            try {
-                const response = await fetcher({
-                    url: `/k8s/status/resource_count/cache_seconds/60`,
-                    method: 'get',
-                });
-                let counts = response.data?.data as Array<ResourceCount>;
-                // 按 group 分组
-                const groups: Record<string, ResourceCount[]> = {};
-                counts?.forEach(item => {
-                    if (!groups[item.Group]) groups[item.Group] = [];
-                    groups[item.Group].push(item);
-                });
-                setResourceGroups(groups);
-            } catch (error) {
-                message.error('获取参数值失败');
-            }
-        };
-        fetchResource();
-    }, [data]);
+    }, [refreshInterval]);
 
     if (!summary) return null;
 
     return (
-        <>
+        <Spin spinning={loading} tip="数据加载中...">
+            <Row justify="end" style={{ marginBottom: 16 }}>
+                <Col>
+                    <Space>
+                        <span>自动刷新：</span>
+                        <Select
+                            style={{ width: 120 }}
+                            value={refreshInterval}
+                            options={refreshOptions}
+                            onChange={setRefreshInterval}
+                        />
+                    </Space>
+                </Col>
+            </Row>
             <Row gutter={[16, 16]}>
                 <Col span={12}>
                     <Card title="CPU （cores）">
@@ -238,7 +287,7 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                         </Card>
                     ))}
             </div>
-        </>
+        </Spin>
     );
 });
 
