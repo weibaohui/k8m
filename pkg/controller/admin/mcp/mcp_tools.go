@@ -58,7 +58,7 @@ func (m *MCPToolController) ToolQuickSave(c *gin.Context) {
 	} else {
 		entity.Enabled = false
 	}
-	err := dao.DB().Model(&entity).Select("Disabled").Updates(entity).Error
+	err := dao.DB().Model(&entity).Select("enabled").Updates(entity).Error
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
