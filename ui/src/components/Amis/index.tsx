@@ -35,6 +35,7 @@ import HelmViewRelease from '@/components/Amis/custom/Helm/HelmViewRelease.tsx';
 import K8sGPTComponent from '@/components/Amis/custom/K8sGPT';
 import InspectionSummaryComponent from '@/components/Amis/custom/InspectionSummary.tsx'
 import InspectionEventListComponent from '@/components/Amis/custom/InspectionEventList.tsx'
+import ClusterSummaryView from "@/components/Amis/custom/cluster/ClusterSummaryView.tsx";
 // 注册自定义组件
 registerRenderer({type: 'k8sTextConditions', component: k8sTextConditionsComponent})
 registerRenderer({type: 'nodeRoles', component: NodeRolesComponent})
@@ -86,7 +87,8 @@ registerRenderer({type: 'k8sGPT', component: K8sGPTComponent})
 registerRenderer({type: 'inspectionSummary', component: InspectionSummaryComponent})
 //@ts-ignore
 registerRenderer({type: 'inspectionEventList', component: InspectionEventListComponent})
-
+//@ts-ignore
+registerRenderer({type: 'clusterSummaryView', component: ClusterSummaryView})
 
 // 注册过滤器
 registerFilter("autoConvertMemory", AutoConvertMemory)
