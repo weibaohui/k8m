@@ -91,7 +91,7 @@
                   "name": "scopes",
                   "label": "授权范围",
                   "placeholder": "输入获取权限范围",
-                  "description": "默认请求openid, email, profile"
+                  "description": "默认请求openid,email,profile,groups"
                 }
               ],
               "submitText": "保存",
@@ -249,7 +249,7 @@
                       "name": "scopes",
                       "label": "授权范围",
                       "placeholder": "输入获取权限范围",
-                      "description": "默认请求openid, email, profile"
+                      "description": "默认请求openid,email,profile,groups"
                     }
                   ],
                   "submitText": "保存",

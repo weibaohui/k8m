@@ -48,14 +48,15 @@ func NewOIDCClient(c *gin.Context, cfg *models.SSOConfig) (*Client, error) {
 		scheme = "https"
 	}
 	host := c.Request.Host
+	// todo 界面显示
 	redirectURL = fmt.Sprintf("%s://%s/auth/%s/%s/callback", scheme, host, cfg.Type, cfg.Name)
 
 	oauth2Config := &oauth2.Config{
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  redirectURL,
-		Endpoint:     provider.Endpoint(),                                                               // 自动使用 /.well-known 配置的接口
-		Scopes:       append([]string{"openid", "email", "profile"}, strings.Split(cfg.Scopes, ",")...), // openid 是必须的
+		Endpoint:     provider.Endpoint(),                                                                         // 自动使用 /.well-known 配置的接口
+		Scopes:       append([]string{"openid", "email", "profile", "groups"}, strings.Split(cfg.Scopes, ",")...), // openid 是必须的
 	}
 
 	return &Client{

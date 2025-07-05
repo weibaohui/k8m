@@ -2,10 +2,11 @@ package sso
 
 import (
 	"fmt"
-	"github.com/weibaohui/k8m/pkg/flag"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/weibaohui/k8m/pkg/flag"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -75,9 +76,13 @@ func HandleCallback(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
 		return
 	}
+	// test
+	// claims["groups"] = []string{"CRM开发组", "b", "c", "d"}
+	klog.V(6).Infof("claims:=\n%s\n", utils.ToJSON(claims))
 
 	username := GetUsername(claims, strings.Split(client.DBConfig.PreferUserNameKeys, ","))
-	_ = service.UserService().CheckAndCreateUser(username, name)
+	groups := GetUserGroups(claims)
+	_ = service.UserService().CheckAndCreateUser(username, name, groups)
 	userLoginToken, _ := service.UserService().GenerateJWTTokenByUserName(username, 24*time.Hour)
 
 	// 返回 HTML + JS，用于写入 localStorage
@@ -112,8 +117,6 @@ func getDefaultOIDCClient(c *gin.Context, name string) (*Client, error) {
 
 }
 func GetUsername(claims map[string]interface{}, preferKeys []string) string {
-	klog.V(6).Infof("claims: %v", claims)
-	klog.V(6).Infof("preferKeys: %v", preferKeys)
 	for _, key := range preferKeys {
 		if val, ok := claims[key].(string); ok && val != "" {
 			return val
@@ -135,7 +138,19 @@ func GetUsername(claims map[string]interface{}, preferKeys []string) string {
 	return "unknown"
 }
 
-// 获取ldap开关状态
+// GetUserGroups 获取用户组
+func GetUserGroups(claims map[string]interface{}) string {
+	// 默认 fallback 顺序
+	if v, ok := claims["groups"].(string); ok && v != "" {
+		return v
+	}
+	if l, ok := claims["groups"].([]string); ok && l != nil {
+		return strings.Join(l, ",")
+	}
+	return ""
+}
+
+// GetLdapEnabled 获取ldap开关状态
 func GetLdapEnabled(c *gin.Context) {
 	cfg := flag.Init()
 	amis.WriteJsonData(c, gin.H{
