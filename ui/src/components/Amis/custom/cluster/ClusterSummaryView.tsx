@@ -45,6 +45,7 @@ function parseMemory(str: string) {
     if (!str) return 0;
     if (str.endsWith('Gi')) return parseFloat(str);
     if (str.endsWith('Mi')) return parseFloat(str) / 1024;
+    if (str.endsWith('Ki')) return parseFloat(str) / 1024 / 1024;
     return parseFloat(str);
 }
 
@@ -123,59 +124,37 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
     return (
         <Row gutter={[16, 16]}>
             <Col span={12}>
-                <Card title="CPU Resources">
-                    <div>Requests: {summary.cpu.request.toFixed(2)} cores / Limits: {summary.cpu.limit.toFixed(2)} /
-                        Total: {summary.cpu.total.toFixed(2)} cores
-                    </div>
-                    <div>Realtime: {summary.cpu.realtime.toFixed(2)} cores</div>
+                <Card title="CPU （cores）">
+                    <div>请求: {summary.cpu.request.toFixed(2)}  / 上限: {summary.cpu.limit.toFixed(2)} /
+                        共计: {summary.cpu.total.toFixed(2)} / 实时: {summary.cpu.realtime.toFixed(2)} / 可用: {summary.cpu.available.toFixed(2)} </div>
                     <div style={{ margin: '8px 0' }}>
-                        <span style={{ color: '#1677ff' }}>Requests</span>
-                        <Progress percent={summary.cpu.request / summary.cpu.total * 100} showInfo={false}
+                        <span style={{ color: '#1677ff' }}>请求 {((summary.cpu.request / summary.cpu.total * 100).toFixed(2))}%</span>
+                        <Progress size="small" percent={summary.cpu.request / summary.cpu.total * 100}
+                            strokeColor="#1677ff" showInfo={false} />
+                        <span style={{ color: '#fa8c16' }}>上限 {((summary.cpu.limit / summary.cpu.total * 100).toFixed(2))}%</span>
+                        <Progress size="small" percent={summary.cpu.limit / summary.cpu.total * 100}
+                            strokeColor="#fa8c16" showInfo={false} />
+                        <span style={{ color: '#52c41a' }}>实时 {((summary.cpu.realtime / summary.cpu.total * 100).toFixed(2))}%</span>
+                        <Progress size="small" percent={summary.cpu.realtime / summary.cpu.total * 100}
+                            strokeColor="#52c41a" showInfo={false} />
+                    </div>
+                </Card>
+            </Col>
+            <Col span={12}>
+                <Card title="内存 （GiB）">
+                    <div>请求: {summary.memory.request.toFixed(2)}  / 上限: {summary.memory.limit.toFixed(2)} /
+                        共计: {summary.memory.total.toFixed(2)} / 实时: {summary.memory.realtime.toFixed(2)} / 可用: {summary.memory.available.toFixed(2)} </div>
+                    <div style={{ margin: '8px 0' }}>
+                        <span style={{ color: '#1677ff' }}>请求 {((summary.memory.request / summary.memory.total * 100).toFixed(2))}%</span>
+                        <Progress size="small" percent={summary.memory.request / summary.memory.total * 100} showInfo={false}
                             strokeColor="#1677ff" />
-                        <span style={{ color: '#fa8c16' }}>Limits</span>
-                        <Progress percent={summary.cpu.limit / summary.cpu.total * 100} showInfo={false}
+                        <span style={{ color: '#fa8c16' }}>上限 {((summary.memory.limit / summary.memory.total * 100).toFixed(2))}%</span>
+                        <Progress size="small" percent={summary.memory.limit / summary.memory.total * 100} showInfo={false}
                             strokeColor="#fa8c16" />
-                        <span style={{ color: '#52c41a' }}>Realtime</span>
-                        <Progress percent={summary.cpu.realtime / summary.cpu.total * 100} showInfo={false}
+                        <span style={{ color: '#52c41a' }}>实时 {((summary.memory.realtime / summary.memory.total * 100).toFixed(2))}%</span>
+                        <Progress size="small" percent={summary.memory.realtime / summary.memory.total * 100} showInfo={false}
                             strokeColor="#52c41a" />
                     </div>
-                    <div>Available: {summary.cpu.available.toFixed(2)} cores</div>
-                </Card>
-            </Col>
-            <Col span={12}>
-                <Card title="Memory Resources">
-                    <div>Requests: {summary.memory.request.toFixed(2)} GiB / Limits: {summary.memory.limit.toFixed(2)} /
-                        Total: {summary.memory.total.toFixed(2)} GiB
-                    </div>
-                    <div>Realtime: {summary.memory.realtime.toFixed(2)} GiB</div>
-                    <div style={{ margin: '8px 0' }}>
-                        <span style={{ color: '#1677ff' }}>Requests</span>
-                        <Progress percent={summary.memory.request / summary.memory.total * 100} showInfo={false}
-                            strokeColor="#1677ff" />
-                        <span style={{ color: '#fa8c16' }}>Limits</span>
-                        <Progress percent={summary.memory.limit / summary.memory.total * 100} showInfo={false}
-                            strokeColor="#fa8c16" />
-                        <span style={{ color: '#52c41a' }}>Realtime</span>
-                        <Progress percent={summary.memory.realtime / summary.memory.total * 100} showInfo={false}
-                            strokeColor="#52c41a" />
-                    </div>
-                    <div>Available: {summary.memory.available.toFixed(2)} GiB</div>
-                </Card>
-            </Col>
-            <Col span={12}>
-                <Card title="Pod Resources">
-                    <div>Used: {summary.pod.used} / Total: {summary.pod.total}</div>
-                    <Progress percent={summary.pod.used / summary.pod.total * 100} showInfo={false}
-                        strokeColor="#fa8c16" />
-                    <div>Available: {summary.pod.available}</div>
-                </Card>
-            </Col>
-            <Col span={12}>
-                <Card title="IP Resources">
-                    <div>Used: {summary.ip.used} / Total: {summary.ip.total}</div>
-                    <Progress percent={summary.ip.used / summary.ip.total * 100} showInfo={false}
-                        strokeColor="#fa8c16" />
-                    <div>Available: {summary.ip.available}</div>
                 </Card>
             </Col>
         </Row>
