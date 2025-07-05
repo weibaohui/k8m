@@ -31,6 +31,12 @@
               "api": "post:/admin/config/sso/save",
               "body": [
                 {
+                  "type": "static",
+                  "label": "回调地址",
+                  "tpl": "<%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/auth/<%= data.type %>/<%= data.name %>/callback",
+                  "description": "请将此地址填写到认证服务器的回调地址配置中"
+                },
+                {
                   "type": "input-text",
                   "name": "name",
                   "label": "配置名称",
@@ -91,7 +97,7 @@
                   "name": "scopes",
                   "label": "授权范围",
                   "placeholder": "输入获取权限范围",
-                  "description": "默认请求openid, email, profile"
+                  "description": "默认请求openid,email,profile,groups"
                 }
               ],
               "submitText": "保存",
@@ -189,6 +195,12 @@
                       "name": "id"
                     },
                     {
+                      "type": "static",
+                      "label": "回调地址",
+                      "tpl": "<%= window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') %>/auth/<%= data.type %>/<%= data.name %>/callback",
+                      "description": "请将此地址填写到认证服务器的回调地址配置中"
+                    },
+                    {
                       "type": "input-text",
                       "name": "name",
                       "label": "配置名称",
@@ -249,7 +261,7 @@
                       "name": "scopes",
                       "label": "授权范围",
                       "placeholder": "输入获取权限范围",
-                      "description": "默认请求openid, email, profile"
+                      "description": "默认请求openid,email,profile,groups"
                     }
                   ],
                   "submitText": "保存",

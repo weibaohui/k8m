@@ -3,11 +3,12 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/go-ldap/ldap/v3"
-	"k8s.io/klog/v2"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/go-ldap/ldap/v3"
+	"k8s.io/klog/v2"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -306,26 +307,43 @@ func (u *userService) GetUserByMCPKey(mcpKey string) (string, error) {
 }
 
 // CheckAndCreateUser 检查用户是否存在，如果不存在则创建一个新用户
-func (u *userService) CheckAndCreateUser(username, source string) error {
-	params := &dao.Params{}
+func (u *userService) CheckAndCreateUser(username, source, groups string) error {
+	params := dao.BuildDefaultParams()
 	user := &models.User{}
 	queryFunc := func(db *gorm.DB) *gorm.DB {
-		return db.Where("username = ?", username)
+		return db.Where("username = ? and source=?", username, source)
 	}
-	_, err := user.GetOne(params, queryFunc)
+	du, err := user.GetOne(params, queryFunc)
 	if err != nil {
+		klog.Errorf("<UNK>: %v", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			klog.V(6).Infof("gorm.ErrRecordNotFound")
+			klog.V(6).Infof("gorm.ErrRecordNotFound")
+			klog.V(6).Infof("gorm.ErrRecordNotFound")
+			klog.V(6).Infof("gorm.ErrRecordNotFound")
 			// 用户不存在，创建新用户
-			newUser := &models.User{
-				Username:  username,
-				Source:    source,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+			du = &models.User{
+				Username:   username,
+				Source:     source,
+				GroupNames: groups,
+				CreatedAt:  time.Now(),
+				UpdatedAt:  time.Now(),
 			}
-			return newUser.Save(params)
+			return du.Save(params)
 		}
 		return err
 	}
+
+	// 数据库中已存在用户，检查是否需要更新用户组
+	if du.GroupNames != groups {
+		// 如果用户组更新了，那么更新数据库
+		err = dao.DB().Model(du).Update("group_names", groups).Error
+		if err != nil {
+			klog.V(6).Infof("更新%s用户组出错%v", username, err)
+			return err
+		}
+	}
+
 	return nil
 }
 

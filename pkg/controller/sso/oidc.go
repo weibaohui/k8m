@@ -54,8 +54,8 @@ func NewOIDCClient(c *gin.Context, cfg *models.SSOConfig) (*Client, error) {
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  redirectURL,
-		Endpoint:     provider.Endpoint(),                                                               // 自动使用 /.well-known 配置的接口
-		Scopes:       append([]string{"openid", "email", "profile"}, strings.Split(cfg.Scopes, ",")...), // openid 是必须的
+		Endpoint:     provider.Endpoint(),                                                                         // 自动使用 /.well-known 配置的接口
+		Scopes:       append([]string{"openid", "email", "profile", "groups"}, strings.Split(cfg.Scopes, ",")...), // openid 是必须的
 	}
 
 	return &Client{

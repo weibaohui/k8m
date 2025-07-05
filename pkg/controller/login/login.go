@@ -147,7 +147,8 @@ func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.
 	}
 
 	// 2. 检查或创建用户
-	if err := service.UserService().CheckAndCreateUser(username, "ldap"); err != nil {
+	// TODO LDAP 如何定义用户归属组
+	if err := service.UserService().CheckAndCreateUser(username, "ldap", ""); err != nil {
 		klog.Errorf("创建/检查LDAP用户失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "系统错误"})
 		return err
