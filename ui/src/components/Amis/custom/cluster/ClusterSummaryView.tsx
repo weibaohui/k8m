@@ -274,15 +274,37 @@ const ClusterSummaryView = React.forwardRef<HTMLSpanElement, ClusterSummaryViewP
                                     return (
                                         <Col key={item.Resource} span={6}>
                                             <div style={{ display: 'flex', alignItems: 'center', background: '#f6f8fa', borderRadius: 8, padding: 12 }}>
-                                                <Avatar style={{ backgroundColor: color, verticalAlign: 'middle', marginRight: 12 }} size="large">
+                                                <Avatar
+                                                    style={{
+                                                        backgroundColor: color,
+                                                        verticalAlign: 'middle',
+                                                        marginRight: 12,
+                                                        width: 48,
+                                                        height: 48,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: 24,
+                                                    }}
+                                                    size={48}
+                                                >
                                                     {item.Resource?.[0]?.toUpperCase() || '?'}
                                                 </Avatar>
                                                 <div>
                                                     <div style={{ fontSize: 18, fontWeight: 600 }}>
                                                         <Statistic value={item.Count} formatter={formatter} />
                                                     </div>
-
-                                                    <div style={{ fontSize: 14, color: '#888' }}>{item.Resource}({item.Version})</div>
+                                                    <div
+                                                        style={{
+                                                            fontSize: 12,
+                                                            color: '#888',
+                                                            wordBreak: 'break-all',
+                                                            whiteSpace: 'normal',
+                                                            maxWidth: 200,
+                                                        }}
+                                                    >
+                                                        {item.Resource}({item.Version})
+                                                    </div>
                                                 </div>
                                             </div>
                                         </Col>
