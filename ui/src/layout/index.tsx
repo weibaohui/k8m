@@ -41,7 +41,10 @@ const App = () => {
         // 开启监听 DOM 更新（例如 MutationObserver）
         //@ts-ignore
         translate.listener.start();
-
+        //@ts-ignore
+        translate.office.showPanel();
+        //@ts-ignore
+        translate.office.fullExtract.isUse = true;
         // 清理定时器 & 监听器（如果需要）
         return () => {
             clearTimeout(timer);
@@ -74,14 +77,30 @@ const App = () => {
                 setProdutcName("k8m");
             });
     }, []);
+    function LangLink({ lang, label }: { lang: string, label: string }) {
+        return (
+            <a
+                href="#"
+                onClick={(e) => {
+                    e.preventDefault();
+                    //@ts-ignore
+                    translate.changeLanguage(lang);
+                }}
+                className="ignore"
+            >
+                {label}
+            </a>
+        );
+    }
     return <Layout className={styles.container}>
         <Layout.Header style={{
             padding: '0 0',
         }}>
 
             <div className={styles.navbar}>
-                <div id="translate">
-                </div>
+
+                {/* <LangLink lang="english" label="EN" />
+                <LangLink lang="chinese_simplified" label="中文" /> */}
 
                 <div className={styles.logo} onClick={goHome}>
                     <h1>

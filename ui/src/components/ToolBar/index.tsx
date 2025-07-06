@@ -78,6 +78,7 @@ const Toolbar = () => {
         {
             key: 'logout',
             label: '退出',
+            icon: <i className="fa-solid fa-right-from-bracket"></i>,
             onClick: handleLogout
         }
     ];
