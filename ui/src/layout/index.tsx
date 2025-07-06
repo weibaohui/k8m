@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from 'react'
 import styles from './index.module.scss'
 import FloatingChatGPTButton from './FloatingChatGPTButton'
 import { fetcher } from '@/components/Amis/fetcher'
-import I18nTranslateProvider from '@/components/I18nTranslateProvider';
+import I18nTranslateProvider from '@/components/I18n/I18nTranslateProvider';
 
 const App = () => {
     const { pathname } = useLocation()
