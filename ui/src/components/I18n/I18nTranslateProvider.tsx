@@ -5,7 +5,9 @@ import enTranslation from './translations/en';
 
 const I18nTranslateProvider = () => {
     useEffect(() => {
+        // i18nTranslate.service.use('none'); // 设置翻译通道
         i18nTranslate.service.use('client.edge'); // 设置翻译通道
+        // i18nTranslate.service.use('giteeAI'); // 设置翻译通道
         // i18nTranslate.whole.enableAll(); // 启用整体翻译
         i18nTranslate.listener.start();
         // i18nTranslate.office.showPanel();//翻译管理面板
