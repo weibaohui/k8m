@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    types: [created, published] # 表示在创建新的 Release 时触发
+    types: [ created, published ] # 表示在创建新的 Release 时触发
 
   # Allows you to run this workflow manually from the Actions tab
   # 可以手动触发
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18]
+        node-version: [ 18 ]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -135,7 +135,7 @@ jobs:
             GIT_COMMIT=${{ github.sha }}
             GIT_TAG=${{ github.ref_name }}
             GIT_REPOSITORY=${{ github.repository }}
-            VERSION=${{ env.GITHUB_REF_NAME }}
+            VERSION=${{ github.ref_name }}
             MODEL=${{ env.OPENAI_API_MODEL }}
             API_KEY=${{ secrets.OPENAI_API_KEY }}
             API_URL=${{ env.OPENAI_API_URL }}
