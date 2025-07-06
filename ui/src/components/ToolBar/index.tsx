@@ -92,7 +92,7 @@ const Toolbar = () => {
         items: langOptions.map(opt => ({
             key: opt.value,
             label: (
-                <span onClick={() => {
+                <span className='ignore' onClick={() => {
                     //@ts-ignore
                     if (window.translate && typeof window.translate.changeLanguage === 'function') {
                         //@ts-ignore

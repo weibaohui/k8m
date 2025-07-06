@@ -45,6 +45,9 @@ const App = () => {
         translate.office.showPanel();
         //@ts-ignore
         translate.office.fullExtract.isUse = true;
+        //@ts-ignore
+        translate.language.setLocal('chinese_simplified'); //设置本地语种（当前网页的语种）
+
         // 清理定时器 & 监听器（如果需要）
         return () => {
             clearTimeout(timer);
@@ -77,21 +80,7 @@ const App = () => {
                 setProdutcName("k8m");
             });
     }, []);
-    function LangLink({ lang, label }: { lang: string, label: string }) {
-        return (
-            <a
-                href="#"
-                onClick={(e) => {
-                    e.preventDefault();
-                    //@ts-ignore
-                    translate.changeLanguage(lang);
-                }}
-                className="ignore"
-            >
-                {label}
-            </a>
-        );
-    }
+
     return <Layout className={styles.container}>
         <Layout.Header style={{
             padding: '0 0',
