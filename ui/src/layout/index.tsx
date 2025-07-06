@@ -98,10 +98,6 @@ const App = () => {
         }}>
 
             <div className={styles.navbar}>
-
-                {/* <LangLink lang="english" label="EN" />
-                <LangLink lang="chinese_simplified" label="中文" /> */}
-
                 <div className={styles.logo} onClick={goHome}>
                     <h1>
                         <span>{produtcName}</span>
