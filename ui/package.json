@@ -30,6 +30,7 @@
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
+    "i18n-jsautotranslate": "^3.17.0",
     "js-yaml": "^4.1.0",
     "jszip": "^3.10.1",
     "jwt-decode": "^4.0.0",

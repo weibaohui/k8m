@@ -8,6 +8,13 @@ import { useCallback, useEffect, useState } from 'react'
 import styles from './index.module.scss'
 import FloatingChatGPTButton from './FloatingChatGPTButton'
 import { fetcher } from '@/components/Amis/fetcher'
+//@ts-ignore
+import i18nTranslate from 'i18n-jsautotranslate';
+//@ts-ignore
+window.translate = i18nTranslate; // 控制台调试方便
+
+i18nTranslate.service.use('client.edge'); // 设置翻译通道
+i18nTranslate.whole.enableAll(); // 启用整体翻译
 
 const App = () => {
     const { pathname } = useLocation()
@@ -19,6 +26,30 @@ const App = () => {
     const goHome = useCallback(() => {
         navigate('/')
     }, [navigate])
+
+    useEffect(() => {
+        // 初始翻译执行
+        //@ts-ignore
+        translate.execute();
+
+        // 解决 input placeholder 延迟渲染问题
+        const timer = setTimeout(() => {
+            //@ts-ignore
+            translate.execute();
+        }, 500);
+
+        // 开启监听 DOM 更新（例如 MutationObserver）
+        //@ts-ignore
+        translate.listener.start();
+
+        // 清理定时器 & 监听器（如果需要）
+        return () => {
+            clearTimeout(timer);
+            //@ts-ignore
+            translate.listener.stop?.(); // 如果有 stop 方法
+        };
+    }, []);
+
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (!pathname.includes('login') && token === null) {
@@ -47,7 +78,11 @@ const App = () => {
         <Layout.Header style={{
             padding: '0 0',
         }}>
+
             <div className={styles.navbar}>
+                <div id="translate">
+                </div>
+
                 <div className={styles.logo} onClick={goHome}>
                     <h1>
                         <span>{produtcName}</span>
