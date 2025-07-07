@@ -377,14 +377,14 @@ func Save(c *gin.Context) {
 	yamlStr := req.Yaml
 
 	// 解析 Yaml 到 Unstructured 对象
-	var obj *unstructured.Unstructured
-	obj = &unstructured.Unstructured{
-		Object: make(map[string]interface{}),
-	}
-	if err = yaml.Unmarshal([]byte(yamlStr), obj.Object); err != nil {
+
+	obj := &unstructured.Unstructured{}
+	var raw map[string]interface{}
+	if err = yaml.Unmarshal([]byte(yamlStr), &raw); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	obj.Object = raw
 	obj.SetName(name)
 	obj.SetNamespace(ns)
 	err = kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).Update(&obj).Error
