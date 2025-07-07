@@ -8,10 +8,10 @@ const I18nTranslateProvider = () => {
         // i18nTranslate.service.use('none'); // 设置翻译通道
         i18nTranslate.service.use('client.edge'); // 设置翻译通道
         // i18nTranslate.service.use('giteeAI'); // 设置翻译通道
-        // i18nTranslate.whole.enableAll(); // 启用整体翻译
+        i18nTranslate.whole.enableAll(); // 启用整体翻译
         i18nTranslate.listener.start();
         // i18nTranslate.office.showPanel();//翻译管理面板
-        // i18nTranslate.office.fullExtract.isUse = true;
+        i18nTranslate.office.fullExtract.isUse = true;
         i18nTranslate.language.setLocal('chinese_simplified'); //设置本地语种（当前网页的语种）
 
         //读取离线配置
