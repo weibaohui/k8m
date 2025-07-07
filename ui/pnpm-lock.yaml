@@ -80,6 +80,9 @@ importers:
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
+      i18n-jsautotranslate:
+        specifier: ^3.17.0
+        version: 3.17.0
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1592,6 +1595,9 @@ packages:
   https-proxy-agent@5.0.1:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
     engines: {node: '>= 6'}
+
+  i18n-jsautotranslate@3.17.0:
+    resolution: {integrity: sha512-tQs9297mOCuE/QCdTuNVNEFjaSORtWyHCoYz5BfM9Jr9bIq4DXoBQ+itPe7LxzeeTv6//fsvyYAx1kAFWT9P+w==}
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -4518,6 +4524,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
     optional: true
+
+  i18n-jsautotranslate@3.17.0: {}
 
   ieee754@1.2.1: {}
 

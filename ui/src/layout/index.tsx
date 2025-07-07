@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react'
 import styles from './index.module.scss'
 import FloatingChatGPTButton from './FloatingChatGPTButton'
 import { fetcher } from '@/components/Amis/fetcher'
+import I18nTranslateProvider from '@/components/I18n/I18nTranslateProvider';
 
 const App = () => {
     const { pathname } = useLocation()
@@ -19,6 +20,7 @@ const App = () => {
     const goHome = useCallback(() => {
         navigate('/')
     }, [navigate])
+
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (!pathname.includes('login') && token === null) {
@@ -43,10 +45,13 @@ const App = () => {
                 setProdutcName("k8m");
             });
     }, []);
+
     return <Layout className={styles.container}>
+        <I18nTranslateProvider />
         <Layout.Header style={{
             padding: '0 0',
         }}>
+
             <div className={styles.navbar}>
                 <div className={styles.logo} onClick={goHome}>
                     <h1>

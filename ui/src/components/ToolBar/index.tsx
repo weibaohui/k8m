@@ -1,7 +1,7 @@
 import { Avatar, Dropdown, Space, MenuProps } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
-import { UserOutlined } from '@ant-design/icons';
+import { UserOutlined, GlobalOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
@@ -78,23 +78,46 @@ const Toolbar = () => {
         {
             key: 'logout',
             label: '退出',
+            icon: <i className="fa-solid fa-right-from-bracket"></i>,
             onClick: handleLogout
         }
     ];
 
+    const langOptions = [
+        { label: '中文', value: 'chinese_simplified' },
+        { label: 'EN', value: 'english' }
+    ];
+
+    const langMenu = {
+        items: langOptions.map(opt => ({
+            key: opt.value,
+            label: (
+                <span className='ignore' onClick={() => {
+                    //@ts-ignore
+                    if (window.translate && typeof window.translate.changeLanguage === 'function') {
+                        //@ts-ignore
+                        window.translate.changeLanguage(opt.value);
+                    }
+                }}>{opt.label}</span>
+            )
+        }))
+    };
+
     return (
         <div className={styles.toolbar}>
             <Space>
-                <li>
-                    <Dropdown menu={{ items: menuItems }} placement='bottomRight'>
-                        <span style={{ cursor: 'pointer' }}>
-                            <Avatar size="small" style={{ backgroundColor: '#1677ff' }} >
-                                <UserOutlined style={{ fontSize: 14 }} />
-                            </Avatar>
-                            {/* <span className='ml-1'>{userInfo.username}</span> */}
-                        </span>
-                    </Dropdown>
-                </li>
+                <Dropdown menu={{ items: menuItems }} placement='bottomRight'>
+                    <span style={{ cursor: 'pointer' }}>
+                        <Avatar size="small" style={{ backgroundColor: '#1677ff' }} >
+                            <UserOutlined style={{ fontSize: 14 }} />
+                        </Avatar>
+                    </span>
+                </Dropdown>
+                <Dropdown menu={langMenu} placement="bottomRight" trigger={['click']}>
+                    <Avatar size="small" style={{ backgroundColor: '#1677ff' }} >
+                        <GlobalOutlined style={{ fontSize: 14 }} />
+                    </Avatar>
+                </Dropdown>
             </Space>
         </div >
     );
