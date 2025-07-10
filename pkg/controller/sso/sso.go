@@ -76,6 +76,7 @@ func HandleCallback(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
 		return
 	}
+	 
 	// test
 	// claims["groups"] = []string{"CRM开发组", "bdd", "c", "d"}
 
@@ -138,15 +139,20 @@ func GetUsername(claims map[string]interface{}, preferKeys []string) string {
 }
 
 // GetUserGroups 获取用户组
-func GetUserGroups(claims map[string]interface{}) string {
-	// 默认 fallback 顺序
-	if v, ok := claims["groups"].(string); ok && v != "" {
-		return v
+func GetUserGroups(claims map[string]any) string {
+	var groups []string
+	if v, ok := claims["groups"].([]any); ok {
+		for _, g := range v {
+			if s, ok := g.(string); ok {
+				groups = append(groups, s)
+			}
+		}
+	} else if v, ok := claims["groups"].([]string); ok {
+		groups = v
+	} else if v, ok := claims["groups"].(string); ok && v != "" {
+		groups = append(groups, v)
 	}
-	if l, ok := claims["groups"].([]string); ok && l != nil {
-		return strings.Join(l, ",")
-	}
-	return ""
+	return strings.Join(groups, ",")
 }
 
 // GetLdapEnabled 获取ldap开关状态
