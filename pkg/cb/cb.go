@@ -1,6 +1,7 @@
 package cb
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -69,9 +70,14 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 	cluster := k8s.ID
 	ctx := stmt.Context
 	nsList := stmt.NamespaceList
-	if stmt.Namespace != "" {
-		nsList = append(nsList, stmt.Namespace)
+	ns := stmt.Namespace
+	if ns != "" {
+		nsList = append(nsList, ns)
 	}
+	name := stmt.Name
+	return checkPermissionLogic(ctx, cluster, nsList, ns, name, action)
+}
+func checkPermissionLogic(ctx context.Context, cluster string, nsList []string, ns, name, action string) (string, []string, error) {
 
 	// 内部监听增加一个认证机制，不用做权限校验
 	// 比如node watch
@@ -237,8 +243,8 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		}
 	}
 
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s，roleString=%v, operation=%s, gck=[%s], resource=[%s/%s] ",
-		cluster, username, roleString, roles, action, stmt.GVK.String(), stmt.Namespace, stmt.Name)
+	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s，roleString=%v, operation=%s,  resource=[%s/%s] ",
+		cluster, username, roleString, roles, action, ns, name)
 	return username, roles, err
 }
 func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
