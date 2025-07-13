@@ -27,8 +27,7 @@ func GetChartValue(c *gin.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")
 	version := c.Param("version")
-	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -49,8 +48,7 @@ func GetChartValue(c *gin.Context) {
 func ChartVersionOptionList(c *gin.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")
-	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

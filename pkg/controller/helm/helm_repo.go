@@ -40,7 +40,7 @@ func AddOrUpdateRepo(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -90,7 +90,7 @@ func DeleteRepo(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c, "")
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -116,8 +116,6 @@ func DeleteRepo(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 func UpdateReposIndex(c *gin.Context) {
-	ns := c.Param("ns")
-
 	var req struct {
 		IDs string `json:"ids"`
 	}
@@ -133,7 +131,7 @@ func UpdateReposIndex(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

@@ -16,7 +16,7 @@ import (
 func ListReleaseHistory(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -29,8 +29,7 @@ func ListReleaseHistory(c *gin.Context) {
 	amis.WriteJsonData(c, history)
 }
 func ListRelease(c *gin.Context) {
-	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -83,7 +82,7 @@ func InstallRelease(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c, req.Namespace)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -113,7 +112,7 @@ func UninstallRelease(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -132,7 +131,7 @@ func GetReleaseNote(c *gin.Context) {
 	ns := c.Param("ns")
 	revision := c.Param("revision")
 
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -154,7 +153,7 @@ func GetReleaseValues(c *gin.Context) {
 	ns := c.Param("ns")
 	revision := c.Param("revision")
 
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -190,7 +189,7 @@ func BatchUninstallRelease(c *gin.Context) {
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
-		h, err := getHelm(c, ns)
+		h, err := getHelm(c)
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
@@ -233,7 +232,7 @@ func UpgradeRelease(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelm(c, req.Namespace)
+	h, err := getHelm(c)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)

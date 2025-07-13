@@ -12,10 +12,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
-	if namespace == "" {
-		namespace = "default"
-	}
+func getHelm(c *gin.Context) (helm.Helm, error) {
+
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
