@@ -75,9 +75,9 @@ func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error
 		nsList = append(nsList, ns)
 	}
 	name := stmt.Name
-	return checkPermissionLogic(ctx, cluster, nsList, ns, name, action)
+	return CheckPermissionLogic(ctx, cluster, nsList, ns, name, action)
 }
-func checkPermissionLogic(ctx context.Context, cluster string, nsList []string, ns, name, action string) (string, []string, error) {
+func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, ns, name, action string) (string, []string, error) {
 
 	// 内部监听增加一个认证机制，不用做权限校验
 	// 比如node watch
