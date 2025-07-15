@@ -8,7 +8,7 @@ export default defineConfig(({mode}) => {
     console.log('current mode', mode)
 
     return {
-        base: '/',
+        base: '/k8m/ui',
         server: {
             port: 3000,
             open: true,
@@ -20,6 +20,9 @@ export default defineConfig(({mode}) => {
             // 添加代理配置
             // 添加monaco-editor静态文件代理
             proxy: {
+                '/k8m/api': {
+                    target: 'http://127.0.0.1:3618'
+                },
                 '/monacoeditorwork': {
                     target: 'http://localhost:3000',
                     rewrite: (path) => path.replace(/^\/monacoeditorwork/, '/node_modules/monaco-editor/min/vs'),

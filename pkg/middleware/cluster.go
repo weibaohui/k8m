@@ -40,18 +40,20 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		// 检查请求路径是否需要跳过集群检测
 		if path == "/" ||
+			path == "/k8m/ui/" ||
 			path == "/favicon.ico" ||
+			path == "/k8m/ui/favicon.ico" ||
 			path == "/healthz" ||
-			strings.HasPrefix(path, "/swagger/") ||
-			strings.HasPrefix(path, "/debug/") ||
-			strings.HasPrefix(path, "/mcp/") ||
-			strings.HasPrefix(path, "/auth/") ||
-			strings.HasPrefix(path, "/assets/") ||
-			strings.HasPrefix(path, "/ai/") || // ai 聊天不带cluster
-			strings.HasPrefix(path, "/params/") || // 配置参数
-			strings.HasPrefix(path, "/mgm/") || // 个人中心
-			strings.HasPrefix(path, "/admin/") || // 管理后台
-			strings.HasPrefix(path, "/public/") {
+			strings.HasPrefix(path, "/k8m/ui/swagger/") ||
+			strings.HasPrefix(path, "/k8m/api/debug/") ||
+			strings.HasPrefix(path, "/k8m/api/mcp/") ||
+			strings.HasPrefix(path, "/k8m/api/auth/") ||
+			strings.HasPrefix(path, "/k8m/ui/assets/") ||
+			strings.HasPrefix(path, "/k8m/api/ai/") || // ai 聊天不带cluster
+			strings.HasPrefix(path, "/k8m/api/params/") || // 配置参数
+			strings.HasPrefix(path, "/k8m/api/mgm/") || // 个人中心
+			strings.HasPrefix(path, "/k8m/api/admin/") || // 管理后台
+			strings.HasPrefix(path, "/k8m/ui/public/") {
 			c.Next()
 			return
 

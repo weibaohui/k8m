@@ -249,7 +249,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                     </Button>
                                     <Button
                                         onClick={() => {
-                                            fetch(historyUrl)
+                                            fetch('/k8m/api' + historyUrl)
                                                 .then(response => response.json())
                                                 .then(data => {
                                                     const itemCount = data.data ? data.data.length : 0;
@@ -270,7 +270,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                     </Button>
                                     <Button
                                         onClick={() => {
-                                            fetch(historyResetUrl)
+                                            fetch('/k8m/api' + historyResetUrl)
                                                 .then(response => response.json())
                                                 .then(_ => {
                                                     Modal.success({
