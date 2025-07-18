@@ -38,7 +38,7 @@ func (hc *HelmChartController) GetChartValue(c *gin.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")
 	version := c.Param("version")
-	h, err := getHelmWithNoCluster(c)
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -59,7 +59,7 @@ func (hc *HelmChartController) GetChartValue(c *gin.Context) {
 func (hc *HelmChartController) ChartVersionOptionList(c *gin.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")
-	h, err := getHelmWithNoCluster(c)
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

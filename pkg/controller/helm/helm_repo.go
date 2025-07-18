@@ -43,7 +43,7 @@ func (r *HelmRepoController) AddOrUpdateRepo(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelmWithNoCluster(c)
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -86,7 +86,7 @@ func RepoOptionList(c *gin.Context) {
 func (r *HelmRepoController) DeleteRepo(c *gin.Context) {
 	ids := c.Param("ids")
 
-	h, err := getHelmWithNoCluster(c)
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -120,7 +120,7 @@ func (r *HelmRepoController) UpdateReposIndex(c *gin.Context) {
 		return
 	}
 
-	h, err := getHelmWithNoCluster(c)
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

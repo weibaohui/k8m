@@ -33,6 +33,13 @@ func RegisterHelmReleaseRoutes(api *gin.RouterGroup) {
 func (hr *HelmReleaseController) ListReleaseHistory(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
+
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "list", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -46,6 +53,12 @@ func (hr *HelmReleaseController) ListReleaseHistory(c *gin.Context) {
 	amis.WriteJsonData(c, history)
 }
 func (hr *HelmReleaseController) ListRelease(c *gin.Context) {
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "list", "", "", "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -148,6 +161,13 @@ func (hr *HelmReleaseController) GetReleaseNote(c *gin.Context) {
 	ns := c.Param("ns")
 	revision := c.Param("revision")
 
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "get", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
 	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -169,7 +189,12 @@ func (hr *HelmReleaseController) GetReleaseValues(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	revision := c.Param("revision")
-
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "get", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

@@ -467,6 +467,7 @@ func main() {
 		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", pod.StopPortForward)
 		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
 
+		// helm release
 		helm.RegisterHelmReleaseRoutes(api)
 
 	}

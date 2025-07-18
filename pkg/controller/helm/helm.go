@@ -25,7 +25,7 @@ func getHelm(c *gin.Context) (helm.Helm, error) {
 	cmd := helm.NewHelmCmd("helm", selectedCluster, cluster)
 	return cmd, nil
 }
-func getHelmWithNoCluster(c *gin.Context) (helm.Helm, error) {
+func getHelmWithNoCluster() (helm.Helm, error) {
 	// return h, err
 	cmd := helm.NewHelmCmdWithNoCluster("helm")
 	return cmd, nil
