@@ -76,7 +76,7 @@ func InstallRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "InstallRelease", releaseName, req.Namespace, repoName)
+	_, _, err := handleCommonLogic(c, "create", releaseName, req.Namespace, repoName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -107,7 +107,7 @@ func UninstallRelease(c *gin.Context) {
 	ns := c.Param("ns")
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "UninstallRelease", releaseName, ns, "")
+	_, _, err := handleCommonLogic(c, "delete", releaseName, ns, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -196,7 +196,7 @@ func BatchUninstallRelease(c *gin.Context) {
 		}
 
 		// 检查权限
-		_, _, err = handleCommonLogic(c, "BatchUninstallRelease", name, ns, "")
+		_, _, err = handleCommonLogic(c, "delete", name, ns, "")
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
@@ -226,7 +226,7 @@ func UpgradeRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "UpgradeRelease", req.Name, req.Namespace, "")
+	_, _, err := handleCommonLogic(c, "update", req.Name, req.Namespace, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

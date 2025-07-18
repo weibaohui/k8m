@@ -478,11 +478,6 @@ func main() {
 		api.GET("/helm/chart/list", helm.ListChart)
 		api.GET("/helm/repo/:repo/chart/:chart/versions", helm.ChartVersionOptionList)
 		api.GET("/helm/repo/:repo/chart/:chart/version/:version/values", helm.GetChartValue)
-		// helm
-		api.GET("/helm/repo/list", helm.ListRepo)
-		api.POST("/helm/repo/delete/:ids", helm.DeleteRepo)
-		api.POST("/helm/repo/update_index", helm.UpdateReposIndex)
-		api.POST("/helm/repo/save", helm.AddOrUpdateRepo)
 
 	}
 
@@ -561,6 +556,9 @@ func main() {
 		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
+
+		// helm Repo 操作
+		helm.RegisterHelmRepoRoutes(admin)
 
 	}
 

@@ -11,7 +11,19 @@ import (
 	"gorm.io/gorm"
 )
 
-func ListRepo(c *gin.Context) {
+type HelmRepoController struct {
+}
+
+func RegisterHelmRepoRoutes(admin *gin.RouterGroup) {
+	ctrl := &HelmRepoController{}
+	// helm
+	admin.GET("/helm/repo/list", ctrl.ListRepo)
+	admin.POST("/helm/repo/delete/:ids", ctrl.DeleteRepo)
+	admin.POST("/helm/repo/update_index", ctrl.UpdateReposIndex)
+	admin.POST("/helm/repo/save", ctrl.AddOrUpdateRepo)
+}
+
+func (r *HelmRepoController) ListRepo(c *gin.Context) {
 	// 从数据库查询列表
 	params := dao.BuildParams(c)
 	m := &models.HelmRepository{}
@@ -24,23 +36,14 @@ func ListRepo(c *gin.Context) {
 }
 
 // AddOrUpdateRepo 添加或更新Helm仓库
-func AddOrUpdateRepo(c *gin.Context) {
-	ns := c.Param("ns")
-
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "AddOrUpdateRepo", "", ns, "")
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
+func (r *HelmRepoController) AddOrUpdateRepo(c *gin.Context) {
 	var repo models.HelmRepository
-	if err = c.ShouldBindJSON(&repo); err != nil {
+	if err := c.ShouldBindJSON(&repo); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	h, err := getHelm(c)
+	h, err := getHelmWithNoCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -80,17 +83,10 @@ func RepoOptionList(c *gin.Context) {
 	})
 }
 
-func DeleteRepo(c *gin.Context) {
+func (r *HelmRepoController) DeleteRepo(c *gin.Context) {
 	ids := c.Param("ids")
 
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "DeleteRepo", ids, "", "")
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	h, err := getHelm(c)
+	h, err := getHelmWithNoCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -115,7 +111,7 @@ func DeleteRepo(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
-func UpdateReposIndex(c *gin.Context) {
+func (r *HelmRepoController) UpdateReposIndex(c *gin.Context) {
 	var req struct {
 		IDs string `json:"ids"`
 	}
@@ -124,14 +120,7 @@ func UpdateReposIndex(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "UpdateReposIndex", req.IDs, "", "")
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	h, err := getHelm(c)
+	h, err := getHelmWithNoCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

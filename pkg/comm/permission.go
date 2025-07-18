@@ -13,6 +13,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// CheckPermissionLogic
+// return username,roles,err
 func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, ns, name, action string) (string, []string, error) {
 
 	// 内部监听增加一个认证机制，不用做权限校验
