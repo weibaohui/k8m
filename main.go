@@ -475,9 +475,6 @@ func main() {
 		api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/notes", helm.GetReleaseNote)
 		api.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
 		api.POST("/helm/release/upgrade", helm.UpgradeRelease)
-		api.GET("/helm/chart/list", helm.ListChart)
-		api.GET("/helm/repo/:repo/chart/:chart/versions", helm.ChartVersionOptionList)
-		api.GET("/helm/repo/:repo/chart/:chart/version/:version/values", helm.GetChartValue)
 
 	}
 
@@ -513,6 +510,9 @@ func main() {
 		mgm.GET("/log/operation/list", log.ListOperation)
 		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
+
+		// helm chart
+		helm.RegisterHelmChartRoutes(mgm)
 
 	}
 
