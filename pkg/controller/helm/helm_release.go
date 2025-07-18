@@ -12,8 +12,25 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type HelmReleaseController struct {
+}
+
+func RegisterHelmReleaseRoutes(api *gin.RouterGroup) {
+	ctrl := &HelmReleaseController{}
+
+	api.GET("/helm/release/list", ctrl.ListRelease)
+	api.GET("/helm/release/ns/:ns/name/:name/history/list", ctrl.ListReleaseHistory)
+	api.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", ctrl.InstallRelease)
+	api.POST("/helm/release/ns/:ns/name/:name/uninstall", ctrl.UninstallRelease)
+	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/values", ctrl.GetReleaseValues)
+	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/notes", ctrl.GetReleaseNote)
+	api.POST("/helm/release/batch/uninstall", ctrl.BatchUninstallRelease)
+	api.POST("/helm/release/upgrade", ctrl.UpgradeRelease)
+
+}
+
 // ListReleaseHistory 获取Release的历史版本
-func ListReleaseHistory(c *gin.Context) {
+func (hr *HelmReleaseController) ListReleaseHistory(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	h, err := getHelm(c)
@@ -28,7 +45,7 @@ func ListReleaseHistory(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, history)
 }
-func ListRelease(c *gin.Context) {
+func (hr *HelmReleaseController) ListRelease(c *gin.Context) {
 	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -58,7 +75,7 @@ func ListRelease(c *gin.Context) {
 }
 
 // InstallRelease 安装Helm Release
-func InstallRelease(c *gin.Context) {
+func (hr *HelmReleaseController) InstallRelease(c *gin.Context) {
 
 	releaseName := c.Param("release")
 	repoName := c.Param("repo")
@@ -102,7 +119,7 @@ func InstallRelease(c *gin.Context) {
 }
 
 // UninstallRelease 卸载Helm Release
-func UninstallRelease(c *gin.Context) {
+func (hr *HelmReleaseController) UninstallRelease(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 
@@ -126,7 +143,7 @@ func UninstallRelease(c *gin.Context) {
 }
 
 // GetReleaseNote 获取ReleaseNote
-func GetReleaseNote(c *gin.Context) {
+func (hr *HelmReleaseController) GetReleaseNote(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	revision := c.Param("revision")
@@ -148,7 +165,7 @@ func GetReleaseNote(c *gin.Context) {
 }
 
 // GetReleaseValues 获取安装yaml
-func GetReleaseValues(c *gin.Context) {
+func (hr *HelmReleaseController) GetReleaseValues(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	revision := c.Param("revision")
@@ -177,7 +194,7 @@ func GetReleaseValues(c *gin.Context) {
 	amis.WriteJsonData(c, ret)
 }
 
-func BatchUninstallRelease(c *gin.Context) {
+func (hr *HelmReleaseController) BatchUninstallRelease(c *gin.Context) {
 	var req struct {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
@@ -212,7 +229,7 @@ func BatchUninstallRelease(c *gin.Context) {
 }
 
 // UpgradeRelease 升级Helm Release
-func UpgradeRelease(c *gin.Context) {
+func (hr *HelmReleaseController) UpgradeRelease(c *gin.Context) {
 
 	var req struct {
 		Name      string `json:"name,omitempty"`

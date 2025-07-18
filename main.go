@@ -467,14 +467,7 @@ func main() {
 		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", pod.StopPortForward)
 		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
 
-		api.GET("/helm/release/list", helm.ListRelease)
-		api.GET("/helm/release/ns/:ns/name/:name/history/list", helm.ListReleaseHistory)
-		api.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", helm.InstallRelease)
-		api.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
-		api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/values", helm.GetReleaseValues)
-		api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/notes", helm.GetReleaseNote)
-		api.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
-		api.POST("/helm/release/upgrade", helm.UpgradeRelease)
+		helm.RegisterHelmReleaseRoutes(api)
 
 	}
 
