@@ -92,7 +92,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/k8s/helm/chart/list",
+      "api": "get:/mgm/helm/chart/list",
       "columns": [
         {
           "type": "operation",
@@ -139,7 +139,7 @@
                       "label": "版本",
                       "clearable": true,
                       "value": "${latest_version}",
-                      "source": "/k8s/helm/repo/${repository_name}/chart/${name}/versions"
+                      "source": "/mgm/helm/repo/${repository_name}/chart/${name}/versions"
                     },
                     {
                       "type": "static",
@@ -222,7 +222,7 @@
                           },
                           {
                             "type": "service",
-                            "api": "/k8s/helm/repo/${repository_name}/chart/${name}/version/${install_version}/values",
+                            "api": "/mgm/helm/repo/${repository_name}/chart/${name}/version/${install_version}/values",
                             "body": [
                               {
                                 "type": "editor",

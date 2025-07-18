@@ -467,22 +467,8 @@ func main() {
 		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", pod.StopPortForward)
 		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
 
-		api.GET("/helm/release/list", helm.ListRelease)
-		api.GET("/helm/release/ns/:ns/name/:name/history/list", helm.ListReleaseHistory)
-		api.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", helm.InstallRelease)
-		api.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
-		api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/values", helm.GetReleaseValues)
-		api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/notes", helm.GetReleaseNote)
-		api.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
-		api.POST("/helm/release/upgrade", helm.UpgradeRelease)
-		api.GET("/helm/chart/list", helm.ListChart)
-		api.GET("/helm/repo/:repo/chart/:chart/versions", helm.ChartVersionOptionList)
-		api.GET("/helm/repo/:repo/chart/:chart/version/:version/values", helm.GetChartValue)
-		// helm
-		api.GET("/helm/repo/list", helm.ListRepo)
-		api.POST("/helm/repo/delete/:ids", helm.DeleteRepo)
-		api.POST("/helm/repo/update_index", helm.UpdateReposIndex)
-		api.POST("/helm/repo/save", helm.AddOrUpdateRepo)
+		// helm release
+		helm.RegisterHelmReleaseRoutes(api)
 
 	}
 
@@ -518,6 +504,9 @@ func main() {
 		mgm.GET("/log/operation/list", log.ListOperation)
 		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
+
+		// helm chart
+		helm.RegisterHelmChartRoutes(mgm)
 
 	}
 
@@ -561,6 +550,9 @@ func main() {
 		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
+
+		// helm Repo 操作
+		helm.RegisterHelmRepoRoutes(admin)
 
 	}
 

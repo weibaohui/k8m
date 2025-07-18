@@ -2,9 +2,9 @@ package helm
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/comm"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/helm"
@@ -12,10 +12,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
-	if namespace == "" {
-		namespace = "default"
-	}
+func getHelm(c *gin.Context) (helm.Helm, error) {
+
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -25,6 +23,11 @@ func getHelm(c *gin.Context, namespace string) (helm.Helm, error) {
 
 	// return h, err
 	cmd := helm.NewHelmCmd("helm", selectedCluster, cluster)
+	return cmd, nil
+}
+func getHelmWithNoCluster() (helm.Helm, error) {
+	// return h, err
+	cmd := helm.NewHelmCmdWithNoCluster("helm")
 	return cmd, nil
 }
 
@@ -46,16 +49,16 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 		ActionResult: "success",
 	}
 
-	var err error
-	if role == constants.RoleClusterReadonly {
-		err = fmt.Errorf("非管理员不能%s资源", action)
-	}
+	err := check(c, cluster, namespace, releaseName, action)
 	if err != nil {
 		log.ActionResult = err.Error()
 	}
-	go func() {
-		time.Sleep(1 * time.Second)
-		service.OperationLogService().Add(&log)
-	}()
+	go service.OperationLogService().Add(&log)
 	return username, role, err
+}
+func check(c *gin.Context, cluster, ns, name, action string) error {
+	ctx := amis.GetContextWithUser(c)
+	nsList := []string{ns}
+	_, _, err := comm.CheckPermissionLogic(ctx, cluster, nsList, ns, name, action)
+	return err
 }
