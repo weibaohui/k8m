@@ -253,4 +253,4 @@ pnpm run dev
 
 ## 微信群
 
-![输入图片说明](https://foruda.gitee.com/images/1752284297039245089/e73b862d_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1752939002803209217/b3119fee_77493.png "屏幕截图")
