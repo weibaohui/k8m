@@ -474,18 +474,9 @@ func main() {
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
 	{
-
 		template.RegisterTemplateRoutes(mgm)
-
 		// user profile 用户自助操作
-		mgm.GET("/user/profile", profile.Profile)
-		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
-		mgm.POST("/user/profile/update_psw", profile.UpdatePsw)
-		// user profile 2FA 用户自助操作
-		mgm.POST("/user/profile/2fa/generate", profile.Generate2FASecret)
-		mgm.POST("/user/profile/2fa/disable", profile.Disable2FA)
-		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
-
+		profile.RegisterProfileRoutes(mgm)
 		// API密钥管理
 		apikey.RegisterAPIKeysRoutes(mgm)
 		// MCP密钥管理
@@ -494,10 +485,8 @@ func main() {
 		log.RegisterLogRoutes(mgm)
 		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
-
 		// helm chart
 		helm.RegisterHelmChartRoutes(mgm)
-
 	}
 
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
@@ -510,7 +499,6 @@ func main() {
 		config.RegisterConfigRoutes(admin)
 		// 大模型列表管理
 		config.RegisterAIModelConfigRoutes(admin)
-
 		// 集群巡检定时任务
 		inspection.RegisterAdminScheduleRoutes(admin)
 		// 集群巡检记录
@@ -519,7 +507,6 @@ func main() {
 		inspection.RegisterAdminLuaScriptRoutes(admin)
 		// 集群巡检webhook管理
 		inspection.RegisterAdminWebhookRoutes(admin)
-
 		// MCP配置
 		mcp.RegisterMCPServerRoutes(admin)
 		mcp.RegisterMCPToolRoutes(admin)
@@ -533,7 +520,6 @@ func main() {
 		cluster.RegisterAdminClusterRoutes(admin)
 		// helm Repo 操作
 		helm.RegisterHelmRepoRoutes(admin)
-
 	}
 
 	showBootInfo(Version, cfg.Port)

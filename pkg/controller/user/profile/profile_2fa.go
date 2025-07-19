@@ -12,14 +12,14 @@ import (
 )
 
 // Disable2FA 禁用2FA
-func Disable2FA(c *gin.Context) {
+func (uc *Controller) Disable2FA(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户信息
 
 	user := &models.User{}
 	user.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
 	// 清除2FA相关信息
 	user.TwoFAEnabled = false
@@ -41,13 +41,13 @@ func Disable2FA(c *gin.Context) {
 }
 
 // Generate2FASecret 生成2FA密钥
-func Generate2FASecret(c *gin.Context) {
+func (uc *Controller) Generate2FASecret(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户信息
 	user := &models.User{}
 	user.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
 	err := dao.DB().
 		Where("username=?", user.Username).
@@ -103,7 +103,7 @@ func Generate2FASecret(c *gin.Context) {
 }
 
 // Enable2FA 验证并启用2FA
-func Enable2FA(c *gin.Context) {
+func (uc *Controller) Enable2FA(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户输入的验证码
@@ -121,7 +121,7 @@ func Enable2FA(c *gin.Context) {
 
 	user := &models.User{}
 	user.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
 	err := dao.DB().
 		Where("username=?", user.Username).
