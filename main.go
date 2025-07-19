@@ -487,10 +487,7 @@ func main() {
 		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
 
 		// API密钥管理
-		mgm.GET("/user/profile/apikeys/list", apikey.List)
-		mgm.POST("/user/profile/apikeys/create", apikey.Create)
-		mgm.POST("/user/profile/apikeys/delete/:id", apikey.Delete)
-
+		apikey.RegisterAPIKeysRoutes(mgm)
 		// MCP密钥管理
 		mcpkey.RegisterMCPKeysRoutes(mgm)
 		// log
