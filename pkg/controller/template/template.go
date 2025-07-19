@@ -7,7 +7,18 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
-func ListTemplate(c *gin.Context) {
+type Controller struct {
+}
+
+func RegisterTemplateRoutes(mgm *gin.RouterGroup) {
+	ctrl := &Controller{}
+	mgm.GET("/custom/template/kind/list", ctrl.ListKind)
+	mgm.GET("/custom/template/list", ctrl.List)
+	mgm.POST("/custom/template/save", ctrl.Save)
+	mgm.POST("/custom/template/delete/:ids", ctrl.Delete)
+}
+
+func (t *Controller) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}
 
@@ -18,7 +29,7 @@ func ListTemplate(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
-func SaveTemplate(c *gin.Context) {
+func (t *Controller) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.CustomTemplate{}
 	err := c.ShouldBindJSON(&m)
@@ -41,7 +52,7 @@ func SaveTemplate(c *gin.Context) {
 		"id": m.ID,
 	})
 }
-func DeleteTemplate(c *gin.Context) {
+func (t *Controller) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}

@@ -10,12 +10,12 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type MCPServerController struct {
+type ServerController struct {
 }
 
 // RegisterMCPServerRoutes 注册路由
 func RegisterMCPServerRoutes(admin *gin.RouterGroup) {
-	ctrl := &MCPServerController{}
+	ctrl := &ServerController{}
 	admin.GET("/mcp/list", ctrl.ServerList)
 	admin.POST("/mcp/connect/:name", ctrl.Connect)
 	admin.POST("/mcp/delete", ctrl.Delete)
@@ -28,7 +28,7 @@ func RegisterMCPServerRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/list [get]
-func (m *MCPServerController) ServerList(c *gin.Context) {
+func (m *ServerController) ServerList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	var mcpServer models.MCPServerConfig
 	list, count, err := mcpServer.List(params)
@@ -40,7 +40,7 @@ func (m *MCPServerController) ServerList(c *gin.Context) {
 // @Param name path string true "MCP服务器名称"
 // @Success 200 {object} string
 // @Router /admin/mcp/connect/{name} [post]
-func (m *MCPServerController) Connect(c *gin.Context) {
+func (m *ServerController) Connect(c *gin.Context) {
 	name := c.Param("name")
 	err := service.McpService().Host().ConnectServer(c.Request.Context(), name)
 	amis.WriteJsonErrorOrOK(c, err)
@@ -50,7 +50,7 @@ func (m *MCPServerController) Connect(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/delete [post]
-func (m *MCPServerController) Delete(c *gin.Context) {
+func (m *ServerController) Delete(c *gin.Context) {
 	var req struct {
 		IDs []int `json:"ids"`
 	}
@@ -73,7 +73,7 @@ func (m *MCPServerController) Delete(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/save [post]
-func (m *MCPServerController) AddOrUpdate(c *gin.Context) {
+func (m *ServerController) AddOrUpdate(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var entity models.MCPServerConfig
@@ -101,7 +101,7 @@ func (m *MCPServerController) AddOrUpdate(c *gin.Context) {
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/mcp/save/id/{id}/status/{status} [post]
-func (m *MCPServerController) QuickSave(c *gin.Context) {
+func (m *ServerController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 	params := dao.BuildParams(c)
@@ -137,7 +137,7 @@ func (m *MCPServerController) QuickSave(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/log/list [get]
-func (m *MCPServerController) MCPLogList(c *gin.Context) {
+func (m *ServerController) MCPLogList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	var tool models.MCPToolLog
 	list, count, err := tool.List(params)

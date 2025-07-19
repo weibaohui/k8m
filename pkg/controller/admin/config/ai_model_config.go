@@ -11,14 +11,14 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-// AIModelConfigController 用于管理AI模型配置
+// Controller 用于管理AI模型配置
 
-type AIModelConfigController struct {
+type Controller struct {
 }
 
 // RegisterAIModelConfigRoutes 注册路由
 func RegisterAIModelConfigRoutes(admin *gin.RouterGroup) {
-	ctrl := &AIModelConfigController{}
+	ctrl := &Controller{}
 	admin.GET("/ai/model/list", ctrl.List)
 	admin.POST("/ai/model/save", ctrl.Save)
 	admin.POST("/ai/model/delete/:ids", ctrl.Delete)
@@ -33,7 +33,7 @@ func RegisterAIModelConfigRoutes(admin *gin.RouterGroup) {
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/ai/model/id/{id}/think/{status} [post]
-func (m *AIModelConfigController) QuickSave(c *gin.Context) {
+func (m *Controller) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 
@@ -59,7 +59,7 @@ func (m *AIModelConfigController) QuickSave(c *gin.Context) {
 // @Param id path int true "模型ID"
 // @Success 200 {object} string
 // @Router /admin/ai/model/test/id/{id} [post]
-func (m *AIModelConfigController) TestConnection(c *gin.Context) {
+func (m *Controller) TestConnection(c *gin.Context) {
 	id := c.Param("id")
 
 	var entity models.AIModelConfig
@@ -93,7 +93,7 @@ func (m *AIModelConfigController) TestConnection(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai/model/save [post]
-func (m *AIModelConfigController) Save(c *gin.Context) {
+func (m *Controller) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var config models.AIModelConfig
@@ -129,7 +129,7 @@ func (m *AIModelConfigController) Save(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai/model/list [get]
-func (m *AIModelConfigController) List(c *gin.Context) {
+func (m *Controller) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	config := &models.AIModelConfig{}
@@ -146,7 +146,7 @@ func (m *AIModelConfigController) List(c *gin.Context) {
 // @Param ids path string true "模型ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/ai/model/delete/{ids} [post]
-func (m *AIModelConfigController) Delete(c *gin.Context) {
+func (m *Controller) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	config := &models.AIModelConfig{}

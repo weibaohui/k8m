@@ -9,12 +9,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type MCPToolController struct {
+type ToolController struct {
 }
 
 // RegisterMCPToolRoutes 注册路由
 func RegisterMCPToolRoutes(admin *gin.RouterGroup) {
-	ctrl := &MCPToolController{}
+	ctrl := &ToolController{}
 	admin.GET("/mcp/server/:name/tools/list", ctrl.ToolsList)
 	admin.POST("/mcp/tool/save/id/:id/status/:status", ctrl.ToolQuickSave)
 
@@ -25,7 +25,7 @@ func RegisterMCPToolRoutes(admin *gin.RouterGroup) {
 // @Param name path string true "MCP服务器名称"
 // @Success 200 {object} string
 // @Router /admin/mcp/server/{name}/tools/list [get]
-func (m *MCPToolController) ToolsList(c *gin.Context) {
+func (m *ToolController) ToolsList(c *gin.Context) {
 	name := c.Param("name")
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
@@ -46,7 +46,7 @@ func (m *MCPToolController) ToolsList(c *gin.Context) {
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/mcp/tool/save/id/{id}/status/{status} [post]
-func (m *MCPToolController) ToolQuickSave(c *gin.Context) {
+func (m *ToolController) ToolQuickSave(c *gin.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 

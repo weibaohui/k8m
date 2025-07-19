@@ -475,10 +475,7 @@ func main() {
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
 	{
 
-		mgm.GET("/custom/template/kind/list", template.ListKind)
-		mgm.GET("/custom/template/list", template.ListTemplate)
-		mgm.POST("/custom/template/save", template.SaveTemplate)
-		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
+		template.RegisterTemplateRoutes(mgm)
 
 		// user profile 用户自助操作
 		mgm.GET("/user/profile", profile.Profile)
@@ -550,7 +547,6 @@ func main() {
 		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
-
 		// helm Repo 操作
 		helm.RegisterHelmRepoRoutes(admin)
 
