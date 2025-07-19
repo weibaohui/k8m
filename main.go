@@ -227,60 +227,25 @@ func main() {
 
 	auth := r.Group("/auth")
 	{
-		auth.POST("/login", login.LoginByPassword)
-		auth.GET("/sso/config", sso.GetSSOConfig)
-		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
-		auth.GET("/oidc/:name/callback", sso.HandleCallback)
-		auth.GET("/ldap/config", sso.GetLdapEnabled)
+		login.RegisterLoginRoutes(auth)
+		sso.RegisterAuthRoutes(auth)
 	}
 
 	// 公共参数
 	params := r.Group("/params", middleware.AuthMiddleware())
 	{
-		// 获取当前登录用户的角色，登录即可
-		params.GET("/user/role", param.UserRole)
-		// 获取某个配置项
-		params.GET("/config/:key", param.Config)
-		// 获取当前登录用户的集群列表,下拉列表
-		params.GET("/cluster/option_list", param.ClusterOptionList)
-		// 获取当前登录用户的集群列表,table列表
-		params.GET("/cluster/all", param.ClusterTableList)
-		// 获取当前软件版本信息
-		params.GET("/version", param.Version)
-		// 获取helm 仓库列表
-		params.GET("/helm/repo/option_list", param.RepoOptionList)
-
-		// 获取翻转显示的指标列表
-		params.GET("/condition/reverse/list", param.Conditions)
-
+		param.RegisterParamRoutes(params)
 	}
 	ai := r.Group("/ai", middleware.AuthMiddleware())
 	{
-
-		// chatgpt
-		ai.GET("/chat/event", chat.Event)
-		ai.GET("/chat/log", chat.Log)
-		ai.GET("/chat/cron", chat.Cron)
-		ai.GET("/chat/describe", chat.Describe)
-		ai.GET("/chat/resource", chat.Resource)
-		ai.GET("/chat/any_question", chat.AnyQuestion)
-		ai.GET("/chat/any_selection", chat.AnySelection)
-		ai.GET("/chat/example", chat.Example)
-		ai.GET("/chat/example/field", chat.FieldExample)
-		ai.GET("/chat/ws_chatgpt", chat.GPTShell)
-		ai.GET("/chat/ws_chatgpt/history", chat.History)
-		ai.GET("/chat/ws_chatgpt/history/reset", chat.Reset)
-		ai.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
-
+		chat.RegisterChatRoutes(ai)
 	}
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
 		// cluster
 		api.GET("/status/resource_count/cache_seconds/:cache", cluster_status.ClusterResourceCount)
-		// dynamic
-		api.POST("/yaml/apply", dynamic.Apply)
-		api.POST("/yaml/upload", dynamic.UploadFile)
-		api.POST("/yaml/delete", dynamic.Delete)
+		// yaml
+		dynamic.RegisterYamlRoutes(api)
 		// CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)                         // CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", dynamic.FetchJson)                // CRD
@@ -348,10 +313,15 @@ func main() {
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pod", dynamic.LinksPod)
 
 		// k8s pod
-		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
-		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
-		api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", pod.Xterm)
-		api.GET("/pod/top/ns/:ns/list", pod.TopList)
+		pod.RegisterLabelRoutes(api)
+		pod.RegisterLogRoutes(api)
+		pod.RegisterXtermRoutes(api)
+		// pod 文件浏览上传下载
+		pod.RegisterPodFileRoutes(api)
+		// Pod 资源使用情况
+		pod.RegisterResourceRoutes(api)
+		// Pod 端口转发
+		pod.RegisterPortRoutes(api)
 
 		// k8s deploy
 		api.POST("/deploy/ns/:ns/name/:name/restart", deploy.Restart)
@@ -452,21 +422,6 @@ func main() {
 		api.GET("/k8s_gpt/cluster/:user_cluster/result", k8sgpt.GetClusterRunAnalysisResult)
 		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
 
-		// pod 文件浏览上传下载
-		api.POST("/file/list", pod.FileList)
-		api.POST("/file/show", pod.ShowFile)
-		api.POST("/file/save", pod.SaveFile)
-		api.GET("/file/download", pod.DownloadFile)
-		api.POST("/file/upload", pod.UploadFile)
-		api.POST("/file/delete", pod.DeleteFile)
-		// Pod 资源使用情况
-		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
-		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
-		// Pod 端口转发
-		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", pod.StartPortForward)
-		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", pod.StopPortForward)
-		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
-
 		// helm release
 		helm.RegisterHelmReleaseRoutes(api)
 
@@ -474,57 +429,31 @@ func main() {
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
 	{
-
-		mgm.GET("/custom/template/kind/list", template.ListKind)
-		mgm.GET("/custom/template/list", template.ListTemplate)
-		mgm.POST("/custom/template/save", template.SaveTemplate)
-		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
-
+		template.RegisterTemplateRoutes(mgm)
 		// user profile 用户自助操作
-		mgm.GET("/user/profile", profile.Profile)
-		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
-		mgm.POST("/user/profile/update_psw", profile.UpdatePsw)
-		// user profile 2FA 用户自助操作
-		mgm.POST("/user/profile/2fa/generate", profile.Generate2FASecret)
-		mgm.POST("/user/profile/2fa/disable", profile.Disable2FA)
-		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
-
+		profile.RegisterProfileRoutes(mgm)
 		// API密钥管理
-		mgm.GET("/user/profile/apikeys/list", apikey.List)
-		mgm.POST("/user/profile/apikeys/create", apikey.Create)
-		mgm.POST("/user/profile/apikeys/delete/:id", apikey.Delete)
-
+		apikey.RegisterAPIKeysRoutes(mgm)
 		// MCP密钥管理
-		mgm.GET("/user/profile/mcpkeys/list", mcpkey.List)
-		mgm.POST("/user/profile/mcpkeys/create", mcpkey.Create)
-		mgm.POST("/user/profile/mcpkeys/delete/:id", mcpkey.Delete)
-
+		mcpkey.RegisterMCPKeysRoutes(mgm)
 		// log
-		mgm.GET("/log/shell/list", log.ListShell)
-		mgm.GET("/log/operation/list", log.ListOperation)
+		log.RegisterLogRoutes(mgm)
 		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
-
 		// helm chart
 		helm.RegisterHelmChartRoutes(mgm)
-
 	}
 
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
 	{
 		// condition
-		admin.GET("/condition/list", config.ConditionList)
-		admin.POST("/condition/save", config.ConditionSave)
-		admin.POST("/condition/delete/:ids", config.ConditionDelete)
-		// 指标翻转状态修改
-		admin.POST("/condition/save/id/:id/status/:status", config.ConditionQuickSave)
-
-		// SSO 配置
-		admin.GET("/config/sso/list", config.SSOConfigList)
-		admin.POST("/config/sso/save", config.SSOConfigSave)
-		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
-		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
-
+		config.RegisterConditionRoutes(admin)
+		// sso
+		config.RegisterSSOConfigRoutes(admin)
+		// 平台参数配置
+		config.RegisterConfigRoutes(admin)
+		// 大模型列表管理
+		config.RegisterAIModelConfigRoutes(admin)
 		// 集群巡检定时任务
 		inspection.RegisterAdminScheduleRoutes(admin)
 		// 集群巡检记录
@@ -533,13 +462,7 @@ func main() {
 		inspection.RegisterAdminLuaScriptRoutes(admin)
 		// 集群巡检webhook管理
 		inspection.RegisterAdminWebhookRoutes(admin)
-
-		// 平台参数配置
-		admin.GET("/config/all", config.GetConfig)
-		admin.POST("/config/update", config.UpdateConfig)
-
-		// 大模型列表管理
-		config.RegisterAIModelConfigRoutes(admin)
+		// MCP配置
 		mcp.RegisterMCPServerRoutes(admin)
 		mcp.RegisterMCPToolRoutes(admin)
 		// 集群授权相关
@@ -550,10 +473,8 @@ func main() {
 		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
-
 		// helm Repo 操作
 		helm.RegisterHelmRepoRoutes(admin)
-
 	}
 
 	showBootInfo(Version, cfg.Port)

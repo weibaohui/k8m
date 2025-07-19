@@ -10,7 +10,7 @@ import (
 )
 
 // Version 获取版本号
-func Version(c *gin.Context) {
+func (pc *Controller) Version(c *gin.Context) {
 
 	cfg := flag.Init()
 	amis.WriteJsonData(c, gin.H{

@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ListKind(c *gin.Context) {
+func (t *Controller) ListKind(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}
 	params.PerPage = 1000

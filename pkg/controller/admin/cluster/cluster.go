@@ -8,11 +8,11 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-type AdminClusterController struct {
+type Controller struct {
 }
 
 func RegisterAdminClusterRoutes(admin *gin.RouterGroup) {
-	ctrl := &AdminClusterController{}
+	ctrl := &Controller{}
 	admin.POST("/cluster/scan", ctrl.Scan)
 	admin.GET("/cluster/file/option_list", ctrl.FileOptionList)
 	admin.POST("/cluster/kubeconfig/save", ctrl.SaveKubeConfig)
@@ -20,8 +20,8 @@ func RegisterAdminClusterRoutes(admin *gin.RouterGroup) {
 	admin.POST("/cluster/:cluster/disconnect", ctrl.Disconnect)
 }
 func RegisterUserClusterRoutes(mgm *gin.RouterGroup) {
-	ctrl := &AdminClusterController{}
-	//前端用户点击重连接按钮
+	ctrl := &Controller{}
+	// 前端用户点击重连接按钮
 	mgm.POST("/cluster/:cluster/reconnect", ctrl.Reconnect)
 }
 
@@ -29,7 +29,7 @@ func RegisterUserClusterRoutes(mgm *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200   {object} string
 // @Router /admin/cluster/file/option_list [get]
-func (a *AdminClusterController) FileOptionList(c *gin.Context) {
+func (a *Controller) FileOptionList(c *gin.Context) {
 	clusters := service.ClusterService().AllClusters()
 
 	if len(clusters) == 0 {
@@ -57,12 +57,12 @@ func (a *AdminClusterController) FileOptionList(c *gin.Context) {
 	})
 }
 
-func (a *AdminClusterController) Scan(c *gin.Context) {
+func (a *Controller) Scan(c *gin.Context) {
 	service.ClusterService().Scan()
 	amis.WriteJsonData(c, "ok")
 }
 
-func (a *AdminClusterController) Reconnect(c *gin.Context) {
+func (a *Controller) Reconnect(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	clusterID, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {
@@ -72,7 +72,7 @@ func (a *AdminClusterController) Reconnect(c *gin.Context) {
 	go service.ClusterService().Connect(clusterID)
 	amis.WriteJsonOKMsg(c, "已执行，请稍后刷新")
 }
-func (a *AdminClusterController) Disconnect(c *gin.Context) {
+func (a *Controller) Disconnect(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	clusterID, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {

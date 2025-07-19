@@ -7,7 +7,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
-func Conditions(c *gin.Context) {
+func (pc *Controller) Conditions(c *gin.Context) {
 	var list []*models.ConditionReverse
 	err := dao.DB().Model(&models.ConditionReverse{}).
 		Select("name").

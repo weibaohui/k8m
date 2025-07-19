@@ -30,7 +30,7 @@ var WebsocketMessageType = map[int]string{
 // - 自动处理连接异常、心跳超时和资源释放。
 //
 // 若 AI 服务未启用或参数绑定失败，将返回相应错误信息。
-func GPTShell(c *gin.Context) {
+func (cc *Controller) GPTShell(c *gin.Context) {
 
 	if !service.AIService().IsEnabled() {
 		amis.WriteJsonData(c, gin.H{

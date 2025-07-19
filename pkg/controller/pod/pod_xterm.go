@@ -28,6 +28,13 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type XtermController struct{}
+
+func RegisterXtermRoutes(api *gin.RouterGroup) {
+	ctrl := &XtermController{}
+	api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", ctrl.Xterm)
+}
+
 var WebsocketMessageType = map[int]string{
 	websocket.BinaryMessage: "binary",
 	websocket.TextMessage:   "text",
@@ -101,7 +108,7 @@ func cmdLogger(c *gin.Context, cmd string) {
 // Xterm 通过 WebSocket 提供与 Kubernetes Pod 容器的交互式终端会话。
 // 支持 xterm.js 前端，处理终端输入输出、窗口大小调整、命令日志记录和连接保活。
 // 会话结束后可根据参数选择性删除目标 Pod。
-func Xterm(c *gin.Context) {
+func (xc *XtermController) Xterm(c *gin.Context) {
 	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
@@ -195,7 +202,6 @@ func Xterm(c *gin.Context) {
 	var waiter sync.WaitGroup
 	waiter.Add(1)
 
-	// this is a keep-alive loop that ensures connection does not hang-up itself
 	lastPongTime := time.Now()
 	conn.SetPongHandler(func(msg string) error {
 		lastPongTime = time.Now()

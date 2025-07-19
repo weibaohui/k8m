@@ -13,8 +13,17 @@ import (
 	"gorm.io/gorm"
 )
 
+type Controller struct{}
+
+func RegisterAPIKeysRoutes(mgm *gin.RouterGroup) {
+	ctrl := &Controller{}
+	mgm.GET("/user/profile/api_keys/list", ctrl.List)
+	mgm.POST("/user/profile/api_keys/create", ctrl.Create)
+	mgm.POST("/user/profile/api_keys/delete/:id", ctrl.Delete)
+}
+
 // Create 创建API密钥
-func Create(c *gin.Context) {
+func (ac *Controller) Create(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var req struct {
@@ -59,7 +68,7 @@ func generateAPIKey(username string) string {
 }
 
 // List 获取API密钥列表
-func List(c *gin.Context) {
+func (ac *Controller) List(c *gin.Context) {
 	username := c.GetString(constants.JwtUserName)
 	params := dao.BuildParams(c)
 
@@ -76,7 +85,7 @@ func List(c *gin.Context) {
 	amis.WriteJsonData(c, list)
 }
 
-func Delete(c *gin.Context) {
+func (ac *Controller) Delete(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 

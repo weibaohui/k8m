@@ -11,11 +11,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type HelmRepoController struct {
+type RepoController struct {
 }
 
 func RegisterHelmRepoRoutes(admin *gin.RouterGroup) {
-	ctrl := &HelmRepoController{}
+	ctrl := &RepoController{}
 	// helm
 	admin.GET("/helm/repo/list", ctrl.ListRepo)
 	admin.POST("/helm/repo/delete/:ids", ctrl.DeleteRepo)
@@ -23,7 +23,7 @@ func RegisterHelmRepoRoutes(admin *gin.RouterGroup) {
 	admin.POST("/helm/repo/save", ctrl.AddOrUpdateRepo)
 }
 
-func (r *HelmRepoController) ListRepo(c *gin.Context) {
+func (r *RepoController) ListRepo(c *gin.Context) {
 	// 从数据库查询列表
 	params := dao.BuildParams(c)
 	m := &models.HelmRepository{}
@@ -36,7 +36,7 @@ func (r *HelmRepoController) ListRepo(c *gin.Context) {
 }
 
 // AddOrUpdateRepo 添加或更新Helm仓库
-func (r *HelmRepoController) AddOrUpdateRepo(c *gin.Context) {
+func (r *RepoController) AddOrUpdateRepo(c *gin.Context) {
 	var repo models.HelmRepository
 	if err := c.ShouldBindJSON(&repo); err != nil {
 		amis.WriteJsonError(c, err)
@@ -83,7 +83,7 @@ func RepoOptionList(c *gin.Context) {
 	})
 }
 
-func (r *HelmRepoController) DeleteRepo(c *gin.Context) {
+func (r *RepoController) DeleteRepo(c *gin.Context) {
 	ids := c.Param("ids")
 
 	h, err := getHelmWithNoCluster()
@@ -111,7 +111,7 @@ func (r *HelmRepoController) DeleteRepo(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
-func (r *HelmRepoController) UpdateReposIndex(c *gin.Context) {
+func (r *RepoController) UpdateReposIndex(c *gin.Context) {
 	var req struct {
 		IDs string `json:"ids"`
 	}

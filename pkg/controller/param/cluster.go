@@ -13,7 +13,7 @@ import (
 	"github.com/weibaohui/kom/kom"
 )
 
-func ClusterOptionList(c *gin.Context) {
+func (pc *Controller) ClusterOptionList(c *gin.Context) {
 	user, _ := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
@@ -56,7 +56,7 @@ func ClusterOptionList(c *gin.Context) {
 	})
 }
 
-func ClusterTableList(c *gin.Context) {
+func (pc *Controller) ClusterTableList(c *gin.Context) {
 	user, _ := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()

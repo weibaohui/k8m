@@ -7,7 +7,14 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
-func ListShell(c *gin.Context) {
+type Controller struct{}
+
+func RegisterLogRoutes(mgm *gin.RouterGroup) {
+	ctrl := &Controller{}
+	mgm.GET("/log/shell/list", ctrl.ListShell)
+	mgm.GET("/log/operation/list", ctrl.ListOperation)
+}
+func (lc *Controller) ListShell(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.ShellLog{}
 
@@ -19,7 +26,7 @@ func ListShell(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-func ListOperation(c *gin.Context) {
+func (lc *Controller) ListOperation(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.OperationLog{}
 

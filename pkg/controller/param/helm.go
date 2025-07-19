@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RepoOptionList(c *gin.Context) {
+func (pc *Controller) HelmRepoOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.OrderBy = "name"
 	m := &models.HelmRepository{}

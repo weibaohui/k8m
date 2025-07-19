@@ -9,7 +9,19 @@ import (
 	"gorm.io/gorm"
 )
 
-func SSOConfigList(c *gin.Context) {
+type SSOConfigController struct {
+}
+
+func RegisterSSOConfigRoutes(admin *gin.RouterGroup) {
+	ctrl := &SSOConfigController{}
+	// SSO 配置
+	admin.GET("/config/sso/list", ctrl.List)
+	admin.POST("/config/sso/save", ctrl.Save)
+	admin.POST("/config/sso/delete/:ids", ctrl.Delete)
+	admin.POST("/config/sso/save/id/:id/status/:enabled", ctrl.QuickSave)
+}
+
+func (sc *SSOConfigController) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.SSOConfig{}
 
@@ -21,7 +33,7 @@ func SSOConfigList(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-func SSOConfigSave(c *gin.Context) {
+func (sc *SSOConfigController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.SSOConfig{}
 	err := c.ShouldBindJSON(&m)
@@ -42,7 +54,7 @@ func SSOConfigSave(c *gin.Context) {
 	})
 }
 
-func SSOConfigDelete(c *gin.Context) {
+func (sc *SSOConfigController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.SSOConfig{}
@@ -55,7 +67,7 @@ func SSOConfigDelete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func SSOConfigQuickSave(c *gin.Context) {
+func (sc *SSOConfigController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 

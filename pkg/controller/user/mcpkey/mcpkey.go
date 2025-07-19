@@ -13,10 +13,19 @@ import (
 	"gorm.io/gorm"
 )
 
+type Controller struct{}
+
+func RegisterMCPKeysRoutes(mgm *gin.RouterGroup) {
+	ctrl := &Controller{}
+	mgm.GET("/user/profile/mcp_keys/list", ctrl.List)
+	mgm.POST("/user/profile/mcp_keys/create", ctrl.Create)
+	mgm.POST("/user/profile/mcp_keys/delete/:id", ctrl.Delete)
+}
+
 // Create 处理创建新的MCP密钥的HTTP请求。
 // 从请求中解析描述信息，获取当前用户，生成有效期为10年的JWT令牌，并创建包含该信息的MCP密钥记录保存到数据库。
 // 失败时返回JSON格式的错误响应，成功时返回操作成功的JSON响应。
-func Create(c *gin.Context) {
+func (mc *Controller) Create(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var req struct {
@@ -54,7 +63,7 @@ func Create(c *gin.Context) {
 }
 
 // List 获取MCP密钥列表
-func List(c *gin.Context) {
+func (mc *Controller) List(c *gin.Context) {
 	username := c.GetString(constants.JwtUserName)
 	params := dao.BuildParams(c)
 
@@ -71,7 +80,7 @@ func List(c *gin.Context) {
 	amis.WriteJsonData(c, list)
 }
 
-func Delete(c *gin.Context) {
+func (mc *Controller) Delete(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 
