@@ -492,13 +492,9 @@ func main() {
 		mgm.POST("/user/profile/apikeys/delete/:id", apikey.Delete)
 
 		// MCP密钥管理
-		mgm.GET("/user/profile/mcpkeys/list", mcpkey.List)
-		mgm.POST("/user/profile/mcpkeys/create", mcpkey.Create)
-		mgm.POST("/user/profile/mcpkeys/delete/:id", mcpkey.Delete)
-
+		mcpkey.RegisterMCPKeysRoutes(mgm)
 		// log
-		mgm.GET("/log/shell/list", log.ListShell)
-		mgm.GET("/log/operation/list", log.ListOperation)
+		log.RegisterLogRoutes(mgm)
 		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
 
