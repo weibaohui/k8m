@@ -315,10 +315,15 @@ func main() {
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pod", dynamic.LinksPod)
 
 		// k8s pod
-		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
-		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
-		api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", pod.Xterm)
-		api.GET("/pod/top/ns/:ns/list", pod.TopList)
+		pod.RegisterLabelRoutes(api)
+		pod.RegisterLogRoutes(api)
+		pod.RegisterXtermRoutes(api)
+		// pod 文件浏览上传下载
+		pod.RegisterPodFileRoutes(api)
+		// Pod 资源使用情况
+		pod.RegisterResourceRoutes(api)
+		// Pod 端口转发
+		pod.RegisterPortRoutes(api)
 
 		// k8s deploy
 		api.POST("/deploy/ns/:ns/name/:name/restart", deploy.Restart)
@@ -418,16 +423,6 @@ func main() {
 		api.POST("/k8s_gpt/cluster/:user_cluster/run", k8sgpt.ClusterRunAnalysis)
 		api.GET("/k8s_gpt/cluster/:user_cluster/result", k8sgpt.GetClusterRunAnalysisResult)
 		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
-
-		// pod 文件浏览上传下载
-		pod.RegisterPodFileRoutes(api)
-		// Pod 资源使用情况
-		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
-		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
-		// Pod 端口转发
-		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", pod.StartPortForward)
-		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", pod.StopPortForward)
-		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
 
 		// helm release
 		helm.RegisterHelmReleaseRoutes(api)

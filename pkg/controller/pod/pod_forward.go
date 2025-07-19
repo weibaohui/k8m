@@ -12,6 +12,15 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+type PortController struct{}
+
+func RegisterPortRoutes(api *gin.RouterGroup) {
+	ctrl := &PortController{}
+	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", ctrl.StartPortForward)
+	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", ctrl.StopPortForward)
+	api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", ctrl.PortForwardList)
+}
+
 // PortInfo 结构体用于描述端口转发信息
 // 包含容器名、端口名、协议、端口号、本地端口、转发状态等
 type PortInfo struct {
@@ -31,7 +40,7 @@ type PortInfo struct {
 var portForwardTable = make(map[string]*PortInfo) // key: cluster/ns/pod/port
 var portForwardTableMutex sync.RWMutex
 
-func StartPortForward(c *gin.Context) {
+func (pc *PortController) StartPortForward(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -102,7 +111,7 @@ func StartPortForward(c *gin.Context) {
 	}()
 	amis.WriteJsonOK(c)
 }
-func StopPortForward(c *gin.Context) {
+func (pc *PortController) StopPortForward(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	containerName := c.Param("container_name")
@@ -126,7 +135,7 @@ func StopPortForward(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func PortForwardList(c *gin.Context) {
+func (pc *PortController) PortForwardList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("name")
 	ns := c.Param("ns")
