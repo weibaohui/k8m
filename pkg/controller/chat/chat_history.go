@@ -6,7 +6,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-func History(c *gin.Context) {
+func (cc *Controller) History(c *gin.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -18,7 +18,7 @@ func History(c *gin.Context) {
 	amis.WriteJsonData(c, history)
 
 }
-func Reset(c *gin.Context) {
+func (cc *Controller) Reset(c *gin.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
 		amis.WriteJsonError(c, err)

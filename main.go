@@ -256,22 +256,7 @@ func main() {
 	}
 	ai := r.Group("/ai", middleware.AuthMiddleware())
 	{
-
-		// chatgpt
-		ai.GET("/chat/event", chat.Event)
-		ai.GET("/chat/log", chat.Log)
-		ai.GET("/chat/cron", chat.Cron)
-		ai.GET("/chat/describe", chat.Describe)
-		ai.GET("/chat/resource", chat.Resource)
-		ai.GET("/chat/any_question", chat.AnyQuestion)
-		ai.GET("/chat/any_selection", chat.AnySelection)
-		ai.GET("/chat/example", chat.Example)
-		ai.GET("/chat/example/field", chat.FieldExample)
-		ai.GET("/chat/ws_chatgpt", chat.GPTShell)
-		ai.GET("/chat/ws_chatgpt/history", chat.History)
-		ai.GET("/chat/ws_chatgpt/history/reset", chat.Reset)
-		ai.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
-
+		chat.RegisterChatRoutes(ai)
 	}
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{

@@ -12,6 +12,27 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type Controller struct {
+}
+
+func RegisterChatRoutes(ai *gin.RouterGroup) {
+	ctrl := &Controller{}
+	ai.GET("/chat/event", ctrl.Event)
+	ai.GET("/chat/log", ctrl.Log)
+	ai.GET("/chat/cron", ctrl.Cron)
+	ai.GET("/chat/describe", ctrl.Describe)
+	ai.GET("/chat/resource", ctrl.Resource)
+	ai.GET("/chat/any_question", ctrl.AnyQuestion)
+	ai.GET("/chat/any_selection", ctrl.AnySelection)
+	ai.GET("/chat/example", ctrl.Example)
+	ai.GET("/chat/example/field", ctrl.FieldExample)
+	ai.GET("/chat/ws_chatgpt", ctrl.GPTShell)
+	ai.GET("/chat/ws_chatgpt/history", ctrl.History)
+	ai.GET("/chat/ws_chatgpt/history/reset", ctrl.Reset)
+	ai.GET("/chat/k8s_gpt/resource", ctrl.K8sGPTResource)
+
+}
+
 type ResourceData struct {
 	// 资源版本
 	Version string `form:"version"`
@@ -65,7 +86,7 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 	}
 	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
-func Event(c *gin.Context) {
+func (cc *Controller) Event(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
@@ -78,8 +99,7 @@ func Event(c *gin.Context) {
 	})
 }
 
-// Describe TODO 改为不要传Describe内容，比较大，传个名称过来，从后台Describe一下即可
-func Describe(c *gin.Context) {
+func (cc *Controller) Describe(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	var data ResourceData
 	err := c.ShouldBindQuery(&data)
@@ -115,7 +135,7 @@ func Describe(c *gin.Context) {
 	})
 }
 
-func Example(c *gin.Context) {
+func (cc *Controller) Example(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -133,7 +153,7 @@ func Example(c *gin.Context) {
 			d.Group, d.Kind, d.Version)
 	})
 }
-func FieldExample(c *gin.Context) {
+func (cc *Controller) FieldExample(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -149,7 +169,7 @@ func FieldExample(c *gin.Context) {
 			d.Group, d.Kind, d.Version, d.Field)
 	})
 }
-func Resource(c *gin.Context) {
+func (cc *Controller) Resource(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -165,7 +185,7 @@ func Resource(c *gin.Context) {
 			d.Group, d.Kind, d.Version)
 	})
 }
-func K8sGPTResource(c *gin.Context) {
+func (cc *Controller) K8sGPTResource(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -187,7 +207,7 @@ func K8sGPTResource(c *gin.Context) {
 			d.Data, d.Name, d.Kind, d.Field)
 	})
 }
-func AnySelection(c *gin.Context) {
+func (cc *Controller) AnySelection(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -201,7 +221,7 @@ func AnySelection(c *gin.Context) {
 			d.Question)
 	})
 }
-func AnyQuestion(c *gin.Context) {
+func (cc *Controller) AnyQuestion(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -218,7 +238,7 @@ func AnyQuestion(c *gin.Context) {
 	})
 }
 
-func Cron(c *gin.Context) {
+func (cc *Controller) Cron(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -233,7 +253,7 @@ func Cron(c *gin.Context) {
 	})
 }
 
-func Log(c *gin.Context) {
+func (cc *Controller) Log(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(d.Data))
