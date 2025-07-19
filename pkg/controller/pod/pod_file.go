@@ -18,6 +18,18 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type FileController struct{}
+
+func RegisterPodFileRoutes(api *gin.RouterGroup) {
+	ctrl := &FileController{}
+	api.POST("/file/list", ctrl.List)
+	api.POST("/file/show", ctrl.Show)
+	api.POST("/file/save", ctrl.Save)
+	api.GET("/file/download", ctrl.Download)
+	api.POST("/file/upload", ctrl.Upload)
+	api.POST("/file/delete", ctrl.Delete)
+}
+
 type info struct {
 	ContainerName string `json:"containerName,omitempty"`
 	PodName       string `json:"podName,omitempty"`
@@ -30,8 +42,8 @@ type info struct {
 	FileType      string `json:"type,omitempty"` // 只有file类型可以查、下载
 }
 
-// FileList  处理获取文件列表的 HTTP 请求
-func FileList(c *gin.Context) {
+// List  处理获取文件列表的 HTTP 请求
+func (fc *FileController) List(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -66,8 +78,8 @@ func FileList(c *gin.Context) {
 	amis.WriteJsonList(c, nodes)
 }
 
-// ShowFile 处理下载文件的 HTTP 请求
-func ShowFile(c *gin.Context) {
+// Show 处理下载文件的 HTTP 请求
+func (fc *FileController) Show(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -119,7 +131,7 @@ func ShowFile(c *gin.Context) {
 		"content": string(fileContent),
 	})
 }
-func SaveFile(c *gin.Context) {
+func (fc *FileController) Save(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -159,7 +171,7 @@ func SaveFile(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func DownloadFile(c *gin.Context) {
+func (fc *FileController) Download(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -202,8 +214,8 @@ func DownloadFile(c *gin.Context) {
 
 }
 
-// UploadFile 处理上传文件的 HTTP 请求
-func UploadFile(c *gin.Context) {
+// Upload 处理上传文件的 HTTP 请求
+func (fc *FileController) Upload(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -302,7 +314,7 @@ func UploadFile(c *gin.Context) {
 	})
 
 }
-func DeleteFile(c *gin.Context) {
+func (fc *FileController) Delete(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

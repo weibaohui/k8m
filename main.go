@@ -420,12 +420,7 @@ func main() {
 		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
 
 		// pod 文件浏览上传下载
-		api.POST("/file/list", pod.FileList)
-		api.POST("/file/show", pod.ShowFile)
-		api.POST("/file/save", pod.SaveFile)
-		api.GET("/file/download", pod.DownloadFile)
-		api.POST("/file/upload", pod.UploadFile)
-		api.POST("/file/delete", pod.DeleteFile)
+		pod.RegisterPodFileRoutes(api)
 		// Pod 资源使用情况
 		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
 		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
