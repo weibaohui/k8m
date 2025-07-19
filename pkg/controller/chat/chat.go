@@ -30,7 +30,6 @@ func RegisterChatRoutes(ai *gin.RouterGroup) {
 	ai.GET("/chat/ws_chatgpt/history", ctrl.History)
 	ai.GET("/chat/ws_chatgpt/history/reset", ctrl.Reset)
 	ai.GET("/chat/k8s_gpt/resource", ctrl.K8sGPTResource)
-
 }
 
 type ResourceData struct {
