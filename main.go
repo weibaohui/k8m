@@ -510,17 +510,13 @@ func main() {
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
 	{
 		// condition
-		admin.GET("/condition/list", config.ConditionList)
-		admin.POST("/condition/save", config.ConditionSave)
-		admin.POST("/condition/delete/:ids", config.ConditionDelete)
-		// 指标翻转状态修改
-		admin.POST("/condition/save/id/:id/status/:status", config.ConditionQuickSave)
-
-		// SSO 配置
-		admin.GET("/config/sso/list", config.SSOConfigList)
-		admin.POST("/config/sso/save", config.SSOConfigSave)
-		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
-		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
+		config.RegisterConditionRoutes(admin)
+		// sso
+		config.RegisterSSOConfigRoutes(admin)
+		// 平台参数配置
+		config.RegisterConfigRoutes(admin)
+		// 大模型列表管理
+		config.RegisterAIModelConfigRoutes(admin)
 
 		// 集群巡检定时任务
 		inspection.RegisterAdminScheduleRoutes(admin)
@@ -531,12 +527,7 @@ func main() {
 		// 集群巡检webhook管理
 		inspection.RegisterAdminWebhookRoutes(admin)
 
-		// 平台参数配置
-		admin.GET("/config/all", config.GetConfig)
-		admin.POST("/config/update", config.UpdateConfig)
-
-		// 大模型列表管理
-		config.RegisterAIModelConfigRoutes(admin)
+		// MCP配置
 		mcp.RegisterMCPServerRoutes(admin)
 		mcp.RegisterMCPToolRoutes(admin)
 		// 集群授权相关

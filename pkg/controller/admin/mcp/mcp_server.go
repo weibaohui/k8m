@@ -16,10 +16,10 @@ type ServerController struct {
 // RegisterMCPServerRoutes 注册路由
 func RegisterMCPServerRoutes(admin *gin.RouterGroup) {
 	ctrl := &ServerController{}
-	admin.GET("/mcp/list", ctrl.ServerList)
+	admin.GET("/mcp/list", ctrl.List)
 	admin.POST("/mcp/connect/:name", ctrl.Connect)
 	admin.POST("/mcp/delete", ctrl.Delete)
-	admin.POST("/mcp/save", ctrl.AddOrUpdate)
+	admin.POST("/mcp/save", ctrl.Save)
 	admin.POST("/mcp/save/id/:id/status/:status", ctrl.QuickSave)
 	admin.GET("/mcp/log/list", ctrl.MCPLogList)
 }
@@ -28,7 +28,7 @@ func RegisterMCPServerRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/list [get]
-func (m *ServerController) ServerList(c *gin.Context) {
+func (m *ServerController) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	var mcpServer models.MCPServerConfig
 	list, count, err := mcpServer.List(params)
@@ -73,7 +73,7 @@ func (m *ServerController) Delete(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/save [post]
-func (m *ServerController) AddOrUpdate(c *gin.Context) {
+func (m *ServerController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var entity models.MCPServerConfig
