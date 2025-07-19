@@ -244,10 +244,8 @@ func main() {
 	{
 		// cluster
 		api.GET("/status/resource_count/cache_seconds/:cache", cluster_status.ClusterResourceCount)
-		// dynamic
-		api.POST("/yaml/apply", dynamic.Apply)
-		api.POST("/yaml/upload", dynamic.UploadFile)
-		api.POST("/yaml/delete", dynamic.Delete)
+		// yaml
+		dynamic.RegisterYamlRoutes(api)
 		// CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)                         // CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", dynamic.FetchJson)                // CRD

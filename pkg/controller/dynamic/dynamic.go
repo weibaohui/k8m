@@ -3,7 +3,6 @@ package dynamic
 import (
 	"context"
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -416,76 +415,6 @@ func Describe(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, string(result))
-}
-
-func UploadFile(c *gin.Context) {
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	ctx := amis.GetContextWithUser(c)
-	// 获取上传的文件
-	file, err := c.FormFile("file")
-	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("获取上传的文件错误。\n %v", err))
-		return
-	}
-	src, err := file.Open()
-	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("打开上传的文件错误。\n %v", err))
-		return
-	}
-	defer src.Close()
-	yamlBytes, err := io.ReadAll(src)
-	if err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("读取上传的文件内容错误。\n %v", err))
-		return
-	}
-	yamlStr := string(yamlBytes)
-	result := kom.Cluster(selectedCluster).WithContext(ctx).Applier().Apply(yamlStr)
-	amis.WriteJsonOKMsg(c, strings.Join(result, "\n"))
-}
-
-func Apply(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	var req yamlRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		amis.WriteJsonError(c, fmt.Errorf("提取yaml错误。\n %v", err))
-		return
-	}
-	yamlStr := req.Yaml
-	result := kom.Cluster(selectedCluster).WithContext(ctx).Applier().Apply(yamlStr)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
-
-}
-func Delete(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	var req yamlRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	yamlStr := req.Yaml
-	result := kom.Cluster(selectedCluster).WithContext(ctx).Applier().Delete(yamlStr)
-	amis.WriteJsonData(c, gin.H{
-		"result": result,
-	})
 }
 
 func Scale(c *gin.Context) {
