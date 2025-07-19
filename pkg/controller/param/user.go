@@ -7,7 +7,7 @@ import (
 )
 
 // UserRole 获取当前用户的Role信息
-func UserRole(c *gin.Context) {
+func (pc *Controller) UserRole(c *gin.Context) {
 	_, role := amis.GetLoginUser(c)
 	clusters := amis.GetLoginUserClusters(c)
 	var cluster string

@@ -21,10 +21,15 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var ErrorUerPassword = errors.New("用户名密码错误")
+type Controller struct{}
 
-// LoginRequest 用户结构体
-type LoginRequest struct {
+func RegisterLoginRoutes(auth *gin.RouterGroup) {
+	ctrl := &Controller{}
+	auth.POST("/login", ctrl.LoginByPassword)
+}
+
+// Request  用户结构体
+type Request struct {
 	Username  string `json:"username" binding:"required"`
 	Password  string `json:"password" binding:"required"`
 	LoginType int    `json:"loginType"` // 0: 普通登录, 1: LDAP登录
@@ -34,8 +39,8 @@ type LoginRequest struct {
 // 验证用户名和密码
 // 1、从cfg中获取用户名，先判断是不是admin，是进行密码比对.必须启用临时管理员配置才进行这一步
 // 2、从DB中获取用户名密码
-func LoginByPassword(c *gin.Context) {
-	var req LoginRequest
+func (lc *Controller) LoginByPassword(c *gin.Context) {
+	var req Request
 	errorInfo := gin.H{"message": "用户名密码错误或用户被禁用"}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		klog.Errorf("LoginByPassword %v", err.Error())

@@ -227,32 +227,14 @@ func main() {
 
 	auth := r.Group("/auth")
 	{
-		auth.POST("/login", login.LoginByPassword)
-		auth.GET("/sso/config", sso.GetSSOConfig)
-		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
-		auth.GET("/oidc/:name/callback", sso.HandleCallback)
-		auth.GET("/ldap/config", sso.GetLdapEnabled)
+		login.RegisterLoginRoutes(auth)
+		sso.RegisterAuthRoutes(auth)
 	}
 
 	// 公共参数
 	params := r.Group("/params", middleware.AuthMiddleware())
 	{
-		// 获取当前登录用户的角色，登录即可
-		params.GET("/user/role", param.UserRole)
-		// 获取某个配置项
-		params.GET("/config/:key", param.Config)
-		// 获取当前登录用户的集群列表,下拉列表
-		params.GET("/cluster/option_list", param.ClusterOptionList)
-		// 获取当前登录用户的集群列表,table列表
-		params.GET("/cluster/all", param.ClusterTableList)
-		// 获取当前软件版本信息
-		params.GET("/version", param.Version)
-		// 获取helm 仓库列表
-		params.GET("/helm/repo/option_list", param.RepoOptionList)
-
-		// 获取翻转显示的指标列表
-		params.GET("/condition/reverse/list", param.Conditions)
-
+		param.RegisterParamRoutes(params)
 	}
 	ai := r.Group("/ai", middleware.AuthMiddleware())
 	{

@@ -9,7 +9,7 @@ import (
 )
 
 // Config 获取某一个参数配置
-func Config(c *gin.Context) {
+func (pc *Controller) Config(c *gin.Context) {
 	key := c.Param("key")
 	cfg := flag.Init()
 	s := ""

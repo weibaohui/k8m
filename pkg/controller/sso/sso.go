@@ -18,7 +18,7 @@ import (
 )
 
 // GetSSOConfig 获取SSO列表，用于前端展示
-func GetSSOConfig(c *gin.Context) {
+func (au *AuthController) GetSSOConfig(c *gin.Context) {
 	// 获取所有的SSO配置
 	var ssoConfigs []models.SSOConfig
 	err := dao.DB().Select([]string{"name", "type"}).Where("enabled == true").Find(&ssoConfigs).Error
@@ -28,7 +28,7 @@ func GetSSOConfig(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, ssoConfigs)
 }
-func GetAuthCodeURL(c *gin.Context) {
+func (au *AuthController) GetAuthCodeURL(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("use sso name: %s", name)
 	// 从配置文件中读取默认的OIDC客户端配置
@@ -44,7 +44,7 @@ func GetAuthCodeURL(c *gin.Context) {
 }
 
 // HandleCallback 处理OAuth2回调
-func HandleCallback(c *gin.Context) {
+func (au *AuthController) HandleCallback(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
 	client, err := getDefaultOIDCClient(c, name)
@@ -76,7 +76,7 @@ func HandleCallback(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
 		return
 	}
-	 
+
 	// test
 	// claims["groups"] = []string{"CRM开发组", "bdd", "c", "d"}
 
@@ -156,7 +156,7 @@ func GetUserGroups(claims map[string]any) string {
 }
 
 // GetLdapEnabled 获取ldap开关状态
-func GetLdapEnabled(c *gin.Context) {
+func (au *AuthController) GetLdapEnabled(c *gin.Context) {
 	cfg := flag.Init()
 	amis.WriteJsonData(c, gin.H{
 		"enabled": cfg.LdapEnabled,
