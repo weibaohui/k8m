@@ -14,13 +14,24 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type NodeAffinityController struct{}
+
+func RegisterNodeAffinityRoutes(api *gin.RouterGroup) {
+	ctrl := &NodeAffinityController{}
+	api.POST("/:kind/group/:group/version/:version/update_node_affinity/ns/:ns/name/:name", ctrl.UpdateNodeAffinity)
+	api.POST("/:kind/group/:group/version/:version/delete_node_affinity/ns/:ns/name/:name", ctrl.DeleteNodeAffinity)
+	api.POST("/:kind/group/:group/version/:version/add_node_affinity/ns/:ns/name/:name", ctrl.AddNodeAffinity)
+	api.GET("/:kind/group/:group/version/:version/list_node_affinity/ns/:ns/name/:name", ctrl.ListNodeAffinity)
+
+}
+
 type nodeAffinity struct {
 	Operator string   `json:"operator"`
 	Key      string   `json:"key"`
 	Values   []string `json:"values"`
 }
 
-func ListNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) ListNodeAffinity(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -98,13 +109,13 @@ func ListNodeAffinity(c *gin.Context) {
 
 	amis.WriteJsonList(c, matchExpressionsList)
 }
-func AddNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) AddNodeAffinity(c *gin.Context) {
 	processNodeAffinity(c, "add")
 }
-func UpdateNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) UpdateNodeAffinity(c *gin.Context) {
 	processNodeAffinity(c, "modify")
 }
-func DeleteNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) DeleteNodeAffinity(c *gin.Context) {
 	processNodeAffinity(c, "delete")
 }
 func processNodeAffinity(c *gin.Context, action string) {

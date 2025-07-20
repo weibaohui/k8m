@@ -14,8 +14,19 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type PodAntiAffinityController struct{}
+
+func RegisterPodAntiAffinityRoutes(api *gin.RouterGroup) {
+	ctrl := &PodAntiAffinityController{}
+	api.POST("/:kind/group/:group/version/:version/update_pod_anti_affinity/ns/:ns/name/:name", ctrl.UpdatePodAntiAffinity)
+	api.POST("/:kind/group/:group/version/:version/delete_pod_anti_affinity/ns/:ns/name/:name", ctrl.DeletePodAntiAffinity)
+	api.POST("/:kind/group/:group/version/:version/add_pod_anti_affinity/ns/:ns/name/:name", ctrl.AddPodAntiAffinity)
+	api.GET("/:kind/group/:group/version/:version/list_pod_anti_affinity/ns/:ns/name/:name", ctrl.ListPodAntiAffinity)
+
+}
+
 // ListPodAntiAffinity 获取 Pod 亲和性列表
-func ListPodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) ListPodAntiAffinity(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -68,13 +79,13 @@ func ListPodAntiAffinity(c *gin.Context) {
 	amis.WriteJsonList(c, list)
 }
 
-func AddPodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) AddPodAntiAffinity(c *gin.Context) {
 	processPodAntiAffinity(c, "add")
 }
-func UpdatePodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) UpdatePodAntiAffinity(c *gin.Context) {
 	processPodAffinity(c, "modify")
 }
-func DeletePodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) DeletePodAntiAffinity(c *gin.Context) {
 	processPodAntiAffinity(c, "delete")
 }
 func processPodAntiAffinity(c *gin.Context, action string) {
