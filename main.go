@@ -313,13 +313,7 @@ func main() {
 		api.POST("/daemonset/batch/restore", ds.BatchRestore)
 
 		// k8s rs
-		api.POST("/replicaset/ns/:ns/name/:name/restart", rs.Restart)
-		api.POST("/replicaset/batch/restart", rs.BatchRestart)
-		api.POST("/replicaset/batch/stop", rs.BatchStop)
-		api.POST("/replicaset/batch/restore", rs.BatchRestore)
-		api.GET("/replicaset/ns/:ns/name/:name/events/all", rs.Event)
-		api.GET("/replicaset/ns/:ns/name/:name/hpa", rs.HPA)
-
+		rs.RegisterRoutes(api)
 		// k8s configmap
 		cm.RegisterRoutes(api)
 		// k8s cronjob
