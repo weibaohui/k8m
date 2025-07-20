@@ -242,8 +242,11 @@ func main() {
 	}
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
+
 		// cluster
-		api.GET("/status/resource_count/cache_seconds/:cache", cluster_status.ClusterResourceCount)
+		cluster_status.RegisterClusterRoutes(api)
+		// CRD
+		dynamic.RegisterCRDRoutes(api)
 		// yaml
 		dynamic.RegisterYamlRoutes(api)
 		// CRD
@@ -263,9 +266,7 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", dynamic.UpdateLabels)           // CRD
 		api.GET("/:kind/group/:group/version/:version/annotations/ns/:ns/name/:name", dynamic.ListAnnotations)           // CRD
 		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
-		api.GET("/crd/group/option_list", dynamic.GroupOptionList)
-		api.GET("/crd/kind/option_list", dynamic.KindOptionList)
-		api.GET("/crd/status", dynamic.CRDStatus)
+
 		// Container 信息
 		api.GET("/:kind/group/:group/version/:version/container_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerInfo)
 		api.GET("/:kind/group/:group/version/:version/container_resources_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerResourcesInfo)
