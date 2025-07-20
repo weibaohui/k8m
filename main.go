@@ -350,16 +350,12 @@ func main() {
 		api.GET("/node/name/option_list", node.NameOptionList)
 		api.GET("/node/labels/list", node.AllLabelList)
 		api.GET("/node/labels/unique_labels", node.UniqueLabels)
-		api.GET("/node/taints/list", node.AllTaintList)
 		api.GET("/node/top/list", node.TopList)
 		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
 		api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", node.CreateKubectlShell)
 
 		// 节点污点
-		api.POST("/node/update_taints/name/:name", node.UpdateTaint)
-		api.POST("/node/delete_taints/name/:name", node.DeleteTaint)
-		api.POST("/node/add_taints/name/:name", node.AddTaint)
-		api.GET("/node/list_taints/name/:name", node.ListTaint)
+		node.RegisterTaintRoutes(api)
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)

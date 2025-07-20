@@ -2,15 +2,92 @@ package node
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 )
 
-// ListTaint 获取某个节点上的污点
-func ListTaint(c *gin.Context) {
+type TaintController struct{}
+
+func RegisterTaintRoutes(api *gin.RouterGroup) {
+	ctrl := &TaintController{}
+	api.POST("/node/update_taints/name/:name", ctrl.Update)
+	api.POST("/node/delete_taints/name/:name", ctrl.Delete)
+	api.POST("/node/add_taints/name/:name", ctrl.Add)
+	api.GET("/node/list_taints/name/:name", ctrl.ListByName)
+	api.GET("/node/taints/list", ctrl.List)
+}
+
+// List 获取所有节点上的污点
+func (tc *TaintController) List(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var nodeList []*v1.Node
+	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Node{}).
+		WithCache(time.Second * 30).
+		List(&nodeList).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	var taintsList []*v1.Taint
+
+	for _, node := range nodeList {
+		for _, taint := range node.Spec.Taints {
+			taintsList = append(taintsList, &taint)
+		}
+	}
+
+	type table struct {
+		Names  []string       `json:"names"`
+		IPs    []string       `json:"ips"`
+		Key    string         `json:"key"`
+		Value  string         `json:"value"`
+		Effect v1.TaintEffect `json:"effect"`
+	}
+
+	var resultList []*table
+
+	for _, v := range taintsList {
+		resultList = append(resultList, &table{
+			Key:    v.Key,
+			Value:  v.Value,
+			Effect: v.Effect,
+			Names:  make([]string, 0),
+			IPs:    make([]string, 0),
+		})
+	}
+	// 排重
+	resultList = slice.UniqueByComparator(resultList, func(i, j *table) bool {
+		return i.Key == j.Key && i.Value == j.Value && i.Effect == j.Effect
+	})
+
+	// 循环labelList，循环node，如果node的label和labelList的key相同，则将node name放入到labelList的node字段中
+	for _, v := range resultList {
+		for _, node := range nodeList {
+			for _, taint := range node.Spec.Taints {
+				if taint.Key == v.Key && taint.Value == v.Value && taint.Effect == v.Effect {
+					v.Names = append(v.Names, node.Name)
+					v.IPs = append(v.IPs, node.Status.Addresses[0].Address)
+				}
+			}
+		}
+	}
+
+	amis.WriteJsonList(c, resultList)
+}
+
+// ListByName 获取某个节点上的污点
+func (tc *TaintController) ListByName(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -36,8 +113,8 @@ type TaintInfo struct {
 	Effect string `json:"effect"`
 }
 
-// AddTaint 添加污点
-func AddTaint(c *gin.Context) {
+// Add 添加污点
+func (tc *TaintController) Add(c *gin.Context) {
 	if err := processTaint(c, "add"); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -45,8 +122,8 @@ func AddTaint(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// DeleteTaint 删除污点
-func DeleteTaint(c *gin.Context) {
+// Delete 删除污点
+func (tc *TaintController) Delete(c *gin.Context) {
 	if err := processTaint(c, "del"); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -54,8 +131,8 @@ func DeleteTaint(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// UpdateTaint 修改污点
-func UpdateTaint(c *gin.Context) {
+// Update 修改污点
+func (tc *TaintController) Update(c *gin.Context) {
 	if err := processTaint(c, "modify"); err != nil {
 		amis.WriteJsonError(c, err)
 		return
