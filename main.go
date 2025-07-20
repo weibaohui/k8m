@@ -295,15 +295,7 @@ func main() {
 		dynamic.RegisterYamlRoutes(api)
 
 		// k8s sts
-		api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", sts.Undo)
-		api.GET("/statefulset/ns/:ns/name/:name/rollout/history", sts.History)
-		api.POST("/statefulset/ns/:ns/name/:name/restart", sts.Restart)
-		api.POST("/statefulset/batch/restart", sts.BatchRestart)
-		api.POST("/statefulset/batch/stop", sts.BatchStop)
-		api.POST("/statefulset/batch/restore", sts.BatchRestore)
-		api.POST("/statefulset/ns/:ns/name/:name/scale/replica/:replica", sts.Scale)
-		api.GET("/statefulset/ns/:ns/name/:name/hpa", sts.HPA)
-
+		sts.RegisterRoutes(api)
 		// k8s ds
 		ds.RegisterRoutes(api)
 
