@@ -43,6 +43,12 @@ type info struct {
 }
 
 // List  处理获取文件列表的 HTTP 请求
+// @Summary 获取文件列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body info true "文件信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/file/list [post]
 func (fc *FileController) List(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -79,6 +85,12 @@ func (fc *FileController) List(c *gin.Context) {
 }
 
 // Show 处理下载文件的 HTTP 请求
+// @Summary 查看文件内容
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body info true "文件信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/file/show [post]
 func (fc *FileController) Show(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -131,6 +143,13 @@ func (fc *FileController) Show(c *gin.Context) {
 		"content": string(fileContent),
 	})
 }
+
+// @Summary 保存文件
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body info true "文件信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/file/save [post]
 func (fc *FileController) Save(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -171,6 +190,15 @@ func (fc *FileController) Save(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 下载文件
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param podName query string true "Pod名称"
+// @Param path query string true "文件路径"
+// @Param containerName query string true "容器名称"
+// @Param namespace query string true "命名空间"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/file/download [get]
 func (fc *FileController) Download(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -215,6 +243,17 @@ func (fc *FileController) Download(c *gin.Context) {
 }
 
 // Upload 处理上传文件的 HTTP 请求
+// @Summary 上传文件
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param containerName formData string true "容器名称"
+// @Param namespace formData string true "命名空间"
+// @Param podName formData string true "Pod名称"
+// @Param path formData string true "文件路径"
+// @Param fileName formData string true "文件名"
+// @Param file formData file true "上传文件"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/file/upload [post]
 func (fc *FileController) Upload(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -314,6 +353,13 @@ func (fc *FileController) Upload(c *gin.Context) {
 	})
 
 }
+
+// @Summary 删除文件
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body info true "文件信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/file/delete [post]
 func (fc *FileController) Delete(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
