@@ -540,6 +540,39 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新系统配置
+  /admin/inspection/record/list:
+    get:
+      description: 根据巡检计划ID获取对应的巡检记录列表
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检记录列表
+  /admin/inspection/schedule/record/id/{id}/push:
+    post:
+      description: 将指定巡检记录的AI总结推送到所有配置的Webhook接收器
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 推送巡检记录
   /admin/mcp/connect/{name}:
     post:
       parameters:

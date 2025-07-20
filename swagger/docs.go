@@ -758,6 +758,61 @@ var doc = `{
                 }
             }
         },
+        "/admin/inspection/record/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据巡检计划ID获取对应的巡检记录列表",
+                "summary": "获取巡检记录列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检计划ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/inspection/schedule/record/id/{id}/push": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "将指定巡检记录的AI总结推送到所有配置的Webhook接收器",
+                "summary": "推送巡检记录",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/mcp/connect/{name}": {
             "post": {
                 "security": [
