@@ -951,28 +951,30 @@ func (cc *ContainerController) generateHealthCheckPatch(kind string, info Health
 		current = current[path].(map[string]interface{})
 	}
 	// 判断健康检查类型
-	if info.LivenessType == "httpGet" {
+	switch info.LivenessType {
+	case "httpGet":
 		info.LivenessProbe["exec"] = nil
 		info.LivenessProbe["tcpSocket"] = nil
-	} else if info.LivenessType == "exec" {
+	case "exec":
 		info.LivenessProbe["httpGet"] = nil
 		info.LivenessProbe["tcpSocket"] = nil
-	} else if info.LivenessType == "tcpSocket" {
+	case "tcpSocket":
 		info.LivenessProbe["httpGet"] = nil
 		info.LivenessProbe["exec"] = nil
-	} else {
+	default:
 		info.LivenessProbe = nil
 	}
-	if info.ReadinessType == "httpGet" {
+	switch info.ReadinessType {
+	case "httpGet":
 		info.ReadinessProbe["exec"] = nil
 		info.ReadinessProbe["tcpSocket"] = nil
-	} else if info.ReadinessType == "exec" {
+	case "exec":
 		info.ReadinessProbe["httpGet"] = nil
 		info.ReadinessProbe["tcpSocket"] = nil
-	} else if info.ReadinessType == "tcpSocket" {
+	case "tcpSocket":
 		info.ReadinessProbe["httpGet"] = nil
 		info.ReadinessProbe["exec"] = nil
-	} else {
+	default:
 		info.ReadinessProbe = nil
 	}
 
