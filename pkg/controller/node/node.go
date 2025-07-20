@@ -18,8 +18,14 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 	api.POST("/node/batch/drain", ctrl.BatchDrain)
 	api.POST("/node/batch/cordon", ctrl.BatchCordon)
 	api.POST("/node/batch/uncordon", ctrl.BatchUnCordon)
-
 }
+
+// @Summary 驱逐指定节点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/drain/name/{name} [post]
 func (nc *ActionController) Drain(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -33,6 +39,13 @@ func (nc *ActionController) Drain(c *gin.Context) {
 		Ctl().Node().Drain()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 隔离指定节点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/cordon/name/{name} [post]
 func (nc *ActionController) Cordon(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -46,6 +59,13 @@ func (nc *ActionController) Cordon(c *gin.Context) {
 		Ctl().Node().Cordon()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 解除指定节点隔离
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/uncordon/name/{name} [post]
 func (nc *ActionController) UnCordon(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -60,8 +80,12 @@ func (nc *ActionController) UnCordon(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-// BatchDrain 批量驱逐指定的 Kubernetes 节点。
-// 从请求体获取节点名称列表，依次对每个节点执行驱逐操作，若有任一节点驱逐失败，则返回错误，否则返回操作成功。
+// @Summary 批量驱逐指定的 Kubernetes 节点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name_list body []string true "节点名称列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/batch/drain [post]
 func (nc *ActionController) BatchDrain(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -95,8 +119,12 @@ func (nc *ActionController) BatchDrain(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// BatchCordon 批量将指定的 Kubernetes 节点设置为不可调度（cordon）。
-// 接收包含节点名称列表的 JSON 请求体，逐个节点执行 cordon 操作，若有节点操作失败则返回错误，否则返回操作成功。
+// @Summary 批量将指定的 Kubernetes 节点设置为不可调度（cordon）
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name_list body []string true "节点名称列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/batch/cordon [post]
 func (nc *ActionController) BatchCordon(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -130,8 +158,12 @@ func (nc *ActionController) BatchCordon(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// BatchUnCordon 批量解除指定节点的隔离状态（Uncordon），使其重新可调度。
-// 从请求体中读取节点名称列表，对每个节点执行解除隔离操作。若有任一节点操作失败，将返回错误信息，否则返回操作成功。
+// @Summary 批量解除指定节点的隔离状态（Uncordon），使其重新可调度
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name_list body []string true "节点名称列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/batch/uncordon [post]
 func (nc *ActionController) BatchUnCordon(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
