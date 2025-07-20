@@ -3,9 +3,9 @@ definitions:
     properties:
       created_at:
         type: string
-      created_by:
-        description: 创建者
-        type: string
+      disabled:
+        description: 是否启用
+        type: boolean
       group_names:
         type: string
       id:
@@ -24,7 +24,7 @@ definitions:
         description: 备用恢复码，逗号分隔
         type: string
       two_fa_enabled:
-        description: 2FA相关字段
+        description: 是否启用2FA
         type: boolean
       two_fa_secret:
         description: 2FA密钥
@@ -41,8 +41,6 @@ definitions:
   models.UserGroup:
     properties:
       created_at:
-        type: string
-      created_by:
         type: string
       description:
         type: string
@@ -135,8 +133,43 @@ paths:
       security:
       - BearerAuth: []
       summary: 测试AI模型连接
+  /admin/cluster/{cluster}/disconnect:
+    post:
+      description: 断开一个正在运行的集群的连接
+      parameters:
+      - description: Base64编码的集群ID
+        in: path
+        name: cluster
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 已执行，请稍后刷新
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 断开集群连接
+  /admin/cluster/{cluster}/reconnect:
+    post:
+      description: 重新连接一个已断开的集群
+      parameters:
+      - description: Base64编码的集群ID
+        in: path
+        name: cluster
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 已执行，请稍后刷新
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 重新连接集群
   /admin/cluster/file/option_list:
     get:
+      description: 获取所有已发现集群的kubeconfig文件名列表，用于下拉选项
       responses:
         "200":
           description: OK
@@ -145,6 +178,17 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取文件类型的集群选项
+  /admin/cluster/scan:
+    post:
+      description: 扫描本地Kubeconfig文件目录以发现新的集群
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 扫描集群
   /admin/cluster_permissions/cluster/{cluster}/list:
     get:
       parameters:

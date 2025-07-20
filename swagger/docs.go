@@ -155,10 +155,86 @@ var doc = `{
                         "BearerAuth": []
                     }
                 ],
+                "description": "获取所有已发现集群的kubeconfig文件名列表，用于下拉选项",
                 "summary": "获取文件类型的集群选项",
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cluster/scan": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "扫描本地Kubeconfig文件目录以发现新的集群",
+                "summary": "扫描集群",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cluster/{cluster}/disconnect": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "断开一个正在运行的集群的连接",
+                "summary": "断开集群连接",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Base64编码的集群ID",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "已执行，请稍后刷新",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cluster/{cluster}/reconnect": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "重新连接一个已断开的集群",
+                "summary": "重新连接集群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Base64编码的集群ID",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "已执行，请稍后刷新",
                         "schema": {
                             "type": "string"
                         }
@@ -866,9 +942,9 @@ var doc = `{
                 "created_at": {
                     "type": "string"
                 },
-                "created_by": {
-                    "description": "创建者",
-                    "type": "string"
+                "disabled": {
+                    "description": "是否启用",
+                    "type": "boolean"
                 },
                 "group_names": {
                     "type": "string"
@@ -895,7 +971,7 @@ var doc = `{
                     "type": "string"
                 },
                 "two_fa_enabled": {
-                    "description": "2FA相关字段",
+                    "description": "是否启用2FA",
                     "type": "boolean"
                 },
                 "two_fa_secret": {
@@ -919,9 +995,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
-                },
-                "created_by": {
                     "type": "string"
                 },
                 "description": {
