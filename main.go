@@ -341,9 +341,7 @@ func main() {
 		api.GET("/gateway_class/option_list", gatewayapi.GatewayClassOptionList)
 
 		// doc
-		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
-		api.GET("/doc/kind/:kind/group/:group/version/:version", doc.Doc)
-		api.POST("/doc/detail", doc.Detail)
+		doc.RegisterRoutes(api)
 
 		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.ResourceRunAnalysis)
 		api.POST("/k8s_gpt/cluster/:user_cluster/run", k8sgpt.ClusterRunAnalysis)
