@@ -321,9 +321,7 @@ func main() {
 		api.GET("/replicaset/ns/:ns/name/:name/hpa", rs.HPA)
 
 		// k8s configmap
-		api.POST("/configmap/ns/:ns/name/:name/import", cm.Import)
-		api.POST("/configmap/ns/:ns/name/:name/:key/update_configmap", cm.Update)
-		api.POST("/configmap/create", cm.Create)
+		cm.RegisterRoutes(api)
 		// k8s cronjob
 		cronjob.RegisterRoutes(api)
 		// k8s storage_class
