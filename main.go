@@ -334,9 +334,7 @@ func main() {
 		api.POST("/storage_class/set_default/name/:name", storageclass.SetDefault)
 		api.GET("/storage_class/option_list", storageclass.OptionList)
 		// k8s ingress_class
-		api.POST("/ingress_class/set_default/name/:name", ingressclass.SetDefault)
-		api.GET("/ingress_class/option_list", ingressclass.OptionList)
-
+		ingressclass.RegisterRoutes(api)
 		// k8s gateway_class
 		gatewayapi.RegisterRoutes(api)
 		// doc
