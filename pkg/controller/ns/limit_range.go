@@ -13,7 +13,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func CreateLimitRange(c *gin.Context) {
+func (nc *Controller) CreateLimitRange(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

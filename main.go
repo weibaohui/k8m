@@ -350,9 +350,7 @@ func main() {
 		node.RegisterShellRoutes(api)
 
 		// k8s ns
-		api.GET("/ns/option_list", ns.OptionList)
-		api.POST("/ResourceQuota/create", ns.CreateResourceQuota)
-		api.POST("/LimitRange/create", ns.CreateLimitRange)
+		ns.RegisterRoutes(api)
 
 		// k8s sts
 		api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", sts.Undo)
