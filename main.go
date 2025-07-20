@@ -338,7 +338,7 @@ func main() {
 		api.GET("/deploy/ns/:ns/name/:name/hpa", deploy.HPA)
 		api.POST("/deploy/create", deploy.Create)
 		// p8s svc
-		api.POST("/service/create", svc.Create)
+		svc.RegisterActionRoutes(api)
 		// k8s node
 		node.RegisterActionRoutes(api)
 		// 资源情况
