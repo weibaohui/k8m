@@ -25,13 +25,14 @@ func RegisterTolerationRoutes(api *gin.RouterGroup) {
 
 // @Summary 获取资源容忍度列表
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
 // @Param ns path string true "命名空间"
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name} [get]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name} [get]
 func (tc *TolerationController) List(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -88,6 +89,7 @@ func (tc *TolerationController) List(c *gin.Context) {
 
 // @Summary 添加资源容忍度
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -95,13 +97,14 @@ func (tc *TolerationController) List(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Param body body Tolerations true "容忍度配置信息"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name} [post]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name} [post]
 func (tc *TolerationController) Add(c *gin.Context) {
 	processTolerations(c, "add")
 }
 
 // @Summary 更新资源容忍度
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -109,13 +112,14 @@ func (tc *TolerationController) Add(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Param body body Tolerations true "容忍度配置信息"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name} [post]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name} [post]
 func (tc *TolerationController) Update(c *gin.Context) {
 	processTolerations(c, "modify")
 }
 
 // @Summary 删除资源容忍度
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -123,7 +127,7 @@ func (tc *TolerationController) Update(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Param body body Tolerations true "容忍度配置信息"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name} [post]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name} [post]
 func (tc *TolerationController) Delete(c *gin.Context) {
 	processTolerations(c, "delete")
 }
