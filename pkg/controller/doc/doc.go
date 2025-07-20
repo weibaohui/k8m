@@ -21,13 +21,12 @@ func RegisterRoutes(api *gin.RouterGroup) {
 
 // @Summary 获取Kubernetes资源文档信息
 // @Security BearerAuth
-// @Param api_version path string true "API版本(base64编码)"
-// @Param kind path string true "资源类型"
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
 // @Success 200 {object} string
-// @Router /doc/kind/{kind}/group/{group}/version/{version} [get]
+// @Router /k8s/cluster/{cluster}/doc/kind/{kind}/group/{group}/version/{version} [get]
 func (cc *Controller) Doc(c *gin.Context) {
 	kind := c.Param("kind")
 	apiVersion := c.Param("api_version")
@@ -71,9 +70,10 @@ type DetailReq struct {
 
 // @Summary 获取文档详情(含翻译)
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param request body DetailReq true "请求体，包含description字段"
 // @Success 200 {object} DetailReq
-// @Router /doc/detail [post]
+// @Router /k8s/cluster/{cluster}/doc/detail [post]
 func (cc *Controller) Detail(c *gin.Context) {
 	detail := &DetailReq{}
 	err := c.ShouldBindBodyWithJSON(&detail)
