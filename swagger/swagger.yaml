@@ -44,6 +44,21 @@ definitions:
       use_built_in_model:
         type: boolean
     type: object
+  models.MCPServerConfig:
+    properties:
+      created_at:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
   models.User:
     properties:
       created_at:
@@ -811,6 +826,52 @@ paths:
       security:
       - BearerAuth: []
       summary: 保存Lua脚本
+  /admin/inspection/webhook/delete/{ids}:
+    post:
+      parameters:
+      - description: Webhook接收器ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除Webhook接收器
+  /admin/inspection/webhook/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Webhook接收器列表
+  /admin/inspection/webhook/option_list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Webhook接收器选项列表
+  /admin/inspection/webhook/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建或更新Webhook接收器
   /admin/mcp/connect/{name}:
     post:
       parameters:
@@ -829,6 +890,13 @@ paths:
       summary: 连接指定MCP服务器
   /admin/mcp/delete:
     post:
+      parameters:
+      - description: 删除请求体包含IDs数组
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
       responses:
         "200":
           description: OK
@@ -859,6 +927,13 @@ paths:
       summary: 获取MCP服务器日志列表
   /admin/mcp/save:
     post:
+      parameters:
+      - description: MCP服务器配置信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.MCPServerConfig'
       responses:
         "200":
           description: OK
@@ -870,12 +945,12 @@ paths:
   /admin/mcp/save/id/{id}/status/{status}:
     post:
       parameters:
-      - description: 服务器ID
+      - description: MCP服务器ID
         in: path
         name: id
         required: true
         type: integer
-      - description: 状态，例如：true、false
+      - description: 服务器状态(true/false)
         in: path
         name: status
         required: true
@@ -887,7 +962,7 @@ paths:
             type: string
       security:
       - BearerAuth: []
-      summary: 快速保存MCP服务器状态
+      summary: 快速更新MCP服务器状态
   /admin/mcp/server/{name}/tools/list:
     get:
       parameters:
@@ -924,7 +999,7 @@ paths:
             type: string
       security:
       - BearerAuth: []
-      summary: 快速保存MCP工具状态
+      summary: 快速更新MCP工具状态
   /admin/user/2fa/disable/{id}:
     post:
       description: 禁用指定用户的二步验证
@@ -972,6 +1047,18 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取用户列表
+  /admin/user/option_list:
+    get:
+      description: 获取用户选项列表，用于下拉选择
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取用户选项列表
   /admin/user/save:
     post:
       consumes:
@@ -993,6 +1080,28 @@ paths:
       security:
       - BearerAuth: []
       summary: 保存用户
+  /admin/user/save/id/{id}/status/{disabled}:
+    post:
+      description: 根据ID快速更新用户启用/禁用状态
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: disabled
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速更新用户状态
   /admin/user/update_psw/{id}:
     post:
       consumes:
@@ -1084,6 +1193,593 @@ paths:
       security:
       - BearerAuth: []
       summary: 保存用户组
+  /ai/chat/any_question:
+    get:
+      parameters:
+      - description: 资源组
+        in: query
+        name: group
+        type: string
+      - description: 资源版本
+        in: query
+        name: version
+        type: string
+      - description: 资源类型
+        in: query
+        name: kind
+        type: string
+      - description: 问题内容
+        in: query
+        name: question
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 回答K8s相关问题
+  /ai/chat/any_selection:
+    get:
+      parameters:
+      - description: 要解释的内容
+        in: query
+        name: question
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 解释选择内容
+  /ai/chat/cron:
+    get:
+      parameters:
+      - description: Cron表达式
+        in: query
+        name: cron
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 分析Cron表达式
+  /ai/chat/describe:
+    get:
+      parameters:
+      - description: 资源组
+        in: query
+        name: group
+        type: string
+      - description: 资源版本
+        in: query
+        name: version
+        type: string
+      - description: 资源类型
+        in: query
+        name: kind
+        type: string
+      - description: 资源名称
+        in: query
+        name: name
+        type: string
+      - description: 命名空间
+        in: query
+        name: namespace
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 分析K8s资源描述
+  /ai/chat/event:
+    get:
+      parameters:
+      - description: 事件备注
+        in: query
+        name: note
+        type: string
+      - description: 事件来源
+        in: query
+        name: source
+        type: string
+      - description: 事件原因
+        in: query
+        name: reason
+        type: string
+      - description: 事件类型
+        in: query
+        name: type
+        type: string
+      - description: 相关资源类型
+        in: query
+        name: regardingKind
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 分析K8s事件
+  /ai/chat/example:
+    get:
+      parameters:
+      - description: 资源组
+        in: query
+        name: group
+        type: string
+      - description: 资源版本
+        in: query
+        name: version
+        type: string
+      - description: 资源类型
+        in: query
+        name: kind
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取K8s资源使用示例
+  /ai/chat/example/field:
+    get:
+      parameters:
+      - description: 资源组
+        in: query
+        name: group
+        type: string
+      - description: 资源版本
+        in: query
+        name: version
+        type: string
+      - description: 资源类型
+        in: query
+        name: kind
+        type: string
+      - description: 字段名称
+        in: query
+        name: field
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取K8s资源字段示例
+  /ai/chat/gptshell:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        type: string
+      - description: 命名空间
+        in: query
+        name: namespace
+        type: string
+      - description: 资源名称
+        in: query
+        name: name
+        type: string
+      - description: 资源类型
+        in: query
+        name: resource
+        type: string
+      - description: 对话内容
+        in: query
+        name: content
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 通过WebSocket提供GPT交互式对话终端
+  /ai/chat/history:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取聊天历史记录
+  /ai/chat/k8s_gpt/resource:
+    get:
+      parameters:
+      - description: 错误内容
+        in: query
+        name: data
+        type: string
+      - description: 资源名称
+        in: query
+        name: name
+        type: string
+      - description: 资源类型
+        in: query
+        name: kind
+        type: string
+      - description: 相关字段
+        in: query
+        name: field
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: K8s错误信息分析
+  /ai/chat/log:
+    get:
+      parameters:
+      - description: 日志内容
+        in: query
+        name: data
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 分析日志
+  /ai/chat/reset:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 重置聊天历史记录
+  /ai/chat/resource:
+    get:
+      parameters:
+      - description: 资源组
+        in: query
+        name: group
+        type: string
+      - description: 资源版本
+        in: query
+        name: version
+        type: string
+      - description: 资源类型
+        in: query
+        name: kind
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取K8s资源使用指南
+  /api/deploy/batch/restart:
+    post:
+      parameters:
+      - description: Deployment名称列表
+        in: body
+        name: name_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: 命名空间列表
+        in: body
+        name: ns_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量重启Deployment
+  /api/deploy/batch/restore:
+    post:
+      parameters:
+      - description: Deployment名称列表
+        in: body
+        name: name_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: 命名空间列表
+        in: body
+        name: ns_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量恢复Deployment
+  /api/deploy/batch/stop:
+    post:
+      parameters:
+      - description: Deployment名称列表
+        in: body
+        name: name_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: 命名空间列表
+        in: body
+        name: ns_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量停止Deployment
+  /api/deploy/create:
+    post:
+      parameters:
+      - description: Deployment配置
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建Deployment
+  /api/deploy/ns/{ns}/name/{name}/events/all:
+    get:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Deployment相关事件
+  /api/deploy/ns/{ns}/name/{name}/hpa:
+    get:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Deployment的HPA信息
+  /api/deploy/ns/{ns}/name/{name}/restart:
+    post:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 重启单个Deployment
+  /api/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/history:
+    get:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: revision
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Deployment版本差异
+  /api/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/undo:
+    post:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: revision
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 回滚Deployment到指定版本
+  /api/deploy/ns/{ns}/name/{name}/rollout/history:
+    get:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Deployment历史版本
+  /api/deploy/ns/{ns}/name/{name}/rollout/pause:
+    post:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 暂停Deployment滚动更新
+  /api/deploy/ns/{ns}/name/{name}/rollout/resume:
+    post:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 恢复Deployment滚动更新
+  /api/deploy/ns/{ns}/name/{name}/scale/replica/{replica}:
+    post:
+      parameters:
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Deployment名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 副本数
+        in: path
+        name: replica
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 扩缩容Deployment
 securityDefinitions:
   BearerAuth:
     in: header
