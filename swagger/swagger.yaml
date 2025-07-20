@@ -190,168 +190,6 @@ info:
   title: k8m API
   version: "1.0"
 paths:
-  /{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name}:
-    post:
-      parameters:
-      - description: 资源类型
-        in: path
-        name: kind
-        required: true
-        type: string
-      - description: API组
-        in: path
-        name: group
-        required: true
-        type: string
-      - description: API版本
-        in: path
-        name: version
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: 资源名称
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: 容忍度配置信息
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dynamic.Tolerations'
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 添加资源容忍度
-  /{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name}:
-    post:
-      parameters:
-      - description: 资源类型
-        in: path
-        name: kind
-        required: true
-        type: string
-      - description: API组
-        in: path
-        name: group
-        required: true
-        type: string
-      - description: API版本
-        in: path
-        name: version
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: 资源名称
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: 容忍度配置信息
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dynamic.Tolerations'
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 删除资源容忍度
-  /{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name}:
-    get:
-      parameters:
-      - description: 资源类型
-        in: path
-        name: kind
-        required: true
-        type: string
-      - description: API组
-        in: path
-        name: group
-        required: true
-        type: string
-      - description: API版本
-        in: path
-        name: version
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: 资源名称
-        in: path
-        name: name
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取资源容忍度列表
-  /{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name}:
-    post:
-      parameters:
-      - description: 资源类型
-        in: path
-        name: kind
-        required: true
-        type: string
-      - description: API组
-        in: path
-        name: group
-        required: true
-        type: string
-      - description: API版本
-        in: path
-        name: version
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: 资源名称
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: 容忍度配置信息
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dynamic.Tolerations'
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 更新资源容忍度
   /admin/ai/model/delete/{ids}:
     post:
       parameters:
@@ -2340,6 +2178,143 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取Kubernetes资源文档信息
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: API组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: API版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 容忍度配置信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dynamic.Tolerations'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 添加资源容忍度
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/annotations/ns/{ns}/name/{name}:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 列出资源注解
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/batch/remove:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 资源名称列表
+        in: body
+        name: name_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: 命名空间列表
+        in: body
+        name: ns_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量删除资源
   /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_env/ns/{ns}/name/{name}/container/{container_name}:
     get:
       parameters:
@@ -2524,6 +2499,141 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取容器资源信息
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: API组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: API版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 容忍度配置信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dynamic.Tolerations'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除资源容忍度
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/describe/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 描述资源
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/force_remove:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 资源名称列表
+        in: body
+        name: name_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: 命名空间列表
+        in: body
+        name: ns_list
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量强制删除资源
   /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/image_pull_secrets/ns/{ns}/name/{name}:
     get:
       parameters:
@@ -2565,6 +2675,429 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取容器镜像拉取密钥选项
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list/ns/{ns}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取资源列表
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name}:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: API组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: API版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取资源容忍度列表
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取资源YAML
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/event:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取资源事件
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/hpa:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取资源HPA信息
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/json:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取资源JSON
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/scale/replica/{replica}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 副本数
+        in: path
+        name: replica
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 扩缩容资源
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/remove/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除单个资源
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 资源YAML内容
+        in: body
+        name: yaml
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新资源
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_annotations/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 注解键值对
+        in: body
+        name: annotations
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新资源注解
   /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_env/ns/{ns}/name/{name}:
     post:
       parameters:
@@ -2706,6 +3239,55 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新容器镜像标签
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_labels/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: 资源组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: 资源版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 标签键值对
+        in: body
+        name: labels
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新资源标签
   /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_resources/ns/{ns}/name/{name}:
     post:
       parameters:
@@ -2753,6 +3335,106 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新容器资源配置
+  /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name}:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 资源类型
+        in: path
+        name: kind
+        required: true
+        type: string
+      - description: API组
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: API版本
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: 资源名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 容忍度配置信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dynamic.Tolerations'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新资源容忍度
+  /k8s/cluster/{cluster}/crd/group/option_list:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取CRD组选项列表
+  /k8s/cluster/{cluster}/crd/kind/option_list:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: CRD组名称
+        in: query
+        name: spec[group]
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取指定组的CRD类型选项列表
+  /k8s/cluster/{cluster}/crd/status:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取CRD状态信息
   /status/resource_count/cache_seconds/{cache}:
     get:
       parameters:
