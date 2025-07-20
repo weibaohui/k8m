@@ -17,6 +17,13 @@ func RegisterResourceRoutes(api *gin.RouterGroup) {
 	api.GET("/node/top/list", ctrl.TopList)
 	api.GET("/node/usage/name/:name", ctrl.Usage)
 }
+
+// @Summary 获取节点资源使用情况
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/usage/name/{name} [get]
 func (nc *ResourceController) Usage(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -36,7 +43,11 @@ func (nc *ResourceController) Usage(c *gin.Context) {
 	amis.WriteJsonData(c, usage)
 }
 
-// TopList 返回所有节点的资源使用率（top指标），包括CPU和内存的用量及其数值化表示，便于前端排序和展示。
+// @Summary 返回所有节点的资源使用率（top指标），包括CPU和内存的用量及其数值化表示，便于前端排序和展示
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/top/list [get]
 func (nc *ResourceController) TopList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
