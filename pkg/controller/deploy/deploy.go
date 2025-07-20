@@ -259,6 +259,13 @@ func (nc *ActionController) HistoryRevisionDiff(c *gin.Context) {
 		"latest":  string(latest),
 	})
 }
+
+// @Summary 暂停Deployment滚动更新
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/rollout/pause [post]
 func (nc *ActionController) Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -273,6 +280,13 @@ func (nc *ActionController) Pause(c *gin.Context) {
 		Ctl().Rollout().Pause()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 恢复Deployment滚动更新
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/rollout/resume [post]
 func (nc *ActionController) Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -287,6 +301,14 @@ func (nc *ActionController) Resume(c *gin.Context) {
 		Ctl().Rollout().Resume()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 扩缩容Deployment
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Param replica path int true "副本数"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/scale/replica/{replica} [post]
 func (nc *ActionController) Scale(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -304,6 +326,14 @@ func (nc *ActionController) Scale(c *gin.Context) {
 		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 回滚Deployment到指定版本
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/undo [post]
 func (nc *ActionController) Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -325,6 +355,12 @@ func (nc *ActionController) Undo(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, result)
 }
 
+// @Summary 获取Deployment相关事件
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/events/all [get]
 // Event 显示deploy下所有的事件列表，包括deploy、rs、pod
 func (nc *ActionController) Event(c *gin.Context) {
 	ns := c.Param("ns")
@@ -390,6 +426,12 @@ func (nc *ActionController) Event(c *gin.Context) {
 	amis.WriteJsonData(c, eventList)
 }
 
+// @Summary 获取Deployment的HPA信息
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/hpa [get]
 func (nc *ActionController) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -408,6 +450,11 @@ func (nc *ActionController) HPA(c *gin.Context) {
 	amis.WriteJsonData(c, hpa)
 }
 
+// @Summary 创建Deployment
+// @Security BearerAuth
+// @Param body body object true "Deployment配置"
+// @Success 200 {object} string
+// @Router /api/deploy/create [post]
 // 创建deployment
 func (nc *ActionController) Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
