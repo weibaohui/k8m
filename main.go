@@ -262,10 +262,8 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                               // CRD
 		api.POST("/:kind/group/:group/version/:version/list/ns/", dynamic.List)                                  // CRD
 		api.POST("/:kind/group/:group/version/:version/list", dynamic.List)
-		api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", dynamic.UpdateLabels)           // CRD
-		api.GET("/:kind/group/:group/version/:version/annotations/ns/:ns/name/:name", dynamic.ListAnnotations)           // CRD
-		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
 
+		dynamic.RegisterMetadataRoutes(api)
 		// Container 信息
 		dynamic.RegisterContainerRoutes(api)
 		// 节点亲和性
