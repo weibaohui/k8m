@@ -582,6 +582,34 @@ paths:
       security:
       - BearerAuth: []
       summary: 删除巡检计划
+  /admin/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}:
+    post:
+      description: 统计指定巡检计划的执行情况，支持按时间范围和集群过滤
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        type: string
+      - description: 集群名称
+        in: path
+        name: cluster
+        type: string
+      - description: 开始时间(RFC3339格式)
+        in: path
+        name: start_time
+        type: string
+      - description: 结束时间(RFC3339格式)
+        in: path
+        name: end_time
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 统计巡检计划执行情况
   /admin/inspection/schedule/id/{id}/update_script_code:
     post:
       parameters:
@@ -663,6 +691,23 @@ paths:
       security:
       - BearerAuth: []
       summary: 推送巡检记录
+  /admin/inspection/schedule/record/id/{id}/summary:
+    post:
+      description: 为指定巡检记录生成AI总结
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 生成巡检记录AI总结
   /admin/inspection/schedule/save:
     post:
       responses:
@@ -710,6 +755,62 @@ paths:
       security:
       - BearerAuth: []
       summary: 启动巡检计划
+  /admin/inspection/script/delete/{ids}:
+    post:
+      parameters:
+      - description: 脚本ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除Lua脚本
+  /admin/inspection/script/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Lua脚本列表
+  /admin/inspection/script/load:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 加载内置Lua脚本
+  /admin/inspection/script/option_list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Lua脚本选项列表
+  /admin/inspection/script/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存Lua脚本
   /admin/mcp/connect/{name}:
     post:
       parameters:

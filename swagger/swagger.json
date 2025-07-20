@@ -813,6 +813,51 @@
                 }
             }
         },
+        "/admin/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "统计指定巡检计划的执行情况，支持按时间范围和集群过滤",
+                "summary": "统计巡检计划执行情况",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检计划ID",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间(RFC3339格式)",
+                        "name": "start_time",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间(RFC3339格式)",
+                        "name": "end_time",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/inspection/schedule/id/{id}/update_script_code": {
             "post": {
                 "security": [
@@ -949,6 +994,34 @@
                 }
             }
         },
+        "/admin/inspection/schedule/record/id/{id}/summary": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "为指定巡检记录生成AI总结",
+                "summary": "生成巡检记录AI总结",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/inspection/schedule/save": {
             "post": {
                 "security": [
@@ -1018,6 +1091,105 @@
                         "required": true
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/inspection/script/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "删除Lua脚本",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "脚本ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/inspection/script/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Lua脚本列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/inspection/script/load": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "加载内置Lua脚本",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/inspection/script/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Lua脚本选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/inspection/script/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "保存Lua脚本",
                 "responses": {
                     "200": {
                         "description": "OK",
