@@ -540,6 +540,16 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新系统配置
+  /admin/inspection/event/status/option_list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检事件状态选项列表
   /admin/inspection/record/list:
     get:
       description: 根据巡检计划ID获取对应的巡检记录列表
@@ -556,6 +566,86 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取巡检记录列表
+  /admin/inspection/schedule/delete/{ids}:
+    post:
+      parameters:
+      - description: 巡检计划ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除巡检计划
+  /admin/inspection/schedule/id/{id}/update_script_code:
+    post:
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 脚本代码
+        in: body
+        name: script_codes
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新巡检脚本代码
+  /admin/inspection/schedule/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检计划列表
+  /admin/inspection/schedule/record/id/{id}/event/list:
+    get:
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检事件列表
+  /admin/inspection/schedule/record/id/{id}/output/list:
+    get:
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检脚本输出列表
   /admin/inspection/schedule/record/id/{id}/push:
     post:
       description: 将指定巡检记录的AI总结推送到所有配置的Webhook接收器
@@ -573,6 +663,53 @@ paths:
       security:
       - BearerAuth: []
       summary: 推送巡检记录
+  /admin/inspection/schedule/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存巡检计划
+  /admin/inspection/schedule/save/id/{id}/status/{enabled}:
+    post:
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: enabled
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速更新巡检计划状态
+  /admin/inspection/schedule/start/id/{id}:
+    post:
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 启动巡检计划
   /admin/mcp/connect/{name}:
     post:
       parameters:
