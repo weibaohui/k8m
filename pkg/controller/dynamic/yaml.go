@@ -19,6 +19,12 @@ func RegisterYamlRoutes(api *gin.RouterGroup) {
 	api.POST("/yaml/delete", ctrl.Delete)
 }
 
+// @Summary 上传YAML文件并应用
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param file formData file true "YAML文件"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/yaml/upload [post]
 func (yc *YamlController) UploadFile(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -49,6 +55,12 @@ func (yc *YamlController) UploadFile(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, strings.Join(result, "\n"))
 }
 
+// @Summary 应用YAML配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body yamlRequest true "YAML配置请求"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/yaml/apply [post]
 func (yc *YamlController) Apply(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -69,6 +81,13 @@ func (yc *YamlController) Apply(c *gin.Context) {
 	})
 
 }
+
+// @Summary 删除YAML配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body yamlRequest true "YAML配置请求"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/yaml/delete [post]
 func (yc *YamlController) Delete(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)

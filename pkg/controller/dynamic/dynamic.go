@@ -444,10 +444,6 @@ func (ac *ActionController) BatchForceRemove(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-type yamlRequest struct {
-	Yaml string `json:"yaml" binding:"required"`
-}
-
 // @Summary 更新资源
 // @Security BearerAuth
 // @Param cluster query string true "集群名称"
