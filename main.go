@@ -342,12 +342,7 @@ func main() {
 
 		// doc
 		doc.RegisterRoutes(api)
-
-		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.ResourceRunAnalysis)
-		api.POST("/k8s_gpt/cluster/:user_cluster/run", k8sgpt.ClusterRunAnalysis)
-		api.GET("/k8s_gpt/cluster/:user_cluster/result", k8sgpt.GetClusterRunAnalysisResult)
-		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
-
+		k8sgpt.RegisterRoutes(api)
 		// helm release
 		helm.RegisterHelmReleaseRoutes(api)
 

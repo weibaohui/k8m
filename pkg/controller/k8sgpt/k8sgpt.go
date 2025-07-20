@@ -14,7 +14,16 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func GetFields(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.GET("/k8s_gpt/kind/:kind/run", ctrl.ResourceRunAnalysis)
+	api.POST("/k8s_gpt/cluster/:user_cluster/run", ctrl.ClusterRunAnalysis)
+	api.GET("/k8s_gpt/cluster/:user_cluster/result", ctrl.GetClusterRunAnalysisResult)
+	api.GET("/k8s_gpt/var", ctrl.GetFields)
+}
+func (cc *Controller) GetFields(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -65,7 +74,7 @@ func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 	return cfg
 }
 
-func ResourceRunAnalysis(c *gin.Context) {
+func (cc *Controller) ResourceRunAnalysis(c *gin.Context) {
 	cfg := createAnalysisConfig(c)
 	kind := c.Param("kind")
 	cfg.Filters = []string{kind}
@@ -76,7 +85,7 @@ func ResourceRunAnalysis(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, result)
 }
-func ClusterRunAnalysis(c *gin.Context) {
+func (cc *Controller) ClusterRunAnalysis(c *gin.Context) {
 	userCluster := c.Param("user_cluster")
 	if userCluster != "" {
 		if id, err := utils.UrlSafeBase64Decode(userCluster); err == nil {
@@ -108,7 +117,7 @@ func ClusterRunAnalysis(c *gin.Context) {
 
 	amis.WriteJsonOKMsg(c, "后台执行，请稍后查看")
 }
-func GetClusterRunAnalysisResult(c *gin.Context) {
+func (cc *Controller) GetClusterRunAnalysisResult(c *gin.Context) {
 	userCluster := c.Param("user_cluster")
 	if userCluster != "" {
 		if id, err := utils.UrlSafeBase64Decode(userCluster); err == nil {
