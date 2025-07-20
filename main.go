@@ -338,8 +338,7 @@ func main() {
 		api.GET("/ingress_class/option_list", ingressclass.OptionList)
 
 		// k8s gateway_class
-		api.GET("/gateway_class/option_list", gatewayapi.GatewayClassOptionList)
-
+		gatewayapi.RegisterRoutes(api)
 		// doc
 		doc.RegisterRoutes(api)
 		k8sgpt.RegisterRoutes(api)
