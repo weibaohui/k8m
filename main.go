@@ -325,11 +325,7 @@ func main() {
 		api.POST("/configmap/ns/:ns/name/:name/:key/update_configmap", cm.Update)
 		api.POST("/configmap/create", cm.Create)
 		// k8s cronjob
-		api.POST("/cronjob/pause/ns/:ns/name/:name", cronjob.Pause)
-		api.POST("/cronjob/resume/ns/:ns/name/:name", cronjob.Resume)
-		api.POST("/cronjob/batch/resume", cronjob.BatchResume)
-		api.POST("/cronjob/batch/pause", cronjob.BatchPause)
-
+		cronjob.RegisterRoutes(api)
 		// k8s storage_class
 		storageclass.RegisterRoutes(api)
 		// k8s ingress_class
