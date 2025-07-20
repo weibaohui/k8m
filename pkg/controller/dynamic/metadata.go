@@ -34,7 +34,7 @@ func (mc *MetadataController) UpdateLabels(c *gin.Context) {
 	var req struct {
 		Labels map[string]string `json:"labels"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
