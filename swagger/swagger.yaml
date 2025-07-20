@@ -178,6 +178,28 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取文件类型的集群选项
+  /admin/cluster/kubeconfig/remove:
+    post:
+      description: 从数据库中删除KubeConfig配置
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除KubeConfig
+  /admin/cluster/kubeconfig/save:
+    post:
+      description: 保存KubeConfig配置到数据库
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存KubeConfig
   /admin/cluster/scan:
     post:
       description: 扫描本地Kubeconfig文件目录以发现新的集群
@@ -332,6 +354,63 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取指定用户已获得授权的集群
+  /admin/condition/delete/{ids}:
+    post:
+      parameters:
+      - description: 条件ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除条件
+  /admin/condition/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取条件列表
+  /admin/condition/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建或更新条件
+  /admin/condition/save/id/{id}/status/{status}:
+    post:
+      parameters:
+      - description: 条件ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速保存条件状态
   /admin/mcp/connect/{name}:
     post:
       parameters:
