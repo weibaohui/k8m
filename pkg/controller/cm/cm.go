@@ -117,7 +117,7 @@ func (cc *Controller) Update(c *gin.Context) {
 	var requestBody struct {
 		Content string `json:"update_configmap"`
 	}
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
+	if err = c.ShouldBindJSON(&requestBody); err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("解析请求体错误: %v", err))
 		return
 	}
@@ -178,7 +178,7 @@ func (cc *Controller) Create(c *gin.Context) {
 		Data map[string]interface{} `json:"data"` // 修改为 interface{} 类型
 	}
 
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
+	if err = c.ShouldBindJSON(&requestBody); err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("解析请求体错误: %v", err))
 		return
 	}
