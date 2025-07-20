@@ -324,19 +324,7 @@ func main() {
 		pod.RegisterPortRoutes(api)
 
 		// k8s deploy
-		api.POST("/deploy/ns/:ns/name/:name/restart", deploy.Restart)
-		api.POST("/deploy/batch/restart", deploy.BatchRestart)
-		api.POST("/deploy/batch/stop", deploy.BatchStop)
-		api.POST("/deploy/batch/restore", deploy.BatchRestore)
-		api.POST("/deploy/ns/:ns/name/:name/revision/:revision/rollout/undo", deploy.Undo)
-		api.GET("/deploy/ns/:ns/name/:name/rollout/history", deploy.History)
-		api.GET("/deploy/ns/:ns/name/:name/revision/:revision/rollout/history", deploy.HistoryRevisionDiff)
-		api.POST("/deploy/ns/:ns/name/:name/rollout/pause", deploy.Pause)
-		api.POST("/deploy/ns/:ns/name/:name/rollout/resume", deploy.Resume)
-		api.POST("/deploy/ns/:ns/name/:name/scale/replica/:replica", deploy.Scale)
-		api.GET("/deploy/ns/:ns/name/:name/events/all", deploy.Event)
-		api.GET("/deploy/ns/:ns/name/:name/hpa", deploy.HPA)
-		api.POST("/deploy/create", deploy.Create)
+		deploy.RegisterActionRoutes(api)
 		// p8s svc
 		svc.RegisterActionRoutes(api)
 		// k8s node
