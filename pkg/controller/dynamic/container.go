@@ -355,6 +355,16 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]interface
 	return patch, nil
 }
 
+// @Summary 获取容器基本信息
+// @Security BearerAuth
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {object} string
+// @Router /{kind}/group/{group}/version/{version}/container_info/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
