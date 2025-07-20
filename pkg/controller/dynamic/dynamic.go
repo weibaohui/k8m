@@ -68,7 +68,7 @@ func (ac *ActionController) List(c *gin.Context) {
 
 	// 用于存储 JSON 数据的 map
 	var jsonData map[string]interface{}
-	if err := c.ShouldBindJSON(&jsonData); err != nil {
+	if err = c.ShouldBindJSON(&jsonData); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -211,7 +211,7 @@ func (ac *ActionController) Event(c *gin.Context) {
 		return
 	}
 
-	apiVersion := fmt.Sprintf("%s", version)
+	apiVersion := version
 	if group != "" {
 		apiVersion = fmt.Sprintf("%s/%s", group, version)
 	}
@@ -375,7 +375,7 @@ func (ac *ActionController) BatchRemove(c *gin.Context) {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -422,7 +422,7 @@ func (ac *ActionController) BatchForceRemove(c *gin.Context) {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -473,7 +473,7 @@ func (ac *ActionController) Save(c *gin.Context) {
 	}
 
 	var req yamlRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
