@@ -249,19 +249,7 @@ func main() {
 		dynamic.RegisterCRDRoutes(api)
 
 		// CRD action
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)                         // CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", dynamic.FetchJson)                // CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", dynamic.Event)                   // CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/hpa", dynamic.HPA)                       // CRD
-		api.POST("/:kind/group/:group/version/:version/ns/:ns/name/:name/scale/replica/:replica", dynamic.Scale) // CRD
-		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove)                // CRD
-		api.POST("/:kind/group/:group/version/:version/batch/remove", dynamic.BatchRemove)                       // CRD
-		api.POST("/:kind/group/:group/version/:version/force_remove", dynamic.BatchForceRemove)                  // CRD
-		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)                  // CRD       // CRD
-		api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", dynamic.Describe)            // CRD
-		api.POST("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                               // CRD
-		api.POST("/:kind/group/:group/version/:version/list/ns/", dynamic.List)                                  // CRD
-		api.POST("/:kind/group/:group/version/:version/list", dynamic.List)
+		dynamic.RegisterActionRoutes(api)
 
 		dynamic.RegisterMetadataRoutes(api)
 		// Container 信息
