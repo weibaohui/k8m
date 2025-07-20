@@ -25,6 +25,10 @@ func RegisterAdminWebhookRoutes(admin *gin.RouterGroup) {
 
 }
 
+// @Summary 获取Webhook接收器选项列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/option_list [get]
 func (s *Controller) WebhookOptionList(c *gin.Context) {
 	m := models.WebhookReceiver{}
 	params := dao.BuildParams(c)
@@ -72,6 +76,10 @@ func (s *Controller) WebhookTest(c *gin.Context) {
 	amis.WriteJsonError(c, fmt.Errorf("unsupported platform: %s", m.Platform))
 }
 
+// @Summary 获取Webhook接收器列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/list [get]
 func (s *Controller) WebhookList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.WebhookReceiver{}
@@ -84,6 +92,10 @@ func (s *Controller) WebhookList(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
+// @Summary 创建或更新Webhook接收器
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/save [post]
 func (s *Controller) WebhookSave(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.WebhookReceiver{}
@@ -100,6 +112,11 @@ func (s *Controller) WebhookSave(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 删除Webhook接收器
+// @Security BearerAuth
+// @Param ids path string true "Webhook接收器ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/delete/{ids} [post]
 func (s *Controller) WebhookDelete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)

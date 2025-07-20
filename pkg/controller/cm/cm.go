@@ -30,7 +30,15 @@ type info struct {
 	FileName string `json:"fileName,omitempty"`
 }
 
-// Import 处理上传文件的 HTTP 请求
+// @Summary 导入文件到ConfigMap
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "ConfigMap名称"
+// @Param fileName formData string true "文件名"
+// @Param file formData file true "上传文件"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/configmap/ns/{ns}/name/{name}/import [post]
 func (cc *Controller) Import(c *gin.Context) {
 	item := &info{}
 	ns := c.Param("ns")
@@ -88,7 +96,15 @@ func (cc *Controller) Import(c *gin.Context) {
 	})
 }
 
-// Update 更新配置文件
+// @Summary 更新ConfigMap中的文件内容
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "ConfigMap名称"
+// @Param key path string true "文件名"
+// @Param request body object true "请求体，包含update_configmap字段"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/configmap/ns/{ns}/name/{name}/{key}/update_configmap [post]
 func (cc *Controller) Update(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -103,7 +119,7 @@ func (cc *Controller) Update(c *gin.Context) {
 	var requestBody struct {
 		Content string `json:"update_configmap"`
 	}
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
+	if err = c.ShouldBindJSON(&requestBody); err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("解析请求体错误: %v", err))
 		return
 	}
@@ -141,7 +157,12 @@ func (cc *Controller) Update(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-// Create 创建configmap接口
+// @Summary 创建ConfigMap
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param request body object true "请求体，包含metadata和data字段"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/configmap/create [post]
 func (cc *Controller) Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -160,7 +181,7 @@ func (cc *Controller) Create(c *gin.Context) {
 		Data map[string]interface{} `json:"data"` // 修改为 interface{} 类型
 	}
 
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
+	if err = c.ShouldBindJSON(&requestBody); err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("解析请求体错误: %v", err))
 		return
 	}

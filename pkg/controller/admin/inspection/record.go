@@ -18,8 +18,15 @@ func RegisterAdminRecordRoutes(admin *gin.RouterGroup) {
 	admin.GET("/inspection/schedule/id/:id/record/list", ctrl.RecordList)
 	admin.GET("/inspection/record/list", ctrl.RecordList)
 	admin.POST("/inspection/schedule/record/id/:id/push", ctrl.Push)
-
 }
+
+// @Summary 获取巡检记录列表
+// @Description 根据巡检计划ID获取对应的巡检记录列表
+// @Security BearerAuth
+// @Param id path string false "巡检计划ID"
+// @Success 200 {object} string
+// @Router /admin/inspection/schedule/id/{id}/record/list [get]
+// @Router /admin/inspection/record/list [get]
 func (r *AdminRecordController) RecordList(c *gin.Context) {
 	params := dao.BuildParams(c)
 
@@ -39,6 +46,12 @@ func (r *AdminRecordController) RecordList(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
+// @Summary 推送巡检记录
+// @Description 将指定巡检记录的AI总结推送到所有配置的Webhook接收器
+// @Security BearerAuth
+// @Param id path string true "巡检记录ID"
+// @Success 200 {object} string
+// @Router /admin/inspection/schedule/record/id/{id}/push [post]
 func (r *AdminRecordController) Push(c *gin.Context) {
 	recordIDStr := c.Param("id")
 	recordID := utils.ToUInt(recordIDStr)

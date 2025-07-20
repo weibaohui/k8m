@@ -21,6 +21,10 @@ func RegisterSSOConfigRoutes(admin *gin.RouterGroup) {
 	admin.POST("/config/sso/save/id/:id/status/:enabled", ctrl.QuickSave)
 }
 
+// @Summary 获取SSO配置列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/config/sso/list [get]
 func (sc *SSOConfigController) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.SSOConfig{}
@@ -33,6 +37,10 @@ func (sc *SSOConfigController) List(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
+// @Summary 创建或更新SSO配置
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/config/sso/save [post]
 func (sc *SSOConfigController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.SSOConfig{}
@@ -54,6 +62,11 @@ func (sc *SSOConfigController) Save(c *gin.Context) {
 	})
 }
 
+// @Summary 删除SSO配置
+// @Security BearerAuth
+// @Param ids path string true "SSO配置ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/config/sso/delete/{ids} [post]
 func (sc *SSOConfigController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
@@ -67,6 +80,12 @@ func (sc *SSOConfigController) Delete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 快速更新SSO配置状态
+// @Security BearerAuth
+// @Param id path int true "SSO配置ID"
+// @Param enabled path string true "状态，例如：true、false"
+// @Success 200 {object} string
+// @Router /admin/config/sso/save/id/{id}/status/{enabled} [post]
 func (sc *SSOConfigController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")

@@ -23,6 +23,12 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	api.GET("/k8s_gpt/cluster/:user_cluster/result", ctrl.GetClusterRunAnalysisResult)
 	api.GET("/k8s_gpt/var", ctrl.GetFields)
 }
+
+// @Summary 获取K8s资源字段信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/k8s_gpt/var [get]
 func (cc *Controller) GetFields(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -74,6 +80,12 @@ func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 	return cfg
 }
 
+// @Summary 对指定资源类型运行K8sGPT分析
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/k8s_gpt/kind/{kind}/run [get]
 func (cc *Controller) ResourceRunAnalysis(c *gin.Context) {
 	cfg := createAnalysisConfig(c)
 	kind := c.Param("kind")
@@ -85,6 +97,13 @@ func (cc *Controller) ResourceRunAnalysis(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, result)
 }
+
+// @Summary 对整个集群运行K8sGPT分析
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param user_cluster path string true "用户集群标识"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/k8s_gpt/cluster/{user_cluster}/run [post]
 func (cc *Controller) ClusterRunAnalysis(c *gin.Context) {
 	userCluster := c.Param("user_cluster")
 	if userCluster != "" {
@@ -117,6 +136,13 @@ func (cc *Controller) ClusterRunAnalysis(c *gin.Context) {
 
 	amis.WriteJsonOKMsg(c, "后台执行，请稍后查看")
 }
+
+// @Summary 获取集群K8sGPT分析结果
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param user_cluster path string true "用户集群标识"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/k8s_gpt/cluster/{user_cluster}/result [get]
 func (cc *Controller) GetClusterRunAnalysisResult(c *gin.Context) {
 	userCluster := c.Param("user_cluster")
 	if userCluster != "" {

@@ -17,7 +17,12 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// GetSSOConfig 获取SSO列表，用于前端展示
+// GetSSOConfig 获取SSO配置列表
+// @Summary 获取SSO配置列表
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/sso/config [get]
 func (au *AuthController) GetSSOConfig(c *gin.Context) {
 	// 获取所有的SSO配置
 	var ssoConfigs []models.SSOConfig
@@ -28,6 +33,14 @@ func (au *AuthController) GetSSOConfig(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, ssoConfigs)
 }
+
+// GetAuthCodeURL 获取认证URL
+// @Summary 获取认证URL
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param name path string true "SSO名称"
+// @Success 302 {string} string
+// @Router /k8s/cluster/{cluster}/oidc/{name}/sso [get]
 func (au *AuthController) GetAuthCodeURL(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("use sso name: %s", name)
@@ -44,6 +57,13 @@ func (au *AuthController) GetAuthCodeURL(c *gin.Context) {
 }
 
 // HandleCallback 处理OAuth2回调
+// @Summary 处理OAuth2回调
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param name path string true "SSO名称"
+// @Param code query string true "认证代码"
+// @Success 200 {string} string
+// @Router /k8s/cluster/{cluster}/oidc/{name}/callback [get]
 func (au *AuthController) HandleCallback(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
@@ -156,6 +176,11 @@ func GetUserGroups(claims map[string]any) string {
 }
 
 // GetLdapEnabled 获取ldap开关状态
+// @Summary 获取LDAP开关状态
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ldap/config [get]
 func (au *AuthController) GetLdapEnabled(c *gin.Context) {
 	cfg := flag.Init()
 	amis.WriteJsonData(c, gin.H{

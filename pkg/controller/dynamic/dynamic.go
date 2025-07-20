@@ -37,6 +37,16 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 	api.POST("/:kind/group/:group/version/:version/list", ctrl.List)
 
 }
+
+// @Summary 获取资源列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list/ns/{ns} [post]
 func (ac *ActionController) List(c *gin.Context) {
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -58,7 +68,7 @@ func (ac *ActionController) List(c *gin.Context) {
 
 	// 用于存储 JSON 数据的 map
 	var jsonData map[string]interface{}
-	if err := c.ShouldBindJSON(&jsonData); err != nil {
+	if err = c.ShouldBindJSON(&jsonData); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -118,12 +128,12 @@ func (ac *ActionController) List(c *gin.Context) {
 		FillTotalCount(&total).
 		List(&list).Error
 
-	list = ac.FillList(selectedCluster, kind, list)
+	list = ac.fillList(selectedCluster, kind, list)
 	amis.WriteJsonListTotalWithError(c, total, list, err)
 }
 
-// FillList 定制填充list []*unstructured.Unstructured列表
-func (ac *ActionController) FillList(selectedCluster string, kind string, list []*unstructured.Unstructured) []*unstructured.Unstructured {
+// fillList 定制填充list []*unstructured.Unstructured列表
+func (ac *ActionController) fillList(selectedCluster string, kind string, list []*unstructured.Unstructured) []*unstructured.Unstructured {
 	switch kind {
 	case "Node":
 		if service.ClusterService().GetNodeStatusAggregated(selectedCluster) {
@@ -177,6 +187,17 @@ func (ac *ActionController) FillList(selectedCluster string, kind string, list [
 	}
 	return list
 }
+
+// @Summary 获取资源事件
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/event [get]
 func (ac *ActionController) Event(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -190,7 +211,7 @@ func (ac *ActionController) Event(c *gin.Context) {
 		return
 	}
 
-	apiVersion := fmt.Sprintf("%s", version)
+	apiVersion := version
 	if group != "" {
 		apiVersion = fmt.Sprintf("%s/%s", group, version)
 	}
@@ -210,6 +231,17 @@ func (ac *ActionController) Event(c *gin.Context) {
 	amis.WriteJsonListWithError(c, eventList, err)
 
 }
+
+// @Summary 获取资源YAML
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name} [get]
 func (ac *ActionController) Fetch(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -240,6 +272,17 @@ func (ac *ActionController) Fetch(c *gin.Context) {
 		"yaml": yamlStr,
 	})
 }
+
+// @Summary 获取资源JSON
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/json [get]
 func (ac *ActionController) FetchJson(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -263,6 +306,17 @@ func (ac *ActionController) FetchJson(c *gin.Context) {
 
 	amis.WriteJsonData(c, obj)
 }
+
+// @Summary 删除单个资源
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/remove/ns/{ns}/name/{name} [post]
 func (ac *ActionController) Remove(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -296,6 +350,16 @@ type NamesPayload struct {
 	Names []string `json:"names"`
 }
 
+// @Summary 批量删除资源
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param name_list body []string true "资源名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/batch/remove [post]
 func (ac *ActionController) BatchRemove(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
@@ -311,7 +375,7 @@ func (ac *ActionController) BatchRemove(c *gin.Context) {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -332,6 +396,17 @@ func (ac *ActionController) BatchRemove(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 批量强制删除资源
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param name_list body []string true "资源名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/force_remove [post]
 func (ac *ActionController) BatchForceRemove(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
@@ -347,7 +422,7 @@ func (ac *ActionController) BatchForceRemove(c *gin.Context) {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -369,10 +444,17 @@ func (ac *ActionController) BatchForceRemove(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-type yamlRequest struct {
-	Yaml string `json:"yaml" binding:"required"`
-}
-
+// @Summary 更新资源
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param yaml body string true "资源YAML内容"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update/ns/{ns}/name/{name} [post]
 func (ac *ActionController) Save(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -387,7 +469,7 @@ func (ac *ActionController) Save(c *gin.Context) {
 	}
 
 	var req yamlRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -413,6 +495,16 @@ func (ac *ActionController) Save(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 描述资源
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/describe/ns/{ns}/name/{name} [post]
 func (ac *ActionController) Describe(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -436,6 +528,17 @@ func (ac *ActionController) Describe(c *gin.Context) {
 	amis.WriteJsonData(c, string(result))
 }
 
+// @Summary 扩缩容资源
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param replica path string true "副本数"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/scale/replica/{replica} [post]
 func (ac *ActionController) Scale(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -457,6 +560,17 @@ func (ac *ActionController) Scale(c *gin.Context) {
 		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 获取资源HPA信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/hpa [get]
 func (ac *ActionController) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")

@@ -40,7 +40,7 @@ func (m *ToolController) List(c *gin.Context) {
 	amis.WriteJsonList(c, list)
 }
 
-// @Summary 快速保存MCP工具状态
+// @Summary 快速更新MCP工具状态
 // @Security BearerAuth
 // @Param id path int true "工具ID"
 // @Param status path string true "状态，例如：true、false"

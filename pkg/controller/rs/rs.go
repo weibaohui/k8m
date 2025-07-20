@@ -24,6 +24,14 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	api.GET("/replicaset/ns/:ns/name/:name/hpa", ctrl.HPA)
 }
 
+// Restart 重启指定的ReplicaSet
+// @Summary 重启指定的ReplicaSet
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "ReplicaSet名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/replicaset/ns/{ns}/name/{name}/restart [post]
 func (cc *Controller) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -39,6 +47,13 @@ func (cc *Controller) Restart(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
+// BatchRestart 批量重启ReplicaSet
+// @Summary 批量重启ReplicaSet
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param body body object true "包含name_list和ns_list的请求体"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/replicaset/batch/restart [post]
 func (cc *Controller) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -75,6 +90,13 @@ func (cc *Controller) BatchRestart(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// BatchStop 批量停止ReplicaSet
+// @Summary 批量停止ReplicaSet
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param body body object true "包含name_list和ns_list的请求体"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/replicaset/batch/stop [post]
 func (cc *Controller) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -111,6 +133,13 @@ func (cc *Controller) BatchStop(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// BatchRestore 批量恢复ReplicaSet
+// @Summary 批量恢复ReplicaSet
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param body body object true "包含name_list和ns_list的请求体"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/replicaset/batch/restore [post]
 func (cc *Controller) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -147,7 +176,14 @@ func (cc *Controller) BatchRestore(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// Event 显示deploy下所有的事件列表，包括deploy、rs、pod
+// Event 获取ReplicaSet相关事件列表
+// @Summary 获取ReplicaSet相关事件列表
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "ReplicaSet名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/replicaset/ns/{ns}/name/{name}/events/all [get]
 func (cc *Controller) Event(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -212,6 +248,14 @@ func (cc *Controller) Event(c *gin.Context) {
 	amis.WriteJsonData(c, eventList)
 }
 
+// HPA 获取ReplicaSet相关HPA列表
+// @Summary 获取ReplicaSet相关HPA列表
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "ReplicaSet名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/replicaset/ns/{ns}/name/{name}/hpa [get]
 func (cc *Controller) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")

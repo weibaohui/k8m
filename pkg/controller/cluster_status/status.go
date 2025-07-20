@@ -12,8 +12,14 @@ type ClusterController struct{}
 func RegisterClusterRoutes(api *gin.RouterGroup) {
 	ctrl := &ClusterController{}
 	api.GET("/status/resource_count/cache_seconds/:cache", ctrl.ClusterResourceCount)
-
 }
+
+// @Summary 获取集群资源数量统计
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param cache path string true "缓存时间（秒）"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/status/resource_count/cache_seconds/{cache} [get]
 func (cc *ClusterController) ClusterResourceCount(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

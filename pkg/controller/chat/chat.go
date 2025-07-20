@@ -85,6 +85,16 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 	}
 	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
+
+// @Summary 分析K8s事件
+// @Security BearerAuth
+// @Param note query string false "事件备注"
+// @Param source query string false "事件来源"
+// @Param reason query string false "事件原因"
+// @Param type query string false "事件类型"
+// @Param regardingKind query string false "相关资源类型"
+// @Success 200 {object} string
+// @Router /ai/chat/event [get]
 func (cc *Controller) Event(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -98,6 +108,15 @@ func (cc *Controller) Event(c *gin.Context) {
 	})
 }
 
+// @Summary 分析K8s资源描述
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Param name query string false "资源名称"
+// @Param namespace query string false "命名空间"
+// @Success 200 {object} string
+// @Router /ai/chat/describe [get]
 func (cc *Controller) Describe(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	var data ResourceData
@@ -134,6 +153,13 @@ func (cc *Controller) Describe(c *gin.Context) {
 	})
 }
 
+// @Summary 获取K8s资源使用示例
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Success 200 {object} string
+// @Router /ai/chat/example [get]
 func (cc *Controller) Example(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -152,6 +178,15 @@ func (cc *Controller) Example(c *gin.Context) {
 			d.Group, d.Kind, d.Version)
 	})
 }
+
+// @Summary 获取K8s资源字段示例
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Param field query string false "字段名称"
+// @Success 200 {object} string
+// @Router /ai/chat/example/field [get]
 func (cc *Controller) FieldExample(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -168,6 +203,14 @@ func (cc *Controller) FieldExample(c *gin.Context) {
 			d.Group, d.Kind, d.Version, d.Field)
 	})
 }
+
+// @Summary 获取K8s资源使用指南
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Success 200 {object} string
+// @Router /ai/chat/resource [get]
 func (cc *Controller) Resource(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -184,6 +227,15 @@ func (cc *Controller) Resource(c *gin.Context) {
 			d.Group, d.Kind, d.Version)
 	})
 }
+
+// @Summary K8s错误信息分析
+// @Security BearerAuth
+// @Param data query string false "错误内容"
+// @Param name query string false "资源名称"
+// @Param kind query string false "资源类型"
+// @Param field query string false "相关字段"
+// @Success 200 {object} string
+// @Router /ai/chat/k8s_gpt/resource [get]
 func (cc *Controller) K8sGPTResource(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -206,6 +258,12 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 			d.Data, d.Name, d.Kind, d.Field)
 	})
 }
+
+// @Summary 解释选择内容
+// @Security BearerAuth
+// @Param question query string false "要解释的内容"
+// @Success 200 {object} string
+// @Router /ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -220,6 +278,15 @@ func (cc *Controller) AnySelection(c *gin.Context) {
 			d.Question)
 	})
 }
+
+// @Summary 回答K8s相关问题
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Param question query string false "问题内容"
+// @Success 200 {object} string
+// @Router /ai/chat/any_question [get]
 func (cc *Controller) AnyQuestion(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -237,6 +304,11 @@ func (cc *Controller) AnyQuestion(c *gin.Context) {
 	})
 }
 
+// @Summary 分析Cron表达式
+// @Security BearerAuth
+// @Param cron query string false "Cron表达式"
+// @Success 200 {object} string
+// @Router /ai/chat/cron [get]
 func (cc *Controller) Cron(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
@@ -252,6 +324,11 @@ func (cc *Controller) Cron(c *gin.Context) {
 	})
 }
 
+// @Summary 分析日志
+// @Security BearerAuth
+// @Param data query string false "日志内容"
+// @Success 200 {object} string
+// @Router /ai/chat/log [get]
 func (cc *Controller) Log(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)

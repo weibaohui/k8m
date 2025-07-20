@@ -16,6 +16,11 @@ func RegisterRoutes(api *gin.RouterGroup) {
 
 }
 
+// @Summary 获取GatewayClass选项列表
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/gateway_class/option_list [get]
 func (cc *Controller) GatewayClassOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)

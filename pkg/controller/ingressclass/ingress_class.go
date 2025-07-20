@@ -16,6 +16,12 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	api.GET("/ingress_class/option_list", ctrl.OptionList)
 }
 
+// @Summary 设置默认的 IngressClass
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "IngressClass 名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ingress_class/set_default/name/{name} [post]
 func (cc *Controller) SetDefault(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -35,6 +41,11 @@ func (cc *Controller) SetDefault(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 获取 IngressClass 选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ingress_class/option_list [get]
 func (cc *Controller) OptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)

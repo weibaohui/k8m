@@ -20,6 +20,11 @@ func RegisterCRDRoutes(api *gin.RouterGroup) {
 	api.GET("/crd/status", ctrl.CRDStatus)
 }
 
+// @Summary 获取CRD组选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/crd/group/option_list [get]
 func (cc *CRDController) GroupOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -42,6 +47,12 @@ func (cc *CRDController) GroupOptionList(c *gin.Context) {
 	})
 }
 
+// @Summary 获取指定组的CRD类型选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param spec[group] query string true "CRD组名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/crd/kind/option_list [get]
 func (cc *CRDController) KindOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)

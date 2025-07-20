@@ -23,6 +23,12 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	api.POST("/LimitRange/create", ctrl.CreateLimitRange)
 
 }
+
+// @Summary 获取命名空间选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ns/option_list [get]
 func (nc *Controller) OptionList(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

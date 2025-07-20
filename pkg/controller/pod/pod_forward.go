@@ -40,6 +40,16 @@ type PortInfo struct {
 var portForwardTable = make(map[string]*PortInfo) // key: cluster/ns/pod/port
 var portForwardTableMutex sync.RWMutex
 
+// @Summary 开始端口转发
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Pod名称"
+// @Param container_name path string true "容器名称"
+// @Param pod_port path string true "Pod端口"
+// @Param local_port path string true "本地端口"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/local_port/{local_port}/start [post]
 func (pc *PortController) StartPortForward(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("name")
@@ -111,6 +121,16 @@ func (pc *PortController) StartPortForward(c *gin.Context) {
 	}()
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 停止端口转发
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Pod名称"
+// @Param container_name path string true "容器名称"
+// @Param pod_port path string true "Pod端口"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/stop [post]
 func (pc *PortController) StopPortForward(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -135,6 +155,13 @@ func (pc *PortController) StopPortForward(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 列出端口转发信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Pod名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/pod/port_forward/ns/{ns}/name/{name}/port/list [get]
 func (pc *PortController) PortForwardList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("name")

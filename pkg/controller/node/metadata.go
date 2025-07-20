@@ -20,6 +20,12 @@ func RegisterMetadataRoutes(api *gin.RouterGroup) {
 	api.GET("/node/labels/list", ctrl.AllLabelList)
 	api.GET("/node/labels/unique_labels", ctrl.UniqueLabels)
 }
+
+// @Summary 获取节点名称选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/name/option_list [get]
 func (nc *MetadataController) NameOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -58,7 +64,11 @@ func (nc *MetadataController) NameOptionList(c *gin.Context) {
 	})
 }
 
-// AllLabelList 获取所有节点上的标签
+// @Summary 获取所有节点上的标签
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/labels/list [get]
 func (nc *MetadataController) AllLabelList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -114,7 +124,11 @@ func (nc *MetadataController) AllLabelList(c *gin.Context) {
 	amis.WriteJsonList(c, labelList)
 }
 
-// UniqueLabels 获取选定集群中所有唯一的节点标签键，并以选项列表形式返回。
+// @Summary 获取选定集群中所有唯一的节点标签键，并以选项列表形式返回
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/labels/unique_labels [get]
 func (nc *MetadataController) UniqueLabels(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

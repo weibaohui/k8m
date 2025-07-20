@@ -28,8 +28,18 @@ func RegisterContainerRoutes(api *gin.RouterGroup) {
 	api.POST("/:kind/group/:group/version/:version/update_resources/ns/:ns/name/:name", ctrl.UpdateResources)
 	api.POST("/:kind/group/:group/version/:version/update_health_checks/ns/:ns/name/:name", ctrl.UpdateHealthChecks)
 	api.POST("/:kind/group/:group/version/:version/update_env/ns/:ns/name/:name", ctrl.UpdateContainerEnv)
-
 }
+
+// @Summary 获取容器镜像拉取密钥选项
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/image_pull_secrets/ns/{ns}/name/{name} [get]
 func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -96,6 +106,17 @@ func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 	})
 }
 
+// @Summary 获取容器资源信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_resources_info/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerResourcesInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -242,6 +263,17 @@ type resourceInfo struct {
 	LimitMemory   string `json:"limit_memory"`
 }
 
+// @Summary 更新容器资源配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body resourceInfo true "资源配置信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_resources/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateResources(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -257,7 +289,7 @@ func (cc *ContainerController) UpdateResources(c *gin.Context) {
 
 	var info resourceInfo
 
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -336,6 +368,17 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]interface
 	return patch, nil
 }
 
+// @Summary 获取容器基本信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_info/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -377,6 +420,17 @@ func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 }
 
 // 获取container的环境变量信息
+// @Summary 获取容器环境变量信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_env/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerEnvInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -418,7 +472,17 @@ type ContainerEnv struct {
 	Envs          map[string]string `json:"envs"`
 }
 
-// 更新container的环境变量信息
+// @Summary 更新容器环境变量
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body ContainerEnv true "容器环境变量信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_env/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -433,7 +497,7 @@ func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
 	}
 
 	var info ContainerEnv
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -695,6 +759,17 @@ type imageInfo struct {
 	ImagePullPolicy  string `json:"image_pull_policy"`
 }
 
+// @Summary 更新容器镜像标签
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body imageInfo true "镜像信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_image/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -710,7 +785,7 @@ func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 
 	var info imageInfo
 
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -775,7 +850,17 @@ func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo)
 	return patch, nil
 }
 
-// 接口 获取容器健康检查信息
+// @Summary 获取容器健康检查信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_health_checks/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerHealthChecksInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -876,7 +961,17 @@ type HealthCheckInfo struct {
 	LivenessProbe  map[string]interface{} `json:"liveness_probe,omitempty"`
 }
 
-// 接口 更新容器健康检查
+// @Summary 更新容器健康检查配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body HealthCheckInfo true "健康检查配置信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_health_checks/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -903,7 +998,7 @@ func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
 	}
 
 	patchJSON := utils.ToJSON(patchData)
-	var item interface{}
+	var item any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -932,28 +1027,30 @@ func (cc *ContainerController) generateHealthCheckPatch(kind string, info Health
 		current = current[path].(map[string]interface{})
 	}
 	// 判断健康检查类型
-	if info.LivenessType == "httpGet" {
+	switch info.LivenessType {
+	case "httpGet":
 		info.LivenessProbe["exec"] = nil
 		info.LivenessProbe["tcpSocket"] = nil
-	} else if info.LivenessType == "exec" {
+	case "exec":
 		info.LivenessProbe["httpGet"] = nil
 		info.LivenessProbe["tcpSocket"] = nil
-	} else if info.LivenessType == "tcpSocket" {
+	case "tcpSocket":
 		info.LivenessProbe["httpGet"] = nil
 		info.LivenessProbe["exec"] = nil
-	} else {
+	default:
 		info.LivenessProbe = nil
 	}
-	if info.ReadinessType == "httpGet" {
+	switch info.ReadinessType {
+	case "httpGet":
 		info.ReadinessProbe["exec"] = nil
 		info.ReadinessProbe["tcpSocket"] = nil
-	} else if info.ReadinessType == "exec" {
+	case "exec":
 		info.ReadinessProbe["httpGet"] = nil
 		info.ReadinessProbe["tcpSocket"] = nil
-	} else if info.ReadinessType == "tcpSocket" {
+	case "tcpSocket":
 		info.ReadinessProbe["httpGet"] = nil
 		info.ReadinessProbe["exec"] = nil
-	} else {
+	default:
 		info.ReadinessProbe = nil
 	}
 

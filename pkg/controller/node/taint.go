@@ -22,7 +22,11 @@ func RegisterTaintRoutes(api *gin.RouterGroup) {
 	api.GET("/node/taints/list", ctrl.List)
 }
 
-// List 获取所有节点上的污点
+// @Summary 获取所有节点上的污点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/taints/list [get]
 func (tc *TaintController) List(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -86,7 +90,12 @@ func (tc *TaintController) List(c *gin.Context) {
 	amis.WriteJsonList(c, resultList)
 }
 
-// ListByName 获取某个节点上的污点
+// @Summary 获取某个节点上的污点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/list_taints/name/{name} [get]
 func (tc *TaintController) ListByName(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -113,7 +122,13 @@ type TaintInfo struct {
 	Effect string `json:"effect"`
 }
 
-// Add 添加污点
+// @Summary 添加污点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Param body body TaintInfo true "污点信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/add_taints/name/{name} [post]
 func (tc *TaintController) Add(c *gin.Context) {
 	if err := processTaint(c, "add"); err != nil {
 		amis.WriteJsonError(c, err)
@@ -122,7 +137,13 @@ func (tc *TaintController) Add(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// Delete 删除污点
+// @Summary 删除污点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Param body body TaintInfo true "污点信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/delete_taints/name/{name} [post]
 func (tc *TaintController) Delete(c *gin.Context) {
 	if err := processTaint(c, "del"); err != nil {
 		amis.WriteJsonError(c, err)
@@ -131,7 +152,13 @@ func (tc *TaintController) Delete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// Update 修改污点
+// @Summary 修改污点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "节点名称"
+// @Param body body TaintInfo true "污点信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/update_taints/name/{name} [post]
 func (tc *TaintController) Update(c *gin.Context) {
 	if err := processTaint(c, "modify"); err != nil {
 		amis.WriteJsonError(c, err)

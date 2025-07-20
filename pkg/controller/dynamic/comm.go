@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+type yamlRequest struct {
+	Yaml string `json:"yaml" binding:"required"`
+}
+
 // 返回资源类型对应的路径
 func getResourcePaths(kind string) ([]string, error) {
 	switch kind {

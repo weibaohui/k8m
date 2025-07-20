@@ -48,6 +48,7 @@ func (m *ServerController) Connect(c *gin.Context) {
 
 // @Summary 删除MCP服务器
 // @Security BearerAuth
+// @Param request body object true "删除请求体包含IDs数组"
 // @Success 200 {object} string
 // @Router /admin/mcp/delete [post]
 func (m *ServerController) Delete(c *gin.Context) {
@@ -71,6 +72,7 @@ func (m *ServerController) Delete(c *gin.Context) {
 
 // @Summary 创建或更新MCP服务器
 // @Security BearerAuth
+// @Param request body models.MCPServerConfig true "MCP服务器配置信息"
 // @Success 200 {object} string
 // @Router /admin/mcp/save [post]
 func (m *ServerController) Save(c *gin.Context) {
@@ -95,10 +97,10 @@ func (m *ServerController) Save(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-// @Summary 快速保存MCP服务器状态
+// @Summary 快速更新MCP服务器状态
 // @Security BearerAuth
-// @Param id path int true "服务器ID"
-// @Param status path string true "状态，例如：true、false"
+// @Param id path int true "MCP服务器ID"
+// @Param status path string true "服务器状态(true/false)"
 // @Success 200 {object} string
 // @Router /admin/mcp/save/id/{id}/status/{status} [post]
 func (m *ServerController) QuickSave(c *gin.Context) {

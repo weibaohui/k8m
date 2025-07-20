@@ -18,6 +18,18 @@ func RegisterMetadataRoutes(api *gin.RouterGroup) {
 	api.GET("/:kind/group/:group/version/:version/annotations/ns/:ns/name/:name", ctrl.ListAnnotations)           // CRD
 	api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", ctrl.UpdateAnnotations) // CRD
 }
+
+// @Summary 更新资源标签
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param labels body map[string]string true "标签键值对"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_labels/ns/{ns}/name/{name} [post]
 func (mc *MetadataController) UpdateLabels(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -34,7 +46,7 @@ func (mc *MetadataController) UpdateLabels(c *gin.Context) {
 	var req struct {
 		Labels map[string]string `json:"labels"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -92,6 +104,60 @@ var immutableKeys = []string{
 	"ingress.count",
 }
 
+// @Summary 列出资源注解
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} map[string]string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/annotations/ns/{ns}/name/{name} [get]
+func (mc *MetadataController) ListAnnotations(c *gin.Context) {
+	ns := c.Param("ns")
+	name := c.Param("name")
+	kind := c.Param("kind")
+	group := c.Param("group")
+	version := c.Param("version")
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var obj *unstructured.Unstructured
+	err = kom.Cluster(selectedCluster).WithContext(ctx).
+		Name(name).Namespace(ns).
+		CRD(group, version, kind).
+		Get(&obj).Error
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	annotations := obj.GetAnnotations()
+	// 排除immutableKeys
+	for _, key := range immutableKeys {
+		delete(annotations, key)
+	}
+
+	amis.WriteJsonData(c, gin.H{
+		"annotations": annotations,
+	})
+}
+
+// @Summary 更新资源注解
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param annotations body map[string]interface{} true "注解键值对"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_annotations/ns/{ns}/name/{name} [post]
 func (mc *MetadataController) UpdateAnnotations(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -155,36 +221,4 @@ func (mc *MetadataController) UpdateAnnotations(c *gin.Context) {
 	}
 
 	amis.WriteJsonOK(c)
-}
-func (mc *MetadataController) ListAnnotations(c *gin.Context) {
-	ns := c.Param("ns")
-	name := c.Param("name")
-	kind := c.Param("kind")
-	group := c.Param("group")
-	version := c.Param("version")
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	var obj *unstructured.Unstructured
-	err = kom.Cluster(selectedCluster).WithContext(ctx).
-		Name(name).Namespace(ns).
-		CRD(group, version, kind).
-		Get(&obj).Error
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	annotations := obj.GetAnnotations()
-	// 排除immutableKeys
-	for _, key := range immutableKeys {
-		delete(annotations, key)
-	}
-
-	amis.WriteJsonData(c, gin.H{
-		"annotations": annotations,
-	})
 }
