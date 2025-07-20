@@ -21,6 +21,15 @@ func RegisterLogRoutes(api *gin.RouterGroup) {
 	api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.DownloadLogs)
 }
 
+// StreamLogs 通过SSE流式传输Pod日志
+// @Summary 流式获取Pod日志
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param pod_name path string true "Pod名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {string} string "日志流"
+// @Router /k8s/cluster/{cluster}/pod/logs/sse/ns/{ns}/pod_name/{pod_name}/container/{container_name} [get]
 func (lc *LogController) StreamLogs(c *gin.Context) {
 
 	ns := c.Param("ns")
@@ -65,6 +74,16 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, cont
 	}
 	sse.WriteSSE(c, stream)
 }
+
+// DownloadLogs 下载Pod日志
+// @Summary 下载Pod日志
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param pod_name path string true "Pod名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {file} file "日志文件"
+// @Router /k8s/cluster/{cluster}/pod/logs/download/ns/{ns}/pod_name/{pod_name}/container/{container_name} [get]
 func (lc *LogController) DownloadLogs(c *gin.Context) {
 
 	ns := c.Param("ns")
