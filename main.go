@@ -300,18 +300,7 @@ func main() {
 		api.GET("/:kind/group/:group/version/:version/list_tolerations/ns/:ns/name/:name", dynamic.ListTolerations)
 
 		// Pod关联资源
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", dynamic.LinksServices)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", dynamic.LinksEndpoints)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", dynamic.LinksPVC)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", dynamic.LinksPV)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", dynamic.LinksIngress)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", dynamic.LinksEnv)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", dynamic.LinksEnvFromPod)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", dynamic.LinksConfigMap)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", dynamic.LinksSecret)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", dynamic.LinksNode)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pod", dynamic.LinksPod)
-
+		dynamic.RegisterPodLinkRoutes(api)
 		// k8s pod
 		pod.RegisterLabelRoutes(api)
 		pod.RegisterLogRoutes(api)
