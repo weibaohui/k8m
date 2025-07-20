@@ -276,7 +276,7 @@ func (cc *ContainerController) UpdateResources(c *gin.Context) {
 
 	var info resourceInfo
 
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -452,7 +452,7 @@ func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
 	}
 
 	var info ContainerEnv
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -729,7 +729,7 @@ func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 
 	var info imageInfo
 
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -922,7 +922,7 @@ func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
 	}
 
 	patchJSON := utils.ToJSON(patchData)
-	var item interface{}
+	var item any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
