@@ -17,6 +17,13 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	api.POST("/cronjob/batch/resume", ctrl.BatchResume)
 	api.POST("/cronjob/batch/pause", ctrl.BatchPause)
 }
+
+// @Summary 暂停 CronJob
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "CronJob 名称"
+// @Success 200 {object} string
+// @Router /cronjob/pause/ns/{ns}/name/{name} [post]
 func (cc *Controller) Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -31,6 +38,13 @@ func (cc *Controller) Pause(c *gin.Context) {
 		Ctl().CronJob().Pause()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 恢复 CronJob
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "CronJob 名称"
+// @Success 200 {object} string
+// @Router /cronjob/resume/ns/{ns}/name/{name} [post]
 func (cc *Controller) Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -46,6 +60,11 @@ func (cc *Controller) Resume(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
+// @Summary 批量恢复 CronJob
+// @Security BearerAuth
+// @Param request body object true "批量恢复请求体，包含 name_list 和 ns_list"
+// @Success 200 {object} string
+// @Router /cronjob/batch/resume [post]
 func (cc *Controller) BatchResume(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -82,6 +101,11 @@ func (cc *Controller) BatchResume(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 批量暂停 CronJob
+// @Security BearerAuth
+// @Param request body object true "批量暂停请求体，包含 name_list 和 ns_list"
+// @Success 200 {object} string
+// @Router /cronjob/batch/pause [post]
 func (cc *Controller) BatchPause(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
