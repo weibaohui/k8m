@@ -37,6 +37,12 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 
 }
 
+// @Summary 批量停止Deployment
+// @Security BearerAuth
+// @Param name_list body []string true "Deployment名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /api/deploy/batch/stop [post]
 func (nc *ActionController) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -72,6 +78,13 @@ func (nc *ActionController) BatchStop(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 批量恢复Deployment
+// @Security BearerAuth
+// @Param name_list body []string true "Deployment名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /api/deploy/batch/restore [post]
 func (nc *ActionController) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -107,6 +120,13 @@ func (nc *ActionController) BatchRestore(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 重启单个Deployment
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/restart [post]
 func (nc *ActionController) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -121,6 +141,13 @@ func (nc *ActionController) Restart(c *gin.Context) {
 		Ctl().Rollout().Restart()
 	amis.WriteJsonErrorOrOK(c, err)
 }
+
+// @Summary 批量重启Deployment
+// @Security BearerAuth
+// @Param name_list body []string true "Deployment名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /api/deploy/batch/restart [post]
 func (nc *ActionController) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -156,6 +183,13 @@ func (nc *ActionController) BatchRestart(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 获取Deployment历史版本
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/rollout/history [get]
 func (nc *ActionController) History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -174,6 +208,14 @@ func (nc *ActionController) History(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, list)
 }
+
+// @Summary 获取Deployment版本差异
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /api/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/history [get]
 func (nc *ActionController) HistoryRevisionDiff(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")

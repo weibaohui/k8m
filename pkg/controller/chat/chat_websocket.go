@@ -22,6 +22,15 @@ var WebsocketMessageType = map[int]string{
 	websocket.PongMessage:   "pong",
 }
 
+// @Summary 通过WebSocket提供GPT交互式对话终端
+// @Security BearerAuth
+// @Param cluster query string false "集群名称"
+// @Param namespace query string false "命名空间"
+// @Param name query string false "资源名称"
+// @Param resource query string false "资源类型"
+// @Param content query string false "对话内容"
+// @Success 101 {string} string "Switching Protocols"
+// @Router /ai/chat/gptshell [get]
 // GPTShell 通过 WebSocket 提供与 ChatGPT 及工具集成的交互式对话终端。
 //
 // 该函数升级 HTTP 连接为 WebSocket，维持心跳检测，实现双向消息流转：
@@ -101,7 +110,7 @@ func (cc *Controller) GPTShell(c *gin.Context) {
 				return
 			}
 			time.Sleep(keepalivePingTimeout / 2)
-			if time.Now().Sub(lastPongTime) > keepalivePingTimeout {
+			if time.Since(lastPongTime) > keepalivePingTimeout {
 				klog.V(6).Infof("failed to get response from ping, triggering disconnect now...")
 				waiter.Done()
 				return
