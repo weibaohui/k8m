@@ -7,7 +7,14 @@ import (
 	"github.com/weibaohui/kom/kom"
 )
 
-func ClusterResourceCount(c *gin.Context) {
+type ClusterController struct{}
+
+func RegisterClusterRoutes(api *gin.RouterGroup) {
+	ctrl := &ClusterController{}
+	api.GET("/status/resource_count/cache_seconds/:cache", ctrl.ClusterResourceCount)
+
+}
+func (cc *ClusterController) ClusterResourceCount(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

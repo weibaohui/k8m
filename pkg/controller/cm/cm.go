@@ -17,13 +17,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.POST("/configmap/ns/:ns/name/:name/import", ctrl.Import)
+	api.POST("/configmap/ns/:ns/name/:name/:key/update_configmap", ctrl.Update)
+	api.POST("/configmap/create", ctrl.Create)
+}
+
 type info struct {
 	FileName string `json:"fileName,omitempty"`
 }
 
 // Import 处理上传文件的 HTTP 请求
-func Import(c *gin.Context) {
-	info := &info{}
+func (cc *Controller) Import(c *gin.Context) {
+	item := &info{}
 	ns := c.Param("ns")
 	name := c.Param("name")
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -32,10 +41,10 @@ func Import(c *gin.Context) {
 		return
 	}
 	ctx := amis.GetContextWithUser(c)
-	info.FileName = c.PostForm("fileName")
+	item.FileName = c.PostForm("fileName")
 
 	// 替换FileName中非法字符
-	info.FileName = utils.SanitizeFileName(info.FileName)
+	item.FileName = utils.SanitizeFileName(item.FileName)
 
 	// 获取上传的文件
 	file, err := c.FormFile("file")
@@ -67,7 +76,7 @@ func Import(c *gin.Context) {
 	if data == nil {
 		data = make(map[string]string)
 	}
-	data[info.FileName] = string(bytes)
+	data[item.FileName] = string(bytes)
 	cm.Data = data
 	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(cm).Update(cm).Error
 	if err != nil {
@@ -80,7 +89,7 @@ func Import(c *gin.Context) {
 }
 
 // Update 更新配置文件
-func Update(c *gin.Context) {
+func (cc *Controller) Update(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	key := c.Param("key")
@@ -133,7 +142,7 @@ func Update(c *gin.Context) {
 }
 
 // Create 创建configmap接口
-func Create(c *gin.Context) {
+func (cc *Controller) Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

@@ -9,7 +9,22 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func History(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+
+	api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
+	api.GET("/statefulset/ns/:ns/name/:name/rollout/history", ctrl.History)
+	api.POST("/statefulset/ns/:ns/name/:name/restart", ctrl.Restart)
+	api.POST("/statefulset/batch/restart", ctrl.BatchRestart)
+	api.POST("/statefulset/batch/stop", ctrl.BatchStop)
+	api.POST("/statefulset/batch/restore", ctrl.BatchRestore)
+	api.POST("/statefulset/ns/:ns/name/:name/scale/replica/:replica", ctrl.Scale)
+	api.GET("/statefulset/ns/:ns/name/:name/hpa", ctrl.HPA)
+
+}
+func (cc *Controller) History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -27,7 +42,7 @@ func History(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, list)
 }
-func Restart(c *gin.Context) {
+func (cc *Controller) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -42,7 +57,7 @@ func Restart(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func BatchRestart(c *gin.Context) {
+func (cc *Controller) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -78,7 +93,7 @@ func BatchRestart(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func BatchStop(c *gin.Context) {
+func (cc *Controller) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -114,7 +129,7 @@ func BatchStop(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func BatchRestore(c *gin.Context) {
+func (cc *Controller) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -149,7 +164,7 @@ func BatchRestore(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func Scale(c *gin.Context) {
+func (cc *Controller) Scale(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	replica := c.Param("replica")
@@ -167,7 +182,7 @@ func Scale(c *gin.Context) {
 		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func Undo(c *gin.Context) {
+func (cc *Controller) Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -188,7 +203,7 @@ func Undo(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, result)
 }
 
-func HPA(c *gin.Context) {
+func (cc *Controller) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)

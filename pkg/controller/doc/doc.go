@@ -10,7 +10,16 @@ import (
 	"github.com/weibaohui/kom/kom"
 )
 
-func Doc(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.GET("/doc/gvk/:api_version/:kind", ctrl.Doc)
+	api.GET("/doc/kind/:kind/group/:group/version/:version", ctrl.Doc)
+	api.POST("/doc/detail", ctrl.Detail)
+}
+
+func (cc *Controller) Doc(c *gin.Context) {
 	kind := c.Param("kind")
 	apiVersion := c.Param("api_version")
 	group := c.Param("group")
@@ -51,7 +60,7 @@ type DetailReq struct {
 	Translate   string `json:"translate"`
 }
 
-func Detail(c *gin.Context) {
+func (cc *Controller) Detail(c *gin.Context) {
 	detail := &DetailReq{}
 	err := c.ShouldBindBodyWithJSON(&detail)
 	if err != nil {

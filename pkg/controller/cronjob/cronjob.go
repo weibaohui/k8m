@@ -8,7 +8,16 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Pause(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.POST("/cronjob/pause/ns/:ns/name/:name", ctrl.Pause)
+	api.POST("/cronjob/resume/ns/:ns/name/:name", ctrl.Resume)
+	api.POST("/cronjob/batch/resume", ctrl.BatchResume)
+	api.POST("/cronjob/batch/pause", ctrl.BatchPause)
+}
+func (cc *Controller) Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -22,7 +31,7 @@ func Pause(c *gin.Context) {
 		Ctl().CronJob().Pause()
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func Resume(c *gin.Context) {
+func (cc *Controller) Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -37,7 +46,7 @@ func Resume(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func BatchResume(c *gin.Context) {
+func (cc *Controller) BatchResume(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -73,7 +82,7 @@ func BatchResume(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func BatchPause(c *gin.Context) {
+func (cc *Controller) BatchPause(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

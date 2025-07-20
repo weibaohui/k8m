@@ -17,13 +17,13 @@ type RepoController struct {
 func RegisterHelmRepoRoutes(admin *gin.RouterGroup) {
 	ctrl := &RepoController{}
 	// helm
-	admin.GET("/helm/repo/list", ctrl.ListRepo)
-	admin.POST("/helm/repo/delete/:ids", ctrl.DeleteRepo)
+	admin.GET("/helm/repo/list", ctrl.List)
+	admin.POST("/helm/repo/delete/:ids", ctrl.Delete)
 	admin.POST("/helm/repo/update_index", ctrl.UpdateReposIndex)
-	admin.POST("/helm/repo/save", ctrl.AddOrUpdateRepo)
+	admin.POST("/helm/repo/save", ctrl.Save)
 }
 
-func (r *RepoController) ListRepo(c *gin.Context) {
+func (r *RepoController) List(c *gin.Context) {
 	// 从数据库查询列表
 	params := dao.BuildParams(c)
 	m := &models.HelmRepository{}
@@ -35,8 +35,8 @@ func (r *RepoController) ListRepo(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-// AddOrUpdateRepo 添加或更新Helm仓库
-func (r *RepoController) AddOrUpdateRepo(c *gin.Context) {
+// Save 添加或更新Helm仓库
+func (r *RepoController) Save(c *gin.Context) {
 	var repo models.HelmRepository
 	if err := c.ShouldBindJSON(&repo); err != nil {
 		amis.WriteJsonError(c, err)
@@ -83,7 +83,7 @@ func RepoOptionList(c *gin.Context) {
 	})
 }
 
-func (r *RepoController) DeleteRepo(c *gin.Context) {
+func (r *RepoController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 
 	h, err := getHelmWithNoCluster()

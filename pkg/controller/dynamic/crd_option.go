@@ -11,7 +11,16 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func GroupOptionList(c *gin.Context) {
+type CRDController struct{}
+
+func RegisterCRDRoutes(api *gin.RouterGroup) {
+	ctrl := &CRDController{}
+	api.GET("/crd/group/option_list", ctrl.GroupOptionList)
+	api.GET("/crd/kind/option_list", ctrl.KindOptionList)
+	api.GET("/crd/status", ctrl.CRDStatus)
+}
+
+func (cc *CRDController) GroupOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -33,7 +42,7 @@ func GroupOptionList(c *gin.Context) {
 	})
 }
 
-func KindOptionList(c *gin.Context) {
+func (cc *CRDController) KindOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -61,134 +70,6 @@ func KindOptionList(c *gin.Context) {
 
 	amis.WriteJsonData(c, gin.H{
 		"options": options,
-	})
-}
-
-// Deprecated: 废弃，请不要使用
-type CrdTree struct {
-	Label    string     `json:"label,omitempty"`
-	Value    string     `json:"value,omitempty"`
-	Group    string     `json:"group,omitempty"`
-	Kind     string     `json:"kind,omitempty"`
-	Version  string     `json:"version,omitempty"`
-	Children []*CrdTree `json:"children"`
-}
-
-// Deprecated: 废弃，请不要使用
-func CrdGuidTreeThree(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	list, err := getCrdList(ctx, selectedCluster)
-
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	//
-	var crdTreeList []*CrdTree
-
-	for _, item := range list {
-		group, found, err := unstructured.NestedString(item.Object, "spec", "group")
-		if err != nil || !found {
-			continue
-		}
-		groupNode := &CrdTree{
-			Label:    group,
-			Value:    group,
-			Group:    group,
-			Children: make([]*CrdTree, 0),
-		}
-		crdTreeList = append(crdTreeList, groupNode)
-
-		kind, found, err := unstructured.NestedString(item.Object, "spec", "names", "kind")
-		if err != nil || !found {
-			continue
-		}
-		kindNode := &CrdTree{
-			Label:    kind,
-			Value:    kind,
-			Group:    group,
-			Kind:     kind,
-			Children: make([]*CrdTree, 0),
-		}
-		groupNode.Children = append(
-			groupNode.Children, kindNode)
-
-		// 获取 spec.versions 数组
-		versions, found, err := unstructured.NestedSlice(item.Object, "spec", "versions")
-		if err != nil || !found {
-			continue
-		}
-
-		// 提取每个版本的 name
-		for _, version := range versions {
-			versionMap, ok := version.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			version, found, err := unstructured.NestedString(versionMap, "name")
-			if err != nil || !found {
-				continue
-			}
-
-			versionNode := &CrdTree{
-				Label:   version,
-				Value:   version,
-				Group:   group,
-				Kind:    kind,
-				Version: version,
-			}
-
-			kindNode.Children = append(kindNode.Children, versionNode)
-
-		}
-
-	}
-
-	amis.WriteJsonData(c, gin.H{
-		"options": crdTreeList,
-	})
-}
-
-// Deprecated: 废弃，请不要使用
-func CrdGuidTree(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	groups := getCrdGroupList(ctx, selectedCluster)
-	var crdTreeList []*CrdTree
-	for _, group := range groups {
-		node := &CrdTree{
-			Label:    group,
-			Value:    group,
-			Group:    group,
-			Children: make([]*CrdTree, 0),
-		}
-		crdTreeList = append(crdTreeList, node)
-		kinds := getCrdKindListByGroup(ctx, selectedCluster, group)
-		for _, kind := range kinds {
-			kindNode := &CrdTree{
-				Label:    kind,
-				Value:    kind,
-				Group:    group,
-				Kind:     kind,
-				Children: make([]*CrdTree, 0),
-			}
-			node.Children = append(node.Children, kindNode)
-		}
-	}
-	amis.WriteJsonData(c, gin.H{
-		"options": crdTreeList,
 	})
 }
 

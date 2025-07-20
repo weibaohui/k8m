@@ -14,7 +14,16 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func OptionList(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.GET("/ns/option_list", ctrl.OptionList)
+	api.POST("/ResourceQuota/create", ctrl.CreateResourceQuota)
+	api.POST("/LimitRange/create", ctrl.CreateLimitRange)
+
+}
+func (nc *Controller) OptionList(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

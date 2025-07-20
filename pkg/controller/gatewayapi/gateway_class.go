@@ -8,7 +8,15 @@ import (
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-func GatewayClassOptionList(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.GET("/gateway_class/option_list", ctrl.GatewayClassOptionList)
+
+}
+
+func (cc *Controller) GatewayClassOptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

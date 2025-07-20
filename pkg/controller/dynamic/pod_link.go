@@ -11,6 +11,24 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+type PodLinkController struct{}
+
+func RegisterPodLinkRoutes(api *gin.RouterGroup) {
+	ctrl := &PodLinkController{}
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", ctrl.LinksServices)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", ctrl.LinksEndpoints)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", ctrl.LinksPVC)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", ctrl.LinksPV)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", ctrl.LinksIngress)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", ctrl.LinksEnv)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", ctrl.LinksEnvFromPod)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", ctrl.LinksConfigMap)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", ctrl.LinksSecret)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", ctrl.LinksNode)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pod", ctrl.LinksPod)
+
+}
+
 var linkCacheTTL = 3 * time.Second
 
 func getPod(selectedCluster string, ctx context.Context, ns string, name string, kind string, group string, version string) (*v1.Pod, error) {
@@ -65,7 +83,7 @@ func getPods(selectedCluster string, ctx context.Context, ns string, name string
 	}
 	return pods, err
 }
-func LinksServices(c *gin.Context) {
+func (pc *PodLinkController) LinksServices(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -92,7 +110,7 @@ func LinksServices(c *gin.Context) {
 	amis.WriteJsonList(c, services)
 }
 
-func LinksEndpoints(c *gin.Context) {
+func (pc *PodLinkController) LinksEndpoints(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -121,7 +139,7 @@ func LinksEndpoints(c *gin.Context) {
 
 }
 
-func LinksPVC(c *gin.Context) {
+func (pc *PodLinkController) LinksPVC(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -148,7 +166,7 @@ func LinksPVC(c *gin.Context) {
 	amis.WriteJsonList(c, pvc)
 }
 
-func LinksPV(c *gin.Context) {
+func (pc *PodLinkController) LinksPV(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -175,7 +193,7 @@ func LinksPV(c *gin.Context) {
 	amis.WriteJsonList(c, pv)
 }
 
-func LinksIngress(c *gin.Context) {
+func (pc *PodLinkController) LinksIngress(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -202,7 +220,7 @@ func LinksIngress(c *gin.Context) {
 	amis.WriteJsonList(c, ingress)
 }
 
-func LinksEnv(c *gin.Context) {
+func (pc *PodLinkController) LinksEnv(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -229,7 +247,7 @@ func LinksEnv(c *gin.Context) {
 	amis.WriteJsonList(c, env)
 }
 
-func LinksEnvFromPod(c *gin.Context) {
+func (pc *PodLinkController) LinksEnvFromPod(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -256,7 +274,7 @@ func LinksEnvFromPod(c *gin.Context) {
 	amis.WriteJsonList(c, env)
 }
 
-func LinksConfigMap(c *gin.Context) {
+func (pc *PodLinkController) LinksConfigMap(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -283,7 +301,7 @@ func LinksConfigMap(c *gin.Context) {
 	amis.WriteJsonList(c, configMap)
 }
 
-func LinksSecret(c *gin.Context) {
+func (pc *PodLinkController) LinksSecret(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -310,7 +328,7 @@ func LinksSecret(c *gin.Context) {
 	amis.WriteJsonList(c, secret)
 }
 
-func LinksNode(c *gin.Context) {
+func (pc *PodLinkController) LinksNode(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -336,7 +354,7 @@ func LinksNode(c *gin.Context) {
 	}
 	amis.WriteJsonList(c, nodes)
 }
-func LinksPod(c *gin.Context) {
+func (pc *PodLinkController) LinksPod(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)

@@ -14,6 +14,17 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type PodAffinityController struct{}
+
+func RegisterPodAffinityRoutes(api *gin.RouterGroup) {
+	ctrl := &PodAffinityController{}
+	api.POST("/:kind/group/:group/version/:version/update_pod_affinity/ns/:ns/name/:name", ctrl.UpdatePodAffinity)
+	api.POST("/:kind/group/:group/version/:version/delete_pod_affinity/ns/:ns/name/:name", ctrl.DeletePodAffinity)
+	api.POST("/:kind/group/:group/version/:version/add_pod_affinity/ns/:ns/name/:name", ctrl.AddPodAffinity)
+	api.GET("/:kind/group/:group/version/:version/list_pod_affinity/ns/:ns/name/:name", ctrl.ListPodAffinity)
+
+}
+
 // {"labelSelector":{"matchLabels":{"app":"other-app","x":"y"}},"topologyKey":"kubernetes.io/hostname"}
 type podAffinity struct {
 	LabelSelector struct {
@@ -23,7 +34,7 @@ type podAffinity struct {
 }
 
 // ListPodAffinity 获取 Pod 亲和性列表
-func ListPodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) ListPodAffinity(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -76,13 +87,13 @@ func ListPodAffinity(c *gin.Context) {
 	amis.WriteJsonList(c, list)
 }
 
-func AddPodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) AddPodAffinity(c *gin.Context) {
 	processPodAffinity(c, "add")
 }
-func UpdatePodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) UpdatePodAffinity(c *gin.Context) {
 	processPodAffinity(c, "modify")
 }
-func DeletePodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) DeletePodAffinity(c *gin.Context) {
 	processPodAffinity(c, "delete")
 }
 func processPodAffinity(c *gin.Context, action string) {

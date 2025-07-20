@@ -18,7 +18,26 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func List(c *gin.Context) {
+type ActionController struct{}
+
+func RegisterActionRoutes(api *gin.RouterGroup) {
+	ctrl := &ActionController{}
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", ctrl.Fetch)                         // CRD
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", ctrl.FetchJson)                // CRD
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", ctrl.Event)                   // CRD
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/hpa", ctrl.HPA)                       // CRD
+	api.POST("/:kind/group/:group/version/:version/ns/:ns/name/:name/scale/replica/:replica", ctrl.Scale) // CRD
+	api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", ctrl.Remove)                // CRD
+	api.POST("/:kind/group/:group/version/:version/batch/remove", ctrl.BatchRemove)                       // CRD
+	api.POST("/:kind/group/:group/version/:version/force_remove", ctrl.BatchForceRemove)                  // CRD
+	api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", ctrl.Save)                  // CRD       // CRD
+	api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", ctrl.Describe)            // CRD
+	api.POST("/:kind/group/:group/version/:version/list/ns/:ns", ctrl.List)                               // CRD
+	api.POST("/:kind/group/:group/version/:version/list/ns/", ctrl.List)                                  // CRD
+	api.POST("/:kind/group/:group/version/:version/list", ctrl.List)
+
+}
+func (ac *ActionController) List(c *gin.Context) {
 	ns := c.Param("ns")
 	group := c.Param("group")
 	kind := c.Param("kind")
@@ -99,12 +118,12 @@ func List(c *gin.Context) {
 		FillTotalCount(&total).
 		List(&list).Error
 
-	list = FillList(selectedCluster, kind, list)
+	list = ac.FillList(selectedCluster, kind, list)
 	amis.WriteJsonListTotalWithError(c, total, list, err)
 }
 
 // FillList 定制填充list []*unstructured.Unstructured列表
-func FillList(selectedCluster string, kind string, list []*unstructured.Unstructured) []*unstructured.Unstructured {
+func (ac *ActionController) FillList(selectedCluster string, kind string, list []*unstructured.Unstructured) []*unstructured.Unstructured {
 	switch kind {
 	case "Node":
 		if service.ClusterService().GetNodeStatusAggregated(selectedCluster) {
@@ -158,7 +177,7 @@ func FillList(selectedCluster string, kind string, list []*unstructured.Unstruct
 	}
 	return list
 }
-func Event(c *gin.Context) {
+func (ac *ActionController) Event(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -191,7 +210,7 @@ func Event(c *gin.Context) {
 	amis.WriteJsonListWithError(c, eventList, err)
 
 }
-func Fetch(c *gin.Context) {
+func (ac *ActionController) Fetch(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -221,7 +240,7 @@ func Fetch(c *gin.Context) {
 		"yaml": yamlStr,
 	})
 }
-func FetchJson(c *gin.Context) {
+func (ac *ActionController) FetchJson(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -244,7 +263,7 @@ func FetchJson(c *gin.Context) {
 
 	amis.WriteJsonData(c, obj)
 }
-func Remove(c *gin.Context) {
+func (ac *ActionController) Remove(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -257,7 +276,7 @@ func Remove(c *gin.Context) {
 		return
 	}
 
-	err = removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
+	err = ac.removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -265,7 +284,7 @@ func Remove(c *gin.Context) {
 	amis.WriteJsonOK(c)
 
 }
-func removeSingle(ctx context.Context, selectedCluster, kind, group, version, ns, name string, force bool) error {
+func (ac *ActionController) removeSingle(ctx context.Context, selectedCluster, kind, group, version, ns, name string, force bool) error {
 	if force {
 		return kom.Cluster(selectedCluster).WithContext(ctx).Name(name).Namespace(ns).CRD(group, version, kind).ForceDelete().Error
 	}
@@ -277,7 +296,7 @@ type NamesPayload struct {
 	Names []string `json:"names"`
 }
 
-func BatchRemove(c *gin.Context) {
+func (ac *ActionController) BatchRemove(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
@@ -299,7 +318,7 @@ func BatchRemove(c *gin.Context) {
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
-		x := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
+		x := ac.removeSingle(ctx, selectedCluster, kind, group, version, ns, name, false)
 		if x != nil {
 			klog.V(6).Infof("batch remove %s error %s/%s %v", kind, ns, name, x)
 			err = x
@@ -313,7 +332,7 @@ func BatchRemove(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
-func BatchForceRemove(c *gin.Context) {
+func (ac *ActionController) BatchForceRemove(c *gin.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
@@ -335,7 +354,7 @@ func BatchForceRemove(c *gin.Context) {
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
-		x := removeSingle(ctx, selectedCluster, kind, group, version, ns, name, true)
+		x := ac.removeSingle(ctx, selectedCluster, kind, group, version, ns, name, true)
 		if x != nil {
 			klog.V(6).Infof("batch force remove %s error %s/%s %v", kind, ns, name, x)
 			err = x
@@ -354,7 +373,7 @@ type yamlRequest struct {
 	Yaml string `json:"yaml" binding:"required"`
 }
 
-func Save(c *gin.Context) {
+func (ac *ActionController) Save(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -394,7 +413,7 @@ func Save(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func Describe(c *gin.Context) {
+func (ac *ActionController) Describe(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -417,7 +436,7 @@ func Describe(c *gin.Context) {
 	amis.WriteJsonData(c, string(result))
 }
 
-func Scale(c *gin.Context) {
+func (ac *ActionController) Scale(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	replica := c.Param("replica")
@@ -438,7 +457,7 @@ func Scale(c *gin.Context) {
 		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func HPA(c *gin.Context) {
+func (ac *ActionController) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")

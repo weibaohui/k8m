@@ -12,7 +12,19 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Restart(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.POST("/replicaset/ns/:ns/name/:name/restart", ctrl.Restart)
+	api.POST("/replicaset/batch/restart", ctrl.BatchRestart)
+	api.POST("/replicaset/batch/stop", ctrl.BatchStop)
+	api.POST("/replicaset/batch/restore", ctrl.BatchRestore)
+	api.GET("/replicaset/ns/:ns/name/:name/events/all", ctrl.Event)
+	api.GET("/replicaset/ns/:ns/name/:name/hpa", ctrl.HPA)
+}
+
+func (cc *Controller) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -27,7 +39,7 @@ func Restart(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func BatchRestart(c *gin.Context) {
+func (cc *Controller) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -63,7 +75,7 @@ func BatchRestart(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func BatchStop(c *gin.Context) {
+func (cc *Controller) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -99,7 +111,7 @@ func BatchStop(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func BatchRestore(c *gin.Context) {
+func (cc *Controller) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -136,7 +148,7 @@ func BatchRestore(c *gin.Context) {
 }
 
 // Event 显示deploy下所有的事件列表，包括deploy、rs、pod
-func Event(c *gin.Context) {
+func (cc *Controller) Event(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -187,9 +199,9 @@ func Event(c *gin.Context) {
 	for _, meta := range metas {
 		conditions = append(conditions, fmt.Sprintf("regarding.name = '%s'", meta))
 	}
-	cc := strings.Join(conditions, " or ")
+	condStr := strings.Join(conditions, " or ")
 	if len(metas) > 0 {
-		sql = sql.Where(cc)
+		sql = sql.Where(condStr)
 	}
 
 	err = sql.List(&eventList).Error
@@ -200,7 +212,7 @@ func Event(c *gin.Context) {
 	amis.WriteJsonData(c, eventList)
 }
 
-func HPA(c *gin.Context) {
+func (cc *Controller) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
