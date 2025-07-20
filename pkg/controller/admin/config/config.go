@@ -15,6 +15,11 @@ func RegisterConfigRoutes(admin *gin.RouterGroup) {
 	admin.GET("/config/all", ctrl.All)
 	admin.POST("/config/update", ctrl.Update)
 }
+
+// @Summary 获取系统配置
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/config/all [get]
 func (cc *Controller) All(c *gin.Context) {
 	config, err := service.ConfigService().GetConfig()
 	if err != nil {
@@ -24,6 +29,11 @@ func (cc *Controller) All(c *gin.Context) {
 	amis.WriteJsonData(c, config)
 }
 
+// @Summary 更新系统配置
+// @Security BearerAuth
+// @Param config body models.Config true "配置信息"
+// @Success 200 {object} string
+// @Router /admin/config/update [post]
 func (cc *Controller) Update(c *gin.Context) {
 	var config models.Config
 	if err := c.ShouldBindJSON(&config); err != nil {

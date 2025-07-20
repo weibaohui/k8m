@@ -1,4 +1,49 @@
 definitions:
+  models.Config:
+    properties:
+      any_select:
+        type: boolean
+      created_at:
+        description: Automatically managed by GORM for creation time
+        type: string
+      enable_ai:
+        description: 是否启用AI功能，默认开启
+        type: boolean
+      id:
+        type: integer
+      image_pull_timeout:
+        description: 镜像拉取超时时间（秒）
+        type: integer
+      jwt_token_secret:
+        type: string
+      kubectl_shell_image:
+        type: string
+      login_type:
+        type: string
+      max_history:
+        description: 模型对话上下文历史记录数
+        type: integer
+      max_iterations:
+        description: 模型自动对话的最大轮数
+        type: integer
+      model_id:
+        type: integer
+      node_shell_image:
+        type: string
+      print_config:
+        type: boolean
+      product_name:
+        description: 产品名称
+        type: string
+      resource_cache_timeout:
+        description: 资源缓存时间（秒）
+        type: integer
+      updated_at:
+        description: Automatically managed by GORM for update time
+        type: string
+      use_built_in_model:
+        type: boolean
+    type: object
   models.User:
     properties:
       created_at:
@@ -411,6 +456,90 @@ paths:
       security:
       - BearerAuth: []
       summary: 快速保存条件状态
+  /admin/config/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取系统配置
+  /admin/config/sso/delete/{ids}:
+    post:
+      parameters:
+      - description: SSO配置ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除SSO配置
+  /admin/config/sso/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取SSO配置列表
+  /admin/config/sso/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 创建或更新SSO配置
+  /admin/config/sso/save/id/{id}/status/{enabled}:
+    post:
+      parameters:
+      - description: SSO配置ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: enabled
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速更新SSO配置状态
+  /admin/config/update:
+    post:
+      parameters:
+      - description: 配置信息
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/models.Config'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新系统配置
   /admin/mcp/connect/{name}:
     post:
       parameters:
