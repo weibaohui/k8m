@@ -261,6 +261,16 @@ type resourceInfo struct {
 	LimitMemory   string `json:"limit_memory"`
 }
 
+// @Summary 更新容器资源配置
+// @Security BearerAuth
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body resourceInfo true "资源配置信息"
+// @Success 200 {object} string
+// @Router /{kind}/group/{group}/version/{version}/update_resources/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateResources(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -406,6 +416,16 @@ func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 }
 
 // 获取container的环境变量信息
+// @Summary 获取容器环境变量信息
+// @Security BearerAuth
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {object} string
+// @Router /{kind}/group/{group}/version/{version}/container_env/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerEnvInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -447,7 +467,16 @@ type ContainerEnv struct {
 	Envs          map[string]string `json:"envs"`
 }
 
-// 更新container的环境变量信息
+// @Summary 更新容器环境变量
+// @Security BearerAuth
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body ContainerEnv true "容器环境变量信息"
+// @Success 200 {object} string
+// @Router /{kind}/group/{group}/version/{version}/update_env/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -724,6 +753,16 @@ type imageInfo struct {
 	ImagePullPolicy  string `json:"image_pull_policy"`
 }
 
+// @Summary 更新容器镜像标签
+// @Security BearerAuth
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body imageInfo true "镜像信息"
+// @Success 200 {object} string
+// @Router /{kind}/group/{group}/version/{version}/update_image/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -804,7 +843,16 @@ func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo)
 	return patch, nil
 }
 
-// 接口 获取容器健康检查信息
+// @Summary 获取容器健康检查信息
+// @Security BearerAuth
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {object} string
+// @Router /{kind}/group/{group}/version/{version}/container_health_checks/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerHealthChecksInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -905,7 +953,16 @@ type HealthCheckInfo struct {
 	LivenessProbe  map[string]interface{} `json:"liveness_probe,omitempty"`
 }
 
-// 接口 更新容器健康检查
+// @Summary 更新容器健康检查配置
+// @Security BearerAuth
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body HealthCheckInfo true "健康检查配置信息"
+// @Success 200 {object} string
+// @Router /{kind}/group/{group}/version/{version}/update_health_checks/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
