@@ -25,7 +25,16 @@ func RegisterPodAntiAffinityRoutes(api *gin.RouterGroup) {
 
 }
 
-// ListPodAntiAffinity 获取 Pod 亲和性列表
+// @Summary 获取Pod反亲和性列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_pod_anti_affinity/ns/{ns}/name/{name} [get]
 func (ac *PodAntiAffinityController) ListPodAntiAffinity(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -79,12 +88,47 @@ func (ac *PodAntiAffinityController) ListPodAntiAffinity(c *gin.Context) {
 	amis.WriteJsonList(c, list)
 }
 
+// @Summary 添加Pod反亲和性
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body podAffinity true "Pod反亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_pod_anti_affinity/ns/{ns}/name/{name} [post]
 func (ac *PodAntiAffinityController) AddPodAntiAffinity(c *gin.Context) {
 	processPodAntiAffinity(c, "add")
 }
+
+// @Summary 更新Pod反亲和性
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body podAffinity true "Pod反亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_pod_anti_affinity/ns/{ns}/name/{name} [post]
 func (ac *PodAntiAffinityController) UpdatePodAntiAffinity(c *gin.Context) {
 	processPodAffinity(c, "modify")
 }
+
+// @Summary 删除Pod反亲和性
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body podAffinity true "Pod反亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_pod_anti_affinity/ns/{ns}/name/{name} [post]
 func (ac *PodAntiAffinityController) DeletePodAntiAffinity(c *gin.Context) {
 	processPodAntiAffinity(c, "delete")
 }
@@ -103,7 +147,7 @@ func processPodAntiAffinity(c *gin.Context, action string) {
 
 	var info podAffinity
 
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
