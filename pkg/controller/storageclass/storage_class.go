@@ -9,7 +9,14 @@ import (
 	v1 "k8s.io/api/storage/v1"
 )
 
-func SetDefault(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.POST("/storage_class/set_default/name/:name", ctrl.SetDefault)
+	api.GET("/storage_class/option_list", ctrl.OptionList)
+}
+func (cc *Controller) SetDefault(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -28,7 +35,7 @@ func SetDefault(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func OptionList(c *gin.Context) {
+func (cc *Controller) OptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
