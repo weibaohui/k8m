@@ -12,6 +12,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// @Summary 创建资源配额
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body object true "资源配额配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ns/create_resource_quota [post]
 func (nc *Controller) CreateResourceQuota(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)

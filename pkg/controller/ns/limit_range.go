@@ -13,6 +13,12 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// @Summary 创建限制范围
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body object true "限制范围配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/LimitRange/create [post]
 func (nc *Controller) CreateLimitRange(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
