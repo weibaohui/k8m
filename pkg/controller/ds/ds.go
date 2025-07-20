@@ -22,6 +22,12 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	api.POST("/daemonset/batch/restore", ctrl.BatchRestore)
 }
 
+// @Summary 获取DaemonSet回滚历史
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "DaemonSet名称"
+// @Success 200 {object} string
+// @Router /daemonset/ns/{ns}/name/{name}/rollout/history [get]
 func (cc *Controller) History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -40,6 +46,13 @@ func (cc *Controller) History(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, list)
 }
+
+// @Summary 重启DaemonSet
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "DaemonSet名称"
+// @Success 200 {object} string
+// @Router /daemonset/ns/{ns}/name/{name}/restart [post]
 func (cc *Controller) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -55,6 +68,11 @@ func (cc *Controller) Restart(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
+// @Summary 批量重启DaemonSet
+// @Security BearerAuth
+// @Param body body object true "包含name_list和ns_list的请求体"
+// @Success 200 {object} string
+// @Router /daemonset/batch/restart [post]
 func (cc *Controller) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -90,6 +108,14 @@ func (cc *Controller) BatchRestart(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 回滚DaemonSet到指定版本
+// @Security BearerAuth
+// @Param ns path string true "命名空间"
+// @Param name path string true "DaemonSet名称"
+// @Param revision path string true "回滚版本"
+// @Success 200 {object} string
+// @Router /daemonset/ns/{ns}/name/{name}/revision/{revision}/rollout/undo [post]
 func (cc *Controller) Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -111,6 +137,11 @@ func (cc *Controller) Undo(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, result)
 }
 
+// @Summary 批量停止DaemonSet
+// @Security BearerAuth
+// @Param body body object true "包含name_list和ns_list的请求体"
+// @Success 200 {object} string
+// @Router /daemonset/batch/stop [post]
 func (cc *Controller) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -146,6 +177,12 @@ func (cc *Controller) BatchStop(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 批量恢复DaemonSet
+// @Security BearerAuth
+// @Param body body object true "包含name_list和ns_list的请求体"
+// @Success 200 {object} string
+// @Router /daemonset/batch/restore [post]
 func (cc *Controller) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
