@@ -14,7 +14,23 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func ImagePullSecretOptionList(c *gin.Context) {
+type ContainerController struct{}
+
+func RegisterContainerRoutes(api *gin.RouterGroup) {
+	ctrl := &ContainerController{}
+	api.GET("/:kind/group/:group/version/:version/container_info/ns/:ns/name/:name/container/:container_name", ctrl.ContainerInfo)
+	api.GET("/:kind/group/:group/version/:version/container_resources_info/ns/:ns/name/:name/container/:container_name", ctrl.ContainerResourcesInfo)
+	api.GET("/:kind/group/:group/version/:version/image_pull_secrets/ns/:ns/name/:name", ctrl.ImagePullSecretOptionList)
+	api.GET("/:kind/group/:group/version/:version/container_health_checks/ns/:ns/name/:name/container/:container_name", ctrl.ContainerHealthChecksInfo)
+	api.GET("/:kind/group/:group/version/:version/container_env/ns/:ns/name/:name/container/:container_name", ctrl.ContainerEnvInfo)
+
+	api.POST("/:kind/group/:group/version/:version/update_image/ns/:ns/name/:name", ctrl.UpdateImageTag)
+	api.POST("/:kind/group/:group/version/:version/update_resources/ns/:ns/name/:name", ctrl.UpdateResources)
+	api.POST("/:kind/group/:group/version/:version/update_health_checks/ns/:ns/name/:name", ctrl.UpdateHealthChecks)
+	api.POST("/:kind/group/:group/version/:version/update_env/ns/:ns/name/:name", ctrl.UpdateContainerEnv)
+
+}
+func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -39,7 +55,7 @@ func ImagePullSecretOptionList(c *gin.Context) {
 		})
 		return
 	}
-	imagePullSecrets, _ := getImagePullSecrets(item)
+	imagePullSecrets, _ := cc.getImagePullSecrets(item)
 	if len(imagePullSecrets) == 0 {
 		amis.WriteJsonData(c, gin.H{
 			"options": make([]map[string]string, 0),
@@ -80,7 +96,7 @@ func ImagePullSecretOptionList(c *gin.Context) {
 	})
 }
 
-func ContainerResourcesInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerResourcesInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -105,7 +121,7 @@ func ContainerResourcesInfo(c *gin.Context) {
 		return
 	}
 
-	requestCPU, limitCPU, requestMemory, limitMemory, err := getContainerResourcesInfoByName(item, containerName)
+	requestCPU, limitCPU, requestMemory, limitMemory, err := cc.getContainerResourcesInfoByName(item, containerName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -120,7 +136,7 @@ func ContainerResourcesInfo(c *gin.Context) {
 
 }
 
-func getContainerResourcesInfoByName(item *unstructured.Unstructured, containerName string) (string, string, string, string, error) {
+func (cc *ContainerController) getContainerResourcesInfoByName(item *unstructured.Unstructured, containerName string) (string, string, string, string, error) {
 	// 获取资源类型
 	kind := item.GetKind()
 
@@ -226,7 +242,7 @@ type resourceInfo struct {
 	LimitMemory   string `json:"limit_memory"`
 }
 
-func UpdateResources(c *gin.Context) {
+func (cc *ContainerController) UpdateResources(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -320,7 +336,7 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]interface
 	return patch, nil
 }
 
-func ContainerInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -345,7 +361,7 @@ func ContainerInfo(c *gin.Context) {
 		return
 	}
 
-	imageFullName, imagePullPolicy, err := getContainerImageByName(item, containerName)
+	imageFullName, imagePullPolicy, err := cc.getContainerImageByName(item, containerName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -361,7 +377,7 @@ func ContainerInfo(c *gin.Context) {
 }
 
 // 获取container的环境变量信息
-func ContainerEnvInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerEnvInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -386,7 +402,7 @@ func ContainerEnvInfo(c *gin.Context) {
 		return
 	}
 	// 返回格式为
-	envVars, err := getContainerEnvVarsByName(item, containerName)
+	envVars, err := cc.getContainerEnvVarsByName(item, containerName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -403,7 +419,7 @@ type ContainerEnv struct {
 }
 
 // 更新container的环境变量信息
-func UpdateContainerEnv(c *gin.Context) {
+func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -422,7 +438,7 @@ func UpdateContainerEnv(c *gin.Context) {
 		return
 	}
 
-	patchData, err := generateEnvPatch(kind, info)
+	patchData, err := cc.generateEnvPatch(kind, info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -457,7 +473,7 @@ func isValidEnvVarName(name string) bool {
 	return true
 }
 
-func generateEnvPatch(kind string, info ContainerEnv) (map[string]interface{}, error) {
+func (cc *ContainerController) generateEnvPatch(kind string, info ContainerEnv) (map[string]interface{}, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -508,7 +524,7 @@ func generateEnvPatch(kind string, info ContainerEnv) (map[string]interface{}, e
 }
 
 // 获取container的env信息
-func getContainerEnvVarsByName(item *unstructured.Unstructured, containerName string) (map[string]string, error) {
+func (cc *ContainerController) getContainerEnvVarsByName(item *unstructured.Unstructured, containerName string) (map[string]string, error) {
 	// 获取资源类型
 	kind := item.GetKind()
 
@@ -578,7 +594,7 @@ func getContainerEnvVarsByName(item *unstructured.Unstructured, containerName st
 }
 
 // 获取 imagePullSecrets 列表
-func getImagePullSecrets(item *unstructured.Unstructured) ([]string, error) {
+func (cc *ContainerController) getImagePullSecrets(item *unstructured.Unstructured) ([]string, error) {
 	// 获取资源类型
 	kind := item.GetKind()
 
@@ -617,7 +633,7 @@ func getImagePullSecrets(item *unstructured.Unstructured) ([]string, error) {
 
 	return secretNames, nil
 }
-func getContainerImageByName(item *unstructured.Unstructured, containerName string) (string, string, error) {
+func (cc *ContainerController) getContainerImageByName(item *unstructured.Unstructured, containerName string) (string, string, error) {
 	// 获取资源类型
 	kind := item.GetKind()
 
@@ -679,7 +695,7 @@ type imageInfo struct {
 	ImagePullPolicy  string `json:"image_pull_policy"`
 }
 
-func UpdateImageTag(c *gin.Context) {
+func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -699,7 +715,7 @@ func UpdateImageTag(c *gin.Context) {
 		return
 	}
 
-	patchData, err := generateDynamicPatch(kind, info)
+	patchData, err := cc.generateDynamicPatch(kind, info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -716,7 +732,7 @@ func UpdateImageTag(c *gin.Context) {
 }
 
 // 生成动态的 patch 数据
-func generateDynamicPatch(kind string, info imageInfo) (map[string]interface{}, error) {
+func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo) (map[string]interface{}, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -760,7 +776,7 @@ func generateDynamicPatch(kind string, info imageInfo) (map[string]interface{}, 
 }
 
 // 接口 获取容器健康检查信息
-func ContainerHealthChecksInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerHealthChecksInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -785,7 +801,7 @@ func ContainerHealthChecksInfo(c *gin.Context) {
 		return
 	}
 
-	healthChecks, err := getContainerHealthChecksByName(item, containerName)
+	healthChecks, err := cc.getContainerHealthChecksByName(item, containerName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -799,7 +815,7 @@ func ContainerHealthChecksInfo(c *gin.Context) {
 }
 
 // 获取容器健康检查信息
-func getContainerHealthChecksByName(item *unstructured.Unstructured, containerName string) (map[string]interface{}, error) {
+func (cc *ContainerController) getContainerHealthChecksByName(item *unstructured.Unstructured, containerName string) (map[string]interface{}, error) {
 	// 获取资源类型
 	kind := item.GetKind()
 
@@ -861,7 +877,7 @@ type HealthCheckInfo struct {
 }
 
 // 接口 更新容器健康检查
-func UpdateHealthChecks(c *gin.Context) {
+func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -879,7 +895,7 @@ func UpdateHealthChecks(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	patchData, err := generateHealthCheckPatch(kind, info)
+	patchData, err := cc.generateHealthCheckPatch(kind, info)
 	klog.V(6).Infof("UpdateHealthChecks Patch JSON :\n%s\n", patchData)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -897,7 +913,7 @@ func UpdateHealthChecks(c *gin.Context) {
 }
 
 // 生成健康检查的 patch 数据
-func generateHealthCheckPatch(kind string, info HealthCheckInfo) (map[string]interface{}, error) {
+func (cc *ContainerController) generateHealthCheckPatch(kind string, info HealthCheckInfo) (map[string]interface{}, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -951,20 +967,4 @@ func generateHealthCheckPatch(kind string, info HealthCheckInfo) (map[string]int
 	}
 
 	return patch, nil
-}
-
-// 返回资源类型对应的路径
-func getResourcePaths(kind string) ([]string, error) {
-	switch kind {
-	case "CloneSet":
-		return []string{"spec", "template", "spec"}, nil
-	case "Deployment", "DaemonSet", "StatefulSet", "ReplicaSet", "Job":
-		return []string{"spec", "template", "spec"}, nil
-	case "CronJob":
-		return []string{"spec", "jobTemplate", "spec", "template", "spec"}, nil
-	case "Pod":
-		return []string{"spec"}, nil
-	default:
-		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
-	}
 }

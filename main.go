@@ -245,11 +245,10 @@ func main() {
 
 		// cluster
 		cluster_status.RegisterClusterRoutes(api)
-		// CRD
+		// CRD status
 		dynamic.RegisterCRDRoutes(api)
-		// yaml
-		dynamic.RegisterYamlRoutes(api)
-		// CRD
+
+		// CRD action
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)                         // CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", dynamic.FetchJson)                // CRD
 		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", dynamic.Event)                   // CRD
@@ -268,17 +267,7 @@ func main() {
 		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
 
 		// Container 信息
-		api.GET("/:kind/group/:group/version/:version/container_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerInfo)
-		api.GET("/:kind/group/:group/version/:version/container_resources_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerResourcesInfo)
-		api.GET("/:kind/group/:group/version/:version/image_pull_secrets/ns/:ns/name/:name", dynamic.ImagePullSecretOptionList)
-		api.GET("/:kind/group/:group/version/:version/container_health_checks/ns/:ns/name/:name/container/:container_name", dynamic.ContainerHealthChecksInfo)
-		api.GET("/:kind/group/:group/version/:version/container_env/ns/:ns/name/:name/container/:container_name", dynamic.ContainerEnvInfo)
-
-		api.POST("/:kind/group/:group/version/:version/update_image/ns/:ns/name/:name", dynamic.UpdateImageTag)
-		api.POST("/:kind/group/:group/version/:version/update_resources/ns/:ns/name/:name", dynamic.UpdateResources)
-		api.POST("/:kind/group/:group/version/:version/update_health_checks/ns/:ns/name/:name", dynamic.UpdateHealthChecks)
-		api.POST("/:kind/group/:group/version/:version/update_env/ns/:ns/name/:name", dynamic.UpdateContainerEnv)
-
+		dynamic.RegisterContainerRoutes(api)
 		// 节点亲和性
 		dynamic.RegisterNodeAffinityRoutes(api)
 		// Pod亲和性
@@ -314,9 +303,10 @@ func main() {
 		// label等基础信息
 		node.RegisterMetadataRoutes(api)
 		node.RegisterShellRoutes(api)
-
 		// k8s ns
 		ns.RegisterRoutes(api)
+		// yaml
+		dynamic.RegisterYamlRoutes(api)
 
 		// k8s sts
 		api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", sts.Undo)
