@@ -32,6 +32,7 @@ func RegisterContainerRoutes(api *gin.RouterGroup) {
 
 // @Summary 获取容器镜像拉取密钥选项
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -107,6 +108,7 @@ func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 
 // @Summary 获取容器资源信息
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -263,6 +265,7 @@ type resourceInfo struct {
 
 // @Summary 更新容器资源配置
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -367,6 +370,7 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]interface
 
 // @Summary 获取容器基本信息
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -418,6 +422,7 @@ func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 // 获取container的环境变量信息
 // @Summary 获取容器环境变量信息
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -469,6 +474,7 @@ type ContainerEnv struct {
 
 // @Summary 更新容器环境变量
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -755,6 +761,7 @@ type imageInfo struct {
 
 // @Summary 更新容器镜像标签
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -845,6 +852,7 @@ func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo)
 
 // @Summary 获取容器健康检查信息
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
@@ -955,6 +963,7 @@ type HealthCheckInfo struct {
 
 // @Summary 更新容器健康检查配置
 // @Security BearerAuth
+// @Param cluster query string true "集群名称"
 // @Param kind path string true "资源类型"
 // @Param group path string true "API组"
 // @Param version path string true "API版本"
