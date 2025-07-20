@@ -340,22 +340,14 @@ func main() {
 		// p8s svc
 		api.POST("/service/create", svc.Create)
 		// k8s node
-		api.POST("/node/drain/name/:name", node.Drain)
-		api.POST("/node/cordon/name/:name", node.Cordon)
-		api.POST("/node/uncordon/name/:name", node.UnCordon)
-		api.GET("/node/usage/name/:name", node.Usage)
-		api.POST("/node/batch/drain", node.BatchDrain)
-		api.POST("/node/batch/cordon", node.BatchCordon)
-		api.POST("/node/batch/uncordon", node.BatchUnCordon)
-		api.GET("/node/name/option_list", node.NameOptionList)
-		api.GET("/node/labels/list", node.AllLabelList)
-		api.GET("/node/labels/unique_labels", node.UniqueLabels)
-		api.GET("/node/top/list", node.TopList)
-		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
-		api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", node.CreateKubectlShell)
-
+		node.RegisterActionRoutes(api)
+		// 资源情况
+		node.RegisterResourceRoutes(api)
 		// 节点污点
 		node.RegisterTaintRoutes(api)
+		// label等基础信息
+		node.RegisterMetadataRoutes(api)
+		node.RegisterShellRoutes(api)
 
 		// k8s ns
 		api.GET("/ns/option_list", ns.OptionList)

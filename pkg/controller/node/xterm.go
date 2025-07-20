@@ -23,7 +23,15 @@ var WebsocketMessageType = map[int]string{
 	websocket.PongMessage:   "pong",
 }
 
-func CreateNodeShell(c *gin.Context) {
+type ShellController struct{}
+
+func RegisterShellRoutes(api *gin.RouterGroup) {
+	ctrl := &ShellController{}
+	api.POST("/node/name/:node_name/create_node_shell", ctrl.CreateNodeShell)
+	api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", ctrl.CreateKubectlShell)
+
+}
+func (nc *ShellController) CreateNodeShell(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -56,7 +64,7 @@ func CreateNodeShell(c *gin.Context) {
 	})
 }
 
-func CreateKubectlShell(c *gin.Context) {
+func (nc *ShellController) CreateKubectlShell(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("node_name")             // NodeName
 	clusterIDBase64 := c.Param("cluster_id") // 集群ID，base64编码
