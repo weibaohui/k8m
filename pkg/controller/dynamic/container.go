@@ -38,7 +38,7 @@ func RegisterContainerRoutes(api *gin.RouterGroup) {
 // @Param ns path string true "命名空间"
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/image_pull_secrets/ns/{ns}/name/{name} [get]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/image_pull_secrets/ns/{ns}/name/{name} [get]
 func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -114,7 +114,7 @@ func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/container_resources_info/ns/{ns}/name/{name}/container/{container_name} [get]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_resources_info/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerResourcesInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -270,7 +270,7 @@ type resourceInfo struct {
 // @Param name path string true "资源名称"
 // @Param body body resourceInfo true "资源配置信息"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/update_resources/ns/{ns}/name/{name} [post]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_resources/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateResources(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -374,7 +374,7 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]interface
 // @Param name path string true "资源名称"
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/container_info/ns/{ns}/name/{name}/container/{container_name} [get]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_info/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -425,7 +425,7 @@ func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/container_env/ns/{ns}/name/{name}/container/{container_name} [get]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_env/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerEnvInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -476,7 +476,7 @@ type ContainerEnv struct {
 // @Param name path string true "资源名称"
 // @Param body body ContainerEnv true "容器环境变量信息"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/update_env/ns/{ns}/name/{name} [post]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_env/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -762,7 +762,7 @@ type imageInfo struct {
 // @Param name path string true "资源名称"
 // @Param body body imageInfo true "镜像信息"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/update_image/ns/{ns}/name/{name} [post]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_image/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -852,7 +852,7 @@ func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo)
 // @Param name path string true "资源名称"
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/container_health_checks/ns/{ns}/name/{name}/container/{container_name} [get]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_health_checks/ns/{ns}/name/{name}/container/{container_name} [get]
 func (cc *ContainerController) ContainerHealthChecksInfo(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -962,7 +962,7 @@ type HealthCheckInfo struct {
 // @Param name path string true "资源名称"
 // @Param body body HealthCheckInfo true "健康检查配置信息"
 // @Success 200 {object} string
-// @Router /{kind}/group/{group}/version/{version}/update_health_checks/ns/{ns}/name/{name} [post]
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_health_checks/ns/{ns}/name/{name} [post]
 func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
