@@ -9,7 +9,20 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func History(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+
+	api.POST("/daemonset/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
+	api.GET("/daemonset/ns/:ns/name/:name/rollout/history", ctrl.History)
+	api.POST("/daemonset/ns/:ns/name/:name/restart", ctrl.Restart)
+	api.POST("/daemonset/batch/restart", ctrl.BatchRestart)
+	api.POST("/daemonset/batch/stop", ctrl.BatchStop)
+	api.POST("/daemonset/batch/restore", ctrl.BatchRestore)
+}
+
+func (cc *Controller) History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -27,7 +40,7 @@ func History(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, list)
 }
-func Restart(c *gin.Context) {
+func (cc *Controller) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -42,7 +55,7 @@ func Restart(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func BatchRestart(c *gin.Context) {
+func (cc *Controller) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -77,7 +90,7 @@ func BatchRestart(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func Undo(c *gin.Context) {
+func (cc *Controller) Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -98,7 +111,7 @@ func Undo(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, result)
 }
 
-func BatchStop(c *gin.Context) {
+func (cc *Controller) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -133,7 +146,7 @@ func BatchStop(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func BatchRestore(c *gin.Context) {
+func (cc *Controller) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

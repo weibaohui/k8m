@@ -305,12 +305,7 @@ func main() {
 		api.GET("/statefulset/ns/:ns/name/:name/hpa", sts.HPA)
 
 		// k8s ds
-		api.POST("/daemonset/ns/:ns/name/:name/revision/:revision/rollout/undo", ds.Undo)
-		api.GET("/daemonset/ns/:ns/name/:name/rollout/history", ds.History)
-		api.POST("/daemonset/ns/:ns/name/:name/restart", ds.Restart)
-		api.POST("/daemonset/batch/restart", ds.BatchRestart)
-		api.POST("/daemonset/batch/stop", ds.BatchStop)
-		api.POST("/daemonset/batch/restore", ds.BatchRestore)
+		ds.RegisterRoutes(api)
 
 		// k8s rs
 		rs.RegisterRoutes(api)
