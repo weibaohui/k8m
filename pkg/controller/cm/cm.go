@@ -32,12 +32,13 @@ type info struct {
 
 // @Summary 导入文件到ConfigMap
 // @Security BearerAuth
+// @Param cluster path string true "集群名称"
 // @Param ns path string true "命名空间"
 // @Param name path string true "ConfigMap名称"
 // @Param fileName formData string true "文件名"
 // @Param file formData file true "上传文件"
 // @Success 200 {object} string
-// @Router /configmap/ns/{ns}/name/{name}/import [post]
+// @Router /k8s/cluster/{cluster}/configmap/ns/{ns}/name/{name}/import [post]
 func (cc *Controller) Import(c *gin.Context) {
 	item := &info{}
 	ns := c.Param("ns")
@@ -97,12 +98,13 @@ func (cc *Controller) Import(c *gin.Context) {
 
 // @Summary 更新ConfigMap中的文件内容
 // @Security BearerAuth
+// @Param cluster path string true "集群名称"
 // @Param ns path string true "命名空间"
 // @Param name path string true "ConfigMap名称"
 // @Param key path string true "文件名"
 // @Param request body object true "请求体，包含update_configmap字段"
 // @Success 200 {object} string
-// @Router /configmap/ns/{ns}/name/{name}/{key}/update_configmap [post]
+// @Router /k8s/cluster/{cluster}/configmap/ns/{ns}/name/{name}/{key}/update_configmap [post]
 func (cc *Controller) Update(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -157,9 +159,10 @@ func (cc *Controller) Update(c *gin.Context) {
 
 // @Summary 创建ConfigMap
 // @Security BearerAuth
+// @Param cluster path string true "集群名称"
 // @Param request body object true "请求体，包含metadata和data字段"
 // @Success 200 {object} string
-// @Router /configmap/create [post]
+// @Router /k8s/cluster/{cluster}/configmap/create [post]
 func (cc *Controller) Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
