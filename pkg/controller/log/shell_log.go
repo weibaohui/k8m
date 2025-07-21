@@ -14,6 +14,12 @@ func RegisterLogRoutes(mgm *gin.RouterGroup) {
 	mgm.GET("/log/shell/list", ctrl.ListShell)
 	mgm.GET("/log/operation/list", ctrl.ListOperation)
 }
+
+// @Summary Shell日志列表
+// @Description 获取所有Shell操作日志
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/log/shell/list [get]
 func (lc *Controller) ListShell(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.ShellLog{}
@@ -26,6 +32,11 @@ func (lc *Controller) ListShell(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
+// @Summary 操作日志列表
+// @Description 获取所有操作日志
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/log/operation/list [get]
 func (lc *Controller) ListOperation(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.OperationLog{}

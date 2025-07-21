@@ -10,6 +10,11 @@ import (
 )
 
 // Version 获取版本号
+// @Summary 获取版本信息
+// @Description 获取当前软件的版本及构建信息
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /params/version [get]
 func (pc *Controller) Version(c *gin.Context) {
 
 	cfg := flag.Init()

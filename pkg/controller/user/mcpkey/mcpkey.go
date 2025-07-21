@@ -25,6 +25,12 @@ func RegisterMCPKeysRoutes(mgm *gin.RouterGroup) {
 // Create 处理创建新的MCP密钥的HTTP请求。
 // 从请求中解析描述信息，获取当前用户，生成有效期为10年的JWT令牌，并创建包含该信息的MCP密钥记录保存到数据库。
 // 失败时返回JSON格式的错误响应，成功时返回操作成功的JSON响应。
+// @Summary 创建MCP密钥
+// @Description 为当前用户创建一个新的MCP密钥（10年有效期）
+// @Security BearerAuth
+// @Param description body string false "密钥描述"
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/mcp_keys/create [post]
 func (mc *Controller) Create(c *gin.Context) {
 	params := dao.BuildParams(c)
 
@@ -63,6 +69,11 @@ func (mc *Controller) Create(c *gin.Context) {
 }
 
 // List 获取MCP密钥列表
+// @Summary 获取MCP密钥列表
+// @Description 获取当前用户的所有MCP密钥
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/user/profile/mcp_keys/list [get]
 func (mc *Controller) List(c *gin.Context) {
 	username := c.GetString(constants.JwtUserName)
 	params := dao.BuildParams(c)
@@ -80,6 +91,12 @@ func (mc *Controller) List(c *gin.Context) {
 	amis.WriteJsonData(c, list)
 }
 
+// @Summary 删除MCP密钥
+// @Description 删除指定ID的MCP密钥
+// @Security BearerAuth
+// @Param id path string true "MCP密钥ID"
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/mcp_keys/delete/{id} [post]
 func (mc *Controller) Delete(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)

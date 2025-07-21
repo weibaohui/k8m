@@ -7,6 +7,11 @@ import (
 )
 
 // UserRole 获取当前用户的Role信息
+// @Summary 获取用户角色信息
+// @Description 获取当前登录用户的角色及默认集群
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /params/user/role [get]
 func (pc *Controller) UserRole(c *gin.Context) {
 	_, role := amis.GetLoginUser(c)
 	clusters := amis.GetLoginUserClusters(c)
