@@ -73,7 +73,7 @@ func (a *Controller) Scan(c *gin.Context) {
 // @Security BearerAuth
 // @Param cluster path string true "Base64编码的集群ID"
 // @Success 200 {object} string "已执行，请稍后刷新"
-// @Router /admin/cluster/{cluster}/reconnect [post]
+// @Router /mgm/cluster/{cluster}/reconnect [post]
 func (a *Controller) Reconnect(c *gin.Context) {
 	clusterBase64 := c.Param("cluster")
 	clusterID, err := utils.DecodeBase64(clusterBase64)

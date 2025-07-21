@@ -20,6 +20,11 @@ func RegisterHelmChartRoutes(mgm *gin.RouterGroup) {
 	mgm.GET("/helm/chart/list", ctrl.ListChart)
 }
 
+// @Summary Helm Chart列表
+// @Description 获取所有Helm Chart信息
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/helm/chart/list [get]
 func (hc *ChartController) ListChart(c *gin.Context) {
 	// 从数据库查询列表
 	params := dao.BuildParams(c)
@@ -33,6 +38,14 @@ func (hc *ChartController) ListChart(c *gin.Context) {
 }
 
 // GetChartValue 获取Chart的值
+// @Summary 获取Chart的默认values.yaml
+// @Description 获取指定Helm仓库、Chart及版本的默认values.yaml内容
+// @Security BearerAuth
+// @Param repo path string true "仓库名称"
+// @Param chart path string true "Chart名称"
+// @Param version path string true "Chart版本"
+// @Success 200 {object} string "yaml内容"
+// @Router /mgm/helm/repo/{repo}/chart/{chart}/version/{version}/values [get]
 func (hc *ChartController) GetChartValue(c *gin.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")
@@ -55,6 +68,13 @@ func (hc *ChartController) GetChartValue(c *gin.Context) {
 }
 
 // ChartVersionOptionList 获取Chart的版本列表
+// @Summary Chart版本列表
+// @Description 获取指定Helm仓库和Chart的所有版本列表
+// @Security BearerAuth
+// @Param repo path string true "仓库名称"
+// @Param chart path string true "Chart名称"
+// @Success 200 {object} string
+// @Router /mgm/helm/repo/{repo}/chart/{chart}/versions [get]
 func (hc *ChartController) ChartVersionOptionList(c *gin.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")

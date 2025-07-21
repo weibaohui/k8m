@@ -26,6 +26,11 @@ func RegisterProfileRoutes(mgm *gin.RouterGroup) {
 	mgm.POST("/user/profile/2fa/enable", ctrl.Enable2FA)
 }
 
+// @Summary 获取用户信息
+// @Description 获取当前登录用户的详细信息
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/user/profile [get]
 func (uc *Controller) Profile(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
@@ -46,6 +51,11 @@ func (uc *Controller) Profile(c *gin.Context) {
 }
 
 // ListUserPermissions 列出当前登录用户所拥有的集群权限
+// @Summary 获取用户集群权限
+// @Description 列出当前登录用户所拥有的集群权限
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/user/profile/cluster/permissions/list [get]
 func (uc *Controller) ListUserPermissions(c *gin.Context) {
 	params := dao.BuildParams(c)
 	clusters, err := service.UserService().GetClusters(params.UserName)
@@ -56,6 +66,12 @@ func (uc *Controller) ListUserPermissions(c *gin.Context) {
 	amis.WriteJsonList(c, clusters)
 }
 
+// @Summary 修改密码
+// @Description 修改当前登录用户的密码
+// @Security BearerAuth
+// @Param password body string true "新密码（加密后）"
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/update_psw [post]
 func (uc *Controller) UpdatePsw(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.User{}

@@ -7,6 +7,11 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
+// @Summary 翻转指标列表
+// @Description 获取所有启用的翻转显示指标名称
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /params/condition/reverse/list [get]
 func (pc *Controller) Conditions(c *gin.Context) {
 	var list []*models.ConditionReverse
 	err := dao.DB().Model(&models.ConditionReverse{}).
