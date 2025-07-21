@@ -256,5 +256,5 @@ pnpm run dev
 ![输入图片说明](https://foruda.gitee.com/images/1752939002803209217/b3119fee_77493.png "屏幕截图")
 
 ## QQ群
-![输入图片说明](https://foruda.gitee.com/images/1753099524033616951/5f02571b_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1753099785542398999/184a765a_77493.png "屏幕截图")
 
