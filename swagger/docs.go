@@ -252,34 +252,6 @@ var doc = `{
                 }
             }
         },
-        "/admin/cluster/{cluster}/reconnect": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "重新连接一个已断开的集群",
-                "summary": "重新连接集群",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Base64编码的集群ID",
-                        "name": "cluster",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "已执行，请稍后刷新",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/cluster_permissions/cluster/{cluster}/list": {
             "get": {
                 "security": [
@@ -751,6 +723,132 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/helm/repo/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除一个或多个Helm仓库",
+                "summary": "删除Helm仓库",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "要删除的仓库ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/helm/repo/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Helm仓库信息",
+                "summary": "Helm仓库列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/helm/repo/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Helm仓库名称，用于下拉选项",
+                "summary": "Helm仓库选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/helm/repo/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "添加或更新一个Helm仓库信息",
+                "summary": "添加或更新Helm仓库",
+                "parameters": [
+                    {
+                        "description": "Helm仓库信息",
+                        "name": "repo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HelmRepository"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/helm/repo/update_index": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定Helm仓库的索引信息",
+                "summary": "更新Helm仓库索引",
+                "parameters": [
+                    {
+                        "description": "要更新索引的仓库ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
                         "schema": {
                             "type": "string"
                         }
@@ -2292,6 +2390,173 @@ var doc = `{
                         "in": "query"
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/ldap/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取系统LDAP登录开关状态",
+                "summary": "获取LDAP开关状态",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "用户通过用户名、密码和2FA验证码登录，支持普通和LDAP登录",
+                "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "密码（加密）",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "登录类型 0:普通 1:LDAP",
+                        "name": "loginType",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "2FA验证码",
+                        "name": "code",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功，返回JWT Token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "登录失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/oidc/{name}/callback": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "处理OIDC认证后的回调，完成用户登录",
+                "summary": "处理OIDC回调",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "SSO名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "认证代码",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/oidc/{name}/sso": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定SSO名称的OIDC认证跳转URL",
+                "summary": "获取认证URL",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "SSO名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sso/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有已启用的SSO配置项",
+                "summary": "获取SSO配置列表",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -4455,33 +4720,6 @@ var doc = `{
                 }
             }
         },
-        "/k8s/cluster/{cluster}/ldap/config": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取LDAP开关状态",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/k8s/cluster/{cluster}/node/add_taints/name/{name}": {
             "post": {
                 "security": [
@@ -5171,81 +5409,6 @@ var doc = `{
                 }
             }
         },
-        "/k8s/cluster/{cluster}/oidc/{name}/callback": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "处理OAuth2回调",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "SSO名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "认证代码",
-                        "name": "code",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/oidc/{name}/sso": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取认证URL",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "SSO名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "302": {
-                        "description": "Found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/k8s/cluster/{cluster}/pod/labels/unique_labels": {
             "get": {
                 "security": [
@@ -5910,33 +6073,6 @@ var doc = `{
                         "schema": {
                             "type": "object"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/sso/config": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取SSO配置列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -9791,6 +9927,683 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/mgm/cluster/{cluster}/reconnect": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "重新连接一个已断开的集群",
+                "summary": "重新连接集群",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Base64编码的集群ID",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "已执行，请稍后刷新",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/custom/template/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除一个或多个自定义模板",
+                "summary": "删除模板",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "要删除的模板ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/custom/template/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有自定义模板信息",
+                "summary": "模板列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/custom/template/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或更新自定义模板",
+                "summary": "保存模板",
+                "parameters": [
+                    {
+                        "description": "模板信息",
+                        "name": "template",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回模板ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/helm/chart/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Helm Chart信息",
+                "summary": "Helm Chart列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/helm/repo/{repo}/chart/{chart}/version/{version}/values": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定Helm仓库、Chart及版本的默认values.yaml内容",
+                "summary": "获取Chart的默认values.yaml",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "仓库名称",
+                        "name": "repo",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chart名称",
+                        "name": "chart",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chart版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "yaml内容",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/helm/repo/{repo}/chart/{chart}/versions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定Helm仓库和Chart的所有版本列表",
+                "summary": "Chart版本列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "仓库名称",
+                        "name": "repo",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chart名称",
+                        "name": "chart",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/log/operation/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有操作日志",
+                "summary": "操作日志列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/log/shell/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Shell操作日志",
+                "summary": "Shell日志列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户的详细信息",
+                "summary": "获取用户信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/2fa/disable": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "禁用当前用户的二步验证",
+                "summary": "禁用2FA",
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/2fa/enable": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "验证并启用当前用户的二步验证",
+                "summary": "启用2FA",
+                "parameters": [
+                    {
+                        "description": "验证码",
+                        "name": "code",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "应用名称",
+                        "name": "app_name",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/2fa/generate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "生成当前用户的二步验证密钥和二维码",
+                "summary": "生成2FA密钥",
+                "responses": {
+                    "200": {
+                        "description": "返回密钥、二维码和备用码",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/api_keys/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "为当前用户创建一个新的API密钥",
+                "summary": "创建API密钥",
+                "parameters": [
+                    {
+                        "description": "密钥描述",
+                        "name": "description",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/api_keys/delete/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定ID的API密钥",
+                "summary": "删除API密钥",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API密钥ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/api_keys/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的所有API密钥",
+                "summary": "获取API密钥列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/cluster/permissions/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "列出当前登录用户所拥有的集群权限",
+                "summary": "获取用户集群权限",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/mcp_keys/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "为当前用户创建一个新的MCP密钥（10年有效期）",
+                "summary": "创建MCP密钥",
+                "parameters": [
+                    {
+                        "description": "密钥描述",
+                        "name": "description",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/mcp_keys/delete/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定ID的MCP密钥",
+                "summary": "删除MCP密钥",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MCP密钥ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/mcp_keys/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的所有MCP密钥",
+                "summary": "获取MCP密钥列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/user/profile/update_psw": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改当前登录用户的密码",
+                "summary": "修改密码",
+                "parameters": [
+                    {
+                        "description": "新密码（加密后）",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/params/cluster/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户可见的集群详细信息（表格）",
+                "summary": "集群表格列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/params/cluster/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户可选的集群列表（下拉选项）",
+                "summary": "集群选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/params/condition/reverse/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有启用的翻转显示指标名称",
+                "summary": "翻转指标列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/params/config/{key}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定key的系统配置项",
+                "summary": "获取配置项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "配置项key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/params/helm/repo/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Helm仓库名称，用于下拉选项",
+                "summary": "Helm仓库选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/params/user/role": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户的角色及默认集群",
+                "summary": "获取用户角色信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/params/version": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前软件的版本及构建信息",
+                "summary": "获取版本信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -10009,6 +10822,114 @@ var doc = `{
                 },
                 "use_built_in_model": {
                     "type": "boolean"
+                }
+            }
+        },
+        "models.CustomTemplate": {
+            "type": "object",
+            "properties": {
+                "cluster": {
+                    "description": "模板类型，最大长度 100",
+                    "type": "string"
+                },
+                "content": {
+                    "description": "模板内容，支持大文本存储",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "Automatically managed by GORM for creation time",
+                    "type": "string"
+                },
+                "created_by": {
+                    "description": "创建者",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "模板 ID，主键，自增",
+                    "type": "integer"
+                },
+                "is_global": {
+                    "description": "模板类型，最大长度 100",
+                    "type": "boolean"
+                },
+                "kind": {
+                    "description": "模板类型，最大长度 100",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "模板名称，非空，最大长度 255",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "Automatically managed by GORM for update time",
+                    "type": "string"
+                }
+            }
+        },
+        "models.HelmRepository": {
+            "type": "object",
+            "properties": {
+                "auth_type": {
+                    "type": "string"
+                },
+                "caFile": {
+                    "type": "string"
+                },
+                "certFile": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "Automatically managed by GORM for creation time",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "仓库描述",
+                    "type": "string"
+                },
+                "encrypted_secret": {
+                    "type": "string"
+                },
+                "generated": {
+                    "description": "repo 索引文件创建时间",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "insecure_skip_tls_verify": {
+                    "type": "boolean"
+                },
+                "is_active": {
+                    "description": "是否启用",
+                    "type": "boolean"
+                },
+                "keyFile": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "仓库名称（唯一）",
+                    "type": "string"
+                },
+                "pass_credentials_all": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "Automatically managed by GORM for update time",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "仓库地址（如 https://charts.example.com）",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "认证用户名（加密存储）",
+                    "type": "string"
                 }
             }
         },
