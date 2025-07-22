@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tree, Button, Form, Input, Select, InputNumber, message, Modal } from 'antd'; // 移除 Modal 导入
+import { Button, Form, Input, Select, InputNumber, message, Modal } from 'antd'; // 移除 Modal 导入
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import DirectoryTree from 'antd/es/tree/DirectoryTree';
@@ -61,7 +61,6 @@ const MenuEditor: React.FC = () => {
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
-    // 移除 modalForm、modalVisible 状态
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null); // 修改为可空类型
     const [parentKey, setParentKey] = useState<string | null>(null);
 
@@ -256,6 +255,7 @@ const MenuEditor: React.FC = () => {
                 </span>
             ),
             children: item.children ? convertToTreeData(item.children) : undefined,
+            isLeaf: !item.children || item.children.length === 0
         }));
     };
 
@@ -310,7 +310,6 @@ const MenuEditor: React.FC = () => {
                     <div style={{ color: '#aaa', marginTop: 32 }}>请选择左侧菜单项进行编辑或点击"新增"按钮创建新菜单项</div>
                 )}
             </div>
-            {/* 移除弹窗组件 */}
         </div>
     );
 };
