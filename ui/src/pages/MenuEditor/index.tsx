@@ -307,7 +307,6 @@ const MenuEditor: React.FC = () => {
                             ]}>
                                 <Input />
                             </Form.Item>
-                            // 右侧表单中的图标选择器修改
                             <Form.Item label="图标" name="icon">
                                 <Select
                                     placeholder="选择图标"
