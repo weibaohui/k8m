@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Form, Input, Select, InputNumber, message, Modal, Tree } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, HomeOutlined, DashboardOutlined, SettingOutlined, UserOutlined, SafetyOutlined, ProjectOutlined, MenuOutlined, FileTextOutlined, SearchOutlined, BellOutlined, MessageOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'; 
 import type { DataNode } from 'antd/es/tree';
-import DirectoryTree from 'antd/es/tree/DirectoryTree';
 
 interface MenuItem {
     key: string;
@@ -64,19 +63,19 @@ const MenuEditor: React.FC = () => {
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
     const [parentKey, setParentKey] = useState<string | null>(null);
 
-    // 图标选项
+    // 图标选项 - 改为Font Awesome图标类
     const iconOptions = [
-        { value: 'home', label: '首页', icon: <HomeOutlined /> },
-        { value: 'dashboard', label: '仪表盘', icon: <DashboardOutlined /> },
-        { value: 'setting', label: '设置', icon: <SettingOutlined /> },
-        { value: 'user', label: '用户', icon: <UserOutlined /> },
-        { value: 'safety', label: '安全', icon: <SafetyOutlined /> },
-        { value: 'project', label: '项目', icon: <ProjectOutlined /> },
-        { value: 'menu', label: '菜单', icon: <MenuOutlined /> },
-        { value: 'file-text', label: '文档', icon: <FileTextOutlined /> },
-        { value: 'search', label: '搜索', icon: <SearchOutlined /> },
-        { value: 'bell', label: '通知', icon: <BellOutlined /> },
-        { value: 'message', label: '消息', icon: <MessageOutlined /> },
+        { value: 'fa-home', label: '首页' },
+        { value: 'fa-tachometer-alt', label: '仪表盘' },
+        { value: 'fa-cog', label: '设置' },
+        { value: 'fa-user', label: '用户' },
+        { value: 'fa-shield-alt', label: '安全' },
+        { value: 'fa-project-diagram', label: '项目' },
+        { value: 'fa-bars', label: '菜单' },
+        { value: 'fa-file-alt', label: '文档' },
+        { value: 'fa-search', label: '搜索' },
+        { value: 'fa-bell', label: '通知' },
+        { value: 'fa-comment', label: '消息' },
     ];
 
     // 递归查找菜单项
@@ -258,26 +257,11 @@ const MenuEditor: React.FC = () => {
 
     // 菜单树数据转换
     const convertToTreeData = (data: MenuItem[]): DataNode[] => {
-        // 创建图标映射表
-        const iconMap: Record<string, React.ReactNode> = {
-            'home': <HomeOutlined />,
-            'dashboard': <DashboardOutlined />,
-            'setting': <SettingOutlined />,
-            'user': <UserOutlined />,
-            'safety': <SafetyOutlined />,
-            'project': <ProjectOutlined />,
-            'menu': <MenuOutlined />,
-            'file-text': <FileTextOutlined />,
-            'search': <SearchOutlined />,
-            'bell': <BellOutlined />,
-            'message': <MessageOutlined />
-        };
-    
         return data.map(item => ({
             key: item.key,
             title: (
                 <span>
-                    {item.icon && iconMap[item.icon] ? <span style={{ marginRight: 4 }}>{iconMap[item.icon]}</span> : null}
+                    {item.icon ? <i className={`fa-solid ${item.icon}`} style={{ marginRight: '4px' }}></i> : null}
                     {item.title}
                     <Button size="small" type="link" icon={<EditOutlined />} onClick={e => { e.stopPropagation(); handleEdit(item.key); }} title="编辑" />
                     <Button size="small" type="link" icon={<DeleteOutlined />} danger onClick={e => { e.stopPropagation(); handleDelete(item.key); }} title="删除" />
@@ -323,6 +307,7 @@ const MenuEditor: React.FC = () => {
                             ]}>
                                 <Input />
                             </Form.Item>
+                            // 右侧表单中的图标选择器修改
                             <Form.Item label="图标" name="icon">
                                 <Select
                                     placeholder="选择图标"
@@ -332,7 +317,7 @@ const MenuEditor: React.FC = () => {
                                     {iconOptions.map(option => (
                                         <Select.Option key={option.value} value={option.value} label={option.label}>
                                             <span style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span style={{ marginRight: 8 }}>{option.icon}</span>
+                                                <i className={`fa-solid ${option.value}`} style={{ marginRight: '8px' }}></i>
                                                 {option.label}
                                             </span>
                                         </Select.Option>
