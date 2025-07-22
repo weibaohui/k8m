@@ -3,6 +3,9 @@ import { Button, Form, Input, InputNumber, message, Modal, Select, Tree } from '
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
+// 导入新的IconPicker组件
+import IconPicker from '@/components/IconPicker';
+
 interface MenuItem {
     key: string;
     title: string;
@@ -64,20 +67,7 @@ const MenuEditor: React.FC = () => {
     const [parentKey, setParentKey] = useState<string | null>(null);
     const [showIconModal, setShowIconModal] = useState(false);
 
-    // 图标选项 - Font Awesome图标类
-    const iconOptions = [
-        { value: 'fa-home', label: '首页' },
-        { value: 'fa-tachometer-alt', label: '仪表盘' },
-        { value: 'fa-cog', label: '设置' },
-        { value: 'fa-user', label: '用户' },
-        { value: 'fa-shield-alt', label: '安全' },
-        { value: 'fa-project-diagram', label: '项目' },
-        { value: 'fa-bars', label: '菜单' },
-        { value: 'fa-file-alt', label: '文档' },
-        { value: 'fa-search', label: '搜索' },
-        { value: 'fa-bell', label: '通知' },
-        { value: 'fa-comment', label: '消息' },
-    ];
+     
 
     // 处理图标选择
     const handleIconSelect = (iconValue: string) => {
@@ -348,36 +338,15 @@ const MenuEditor: React.FC = () => {
             </div>
 
             {/* 图标选择弹窗 */}
-            <Modal
-                title="选择图标"
-                visible={showIconModal}
-                onCancel={() => setShowIconModal(false)}
-                footer={null}
-                width={600}
-            >
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '10px', padding: '10px' }}>
-                    {iconOptions.map(option => (
-                        <div
-                            key={option.value}
-                            onClick={() => handleIconSelect(option.value)}
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '20px',
-                                height: '20px',
-                                border: '1px solid #eee',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                backgroundColor: form.getFieldValue('icon') === option.value ? '#f0f7ff' : '#fff'
-                            }}
-                        >
-                            <i className={`fa-solid ${option.value}`} style={{ fontSize: '24px', marginBottom: '4px' }}></i>
-                        </div>
-                    ))}
-                </div>
-            </Modal>
+            // 替换原来的图标选择弹窗部分
+            <IconPicker
+              visible={showIconModal}
+              onCancel={() => setShowIconModal(false)}
+              onSelect={handleIconSelect}
+              selectedIcon={form.getFieldValue('icon')}
+            />
+            
+            // 删除原来的Modal组件代码
         </div>
     );
 };
