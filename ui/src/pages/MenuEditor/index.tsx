@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Select, InputNumber, message, Modal, Tree } from 'antd'; // 移除 Modal 导入
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Select, InputNumber, message, Modal, Tree } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, HomeOutlined, DashboardOutlined, SettingOutlined, UserOutlined, SafetyOutlined, ProjectOutlined, MenuOutlined, FileTextOutlined, SearchOutlined, BellOutlined, MessageOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import DirectoryTree from 'antd/es/tree/DirectoryTree';
 
@@ -61,8 +61,23 @@ const MenuEditor: React.FC = () => {
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
-    const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null); // 修改为可空类型
+    const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
     const [parentKey, setParentKey] = useState<string | null>(null);
+
+    // 图标选项
+    const iconOptions = [
+        { value: 'home', label: '首页', icon: <HomeOutlined /> },
+        { value: 'dashboard', label: '仪表盘', icon: <DashboardOutlined /> },
+        { value: 'setting', label: '设置', icon: <SettingOutlined /> },
+        { value: 'user', label: '用户', icon: <UserOutlined /> },
+        { value: 'safety', label: '安全', icon: <SafetyOutlined /> },
+        { value: 'project', label: '项目', icon: <ProjectOutlined /> },
+        { value: 'menu', label: '菜单', icon: <MenuOutlined /> },
+        { value: 'file-text', label: '文档', icon: <FileTextOutlined /> },
+        { value: 'search', label: '搜索', icon: <SearchOutlined /> },
+        { value: 'bell', label: '通知', icon: <BellOutlined /> },
+        { value: 'message', label: '消息', icon: <MessageOutlined /> },
+    ];
 
     // 递归查找菜单项
     const findMenuItem = (data: MenuItem[], key: string): MenuItem | null => {
@@ -243,11 +258,26 @@ const MenuEditor: React.FC = () => {
 
     // 菜单树数据转换
     const convertToTreeData = (data: MenuItem[]): DataNode[] => {
+        // 创建图标映射表
+        const iconMap: Record<string, React.ReactNode> = {
+            'home': <HomeOutlined />,
+            'dashboard': <DashboardOutlined />,
+            'setting': <SettingOutlined />,
+            'user': <UserOutlined />,
+            'safety': <SafetyOutlined />,
+            'project': <ProjectOutlined />,
+            'menu': <MenuOutlined />,
+            'file-text': <FileTextOutlined />,
+            'search': <SearchOutlined />,
+            'bell': <BellOutlined />,
+            'message': <MessageOutlined />
+        };
+    
         return data.map(item => ({
             key: item.key,
             title: (
                 <span>
-                    {item.icon ? <span style={{ marginRight: 4 }}><i className={`anticon anticon-${item.icon}`} /></span> : null}
+                    {item.icon && iconMap[item.icon] ? <span style={{ marginRight: 4 }}>{iconMap[item.icon]}</span> : null}
                     {item.title}
                     <Button size="small" type="link" icon={<EditOutlined />} onClick={e => { e.stopPropagation(); handleEdit(item.key); }} title="编辑" />
                     <Button size="small" type="link" icon={<DeleteOutlined />} danger onClick={e => { e.stopPropagation(); handleDelete(item.key); }} title="删除" />
@@ -293,7 +323,22 @@ const MenuEditor: React.FC = () => {
                             ]}>
                                 <Input />
                             </Form.Item>
-                            <Form.Item label="图标" name="icon"> <Input placeholder="如 home, dashboard, setting..." /> </Form.Item>
+                            <Form.Item label="图标" name="icon">
+                                <Select
+                                    placeholder="选择图标"
+                                    style={{ width: '100%' }}
+                                    optionFilterProp="label"
+                                >
+                                    {iconOptions.map(option => (
+                                        <Select.Option key={option.value} value={option.value} label={option.label}>
+                                            <span style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span style={{ marginRight: 8 }}>{option.icon}</span>
+                                                {option.label}
+                                            </span>
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
                             <Form.Item label="URL" name="url"> <Input /> </Form.Item>
                             <Form.Item label="点击事件" name="eventType"> <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} /> </Form.Item>
                             <Form.Item label="排序" name="order"> <InputNumber min={1} /> </Form.Item>
