@@ -60,6 +60,7 @@ const MenuEditor: React.FC = () => {
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
+    const [modalForm] = Form.useForm();
     const [modalVisible, setModalVisible] = useState(false);
     const [editMode, setEditMode] = useState<'add' | 'edit'>('add');
     const [parentKey, setParentKey] = useState<string | null>(null);
@@ -98,13 +99,14 @@ const MenuEditor: React.FC = () => {
         });
     };
 
-    // 递归添加菜单项
+    // 递归添加菜单项，新增后自动展开父节点
     const addMenuItem = (data: MenuItem[], parentKey: string | null, newItem: MenuItem): MenuItem[] => {
         if (!parentKey) {
             return [...data, newItem];
         }
         return data.map(item => {
             if (item.key === parentKey) {
+                // 新增后自动展开父节点
                 return { ...item, children: [...(item.children || []), newItem] };
             }
             if (item.children) {
@@ -184,7 +186,8 @@ const MenuEditor: React.FC = () => {
     const handleAdd = (parentKey: string | null = null) => {
         setEditMode('add');
         setParentKey(parentKey);
-        form.resetFields();
+        modalForm.resetFields();
+        modalForm.setFieldsValue({ title: '', icon: '', url: '', eventType: 'url', order: 1 });
         setModalVisible(true);
     };
 
@@ -193,11 +196,11 @@ const MenuEditor: React.FC = () => {
         const editKey = key || selectedKey;
         if (!editKey) return;
         setEditMode('edit');
-        setModalVisible(true);
         const item = findMenuItem(menuData, editKey);
         if (item) {
-            form.setFieldsValue(item);
+            modalForm.setFieldsValue(item);
         }
+        setModalVisible(true);
     };
 
     // 删除菜单项
@@ -219,20 +222,18 @@ const MenuEditor: React.FC = () => {
 
     // 保存菜单项
     const handleSave = () => {
-        form.validateFields().then(values => {
+        modalForm.validateFields().then(values => {
             if (editMode === 'add') {
                 const newKey = Date.now().toString();
                 const newItem: MenuItem = { ...values, key: newKey };
-                setMenuData(addMenuItem(menuData, parentKey, newItem));
+                setMenuData(prev => addMenuItem(prev, parentKey, newItem));
                 message.success('添加成功');
             } else if (editMode === 'edit' && selectedKey) {
                 setMenuData(updateMenuItem(menuData, selectedKey, { ...values, key: selectedKey }));
                 message.success('保存成功');
             }
             setModalVisible(false);
-            // 不自动清空选中，便于连续编辑
-            // setSelectedKey(null);
-            // form.resetFields();
+            modalForm.resetFields();
         });
     };
 
@@ -303,9 +304,8 @@ const MenuEditor: React.FC = () => {
                 destroyOnClose
             >
                 <Form
-                    form={form}
+                    form={modalForm}  // 修复：将 form 改为 modalForm
                     layout="vertical"
-                    initialValues={{ eventType: 'url', order: 1 }}
                 >
                     <Form.Item label="菜单名称" name="title" rules={[{ required: true, message: '请输入菜单名称' }]}> <Input /> </Form.Item>
                     <Form.Item label="图标" name="icon"> <Input placeholder="如 home, dashboard, setting..." /> </Form.Item>
