@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tree, Button, Form, Input, Select, InputNumber, Modal, message } from 'antd';
+import { Tree, Button, Form, Input, Select, InputNumber, message, Modal } from 'antd'; // 移除 Modal 导入
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
@@ -60,9 +60,8 @@ const MenuEditor: React.FC = () => {
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
-    const [modalForm] = Form.useForm();
-    const [modalVisible, setModalVisible] = useState(false);
-    const [editMode, setEditMode] = useState<'add' | 'edit'>('add');
+    // 移除 modalForm、modalVisible 状态
+    const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null); // 修改为可空类型
     const [parentKey, setParentKey] = useState<string | null>(null);
 
     // 递归查找菜单项
@@ -123,10 +122,12 @@ const MenuEditor: React.FC = () => {
             const item = findMenuItem(menuData, selectedKeys[0] as string);
             if (item) {
                 form.setFieldsValue(item);
+                setEditMode('edit'); // 选中时切换到编辑模式
             }
         } else {
             setSelectedKey(null);
             form.resetFields();
+            setEditMode(null); // 取消选择时重置模式
         }
     };
 
@@ -182,25 +183,26 @@ const MenuEditor: React.FC = () => {
         setMenuData(data);
     };
 
-    // 新增菜单项
+    // 新增菜单项 - 修改为直接操作右侧表单
     const handleAdd = (parentKey: string | null = null) => {
         setEditMode('add');
         setParentKey(parentKey);
-        modalForm.resetFields();
-        modalForm.setFieldsValue({ title: '', icon: '', url: '', eventType: 'url', order: 1 });
-        setModalVisible(true);
+        setSelectedKey(null); // 清除选中状态
+        form.resetFields();
+        form.setFieldsValue({ title: '', icon: '', url: '', eventType: 'url', order: 1 });
     };
 
-    // 编辑菜单项
+    // 编辑菜单项 - 修改为直接操作右侧表单
     const handleEdit = (key?: string) => {
         const editKey = key || selectedKey;
         if (!editKey) return;
         setEditMode('edit');
+        setParentKey(null);
+        setSelectedKey(editKey);
         const item = findMenuItem(menuData, editKey);
         if (item) {
-            modalForm.setFieldsValue(item);
+            form.setFieldsValue(item);
         }
-        setModalVisible(true);
     };
 
     // 删除菜单项
@@ -220,20 +222,20 @@ const MenuEditor: React.FC = () => {
         });
     };
 
-    // 保存菜单项
+    // 保存菜单项 - 修改为处理右侧表单
     const handleSave = () => {
-        modalForm.validateFields().then(values => {
+        form.validateFields().then(values => {
             if (editMode === 'add') {
                 const newKey = Date.now().toString();
                 const newItem: MenuItem = { ...values, key: newKey };
                 setMenuData(prev => addMenuItem(prev, parentKey, newItem));
                 message.success('添加成功');
+                setSelectedKey(newKey);
+                setEditMode('edit'); // 新增后切换到编辑模式
             } else if (editMode === 'edit' && selectedKey) {
                 setMenuData(updateMenuItem(menuData, selectedKey, { ...values, key: selectedKey }));
                 message.success('保存成功');
             }
-            setModalVisible(false);
-            modalForm.resetFields();
         });
     };
 
@@ -272,48 +274,38 @@ const MenuEditor: React.FC = () => {
             </div>
             {/* 右侧表单 */}
             <div style={{ flex: 1, padding: 32 }}>
-                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>菜单项编辑</div>
-                {selectedKey ? (
-                    <>
+                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
+                    {editMode === 'add' ? '新增菜单项' : '菜单项编辑'}
+                </div>
+                {editMode || selectedKey ? (
+                    <> // 有编辑模式或选中项时显示表单
                         <Form
                             form={form}
                             layout="vertical"
-                            initialValues={{ eventType: 'url', order: 1 }}
+                            initialValues={{ title: '', eventType: 'url', order: 1 }} // 添加title初始值
                         >
-                            <Form.Item label="菜单名称" name="title" rules={[{ required: true, message: '请输入菜单名称' }]}> <Input /> </Form.Item>
+                            <Form.Item label="菜单名称" name="title" rules={[
+                                { required: true, whitespace: true, message: '请输入菜单名称' } // 添加whitespace验证
+                            ]}>
+                                <Input />
+                            </Form.Item>
                             <Form.Item label="图标" name="icon"> <Input placeholder="如 home, dashboard, setting..." /> </Form.Item>
                             <Form.Item label="URL" name="url"> <Input /> </Form.Item>
                             <Form.Item label="点击事件" name="eventType"> <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} /> </Form.Item>
                             <Form.Item label="排序" name="order"> <InputNumber min={1} /> </Form.Item>
                         </Form>
                         <Button type="primary" onClick={handleSave} style={{ marginRight: 8 }}>保存</Button>
-                        <Button onClick={() => { setSelectedKey(null); form.resetFields(); }}>取消</Button>
+                        <Button onClick={() => {
+                            setSelectedKey(null);
+                            form.resetFields();
+                            setEditMode(null);
+                        }}>取消</Button>
                     </>
                 ) : (
-                    <div style={{ color: '#aaa', marginTop: 32 }}>请选择左侧菜单项进行编辑</div>
+                    <div style={{ color: '#aaa', marginTop: 32 }}>请选择左侧菜单项进行编辑或点击"新增"按钮创建新菜单项</div>
                 )}
             </div>
-            {/* 弹窗用于新增/编辑 */}
-            <Modal
-                title={editMode === 'add' ? '新增菜单项' : '编辑菜单项'}
-                open={modalVisible}
-                onOk={handleSave}
-                onCancel={() => setModalVisible(false)}
-                okText="保存"
-                cancelText="取消"
-                destroyOnClose
-            >
-                <Form
-                    form={modalForm}  // 修复：将 form 改为 modalForm
-                    layout="vertical"
-                >
-                    <Form.Item label="菜单名称" name="title" rules={[{ required: true, message: '请输入菜单名称' }]}> <Input /> </Form.Item>
-                    <Form.Item label="图标" name="icon"> <Input placeholder="如 home, dashboard, setting..." /> </Form.Item>
-                    <Form.Item label="URL" name="url"> <Input /> </Form.Item>
-                    <Form.Item label="点击事件" name="eventType"> <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} /> </Form.Item>
-                    <Form.Item label="排序" name="order"> <InputNumber min={1} /> </Form.Item>
-                </Form>
-            </Modal>
+            {/* 移除弹窗组件 */}
         </div>
     );
 };
