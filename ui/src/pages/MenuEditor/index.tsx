@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Select, InputNumber, message, Modal } from 'antd'; // 移除 Modal 导入
+import { Button, Form, Input, Select, InputNumber, message, Modal, Tree } from 'antd'; // 移除 Modal 导入
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import DirectoryTree from 'antd/es/tree/DirectoryTree';
@@ -265,7 +265,7 @@ const MenuEditor: React.FC = () => {
             <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
                 <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>菜单树</div>
                 <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd(null)} style={{ marginBottom: 12 }}>新增根菜单</Button>
-                <DirectoryTree
+                <Tree
                     treeData={convertToTreeData(menuData)}
                     defaultExpandAll
                     showLine
@@ -274,7 +274,6 @@ const MenuEditor: React.FC = () => {
                     draggable
                     onDrop={onDrop}
                     blockNode
-                    
                 />
             </div>
             {/* 右侧表单 */}
@@ -283,7 +282,7 @@ const MenuEditor: React.FC = () => {
                     {editMode === 'add' ? '新增菜单项' : '菜单项编辑'}
                 </div>
                 {editMode || selectedKey ? (
-                    <> // 有编辑模式或选中项时显示表单
+                    <> 
                         <Form
                             form={form}
                             layout="vertical"
