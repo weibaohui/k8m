@@ -3,7 +3,6 @@ import { Button, Form, Input, InputNumber, message, Modal, Select, Tree } from '
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
-// 导入新的IconPicker组件
 import IconPicker from '@/components/IconPicker';
 
 interface MenuItem {
@@ -337,8 +336,6 @@ const MenuEditor: React.FC = () => {
                 )}
             </div>
 
-            {/* 图标选择弹窗 */}
-            // 替换原来的图标选择弹窗部分
             <IconPicker
               visible={showIconModal}
               onCancel={() => setShowIconModal(false)}
@@ -346,7 +343,6 @@ const MenuEditor: React.FC = () => {
               selectedIcon={form.getFieldValue('icon')}
             />
             
-            // 删除原来的Modal组件代码
         </div>
     );
 };

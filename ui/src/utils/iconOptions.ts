@@ -986,6 +986,21 @@ const iconOptions = [
         { value: 'fa-wheat-awn' },
         { value: 'fa-wheelchair' },
         { value: 'fa-wifi' },
+        { value: 'fa-wifi' },
+        { value: 'fa-wind' },
+        { value: 'fa-wine-bottle' },
+        { value: 'fa-wine-glass' },
+        { value: 'fa-won-sign' },
+        { value: 'fa-worm' },
+        { value: 'fa-wrench' },
+        { value: 'fa-x-ray' },
+        { value: 'fa-x' },
+        { value: 'fa-xmark' },
+        { value: 'fa-xmarks-lines' },
+        { value: 'fa-y' },
+        { value: 'fa-yen-sign' },
+        { value: 'fa-yin-yang' },
+        { value: 'fa-z' },
 ];
 
 export default iconOptions;

@@ -1,5 +1,7 @@
 .icon-picker-container {
   padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .icon-grid {
@@ -9,11 +11,12 @@
   margin-bottom: 20px;
   max-height: 400px;
   overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .icon-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 48px;
