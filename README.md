@@ -217,6 +217,9 @@ pnpm run build
 #### 编译调试后端
 
 ```bash
+#下载依赖
+go mod tidy
+#运行
 air
 #或者
 go run main.go 
