@@ -233,7 +233,9 @@ const MenuEditor: React.FC = () => {
                 setSelectedKey(newKey);
                 setEditMode('edit'); // 新增后切换到编辑模式
             } else if (editMode === 'edit' && selectedKey) {
-                setMenuData(updateMenuItem(menuData, selectedKey, { ...values, key: selectedKey }));
+                const existingItem = findMenuItem(menuData, selectedKey);
+                const newItem = { ...existingItem, ...values, key: selectedKey };
+                setMenuData(updateMenuItem(menuData, selectedKey, newItem));
                 message.success('保存成功');
             }
         });
