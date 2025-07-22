@@ -25,8 +25,8 @@
                             "type": "tabs",
                             "tabs": [
                                 {
-                                    "title": "飞书",
-                                    "key": "feishu",
+                                    "title": "飞书群",
+                                    "key": "feishu-group",
                                     "body": [
                                         {
                                             "type": "form",
@@ -52,13 +52,13 @@
                                                 {
                                                     "type": "input-url",
                                                     "name": "target_url",
-                                                    "label": "飞书URL",
+                                                    "label": "群机器人URL",
                                                     "required": true
                                                 },
                                                 {
                                                     "type": "input-text",
                                                     "name": "sign_secret",
-                                                    "label": "飞书签名密钥",
+                                                    "label": "群机器人签名密钥",
                                                     "required": true
                                                 },
                                                 {
