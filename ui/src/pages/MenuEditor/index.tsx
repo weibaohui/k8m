@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Select, InputNumber, message, Modal, Tree } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'; 
+import { Button, Form, Input, InputNumber, message, Modal, Select, Tree } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
 interface MenuItem {
@@ -17,37 +17,37 @@ const initialMenu: MenuItem[] = [
     {
         key: '1',
         title: '首页',
-        icon: 'home',
+        icon: 'fa-home',
         order: 1,
         children: [
             {
                 key: '1-1',
                 title: '仪表盘',
-                icon: 'dashboard',
+                icon: 'fa-tachometer-alt',
                 order: 1,
             },
             {
                 key: '1-2',
                 title: '项目管理',
-                icon: 'project',
+                icon: 'fa-project-diagram',
                 order: 2,
             },
             {
                 key: '1-3',
                 title: '设置',
-                icon: 'setting',
+                icon: 'fa-cog',
                 order: 3,
                 children: [
                     {
                         key: '1-3-1',
                         title: '用户设置',
-                        icon: 'user',
+                        icon: 'fa-user',
                         order: 1,
                     },
                     {
                         key: '1-3-2',
                         title: '权限设置',
-                        icon: 'safety',
+                        icon: 'fa-shield-alt',
                         order: 2,
                     },
                 ],
@@ -62,8 +62,9 @@ const MenuEditor: React.FC = () => {
     const [form] = Form.useForm();
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
     const [parentKey, setParentKey] = useState<string | null>(null);
+    const [showIconModal, setShowIconModal] = useState(false);
 
-    // 图标选项 - 改为Font Awesome图标类
+    // 图标选项 - Font Awesome图标类
     const iconOptions = [
         { value: 'fa-home', label: '首页' },
         { value: 'fa-tachometer-alt', label: '仪表盘' },
@@ -77,6 +78,12 @@ const MenuEditor: React.FC = () => {
         { value: 'fa-bell', label: '通知' },
         { value: 'fa-comment', label: '消息' },
     ];
+
+    // 处理图标选择
+    const handleIconSelect = (iconValue: string) => {
+        form.setFieldsValue({ icon: iconValue });
+        setShowIconModal(false);
+    };
 
     // 递归查找菜单项
     const findMenuItem = (data: MenuItem[], key: string): MenuItem | null => {
@@ -112,14 +119,13 @@ const MenuEditor: React.FC = () => {
         });
     };
 
-    // 递归添加菜单项，新增后自动展开父节点
+    // 递归添加菜单项
     const addMenuItem = (data: MenuItem[], parentKey: string | null, newItem: MenuItem): MenuItem[] => {
         if (!parentKey) {
             return [...data, newItem];
         }
         return data.map(item => {
             if (item.key === parentKey) {
-                // 新增后自动展开父节点
                 return { ...item, children: [...(item.children || []), newItem] };
             }
             if (item.children) {
@@ -136,12 +142,12 @@ const MenuEditor: React.FC = () => {
             const item = findMenuItem(menuData, selectedKeys[0] as string);
             if (item) {
                 form.setFieldsValue(item);
-                setEditMode('edit'); // 选中时切换到编辑模式
+                setEditMode('edit');
             }
         } else {
             setSelectedKey(null);
             form.resetFields();
-            setEditMode(null); // 取消选择时重置模式
+            setEditMode(null);
         }
     };
 
@@ -174,7 +180,8 @@ const MenuEditor: React.FC = () => {
             // 拖到节点内部
             loop(data, dropKey, (item) => {
                 item.children = item.children || [];
-                item.children.unshift(dragObj!);
+                item.children.push(dragObj!);
+                message.info(`已添加为 ${item.title} 的子菜单`);
             });
         } else if (
             (info.node.children || []).length > 0 && info.node.expanded && dropPosition === 1
@@ -182,7 +189,8 @@ const MenuEditor: React.FC = () => {
             // 拖到有子节点的节点底部
             loop(data, dropKey, (item) => {
                 item.children = item.children || [];
-                item.children.unshift(dragObj!);
+                item.children.push(dragObj!);
+                message.info(`已添加为 ${item.title} 的子菜单`);
             });
         } else {
             // 拖到节点之间
@@ -193,20 +201,21 @@ const MenuEditor: React.FC = () => {
                 i = idx;
             });
             ar.splice(dropPosition === -1 ? i! : i! + 1, 0, dragObj!);
+            message.info(`已添加为 ${info.node.title.props.children[1]} 的同级菜单`);
         }
         setMenuData(data);
     };
 
-    // 新增菜单项 - 修改为直接操作右侧表单
+    // 新增菜单项
     const handleAdd = (parentKey: string | null = null) => {
         setEditMode('add');
         setParentKey(parentKey);
-        setSelectedKey(null); // 清除选中状态
+        setSelectedKey(null);
         form.resetFields();
         form.setFieldsValue({ title: '', icon: '', url: '', eventType: 'url', order: 1 });
     };
 
-    // 编辑菜单项 - 修改为直接操作右侧表单
+    // 编辑菜单项
     const handleEdit = (key?: string) => {
         const editKey = key || selectedKey;
         if (!editKey) return;
@@ -236,7 +245,7 @@ const MenuEditor: React.FC = () => {
         });
     };
 
-    // 保存菜单项 - 修改为处理右侧表单
+    // 保存菜单项
     const handleSave = () => {
         form.validateFields().then(values => {
             if (editMode === 'add') {
@@ -245,7 +254,7 @@ const MenuEditor: React.FC = () => {
                 setMenuData(prev => addMenuItem(prev, parentKey, newItem));
                 message.success('添加成功');
                 setSelectedKey(newKey);
-                setEditMode('edit'); // 新增后切换到编辑模式
+                setEditMode('edit');
             } else if (editMode === 'edit' && selectedKey) {
                 const existingItem = findMenuItem(menuData, selectedKey);
                 const newItem = { ...existingItem, ...values, key: selectedKey };
@@ -300,28 +309,27 @@ const MenuEditor: React.FC = () => {
                         <Form
                             form={form}
                             layout="vertical"
-                            initialValues={{ title: '', eventType: 'url', order: 1 }} // 添加title初始值
+                            initialValues={{ title: '', eventType: 'url', order: 1 }}
                         >
                             <Form.Item label="菜单名称" name="title" rules={[
-                                { required: true, whitespace: true, message: '请输入菜单名称' } // 添加whitespace验证
+                                { required: true, whitespace: true, message: '请输入菜单名称' }
                             ]}>
                                 <Input />
                             </Form.Item>
                             <Form.Item label="图标" name="icon">
-                                <Select
-                                    placeholder="选择图标"
-                                    style={{ width: '100%' }}
-                                    optionFilterProp="label"
+                                <Button
+                                    type="primary"
+                                    onClick={() => setShowIconModal(true)}
+                                    style={{ width: '100%', justifyContent: 'space-between' }}
                                 >
-                                    {iconOptions.map(option => (
-                                        <Select.Option key={option.value} value={option.value} label={option.label}>
-                                            <span style={{ display: 'flex', alignItems: 'center' }}>
-                                                <i className={`fa-solid ${option.value}`} style={{ marginRight: '8px' }}></i>
-                                                {option.label}
-                                            </span>
-                                        </Select.Option>
-                                    ))}
-                                </Select>
+                                    {form.getFieldValue('icon') ? (
+                                        <span style={{ display: 'flex', alignItems: 'center' }}>
+                                            <i className={`fa-solid ${form.getFieldValue('icon')}`} style={{ marginRight: '8px' }}></i>
+                                        </span>
+                                    ) : (
+                                        '选择图标'
+                                    )}
+                                </Button>
                             </Form.Item>
                             <Form.Item label="URL" name="url"> <Input /> </Form.Item>
                             <Form.Item label="点击事件" name="eventType"> <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} /> </Form.Item>
@@ -338,6 +346,38 @@ const MenuEditor: React.FC = () => {
                     <div style={{ color: '#aaa', marginTop: 32 }}>请选择左侧菜单项进行编辑或点击"新增"按钮创建新菜单项</div>
                 )}
             </div>
+
+            {/* 图标选择弹窗 */}
+            <Modal
+                title="选择图标"
+                visible={showIconModal}
+                onCancel={() => setShowIconModal(false)}
+                footer={null}
+                width={600}
+            >
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '10px', padding: '10px' }}>
+                    {iconOptions.map(option => (
+                        <div
+                            key={option.value}
+                            onClick={() => handleIconSelect(option.value)}
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '20px',
+                                height: '20px',
+                                border: '1px solid #eee',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                backgroundColor: form.getFieldValue('icon') === option.value ? '#f0f7ff' : '#fff'
+                            }}
+                        >
+                            <i className={`fa-solid ${option.value}`} style={{ fontSize: '24px', marginBottom: '4px' }}></i>
+                        </div>
+                    ))}
+                </div>
+            </Modal>
         </div>
     );
 };
