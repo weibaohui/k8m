@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Tree, Button, Form, Input, Select, InputNumber, message, Modal } from 'antd'; // 移除 Modal 导入
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
+import DirectoryTree from 'antd/es/tree/DirectoryTree';
 
 interface MenuItem {
     key: string;
@@ -249,9 +250,9 @@ const MenuEditor: React.FC = () => {
                 <span>
                     {item.icon ? <span style={{ marginRight: 4 }}><i className={`anticon anticon-${item.icon}`} /></span> : null}
                     {item.title}
-                    <Button size="small" type="link" icon={<EditOutlined />} onClick={e => { e.stopPropagation(); handleEdit(item.key); }}>编辑</Button>
-                    <Button size="small" type="link" icon={<DeleteOutlined />} danger onClick={e => { e.stopPropagation(); handleDelete(item.key); }}>删除</Button>
-                    <Button size="small" type="link" icon={<PlusOutlined />} onClick={e => { e.stopPropagation(); handleAdd(item.key); }}>新增</Button>
+                    <Button size="small" type="link" icon={<EditOutlined />} onClick={e => { e.stopPropagation(); handleEdit(item.key); }} title="编辑" />
+                    <Button size="small" type="link" icon={<DeleteOutlined />} danger onClick={e => { e.stopPropagation(); handleDelete(item.key); }} title="删除" />
+                    <Button size="small" type="link" icon={<PlusOutlined />} onClick={e => { e.stopPropagation(); handleAdd(item.key); }} title="新增" />
                 </span>
             ),
             children: item.children ? convertToTreeData(item.children) : undefined,
@@ -264,14 +265,16 @@ const MenuEditor: React.FC = () => {
             <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
                 <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>菜单树</div>
                 <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd(null)} style={{ marginBottom: 12 }}>新增根菜单</Button>
-                <Tree
+                <DirectoryTree
                     treeData={convertToTreeData(menuData)}
                     defaultExpandAll
+                    showLine
                     selectedKeys={selectedKey ? [selectedKey] : []}
                     onSelect={onSelect}
                     draggable
                     onDrop={onDrop}
                     blockNode
+                    
                 />
             </div>
             {/* 右侧表单 */}
