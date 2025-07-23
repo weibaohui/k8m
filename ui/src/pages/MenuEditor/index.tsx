@@ -144,7 +144,15 @@ const MenuEditor: React.FC = () => {
             const item = findMenuItem(menuData, selectedKeys[0] as string);
             console.log("onSelect:", item);
             if (item) {
-                form.setFieldsValue(item);
+                form.resetFields();
+                const formValues = {
+                    title: item.title,
+                    icon: item.icon || '',
+                    url: item.url || '',
+                    eventType: item.eventType || 'url',
+                    order: item.order || 1
+                };
+                form.setFieldsValue(formValues);
                 setEditMode('edit');
             }
         } else {
@@ -228,7 +236,16 @@ const MenuEditor: React.FC = () => {
         const item = findMenuItem(menuData, editKey);
         console.log("handleEdit:", item);
         if (item) {
-            form.setFieldsValue(item);
+            // 先重置表单，然后设置有值的字段
+            form.resetFields();
+            const formValues = {
+                title: item.title,
+                icon: item.icon || '',
+                url: item.url || '',
+                eventType: item.eventType || 'url',
+                order: item.order || 1
+            };
+            form.setFieldsValue(formValues);
         }
     };
 
