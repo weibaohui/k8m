@@ -366,7 +366,7 @@ const MenuEditor: React.FC = () => {
                         <Form
                             form={form}
                             layout="vertical"
-                            initialValues={{ title: '', eventType: 'url', order: 1 }}
+                            // 移除静态initialValues
                         >
                             <Form.Item label="菜单名称" name="title" rules={[
                                 { required: true, whitespace: true, message: '请输入菜单名称' }
