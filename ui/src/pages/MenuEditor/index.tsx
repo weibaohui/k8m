@@ -65,8 +65,19 @@ const MenuEditor: React.FC = () => {
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
     const [parentKey, setParentKey] = useState<string | null>(null);
     const [showIconModal, setShowIconModal] = useState(false);
+    const [isPreview, setIsPreview] = useState(false);
 
-     
+    // 处理菜单项点击
+    const handleMenuClick = (key: string) => {
+        const item = findMenuItem(menuData, key);
+        if (item) {
+            if (item.eventType === 'url' && item.url) {
+                window.open(item.url, '_blank');
+            } else if (item.eventType === 'custom') {
+                message.info(`触发自定义事件: ${item.title}`);
+            }
+        }
+    };
 
     // 处理图标选择
     const handleIconSelect = (iconValue: string) => {
@@ -275,26 +286,79 @@ const MenuEditor: React.FC = () => {
         <div style={{ display: 'flex', height: '80vh', border: '1px solid #eee', borderRadius: 8, overflow: 'hidden' }}>
             {/* 左侧菜单树 */}
             <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
-                <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>菜单树</div>
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd(null)} style={{ marginBottom: 12 }}>新增根菜单</Button>
-                <Tree
-                    treeData={convertToTreeData(menuData)}
-                    defaultExpandAll
-                    showLine
-                    selectedKeys={selectedKey ? [selectedKey] : []}
-                    onSelect={onSelect}
-                    draggable
-                    onDrop={onDrop}
-                    blockNode
-                />
+                <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>
+                    菜单树
+                    <Button
+                        type={isPreview ? "primary" : "default"}
+                        onClick={() => setIsPreview(!isPreview)}
+                        style={{ marginLeft: 8, float: 'right' }}
+                    >
+                        {isPreview ? "返回编辑" : "预览"}
+                    </Button>
+                </div>
+                {!isPreview && (
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => handleAdd(null)}
+                        style={{ marginBottom: 12 }}
+                    >
+                        新增根菜单
+                    </Button>
+                )}
+                {isPreview ? (
+                    <Tree
+                        treeData={menuData.map(item => ({
+                            key: item.key,
+                            title: (
+                                <span onClick={() => handleMenuClick(item.key)}>
+                                    {item.icon && <i className={`fa-solid ${item.icon}`} style={{ marginRight: '4px' }}></i>}
+                                    {item.title}
+                                </span>
+                            ),
+                            children: item.children?.map(child => ({
+                                key: child.key,
+                                title: (
+                                    <span onClick={() => handleMenuClick(child.key)}>
+                                        {child.icon && <i className={`fa-solid ${child.icon}`} style={{ marginRight: '4px' }}></i>}
+                                        {child.title}
+                                    </span>
+                                ),
+                                children: child.children?.map(grandChild => ({
+                                    key: grandChild.key,
+                                    title: (
+                                        <span onClick={() => handleMenuClick(grandChild.key)}>
+                                            {grandChild.icon && <i className={`fa-solid ${grandChild.icon}`} style={{ marginRight: '4px' }}></i>}
+                                            {grandChild.title}
+                                        </span>
+                                    )
+                                }))
+                            }))
+                        }))}
+                        defaultExpandAll
+                        showLine
+                        blockNode
+                    />
+                ) : (
+                    <Tree
+                        treeData={convertToTreeData(menuData)}
+                        defaultExpandAll
+                        showLine
+                        selectedKeys={selectedKey ? [selectedKey] : []}
+                        onSelect={onSelect}
+                        draggable
+                        onDrop={onDrop}
+                        blockNode
+                    />
+                )}
             </div>
             {/* 右侧表单 */}
-            <div style={{ flex: 1, padding: 32 }}>
+            <div style={{ flex: 1, padding: 32, display: isPreview ? 'none' : 'block' }}>
                 <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
                     {editMode === 'add' ? '新增菜单项' : '菜单项编辑'}
                 </div>
                 {editMode || selectedKey ? (
-                    <> 
+                    <>
                         <Form
                             form={form}
                             layout="vertical"
@@ -337,12 +401,12 @@ const MenuEditor: React.FC = () => {
             </div>
 
             <IconPicker
-              visible={showIconModal}
-              onCancel={() => setShowIconModal(false)}
-              onSelect={handleIconSelect}
-              selectedIcon={form.getFieldValue('icon')}
+                visible={showIconModal}
+                onCancel={() => setShowIconModal(false)}
+                onSelect={handleIconSelect}
+                selectedIcon={form.getFieldValue('icon')}
             />
-            
+
         </div>
     );
 };
