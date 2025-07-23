@@ -142,6 +142,7 @@ const MenuEditor: React.FC = () => {
         if (selectedKeys.length > 0) {
             setSelectedKey(selectedKeys[0] as string);
             const item = findMenuItem(menuData, selectedKeys[0] as string);
+            console.log("onSelect:", item);
             if (item) {
                 form.setFieldsValue(item);
                 setEditMode('edit');
@@ -225,6 +226,7 @@ const MenuEditor: React.FC = () => {
         setParentKey(null);
         setSelectedKey(editKey);
         const item = findMenuItem(menuData, editKey);
+        console.log("handleEdit:", item);
         if (item) {
             form.setFieldsValue(item);
         }
