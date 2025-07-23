@@ -44,6 +44,8 @@ const initialMenu: MenuItem[] = [
                         key: '1-3-1',
                         title: '用户设置',
                         icon: 'fa-user',
+                        eventType: 'url',
+                        url: 'http://www.baidu.com',
                         order: 1,
                     },
                     {
