@@ -366,7 +366,6 @@ const MenuEditor: React.FC = () => {
                         <Form
                             form={form}
                             layout="vertical"
-                            // 移除静态initialValues
                         >
                             <Form.Item label="菜单名称" name="title" rules={[
                                 { required: true, whitespace: true, message: '请输入菜单名称' }
@@ -388,9 +387,15 @@ const MenuEditor: React.FC = () => {
                                     )}
                                 </Button>
                             </Form.Item>
-                            <Form.Item label="URL" name="url"> <Input /> </Form.Item>
-                            <Form.Item label="点击事件" name="eventType"> <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} /> </Form.Item>
-                            <Form.Item label="排序" name="order"> <InputNumber min={1} /> </Form.Item>
+                            <Form.Item label="URL" name="url">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="点击事件" name="eventType">
+                                <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
+                            </Form.Item>
+                            <Form.Item label="排序" name="order">
+                                <InputNumber min={1} />
+                            </Form.Item>
                         </Form>
                         <Button type="primary" onClick={handleSave} style={{ marginRight: 8 }}>保存</Button>
                         <Button onClick={() => {
