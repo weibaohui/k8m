@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button, Form, Input, InputNumber, message, Modal, Select, Tree } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
@@ -62,6 +62,9 @@ const initialMenu: MenuItem[] = [
 
 const MenuEditor: React.FC = () => {
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
+    const [history, setHistory] = useState<{ data: MenuItem[], time: string }[]>([]);
+    const [historyIndex, setHistoryIndex] = useState(-1);
+    const [showHistory, setShowHistory] = useState(false);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
@@ -227,6 +230,7 @@ const MenuEditor: React.FC = () => {
             });
         }
         setMenuData(data);
+        saveHistory(data);
     };
 
     // 新增菜单项
@@ -268,7 +272,9 @@ const MenuEditor: React.FC = () => {
         Modal.confirm({
             title: '确认删除该菜单项？',
             onOk: () => {
-                setMenuData(deleteMenuItem(menuData, delKey));
+                const newData = deleteMenuItem(menuData, delKey);
+                setMenuData(newData);
+                saveHistory(newData);
                 if (delKey === selectedKey) {
                     setSelectedKey(null);
                     form.resetFields();
@@ -284,14 +290,18 @@ const MenuEditor: React.FC = () => {
             if (editMode === 'add') {
                 const newKey = Date.now().toString();
                 const newItem: MenuItem = { ...values, key: newKey };
-                setMenuData(prev => addMenuItem(prev, parentKey, newItem));
+                const newData = addMenuItem(menuData, parentKey, newItem);
+                setMenuData(newData);
+                saveHistory(newData);
                 message.success('添加成功');
                 setSelectedKey(newKey);
                 setEditMode('edit');
             } else if (editMode === 'edit' && selectedKey) {
                 const existingItem = findMenuItem(menuData, selectedKey);
                 const newItem = { ...existingItem, ...values, key: selectedKey };
-                setMenuData(updateMenuItem(menuData, selectedKey, newItem));
+                const newData = updateMenuItem(menuData, selectedKey, newItem);
+                setMenuData(newData);
+                saveHistory(newData);
                 message.success('保存成功');
             }
             // 输出最终菜单JSON
@@ -317,12 +327,42 @@ const MenuEditor: React.FC = () => {
         }));
     };
 
+    // 保存历史记录
+    const saveHistory = (data: MenuItem[]) => {
+        const newHistory = [...history];
+        // 如果当前不是最新历史记录，则丢弃后面的记录
+        if (historyIndex < newHistory.length - 1) {
+            newHistory.splice(historyIndex + 1);
+        }
+        newHistory.push({
+            data: JSON.parse(JSON.stringify(data)), // 深拷贝
+            time: new Date().toLocaleString()
+        });
+        setHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+    };
+
+    // 恢复历史记录
+    const restoreHistory = (index: number) => {
+        if (index >= 0 && index < history.length) {
+            setMenuData(JSON.parse(JSON.stringify(history[index].data)));
+            setHistoryIndex(index);
+        }
+    };
+
     return (
         <div style={{ display: 'flex', height: '80vh', border: '1px solid #eee', borderRadius: 8, overflow: 'hidden' }}>
             {/* 左侧菜单树 */}
             <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
                 <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>
                     菜单树
+                    <Button
+                        type={showHistory ? "primary" : "default"}
+                        onClick={() => setShowHistory(!showHistory)}
+                        style={{ marginLeft: 8, float: 'right' }}
+                    >
+                        历史记录
+                    </Button>
                     <Button
                         type={isPreview ? "primary" : "default"}
                         onClick={() => setIsPreview(!isPreview)}
@@ -392,6 +432,60 @@ const MenuEditor: React.FC = () => {
                 <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
                     {editMode === 'add' ? '新增菜单项' : '菜单项编辑'}
                 </div>
+
+                {/* 历史记录面板 */}
+                <Modal
+                    title="菜单修改历史"
+                    visible={showHistory}
+                    onCancel={() => setShowHistory(false)}
+                    footer={null}
+                    width={800}
+                >
+                    <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#f0f0f0' }}>
+                                    <th style={{ padding: '8px', border: '1px solid #ddd' }}>时间</th>
+                                    <th style={{ padding: '8px', border: '1px solid #ddd' }}>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {history.map((record, index) => (
+                                    <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
+                                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.time}</td>
+                                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                                            <Button
+                                                type="link"
+                                                onClick={() => {
+                                                    restoreHistory(index);
+                                                    setShowHistory(false);
+                                                }}
+                                            >
+                                                恢复到此版本
+                                            </Button>
+                                            <Button
+                                                type="link"
+                                                onClick={() => {
+                                                    Modal.info({
+                                                        title: '菜单数据',
+                                                        content: (
+                                                            <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
+                                                                {JSON.stringify(record.data, null, 2)}
+                                                            </pre>
+                                                        ),
+                                                        width: 800,
+                                                    });
+                                                }}
+                                            >
+                                                查看JSON
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </Modal>
                 {editMode || selectedKey ? (
                     <>
                         <Form
