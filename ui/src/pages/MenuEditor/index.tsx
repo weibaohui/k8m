@@ -192,7 +192,7 @@ const MenuEditor: React.FC = () => {
             loop(data, dropKey, (item) => {
                 item.children = item.children || [];
                 item.children.push(dragObj!);
-                message.info(`已添加为 ${item.title} 的子菜单`);
+                message.info(`已经将 ${dragObj!.title} 添加为 ${item.title} 的子菜单`);
             });
         } else if (
             (info.node.children || []).length > 0 && info.node.expanded && dropPosition === 1
@@ -201,7 +201,7 @@ const MenuEditor: React.FC = () => {
             loop(data, dropKey, (item) => {
                 item.children = item.children || [];
                 item.children.push(dragObj!);
-                message.info(`已添加为 ${item.title} 的子菜单`);
+                message.info(`已经将 ${dragObj!.title} 添加为 ${item.title} 的子菜单`);
             });
         } else {
             // 拖到节点之间
@@ -212,7 +212,7 @@ const MenuEditor: React.FC = () => {
                 i = idx;
             });
             ar.splice(dropPosition === -1 ? i! : i! + 1, 0, dragObj!);
-            message.info(`已添加为 ${info.node.title.props.children[1]} 的同级菜单`);
+            message.info(`已经将 ${dragObj!.title} 添加为 ${info.node.title.props.children[1]} 的同级菜单`);
         }
         setMenuData(data);
     };
