@@ -282,6 +282,8 @@ const MenuEditor: React.FC = () => {
                 setMenuData(updateMenuItem(menuData, selectedKey, newItem));
                 message.success('保存成功');
             }
+            // 输出最终菜单JSON
+            console.log("Final Menu JSON:", JSON.stringify(menuData, null, 2));
         });
     };
 
