@@ -6,6 +6,8 @@ import type { DataNode } from 'antd/es/tree';
 import IconPicker from '@/components/IconPicker';
 import MenuPreviewTree from '@/pages/MenuEditor/MenuPreviewTree';
 import { MenuItem } from '@/types/menu';
+import { Custom } from 'amis/lib/renderers/Custom';
+import CustomEventTags from './CustomEventTags';
 
 const initialMenu: MenuItem[] = [
     {
@@ -66,16 +68,7 @@ const MenuEditor: React.FC = () => {
     // 在组件顶部添加useState来跟踪当前的事件类型
     const [currentEventType, setCurrentEventType] = useState<'url' | 'custom'>('url');
 
-    // 初始化和管理自定义标签
-    const [customTags, setCustomTags] = useState<Array<{ label: string, value: string }>>(() => {
-        try {
-            const savedTags = localStorage.getItem('menuCustomTags');
-            return savedTags ? JSON.parse(savedTags) : [];
-        } catch (e) {
-            console.error('Failed to load custom tags:', e);
-            return [];
-        }
-    });
+    // 不再需要在这里管理customTags状态
 
     // eventType 的变化现在直接通过 Select 的 onChange 处理
     useEffect(() => {
@@ -587,69 +580,11 @@ const MenuEditor: React.FC = () => {
                         )}
 
                         {currentEventType === 'custom' && (
-                            <Form.Item label="自定义事件代码" name="customEvent" rules={[
+                            <Form.Item label="自定义事件代码" rules={[
                                 { required: true, message: '请输入自定义事件代码' }
                             ]}>
                                 <>
-                                    <div style={{ marginBottom: 8 }}>
-                                        <span style={{ marginRight: 8, color: '#666' }}>快捷输入:</span>
-                                        <Space size={[4, 8]} wrap>
-                                            {[
-                                                { label: '页面跳转', value: '() => onMenuClick(\'/cluster/ns\')' },
-                                                { label: '刷新页面', value: '() => window.location.reload()' },
-                                                { label: '控制台日志', value: '() => console.log(\'菜单点击\')' },
-                                                ...customTags
-                                            ].map((tag, index) => (
-                                                <Tag
-                                                    key={index}
-                                                    color="blue"
-                                                    style={{ cursor: 'pointer' }}
-                                                    onClick={() => form.setFieldsValue({ customEvent: tag.value })}
-                                                >
-                                                    {tag.label}
-                                                </Tag>
-                                            ))}
-                                        </Space>
-                                        <Button
-                                            type="link"
-                                            size="small"
-                                            style={{ padding: '2px 8px' }}
-                                            onClick={() => {
-                                                const currentValue = form.getFieldValue('customEvent');
-                                                Modal.confirm({
-                                                    title: '保存为快捷输入',
-                                                    content: (
-                                                        <Space.Compact>
-                                                            <Input
-                                                                style={{ width: '30%' }}
-                                                                placeholder="输入标签名"
-                                                                id="tagLabel"
-                                                            />
-                                                            <Input
-                                                                style={{ width: '70%' }}
-                                                                defaultValue={currentValue}
-                                                                placeholder="输入代码"
-                                                                id="tagValue"
-                                                            />
-                                                        </Space.Compact>
-                                                    ),
-                                                    onOk: () => {
-                                                        // 这里可以保存新的快捷输入到本地存储
-                                                        const label = (document.getElementById('tagLabel') as HTMLInputElement)?.value;
-                                                        const value = (document.getElementById('tagValue') as HTMLInputElement)?.value;
-                                                        if (label && value) {
-                                                            const newCustomTags = [...customTags, { label, value }];
-                                                            setCustomTags(newCustomTags);
-                                                            localStorage.setItem('menuCustomTags', JSON.stringify(newCustomTags));
-                                                            message.success('保存成功');
-                                                        }
-                                                    }
-                                                });
-                                            }}
-                                        >
-                                            +添加快捷输入
-                                        </Button>
-                                    </div>
+                                    <CustomEventTags onChange={(value) => form.setFieldsValue({ customEvent: value })} />
                                     <Form.Item noStyle name="customEvent">
                                         <Input.TextArea rows={4} placeholder="请输入自定义事件代码" />
                                     </Form.Item>
