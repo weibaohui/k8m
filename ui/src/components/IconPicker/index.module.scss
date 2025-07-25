@@ -1,0 +1,46 @@
+.icon-picker-container {
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.icon-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 24px;
+
+  &:hover {
+    background-color: #f0f7ff;
+    border-color: #1890ff;
+  }
+
+  &.selected {
+    background-color: #e6f7ff;
+    border-color: #1890ff;
+    color: #1890ff;
+  }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
