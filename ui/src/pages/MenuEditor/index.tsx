@@ -411,7 +411,7 @@ const MenuEditor: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {history.map((record, index) => (
+                                {[...history].reverse().map((record, index) => (
                                     <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
                                         <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.time}</td>
                                         <td style={{ padding: '8px', border: '1px solid #ddd' }}>
@@ -516,3 +516,4 @@ const MenuEditor: React.FC = () => {
 };
 
 export default MenuEditor;
+
