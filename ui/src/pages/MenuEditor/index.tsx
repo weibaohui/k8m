@@ -82,11 +82,11 @@ const MenuEditor: React.FC = () => {
                         },
                         message
                     };
-                    
+
                     // 构建并执行自定义函数
                     const func = new Function(...Object.keys(context), `return ${item.customEvent}`);
                     const result = func(...Object.values(context));
-                    
+
                     // 如果是函数，执行它
                     if (typeof result === 'function') {
                         result();
@@ -269,16 +269,16 @@ const MenuEditor: React.FC = () => {
         // 修改处理表单值的地方，确保customEvent字段被正确处理
         // 在handleEdit函数中
         if (item) {
-        form.resetFields();
-        const formValues = {
-        title: item.title,
-        icon: item.icon || '',
-        url: item.url || '',
-        eventType: item.eventType || 'url',
-        customEvent: item.customEvent || '',
-        order: item.order || 1
-        };
-        form.setFieldsValue(formValues);
+            form.resetFields();
+            const formValues = {
+                title: item.title,
+                icon: item.icon || '',
+                url: item.url || '',
+                eventType: item.eventType || 'url',
+                customEvent: item.customEvent || '',
+                order: item.order || 1
+            };
+            form.setFieldsValue(formValues);
         }
     };
 
@@ -508,18 +508,18 @@ const MenuEditor: React.FC = () => {
                                     )}
                                 </Button>
                             </Form.Item>
-                            
+
                             <Form.Item label="点击事件" name="eventType">
                                 <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
                             </Form.Item>
-                            
+
                             {/* 条件渲染URL输入框 */}
                             {form.getFieldValue('eventType') === 'url' && (
                                 <Form.Item label="URL" name="url">
                                     <Input />
                                 </Form.Item>
                             )}
-                            
+
                             {/* 条件渲染自定义事件代码输入框 */}
                             {form.getFieldValue('eventType') === 'custom' && (
                                 <Form.Item label="自定义事件代码" name="customEvent" rules={[
@@ -528,7 +528,7 @@ const MenuEditor: React.FC = () => {
                                     <Input.TextArea rows={4} placeholder="例如: () => onMenuClick('/cluster/ns')" />
                                 </Form.Item>
                             )}
-                            
+
                             <Form.Item label="排序" name="order">
                                 <InputNumber min={1} />
                             </Form.Item>
