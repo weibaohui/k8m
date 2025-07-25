@@ -362,61 +362,88 @@ const MenuEditor: React.FC = () => {
     };
 
     return (
-        <div style={{ display: 'flex', height: '80vh', border: '1px solid #eee', borderRadius: 8, overflow: 'hidden' }}>
-            {/* 左侧菜单树 */}
-            <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
-                <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>
-                    菜单树
-                    <Button
-                        type={showHistory ? "primary" : "default"}
-                        onClick={() => setShowHistory(!showHistory)}
-                        style={{ marginLeft: 8, float: 'right' }}
-                    >
-                        历史记录
-                    </Button>
-                    <Button
-                        type={isPreview ? "primary" : "default"}
-                        onClick={() => setIsPreview(!isPreview)}
-                        style={{ marginLeft: 8, float: 'right' }}
-                    >
-                        {isPreview ? "返回编辑" : "预览"}
-                    </Button>
+        <>
+            <div style={{ display: 'flex', height: '80vh', border: '1px solid #eee', borderRadius: 8, overflow: 'hidden' }}>
+                {/* 左侧菜单树 */}
+                <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
+                    <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>
+                        菜单树
+                        <Button
+                            type={showHistory ? "primary" : "default"}
+                            onClick={() => setShowHistory(!showHistory)}
+                            style={{ marginLeft: 8, float: 'right' }}
+                        >
+                            历史记录
+                        </Button>
+                        <Button
+                            type={isPreview ? "primary" : "default"}
+                            onClick={() => setIsPreview(!isPreview)}
+                            style={{ marginLeft: 8, float: 'right' }}
+                        >
+                            {isPreview ? "返回编辑" : "预览"}
+                        </Button>
+                    </div>
+                    {!isPreview && (
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => handleAdd(null)}
+                            style={{ marginBottom: 12 }}
+                        >
+                            新增根菜单
+                        </Button>
+                    )}
+                    {isPreview ? (
+                        <MenuPreviewTree menuData={menuData} onMenuClick={handleMenuClick} />
+                    ) : (
+                        <Tree
+                            treeData={convertToTreeData(menuData)}
+                            defaultExpandAll
+                            showLine
+                            selectedKeys={selectedKey ? [selectedKey] : []}
+                            onSelect={onSelect}
+                            draggable
+                            onDrop={onDrop}
+                            blockNode
+                        />
+                    )}
                 </div>
-                {!isPreview && (
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => handleAdd(null)}
-                        style={{ marginBottom: 12 }}
-                    >
-                        新增根菜单
-                    </Button>
-                )}
-                {isPreview ? (
-                    <MenuPreviewTree menuData={menuData} onMenuClick={handleMenuClick} />
-                ) : (
-                    <Tree
-                        treeData={convertToTreeData(menuData)}
-                        defaultExpandAll
-                        showLine
-                        selectedKeys={selectedKey ? [selectedKey] : []}
-                        onSelect={onSelect}
-                        draggable
-                        onDrop={onDrop}
-                        blockNode
-                    />
-                )}
-            </div>
-            {/* 右侧表单 */}
-            <div style={{ flex: 1, padding: 32, display: isPreview ? 'none' : 'block' }}>
-                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
-                    {editMode === 'add' ? '新增菜单项' : '菜单项编辑'}
+                {/* 右侧使用说明面板 */}
+                <div style={{ flex: 1, padding: 32, display: isPreview ? 'none' : 'block' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
+                        使用说明
+                    </div>
+                    <div style={{ color: '#666', lineHeight: '1.8' }}>
+                        <h3>基本操作：</h3>
+                        <ul>
+                            <li>点击"新增根菜单"按钮可以在顶层添加菜单项</li>
+                            <li>点击菜单项后的<EditOutlined />图标可以编辑该菜单</li>
+                            <li>点击菜单项后的<DeleteOutlined />图标可以删除该菜单</li>
+                            <li>点击菜单项后的<PlusOutlined />图标可以添加子菜单</li>
+                        </ul>
+
+                        <h3>高级功能：</h3>
+                        <ul>
+                            <li>支持拖拽排序：直接拖动菜单项可以调整顺序或层级</li>
+                            <li>支持两种菜单动作：URL跳转和自定义事件</li>
+                            <li>历史记录：点击右上角"历史记录"按钮可以查看和恢复历史版本</li>
+                            <li>预览模式：点击右上角"预览"按钮可以预览实际效果</li>
+                        </ul>
+
+                        <h3>菜单配置说明：</h3>
+                        <ul>
+                            <li>图标：支持 Font Awesome 图标</li>
+                            <li>URL跳转：直接填写目标URL地址</li>
+                            <li>自定义事件：可以编写 JavaScript 代码实现复杂交互</li>
+                            <li>排序号：决定同级菜单的显示顺序</li>
+                        </ul>
+                    </div>
                 </div>
 
                 {/* 历史记录面板 */}
                 <Modal
                     title="菜单修改历史"
-                    visible={showHistory}
+                    open={showHistory}
                     onCancel={() => setShowHistory(false)}
                     footer={null}
                     width={800}
@@ -475,68 +502,77 @@ const MenuEditor: React.FC = () => {
                         </table>
                     </div>
                 </Modal>
-                {editMode || selectedKey ? (
-                    <>
-                        {/*  修改表单部分，添加自定义事件代码输入框 */}
-                        <Form
-                            form={form}
-                            layout="vertical"
-                        >
-                            <Form.Item label="菜单名称" name="title" rules={[
-                                { required: true, whitespace: true, message: '请输入菜单名称' }
-                            ]}>
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label="图标" name="icon">
-                                <Button
-                                    type="primary"
-                                    onClick={() => setShowIconModal(true)}
-                                    style={{ width: '100%', justifyContent: 'space-between' }}
-                                >
-                                    {form.getFieldValue('icon') ? (
-                                        <span style={{ display: 'flex', alignItems: 'center' }}>
-                                            <i className={`fa-solid ${form.getFieldValue('icon')}`} style={{ marginRight: '8px' }}></i>
-                                        </span>
-                                    ) : (
-                                        '选择图标'
-                                    )}
-                                </Button>
-                            </Form.Item>
 
-                            {/* 修改表单中的条件渲染部分 */}
-                            <Form.Item label="点击事件" name="eventType">
-                                <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
-                            </Form.Item>
-
-                            {/* 使用currentEventType状态来条件渲染 */}
-                            {currentEventType === 'url' && (
-                                <Form.Item label="URL" name="url">
-                                    <Input />
-                                </Form.Item>
-                            )}
-
-                            {currentEventType === 'custom' && (
-                                <Form.Item label="自定义事件代码" name="customEvent" rules={[
-                                    { required: true, message: '请输入自定义事件代码' }
-                                ]}>
-                                    <Input.TextArea rows={4} placeholder="例如: () => onMenuClick('/cluster/ns')" />
-                                </Form.Item>
-                            )}
-
-                            <Form.Item label="排序" name="order">
-                                <InputNumber min={1} />
-                            </Form.Item>
-                        </Form>
-                        <Button type="primary" onClick={handleSave} style={{ marginRight: 8 }}>保存</Button>
-                        <Button onClick={() => {
+                {/* 编辑表单弹窗 */}
+                <Modal
+                    title={editMode === 'add' ? '新增菜单项' : '编辑菜单项'}
+                    open={!!editMode}
+                    onCancel={() => {
+                        setEditMode(null);
+                        setSelectedKey(null);
+                        form.resetFields();
+                    }}
+                    footer={[
+                        <Button key="cancel" onClick={() => {
+                            setEditMode(null);
                             setSelectedKey(null);
                             form.resetFields();
-                            setEditMode(null);
-                        }}>取消</Button>
-                    </>
-                ) : (
-                    <div style={{ color: '#aaa', marginTop: 32 }}>请选择左侧菜单项进行编辑或点击"新增"按钮创建新菜单项</div>
-                )}
+                        }}>
+                            取消
+                        </Button>,
+                        <Button key="submit" type="primary" onClick={handleSave}>
+                            保存
+                        </Button>
+                    ]}
+                >
+                    <Form
+                        form={form}
+                        layout="vertical"
+                    >
+                        <Form.Item label="菜单名称" name="title" rules={[
+                            { required: true, whitespace: true, message: '请输入菜单名称' }
+                        ]}>
+                            <Input />
+                        </Form.Item>
+                        <Form.Item label="图标" name="icon">
+                            <Button
+                                type="primary"
+                                onClick={() => setShowIconModal(true)}
+                                style={{ width: '100%', justifyContent: 'space-between' }}
+                            >
+                                {form.getFieldValue('icon') ? (
+                                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                                        <i className={`fa-solid ${form.getFieldValue('icon')}`} style={{ marginRight: '8px' }}></i>
+                                    </span>
+                                ) : (
+                                    '选择图标'
+                                )}
+                            </Button>
+                        </Form.Item>
+
+                        <Form.Item label="点击事件" name="eventType">
+                            <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
+                        </Form.Item>
+
+                        {currentEventType === 'url' && (
+                            <Form.Item label="URL" name="url">
+                                <Input />
+                            </Form.Item>
+                        )}
+
+                        {currentEventType === 'custom' && (
+                            <Form.Item label="自定义事件代码" name="customEvent" rules={[
+                                { required: true, message: '请输入自定义事件代码' }
+                            ]}>
+                                <Input.TextArea rows={4} placeholder="例如: () => onMenuClick('/cluster/ns')" />
+                            </Form.Item>
+                        )}
+
+                        <Form.Item label="排序" name="order">
+                            <InputNumber min={1} />
+                        </Form.Item>
+                    </Form>
+                </Modal>
             </div>
 
             <IconPicker
@@ -546,7 +582,7 @@ const MenuEditor: React.FC = () => {
                 selectedIcon={form.getFieldValue('icon')}
             />
 
-        </div>
+        </>
     );
 };
 
