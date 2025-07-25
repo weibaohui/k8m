@@ -166,26 +166,11 @@ const MenuEditor: React.FC = () => {
 
     // 处理菜单树选择
     const onSelect = (selectedKeys: React.Key[]) => {
+        // 仅设置选中项，不触发编辑模式
         if (selectedKeys.length > 0) {
             setSelectedKey(selectedKeys[0] as string);
-            const item = findMenuItem(menuData, selectedKeys[0] as string);
-            console.log("onSelect:", item);
-            if (item) {
-                form.resetFields();
-                const formValues = {
-                    title: item.title,
-                    icon: item.icon || '',
-                    url: item.url || '',
-                    eventType: item.eventType || 'url',
-                    order: item.order || 1
-                };
-                form.setFieldsValue(formValues);
-                setEditMode('edit');
-            }
         } else {
             setSelectedKey(null);
-            form.resetFields();
-            setEditMode(null);
         }
     };
 
@@ -270,13 +255,12 @@ const MenuEditor: React.FC = () => {
     const handleEdit = (key?: string) => {
         const editKey = key || selectedKey;
         if (!editKey) return;
+
         setEditMode('edit');
         setParentKey(null);
         setSelectedKey(editKey);
+
         const item = findMenuItem(menuData, editKey);
-        console.log("handleEdit:", item);
-        // 修改处理表单值的地方，确保customEvent字段被正确处理
-        // 在handleEdit函数中
         if (item) {
             form.resetFields();
             const formValues = {
@@ -288,12 +272,8 @@ const MenuEditor: React.FC = () => {
                 order: item.order || 1
             };
             form.setFieldsValue(formValues);
-            setCurrentEventType(formValues.eventType); // 更新状态
+            setCurrentEventType(formValues.eventType);
         }
-
-        // 在handleAdd函数中
-        form.setFieldsValue({ title: '', icon: '', url: '', eventType: 'url', customEvent: '', order: 1 });
-        setCurrentEventType('url'); // 更新状态
     };
 
     // 删除菜单项
