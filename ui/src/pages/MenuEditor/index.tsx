@@ -316,7 +316,6 @@ const MenuEditor: React.FC = () => {
                 saveHistory(newData);
                 message.success('添加成功');
                 setSelectedKey(newKey);
-                setEditMode('edit');
             } else if (editMode === 'edit' && selectedKey) {
                 const existingItem = findMenuItem(menuData, selectedKey);
                 const newItem = { ...existingItem, ...values, key: selectedKey };
@@ -325,6 +324,9 @@ const MenuEditor: React.FC = () => {
                 saveHistory(newData);
                 message.success('保存成功');
             }
+            // 关闭Modal并重置表单
+            setEditMode(null);
+            form.resetFields();
             // 输出最终菜单JSON
             console.log("Final Menu JSON:", JSON.stringify(menuData, null, 2));
         });
