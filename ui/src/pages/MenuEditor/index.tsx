@@ -65,6 +65,25 @@ const MenuEditor: React.FC = () => {
     const [isPreview, setIsPreview] = useState(false);
     // 在组件顶部添加useState来跟踪当前的事件类型
     const [currentEventType, setCurrentEventType] = useState<'url' | 'custom'>('url');
+    const [customTags, setCustomTags] = useState<Array<{ label: string, value: string }>>(() => {
+        try {
+            return JSON.parse(localStorage.getItem('menuCustomTags') || '[]');
+        } catch {
+            return [];
+        }
+    });
+
+    // 加载自定义标签
+    useEffect(() => {
+        const tags = localStorage.getItem('menuCustomTags');
+        if (tags) {
+            try {
+                setCustomTags(JSON.parse(tags));
+            } catch (e) {
+                console.error('Failed to load custom tags:', e);
+            }
+        }
+    }, []);
 
     // eventType 的变化现在直接通过 Select 的 onChange 处理
     useEffect(() => {
@@ -559,7 +578,7 @@ const MenuEditor: React.FC = () => {
 
                         <Form.Item label="点击事件" name="eventType" initialValue="url">
                             <Select
-                                style={{ zIndex: 100000 }}
+                                style={{ zIndex: 1000000 }}
                                 defaultValue="url"
                                 options={[
                                     { label: 'URL跳转', value: 'url' },
@@ -579,7 +598,69 @@ const MenuEditor: React.FC = () => {
                             <Form.Item label="自定义事件代码" name="customEvent" rules={[
                                 { required: true, message: '请输入自定义事件代码' }
                             ]}>
-                                <Input.TextArea rows={4} placeholder="例如: () => onMenuClick('/cluster/ns')" />
+                                <>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <span style={{ marginRight: 8, color: '#666' }}>快捷输入:</span>
+                                        {[
+                                            { label: '页面跳转', value: '() => onMenuClick(\'/cluster/ns\')' },
+                                            { label: '刷新页面', value: '() => window.location.reload()' },
+                                            { label: '控制台日志', value: '() => console.log(\'菜单点击\')' },
+                                            ...customTags
+                                        ].map((tag, index) => (
+                                            <Button
+                                                key={index}
+                                                type="link"
+                                                size="small"
+                                                style={{ padding: '2px 8px' }}
+                                                onClick={() => form.setFieldsValue({ customEvent: tag.value })}
+                                            >
+                                                {tag.label}
+                                            </Button>
+                                        ))}
+                                        <Button
+                                            type="link"
+                                            size="small"
+                                            style={{ padding: '2px 8px' }}
+                                            onClick={() => {
+                                                const currentValue = form.getFieldValue('customEvent');
+                                                Modal.confirm({
+                                                    title: '保存为快捷输入',
+                                                    content: (
+                                                        <Input.Group compact>
+                                                            <Input
+                                                                style={{ width: '30%' }}
+                                                                placeholder="输入标签名"
+                                                                id="tagLabel"
+                                                            />
+                                                            <Input
+                                                                style={{ width: '70%' }}
+                                                                defaultValue={currentValue}
+                                                                placeholder="输入代码"
+                                                                id="tagValue"
+                                                            />
+                                                        </Input.Group>
+                                                    ),
+                                                    onOk: () => {
+                                                        // 这里可以保存新的快捷输入到本地存储
+                                                        const label = (document.getElementById('tagLabel') as HTMLInputElement)?.value;
+                                                        const value = (document.getElementById('tagValue') as HTMLInputElement)?.value;
+                                                        if (label && value) {
+                                                            const customTags = JSON.parse(localStorage.getItem('menuCustomTags') || '[]');
+                                                            customTags.push({ label, value });
+                                                            localStorage.setItem('menuCustomTags', JSON.stringify(customTags));
+                                                            message.success('保存成功');
+                                                        }
+                                                    }
+                                                });
+                                            }}
+                                        >
+                                            +添加快捷输入
+                                        </Button>
+                                    </div>
+                                    <Form.Item noStyle name="customEvent">
+                                        <Input.TextArea rows={4} placeholder="请输入自定义事件代码" />
+                                    </Form.Item>
+                                </>
                             </Form.Item>
                         )}
 
