@@ -431,7 +431,7 @@ const MenuEditor: React.FC = () => {
                                                         title: '菜单预览',
                                                         content: (
                                                             <div>
-                                                                <MenuPreviewTree menuData={record.data} />
+                                                                <MenuPreviewTree menuData={record.data} onMenuClick={handleMenuClick} />
                                                                 <div style={{ marginTop: 16 }}>
                                                                     <pre style={{ maxHeight: '200px', overflow: 'auto' }}>
                                                                         {JSON.stringify(record.data, null, 2)}
