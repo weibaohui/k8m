@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Tree } from 'antd';
+import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
@@ -431,12 +431,16 @@ const MenuEditor: React.FC = () => {
                                                         title: '菜单预览',
                                                         content: (
                                                             <div>
-                                                                <MenuPreviewTree menuData={record.data} onMenuClick={handleMenuClick} />
-                                                                <div style={{ marginTop: 16 }}>
-                                                                    <pre style={{ maxHeight: '200px', overflow: 'auto' }}>
-                                                                        {JSON.stringify(record.data, null, 2)}
-                                                                    </pre>
-                                                                </div>
+                                                                <Tabs defaultActiveKey="1">
+                                                                    <Tabs.TabPane tab="菜单JSON配置" key="1">
+                                                                        <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
+                                                                            {JSON.stringify(record.data, null, 2)}
+                                                                        </pre>
+                                                                    </Tabs.TabPane>
+                                                                    <Tabs.TabPane tab="菜单预览" key="2">
+                                                                        <MenuPreviewTree menuData={record.data} onMenuClick={handleMenuClick} />
+                                                                    </Tabs.TabPane>
+                                                                </Tabs>
                                                             </div>
                                                         ),
                                                         width: 800,
