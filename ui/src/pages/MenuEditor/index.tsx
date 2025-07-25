@@ -559,7 +559,7 @@ const MenuEditor: React.FC = () => {
 
                         <Form.Item label="点击事件" name="eventType" initialValue="url">
                             <Select
-                                style={{ width: '100%' }}
+                                style={{ zIndex: 100000 }}
                                 defaultValue="url"
                                 options={[
                                     { label: 'URL跳转', value: 'url' },
