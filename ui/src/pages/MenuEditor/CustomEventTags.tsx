@@ -57,16 +57,43 @@ const CustomEventTags: React.FC<CustomEventTagsProps> = ({ value, onChange }) =>
         });
     };
 
+    // 处理删除自定义标签
+    const handleDeleteTag = (index: number) => {
+        const newCustomTags = customTags.filter((_, i) => i !== index);
+        setCustomTags(newCustomTags);
+        localStorage.setItem('menuCustomTags', JSON.stringify(newCustomTags));
+        message.success('删除成功');
+    };
+
     return (
         <div style={{ marginBottom: 8 }}>
             <span style={{ marginRight: 8, color: '#666' }}>快捷输入:</span>
             <Space size={[4, 8]} wrap>
-                {[...defaultTags, ...customTags].map((tag, index) => (
+                {/* 默认标签 */}
+                {defaultTags.map((tag, index) => (
                     <Tag
-                        key={index}
+                        key={`default-${index}`}
                         color="blue"
                         style={{ cursor: 'pointer' }}
                         onClick={() => onChange?.(tag.value)}
+                    >
+                        {tag.label}
+                    </Tag>
+                ))}
+                {/* 自定义标签 */}
+                {customTags.map((tag, index) => (
+                    <Tag
+                        key={`custom-${index}`}
+                        color="blue"
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => {
+                            // 防止点击关闭按钮时触发 tag 的点击事件
+                            if ((e.target as HTMLElement).tagName.toLowerCase() !== 'svg') {
+                                onChange?.(tag.value);
+                            }
+                        }}
+                        closable
+                        onClose={() => handleDeleteTag(index)}
                     >
                         {tag.label}
                     </Tag>
