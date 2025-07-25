@@ -64,10 +64,8 @@ const MenuEditor: React.FC = () => {
     const [parentKey, setParentKey] = useState<string | null>(null);
     const [showIconModal, setShowIconModal] = useState(false);
     const [isPreview, setIsPreview] = useState(false);
-    // 在组件顶部添加useState来跟踪当前的事件类型
     const [currentEventType, setCurrentEventType] = useState<'url' | 'custom'>('url');
 
-    // 不再需要在这里管理customTags状态
 
     // eventType 的变化现在直接通过 Select 的 onChange 处理
     useEffect(() => {
@@ -76,8 +74,6 @@ const MenuEditor: React.FC = () => {
         setCurrentEventType(initialEventType || 'url');
     }, [form]);
 
-    // 处理菜单项点击
-    // 修改handleMenuClick函数，使其能够执行自定义事件代码
     const handleMenuClick = (key: string) => {
         const item = findMenuItem(menuData, key);
         if (item) {
