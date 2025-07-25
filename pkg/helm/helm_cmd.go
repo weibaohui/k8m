@@ -112,7 +112,7 @@ func NewHelmCmdWithNoCluster(helmBin string) *HelmCmd {
 
 // runAndLog 执行 helm 命令并输出日志，支持 shell 特性和可选 stdin
 func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
-
+	args = slice.InsertAt(args, 0, "--debug")
 	if h.cluster != nil && h.cluster.IsInCluster {
 		accessArgs := []string{
 			"--kube-token", h.token,
