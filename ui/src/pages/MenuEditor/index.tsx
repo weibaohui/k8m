@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
@@ -63,6 +63,15 @@ const MenuEditor: React.FC = () => {
     const [parentKey, setParentKey] = useState<string | null>(null);
     const [showIconModal, setShowIconModal] = useState(false);
     const [isPreview, setIsPreview] = useState(false);
+    // 在组件顶部添加useState来跟踪当前的事件类型
+    const [currentEventType, setCurrentEventType] = useState<'url' | 'custom'>('url');
+
+    // 使用Form.useWatch来监听eventType字段的变化
+    // 使用 Form.useWatch 监听 eventType 字段变化
+    const eventType = Form.useWatch('eventType', form);
+    useEffect(() => {
+        setCurrentEventType(eventType || 'url');
+    }, [eventType]);
 
     // 处理菜单项点击
     // 修改handleMenuClick函数，使其能够执行自定义事件代码
@@ -279,7 +288,12 @@ const MenuEditor: React.FC = () => {
                 order: item.order || 1
             };
             form.setFieldsValue(formValues);
+            setCurrentEventType(formValues.eventType); // 更新状态
         }
+
+        // 在handleAdd函数中
+        form.setFieldsValue({ title: '', icon: '', url: '', eventType: 'url', customEvent: '', order: 1 });
+        setCurrentEventType('url'); // 更新状态
     };
 
     // 删除菜单项
@@ -483,7 +497,7 @@ const MenuEditor: React.FC = () => {
                 </Modal>
                 {editMode || selectedKey ? (
                     <>
-                        // 修改表单部分，添加自定义事件代码输入框
+                        {/*  修改表单部分，添加自定义事件代码输入框 */}
                         <Form
                             form={form}
                             layout="vertical"
@@ -509,19 +523,19 @@ const MenuEditor: React.FC = () => {
                                 </Button>
                             </Form.Item>
 
+                            {/* 修改表单中的条件渲染部分 */}
                             <Form.Item label="点击事件" name="eventType">
                                 <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
                             </Form.Item>
 
-                            {/* 条件渲染URL输入框 */}
-                            {form.getFieldValue('eventType') === 'url' && (
+                            {/* 使用currentEventType状态来条件渲染 */}
+                            {currentEventType === 'url' && (
                                 <Form.Item label="URL" name="url">
                                     <Input />
                                 </Form.Item>
                             )}
 
-                            {/* 条件渲染自定义事件代码输入框 */}
-                            {form.getFieldValue('eventType') === 'custom' && (
+                            {currentEventType === 'custom' && (
                                 <Form.Item label="自定义事件代码" name="customEvent" rules={[
                                     { required: true, message: '请输入自定义事件代码' }
                                 ]}>
