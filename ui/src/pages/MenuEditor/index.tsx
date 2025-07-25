@@ -60,11 +60,13 @@ const MenuEditor: React.FC = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
+
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
     const [parentKey, setParentKey] = useState<string | null>(null);
     const [showIconModal, setShowIconModal] = useState(false);
     const [isPreview, setIsPreview] = useState(false);
     const [currentEventType, setCurrentEventType] = useState<'url' | 'custom'>('url');
+    const [currentIcon, setCurrentIcon] = useState<string | null>(null);
 
 
     // eventType 的变化现在直接通过 Select 的 onChange 处理
@@ -72,6 +74,8 @@ const MenuEditor: React.FC = () => {
         // 当表单初始化时，设置默认值
         const initialEventType = form.getFieldValue('eventType');
         setCurrentEventType(initialEventType || 'url');
+        setCurrentIcon(form.getFieldValue('icon') || null);
+
     }, [form]);
 
     const handleMenuClick = (key: string) => {
@@ -109,7 +113,8 @@ const MenuEditor: React.FC = () => {
 
     // 处理图标选择
     const handleIconSelect = (iconValue: string) => {
-        form.setFieldsValue({ icon: iconValue });
+        setCurrentIcon(iconValue);
+        form.setFieldValue('icon', iconValue)
         setShowIconModal(false);
     };
 
@@ -279,6 +284,7 @@ const MenuEditor: React.FC = () => {
             };
             form.setFieldsValue(formValues);
             setCurrentEventType(formValues.eventType);
+            setCurrentIcon(formValues.icon || null);
         }
     };
 
@@ -548,9 +554,9 @@ const MenuEditor: React.FC = () => {
                                 onClick={() => setShowIconModal(true)}
                                 style={{ width: '100%', justifyContent: 'space-between' }}
                             >
-                                {form.getFieldValue('icon') ? (
+                                {currentIcon ? (
                                     <span style={{ display: 'flex', alignItems: 'center' }}>
-                                        <i className={`fa-solid ${form.getFieldValue('icon')}`} style={{ marginRight: '8px' }}></i>
+                                        <i className={`fa-solid ${currentIcon}`} style={{ marginRight: '8px' }}></i>
                                     </span>
                                 ) : (
                                     '选择图标'
@@ -599,7 +605,7 @@ const MenuEditor: React.FC = () => {
                 open={showIconModal}
                 onCancel={() => setShowIconModal(false)}
                 onSelect={handleIconSelect}
-                selectedIcon={form.getFieldValue('icon')}
+                selectedIcon={currentIcon || ''}
             />
 
         </>
