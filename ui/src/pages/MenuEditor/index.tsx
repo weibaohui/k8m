@@ -482,11 +482,12 @@ const MenuEditor: React.FC = () => {
                                     )}
                                 </Button>
                             </Form.Item>
-                            <Form.Item label="URL" name="url">
-                                <Input />
-                            </Form.Item>
+                            
                             <Form.Item label="点击事件" name="eventType">
                                 <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
+                            </Form.Item>
+                            <Form.Item label="URL" name="url">
+                                <Input />
                             </Form.Item>
                             <Form.Item label="排序" name="order">
                                 <InputNumber min={1} />
