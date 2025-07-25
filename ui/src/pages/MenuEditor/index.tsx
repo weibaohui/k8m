@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree } from 'antd';
+import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Tabs, Tree } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
@@ -65,25 +65,17 @@ const MenuEditor: React.FC = () => {
     const [isPreview, setIsPreview] = useState(false);
     // 在组件顶部添加useState来跟踪当前的事件类型
     const [currentEventType, setCurrentEventType] = useState<'url' | 'custom'>('url');
+
+    // 初始化和管理自定义标签
     const [customTags, setCustomTags] = useState<Array<{ label: string, value: string }>>(() => {
         try {
-            return JSON.parse(localStorage.getItem('menuCustomTags') || '[]');
-        } catch {
+            const savedTags = localStorage.getItem('menuCustomTags');
+            return savedTags ? JSON.parse(savedTags) : [];
+        } catch (e) {
+            console.error('Failed to load custom tags:', e);
             return [];
         }
     });
-
-    // 加载自定义标签
-    useEffect(() => {
-        const tags = localStorage.getItem('menuCustomTags');
-        if (tags) {
-            try {
-                setCustomTags(JSON.parse(tags));
-            } catch (e) {
-                console.error('Failed to load custom tags:', e);
-            }
-        }
-    }, []);
 
     // eventType 的变化现在直接通过 Select 的 onChange 处理
     useEffect(() => {
@@ -626,7 +618,7 @@ const MenuEditor: React.FC = () => {
                                                 Modal.confirm({
                                                     title: '保存为快捷输入',
                                                     content: (
-                                                        <Input.Group compact>
+                                                        <Space.Compact>
                                                             <Input
                                                                 style={{ width: '30%' }}
                                                                 placeholder="输入标签名"
@@ -638,16 +630,16 @@ const MenuEditor: React.FC = () => {
                                                                 placeholder="输入代码"
                                                                 id="tagValue"
                                                             />
-                                                        </Input.Group>
+                                                        </Space.Compact>
                                                     ),
                                                     onOk: () => {
                                                         // 这里可以保存新的快捷输入到本地存储
                                                         const label = (document.getElementById('tagLabel') as HTMLInputElement)?.value;
                                                         const value = (document.getElementById('tagValue') as HTMLInputElement)?.value;
                                                         if (label && value) {
-                                                            const customTags = JSON.parse(localStorage.getItem('menuCustomTags') || '[]');
-                                                            customTags.push({ label, value });
-                                                            localStorage.setItem('menuCustomTags', JSON.stringify(customTags));
+                                                            const newCustomTags = [...customTags, { label, value }];
+                                                            setCustomTags(newCustomTags);
+                                                            localStorage.setItem('menuCustomTags', JSON.stringify(newCustomTags));
                                                             message.success('保存成功');
                                                         }
                                                     }
