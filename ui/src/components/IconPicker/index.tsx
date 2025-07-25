@@ -4,13 +4,13 @@ import iconOptions from '@/utils/iconOptions';
 import './index.module.scss';
 
 interface IconPickerProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSelect: (iconValue: string) => void;
   selectedIcon?: string;
 }
 
-const IconPicker: React.FC<IconPickerProps> = ({ visible, onCancel, onSelect, selectedIcon }) => {
+const IconPicker: React.FC<IconPickerProps> = ({ open, onCancel, onSelect, selectedIcon }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [iconsPerPage] = useState(64); // 8x8网格
   const [displayIcons, setDisplayIcons] = useState<{ value: string }[]>([]);
@@ -36,15 +36,15 @@ const IconPicker: React.FC<IconPickerProps> = ({ visible, onCancel, onSelect, se
   return (
     <Modal
       title="选择图标"
-      visible={visible}
+      open={open}
       onCancel={onCancel}
       footer={null}
       width={600}
     >
       <div className="icon-picker-container" style={{ padding: '16px', width: '100%', boxSizing: 'border-box' }}>
-        <div 
+        <div
           className="icon-grid"
-          style={{ 
+          style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(8, 1fr)',
             gap: '12px',
@@ -60,7 +60,7 @@ const IconPicker: React.FC<IconPickerProps> = ({ visible, onCancel, onSelect, se
               key={icon.value}
               className={`icon-item ${selectedIcon === icon.value ? 'selected' : ''}`}
               onClick={() => handleIconSelect(icon.value)}
-              style={{ 
+              style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -88,7 +88,7 @@ const IconPicker: React.FC<IconPickerProps> = ({ visible, onCancel, onSelect, se
             total={iconOptions.length}
             onChange={handlePageChange}
             showSizeChanger={false}
-             size="small"
+            size="small"
           />
         </div>
       </div>

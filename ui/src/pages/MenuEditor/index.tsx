@@ -565,7 +565,6 @@ const MenuEditor: React.FC = () => {
                         <Form.Item label="点击事件" name="eventType" initialValue="url">
                             <Select
                                 style={{ zIndex: 1000000 }}
-                                defaultValue="url"
                                 options={[
                                     { label: 'URL跳转', value: 'url' },
                                     { label: '自定义', value: 'custom' }
@@ -601,7 +600,7 @@ const MenuEditor: React.FC = () => {
             </div>
 
             <IconPicker
-                visible={showIconModal}
+                open={showIconModal}
                 onCancel={() => setShowIconModal(false)}
                 onSelect={handleIconSelect}
                 selectedIcon={form.getFieldValue('icon')}
