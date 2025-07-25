@@ -66,12 +66,12 @@ const MenuEditor: React.FC = () => {
     // 在组件顶部添加useState来跟踪当前的事件类型
     const [currentEventType, setCurrentEventType] = useState<'url' | 'custom'>('url');
 
-    // 使用Form.useWatch来监听eventType字段的变化
-    // 使用 Form.useWatch 监听 eventType 字段变化
-    const eventType = Form.useWatch('eventType', form);
+    // eventType 的变化现在直接通过 Select 的 onChange 处理
     useEffect(() => {
-        setCurrentEventType(eventType || 'url');
-    }, [eventType]);
+        // 当表单初始化时，设置默认值
+        const initialEventType = form.getFieldValue('eventType');
+        setCurrentEventType(initialEventType || 'url');
+    }, [form]);
 
     // 处理菜单项点击
     // 修改handleMenuClick函数，使其能够执行自定义事件代码
@@ -248,7 +248,14 @@ const MenuEditor: React.FC = () => {
         setParentKey(parentKey);
         setSelectedKey(null);
         form.resetFields();
-        form.setFieldsValue({ title: '', icon: '', url: '', eventType: 'url', order: 1 });
+        form.setFieldsValue({
+            title: '',
+            icon: '',
+            url: '',
+            eventType: 'url',
+            order: 1,
+            customEvent: ''
+        });
     };
 
     // 编辑菜单项
@@ -550,8 +557,16 @@ const MenuEditor: React.FC = () => {
                             </Button>
                         </Form.Item>
 
-                        <Form.Item label="点击事件" name="eventType">
-                            <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
+                        <Form.Item label="点击事件" name="eventType" initialValue="url">
+                            <Select
+                                style={{ width: '100%' }}
+                                defaultValue="url"
+                                options={[
+                                    { label: 'URL跳转', value: 'url' },
+                                    { label: '自定义', value: 'custom' }
+                                ]}
+                                onChange={(value) => setCurrentEventType(value as 'url' | 'custom')}
+                            />
                         </Form.Item>
 
                         {currentEventType === 'url' && (
