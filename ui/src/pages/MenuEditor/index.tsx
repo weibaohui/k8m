@@ -1,19 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button, Form, Input, InputNumber, message, Modal, Select, Tree } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
 import IconPicker from '@/components/IconPicker';
-
-interface MenuItem {
-    key: string;
-    title: string;
-    icon?: string;
-    url?: string;
-    eventType?: 'url' | 'custom';
-    order?: number;
-    children?: MenuItem[];
-}
+import MenuPreviewTree from '@/pages/MenuEditor/MenuPreviewTree';
+import { MenuItem } from '@/types/menu';
 
 const initialMenu: MenuItem[] = [
     {
@@ -382,38 +374,7 @@ const MenuEditor: React.FC = () => {
                     </Button>
                 )}
                 {isPreview ? (
-                    <Tree
-                        treeData={menuData.map(item => ({
-                            key: item.key,
-                            title: (
-                                <span onClick={() => handleMenuClick(item.key)}>
-                                    {item.icon && <i className={`fa-solid ${item.icon}`} style={{ marginRight: '4px' }}></i>}
-                                    {item.title}
-                                </span>
-                            ),
-                            children: item.children?.map(child => ({
-                                key: child.key,
-                                title: (
-                                    <span onClick={() => handleMenuClick(child.key)}>
-                                        {child.icon && <i className={`fa-solid ${child.icon}`} style={{ marginRight: '4px' }}></i>}
-                                        {child.title}
-                                    </span>
-                                ),
-                                children: child.children?.map(grandChild => ({
-                                    key: grandChild.key,
-                                    title: (
-                                        <span onClick={() => handleMenuClick(grandChild.key)}>
-                                            {grandChild.icon && <i className={`fa-solid ${grandChild.icon}`} style={{ marginRight: '4px' }}></i>}
-                                            {grandChild.title}
-                                        </span>
-                                    )
-                                }))
-                            }))
-                        }))}
-                        defaultExpandAll
-                        showLine
-                        blockNode
-                    />
+                    <MenuPreviewTree menuData={menuData} onMenuClick={handleMenuClick} />
                 ) : (
                     <Tree
                         treeData={convertToTreeData(menuData)}
@@ -467,17 +428,22 @@ const MenuEditor: React.FC = () => {
                                                 type="link"
                                                 onClick={() => {
                                                     Modal.info({
-                                                        title: '菜单数据',
+                                                        title: '菜单预览',
                                                         content: (
-                                                            <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
-                                                                {JSON.stringify(record.data, null, 2)}
-                                                            </pre>
+                                                            <div>
+                                                                <MenuPreviewTree menuData={record.data} />
+                                                                <div style={{ marginTop: 16 }}>
+                                                                    <pre style={{ maxHeight: '200px', overflow: 'auto' }}>
+                                                                        {JSON.stringify(record.data, null, 2)}
+                                                                    </pre>
+                                                                </div>
+                                                            </div>
                                                         ),
                                                         width: 800,
                                                     });
                                                 }}
                                             >
-                                                查看JSON
+                                                预览此版本
                                             </Button>
                                         </td>
                                     </tr>
