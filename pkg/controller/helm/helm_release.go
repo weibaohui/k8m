@@ -24,6 +24,7 @@ func RegisterHelmReleaseRoutes(api *gin.RouterGroup) {
 	api.POST("/helm/release/ns/:ns/name/:name/uninstall", ctrl.UninstallRelease)
 	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/values", ctrl.GetReleaseValues)
 	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/notes", ctrl.GetReleaseNote)
+	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/install_log", ctrl.GetReleaseInstallLog)
 	api.POST("/helm/release/batch/uninstall", ctrl.BatchUninstallRelease)
 	api.POST("/helm/release/upgrade", ctrl.UpgradeRelease)
 
@@ -215,6 +216,40 @@ func (hr *ReleaseController) GetReleaseNote(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, gin.H{
 		"note": note,
+	})
+}
+
+// @Summary 获取Release安装Log
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Release名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log [get]
+func (hr *ReleaseController) GetReleaseInstallLog(c *gin.Context) {
+	releaseName := c.Param("name")
+	ns := c.Param("ns")
+
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 检查权限
+	_, _, err = handleCommonLogic(c, "get", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	rr, err := models.GetHelmReleaseByNsAndReleaseName(ns, releaseName, selectedCluster)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{
+		"result": rr.Result,
 	})
 }
 
