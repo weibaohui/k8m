@@ -65,13 +65,36 @@ const MenuEditor: React.FC = () => {
     const [isPreview, setIsPreview] = useState(false);
 
     // 处理菜单项点击
+    // 修改handleMenuClick函数，使其能够执行自定义事件代码
     const handleMenuClick = (key: string) => {
         const item = findMenuItem(menuData, key);
         if (item) {
             if (item.eventType === 'url' && item.url) {
                 window.open(item.url, '_blank');
-            } else if (item.eventType === 'custom') {
-                message.info(`触发自定义事件: ${item.title}`);
+            } else if (item.eventType === 'custom' && item.customEvent) {
+                try {
+                    // 创建一个函数执行上下文
+                    const context = {
+                        onMenuClick: (path: string) => {
+                            // 这里实现onMenuClick的逻辑
+                            console.log(`执行自定义菜单点击: ${path}`);
+                            // 可以根据需要添加路由跳转或其他逻辑
+                        },
+                        message
+                    };
+                    
+                    // 构建并执行自定义函数
+                    const func = new Function(...Object.keys(context), `return ${item.customEvent}`);
+                    const result = func(...Object.values(context));
+                    
+                    // 如果是函数，执行它
+                    if (typeof result === 'function') {
+                        result();
+                    }
+                } catch (error) {
+                    console.error('自定义事件执行错误:', error);
+                    message.error('自定义事件执行错误');
+                }
             }
         }
     };
@@ -243,17 +266,19 @@ const MenuEditor: React.FC = () => {
         setSelectedKey(editKey);
         const item = findMenuItem(menuData, editKey);
         console.log("handleEdit:", item);
+        // 修改处理表单值的地方，确保customEvent字段被正确处理
+        // 在handleEdit函数中
         if (item) {
-            // 先重置表单，然后设置有值的字段
-            form.resetFields();
-            const formValues = {
-                title: item.title,
-                icon: item.icon || '',
-                url: item.url || '',
-                eventType: item.eventType || 'url',
-                order: item.order || 1
-            };
-            form.setFieldsValue(formValues);
+        form.resetFields();
+        const formValues = {
+        title: item.title,
+        icon: item.icon || '',
+        url: item.url || '',
+        eventType: item.eventType || 'url',
+        customEvent: item.customEvent || '',
+        order: item.order || 1
+        };
+        form.setFieldsValue(formValues);
         }
     };
 
@@ -458,6 +483,7 @@ const MenuEditor: React.FC = () => {
                 </Modal>
                 {editMode || selectedKey ? (
                     <>
+                        // 修改表单部分，添加自定义事件代码输入框
                         <Form
                             form={form}
                             layout="vertical"
@@ -486,9 +512,23 @@ const MenuEditor: React.FC = () => {
                             <Form.Item label="点击事件" name="eventType">
                                 <Select options={[{ label: 'url跳转', value: 'url' }, { label: '自定义', value: 'custom' }]} />
                             </Form.Item>
-                            <Form.Item label="URL" name="url">
-                                <Input />
-                            </Form.Item>
+                            
+                            {/* 条件渲染URL输入框 */}
+                            {form.getFieldValue('eventType') === 'url' && (
+                                <Form.Item label="URL" name="url">
+                                    <Input />
+                                </Form.Item>
+                            )}
+                            
+                            {/* 条件渲染自定义事件代码输入框 */}
+                            {form.getFieldValue('eventType') === 'custom' && (
+                                <Form.Item label="自定义事件代码" name="customEvent" rules={[
+                                    { required: true, message: '请输入自定义事件代码' }
+                                ]}>
+                                    <Input.TextArea rows={4} placeholder="例如: () => onMenuClick('/cluster/ns')" />
+                                </Form.Item>
+                            )}
+                            
                             <Form.Item label="排序" name="order">
                                 <InputNumber min={1} />
                             </Form.Item>
