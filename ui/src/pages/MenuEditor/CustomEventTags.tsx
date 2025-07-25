@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Input, message, Modal, Space, Tag } from 'antd';
+import { PlusSquareOutlined } from '@ant-design/icons';
 
 interface CustomEventTagsProps {
     value?: string;
@@ -104,8 +105,9 @@ const CustomEventTags: React.FC<CustomEventTagsProps> = ({ value, onChange }) =>
                 size="small"
                 style={{ padding: '2px 8px' }}
                 onClick={handleAddCustomTag}
+                icon={<PlusSquareOutlined />}
             >
-                +添加快捷输入
+                新增
             </Button>
         </div>
     );

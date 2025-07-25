@@ -4,10 +4,9 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
 import IconPicker from '@/components/IconPicker';
-import MenuPreviewTree from '@/pages/MenuEditor/MenuPreviewTree';
 import { MenuItem } from '@/types/menu';
-import { Custom } from 'amis/lib/renderers/Custom';
 import CustomEventTags from './CustomEventTags';
+import MenuPreviewTree from './MenuPreviewTree';
 
 const initialMenu: MenuItem[] = [
     {
