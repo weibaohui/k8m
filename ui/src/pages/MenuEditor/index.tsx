@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Tabs, Tree } from 'antd';
+import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Tag, Tabs, Tree } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 
@@ -593,22 +593,23 @@ const MenuEditor: React.FC = () => {
                                 <>
                                     <div style={{ marginBottom: 8 }}>
                                         <span style={{ marginRight: 8, color: '#666' }}>快捷输入:</span>
-                                        {[
-                                            { label: '页面跳转', value: '() => onMenuClick(\'/cluster/ns\')' },
-                                            { label: '刷新页面', value: '() => window.location.reload()' },
-                                            { label: '控制台日志', value: '() => console.log(\'菜单点击\')' },
-                                            ...customTags
-                                        ].map((tag, index) => (
-                                            <Button
-                                                key={index}
-                                                type="link"
-                                                size="small"
-                                                style={{ padding: '2px 8px' }}
-                                                onClick={() => form.setFieldsValue({ customEvent: tag.value })}
-                                            >
-                                                {tag.label}
-                                            </Button>
-                                        ))}
+                                        <Space size={[4, 8]} wrap>
+                                            {[
+                                                { label: '页面跳转', value: '() => onMenuClick(\'/cluster/ns\')' },
+                                                { label: '刷新页面', value: '() => window.location.reload()' },
+                                                { label: '控制台日志', value: '() => console.log(\'菜单点击\')' },
+                                                ...customTags
+                                            ].map((tag, index) => (
+                                                <Tag
+                                                    key={index}
+                                                    color="blue"
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => form.setFieldsValue({ customEvent: tag.value })}
+                                                >
+                                                    {tag.label}
+                                                </Tag>
+                                            ))}
+                                        </Space>
                                         <Button
                                             type="link"
                                             size="small"
