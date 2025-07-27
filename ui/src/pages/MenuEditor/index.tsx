@@ -524,9 +524,9 @@ const MenuEditor: React.FC = () => {
                         form={form}
                         layout="vertical"
                     >
-                        <Form.Item label="菜单key" name="key">
+                        {/* <Form.Item label="菜单key" name="key">
                             <Input readOnly placeholder="系统自动生成唯一标识" />
-                        </Form.Item>
+                        </Form.Item> */}
                         <Form.Item label="菜单名称" name="title" rules={[
                             {required: true, whitespace: true, message: '请输入菜单名称'}
                         ]}>
