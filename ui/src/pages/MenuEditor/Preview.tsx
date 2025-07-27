@@ -123,6 +123,9 @@ const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
                 parser.functions.isPlatformAdmin=function() {
                     return userRole == 'platform_admin';
                 };
+                parser.functions.isUserHasRole=function(role: string) {
+                    return userRole == role;
+                };
                 
                 //增加几个方法，
                 // 解析表达式
