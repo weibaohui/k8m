@@ -28,15 +28,15 @@ const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
                 // 创建一个函数执行上下文
                 const context = {
                     // 这里可以添加一些上下文变量，例如用户信息等
-                    user: { role: 'admin' }, // 示例数据
-                    // 可以根据实际需求添加更多上下文
-                };
+                    user: { role: 'user' }, // 示例数据
+                 };
                 
                 // 创建 expr-eval 解析器实例
                 const parser = new Parser();
                 
                 // 注入预定义的方法
                 // 例如，添加一个名为 'contains' 的自定义函数
+                // 用法：contains('admin', user.role)
                 parser.functions.contains = function(str: string | string[], substr: string) {
                     if (typeof str !== 'string' || typeof substr !== 'string') {
                         return false;
@@ -52,7 +52,7 @@ const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
                 
                 return Boolean(result);
             } catch (error) {
-                console.error('显示表达式执行错误:', error);
+                console.error('评估显示表达式错误:', error);
                 return false;
             }
         }
