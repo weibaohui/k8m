@@ -77,6 +77,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
+      expr-eval:
+        specifier: ^2.0.2
+        version: 2.0.2
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -1394,6 +1397,9 @@ packages:
   exceljs@4.4.0:
     resolution: {integrity: sha512-XctvKaEMaj1Ii9oDOqbW/6e1gXknSY4g/aLCDicOXqBE4M0nRWkUu0PTp++UPNzoFY12BNHMfs/VadKIS6llvg==}
     engines: {node: '>=8.3.0'}
+
+  expr-eval@2.0.2:
+    resolution: {integrity: sha512-4EMSHGOPSwAfBiibw3ndnP0AvjDWLsMvGOvWEZ2F96IGk0bIVdjQisOHxReSkE13mHcfbuCiXw+G4y0zv6N8Eg==}
 
   fast-csv@4.3.6:
     resolution: {integrity: sha512-2RNSpuwwsJGP0frGsOmTb9oUF+VkFSM4SyLTDgwf2ciHWTarN0lQTC+F2f/t5J9QjW+c65VFIAAu85GsvMIusw==}
@@ -4305,6 +4311,8 @@ snapshots:
       tmp: 0.2.3
       unzipper: 0.10.14
       uuid: 8.3.2
+
+  expr-eval@2.0.2: {}
 
   fast-csv@4.3.6:
     dependencies:

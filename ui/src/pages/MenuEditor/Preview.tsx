@@ -1,6 +1,7 @@
 import React from 'react';
 import {Tree} from 'antd';
 import {MenuItem} from '@/types/menu';
+import { Parser } from 'expr-eval'; // 引入 expr-eval
 
 interface PreviewProps {
     menuData: MenuItem[];
@@ -31,9 +32,23 @@ const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
                     // 可以根据实际需求添加更多上下文
                 };
                 
-                // 构建并执行自定义函数
-                const func = new Function(...Object.keys(context), `return ${item.show}`);
-                const result = func(...Object.values(context));
+                // 创建 expr-eval 解析器实例
+                const parser = new Parser();
+                
+                // 注入预定义的方法
+                // 例如，添加一个名为 'contains' 的自定义函数
+                parser.functions.contains = function(str: string | string[], substr: string) {
+                    if (typeof str !== 'string' || typeof substr !== 'string') {
+                        return false;
+                    }
+                    return str.includes(substr);
+                };
+                
+                // 解析表达式
+                const expr = parser.parse(item.show);
+                
+                // 评估表达式
+                const result = expr.evaluate(context);
                 
                 return Boolean(result);
             } catch (error) {

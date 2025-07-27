@@ -34,3 +34,4 @@ bin/
 data/k8m.db
 dist.zip
 data/
+ui/node_modules/

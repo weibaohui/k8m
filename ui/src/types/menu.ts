@@ -7,5 +7,5 @@ export interface MenuItem {
     customEvent?: string;
     order?: number;
     children?: MenuItem[];
-    show?: boolean | string; // 添加这一行
+    show?: string; // 修改这里，只保留字符串类型
 }
