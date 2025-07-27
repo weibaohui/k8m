@@ -216,7 +216,9 @@ const MenuEditor: React.FC = () => {
             url: '',
             eventType: 'url',
             order: 1,
-            customEvent: ''
+            customEvent: '',
+            show: 'true', // 添加默认值
+            showValue: true
         });
     };
 
@@ -239,7 +241,11 @@ const MenuEditor: React.FC = () => {
                 url: item.url || '',
                 eventType: item.eventType || 'url',
                 customEvent: item.customEvent || '',
-                order: item.order || 1
+                order: item.order || 1,
+                show: typeof item.show === 'boolean' ? item.show.toString() : 
+                      (typeof item.show === 'string' ? 'custom' : 'true'),
+                showValue: typeof item.show === 'boolean' ? item.show : 
+                           (typeof item.show === 'string' ? item.show : true)
             };
             form.setFieldsValue(formValues);
             setCurrentEventType(formValues.eventType);
@@ -581,7 +587,46 @@ const MenuEditor: React.FC = () => {
                         <Form.Item label="排序" name="order">
                             <InputNumber min={1}/>
                         </Form.Item>
-                    </Form>
+                    
+                    {/* 添加显示/隐藏控制字段 */}
+                    <Form.Item label="显示控制" name="show">
+                        <Select
+                            style={{ zIndex: 1000000 }}
+                            options={[
+                                { label: '始终显示', value: 'true' },
+                                { label: '始终隐藏', value: 'false' },
+                                { label: '自定义表达式', value: 'custom' }
+                            ]}
+                            onChange={(value) => {
+                                if (value !== 'custom') {
+                                    form.setFieldsValue({ showValue: value === 'true' });
+                                }
+                            }}
+                        />
+                    </Form.Item>
+                    
+                    <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.show !== currentValues.show}>
+                        {({ getFieldValue }) => {
+                            const showType = getFieldValue('show');
+                            return showType === 'custom' ? (
+                                <Form.Item 
+                                    label="显示表达式" 
+                                    name="showValue" 
+                                    rules={[{ required: true, message: '请输入显示表达式' }]}
+                                >
+                                    <Input.TextArea 
+                                        rows={3} 
+                                        placeholder="请输入JavaScript表达式，例如: true 或 user.role === 'admin'"
+                                    />
+                                </Form.Item>
+                            ) : (
+                                <Form.Item name="showValue" noStyle>
+                                    <Input type="hidden" />
+                                </Form.Item>
+                            );
+                        }}
+                    </Form.Item>
+                </Form>
                 </Modal>
             </div>
 

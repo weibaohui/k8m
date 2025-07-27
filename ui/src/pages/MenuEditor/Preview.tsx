@@ -12,34 +12,52 @@ const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
         onMenuClick?.(key);
     };
 
+    // 评估show属性
+    const shouldShowItem = (item: MenuItem): boolean => {
+        if (item.show === undefined || item.show === null) {
+            return true;
+        }
+        
+        if (typeof item.show === 'boolean') {
+            return item.show;
+        }
+        
+        if (typeof item.show === 'string') {
+            try {
+                // 创建一个函数执行上下文
+                const context = {
+                    // 这里可以添加一些上下文变量，例如用户信息等
+                    user: { role: 'admin' }, // 示例数据
+                    // 可以根据实际需求添加更多上下文
+                };
+                
+                // 构建并执行自定义函数
+                const func = new Function(...Object.keys(context), `return ${item.show}`);
+                const result = func(...Object.values(context));
+                
+                return Boolean(result);
+            } catch (error) {
+                console.error('显示表达式执行错误:', error);
+                return false;
+            }
+        }
+        
+        return true;
+    };
+
     const convertToTreeData = (data: MenuItem[]) => {
-        return data.map(item => ({
-            key: item.key,
+        // 过滤掉不显示的菜单项
+        const filteredData = data.filter(item => shouldShowItem(item));
+        
+        return filteredData.map((item): { key: string; title: React.ReactNode; children?: ReturnType<typeof convertToTreeData> } => ({
+            key: item.key as string,
             title: (
                 <span onClick={() => handleClick(item.key)}>
                     {item.icon && <i className={`fa-solid ${item.icon}`} style={{marginRight: '4px'}}></i>}
                     {item.title}
                 </span>
             ),
-            children: item.children?.map(child => ({
-                key: child.key,
-                title: (
-                    <span onClick={() => handleClick(child.key)}>
-                        {child.icon && <i className={`fa-solid ${child.icon}`} style={{marginRight: '4px'}}></i>}
-                        {child.title}
-                    </span>
-                ),
-                children: child.children?.map(grandChild => ({
-                    key: grandChild.key,
-                    title: (
-                        <span onClick={() => handleClick(grandChild.key)}>
-                            {grandChild.icon &&
-                                <i className={`fa-solid ${grandChild.icon}`} style={{marginRight: '4px'}}></i>}
-                            {grandChild.title}
-                        </span>
-                    )
-                }))
-            }))
+            children: item.children ? convertToTreeData(item.children) : undefined
         }));
     };
 
