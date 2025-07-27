@@ -1,14 +1,80 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {Tree} from 'antd';
 import {MenuItem} from '@/types/menu';
 import { Parser } from 'expr-eval'; // 引入 expr-eval
+import {fetcher} from '@/components/Amis/fetcher';
 
 interface PreviewProps {
     menuData: MenuItem[];
     onMenuClick?: (key: string) => void;
 }
 
+// 定义用户角色接口
+interface UserRoleResponse {
+    role: string;  // 根据实际数据结构调整类型
+    cluster: string;
+}
+
+interface CRDSupportedStatus {
+    IsGatewayAPISupported: boolean;
+    IsOpenKruiseSupported: boolean;
+    IsIstioSupported: boolean;
+}
+
+
 const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
+    
+    const [userRole, setUserRole] = useState<string>('');
+    const [isGatewayAPISupported, setIsGatewayAPISupported] = useState<boolean>(false);
+    const [isOpenKruiseSupported, setIsOpenKruiseSupported] = useState<boolean>(false);
+    const [isIstioSupported, setIsIstioSupported] = useState<boolean>(false);
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            try {
+                const response = await fetcher({
+                    url: '/params/user/role',
+                    method: 'get'
+                });
+                // 检查 response.data 是否存在，并确保其类型正确
+                if (response.data && typeof response.data === 'object') {
+                    const role = response.data.data as UserRoleResponse;
+                    setUserRole(role.role);
+
+                    const originCluster = localStorage.getItem('cluster') || '';
+                    if (originCluster == "" && role.cluster != "") {
+                        localStorage.setItem('cluster', role.cluster);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch user role:', error);
+            }
+        };
+
+        const fetchCRDSupportedStatus = async () => {
+            try {
+                const response = await fetcher({
+                    url: '/k8s/crd/status',
+                    method: 'get'
+                });
+                if (response.data && typeof response.data === 'object') {
+                    const status = response.data.data as CRDSupportedStatus;
+                    setIsGatewayAPISupported(status.IsGatewayAPISupported);
+                    setIsOpenKruiseSupported(status.IsOpenKruiseSupported);
+                    setIsIstioSupported(status.IsIstioSupported);
+                }
+            } catch (error) {
+                console.error('Failed to fetch Gateway API status:', error);
+            }
+        };
+
+
+        fetchUserRole();
+        fetchCRDSupportedStatus();
+    }, []);
+
+
+    
     const handleClick = (key: string) => {
         onMenuClick?.(key);
     };
