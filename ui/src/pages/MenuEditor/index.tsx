@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Tag, Tabs, Tree } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { DataNode } from 'antd/es/tree';
+import React, {useEffect, useState} from 'react';
+import {Button, Form, Input, InputNumber, message, Modal, Select, Space, Tag, Tabs, Tree} from 'antd';
+import {PlusOutlined, EditOutlined, DeleteOutlined} from '@ant-design/icons';
+import type {DataNode} from 'antd/es/tree';
 
 import IconPicker from '@/components/IconPicker';
-import { MenuItem } from '@/types/menu';
+import {MenuItem} from '@/types/menu';
 import CustomEventTags from './CustomEventTags';
-import MenuPreviewTree from './MenuPreviewTree';
+import Preview from './Preview.tsx';
 
 const initialMenu: MenuItem[] = [
     {
@@ -133,9 +133,9 @@ const MenuEditor: React.FC = () => {
     // 递归更新菜单项
     const updateMenuItem = (data: MenuItem[], key: string, newItem: MenuItem): MenuItem[] => {
         return data.map(item => {
-            if (item.key === key) return { ...newItem };
+            if (item.key === key) return {...newItem};
             if (item.children) {
-                return { ...item, children: updateMenuItem(item.children, key, newItem) };
+                return {...item, children: updateMenuItem(item.children, key, newItem)};
             }
             return item;
         });
@@ -159,10 +159,10 @@ const MenuEditor: React.FC = () => {
         }
         return data.map(item => {
             if (item.key === parentKey) {
-                return { ...item, children: [...(item.children || []), newItem] };
+                return {...item, children: [...(item.children || []), newItem]};
             }
             if (item.children) {
-                return { ...item, children: addMenuItem(item.children, parentKey, newItem) };
+                return {...item, children: addMenuItem(item.children, parentKey, newItem)};
             }
             return item;
         });
@@ -312,7 +312,7 @@ const MenuEditor: React.FC = () => {
         form.validateFields().then(values => {
             if (editMode === 'add') {
                 const newKey = Date.now().toString();
-                const newItem: MenuItem = { ...values, key: newKey };
+                const newItem: MenuItem = {...values, key: newKey};
                 const newData = addMenuItem(menuData, parentKey, newItem);
                 setMenuData(newData);
                 saveHistory(newData);
@@ -320,7 +320,7 @@ const MenuEditor: React.FC = () => {
                 setSelectedKey(newKey);
             } else if (editMode === 'edit' && selectedKey) {
                 const existingItem = findMenuItem(menuData, selectedKey);
-                const newItem = { ...existingItem, ...values, key: selectedKey };
+                const newItem = {...existingItem, ...values, key: selectedKey};
                 const newData = updateMenuItem(menuData, selectedKey, newItem);
                 setMenuData(newData);
                 saveHistory(newData);
@@ -340,11 +340,20 @@ const MenuEditor: React.FC = () => {
             key: item.key,
             title: (
                 <span>
-                    {item.icon ? <i className={`fa-solid ${item.icon}`} style={{ marginRight: '4px' }}></i> : null}
+                    {item.icon ? <i className={`fa-solid ${item.icon}`} style={{marginRight: '4px'}}></i> : null}
                     {item.title}
-                    <Button size="small" type="link" icon={<EditOutlined />} onClick={e => { e.stopPropagation(); handleEdit(item.key); }} title="编辑" />
-                    <Button size="small" type="link" icon={<DeleteOutlined />} danger onClick={e => { e.stopPropagation(); handleDelete(item.key); }} title="删除" />
-                    <Button size="small" type="link" icon={<PlusOutlined />} onClick={e => { e.stopPropagation(); handleAdd(item.key); }} title="新增" />
+                    <Button size="small" type="link" icon={<EditOutlined/>} onClick={e => {
+                        e.stopPropagation();
+                        handleEdit(item.key);
+                    }} title="编辑"/>
+                    <Button size="small" type="link" icon={<DeleteOutlined/>} danger onClick={e => {
+                        e.stopPropagation();
+                        handleDelete(item.key);
+                    }} title="删除"/>
+                    <Button size="small" type="link" icon={<PlusOutlined/>} onClick={e => {
+                        e.stopPropagation();
+                        handleAdd(item.key);
+                    }} title="新增"/>
                 </span>
             ),
             children: item.children ? convertToTreeData(item.children) : undefined,
@@ -377,22 +386,28 @@ const MenuEditor: React.FC = () => {
 
     return (
         <>
-            <div style={{ display: 'flex', height: '80vh', border: '1px solid #eee', borderRadius: 8, overflow: 'hidden' }}>
+            <div style={{
+                display: 'flex',
+                height: '80vh',
+                border: '1px solid #eee',
+                borderRadius: 8,
+                overflow: 'hidden'
+            }}>
                 {/* 左侧菜单树 */}
-                <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
-                    <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>
+                <div style={{width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto'}}>
+                    <div style={{marginBottom: 16, fontWeight: 'bold', fontSize: 18}}>
                         菜单树
                         <Button
                             type={showHistory ? "primary" : "default"}
                             onClick={() => setShowHistory(!showHistory)}
-                            style={{ marginLeft: 8, float: 'right' }}
+                            style={{marginLeft: 8, float: 'right'}}
                         >
                             历史记录
                         </Button>
                         <Button
                             type={isPreview ? "primary" : "default"}
                             onClick={() => setIsPreview(!isPreview)}
-                            style={{ marginLeft: 8, float: 'right' }}
+                            style={{marginLeft: 8, float: 'right'}}
                         >
                             {isPreview ? "返回编辑" : "预览"}
                         </Button>
@@ -400,15 +415,15 @@ const MenuEditor: React.FC = () => {
                     {!isPreview && (
                         <Button
                             type="primary"
-                            icon={<PlusOutlined />}
+                            icon={<PlusOutlined/>}
                             onClick={() => handleAdd(null)}
-                            style={{ marginBottom: 12 }}
+                            style={{marginBottom: 12}}
                         >
                             新增根菜单
                         </Button>
                     )}
                     {isPreview ? (
-                        <MenuPreviewTree menuData={menuData} onMenuClick={handleMenuClick} />
+                        <Preview menuData={menuData} onMenuClick={handleMenuClick}/>
                     ) : (
                         <Tree
                             treeData={convertToTreeData(menuData)}
@@ -423,17 +438,17 @@ const MenuEditor: React.FC = () => {
                     )}
                 </div>
                 {/* 右侧使用说明面板 */}
-                <div style={{ flex: 1, padding: 32, display: isPreview ? 'none' : 'block' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
+                <div style={{flex: 1, padding: 32, display: isPreview ? 'none' : 'block'}}>
+                    <div style={{fontWeight: 'bold', fontSize: 18, marginBottom: 16}}>
                         使用说明
                     </div>
-                    <div style={{ color: '#666', lineHeight: '1.8' }}>
+                    <div style={{color: '#666', lineHeight: '1.8'}}>
                         <h3>基本操作：</h3>
                         <ul>
                             <li>点击"新增根菜单"按钮可以在顶层添加菜单项</li>
-                            <li>点击菜单项后的<EditOutlined />图标可以编辑该菜单</li>
-                            <li>点击菜单项后的<DeleteOutlined />图标可以删除该菜单</li>
-                            <li>点击菜单项后的<PlusOutlined />图标可以添加子菜单</li>
+                            <li>点击菜单项后的<EditOutlined/>图标可以编辑该菜单</li>
+                            <li>点击菜单项后的<DeleteOutlined/>图标可以删除该菜单</li>
+                            <li>点击菜单项后的<PlusOutlined/>图标可以添加子菜单</li>
                         </ul>
 
                         <h3>高级功能：</h3>
@@ -462,56 +477,60 @@ const MenuEditor: React.FC = () => {
                     footer={null}
                     width={800}
                 >
-                    <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div style={{maxHeight: '60vh', overflow: 'auto'}}>
+                        <table style={{width: '100%', borderCollapse: 'collapse'}}>
                             <thead>
-                                <tr style={{ backgroundColor: '#f0f0f0' }}>
-                                    <th style={{ padding: '8px', border: '1px solid #ddd' }}>时间</th>
-                                    <th style={{ padding: '8px', border: '1px solid #ddd' }}>操作</th>
-                                </tr>
+                            <tr style={{backgroundColor: '#f0f0f0'}}>
+                                <th style={{padding: '8px', border: '1px solid #ddd'}}>时间</th>
+                                <th style={{padding: '8px', border: '1px solid #ddd'}}>操作</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                {[...history].reverse().map((record, index) => (
-                                    <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-                                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.time}</td>
-                                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                                            <Button
-                                                type="link"
-                                                onClick={() => {
-                                                    restoreHistory(index);
-                                                    setShowHistory(false);
-                                                }}
-                                            >
-                                                恢复到此版本
-                                            </Button>
-                                            <Button
-                                                type="link"
-                                                onClick={() => {
-                                                    Modal.info({
-                                                        title: '菜单预览',
-                                                        content: (
-                                                            <div>
-                                                                <Tabs defaultActiveKey="1">
-                                                                    <Tabs.TabPane tab="菜单JSON配置" key="1">
-                                                                        <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
+                            {[...history].reverse().map((record, index) => (
+                                <tr key={index} style={{borderBottom: '1px solid #ddd'}}>
+                                    <td style={{padding: '8px', border: '1px solid #ddd'}}>{record.time}</td>
+                                    <td style={{padding: '8px', border: '1px solid #ddd'}}>
+                                        <Button
+                                            type="link"
+                                            onClick={() => {
+                                                restoreHistory(index);
+                                                setShowHistory(false);
+                                            }}
+                                        >
+                                            恢复到此版本
+                                        </Button>
+                                        <Button
+                                            type="link"
+                                            onClick={() => {
+                                                Modal.info({
+                                                    title: '菜单预览',
+                                                    content: (
+                                                        <div>
+                                                            <Tabs defaultActiveKey="1">
+                                                                <Tabs.TabPane tab="菜单JSON配置" key="1">
+                                                                        <pre style={{
+                                                                            maxHeight: '400px',
+                                                                            overflow: 'auto'
+                                                                        }}>
                                                                             {JSON.stringify(record.data, null, 2)}
                                                                         </pre>
-                                                                    </Tabs.TabPane>
-                                                                    <Tabs.TabPane tab="菜单预览" key="2">
-                                                                        <MenuPreviewTree menuData={record.data} onMenuClick={handleMenuClick} />
-                                                                    </Tabs.TabPane>
-                                                                </Tabs>
-                                                            </div>
-                                                        ),
-                                                        width: 800,
-                                                    });
-                                                }}
-                                            >
-                                                预览此版本
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                                                </Tabs.TabPane>
+                                                                <Tabs.TabPane tab="菜单预览" key="2">
+                                                                    <Preview menuData={record.data}
+                                                                             onMenuClick={handleMenuClick}/>
+                                                                </Tabs.TabPane>
+                                                            </Tabs>
+                                                        </div>
+                                                    ),
+                                                    width: 800,
+                                                });
+                                            }}
+                                        >
+                                            预览此版本
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
                             </tbody>
                         </table>
                     </div>
@@ -544,19 +563,19 @@ const MenuEditor: React.FC = () => {
                         layout="vertical"
                     >
                         <Form.Item label="菜单名称" name="title" rules={[
-                            { required: true, whitespace: true, message: '请输入菜单名称' }
+                            {required: true, whitespace: true, message: '请输入菜单名称'}
                         ]}>
-                            <Input />
+                            <Input/>
                         </Form.Item>
                         <Form.Item label="图标" name="icon">
                             <Button
                                 type="primary"
                                 onClick={() => setShowIconModal(true)}
-                                style={{ width: '100%', justifyContent: 'space-between' }}
+                                style={{width: '100%', justifyContent: 'space-between'}}
                             >
                                 {currentIcon ? (
-                                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                                        <i className={`fa-solid ${currentIcon}`} style={{ marginRight: '8px' }}></i>
+                                    <span style={{display: 'flex', alignItems: 'center'}}>
+                                        <i className={`fa-solid ${currentIcon}`} style={{marginRight: '8px'}}></i>
                                     </span>
                                 ) : (
                                     '选择图标'
@@ -566,10 +585,10 @@ const MenuEditor: React.FC = () => {
 
                         <Form.Item label="点击事件" name="eventType" initialValue="url">
                             <Select
-                                style={{ zIndex: 1000000 }}
+                                style={{zIndex: 1000000}}
                                 options={[
-                                    { label: 'URL跳转', value: 'url' },
-                                    { label: '自定义', value: 'custom' }
+                                    {label: 'URL跳转', value: 'url'},
+                                    {label: '自定义', value: 'custom'}
                                 ]}
                                 onChange={(value) => setCurrentEventType(value as 'url' | 'custom')}
                             />
@@ -577,25 +596,25 @@ const MenuEditor: React.FC = () => {
 
                         {currentEventType === 'url' && (
                             <Form.Item label="URL" name="url">
-                                <Input />
+                                <Input/>
                             </Form.Item>
                         )}
 
                         {currentEventType === 'custom' && (
                             <Form.Item label="自定义事件代码" rules={[
-                                { required: true, message: '请输入自定义事件代码' }
+                                {required: true, message: '请输入自定义事件代码'}
                             ]}>
                                 <>
-                                    <CustomEventTags onChange={(value) => form.setFieldsValue({ customEvent: value })} />
+                                    <CustomEventTags onChange={(value) => form.setFieldsValue({customEvent: value})}/>
                                     <Form.Item noStyle name="customEvent">
-                                        <Input.TextArea rows={4} placeholder="请输入自定义事件代码" />
+                                        <Input.TextArea rows={4} placeholder="请输入自定义事件代码"/>
                                     </Form.Item>
                                 </>
                             </Form.Item>
                         )}
 
                         <Form.Item label="排序" name="order">
-                            <InputNumber min={1} />
+                            <InputNumber min={1}/>
                         </Form.Item>
                     </Form>
                 </Modal>

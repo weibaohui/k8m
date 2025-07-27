@@ -1,13 +1,13 @@
 import React from 'react';
-import { Tree } from 'antd';
-import { MenuItem } from '@/types/menu';
+import {Tree} from 'antd';
+import {MenuItem} from '@/types/menu';
 
-interface MenuPreviewTreeProps {
+interface PreviewProps {
     menuData: MenuItem[];
     onMenuClick?: (key: string) => void;
 }
 
-const MenuPreviewTree: React.FC<MenuPreviewTreeProps> = ({ menuData, onMenuClick }) => {
+const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
     const handleClick = (key: string) => {
         onMenuClick?.(key);
     };
@@ -17,7 +17,7 @@ const MenuPreviewTree: React.FC<MenuPreviewTreeProps> = ({ menuData, onMenuClick
             key: item.key,
             title: (
                 <span onClick={() => handleClick(item.key)}>
-                    {item.icon && <i className={`fa-solid ${item.icon}`} style={{ marginRight: '4px' }}></i>}
+                    {item.icon && <i className={`fa-solid ${item.icon}`} style={{marginRight: '4px'}}></i>}
                     {item.title}
                 </span>
             ),
@@ -25,7 +25,7 @@ const MenuPreviewTree: React.FC<MenuPreviewTreeProps> = ({ menuData, onMenuClick
                 key: child.key,
                 title: (
                     <span onClick={() => handleClick(child.key)}>
-                        {child.icon && <i className={`fa-solid ${child.icon}`} style={{ marginRight: '4px' }}></i>}
+                        {child.icon && <i className={`fa-solid ${child.icon}`} style={{marginRight: '4px'}}></i>}
                         {child.title}
                     </span>
                 ),
@@ -33,7 +33,8 @@ const MenuPreviewTree: React.FC<MenuPreviewTreeProps> = ({ menuData, onMenuClick
                     key: grandChild.key,
                     title: (
                         <span onClick={() => handleClick(grandChild.key)}>
-                            {grandChild.icon && <i className={`fa-solid ${grandChild.icon}`} style={{ marginRight: '4px' }}></i>}
+                            {grandChild.icon &&
+                                <i className={`fa-solid ${grandChild.icon}`} style={{marginRight: '4px'}}></i>}
                             {grandChild.title}
                         </span>
                     )
@@ -52,4 +53,4 @@ const MenuPreviewTree: React.FC<MenuPreviewTreeProps> = ({ menuData, onMenuClick
     );
 };
 
-export default MenuPreviewTree;
+export default Preview;
