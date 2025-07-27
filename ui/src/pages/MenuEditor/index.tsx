@@ -210,6 +210,7 @@ const MenuEditor: React.FC = () => {
         setSelectedKey(null);
         form.resetFields();
         form.setFieldsValue({
+            key: '', // 新增菜单时key为空，保存时再生成
             title: '',
             icon: '',
             url: '',
@@ -232,6 +233,7 @@ const MenuEditor: React.FC = () => {
         if (item) {
             form.resetFields();
             const formValues = {
+                key: item.key, // 添加key字段
                 title: item.title,
                 icon: item.icon || '',
                 url: item.url || '',
@@ -268,7 +270,8 @@ const MenuEditor: React.FC = () => {
     const handleSave = () => {
         form.validateFields().then(values => {
             if (editMode === 'add') {
-                const newKey = Date.now().toString();
+                // 生成唯一key
+                const newKey = `menu_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 const newItem: MenuItem = {...values, key: newKey};
                 const newData = addMenuItem(menuData, parentKey, newItem);
                 setMenuData(newData);
@@ -277,6 +280,7 @@ const MenuEditor: React.FC = () => {
                 setSelectedKey(newKey);
             } else if (editMode === 'edit' && selectedKey) {
                 const existingItem = findMenuItem(menuData, selectedKey);
+                // 保留现有key不变
                 const newItem = {...existingItem, ...values, key: selectedKey};
                 const newData = updateMenuItem(menuData, selectedKey, newItem);
                 setMenuData(newData);
@@ -286,8 +290,7 @@ const MenuEditor: React.FC = () => {
             // 关闭Modal并重置表单
             setEditMode(null);
             form.resetFields();
-            // 输出最终菜单JSON
-            console.log("Final Menu JSON:", JSON.stringify(menuData, null, 2));
+           
         });
     };
 
@@ -331,6 +334,8 @@ const MenuEditor: React.FC = () => {
         });
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
+         // 输出最终菜单JSON
+         console.log("Final Menu JSON:", JSON.stringify(data, null, 2));
     };
 
     // 恢复历史记录
@@ -519,6 +524,9 @@ const MenuEditor: React.FC = () => {
                         form={form}
                         layout="vertical"
                     >
+                        <Form.Item label="菜单key" name="key">
+                            <Input readOnly placeholder="系统自动生成唯一标识" />
+                        </Form.Item>
                         <Form.Item label="菜单名称" name="title" rules={[
                             {required: true, whitespace: true, message: '请输入菜单名称'}
                         ]}>
