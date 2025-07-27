@@ -429,7 +429,19 @@ const MenuEditor: React.FC = () => {
                             <li>URL跳转：直接填写目标URL地址</li>
                             <li>自定义事件：可以编写 JavaScript 代码实现复杂交互</li>
                             <li>排序号：决定同级菜单的显示顺序</li>
+                            <li>
+                                显示表达式：控制菜单项是否显示，支持使用预定义函数的JavaScript表达式
+                                <ul>
+                                    <li><code>true</code> 或 <code>false</code>：直接控制显示</li>
+                                    <li><code>contains('admin', user.role)</code>：检查用户角色是否包含指定字符串</li>
+                                    <li><code>isGatewayAPISupported()</code>：检查集群是否支持Gateway API</li>
+                                    <li><code>isIstioSupported()</code>：检查集群是否支持Istio</li>
+                                    <li><code>isOpenKruiseSupported()</code>：检查集群是否支持OpenKruise</li>
+                                    <li><code>isPlatformAdmin()</code>：检查用户是否为平台管理员</li>
+                                </ul>
+                            </li>
                         </ul>
+                        
                     </div>
                 </div>
 
