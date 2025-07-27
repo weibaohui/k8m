@@ -109,7 +109,22 @@ const Preview: React.FC<PreviewProps> = ({menuData, onMenuClick}) => {
                     }
                     return str.includes(substr);
                 };
+                //增加几个方法，判断是否支持gateway api、istio、kruise
+                parser.functions.isGatewayAPISupported = function() {
+                    return isGatewayAPISupported;
+                };
+                parser.functions.isIstioSupported = function() {
+                    return isIstioSupported;
+                };
+                parser.functions.isOpenKruiseSupported = function() {
+                    return isOpenKruiseSupported;
+                };
+                //userRole==platform_admin
+                parser.functions.isPlatformAdmin=function() {
+                    return userRole == 'platform_admin';
+                };
                 
+                //增加几个方法，
                 // 解析表达式
                 const expr = parser.parse(item.show);
                 
