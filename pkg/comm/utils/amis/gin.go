@@ -28,6 +28,8 @@ func GetLoginUserClusters(c *gin.Context) []string {
 }
 
 // GetLoginUser 获取当前登录用户名及其角色
+// 角色默认是Guest普通用户，如果是平台管理员，则返回平台管理员。
+// Role非数组，值为guest\platform_admin 二选一
 func GetLoginUser(c *gin.Context) (string, string) {
 	user := c.GetString(constants.JwtUserName)
 	role := c.GetString(constants.JwtUserRole)
