@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import type { MenuProps } from 'antd';
-import { useEffect, useState } from 'react';
-import { fetcher } from '../Amis/fetcher';
+import {useNavigate} from "react-router-dom";
+import type {MenuProps} from 'antd';
+import {useEffect, useState} from 'react';
+import {fetcher} from '../Amis/fetcher';
 
 // 定义用户角色接口
 interface UserRoleResponse {
@@ -68,7 +68,7 @@ const items: () => MenuItem[] = () => {
         fetchCRDSupportedStatus();
     }, []);
 
-    const onMenuClick = (path: string) => {
+    const loadJsonPage = (path: string) => {
         navigate(path)
     }
     return [
@@ -77,35 +77,35 @@ const items: () => MenuItem[] = () => {
             title: "多集群",
             icon: <i className="fa-solid fa-server"></i>,
             key: "cluster_user",
-            onClick: () => onMenuClick('/user/cluster/cluster_user')
+            onClick: () => loadJsonPage('/user/cluster/cluster_user')
         },
         {
             label: "集群总览",
             title: "集群总览",
             icon: <i className="fa-solid fa-chart-pie"></i>,
             key: "cluster_summary",
-            onClick: () => onMenuClick('/cluster/summary_view')
+            onClick: () => loadJsonPage('/cluster/summary_view')
         },
         {
             label: "命名空间",
             title: "命名空间",
             icon: <i className="fa-solid fa-border-style"></i>,
             key: "cluster_ns",
-            onClick: () => onMenuClick('/cluster/ns')
+            onClick: () => loadJsonPage('/cluster/ns')
         },
         {
             label: "节点",
             title: "节点",
             icon: <i className="fa-solid fa-computer"></i>,
             key: "cluster_node",
-            onClick: () => onMenuClick('/cluster/node')
+            onClick: () => loadJsonPage('/cluster/node')
         },
         {
             label: "事件",
             title: "事件",
             icon: <i className="fa-solid fa-bell"></i>,
             key: "event",
-            onClick: () => onMenuClick('/ns/event')
+            onClick: () => loadJsonPage('/ns/event')
         },
 
         {
@@ -119,49 +119,49 @@ const items: () => MenuItem[] = () => {
                     title: "部署",
                     icon: <i className="fa-solid fa-layer-group"></i>,
                     key: "deploy",
-                    onClick: () => onMenuClick('/ns/deploy')
+                    onClick: () => loadJsonPage('/ns/deploy')
                 },
                 {
                     label: "有状态集",
                     title: "有状态集",
                     icon: <i className="fa-solid fa-database"></i>,
                     key: "statefulset",
-                    onClick: () => onMenuClick('/ns/statefulset')
+                    onClick: () => loadJsonPage('/ns/statefulset')
                 },
                 {
                     label: "守护进程集",
                     title: "守护进程集",
                     icon: <i className="fa-solid fa-shield-halved"></i>,
                     key: "daemonset",
-                    onClick: () => onMenuClick('/ns/daemonset')
+                    onClick: () => loadJsonPage('/ns/daemonset')
                 },
                 {
                     label: "任务",
                     title: "任务",
                     icon: <i className="fa-solid fa-list-check"></i>,
                     key: "job",
-                    onClick: () => onMenuClick('/ns/job')
+                    onClick: () => loadJsonPage('/ns/job')
                 },
                 {
                     label: "定时任务",
                     title: "定时任务",
                     icon: <i className="fa-solid fa-clock"></i>,
                     key: "cronjob",
-                    onClick: () => onMenuClick('/ns/cronjob')
+                    onClick: () => loadJsonPage('/ns/cronjob')
                 },
                 {
                     label: "容器组",
                     title: "容器组",
                     icon: <i className="fa-solid fa-cubes"></i>,
                     key: "pod",
-                    onClick: () => onMenuClick('/ns/pod')
+                    onClick: () => loadJsonPage('/ns/pod')
                 },
                 {
                     label: "副本集",
                     title: "副本集",
                     icon: <i className="fa-solid fa-clone"></i>,
                     key: "replicaset",
-                    onClick: () => onMenuClick('/ns/replicaset')
+                    onClick: () => loadJsonPage('/ns/replicaset')
                 },
             ],
         },
@@ -174,7 +174,7 @@ const items: () => MenuItem[] = () => {
                     label: "自定义资源",
                     icon: <i className="fa-solid fa-gears"></i>,
                     key: "custom_resource",
-                    onClick: () => onMenuClick('/crd/crd')
+                    onClick: () => loadJsonPage('/crd/crd')
                 }
             ],
         },
@@ -190,96 +190,96 @@ const items: () => MenuItem[] = () => {
                         title: "克隆集",
                         icon: <i className="fa-solid fa-clone"></i>,
                         key: "advanced-cloneset",
-                        onClick: () => onMenuClick('/openkruise/cloneset')
+                        onClick: () => loadJsonPage('/openkruise/cloneset')
                     }, {
                         label: "高级有状态集",
                         title: "高级有状态集",
                         icon: <i className="fa-solid fa-layer-group"></i>,
                         key: "advanced-statefulset",
-                        onClick: () => onMenuClick('/openkruise/statefulset')
+                        onClick: () => loadJsonPage('/openkruise/statefulset')
                     },
                     {
                         label: "高级守护进程集",
                         title: "高级守护进程集",
                         icon: <i className="fa-solid fa-shield-halved"></i>,
                         key: "advanced-daemonSet",
-                        onClick: () => onMenuClick('/openkruise/daemonset')
+                        onClick: () => loadJsonPage('/openkruise/daemonset')
                     },
                     {
                         label: "高级定时任务",
                         title: "高级定时任务",
                         icon: <i className="fa-solid fa-clock"></i>,
                         key: "advanced-cronJob",
-                        onClick: () => onMenuClick('/openkruise/cronjob')
+                        onClick: () => loadJsonPage('/openkruise/cronjob')
                     },
                     {
                         label: "广播作业任务",
                         title: "广播作业任务",
                         icon: <i className="fa-solid fa-broadcast-tower"></i>,
                         key: "broadcast-job",
-                        onClick: () => onMenuClick('/openkruise/broadcastjob')
+                        onClick: () => loadJsonPage('/openkruise/broadcastjob')
                     },
                     {
                         label: "边车集",
                         title: "边车集",
                         icon: <i className="fa-solid fa-car-side"></i>,
                         key: "sidecarset",
-                        onClick: () => onMenuClick('/openkruise/sidecarset')
+                        onClick: () => loadJsonPage('/openkruise/sidecarset')
                     },
                     {
                         label: "工作负载分布",
                         title: "工作负载分布",
                         icon: <i className="fa-solid fa-arrows-split-up-and-left"></i>,
                         key: "workload-spread",
-                        onClick: () => onMenuClick('/openkruise/workloadspread')
+                        onClick: () => loadJsonPage('/openkruise/workloadspread')
                     },
                     {
                         label: "联合部署",
                         title: "联合部署",
                         icon: <i className="fa-solid fa-object-group"></i>,
                         key: "united-deployment",
-                        onClick: () => onMenuClick('/openkruise/uniteddeployment')
+                        onClick: () => loadJsonPage('/openkruise/uniteddeployment')
                     },
                     {
                         label: "容器重建请求",
                         title: "容器重建请求",
                         icon: <i className="fa-solid fa-recycle"></i>,
                         key: "container_recreate_request",
-                        onClick: () => onMenuClick('/openkruise/container_recreate_request')
+                        onClick: () => loadJsonPage('/openkruise/container_recreate_request')
                     },
                     {
                         label: "镜像拉取作业",
                         title: "镜像拉取作业",
                         icon: <i className="fa-solid fa-cloud-arrow-down"></i>,
                         key: "imagepulljob",
-                        onClick: () => onMenuClick('/openkruise/imagepulljob')
+                        onClick: () => loadJsonPage('/openkruise/imagepulljob')
                     },
                     {
                         label: "持久化状态",
                         title: "持久化状态",
                         icon: <i className="fa-solid fa-database"></i>,
                         key: "persistentpodstate",
-                        onClick: () => onMenuClick('/openkruise/persistentpodstate')
+                        onClick: () => loadJsonPage('/openkruise/persistentpodstate')
                     }, {
                         label: "Pod探测标记",
                         title: "Pod探测标记",
                         icon: <i className="fa-solid fa-magnifying-glass"></i>,
                         key: "podprobemarker",
-                        onClick: () => onMenuClick('/openkruise/podprobemarker')
+                        onClick: () => loadJsonPage('/openkruise/podprobemarker')
                     },
                     {
                         label: "Pod不可用预算",
                         title: "Pod不可用预算",
                         icon: <i className="fa-solid fa-circle-exclamation"></i>,
                         key: "PodUnavailableBudget",
-                        onClick: () => onMenuClick('/openkruise/PodUnavailableBudget')
+                        onClick: () => loadJsonPage('/openkruise/PodUnavailableBudget')
                     },
                     {
                         label: "资源分发",
                         title: "资源分发",
                         icon: <i className="fa-solid fa-share-nodes"></i>,
                         key: "ResourceDistribution",
-                        onClick: () => onMenuClick('/openkruise/ResourceDistribution')
+                        onClick: () => loadJsonPage('/openkruise/ResourceDistribution')
                     },
 
                 ],
@@ -297,98 +297,98 @@ const items: () => MenuItem[] = () => {
                         title: "VirtualService",
                         icon: <i className="fa-solid fa-route"></i>,
                         key: "isito-VirtualService",
-                        onClick: () => onMenuClick('/istio/VirtualService')
+                        onClick: () => loadJsonPage('/istio/VirtualService')
                     },
                     {
                         label: "目标规则",
                         title: "DestinationRule",
                         icon: <i className="fa-solid fa-location-dot"></i>,
                         key: "istio-DestinationRule",
-                        onClick: () => onMenuClick('/istio/DestinationRule')
+                        onClick: () => loadJsonPage('/istio/DestinationRule')
                     },
                     {
                         label: "Envoy过滤器",
                         title: "EnvoyFilter",
                         icon: <i className="fa-solid fa-filter"></i>,
                         key: "istio-EnvoyFilter",
-                        onClick: () => onMenuClick('/istio/EnvoyFilter')
+                        onClick: () => loadJsonPage('/istio/EnvoyFilter')
                     },
                     {
                         label: "网关",
                         title: "Gateway",
                         icon: <i className="fa-solid fa-network-wired"></i>,
                         key: "istio-Gateway",
-                        onClick: () => onMenuClick('/istio/Gateway')
+                        onClick: () => loadJsonPage('/istio/Gateway')
                     },
                     {
                         label: "对等认证",
                         title: "PeerAuthentication",
                         icon: <i className="fa-solid fa-user-shield"></i>,
                         key: "istio-PeerAuthentication",
-                        onClick: () => onMenuClick('/istio/PeerAuthentication')
+                        onClick: () => loadJsonPage('/istio/PeerAuthentication')
                     },
                     {
                         label: "代理配置",
                         title: "ProxyConfig",
                         icon: <i className="fa-solid fa-gears"></i>,
                         key: "istio-ProxyConfig",
-                        onClick: () => onMenuClick('/istio/ProxyConfig')
+                        onClick: () => loadJsonPage('/istio/ProxyConfig')
                     },
                     {
                         label: "请求认证",
                         title: "RequestAuthentication",
                         icon: <i className="fa-solid fa-key"></i>,
                         key: "istio-RequestAuthentication",
-                        onClick: () => onMenuClick('/istio/RequestAuthentication')
+                        onClick: () => loadJsonPage('/istio/RequestAuthentication')
                     },
                     {
                         label: "服务入口",
                         title: "ServiceEntry",
                         icon: <i className="fa-solid fa-door-open"></i>,
                         key: "istio-ServiceEntry",
-                        onClick: () => onMenuClick('/istio/ServiceEntry')
+                        onClick: () => loadJsonPage('/istio/ServiceEntry')
                     },
                     {
                         label: "边车",
                         title: "Sidecar",
                         icon: <i className="fa-solid fa-car-side"></i>,
                         key: "istio-Sidecar",
-                        onClick: () => onMenuClick('/istio/Sidecar')
+                        onClick: () => loadJsonPage('/istio/Sidecar')
                     },
                     {
                         label: "遥测",
                         title: "Telemetry",
                         icon: <i className="fa-solid fa-chart-line"></i>,
                         key: "istio-Telemetry",
-                        onClick: () => onMenuClick('/istio/Telemetry')
+                        onClick: () => loadJsonPage('/istio/Telemetry')
                     },
                     {
                         label: "授权策略",
                         title: "AuthorizationPolicy",
                         icon: <i className="fa-solid fa-user-lock"></i>,
                         key: "istio-AuthorizationPolicy",
-                        onClick: () => onMenuClick('/istio/AuthorizationPolicy')
+                        onClick: () => loadJsonPage('/istio/AuthorizationPolicy')
                     },
                     {
                         label: "Wasm插件",
                         title: "WasmPlugin",
                         icon: <i className="fa-solid fa-puzzle-piece"></i>,
                         key: "istio-WasmPlugin",
-                        onClick: () => onMenuClick('/istio/WasmPlugin')
+                        onClick: () => loadJsonPage('/istio/WasmPlugin')
                     },
                     {
                         label: "工作负载条目",
                         title: "WorkloadEntry",
                         icon: <i className="fa-solid fa-server"></i>,
                         key: "istio-WorkloadEntry",
-                        onClick: () => onMenuClick('/istio/WorkloadEntry')
+                        onClick: () => loadJsonPage('/istio/WorkloadEntry')
                     },
                     {
                         label: "工作负载组",
                         title: "WorkloadGroup",
                         icon: <i className="fa-solid fa-people-group"></i>,
                         key: "istio-WorkloadGroup",
-                        onClick: () => onMenuClick('/istio/WorkloadGroup')
+                        onClick: () => loadJsonPage('/istio/WorkloadGroup')
                     }
                 ],
             },
@@ -405,21 +405,21 @@ const items: () => MenuItem[] = () => {
                     title: "仓库",
                     icon: <i className="fas fa-database"></i>,
                     key: "helm_repo",
-                    onClick: () => onMenuClick('/helm/repo')
+                    onClick: () => loadJsonPage('/helm/repo')
                 },
                 {
                     label: "应用包",
                     title: "应用包",
                     icon: <i className="fa-solid fa-cubes"></i>,
                     key: "helm_chart",
-                    onClick: () => onMenuClick('/helm/chart')
+                    onClick: () => loadJsonPage('/helm/chart')
                 },
                 {
                     label: "应用实例",
                     title: "应用实例",
                     icon: <i className="fas fa-layer-group"></i>,
                     key: "helm_release",
-                    onClick: () => onMenuClick('/helm/release')
+                    onClick: () => loadJsonPage('/helm/release')
                 }
             ]
         },
@@ -432,25 +432,25 @@ const items: () => MenuItem[] = () => {
                     label: "配置映射",
                     icon: <i className="fa-solid fa-map"></i>,
                     key: "configmap",
-                    onClick: () => onMenuClick('/ns/configmap')
+                    onClick: () => loadJsonPage('/ns/configmap')
                 },
                 {
                     label: "密钥",
                     icon: <i className="fa-solid fa-key"></i>,
                     key: "secret",
-                    onClick: () => onMenuClick('/ns/secret')
+                    onClick: () => loadJsonPage('/ns/secret')
                 },
                 {
                     label: "验证钩子",
                     icon: <i className="fa-solid fa-check"></i>,
                     key: "validation_webhook",
-                    onClick: () => onMenuClick('/cluster/validation_webhook')
+                    onClick: () => loadJsonPage('/cluster/validation_webhook')
                 },
                 {
                     label: "变更钩子",
                     icon: <i className="fa-solid fa-exchange"></i>,
                     key: "mutating_webhook",
-                    onClick: () => onMenuClick('/cluster/mutating_webhook')
+                    onClick: () => loadJsonPage('/cluster/mutating_webhook')
                 },
             ],
         },
@@ -463,19 +463,19 @@ const items: () => MenuItem[] = () => {
                     label: "SVC服务",
                     icon: <i className="fa-solid fa-project-diagram"></i>,
                     key: "svc",
-                    onClick: () => onMenuClick('/ns/svc')
+                    onClick: () => loadJsonPage('/ns/svc')
                 },
                 {
                     label: "Ingress入口",
                     icon: <i className="fa-solid fa-wifi"></i>,
                     key: "ingress",
-                    onClick: () => onMenuClick('/ns/ing')
+                    onClick: () => loadJsonPage('/ns/ing')
                 },
                 {
                     label: "Ingress入口类",
                     icon: <i className="fa-solid fa-sitemap"></i>,
                     key: "ingress_class",
-                    onClick: () => onMenuClick('/cluster/ingress_class')
+                    onClick: () => loadJsonPage('/cluster/ingress_class')
                 },
             ],
         },
@@ -489,43 +489,43 @@ const items: () => MenuItem[] = () => {
                         label: "网关类",
                         icon: <i className="fa-solid fa-door-open"></i>,
                         key: "gatewayapi_gateway_class",
-                        onClick: () => onMenuClick('/gatewayapi/gateway_class')
+                        onClick: () => loadJsonPage('/gatewayapi/gateway_class')
                     },
                     {
                         label: "网关",
                         icon: <i className="fa-solid fa-archway"></i>,
                         key: "gatewayapi_gateway",
-                        onClick: () => onMenuClick('/gatewayapi/gateway')
+                        onClick: () => loadJsonPage('/gatewayapi/gateway')
                     },
                     {
                         label: "HTTP路由",
                         icon: <i className="fa-solid fa-route"></i>,
                         key: "gatewayapi_http_route",
-                        onClick: () => onMenuClick('/gatewayapi/http_route')
+                        onClick: () => loadJsonPage('/gatewayapi/http_route')
                     },
                     {
                         label: "GRPC路由",
                         icon: <i className="fa-solid fa-code-branch"></i>,
                         key: "gatewayapi_grpc_route",
-                        onClick: () => onMenuClick('/gatewayapi/grpc_route')
+                        onClick: () => loadJsonPage('/gatewayapi/grpc_route')
                     },
                     {
                         label: "TCP路由",
                         icon: <i className="fa-solid fa-plug"></i>,
                         key: "gatewayapi_tcp_route",
-                        onClick: () => onMenuClick('/gatewayapi/tcp_route')
+                        onClick: () => loadJsonPage('/gatewayapi/tcp_route')
                     },
                     {
                         label: "UDP路由",
                         icon: <i className="fa-solid fa-broadcast-tower"></i>,
                         key: "gatewayapi_udp_route",
-                        onClick: () => onMenuClick('/gatewayapi/udp_route')
+                        onClick: () => loadJsonPage('/gatewayapi/udp_route')
                     },
                     {
                         label: "TLS路由",
                         icon: <i className="fa-solid fa-shield-alt"></i>,
                         key: "gatewayapi_tls_route",
-                        onClick: () => onMenuClick('/gatewayapi/tls_route')
+                        onClick: () => loadJsonPage('/gatewayapi/tls_route')
                     },
                 ],
             },
@@ -539,19 +539,19 @@ const items: () => MenuItem[] = () => {
                     label: "持久卷声明",
                     icon: <i className="fa-solid fa-folder"></i>,
                     key: "pvc",
-                    onClick: () => onMenuClick('/ns/pvc')
+                    onClick: () => loadJsonPage('/ns/pvc')
                 },
                 {
                     label: "持久卷",
                     icon: <i className="fa-solid fa-hdd"></i>,
                     key: "pv",
-                    onClick: () => onMenuClick('/cluster/pv')
+                    onClick: () => loadJsonPage('/cluster/pv')
                 },
                 {
                     label: "存储类",
                     icon: <i className="fa-solid fa-coins"></i>,
                     key: "storage_class",
-                    onClick: () => onMenuClick('/cluster/storage_class')
+                    onClick: () => loadJsonPage('/cluster/storage_class')
                 },
             ],
         },
@@ -564,31 +564,31 @@ const items: () => MenuItem[] = () => {
                     label: "服务账户",
                     icon: <i className="fa-solid fa-user-shield"></i>,
                     key: "service_account",
-                    onClick: () => onMenuClick('/ns/service_account')
+                    onClick: () => loadJsonPage('/ns/service_account')
                 },
                 {
                     label: "角色",
                     icon: <i className="fa-solid fa-user-tag"></i>,
                     key: "role",
-                    onClick: () => onMenuClick('/ns/role')
+                    onClick: () => loadJsonPage('/ns/role')
                 },
                 {
                     label: "角色绑定",
                     icon: <i className="fa-solid fa-link"></i>,
                     key: "role_binding",
-                    onClick: () => onMenuClick('/ns/role_binding')
+                    onClick: () => loadJsonPage('/ns/role_binding')
                 },
                 {
                     label: "集群角色",
                     icon: <i className="fa-solid fa-users"></i>,
                     key: "cluster_role",
-                    onClick: () => onMenuClick('/cluster/cluster_role')
+                    onClick: () => loadJsonPage('/cluster/cluster_role')
                 },
                 {
                     label: "集群角色绑定",
                     icon: <i className="fa-solid fa-user-lock"></i>,
                     key: "cluster_role_binding",
-                    onClick: () => onMenuClick('/cluster/cluster_role_binding')
+                    onClick: () => loadJsonPage('/cluster/cluster_role_binding')
                 },
             ],
         },
@@ -603,91 +603,91 @@ const items: () => MenuItem[] = () => {
                     label: "端点",
                     icon: <i className="fa-solid fa-ethernet"></i>,
                     key: "endpoint",
-                    onClick: () => onMenuClick('/ns/endpoint')
+                    onClick: () => loadJsonPage('/ns/endpoint')
                 },
                 {
                     label: "端点切片",
                     icon: <i className="fa-solid fa-newspaper"></i>,
                     key: "endpointslice",
-                    onClick: () => onMenuClick('/ns/endpointslice')
+                    onClick: () => loadJsonPage('/ns/endpointslice')
                 },
                 {
                     label: "水平自动扩缩",
                     icon: <i className="fa-solid fa-arrows-left-right"></i>,
                     key: "hpa",
-                    onClick: () => onMenuClick('/ns/hpa')
+                    onClick: () => loadJsonPage('/ns/hpa')
                 },
                 {
                     label: "网络策略",
                     icon: <i className="fa-solid fa-project-diagram"></i>,
                     key: "network_policy",
-                    onClick: () => onMenuClick('/ns/network_policy')
+                    onClick: () => loadJsonPage('/ns/network_policy')
                 },
                 {
                     label: "资源配额",
                     icon: <i className="fa-solid fa-chart-pie"></i>,
                     key: "resource_quota",
-                    onClick: () => onMenuClick('/ns/resource_quota')
+                    onClick: () => loadJsonPage('/ns/resource_quota')
                 },
                 {
                     label: "限制范围",
                     icon: <i className="fa-solid fa-compress"></i>,
                     key: "limit_range",
-                    onClick: () => onMenuClick('/ns/limit_range')
+                    onClick: () => loadJsonPage('/ns/limit_range')
                 },
                 {
                     label: "Pod中断配置",
                     icon: <i className="fa-solid fa-receipt"></i>,
                     key: "pdb",
-                    onClick: () => onMenuClick('/ns/pdb')
+                    onClick: () => loadJsonPage('/ns/pdb')
                 },
                 {
                     label: "租约",
                     icon: <i className="fa-solid fa-file-contract"></i>,
                     key: "lease",
-                    onClick: () => onMenuClick('/ns/lease')
+                    onClick: () => loadJsonPage('/ns/lease')
                 },
                 {
                     label: "优先级类",
                     icon: <i className="fa-solid fa-sort"></i>,
                     key: "priority_class",
-                    onClick: () => onMenuClick('/cluster/priority_class')
+                    onClick: () => loadJsonPage('/cluster/priority_class')
                 },
                 {
                     label: "运行时类",
                     icon: <i className="fa-solid fa-play"></i>,
                     key: "runtime_class",
-                    onClick: () => onMenuClick('/cluster/runtime_class')
+                    onClick: () => loadJsonPage('/cluster/runtime_class')
                 },
                 {
                     label: "CSI节点",
                     icon: <i className="fa-solid fa-server"></i>,
                     key: "csi_node",
-                    onClick: () => onMenuClick('/cluster/csi_node')
+                    onClick: () => loadJsonPage('/cluster/csi_node')
                 },
                 {
                     label: "API 服务",
                     icon: <i className="fa-solid fa-code"></i>,
                     key: "api_service",
-                    onClick: () => onMenuClick('/cluster/api_service')
+                    onClick: () => loadJsonPage('/cluster/api_service')
                 },
                 {
                     label: "流量规则",
                     icon: <i className="fa-solid fa-random"></i>,
                     key: "flow_schema",
-                    onClick: () => onMenuClick('/cluster/flow_schema')
+                    onClick: () => loadJsonPage('/cluster/flow_schema')
                 },
                 {
                     label: "优先级配置",
                     icon: <i className="fa-solid fa-sliders"></i>,
                     key: "priority_level_config",
-                    onClick: () => onMenuClick('/cluster/priority_level_config')
+                    onClick: () => loadJsonPage('/cluster/priority_level_config')
                 },
                 {
                     label: "组件状态",
                     icon: <i className="fa-solid fa-info-circle"></i>,
                     key: "component_status",
-                    onClick: () => onMenuClick('/cluster/component_status')
+                    onClick: () => loadJsonPage('/cluster/component_status')
                 },
             ],
         },
@@ -702,13 +702,13 @@ const items: () => MenuItem[] = () => {
                         title: "多集群管理",
                         icon: <i className="fa-solid fa-server"></i>,
                         key: "cluster_all",
-                        onClick: () => onMenuClick('/admin/cluster/cluster_all')
+                        onClick: () => loadJsonPage('/admin/cluster/cluster_all')
                     },
                     {
                         label: "参数设置",
                         icon: <i className="fa-solid fa-sliders"></i>,
                         key: "system_config",
-                        onClick: () => onMenuClick('/admin/config/config')
+                        onClick: () => loadJsonPage('/admin/config/config')
                     },
                     {
                         label: "集群巡检设置",
@@ -719,33 +719,33 @@ const items: () => MenuItem[] = () => {
                                 label: "巡检汇总",
                                 icon: <i className="fa-solid fa-clipboard-list"></i>,
                                 key: "inspection_summary",
-                                onClick: () => onMenuClick('/admin/inspection/summary'),
+                                onClick: () => loadJsonPage('/admin/inspection/summary'),
 
                             },
                             {
                                 label: "巡检计划",
                                 icon: <i className="fa-solid fa-stethoscope"></i>,
                                 key: "inspection_schedule",
-                                onClick: () => onMenuClick('/admin/inspection/schedule'),
+                                onClick: () => loadJsonPage('/admin/inspection/schedule'),
 
                             },
                             {
                                 label: "巡检记录",
                                 icon: <i className="fa-solid fa-clipboard-list"></i>,
                                 key: "inspection_record",
-                                onClick: () => onMenuClick('/admin/inspection/record')
+                                onClick: () => loadJsonPage('/admin/inspection/record')
                             },
                             {
                                 label: "巡检规则",
                                 icon: <i className="fa-solid fa-clipboard-check"></i>,
                                 key: "script_management",
-                                onClick: () => onMenuClick('/admin/inspection/script')
+                                onClick: () => loadJsonPage('/admin/inspection/script')
                             },
                             {
                                 label: "webhook管理",
                                 icon: <i className="fa-solid fa-bell-concierge"></i>,
                                 key: "webhook_management",
-                                onClick: () => onMenuClick('/admin/inspection/webhook')
+                                onClick: () => loadJsonPage('/admin/inspection/webhook')
                             },
                         ]
                     },
@@ -754,43 +754,43 @@ const items: () => MenuItem[] = () => {
                         label: "AI模型配置",
                         icon: <i className="fa-solid fa-sliders"></i>,
                         key: "ai_model_config",
-                        onClick: () => onMenuClick('/admin/config/ai_model_config')
+                        onClick: () => loadJsonPage('/admin/config/ai_model_config')
                     },
                     {
                         label: "用户管理",
                         icon: <i className="fa-solid fa-user-gear"></i>,
                         key: "user_management",
-                        onClick: () => onMenuClick('/admin/user/user')
+                        onClick: () => loadJsonPage('/admin/user/user')
                     },
                     {
                         label: "用户组管理",
                         icon: <i className="fa-solid fa-users-gear"></i>,
                         key: "user_group_management",
-                        onClick: () => onMenuClick('/admin/user/user_group')
+                        onClick: () => loadJsonPage('/admin/user/user_group')
                     },
                     {
                         label: "MCP管理",
                         icon: <i className="fa-solid fa-server"></i>,
                         key: "mcp_management",
-                        onClick: () => onMenuClick('/admin/mcp/mcp')
+                        onClick: () => loadJsonPage('/admin/mcp/mcp')
                     },
                     {
                         label: "MCP执行记录",
                         icon: <i className="fa-solid fa-history"></i>,
                         key: "mcp_tool_log",
-                        onClick: () => onMenuClick('/admin/mcp/mcp_log')
+                        onClick: () => loadJsonPage('/admin/mcp/mcp_log')
                     },
                     {
                         label: "指标显示翻转",
                         icon: <i className="fa-solid fa-arrows-rotate"></i>,
                         key: "condition_reverse",
-                        onClick: () => onMenuClick('/admin/config/condition')
+                        onClick: () => loadJsonPage('/admin/config/condition')
                     },
                     {
                         label: "单点登录",
                         icon: <i className="fa-solid fa-right-to-bracket"></i>,
                         key: "sso_config",
-                        onClick: () => onMenuClick('/admin/config/sso_config')
+                        onClick: () => loadJsonPage('/admin/config/sso_config')
                     }
                 ],
             },
@@ -805,25 +805,25 @@ const items: () => MenuItem[] = () => {
                     label: "登录设置",
                     icon: <i className="fa-solid fa-key"></i>,
                     key: "user_profile_login_settings",
-                    onClick: () => onMenuClick('/user/profile/login_settings')
+                    onClick: () => loadJsonPage('/user/profile/login_settings')
                 },
                 {
                     label: "我的集群",
                     icon: <i className="fa-solid fa-server"></i>,
                     key: "user_profile_clusters",
-                    onClick: () => onMenuClick('/user/profile/my_clusters')
+                    onClick: () => loadJsonPage('/user/profile/my_clusters')
                 },
                 {
                     label: "API密钥",
                     icon: <i className="fa-solid fa-key"></i>,
                     key: "user_profile_api_keys",
-                    onClick: () => onMenuClick('/user/profile/api_keys')
+                    onClick: () => loadJsonPage('/user/profile/api_keys')
                 },
                 {
                     label: "开放MCP",
                     icon: <i className="fa-solid fa-share-nodes"></i>,
                     key: "user_profile_mcp_keys",
-                    onClick: () => onMenuClick('/user/profile/mcp_keys')
+                    onClick: () => loadJsonPage('/user/profile/mcp_keys')
                 },
 
             ],
@@ -840,7 +840,7 @@ const items: () => MenuItem[] = () => {
             title: "关于",
             icon: <i className="fa-solid fa-circle-info"></i>,
             key: "about",
-            onClick: () => onMenuClick('/about/about')
+            onClick: () => loadJsonPage('/about/about')
         },
     ];
 }
