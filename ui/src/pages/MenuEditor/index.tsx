@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Form, Input, InputNumber, message, Modal, Select, Space, Tag, Tabs, Tree} from 'antd';
+import {Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree} from 'antd';
 import {PlusOutlined, EditOutlined, DeleteOutlined} from '@ant-design/icons';
 import type {DataNode} from 'antd/es/tree';
 
@@ -231,7 +231,7 @@ const MenuEditor: React.FC = () => {
             // 拖到节点之间
             let ar: MenuItem[] = data;
             let i: number;
-            loop(data, dropKey, (item, idx, arr) => {
+            loop(data, dropKey, (_, idx, arr) => {
                 ar = arr;
                 i = idx;
             });
