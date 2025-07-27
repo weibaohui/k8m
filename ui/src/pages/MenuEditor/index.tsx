@@ -352,7 +352,7 @@ const MenuEditor: React.FC = () => {
         <>
             <div style={{
                 display: 'flex',
-                height: '80vh',
+                height: '100vh',
                 border: '1px solid #eee',
                 borderRadius: 8,
                 overflow: 'hidden'
@@ -434,10 +434,10 @@ const MenuEditor: React.FC = () => {
                                 <ul>
                                     <li><code>true</code> 或 <code>false</code>：直接控制显示</li>
                                     <li><code>contains('admin', user.role)</code>：检查用户角色是否包含指定字符串</li>
-                                    <li><code>isGatewayAPISupported()</code>：检查集群是否支持Gateway API</li>
-                                    <li><code>isIstioSupported()</code>：检查集群是否支持Istio</li>
-                                    <li><code>isOpenKruiseSupported()</code>：检查集群是否支持OpenKruise</li>
-                                    <li><code>isPlatformAdmin()</code>：检查用户是否为平台管理员</li>
+                                    <li><code>isGatewayAPISupported()==true</code>：检查集群是否支持Gateway API</li>
+                                    <li><code>isIstioSupported()==true</code>：检查集群是否支持Istio</li>
+                                    <li><code>isOpenKruiseSupported()==true</code>：检查集群是否支持OpenKruise</li>
+                                    <li><code>isPlatformAdmin()==true</code>：检查用户是否为平台管理员</li>
                                 </ul>
                             </li>
                         </ul>
