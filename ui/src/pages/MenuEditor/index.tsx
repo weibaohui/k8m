@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree} from 'antd';
 import {PlusOutlined, EditOutlined, DeleteOutlined} from '@ant-design/icons';
 import type {DataNode} from 'antd/es/tree';
+import {useNavigate} from 'react-router-dom';
 
 import IconPicker from '@/components/IconPicker';
 import {MenuItem} from '@/types/menu';
@@ -11,6 +12,7 @@ import Preview from './Preview.tsx';
 
 
 const MenuEditor: React.FC = () => {
+    const navigate = useNavigate();
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
     const [history, setHistory] = useState<{ data: MenuItem[], time: string }[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
@@ -355,7 +357,7 @@ const MenuEditor: React.FC = () => {
                         </Button>
                     )}
                     {isPreview ? (
-                        <Preview menuData={menuData}/>
+                        <Preview menuData={menuData} navigate={navigate}/>
                     ) : (
                         <Tree
                             treeData={convertToTreeData(menuData)}

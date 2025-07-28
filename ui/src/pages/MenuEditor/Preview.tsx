@@ -3,11 +3,12 @@ import {message, Tree} from 'antd';
 import {MenuItem} from '@/types/menu';
 import {Parser} from 'expr-eval'; // 引入 expr-eval
 import {fetcher} from '@/components/Amis/fetcher';
-import {useNavigate} from "react-router-dom";
+import {useNavigate, NavigateFunction} from "react-router-dom";
 
 interface PreviewProps {
     menuData: MenuItem[];
     onMenuClick?: (key: string) => void;
+    navigate?: NavigateFunction; // 添加可选的 navigate 属性
 }
 
 // 定义用户角色接口
@@ -23,8 +24,21 @@ interface CRDSupportedStatus {
 }
 
 
-const Preview: React.FC<PreviewProps> = ({menuData}) => {
-    const navigate = useNavigate()
+const Preview: React.FC<PreviewProps> = ({menuData, navigate: propNavigate}) => {
+    // 尝试使用传入的 navigate 或者 useNavigate hook
+    let navigateFunc: NavigateFunction | undefined;
+
+    try {
+        // 尝试使用 React Router 的 useNavigate hook
+        const routerNavigate = useNavigate();
+        navigateFunc = propNavigate || routerNavigate;
+    } catch (error) {
+        // 如果不在 Router 上下文中，使用传入的 navigate 或者提供一个空函数
+        navigateFunc = propNavigate || (path => {
+            console.warn('Navigation attempted outside Router context to:', path);
+            // 可以在这里添加备用导航逻辑，例如使用 window.location
+        });
+    }
 
     const [userRole, setUserRole] = useState<string>('');
     const [isGatewayAPISupported, setIsGatewayAPISupported] = useState<boolean>(false);
@@ -87,7 +101,11 @@ const Preview: React.FC<PreviewProps> = ({menuData}) => {
                     // 创建一个函数执行上下文
                     const context = {
                         loadJsonPage: (path: string) => {
-                            navigate(path)
+                            if (navigateFunc) {
+                                navigateFunc(path);
+                            } else {
+                                console.warn('Navigation attempted but navigate function is not available');
+                            }
                         }
                     };
 
