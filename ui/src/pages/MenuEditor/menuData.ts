@@ -1,4 +1,4 @@
-import { MenuItem } from '@/types/menu';
+import {MenuItem} from '@/types/menu';
 
 export const initialMenu: MenuItem[] = [
     {
@@ -23,14 +23,7 @@ export const initialMenu: MenuItem[] = [
                 customEvent: '() => loadJsonPage("/cluster/summary_view")',
                 order: 2,
             },
-            {
-                key: 'namespace',
-                title: '命名空间',
-                icon: 'fa-solid fa-folder',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/cluster/namespace")',
-                order: 3,
-            },
+             
             {
                 key: 'node',
                 title: '节点',

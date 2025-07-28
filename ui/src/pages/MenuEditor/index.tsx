@@ -35,38 +35,6 @@ const MenuEditor: React.FC = () => {
 
     }, [form]);
 
-    const handleMenuClick = (key: string) => {
-        const item = findMenuItem(menuData, key);
-        if (item) {
-            if (item.eventType === 'url' && item.url) {
-                window.open(item.url, '_blank');
-            } else if (item.eventType === 'custom' && item.customEvent) {
-                try {
-                    // 创建一个函数执行上下文
-                    const context = {
-                        onMenuClick: (path: string) => {
-                            // 这里实现onMenuClick的逻辑
-                            console.log(`执行自定义菜单点击: ${path}`);
-                            // 可以根据需要添加路由跳转或其他逻辑
-                        },
-                        message
-                    };
-
-                    // 构建并执行自定义函数
-                    const func = new Function(...Object.keys(context), `return ${item.customEvent}`);
-                    const result = func(...Object.values(context));
-
-                    // 如果是函数，执行它
-                    if (typeof result === 'function') {
-                        result();
-                    }
-                } catch (error) {
-                    console.error('自定义事件执行错误:', error);
-                    message.error('自定义事件执行错误');
-                }
-            }
-        }
-    };
 
     // 处理图标选择
     const handleIconSelect = (iconValue: string) => {
@@ -225,11 +193,11 @@ const MenuEditor: React.FC = () => {
     const handleEdit = (key?: string) => {
         const editKey = key || selectedKey;
         if (!editKey) return;
-    
+
         setEditMode('edit');
         setParentKey(null);
         setSelectedKey(editKey);
-    
+
         const item = findMenuItem(menuData, editKey);
         if (item) {
             form.resetFields();
@@ -292,7 +260,7 @@ const MenuEditor: React.FC = () => {
             // 关闭Modal并重置表单
             setEditMode(null);
             form.resetFields();
-           
+
         });
     };
 
@@ -336,8 +304,8 @@ const MenuEditor: React.FC = () => {
         });
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
-         // 输出最终菜单JSON
-         console.log("Final Menu JSON:", JSON.stringify(data, null, 2));
+        // 输出最终菜单JSON
+        console.log("Final Menu JSON:", JSON.stringify(data, null, 2));
     };
 
     // 恢复历史记录
@@ -387,7 +355,7 @@ const MenuEditor: React.FC = () => {
                         </Button>
                     )}
                     {isPreview ? (
-                        <Preview menuData={menuData} onMenuClick={handleMenuClick}/>
+                        <Preview menuData={menuData}/>
                     ) : (
                         <Tree
                             treeData={convertToTreeData(menuData)}
@@ -441,7 +409,7 @@ const MenuEditor: React.FC = () => {
                                 </ul>
                             </li>
                         </ul>
-                        
+
                     </div>
                 </div>
 
@@ -492,8 +460,7 @@ const MenuEditor: React.FC = () => {
                                                                         </pre>
                                                                 </Tabs.TabPane>
                                                                 <Tabs.TabPane tab="菜单预览" key="2">
-                                                                    <Preview menuData={record.data}
-                                                                             onMenuClick={handleMenuClick}/>
+                                                                    <Preview menuData={record.data}/>
                                                                 </Tabs.TabPane>
                                                             </Tabs>
                                                         </div>
@@ -595,19 +562,19 @@ const MenuEditor: React.FC = () => {
                         <Form.Item label="排序" name="order">
                             <InputNumber min={1}/>
                         </Form.Item>
-                    
-                    {/* 修改显示控制部分 */}
-                    <Form.Item 
-                        label="显示表达式" 
-                        name="show" 
-                        rules={[{ required: true, message: '请输入显示表达式' }]}
-                    >
-                        <Input.TextArea 
-                            rows={3} 
-                            placeholder="请输入JavaScript表达式，例如: true 或 user.role === 'admin'"
-                        />
-                    </Form.Item>
-                </Form>
+
+                        {/* 修改显示控制部分 */}
+                        <Form.Item
+                            label="显示表达式"
+                            name="show"
+                            rules={[{required: true, message: '请输入显示表达式'}]}
+                        >
+                            <Input.TextArea
+                                rows={3}
+                                placeholder="请输入JavaScript表达式，例如: true 或 user.role === 'admin'"
+                            />
+                        </Form.Item>
+                    </Form>
                 </Modal>
             </div>
 
