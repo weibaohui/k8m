@@ -1,4 +1,4 @@
-import { MenuItem } from '@/types/menu';
+import {MenuItem} from '@/types/menu';
 
 export const initialMenu: MenuItem[] = [
     {
@@ -126,7 +126,7 @@ export const initialMenu: MenuItem[] = [
         title: 'OpenKruise',
         icon: 'fa-solid fa-cube',
         order: 8,
-        show: 'isOpenKruiseSupported()',
+        show: 'isOpenKruiseSupported()==true',
         children: [
             {
                 key: 'advanced-cloneset',
@@ -247,7 +247,7 @@ export const initialMenu: MenuItem[] = [
         title: 'Istio',
         icon: 'fa-solid fa-cube',
         order: 9,
-        show: 'isIstioSupported()',
+        show: 'isIstioSupported()==true',
         children: [
             {
                 key: 'isito-VirtualService',
@@ -376,6 +376,7 @@ export const initialMenu: MenuItem[] = [
                 eventType: 'custom',
                 customEvent: '() => loadJsonPage("/helm/repo")',
                 order: 1,
+                show: 'isPlatformAdmin()==true',
             },
             {
                 key: 'helm_chart',
@@ -472,7 +473,7 @@ export const initialMenu: MenuItem[] = [
         title: '网关API',
         icon: 'fa-solid fa-door-closed',
         order: 13,
-        show: 'isGatewayAPISupported()',
+        show: 'isGatewayAPISupported()==true',
         children: [
             {
                 key: 'gatewayapi_gateway_class',
@@ -746,7 +747,7 @@ export const initialMenu: MenuItem[] = [
         title: '平台设置',
         icon: 'fa-solid fa-wrench',
         order: 17,
-        show: 'userRole === "platform_admin"',
+        show: 'isPlatformAdmin()==true',
         children: [
             {
                 key: 'cluster_all',
