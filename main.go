@@ -203,7 +203,7 @@ func main() {
 	// @securityDefinitions.apikey BearerAuth
 	// @in header
 	// @name Authorization
-	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。
+	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 直接返回 index.html
@@ -227,315 +227,125 @@ func main() {
 
 	auth := r.Group("/auth")
 	{
-		auth.POST("/login", login.LoginByPassword)
-		auth.GET("/sso/config", sso.GetSSOConfig)
-		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
-		auth.GET("/oidc/:name/callback", sso.HandleCallback)
-		auth.GET("/ldap/config", config.GetLdapConfig)
+		login.RegisterLoginRoutes(auth)
+		sso.RegisterAuthRoutes(auth)
 	}
 
 	// 公共参数
 	params := r.Group("/params", middleware.AuthMiddleware())
 	{
-		// 获取当前登录用户的角色，登录即可
-		params.GET("/user/role", param.UserRole)
-		// 获取某个配置项
-		params.GET("/config/:key", param.Config)
-		// 获取当前登录用户的集群列表,下拉列表
-		params.GET("/cluster/option_list", param.ClusterOptionList)
-		// 获取当前登录用户的集群列表,table列表
-		params.GET("/cluster/all", param.ClusterTableList)
-		// 获取当前软件版本信息
-		params.GET("/version", param.Version)
-		// 获取helm 仓库列表
-		params.GET("/helm/repo/option_list", param.RepoOptionList)
-
-		// 获取翻转显示的指标列表
-		params.GET("/condition/reverse/list", param.Conditions)
-
+		param.RegisterParamRoutes(params)
 	}
 	ai := r.Group("/ai", middleware.AuthMiddleware())
 	{
-
-		// chatgpt
-		ai.GET("/chat/event", chat.Event)
-		ai.GET("/chat/log", chat.Log)
-		ai.GET("/chat/cron", chat.Cron)
-		ai.GET("/chat/describe", chat.Describe)
-		ai.GET("/chat/resource", chat.Resource)
-		ai.GET("/chat/any_question", chat.AnyQuestion)
-		ai.GET("/chat/any_selection", chat.AnySelection)
-		ai.GET("/chat/example", chat.Example)
-		ai.GET("/chat/example/field", chat.FieldExample)
-		ai.GET("/chat/ws_chatgpt", chat.GPTShell)
-		ai.GET("/chat/ws_chatgpt/history", chat.History)
-		ai.GET("/chat/ws_chatgpt/history/reset", chat.Reset)
-		ai.GET("/chat/k8s_gpt/resource", chat.K8sGPTResource)
-
+		chat.RegisterChatRoutes(ai)
 	}
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
+
 		// cluster
-		api.GET("/status/resource_count/cache_seconds/:cache", cluster_status.ClusterResourceCount)
-		// dynamic
-		api.POST("/yaml/apply", dynamic.Apply)
-		api.POST("/yaml/upload", dynamic.UploadFile)
-		api.POST("/yaml/delete", dynamic.Delete)
-		// CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", dynamic.Fetch)                         // CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", dynamic.FetchJson)                // CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", dynamic.Event)                   // CRD
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/hpa", dynamic.HPA)                       // CRD
-		api.POST("/:kind/group/:group/version/:version/ns/:ns/name/:name/scale/replica/:replica", dynamic.Scale) // CRD
-		api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", dynamic.Remove)                // CRD
-		api.POST("/:kind/group/:group/version/:version/batch/remove", dynamic.BatchRemove)                       // CRD
-		api.POST("/:kind/group/:group/version/:version/force_remove", dynamic.BatchForceRemove)                  // CRD
-		api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", dynamic.Save)                  // CRD       // CRD
-		api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", dynamic.Describe)            // CRD
-		api.POST("/:kind/group/:group/version/:version/list/ns/:ns", dynamic.List)                               // CRD
-		api.POST("/:kind/group/:group/version/:version/list/ns/", dynamic.List)                                  // CRD
-		api.POST("/:kind/group/:group/version/:version/list", dynamic.List)
-		api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", dynamic.UpdateLabels)           // CRD
-		api.GET("/:kind/group/:group/version/:version/annotations/ns/:ns/name/:name", dynamic.ListAnnotations)           // CRD
-		api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", dynamic.UpdateAnnotations) // CRD
-		api.GET("/crd/group/option_list", dynamic.GroupOptionList)
-		api.GET("/crd/kind/option_list", dynamic.KindOptionList)
-		api.GET("/crd/status", dynamic.CRDStatus)
+		cluster_status.RegisterClusterRoutes(api)
+		// CRD status
+		dynamic.RegisterCRDRoutes(api)
+
+		// CRD action
+		dynamic.RegisterActionRoutes(api)
+
+		dynamic.RegisterMetadataRoutes(api)
 		// Container 信息
-		api.GET("/:kind/group/:group/version/:version/container_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerInfo)
-		api.GET("/:kind/group/:group/version/:version/container_resources_info/ns/:ns/name/:name/container/:container_name", dynamic.ContainerResourcesInfo)
-		api.GET("/:kind/group/:group/version/:version/image_pull_secrets/ns/:ns/name/:name", dynamic.ImagePullSecretOptionList)
-		api.GET("/:kind/group/:group/version/:version/container_health_checks/ns/:ns/name/:name/container/:container_name", dynamic.ContainerHealthChecksInfo)
-		api.GET("/:kind/group/:group/version/:version/container_env/ns/:ns/name/:name/container/:container_name", dynamic.ContainerEnvInfo)
-
-		api.POST("/:kind/group/:group/version/:version/update_image/ns/:ns/name/:name", dynamic.UpdateImageTag)
-		api.POST("/:kind/group/:group/version/:version/update_resources/ns/:ns/name/:name", dynamic.UpdateResources)
-		api.POST("/:kind/group/:group/version/:version/update_health_checks/ns/:ns/name/:name", dynamic.UpdateHealthChecks)
-		api.POST("/:kind/group/:group/version/:version/update_env/ns/:ns/name/:name", dynamic.UpdateContainerEnv)
-
+		dynamic.RegisterContainerRoutes(api)
 		// 节点亲和性
-		api.POST("/:kind/group/:group/version/:version/update_node_affinity/ns/:ns/name/:name", dynamic.UpdateNodeAffinity)
-		api.POST("/:kind/group/:group/version/:version/delete_node_affinity/ns/:ns/name/:name", dynamic.DeleteNodeAffinity)
-		api.POST("/:kind/group/:group/version/:version/add_node_affinity/ns/:ns/name/:name", dynamic.AddNodeAffinity)
-		api.GET("/:kind/group/:group/version/:version/list_node_affinity/ns/:ns/name/:name", dynamic.ListNodeAffinity)
+		dynamic.RegisterNodeAffinityRoutes(api)
 		// Pod亲和性
-		api.POST("/:kind/group/:group/version/:version/update_pod_affinity/ns/:ns/name/:name", dynamic.UpdatePodAffinity)
-		api.POST("/:kind/group/:group/version/:version/delete_pod_affinity/ns/:ns/name/:name", dynamic.DeletePodAffinity)
-		api.POST("/:kind/group/:group/version/:version/add_pod_affinity/ns/:ns/name/:name", dynamic.AddPodAffinity)
-		api.GET("/:kind/group/:group/version/:version/list_pod_affinity/ns/:ns/name/:name", dynamic.ListPodAffinity)
+		dynamic.RegisterPodAffinityRoutes(api)
 		// Pod反亲和性
-		api.POST("/:kind/group/:group/version/:version/update_pod_anti_affinity/ns/:ns/name/:name", dynamic.UpdatePodAntiAffinity)
-		api.POST("/:kind/group/:group/version/:version/delete_pod_anti_affinity/ns/:ns/name/:name", dynamic.DeletePodAntiAffinity)
-		api.POST("/:kind/group/:group/version/:version/add_pod_anti_affinity/ns/:ns/name/:name", dynamic.AddPodAntiAffinity)
-		api.GET("/:kind/group/:group/version/:version/list_pod_anti_affinity/ns/:ns/name/:name", dynamic.ListPodAntiAffinity)
+		dynamic.RegisterPodAntiAffinityRoutes(api)
 		// 容忍度
-		api.POST("/:kind/group/:group/version/:version/update_tolerations/ns/:ns/name/:name", dynamic.UpdateTolerations)
-		api.POST("/:kind/group/:group/version/:version/delete_tolerations/ns/:ns/name/:name", dynamic.DeleteTolerations)
-		api.POST("/:kind/group/:group/version/:version/add_tolerations/ns/:ns/name/:name", dynamic.AddTolerations)
-		api.GET("/:kind/group/:group/version/:version/list_tolerations/ns/:ns/name/:name", dynamic.ListTolerations)
+		dynamic.RegisterTolerationRoutes(api)
 
 		// Pod关联资源
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", dynamic.LinksServices)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", dynamic.LinksEndpoints)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", dynamic.LinksPVC)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", dynamic.LinksPV)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", dynamic.LinksIngress)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", dynamic.LinksEnv)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", dynamic.LinksEnvFromPod)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", dynamic.LinksConfigMap)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", dynamic.LinksSecret)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", dynamic.LinksNode)
-		api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pod", dynamic.LinksPod)
-
+		dynamic.RegisterPodLinkRoutes(api)
 		// k8s pod
-		api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", pod.StreamLogs)
-		api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", pod.DownloadLogs)
-		api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", pod.Xterm)
-		api.GET("/pod/top/ns/:ns/list", pod.TopList)
+		pod.RegisterLabelRoutes(api)
+		pod.RegisterLogRoutes(api)
+		pod.RegisterXtermRoutes(api)
+		// pod 文件浏览上传下载
+		pod.RegisterPodFileRoutes(api)
+		// Pod 资源使用情况
+		pod.RegisterResourceRoutes(api)
+		// Pod 端口转发
+		pod.RegisterPortRoutes(api)
 
 		// k8s deploy
-		api.POST("/deploy/ns/:ns/name/:name/restart", deploy.Restart)
-		api.POST("/deploy/batch/restart", deploy.BatchRestart)
-		api.POST("/deploy/batch/stop", deploy.BatchStop)
-		api.POST("/deploy/batch/restore", deploy.BatchRestore)
-		api.POST("/deploy/ns/:ns/name/:name/revision/:revision/rollout/undo", deploy.Undo)
-		api.GET("/deploy/ns/:ns/name/:name/rollout/history", deploy.History)
-		api.GET("/deploy/ns/:ns/name/:name/revision/:revision/rollout/history", deploy.HistoryRevisionDiff)
-		api.POST("/deploy/ns/:ns/name/:name/rollout/pause", deploy.Pause)
-		api.POST("/deploy/ns/:ns/name/:name/rollout/resume", deploy.Resume)
-		api.POST("/deploy/ns/:ns/name/:name/scale/replica/:replica", deploy.Scale)
-		api.GET("/deploy/ns/:ns/name/:name/events/all", deploy.Event)
-		api.GET("/deploy/ns/:ns/name/:name/hpa", deploy.HPA)
-		api.POST("/deploy/create", deploy.Create)
+		deploy.RegisterActionRoutes(api)
 		// p8s svc
-		api.POST("/service/create", svc.Create)
+		svc.RegisterActionRoutes(api)
 		// k8s node
-		api.POST("/node/drain/name/:name", node.Drain)
-		api.POST("/node/cordon/name/:name", node.Cordon)
-		api.POST("/node/uncordon/name/:name", node.UnCordon)
-		api.GET("/node/usage/name/:name", node.Usage)
-		api.POST("/node/batch/drain", node.BatchDrain)
-		api.POST("/node/batch/cordon", node.BatchCordon)
-		api.POST("/node/batch/uncordon", node.BatchUnCordon)
-		api.GET("/node/name/option_list", node.NameOptionList)
-		api.GET("/node/labels/list", node.AllLabelList)
-		api.GET("/node/labels/unique_labels", node.UniqueLabels)
-		api.GET("/node/taints/list", node.AllTaintList)
-		api.GET("/node/top/list", node.TopList)
-		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
-		api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", node.CreateKubectlShell)
-
-		// 污点
-		api.POST("/node/update_taints/name/:name", node.UpdateTaint)
-		api.POST("/node/delete_taints/name/:name", node.DeleteTaint)
-		api.POST("/node/add_taints/name/:name", node.AddTaint)
-		api.GET("/node/list_taints/name/:name", node.ListTaint)
-
+		node.RegisterActionRoutes(api)
+		// 资源情况
+		node.RegisterResourceRoutes(api)
+		// 节点污点
+		node.RegisterTaintRoutes(api)
+		// label等基础信息
+		node.RegisterMetadataRoutes(api)
+		node.RegisterShellRoutes(api)
 		// k8s ns
-		api.GET("/ns/option_list", ns.OptionList)
-		api.POST("/ResourceQuota/create", ns.CreateResourceQuota)
-		api.POST("/LimitRange/create", ns.CreateLimitRange)
+		ns.RegisterRoutes(api)
+		// yaml
+		dynamic.RegisterYamlRoutes(api)
 
 		// k8s sts
-		api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", sts.Undo)
-		api.GET("/statefulset/ns/:ns/name/:name/rollout/history", sts.History)
-		api.POST("/statefulset/ns/:ns/name/:name/restart", sts.Restart)
-		api.POST("/statefulset/batch/restart", sts.BatchRestart)
-		api.POST("/statefulset/batch/stop", sts.BatchStop)
-		api.POST("/statefulset/batch/restore", sts.BatchRestore)
-		api.POST("/statefulset/ns/:ns/name/:name/scale/replica/:replica", sts.Scale)
-		api.GET("/statefulset/ns/:ns/name/:name/hpa", sts.HPA)
-
+		sts.RegisterRoutes(api)
 		// k8s ds
-		api.POST("/daemonset/ns/:ns/name/:name/revision/:revision/rollout/undo", ds.Undo)
-		api.GET("/daemonset/ns/:ns/name/:name/rollout/history", ds.History)
-		api.POST("/daemonset/ns/:ns/name/:name/restart", ds.Restart)
-		api.POST("/daemonset/batch/restart", ds.BatchRestart)
-		api.POST("/daemonset/batch/stop", ds.BatchStop)
-		api.POST("/daemonset/batch/restore", ds.BatchRestore)
+		ds.RegisterRoutes(api)
 
 		// k8s rs
-		api.POST("/replicaset/ns/:ns/name/:name/restart", rs.Restart)
-		api.POST("/replicaset/batch/restart", rs.BatchRestart)
-		api.POST("/replicaset/batch/stop", rs.BatchStop)
-		api.POST("/replicaset/batch/restore", rs.BatchRestore)
-		api.GET("/replicaset/ns/:ns/name/:name/events/all", rs.Event)
-		api.GET("/replicaset/ns/:ns/name/:name/hpa", rs.HPA)
-
+		rs.RegisterRoutes(api)
 		// k8s configmap
-		api.POST("/configmap/ns/:ns/name/:name/import", cm.Import)
-		api.POST("/configmap/ns/:ns/name/:name/:key/update_configmap", cm.Update)
-		api.POST("/configmap/create", cm.Create)
+		cm.RegisterRoutes(api)
 		// k8s cronjob
-		api.POST("/cronjob/pause/ns/:ns/name/:name", cronjob.Pause)
-		api.POST("/cronjob/resume/ns/:ns/name/:name", cronjob.Resume)
-		api.POST("/cronjob/batch/resume", cronjob.BatchResume)
-		api.POST("/cronjob/batch/pause", cronjob.BatchPause)
-
+		cronjob.RegisterRoutes(api)
 		// k8s storage_class
-		api.POST("/storage_class/set_default/name/:name", storageclass.SetDefault)
-		api.GET("/storage_class/option_list", storageclass.OptionList)
+		storageclass.RegisterRoutes(api)
 		// k8s ingress_class
-		api.POST("/ingress_class/set_default/name/:name", ingressclass.SetDefault)
-		api.GET("/ingress_class/option_list", ingressclass.OptionList)
-
+		ingressclass.RegisterRoutes(api)
 		// k8s gateway_class
-		api.GET("/gateway_class/option_list", gatewayapi.GatewayClassOptionList)
-
+		gatewayapi.RegisterRoutes(api)
 		// doc
-		api.GET("/doc/gvk/:api_version/:kind", doc.Doc)
-		api.GET("/doc/kind/:kind/group/:group/version/:version", doc.Doc)
-		api.POST("/doc/detail", doc.Detail)
-
-		api.GET("/k8s_gpt/kind/:kind/run", k8sgpt.ResourceRunAnalysis)
-		api.POST("/k8s_gpt/cluster/:user_cluster/run", k8sgpt.ClusterRunAnalysis)
-		api.GET("/k8s_gpt/cluster/:user_cluster/result", k8sgpt.GetClusterRunAnalysisResult)
-		api.GET("/k8s_gpt/var", k8sgpt.GetFields)
-
-		// pod 文件浏览上传下载
-		api.POST("/file/list", pod.FileList)
-		api.POST("/file/show", pod.ShowFile)
-		api.POST("/file/save", pod.SaveFile)
-		api.GET("/file/download", pod.DownloadFile)
-		api.POST("/file/upload", pod.UploadFile)
-		api.POST("/file/delete", pod.DeleteFile)
-		// Pod 资源使用情况
-		api.GET("/pod/usage/ns/:ns/name/:name", pod.Usage)
-		api.GET("/pod/labels/unique_labels", pod.UniqueLabels)
-		// Pod 端口转发
-		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", pod.StartPortForward)
-		api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", pod.StopPortForward)
-		api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", pod.PortForwardList)
-
-		api.GET("/helm/release/list", helm.ListRelease)
-		api.GET("/helm/release/ns/:ns/name/:name/history/list", helm.ListReleaseHistory)
-		api.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", helm.InstallRelease)
-		api.POST("/helm/release/ns/:ns/name/:name/uninstall", helm.UninstallRelease)
-		api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/values", helm.GetReleaseValues)
-		api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/notes", helm.GetReleaseNote)
-		api.POST("/helm/release/batch/uninstall", helm.BatchUninstallRelease)
-		api.POST("/helm/release/upgrade", helm.UpgradeRelease)
-		api.GET("/helm/chart/list", helm.ListChart)
-		api.GET("/helm/repo/:repo/chart/:chart/versions", helm.ChartVersionOptionList)
-		api.GET("/helm/repo/:repo/chart/:chart/version/:version/values", helm.GetChartValue)
-		// helm
-		api.GET("/helm/repo/list", helm.ListRepo)
-		api.POST("/helm/repo/delete/:ids", helm.DeleteRepo)
-		api.POST("/helm/repo/update_index", helm.UpdateReposIndex)
-		api.POST("/helm/repo/save", helm.AddOrUpdateRepo)
+		doc.RegisterRoutes(api)
+		k8sgpt.RegisterRoutes(api)
+		// helm release
+		helm.RegisterHelmReleaseRoutes(api)
 
 	}
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
 	{
-
-		mgm.GET("/custom/template/kind/list", template.ListKind)
-		mgm.GET("/custom/template/list", template.ListTemplate)
-		mgm.POST("/custom/template/save", template.SaveTemplate)
-		mgm.POST("/custom/template/delete/:ids", template.DeleteTemplate)
-
+		template.RegisterTemplateRoutes(mgm)
 		// user profile 用户自助操作
-		mgm.GET("/user/profile", profile.Profile)
-		mgm.GET("/user/profile/cluster/permissions/list", profile.ListUserPermissions)
-		mgm.POST("/user/profile/update_psw", profile.UpdatePsw)
-		// user profile 2FA 用户自助操作
-		mgm.POST("/user/profile/2fa/generate", profile.Generate2FASecret)
-		mgm.POST("/user/profile/2fa/disable", profile.Disable2FA)
-		mgm.POST("/user/profile/2fa/enable", profile.Enable2FA)
-
+		profile.RegisterProfileRoutes(mgm)
 		// API密钥管理
-		mgm.GET("/user/profile/apikeys/list", apikey.List)
-		mgm.POST("/user/profile/apikeys/create", apikey.Create)
-		mgm.POST("/user/profile/apikeys/delete/:id", apikey.Delete)
-
+		apikey.RegisterAPIKeysRoutes(mgm)
 		// MCP密钥管理
-		mgm.GET("/user/profile/mcpkeys/list", mcpkey.List)
-		mgm.POST("/user/profile/mcpkeys/create", mcpkey.Create)
-		mgm.POST("/user/profile/mcpkeys/delete/:id", mcpkey.Delete)
-
+		mcpkey.RegisterMCPKeysRoutes(mgm)
 		// log
-		mgm.GET("/log/shell/list", log.ListShell)
-		mgm.GET("/log/operation/list", log.ListOperation)
+		log.RegisterLogRoutes(mgm)
 		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
-
+		// helm chart
+		helm.RegisterHelmChartRoutes(mgm)
 	}
 
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
 	{
 		// condition
-		admin.GET("/condition/list", config.ConditionList)
-		admin.POST("/condition/save", config.ConditionSave)
-		admin.POST("/condition/delete/:ids", config.ConditionDelete)
-		// 指标翻转状态修改
-		admin.POST("/condition/save/id/:id/status/:status", config.ConditionQuickSave)
-
-		// SSO 配置
-		admin.GET("/config/sso/list", config.SSOConfigList)
-		admin.POST("/config/sso/save", config.SSOConfigSave)
-		admin.POST("/config/sso/delete/:ids", config.SSOConfigDelete)
-		admin.POST("/config/sso/save/id/:id/status/:enabled", config.SSOConfigQuickSave)
-
+		config.RegisterConditionRoutes(admin)
+		// sso
+		config.RegisterSSOConfigRoutes(admin)
+		// 平台参数配置
+		config.RegisterConfigRoutes(admin)
+		// 大模型列表管理
+		config.RegisterAIModelConfigRoutes(admin)
 		// 集群巡检定时任务
 		inspection.RegisterAdminScheduleRoutes(admin)
 		// 集群巡检记录
@@ -544,13 +354,7 @@ func main() {
 		inspection.RegisterAdminLuaScriptRoutes(admin)
 		// 集群巡检webhook管理
 		inspection.RegisterAdminWebhookRoutes(admin)
-
-		// 平台参数配置
-		admin.GET("/config/all", config.GetConfig)
-		admin.POST("/config/update", config.UpdateConfig)
-
-		// 大模型列表管理
-		config.RegisterAIModelConfigRoutes(admin)
+		// MCP配置
 		mcp.RegisterMCPServerRoutes(admin)
 		mcp.RegisterMCPToolRoutes(admin)
 		// 集群授权相关
@@ -559,16 +363,10 @@ func main() {
 		user.RegisterAdminUserRoutes(admin)
 		// 用户组管理相关
 		user.RegisterAdminUserGroupRoutes(admin)
-		// LDAP配置管理相关
-		admin.GET("/config/ldap/list", config.LDAPConfigList)
-		admin.GET("/config/ldap/:id", config.LDAPConfigDetail)
-		admin.POST("/config/ldap/save", config.LDAPConfigSave)
-		admin.POST("/config/ldap/delete/:ids", config.LDAPConfigDelete)
-		admin.POST("/config/ldap/save/id/:id/status/:enabled", config.LDAPConfigQuickSave)
-		admin.POST("/config/ldap/test_connect", config.LDAPConfigTestConnect)
 		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
-
+		// helm Repo 操作
+		helm.RegisterHelmRepoRoutes(admin)
 	}
 
 	showBootInfo(Version, cfg.Port)
