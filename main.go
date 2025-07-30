@@ -231,7 +231,7 @@ func main() {
 		auth.GET("/sso/config", sso.GetSSOConfig)
 		auth.GET("/oidc/:name/sso", sso.GetAuthCodeURL)
 		auth.GET("/oidc/:name/callback", sso.HandleCallback)
-		auth.GET("/ldap/config", sso.GetLdapEnabled)
+		auth.GET("/ldap/config", config.GetLdapConfig)
 	}
 
 	// 公共参数
@@ -385,7 +385,7 @@ func main() {
 		api.POST("/node/name/:node_name/create_node_shell", node.CreateNodeShell)
 		api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", node.CreateKubectlShell)
 
-		// 节点污点
+		// 污点
 		api.POST("/node/update_taints/name/:name", node.UpdateTaint)
 		api.POST("/node/delete_taints/name/:name", node.DeleteTaint)
 		api.POST("/node/add_taints/name/:name", node.AddTaint)
@@ -559,6 +559,13 @@ func main() {
 		user.RegisterAdminUserRoutes(admin)
 		// 用户组管理相关
 		user.RegisterAdminUserGroupRoutes(admin)
+		// LDAP配置管理相关
+		admin.GET("/config/ldap/list", config.LDAPConfigList)
+		admin.GET("/config/ldap/:id", config.LDAPConfigDetail)
+		admin.POST("/config/ldap/save", config.LDAPConfigSave)
+		admin.POST("/config/ldap/delete/:ids", config.LDAPConfigDelete)
+		admin.POST("/config/ldap/save/id/:id/status/:enabled", config.LDAPConfigQuickSave)
+		admin.POST("/config/ldap/test_connect", config.LDAPConfigTestConnect)
 		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
 

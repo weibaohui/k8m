@@ -15,7 +15,7 @@ definitions:
       salt:
         type: string
       source:
-        description: 来源，如：db, ldap, oauth
+        description: 来源，如：db, ldap_config.json, oauth
         type: string
       two_fa_app_name:
         description: 2FA应用名称，用于提醒用户使用的是哪个软件
