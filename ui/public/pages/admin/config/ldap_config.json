@@ -220,7 +220,6 @@
                       "placeholder": "请输入LDAP服务器地址"
                     },
                     {
-                      "type": "input-number",
                       "name": "port",
                       "label": "服务器端口",
                       "required": true,

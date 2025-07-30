@@ -91,7 +91,6 @@ func (lc *LdapConfigController) LDAPConfigSave(c *gin.Context) {
 			}
 		}
 	} else {
-		// 新增配置时也要对密码进行加密
 		if m.BindPassword != "" {
 			encrypted, err := utils.AesEncrypt([]byte(m.BindPassword))
 			if err != nil {
@@ -117,7 +116,6 @@ func (lc *LdapConfigController) LDAPConfigSave(c *gin.Context) {
 }
 
 // 删除LDAP配置（支持批量）
-func (lc *LdapConfigController) LDAPConfigDelete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.LDAPConfig{}
@@ -131,7 +129,6 @@ func (lc *LdapConfigController) LDAPConfigDelete(c *gin.Context) {
 }
 
 // LDAPConfigQuickSave 快速保存启用状态
-func (lc *LdapConfigController) LDAPConfigQuickSave(c *gin.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 
