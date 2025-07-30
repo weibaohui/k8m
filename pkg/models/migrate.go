@@ -94,6 +94,9 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&SSOConfig{}); err != nil {
 		errs = append(errs, err)
 	}
+	if err := dao.DB().AutoMigrate(&LDAPConfig{}); err != nil {
+		errs = append(errs, err)
+	}
 	if err := dao.DB().AutoMigrate(&AIModelConfig{}); err != nil {
 		errs = append(errs, err)
 	}

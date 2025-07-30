@@ -371,7 +371,7 @@ func (u *userService) CheckAndCreateUser(username, source, groups string) error 
 
 	// 数据库中已存在用户，检查是否需要更新用户组
 	if groups != "" && du.GroupNames != groups {
-		// 如果用户组更新了，那么更新数据库
+		// 只更新 group_names 字段，避免更新其他字段导致 password 被清空
 		err = du.UpdateColumn("group_names", groups)
 		if err != nil {
 			klog.V(6).Infof("更新%s用户组出错%v", username, err)
@@ -407,8 +407,8 @@ func (u *userService) ClearCacheByKey(cacheKey string) {
 }
 
 // ldap连接
-func (u *userService) ldapConnection(cfg *flag.Config) (*ldap.Conn, error) {
-	conn, err := ldap.Dial("tcp", cfg.LdapHost+":"+cfg.LdapPort)
+func (u *userService) ldapConnection(config *models.LDAPConfig) (*ldap.Conn, error) {
+	conn, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", config.Host, config.Port))
 	if err != nil {
 		klog.Errorf("无法连接到ldap服务器: %v", err)
 		return nil, err
@@ -420,27 +420,35 @@ func (u *userService) ldapConnection(cfg *flag.Config) (*ldap.Conn, error) {
 }
 
 // ldap搜索
-func (u *userService) searchRequest(conn *ldap.Conn, username string, cfg *flag.Config) (*ldap.Entry, error) {
+func (u *userService) searchRequest(conn *ldap.Conn, username string, config *models.LDAPConfig) (*ldap.Entry, error) {
 	var (
 		cur              *ldap.SearchResult
 		ldapFieldsFilter = []string{
 			"dn",
 		}
 	)
-	err := conn.Bind(cfg.LdapBindUserDN, cfg.LdapPassword)
+
+	// 解密管理员密码
+	bindPassword, err := utils.AesDecrypt(config.BindPassword)
+	if err != nil {
+		klog.Errorf("LDAP密码解密失败: %v", err)
+		return nil, errors.New("LDAP配置错误")
+	}
+
+	err = conn.Bind(config.BindDN, string(bindPassword))
 	if err != nil {
 		klog.Errorf("LDAP绑定失败: %v", err)
 		return nil, errors.New("LDAP认证失败")
 	}
 
 	sql := ldap.NewSearchRequest(
-		cfg.LdapBaseDN,
+		config.BaseDN,
 		ldap.ScopeWholeSubtree,
 		ldap.DerefAlways,
 		0,
 		0,
 		false,
-		fmt.Sprintf("(%v=%v)", cfg.LdapUserField, username),
+		fmt.Sprintf("(%v=%v)", config.UserFilter, username),
 		ldapFieldsFilter,
 		nil)
 
@@ -460,15 +468,33 @@ func (u *userService) searchRequest(conn *ldap.Conn, username string, cfg *flag.
 
 // 登录ldap
 func (u *userService) LoginWithLdap(username string, password string, cfg *flag.Config) (*ldap.Entry, error) {
+	// 从数据库获取启用的LDAP配置
+	ldapConfig := &models.LDAPConfig{}
+	params := &dao.Params{}
+
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Where("enabled = ?", true).Order("id desc").Limit(1)
+	}
+
+	config, err := ldapConfig.GetOne(params, queryFunc)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			klog.Error("未找到启用的LDAP配置")
+			return nil, errors.New("LDAP未配置或未启用")
+		}
+		klog.Errorf("获取LDAP配置失败: %v", err)
+		return nil, err
+	}
+
 	// 创建新连接
-	conn, err := u.ldapConnection(cfg)
+	conn, err := u.ldapConnection(config)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
 
 	// 使用连接进行搜索
-	userInfo, err := u.searchRequest(conn, username, cfg)
+	userInfo, err := u.searchRequest(conn, username, config)
 	if err != nil {
 		return nil, err
 	}

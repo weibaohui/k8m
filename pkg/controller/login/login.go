@@ -71,7 +71,6 @@ func (lc *Controller) LoginByPassword(c *gin.Context) {
 	// LDAP登录判断
 	if req.LoginType == 1 {
 		if err := handleLDAPLogin(c, req.Username, string(decrypt), req.Code, cfg); err != nil {
-			// 前端处理登录状态码，不要修改
 			c.JSON(http.StatusUnauthorized, errorInfo)
 			return
 		}
@@ -160,10 +159,41 @@ func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.
 		return err
 	}
 
-	// 2. 检查或创建用户
-	// TODO LDAP 如何定义用户归属组
-	if err := service.UserService().CheckAndCreateUser(username, "ldap", ""); err != nil {
-		klog.Errorf("创建/检查LDAP用户失败: %v", err)
+	// 获取LDAP配置，查询默认用户组
+	ldapConfig := &models.LDAPConfig{}
+	params := &dao.Params{}
+
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Where("enabled = ?", true).Order("id desc").Limit(1)
+	}
+
+	config, err := ldapConfig.GetOne(params, queryFunc)
+	var defaultGroup string
+	if err == nil && config != nil {
+		defaultGroup = config.DefaultGroup
+	}
+
+	// 2. 检查用户是否已存在
+	userModel := &models.User{}
+	err = dao.DB().Where("username = ?", username).First(userModel).Error
+	if err == nil {
+		// 用户已存在，检查是否被禁用
+		if userModel.Disabled {
+			klog.Errorf("用户[%s]被禁用", username)
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "用户被禁用"})
+			return errors.New("用户被禁用")
+		}
+		// 已存在直接走后续流程
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		// 用户不存在，插入
+		if err := service.UserService().CheckAndCreateUser(username, "ldap_config", defaultGroup); err != nil {
+			klog.Errorf("创建/检查LDAP用户失败: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "系统错误"})
+			return err
+		}
+	} else {
+		// 其他数据库错误
+		klog.Errorf("查询用户失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "系统错误"})
 		return err
 	}
