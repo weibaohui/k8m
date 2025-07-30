@@ -95,7 +95,7 @@
                   "source": {
                     "method": "get",
                     "url": "/admin/user_group/list",
-                    "adaptor": "return {\n  status: payload.status,\n  msg: payload.msg,\n  data: {\n    options: payload.data.rows.map(item => ({\n      label: item.group_name,\n      value: item.role\n    }))\n  }\n};"
+                    "adaptor": "return {\n  status: payload.status,\n  msg: payload.msg,\n  data: {\n    options: payload.data.rows.map(item => ({\n      label: item.group_name,\n      value: group_name\n    }))\n  }\n};"
                   },
                   "description": "LDAP用户首次登录时默认绑定的用户组",
                   "clearable": true,
@@ -220,7 +220,7 @@
                       "placeholder": "请输入LDAP服务器地址"
                     },
                     {
-                      "type": "input-text",
+                      "type": "input-number",
                       "name": "port",
                       "label": "服务器端口",
                       "required": true,
