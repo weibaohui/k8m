@@ -343,6 +343,8 @@ func main() {
 		config.RegisterConditionRoutes(admin)
 		// sso
 		config.RegisterSSOConfigRoutes(admin)
+		// ldap
+		config.RegisterLdapConfigRoutes(admin)
 		// 平台参数配置
 		config.RegisterConfigRoutes(admin)
 		// 大模型列表管理
