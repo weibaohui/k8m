@@ -14,13 +14,34 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type NodeAffinityController struct{}
+
+func RegisterNodeAffinityRoutes(api *gin.RouterGroup) {
+	ctrl := &NodeAffinityController{}
+	api.POST("/:kind/group/:group/version/:version/update_node_affinity/ns/:ns/name/:name", ctrl.UpdateNodeAffinity)
+	api.POST("/:kind/group/:group/version/:version/delete_node_affinity/ns/:ns/name/:name", ctrl.DeleteNodeAffinity)
+	api.POST("/:kind/group/:group/version/:version/add_node_affinity/ns/:ns/name/:name", ctrl.AddNodeAffinity)
+	api.GET("/:kind/group/:group/version/:version/list_node_affinity/ns/:ns/name/:name", ctrl.ListNodeAffinity)
+
+}
+
 type nodeAffinity struct {
 	Operator string   `json:"operator"`
 	Key      string   `json:"key"`
 	Values   []string `json:"values"`
 }
 
-func ListNodeAffinity(c *gin.Context) {
+// @Summary 获取节点亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {array} interface{}
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_node_affinity/ns/{ns}/name/{name} [get]
+func (ac *NodeAffinityController) ListNodeAffinity(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -98,13 +119,49 @@ func ListNodeAffinity(c *gin.Context) {
 
 	amis.WriteJsonList(c, matchExpressionsList)
 }
-func AddNodeAffinity(c *gin.Context) {
+
+// @Summary 添加节点亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param nodeAffinity body nodeAffinity true "节点亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_node_affinity/ns/{ns}/name/{name} [post]
+func (ac *NodeAffinityController) AddNodeAffinity(c *gin.Context) {
 	processNodeAffinity(c, "add")
 }
-func UpdateNodeAffinity(c *gin.Context) {
+
+// @Summary 更新节点亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param nodeAffinity body nodeAffinity true "节点亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_node_affinity/ns/{ns}/name/{name} [post]
+func (ac *NodeAffinityController) UpdateNodeAffinity(c *gin.Context) {
 	processNodeAffinity(c, "modify")
 }
-func DeleteNodeAffinity(c *gin.Context) {
+
+// @Summary 删除节点亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param nodeAffinity body nodeAffinity true "节点亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_node_affinity/ns/{ns}/name/{name} [post]
+func (ac *NodeAffinityController) DeleteNodeAffinity(c *gin.Context) {
 	processNodeAffinity(c, "delete")
 }
 func processNodeAffinity(c *gin.Context, action string) {
@@ -122,7 +179,7 @@ func processNodeAffinity(c *gin.Context, action string) {
 
 	var info nodeAffinity
 
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -332,7 +389,7 @@ func generateRequiredNodeAffinityDynamicPatch(kind string, rules []interface{}) 
 
 	return patch, nil
 }
-func makeDeleteNodeAffinityDynamicPatch(kind string, rules []interface{}) (map[string]interface{}, error) {
+func makeDeleteNodeAffinityDynamicPatch(kind string, rules []any) (map[string]any, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {

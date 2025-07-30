@@ -11,7 +11,24 @@ import (
 	"gorm.io/gorm"
 )
 
-func ListRepo(c *gin.Context) {
+type RepoController struct {
+}
+
+func RegisterHelmRepoRoutes(admin *gin.RouterGroup) {
+	ctrl := &RepoController{}
+	// helm
+	admin.GET("/helm/repo/list", ctrl.List)
+	admin.POST("/helm/repo/delete/:ids", ctrl.Delete)
+	admin.POST("/helm/repo/update_index", ctrl.UpdateReposIndex)
+	admin.POST("/helm/repo/save", ctrl.Save)
+}
+
+// @Summary Helm仓库列表
+// @Description 获取所有Helm仓库信息
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/helm/repo/list [get]
+func (r *RepoController) List(c *gin.Context) {
 	// 从数据库查询列表
 	params := dao.BuildParams(c)
 	m := &models.HelmRepository{}
@@ -23,24 +40,21 @@ func ListRepo(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-// AddOrUpdateRepo 添加或更新Helm仓库
-func AddOrUpdateRepo(c *gin.Context) {
-	ns := c.Param("ns")
-
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "AddOrUpdateRepo", "", ns, "")
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
+// Save 添加或更新Helm仓库
+// @Summary 添加或更新Helm仓库
+// @Description 添加或更新一个Helm仓库信息
+// @Security BearerAuth
+// @Param repo body models.HelmRepository true "Helm仓库信息"
+// @Success 200 {object} string "操作成功"
+// @Router /admin/helm/repo/save [post]
+func (r *RepoController) Save(c *gin.Context) {
 	var repo models.HelmRepository
-	if err = c.ShouldBindJSON(&repo); err != nil {
+	if err := c.ShouldBindJSON(&repo); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	h, err := getHelm(c, ns)
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -53,6 +67,11 @@ func AddOrUpdateRepo(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary Helm仓库选项列表
+// @Description 获取所有Helm仓库名称，用于下拉选项
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/helm/repo/option_list [get]
 func RepoOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.HelmRepository{}
@@ -80,17 +99,16 @@ func RepoOptionList(c *gin.Context) {
 	})
 }
 
-func DeleteRepo(c *gin.Context) {
+// @Summary 删除Helm仓库
+// @Description 删除一个或多个Helm仓库
+// @Security BearerAuth
+// @Param ids path string true "要删除的仓库ID，多个用逗号分隔"
+// @Success 200 {object} string "操作成功"
+// @Router /admin/helm/repo/delete/{ids} [post]
+func (r *RepoController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "DeleteRepo", ids, "", "")
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	h, err := getHelm(c, "")
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -115,9 +133,14 @@ func DeleteRepo(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
-func UpdateReposIndex(c *gin.Context) {
-	ns := c.Param("ns")
 
+// @Summary 更新Helm仓库索引
+// @Description 更新指定Helm仓库的索引信息
+// @Security BearerAuth
+// @Param ids body string true "要更新索引的仓库ID，多个用逗号分隔"
+// @Success 200 {object} string "操作成功"
+// @Router /admin/helm/repo/update_index [post]
+func (r *RepoController) UpdateReposIndex(c *gin.Context) {
 	var req struct {
 		IDs string `json:"ids"`
 	}
@@ -126,14 +149,7 @@ func UpdateReposIndex(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
-	_, _, err := handleCommonLogic(c, "UpdateReposIndex", req.IDs, "", "")
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	h, err := getHelm(c, ns)
+	h, err := getHelmWithNoCluster()
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

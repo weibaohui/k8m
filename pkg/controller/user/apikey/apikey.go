@@ -13,8 +13,23 @@ import (
 	"gorm.io/gorm"
 )
 
+type Controller struct{}
+
+func RegisterAPIKeysRoutes(mgm *gin.RouterGroup) {
+	ctrl := &Controller{}
+	mgm.GET("/user/profile/api_keys/list", ctrl.List)
+	mgm.POST("/user/profile/api_keys/create", ctrl.Create)
+	mgm.POST("/user/profile/api_keys/delete/:id", ctrl.Delete)
+}
+
 // Create 创建API密钥
-func Create(c *gin.Context) {
+// @Summary 创建API密钥
+// @Description 为当前用户创建一个新的API密钥
+// @Security BearerAuth
+// @Param description body string false "密钥描述"
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/api_keys/create [post]
+func (ac *Controller) Create(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var req struct {
@@ -59,7 +74,12 @@ func generateAPIKey(username string) string {
 }
 
 // List 获取API密钥列表
-func List(c *gin.Context) {
+// @Summary 获取API密钥列表
+// @Description 获取当前用户的所有API密钥
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/user/profile/api_keys/list [get]
+func (ac *Controller) List(c *gin.Context) {
 	username := c.GetString(constants.JwtUserName)
 	params := dao.BuildParams(c)
 
@@ -76,7 +96,13 @@ func List(c *gin.Context) {
 	amis.WriteJsonData(c, list)
 }
 
-func Delete(c *gin.Context) {
+// @Summary 删除API密钥
+// @Description 删除指定ID的API密钥
+// @Security BearerAuth
+// @Param id path string true "API密钥ID"
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/api_keys/delete/{id} [post]
+func (ac *Controller) Delete(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 

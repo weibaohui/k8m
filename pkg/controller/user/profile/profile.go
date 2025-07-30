@@ -13,7 +13,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func Profile(c *gin.Context) {
+type Controller struct{}
+
+func RegisterProfileRoutes(mgm *gin.RouterGroup) {
+	ctrl := &Controller{}
+	mgm.GET("/user/profile", ctrl.Profile)
+	mgm.GET("/user/profile/cluster/permissions/list", ctrl.ListUserPermissions)
+	mgm.POST("/user/profile/update_psw", ctrl.UpdatePsw)
+	// user profile 2FA 用户自助操作
+	mgm.POST("/user/profile/2fa/generate", ctrl.Generate2FASecret)
+	mgm.POST("/user/profile/2fa/disable", ctrl.Disable2FA)
+	mgm.POST("/user/profile/2fa/enable", ctrl.Enable2FA)
+}
+
+// @Summary 获取用户信息
+// @Description 获取当前登录用户的详细信息
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/user/profile [get]
+func (uc *Controller) Profile(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 
@@ -33,7 +51,12 @@ func Profile(c *gin.Context) {
 }
 
 // ListUserPermissions 列出当前登录用户所拥有的集群权限
-func ListUserPermissions(c *gin.Context) {
+// @Summary 获取用户集群权限
+// @Description 列出当前登录用户所拥有的集群权限
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /mgm/user/profile/cluster/permissions/list [get]
+func (uc *Controller) ListUserPermissions(c *gin.Context) {
 	params := dao.BuildParams(c)
 	clusters, err := service.UserService().GetClusters(params.UserName)
 	if err != nil {
@@ -43,7 +66,13 @@ func ListUserPermissions(c *gin.Context) {
 	amis.WriteJsonList(c, clusters)
 }
 
-func UpdatePsw(c *gin.Context) {
+// @Summary 修改密码
+// @Description 修改当前登录用户的密码
+// @Security BearerAuth
+// @Param password body string true "新密码（加密后）"
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/update_psw [post]
+func (uc *Controller) UpdatePsw(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.User{}
 	err := c.ShouldBindJSON(&m)

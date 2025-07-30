@@ -6,8 +6,13 @@ import (
 	"github.com/weibaohui/kom/kom"
 )
 
+// @Summary 获取CRD状态信息
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/crd/status [get]
 // CRDStatus 处理 HTTP 请求，返回当前选中集群是否支持 Gateway API 的状态。
-func CRDStatus(c *gin.Context) {
+func (cc *CRDController) CRDStatus(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

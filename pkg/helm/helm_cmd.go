@@ -89,9 +89,30 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 	return h
 }
 
+// NewHelmCmdWithNoCluster 仅Helm命令
+func NewHelmCmdWithNoCluster(helmBin string) *HelmCmd {
+
+	if helmBin == "" {
+		helmBin = "helm"
+	}
+
+	cfg := flag.Init()
+
+	h := &HelmCmd{
+		HelmBin:      helmBin,
+		repoCacheDir: cfg.HelmCachePath,
+	}
+
+	// 确保目录存在
+	if err := os.MkdirAll(h.repoCacheDir, 0755); err != nil {
+		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
+	}
+	return h
+}
+
 // runAndLog 执行 helm 命令并输出日志，支持 shell 特性和可选 stdin
 func (h *HelmCmd) runAndLog(args []string, stdin string) ([]byte, error) {
-
+	args = slice.InsertAt(args, 0, "--debug")
 	if h.cluster != nil && h.cluster.IsInCluster {
 		accessArgs := []string{
 			"--kube-token", h.token,

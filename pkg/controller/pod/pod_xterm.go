@@ -28,6 +28,13 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type XtermController struct{}
+
+func RegisterXtermRoutes(api *gin.RouterGroup) {
+	ctrl := &XtermController{}
+	api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", ctrl.Xterm)
+}
+
 var WebsocketMessageType = map[int]string{
 	websocket.BinaryMessage: "binary",
 	websocket.TextMessage:   "text",
@@ -98,10 +105,19 @@ func cmdLogger(c *gin.Context, cmd string) {
 
 }
 
+// @Summary 提供Pod容器的交互式终端会话
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param pod_name path string true "Pod名称"
+// @Param container_name query string false "容器名称，默认为第一个容器"
+// @Param remove query bool false "会话结束后是否删除Pod"
+// @Success 101 {string} string "WebSocket连接成功"
+// @Router /k8s/cluster/{cluster}/pod/xterm/ns/{ns}/pod_name/{pod_name} [get]
 // Xterm 通过 WebSocket 提供与 Kubernetes Pod 容器的交互式终端会话。
 // 支持 xterm.js 前端，处理终端输入输出、窗口大小调整、命令日志记录和连接保活。
 // 会话结束后可根据参数选择性删除目标 Pod。
-func Xterm(c *gin.Context) {
+func (xc *XtermController) Xterm(c *gin.Context) {
 	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
@@ -195,7 +211,6 @@ func Xterm(c *gin.Context) {
 	var waiter sync.WaitGroup
 	waiter.Add(1)
 
-	// this is a keep-alive loop that ensures connection does not hang-up itself
 	lastPongTime := time.Now()
 	conn.SetPongHandler(func(msg string) error {
 		lastPongTime = time.Now()

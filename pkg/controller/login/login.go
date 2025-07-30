@@ -21,10 +21,15 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var ErrorUerPassword = errors.New("用户名密码错误")
+type Controller struct{}
 
-// LoginRequest 用户结构体
-type LoginRequest struct {
+func RegisterLoginRoutes(auth *gin.RouterGroup) {
+	ctrl := &Controller{}
+	auth.POST("/login", ctrl.LoginByPassword)
+}
+
+// Request  用户结构体
+type Request struct {
 	Username  string `json:"username" binding:"required"`
 	Password  string `json:"password" binding:"required"`
 	LoginType int    `json:"loginType"` // 0: 普通登录, 1: LDAP登录
@@ -34,8 +39,17 @@ type LoginRequest struct {
 // 验证用户名和密码
 // 1、从cfg中获取用户名，先判断是不是admin，是进行密码比对.必须启用临时管理员配置才进行这一步
 // 2、从DB中获取用户名密码
-func LoginByPassword(c *gin.Context) {
-	var req LoginRequest
+// @Summary 用户登录
+// @Description 用户通过用户名、密码和2FA验证码登录，支持普通和LDAP登录
+// @Param username body string true "用户名"
+// @Param password body string true "密码（加密）"
+// @Param loginType body int false "登录类型 0:普通 1:LDAP"
+// @Param code body string false "2FA验证码"
+// @Success 200 {object} string "登录成功，返回JWT Token"
+// @Failure 401 {object} string "登录失败"
+// @Router /auth/login [post]
+func (lc *Controller) LoginByPassword(c *gin.Context) {
+	var req Request
 	errorInfo := gin.H{"message": "用户名密码错误或用户被禁用"}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		klog.Errorf("LoginByPassword %v", err.Error())

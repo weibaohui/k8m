@@ -9,7 +9,30 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func History(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+
+	api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
+	api.GET("/statefulset/ns/:ns/name/:name/rollout/history", ctrl.History)
+	api.POST("/statefulset/ns/:ns/name/:name/restart", ctrl.Restart)
+	api.POST("/statefulset/batch/restart", ctrl.BatchRestart)
+	api.POST("/statefulset/batch/stop", ctrl.BatchStop)
+	api.POST("/statefulset/batch/restore", ctrl.BatchRestore)
+	api.POST("/statefulset/ns/:ns/name/:name/scale/replica/:replica", ctrl.Scale)
+	api.GET("/statefulset/ns/:ns/name/:name/hpa", ctrl.HPA)
+
+}
+
+// @Summary 获取StatefulSet滚动历史
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "StatefulSet名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/rollout/history [get]
+func (cc *Controller) History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -27,7 +50,15 @@ func History(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, list)
 }
-func Restart(c *gin.Context) {
+
+// @Summary 重启StatefulSet
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "StatefulSet名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/restart [post]
+func (cc *Controller) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -42,7 +73,14 @@ func Restart(c *gin.Context) {
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-func BatchRestart(c *gin.Context) {
+// @Summary 批量重启StatefulSet
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name_list body []string true "StatefulSet名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/batch/restart [post]
+func (cc *Controller) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -78,7 +116,14 @@ func BatchRestart(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func BatchStop(c *gin.Context) {
+// @Summary 批量停止StatefulSet
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name_list body []string true "StatefulSet名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/batch/stop [post]
+func (cc *Controller) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -114,7 +159,14 @@ func BatchStop(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func BatchRestore(c *gin.Context) {
+// @Summary 批量恢复StatefulSet
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name_list body []string true "StatefulSet名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/batch/restore [post]
+func (cc *Controller) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -149,7 +201,16 @@ func BatchRestore(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func Scale(c *gin.Context) {
+
+// @Summary 扩缩容StatefulSet
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "StatefulSet名称"
+// @Param replica path int true "副本数"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/scale/replica/{replica} [post]
+func (cc *Controller) Scale(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	replica := c.Param("replica")
@@ -167,7 +228,16 @@ func Scale(c *gin.Context) {
 		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func Undo(c *gin.Context) {
+
+// @Summary 回滚StatefulSet到指定版本
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "StatefulSet名称"
+// @Param revision path int true "版本号"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/revision/{revision}/rollout/undo [post]
+func (cc *Controller) Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -188,7 +258,14 @@ func Undo(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, result)
 }
 
-func HPA(c *gin.Context) {
+// @Summary 获取StatefulSet的HPA列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "StatefulSet名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/hpa [get]
+func (cc *Controller) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)

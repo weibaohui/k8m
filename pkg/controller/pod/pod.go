@@ -3,10 +3,7 @@ package pod
 import (
 	"errors"
 	"fmt"
-	"strings"
-	"time"
 
-	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
@@ -16,17 +13,34 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func StreamLogs(c *gin.Context) {
+type LogController struct{}
+
+func RegisterLogRoutes(api *gin.RouterGroup) {
+	ctrl := &LogController{}
+	api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.StreamLogs)
+	api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.DownloadLogs)
+}
+
+// StreamLogs 通过SSE流式传输Pod日志
+// @Summary 流式获取Pod日志
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param pod_name path string true "Pod名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {string} string "日志流"
+// @Router /k8s/cluster/{cluster}/pod/logs/sse/ns/{ns}/pod_name/{pod_name}/container/{container_name} [get]
+func (lc *LogController) StreamLogs(c *gin.Context) {
 
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
-	StreamPodLogsBySelector(c, ns, containerName, metav1.ListOptions{
+	lc.streamPodLogsBySelector(c, ns, containerName, metav1.ListOptions{
 		FieldSelector: selector,
 	})
 }
-func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
+func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -60,16 +74,26 @@ func StreamPodLogsBySelector(c *gin.Context, ns string, containerName string, op
 	}
 	sse.WriteSSE(c, stream)
 }
-func DownloadLogs(c *gin.Context) {
+
+// DownloadLogs 下载Pod日志
+// @Summary 下载Pod日志
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param pod_name path string true "Pod名称"
+// @Param container_name path string true "容器名称"
+// @Success 200 {file} file "日志文件"
+// @Router /k8s/cluster/{cluster}/pod/logs/download/ns/{ns}/pod_name/{pod_name}/container/{container_name} [get]
+func (lc *LogController) DownloadLogs(c *gin.Context) {
 
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
 	selector := fmt.Sprintf("metadata.name=%s", podName)
-	DownloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{FieldSelector: selector})
+	lc.downloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{FieldSelector: selector})
 }
- 
-func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
+
+func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -104,86 +128,4 @@ func DownloadPodLogsBySelector(c *gin.Context, ns string, containerName string, 
 		return
 	}
 	sse.DownloadLog(c, logOpt, stream)
-}
-func Usage(c *gin.Context) {
-	name := c.Param("name")
-	ns := c.Param("ns")
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	usage, err := kom.Cluster(selectedCluster).WithContext(ctx).
-		Resource(&v1.Pod{}).
-		Namespace(ns).
-		Name(name).
-		Ctl().Pod().ResourceUsageTable()
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	amis.WriteJsonData(c, usage)
-}
-
-// UniqueLabels 返回当前集群中所有唯一的 Pod 标签键列表，格式化为前端可用的选项数组。
-func UniqueLabels(c *gin.Context) {
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	labels := service.PodService().GetUniquePodLabels(selectedCluster)
-
-	var names []map[string]string
-	for k := range labels {
-		names = append(names, map[string]string{
-			"label": k,
-			"value": k,
-		})
-	}
-	slice.SortBy(names, func(a, b map[string]string) bool {
-		return a["label"] < b["label"]
-	})
-	amis.WriteJsonData(c, gin.H{
-		"options": names,
-	})
-}
-
-// TopList 返回指定命名空间下所有 Pod 的资源使用情况（CPU、内存等），支持多命名空间查询，并以便于前端排序的格式输出。
-func TopList(c *gin.Context) {
-	ns := c.Param("ns")
-	ctx := amis.GetContextWithUser(c)
-	selectedCluster, err := amis.GetSelectedCluster(c)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	podMetrics, err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).
-		Namespace(strings.Split(ns, ",")...).
-		WithCache(time.Second * 30).
-		Ctl().Pod().Top()
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-
-	// 转换为map 前端排序使用，usage.cpu这种前端无法正确排序
-	var result []map[string]string
-	for _, item := range podMetrics {
-		result = append(result, map[string]string{
-			"name":            item.Name,
-			"namespace":       item.Namespace,
-			"cpu":             item.Usage.CPU,
-			"memory":          item.Usage.Memory,
-			"cpu_nano":        fmt.Sprintf("%d", item.Usage.CPUNano),
-			"memory_byte":     fmt.Sprintf("%d", item.Usage.MemoryByte),
-			"cpu_fraction":    item.Usage.CPUFraction,
-			"memory_fraction": item.Usage.MemoryFraction,
-		})
-	}
-	amis.WriteJsonList(c, result)
 }

@@ -13,15 +13,27 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type Tolerations struct {
-	Operator          string `json:"operator"`
-	Key               string `json:"key"`
-	Value             string `json:"value"`
-	Effect            string `json:"effect"`
-	TolerationSeconds *int64 `json:"tolerationSeconds"`
+type TolerationController struct{}
+
+func RegisterTolerationRoutes(api *gin.RouterGroup) {
+	ctrl := &TolerationController{}
+	api.POST("/:kind/group/:group/version/:version/update_tolerations/ns/:ns/name/:name", ctrl.Update)
+	api.POST("/:kind/group/:group/version/:version/delete_tolerations/ns/:ns/name/:name", ctrl.Delete)
+	api.POST("/:kind/group/:group/version/:version/add_tolerations/ns/:ns/name/:name", ctrl.Add)
+	api.GET("/:kind/group/:group/version/:version/list_tolerations/ns/:ns/name/:name", ctrl.List)
 }
 
-func ListTolerations(c *gin.Context) {
+// @Summary 获取资源容忍度列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name} [get]
+func (tc *TolerationController) List(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -74,15 +86,52 @@ func ListTolerations(c *gin.Context) {
 
 	amis.WriteJsonList(c, tolerationsList)
 }
-func AddTolerations(c *gin.Context) {
+
+// @Summary 添加资源容忍度
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body Tolerations true "容忍度配置信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name} [post]
+func (tc *TolerationController) Add(c *gin.Context) {
 	processTolerations(c, "add")
 }
-func UpdateTolerations(c *gin.Context) {
+
+// @Summary 更新资源容忍度
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body Tolerations true "容忍度配置信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name} [post]
+func (tc *TolerationController) Update(c *gin.Context) {
 	processTolerations(c, "modify")
 }
-func DeleteTolerations(c *gin.Context) {
+
+// @Summary 删除资源容忍度
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param body body Tolerations true "容忍度配置信息"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name} [post]
+func (tc *TolerationController) Delete(c *gin.Context) {
 	processTolerations(c, "delete")
 }
+
 func processTolerations(c *gin.Context, action string) {
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -131,7 +180,7 @@ func processTolerations(c *gin.Context, action string) {
 		return
 	}
 	patchJSON := utils.ToJSON(patchData)
-	klog.V(6).Infof("UpdateTolerations Patch JSON :\n%s\n", patchJSON)
+	klog.V(6).Infof("Update Patch JSON :\n%s\n", patchJSON)
 	var obj interface{}
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
@@ -253,4 +302,12 @@ func generateRequiredTolerationsDynamicPatch(kind string, rules []interface{}) (
 	current["tolerations"] = rules
 
 	return patch, nil
+}
+
+type Tolerations struct {
+	Operator          string `json:"operator"`
+	Key               string `json:"key"`
+	Value             string `json:"value"`
+	Effect            string `json:"effect"`
+	TolerationSeconds *int64 `json:"tolerationSeconds"`
 }

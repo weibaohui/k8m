@@ -9,7 +9,13 @@ import (
 )
 
 // Config 获取某一个参数配置
-func Config(c *gin.Context) {
+// @Summary 获取配置项
+// @Description 获取指定key的系统配置项
+// @Security BearerAuth
+// @Param key path string true "配置项key"
+// @Success 200 {object} string
+// @Router /params/config/{key} [get]
+func (pc *Controller) Config(c *gin.Context) {
 	key := c.Param("key")
 	cfg := flag.Init()
 	s := ""

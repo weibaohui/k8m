@@ -20,9 +20,12 @@ func RegisterAdminLuaScriptRoutes(admin *gin.RouterGroup) {
 	admin.POST("/inspection/script/save", ctrl.LuaScriptSave)
 	admin.POST("/inspection/script/load", ctrl.LuaScriptLoad)
 	admin.GET("/inspection/script/option_list", ctrl.LuaScriptOptionList)
-
 }
 
+// @Summary 获取Lua脚本列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/script/list [get]
 func (s *AdminLuaScriptController) LuaScriptList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.InspectionLuaScript{}
@@ -34,6 +37,11 @@ func (s *AdminLuaScriptController) LuaScriptList(c *gin.Context) {
 	}
 	amis.WriteJsonListWithTotal(c, total, items)
 }
+
+// @Summary 保存Lua脚本
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/script/save [post]
 func (s *AdminLuaScriptController) LuaScriptSave(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.InspectionLuaScript{}
@@ -54,6 +62,12 @@ func (s *AdminLuaScriptController) LuaScriptSave(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
+
+// @Summary 删除Lua脚本
+// @Security BearerAuth
+// @Param ids path string true "脚本ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/inspection/script/delete/{ids} [post]
 func (s *AdminLuaScriptController) LuaScriptDelete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
@@ -69,6 +83,10 @@ func (s *AdminLuaScriptController) LuaScriptDelete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 获取Lua脚本选项列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/script/option_list [get]
 func (s *AdminLuaScriptController) LuaScriptOptionList(c *gin.Context) {
 	m := models.InspectionLuaScript{}
 	params := dao.BuildParams(c)
@@ -97,9 +115,12 @@ func (s *AdminLuaScriptController) LuaScriptOptionList(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"options": scripts,
 	})
-
 }
 
+// @Summary 加载内置Lua脚本
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/script/load [post]
 func (s *AdminLuaScriptController) LuaScriptLoad(c *gin.Context) {
 	// 删除后，重新插入内置脚本
 	err := dao.DB().Model(&models.InspectionLuaScript{}).Where("script_type = ?", constants.LuaScriptTypeBuiltin).Delete(&models.InspectionLuaScript{}).Error

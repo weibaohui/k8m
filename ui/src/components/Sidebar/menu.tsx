@@ -835,6 +835,13 @@ const items: () => MenuItem[] = () => {
             ],
         },
         {
+            label: "开放API",
+            title: "开放API",
+            icon: <i className="fa-solid fa-code-branch"></i>,
+            key: "open_api",
+            onClick: () => open('/swagger/index.html')
+        },
+        {
             label: "关于",
             title: "关于",
             icon: <i className="fa-solid fa-circle-info"></i>,

@@ -12,6 +12,26 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type Controller struct {
+}
+
+func RegisterChatRoutes(ai *gin.RouterGroup) {
+	ctrl := &Controller{}
+	ai.GET("/chat/event", ctrl.Event)
+	ai.GET("/chat/log", ctrl.Log)
+	ai.GET("/chat/cron", ctrl.Cron)
+	ai.GET("/chat/describe", ctrl.Describe)
+	ai.GET("/chat/resource", ctrl.Resource)
+	ai.GET("/chat/any_question", ctrl.AnyQuestion)
+	ai.GET("/chat/any_selection", ctrl.AnySelection)
+	ai.GET("/chat/example", ctrl.Example)
+	ai.GET("/chat/example/field", ctrl.FieldExample)
+	ai.GET("/chat/ws_chatgpt", ctrl.GPTShell)
+	ai.GET("/chat/ws_chatgpt/history", ctrl.History)
+	ai.GET("/chat/ws_chatgpt/history/reset", ctrl.Reset)
+	ai.GET("/chat/k8s_gpt/resource", ctrl.K8sGPTResource)
+}
+
 type ResourceData struct {
 	// 资源版本
 	Version string `form:"version"`
@@ -65,7 +85,17 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 	}
 	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
-func Event(c *gin.Context) {
+
+// @Summary 分析K8s事件
+// @Security BearerAuth
+// @Param note query string false "事件备注"
+// @Param source query string false "事件来源"
+// @Param reason query string false "事件原因"
+// @Param type query string false "事件类型"
+// @Param regardingKind query string false "相关资源类型"
+// @Success 200 {object} string
+// @Router /ai/chat/event [get]
+func (cc *Controller) Event(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
@@ -78,8 +108,16 @@ func Event(c *gin.Context) {
 	})
 }
 
-// Describe TODO 改为不要传Describe内容，比较大，传个名称过来，从后台Describe一下即可
-func Describe(c *gin.Context) {
+// @Summary 分析K8s资源描述
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Param name query string false "资源名称"
+// @Param namespace query string false "命名空间"
+// @Success 200 {object} string
+// @Router /ai/chat/describe [get]
+func (cc *Controller) Describe(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	var data ResourceData
 	err := c.ShouldBindQuery(&data)
@@ -115,7 +153,14 @@ func Describe(c *gin.Context) {
 	})
 }
 
-func Example(c *gin.Context) {
+// @Summary 获取K8s资源使用示例
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Success 200 {object} string
+// @Router /ai/chat/example [get]
+func (cc *Controller) Example(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -133,7 +178,16 @@ func Example(c *gin.Context) {
 			d.Group, d.Kind, d.Version)
 	})
 }
-func FieldExample(c *gin.Context) {
+
+// @Summary 获取K8s资源字段示例
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Param field query string false "字段名称"
+// @Success 200 {object} string
+// @Router /ai/chat/example/field [get]
+func (cc *Controller) FieldExample(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -149,7 +203,15 @@ func FieldExample(c *gin.Context) {
 			d.Group, d.Kind, d.Version, d.Field)
 	})
 }
-func Resource(c *gin.Context) {
+
+// @Summary 获取K8s资源使用指南
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Success 200 {object} string
+// @Router /ai/chat/resource [get]
+func (cc *Controller) Resource(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -165,7 +227,16 @@ func Resource(c *gin.Context) {
 			d.Group, d.Kind, d.Version)
 	})
 }
-func K8sGPTResource(c *gin.Context) {
+
+// @Summary K8s错误信息分析
+// @Security BearerAuth
+// @Param data query string false "错误内容"
+// @Param name query string false "资源名称"
+// @Param kind query string false "资源类型"
+// @Param field query string false "相关字段"
+// @Success 200 {object} string
+// @Router /ai/chat/k8s_gpt/resource [get]
+func (cc *Controller) K8sGPTResource(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -187,7 +258,13 @@ func K8sGPTResource(c *gin.Context) {
 			d.Data, d.Name, d.Kind, d.Field)
 	})
 }
-func AnySelection(c *gin.Context) {
+
+// @Summary 解释选择内容
+// @Security BearerAuth
+// @Param question query string false "要解释的内容"
+// @Success 200 {object} string
+// @Router /ai/chat/any_selection [get]
+func (cc *Controller) AnySelection(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -201,7 +278,16 @@ func AnySelection(c *gin.Context) {
 			d.Question)
 	})
 }
-func AnyQuestion(c *gin.Context) {
+
+// @Summary 回答K8s相关问题
+// @Security BearerAuth
+// @Param group query string false "资源组"
+// @Param version query string false "资源版本"
+// @Param kind query string false "资源类型"
+// @Param question query string false "问题内容"
+// @Success 200 {object} string
+// @Router /ai/chat/any_question [get]
+func (cc *Controller) AnyQuestion(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -218,7 +304,12 @@ func AnyQuestion(c *gin.Context) {
 	})
 }
 
-func Cron(c *gin.Context) {
+// @Summary 分析Cron表达式
+// @Security BearerAuth
+// @Param cron query string false "Cron表达式"
+// @Success 200 {object} string
+// @Router /ai/chat/cron [get]
+func (cc *Controller) Cron(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
@@ -233,7 +324,12 @@ func Cron(c *gin.Context) {
 	})
 }
 
-func Log(c *gin.Context) {
+// @Summary 分析日志
+// @Security BearerAuth
+// @Param data query string false "日志内容"
+// @Success 200 {object} string
+// @Router /ai/chat/log [get]
+func (cc *Controller) Log(c *gin.Context) {
 	handleRequest(c, func(data interface{}) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(d.Data))

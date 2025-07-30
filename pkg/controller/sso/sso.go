@@ -17,8 +17,12 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// GetSSOConfig 获取SSO列表，用于前端展示
-func GetSSOConfig(c *gin.Context) {
+// @Summary 获取SSO配置列表
+// @Description 获取所有已启用的SSO配置项
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /auth/sso/config [get]
+func (au *AuthController) GetSSOConfig(c *gin.Context) {
 	// 获取所有的SSO配置
 	var ssoConfigs []models.SSOConfig
 	err := dao.DB().Select([]string{"name", "type"}).Where("enabled == true").Find(&ssoConfigs).Error
@@ -28,7 +32,18 @@ func GetSSOConfig(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, ssoConfigs)
 }
-func GetAuthCodeURL(c *gin.Context) {
+
+// GetAuthCodeURL 获取认证URL
+// @Summary 获取认证URL
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Summary 获取认证URL
+// @Description 获取指定SSO名称的OIDC认证跳转URL
+// @Security BearerAuth
+// @Param name path string true "SSO名称"
+// @Success 302 {string} string
+// @Router /auth/oidc/{name}/sso [get]
+func (au *AuthController) GetAuthCodeURL(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("use sso name: %s", name)
 	// 从配置文件中读取默认的OIDC客户端配置
@@ -43,8 +58,14 @@ func GetAuthCodeURL(c *gin.Context) {
 	c.Redirect(http.StatusFound, url)
 }
 
-// HandleCallback 处理OAuth2回调
-func HandleCallback(c *gin.Context) {
+// @Summary 处理OIDC回调
+// @Description 处理OIDC认证后的回调，完成用户登录
+// @Security BearerAuth
+// @Param name path string true "SSO名称"
+// @Param code query string true "认证代码"
+// @Success 200 {string} string
+// @Router /auth/oidc/{name}/callback [get]
+func (au *AuthController) HandleCallback(c *gin.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
 	client, err := getDefaultOIDCClient(c, name)
@@ -76,7 +97,7 @@ func HandleCallback(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
 		return
 	}
-	 
+
 	// test
 	// claims["groups"] = []string{"CRM开发组", "bdd", "c", "d"}
 
@@ -155,8 +176,12 @@ func GetUserGroups(claims map[string]any) string {
 	return strings.Join(groups, ",")
 }
 
-// GetLdapEnabled 获取ldap开关状态
-func GetLdapEnabled(c *gin.Context) {
+// @Summary 获取LDAP开关状态
+// @Description 获取系统LDAP登录开关状态
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /auth/ldap/config [get]
+func (au *AuthController) GetLdapEnabled(c *gin.Context) {
 	cfg := flag.Init()
 	amis.WriteJsonData(c, gin.H{
 		"enabled": cfg.LdapEnabled,

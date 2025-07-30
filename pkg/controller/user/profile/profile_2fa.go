@@ -12,14 +12,19 @@ import (
 )
 
 // Disable2FA 禁用2FA
-func Disable2FA(c *gin.Context) {
+// @Summary 禁用2FA
+// @Description 禁用当前用户的二步验证
+// @Security BearerAuth
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/2fa/disable [post]
+func (uc *Controller) Disable2FA(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户信息
 
 	user := &models.User{}
 	user.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
 	// 清除2FA相关信息
 	user.TwoFAEnabled = false
@@ -41,13 +46,18 @@ func Disable2FA(c *gin.Context) {
 }
 
 // Generate2FASecret 生成2FA密钥
-func Generate2FASecret(c *gin.Context) {
+// @Summary 生成2FA密钥
+// @Description 生成当前用户的二步验证密钥和二维码
+// @Security BearerAuth
+// @Success 200 {object} string "返回密钥、二维码和备用码"
+// @Router /mgm/user/profile/2fa/generate [post]
+func (uc *Controller) Generate2FASecret(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户信息
 	user := &models.User{}
 	user.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
 	err := dao.DB().
 		Where("username=?", user.Username).
@@ -103,7 +113,14 @@ func Generate2FASecret(c *gin.Context) {
 }
 
 // Enable2FA 验证并启用2FA
-func Enable2FA(c *gin.Context) {
+// @Summary 启用2FA
+// @Description 验证并启用当前用户的二步验证
+// @Security BearerAuth
+// @Param code body string true "验证码"
+// @Param app_name body string false "应用名称"
+// @Success 200 {object} string "操作成功"
+// @Router /mgm/user/profile/2fa/enable [post]
+func (uc *Controller) Enable2FA(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户输入的验证码
@@ -121,7 +138,7 @@ func Enable2FA(c *gin.Context) {
 
 	user := &models.User{}
 	user.Username = params.UserName
-	params.UserName = "" //避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
+	params.UserName = "" // 避免增加CreatedBy字段,因为查询用户集群权限，是管理员授权的，所以不需要CreatedBy字段
 
 	err := dao.DB().
 		Where("username=?", user.Username).

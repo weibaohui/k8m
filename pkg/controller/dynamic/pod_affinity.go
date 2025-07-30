@@ -14,6 +14,17 @@ import (
 	"k8s.io/klog/v2"
 )
 
+type PodAffinityController struct{}
+
+func RegisterPodAffinityRoutes(api *gin.RouterGroup) {
+	ctrl := &PodAffinityController{}
+	api.POST("/:kind/group/:group/version/:version/update_pod_affinity/ns/:ns/name/:name", ctrl.UpdatePodAffinity)
+	api.POST("/:kind/group/:group/version/:version/delete_pod_affinity/ns/:ns/name/:name", ctrl.DeletePodAffinity)
+	api.POST("/:kind/group/:group/version/:version/add_pod_affinity/ns/:ns/name/:name", ctrl.AddPodAffinity)
+	api.GET("/:kind/group/:group/version/:version/list_pod_affinity/ns/:ns/name/:name", ctrl.ListPodAffinity)
+
+}
+
 // {"labelSelector":{"matchLabels":{"app":"other-app","x":"y"}},"topologyKey":"kubernetes.io/hostname"}
 type podAffinity struct {
 	LabelSelector struct {
@@ -23,7 +34,17 @@ type podAffinity struct {
 }
 
 // ListPodAffinity 获取 Pod 亲和性列表
-func ListPodAffinity(c *gin.Context) {
+// @Summary 获取Pod亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {array} interface{}
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_pod_affinity/ns/{ns}/name/{name} [get]
+func (ac *PodAffinityController) ListPodAffinity(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -76,13 +97,48 @@ func ListPodAffinity(c *gin.Context) {
 	amis.WriteJsonList(c, list)
 }
 
-func AddPodAffinity(c *gin.Context) {
+// @Summary 添加Pod亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param podAffinity body podAffinity true "Pod亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_pod_affinity/ns/{ns}/name/{name} [post]
+func (ac *PodAffinityController) AddPodAffinity(c *gin.Context) {
 	processPodAffinity(c, "add")
 }
-func UpdatePodAffinity(c *gin.Context) {
+
+// @Summary 更新Pod亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param podAffinity body podAffinity true "Pod亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_pod_affinity/ns/{ns}/name/{name} [post]
+func (ac *PodAffinityController) UpdatePodAffinity(c *gin.Context) {
 	processPodAffinity(c, "modify")
 }
-func DeletePodAffinity(c *gin.Context) {
+
+// @Summary 删除Pod亲和性配置
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "资源组"
+// @Param version path string true "资源版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Param podAffinity body podAffinity true "Pod亲和性配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_pod_affinity/ns/{ns}/name/{name} [post]
+func (ac *PodAffinityController) DeletePodAffinity(c *gin.Context) {
 	processPodAffinity(c, "delete")
 }
 func processPodAffinity(c *gin.Context, action string) {
@@ -100,7 +156,7 @@ func processPodAffinity(c *gin.Context, action string) {
 
 	var info podAffinity
 
-	if err := c.ShouldBindJSON(&info); err != nil {
+	if err = c.ShouldBindJSON(&info); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

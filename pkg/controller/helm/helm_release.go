@@ -12,11 +12,42 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// ListReleaseHistory 获取Release的历史版本
-func ListReleaseHistory(c *gin.Context) {
+type ReleaseController struct {
+}
+
+func RegisterHelmReleaseRoutes(api *gin.RouterGroup) {
+	ctrl := &ReleaseController{}
+
+	api.GET("/helm/release/list", ctrl.ListRelease)
+	api.GET("/helm/release/ns/:ns/name/:name/history/list", ctrl.ListReleaseHistory)
+	api.POST("/helm/release/:release/repo/:repo/chart/:chart/version/:version/install", ctrl.InstallRelease)
+	api.POST("/helm/release/ns/:ns/name/:name/uninstall", ctrl.UninstallRelease)
+	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/values", ctrl.GetReleaseValues)
+	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/notes", ctrl.GetReleaseNote)
+	api.GET("/helm/release/ns/:ns/name/:name/revision/:revision/install_log", ctrl.GetReleaseInstallLog)
+	api.POST("/helm/release/batch/uninstall", ctrl.BatchUninstallRelease)
+	api.POST("/helm/release/upgrade", ctrl.UpgradeRelease)
+
+}
+
+// @Summary 获取Release的历史版本
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Release名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/history/list [get]
+func (hr *ReleaseController) ListReleaseHistory(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
+
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "list", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -28,9 +59,20 @@ func ListReleaseHistory(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, history)
 }
-func ListRelease(c *gin.Context) {
-	ns := c.Param("ns")
-	h, err := getHelm(c, ns)
+
+// @Summary 获取Release列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/list [get]
+func (hr *ReleaseController) ListRelease(c *gin.Context) {
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "list", "", "", "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -58,8 +100,17 @@ func ListRelease(c *gin.Context) {
 	amis.WriteJsonData(c, list)
 }
 
-// InstallRelease 安装Helm Release
-func InstallRelease(c *gin.Context) {
+// @Summary 安装Helm Release
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param release path string true "Release名称"
+// @Param repo path string true "仓库名称"
+// @Param chart path string true "Chart名称"
+// @Param version path string true "版本号"
+// @Param body body object true "安装参数"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/{release}/repo/{repo}/chart/{chart}/version/{version}/install [post]
+func (hr *ReleaseController) InstallRelease(c *gin.Context) {
 
 	releaseName := c.Param("release")
 	repoName := c.Param("repo")
@@ -77,13 +128,13 @@ func InstallRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "InstallRelease", releaseName, req.Namespace, repoName)
+	_, _, err := handleCommonLogic(c, "create", releaseName, req.Namespace, repoName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	h, err := getHelm(c, req.Namespace)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -102,18 +153,24 @@ func InstallRelease(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, "正在安装中，界面显示可能有延迟")
 }
 
-// UninstallRelease 卸载Helm Release
-func UninstallRelease(c *gin.Context) {
+// @Summary 卸载Helm Release
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Release名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/uninstall [post]
+func (hr *ReleaseController) UninstallRelease(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "UninstallRelease", releaseName, ns, "")
+	_, _, err := handleCommonLogic(c, "delete", releaseName, ns, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	h, err := getHelm(c, ns)
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -126,13 +183,27 @@ func UninstallRelease(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// GetReleaseNote 获取ReleaseNote
-func GetReleaseNote(c *gin.Context) {
+// @Summary 获取ReleaseNote
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Release名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/notes [get]
+func (hr *ReleaseController) GetReleaseNote(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	revision := c.Param("revision")
 
-	h, err := getHelm(c, ns)
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "get", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -148,13 +219,59 @@ func GetReleaseNote(c *gin.Context) {
 	})
 }
 
-// GetReleaseValues 获取安装yaml
-func GetReleaseValues(c *gin.Context) {
+// @Summary 获取Release安装Log
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Release名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log [get]
+func (hr *ReleaseController) GetReleaseInstallLog(c *gin.Context) {
+	releaseName := c.Param("name")
+	ns := c.Param("ns")
+
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 检查权限
+	_, _, err = handleCommonLogic(c, "get", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	rr, err := models.GetHelmReleaseByNsAndReleaseName(ns, releaseName, selectedCluster)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, gin.H{
+		"result": rr.Result,
+	})
+}
+
+// @Summary 获取安装yaml
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Release名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/values [get]
+func (hr *ReleaseController) GetReleaseValues(c *gin.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	revision := c.Param("revision")
-
-	h, err := getHelm(c, ns)
+	// 检查权限
+	_, _, err := handleCommonLogic(c, "get", releaseName, ns, "")
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	h, err := getHelm(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -178,7 +295,13 @@ func GetReleaseValues(c *gin.Context) {
 	amis.WriteJsonData(c, ret)
 }
 
-func BatchUninstallRelease(c *gin.Context) {
+// @Summary 批量卸载Helm Release
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body object true "批量卸载参数"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/batch/uninstall [post]
+func (hr *ReleaseController) BatchUninstallRelease(c *gin.Context) {
 	var req struct {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
@@ -190,14 +313,14 @@ func BatchUninstallRelease(c *gin.Context) {
 	for i := 0; i < len(req.Names); i++ {
 		name := req.Names[i]
 		ns := req.Namespaces[i]
-		h, err := getHelm(c, ns)
+		h, err := getHelm(c)
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
 		}
 
 		// 检查权限
-		_, _, err = handleCommonLogic(c, "BatchUninstallRelease", name, ns, "")
+		_, _, err = handleCommonLogic(c, "delete", name, ns, "")
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
@@ -212,8 +335,13 @@ func BatchUninstallRelease(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// UpgradeRelease 升级Helm Release
-func UpgradeRelease(c *gin.Context) {
+// @Summary 升级Helm Release
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body object true "升级参数"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/helm/release/upgrade [post]
+func (hr *ReleaseController) UpgradeRelease(c *gin.Context) {
 
 	var req struct {
 		Name      string `json:"name,omitempty"`
@@ -227,13 +355,13 @@ func UpgradeRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "UpgradeRelease", req.Name, req.Namespace, "")
+	_, _, err := handleCommonLogic(c, "update", req.Name, req.Namespace, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	h, err := getHelm(c, req.Namespace)
+	h, err := getHelm(c)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)

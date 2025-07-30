@@ -14,7 +14,22 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func OptionList(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.GET("/ns/option_list", ctrl.OptionList)
+	api.POST("/ResourceQuota/create", ctrl.CreateResourceQuota)
+	api.POST("/LimitRange/create", ctrl.CreateLimitRange)
+
+}
+
+// @Summary 获取命名空间选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ns/option_list [get]
+func (nc *Controller) OptionList(c *gin.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

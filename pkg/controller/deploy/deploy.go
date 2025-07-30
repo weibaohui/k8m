@@ -17,7 +17,34 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func BatchStop(c *gin.Context) {
+type ActionController struct{}
+
+func RegisterActionRoutes(api *gin.RouterGroup) {
+	ctrl := &ActionController{}
+	api.POST("/deploy/ns/:ns/name/:name/restart", ctrl.Restart)
+	api.POST("/deploy/batch/restart", ctrl.BatchRestart)
+	api.POST("/deploy/batch/stop", ctrl.BatchStop)
+	api.POST("/deploy/batch/restore", ctrl.BatchRestore)
+	api.POST("/deploy/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
+	api.GET("/deploy/ns/:ns/name/:name/rollout/history", ctrl.History)
+	api.GET("/deploy/ns/:ns/name/:name/revision/:revision/rollout/history", ctrl.HistoryRevisionDiff)
+	api.POST("/deploy/ns/:ns/name/:name/rollout/pause", ctrl.Pause)
+	api.POST("/deploy/ns/:ns/name/:name/rollout/resume", ctrl.Resume)
+	api.POST("/deploy/ns/:ns/name/:name/scale/replica/:replica", ctrl.Scale)
+	api.GET("/deploy/ns/:ns/name/:name/events/all", ctrl.Event)
+	api.GET("/deploy/ns/:ns/name/:name/hpa", ctrl.HPA)
+	api.POST("/deploy/create", ctrl.Create)
+
+}
+
+// @Summary 批量停止Deployment
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param name_list body []string true "Deployment名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/batch/stop [post]
+func (nc *ActionController) BatchStop(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -29,7 +56,7 @@ func BatchStop(c *gin.Context) {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -52,7 +79,15 @@ func BatchStop(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func BatchRestore(c *gin.Context) {
+
+// @Summary 批量恢复Deployment
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param name_list body []string true "Deployment名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/batch/restore [post]
+func (nc *ActionController) BatchRestore(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -64,7 +99,7 @@ func BatchRestore(c *gin.Context) {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -87,7 +122,15 @@ func BatchRestore(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func Restart(c *gin.Context) {
+
+// @Summary 重启单个Deployment
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/restart [post]
+func (nc *ActionController) Restart(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -101,7 +144,15 @@ func Restart(c *gin.Context) {
 		Ctl().Rollout().Restart()
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func BatchRestart(c *gin.Context) {
+
+// @Summary 批量重启Deployment
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param name_list body []string true "Deployment名称列表"
+// @Param ns_list body []string true "命名空间列表"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/batch/restart [post]
+func (nc *ActionController) BatchRestart(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -113,7 +164,7 @@ func BatchRestart(c *gin.Context) {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -136,7 +187,15 @@ func BatchRestart(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-func History(c *gin.Context) {
+
+// @Summary 获取Deployment历史版本
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/rollout/history [get]
+func (nc *ActionController) History(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -154,7 +213,16 @@ func History(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, list)
 }
-func HistoryRevisionDiff(c *gin.Context) {
+
+// @Summary 获取Deployment版本差异
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/history [get]
+func (nc *ActionController) HistoryRevisionDiff(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -197,7 +265,15 @@ func HistoryRevisionDiff(c *gin.Context) {
 		"latest":  string(latest),
 	})
 }
-func Pause(c *gin.Context) {
+
+// @Summary 暂停Deployment滚动更新
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/rollout/pause [post]
+func (nc *ActionController) Pause(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -211,7 +287,15 @@ func Pause(c *gin.Context) {
 		Ctl().Rollout().Pause()
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func Resume(c *gin.Context) {
+
+// @Summary 恢复Deployment滚动更新
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/rollout/resume [post]
+func (nc *ActionController) Resume(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -225,7 +309,16 @@ func Resume(c *gin.Context) {
 		Ctl().Rollout().Resume()
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func Scale(c *gin.Context) {
+
+// @Summary 扩缩容Deployment
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Param replica path int true "副本数"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/scale/replica/{replica} [post]
+func (nc *ActionController) Scale(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	replica := c.Param("replica")
@@ -242,7 +335,16 @@ func Scale(c *gin.Context) {
 		Ctl().Scaler().Scale(r)
 	amis.WriteJsonErrorOrOK(c, err)
 }
-func Undo(c *gin.Context) {
+
+// @Summary 回滚Deployment到指定版本
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Param revision path string true "版本号"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/undo [post]
+func (nc *ActionController) Undo(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -263,8 +365,15 @@ func Undo(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, result)
 }
 
+// @Summary 获取Deployment相关事件
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/events/all [get]
 // Event 显示deploy下所有的事件列表，包括deploy、rs、pod
-func Event(c *gin.Context) {
+func (nc *ActionController) Event(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -328,7 +437,14 @@ func Event(c *gin.Context) {
 	amis.WriteJsonData(c, eventList)
 }
 
-func HPA(c *gin.Context) {
+// @Summary 获取Deployment的HPA信息
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param ns path string true "命名空间"
+// @Param name path string true "Deployment名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/hpa [get]
+func (nc *ActionController) HPA(c *gin.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -346,8 +462,14 @@ func HPA(c *gin.Context) {
 	amis.WriteJsonData(c, hpa)
 }
 
+// @Summary 创建Deployment
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param body body object true "Deployment配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deploy/create [post]
 // 创建deployment
-func Create(c *gin.Context) {
+func (nc *ActionController) Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -376,7 +498,7 @@ func Create(c *gin.Context) {
 		}
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -388,7 +510,7 @@ func Create(c *gin.Context) {
 		return
 	}
 	// 构建Deployment对象
-	deployment := &v1.Deployment{
+	item := &v1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:   req.Metadata.Namespace,
 			Name:        req.Metadata.Name,
@@ -419,7 +541,7 @@ func Create(c *gin.Context) {
 
 	// 设置容器信息
 	for _, container := range req.Spec.Template.Spec.Containers {
-		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{
+		item.Spec.Template.Spec.Containers = append(item.Spec.Template.Spec.Containers, corev1.Container{
 			Name:            container.Name,
 			Image:           container.Image,
 			ImagePullPolicy: container.ImagePullPolicy,
@@ -429,9 +551,9 @@ func Create(c *gin.Context) {
 	// 创建Deployment
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
-		Resource(deployment).
+		Resource(item).
 		Namespace(req.Metadata.Namespace).
-		Create(deployment).Error
+		Create(item).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

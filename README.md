@@ -217,6 +217,9 @@ pnpm run build
 #### 编译调试后端
 
 ```bash
+#下载依赖
+go mod tidy
+#运行
 air
 #或者
 go run main.go 
@@ -252,5 +255,7 @@ pnpm run dev
 <br><img width="214" alt="Image" src="https://github.com/user-attachments/assets/166db141-42c5-42c4-9964-8e25cf12d04c" />
 
 ## 微信群
+![输入图片说明](https://foruda.gitee.com/images/1753455031254775761/148f6887_77493.png "屏幕截图")
+## QQ群
+![输入图片说明](https://foruda.gitee.com/images/1753099785542398999/184a765a_77493.png "屏幕截图")
 
-![输入图片说明](https://foruda.gitee.com/images/1751469149301951831/3f8cf2ad_77493.png "屏幕截图")

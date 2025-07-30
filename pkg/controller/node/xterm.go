@@ -23,7 +23,22 @@ var WebsocketMessageType = map[int]string{
 	websocket.PongMessage:   "pong",
 }
 
-func CreateNodeShell(c *gin.Context) {
+type ShellController struct{}
+
+func RegisterShellRoutes(api *gin.RouterGroup) {
+	ctrl := &ShellController{}
+	api.POST("/node/name/:node_name/create_node_shell", ctrl.CreateNodeShell)
+	api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", ctrl.CreateKubectlShell)
+
+}
+
+// @Summary 创建节点shell
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param node_name path string true "节点名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/name/{node_name}/create_node_shell [post]
+func (nc *ShellController) CreateNodeShell(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -56,7 +71,14 @@ func CreateNodeShell(c *gin.Context) {
 	})
 }
 
-func CreateKubectlShell(c *gin.Context) {
+// @Summary 创建kubectl shell
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param node_name path string true "节点名称"
+// @Param cluster_id path string true "集群ID，base64编码"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/node/name/{node_name}/cluster_id/{cluster_id}/create_kubectl_shell [post]
+func (nc *ShellController) CreateKubectlShell(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("node_name")             // NodeName
 	clusterIDBase64 := c.Param("cluster_id") // 集群ID，base64编码

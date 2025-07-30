@@ -11,8 +11,22 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+type ActionController struct{}
+
+func RegisterActionRoutes(api *gin.RouterGroup) {
+	ctrl := &ActionController{}
+	api.POST("/service/create", ctrl.Create)
+
+}
+
+// @Summary 创建Service
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param body body object true "Service创建参数"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/service/create [post]
 // Create 创建Service接口
-func Create(c *gin.Context) {
+func (nc *ActionController) Create(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

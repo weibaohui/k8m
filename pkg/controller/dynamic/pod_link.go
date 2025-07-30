@@ -11,6 +11,24 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+type PodLinkController struct{}
+
+func RegisterPodLinkRoutes(api *gin.RouterGroup) {
+	ctrl := &PodLinkController{}
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", ctrl.LinksServices)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", ctrl.LinksEndpoints)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", ctrl.LinksPVC)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", ctrl.LinksPV)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", ctrl.LinksIngress)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", ctrl.LinksEnv)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", ctrl.LinksEnvFromPod)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", ctrl.LinksConfigMap)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", ctrl.LinksSecret)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", ctrl.LinksNode)
+	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pod", ctrl.LinksPod)
+
+}
+
 var linkCacheTTL = 3 * time.Second
 
 func getPod(selectedCluster string, ctx context.Context, ns string, name string, kind string, group string, version string) (*v1.Pod, error) {
@@ -65,7 +83,18 @@ func getPods(selectedCluster string, ctx context.Context, ns string, name string
 	}
 	return pods, err
 }
-func LinksServices(c *gin.Context) {
+
+// @Summary 获取Pod关联的服务
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/services [get]
+func (pc *PodLinkController) LinksServices(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -92,7 +121,17 @@ func LinksServices(c *gin.Context) {
 	amis.WriteJsonList(c, services)
 }
 
-func LinksEndpoints(c *gin.Context) {
+// @Summary 获取Pod关联的端点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/endpoints [get]
+func (pc *PodLinkController) LinksEndpoints(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -121,7 +160,17 @@ func LinksEndpoints(c *gin.Context) {
 
 }
 
-func LinksPVC(c *gin.Context) {
+// @Summary 获取Pod关联的PVC
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/pvc [get]
+func (pc *PodLinkController) LinksPVC(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -148,7 +197,17 @@ func LinksPVC(c *gin.Context) {
 	amis.WriteJsonList(c, pvc)
 }
 
-func LinksPV(c *gin.Context) {
+// @Summary 获取Pod关联的PV
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/pv [get]
+func (pc *PodLinkController) LinksPV(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -175,7 +234,17 @@ func LinksPV(c *gin.Context) {
 	amis.WriteJsonList(c, pv)
 }
 
-func LinksIngress(c *gin.Context) {
+// @Summary 获取Pod关联的Ingress
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/ingress [get]
+func (pc *PodLinkController) LinksIngress(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -202,7 +271,17 @@ func LinksIngress(c *gin.Context) {
 	amis.WriteJsonList(c, ingress)
 }
 
-func LinksEnv(c *gin.Context) {
+// @Summary 获取Pod关联的环境变量
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/env [get]
+func (pc *PodLinkController) LinksEnv(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -229,7 +308,17 @@ func LinksEnv(c *gin.Context) {
 	amis.WriteJsonList(c, env)
 }
 
-func LinksEnvFromPod(c *gin.Context) {
+// @Summary 获取Pod关联的来自其他Pod的环境变量
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/envFromPod [get]
+func (pc *PodLinkController) LinksEnvFromPod(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -256,7 +345,17 @@ func LinksEnvFromPod(c *gin.Context) {
 	amis.WriteJsonList(c, env)
 }
 
-func LinksConfigMap(c *gin.Context) {
+// @Summary 获取Pod关联的ConfigMap
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/configmap [get]
+func (pc *PodLinkController) LinksConfigMap(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -283,7 +382,17 @@ func LinksConfigMap(c *gin.Context) {
 	amis.WriteJsonList(c, configMap)
 }
 
-func LinksSecret(c *gin.Context) {
+// @Summary 获取Pod关联的Secret
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/secret [get]
+func (pc *PodLinkController) LinksSecret(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -310,7 +419,17 @@ func LinksSecret(c *gin.Context) {
 	amis.WriteJsonList(c, secret)
 }
 
-func LinksNode(c *gin.Context) {
+// @Summary 获取Pod关联的节点
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param kind path string true "资源类型"
+// @Param group path string true "API组"
+// @Param version path string true "API版本"
+// @Param ns path string true "命名空间"
+// @Param name path string true "资源名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/node [get]
+func (pc *PodLinkController) LinksNode(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -336,7 +455,7 @@ func LinksNode(c *gin.Context) {
 	}
 	amis.WriteJsonList(c, nodes)
 }
-func LinksPod(c *gin.Context) {
+func (pc *PodLinkController) LinksPod(c *gin.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)

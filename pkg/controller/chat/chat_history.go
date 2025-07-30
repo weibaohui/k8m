@@ -6,7 +6,11 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-func History(c *gin.Context) {
+// @Summary 获取聊天历史记录
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /ai/chat/history [get]
+func (cc *Controller) History(c *gin.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -18,7 +22,12 @@ func History(c *gin.Context) {
 	amis.WriteJsonData(c, history)
 
 }
-func Reset(c *gin.Context) {
+
+// @Summary 重置聊天历史记录
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /ai/chat/reset [post]
+func (cc *Controller) Reset(c *gin.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
 		amis.WriteJsonError(c, err)

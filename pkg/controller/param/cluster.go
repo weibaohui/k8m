@@ -13,7 +13,12 @@ import (
 	"github.com/weibaohui/kom/kom"
 )
 
-func ClusterOptionList(c *gin.Context) {
+// @Summary 集群选项列表
+// @Description 获取当前登录用户可选的集群列表（下拉选项）
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /params/cluster/option_list [get]
+func (pc *Controller) ClusterOptionList(c *gin.Context) {
 	user, _ := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
@@ -56,7 +61,12 @@ func ClusterOptionList(c *gin.Context) {
 	})
 }
 
-func ClusterTableList(c *gin.Context) {
+// @Summary 集群表格列表
+// @Description 获取当前登录用户可见的集群详细信息（表格）
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /params/cluster/all [get]
+func (pc *Controller) ClusterTableList(c *gin.Context) {
 	user, _ := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()

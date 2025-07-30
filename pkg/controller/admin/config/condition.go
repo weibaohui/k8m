@@ -8,7 +8,22 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
-func ConditionList(c *gin.Context) {
+type ConditionController struct {
+}
+
+func RegisterConditionRoutes(admin *gin.RouterGroup) {
+	ctrl := &ConditionController{}
+	admin.GET("/condition/list", ctrl.List)
+	admin.POST("/condition/save", ctrl.Save)
+	admin.POST("/condition/delete/:ids", ctrl.Delete)
+	admin.POST("/condition/save/id/:id/status/:status", ctrl.QuickSave)
+}
+
+// @Summary 获取条件列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/condition/list [get]
+func (cc *ConditionController) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.ConditionReverse{}
 
@@ -20,7 +35,11 @@ func ConditionList(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-func ConditionSave(c *gin.Context) {
+// @Summary 创建或更新条件
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/condition/save [post]
+func (cc *ConditionController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.ConditionReverse{}
 	err := c.ShouldBindJSON(&m)
@@ -39,7 +58,12 @@ func ConditionSave(c *gin.Context) {
 	})
 }
 
-func ConditionDelete(c *gin.Context) {
+// @Summary 删除条件
+// @Security BearerAuth
+// @Param ids path string true "条件ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/condition/delete/{ids} [post]
+func (cc *ConditionController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.ConditionReverse{}
@@ -52,7 +76,13 @@ func ConditionDelete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func ConditionQuickSave(c *gin.Context) {
+// @Summary 快速保存条件状态
+// @Security BearerAuth
+// @Param id path int true "条件ID"
+// @Param status path string true "状态，例如：true、false"
+// @Success 200 {object} string
+// @Router /admin/condition/save/id/{id}/status/{status} [post]
+func (cc *ConditionController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 

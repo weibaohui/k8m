@@ -12,11 +12,11 @@ import (
 	"github.com/weibaohui/k8m/pkg/webhook"
 )
 
-type AdminWebhookController struct {
+type Controller struct {
 }
 
 func RegisterAdminWebhookRoutes(admin *gin.RouterGroup) {
-	ctrl := &AdminWebhookController{}
+	ctrl := &Controller{}
 	admin.GET("/inspection/webhook/list", ctrl.WebhookList)
 	admin.POST("/inspection/webhook/delete/:ids", ctrl.WebhookDelete)
 	admin.POST("/inspection/webhook/save", ctrl.WebhookSave)
@@ -25,7 +25,11 @@ func RegisterAdminWebhookRoutes(admin *gin.RouterGroup) {
 
 }
 
-func (s *AdminWebhookController) WebhookOptionList(c *gin.Context) {
+// @Summary 获取Webhook接收器选项列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/option_list [get]
+func (s *Controller) WebhookOptionList(c *gin.Context) {
 	m := models.WebhookReceiver{}
 	params := dao.BuildParams(c)
 	params.PerPage = 100000
@@ -52,7 +56,7 @@ func (s *AdminWebhookController) WebhookOptionList(c *gin.Context) {
 	})
 
 }
-func (s *AdminWebhookController) WebhookTest(c *gin.Context) {
+func (s *Controller) WebhookTest(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 	m := &models.WebhookReceiver{
@@ -72,7 +76,11 @@ func (s *AdminWebhookController) WebhookTest(c *gin.Context) {
 	amis.WriteJsonError(c, fmt.Errorf("unsupported platform: %s", m.Platform))
 }
 
-func (s *AdminWebhookController) WebhookList(c *gin.Context) {
+// @Summary 获取Webhook接收器列表
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/list [get]
+func (s *Controller) WebhookList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.WebhookReceiver{}
 
@@ -84,7 +92,11 @@ func (s *AdminWebhookController) WebhookList(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-func (s *AdminWebhookController) WebhookSave(c *gin.Context) {
+// @Summary 创建或更新Webhook接收器
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/save [post]
+func (s *Controller) WebhookSave(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.WebhookReceiver{}
 	err := c.ShouldBindJSON(&m)
@@ -100,7 +112,12 @@ func (s *AdminWebhookController) WebhookSave(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func (s *AdminWebhookController) WebhookDelete(c *gin.Context) {
+// @Summary 删除Webhook接收器
+// @Security BearerAuth
+// @Param ids path string true "Webhook接收器ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/inspection/webhook/delete/{ids} [post]
+func (s *Controller) WebhookDelete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.WebhookReceiver{}

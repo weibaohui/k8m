@@ -9,14 +9,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type MCPToolController struct {
+type ToolController struct {
 }
 
 // RegisterMCPToolRoutes 注册路由
 func RegisterMCPToolRoutes(admin *gin.RouterGroup) {
-	ctrl := &MCPToolController{}
-	admin.GET("/mcp/server/:name/tools/list", ctrl.ToolsList)
-	admin.POST("/mcp/tool/save/id/:id/status/:status", ctrl.ToolQuickSave)
+	ctrl := &ToolController{}
+	admin.GET("/mcp/server/:name/tools/list", ctrl.List)
+	admin.POST("/mcp/tool/save/id/:id/status/:status", ctrl.QuickSave)
 
 }
 
@@ -25,7 +25,7 @@ func RegisterMCPToolRoutes(admin *gin.RouterGroup) {
 // @Param name path string true "MCP服务器名称"
 // @Success 200 {object} string
 // @Router /admin/mcp/server/{name}/tools/list [get]
-func (m *MCPToolController) ToolsList(c *gin.Context) {
+func (m *ToolController) List(c *gin.Context) {
 	name := c.Param("name")
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
@@ -40,13 +40,13 @@ func (m *MCPToolController) ToolsList(c *gin.Context) {
 	amis.WriteJsonList(c, list)
 }
 
-// @Summary 快速保存MCP工具状态
+// @Summary 快速更新MCP工具状态
 // @Security BearerAuth
 // @Param id path int true "工具ID"
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/mcp/tool/save/id/{id}/status/{status} [post]
-func (m *MCPToolController) ToolQuickSave(c *gin.Context) {
+func (m *ToolController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 

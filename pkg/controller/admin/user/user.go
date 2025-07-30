@@ -175,6 +175,11 @@ func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB
 	return queryFuncs
 }
 
+// @Summary 获取用户选项列表
+// @Description 获取用户选项列表，用于下拉选择
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{}
+// @Router /admin/user/option_list [get]
 func (a *AdminUserController) UserOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
@@ -249,6 +254,13 @@ func (a *AdminUserController) Disable2FA(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// @Summary 快速更新用户状态
+// @Description 根据ID快速更新用户启用/禁用状态
+// @Security BearerAuth
+// @Param id path int true "用户ID"
+// @Param disabled path string true "状态，例如：true、false"
+// @Success 200 {object} string
+// @Router /admin/user/save/id/{id}/status/{disabled} [post]
 func (a *AdminUserController) UserStatusQuickSave(c *gin.Context) {
 	id := c.Param("id")
 	disabled := c.Param("disabled")

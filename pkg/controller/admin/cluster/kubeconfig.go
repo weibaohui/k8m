@@ -12,7 +12,12 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func (a *AdminClusterController) SaveKubeConfig(c *gin.Context) {
+// @Summary 保存KubeConfig
+// @Description 保存KubeConfig配置到数据库
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/cluster/kubeconfig/save [post]
+func (a *Controller) SaveKubeConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.KubeConfig{}
@@ -74,7 +79,13 @@ func (a *AdminClusterController) SaveKubeConfig(c *gin.Context) {
 	// 初始化本项目中的回调
 	amis.WriteJsonOK(c)
 }
-func (a *AdminClusterController) RemoveKubeConfig(c *gin.Context) {
+
+// @Summary 删除KubeConfig
+// @Description 从数据库中删除KubeConfig配置
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/cluster/kubeconfig/remove [post]
+func (a *Controller) RemoveKubeConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.KubeConfig{}

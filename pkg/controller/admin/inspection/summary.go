@@ -17,8 +17,16 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// SummaryBySchedule 汇总指定scheduleID下的巡检执行信息
-// SummaryBySchedule 统计巡检计划执行情况，支持按时间范围过滤
+// @Summary 统计巡检计划执行情况
+// @Description 统计指定巡检计划的执行情况，支持按时间范围和集群过滤
+// @Security BearerAuth
+// @Param id path string false "巡检计划ID"
+// @Param cluster path string false "集群名称"
+// @Param start_time path string false "开始时间(RFC3339格式)"
+// @Param end_time path string false "结束时间(RFC3339格式)"
+// @Success 200 {object} string
+// @Router /admin/inspection/schedule/id/{id}/summary [post]
+// @Router /admin/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time} [post]
 func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 100000000
@@ -206,7 +214,12 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 	amis.WriteJsonData(c, result)
 }
 
-// SummaryByRecordID 汇总指定巡检记录的规则总数与失败数
+// @Summary 生成巡检记录AI总结
+// @Description 为指定巡检记录生成AI总结
+// @Security BearerAuth
+// @Param id path string true "巡检记录ID"
+// @Success 200 {object} string
+// @Router /admin/inspection/schedule/record/id/{id}/summary [post]
 func (s *AdminScheduleController) SummaryByRecordID(c *gin.Context) {
 	recordIDStr := c.Param("id")
 	if recordIDStr == "" {

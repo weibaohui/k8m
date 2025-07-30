@@ -8,7 +8,21 @@ import (
 	v1 "k8s.io/api/networking/v1"
 )
 
-func SetDefault(c *gin.Context) {
+type Controller struct{}
+
+func RegisterRoutes(api *gin.RouterGroup) {
+	ctrl := &Controller{}
+	api.POST("/ingress_class/set_default/name/:name", ctrl.SetDefault)
+	api.GET("/ingress_class/option_list", ctrl.OptionList)
+}
+
+// @Summary 设置默认的 IngressClass
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param name path string true "IngressClass 名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ingress_class/set_default/name/{name} [post]
+func (cc *Controller) SetDefault(c *gin.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -27,7 +41,12 @@ func SetDefault(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func OptionList(c *gin.Context) {
+// @Summary 获取 IngressClass 选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/ingress_class/option_list [get]
+func (cc *Controller) OptionList(c *gin.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

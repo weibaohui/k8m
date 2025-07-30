@@ -9,7 +9,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func RepoOptionList(c *gin.Context) {
+// @Summary Helm仓库选项列表
+// @Description 获取所有Helm仓库名称，用于下拉选项
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /params/helm/repo/option_list [get]
+func (pc *Controller) HelmRepoOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.OrderBy = "name"
 	m := &models.HelmRepository{}
