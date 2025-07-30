@@ -14,8 +14,22 @@ import (
 	"net/http"
 )
 
+type LdapConfigController struct {
+}
+
+func RegisterLdapConfigRoutes(admin *gin.RouterGroup) {
+	ctrl := &LdapConfigController{}
+	// ldap 配置
+	admin.GET("/config/ldap/list", ctrl.LDAPConfigList)
+	admin.GET("/config/ldap/:id", ctrl.LDAPConfigDetail)
+	admin.POST("/config/ldap/save", ctrl.LDAPConfigSave)
+	admin.POST("/config/ldap/delete/:ids", ctrl.LDAPConfigDelete)
+	admin.POST("/config/ldap/save/id/:id/status/:enabled", ctrl.LDAPConfigQuickSave)
+	admin.POST("/config/ldap/test_connect", ctrl.LDAPConfigTestConnect)
+}
+
 // LDAP配置列表
-func LDAPConfigList(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.LDAPConfig{}
 
@@ -34,7 +48,7 @@ func LDAPConfigList(c *gin.Context) {
 }
 
 // 获取单个LDAP配置
-func LDAPConfigDetail(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigDetail(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 	m := &models.LDAPConfig{}
@@ -49,7 +63,7 @@ func LDAPConfigDetail(c *gin.Context) {
 }
 
 // 保存LDAP配置（新建/编辑）
-func LDAPConfigSave(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigSave(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.LDAPConfig{}
 	err := c.ShouldBindJSON(&m)
@@ -77,7 +91,7 @@ func LDAPConfigSave(c *gin.Context) {
 			}
 		}
 	} else {
-		// 新建，必须加密
+		// 新增配置时也要对密码进行加密
 		if m.BindPassword != "" {
 			encrypted, err := utils.AesEncrypt([]byte(m.BindPassword))
 			if err != nil {
@@ -103,7 +117,7 @@ func LDAPConfigSave(c *gin.Context) {
 }
 
 // 删除LDAP配置（支持批量）
-func LDAPConfigDelete(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigDelete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.LDAPConfig{}
@@ -117,7 +131,7 @@ func LDAPConfigDelete(c *gin.Context) {
 }
 
 // LDAPConfigQuickSave 快速保存启用状态
-func LDAPConfigQuickSave(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigQuickSave(c *gin.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 
@@ -139,14 +153,14 @@ func LDAPConfigQuickSave(c *gin.Context) {
 }
 
 // 获取ldap的enabled状态
-func GetLdapConfig(c *gin.Context) {
+func (lc *LdapConfigController) GetLdapConfig(c *gin.Context) {
 	// 查询是否有启用的LDAP配置
 	var ldapConfig models.LDAPConfig
 	err := dao.DB().Where("enabled = ?", true).Order("id desc").Limit(1).Find(&ldapConfig).Error
 
-	// 构造前端需要的响应格式
+	// 构造前端需要的响应���式
 	response := gin.H{
-		"enabled": ldapConfig.ID > 0, // 如果找到启用的配置，则ID > 0
+		"enabled": ldapConfig.ID > 0, // 如果找���启用的配置，则ID > 0
 	}
 
 	if err != nil {
@@ -157,7 +171,7 @@ func GetLdapConfig(c *gin.Context) {
 }
 
 // 测试LDAP连接
-func LDAPConfigTestConnect(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigTestConnect(c *gin.Context) {
 	type Req struct {
 		Host         string `json:"host"`
 		Port         int    `json:"port"`
@@ -172,14 +186,6 @@ func LDAPConfigTestConnect(c *gin.Context) {
 		return
 	}
 
-	// 对bind_password进行解密处理
-	if req.BindPassword != "" {
-		plain, err := utils.AesDecrypt(req.BindPassword)
-		if err == nil {
-			req.BindPassword = string(plain)
-		}
-	}
-
 	addr := fmt.Sprintf("%s:%d", req.Host, req.Port)
 	conn, err := ldap.Dial("tcp", addr)
 	if err != nil {
@@ -188,10 +194,25 @@ func LDAPConfigTestConnect(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	if err := conn.Bind(req.BindDN, req.BindPassword); err != nil {
-		klog.Errorf("管理员账号或密码错误: %v", err)
-		c.JSON(http.StatusOK, gin.H{"status": 1, "msg": fmt.Sprintf("管理员账号或密码错误: %v", err)})
+
+	// 先尝试用明文密码绑定
+	if err := conn.Bind(req.BindDN, req.BindPassword); err == nil {
+		c.JSON(http.StatusOK, gin.H{"status": 0, "msg": "连接成功"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": 0, "msg": "连接成功"})
+
+	// 如果明文失败，再尝试解密（兼容编辑后密文场景）
+	decryptedPwd := req.BindPassword
+	if req.BindPassword != "" {
+		if plain, err := utils.AesDecrypt(req.BindPassword); err == nil {
+			decryptedPwd = string(plain)
+			if err := conn.Bind(req.BindDN, decryptedPwd); err == nil {
+				c.JSON(http.StatusOK, gin.H{"status": 0, "msg": "连接成功"})
+				return
+			}
+		}
+	}
+
+	klog.Errorf("管理员账号或密码错误")
+	c.JSON(http.StatusOK, gin.H{"status": 1, "msg": "管理员账号或密码错误"})
 }
