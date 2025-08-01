@@ -15,7 +15,7 @@ type User struct {
 	Salt             string    `gorm:"not null" json:"salt,omitempty"`
 	Password         string    `gorm:"not null" json:"password,omitempty"`
 	GroupNames       string    `json:"group_names,omitempty"`
-	Source           string    `json:"source,omitempty"` // 来源，如：db, ldap, oauth
+	Source           string    `json:"source,omitempty"` // 来源，如：db, ldap_config.json, oauth
 	CreatedAt        time.Time `json:"created_at,omitempty"`
 	UpdatedAt        time.Time `json:"updated_at,omitempty"`                          // Automatically managed by GORM for update time
 	TwoFAEnabled     bool      `gorm:"default:false" json:"two_fa_enabled,omitempty"` // 是否启用2FA

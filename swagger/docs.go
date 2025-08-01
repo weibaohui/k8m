@@ -10979,7 +10979,7 @@ var doc = `{
                     "type": "string"
                 },
                 "source": {
-                    "description": "来源，如：db, ldap, oauth",
+                    "description": "来源，如：db, ldap_config.json, oauth",
                     "type": "string"
                 },
                 "two_fa_app_name": {

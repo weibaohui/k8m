@@ -791,6 +791,12 @@ const items: () => MenuItem[] = () => {
                         icon: <i className="fa-solid fa-right-to-bracket"></i>,
                         key: "sso_config",
                         onClick: () => onMenuClick('/admin/config/sso_config')
+                    },
+                    {
+                        label: "LDAP登录",
+                        icon: <i className="fa-solid fa-right-to-bracket"></i>,
+                        key: "ldap_config",
+                        onClick: () => onMenuClick('/admin/config/ldap_config')
                     }
                 ],
             },

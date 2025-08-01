@@ -41,11 +41,14 @@ const Login = () => {
         fetch('/auth/ldap/config')
             .then(res => res.json())
             .then(data => {
-                if (data.status === 0) {
+                if (data.status === 0 && data.data) {
                     setLdapEnabled(data.data.enabled);
                 }
             })
-            .catch(() => message.error('获取LDAP配置失败'));
+            .catch(() => {
+                console.error('获取LDAP配置失败');
+                setLdapEnabled(false);
+            });
     }, []);
 
     // useEffect 读取 remember 数据

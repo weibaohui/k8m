@@ -1,0 +1,338 @@
+{
+  "type": "page",
+  "title": "LDAP配置管理",
+  "body": [
+    {
+      "type": "alert",
+      "level": "info",
+      "body": "<p>LDAP配置用于设置外部目录服务认证，支持 Active Directory 和 OpenLDAP。启用后，用户可以通过LDAP账号登录系统。</p>"
+    },
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建配置",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建LDAP配置  (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/admin/config/ldap/save",
+              "submitText": "",
+              "resetText": "",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "name",
+                  "label": "配置名称",
+                  "required": true,
+                  "placeholder": "请输入配置名称",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 2,
+                    "maxLength": 50
+                  }
+                },
+                {
+                  "type": "input-text",
+                  "name": "host",
+                  "label": "服务器地址",
+                  "required": true,
+                  "placeholder": "请输入LDAP服务器地址"
+                },
+                {
+                  "type": "input-text",
+                  "name": "port",
+                  "label": "服务器端口",
+                  "required": true,
+                  "placeholder": "默认389",
+                  "value": 389
+                },
+                {
+                  "type": "input-text",
+                  "name": "bind_dn",
+                  "label": "管理员DN",
+                  "required": true,
+                  "placeholder": "如：cn=admin,dc=example,dc=com"
+                },
+                {
+                  "type": "input-password",
+                  "name": "bind_password",
+                  "label": "管理员密码",
+                  "required": true,
+                  "placeholder": "请输入管理员密码"
+                },
+                {
+                  "type": "input-text",
+                  "name": "base_dn",
+                  "label": "基础DN",
+                  "required": true,
+                  "placeholder": "如：dc=example,dc=com"
+                },
+                {
+                  "type": "input-text",
+                  "name": "user_filter",
+                  "label": "用户过滤器",
+                  "required": true,
+                  "placeholder": "如：uid或sAMAccountName",
+                  "value": ""
+                },
+                {
+                  "type": "select",
+                  "name": "default_group",
+                  "label": "默认用户组",
+                  "source": {
+                    "method": "get",
+                    "url": "/admin/user_group/list",
+                    "adaptor": "return {\n  status: payload.status,\n  msg: payload.msg,\n  data: {\n    options: payload.data.rows.map(item => ({\n      label: item.group_name,\n      value: item.group_name\n    }))\n  }\n};"
+                  },
+                  "description": "LDAP用户首次登录时默认绑定的用户组",
+                  "clearable": true,
+                  "placeholder": "请选择默认用户组",
+                  "inputClassName": "default-group-select"
+                },
+                {
+                  "type": "button",
+                  "label": "测试连接",
+                  "level": "info",
+                  "actionType": "ajax",
+                  "block": false,
+                  "className": "ml-2",
+                  "api": {
+                    "method": "post",
+                    "url": "/admin/config/ldap/test_connect",
+                    "data": {
+                      "host": "${host}",
+                      "port": "${port}",
+                      "bind_dn": "${bind_dn}",
+                      "bind_password": "${bind_password}",
+                      "base_dn": "${base_dn}",
+                      "user_filter": "${user_filter}"
+                    },
+                    "messages": {
+                      "success": "连接成功",
+                      "failed": "连接失败"
+                    }
+                  }
+                }
+              ],
+              "actions": [
+                {
+                  "type": "submit",
+                  "label": "保存",
+                  "level": "primary"
+                },
+                {
+                  "type": "reset",
+                  "label": "重置"
+                }
+              ],
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              }
+            }
+          }
+        }
+      ],
+      "quickSaveItemApi": "/admin/config/ldap/save/id/${id}/status/${enabled}",
+      "columns": [
+        {
+          "name": "name",
+          "label": "配置名称",
+          "sortable": true
+        },
+        {
+          "name": "host",
+          "label": "服务器地址",
+          "sortable": true
+        },
+        {
+          "name": "port",
+          "label": "端口",
+          "width": 80
+        },
+        {
+          "name": "base_dn",
+          "label": "基础DN"
+        },
+        {
+          "name": "enabled",
+          "label": "启用状态",
+          "quickEdit": {
+            "mode": "inline",
+            "type": "switch",
+            "onText": "开启",
+            "offText": "关闭",
+            "saveImmediately": true,
+            "resetOnFailed": true
+          }
+        },
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 100,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fa fa-pencil",
+              "actionType": "drawer",
+              "tooltip": "编辑",
+              "drawer": {
+                "position": "right",
+                "size": "lg",
+                "title": "编辑配置",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/config/ldap/save",
+                  "initApi": "get:/admin/config/ldap/${id}",
+                  "submitText": "",
+                  "resetText": "",
+                  "body": [
+                    {
+                      "type": "input-text",
+                      "name": "name",
+                      "label": "配置名称",
+                      "required": true,
+                      "placeholder": "请输入配置名称",
+                      "validateOnChange": true,
+                      "validations": {
+                        "minLength": 2,
+                        "maxLength": 50
+                      }
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "host",
+                      "label": "服务器地址",
+                      "required": true,
+                      "placeholder": "请输入LDAP服务器地址"
+                    },
+                    {
+                      "type": "input-number",
+                      "name": "port",
+                      "label": "服务器端口",
+                      "required": true,
+                      "placeholder": "默认389",
+                      "value": 389
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "bind_dn",
+                      "label": "管理员DN",
+                      "required": true,
+                      "placeholder": "如：cn=admin,dc=example,dc=com"
+                    },
+                    {
+                      "type": "input-password",
+                      "name": "bind_password",
+                      "label": "管理员密码",
+                      "required": true,
+                      "placeholder": "请输入管理员密码"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "base_dn",
+                      "label": "基础DN",
+                      "required": true,
+                      "placeholder": "如：dc=example,dc=com"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "user_filter",
+                      "label": "用户过滤器",
+                      "required": true,
+                      "placeholder": "如：uid或sAMAccountName",
+                      "value": ""
+                    },
+                    {
+                      "type": "select",
+                      "name": "default_group",
+                      "label": "默认用户组",
+                      "source": {
+                        "method": "get",
+                        "url": "/admin/user_group/list",
+                        "adaptor": "return {\n  status: payload.status,\n  msg: payload.msg,\n  data: {\n    options: payload.data.rows.map(item => ({\n      label: item.group_name,\n      value: item.group_name\n    }))\n  }\n};"
+                      },
+                      "description": "LDAP用户首次登录时默认绑定的用户组",
+                      "clearable": true,
+                      "placeholder": "请选择默认用户组",
+                      "inputClassName": "default-group-select"
+                    },
+                    {
+                      "type": "button",
+                      "label": "测试连接",
+                      "level": "info",
+                      "actionType": "ajax",
+                      "block": false,
+                      "className": "ml-2",
+                      "api": {
+                        "method": "post",
+                        "url": "/admin/config/ldap/test_connect",
+                        "data": {
+                          "host": "${host}",
+                          "port": "${port}",
+                          "bind_dn": "${bind_dn}",
+                          "bind_password": "${bind_password}",
+                          "base_dn": "${base_dn}",
+                          "user_filter": "${user_filter}"
+                        },
+                        "messages": {
+                          "success": "连接成功",
+                          "failed": "连接失败"
+                        }
+                      }
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": "submit",
+                      "label": "保存",
+                      "level": "primary"
+                    },
+                    {
+                      "type": "reset",
+                      "label": "重置"
+                    }
+                  ],
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  }
+                }
+              }
+            },
+            {
+              "type": "button",
+              "icon": "fa fa-trash",
+              "tooltip": "删除",
+              "confirmText": "确认要删除吗？",
+              "actionType": "ajax",
+              "api": "post:/admin/config/ldap/delete/${id}"
+            }
+          ]
+        }
+      ],
+      "api": "get:/admin/config/ldap/list",
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "api": "post:/admin/config/ldap/delete/${ids}",
+          "confirmText": "确定要删除选中的配置吗？"
+        }
+      ]
+    }
+  ]
+}
