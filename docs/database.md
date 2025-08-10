@@ -47,11 +47,11 @@ K8M 支持多种数据库后端，包括 SQLite、MySQL   - 环境变量：
 2. **高级配置** - 自定义完整的 DSN 参数：
    - 环境变量：
      ```env
-     SQLITE_DSN="file:./data/k8m.db?_journal_mode=WAL&_busy_timeout=5000"
+     SQLITE_DSN="file:./data/k8m.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)"
      ```
    - 启动参数：
      ```shell
-     --sqlite-dsn="file:./data/k8m.db?_journal_mode=WAL&_busy_timeout=5000"
+     --sqlite-dsn="file:./data/k8m.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)"
      ```
 
    > **优先级说明**：
