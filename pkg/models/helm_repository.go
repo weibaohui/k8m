@@ -54,9 +54,3 @@ func (c *HelmRepository) GetIDByNameAndURL(params *dao.Params) (uint, error) {
 	}
 	return t.ID, err
 }
-
-func (c *HelmRepository) UpdateContent(params *dao.Params) error {
-	return c.Save(params, func(db *gorm.DB) *gorm.DB {
-		return db.Select([]string{"content", "generated"}).Where("id = ?", c.ID).Save(c)
-	})
-}
