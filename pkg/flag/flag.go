@@ -264,7 +264,8 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
 	// 数据库-sqlite
 	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认./data/k8m.db")
-	pflag.StringVar(&c.SqliteDSN, "sqlite-dsn", defaultSqliteDSN, "sqlite DSN参数配置，例如：file:./data/app.db?_journal_mode=WAL&busy_timeout=5000")
+	pflag.StringVar(&c.SqliteDSN, "sqlite-dsn", defaultSqliteDSN, "sqlite DSN参数配置（优先于 --sqlite-path），例如：file:./data/app.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)")
+
 	// 数据库-mysql
 	pflag.StringVar(&c.MysqlHost, "mysql-host", defaultMysqlHost, "MySQL主机地址")
 	pflag.IntVar(&c.MysqlPort, "mysql-port", defaultMysqlPort, "MySQL端口")
