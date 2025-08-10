@@ -23,6 +23,8 @@ K8M 支持多种数据库后端，包括 SQLite、MySQL 和 PostgreSQL。数据�
 
 ## 2. SQLite 配置
 
+### 基础配置
+
 仅需指定数据库文件路径：
 
 - 环境变量：
@@ -34,23 +36,39 @@ K8M 支持多种数据库后端，包括 SQLite、MySQL 和 PostgreSQL。数据�
   --sqlite-path=./data/k8m.db
   ```
 
+### 并发写入优化
+
+为了降低多并发写入时出现 "database is locked" 的风险，K8M 已在内部启用了以下优化：
+
+1. WAL (Write-Ahead Logging) 模式
+2. busy_timeout 设置为 5000ms
+
+### 注意事项
+
+1. **目录权限**: 启动前请确保数据库文件所在目录 (如 `./data`) 已存在且具有正确的读写权限。
+2. **并发限制**: SQLite 适合轻量级应用场景。如果您的应用场景涉及大量并发写入，建议考虑使用 MySQL 或 PostgreSQL。
+3. **备份建议**: 建议定期备份数据库文件，可以通过以下命令进行备份：
+   ```shell
+   cp ./data/k8m.db ./data/k8m.db.backup
+   ```
+
 ---
 
 ## 3. MySQL 配置
 
 支持如下参数：
 
-| 环境变量         | 启动参数             | 说明           | 默认值                |
-|------------------|----------------------|----------------|-----------------------|
-| MYSQL_HOST       | --mysql-host         | 主机           | 127.0.0.1             |
-| MYSQL_PORT       | --mysql-port         | 端口           | 3306                  |
-| MYSQL_USER       | --mysql-user         | 用户名         | root                  |
-| MYSQL_PASSWORD   | --mysql-password     | 密码           | ""                    |
-| MYSQL_DATABASE   | --mysql-database     | 数据库名       | k8m                   |
-| MYSQL_CHARSET    | --mysql-charset      | 字符集         | utf8mb4               |
-| MYSQL_COLLATION  | --mysql-collation    | 排序规则       | utf8mb4_general_ci    |
-| MYSQL_QUERY      | --mysql-query        | 额外参数       | parseTime=True&loc=Local |
-| MYSQL_LOGMODE    | --mysql-logmode      | 日志模式       | false                 |
+| 环境变量        | 启动参数          | 说明     | 默认值                   |
+| --------------- | ----------------- | -------- | ------------------------ |
+| MYSQL_HOST      | --mysql-host      | 主机     | 127.0.0.1                |
+| MYSQL_PORT      | --mysql-port      | 端口     | 3306                     |
+| MYSQL_USER      | --mysql-user      | 用户名   | root                     |
+| MYSQL_PASSWORD  | --mysql-password  | 密码     | ""                       |
+| MYSQL_DATABASE  | --mysql-database  | 数据库名 | k8m                      |
+| MYSQL_CHARSET   | --mysql-charset   | 字符集   | utf8mb4                  |
+| MYSQL_COLLATION | --mysql-collation | 排序规则 | utf8mb4_general_ci       |
+| MYSQL_QUERY     | --mysql-query     | 额外参数 | parseTime=True&loc=Local |
+| MYSQL_LOGMODE   | --mysql-logmode   | 日志模式 | false                    |
 
 示例：
 ```env
@@ -72,16 +90,16 @@ MYSQL_LOGMODE=false
 
 支持如下参数：
 
-| 环境变量         | 启动参数             | 说明           | 默认值                |
-|------------------|----------------------|----------------|-----------------------|
-| PG_HOST          | --pg-host            | 主机           | 127.0.0.1             |
-| PG_PORT          | --pg-port            | 端口           | 5432                  |
-| PG_USER          | --pg-user            | 用户名         | postgres              |
-| PG_PASSWORD      | --pg-password        | 密码           | ""                    |
-| PG_DATABASE      | --pg-database        | 数据库名       | k8m                   |
-| PG_SSLMODE       | --pg-sslmode         | SSL模式        | disable               |
-| PG_TIMEZONE      | --pg-timezone        | 时区           | Asia/Shanghai         |
-| PG_LOGMODE       | --pg-logmode         | 日志模式       | false                 |
+| 环境变量    | 启动参数      | 说明     | 默认值        |
+| ----------- | ------------- | -------- | ------------- |
+| PG_HOST     | --pg-host     | 主机     | 127.0.0.1     |
+| PG_PORT     | --pg-port     | 端口     | 5432          |
+| PG_USER     | --pg-user     | 用户名   | postgres      |
+| PG_PASSWORD | --pg-password | 密码     | ""            |
+| PG_DATABASE | --pg-database | 数据库名 | k8m           |
+| PG_SSLMODE  | --pg-sslmode  | SSL模式  | disable       |
+| PG_TIMEZONE | --pg-timezone | 时区     | Asia/Shanghai |
+| PG_LOGMODE  | --pg-logmode  | 日志模式 | false         |
 
 示例：
 ```env

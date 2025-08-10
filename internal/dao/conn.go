@@ -71,7 +71,9 @@ func openSqliteDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, er
 		}
 	}
 
-	db, err := gorm.Open(sqlite.Open(cfg.SqlitePath), &gorm.Config{
+	// 使用 WAL 模式和 busy_timeout 以优化并发性能
+	dsn := fmt.Sprintf("file:%s?_journal_mode=WAL&busy_timeout=5000", cfg.SqlitePath)
+	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: customLogger,
 	})
 	if err != nil {
