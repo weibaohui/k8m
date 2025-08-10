@@ -1,6 +1,13 @@
 # 数据库配置说明
 
-K8M 支持多种数据库后端，包括 SQLite、MySQL 和 PostgreSQL。数据库类型通过 `DB_DRIVER` 环境变量或启动参数指定。
+K8M 支持多种数据库后端，包括 SQLite、MySQL   - 环境变量：
+     ```env
+     SQLITE_DSN="file:./data/k8m.db?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)"
+     ```
+   - 启动参数：
+     ```shell
+     --sqlite-dsn="file:./data/k8m.db?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)"
+     ```reSQL。数据库类型通过 `DB_DRIVER` 环境变量或启动参数指定。
 
 ## 1. 选择数据库类型
 
@@ -40,15 +47,18 @@ K8M 支持多种数据库后端，包括 SQLite、MySQL 和 PostgreSQL。数据�
 2. **高级配置** - 自定义完整的 DSN 参数：
    - 环境变量：
      ```env
-     SQLITE_DSN="file:./data/k8m.db?_journal_mode=WAL&busy_timeout=5000"
+     SQLITE_DSN="file:./data/k8m.db?_journal_mode=WAL&_busy_timeout=5000"
      ```
    - 启动参数：
      ```shell
-     --sqlite-dsn="file:./data/k8m.db?_journal_mode=WAL&busy_timeout=5000"
+     --sqlite-dsn="file:./data/k8m.db?_journal_mode=WAL&_busy_timeout=5000"
      ```
 
-   > 注意：如果设置了 SQLITE_DSN，将优先使用此配置，否则使用默认优化配置。
-
+   > **优先级说明**：
+   > - 如果设置了 `SQLITE_DSN`，将优先使用此配置
+   > - 如果同时设置了 `SQLITE_DSN` 和 `SQLITE_PATH`，系统会给出警告并优先使用 `SQLITE_DSN`
+   > - 如果都未设置，将使用默认的优化配置
+   > - 更多DNS参数，请参考https://github.com/glebarez/go-sqlite?tab=readme-ov-file#connection-string-examples
 ### 并发写入优化
 
 为了降低多并发写入时出现 "database is locked" 的风险，K8M 已在内部启用了以下优化：

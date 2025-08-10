@@ -300,6 +300,10 @@ func (c *Config) InitFlags() {
 	}
 	pflag.Parse()
 
+	// SQLite 配置优先级警告
+	if c.SqliteDSN != "" && c.SqlitePath != "" {
+		klog.Warning("检测到同时设置了 --sqlite-dsn 与 --sqlite-path，将优先使用 --sqlite-dsn")
+	}
 }
 
 // getEnv 读取环境变量，如果不存在则返回默认值
