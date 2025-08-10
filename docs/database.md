@@ -49,7 +49,7 @@ K8M 支持多种数据库后端，包括 SQLite、MySQL、PostgreSQL。
    > **优先级说明**：
    > - 如果设置了 `SQLITE_DSN`，将优先使用此配置
    > - 如果同时设置了 `SQLITE_DSN` 和 `SQLITE_PATH`，系统会给出警告并优先使用 `SQLITE_DSN`
-   > - 如果都未设置，将使用默认的优化配置
+   > - 如果都未设置，将使用默认的优化配置（例如：默认路径 `./data/k8m.db`，默认 DSN `file:./data/k8m.db?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)`）
    > - 更多DSN参数，请参考https://github.com/glebarez/go-sqlite?tab=readme-ov-file#connection-string-examples
    > - https://github.com/mattn/go-sqlite3/blob/3392062c729d77820afc1f5cae3427f0de39e954/sqlite3.go#L908
 ### 并发写入优化
