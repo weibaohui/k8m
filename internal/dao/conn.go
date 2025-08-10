@@ -65,13 +65,21 @@ func openSqliteDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, er
 		}
 		file, err := os.Create(cfg.SqlitePath)
 		defer file.Close()
+
 		if err != nil {
 			klog.Errorf("创建数据库文件[%s]失败: %v", cfg.SqlitePath, err.Error())
 			return nil, err
 		}
+
 	}
 
-	db, err := gorm.Open(sqlite.Open(cfg.SqlitePath), &gorm.Config{
+	// 优先使用自定义DSN，如果未设置则使用默认配置
+	dsn := cfg.SqliteDSN
+	if dsn == "" {
+		// 使用 WAL 模式和 busy_timeout 以优化并发性能
+		dsn = fmt.Sprintf("file:%s?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)", cfg.SqlitePath)
+	}
+	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: customLogger,
 	})
 	if err != nil {
