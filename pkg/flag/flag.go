@@ -54,6 +54,8 @@ type Config struct {
 	AnySelect            bool    // 是否开启任意选择，默认开启
 	DBDriver             string  // 数据库驱动类型: sqlite、mysql、postgresql等
 	SqlitePath           string  // sqlite 数据库路径
+	SqliteDSN            string  // sqlite 自定义 DSN 参数配置，设置后优先使用
+
 	// MySQL 配置
 	MysqlHost      string // mysql 主机
 	MysqlPort      int    // mysql 端口
@@ -168,6 +170,7 @@ func (c *Config) InitFlags() {
 
 	// sqlite数据库文件路径
 	defaultSqlitePath := getEnv("SQLITE_PATH", "./data/k8m.db")
+	defaultSqliteDSN := getEnv("SQLITE_DSN", "") // 默认为空，表示使用默认 DSN 配置
 
 	// 默认开启任意选择
 	defaultAnySelect := getEnvAsBool("ANY_SELECT", true)
@@ -261,6 +264,7 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
 	// 数据库-sqlite
 	pflag.StringVar(&c.SqlitePath, "sqlite-path", defaultSqlitePath, "sqlite数据库文件路径，默认./data/k8m.db")
+	pflag.StringVar(&c.SqliteDSN, "sqlite-dsn", defaultSqliteDSN, "sqlite DSN参数配置，例如：file:./data/app.db?_journal_mode=WAL&busy_timeout=5000")
 	// 数据库-mysql
 	pflag.StringVar(&c.MysqlHost, "mysql-host", defaultMysqlHost, "MySQL主机地址")
 	pflag.IntVar(&c.MysqlPort, "mysql-port", defaultMysqlPort, "MySQL端口")

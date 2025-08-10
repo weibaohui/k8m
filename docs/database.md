@@ -25,16 +25,29 @@ K8M 支持多种数据库后端，包括 SQLite、MySQL 和 PostgreSQL。数据�
 
 ### 基础配置
 
-仅需指定数据库文件路径：
+可以通过以下方式配置 SQLite：
 
-- 环境变量：
-  ```env
-  SQLITE_PATH=./data/k8m.db
-  ```
-- 启动参数：
-  ```shell
-  --sqlite-path=./data/k8m.db
-  ```
+1. **基本配置** - 仅指定数据库文件路径：
+   - 环境变量：
+     ```env
+     SQLITE_PATH=./data/k8m.db
+     ```
+   - 启动参数：
+     ```shell
+     --sqlite-path=./data/k8m.db
+     ```
+
+2. **高级配置** - 自定义完整的 DSN 参数：
+   - 环境变量：
+     ```env
+     SQLITE_DSN="file:./data/k8m.db?_journal_mode=WAL&busy_timeout=5000"
+     ```
+   - 启动参数：
+     ```shell
+     --sqlite-dsn="file:./data/k8m.db?_journal_mode=WAL&busy_timeout=5000"
+     ```
+
+   > 注意：如果设置了 SQLITE_DSN，将优先使用此配置，否则使用默认优化配置。
 
 ### 并发写入优化
 
