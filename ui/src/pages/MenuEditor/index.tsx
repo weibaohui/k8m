@@ -397,9 +397,7 @@ const MenuEditor: React.FC = () => {
                                 icon={<PlusOutlined />}
                                 onClick={() => handleAdd(null)}
                                 style={{ marginBottom: 12 }}
-                            >
-                                新增
-                            </Button>
+                            />
                         </Tooltip>
                     </div>
                     {isPreview ? (
