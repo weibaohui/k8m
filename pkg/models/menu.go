@@ -13,7 +13,6 @@ import (
 type Menu struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	MenuData  string    `gorm:"type:json" json:"menu_data,omitempty"`
-	Version   int       `gorm:"index;unique" json:"version,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
@@ -24,7 +23,6 @@ func (m *Menu) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (
 }
 
 func (c *Menu) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
-	c.Version = c.Version + 1
 	return dao.GenericSave(params, c, queryFuncs...)
 }
 
