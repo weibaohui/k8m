@@ -22,6 +22,11 @@ func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
 	admin.POST("/menu/delete/:ids", ctrl.Delete)
 
 }
+// @Summary 获取菜单列表
+// @Description 获取所有菜单版本信息
+// @Security BearerAuth
+// @Success 200 {object} []models.Menu
+// @Router /admin/menu/list [get]
 func (a *AdminMenuController) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
@@ -34,6 +39,13 @@ func (a *AdminMenuController) List(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, items)
 }
+// @Summary 保存菜单
+// @Description 新增或更新菜单（每次操作生成新版本）
+// @Security BearerAuth
+// @Accept json
+// @Param data body models.Menu true "菜单内容"
+// @Success 200 {object} map[string]interface{}
+// @Router /admin/menu/save [post]
 func (a *AdminMenuController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
@@ -46,6 +58,12 @@ func (a *AdminMenuController) Save(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+// @Summary 删除菜单
+// @Description 根据ID批量删除菜单版本
+// @Security BearerAuth
+// @Param ids path string true "菜单ID，多个用逗号分隔"
+// @Success 200 {object} string
+// @Router /admin/menu/delete/{ids} [post]
 func (a *AdminMenuController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
