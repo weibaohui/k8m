@@ -20,6 +20,34 @@ const MenuEditor: React.FC = () => {
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
 
+    // 从localStorage加载历史记录
+    const loadHistoryFromStorage = () => {
+        try {
+            const storedHistory = localStorage.getItem('menuEditorHistory');
+            if (storedHistory) {
+                const parsedHistory = JSON.parse(storedHistory);
+                setHistory(parsedHistory);
+                setHistoryIndex(parsedHistory.length - 1);
+            }
+        } catch (error) {
+            console.error('加载历史记录失败:', error);
+        }
+    };
+
+    // 保存历史记录到localStorage
+    const saveHistoryToStorage = (historyData: { data: MenuItem[], time: string }[]) => {
+        try {
+            localStorage.setItem('menuEditorHistory', JSON.stringify(historyData));
+        } catch (error) {
+            console.error('保存历史记录失败:', error);
+        }
+    };
+
+    // 组件初始化时加载历史记录
+    useEffect(() => {
+        loadHistoryFromStorage();
+    }, []);
+
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
     const [parentKey, setParentKey] = useState<string | null>(null);
     const [showIconModal, setShowIconModal] = useState(false);
@@ -310,8 +338,19 @@ const MenuEditor: React.FC = () => {
             data: JSON.parse(JSON.stringify(data)), // 深拷贝
             time: new Date().toLocaleString()
         });
+        
+        // 限制历史记录数量，避免localStorage过大
+        const maxHistoryCount = 50;
+        if (newHistory.length > maxHistoryCount) {
+            newHistory.splice(0, newHistory.length - maxHistoryCount);
+        }
+        
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
+        
+        // 保存到localStorage
+        saveHistoryToStorage(newHistory);
+        
         // 输出最终菜单JSON
         console.log("Final Menu JSON:", JSON.stringify(data, null, 2));
     };
@@ -403,7 +442,13 @@ const MenuEditor: React.FC = () => {
                                     type={showHistory ? "primary" : "text"}
                                     size="small"
                                     icon={<HistoryOutlined />}
-                                    onClick={() => setShowHistory(!showHistory)}
+                                    onClick={() => {
+                                        if (!showHistory) {
+                                            // 打开历史面板时重新加载历史记录
+                                            loadHistoryFromStorage();
+                                        }
+                                        setShowHistory(!showHistory);
+                                    }}
                                 />
                             </Tooltip>
                         </div>
@@ -484,20 +529,23 @@ const MenuEditor: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {[...history].reverse().map((record, index) => (
-                                    <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-                                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.time}</td>
-                                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                                            <Tooltip title="恢复到此版本">
-                                                <Button
-                                                    type="link"
-                                                    onClick={() => {
-                                                        restoreHistory(index);
-                                                        setShowHistory(false);
-                                                    }}
-                                                >
-                                                    恢复到此版本
-                                                </Button>
+                                {[...history].reverse().map((record, index) => {
+                                    const actualIndex = history.length - 1 - index; // 计算实际索引
+                                    return (
+                                        <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
+                                            <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.time}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                                                <Tooltip title="恢复到此版本">
+                                                    <Button
+                                                        type="link"
+                                                        onClick={() => {
+                                                            restoreHistory(actualIndex);
+                                                            setShowHistory(false);
+                                                            message.success('已恢复到选定版本');
+                                                        }}
+                                                    >
+                                                        恢复到此版本
+                                                    </Button>
                                             </Tooltip>
                                             <Tooltip title="预览此版本">
                                                 <Button
@@ -567,7 +615,8 @@ const MenuEditor: React.FC = () => {
                                             </Tooltip>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
