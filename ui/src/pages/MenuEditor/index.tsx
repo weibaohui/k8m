@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons';
+import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined, EyeOutlined, HistoryOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import { useNavigate } from 'react-router-dom';
 
@@ -274,18 +274,24 @@ const MenuEditor: React.FC = () => {
                 <span>
                     {item.icon ? <i className={`fa-solid ${item.icon}`} style={{ marginRight: '4px' }}></i> : null}
                     {item.title}
-                    <Button size="small" type="link" icon={<EditOutlined />} onClick={e => {
-                        e.stopPropagation();
-                        handleEdit(item.key);
-                    }} title="编辑" />
-                    <Button size="small" type="link" icon={<DeleteOutlined />} danger onClick={e => {
-                        e.stopPropagation();
-                        handleDelete(item.key);
-                    }} title="删除" />
-                    <Button size="small" type="link" icon={<PlusOutlined />} onClick={e => {
-                        e.stopPropagation();
-                        handleAdd(item.key);
-                    }} title="新增" />
+                    <Tooltip title="编辑">
+                        <Button size="small" type="link" icon={<EditOutlined />} onClick={e => {
+                            e.stopPropagation();
+                            handleEdit(item.key);
+                        }} />
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button size="small" type="link" icon={<DeleteOutlined />} danger onClick={e => {
+                            e.stopPropagation();
+                            handleDelete(item.key);
+                        }} />
+                    </Tooltip>
+                    <Tooltip title="新增">
+                        <Button size="small" type="link" icon={<PlusOutlined />} onClick={e => {
+                            e.stopPropagation();
+                            handleAdd(item.key);
+                        }} />
+                    </Tooltip>
                 </span>
             ),
             children: item.children ? convertToTreeData(item.children) : undefined,
@@ -330,62 +336,71 @@ const MenuEditor: React.FC = () => {
                 {/* 左侧菜单树 */}
                 <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
                     <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>
-                        <Button
-                            type={showHistory ? "primary" : "default"}
-                            onClick={() => setShowHistory(!showHistory)}
-                            style={{ marginLeft: 8, float: 'right' }}
-                        >
-                            历史
-                        </Button>
-                        <Button
-                            type="default"
-                            onClick={() => {
-                                Modal.info({
-                                    title: '当前菜单JSON配置',
-                                    content: (
-                                        <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
-                                            {JSON.stringify(menuData, null, 2)}
-                                        </pre>
-                                    ),
-                                    width: 800,
-                                });
-                            }}
-                            style={{ marginLeft: 8, float: 'right' }}
-                        >
-                            JSON
-                        </Button>
-                        <Button
-                            type="default"
-                            icon={<CopyOutlined />}
-                            onClick={() => {
-                                const jsonString = JSON.stringify(menuData, null, 2);
-                                navigator.clipboard.writeText(jsonString).then(() => {
-                                    message.success('JSON配置已复制到剪贴板');
-                                }).catch(() => {
-                                    message.error('复制失败，请手动复制');
-                                });
-                            }}
-                            style={{ marginLeft: 8, float: 'right' }}
-                        >
-                            复制
-                        </Button>
-                        <Button
-                            type={isPreview ? "primary" : "default"}
-                            onClick={() => setIsPreview(!isPreview)}
-                            style={{ marginLeft: 8, float: 'right' }}
-                        >
-                            {isPreview ? "返回" : "预览"}
-                        </Button>
+                        <Tooltip title="菜单修改历史">
+                            <Button
+                                type={showHistory ? "primary" : "text"}
+                                size="small"
+                                icon={<HistoryOutlined />}
+                                onClick={() => setShowHistory(!showHistory)}
+                                style={{ marginLeft: 8, float: 'right' }}
+                            />
+                        </Tooltip>
+                        <Tooltip title="显示JSON配置">
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<FileTextOutlined />}
+                                onClick={() => {
+                                    Modal.info({
+                                        title: '当前菜单JSON配置',
+                                        content: (
+                                            <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
+                                                {JSON.stringify(menuData, null, 2)}
+                                            </pre>
+                                        ),
+                                        width: 800,
+                                    });
+                                }}
+                                style={{ marginLeft: 4, float: 'right' }}
+                            />
+                        </Tooltip>
+                        <Tooltip title="复制JSON配置">
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<CopyOutlined />}
+                                onClick={() => {
+                                    const jsonString = JSON.stringify(menuData, null, 2);
+                                    navigator.clipboard.writeText(jsonString).then(() => {
+                                        message.success('JSON配置已复制到剪贴板');
+                                    }).catch(() => {
+                                        message.error('复制失败，请手动复制');
+                                    });
+                                }}
+                                style={{ marginLeft: 4, float: 'right' }}
+                            />
+                        </Tooltip>
+                        <Tooltip title={isPreview ? "返回编辑" : "预览菜单"}>
+                            <Button
+                                type={isPreview ? "primary" : "text"}
+                                size="small"
+                                icon={<EyeOutlined />}
+                                onClick={() => setIsPreview(!isPreview)}
+                                style={{ marginLeft: 8, float: 'right' }}
+                            />
+                        </Tooltip>
 
 
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={() => handleAdd(null)}
-                            style={{ marginBottom: 12 }}
-                        >
-                            新增
-                        </Button>
+                        <Tooltip title="新增菜单项">
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={() => handleAdd(null)}
+                                style={{ marginBottom: 12 }}
+                            >
+                                新增
+                            </Button>
+                        </Tooltip>
                     </div>
                     {isPreview ? (
                         <Preview menuData={menuData} navigate={navigate} />
@@ -467,76 +482,83 @@ const MenuEditor: React.FC = () => {
                                     <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
                                         <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.time}</td>
                                         <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                                            <Button
-                                                type="link"
-                                                onClick={() => {
-                                                    restoreHistory(index);
-                                                    setShowHistory(false);
-                                                }}
-                                            >
-                                                恢复到此版本
-                                            </Button>
-                                            <Button
-                                                type="link"
-                                                onClick={() => {
-                                                    Modal.info({
-                                                        title: '菜单预览',
-                                                        content: (
-                                                            <div>
-                                                                <Tabs defaultActiveKey="1">
-                                                                    <Tabs.TabPane tab="菜单JSON配置" key="1">
-                                                                        <pre style={{
-                                                                            maxHeight: '400px',
-                                                                            overflow: 'auto'
-                                                                        }}>
-                                                                            {JSON.stringify(record.data, null, 2)}
-                                                                        </pre>
-                                                                    </Tabs.TabPane>
-                                                                    <Tabs.TabPane tab="菜单预览" key="2">
-                                                                        <Preview menuData={record.data} />
-                                                                    </Tabs.TabPane>
-                                                                </Tabs>
-                                                            </div>
-                                                        ),
-                                                        width: 800,
-                                                    });
-                                                }}
-                                            >
-                                                预览此版本
-                                            </Button>
-                                            <Button
-                                                type="link"
-                                                onClick={() => {
-                                                    Modal.info({
-                                                        title: '菜单JSON配置',
-                                                        content: (
-                                                            <pre style={{
-                                                                maxHeight: '400px',
-                                                                overflow: 'auto'
-                                                            }}>
-                                                                {JSON.stringify(record.data, null, 2)}
-                                                            </pre>
-                                                        ),
-                                                        width: 800,
-                                                    });
-                                                }}
-                                            >
-                                                JSON
-                                            </Button>
-                                            <Button
-                                                type="link"
-                                                icon={<CopyOutlined />}
-                                                onClick={() => {
-                                                    const jsonString = JSON.stringify(record.data, null, 2);
-                                                    navigator.clipboard.writeText(jsonString).then(() => {
-                                                        message.success('JSON配置已复制到剪贴板');
-                                                    }).catch(() => {
-                                                        message.error('复制失败，请手动复制');
-                                                    });
-                                                }}
-                                            >
-                                                复制
-                                            </Button>
+                                            <Tooltip title="恢复到此版本">
+                                                <Button
+                                                    type="link"
+                                                    onClick={() => {
+                                                        restoreHistory(index);
+                                                        setShowHistory(false);
+                                                    }}
+                                                >
+                                                    恢复到此版本
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip title="预览此版本">
+                                                <Button
+                                                    type="link"
+                                                    onClick={() => {
+                                                        Modal.info({
+                                                            title: '菜单预览',
+                                                            content: (
+                                                                <div>
+                                                                    <Tabs defaultActiveKey="1">
+                                                                        <Tabs.TabPane tab="菜单JSON配置" key="1">
+                                                                            <pre style={{
+                                                                                maxHeight: '400px',
+                                                                                overflow: 'auto'
+                                                                            }}>
+                                                                                {JSON.stringify(record.data, null, 2)}
+                                                                            </pre>
+                                                                        </Tabs.TabPane>
+                                                                        <Tabs.TabPane tab="菜单预览" key="2">
+                                                                            <Preview menuData={record.data} />
+                                                                        </Tabs.TabPane>
+                                                                    </Tabs>
+                                                                </div>
+                                                            ),
+                                                            width: 800,
+                                                        });
+                                                    }}
+                                                >
+                                                    预览此版本
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip title="显示JSON配置">
+                                                <Button
+                                                    type="text"
+                                                    size="small"
+                                                    icon={<FileTextOutlined />}
+                                                    onClick={() => {
+                                                        Modal.info({
+                                                            title: '菜单JSON配置',
+                                                            content: (
+                                                                <pre style={{
+                                                                    maxHeight: '400px',
+                                                                    overflow: 'auto'
+                                                                }}>
+                                                                    {JSON.stringify(record.data, null, 2)}
+                                                                </pre>
+                                                            ),
+                                                            width: 800,
+                                                        });
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                            <Tooltip title="复制JSON配置">
+                                                <Button
+                                                    type="text"
+                                                    size="small"
+                                                    icon={<CopyOutlined />}
+                                                    onClick={() => {
+                                                        const jsonString = JSON.stringify(record.data, null, 2);
+                                                        navigator.clipboard.writeText(jsonString).then(() => {
+                                                            message.success('JSON配置已复制到剪贴板');
+                                                        }).catch(() => {
+                                                            message.error('复制失败，请手动复制');
+                                                        });
+                                                    }}
+                                                />
+                                            </Tooltip>
                                         </td>
                                     </tr>
                                 ))}
@@ -555,16 +577,20 @@ const MenuEditor: React.FC = () => {
                         form.resetFields();
                     }}
                     footer={[
-                        <Button key="cancel" onClick={() => {
-                            setEditMode(null);
-                            setSelectedKey(null);
-                            form.resetFields();
-                        }}>
-                            取消
-                        </Button>,
-                        <Button key="submit" type="primary" onClick={handleSave}>
-                            保存
-                        </Button>
+                        <Tooltip key="cancel-tooltip" title="取消编辑">
+                            <Button key="cancel" onClick={() => {
+                                setEditMode(null);
+                                setSelectedKey(null);
+                                form.resetFields();
+                            }}>
+                                取消
+                            </Button>
+                        </Tooltip>,
+                        <Tooltip key="submit-tooltip" title="保存菜单项">
+                            <Button key="submit" type="primary" onClick={handleSave}>
+                                保存
+                            </Button>
+                        </Tooltip>
                     ]}
                 >
                     <Form
@@ -580,19 +606,21 @@ const MenuEditor: React.FC = () => {
                             <Input />
                         </Form.Item>
                         <Form.Item label="图标" name="icon">
-                            <Button
-                                type="primary"
-                                onClick={() => setShowIconModal(true)}
-                                style={{ width: '100%', justifyContent: 'space-between' }}
-                            >
-                                {currentIcon ? (
-                                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                                        <i className={`fa-solid ${currentIcon}`} style={{ marginRight: '8px' }}></i>
-                                    </span>
-                                ) : (
-                                    '选择图标'
-                                )}
-                            </Button>
+                            <Tooltip title="点击选择图标">
+                                <Button
+                                    type="primary"
+                                    onClick={() => setShowIconModal(true)}
+                                    style={{ width: '100%', justifyContent: 'space-between' }}
+                                >
+                                    {currentIcon ? (
+                                        <span style={{ display: 'flex', alignItems: 'center' }}>
+                                            <i className={`fa-solid ${currentIcon}`} style={{ marginRight: '8px' }}></i>
+                                        </span>
+                                    ) : (
+                                        '选择图标'
+                                    )}
+                                </Button>
+                            </Tooltip>
                         </Form.Item>
 
                         <Form.Item label="点击事件" name="eventType" initialValue="url">
