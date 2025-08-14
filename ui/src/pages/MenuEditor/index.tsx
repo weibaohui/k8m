@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import { useNavigate } from 'react-router-dom';
 
@@ -355,6 +355,21 @@ const MenuEditor: React.FC = () => {
                             JSON
                         </Button>
                         <Button
+                            type="default"
+                            icon={<CopyOutlined />}
+                            onClick={() => {
+                                const jsonString = JSON.stringify(menuData, null, 2);
+                                navigator.clipboard.writeText(jsonString).then(() => {
+                                    message.success('JSON配置已复制到剪贴板');
+                                }).catch(() => {
+                                    message.error('复制失败，请手动复制');
+                                });
+                            }}
+                            style={{ marginLeft: 8, float: 'right' }}
+                        >
+                            复制
+                        </Button>
+                        <Button
                             type={isPreview ? "primary" : "default"}
                             onClick={() => setIsPreview(!isPreview)}
                             style={{ marginLeft: 8, float: 'right' }}
@@ -507,6 +522,20 @@ const MenuEditor: React.FC = () => {
                                                 }}
                                             >
                                                 JSON
+                                            </Button>
+                                            <Button
+                                                type="link"
+                                                icon={<CopyOutlined />}
+                                                onClick={() => {
+                                                    const jsonString = JSON.stringify(record.data, null, 2);
+                                                    navigator.clipboard.writeText(jsonString).then(() => {
+                                                        message.success('JSON配置已复制到剪贴板');
+                                                    }).catch(() => {
+                                                        message.error('复制失败，请手动复制');
+                                                    });
+                                                }}
+                                            >
+                                                复制
                                             </Button>
                                         </td>
                                     </tr>
