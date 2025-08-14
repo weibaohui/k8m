@@ -335,71 +335,78 @@ const MenuEditor: React.FC = () => {
             }}>
                 {/* 左侧菜单树 */}
                 <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
-                    <div style={{ marginBottom: 16, fontWeight: 'bold', fontSize: 18 }}>
-                        <Tooltip title="菜单修改历史">
-                            <Button
-                                type={showHistory ? "primary" : "text"}
-                                size="small"
-                                icon={<HistoryOutlined />}
-                                onClick={() => setShowHistory(!showHistory)}
-                                style={{ marginLeft: 8, float: 'right' }}
-                            />
-                        </Tooltip>
-                        <Tooltip title="显示JSON配置">
-                            <Button
-                                type="text"
-                                size="small"
-                                icon={<FileTextOutlined />}
-                                onClick={() => {
-                                    Modal.info({
-                                        title: '当前菜单JSON配置',
-                                        content: (
-                                            <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
-                                                {JSON.stringify(menuData, null, 2)}
-                                            </pre>
-                                        ),
-                                        width: 800,
-                                    });
-                                }}
-                                style={{ marginLeft: 4, float: 'right' }}
-                            />
-                        </Tooltip>
-                        <Tooltip title="复制JSON配置">
-                            <Button
-                                type="text"
-                                size="small"
-                                icon={<CopyOutlined />}
-                                onClick={() => {
-                                    const jsonString = JSON.stringify(menuData, null, 2);
-                                    navigator.clipboard.writeText(jsonString).then(() => {
-                                        message.success('JSON配置已复制到剪贴板');
-                                    }).catch(() => {
-                                        message.error('复制失败，请手动复制');
-                                    });
-                                }}
-                                style={{ marginLeft: 4, float: 'right' }}
-                            />
-                        </Tooltip>
-                        <Tooltip title={isPreview ? "返回编辑" : "预览菜单"}>
-                            <Button
-                                type={isPreview ? "primary" : "text"}
-                                size="small"
-                                icon={<EyeOutlined />}
-                                onClick={() => setIsPreview(!isPreview)}
-                                style={{ marginLeft: 8, float: 'right' }}
-                            />
-                        </Tooltip>
-
-
-                        <Tooltip title="新增菜单项">
-                            <Button
-                                type="text"
-                                size="small"
-                                icon={<PlusOutlined />}
-                                onClick={() => handleAdd(null)}
-                                style={{ marginLeft: 4, float: 'right' }}
-                            />
-                        </Tooltip>
+                    <div style={{ 
+                        marginBottom: 16, 
+                        fontWeight: 'bold', 
+                        fontSize: 18,
+                        backgroundColor: '#f5f5f5',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #e8e8e8',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <span>菜单编辑器</span>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <Tooltip title="新增菜单项">
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<PlusOutlined />}
+                                    onClick={() => handleAdd(null)}
+                                />
+                            </Tooltip>
+                            <Tooltip title={isPreview ? "返回编辑" : "预览菜单"}>
+                                <Button
+                                    type={isPreview ? "primary" : "text"}
+                                    size="small"
+                                    icon={<EyeOutlined />}
+                                    onClick={() => setIsPreview(!isPreview)}
+                                />
+                            </Tooltip>
+                            <Tooltip title="复制JSON配置">
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<CopyOutlined />}
+                                    onClick={() => {
+                                        const jsonString = JSON.stringify(menuData, null, 2);
+                                        navigator.clipboard.writeText(jsonString).then(() => {
+                                            message.success('JSON配置已复制到剪贴板');
+                                        }).catch(() => {
+                                            message.error('复制失败，请手动复制');
+                                        });
+                                    }}
+                                />
+                            </Tooltip>
+                            <Tooltip title="显示JSON配置">
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<FileTextOutlined />}
+                                    onClick={() => {
+                                        Modal.info({
+                                            title: '当前菜单JSON配置',
+                                            content: (
+                                                <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
+                                                    {JSON.stringify(menuData, null, 2)}
+                                                </pre>
+                                            ),
+                                            width: 800,
+                                        });
+                                    }}
+                                />
+                            </Tooltip>
+                            <Tooltip title="菜单修改历史">
+                                <Button
+                                    type={showHistory ? "primary" : "text"}
+                                    size="small"
+                                    icon={<HistoryOutlined />}
+                                    onClick={() => setShowHistory(!showHistory)}
+                                />
+                            </Tooltip>
+                        </div>
                     </div>
                     {isPreview ? (
                         <Preview menuData={menuData} navigate={navigate} />
