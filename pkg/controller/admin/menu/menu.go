@@ -22,6 +22,7 @@ func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
 	admin.POST("/menu/delete/:ids", ctrl.Delete)
 
 }
+
 // @Summary 获取菜单列表
 // @Description 获取所有菜单版本信息
 // @Security BearerAuth
@@ -39,6 +40,7 @@ func (a *AdminMenuController) List(c *gin.Context) {
 	}
 	amis.WriteJsonData(c, items)
 }
+
 // @Summary 保存菜单
 // @Description 新增或更新菜单（每次操作生成新版本）
 // @Security BearerAuth
@@ -49,6 +51,10 @@ func (a *AdminMenuController) List(c *gin.Context) {
 func (a *AdminMenuController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
+	if err := c.ShouldBind(&m); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	err := m.Save(params, func(db *gorm.DB) *gorm.DB {
 		return db
 	})
@@ -58,6 +64,7 @@ func (a *AdminMenuController) Save(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
 // @Summary 删除菜单
 // @Description 根据ID批量删除菜单版本
 // @Security BearerAuth
