@@ -9,6 +9,7 @@ import { MenuItem } from '@/types/menu';
 import { initialMenu } from './menuData'; // 添加这一行导入语句
 import CustomEventTags from './CustomEventTags';
 import Preview from './Preview.tsx';
+import { fetcher } from '@/components/Amis/fetcher';
 
 
 const MenuEditor: React.FC = () => {
@@ -327,32 +328,68 @@ const MenuEditor: React.FC = () => {
         }));
     };
 
-    // 保存历史记录
-    const saveHistory = (data: MenuItem[]) => {
-        const newHistory = [...history];
-        // 如果当前不是最新历史记录，则丢弃后面的记录
-        if (historyIndex < newHistory.length - 1) {
-            newHistory.splice(historyIndex + 1);
+    /**
+     * 保存菜单数据到后端API
+     * @param data 菜单数据
+     */
+    const saveMenuToAPI = async (data: MenuItem[]) => {
+         try {
+             const response = await fetcher({
+                 url: '/admin/menu/save',
+                 method: 'post',
+                 data: {
+                     menu_data: data
+                 }
+             });
+             
+             if (response.status === 0) {
+                 message.success('菜单保存成功');
+                 return true;
+             } else {
+                 message.error((response as any).msg || '保存失败');
+                 return false;
+             }
+         } catch (error) {
+             console.error('保存菜单失败:', error);
+             message.error('保存菜单失败，请检查网络连接');
+             return false;
+         }
+     };
+
+    /**
+     * 保存历史记录到本地存储
+     * @param data 菜单数据
+     */
+    const saveHistory = async (data: MenuItem[]) => {
+        // 先尝试保存到后端API
+        const saveSuccess = await saveMenuToAPI(data);
+        
+        if (saveSuccess) {
+            const newHistory = [...history];
+            // 如果当前不是最新历史记录，则丢弃后面的记录
+            if (historyIndex < newHistory.length - 1) {
+                newHistory.splice(historyIndex + 1);
+            }
+            newHistory.push({
+                data: JSON.parse(JSON.stringify(data)), // 深拷贝
+                time: new Date().toLocaleString()
+            });
+
+            // 限制历史记录数量，避免localStorage过大
+            const maxHistoryCount = 50;
+            if (newHistory.length > maxHistoryCount) {
+                newHistory.splice(0, newHistory.length - maxHistoryCount);
+            }
+
+            setHistory(newHistory);
+            setHistoryIndex(newHistory.length - 1);
+
+            // 保存到localStorage
+            saveHistoryToStorage(newHistory);
+
+            // 输出最终菜单JSON
+            console.log("Final Menu JSON:", JSON.stringify(data, null, 2));
         }
-        newHistory.push({
-            data: JSON.parse(JSON.stringify(data)), // 深拷贝
-            time: new Date().toLocaleString()
-        });
-        
-        // 限制历史记录数量，避免localStorage过大
-        const maxHistoryCount = 50;
-        if (newHistory.length > maxHistoryCount) {
-            newHistory.splice(0, newHistory.length - maxHistoryCount);
-        }
-        
-        setHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-        
-        // 保存到localStorage
-        saveHistoryToStorage(newHistory);
-        
-        // 输出最终菜单JSON
-        console.log("Final Menu JSON:", JSON.stringify(data, null, 2));
     };
 
     // 恢复历史记录
@@ -374,9 +411,9 @@ const MenuEditor: React.FC = () => {
             }}>
                 {/* 左侧菜单树 */}
                 <div style={{ width: 350, borderRight: '1px solid #eee', padding: 16, overflow: 'auto' }}>
-                    <div style={{ 
-                        marginBottom: 16, 
-                        fontWeight: 'bold', 
+                    <div style={{
+                        marginBottom: 16,
+                        fontWeight: 'bold',
                         fontSize: 18,
                         backgroundColor: '#f5f5f5',
                         padding: '8px 12px',
@@ -546,75 +583,75 @@ const MenuEditor: React.FC = () => {
                                                     >
                                                         恢复到此版本
                                                     </Button>
-                                            </Tooltip>
-                                            <Tooltip title="预览此版本">
-                                                <Button
-                                                    type="link"
-                                                    onClick={() => {
-                                                        Modal.info({
-                                                            title: '菜单预览',
-                                                            content: (
-                                                                <div>
-                                                                    <Tabs defaultActiveKey="1">
-                                                                        <Tabs.TabPane tab="菜单JSON配置" key="1">
-                                                                            <pre style={{
-                                                                                maxHeight: '400px',
-                                                                                overflow: 'auto'
-                                                                            }}>
-                                                                                {JSON.stringify(record.data, null, 2)}
-                                                                            </pre>
-                                                                        </Tabs.TabPane>
-                                                                        <Tabs.TabPane tab="菜单预览" key="2">
-                                                                            <Preview menuData={record.data} />
-                                                                        </Tabs.TabPane>
-                                                                    </Tabs>
-                                                                </div>
-                                                            ),
-                                                            width: 800,
-                                                        });
-                                                    }}
-                                                >
-                                                    预览此版本
-                                                </Button>
-                                            </Tooltip>
-                                            <Tooltip title="显示JSON配置">
-                                                <Button
-                                                    type="text"
-                                                    size="small"
-                                                    icon={<FileTextOutlined />}
-                                                    onClick={() => {
-                                                        Modal.info({
-                                                            title: '菜单JSON配置',
-                                                            content: (
-                                                                <pre style={{
-                                                                    maxHeight: '400px',
-                                                                    overflow: 'auto'
-                                                                }}>
-                                                                    {JSON.stringify(record.data, null, 2)}
-                                                                </pre>
-                                                            ),
-                                                            width: 800,
-                                                        });
-                                                    }}
-                                                />
-                                            </Tooltip>
-                                            <Tooltip title="复制JSON配置">
-                                                <Button
-                                                    type="text"
-                                                    size="small"
-                                                    icon={<CopyOutlined />}
-                                                    onClick={() => {
-                                                        const jsonString = JSON.stringify(record.data, null, 2);
-                                                        navigator.clipboard.writeText(jsonString).then(() => {
-                                                            message.success('JSON配置已复制到剪贴板');
-                                                        }).catch(() => {
-                                                            message.error('复制失败，请手动复制');
-                                                        });
-                                                    }}
-                                                />
-                                            </Tooltip>
-                                        </td>
-                                    </tr>
+                                                </Tooltip>
+                                                <Tooltip title="预览此版本">
+                                                    <Button
+                                                        type="link"
+                                                        onClick={() => {
+                                                            Modal.info({
+                                                                title: '菜单预览',
+                                                                content: (
+                                                                    <div>
+                                                                        <Tabs defaultActiveKey="1">
+                                                                            <Tabs.TabPane tab="菜单JSON配置" key="1">
+                                                                                <pre style={{
+                                                                                    maxHeight: '400px',
+                                                                                    overflow: 'auto'
+                                                                                }}>
+                                                                                    {JSON.stringify(record.data, null, 2)}
+                                                                                </pre>
+                                                                            </Tabs.TabPane>
+                                                                            <Tabs.TabPane tab="菜单预览" key="2">
+                                                                                <Preview menuData={record.data} />
+                                                                            </Tabs.TabPane>
+                                                                        </Tabs>
+                                                                    </div>
+                                                                ),
+                                                                width: 800,
+                                                            });
+                                                        }}
+                                                    >
+                                                        预览此版本
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip title="显示JSON配置">
+                                                    <Button
+                                                        type="text"
+                                                        size="small"
+                                                        icon={<FileTextOutlined />}
+                                                        onClick={() => {
+                                                            Modal.info({
+                                                                title: '菜单JSON配置',
+                                                                content: (
+                                                                    <pre style={{
+                                                                        maxHeight: '400px',
+                                                                        overflow: 'auto'
+                                                                    }}>
+                                                                        {JSON.stringify(record.data, null, 2)}
+                                                                    </pre>
+                                                                ),
+                                                                width: 800,
+                                                            });
+                                                        }}
+                                                    />
+                                                </Tooltip>
+                                                <Tooltip title="复制JSON配置">
+                                                    <Button
+                                                        type="text"
+                                                        size="small"
+                                                        icon={<CopyOutlined />}
+                                                        onClick={() => {
+                                                            const jsonString = JSON.stringify(record.data, null, 2);
+                                                            navigator.clipboard.writeText(jsonString).then(() => {
+                                                                message.success('JSON配置已复制到剪贴板');
+                                                            }).catch(() => {
+                                                                message.error('复制失败，请手动复制');
+                                                            });
+                                                        }}
+                                                    />
+                                                </Tooltip>
+                                            </td>
+                                        </tr>
                                     );
                                 })}
                             </tbody>
