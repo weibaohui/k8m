@@ -393,10 +393,11 @@ const MenuEditor: React.FC = () => {
 
                         <Tooltip title="新增菜单项">
                             <Button
-                                type="primary"
+                                type="text"
+                                size="small"
                                 icon={<PlusOutlined />}
                                 onClick={() => handleAdd(null)}
-                                style={{ marginBottom: 12 }}
+                                style={{ marginLeft: 4, float: 'right' }}
                             />
                         </Tooltip>
                     </div>
