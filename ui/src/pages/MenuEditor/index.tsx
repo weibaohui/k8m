@@ -22,7 +22,7 @@ interface ApiResponse {
 }
 interface HistoryItem {
     menu_data: MenuItem[];
-    id: string;
+    id: number;
     updated_at: string;
     created_at: string;
 }
@@ -304,7 +304,6 @@ const MenuEditor: React.FC = () => {
                 const newData = updateMenuItem(menuData, selectedKey, newItem);
                 setMenuData(newData);
                 saveHistory(newData);
-                message.success('保存成功');
             }
             // 关闭Modal并重置表单
             setEditMode(null);
@@ -358,17 +357,16 @@ const MenuEditor: React.FC = () => {
                 data: {
                     menu_data: data
                 }
-            });
+            }) as ApiResponse;
 
-            if (response.status === 0) {
+            if (response.data?.status === 0) {
                 message.success('菜单保存成功');
                 return true;
             } else {
-                message.error((response as any).msg || '保存失败');
+                message.error(response.data?.msg || '保存失败');
                 return false;
             }
         } catch (error) {
-            console.error('保存菜单失败:', error);
             message.error('保存菜单失败，请检查网络连接');
             return false;
         }
@@ -410,6 +408,34 @@ const MenuEditor: React.FC = () => {
             setMenuData(JSON.parse(JSON.stringify(history[index])));
             setHistoryIndex(index);
         }
+    };
+
+    /**
+     * 删除历史记录
+     * @param id 历史记录ID
+     */
+    const handleDeleteHistory = async (id: number) => {
+        Modal.confirm({
+            title: '确认删除此历史记录？',
+            onOk: async () => {
+                try {
+                    const response = await fetcher({
+                        url: `/admin/menu/history/delete/${id}`,
+                        method: 'post'
+                    }) as ApiResponse;
+
+                    if (response.data?.status === 0) {
+                        message.success('历史记录删除成功');
+                        loadHistoryFromAPI(); // 重新加载历史记录
+                    } else {
+                        message.error(response.msg || '删除失败');
+                    }
+                } catch (error) {
+                    console.error('删除历史记录失败:', error);
+                    message.error('删除历史记录失败，请检查网络连接');
+                }
+            },
+        });
     };
 
     return (
@@ -596,6 +622,16 @@ const MenuEditor: React.FC = () => {
                                                         }}
                                                     >
                                                         恢复到此版本
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip title="删除此历史记录">
+                                                    <Button
+                                                        type="link"
+                                                        danger
+                                                        icon={<DeleteOutlined />}
+                                                        onClick={() => handleDeleteHistory(record.id)}
+                                                    >
+                                                        删除
                                                     </Button>
                                                 </Tooltip>
                                                 <Tooltip title="预览此版本">

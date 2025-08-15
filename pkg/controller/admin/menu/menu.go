@@ -1,6 +1,8 @@
 package menu
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -21,6 +23,7 @@ func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
 	admin.GET("/menu/history", ctrl.History)
 	admin.POST("/menu/save", ctrl.Save)
 	admin.POST("/menu/delete/:ids", ctrl.Delete)
+	admin.POST("/menu/history/delete/:id", ctrl.DeleteHistory)
 
 }
 
@@ -97,6 +100,29 @@ func (a *AdminMenuController) Delete(c *gin.Context) {
 	m := &models.Menu{}
 
 	err := m.Delete(params, ids)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+// @Summary 删除菜单历史记录
+// @Description 根据ID删除单个菜单历史记录
+// @Security BearerAuth
+// @Param id path int true "菜单历史记录ID"
+// @Success 200 {object} string
+// @Router /admin/menu/history/delete/{id} [delete]
+func (a *AdminMenuController) DeleteHistory(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	m := &models.Menu{}
+	err = m.DeleteByID(id)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

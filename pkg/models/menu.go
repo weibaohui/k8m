@@ -103,3 +103,8 @@ func (m *Menu) GetLatest(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.
 	}
 	return &menu, nil
 }
+
+// DeleteByID removes a single menu record by its ID.
+func (m *Menu) DeleteByID(id int) error {
+	return dao.DB().Delete(&Menu{}, id).Error
+}
