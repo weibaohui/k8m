@@ -579,7 +579,7 @@ const MenuEditor: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {[...history].reverse().map((record, index) => {
+                                {[...history].map((record, index) => {
                                     const actualIndex = history.length - 1 - index; // 计算实际索引
                                     return (
                                         <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>

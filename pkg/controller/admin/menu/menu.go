@@ -74,8 +74,9 @@ func (a *AdminMenuController) Save(c *gin.Context) {
 func (a *AdminMenuController) History(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
+	params.PerPage = 100000
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at DESC").Limit(50) // 限制返回最近50条记录
+		return db.Order("created_at DESC") // 按创建时间倒序排序
 	})
 	if err != nil {
 		amis.WriteJsonError(c, err)
