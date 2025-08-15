@@ -17,13 +17,19 @@ interface ApiResponse {
     data?: {
         status: number;
         msg?: string;
-        data: MenuItem[];
+        data: HistoryItem[];
     };
+}
+interface HistoryItem {
+    menu_data: MenuItem[];
+    id: string;
+    updated_at: string;
+    created_at: string;
 }
 const MenuEditor: React.FC = () => {
     const navigate = useNavigate();
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
-    const [history, setHistory] = useState<MenuItem[]>([]);
+    const [history, setHistory] = useState<HistoryItem[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [showHistory, setShowHistory] = useState(false);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -382,10 +388,7 @@ const MenuEditor: React.FC = () => {
             if (historyIndex < newHistory.length - 1) {
                 newHistory.splice(historyIndex + 1);
             }
-            newHistory.push({
-                data: JSON.parse(JSON.stringify(data)), // 深拷贝
-                time: new Date().toLocaleString()
-            });
+            newHistory.push(JSON.parse(JSON.stringify(data))); // 深拷贝
 
             // 限制历史记录数量，避免localStorage过大
             const maxHistoryCount = 50;
@@ -404,7 +407,7 @@ const MenuEditor: React.FC = () => {
     // 恢复历史记录
     const restoreHistory = (index: number) => {
         if (index >= 0 && index < history.length) {
-            setMenuData(JSON.parse(JSON.stringify(history[index].data)));
+            setMenuData(JSON.parse(JSON.stringify(history[index])));
             setHistoryIndex(index);
         }
     };
@@ -579,7 +582,8 @@ const MenuEditor: React.FC = () => {
                                     const actualIndex = history.length - 1 - index; // 计算实际索引
                                     return (
                                         <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-                                            <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.time}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.id}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.created_at}</td>
                                             <td style={{ padding: '8px', border: '1px solid #ddd' }}>
                                                 <Tooltip title="恢复到此版本">
                                                     <Button
@@ -607,11 +611,11 @@ const MenuEditor: React.FC = () => {
                                                                                     maxHeight: '400px',
                                                                                     overflow: 'auto'
                                                                                 }}>
-                                                                                    {JSON.stringify(record.data, null, 2)}
+                                                                                    {JSON.stringify(record.menu_data, null, 2)}
                                                                                 </pre>
                                                                             </Tabs.TabPane>
                                                                             <Tabs.TabPane tab="菜单预览" key="2">
-                                                                                <Preview menuData={record.data} />
+                                                                                <Preview menuData={record.menu_data} />
                                                                             </Tabs.TabPane>
                                                                         </Tabs>
                                                                     </div>
@@ -636,7 +640,7 @@ const MenuEditor: React.FC = () => {
                                                                         maxHeight: '400px',
                                                                         overflow: 'auto'
                                                                     }}>
-                                                                        {JSON.stringify(record.data, null, 2)}
+                                                                        {JSON.stringify(record.menu_data, null, 2)}
                                                                     </pre>
                                                                 ),
                                                                 width: 800,
@@ -650,7 +654,7 @@ const MenuEditor: React.FC = () => {
                                                         size="small"
                                                         icon={<CopyOutlined />}
                                                         onClick={() => {
-                                                            const jsonString = JSON.stringify(record.data, null, 2);
+                                                            const jsonString = JSON.stringify(record.menu_data, null, 2);
                                                             navigator.clipboard.writeText(jsonString).then(() => {
                                                                 message.success('JSON配置已复制到剪贴板');
                                                             }).catch(() => {
