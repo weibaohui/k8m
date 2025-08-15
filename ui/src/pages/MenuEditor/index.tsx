@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip } from 'antd';
+import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip, Flex } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined, EyeOutlined, HistoryOutlined, RollbackOutlined, SnippetsOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { initialMenu } from './menuData'; // 添加这一行导入语句
 import CustomEventTags from './CustomEventTags';
 import Preview from './Preview.tsx';
 import { fetcher } from '@/components/Amis/fetcher';
+import ButtonGroup from 'antd/lib/button/button-group';
 
 interface ApiResponse {
     status: number;
@@ -448,20 +449,6 @@ const MenuEditor: React.FC = () => {
             .catch(() => message.error('复制失败'));
     };
 
-    /**
-     * 粘贴剪贴板数据到当前菜单
-     * @param data 菜单数据
-     */
-    const handlePasteHistory = (data: MenuItem[]) => {
-        Modal.confirm({
-            title: '确认粘贴此历史记录数据到当前菜单？',
-            content: '这将覆盖当前菜单的配置。',
-            onOk: () => {
-                setMenuData(JSON.parse(JSON.stringify(data)));
-                message.success('菜单数据已粘贴');
-            },
-        });
-    };
 
     return (
         <>
@@ -636,10 +623,10 @@ const MenuEditor: React.FC = () => {
                                         <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
                                             <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.id}</td>
                                             <td style={{ padding: '8px', border: '1px solid #ddd' }}>{record.created_at}</td>
-                                            <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                                                <Tooltip title="恢复到此版本">
+                                            <td style={{ padding: '0px', border: '1px solid #ddd' }}>
+                                                <Flex wrap gap="small">
+
                                                     <Button
-                                                        type="link"
                                                         icon={<RollbackOutlined />}
                                                         onClick={() => {
                                                             restoreHistory(actualIndex);
@@ -649,20 +636,14 @@ const MenuEditor: React.FC = () => {
                                                     >
                                                         恢复
                                                     </Button>
-                                                </Tooltip>
-                                                <Tooltip title="删除此历史记录">
                                                     <Button
-                                                        type="link"
                                                         danger
                                                         icon={<DeleteOutlined />}
                                                         onClick={() => handleDeleteHistory(record.id)}
                                                     >
                                                         删除
                                                     </Button>
-                                                </Tooltip>
-                                                <Tooltip title="预览此版本">
                                                     <Button
-                                                        type="link"
                                                         icon={<EyeOutlined />}
                                                         onClick={() => {
                                                             Modal.info({
@@ -690,40 +671,14 @@ const MenuEditor: React.FC = () => {
                                                     >
                                                         预览
                                                     </Button>
-                                                </Tooltip>
-                                                <Tooltip title="复制此版本菜单数据">
                                                     <Button
-                                                        type="link"
                                                         icon={<CopyOutlined />}
                                                         onClick={() => handleCopyHistory(record.menu_data)}
                                                     >
                                                         复制
                                                     </Button>
-                                                </Tooltip>
-                                                <Tooltip title="粘贴此版本菜单数据">
-                                                    <Button
-                                                        type="link"
-                                                        icon={<SnippetsOutlined />}
-                                                        onClick={() => handlePasteHistory(record.menu_data)}
-                                                    >
-                                                        粘贴
-                                                    </Button>
-                                                </Tooltip>
-                                                <Tooltip title="复制JSON配置">
-                                                    <Button
-                                                        type="text"
-                                                        size="small"
-                                                        icon={<CopyOutlined />}
-                                                        onClick={() => {
-                                                            const jsonString = JSON.stringify(record.menu_data, null, 2);
-                                                            navigator.clipboard.writeText(jsonString).then(() => {
-                                                                message.success('JSON配置已复制到剪贴板');
-                                                            }).catch(() => {
-                                                                message.error('复制失败，请手动复制');
-                                                            });
-                                                        }}
-                                                    />
-                                                </Tooltip>
+
+                                                </Flex>
                                             </td>
                                         </tr>
                                     );
