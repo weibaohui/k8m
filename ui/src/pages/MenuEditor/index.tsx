@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined, EyeOutlined, HistoryOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined, EyeOutlined, HistoryOutlined, RollbackOutlined, SnippetsOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import { useNavigate } from 'react-router-dom';
 
@@ -421,10 +421,10 @@ const MenuEditor: React.FC = () => {
                 try {
                     const response = await fetcher({
                         url: `/admin/menu/history/delete/${id}`,
-                        method: 'post'
+                        method: 'delete'
                     }) as ApiResponse;
 
-                    if (response.data?.status === 0) {
+                    if (response.status === 0) {
                         message.success('历史记录删除成功');
                         loadHistoryFromAPI(); // 重新加载历史记录
                     } else {
@@ -434,6 +434,31 @@ const MenuEditor: React.FC = () => {
                     console.error('删除历史记录失败:', error);
                     message.error('删除历史记录失败，请检查网络连接');
                 }
+            },
+        });
+    };
+
+    /**
+     * 复制历史记录数据到剪贴板
+     * @param data 菜单数据
+     */
+    const handleCopyHistory = (data: MenuItem[]) => {
+        navigator.clipboard.writeText(JSON.stringify(data, null, 2))
+            .then(() => message.success('菜单数据已复制到剪贴板'))
+            .catch(() => message.error('复制失败'));
+    };
+
+    /**
+     * 粘贴剪贴板数据到当前菜单
+     * @param data 菜单数据
+     */
+    const handlePasteHistory = (data: MenuItem[]) => {
+        Modal.confirm({
+            title: '确认粘贴此历史记录数据到当前菜单？',
+            content: '这将覆盖当前菜单的配置。',
+            onOk: () => {
+                setMenuData(JSON.parse(JSON.stringify(data)));
+                message.success('菜单数据已粘贴');
             },
         });
     };
@@ -615,13 +640,14 @@ const MenuEditor: React.FC = () => {
                                                 <Tooltip title="恢复到此版本">
                                                     <Button
                                                         type="link"
+                                                        icon={<RollbackOutlined />}
                                                         onClick={() => {
                                                             restoreHistory(actualIndex);
                                                             setShowHistory(false);
                                                             message.success('已恢复到选定版本');
                                                         }}
                                                     >
-                                                        恢复到此版本
+                                                        恢复
                                                     </Button>
                                                 </Tooltip>
                                                 <Tooltip title="删除此历史记录">
@@ -637,6 +663,7 @@ const MenuEditor: React.FC = () => {
                                                 <Tooltip title="预览此版本">
                                                     <Button
                                                         type="link"
+                                                        icon={<EyeOutlined />}
                                                         onClick={() => {
                                                             Modal.info({
                                                                 title: '菜单预览',
@@ -661,29 +688,26 @@ const MenuEditor: React.FC = () => {
                                                             });
                                                         }}
                                                     >
-                                                        预览此版本
+                                                        预览
                                                     </Button>
                                                 </Tooltip>
-                                                <Tooltip title="显示JSON配置">
+                                                <Tooltip title="复制此版本菜单数据">
                                                     <Button
-                                                        type="text"
-                                                        size="small"
-                                                        icon={<FileTextOutlined />}
-                                                        onClick={() => {
-                                                            Modal.info({
-                                                                title: '菜单JSON配置',
-                                                                content: (
-                                                                    <pre style={{
-                                                                        maxHeight: '400px',
-                                                                        overflow: 'auto'
-                                                                    }}>
-                                                                        {JSON.stringify(record.menu_data, null, 2)}
-                                                                    </pre>
-                                                                ),
-                                                                width: 800,
-                                                            });
-                                                        }}
-                                                    />
+                                                        type="link"
+                                                        icon={<CopyOutlined />}
+                                                        onClick={() => handleCopyHistory(record.menu_data)}
+                                                    >
+                                                        复制
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip title="粘贴此版本菜单数据">
+                                                    <Button
+                                                        type="link"
+                                                        icon={<SnippetsOutlined />}
+                                                        onClick={() => handlePasteHistory(record.menu_data)}
+                                                    >
+                                                        粘贴
+                                                    </Button>
                                                 </Tooltip>
                                                 <Tooltip title="复制JSON配置">
                                                     <Button
