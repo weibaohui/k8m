@@ -11,42 +11,54 @@ import CustomEventTags from './CustomEventTags';
 import Preview from './Preview.tsx';
 import { fetcher } from '@/components/Amis/fetcher';
 
-
+interface ApiResponse {
+    status: number;
+    msg?: string;
+    data?: {
+        status: number;
+        msg?: string;
+        data: MenuItem[];
+    };
+}
 const MenuEditor: React.FC = () => {
     const navigate = useNavigate();
     const [menuData, setMenuData] = useState<MenuItem[]>(initialMenu);
-    const [history, setHistory] = useState<{ data: MenuItem[], time: string }[]>([]);
+    const [history, setHistory] = useState<MenuItem[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [showHistory, setShowHistory] = useState(false);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
 
-    // 从localStorage加载历史记录
-    const loadHistoryFromStorage = () => {
+    /**
+     * 从API加载历史记录
+     */
+    const loadHistoryFromAPI = async () => {
         try {
-            const storedHistory = localStorage.getItem('menuEditorHistory');
-            if (storedHistory) {
-                const parsedHistory = JSON.parse(storedHistory);
-                setHistory(parsedHistory);
-                setHistoryIndex(parsedHistory.length - 1);
+            const response = await fetcher({
+                url: '/admin/menu/history',
+                method: 'get'
+            }) as ApiResponse;
+
+            if (response.data?.status !== 0) {
+                message.error(`获取巡检结果失败:请尝试刷新后重试。 ${response.data?.msg}`);
+            } else {
+                const result = response.data.data;
+                setHistory(result);
+                setHistoryIndex(result.length - 1);
             }
+
         } catch (error) {
-            console.error('加载历史记录失败:', error);
+            console.error('从API加载历史记录失败:', error);
         }
     };
 
-    // 保存历史记录到localStorage
-    const saveHistoryToStorage = (historyData: { data: MenuItem[], time: string }[]) => {
-        try {
-            localStorage.setItem('menuEditorHistory', JSON.stringify(historyData));
-        } catch (error) {
-            console.error('保存历史记录失败:', error);
-        }
-    };
+
+
+
 
     // 组件初始化时加载历史记录
     useEffect(() => {
-        loadHistoryFromStorage();
+        loadHistoryFromAPI();
     }, []);
 
     const [editMode, setEditMode] = useState<'add' | 'edit' | null>(null);
@@ -333,28 +345,28 @@ const MenuEditor: React.FC = () => {
      * @param data 菜单数据
      */
     const saveMenuToAPI = async (data: MenuItem[]) => {
-         try {
-             const response = await fetcher({
-                 url: '/admin/menu/save',
-                 method: 'post',
-                 data: {
-                     menu_data: data
-                 }
-             });
-             
-             if (response.status === 0) {
-                 message.success('菜单保存成功');
-                 return true;
-             } else {
-                 message.error((response as any).msg || '保存失败');
-                 return false;
-             }
-         } catch (error) {
-             console.error('保存菜单失败:', error);
-             message.error('保存菜单失败，请检查网络连接');
-             return false;
-         }
-     };
+        try {
+            const response = await fetcher({
+                url: '/admin/menu/save',
+                method: 'post',
+                data: {
+                    menu_data: data
+                }
+            });
+
+            if (response.status === 0) {
+                message.success('菜单保存成功');
+                return true;
+            } else {
+                message.error((response as any).msg || '保存失败');
+                return false;
+            }
+        } catch (error) {
+            console.error('保存菜单失败:', error);
+            message.error('保存菜单失败，请检查网络连接');
+            return false;
+        }
+    };
 
     /**
      * 保存历史记录到本地存储
@@ -363,7 +375,7 @@ const MenuEditor: React.FC = () => {
     const saveHistory = async (data: MenuItem[]) => {
         // 先尝试保存到后端API
         const saveSuccess = await saveMenuToAPI(data);
-        
+
         if (saveSuccess) {
             const newHistory = [...history];
             // 如果当前不是最新历史记录，则丢弃后面的记录
@@ -383,9 +395,6 @@ const MenuEditor: React.FC = () => {
 
             setHistory(newHistory);
             setHistoryIndex(newHistory.length - 1);
-
-            // 保存到localStorage
-            saveHistoryToStorage(newHistory);
 
             // 输出最终菜单JSON
             console.log("Final Menu JSON:", JSON.stringify(data, null, 2));
@@ -481,8 +490,8 @@ const MenuEditor: React.FC = () => {
                                     icon={<HistoryOutlined />}
                                     onClick={() => {
                                         if (!showHistory) {
-                                            // 打开历史面板时重新加载历史记录
-                                            loadHistoryFromStorage();
+                                            // 打开历史面板时重新从API加载历史记录
+                                            loadHistoryFromAPI();
                                         }
                                         setShowHistory(!showHistory);
                                     }}

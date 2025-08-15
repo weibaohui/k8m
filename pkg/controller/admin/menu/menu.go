@@ -18,6 +18,7 @@ func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
 	ctrl := AdminMenuController{}
 	// menu 平台管理员可操作，管理菜单
 	admin.GET("/menu/list", ctrl.List)
+	admin.GET("/menu/history", ctrl.History)
 	admin.POST("/menu/save", ctrl.Save)
 	admin.POST("/menu/delete/:ids", ctrl.Delete)
 
@@ -63,6 +64,24 @@ func (a *AdminMenuController) Save(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonOK(c)
+}
+
+// @Summary 获取菜单历史记录
+// @Description 获取菜单修改历史记录，按时间倒序排列
+// @Security BearerAuth
+// @Success 200 {object} []models.Menu
+// @Router /admin/menu/history [get]
+func (a *AdminMenuController) History(c *gin.Context) {
+	params := dao.BuildParams(c)
+	m := &models.Menu{}
+	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at DESC").Limit(50) // 限制返回最近50条记录
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, items)
 }
 
 // @Summary 删除菜单
