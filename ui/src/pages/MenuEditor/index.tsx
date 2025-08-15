@@ -573,6 +573,7 @@ const MenuEditor: React.FC = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ backgroundColor: '#f0f0f0' }}>
+                                    <th style={{ padding: '8px', border: '1px solid #ddd' }}>序号</th>
                                     <th style={{ padding: '8px', border: '1px solid #ddd' }}>时间</th>
                                     <th style={{ padding: '8px', border: '1px solid #ddd' }}>操作</th>
                                 </tr>
