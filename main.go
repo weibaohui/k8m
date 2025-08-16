@@ -20,6 +20,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 	"github.com/weibaohui/k8m/pkg/controller/admin/inspection"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
+	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cluster_status"
