@@ -160,11 +160,13 @@
             },
             {
               "type": "button",
-              "icon": "fas fa-cog text-info",
+              "icon": "fas fa-bars text-info",
               "actionType": "dialog",
               "tooltip": "设置菜单",
               "dialog": {
-                "title": "设置用户组菜单配置",
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "设置用户组菜单配置 （ESC 关闭）",
                 "size": "lg",
                 "body": {
                   "type": "form",
@@ -275,6 +277,15 @@
                 "value": "platform_admin"
               }
             ]
+          }
+        },
+        {
+          "name": "menu_data",
+          "label": "菜单状态",
+          "type": "mapping",
+          "map": {
+            "": "",
+            "*": "<span class='label label-success'>已设置</span>"
           }
         },
         {
