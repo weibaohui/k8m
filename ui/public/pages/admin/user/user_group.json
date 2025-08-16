@@ -179,24 +179,33 @@
                           "actionType": "url",
                           "url": "/#/MenuEditor",
                           "blank": true,
-                          "className": "mb-3"
+                          "className": "mb-2"
                         }
                       ]
                     },
+                    
+                     
                     {
-                      "type": "textarea",
+                      "type": "editor",
                       "name": "menu_data",
-                      "label": "菜单配置 (JSON格式)",
+                      "size": "xl",
                       "required": true,
-                      "minRows": 10,
-                      "maxRows": 20,
-                      "placeholder": "请粘贴JSON格式的菜单配置数据",
-                      "description": "请输入有效的JSON格式菜单配置"
+                      "allowFullscreen": true,
+                      "placeholder": "请粘贴菜单JSON配置",
+                      "language": "json",
+                      "value": "${menu_data}",
+                      "options": {
+                        "wordWrap": "on",
+                        "scrollbar": {
+                          "vertical": "auto"
+                        }
+                      }
                     },
                     {
                       "type": "alert",
-                      "level": "info",
-                      "body": "请确保输入的是有效的JSON格式数据，配置将用于定义该用户组的菜单结构。您可以使用上方的菜单编辑器来可视化编辑菜单，然后将生成的JSON配置粘贴到此处。"
+                      "level": "warning",
+                      "body": "<div class='alert alert-warning'><p><strong>使用说明：</strong></p><p>点击上方的「打开菜单编辑器」按钮，在新标签页中打开可视化菜单编辑器，在菜单编辑器中设计和配置您需要的菜单结构，完成菜单设计后，复制编辑器生成的最终JSON配置。将复制的JSON配置粘贴到上方的编辑器</p></div>",
+                      "className": "mb-3"
                     }
                   ],
                   "submitText": "保存配置",
