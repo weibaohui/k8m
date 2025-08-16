@@ -27,12 +27,13 @@ const Preview: React.FC<PreviewProps> = ({ menuData, navigate: propNavigate }) =
     }
 
     // 使用自定义hooks
-    const userRole = useUserRole();
+    const { userRole, menuData: _menuData } = useUserRole();
     const { isGatewayAPISupported, isOpenKruiseSupported, isIstioSupported } = useCRDStatus();
 
     // 创建菜单可见性上下文
     const visibilityContext = {
         userRole,
+        _menuData,
         isGatewayAPISupported,
         isOpenKruiseSupported,
         isIstioSupported
