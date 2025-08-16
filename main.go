@@ -371,7 +371,7 @@ func main() {
 		// helm Repo 操作
 		helm.RegisterHelmRepoRoutes(admin)
 
-		//菜单自定义
+		// 菜单自定义
 		menu.RegisterAdminMenuRoutes(admin)
 	}
 
