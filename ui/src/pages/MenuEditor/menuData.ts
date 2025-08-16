@@ -1,4 +1,4 @@
-import { MenuItem } from '@/types/menu';
+import {MenuItem} from '@/types/menu';
 
 export const initialMenu: MenuItem[] = [
     {
@@ -869,6 +869,15 @@ export const initialMenu: MenuItem[] = [
                 customEvent: '() => loadJsonPage("/admin/config/sso_config")',
                 order: 10,
             },
+            {
+                key: 'ldap_config',
+                title: 'LDAP登录',
+                icon: 'fa-solid fa-right-to-bracket',
+                eventType: 'custom',
+                customEvent: '() => loadJsonPage("/admin/config/ldap_config")',
+                order: 11,
+            }
+
         ],
     },
     {
@@ -921,7 +930,7 @@ export const initialMenu: MenuItem[] = [
     },
     {
         key: 'about',
-        title: '关于333',
+        title: '关于',
         icon: 'fa-solid fa-circle-info',
         eventType: 'custom',
         customEvent: '() => loadJsonPage("/about/about")',
