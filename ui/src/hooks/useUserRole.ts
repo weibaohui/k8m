@@ -4,10 +4,12 @@ import { fetcher } from '@/components/Amis/fetcher';
 interface UserRoleResponse {
     role: string;
     cluster: string;
+    menu_data: string;
 }
 
 export const useUserRole = () => {
     const [userRole, setUserRole] = useState<string>('');
+    const [menuData, setMenuData] = useState<string>('');
 
     useEffect(() => {
         const fetchUserRole = async () => {
@@ -16,10 +18,11 @@ export const useUserRole = () => {
                     url: '/params/user/role',
                     method: 'get'
                 });
-                
+
                 if (response.data && typeof response.data === 'object') {
                     const role = response.data.data as UserRoleResponse;
                     setUserRole(role.role);
+                    setMenuData(role.menu_data);
 
                     const originCluster = localStorage.getItem('cluster') || '';
                     if (originCluster === "" && role.cluster !== "") {
@@ -34,5 +37,5 @@ export const useUserRole = () => {
         fetchUserRole();
     }, []);
 
-    return userRole;
+    return { userRole, menuData };
 };

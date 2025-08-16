@@ -14,14 +14,15 @@ type AntdMenuItem = Required<MenuProps>['items'][number];
 const Sidebar = () => {
     const { collapse } = useStore(state => state)
     const navigate = useNavigate();
-    
+
     // 使用自定义hooks
-    const userRole = useUserRole();
+    const { userRole, menuData } = useUserRole();
     const { isGatewayAPISupported, isOpenKruiseSupported, isIstioSupported } = useCRDStatus();
 
     // 创建菜单可见性上下文
     const visibilityContext = {
         userRole,
+        menuData,
         isGatewayAPISupported,
         isOpenKruiseSupported,
         isIstioSupported
@@ -80,10 +81,30 @@ const Sidebar = () => {
             });
     };
 
+    // 解析菜单数据，优先使用 menuData，如果无效则使用 initialMenu
+    const getMenuData = (): MenuItem[] => {
+        if (menuData) {
+            try {
+                const parsedMenuData = JSON.parse(menuData);
+                // 检查解析后的数据是否为有效的数组
+                if (Array.isArray(parsedMenuData) && parsedMenuData.length > 0) {
+                    return parsedMenuData;
+                }
+            } catch (error) {
+                console.warn('Failed to parse menuData, falling back to initialMenu:', error);
+            }
+        }
+        return initialMenu;
+    };
+
     // 使用 useMemo 缓存转换结果，依赖状态变化
-    const menuItems = useMemo(() => convertMenuItems(initialMenu), [
+    const menuItems = useMemo(() => {
+        const menuDataToUse = getMenuData();
+        return convertMenuItems(menuDataToUse);
+    }, [
         navigate,
         userRole,
+        menuData,
         isGatewayAPISupported,
         isOpenKruiseSupported,
         isIstioSupported
