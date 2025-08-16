@@ -13,7 +13,7 @@ import (
 // @Success 200 {object} string
 // @Router /params/user/role [get]
 func (pc *Controller) UserRole(c *gin.Context) {
-	_, role := amis.GetLoginUser(c)
+	user, role := amis.GetLoginUser(c)
 	clusters := amis.GetLoginUserClusters(c)
 	var cluster string
 	if len(clusters) == 1 {
@@ -24,9 +24,19 @@ func (pc *Controller) UserRole(c *gin.Context) {
 			cluster = service.ClusterService().FirstClusterID()
 		}
 	}
-
+	groupNames, err := service.UserService().GetGroupNames(user)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	menuData, err := service.UserService().GetGroupMenuData(groupNames)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	amis.WriteJsonData(c, gin.H{
-		"role":    role,
-		"cluster": cluster,
+		"role":      role,
+		"cluster":   cluster,
+		"menu_data": menuData,
 	})
 }
