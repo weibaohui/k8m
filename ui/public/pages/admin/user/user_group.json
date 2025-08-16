@@ -169,6 +169,21 @@
                       "name": "id"
                     },
                     {
+                      "type": "group",
+                      "body": [
+                        {
+                          "type": "button",
+                          "label": "打开菜单编辑器",
+                          "icon": "fas fa-external-link-alt",
+                          "level": "info",
+                          "actionType": "url",
+                          "url": "/#/MenuEditor",
+                          "blank": true,
+                          "className": "mb-3"
+                        }
+                      ]
+                    },
+                    {
                       "type": "textarea",
                       "name": "menu_data",
                       "label": "菜单配置 (JSON格式)",
@@ -181,7 +196,7 @@
                     {
                       "type": "alert",
                       "level": "info",
-                      "body": "请确保输入的是有效的JSON格式数据，配置将用于定义该用户组的菜单结构。"
+                      "body": "请确保输入的是有效的JSON格式数据，配置将用于定义该用户组的菜单结构。您可以使用上方的菜单编辑器来可视化编辑菜单，然后将生成的JSON配置粘贴到此处。"
                     }
                   ],
                   "submitText": "保存配置",
