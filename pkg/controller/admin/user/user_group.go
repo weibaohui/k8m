@@ -20,6 +20,7 @@ func RegisterAdminUserGroupRoutes(admin *gin.RouterGroup) {
 	ctrl := AdminUserGroupController{}
 	admin.GET("/user_group/list", ctrl.ListUserGroup)
 	admin.POST("/user_group/save", ctrl.SaveUserGroup)
+	admin.POST("/user_group/save_menu", ctrl.SaveUserGroupMenu)
 	admin.POST("/user_group/delete/:ids", ctrl.DeleteUserGroup)
 	admin.GET("/user_group/option_list", ctrl.GroupOptionList)
 }
@@ -68,6 +69,50 @@ func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 	amis.WriteJsonData(c, gin.H{
 		"id": m.ID,
 	})
+}
+
+// @Summary 保存用户组菜单配置
+// @Description 保存用户组的菜单配置数据
+// @Security BearerAuth
+// @Accept json
+// @Param data body map[string]interface{} true "菜单配置信息"
+// @Success 200 {object} map[string]interface{}
+// @Router /admin/user_group/save_menu [post]
+func (a *AdminUserGroupController) SaveUserGroupMenu(c *gin.Context) {
+	var requestData struct {
+		ID       uint   `json:"id" binding:"required"`
+		MenuData string `json:"menu_data" binding:"required"`
+	}
+
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	params := dao.BuildParams(c)
+	m := &models.UserGroup{}
+	
+	// 先查找用户组
+	userGroup, err := m.GetOne(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", requestData.ID)
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 更新菜单数据
+	userGroup.MenuData = requestData.MenuData
+	err = userGroup.Save(params)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 清除用户组的缓存
+	service.UserService().ClearCacheByKey(userGroup.GroupName)
+	amis.WriteJsonOK(c)
 }
 
 // @Summary 删除用户组

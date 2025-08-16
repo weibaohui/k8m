@@ -6,6 +6,7 @@ import Login from '@/pages/Login/index.tsx'
 import PodExec from '@/pages/PodExec'
 import PodLog from '@/pages/PodLog'
 import NodeExec from '@/pages/NodeExec'
+import MenuEditor from '@/pages/MenuEditor'
 
 const lazyLoad = (Component: React.LazyExoticComponent<() => JSX.Element>) => {
     return (
@@ -21,6 +22,7 @@ const Router = () => {
             <Route path='/NodeExec' element={<NodeExec/>}></Route>
             <Route path='/PodExec' element={<PodExec/>}></Route>
             <Route path='/PodLog' element={<PodLog/>}></Route>
+            <Route path='/MenuEditor' element={<MenuEditor/>}></Route>
             <Route path='/' element={<Layout/>}>
                 <Route path='/' element={<Navigate to="/user/cluster/cluster_user"/>}></Route>
                 <Route path='/*' element={
