@@ -23,6 +23,46 @@ type userService struct {
 	cacheKeys sync.Map // 用于存储所有使用过的缓存key
 }
 
+func (u *userService) GetGroupMenuData(groupNames string) (any, error) {
+	if groupNames == "" {
+		return nil, nil
+	}
+
+	// 按逗号分割，取第一个组名
+	groupNameList := strings.Split(groupNames, ",")
+	firstGroupName := strings.TrimSpace(groupNameList[0])
+
+	if firstGroupName == "" {
+		return nil, nil
+	}
+
+	cacheKey := u.formatCacheKey("user:groupmenu:%s", firstGroupName)
+
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() (any, error) {
+		params := &dao.Params{}
+		userGroup := &models.UserGroup{}
+		queryFunc := func(db *gorm.DB) *gorm.DB {
+			return db.Select("menu_data").Where("group_name = ?", firstGroupName)
+		}
+
+		item, err := userGroup.GetOne(params, queryFunc)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, nil
+			}
+			return nil, err
+		}
+
+		if item.MenuData == "" {
+			return nil, nil
+		}
+
+		return item.MenuData, nil
+	})
+
+	return result, err
+}
+
 // addCacheKey 添加缓存key到列表中（并发安全）
 func (u *userService) addCacheKey(key string) {
 	u.cacheKeys.Store(key, struct{}{})
