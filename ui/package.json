@@ -29,6 +29,7 @@
     "copy-to-clipboard": "^3.3.3",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "i18n-jsautotranslate": "^3.17.0",
     "js-yaml": "^4.1.0",
