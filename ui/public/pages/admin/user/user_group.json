@@ -154,6 +154,55 @@
             },
             {
               "type": "button",
+              "icon": "fas fa-cog text-info",
+              "actionType": "dialog",
+              "tooltip": "设置菜单",
+              "dialog": {
+                "title": "设置用户组菜单配置",
+                "size": "lg",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/user_group/save_menu",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "textarea",
+                      "name": "menu_data",
+                      "label": "菜单配置 (JSON格式)",
+                      "required": true,
+                      "minRows": 10,
+                      "maxRows": 20,
+                      "placeholder": "请粘贴JSON格式的菜单配置数据",
+                      "description": "请输入有效的JSON格式菜单配置"
+                    },
+                    {
+                      "type": "alert",
+                      "level": "info",
+                      "body": "请确保输入的是有效的JSON格式数据，配置将用于定义该用户组的菜单结构。"
+                    }
+                  ],
+                  "submitText": "保存配置",
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "groupCRUD"
+                        },
+                        {
+                          "actionType": "closeDialog"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "button",
               "icon": "fas fa-trash text-danger",
               "actionType": "ajax",
               "confirmText": "确定删除该用户组？",

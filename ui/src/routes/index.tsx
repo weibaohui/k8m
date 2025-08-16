@@ -22,7 +22,7 @@ const Router = () => {
             <Route path='/NodeExec' element={<NodeExec />}></Route>
             <Route path='/PodExec' element={<PodExec />}></Route>
             <Route path='/PodLog' element={<PodLog />}></Route>
-            <Route path='/menu' element={<MenuEditor />}></Route>
+            <Route path='/MenuEditor' element={<MenuEditor />}></Route>
             <Route path='/' element={<Layout />}>
                 <Route path='/' element={<Navigate to="/user/cluster/cluster_user" />}></Route>
                 <Route path='/*' element={
