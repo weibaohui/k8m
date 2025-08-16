@@ -40,7 +40,6 @@ const Preview: React.FC<PreviewProps> = ({ menuData, navigate: propNavigate }) =
 
 
     const handleClick = (key: string) => {
-        console.log('点击菜单项:', key)
         const item = findMenuItem(menuData, key);
         if (item) {
             if (item.eventType === 'url' && item.url) {
