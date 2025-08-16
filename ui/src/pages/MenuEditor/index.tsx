@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip, Flex, Space } from 'antd';
+import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip, Flex } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined, EyeOutlined, HistoryOutlined, RollbackOutlined, SnippetsOutlined, ImportOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import { useNavigate } from 'react-router-dom';
 
 import IconPicker from '@/components/IconPicker';
 import { MenuItem } from '@/types/menu';
-import { initialMenu } from './menuData'; // 添加这一行导入语句
+import { initialMenu } from './menuData'; 
 import CustomEventTags from './CustomEventTags';
 import Preview from './Preview.tsx';
 import { fetcher } from '@/components/Amis/fetcher';

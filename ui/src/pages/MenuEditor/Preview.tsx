@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {message, Tree} from 'antd';
-import {MenuItem} from '@/types/menu';
-import {Parser} from 'expr-eval'; // 引入 expr-eval
-import {fetcher} from '@/components/Amis/fetcher';
-import {useNavigate, NavigateFunction} from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { message, Tree } from 'antd';
+import { MenuItem } from '@/types/menu';
+import { Parser } from 'expr-eval'; // 引入 expr-eval
+import { fetcher } from '@/components/Amis/fetcher';
+import { useNavigate, NavigateFunction } from "react-router-dom";
 
 interface PreviewProps {
     menuData: MenuItem[];
@@ -24,7 +24,7 @@ interface CRDSupportedStatus {
 }
 
 
-const Preview: React.FC<PreviewProps> = ({menuData, navigate: propNavigate}) => {
+const Preview: React.FC<PreviewProps> = ({ menuData, navigate: propNavigate }) => {
     // 尝试使用传入的 navigate 或者 useNavigate hook
     let navigateFunc: NavigateFunction | undefined;
 
@@ -151,7 +151,7 @@ const Preview: React.FC<PreviewProps> = ({menuData, navigate: propNavigate}) => 
                 // 创建一个函数执行上下文
                 const context = {
                     // 这里可以添加一些上下文变量，例如用户信息等
-                    user: {role: 'user'}, // 示例数据
+                    user: { role: 'user' }, // 示例数据
                 };
 
                 // 创建 expr-eval 解析器实例
@@ -213,7 +213,7 @@ const Preview: React.FC<PreviewProps> = ({menuData, navigate: propNavigate}) => 
             key: item.key as string,
             title: (
                 <span onClick={() => handleClick(item.key)}>
-                    {item.icon && <i className={`fa-solid ${item.icon}`} style={{marginRight: '4px'}}></i>}
+                    {item.icon && <i className={`fa-solid ${item.icon}`} style={{ marginRight: '4px' }}></i>}
                     {item.title}
                 </span>
             ),

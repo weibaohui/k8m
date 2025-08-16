@@ -1,4 +1,4 @@
-import {MenuItem} from '@/types/menu';
+import { MenuItem } from '@/types/menu';
 
 export const initialMenu: MenuItem[] = [
     {
@@ -921,7 +921,7 @@ export const initialMenu: MenuItem[] = [
     },
     {
         key: 'about',
-        title: '关于',
+        title: '关于333',
         icon: 'fa-solid fa-circle-info',
         eventType: 'custom',
         customEvent: '() => loadJsonPage("/about/about")',
