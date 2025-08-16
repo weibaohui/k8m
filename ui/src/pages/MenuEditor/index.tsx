@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip, Flex } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined, EyeOutlined, HistoryOutlined, RollbackOutlined, SnippetsOutlined } from '@ant-design/icons';
+import { Button, Form, Input, InputNumber, message, Modal, Select, Tabs, Tree, Tooltip, Flex, Space } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined, EyeOutlined, HistoryOutlined, RollbackOutlined, SnippetsOutlined, ImportOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,6 +34,8 @@ const MenuEditor: React.FC = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [form] = Form.useForm();
+    const [isImportModalVisible, setIsImportModalVisible] = useState(false);
+    const [importJson, setImportJson] = useState('');
 
     /**
      * 从API加载历史记录
@@ -439,6 +441,23 @@ const MenuEditor: React.FC = () => {
     };
 
     /**
+     * @description 处理导入菜单的逻辑
+     */
+    const handleImport = () => {
+        try {
+            const importedMenu = JSON.parse(importJson);
+            // 在这里可以添加对导入的JSON数据格式的校验
+            setMenuData(importedMenu);
+            saveHistory(importedMenu);
+            message.success('菜单导入成功');
+            setIsImportModalVisible(false);
+            setImportJson('');
+        } catch (error) {
+            message.error('JSON格式错误，请检查后重试');
+        }
+    };
+
+    /**
      * 复制历史记录数据到剪贴板
      * @param data 菜单数据
      */
@@ -488,6 +507,14 @@ const MenuEditor: React.FC = () => {
                                     size="small"
                                     icon={<EyeOutlined />}
                                     onClick={() => setIsPreview(!isPreview)}
+                                />
+                            </Tooltip>
+                            <Tooltip title="导入菜单">
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<ImportOutlined />}
+                                    onClick={() => setIsImportModalVisible(true)}
                                 />
                             </Tooltip>
                             <Tooltip title="复制JSON配置">
@@ -799,6 +826,25 @@ const MenuEditor: React.FC = () => {
                     </Form>
                 </Modal>
             </div>
+
+            <Modal
+                title="导入菜单配置"
+                open={isImportModalVisible}
+                onOk={handleImport}
+                onCancel={() => {
+                    setIsImportModalVisible(false);
+                    setImportJson('');
+                }}
+                okText="导入"
+                cancelText="取消"
+            >
+                <Input.TextArea
+                    rows={10}
+                    value={importJson}
+                    onChange={(e) => setImportJson(e.target.value)}
+                    placeholder='请在此处粘贴菜单的JSON配置'
+                />
+            </Modal>
 
             <IconPicker
                 open={showIconModal}
