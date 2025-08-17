@@ -1081,6 +1081,7 @@ github.com/ugorji/go/codec v1.3.0 h1:Qd2W2sQawAfG8XSvzwhBeoGq71zXOC/Q1E9y/wUcsUA
 github.com/ugorji/go/codec v1.3.0/go.mod h1:pRBVtBSKl77K30Bv8R2P+cLSGaTtex6fsA2Wjqmfxj4=
 github.com/weibaohui/kom v0.2.56 h1:xplIcmLSGCAJI3bxJRUpaUKdX4bpCslhSjZqfeYfLVg=
 github.com/weibaohui/kom v0.2.56/go.mod h1:3JIAdMOnSwrV83DmKZQ0QFvKRzQ0g86kuLXI+kyFl/Y=
+github.com/weibaohui/kom v0.2.57/go.mod h1:3JIAdMOnSwrV83DmKZQ0QFvKRzQ0g86kuLXI+kyFl/Y=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
 github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=

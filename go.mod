@@ -28,7 +28,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.5
-	github.com/weibaohui/kom v0.2.56
+	github.com/weibaohui/kom v0.2.57
 	github.com/yuin/gopher-lua v1.1.1
 	golang.org/x/net v0.41.0
 	golang.org/x/oauth2 v0.30.0
