@@ -195,7 +195,6 @@
                       "type": "editor",
                       "name": "menu_data",
                       "size": "xl",
-                      "required": true,
                       "allowFullscreen": true,
                       "placeholder": "请粘贴菜单JSON配置",
                       "language": "json",

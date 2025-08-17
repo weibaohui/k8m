@@ -81,7 +81,7 @@ func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 func (a *AdminUserGroupController) SaveUserGroupMenu(c *gin.Context) {
 	var requestData struct {
 		ID       uint   `json:"id" binding:"required"`
-		MenuData string `json:"menu_data" binding:"required"`
+		MenuData string `json:"menu_data"`
 	}
 
 	err := c.ShouldBindJSON(&requestData)
@@ -92,7 +92,7 @@ func (a *AdminUserGroupController) SaveUserGroupMenu(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
-	
+
 	// 先查找用户组
 	userGroup, err := m.GetOne(params, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", requestData.ID)
