@@ -236,6 +236,15 @@ definitions:
       url:
         type: string
     type: object
+  models.Menu:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   models.User:
     properties:
       created_at:
@@ -285,6 +294,8 @@ definitions:
         type: string
       id:
         type: integer
+      menu_data:
+        type: string
       role:
         description: 管理员/只读
         type: string
@@ -1266,6 +1277,87 @@ paths:
       security:
       - BearerAuth: []
       summary: 快速更新MCP工具状态
+  /admin/menu/delete/{ids}:
+    post:
+      description: 根据ID批量删除菜单版本
+      parameters:
+      - description: 菜单ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除菜单
+  /admin/menu/history:
+    get:
+      description: 获取菜单修改历史记录，按时间倒序排列
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Menu'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 获取菜单历史记录
+  /admin/menu/history/delete/{id}:
+    delete:
+      description: 根据ID删除单个菜单历史记录
+      parameters:
+      - description: 菜单历史记录ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除菜单历史记录
+  /admin/menu/list:
+    get:
+      description: 获取所有菜单版本信息
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Menu'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 获取菜单列表
+  /admin/menu/save:
+    post:
+      consumes:
+      - application/json
+      description: 新增或更新菜单（每次操作生成新版本）
+      parameters:
+      - description: 菜单内容
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.Menu'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 保存菜单
   /admin/user/2fa/disable/{id}:
     post:
       description: 禁用指定用户的二步验证
@@ -1459,6 +1551,28 @@ paths:
       security:
       - BearerAuth: []
       summary: 保存用户组
+  /admin/user_group/save_menu:
+    post:
+      consumes:
+      - application/json
+      description: 保存用户组的菜单配置数据
+      parameters:
+      - description: 菜单配置信息
+        in: body
+        name: data
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 保存用户组菜单配置
   /ai/chat/any_question:
     get:
       parameters:
@@ -5138,6 +5252,37 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取Release的历史版本
+  /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Release名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: revision
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Release安装Log
   /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/notes:
     get:
       parameters:

@@ -1595,6 +1595,140 @@
                 }
             }
         },
+        "/admin/menu/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID批量删除菜单版本",
+                "summary": "删除菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "菜单ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/menu/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取菜单修改历史记录，按时间倒序排列",
+                "summary": "获取菜单历史记录",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Menu"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/menu/history/delete/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除单个菜单历史记录",
+                "summary": "删除菜单历史记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "菜单历史记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/menu/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有菜单版本信息",
+                "summary": "获取菜单列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Menu"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/menu/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或更新菜单（每次操作生成新版本）",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "保存菜单",
+                "parameters": [
+                    {
+                        "description": "菜单内容",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Menu"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/admin/user/2fa/disable/{id}": {
             "post": {
                 "security": [
@@ -1897,6 +2031,41 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.UserGroup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/user_group/save_menu": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存用户组的菜单配置数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "保存用户组菜单配置",
+                "parameters": [
+                    {
+                        "description": "菜单配置信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 ],
@@ -4262,6 +4431,54 @@
                         "type": "string",
                         "description": "Release名称",
                         "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Release安装Log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "ns",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "版本号",
+                        "name": "revision",
                         "in": "path",
                         "required": true
                     }
@@ -10939,6 +11156,20 @@
                 }
             }
         },
+        "models.Menu": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.User": {
             "type": "object",
             "properties": {
@@ -10962,7 +11193,7 @@
                     "type": "string"
                 },
                 "source": {
-                    "description": "来源，如：db, ldap, oauth",
+                    "description": "来源，如：db, ldap_config.json, oauth",
                     "type": "string"
                 },
                 "two_fa_app_name": {
@@ -11008,6 +11239,9 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "menu_data": {
+                    "type": "string"
                 },
                 "role": {
                     "description": "管理员/只读",
