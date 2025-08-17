@@ -39,10 +39,25 @@ const Sidebar = () => {
                     navigate(path);
                 };
 
-                // 解析 customEvent 中的路径
+                /**
+                 * 解析 customEvent 中的路径
+                 * @param customEvent - 自定义事件字符串
+                 * @returns 解析出的路径
+                 */
                 const getPathFromCustomEvent = (customEvent?: string): string => {
                     if (!customEvent) return '';
                     const match = customEvent.match(/loadJsonPage\("([^"]+)"\)/);
+                    return match ? match[1] : '';
+                };
+
+                /**
+                 * 解析 customEvent 中的 open 函数调用
+                 * @param customEvent - 自定义事件字符串
+                 * @returns 解析出的 URL
+                 */
+                const getUrlFromCustomEvent = (customEvent?: string): string => {
+                    if (!customEvent) return '';
+                    const match = customEvent.match(/open\("([^"]+)"\)/);
                     return match ? match[1] : '';
                 };
 
@@ -55,8 +70,14 @@ const Sidebar = () => {
                 // 如果有 customEvent，添加 onClick 处理
                 if (item.customEvent) {
                     const path = getPathFromCustomEvent(item.customEvent);
+                    const url = getUrlFromCustomEvent(item.customEvent);
+                    
                     if (path) {
+                        // 处理 loadJsonPage 类型的事件
                         (menuItem as any).onClick = () => loadJsonPage(path);
+                    } else if (url) {
+                        // 处理 open 类型的事件
+                        (menuItem as any).onClick = () => window.open(url, '_blank');
                     }
                 }
 
