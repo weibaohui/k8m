@@ -7,6 +7,8 @@
 
 [![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
+
 ![Alt](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg "Repobeats analytics image")
 
 **k8m** 是一款AI驱动的 Mini Kubernetes AI Dashboard 轻量级控制台工具，专为简化集群管理设计。它基于 AMIS 构建，并通过  [
