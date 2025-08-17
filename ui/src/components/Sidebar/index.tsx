@@ -49,7 +49,7 @@ const Sidebar = () => {
                 const menuItem: AntdMenuItem = {
                     key: item.key,
                     label: item.title,
-                    icon: item.icon ? <i className={item.icon}></i> : undefined,
+                    icon: item.icon ? <i className={`fa-solid ${item.icon}`}></i> : undefined,
                 };
 
                 // 如果有 customEvent，添加 onClick 处理
