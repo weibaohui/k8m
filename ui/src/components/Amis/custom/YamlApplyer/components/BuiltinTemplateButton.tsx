@@ -121,6 +121,25 @@ spec:
       limits:
         memory: "128Mi"
         cpu: "500m"`
+            },
+            cronjob: {
+                label: 'CronJob',
+                content: `apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-cronjob
+  namespace: default
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: my-cron-container
+            image: busybox
+            command: ["/bin/sh", "-c", "date; echo Hello from the Kubernetes cluster"]
+          restartPolicy: OnFailure`
             }
         }
     },

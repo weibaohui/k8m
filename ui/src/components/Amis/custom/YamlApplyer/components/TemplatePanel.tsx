@@ -1,10 +1,10 @@
-import React, {useRef, useState, useEffect} from 'react';
-import {Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider, message} from 'antd';
-import {DeleteFilled, EditFilled, PlusOutlined} from '@ant-design/icons';
-import {fetcher} from '@/components/Amis/fetcher';
+import React, { useRef, useState, useEffect } from 'react';
+import { Button, List, Input, Modal, Space, Drawer, Select, InputRef, Divider, message } from 'antd';
+import { DeleteFilled, EditFilled, PlusOutlined } from '@ant-design/icons';
+import { fetcher } from '@/components/Amis/fetcher';
 import * as monaco from 'monaco-editor';
 import JSZip from 'jszip';
-import {saveAs} from 'file-saver';
+import { saveAs } from 'file-saver';
 
 interface TemplateItem {
     id?: string;
@@ -18,7 +18,7 @@ interface TemplatePanelProps {
     refreshKey?: number;
 }
 
-const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshKey = 0}) => {
+const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refreshKey = 0 }) => {
     const [templates, setTemplates] = useState<TemplateItem[]>([]);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -132,7 +132,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                     setTemplates(prevTemplates =>
                         prevTemplates.map(template =>
                             template.id === editingTemplate.id
-                                ? {...template, ...editForm}
+                                ? { ...template, ...editForm }
                                 : template
                         )
                     );
@@ -184,8 +184,8 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
     };
 
     const renderTemplate = (template: TemplateItem) => (
-        <List.Item key={template.id} className="list-item" style={{cursor: 'pointer'}}
-                   onClick={() => onSelectTemplate(template.content)}>
+        <List.Item key={template.id} className="list-item" style={{ cursor: 'pointer' }}
+            onClick={() => onSelectTemplate(template.content)}>
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -202,10 +202,10 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                 }}>
                     {template.name}
                 </div>
-                <div style={{display: 'flex', gap: '8px', zIndex: 10}}>
+                <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
                     <Button
                         type="text"
-                        icon={<EditFilled style={{color: '#1890ff'}}/>}
+                        icon={<EditFilled style={{ color: '#1890ff' }} />}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleNameEdit(template);
@@ -213,7 +213,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                     />
                     <Button
                         type="text"
-                        icon={<DeleteFilled style={{color: '#f23034'}}/>}
+                        icon={<DeleteFilled style={{ color: '#f23034' }} />}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(template.id);
@@ -243,7 +243,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                 }}>
                     自定义模板
                 </div>
-                <div style={{display: 'flex', gap: '8px'}}>
+                <div style={{ display: 'flex', gap: '8px' }}>
                     <Button
                         variant="outlined"
                         onClick={async () => {
@@ -369,7 +369,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                                     });
                                 });
 
-                                const blob = await zip.generateAsync({type: 'blob'});
+                                const blob = await zip.generateAsync({ type: 'blob' });
                                 saveAs(blob, 'templates.zip');
                                 message.success(`成功导出 ${allTemplates.length} 个模板`);
                                 allTemplates = []
@@ -423,9 +423,9 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                     </Button>
                 </div>
             </div>
-            <div style={{marginBottom: '10px', display: 'flex', gap: '8px'}}>
+            <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
                 <Select
-                    style={{width: 200}}
+                    style={{ width: 200 }}
                     value={selectedKind}
                     onChange={(value) => {
                         setCurrentPage(1);
@@ -433,7 +433,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                     }}
                     placeholder="按资源分类筛选"
                     allowClear
-                    options={resourceTypesList.map(type => ({label: type, value: type}))}
+                    options={resourceTypesList.map(type => ({ label: type, value: type }))}
                 />
             </div>
             <List
@@ -441,7 +441,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                 renderItem={renderTemplate}
                 bordered={true}
             />
-            <div style={{marginTop: '16px', textAlign: 'right'}}>
+            <div style={{ marginTop: '16px', textAlign: 'right' }}>
                 <Space.Compact>
                     <Button
                         type="default"
@@ -469,7 +469,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                 open={drawerVisible}
                 onClose={() => setDrawerVisible(false)}
                 footer={
-                    <div style={{textAlign: 'right'}}>
+                    <div style={{ textAlign: 'right' }}>
                         <Space>
                             <Button onClick={() => setDrawerVisible(false)}>取消</Button>
                             <Button type="primary" onClick={handleEditSubmit}>保存</Button>
@@ -477,29 +477,29 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                     </div>
                 }
             >
-                <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
-                        <div style={{marginBottom: '8px'}}>模板名称</div>
+                        <div style={{ marginBottom: '8px' }}>模板名称</div>
                         <Input
                             value={editForm.name}
-                            onChange={(e) => setEditForm(prev => ({...prev, name: e.target.value}))}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
                             placeholder="请输入模板名称"
                         />
                     </div>
                     <div>
-                        <div style={{marginBottom: '8px'}}>资源分类</div>
+                        <div style={{ marginBottom: '8px' }}>资源分类</div>
                         <Select
                             value={editForm.kind}
-                            onChange={(value) => setEditForm(prev => ({...prev, kind: value}))}
+                            onChange={(value) => setEditForm(prev => ({ ...prev, kind: value }))}
                             placeholder="请选择资源分类"
-                            options={resourceTypesList.map(type => ({label: type, value: type}))}
-                            style={{width: 200}}
+                            options={resourceTypesList.map(type => ({ label: type, value: type }))}
+                            style={{ width: 200 }}
                             allowClear
                             dropdownRender={(menu) => (
                                 <>
                                     {menu}
-                                    <Divider style={{margin: '8px 0'}}/>
-                                    <Space style={{padding: '0 8px 4px'}}>
+                                    <Divider style={{ margin: '8px 0' }} />
+                                    <Space style={{ padding: '0 8px 4px' }}>
                                         <Input
                                             placeholder="请输入新的资源分类"
                                             ref={inputRef}
@@ -507,7 +507,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                                             onChange={onNewKindChange}
                                             onKeyDown={(e) => e.stopPropagation()}
                                         />
-                                        <Button type="text" icon={<PlusOutlined/>} onClick={handleAddKind}>
+                                        <Button type="text" icon={<PlusOutlined />} onClick={handleAddKind}>
                                             添加分类
                                         </Button>
                                     </Space>
@@ -516,7 +516,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                         />
                     </div>
                     <div>
-                        <div style={{marginBottom: '8px'}}>模板内容</div>
+                        <div style={{ marginBottom: '8px' }}>模板内容</div>
                         <div
                             ref={(el) => {
                                 if (el && !el.hasChildNodes()) {
@@ -541,7 +541,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
                                     });
                                 }
                             }}
-                            style={{height: '400px', border: '1px solid #d9d9d9'}}
+                            style={{ height: '400px', border: '1px solid #d9d9d9' }}
                         />
                     </div>
                 </div>
