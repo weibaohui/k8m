@@ -4,12 +4,12 @@ import { DownOutlined } from '@ant-design/icons';
 
 // 内置模板数据 - 多级菜单结构
 const BUILTIN_TEMPLATES = {
-    workload: {
-        label: 'Workload',
-        children: {
-            deployment: {
-                label: 'Deployment',
-                content: `apiVersion: apps/v1
+  workload: {
+    label: 'Workload',
+    children: {
+      deployment: {
+        label: 'Deployment',
+        content: `apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-app
@@ -36,10 +36,10 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"`
-            },
-            statefulset: {
-                label: 'StatefulSet',
-                content: `apiVersion: apps/v1
+      },
+      statefulset: {
+        label: 'StatefulSet',
+        content: `apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: my-statefulset
@@ -71,10 +71,10 @@ spec:
       resources:
         requests:
           storage: 1Gi`
-            },
-            daemonset: {
-                label: 'DaemonSet',
-                content: `apiVersion: apps/v1
+      },
+      daemonset: {
+        label: 'DaemonSet',
+        content: `apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: my-daemonset
@@ -100,10 +100,10 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"`
-            },
-            pod: {
-                label: 'Pod',
-                content: `apiVersion: v1
+      },
+      pod: {
+        label: 'Pod',
+        content: `apiVersion: v1
 kind: Pod
 metadata:
   name: my-pod
@@ -121,10 +121,10 @@ spec:
       limits:
         memory: "128Mi"
         cpu: "500m"`
-            },
-            cronjob: {
-                label: 'CronJob',
-                content: `apiVersion: batch/v1
+      },
+      cronjob: {
+        label: 'CronJob',
+        content: `apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: my-cronjob
@@ -140,15 +140,15 @@ spec:
             image: busybox
             command: ["/bin/sh", "-c", "date; echo Hello from the Kubernetes cluster"]
           restartPolicy: OnFailure`
-            }
-        }
-    },
-    network: {
-        label: 'Network',
-        children: {
-            service: {
-                label: 'Service',
-                content: `apiVersion: v1
+      }
+    }
+  },
+  network: {
+    label: 'Network',
+    children: {
+      service: {
+        label: 'Service',
+        content: `apiVersion: v1
 kind: Service
 metadata:
   name: my-service
@@ -161,10 +161,10 @@ spec:
     port: 80
     targetPort: 80
   type: ClusterIP`
-            },
-            ingress: {
-                label: 'Ingress',
-                content: `apiVersion: networking.k8s.io/v1
+      },
+      ingress: {
+        label: 'Ingress',
+        content: `apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-ingress
@@ -183,15 +183,15 @@ spec:
             name: my-service
             port:
               number: 80`
-            }
-        }
-    },
-    config: {
-        label: 'Config',
-        children: {
-            configmap: {
-                label: 'ConfigMap',
-                content: `apiVersion: v1
+      }
+    }
+  },
+  config: {
+    label: 'Config',
+    children: {
+      configmap: {
+        label: 'ConfigMap',
+        content: `apiVersion: v1
 kind: ConfigMap
 metadata:
   name: my-config
@@ -205,27 +205,30 @@ data:
       host: localhost
       port: 5432
       name: mydb`
-            },
-            secret: {
-                label: 'Secret',
-                content: `apiVersion: v1
+      },
+      secret: {
+        label: 'Secret',
+        content: `apiVersion: v1
 kind: Secret
 metadata:
   name: my-secret
   namespace: default
 type: Opaque
 data:
-  username: YWRtaW4=  # admin (base64 encoded)
-  password: MWYyZDFlMmU2N2Rm  # 1f2d1e2e67df (base64 encoded)`
-            }
-        }
-    },
-    storage: {
-        label: 'Storage',
-        children: {
-            pv: {
-                label: 'PersistentVolume',
-                content: `apiVersion: v1
+  # 示例：echo -n 'username' | base64
+  username: BASE64_ENCODED_USERNAME
+  # 示例：echo -n 'password' | base64
+  password: BASE64_ENCODED_PASSWORD
+`
+      }
+    }
+  },
+  storage: {
+    label: 'Storage',
+    children: {
+      pv: {
+        label: 'PersistentVolume',
+        content: `apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: my-pv
@@ -238,10 +241,10 @@ spec:
   storageClassName: manual
   hostPath:
     path: /data/my-pv`
-            },
-            pvc: {
-                label: 'PersistentVolumeClaim',
-                content: `apiVersion: v1
+      },
+      pvc: {
+        label: 'PersistentVolumeClaim',
+        content: `apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: my-pvc
@@ -253,14 +256,14 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: manual`
-            }
-        }
+      }
     }
+  }
 };
 
 interface BuiltinTemplateButtonProps {
-    onSelectTemplate: (content: string) => void;
-    style?: React.CSSProperties;
+  onSelectTemplate: (content: string) => void;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -268,87 +271,87 @@ interface BuiltinTemplateButtonProps {
  * 提供常用的Kubernetes资源模板选择功能
  */
 const BuiltinTemplateButton: React.FC<BuiltinTemplateButtonProps> = ({ onSelectTemplate, style }) => {
-    const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-    /**
-     * 处理模板选择
-     * @param key 模板键值
-     */
-    const handleMenuClick = ({ key }: { key: string }) => {
-        // 解析多级key，格式如: "workload.pod.deployment"
-        const keys = key.split('.');
-        let current: any = BUILTIN_TEMPLATES;
+  /**
+   * 处理模板选择
+   * @param key 模板键值
+   */
+  const handleMenuClick = ({ key }: { key: string }) => {
+    // 解析多级key，格式如: "workload.pod.deployment"
+    const keys = key.split('.');
+    let current: any = BUILTIN_TEMPLATES;
 
-        for (const k of keys) {
-            if (current.children && current.children[k]) {
-                current = current.children[k];
-            } else if (current[k]) {
-                current = current[k];
-            } else {
-                return;
-            }
-        }
+    for (const k of keys) {
+      if (current.children && current.children[k]) {
+        current = current.children[k];
+      } else if (current[k]) {
+        current = current[k];
+      } else {
+        return;
+      }
+    }
 
-        if (current.content) {
-            onSelectTemplate(current.content);
-        }
-        setVisible(false);
-    };
+    if (current.content) {
+      onSelectTemplate(current.content);
+    }
+    setVisible(false);
+  };
 
-    /**
-     * 处理下拉菜单显示状态变化
-     * @param flag 显示状态
-     */
-    const handleVisibleChange = (flag: boolean) => {
-        setVisible(flag);
-    };
+  /**
+   * 处理下拉菜单显示状态变化
+   * @param flag 显示状态
+   */
+  const handleVisibleChange = (flag: boolean) => {
+    setVisible(flag);
+  };
 
-    /**
-     * 递归构建多级菜单项
-     * @param templates 模板对象
-     * @param parentKey 父级键值
-     */
-    const buildMenuItems = (templates: any, parentKey = ''): any[] => {
-        return Object.entries(templates).map(([key, value]: [string, any]) => {
-            const fullKey = parentKey ? `${parentKey}.${key}` : key;
+  /**
+   * 递归构建多级菜单项
+   * @param templates 模板对象
+   * @param parentKey 父级键值
+   */
+  const buildMenuItems = (templates: any, parentKey = ''): any[] => {
+    return Object.entries(templates).map(([key, value]: [string, any]) => {
+      const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
-            if (value.children) {
-                // 有子菜单
-                return {
-                    key: fullKey,
-                    label: value.label,
-                    children: buildMenuItems(value.children, fullKey)
-                };
-            } else if (value.content) {
-                // 叶子节点，包含模板内容
-                return {
-                    key: fullKey,
-                    label: value.label
-                };
-            }
-            return null;
-        }).filter(Boolean);
-    };
+      if (value.children) {
+        // 有子菜单
+        return {
+          key: fullKey,
+          label: value.label,
+          children: buildMenuItems(value.children, fullKey)
+        };
+      } else if (value.content) {
+        // 叶子节点，包含模板内容
+        return {
+          key: fullKey,
+          label: value.label
+        };
+      }
+      return null;
+    }).filter(Boolean);
+  };
 
-    const menuItems = buildMenuItems(BUILTIN_TEMPLATES);
+  const menuItems = buildMenuItems(BUILTIN_TEMPLATES);
 
-    const menu = {
-        items: menuItems,
-        onClick: handleMenuClick
-    };
+  const menu = {
+    items: menuItems,
+    onClick: handleMenuClick
+  };
 
-    return (
-        <Dropdown
-            menu={menu}
-            onOpenChange={handleVisibleChange}
-            open={visible}
-            trigger={['click']}
-        >
-            <Button style={style}>
-                内置模板 <DownOutlined />
-            </Button>
-        </Dropdown>
-    );
+  return (
+    <Dropdown
+      menu={menu}
+      onOpenChange={handleVisibleChange}
+      open={visible}
+      trigger={['click']}
+    >
+      <Button style={style}>
+        内置模板 <DownOutlined />
+      </Button>
+    </Dropdown>
+  );
 };
 
 export default BuiltinTemplateButton;
