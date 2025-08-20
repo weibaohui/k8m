@@ -7,12 +7,9 @@ const BUILTIN_TEMPLATES = {
     workload: {
         label: 'Workload',
         children: {
-            pod: {
-                label: 'Pod',
-                children: {
-                    deployment: {
-                        label: 'Deployment',
-                        content: `apiVersion: apps/v1
+            deployment: {
+                label: 'Deployment',
+                content: `apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-app
@@ -39,10 +36,10 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"`
-                    },
-                    statefulset: {
-                        label: 'StatefulSet',
-                        content: `apiVersion: apps/v1
+            },
+            statefulset: {
+                label: 'StatefulSet',
+                content: `apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: my-statefulset
@@ -74,10 +71,10 @@ spec:
       resources:
         requests:
           storage: 1Gi`
-                    },
-                    daemonset: {
-                        label: 'DaemonSet',
-                        content: `apiVersion: apps/v1
+            },
+            daemonset: {
+                label: 'DaemonSet',
+                content: `apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: my-daemonset
@@ -103,8 +100,27 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"`
-                    }
-                }
+            },
+            pod: {
+                label: 'Pod',
+                content: `apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  namespace: default
+spec:
+  containers:
+  - name: my-container
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"`
             }
         }
     },
