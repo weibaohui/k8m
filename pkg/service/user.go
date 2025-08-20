@@ -23,9 +23,9 @@ type userService struct {
 	cacheKeys sync.Map // 用于存储所有使用过的缓存key
 }
 
-func (u *userService) GetGroupMenuData(groupNames string) (any, error) {
+func (u *userService) GetGroupMenuData(groupNames string) (string, error) {
 	if groupNames == "" {
-		return nil, nil
+		return "", nil
 	}
 
 	// 按逗号分割，取第一个组名
@@ -33,12 +33,12 @@ func (u *userService) GetGroupMenuData(groupNames string) (any, error) {
 	firstGroupName := strings.TrimSpace(groupNameList[0])
 
 	if firstGroupName == "" {
-		return nil, nil
+		return "", nil
 	}
 
 	cacheKey := u.formatCacheKey("user:groupmenu:%s", firstGroupName)
 
-	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() (any, error) {
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() (string, error) {
 		params := &dao.Params{}
 		userGroup := &models.UserGroup{}
 		queryFunc := func(db *gorm.DB) *gorm.DB {
@@ -48,13 +48,13 @@ func (u *userService) GetGroupMenuData(groupNames string) (any, error) {
 		item, err := userGroup.GetOne(params, queryFunc)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, nil
+				return "", nil
 			}
-			return nil, err
+			return "", err
 		}
 
 		if item.MenuData == "" {
-			return nil, nil
+			return "", nil
 		}
 
 		return item.MenuData, nil
