@@ -226,184 +226,202 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({onSelectTemplate, refreshK
 
     return (
         <div>
-            <div style={{marginBottom: '10px', display: 'flex', gap: '8px'}}>
-                <Button
-                    variant="outlined"
-                    onClick={async () => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = '.zip';
-                        input.onchange = async (e) => {
-                            const file = (e.target as HTMLInputElement).files?.[0];
-                            if (file) {
-                                try {
-                                    const zip = await JSZip.loadAsync(file);
-                                    const newTemplates: TemplateItem[] = [];
+            <div style={{
+                border: '1px solid #d9d9d9',
+                borderRadius: '4px',
+                padding: '16px',
+                position: 'relative',
+                marginBottom: '10px'
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: '-12px',
+                    left: '12px',
+                    background: '#FFFFFF',
+                    padding: '0 8px',
+                    fontWeight: '500'
+                }}>
+                    自定义模板
+                </div>
+                <div style={{display: 'flex', gap: '8px'}}>
+                    <Button
+                        variant="outlined"
+                        onClick={async () => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = '.zip';
+                            input.onchange = async (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) {
+                                    try {
+                                        const zip = await JSZip.loadAsync(file);
+                                        const newTemplates: TemplateItem[] = [];
 
-                                    for (const [filePath, fileData] of Object.entries(zip.files)) {
-                                        if (!fileData.dir && (filePath.endsWith('.yaml') || filePath.endsWith('.yml'))) {
-                                            const content = await fileData.async('text');
-                                            const pathParts = filePath.split('/');
-                                            const kind = pathParts.length > 1 ? pathParts[0] : '';
-                                            const name = pathParts[pathParts.length - 1].replace(/\.(yaml|yml)$/, '');
+                                        for (const [filePath, fileData] of Object.entries(zip.files)) {
+                                            if (!fileData.dir && (filePath.endsWith('.yaml') || filePath.endsWith('.yml'))) {
+                                                const content = await fileData.async('text');
+                                                const pathParts = filePath.split('/');
+                                                const kind = pathParts.length > 1 ? pathParts[0] : '';
+                                                const name = pathParts[pathParts.length - 1].replace(/\.(yaml|yml)$/, '');
 
-                                            newTemplates.push({
-                                                content,
-                                                kind,
-                                                name
-                                            });
-                                        }
-                                    }
-
-                                    if (newTemplates.length > 0) {
-                                        for (const template of newTemplates) {
-                                            try {
-                                                await fetcher({
-                                                    url: '/mgm/custom/template/save',
-                                                    method: 'post',
-                                                    data: template
+                                                newTemplates.push({
+                                                    content,
+                                                    kind,
+                                                    name
                                                 });
-                                            } catch (error) {
-                                                console.error('Failed to save template:', error);
                                             }
                                         }
-                                        message.success(`成功导入 ${newTemplates.length} 个模板`);
-                                        // 刷新模板列表
-                                        const response = await fetcher({
-                                            url: `/mgm/custom/template/list?page=${currentPage}&perPage=${pageSize}`,
-                                            method: 'get'
-                                        });
-                                        //@ts-ignore
-                                        if (response.data?.status === 0 && response.data?.data?.rows) {
+
+                                        if (newTemplates.length > 0) {
+                                            for (const template of newTemplates) {
+                                                try {
+                                                    await fetcher({
+                                                        url: '/mgm/custom/template/save',
+                                                        method: 'post',
+                                                        data: template
+                                                    });
+                                                } catch (error) {
+                                                    console.error('Failed to save template:', error);
+                                                }
+                                            }
+                                            message.success(`成功导入 ${newTemplates.length} 个模板`);
+                                            // 刷新模板列表
+                                            const response = await fetcher({
+                                                url: `/mgm/custom/template/list?page=${currentPage}&perPage=${pageSize}`,
+                                                method: 'get'
+                                            });
                                             //@ts-ignore
-                                            setTemplates(response.data.data.rows);
-                                            //@ts-ignore
-                                            setTotal(response.data.data.count || 0);
+                                            if (response.data?.status === 0 && response.data?.data?.rows) {
+                                                //@ts-ignore
+                                                setTemplates(response.data.data.rows);
+                                                //@ts-ignore
+                                                setTotal(response.data.data.count || 0);
+                                            }
+                                        } else {
+                                            Modal.warning({
+                                                title: '导入提示',
+                                                content: 'ZIP文件中没有找到YAML文件'
+                                            });
                                         }
-                                    } else {
-                                        Modal.warning({
-                                            title: '导入提示',
-                                            content: 'ZIP文件中没有找到YAML文件'
+                                    } catch (error) {
+                                        Modal.error({
+                                            title: '导入失败',
+                                            content: '无法解析ZIP文件或文件格式错误'
                                         });
                                     }
-                                } catch (error) {
-                                    Modal.error({
-                                        title: '导入失败',
-                                        content: '无法解析ZIP文件或文件格式错误'
-                                    });
                                 }
-                            }
-                        };
-                        input.click();
-                    }}
-                >
-                    导入模板
-                </Button>
-                <Button
-                    variant="outlined"
-                    onClick={async () => {
-                        try {
-                            // 获取第一页数据以获取总数
-                            const firstPageResponse = await fetcher({
-                                url: `/mgm/custom/template/list?page=1&perPage=${pageSize}`,
-                                method: 'get'
-                            });
-
-                            if (firstPageResponse.data?.status !== 0) {
-                                throw new Error('获取模板数据失败');
-                            }
-
-                            //@ts-ignore
-                            const totalCount = firstPageResponse.data.data.count;
-                            const totalPages = Math.ceil(totalCount / pageSize);
-                            let allTemplates: TemplateItem[] = [];
-
-                            // 循环获取所有页面的数据
-                            for (let page = 1; page <= totalPages; page++) {
-                                const response = await fetcher({
-                                    url: `/mgm/custom/template/list?page=${page}&perPage=${pageSize}`,
+                            };
+                            input.click();
+                        }}
+                    >
+                        导入
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        onClick={async () => {
+                            try {
+                                // 获取第一页数据以获取总数
+                                const firstPageResponse = await fetcher({
+                                    url: `/mgm/custom/template/list?page=1&perPage=${pageSize}`,
                                     method: 'get'
                                 });
 
+                                if (firstPageResponse.data?.status !== 0) {
+                                    throw new Error('获取模板数据失败');
+                                }
+
                                 //@ts-ignore
-                                if (response.data?.status === 0 && response.data?.data?.rows) {
+                                const totalCount = firstPageResponse.data.data.count;
+                                const totalPages = Math.ceil(totalCount / pageSize);
+                                let allTemplates: TemplateItem[] = [];
+
+                                // 循环获取所有页面的数据
+                                for (let page = 1; page <= totalPages; page++) {
+                                    const response = await fetcher({
+                                        url: `/mgm/custom/template/list?page=${page}&perPage=${pageSize}`,
+                                        method: 'get'
+                                    });
+
                                     //@ts-ignore
-                                    allTemplates.push(...response.data.data.rows);
+                                    if (response.data?.status === 0 && response.data?.data?.rows) {
+                                        //@ts-ignore
+                                        allTemplates.push(...response.data.data.rows);
+                                    }
                                 }
+
+                                const zip = new JSZip();
+
+                                // 按kind分组创建文件夹
+                                const templatesByKind: { [key: string]: TemplateItem[] } = {};
+                                allTemplates.forEach(template => {
+                                    const kind = template.kind || '未分类';
+                                    if (!templatesByKind[kind]) {
+                                        templatesByKind[kind] = [];
+                                    }
+                                    templatesByKind[kind].push(template);
+                                });
+
+                                // 创建文件夹结构并添加文件
+                                Object.entries(templatesByKind).forEach(([kind, templates]) => {
+                                    templates.forEach(template => {
+                                        const fileName = `${kind}/${template.name}.yaml`;
+                                        zip.file(fileName, template.content);
+                                    });
+                                });
+
+                                const blob = await zip.generateAsync({type: 'blob'});
+                                saveAs(blob, 'templates.zip');
+                                message.success(`成功导出 ${allTemplates.length} 个模板`);
+                                allTemplates = []
+                            } catch (error) {
+                                console.error('导出模板失败:', error);
+                                Modal.error({
+                                    title: '导出失败',
+                                    content: '导出模板时发生错误：' + (error instanceof Error ? error.message : '未知错误')
+                                });
                             }
-
-                            const zip = new JSZip();
-
-                            // 按kind分组创建文件夹
-                            const templatesByKind: { [key: string]: TemplateItem[] } = {};
-                            allTemplates.forEach(template => {
-                                const kind = template.kind || '未分类';
-                                if (!templatesByKind[kind]) {
-                                    templatesByKind[kind] = [];
+                        }}
+                    >
+                        导出
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        onClick={() => {
+                            //@ts-ignore
+                            const newTemplate: TemplateItem = {
+                                name: `模板 ${templates.length + 1}`,
+                                content: '',
+                                kind: selectedKind
+                            };
+                            // 调用后端API保存新模板
+                            fetcher({
+                                url: '/mgm/custom/template/save',
+                                method: 'post',
+                                data: newTemplate
+                            }).then(response => {
+                                if (response.data?.status === 0) {
+                                    const savedTemplate = {
+                                        ...newTemplate,
+                                        //@ts-ignore
+                                        id: response.data.data.id || Math.random().toString(36).substring(2, 15)
+                                    };
+                                    setTemplates(prev => [...prev, savedTemplate]);
+                                    message.success('新模板已成功创建');
+                                } else {
+                                    throw new Error(response.data?.msg || '创建失败');
                                 }
-                                templatesByKind[kind].push(template);
-                            });
-
-                            // 创建文件夹结构并添加文件
-                            Object.entries(templatesByKind).forEach(([kind, templates]) => {
-                                templates.forEach(template => {
-                                    const fileName = `${kind}/${template.name}.yaml`;
-                                    zip.file(fileName, template.content);
+                            }).catch(error => {
+                                console.error('Failed to create template:', error);
+                                Modal.error({
+                                    title: '创建失败',
+                                    content: '无法创建新模板：' + error.message
                                 });
                             });
-
-                            const blob = await zip.generateAsync({type: 'blob'});
-                            saveAs(blob, 'templates.zip');
-                            message.success(`成功导出 ${allTemplates.length} 个模板`);
-                            allTemplates = []
-                        } catch (error) {
-                            console.error('导出模板失败:', error);
-                            Modal.error({
-                                title: '导出失败',
-                                content: '导出模板时发生错误：' + (error instanceof Error ? error.message : '未知错误')
-                            });
-                        }
-                    }}
-                >
-                    导出模板
-                </Button>
-                <Button
-                    variant="outlined"
-                    onClick={() => {
-                        //@ts-ignore
-                        const newTemplate: TemplateItem = {
-                            name: `模板 ${templates.length + 1}`,
-                            content: '',
-                            kind: selectedKind
-                        };
-                        // 调用后端API保存新模板
-                        fetcher({
-                            url: '/mgm/custom/template/save',
-                            method: 'post',
-                            data: newTemplate
-                        }).then(response => {
-                            if (response.data?.status === 0) {
-                                const savedTemplate = {
-                                    ...newTemplate,
-                                    //@ts-ignore
-                                    id: response.data.data.id || Math.random().toString(36).substring(2, 15)
-                                };
-                                setTemplates(prev => [...prev, savedTemplate]);
-                                message.success('新模板已成功创建');
-                            } else {
-                                throw new Error(response.data?.msg || '创建失败');
-                            }
-                        }).catch(error => {
-                            console.error('Failed to create template:', error);
-                            Modal.error({
-                                title: '创建失败',
-                                content: '无法创建新模板：' + error.message
-                            });
-                        });
-                    }}
-                >
-                    新建模板
-                </Button>
+                        }}
+                    >
+                        新建
+                    </Button>
+                </div>
             </div>
             <div style={{marginBottom: '10px', display: 'flex', gap: '8px'}}>
                 <Select
