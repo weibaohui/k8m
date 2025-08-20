@@ -19,8 +19,8 @@ type SSOConfig struct {
 	Enabled            bool      `gorm:"default:false" json:"enabled,omitempty"`            // 是否启用SSO
 	PreferUserNameKeys string    `gorm:"type:text;" json:"prefer_user_name_keys,omitempty"` // 用户自定义获取用户名的字段顺序，适用于如果用户名字段不在默认字段中情况
 	Scopes             string    `gorm:"type:text;" json:"scopes,omitempty"`                // 授权范围
-	CreatedAt          time.Time `json:"created_at,omitempty"`                              // 创建时间
-	UpdatedAt          time.Time `json:"updated_at,omitempty"`                              // 更新时间
+	CreatedAt          time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt          time.Time `json:"updated_at,omitempty"` // 更新时间
 }
 
 // List 列出所有记录

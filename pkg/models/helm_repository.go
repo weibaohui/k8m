@@ -25,7 +25,7 @@ type HelmRepository struct {
 	CAFile                string    `json:"caFile,omitempty"`
 	InsecureSkipTLSverify bool      `json:"insecure_skip_tls_verify,omitempty"`
 	PassCredentialsAll    bool      `json:"pass_credentials_all,omitempty"`
-	CreatedAt             time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
+	CreatedAt             time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt             time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 

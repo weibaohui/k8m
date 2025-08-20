@@ -20,7 +20,7 @@ type AIModelConfig struct {
 	TopP        float32   `json:"top_p"`
 	Think       bool      `json:"think"` // 是否关闭思考模式
 	Description string    `json:"description,omitempty"`
-	CreatedAt   time.Time `json:"created_at,omitempty"`
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
 }
 

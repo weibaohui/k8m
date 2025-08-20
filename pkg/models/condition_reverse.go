@@ -14,8 +14,8 @@ type ConditionReverse struct {
 	Name        string    `gorm:"type:text" json:"name,omitempty"`        // 指标名称，使用包含方式查找。如Pressure、Unavailable等
 	Enabled     bool      `json:"enabled,omitempty"`                      // 指标描述
 	Description string    `gorm:"type:text" json:"description,omitempty"` // 指标描述
-	CreatedAt   time.Time `json:"created_at,omitempty"`                   // 创建时间
-	UpdatedAt   time.Time `json:"updated_at,omitempty"`                   // 更新时间
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty"` // 更新时间
 }
 
 // List 列出所有记录

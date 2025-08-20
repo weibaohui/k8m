@@ -20,7 +20,7 @@ type ClusterUserRole struct {
 	Namespaces          string                             `json:"namespaces,omitempty"`            // Namespaces列表，逗号分割 ，该用户可以访问的Ns
 	BlacklistNamespaces string                             `json:"blacklist_namespaces,omitempty"`  // 黑名单Namespaces列表，逗号分割，禁止访问的Ns
 	AuthorizationType   constants.ClusterAuthorizationType `json:"authorization_type,omitempty"`    // 用户类型。User\Group两种，默认为User，空为User。Group指用户组
-	CreatedAt           time.Time                          `json:"created_at,omitempty"`
+	CreatedAt           time.Time                          `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt           time.Time                          `json:"updated_at,omitempty"`
 }
 

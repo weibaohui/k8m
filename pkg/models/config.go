@@ -24,7 +24,7 @@ type Config struct {
 	MaxHistory           int32     `json:"max_history"`                                        //  模型对话上下文历史记录数
 	ResourceCacheTimeout int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"` // 资源缓存时间（秒）
 	ModelID              uint      `json:"model_id"`
-	CreatedAt            time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
+	CreatedAt            time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt            time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 

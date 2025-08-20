@@ -21,7 +21,7 @@ type HelmChart struct {
 	KubeVersion    string    `json:"kubeVersion,omitempty"`                         // 最低k8s版本要求
 	AppVersion     string    `json:"appVersion,omitempty"`                          // app应用版本
 	Deprecated     bool      `json:"deprecated,omitempty"`                          // Whether or not this chart is deprecated
-	CreatedAt      time.Time `json:"created_at"`
+	CreatedAt      time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt      time.Time `json:"updated_at"`
 	Sources        string    `json:"sources,omitempty"` // 源码主页
 }

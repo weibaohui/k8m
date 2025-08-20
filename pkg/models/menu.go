@@ -14,7 +14,7 @@ import (
 type Menu struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	MenuData  string    `gorm:"type:text" json:"-"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
@@ -36,14 +36,14 @@ func (m *Menu) MarshalJSON() ([]byte, error) {
 			menuData = m.MenuData
 		}
 	}
-	
+
 	menuJSON := MenuDataJSON{
 		ID:        m.ID,
 		MenuData:  menuData,
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 	}
-	
+
 	return json.Marshal(menuJSON)
 }
 
@@ -54,11 +54,11 @@ func (m *Menu) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &menuJSON); err != nil {
 		return err
 	}
-	
+
 	m.ID = menuJSON.ID
 	m.CreatedAt = menuJSON.CreatedAt
 	m.UpdatedAt = menuJSON.UpdatedAt
-	
+
 	// 将menu_data转换为JSON字符串存储
 	if menuJSON.MenuData != nil {
 		menuDataBytes, err := json.Marshal(menuJSON.MenuData)
@@ -67,7 +67,7 @@ func (m *Menu) UnmarshalJSON(data []byte) error {
 		}
 		m.MenuData = string(menuDataBytes)
 	}
-	
+
 	return nil
 }
 
