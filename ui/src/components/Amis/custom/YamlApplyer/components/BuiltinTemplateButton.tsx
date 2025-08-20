@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 
 // 内置模板数据 - 多级菜单结构
@@ -259,7 +259,7 @@ const BuiltinTemplateButton: React.FC<BuiltinTemplateButtonProps> = ({ onSelectT
         // 解析多级key，格式如: "workload.pod.deployment"
         const keys = key.split('.');
         let current: any = BUILTIN_TEMPLATES;
-        
+
         for (const k of keys) {
             if (current.children && current.children[k]) {
                 current = current.children[k];
@@ -269,7 +269,7 @@ const BuiltinTemplateButton: React.FC<BuiltinTemplateButtonProps> = ({ onSelectT
                 return;
             }
         }
-        
+
         if (current.content) {
             onSelectTemplate(current.content);
         }
@@ -292,7 +292,7 @@ const BuiltinTemplateButton: React.FC<BuiltinTemplateButtonProps> = ({ onSelectT
     const buildMenuItems = (templates: any, parentKey = ''): any[] => {
         return Object.entries(templates).map(([key, value]: [string, any]) => {
             const fullKey = parentKey ? `${parentKey}.${key}` : key;
-            
+
             if (value.children) {
                 // 有子菜单
                 return {
