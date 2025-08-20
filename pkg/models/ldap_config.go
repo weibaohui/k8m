@@ -23,7 +23,7 @@ type LDAPConfig struct {
 	LOGIN2AUTHCLOSE bool      `gorm:"default:true" json:"login2_auth_close"`   // 登录后开启认证
 	DefaultGroup    string    `gorm:"size:50" json:"default_group"`            // 默认用户组
 	Enabled         bool      `gorm:"default:true" json:"enabled"`             // 启用状态
-	CreatedAt       time.Time `json:"created_at"`
+	CreatedAt       time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 

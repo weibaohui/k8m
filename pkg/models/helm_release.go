@@ -19,7 +19,7 @@ type HelmRelease struct {
 	Status       string    `json:"status,omitempty"`                          // 安装状态
 	Cluster      string    `json:"cluster,omitempty"`
 	Result       string    `json:"result,omitempty"` // 描述
-	CreatedAt    time.Time `json:"created_at,omitempty"`
+	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 }
 

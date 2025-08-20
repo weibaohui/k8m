@@ -17,7 +17,7 @@ type KubeConfig struct {
 	Cluster     string    `gorm:"index" json:"cluster,omitempty"` // 模板类型，最大长度 100
 	Namespace   string    `gorm:"index" json:"namespace,omitempty"`
 	DisplayName string    `gorm:"index" json:"display_name,omitempty"`
-	CreatedAt   time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 

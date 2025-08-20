@@ -18,7 +18,7 @@ type MCPToolLog struct {
 	Result      string    `gorm:"type:text" json:"result,omitempty"` // 执行结果
 	Error       string    `gorm:"type:text" json:"error,omitempty"`  // 错误信息
 	ExecuteTime int64     `json:"execute_time,omitempty"`            // 执行时间(毫秒)
-	CreatedAt   time.Time `json:"created_at,omitempty"`
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	CreatedBy   string    `gorm:"index" json:"created_by,omitempty"`
 }
 

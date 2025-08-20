@@ -18,7 +18,7 @@ type ShellLog struct {
 	ContainerName string    `json:"container_name,omitempty"`
 	Command       string    `json:"command,omitempty"` // shell 执行命令
 	Role          string    `json:"role,omitempty"`
-	CreatedAt     time.Time `json:"created_at,omitempty"` // Automatically managed by GORM for creation time
+	CreatedAt     time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt     time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 

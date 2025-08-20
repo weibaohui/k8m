@@ -14,7 +14,7 @@ type MCPServerConfig struct {
 	URL       string    `gorm:"not null" json:"url,omitempty"`
 	Name      string    `gorm:"uniqueIndex;not null;type:varchar(255)" json:"name,omitempty"`
 	Enabled   bool      `gorm:"default:false" json:"enabled,omitempty"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 

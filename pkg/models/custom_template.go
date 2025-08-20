@@ -17,8 +17,8 @@ type CustomTemplate struct {
 	Cluster   string    `gorm:"index" json:"cluster,omitempty"`               // 模板类型，最大长度 100
 	IsGlobal  bool      `gorm:"index" json:"is_global,omitempty"`             // 模板类型，最大长度 100
 	CreatedBy string    `gorm:"index" json:"created_by,omitempty"`            // 创建者
-	CreatedAt time.Time `json:"created_at,omitempty"`                         // Automatically managed by GORM for creation time
-	UpdatedAt time.Time `json:"updated_at,omitempty"`                         // Automatically managed by GORM for update time
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 
 func (c *CustomTemplate) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*CustomTemplate, int64, error) {

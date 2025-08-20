@@ -16,7 +16,7 @@ type MCPTool struct {
 	Description string    `gorm:"type:text" json:"description,omitempty"`                       // 工具描述
 	InputSchema string    `gorm:"type:text" json:"input_schema,omitempty"`                      // 输入模式，JSON格式
 	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`                        // 是否启用
-	CreatedAt   time.Time `json:"created_at,omitempty"`                                         // 创建时间
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`                        // 创建时间
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`                                         // 更新时间
 }
 

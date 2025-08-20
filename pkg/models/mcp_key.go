@@ -17,7 +17,7 @@ type McpKey struct {
 	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`    // 是否启用
 	Jwt         string    `gorm:"type:text" json:"jwt"`                     //  JWT
 	LastUsedAt  time.Time `json:"last_used_at,omitempty"`                   // 最后使用时间
-	CreatedAt   time.Time `json:"created_at,omitempty"`
+	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 	CreatedBy   string    `json:"created_by,omitempty"` // 创建者
 }
