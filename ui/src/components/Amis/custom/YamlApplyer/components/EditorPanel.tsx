@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as monaco from 'monaco-editor';
 import { Button, Modal, List } from 'antd';
 import { fetcher } from "@/components/Amis/fetcher.ts";
+import BuiltinTemplateButton from './BuiltinTemplateButton';
 
 interface EditorPanelProps {
     onSaveSuccess: (content: string) => void;
@@ -176,12 +177,23 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
         input.click();
     };
 
+    /**
+     * 处理内置模板选择
+     * @param content 模板内容
+     */
+    const handleTemplateSelect = (content: string) => {
+        if (monacoInstance.current) {
+            monacoInstance.current.setValue(content);
+        }
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ marginBottom: '10px' }}>
                 <Button onClick={handleSave} type="primary" style={{ marginRight: '8px' }}>
                     应用
                 </Button>
+                <BuiltinTemplateButton onSelectTemplate={handleTemplateSelect} style={{ marginRight: '8px' }} />
                 <Button onClick={() => {
                     Modal.confirm({
                         title: '确认删除',
