@@ -15,9 +15,15 @@ func RandNDigitInt(n int) int {
 	_min := intPow(10, n-1)
 	_max := intPow(10, n) - 1
 
+	// 使用 int64 进行计算以避免溢出
+	r := int64(_max) - int64(_min) + 1
+	if r <= 0 {
+		// 如果范围无效，返回最小值
+		return _min
+	}
+
 	// 使用 crypto/rand 生成安全随机数
-	rangeSize := _max - _min + 1
-	randomNum, err := rand.Int(rand.Reader, big.NewInt(int64(rangeSize)))
+	randomNum, err := rand.Int(rand.Reader, big.NewInt(r))
 	if err != nil {
 		// 如果生成随机数失败，返回最小值
 		return _min
@@ -31,9 +37,15 @@ func RandInt(min, max int) int {
 		min, max = max, min
 	}
 
+	// 使用 int64 进行计算以避免溢出
+	r := int64(max) - int64(min) + 1
+	if r <= 0 {
+		// 如果范围无效，返回最小值
+		return min
+	}
+
 	// 使用 crypto/rand 生成安全随机数
-	rangeSize := max - min + 1
-	randomNum, err := rand.Int(rand.Reader, big.NewInt(int64(rangeSize)))
+	randomNum, err := rand.Int(rand.Reader, big.NewInt(r))
 	if err != nil {
 		// 如果生成随机数失败，返回最小值
 		return min
