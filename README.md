@@ -257,7 +257,7 @@ pnpm run dev
 <br><img width="214" alt="Image" src="https://github.com/user-attachments/assets/166db141-42c5-42c4-9964-8e25cf12d04c" />
 
 ## 微信群
-![输入图片说明](https://foruda.gitee.com/images/1755419620034721625/d82f5ae2_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1756112192255758040/16657257_77493.png "屏幕截图")
 ## QQ群
 ![输入图片说明](https://foruda.gitee.com/images/1753099785542398999/184a765a_77493.png "屏幕截图")
 
