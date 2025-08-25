@@ -3,6 +3,7 @@ package dynamic
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -92,6 +93,23 @@ func (ac *ActionController) List(c *gin.Context) {
 	queryConditions = slice.Filter(queryConditions, func(index int, item string) bool {
 		return !strings.HasSuffix(item, "=")
 	})
+
+	// 检查jsonData中metadata.namespace是否在nsList中，如果不在，给出一个提示
+	if metadata, ok := jsonData["metadata"]; ok {
+		if metadataMap, ok := metadata.(map[string]interface{}); ok {
+			if namespace, ok := metadataMap["namespace"]; ok {
+				if namespaceStr, ok := namespace.(string); ok && namespaceStr != "" {
+					// 检查namespaceStr是否在nsList中
+					namespaceInList := slices.Contains(nsList, namespaceStr)
+					if !namespaceInList {
+						nsRangeError := fmt.Errorf("查询条件中的命名空间 '%s' 不在当前查询范围 [%v] 中，请重新选择", namespaceStr, strings.Join(nsList, ","))
+						amis.WriteJsonError(c, nsRangeError)
+						return
+					}
+				}
+			}
+		}
+	}
 
 	if len(queryConditions) > 0 {
 		queryString := strings.Join(queryConditions, " and ")
