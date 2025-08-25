@@ -95,19 +95,13 @@ func (ac *ActionController) List(c *gin.Context) {
 	})
 
 	// 检查jsonData中metadata.namespace是否在nsList中，如果不在，给出一个提示
-	if metadata, ok := jsonData["metadata"]; ok {
-		if metadataMap, ok := metadata.(map[string]interface{}); ok {
-			if namespace, ok := metadataMap["namespace"]; ok {
-				if namespaceStr, ok := namespace.(string); ok && namespaceStr != "" {
-					// 检查namespaceStr是否在nsList中
-					namespaceInList := slices.Contains(nsList, namespaceStr)
-					if !namespaceInList {
-						nsRangeError := fmt.Errorf("查询条件中的命名空间 '%s' 不在当前查询范围 [%v] 中，请重新选择", namespaceStr, strings.Join(nsList, ","))
-						amis.WriteJsonError(c, nsRangeError)
-						return
-					}
-				}
-			}
+	if namespaceStr := getNestedStringFromJSON(jsonData, "metadata.namespace"); namespaceStr != "" {
+		// 检查namespaceStr是否在nsList中
+		namespaceInList := slices.Contains(nsList, namespaceStr)
+		if !namespaceInList {
+			nsRangeError := fmt.Errorf("查询条件中的命名空间 '%s' 不在当前查询范围 [%s] 中，请重新选择", namespaceStr, strings.Join(nsList, ","))
+			amis.WriteJsonError(c, nsRangeError)
+			return
 		}
 	}
 
@@ -609,6 +603,44 @@ func (ac *ActionController) HPA(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, hpa)
+}
+
+// getNestedStringFromJSON 从嵌套的JSON数据中获取指定路径的字符串值
+// path参数使用点号分隔，例如: "metadata.namespace", "spec.replicas"
+// 如果路径不存在或值不是字符串类型，返回空字符串
+func getNestedStringFromJSON(data map[string]interface{}, path string) string {
+	if data == nil || path == "" {
+		return ""
+	}
+
+	// 按点号分割路径
+	keys := strings.Split(path, ".")
+	current := data
+
+	// 逐层向下查找
+	for i, key := range keys {
+		value, exists := current[key]
+		if !exists {
+			return ""
+		}
+
+		// 如果是最后一层，尝试转换为字符串
+		if i == len(keys)-1 {
+			if str, ok := value.(string); ok {
+				return str
+			}
+			return ""
+		}
+
+		// 如果不是最后一层，必须是map类型才能继续
+		if nextMap, ok := value.(map[string]interface{}); ok {
+			current = nextMap
+		} else {
+			return ""
+		}
+	}
+
+	return ""
 }
 
 // 递归解析 JSON 数据
