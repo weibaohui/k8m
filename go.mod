@@ -28,7 +28,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.5
-	github.com/weibaohui/kom v0.2.57
+	github.com/weibaohui/kom v0.2.60
 	github.com/yuin/gopher-lua v1.1.1
 	golang.org/x/net v0.41.0
 	golang.org/x/oauth2 v0.30.0
@@ -53,6 +53,19 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.25.0 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.25.9 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.16.7 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.10 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.9 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.9 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.9 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.18.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.26.0 // indirect
+	github.com/aws/smithy-go v1.20.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/boombuler/barcode v1.0.2 // indirect

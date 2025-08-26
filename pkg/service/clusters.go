@@ -140,12 +140,14 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 		}
 	}
 	// 解析selectedCluster
-	clusterID := strings.Split(id, "/")
-	if len(clusterID) != 2 {
+	// 第一个/前面的字符是fileName。其他的都是contextName
+	// 有可能会出现多个/，如config/aws-x-x-x/demo
+	slashIndex := strings.Index(id, "/")
+	if slashIndex == -1 {
 		return nil
 	}
-	fileName := clusterID[0]
-	contextName := clusterID[1]
+	fileName := id[:slashIndex]
+	contextName := id[slashIndex+1:]
 	for _, clusterConfig := range c.clusterConfigs {
 		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
 			return clusterConfig
@@ -536,6 +538,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	} else {
 		// 集群外模式
 		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
+
 		if err != nil {
 			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
 			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
@@ -569,7 +572,10 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 		}
 		bytes := []byte(strings.Join(lines, "\n"))
 		restConfig, err = clientcmd.RESTConfigFromKubeConfig(bytes)
+
 	}
+	config.restConfig = restConfig
+
 	// 校验集群是否可连接
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
@@ -589,7 +595,6 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	}
 	klog.V(6).Infof("LoadRestConfig 获取集群 版本成功 %s", config.GetClusterID())
 	config.ServerVersion = info.GitVersion
-	config.restConfig = restConfig
 	return err
 }
 
