@@ -22,6 +22,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/klog/v2"
 )
 
@@ -62,6 +63,7 @@ type ClusterConfig struct {
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
+	AuthInfo                *api.AuthInfo
 }
 type ClusterConfigSource string
 
@@ -140,12 +142,14 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 		}
 	}
 	// 解析selectedCluster
-	clusterID := strings.Split(id, "/")
-	if len(clusterID) != 2 {
+	// 第一个/前面的字符是fileName。其他的都是contextName
+	// 有可能会出现多个/，如config/aws-x-x-x/demo
+	slashIndex := strings.Index(id, "/")
+	if slashIndex == -1 {
 		return nil
 	}
-	fileName := clusterID[0]
-	contextName := clusterID[1]
+	fileName := id[:slashIndex]
+	contextName := id[slashIndex+1:]
 	for _, clusterConfig := range c.clusterConfigs {
 		if clusterConfig.FileName == fileName && clusterConfig.ContextName == contextName {
 			return clusterConfig
@@ -345,6 +349,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 		for contextName, _ := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
+			authInfo := config.AuthInfos[context.AuthInfo]
 
 			clusterConfig := &ClusterConfig{
 				FileName:             file.Name(),
@@ -357,6 +362,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 				Source:               ClusterConfigSourceFile,
+				AuthInfo:             authInfo,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
@@ -406,6 +412,7 @@ func (c *clusterService) ScanClustersInDB() {
 		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
+			authInfo := config.AuthInfos[context.AuthInfo]
 
 			if context.AuthInfo == kc.User {
 				// 检查是否已存在该配置
@@ -431,6 +438,7 @@ func (c *clusterService) ScanClustersInDB() {
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
+						AuthInfo:             authInfo,
 					}
 					clusterConfig.Server = cluster.Server
 					c.AddToClusterList(clusterConfig)
@@ -485,6 +493,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 		for contextName, _ := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
+			authInfo := config.AuthInfos[context.AuthInfo]
 
 			clusterConfig := &ClusterConfig{
 				FileName:             file.Name(),
@@ -496,6 +505,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 				Source:               ClusterConfigSourceFile,
+				AuthInfo:             authInfo,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
@@ -536,6 +546,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	} else {
 		// 集群外模式
 		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
+
 		if err != nil {
 			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
 			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
@@ -569,7 +580,10 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 		}
 		bytes := []byte(strings.Join(lines, "\n"))
 		restConfig, err = clientcmd.RESTConfigFromKubeConfig(bytes)
+
 	}
+	config.restConfig = restConfig
+
 	// 校验集群是否可连接
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
@@ -589,7 +603,6 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	}
 	klog.V(6).Infof("LoadRestConfig 获取集群 版本成功 %s", config.GetClusterID())
 	config.ServerVersion = info.GitVersion
-	config.restConfig = restConfig
 	return err
 }
 
