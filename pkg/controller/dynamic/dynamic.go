@@ -3,6 +3,7 @@ package dynamic
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
@@ -92,6 +93,19 @@ func (ac *ActionController) List(c *gin.Context) {
 	queryConditions = slice.Filter(queryConditions, func(index int, item string) bool {
 		return !strings.HasSuffix(item, "=")
 	})
+
+	// 检查jsonData中metadata.namespace是否在nsList中，如果不在，则增加到nsList中
+	if namespaceStr := getNestedStringFromJSON(jsonData, "metadata.namespace"); namespaceStr != "" {
+		// 检查namespaceStr是否在nsList中
+		namespaceInList := slices.Contains(nsList, namespaceStr)
+		if !namespaceInList {
+			// 如果命名空间不在范围内，自动添加到nsList中
+			nsList = append(nsList, namespaceStr)
+			klog.V(8).Infof("查询条件中的命名空间 '%s' 已自动添加到查询范围中，当前范围: [%s]", namespaceStr, strings.Join(nsList, ","))
+			// 需要重新设置Namespace范围
+			sql = sql.Namespace(nsList...)
+		}
+	}
 
 	if len(queryConditions) > 0 {
 		queryString := strings.Join(queryConditions, " and ")
@@ -591,6 +605,44 @@ func (ac *ActionController) HPA(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, hpa)
+}
+
+// getNestedStringFromJSON 从嵌套的JSON数据中获取指定路径的字符串值
+// path参数使用点号分隔，例如: "metadata.namespace", "spec.replicas"
+// 如果路径不存在或值不是字符串类型，返回空字符串
+func getNestedStringFromJSON(data map[string]interface{}, path string) string {
+	if data == nil || path == "" {
+		return ""
+	}
+
+	// 按点号分割路径
+	keys := strings.Split(path, ".")
+	current := data
+
+	// 逐层向下查找
+	for i, key := range keys {
+		value, exists := current[key]
+		if !exists {
+			return ""
+		}
+
+		// 如果是最后一层，尝试转换为字符串
+		if i == len(keys)-1 {
+			if str, ok := value.(string); ok {
+				return str
+			}
+			return ""
+		}
+
+		// 如果不是最后一层，必须是map类型才能继续
+		if nextMap, ok := value.(map[string]interface{}); ok {
+			current = nextMap
+		} else {
+			return ""
+		}
+	}
+
+	return ""
 }
 
 // 递归解析 JSON 数据
