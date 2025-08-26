@@ -94,14 +94,16 @@ func (ac *ActionController) List(c *gin.Context) {
 		return !strings.HasSuffix(item, "=")
 	})
 
-	// 检查jsonData中metadata.namespace是否在nsList中，如果不在，给出一个提示
+	// 检查jsonData中metadata.namespace是否在nsList中，如果不在，则增加到nsList中
 	if namespaceStr := getNestedStringFromJSON(jsonData, "metadata.namespace"); namespaceStr != "" {
 		// 检查namespaceStr是否在nsList中
 		namespaceInList := slices.Contains(nsList, namespaceStr)
 		if !namespaceInList {
-			nsRangeError := fmt.Errorf("查询条件中的命名空间 '%s' 不在当前查询范围 [%s] 中，请重新选择", namespaceStr, strings.Join(nsList, ","))
-			amis.WriteJsonError(c, nsRangeError)
-			return
+			// 如果命名空间不在范围内，自动添加到nsList中
+			nsList = append(nsList, namespaceStr)
+			klog.V(8).Infof("查询条件中的命名空间 '%s' 已自动添加到查询范围中，当前范围: [%s]", namespaceStr, strings.Join(nsList, ","))
+			// 需要重新设置Namespace范围
+			sql = sql.Namespace(nsList...)
 		}
 	}
 
