@@ -22,7 +22,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/klog/v2"
 )
 
@@ -63,7 +62,6 @@ type ClusterConfig struct {
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
-	AuthInfo                *api.AuthInfo
 }
 type ClusterConfigSource string
 
@@ -349,7 +347,6 @@ func (c *clusterService) ScanClustersInDir(path string) {
 		for contextName, _ := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
-			authInfo := config.AuthInfos[context.AuthInfo]
 
 			clusterConfig := &ClusterConfig{
 				FileName:             file.Name(),
@@ -362,7 +359,6 @@ func (c *clusterService) ScanClustersInDir(path string) {
 				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 				Source:               ClusterConfigSourceFile,
-				AuthInfo:             authInfo,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
@@ -412,7 +408,6 @@ func (c *clusterService) ScanClustersInDB() {
 		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
-			authInfo := config.AuthInfos[context.AuthInfo]
 
 			if context.AuthInfo == kc.User {
 				// 检查是否已存在该配置
@@ -438,7 +433,6 @@ func (c *clusterService) ScanClustersInDB() {
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
-						AuthInfo:             authInfo,
 					}
 					clusterConfig.Server = cluster.Server
 					c.AddToClusterList(clusterConfig)
@@ -493,7 +487,6 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 		for contextName, _ := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
-			authInfo := config.AuthInfos[context.AuthInfo]
 
 			clusterConfig := &ClusterConfig{
 				FileName:             file.Name(),
@@ -505,7 +498,6 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 				Source:               ClusterConfigSourceFile,
-				AuthInfo:             authInfo,
 			}
 			clusterConfig.Server = cluster.Server
 			c.AddToClusterList(clusterConfig)
