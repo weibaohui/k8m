@@ -419,7 +419,7 @@ func (c *clusterService) ScanClustersInDB() {
 			}
 			_, err := c.RegisterAWSEKSCluster(eksConfig)
 			if err != nil {
-				klog.V(6).Infof("注册集群 [%s]失败: %v", kc.Server, err)
+				klog.V(6).Infof("注册集群 [%s/%s] [%s] 失败: %v", kc.Region, kc.ClusterName, kc.Server, err)
 				continue
 			}
 			continue
