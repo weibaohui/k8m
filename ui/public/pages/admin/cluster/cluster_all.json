@@ -852,7 +852,7 @@
                   "label": "解除纳管",
                   "icon": "fas fa-unlink  text-primary",
                   "actionType": "ajax",
-                  "visibleOn": " source==='DB' ",
+                  "visibleOn": " source==='DB' || source==='AWS' ",
                   "confirmText": "确定要解除纳管?",
                   "api": {
                     "url": "/admin/cluster/kubeconfig/remove",
@@ -975,7 +975,8 @@
           "map": {
             "InCluster": "集群内",
             "DB": "数据库",
-            "File": "文件"
+            "File": "文件",
+            "AWS": "AWS"
           }
         },
         {

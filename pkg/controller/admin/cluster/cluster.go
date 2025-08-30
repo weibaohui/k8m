@@ -18,6 +18,7 @@ func RegisterAdminClusterRoutes(admin *gin.RouterGroup) {
 	admin.POST("/cluster/kubeconfig/save", ctrl.SaveKubeConfig)
 	admin.POST("/cluster/kubeconfig/remove", ctrl.RemoveKubeConfig)
 	admin.POST("/cluster/:cluster/disconnect", ctrl.Disconnect)
+	admin.POST("/cluster/aws/save", ctrl.SaveAWSEKSCluster)
 }
 func RegisterUserClusterRoutes(mgm *gin.RouterGroup) {
 	ctrl := &Controller{}

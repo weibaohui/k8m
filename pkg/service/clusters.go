@@ -392,7 +392,7 @@ func (c *clusterService) ScanClustersInDB() {
 	}
 
 	for i, cc := range c.clusterConfigs {
-		if cc.Source == ClusterConfigSourceDB {
+		if cc.Source == ClusterConfigSourceDB || cc.Source == ClusterConfigSourceAWS {
 			// 查一下list中是否存在
 			filter := slice.Filter(list, func(index int, item *models.KubeConfig) bool {
 				if item.Server == cc.Server && item.User == cc.UserName && item.Cluster == cc.ClusterName {
@@ -417,7 +417,21 @@ func (c *clusterService) ScanClustersInDB() {
 			klog.V(6).Infof("解析集群 [%s]失败: %v", kc.Server, err)
 			continue
 		}
-
+		if kc.IsAWSEKS {
+			// 构造AWS EKS配置
+			eksConfig := &komaws.EKSAuthConfig{
+				AccessKey:       kc.AccessKey,
+				SecretAccessKey: kc.SecretAccessKey,
+				Region:          kc.Region,
+				ClusterName:     kc.ClusterName,
+			}
+			_, err := c.RegisterAWSEKSCluster(eksConfig)
+			if err != nil {
+				klog.V(6).Infof("注册集群 [%s]失败: %v", kc.Server, err)
+				continue
+			}
+			continue
+		}
 		// 检查每个context
 		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
@@ -724,10 +738,10 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 	}
 
 	// 生成集群ID
-	clusterID := fmt.Sprintf("aws-%s/%s", config.Region, config.ClusterName)
+	clusterID := fmt.Sprintf("%s/%s", config.Region, config.ClusterName)
 
 	clusterConfig := &ClusterConfig{
-		FileName:             fmt.Sprintf("aws-%s", config.ClusterName),
+		FileName:             config.ClusterName,
 		ContextName:          config.ClusterName,
 		ClusterName:          config.ClusterName,
 		ClusterID:            clusterID,
