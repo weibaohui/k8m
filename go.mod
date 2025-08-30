@@ -4,10 +4,6 @@ go 1.24.0
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/aws/aws-sdk-go-v2 v1.38.3
-	github.com/aws/aws-sdk-go-v2/config v1.25.9
-	github.com/aws/aws-sdk-go-v2/credentials v1.16.7
-	github.com/aws/aws-sdk-go-v2/service/eks v1.73.1
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/dgraph-io/ristretto/v2 v2.2.0
 	github.com/duke-git/lancet/v2 v2.3.7
@@ -32,7 +28,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.5
-	github.com/weibaohui/kom v0.2.61
+	github.com/weibaohui/kom v0.2.63
 	github.com/yuin/gopher-lua v1.1.1
 	golang.org/x/net v0.41.0
 	golang.org/x/oauth2 v0.30.0
@@ -57,6 +53,9 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.38.3 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.25.9 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.16.7 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.10 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.6 // indirect
@@ -109,7 +108,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect

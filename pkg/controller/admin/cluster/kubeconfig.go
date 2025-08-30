@@ -149,7 +149,7 @@ func (a *Controller) SaveAWSEKSCluster(c *gin.Context) {
 	}
 
 	kg := komaws.NewKubeconfigGenerator()
-	kcs, err := kg.GenerateFromAWS(*eksConfig)
+	kcs, err := kg.GenerateFromAWS(eksConfig)
 	if err != nil {
 		klog.V(6).Infof("生成AWS EKS集群kubeconfig配置失败: %v", err)
 		amis.WriteJsonError(c, fmt.Errorf("生成AWS EKS集群kubeconfig配置失败: %w", err))

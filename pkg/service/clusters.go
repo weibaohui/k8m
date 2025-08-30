@@ -351,7 +351,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 			klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
 			continue // 解析失败，跳过该文件
 		}
-		for contextName, _ := range config.Contexts {
+		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
 
@@ -505,7 +505,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 			klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
 			continue // 解析失败，跳过该文件
 		}
-		for contextName, _ := range config.Contexts {
+		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
 
@@ -717,7 +717,7 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 	}
 
 	// 将项目内部的AWSEKSConfig转换为kom库要求的kom.aws.EKSAuthConfig
-	eksAuthConfig := komaws.EKSAuthConfig{
+	eksAuthConfig := &komaws.EKSAuthConfig{
 		AccessKey:       config.AccessKey,
 		SecretAccessKey: config.SecretAccessKey,
 		Region:          config.Region,
@@ -729,25 +729,37 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 	if err != nil {
 		return nil, fmt.Errorf("生成AWS EKS集群配置文件失败: %w", err)
 	}
-
-	// 使用kom统一的AWS EKS集群注册方法
-	_, err = kom.Clusters().RegisterAWSCluster(eksAuthConfig)
+	kubeconfig, err := clientcmd.Load([]byte(content))
 	if err != nil {
-		return nil, fmt.Errorf("注册AWS EKS集群失败: %w", err)
+		klog.V(6).Infof("解析 AWS EKS集群kubeconfig配置失败: %v", err)
+		return nil, fmt.Errorf("生成AWS EKS集群配置文件失败: %w", err)
 	}
 
+	var serverURL string
+	for contextName := range kubeconfig.Contexts {
+		context := kubeconfig.Contexts[contextName]
+		cluster := kubeconfig.Clusters[context.Cluster]
+		serverURL = cluster.Server
+	}
 	clusterConfig := &ClusterConfig{
-		FileName:             config.ClusterName,
-		ContextName:          config.ClusterName,
-		ClusterName:          config.ClusterName,
+		FileName:             string(ClusterConfigSourceAWS),
+		ContextName:          fmt.Sprintf("%s-%s", config.Region, config.ClusterName),
+		ClusterName:          fmt.Sprintf("%s-%s", config.Region, config.ClusterName),
 		kubeConfig:           []byte(content),
 		watchStatus:          make(map[string]*clusterWatchStatus),
 		ClusterConnectStatus: constants.ClusterConnectStatusConnected,
 		Source:               ClusterConfigSourceAWS,
+		Server:               serverURL,
 		IsAWSEKS:             true,
 		AWSConfig:            config,
 	}
 	clusterID := clusterConfig.GetClusterID()
+
+	// 使用kom统一的AWS EKS集群注册方法
+	_, err = kom.Clusters().RegisterAWSClusterWithID(eksAuthConfig, clusterID)
+	if err != nil {
+		return nil, fmt.Errorf("注册AWS EKS集群失败: %w", err)
+	}
 
 	// 添加到集群列表
 	c.AddToClusterList(clusterConfig)
