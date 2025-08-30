@@ -4,6 +4,10 @@ go 1.24.0
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/aws/aws-sdk-go-v2 v1.38.3
+	github.com/aws/aws-sdk-go-v2/config v1.25.9
+	github.com/aws/aws-sdk-go-v2/credentials v1.16.7
+	github.com/aws/aws-sdk-go-v2/service/eks v1.73.1
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/dgraph-io/ristretto/v2 v2.2.0
 	github.com/duke-git/lancet/v2 v2.3.7
@@ -53,19 +57,16 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.25.0 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.25.9 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.16.7 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.10 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.9 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.9 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.6 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.18.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.26.0 // indirect
-	github.com/aws/smithy-go v1.20.0 // indirect
+	github.com/aws/smithy-go v1.23.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/boombuler/barcode v1.0.2 // indirect
@@ -108,6 +109,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect

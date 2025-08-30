@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/kom/kom"
+	komaws "github.com/weibaohui/kom/kom/aws"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -62,12 +64,15 @@ type ClusterConfig struct {
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
+	AWSConfig               *komaws.EKSAuthConfig          `json:"aws_config,omitempty"` // AWS EKS配置信息
+	IsAWSEKS                bool                           `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
 }
 type ClusterConfigSource string
 
 var ClusterConfigSourceFile ClusterConfigSource = "File"
 var ClusterConfigSourceDB ClusterConfigSource = "DB"
 var ClusterConfigSourceInCluster ClusterConfigSource = "InCluster"
+var ClusterConfigSourceAWS ClusterConfigSource = "AWS"
 
 // 记录每个集群的watch 启动情况
 // watch 有多种类型，需要记录
@@ -104,6 +109,15 @@ func (c *ClusterConfig) GetKubeconfig() string {
 
 // GetClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
 func (c *ClusterConfig) GetClusterID() string {
+	// 如果是AWS EKS集群，使用特殊的ID格式
+	if c.IsAWSEKS {
+		id := fmt.Sprintf("aws-%s/%s", c.AWSConfig.Region, c.ClusterName)
+		c.ClusterID = id
+		c.ClusterIDBase64 = base64.StdEncoding.EncodeToString([]byte(id))
+		return id
+	}
+
+	// 原有逻辑
 	id := fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
 	if c.IsInCluster {
 		id = "InCluster"
@@ -520,6 +534,16 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
 	clusterID := clusterConfig.GetClusterID()
+
+	// AWS EKS集群已经通过kom.RegisterAWSCluster注册，跳过重复注册
+	if clusterConfig.IsAWSEKS {
+		klog.V(4).Infof("AWS EKS集群[%s]已通过kom.RegisterAWSCluster注册，跳过RegisterCluster", clusterID)
+		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+		// 执行回调注册
+		c.callbackRegisterFunc(clusterConfig)
+		return true, nil
+	}
+
 	err := c.LoadRestConfig(clusterConfig)
 	if err != nil {
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
@@ -637,4 +661,89 @@ func (c *ClusterConfig) GetClusterScanResult() *analysis.ResultWithStatus {
 
 	return c.K8sGPTProblemsResult
 
+}
+
+// =========================== 集群服务增强方法 ===========================
+
+// validateAWSConfig 验证AWS配置
+func (c *clusterService) validateAWSConfig(config *komaws.EKSAuthConfig) error {
+	if config == nil {
+		return fmt.Errorf("AWS配置不能为空")
+	}
+
+	if config.AccessKey == "" {
+		return fmt.Errorf("AWS Access Key不能为空")
+	}
+
+	if config.SecretAccessKey == "" {
+		return fmt.Errorf("AWS Secret Access Key不能为空")
+	}
+
+	if config.Region == "" {
+		return fmt.Errorf("AWS区域不能为空")
+	}
+
+	if config.ClusterName == "" {
+		return fmt.Errorf("EKS集群名称不能为空")
+	}
+
+	// 验证区域格式
+	if !c.isValidAWSRegion(config.Region) {
+		return fmt.Errorf("无效的AWS区域格式: %s", config.Region)
+	}
+
+	return nil
+}
+
+// isValidAWSRegion 验证AWS区域格式
+func (c *clusterService) isValidAWSRegion(region string) bool {
+	// AWS区域格式验证：如 us-east-1, eu-west-1 等
+	matched, _ := regexp.MatchString(`^[a-z0-9\-]+$`, region)
+	return matched && len(region) >= 8 && len(region) <= 20
+}
+
+// RegisterAWSEKSCluster 注册AWS EKS集群
+func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*ClusterConfig, error) {
+	// 参数验证
+	if err := c.validateAWSConfig(config); err != nil {
+		return nil, fmt.Errorf("AWS配置验证失败: %w", err)
+	}
+
+	// 将项目内部的AWSEKSConfig转换为kom库要求的kom.aws.EKSAuthConfig
+	eksAuthConfig := komaws.EKSAuthConfig{
+		AccessKey:       config.AccessKey,
+		SecretAccessKey: config.SecretAccessKey,
+		Region:          config.Region,
+		ClusterName:     config.ClusterName,
+	}
+
+	// 使用kom统一的AWS EKS集群注册方法
+	_, err := kom.Clusters().RegisterAWSCluster(eksAuthConfig)
+	if err != nil {
+		return nil, fmt.Errorf("注册AWS EKS集群失败: %w", err)
+	}
+
+	// 生成集群ID
+	clusterID := fmt.Sprintf("aws-%s/%s", config.Region, config.ClusterName)
+
+	clusterConfig := &ClusterConfig{
+		FileName:             fmt.Sprintf("aws-%s", config.ClusterName),
+		ContextName:          config.ClusterName,
+		ClusterName:          config.ClusterName,
+		ClusterID:            clusterID,
+		watchStatus:          make(map[string]*clusterWatchStatus),
+		ClusterConnectStatus: constants.ClusterConnectStatusConnected,
+		Source:               ClusterConfigSourceAWS,
+		IsAWSEKS:             true,
+		AWSConfig:            config,
+	}
+
+	// 添加到集群列表
+	c.AddToClusterList(clusterConfig)
+
+	// 执行回调注册，因为kom已经处理了集群连接
+	c.callbackRegisterFunc(clusterConfig)
+
+	klog.V(4).Infof("成功注册AWS EKS集群: %s [%s]", config.ClusterName, clusterID)
+	return clusterConfig, nil
 }
