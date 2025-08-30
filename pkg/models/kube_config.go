@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/base64"
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
@@ -40,4 +41,66 @@ func (c *KubeConfig) Delete(params *dao.Params, ids string, queryFuncs ...func(*
 
 func (c *KubeConfig) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*KubeConfig, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
+}
+
+// BeforeSave 在保存前加密敏感字段
+func (c *KubeConfig) BeforeSave(tx *gorm.DB) error {
+	if c.AccessKey != "" {
+		encrypted, err := encryptField(c.AccessKey)
+		if err != nil {
+			return err
+		}
+		c.AccessKey = encrypted
+	}
+	if c.SecretAccessKey != "" {
+		encrypted, err := encryptField(c.SecretAccessKey)
+		if err != nil {
+			return err
+		}
+		c.SecretAccessKey = encrypted
+	}
+	return nil
+}
+
+// AfterFind 在查询后解密敏感字段
+func (c *KubeConfig) AfterFind(tx *gorm.DB) error {
+	if c.AccessKey != "" {
+		decrypted, err := decryptField(c.AccessKey)
+		if err != nil {
+			return err
+		}
+		c.AccessKey = decrypted
+	}
+	if c.SecretAccessKey != "" {
+		decrypted, err := decryptField(c.SecretAccessKey)
+		if err != nil {
+			return err
+		}
+		c.SecretAccessKey = decrypted
+	}
+	return nil
+}
+
+// encryptField 加密字段
+func encryptField(plaintext string) (string, error) {
+	if plaintext == "" {
+		return "", nil
+	}
+	encrypted, err := utils.AesEncrypt([]byte(plaintext))
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(encrypted), nil
+}
+
+// decryptField 解密字段
+func decryptField(ciphertext string) (string, error) {
+	if ciphertext == "" {
+		return "", nil
+	}
+	decrypted, err := utils.AesDecrypt(ciphertext)
+	if err != nil {
+		return "", err
+	}
+	return string(decrypted), nil
 }
