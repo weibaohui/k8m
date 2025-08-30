@@ -38,6 +38,60 @@
           }
         },
         {
+          "type": "button",
+          "label": "纳管AWS EKS集群",
+          "level": "primary",
+          "actionType": "drawer",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "纳管AWS EKS集群 (ESC 关闭)",
+            "body": [
+              {
+                "type": "form",
+                "api": "post:/admin/cluster/aws/save",
+                "body": [
+                  {
+                    "type": "input-text",
+                    "name": "accessKey",
+                    "label": "Access Key",
+                    "placeholder": "请输入AWS Access Key",
+                    "required": true
+                  },
+                  {
+                    "type": "input-password",
+                    "name": "secretKey",
+                    "label": "Secret Key",
+                    "placeholder": "请输入AWS Secret Key",
+                    "required": true
+                  },
+                  {
+                    "type": "input-text",
+                    "name": "region",
+                    "label": "Region",
+                    "placeholder": "请输入AWS Region，例如：us-west-2",
+                    "required": true
+                  },
+                  {
+                    "type": "input-text",
+                    "name": "clusterName",
+                    "label": "集群名称",
+                    "placeholder": "请输入EKS集群名称",
+                    "required": true
+                  },
+                  {
+                    "type": "input-text",
+                    "name": "displayName",
+                    "label": "显示名称",
+                    "placeholder": "请输入显示名称（可选）"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
           "type": "columns-toggler",
           "align": "right",
           "draggable": true,
