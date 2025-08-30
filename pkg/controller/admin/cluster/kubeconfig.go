@@ -148,7 +148,7 @@ func (a *Controller) SaveAWSEKSCluster(c *gin.Context) {
 		ClusterName:     req.ClusterName,
 	}
 
-	kg := komaws.KubeconfigGenerator{}
+	kg := komaws.NewKubeconfigGenerator()
 	kcs, err := kg.GenerateFromAWS(*eksConfig)
 	if err != nil {
 		klog.V(6).Infof("生成AWS EKS集群kubeconfig配置失败: %v", err)
@@ -206,6 +206,6 @@ func (a *Controller) SaveAWSEKSCluster(c *gin.Context) {
 
 	// 执行一下扫描
 	service.ClusterService().ScanClustersInDB()
-	
+
 	amis.WriteJsonOKMsg(c, "AWS EKS集群纳管成功")
 }
