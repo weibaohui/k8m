@@ -63,7 +63,7 @@ type ClusterConfig struct {
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
-	AWSConfig               *komaws.EKSAuthConfig          `json:"-"`                    // AWS EKS配置信息
+	AWSConfig               *komaws.EKSAuthConfig          `json:"aws_config,omitempty"` // AWS EKS配置信息
 	IsAWSEKS                bool                           `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
 }
 type ClusterConfigSource string
@@ -409,21 +409,21 @@ func (c *clusterService) ScanClustersInDB() {
 			klog.V(6).Infof("解析集群 [%s]失败: %v", kc.Server, err)
 			continue
 		}
-		if kc.IsAWSEKS {
-			// 构造AWS EKS配置
-			eksConfig := &komaws.EKSAuthConfig{
-				AccessKey:       kc.AccessKey,
-				SecretAccessKey: kc.SecretAccessKey,
-				Region:          kc.Region,
-				ClusterName:     kc.ClusterName,
-			}
-			_, err := c.RegisterAWSEKSCluster(eksConfig)
-			if err != nil {
-				klog.V(6).Infof("注册集群 [%s/%s] [%s] 失败: %v", kc.Region, kc.ClusterName, kc.Server, err)
-				continue
-			}
-			continue
-		}
+		// if kc.IsAWSEKS {
+		// 	// 构造AWS EKS配置
+		// 	eksConfig := &komaws.EKSAuthConfig{
+		// 		AccessKey:       kc.AccessKey,
+		// 		SecretAccessKey: kc.SecretAccessKey,
+		// 		Region:          kc.Region,
+		// 		ClusterName:     kc.ClusterName,
+		// 	}
+		// 	_, err := c.RegisterAWSEKSCluster(eksConfig)
+		// 	if err != nil {
+		// 		klog.V(6).Infof("注册集群 [%s/%s] [%s] 失败: %v", kc.Region, kc.ClusterName, kc.Server, err)
+		// 		continue
+		// 	}
+		// 	continue
+		// }
 		// 检查每个context
 		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
@@ -453,6 +453,16 @@ func (c *clusterService) ScanClustersInDB() {
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
+					}
+					if kc.IsAWSEKS {
+						clusterConfig.Source = ClusterConfigSourceAWS
+						eksConfig := &komaws.EKSAuthConfig{
+							AccessKey:       kc.AccessKey,
+							SecretAccessKey: kc.SecretAccessKey,
+							Region:          kc.Region,
+							ClusterName:     kc.ClusterName,
+						}
+						clusterConfig.AWSConfig = eksConfig
 					}
 					clusterConfig.Server = cluster.Server
 					c.AddToClusterList(clusterConfig)
@@ -544,6 +554,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	// AWS EKS集群已经通过kom.RegisterAWSCluster注册，跳过重复注册
 	if clusterConfig.IsAWSEKS {
 		klog.V(4).Infof("AWS EKS集群[%s]已通过kom.RegisterAWSCluster注册，跳过RegisterCluster", clusterID)
+		kom.Clusters().RegisterAWSCluster(clusterConfig.AWSConfig)
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 		// 执行回调注册
 		c.callbackRegisterFunc(clusterConfig)
