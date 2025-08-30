@@ -63,7 +63,7 @@ type ClusterConfig struct {
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
-	AWSConfig               *komaws.EKSAuthConfig          `json:"aws_config,omitempty"` // AWS EKS配置信息
+	AWSConfig               *komaws.EKSAuthConfig          `json:"-"`                    // AWS EKS配置信息
 	IsAWSEKS                bool                           `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
 }
 type ClusterConfigSource string
