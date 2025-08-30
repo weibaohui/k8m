@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -694,19 +693,7 @@ func (c *clusterService) validateAWSConfig(config *komaws.EKSAuthConfig) error {
 		return fmt.Errorf("EKS集群名称不能为空")
 	}
 
-	// 验证区域格式
-	if !c.isValidAWSRegion(config.Region) {
-		return fmt.Errorf("无效的AWS区域格式: %s", config.Region)
-	}
-
 	return nil
-}
-
-// isValidAWSRegion 验证AWS区域格式
-func (c *clusterService) isValidAWSRegion(region string) bool {
-	// AWS区域格式验证：如 us-east-1, eu-west-1 等
-	matched, _ := regexp.MatchString(`^[a-z0-9\-]+$`, region)
-	return matched && len(region) >= 8 && len(region) <= 20
 }
 
 // RegisterAWSEKSCluster 注册AWS EKS集群
