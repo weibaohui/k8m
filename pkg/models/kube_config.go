@@ -17,8 +17,8 @@ type KubeConfig struct {
 	Cluster         string    `gorm:"index" json:"cluster,omitempty"` // 类型，最大长度 100
 	Namespace       string    `gorm:"index" json:"namespace,omitempty"`
 	DisplayName     string    `gorm:"index" json:"display_name,omitempty"`
-	AccessKey       string    `json:"access_key"`           // AWS Access Key ID
-	SecretAccessKey string    `json:"secret_access_key"`    // AWS Secret Access Key
+	AccessKey       string    `json:"-"`                    // AWS Access Key ID
+	SecretAccessKey string    `json:"-"`                    // AWS Secret Access Key
 	ClusterName     string    `json:"cluster_name"`         // AWS EKS 集群名称
 	Region          string    `json:"region"`               // AWS 区域
 	IsAWSEKS        bool      `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
