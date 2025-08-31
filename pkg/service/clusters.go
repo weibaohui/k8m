@@ -409,21 +409,7 @@ func (c *clusterService) ScanClustersInDB() {
 			klog.V(6).Infof("解析集群 [%s]失败: %v", kc.Server, err)
 			continue
 		}
-		// if kc.IsAWSEKS {
-		// 	// 构造AWS EKS配置
-		// 	eksConfig := &komaws.EKSAuthConfig{
-		// 		AccessKey:       kc.AccessKey,
-		// 		SecretAccessKey: kc.SecretAccessKey,
-		// 		Region:          kc.Region,
-		// 		ClusterName:     kc.ClusterName,
-		// 	}
-		// 	_, err := c.RegisterAWSEKSCluster(eksConfig)
-		// 	if err != nil {
-		// 		klog.V(6).Infof("注册集群 [%s/%s] [%s] 失败: %v", kc.Region, kc.ClusterName, kc.Server, err)
-		// 		continue
-		// 	}
-		// 	continue
-		// }
+
 		// 检查每个context
 		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
@@ -442,7 +428,7 @@ func (c *clusterService) ScanClustersInDB() {
 				// 如果不存在，添加新配置
 				if !exists {
 					clusterConfig := &ClusterConfig{
-						FileName:             kc.DisplayName,
+						FileName:             string(ClusterConfigSourceDB),
 						ContextName:          contextName,
 						ClusterID:            fmt.Sprintf("%s/%s", kc.DisplayName, contextName),
 						UserName:             context.AuthInfo,
@@ -463,6 +449,8 @@ func (c *clusterService) ScanClustersInDB() {
 							ClusterName:     kc.ClusterName,
 						}
 						clusterConfig.AWSConfig = eksConfig
+						clusterConfig.IsAWSEKS = true
+						clusterConfig.FileName = string(ClusterConfigSourceAWS)
 					}
 					clusterConfig.Server = cluster.Server
 					c.AddToClusterList(clusterConfig)
@@ -553,7 +541,11 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 
 	// AWS EKS集群已经通过kom.RegisterAWSCluster注册，跳过重复注册
 	if clusterConfig.IsAWSEKS {
-		kom.Clusters().RegisterAWSCluster(clusterConfig.AWSConfig)
+		_, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID)
+		if err != nil {
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			return false, err
+		}
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 		// 执行回调注册
 		c.callbackRegisterFunc(clusterConfig)
@@ -732,11 +724,18 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 		return nil, fmt.Errorf("生成AWS EKS集群配置文件失败: %w", err)
 	}
 
-	for contextName := range kubeconfig.Contexts {
+	// 只取第一个context
+	var contextName string
+	var clusterConfig *ClusterConfig
+	for name := range kubeconfig.Contexts {
+		contextName = name
+		break
+	}
+	if contextName != "" {
 		context := kubeconfig.Contexts[contextName]
 		cluster := kubeconfig.Clusters[context.Cluster]
 
-		clusterConfig := &ClusterConfig{
+		clusterConfig = &ClusterConfig{
 			FileName:             string(ClusterConfigSourceAWS),
 			ContextName:          contextName,
 			ClusterName:          context.Cluster,
