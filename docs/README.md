@@ -3,6 +3,7 @@
 欢迎查看K8M的文档。这里提供了所有关于K8M的使用指南和配置说明。
 
 ## 文档列表
+- [AWS EKS 集群纳管说明](aws-eks-cluster-management.md) - 如何将AWS EKS集群纳管到K8M中。
 - [lua巡检规则](lua_inspection_script.md) - 如何编写Lua巡检规则脚本。
 - [数据库配置说明](database.md) - 如何配置数据库连接。
 - [OIDC单点登录](oidc.md) - 如何配置使用OIDC单点登录。
