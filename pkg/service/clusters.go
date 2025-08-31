@@ -539,16 +539,25 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
 	clusterID := clusterConfig.GetClusterID()
 
-	// AWS EKS集群已经通过kom.RegisterAWSCluster注册，跳过重复注册
 	if clusterConfig.IsAWSEKS {
-		_, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID)
-		if err != nil {
+		if clusterConfig.AWSConfig == nil {
+			err := fmt.Errorf("AWS EKS 集群[%s]缺少 AWSConfig", clusterID)
 			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
+			return false, err
+		}
+		// 使用带 ID 的注册确保幂等
+		if _, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID); err != nil {
+			klog.V(4).Infof("注册 AWS 集群[%s]失败: %v", clusterID, err)
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
 			return false, err
 		}
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
-		// 执行回调注册
-		c.callbackRegisterFunc(clusterConfig)
+		if c.callbackRegisterFunc != nil {
+			c.callbackRegisterFunc(clusterConfig)
+		}
+ 
 		return true, nil
 	}
 
