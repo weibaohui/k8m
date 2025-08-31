@@ -109,6 +109,8 @@ K8M支持纳管AWS EKS（Elastic Kubernetes Service）集群，让您可以通�
 
 添加成功后，您可以通过以下方式验证集群连接：
 
+![输入图片说明](https://foruda.gitee.com/images/1756647821717254442/1b9ca7f3_77493.png "屏幕截图")
+
 ### 1. 检查集群状态
 
 在集群列表中，您应该能看到：
