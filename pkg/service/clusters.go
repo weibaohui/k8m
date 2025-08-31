@@ -553,7 +553,6 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 
 	// AWS EKS集群已经通过kom.RegisterAWSCluster注册，跳过重复注册
 	if clusterConfig.IsAWSEKS {
-		klog.V(4).Infof("AWS EKS集群[%s]已通过kom.RegisterAWSCluster注册，跳过RegisterCluster", clusterID)
 		kom.Clusters().RegisterAWSCluster(clusterConfig.AWSConfig)
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 		// 执行回调注册
@@ -602,7 +601,7 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	var err error
 	if config.IsInCluster {
 		// 集群内模式
-		restConfig, err = rest.InClusterConfig()
+		restConfig, _ = rest.InClusterConfig()
 	} else {
 		// 集群外模式
 		lines := strings.Split(string(config.kubeConfig), "\n")
