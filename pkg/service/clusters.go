@@ -18,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/kom/kom"
+	komaws "github.com/weibaohui/kom/kom/aws"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -62,12 +63,15 @@ type ClusterConfig struct {
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
+	AWSConfig               *komaws.EKSAuthConfig          `json:"aws_config,omitempty"` // AWS EKS配置信息
+	IsAWSEKS                bool                           `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
 }
 type ClusterConfigSource string
 
 var ClusterConfigSourceFile ClusterConfigSource = "File"
 var ClusterConfigSourceDB ClusterConfigSource = "DB"
 var ClusterConfigSourceInCluster ClusterConfigSource = "InCluster"
+var ClusterConfigSourceAWS ClusterConfigSource = "AWS"
 
 // 记录每个集群的watch 启动情况
 // watch 有多种类型，需要记录
@@ -104,6 +108,8 @@ func (c *ClusterConfig) GetKubeconfig() string {
 
 // GetClusterID 根据ClusterConfig，按照 文件名+context名称 获取clusterID
 func (c *ClusterConfig) GetClusterID() string {
+
+	// 原有逻辑
 	id := fmt.Sprintf("%s/%s", c.FileName, c.ContextName)
 	if c.IsInCluster {
 		id = "InCluster"
@@ -344,7 +350,7 @@ func (c *clusterService) ScanClustersInDir(path string) {
 			klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
 			continue // 解析失败，跳过该文件
 		}
-		for contextName, _ := range config.Contexts {
+		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
 
@@ -378,7 +384,7 @@ func (c *clusterService) ScanClustersInDB() {
 	}
 
 	for i, cc := range c.clusterConfigs {
-		if cc.Source == ClusterConfigSourceDB {
+		if cc.Source == ClusterConfigSourceDB || cc.Source == ClusterConfigSourceAWS {
 			// 查一下list中是否存在
 			filter := slice.Filter(list, func(index int, item *models.KubeConfig) bool {
 				if item.Server == cc.Server && item.User == cc.UserName && item.Cluster == cc.ClusterName {
@@ -413,7 +419,7 @@ func (c *clusterService) ScanClustersInDB() {
 				// 检查是否已存在该配置
 				exists := false
 				for _, cc := range c.clusterConfigs {
-					if cc.FileName == "DB" && cc.Server == cluster.Server && cc.ContextName == contextName {
+					if (cc.FileName == string(ClusterConfigSourceDB) || cc.FileName == string(ClusterConfigSourceAWS)) && cc.Server == cluster.Server && cc.ContextName == contextName {
 						exists = true
 						break
 					}
@@ -422,7 +428,7 @@ func (c *clusterService) ScanClustersInDB() {
 				// 如果不存在，添加新配置
 				if !exists {
 					clusterConfig := &ClusterConfig{
-						FileName:             kc.DisplayName,
+						FileName:             string(ClusterConfigSourceDB),
 						ContextName:          contextName,
 						ClusterID:            fmt.Sprintf("%s/%s", kc.DisplayName, contextName),
 						UserName:             context.AuthInfo,
@@ -433,6 +439,18 @@ func (c *clusterService) ScanClustersInDB() {
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
+					}
+					if kc.IsAWSEKS {
+						clusterConfig.Source = ClusterConfigSourceAWS
+						eksConfig := &komaws.EKSAuthConfig{
+							AccessKey:       kc.AccessKey,
+							SecretAccessKey: kc.SecretAccessKey,
+							Region:          kc.Region,
+							ClusterName:     kc.ClusterName,
+						}
+						clusterConfig.AWSConfig = eksConfig
+						clusterConfig.IsAWSEKS = true
+						clusterConfig.FileName = string(ClusterConfigSourceAWS)
 					}
 					clusterConfig.Server = cluster.Server
 					c.AddToClusterList(clusterConfig)
@@ -484,7 +502,7 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 			klog.V(6).Infof("解析文件[%s]失败: %v", filePath, err)
 			continue // 解析失败，跳过该文件
 		}
-		for contextName, _ := range config.Contexts {
+		for contextName := range config.Contexts {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
 
@@ -520,6 +538,29 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
 	clusterID := clusterConfig.GetClusterID()
+
+	if clusterConfig.IsAWSEKS {
+		if clusterConfig.AWSConfig == nil {
+			err := fmt.Errorf("AWS EKS 集群[%s]缺少 AWSConfig", clusterID)
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
+			return false, err
+		}
+		// 使用带 ID 的注册确保幂等
+		if _, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID); err != nil {
+			klog.V(4).Infof("注册 AWS 集群[%s]失败: %v", clusterID, err)
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
+			return false, err
+		}
+		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+		if c.callbackRegisterFunc != nil {
+			c.callbackRegisterFunc(clusterConfig)
+		}
+ 
+		return true, nil
+	}
+
 	err := c.LoadRestConfig(clusterConfig)
 	if err != nil {
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
@@ -561,7 +602,7 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	var err error
 	if config.IsInCluster {
 		// 集群内模式
-		restConfig, err = rest.InClusterConfig()
+		restConfig, _ = rest.InClusterConfig()
 	} else {
 		// 集群外模式
 		lines := strings.Split(string(config.kubeConfig), "\n")
@@ -637,4 +678,98 @@ func (c *ClusterConfig) GetClusterScanResult() *analysis.ResultWithStatus {
 
 	return c.K8sGPTProblemsResult
 
+}
+
+// =========================== 集群服务增强方法 ===========================
+
+// validateAWSConfig 验证AWS配置
+func (c *clusterService) validateAWSConfig(config *komaws.EKSAuthConfig) error {
+	if config == nil {
+		return fmt.Errorf("AWS配置不能为空")
+	}
+
+	if config.AccessKey == "" {
+		return fmt.Errorf("AWS Access Key不能为空")
+	}
+
+	if config.SecretAccessKey == "" {
+		return fmt.Errorf("AWS Secret Access Key不能为空")
+	}
+
+	if config.Region == "" {
+		return fmt.Errorf("AWS区域不能为空")
+	}
+
+	if config.ClusterName == "" {
+		return fmt.Errorf("EKS集群名称不能为空")
+	}
+
+	return nil
+}
+
+// RegisterAWSEKSCluster 注册AWS EKS集群
+func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*ClusterConfig, error) {
+	// 参数验证
+	if err := c.validateAWSConfig(config); err != nil {
+		return nil, fmt.Errorf("AWS配置验证失败: %w", err)
+	}
+
+	// 将项目内部的AWSEKSConfig转换为kom库要求的kom.aws.EKSAuthConfig
+	eksAuthConfig := &komaws.EKSAuthConfig{
+		AccessKey:       config.AccessKey,
+		SecretAccessKey: config.SecretAccessKey,
+		Region:          config.Region,
+		ClusterName:     config.ClusterName,
+	}
+
+	kg := komaws.NewKubeconfigGenerator()
+	content, err := kg.GenerateFromAWS(eksAuthConfig)
+	if err != nil {
+		return nil, fmt.Errorf("生成AWS EKS集群配置文件失败: %w", err)
+	}
+	kubeconfig, err := clientcmd.Load([]byte(content))
+	if err != nil {
+		klog.V(6).Infof("解析 AWS EKS集群kubeconfig配置失败: %v", err)
+		return nil, fmt.Errorf("生成AWS EKS集群配置文件失败: %w", err)
+	}
+
+	// 只取第一个context
+	var contextName string
+	var clusterConfig *ClusterConfig
+	for name := range kubeconfig.Contexts {
+		contextName = name
+		break
+	}
+	if contextName != "" {
+		context := kubeconfig.Contexts[contextName]
+		cluster := kubeconfig.Clusters[context.Cluster]
+
+		clusterConfig = &ClusterConfig{
+			FileName:             string(ClusterConfigSourceAWS),
+			ContextName:          contextName,
+			ClusterName:          context.Cluster,
+			Namespace:            context.Namespace,
+			Server:               cluster.Server,
+			kubeConfig:           []byte(content),
+			watchStatus:          make(map[string]*clusterWatchStatus),
+			ClusterConnectStatus: constants.ClusterConnectStatusConnected,
+			Source:               ClusterConfigSourceAWS,
+			IsAWSEKS:             true,
+			AWSConfig:            config,
+		}
+		clusterID := clusterConfig.GetClusterID()
+
+		// 使用kom统一的AWS EKS集群注册方法
+		_, err = kom.Clusters().RegisterAWSClusterWithID(eksAuthConfig, clusterID)
+		if err != nil {
+			return nil, fmt.Errorf("注册AWS EKS集群失败: %w", err)
+		}
+
+		// 添加到集群列表
+		c.AddToClusterList(clusterConfig)
+
+		klog.V(4).Infof("成功注册AWS EKS集群: %s [%s]", config.ClusterName, clusterID)
+	}
+
+	return clusterConfig, nil
 }
