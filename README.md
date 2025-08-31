@@ -35,7 +35,7 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 ### 主要特点
 
 - **迷你化设计**：所有功能整合在一个单一的可执行文件中，部署便捷，使用简单。
-- **简便易用**：友好的用户界面和直观的操作流程，让 Kubernetes 管理更加轻松。
+- **简便易用**：友好的用户界面和直观的操作流程，让 Kubernetes 管理更加轻松。支持标准k8s、aws eks、k3s、kind、k0s等集群类型。
 - **高效性能**：后端采用 Golang 构建，前端基于百度 AMIS，保证资源利用率高、响应速度快。
 - **AI驱动融合**
   ：基于ChatGPT实现划词解释、资源指南、YAML属性自动翻译、Describe信息解读、日志AI问诊、运行命令推荐,并集成了[k8s-gpt](https://github.com/k8sgpt-ai/k8sgpt)
@@ -140,23 +140,23 @@ ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
 
 k8m 支持通过环境变量和命令行参数灵活配置，主要参数如下：
 
-| 环境变量                  | 默认值                      | 说明                                    |
-|-----------------------|--------------------------|---------------------------------------|
-| `PORT`                | `3618`                   | 监听的端口号                                |
-| `KUBECONFIG`          | `~/.kube/config`         | `kubeconfig` 文件路径，会自动扫描识别同级目录下所有的配置文件 |
-| `ANY_SELECT`          | `"true"`                 | 是否开启任意选择划词解释，默认开启 (default true)      |
-| `LOGIN_TYPE`          | `"password"`             | 登录方式（如 `password`, `oauth`, `token`）  |
-| `ENABLE_TEMP_ADMIN`   | `"false"`                | 是否启用临时管理员账户配置，默认关闭。初次登录、忘记密码时使用       |
-| `ADMIN_USERNAME`      |                          | 管理员用户名，启用临时管理员账户配置后生效                 |
-| `ADMIN_PASSWORD`      |                          | 管理员密码，启用临时管理员账户配置后生效                  |
-| `DEBUG`               | `"false"`                | 是否开启 `debug` 模式                       |
-| `LOG_V`               | `"2"`                    | log输出日志，同klog用法                       |
-| `JWT_TOKEN_SECRET`    | `"your-secret-key"`      | 用于 JWT Token 生成的密钥                    |
-| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest` | kubectl shell 镜像地址                    |
-| `NODE_SHELL_IMAGE`    | `alpine:latest`          | Node shell 镜像地址                       |
-| `IMAGE_PULL_TIMEOUT`  | `30`                     | Node shell、kubectl shell 镜像拉取超时时间（秒）  |
-| `CONNECT_CLUSTER`     | `"false"`                | 启动程序后，是否自动连接发现的集群，默认关闭                |
-| `PRINT_CONFIG`        | `"false"`                | 是否打印配置信息                              |
+| 环境变量              | 默认值                   | 说明                                                           |
+| --------------------- | ------------------------ | -------------------------------------------------------------- |
+| `PORT`                | `3618`                   | 监听的端口号                                                   |
+| `KUBECONFIG`          | `~/.kube/config`         | `kubeconfig` 文件路径，会自动扫描识别同级目录下所有的配置文件  |
+| `ANY_SELECT`          | `"true"`                 | 是否开启任意选择划词解释，默认开启 (default true)              |
+| `LOGIN_TYPE`          | `"password"`             | 登录方式（如 `password`, `oauth`, `token`）                    |
+| `ENABLE_TEMP_ADMIN`   | `"false"`                | 是否启用临时管理员账户配置，默认关闭。初次登录、忘记密码时使用 |
+| `ADMIN_USERNAME`      |                          | 管理员用户名，启用临时管理员账户配置后生效                     |
+| `ADMIN_PASSWORD`      |                          | 管理员密码，启用临时管理员账户配置后生效                       |
+| `DEBUG`               | `"false"`                | 是否开启 `debug` 模式                                          |
+| `LOG_V`               | `"2"`                    | log输出日志，同klog用法                                        |
+| `JWT_TOKEN_SECRET`    | `"your-secret-key"`      | 用于 JWT Token 生成的密钥                                      |
+| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest` | kubectl shell 镜像地址                                         |
+| `NODE_SHELL_IMAGE`    | `alpine:latest`          | Node shell 镜像地址                                            |
+| `IMAGE_PULL_TIMEOUT`  | `30`                     | Node shell、kubectl shell 镜像拉取超时时间（秒）               |
+| `CONNECT_CLUSTER`     | `"false"`                | 启动程序后，是否自动连接发现的集群，默认关闭                   |
+| `PRINT_CONFIG`        | `"false"`                | 是否打印配置信息                                               |
 
 详细参数说明和更多配置方式请参考 [docs/readme.md](docs/README.md)。
 
