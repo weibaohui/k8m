@@ -164,21 +164,81 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 
 // GetCertificateExpiry 获取集群证书的过期时间
 func (c *ClusterConfig) GetCertificateExpiry() time.Time {
+	// 检查 kubeConfig 是否为空
+	if len(c.kubeConfig) == 0 {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] kubeConfig为空", c.ClusterID)
+		return time.Time{}
+	}
+
 	config, err := clientcmd.Load(c.kubeConfig)
 	if err != nil {
 		klog.V(8).Infof("设置NotAfter, 解析文件[%s]失败: %v", c.ClusterID, err)
 		return time.Time{}
 	}
-	authInfo, exists := config.AuthInfos[config.Contexts[config.CurrentContext].AuthInfo]
-	if !exists {
-		klog.V(8).Infof("设置NotAfter, current context not found")
+
+	// 检查 config 是否为空
+	if config == nil {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] config为空", c.ClusterID)
 		return time.Time{}
 	}
+
+	// 检查 CurrentContext 是否为空
+	if config.CurrentContext == "" {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] CurrentContext为空", c.ClusterID)
+		return time.Time{}
+	}
+
+	// 检查 Contexts 是否为空
+	if config.Contexts == nil {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] Contexts为空", c.ClusterID)
+		return time.Time{}
+	}
+
+	// 检查当前 context 是否存在
+	currentContext, contextExists := config.Contexts[config.CurrentContext]
+	if !contextExists || currentContext == nil {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] 当前context[%s]不存在", c.ClusterID, config.CurrentContext)
+		return time.Time{}
+	}
+
+	// 检查 AuthInfos 是否为空
+	if config.AuthInfos == nil {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] AuthInfos为空", c.ClusterID)
+		return time.Time{}
+	}
+
+	// 检查 AuthInfo 名称是否为空
+	if currentContext.AuthInfo == "" {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] AuthInfo名称为空", c.ClusterID)
+		return time.Time{}
+	}
+
+	// 获取 authInfo
+	authInfo, exists := config.AuthInfos[currentContext.AuthInfo]
+	if !exists || authInfo == nil {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] authInfo[%s]不存在", c.ClusterID, currentContext.AuthInfo)
+		return time.Time{}
+	}
+
+	// 检查证书数据是否为空
+	if len(authInfo.ClientCertificateData) == 0 {
+		klog.V(8).Infof("设置NotAfter, 集群[%s] ClientCertificateData为空", c.ClusterID)
+		return time.Time{}
+	}
+
+	// 解析证书
 	cert, err := utils.ParseCertificate(authInfo.ClientCertificateData)
 	if err != nil {
-		klog.V(8).Infof("设置NotAfter,  [%s]解析证书:%s 失败: %v", c.ClusterID, authInfo.ClientCertificateData, err)
+		klog.V(8).Infof("设置NotAfter, 集群[%s]解析证书失败: %v", c.ClusterID, err)
 		return time.Time{}
 	}
+
+	// 检查证书是否为空
+	if cert == nil {
+		klog.V(8).Infof("设置NotAfter, 集群[%s]解析出的证书为空", c.ClusterID)
+		return time.Time{}
+	}
+
 	return cert.NotAfter.Local()
 }
 
@@ -557,7 +617,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 		if c.callbackRegisterFunc != nil {
 			c.callbackRegisterFunc(clusterConfig)
 		}
- 
+
 		return true, nil
 	}
 
