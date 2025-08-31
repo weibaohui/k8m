@@ -60,6 +60,12 @@
               "name": "platform",
               "label": "平台",
               "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "dbType",
+              "label": "数据库类型",
+              "disabled": true
             }
           ]
         }
