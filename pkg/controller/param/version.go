@@ -27,5 +27,6 @@ func (pc *Controller) Version(c *gin.Context) {
 		"goVersion": runtime.Version(),
 		"compiler":  runtime.Compiler,
 		"platform":  fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
+		"dbType":    cfg.DBDriver,
 	})
 }
