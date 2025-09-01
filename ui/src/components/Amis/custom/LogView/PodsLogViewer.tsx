@@ -166,7 +166,7 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                 />
                 {((selectedContainer && selectedPod) || isAllPods || isAllContainers) && (
                     <SSELogDownloadComponent
-                        url={`/k8s/pod/logs/download/ns/${selectedPod?.namespace}/pod_name/${selectedPod?.name}/container/${selectedContainer}`}
+                        url={`/k8s/pod/logs/download/ns/${data?.metadata?.namespace}/pod_name/${selectedPod?.name}/container/${selectedContainer}`}
                         data={{
                             tailLines: tailLines,
                             sinceTime: sinceTime,
@@ -182,7 +182,7 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
             <div style={{ background: '#f5f5f5', padding: '4px', borderRadius: '4px', height: 'calc(100vh - 150px)', overflow: 'auto' }}>
                 {((selectedContainer && selectedPod) || isAllPods || isAllContainers) && (
                     <SSELogDisplayComponent
-                        url={`/k8s/pod/logs/sse/ns/${selectedPod?.namespace}/pod_name/${selectedPod?.name}/container/${selectedContainer}`
+                        url={`/k8s/pod/logs/sse/ns/${data?.metadata?.namespace}/pod_name/${selectedPod?.name}/container/${selectedContainer}`
                         }
                         data={{
                             tailLines: tailLines,
