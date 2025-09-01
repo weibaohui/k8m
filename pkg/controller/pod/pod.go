@@ -11,6 +11,7 @@ import (
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 )
 
 type LogController struct{}
@@ -35,10 +36,21 @@ func (lc *LogController) StreamLogs(c *gin.Context) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
-	selector := fmt.Sprintf("metadata.name=%s", podName)
-	lc.streamPodLogsBySelector(c, ns, containerName, metav1.ListOptions{
-		FieldSelector: selector,
-	})
+
+	lop := metav1.ListOptions{}
+	labelSelector := c.Request.FormValue("labelSelector")
+
+	//不选pod，设置了labelSelector，说明是要查询多个pod了
+	//undefined 是前端处理问题
+	if labelSelector != "" && (podName == "" || podName == "undefined") {
+		lop.LabelSelector = labelSelector
+	}
+	// 查某一个pod
+	if podName != "" && podName != "undefined" {
+		lop.FieldSelector = fmt.Sprintf("metadata.name=%s", podName)
+	}
+	klog.V(2).Infof("StreamLogs metav1.ListOptions=%v", lop)
+	lc.streamPodLogsBySelector(c, ns, containerName, lop)
 }
 func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
 	ctx := amis.GetContextWithUser(c)
