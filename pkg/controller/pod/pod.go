@@ -40,10 +40,15 @@ func (lc *LogController) StreamLogs(c *gin.Context) {
 	containerName := c.Param("container_name")
 
 	lop := metav1.ListOptions{}
+	allPodsStr := c.Request.FormValue("allPods")
+	allPods := false
+	if allPodsStr == "true" {
+		allPods = true
+	}
 	labelSelector := c.Request.FormValue("labelSelector")
 
-	//不选pod，设置了labelSelector，说明是要查询多个pod了
-	//undefined 是前端处理问题
+	// 不选pod，设置了labelSelector，说明是要查询多个pod了
+	// undefined 是前端处理问题
 	if labelSelector != "" && (podName == "" || podName == "undefined") {
 		lop.LabelSelector = labelSelector
 	}
@@ -51,10 +56,10 @@ func (lc *LogController) StreamLogs(c *gin.Context) {
 	if podName != "" && podName != "undefined" {
 		lop.FieldSelector = fmt.Sprintf("metadata.name=%s", podName)
 	}
-	klog.V(2).Infof("StreamLogs metav1.ListOptions=%v", lop)
-	lc.streamPodLogsBySelector(c, ns, containerName, lop)
+	klog.V(8).Infof("StreamLogs metav1.ListOptions=%v", lop)
+	lc.streamPodLogsBySelector(c, ns, allPods, containerName, lop)
 }
-func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
+func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allPods bool, containerName string, options metav1.ListOptions) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -68,7 +73,6 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, cont
 		amis.WriteJsonError(c, err)
 		return
 	}
-
 	pr, pw := io.Pipe()
 
 	for _, pd := range pods {
@@ -82,23 +86,32 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, cont
 		podService := service.PodService()
 		stream, err := podService.StreamPodLogs(ctx, selectedCluster, ns, podName, logOpt)
 		if err != nil {
-			amis.WriteJsonError(c, err)
-			return
+			// amis.WriteJsonError(c, err)
+			continue
 		}
 		go func(pd *v1.Pod, r io.ReadCloser) {
 			defer r.Close()
 			var prefix string
-			if pd.GetNamespace() != "" {
-				prefix = fmt.Sprintf("%s/%s: ", pd.GetNamespace(), pd.GetName())
-			}
-			if containerName != "" {
-				prefix = fmt.Sprintf("%s/%s/%s: ", pd.GetNamespace(), pd.GetName(), containerName)
+			if allPods {
+				if pd.GetNamespace() != "" {
+					prefix = fmt.Sprintf("%s/%s", pd.GetNamespace(), pd.GetName())
+				}
+				if containerName != "" {
+					prefix = fmt.Sprintf("%s/%s/%s", pd.GetNamespace(), pd.GetName(), containerName)
+				}
 			}
 
 			scanner := bufio.NewScanner(r)
 			for scanner.Scan() {
-				line := fmt.Sprintf("[%s] %s", prefix, scanner.Text())
+				var line string
+				if allPods {
+					//聚合显示所有pod，才需要区分每一行是来自哪个POD
+					line = fmt.Sprintf("[%s] %s\n", prefix, scanner.Text())
+				} else {
+					line = fmt.Sprintf("%s\n", scanner.Text())
+				}
 				if _, err := pw.Write([]byte(line)); err != nil {
+					amis.WriteJsonError(c, err)
 					return // 管道已关闭
 				}
 			}
@@ -108,7 +121,7 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, cont
 	// 监听 ctx，用户断开 SSE 时关闭 PipeWriter
 	go func() {
 		<-ctx.Done()
-		klog.V(2).Infof("SSE connection closed.")
+		klog.V(8).Infof("SSE connection closed.")
 		pw.Close()
 	}()
 
