@@ -27,7 +27,7 @@ ENV TZ=Asia/Shanghai
 COPY --from=golang-builder /app/k8m .
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk upgrade && apk add --no-cache curl bash inotify-tools alpine-conf busybox-extras tzdata   tar gzip\
+    && apk upgrade && apk add --no-cache curl bash inotify-tools alpine-conf busybox-extras tzdata  aws-cli tar gzip\
     && apk del alpine-conf && rm -rf /var/cache/* && chmod +x k8m
 ADD reload.sh /app/reload.sh
 RUN chmod +x /app/reload.sh
