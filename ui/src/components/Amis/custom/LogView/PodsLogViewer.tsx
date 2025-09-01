@@ -61,7 +61,6 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
 
         // 处理 labels，转换为 labelSelector 格式
         if (data?.metadata?.labels) {
-            console.log(data.metadata.labels);
             const labels = data.metadata.labels;
             // 将 labels 对象转换为 "key1=value1,key2=value2" 格式
             const labelSelectorString = Object.entries(labels)
@@ -137,7 +136,7 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                             }
                         }}
                         options={[
-                            { label: '全部容器', value: 'ALL_CONTAINERS' },
+                            // { label: '全部容器', value: 'ALL_CONTAINERS' },
                             ...containers.map(container => ({
                                 label: container.name,
                                 value: container.name
