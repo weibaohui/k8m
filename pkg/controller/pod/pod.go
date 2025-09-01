@@ -111,7 +111,7 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allP
 			for scanner.Scan() {
 				var line string
 				if allPods {
-					//聚合显示所有pod，才需要区分每一行是来自哪个POD
+					// 聚合显示所有pod，才需要区分每一行是来自哪个POD
 					line = fmt.Sprintf("[%s] %s\n", prefix, scanner.Text())
 				} else {
 					line = fmt.Sprintf("%s\n", scanner.Text())
@@ -226,7 +226,7 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 			for scanner.Scan() {
 				var line string
 				if allPods {
-					//聚合显示所有pod，才需要区分每一行是来自哪个POD
+					// 聚合显示所有pod，才需要区分每一行是来自哪个POD
 					line = fmt.Sprintf("[%s] %s\n", prefix, scanner.Text())
 				} else {
 					line = fmt.Sprintf("%s\n", scanner.Text())
@@ -241,7 +241,7 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 	// 监听 ctx，用户断开时关闭 PipeWriter
 	go func() {
 		<-ctx.Done()
-		klog.V(8).Infof("Download connection closed.")
+		klog.V(6).Infof("Download connection closed.")
 		pw.Close()
 	}()
 
