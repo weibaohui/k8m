@@ -15,11 +15,13 @@ interface PodLogViewerProps {
 
 const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
     url = replacePlaceholders(url, data);
-
     const [pods, setPods] = useState<Pod[]>([]);
     const [selectedPod, setSelectedPod] = useState<{ name: string; namespace: string }>();
     const [containers, setContainers] = useState<Container[]>([]);
     const [selectedContainer, setSelectedContainer] = useState<string>('');
+    const [isAllPods, setIsAllPods] = useState<boolean>(false);
+    const [isAllContainers, setIsAllContainers] = useState<boolean>(false);
+    const [labelSelector, setLabelSelector] = useState<string>('');
 
     const [tailLines, setTailLines] = React.useState(100);
     const [follow, setFollow] = React.useState(true);
@@ -56,11 +58,28 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
     }, [url]);
 
     useEffect(() => {
+
+        // 处理 labels，转换为 labelSelector 格式
+        if (data?.metadata?.labels) {
+            console.log(data.metadata.labels);
+            const labels = data.metadata.labels;
+            // 将 labels 对象转换为 "key1=value1,key2=value2" 格式
+            const labelSelectorString = Object.entries(labels)
+                .map(([key, value]) => `${key}=${value}`)
+                .join(',');
+            setLabelSelector(labelSelectorString);
+        } else {
+            setLabelSelector('');
+        }
+
         if (selectedPod) {
             const podData = pods.find(pod =>
                 pod.metadata.name === selectedPod.name &&
                 pod.metadata.namespace === selectedPod.namespace
             );
+
+
+
             // 合并 initContainers 和 containers
             const allContainers = [
                 ...(podData?.spec?.containers || []),
@@ -85,27 +104,47 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Select
                         style={{ minWidth: 200 }}
-                        value={selectedPod ? selectedPod.name : undefined}
+                        value={isAllPods ? 'ALL_PODS' : (selectedPod ? selectedPod.name : undefined)}
                         onChange={(value) => {
-                            const namespace = pods.find(pod => pod.metadata.name === value)?.metadata.namespace || '';
-                            setSelectedPod({ namespace, name: value });
+                            if (value === 'ALL_PODS') {
+                                setIsAllPods(true);
+                                setSelectedPod(undefined);
+                            } else {
+                                setIsAllPods(false);
+                                const namespace = pods.find(pod => pod.metadata.name === value)?.metadata.namespace || '';
+                                setSelectedPod({ namespace, name: value });
+                            }
                         }}
-                        options={pods.map(pod => ({
-                            label: pod.metadata.name,
-                            value: pod.metadata.name
-                        }))}
+                        options={[
+                            { label: '全部Pod', value: 'ALL_PODS' },
+                            ...pods.map(pod => ({
+                                label: pod.metadata.name,
+                                value: pod.metadata.name
+                            }))
+                        ]}
                         placeholder="选择Pod"
                     />
                     <Select
                         style={{ minWidth: 200 }}
-                        value={selectedContainer}
-                        onChange={setSelectedContainer}
-                        options={containers.map(container => ({
-                            label: container.name,
-                            value: container.name
-                        }))}
+                        value={isAllContainers ? 'ALL_CONTAINERS' : selectedContainer}
+                        onChange={(value) => {
+                            if (value === 'ALL_CONTAINERS') {
+                                setIsAllContainers(true);
+                                setSelectedContainer('');
+                            } else {
+                                setIsAllContainers(false);
+                                setSelectedContainer(value);
+                            }
+                        }}
+                        options={[
+                            { label: '全部容器', value: 'ALL_CONTAINERS' },
+                            ...containers.map(container => ({
+                                label: container.name,
+                                value: container.name
+                            }))
+                        ]}
                         placeholder="选择容器"
-                        disabled={!selectedPod}
+                        disabled={!selectedPod && !isAllPods}
                     />
                 </div>
             }
@@ -125,28 +164,35 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                     onPreviousChange={setPrevious}
                     onSinceTimeChange={setSinceTime}
                 />
-                {selectedContainer && selectedPod && (
+                {((selectedContainer && selectedPod) || isAllPods || isAllContainers) && (
                     <SSELogDownloadComponent
-                        url={`/k8s/pod/logs/download/ns/${selectedPod.namespace}/pod_name/${selectedPod.name}/container/${selectedContainer}`}
+                        url={`/k8s/pod/logs/download/ns/${selectedPod?.namespace}/pod_name/${selectedPod?.name}/container/${selectedContainer}`}
                         data={{
                             tailLines: tailLines,
                             sinceTime: sinceTime,
                             previous: previous,
                             timestamps: timestamps,
+                            allPods: isAllPods,
+                            allContainers: isAllContainers,
+                            labelSelector: labelSelector,
                         }}
                     />
                 )}
             </div>
             <div style={{ background: '#f5f5f5', padding: '4px', borderRadius: '4px', height: 'calc(100vh - 150px)', overflow: 'auto' }}>
-                {selectedContainer && selectedPod && (
+                {((selectedContainer && selectedPod) || isAllPods || isAllContainers) && (
                     <SSELogDisplayComponent
-                        url={`/k8s/pod/logs/sse/ns/${selectedPod.namespace}/pod_name/${selectedPod.name}/container/${selectedContainer}`}
+                        url={`/k8s/pod/logs/sse/ns/${selectedPod?.namespace}/pod_name/${selectedPod?.name}/container/${selectedContainer}`
+                        }
                         data={{
                             tailLines: tailLines,
                             sinceTime: sinceTime,
                             follow: follow,
                             previous: previous,
                             timestamps: timestamps,
+                            allPods: isAllPods,
+                            allContainers: isAllContainers,
+                            labelSelector: labelSelector,
                         }}
                     />
                 )}
