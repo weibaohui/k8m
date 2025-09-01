@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -193,6 +194,9 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 
 	pr, pw := io.Pipe()
 
+	// 使用 sync.WaitGroup 来等待所有 goroutine 完成
+	var wg sync.WaitGroup
+
 	for _, pd := range pods {
 		var podName = pd.GetName()
 
@@ -210,8 +214,10 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 			continue
 		}
 
+		wg.Add(1)
 		go func(pd *v1.Pod, r io.ReadCloser) {
 			defer r.Close()
+			defer wg.Done()
 			var prefix string
 			if allPods {
 				if pd.GetNamespace() != "" {
@@ -237,6 +243,13 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 			}
 		}(&pd, stream)
 	}
+
+	// 启动一个 goroutine 等待所有日志读取完成后关闭 writer
+	go func() {
+		wg.Wait()
+		klog.V(8).Infof("All pod logs reading completed, closing pipe writer.")
+		pw.Close()
+	}()
 
 	// 监听 ctx，用户断开时关闭 PipeWriter
 	go func() {
