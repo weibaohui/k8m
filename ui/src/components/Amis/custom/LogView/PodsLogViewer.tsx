@@ -58,7 +58,6 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
     }, [url]);
 
     useEffect(() => {
-
         // 处理 labels，转换为 labelSelector 格式
         if (data?.metadata?.labels) {
             const labels = data.metadata.labels;
@@ -71,12 +70,13 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
             setLabelSelector('');
         }
 
+    }, [data]);
+    useEffect(() => {
         if (selectedPod) {
             const podData = pods.find(pod =>
                 pod.metadata.name === selectedPod.name &&
                 pod.metadata.namespace === selectedPod.namespace
             );
-
 
 
             // 合并 initContainers 和 containers
@@ -178,7 +178,13 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ url, data }) => {
                     />
                 )}
             </div>
-            <div style={{ background: '#f5f5f5', padding: '4px', borderRadius: '4px', height: 'calc(100vh - 150px)', overflow: 'auto' }}>
+            <div style={{
+                background: '#f5f5f5',
+                padding: '4px',
+                borderRadius: '4px',
+                height: 'calc(100vh - 150px)',
+                overflow: 'auto'
+            }}>
                 {((selectedContainer && selectedPod) || isAllPods || isAllContainers) && (
                     <SSELogDisplayComponent
                         url={`/k8s/pod/logs/sse/ns/${data?.metadata?.namespace}/pod_name/${selectedPod?.name}/container/${selectedContainer}`
