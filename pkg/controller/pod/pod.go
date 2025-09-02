@@ -1,8 +1,11 @@
 package pod
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -11,6 +14,7 @@ import (
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 )
 
 type LogController struct{}
@@ -35,12 +39,28 @@ func (lc *LogController) StreamLogs(c *gin.Context) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
-	selector := fmt.Sprintf("metadata.name=%s", podName)
-	lc.streamPodLogsBySelector(c, ns, containerName, metav1.ListOptions{
-		FieldSelector: selector,
-	})
+
+	lop := metav1.ListOptions{}
+	allPodsStr := c.Request.FormValue("allPods")
+	allPods := false
+	if allPodsStr == "true" {
+		allPods = true
+	}
+	labelSelector := c.Request.FormValue("labelSelector")
+
+	// 不选pod，设置了labelSelector，说明是要查询多个pod了
+	// undefined 是前端处理问题
+	if labelSelector != "" && (podName == "" || podName == "undefined") {
+		lop.LabelSelector = labelSelector
+	}
+	// 查某一个pod
+	if podName != "" && podName != "undefined" {
+		lop.FieldSelector = fmt.Sprintf("metadata.name=%s", podName)
+	}
+	klog.V(8).Infof("StreamLogs metav1.ListOptions=%v", lop)
+	lc.streamPodLogsBySelector(c, ns, allPods, containerName, lop)
 }
-func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
+func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allPods bool, containerName string, options metav1.ListOptions) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -54,25 +74,75 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, cont
 		amis.WriteJsonError(c, err)
 		return
 	}
-	if len(pods) != 1 {
+	// 如果不是 allPods 模式，保持原有逻辑，只允许一个 Pod
+	if !allPods && len(pods) != 1 {
 		amis.WriteJsonError(c, errors.New("pod 数量过多"))
 		return
 	}
 
-	var podName = pods[0].GetName()
-	logOpt, err := BindPodLogOptions(c, containerName)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	podService := service.PodService()
-	stream, err := podService.StreamPodLogs(ctx, selectedCluster, ns, podName, logOpt)
+	pr, pw := io.Pipe()
+	var mu sync.Mutex
+	for _, pd := range pods {
 
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
+		var podName = pd.GetName()
+		logOpt, err := BindPodLogOptions(c, containerName)
+		if err != nil {
+			// amis.WriteJsonError(c, err)
+			continue
+		}
+		podService := service.PodService()
+		stream, err := podService.StreamPodLogs(ctx, selectedCluster, ns, podName, logOpt)
+		if err != nil {
+			// amis.WriteJsonError(c, err)
+			continue
+		}
+		go func(pd v1.Pod, r io.ReadCloser) {
+			defer r.Close()
+			var prefix string
+			if allPods {
+				if pd.GetNamespace() != "" {
+					prefix = fmt.Sprintf("%s/%s", pd.GetNamespace(), pd.GetName())
+				}
+				if containerName != "" {
+					prefix = fmt.Sprintf("%s/%s/%s", pd.GetNamespace(), pd.GetName(), containerName)
+				}
+			}
+
+			scanner := bufio.NewScanner(r)
+			buf := make([]byte, 0, 64*1024)
+			scanner.Buffer(buf, 10*1024*1024)
+			for scanner.Scan() {
+				var line string
+				if allPods {
+					// 聚合显示所有pod，才需要区分每一行是来自哪个POD
+					line = fmt.Sprintf("[%s] %s\n", prefix, scanner.Text())
+				} else {
+					line = fmt.Sprintf("%s\n", scanner.Text())
+				}
+
+				mu.Lock()
+				_, err := pw.Write([]byte(line))
+				mu.Unlock()
+				if err != nil {
+					klog.V(6).Infof("pipe write error: %v", err)
+					return // 管道已关闭
+				}
+			}
+
+			if err := scanner.Err(); err != nil {
+				klog.V(6).Infof("scanner error for pod %s: %v", pd.GetName(), err)
+			}
+		}(pd, stream)
 	}
-	sse.WriteSSE(c, stream)
+
+	// 监听 ctx，用户断开 SSE 时关闭 PipeWriter
+	go func() {
+		<-ctx.Done()
+		klog.V(8).Infof("SSE connection closed.")
+		pw.Close()
+	}()
+
+	sse.WriteSSE(c, pr)
 }
 
 // DownloadLogs 下载Pod日志
@@ -89,11 +159,29 @@ func (lc *LogController) DownloadLogs(c *gin.Context) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Param("container_name")
-	selector := fmt.Sprintf("metadata.name=%s", podName)
-	lc.downloadPodLogsBySelector(c, ns, containerName, metav1.ListOptions{FieldSelector: selector})
+
+	lop := metav1.ListOptions{}
+	allPodsStr := c.Request.FormValue("allPods")
+	allPods := false
+	if allPodsStr == "true" {
+		allPods = true
+	}
+	labelSelector := c.Request.FormValue("labelSelector")
+
+	// 不选pod，设置了labelSelector，说明是要查询多个pod了
+	// undefined 是前端处理问题
+	if labelSelector != "" && (podName == "" || podName == "undefined") {
+		lop.LabelSelector = labelSelector
+	}
+	// 查某一个pod
+	if podName != "" && podName != "undefined" {
+		lop.FieldSelector = fmt.Sprintf("metadata.name=%s", podName)
+	}
+	klog.V(8).Infof("DownloadLogs metav1.ListOptions=%v", lop)
+	lc.downloadPodLogsBySelector(c, ns, allPods, containerName, lop)
 }
 
-func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, containerName string, options metav1.ListOptions) {
+func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, allPods bool, containerName string, options metav1.ListOptions) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -107,25 +195,84 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, co
 		amis.WriteJsonError(c, err)
 		return
 	}
-	if len(pods) != 1 {
+
+	// 如果不是 allPods 模式，保持原有逻辑，只允许一个 Pod
+	if !allPods && len(pods) != 1 {
 		amis.WriteJsonError(c, errors.New("pod 数量过多"))
 		return
 	}
 
-	var podName = pods[0].GetName()
-	logOpt, err := BindPodLogOptions(c, containerName)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	logOpt.Follow = false
+	pr, pw := io.Pipe()
+	var mu sync.Mutex
+	// 使用 sync.WaitGroup 来等待所有 goroutine 完成
+	var wg sync.WaitGroup
 
-	podService := service.PodService()
-	stream, err := podService.StreamPodLogs(ctx, selectedCluster, ns, podName, logOpt)
+	for _, pd := range pods {
+		var podName = pd.GetName()
 
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
+		// 获取日志选项
+		logOpt, err := BindPodLogOptions(c, containerName)
+		if err != nil {
+			// amis.WriteJsonError(c, err)
+			continue
+		}
+		logOpt.Follow = false
+
+		podService := service.PodService()
+		stream, err := podService.StreamPodLogs(ctx, selectedCluster, ns, podName, logOpt)
+		if err != nil {
+			continue
+		}
+
+		wg.Add(1)
+		go func(pd v1.Pod, r io.ReadCloser) {
+			defer r.Close()
+			defer wg.Done()
+			var prefix string
+			if allPods {
+				if pd.GetNamespace() != "" {
+					prefix = fmt.Sprintf("%s/%s", pd.GetNamespace(), pd.GetName())
+				}
+				if containerName != "" {
+					prefix = fmt.Sprintf("%s/%s/%s", pd.GetNamespace(), pd.GetName(), containerName)
+				}
+			}
+
+			scanner := bufio.NewScanner(r)
+			buf := make([]byte, 0, 64*1024)
+			scanner.Buffer(buf, 10*1024*1024)
+			for scanner.Scan() {
+				var line string
+				if allPods {
+					// 聚合显示所有pod，才需要区分每一行是来自哪个POD
+					line = fmt.Sprintf("[%s] %s\n", prefix, scanner.Text())
+				} else {
+					line = fmt.Sprintf("%s\n", scanner.Text())
+				}
+				mu.Lock()
+				_, err := pw.Write([]byte(line))
+				mu.Unlock()
+				if err != nil {
+					klog.V(6).Infof("pipe write error: %v", err)
+					return // 管道已关闭
+				}
+			}
+		}(pd, stream)
 	}
-	sse.DownloadLog(c, logOpt, stream)
+
+	// 启动一个 goroutine 等待所有日志读取完成后关闭 writer
+	go func() {
+		wg.Wait()
+		klog.V(8).Infof("All pod logs reading completed, closing pipe writer.")
+		pw.Close()
+	}()
+
+	// 监听 ctx，用户断开时关闭 PipeWriter
+	go func() {
+		<-ctx.Done()
+		klog.V(6).Infof("Download connection closed.")
+		pw.Close()
+	}()
+
+	sse.DownloadLog(c, containerName, pr)
 }

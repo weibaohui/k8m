@@ -1,6 +1,6 @@
-import {appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders} from "@/utils/utils.ts";
+import { appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders } from "@/utils/utils.ts";
 import React from "react";
-import {Button} from "antd";
+import { Button } from "antd";
 
 // 定义组件的 props 类型
 interface SSEDownloadProps {
@@ -11,6 +11,9 @@ interface SSEDownloadProps {
         previous?: boolean;
         timestamps?: boolean;
         sinceSeconds?: number;
+        labelSelector?: string;  // 对应 -l app=nginx
+        allPods?: boolean;       // 对应 --all-pods
+        allContainers?: boolean; // 对应 --all-containers
     }; // 附加参数
 }
 
@@ -24,7 +27,10 @@ const SSELogDownloadComponent = React.forwardRef((props: SSEDownloadProps, _) =>
         sinceTime: props.data.sinceTime,
         previous: props.data.previous,
         timestamps: props.data.timestamps,
-        sinceSeconds: props.data.sinceSeconds || ""
+        sinceSeconds: props.data.sinceSeconds || "",
+        labelSelector: props.data.labelSelector,
+        allPods: props.data.allPods,
+        allContainers: props.data.allContainers
     };
     // @ts-ignore
     finalUrl = appendQueryParam(finalUrl, params);

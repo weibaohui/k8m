@@ -13,6 +13,9 @@ interface SSEComponentProps {
         previous?: boolean;
         timestamps?: boolean;
         sinceSeconds?: number;
+        labelSelector?: string;  // 对应 -l app=nginx
+        allPods?: boolean;       // 对应 --all-pods
+        allContainers?: boolean; // 对应 --all-containers
     };
 }
 
@@ -25,7 +28,10 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         follow: props.data.follow,
         previous: props.data.previous,
         timestamps: props.data.timestamps,
-        sinceSeconds: props.data.sinceSeconds || ""
+        sinceSeconds: props.data.sinceSeconds || "",
+        labelSelector: props.data.labelSelector,
+        allPods: props.data.allPods,
+        allContainers: props.data.allContainers
     };
     // @ts-ignore
     let finalUrl = appendQueryParam(url, params);
