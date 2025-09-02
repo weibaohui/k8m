@@ -203,7 +203,7 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 	}
 
 	pr, pw := io.Pipe()
-
+	var mu sync.Mutex
 	// 使用 sync.WaitGroup 来等待所有 goroutine 完成
 	var wg sync.WaitGroup
 
@@ -249,7 +249,11 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 				} else {
 					line = fmt.Sprintf("%s\n", scanner.Text())
 				}
-				if _, err := pw.Write([]byte(line)); err != nil {
+				mu.Lock()
+				_, err := pw.Write([]byte(line))
+				mu.Unlock()
+				if err != nil {
+					klog.V(6).Infof("pipe write error: %v", err)
 					return // 管道已关闭
 				}
 			}
