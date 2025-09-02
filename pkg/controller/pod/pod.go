@@ -81,7 +81,7 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allP
 	}
 
 	pr, pw := io.Pipe()
-
+	var mu sync.Mutex
 	for _, pd := range pods {
 
 		var podName = pd.GetName()
@@ -96,7 +96,7 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allP
 			// amis.WriteJsonError(c, err)
 			continue
 		}
-		go func(pd *v1.Pod, r io.ReadCloser) {
+		go func(pd v1.Pod, r io.ReadCloser) {
 			defer r.Close()
 			var prefix string
 			if allPods {
@@ -109,6 +109,8 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allP
 			}
 
 			scanner := bufio.NewScanner(r)
+			buf := make([]byte, 0, 64*1024)
+			scanner.Buffer(buf, 10*1024*1024)
 			for scanner.Scan() {
 				var line string
 				if allPods {
@@ -117,12 +119,20 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allP
 				} else {
 					line = fmt.Sprintf("%s\n", scanner.Text())
 				}
-				if _, err := pw.Write([]byte(line)); err != nil {
-					amis.WriteJsonError(c, err)
+
+				mu.Lock()
+				_, err := pw.Write([]byte(line))
+				mu.Unlock()
+				if err != nil {
+					klog.V(6).Infof("pipe write error: %v", err)
 					return // 管道已关闭
 				}
 			}
-		}(&pd, stream)
+
+			if err := scanner.Err(); err != nil {
+				klog.V(6).Infof("scanner error for pod %s: %v", pd.GetName(), err)
+			}
+		}(pd, stream)
 	}
 
 	// 监听 ctx，用户断开 SSE 时关闭 PipeWriter
@@ -215,7 +225,7 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 		}
 
 		wg.Add(1)
-		go func(pd *v1.Pod, r io.ReadCloser) {
+		go func(pd v1.Pod, r io.ReadCloser) {
 			defer r.Close()
 			defer wg.Done()
 			var prefix string
@@ -229,6 +239,8 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 			}
 
 			scanner := bufio.NewScanner(r)
+			buf := make([]byte, 0, 64*1024)
+			scanner.Buffer(buf, 10*1024*1024)
 			for scanner.Scan() {
 				var line string
 				if allPods {
@@ -241,7 +253,7 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 					return // 管道已关闭
 				}
 			}
-		}(&pd, stream)
+		}(pd, stream)
 	}
 
 	// 启动一个 goroutine 等待所有日志读取完成后关闭 writer
