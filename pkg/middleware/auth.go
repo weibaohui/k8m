@@ -20,6 +20,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if path == "/" ||
 			path == "/favicon.ico" ||
 			path == "/healthz" ||
+			strings.HasPrefix(path, "/monacoeditorwork/") ||
 			strings.HasPrefix(path, "/swagger/") ||
 			strings.HasPrefix(path, "/debug/") ||
 			strings.HasPrefix(path, "/mcp/") ||
