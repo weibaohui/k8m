@@ -15,9 +15,10 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
     api,
     data,
 }) => {
-    const [loading, setLoading] = useState(false);
+    const [oldPassword, setOldPassword] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     if (api) {
         api = replacePlaceholders(api, data)
@@ -28,9 +29,12 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
      * 验证两次密码输入是否一致，一致才允许提交
      */
     const handleSave = async () => {
-        if (!api) return;
+        if (!oldPassword) {
+            message.error('请输入原密码');
+            return;
+        }
         if (!password) {
-            message.error('请输入密码');
+            message.error('请输入新密码');
             return;
         }
         if (!confirmPassword) {
@@ -43,6 +47,7 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
         }
         setLoading(true);
 
+        const encryptedOldPassword = encrypt(oldPassword);
         const encryptedPassword = encrypt(password);
         const encryptedConfirmPassword = encrypt(confirmPassword);
 
@@ -50,6 +55,7 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
             url: api,
             method: 'post',
             data: {
+                oldPassword: encryptedOldPassword,
                 password: encryptedPassword,
                 confirmPassword: encryptedConfirmPassword
             }
@@ -59,6 +65,7 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
             message.error(`密码修改失败:请尝试刷新后重试。 ${response.data?.msg}`);
         } else {
             message.info('密码修改成功！');
+            setOldPassword('');
             setPassword('');
             setConfirmPassword('');
         }
@@ -69,6 +76,15 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
         <>
             <div style={{ width: '100%', height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ minWidth: '80px' }}>原密码:</span>
+                        <Input.Password
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                            placeholder="请输入原密码"
+                            style={{ flex: 1 }}
+                        />
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ minWidth: '80px' }}>新密码:</span>
                         <Input.Password
@@ -99,7 +115,7 @@ const PasswordEditorWithForm: React.FC<PasswordEditorWithFormProps> = ({
                                 type="primary" 
                                 onClick={handleSave} 
                                 loading={loading}
-                                disabled={!password || !confirmPassword || password !== confirmPassword}
+                                disabled={!oldPassword || !password || !confirmPassword || password !== confirmPassword}
                             >
                                 保存
                             </Button>
