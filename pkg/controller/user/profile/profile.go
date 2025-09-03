@@ -66,26 +66,47 @@ func (uc *Controller) ListUserPermissions(c *gin.Context) {
 	amis.WriteJsonList(c, clusters)
 }
 
+// PasswordUpdateRequest 密码修改请求结构体
+type PasswordUpdateRequest struct {
+	Password        string `json:"password" binding:"required"`         // 新密码（加密后）
+	ConfirmPassword string `json:"confirmPassword" binding:"required"` // 确认密码（加密后）
+}
+
 // @Summary 修改密码
-// @Description 修改当前登录用户的密码
+// @Description 修改当前登录用户的密码，需要两次输入密码确认
 // @Security BearerAuth
-// @Param password body string true "新密码（加密后）"
+// @Param request body PasswordUpdateRequest true "密码修改请求"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/update_psw [post]
 func (uc *Controller) UpdatePsw(c *gin.Context) {
 	params := dao.BuildParams(c)
-	m := models.User{}
-	err := c.ShouldBindJSON(&m)
+	req := PasswordUpdateRequest{}
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	// 解密两个密码进行比较
+	pswBytes, err := utils.AesDecrypt(req.Password)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	confirmPswBytes, err := utils.AesDecrypt(req.ConfirmPassword)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 验证两次密码是否一致
+	if string(pswBytes) != string(confirmPswBytes) {
+		amis.WriteJsonError(c, fmt.Errorf("两次输入的密码不一致"))
+		return
+	}
+
 	// 密码 + 盐重新计算
-	pswBytes, err := utils.AesDecrypt(m.Password)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+	m := models.User{}
 	m.Salt = utils.RandNLengthString(8)
 	psw, err := utils.AesEncrypt([]byte(fmt.Sprintf("%s%s", string(pswBytes), m.Salt)))
 	if err != nil {
