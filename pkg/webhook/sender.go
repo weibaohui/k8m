@@ -25,6 +25,15 @@ func RegisterSender(platform string, sender Sender) {
 	senderRegistry[platform] = sender
 }
 
+// GetSender returns the appropriate sender.
+// 若找不到平台，返回 nil 并建议调用方处理异常
+func GetSender(platform string) (Sender, error) {
+	if s, ok := senderRegistry[platform]; ok {
+		return s, nil
+	}
+	return nil, fmt.Errorf("webhook sender for platform '%s' not found", platform)
+}
+
 // getSender returns the appropriate sender.
 // 若找不到平台，返回 nil 并建议调用方处理异常
 func getSender(platform string) (Sender, error) {

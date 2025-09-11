@@ -14,7 +14,7 @@ type Receiver struct {
 	Headers       map[string]string
 	Template      string
 	SignSecret    string
-	SignAlgo      string // e.g. "hmac-sha256", "feishu"
+	SignAlgo      string // e.g. "hmac-sha256", "feishu", "dingtalk"
 	SignHeaderKey string // e.g. "X-Signature" or unused
 }
 
@@ -29,6 +29,20 @@ func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
 		SignSecret:    signSecret,
 		SignAlgo:      "feishu",
 		SignHeaderKey: "", // 飞书不需要 header 签名，是 URL 参数
+	}
+}
+
+// NewDingtalkReceiver 快捷创建钉钉 Receiver
+func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
+	return &Receiver{
+		Platform:      "dingtalk",
+		TargetURL:     targetURL,
+		Method:        "POST",
+		Headers:       map[string]string{},
+		Template:      `{"msgtype":"text","text":{"content":"%s"}}`,
+		SignSecret:    signSecret,
+		SignAlgo:      "dingtalk",
+		SignHeaderKey: "", // 钉钉不需要 header 签名，是 URL 参数
 	}
 }
 
@@ -52,6 +66,10 @@ func (r *Receiver) Validate() error {
 func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 	if receiver.Platform == "feishu" {
 		rr := NewFeishuReceiver(receiver.TargetURL, receiver.SignSecret)
+		return rr
+	}
+	if receiver.Platform == "dingtalk" {
+		rr := NewDingtalkReceiver(receiver.TargetURL, receiver.SignSecret)
 		return rr
 	}
 	return nil
