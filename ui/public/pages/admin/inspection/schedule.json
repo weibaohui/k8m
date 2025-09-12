@@ -340,7 +340,7 @@
           "name": "script_codes",
           "label": "规则数",
           "type": "tpl",
-          "tpl": "${script_codes | split:','|count}"
+          "tpl": "<%= data.script_codes ? (data.script_codes.split(',').filter(item => item !== '').length) : 0 %>"
         },
         {
           "name": "cron",

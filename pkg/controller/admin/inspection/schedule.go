@@ -266,6 +266,10 @@ func (s *AdminScheduleController) Start(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	if strings.TrimSpace(one.ScriptCodes) == "" {
+		amis.WriteJsonError(c, fmt.Errorf("无检测规则，请先在 操作-管理规则 菜单中配置"))
+		return
+	}
 	go func() {
 		sb := lua.ScheduleBackground{}
 		clusters := strings.Split(one.Clusters, ",")
