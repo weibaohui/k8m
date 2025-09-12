@@ -434,10 +434,8 @@ func (c *clusterService) ScanClustersInDir(path string) {
 }
 func (c *clusterService) ScanClustersInDB() {
 
-	kc := &models.KubeConfig{}
-
 	var list []*models.KubeConfig
-	err := dao.DB().Model(kc).Find(&list).Error
+	err := dao.DB().Model(&models.KubeConfig{}).Find(&list).Error
 	if err != nil {
 		klog.Errorf("查询集群失败: %v", err)
 		return
@@ -463,10 +461,10 @@ func (c *clusterService) ScanClustersInDB() {
 	}
 
 	// 2. 处理数据库中的配置
-	for _, kc := range list {
-		config, err := clientcmd.Load([]byte(kc.Content))
+	for _, item := range list {
+		config, err := clientcmd.Load([]byte(item.Content))
 		if err != nil {
-			klog.V(6).Infof("解析集群 [%s]失败: %v", kc.Server, err)
+			klog.V(6).Infof("解析集群 [%s]失败: %v", item.Server, err)
 			continue
 		}
 
@@ -475,11 +473,11 @@ func (c *clusterService) ScanClustersInDB() {
 			context := config.Contexts[contextName]
 			cluster := config.Clusters[context.Cluster]
 
-			if context.AuthInfo == kc.User {
+			if context.AuthInfo == item.User {
 				// 检查是否已存在该配置
 				exists := false
 				for _, cc := range c.clusterConfigs {
-					if (cc.FileName == string(ClusterConfigSourceDB) || cc.FileName == string(ClusterConfigSourceAWS)) && cc.Server == cluster.Server && cc.ContextName == contextName {
+					if (cc.FileName == string(ClusterConfigSourceAWS)) && cc.Server == cluster.Server && cc.ContextName == contextName {
 						exists = true
 						break
 					}
@@ -488,25 +486,30 @@ func (c *clusterService) ScanClustersInDB() {
 				// 如果不存在，添加新配置
 				if !exists {
 					clusterConfig := &ClusterConfig{
-						FileName:             string(ClusterConfigSourceDB),
 						ContextName:          contextName,
-						ClusterID:            fmt.Sprintf("%s/%s", kc.DisplayName, contextName),
 						UserName:             context.AuthInfo,
 						ClusterName:          context.Cluster,
 						Namespace:            context.Namespace,
-						kubeConfig:           []byte(kc.Content),
+						kubeConfig:           []byte(item.Content),
 						watchStatus:          make(map[string]*clusterWatchStatus),
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
 					}
-					if kc.IsAWSEKS {
+					if item.DisplayName != "" {
+						clusterConfig.FileName = item.DisplayName
+					} else {
+						clusterConfig.FileName = fmt.Sprintf("%d-%s", item.ID, contextName)
+					}
+
+					// aws 单独处理
+					if item.IsAWSEKS {
 						clusterConfig.Source = ClusterConfigSourceAWS
 						eksConfig := &komaws.EKSAuthConfig{
-							AccessKey:       kc.AccessKey,
-							SecretAccessKey: kc.SecretAccessKey,
-							Region:          kc.Region,
-							ClusterName:     kc.ClusterName,
+							AccessKey:       item.AccessKey,
+							SecretAccessKey: item.SecretAccessKey,
+							Region:          item.Region,
+							ClusterName:     item.ClusterName,
 						}
 						clusterConfig.AWSConfig = eksConfig
 						clusterConfig.IsAWSEKS = true
