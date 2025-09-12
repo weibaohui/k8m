@@ -250,14 +250,24 @@
                       "type": "input-text",
                       "name": "name",
                       "label": "名称",
-                      "placeholder": "如 飞书群, 钉钉群",
+                      "placeholder": "飞书群",
                       "required": true
                     },
                     {
-                      "type": "input-text",
+                      "type": "select",
                       "name": "platform",
                       "label": "平台",
-                      "placeholder": "如 feishu, dingtalk"
+                      "options": [
+                        {
+                          "label": "飞书",
+                          "value": "feishu"
+                        },
+                        {
+                          "label": "钉钉",
+                          "value": "dingtalk"
+                        }
+                      ],
+                      "placeholder": "请选择平台"
                     },
                     {
                       "type": "input-url",
@@ -268,27 +278,9 @@
                     },
                     {
                       "type": "input-text",
-                      "name": "method",
-                      "label": "请求方法",
-                      "placeholder": "如 POST, GET"
-                    },
-                    {
-                      "type": "input-text",
                       "name": "sign_secret",
                       "label": "签名密钥",
                       "placeholder": "如有签名需求请填写"
-                    },
-                    {
-                      "type": "input-text",
-                      "name": "sign_algo",
-                      "label": "签名算法",
-                      "placeholder": "如 hmac-sha256, feishu"
-                    },
-                    {
-                      "type": "input-text",
-                      "name": "sign_header_key",
-                      "label": "签名Header键",
-                      "placeholder": "如 X-Signature"
                     },
                     {
                       "type": "editor",
@@ -337,14 +329,17 @@
         {
           "name": "platform",
           "label": "平台",
-          "type": "text",
-          "width": "100px"
+          "type": "mapping",
+          "map": {
+            "dingtalk": "<span class='label label-success'>钉钉群机器人</span>",
+            "feishu": "<span class='label label-warning'>飞书群机器人</span>",
+            "*": "<span class='label label-success'>未知</span>"
+          }
         },
         {
           "name": "target_url",
-          "label": "目标URL",
-          "type": "text",
-          "width": "300px"
+          "label": "Webhook地址",
+          "type": "text"
         },
         {
           "name": "sign_secret",
