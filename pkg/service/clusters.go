@@ -479,7 +479,7 @@ func (c *clusterService) ScanClustersInDB() {
 				// 检查是否已存在该配置
 				exists := false
 				for _, cc := range c.clusterConfigs {
-					if (cc.FileName == string(ClusterConfigSourceDB) || cc.FileName == string(ClusterConfigSourceAWS)) && cc.Server == cluster.Server && cc.ContextName == contextName {
+					if (cc.FileName == string(ClusterConfigSourceAWS)) && cc.Server == cluster.Server && cc.ContextName == contextName {
 						exists = true
 						break
 					}
@@ -488,7 +488,7 @@ func (c *clusterService) ScanClustersInDB() {
 				// 如果不存在，添加新配置
 				if !exists {
 					clusterConfig := &ClusterConfig{
-						FileName:             string(ClusterConfigSourceDB),
+						FileName:             kc.DisplayName,
 						ContextName:          contextName,
 						ClusterID:            fmt.Sprintf("%s/%s", kc.DisplayName, contextName),
 						UserName:             context.AuthInfo,
