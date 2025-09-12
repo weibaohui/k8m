@@ -47,7 +47,7 @@
                           "name": "name",
                           "label": "名称",
                           "required": true,
-                          "placeholder": "如 飞书群, 钉钉群"
+                          "placeholder": "如飞书群"
                         },
                         {
                           "type": "input-url",
@@ -100,6 +100,11 @@
                       "api": "post:/admin/inspection/webhook/save",
                       "wrapWithPanel": false,
                       "body": [
+                        {
+                          "type": "alert",
+                          "level": "info",
+                          "body": "本接口支持自定义机器人在企业<span style='color: red; font-weight: bold;'>内部群</span>中发送消息，调用本接口前需要创建webhook自定义机器人。"
+                        },
                         {
                           "type": "hidden",
                           "name": "id"
@@ -337,14 +342,31 @@
           }
         },
         {
-          "name": "target_url",
-          "label": "Webhook地址",
-          "type": "text"
-        },
-        {
-          "name": "sign_secret",
-          "label": "签名校验",
-          "type": "text"
+          "name": "details",
+          "label": "详细信息",
+          "type": "button",
+          "btnLevel": "link",
+          "actionType": "dialog",
+          "dialog": {
+            "title": "Webhook 详细信息",
+            "body": {
+              "type": "form",
+              "body": [
+                {
+                  "type": "input-url",
+                  "name": "target_url",
+                  "label": "Webhook地址",
+                  "disabled": true
+                },
+                {
+                  "type": "input-text",
+                  "name": "sign_secret",
+                  "label": "签名密钥",
+                  "disabled": true
+                }
+              ]
+            }
+          }
         },
         {
           "name": "template",
