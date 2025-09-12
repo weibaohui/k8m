@@ -25,7 +25,7 @@ func (d *DingtalkSender) Send(msg string, receiver *Receiver) (*SendResult, erro
 	// Add Dingtalk signature if enabled
 	finalURL := receiver.TargetURL
 	if receiver.SignAlgo == "dingtalk" && receiver.SignSecret != "" {
-		timestamp := time.Now().UnixMilli() // 钉钉使用毫秒时间戳
+		timestamp := time.Now().UnixNano() / 1e6 // 钉钉使用毫秒时间戳
 		timestampStr := strconv.FormatInt(timestamp, 10)
 		signature, err := GenDingtalkSign(receiver.SignSecret, timestamp)
 		if err != nil {
@@ -35,7 +35,7 @@ func (d *DingtalkSender) Send(msg string, receiver *Receiver) (*SendResult, erro
 		params := url.Values{}
 		params.Set("timestamp", timestampStr)
 		params.Set("sign", signature)
-		finalURL = fmt.Sprintf("%s?%s", finalURL, params.Encode())
+		finalURL = fmt.Sprintf("%s&%s", finalURL, params.Encode())
 	}
 
 	payload := map[string]interface{}{
@@ -81,16 +81,16 @@ func (d *DingtalkSender) Send(msg string, receiver *Receiver) (*SendResult, erro
 
 // GenDingtalkSign generates signature for Dingtalk webhook
 func GenDingtalkSign(secret string, timestamp int64) (string, error) {
-	// timestamp+"\n"+secret 做sha256, 再进行base64 encode
-	stringToSign := fmt.Sprintf("%d", timestamp) + "\n" + secret
+	// 构造签名字符串: timestamp + "\n" + secret
+	stringToSign := fmt.Sprintf("%d\n%s", timestamp, secret)
+
+	// 使用HMAC-SHA256算法计算签名
 	h := hmac.New(sha256.New, []byte(secret))
-	_, err := h.Write([]byte(stringToSign))
-	if err != nil {
-		return "", err
-	}
+	h.Write([]byte(stringToSign))
 	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	// 对签名进行URL编码
-	urlEncodedSign := url.QueryEscape(signature)
-	return urlEncodedSign, nil
+	// 对签名结果进行URL编码
+	encodedSign := url.QueryEscape(signature)
+
+	return encodedSign, nil
 }
