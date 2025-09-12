@@ -487,7 +487,6 @@ func (c *clusterService) ScanClustersInDB() {
 				if !exists {
 					clusterConfig := &ClusterConfig{
 						ContextName:          contextName,
-						ClusterID:            fmt.Sprintf("%s/%s", item.DisplayName, contextName),
 						UserName:             context.AuthInfo,
 						ClusterName:          context.Cluster,
 						Namespace:            context.Namespace,
@@ -503,6 +502,7 @@ func (c *clusterService) ScanClustersInDB() {
 						clusterConfig.FileName = fmt.Sprintf("%d-%s", item.ID, contextName)
 					}
 
+					// aws 单独处理
 					if item.IsAWSEKS {
 						clusterConfig.Source = ClusterConfigSourceAWS
 						eksConfig := &komaws.EKSAuthConfig{
