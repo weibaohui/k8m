@@ -6,7 +6,7 @@ import (
 
 type IndexFile struct {
 	// This is used ONLY for validation against chartmuseum's index files and is discarded after validation.
-	ServerInfo map[string]interface{}   `json:"serverInfo,omitempty"`
+	ServerInfo map[string]any           `json:"serverInfo,omitempty"`
 	APIVersion string                   `json:"apiVersion"`
 	Generated  time.Time                `json:"generated"`
 	Entries    map[string]ChartVersions `json:"entries"`
@@ -108,7 +108,7 @@ type Dependency struct {
 	Enabled bool `json:"enabled,omitempty" yaml:"enabled,omitempty"`
 	// ImportValues holds the mapping of source values to parent key to be imported. Each item can be a
 	// string or pair of child/parent sublist items.
-	ImportValues []interface{} `json:"import-values,omitempty" yaml:"import-values,omitempty"`
+	ImportValues []any `json:"import-values,omitempty" yaml:"import-values,omitempty"`
 	// Alias usable alias to be used for the chart
 	Alias string `json:"alias,omitempty" yaml:"alias,omitempty"`
 }

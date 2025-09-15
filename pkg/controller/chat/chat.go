@@ -59,7 +59,7 @@ type ResourceData struct {
 	Question string `form:"question"`
 }
 
-func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
+func handleRequest(c *gin.Context, promptFunc func(data any) string) {
 	if !service.AIService().IsEnabled() {
 		amis.WriteJsonData(c, gin.H{
 			"result": "请先配置开启ChatGPT功能",
@@ -96,7 +96,7 @@ func handleRequest(c *gin.Context, promptFunc func(data interface{}) string) {
 // @Success 200 {object} string
 // @Router /ai/chat/event [get]
 func (cc *Controller) Event(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
 			"note":   d.Note,
@@ -136,7 +136,7 @@ func (cc *Controller) Describe(c *gin.Context) {
 		Namespace(data.Namespace).
 		Describe(&describe)
 
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
@@ -161,7 +161,7 @@ func (cc *Controller) Describe(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/example [get]
 func (cc *Controller) Example(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
@@ -188,7 +188,7 @@ func (cc *Controller) Example(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/example/field [get]
 func (cc *Controller) FieldExample(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
@@ -212,7 +212,7 @@ func (cc *Controller) FieldExample(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/resource [get]
 func (cc *Controller) Resource(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
@@ -237,7 +237,7 @@ func (cc *Controller) Resource(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/k8s_gpt/resource [get]
 func (cc *Controller) K8sGPTResource(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
@@ -265,7 +265,7 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
@@ -288,7 +288,7 @@ func (cc *Controller) AnySelection(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/any_question [get]
 func (cc *Controller) AnyQuestion(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`
@@ -310,7 +310,7 @@ func (cc *Controller) AnyQuestion(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/cron [get]
 func (cc *Controller) Cron(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(
 			`我正在查看k8s cronjob 中的schedule 表达式：%s。
@@ -330,7 +330,7 @@ func (cc *Controller) Cron(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/log [get]
 func (cc *Controller) Log(c *gin.Context) {
-	handleRequest(c, func(data interface{}) string {
+	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(d.Data))
 	})

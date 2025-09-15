@@ -20,16 +20,16 @@ type Menu struct {
 
 // MenuDataJSON 用于处理JSON序列化和反序列化
 type MenuDataJSON struct {
-	ID        uint        `json:"id,omitempty"`
-	MenuData  interface{} `json:"menu_data,omitempty"`
-	CreatedAt time.Time   `json:"created_at,omitempty"`
-	UpdatedAt time.Time   `json:"updated_at,omitempty"`
+	ID        uint      `json:"id,omitempty"`
+	MenuData  any       `json:"menu_data,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
 // MarshalJSON 自定义JSON序列化方法
 // 将存储在数据库中的字符串转换为JSON对象
 func (m *Menu) MarshalJSON() ([]byte, error) {
-	var menuData interface{}
+	var menuData any
 	if m.MenuData != "" {
 		if err := json.Unmarshal([]byte(m.MenuData), &menuData); err != nil {
 			// 如果解析失败，直接返回字符串

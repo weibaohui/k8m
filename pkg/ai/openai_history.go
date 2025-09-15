@@ -71,7 +71,7 @@ func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
 					Content: utils.ToJSON(m),
 				})
 			}
-		case []interface{}:
+		case []any:
 			for _, m := range item {
 				history = append(history, openai.ChatCompletionMessage{
 					Role:    openai.ChatMessageRoleUser,

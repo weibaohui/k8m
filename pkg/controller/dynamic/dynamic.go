@@ -68,7 +68,7 @@ func (ac *ActionController) List(c *gin.Context) {
 	}
 
 	// 用于存储 JSON 数据的 map
-	var jsonData map[string]interface{}
+	var jsonData map[string]any
 	if err = c.ShouldBindJSON(&jsonData); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -493,7 +493,7 @@ func (ac *ActionController) Save(c *gin.Context) {
 	// 解析 Yaml 到 Unstructured 对象
 
 	obj := &unstructured.Unstructured{}
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err = yaml.Unmarshal([]byte(yamlStr), &raw); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -610,7 +610,7 @@ func (ac *ActionController) HPA(c *gin.Context) {
 // getNestedStringFromJSON 从嵌套的JSON数据中获取指定路径的字符串值
 // path参数使用点号分隔，例如: "metadata.namespace", "spec.replicas"
 // 如果路径不存在或值不是字符串类型，返回空字符串
-func getNestedStringFromJSON(data map[string]interface{}, path string) string {
+func getNestedStringFromJSON(data map[string]any, path string) string {
 	if data == nil || path == "" {
 		return ""
 	}
@@ -635,7 +635,7 @@ func getNestedStringFromJSON(data map[string]interface{}, path string) string {
 		}
 
 		// 如果不是最后一层，必须是map类型才能继续
-		if nextMap, ok := value.(map[string]interface{}); ok {
+		if nextMap, ok := value.(map[string]any); ok {
 			current = nextMap
 		} else {
 			return ""
@@ -651,12 +651,12 @@ func getNestedStringFromJSON(data map[string]interface{}, path string) string {
 //
 // // 示例 JSON 数据
 //
-//	jsonData := map[string]interface{}{
+//	jsonData := map[string]any{
 //		"page":    1,
-//		"metadata": map[string]interface{}{
+//		"metadata": map[string]any{
 //			"name": "nginx",
 //		},
-//		"status": map[string]interface{}{
+//		"status": map[string]any{
 //			"phase": "Running",
 //		},
 //		"perPage": 10,
@@ -664,7 +664,7 @@ func getNestedStringFromJSON(data map[string]interface{}, path string) string {
 // 	queryString := strings.Join(queryConditions, "&")
 // 输出: page=1&metadata.name=nginx&status.phase=Running&perPage=10
 
-func parseNestedJSON(prefix string, data map[string]interface{}) []string {
+func parseNestedJSON(prefix string, data map[string]any) []string {
 	var result []string
 
 	for key, value := range data {
@@ -681,7 +681,7 @@ func parseNestedJSON(prefix string, data map[string]interface{}) []string {
 			continue
 		}
 		switch v := value.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			// 递归解析嵌套对象
 			result = append(result, parseNestedJSON(currentKey, v)...)
 		default:

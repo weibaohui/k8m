@@ -11,7 +11,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 )
 
-func RolePlatformOnly(handler interface{}) gin.HandlerFunc {
+func RolePlatformOnly(handler any) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, role := amis.GetLoginUser(c)
 		if role == "" {

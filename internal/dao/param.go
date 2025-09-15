@@ -9,12 +9,12 @@ import (
 
 // Params 用于处理分页和排序参数，以及上下文中的用户信息
 type Params struct {
-	OrderBy  string                 // 排序字段
-	OrderDir string                 // 排序方向
-	Page     int                    // 当前页
-	PerPage  int                    // 每页数量
-	Queries  map[string]interface{} // 动态查询条件
-	UserName string                 // 登录用户名
+	OrderBy  string         // 排序字段
+	OrderDir string         // 排序方向
+	Page     int            // 当前页
+	PerPage  int            // 每页数量
+	Queries  map[string]any // 动态查询条件
+	UserName string         // 登录用户名
 
 }
 
@@ -49,7 +49,7 @@ func BuildParams(c *gin.Context) *Params {
 	}
 
 	// 构建动态查询条件
-	queries := make(map[string]interface{})
+	queries := make(map[string]any)
 	// 遍历所有查询参数
 	for key, values := range c.Request.URL.Query() {
 		// values 是 []string，我们只取第一个值

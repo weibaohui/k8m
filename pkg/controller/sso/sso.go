@@ -92,7 +92,7 @@ func (au *AuthController) HandleCallback(c *gin.Context) {
 		return
 	}
 
-	var claims map[string]interface{}
+	var claims map[string]any
 	if err = idToken.Claims(&claims); err != nil {
 		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
 		return
@@ -137,7 +137,7 @@ func getDefaultOIDCClient(c *gin.Context, name string) (*Client, error) {
 	return NewOIDCClient(c, dbConfig)
 
 }
-func GetUsername(claims map[string]interface{}, preferKeys []string) string {
+func GetUsername(claims map[string]any, preferKeys []string) string {
 	for _, key := range preferKeys {
 		if val, ok := claims[key].(string); ok && val != "" {
 			return val

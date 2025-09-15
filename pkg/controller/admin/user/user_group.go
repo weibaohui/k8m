@@ -47,7 +47,7 @@ func (a *AdminUserGroupController) ListUserGroup(c *gin.Context) {
 // @Security BearerAuth
 // @Accept json
 // @Param data body models.UserGroup true "用户组信息"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} map[string]any
 // @Router /admin/user_group/save [post]
 func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 
@@ -75,8 +75,8 @@ func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 // @Description 保存用户组的菜单配置数据
 // @Security BearerAuth
 // @Accept json
-// @Param data body map[string]interface{} true "菜单配置信息"
-// @Success 200 {object} map[string]interface{}
+// @Param data body map[string]any true "菜单配置信息"
+// @Success 200 {object} map[string]any
 // @Router /admin/user_group/save_menu [post]
 func (a *AdminUserGroupController) SaveUserGroupMenu(c *gin.Context) {
 	var requestData struct {

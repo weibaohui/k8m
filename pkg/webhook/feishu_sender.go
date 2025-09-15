@@ -37,7 +37,7 @@ func (f *FeishuSender) Send(msg string, receiver *Receiver) (*SendResult, error)
 		params.Set("sign", signature)
 		finalURL = fmt.Sprintf("%s?%s", finalURL, params.Encode())
 	}
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"msg_type": "text",
 		"content": map[string]string{
 			"text": msg,

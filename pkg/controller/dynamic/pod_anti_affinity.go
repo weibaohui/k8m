@@ -75,12 +75,12 @@ func (ac *PodAntiAffinityController) ListPodAntiAffinity(c *gin.Context) {
 	}
 	if !found {
 		// 没有的话，返回一个空列表
-		amis.WriteJsonList(c, []interface{}{})
+		amis.WriteJsonList(c, []any{})
 		return
 	}
 
 	// 强制转换为数组
-	list, ok := affinity.([]interface{})
+	list, ok := affinity.([]any)
 	if !ok {
 		amis.WriteJsonError(c, fmt.Errorf("list is not an array"))
 		return
@@ -178,7 +178,7 @@ func processPodAntiAffinity(c *gin.Context, action string) {
 	// 将{}替换为null，为null才会删除
 	patchJSON = strings.ReplaceAll(patchJSON, "{}", "null")
 	klog.V(6).Infof("UpdatePodAffinity Patch JSON :\n%s\n", patchJSON)
-	var obj interface{}
+	var obj any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -189,7 +189,7 @@ func processPodAntiAffinity(c *gin.Context, action string) {
 
 // getPodAffinityTerms 获取 PodAffinity 的 Affinity Terms
 // action : modify\update\add
-func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, action string, rule podAffinity) ([]interface{}, error) {
+func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, action string, rule podAffinity) ([]any, error) {
 
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
@@ -205,11 +205,11 @@ func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, actio
 	}
 	if !found {
 		// 如果没有，那么如果是 add 操作，那么创建一个空的 podAffinityTerms
-		affinity = make([]interface{}, 0)
+		affinity = make([]any, 0)
 	}
 
 	// 强制转换为数组
-	podAffinityTerms, ok := affinity.([]interface{})
+	podAffinityTerms, ok := affinity.([]any)
 	if !ok {
 		return nil, fmt.Errorf("podAffinityTerms is not an array")
 	}
@@ -221,9 +221,9 @@ func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, actio
 	// ]
 	// 其长度为8
 	if (len(podAffinityTerms) == 0 || len(x) == 8) && action == "add" {
-		podAffinityTerms = []interface{}{
-			map[string]interface{}{
-				"labelSelector": map[string]interface{}{
+		podAffinityTerms = []any{
+			map[string]any{
+				"labelSelector": map[string]any{
 					"matchLabels": rule.LabelSelector.MatchLabels,
 				},
 				"topologyKey": rule.TopologyKey,
@@ -233,9 +233,9 @@ func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, actio
 	}
 
 	// 进行操作：删除或新增
-	var newPodAffinityTerms []interface{}
+	var newPodAffinityTerms []any
 	for _, term := range podAffinityTerms {
-		termMap, ok := term.(map[string]interface{})
+		termMap, ok := term.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -260,8 +260,8 @@ func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, actio
 		// 如果是修改操作，并且 matchLabels 和 topologyKey 匹配，修改该 term 的 matchLabels
 		if action == "modify" && topologyKey == rule.TopologyKey {
 			// 修改新值，不修改原值，直接添加到新列表
-			newPodAffinityTerms = append(newPodAffinityTerms, map[string]interface{}{
-				"labelSelector": map[string]interface{}{
+			newPodAffinityTerms = append(newPodAffinityTerms, map[string]any{
+				"labelSelector": map[string]any{
 					"matchLabels": rule.LabelSelector.MatchLabels,
 				},
 				"topologyKey": rule.TopologyKey,
@@ -275,12 +275,12 @@ func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, actio
 
 	// 如果是新增操作，增加新的 podAffinityTerm
 	if action == "add" {
-		if !slice.ContainBy(newPodAffinityTerms, func(item interface{}) bool {
-			m := item.(map[string]interface{})
+		if !slice.ContainBy(newPodAffinityTerms, func(item any) bool {
+			m := item.(map[string]any)
 			return m["topologyKey"] == rule.TopologyKey
 		}) {
-			newPodAffinityTerms = append(newPodAffinityTerms, map[string]interface{}{
-				"labelSelector": map[string]interface{}{
+			newPodAffinityTerms = append(newPodAffinityTerms, map[string]any{
+				"labelSelector": map[string]any{
 					"matchLabels": rule.LabelSelector.MatchLabels,
 				},
 				"topologyKey": rule.TopologyKey,
@@ -293,7 +293,7 @@ func getPodAntiAffinityTerms(kind string, item *unstructured.Unstructured, actio
 }
 
 // 生成动态的 patch 数据
-func generateRequiredPodAntiAffinityDynamicPatch(kind string, terms []interface{}) (map[string]interface{}, error) {
+func generateRequiredPodAntiAffinityDynamicPatch(kind string, terms []any) (map[string]any, error) {
 	// 打印rules
 	klog.V(6).Infof("generateRequiredPodAntiAffinityDynamicPatch rules:\n%+v len=%d\n", terms, len(terms))
 	// 删除[] len=0
@@ -305,15 +305,15 @@ func generateRequiredPodAntiAffinityDynamicPatch(kind string, terms []interface{
 	requiredAntiAffinityPath := append(paths, "affinity", "podAntiAffinity")
 
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	current := patch
 
 	// 按层级动态生成嵌套结构
 	for _, path := range requiredAntiAffinityPath {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 	// 单独处理删除时，terms为空的情况，要赋值为nil
 	// 生成json 如下，那么需要将{}替换为null，为null才会删除
