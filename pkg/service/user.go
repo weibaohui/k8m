@@ -125,7 +125,7 @@ func (u *userService) GetRolesByGroupNames(groupNames []string) ([]string, error
 		return nil, nil
 	}
 
-	cacheKey := u.formatCacheKey("user:roles:%s", groupNames)
+	cacheKey := u.formatCacheKey("user:roles:%s", strings.Join(groupNames, ","))
 
 	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
 		var ugList []models.UserGroup
