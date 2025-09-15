@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -23,44 +24,63 @@ type userService struct {
 	cacheKeys sync.Map // 用于存储所有使用过的缓存key
 }
 
-func (u *userService) GetGroupMenuData(groupNames string) (string, error) {
-	if groupNames == "" {
-		return "", nil
+// GetGroupMenuData 获取用户组的菜单数据
+// groupNames: 用户组名称，逗号分隔
+// 用户会属于多个组，每个组有不同的菜单数据，如何合并？
+// 当前策略，保留第一个出现的项，以后再改成菜单切换形式，看到多套菜单，根据不同角色下的菜单数据进行切换
+// return: 菜单数据，json字符串
+func (u *userService) GetGroupMenuData(groupNameList []string) (any, error) {
+	if len(groupNameList) == 0 {
+		// 返回默认空菜单结构
+		return []interface{}{}, nil
 	}
 
-	// 按逗号分割，取第一个组名
-	groupNameList := strings.Split(groupNames, ",")
-	firstGroupName := strings.TrimSpace(groupNameList[0])
-
-	if firstGroupName == "" {
-		return "", nil
-	}
-
-	cacheKey := u.formatCacheKey("user:groupmenu:%s", firstGroupName)
-
-	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() (string, error) {
-		params := &dao.Params{}
-		userGroup := &models.UserGroup{}
-		queryFunc := func(db *gorm.DB) *gorm.DB {
-			return db.Select("menu_data").Where("group_name = ?", firstGroupName)
+	// 尝试从所有用户组中获取菜单数据
+	// 找到第一个不为空的cacheKey，返回其数据
+	for _, groupName := range groupNameList {
+		groupName = strings.TrimSpace(groupName)
+		if groupName == "" {
+			continue
 		}
 
-		item, err := userGroup.GetOne(params, queryFunc)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return "", nil
+		cacheKey := u.formatCacheKey("user:groupmenu:%s", groupName)
+
+		result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() (any, error) {
+			params := &dao.Params{}
+			userGroup := &models.UserGroup{}
+			queryFunc := func(db *gorm.DB) *gorm.DB {
+				return db.Select("menu_data").Where("group_name = ?", groupName)
 			}
-			return "", err
+
+			item, err := userGroup.GetOne(params, queryFunc)
+			if err != nil {
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return nil, err
+				}
+				return []interface{}{}, nil
+			}
+
+			if item.MenuData != "" {
+				// 将JSON字符串解析为Go对象
+				var menuData interface{}
+				if err := json.Unmarshal([]byte(item.MenuData), &menuData); err == nil {
+					return menuData, nil
+				}
+				// 如果解析失败，返回空数组
+				return []interface{}{}, nil
+			}
+
+			return []interface{}{}, nil
+		})
+
+		// 如果找到了有效的菜单数据，直接返回
+		if err == nil && result != nil {
+			return result, nil
 		}
+	}
 
-		if item.MenuData == "" {
-			return "", nil
-		}
-
-		return item.MenuData, nil
-	})
-
-	return result, err
+	// 如果没有找到任何菜单数据，返回默认空菜单结构
+	return []interface{}{}, nil
 }
 
 // addCacheKey 添加缓存key到列表中（并发安全）
@@ -100,8 +120,8 @@ func (u *userService) List() ([]*models.User, error) {
 }
 
 // GetRolesByGroupNames 获取用户的角色
-func (u *userService) GetRolesByGroupNames(groupNames string) ([]string, error) {
-	if groupNames == "" {
+func (u *userService) GetRolesByGroupNames(groupNames []string) ([]string, error) {
+	if len(groupNames) == 0 {
 		return nil, nil
 	}
 
@@ -109,7 +129,7 @@ func (u *userService) GetRolesByGroupNames(groupNames string) ([]string, error) 
 
 	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
 		var ugList []models.UserGroup
-		err := dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", strings.Split(groupNames, ",")).Distinct("role").Find(&ugList).Error
+		err := dao.DB().Model(&models.UserGroup{}).Where("group_name in ?", groupNames).Distinct("role").Find(&ugList).Error
 		if err != nil {
 			return nil, err
 		}
@@ -149,7 +169,7 @@ func (u *userService) GetClusterRole(cluster string, username string, jwtUserRol
 		// 查找用户本身、用户所在组，两个层面的集群权限。先形成查询名称的列表
 		var unionNames []string
 		if groupNames, err := u.GetGroupNames(username); err == nil {
-			unionNames = append(unionNames, strings.Split(groupNames, ",")...)
+			unionNames = append(unionNames, groupNames...)
 		}
 		unionNames = append(unionNames, username)
 
@@ -214,8 +234,7 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 		// 以上为授权类型为用户的情况
 		// 以下为授权类型为用户组的情况
 		// 先获取用户所在用户组名称，可能多个
-		if groupNames, err := u.GetGroupNames(username); err == nil {
-			goupNameList := strings.Split(groupNames, ",")
+		if goupNameList, err := u.GetGroupNames(username); err == nil {
 			if len(goupNameList) > 0 {
 				// 查找用户组对应的授权
 				if items2, _, err := clusterRole.List(params, func(db *gorm.DB) *gorm.DB {
@@ -300,10 +319,11 @@ func (u *userService) GenerateJWTToken(username string, roles []string, clusters
 }
 
 // GetGroupNames 获取用户所在的用户组
-func (u *userService) GetGroupNames(username string) (string, error) {
+// return: 用户组名称列表
+func (u *userService) GetGroupNames(username string) ([]string, error) {
 	cacheKey := u.formatCacheKey("user:groupnames:%s", username)
 
-	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() (string, error) {
+	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
 		params := &dao.Params{}
 		user := &models.User{}
 		queryFunc := func(db *gorm.DB) *gorm.DB {
@@ -311,9 +331,23 @@ func (u *userService) GetGroupNames(username string) (string, error) {
 		}
 		item, err := user.GetOne(params, queryFunc)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return item.GroupNames, nil
+
+		// 如果GroupNames为空返回空切片
+		if item.GroupNames == "" {
+			return []string{}, nil
+		}
+
+		// 将逗号分隔的字符串转为切片并去除空白
+		groups := strings.Split(item.GroupNames, ",")
+		var cleanGroups []string
+		for _, g := range groups {
+			if trimmed := strings.TrimSpace(g); trimmed != "" {
+				cleanGroups = append(cleanGroups, trimmed)
+			}
+		}
+		return cleanGroups, nil
 	})
 
 	return result, err
