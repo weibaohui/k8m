@@ -7,7 +7,7 @@ import (
 )
 
 // ToJSON 将任意结构体转换为格式化的 JSON 字符串
-func ToJSON(v interface{}) string {
+func ToJSON(v any) string {
 	jsonData, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		klog.V(6).Infof("Error converting to JSON: %v", err)

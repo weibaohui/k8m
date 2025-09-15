@@ -179,8 +179,8 @@ func (cc *ContainerController) getContainerResourcesInfoByName(item *unstructure
 
 	// 遍历 containers 列表
 	for _, container := range containers {
-		// 断言 container 类型为 map[string]interface{}
-		containerMap, ok := container.(map[string]interface{})
+		// 断言 container 类型为 map[string]any
+		containerMap, ok := container.(map[string]any)
 		if !ok {
 			return "", "", "", "", fmt.Errorf("unexpected container format")
 		}
@@ -208,7 +208,7 @@ func (cc *ContainerController) getContainerResourcesInfoByName(item *unstructure
 				return "", "", "", "", fmt.Errorf("error getting container requests: %w", err)
 			}
 			if !found {
-				requestsMap = make(map[string]interface{}) // 如果没有 requests 字段，初始化为空 map
+				requestsMap = make(map[string]any) // 如果没有 requests 字段，初始化为空 map
 			}
 
 			// 获取 limits
@@ -217,7 +217,7 @@ func (cc *ContainerController) getContainerResourcesInfoByName(item *unstructure
 				return "", "", "", "", fmt.Errorf("error getting container limits: %w", err)
 			}
 			if !found {
-				limitsMap = make(map[string]interface{}) // 如果没有 limits 字段，初始化为空 map
+				limitsMap = make(map[string]any) // 如果没有 limits 字段，初始化为空 map
 			}
 
 			// 获取 request CPU
@@ -301,7 +301,7 @@ func (cc *ContainerController) UpdateResources(c *gin.Context) {
 	}
 
 	patchJSON := utils.ToJSON(patchData)
-	var item interface{}
+	var item any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -311,7 +311,7 @@ func (cc *ContainerController) UpdateResources(c *gin.Context) {
 }
 
 // 生成资源patch数据
-func generateResourcePatch(kind string, info resourceInfo) (map[string]interface{}, error) {
+func generateResourcePatch(kind string, info resourceInfo) (map[string]any, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -319,19 +319,19 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]interface
 	}
 
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	current := patch
 
 	// 按层级动态生成嵌套结构
 	for _, path := range paths {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 
 	// 构造资源请求和限制
-	resources := make(map[string]interface{})
+	resources := make(map[string]any)
 
 	// 设置请求资源
 	requests := make(map[string]string)
@@ -358,7 +358,7 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]interface
 	}
 
 	// 构造容器数组
-	current["containers"] = []map[string]interface{}{
+	current["containers"] = []map[string]any{
 		{
 			"name":      info.ContainerName,
 			"resources": resources,
@@ -508,7 +508,7 @@ func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
 		return
 	}
 	patchJSON := utils.ToJSON(patchData)
-	var patch interface{}
+	var patch any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -537,14 +537,14 @@ func isValidEnvVarName(name string) bool {
 	return true
 }
 
-func (cc *ContainerController) generateEnvPatch(kind string, info ContainerEnv) (map[string]interface{}, error) {
+func (cc *ContainerController) generateEnvPatch(kind string, info ContainerEnv) (map[string]any, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
 		return nil, err
 	}
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	// 验证环境变量名称是否符合规范
 	for key := range info.Envs {
 		if !isValidEnvVarName(key) {
@@ -557,9 +557,9 @@ func (cc *ContainerController) generateEnvPatch(kind string, info ContainerEnv) 
 	// 按层级动态生成嵌套结构
 	for _, path := range paths {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 
 	// 构造环境变量数组
@@ -577,7 +577,7 @@ func (cc *ContainerController) generateEnvPatch(kind string, info ContainerEnv) 
 		envArray = nil
 	}
 	// 构造容器数组
-	current["containers"] = []map[string]interface{}{
+	current["containers"] = []map[string]any{
 		{
 			"name": info.ContainerName,
 			"env":  envArray,
@@ -609,8 +609,8 @@ func (cc *ContainerController) getContainerEnvVarsByName(item *unstructured.Unst
 	}
 	// 遍历 containers 列表
 	for _, container := range containers {
-		// 断言 container 类型为 map[string]interface{}
-		containerMap, ok := container.(map[string]interface{})
+		// 断言 container 类型为 map[string]any
+		containerMap, ok := container.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("unexpected container format")
 		}
@@ -633,8 +633,8 @@ func (cc *ContainerController) getContainerEnvVarsByName(item *unstructured.Unst
 			// 遍历 env 列表
 			envVars := make(map[string]string)
 			for _, envVar := range env {
-				// 断言 envVar 类型为 map[string]interface{}
-				envVarMap, ok := envVar.(map[string]interface{})
+				// 断言 envVar 类型为 map[string]any
+				envVarMap, ok := envVar.(map[string]any)
 				if !ok {
 					return nil, fmt.Errorf("unexpected envVar format")
 				}
@@ -681,7 +681,7 @@ func (cc *ContainerController) getImagePullSecrets(item *unstructured.Unstructur
 	// 提取 secret name 列表
 	var secretNames []string
 	for _, secret := range secrets {
-		secretMap, ok := secret.(map[string]interface{})
+		secretMap, ok := secret.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("unexpected imagePullSecret format")
 		}
@@ -719,8 +719,8 @@ func (cc *ContainerController) getContainerImageByName(item *unstructured.Unstru
 
 	// 遍历 containers 列表
 	for _, container := range containers {
-		// 断言 container 类型为 map[string]interface{}
-		containerMap, ok := container.(map[string]interface{})
+		// 断言 container 类型为 map[string]any
+		containerMap, ok := container.(map[string]any)
 		if !ok {
 			return "", "", fmt.Errorf("unexpected container format")
 		}
@@ -797,7 +797,7 @@ func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 	}
 
 	patchJSON := utils.ToJSON(patchData)
-	var item interface{}
+	var item any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -807,7 +807,7 @@ func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
 }
 
 // 生成动态的 patch 数据
-func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo) (map[string]interface{}, error) {
+func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo) (map[string]any, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -815,15 +815,15 @@ func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo)
 	}
 
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	current := patch
 
 	// 按层级动态生成嵌套结构
 	for _, path := range paths {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 
 	// 构造 `imagePullSecrets`
@@ -900,7 +900,7 @@ func (cc *ContainerController) ContainerHealthChecksInfo(c *gin.Context) {
 }
 
 // 获取容器健康检查信息
-func (cc *ContainerController) getContainerHealthChecksByName(item *unstructured.Unstructured, containerName string) (map[string]interface{}, error) {
+func (cc *ContainerController) getContainerHealthChecksByName(item *unstructured.Unstructured, containerName string) (map[string]any, error) {
 	// 获取资源类型
 	kind := item.GetKind()
 
@@ -922,7 +922,7 @@ func (cc *ContainerController) getContainerHealthChecksByName(item *unstructured
 
 	// 遍历 containers 列表
 	for _, container := range containers {
-		containerMap, ok := container.(map[string]interface{})
+		containerMap, ok := container.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("unexpected container format")
 		}
@@ -933,7 +933,7 @@ func (cc *ContainerController) getContainerHealthChecksByName(item *unstructured
 		}
 
 		if name == containerName {
-			result := make(map[string]interface{})
+			result := make(map[string]any)
 
 			// 获取就绪检查
 			if readinessProbe, found, _ := unstructured.NestedMap(containerMap, "readinessProbe"); found {
@@ -954,11 +954,11 @@ func (cc *ContainerController) getContainerHealthChecksByName(item *unstructured
 
 // 健康检查配置结构体
 type HealthCheckInfo struct {
-	ContainerName  string                 `json:"container_name"`
-	LivenessType   string                 `json:"liveness_type"`
-	ReadinessType  string                 `json:"readiness_type"`
-	ReadinessProbe map[string]interface{} `json:"readiness_probe,omitempty"`
-	LivenessProbe  map[string]interface{} `json:"liveness_probe,omitempty"`
+	ContainerName  string         `json:"container_name"`
+	LivenessType   string         `json:"liveness_type"`
+	ReadinessType  string         `json:"readiness_type"`
+	ReadinessProbe map[string]any `json:"readiness_probe,omitempty"`
+	LivenessProbe  map[string]any `json:"liveness_probe,omitempty"`
 }
 
 // @Summary 更新容器健康检查配置
@@ -1008,7 +1008,7 @@ func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
 }
 
 // 生成健康检查的 patch 数据
-func (cc *ContainerController) generateHealthCheckPatch(kind string, info HealthCheckInfo) (map[string]interface{}, error) {
+func (cc *ContainerController) generateHealthCheckPatch(kind string, info HealthCheckInfo) (map[string]any, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -1016,15 +1016,15 @@ func (cc *ContainerController) generateHealthCheckPatch(kind string, info Health
 	}
 
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	current := patch
 
 	// 按层级动态生成嵌套结构
 	for _, path := range paths {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 	// 判断健康检查类型
 	switch info.LivenessType {
@@ -1055,7 +1055,7 @@ func (cc *ContainerController) generateHealthCheckPatch(kind string, info Health
 	}
 
 	// 构造容器数组
-	current["containers"] = []map[string]interface{}{
+	current["containers"] = []map[string]any{
 		{
 			"name":           info.ContainerName,
 			"livenessProbe":  info.LivenessProbe,

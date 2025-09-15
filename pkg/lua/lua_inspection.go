@@ -144,11 +144,11 @@ func (p *Inspection) registerCheckEvent(events *[]CheckEvent, item *models.Inspe
 	p.lua.SetGlobal("check_event", p.lua.NewFunction(func(L *lua.LState) int {
 		status := L.CheckString(1)
 		msg := L.CheckString(2)
-		var extra map[string]interface{}
+		var extra map[string]any
 		if L.GetTop() >= 3 {
 			extraVal := L.CheckAny(3)
 			if tbl, ok := extraVal.(*lua.LTable); ok {
-				extra = lValueToGoValue(tbl).(map[string]interface{})
+				extra = lValueToGoValue(tbl).(map[string]any)
 			}
 		}
 		var name, namespace string

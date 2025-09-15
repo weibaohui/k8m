@@ -39,7 +39,7 @@ type nodeAffinity struct {
 // @Param version path string true "资源版本"
 // @Param ns path string true "命名空间"
 // @Param name path string true "资源名称"
-// @Success 200 {array} interface{}
+// @Success 200 {array} any
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_node_affinity/ns/{ns}/name/{name} [get]
 func (ac *NodeAffinityController) ListNodeAffinity(c *gin.Context) {
 	name := c.Param("name")
@@ -81,21 +81,21 @@ func (ac *NodeAffinityController) ListNodeAffinity(c *gin.Context) {
 	}
 	if !found {
 		// 没有的话，返回一个空列表
-		amis.WriteJsonList(c, []interface{}{})
+		amis.WriteJsonList(c, []any{})
 		return
 	}
 
 	// 强制转换为数组
-	nodeSelectorTerms, ok := affinity.([]interface{})
+	nodeSelectorTerms, ok := affinity.([]any)
 	if !ok {
 		amis.WriteJsonError(c, fmt.Errorf("nodeSelectorTerms is not an array"))
 		return
 	}
 
-	var matchExpressionsList []interface{}
+	var matchExpressionsList []any
 	// 遍历 nodeSelectorTerms 来提取 matchExpressions
 	for _, term := range nodeSelectorTerms {
-		termMap, ok := term.(map[string]interface{})
+		termMap, ok := term.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -111,7 +111,7 @@ func (ac *NodeAffinityController) ListNodeAffinity(c *gin.Context) {
 		}
 
 		// 强制转换为数组，并将其添加到 matchExpressionsList
-		matchExpressionsArray, ok := matchExpressions.([]interface{})
+		matchExpressionsArray, ok := matchExpressions.([]any)
 		if ok {
 			matchExpressionsList = append(matchExpressionsList, matchExpressionsArray...)
 		}
@@ -217,7 +217,7 @@ func processNodeAffinity(c *gin.Context, action string) {
 	// 将{}替换为null，为null才会删除
 	patchJSON = strings.ReplaceAll(patchJSON, "{}", "null")
 	klog.V(6).Infof("UpdateNodeAffinity Patch JSON :\n%s\n", patchJSON)
-	var obj interface{}
+	var obj any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -228,7 +228,7 @@ func processNodeAffinity(c *gin.Context, action string) {
 
 // getNodeSelectorTerms 获取 NodeAffinity 的 NodeSelectorTerms
 // action : modify\update\add
-func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action string, rule nodeAffinity) ([]interface{}, error) {
+func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action string, rule nodeAffinity) ([]any, error) {
 
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
@@ -244,11 +244,11 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 	}
 	if !found {
 		// 如果没有，那么如果是 add 操作，那么创建一个空的 NodeSelectorTerms
-		affinity = make([]interface{}, 0)
+		affinity = make([]any, 0)
 	}
 
 	// 强制转换为数组
-	nodeSelectorTerms, ok := affinity.([]interface{})
+	nodeSelectorTerms, ok := affinity.([]any)
 	if !ok {
 		return nil, fmt.Errorf("nodeSelectorTerms is not an array")
 	}
@@ -259,9 +259,9 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 	// ]
 	// 其长度为8
 	if (len(nodeSelectorTerms) == 0 || len(x) == 8) && action == "add" {
-		nodeSelectorTerms = []interface{}{
-			map[string]interface{}{
-				"matchExpressions": []map[string]interface{}{{
+		nodeSelectorTerms = []any{
+			map[string]any{
+				"matchExpressions": []map[string]any{{
 					"key":      rule.Key,
 					"operator": rule.Operator,
 					"values":   rule.Values,
@@ -273,9 +273,9 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 	}
 
 	// 进行操作：删除或新增
-	var newNodeSelectorTerms []interface{}
+	var newNodeSelectorTerms []any
 	for _, term := range nodeSelectorTerms {
-		termMap, ok := term.(map[string]interface{})
+		termMap, ok := term.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -290,15 +290,15 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 		}
 
 		// 强制转换为数组
-		matchExpressionsArray, ok := matchExpressions.([]interface{})
+		matchExpressionsArray, ok := matchExpressions.([]any)
 		if !ok {
 			continue
 		}
 
 		// 处理每一个 matchExpression
-		var newMatchExpressions []interface{}
+		var newMatchExpressions []any
 		for _, expr := range matchExpressionsArray {
-			exprMap, ok := expr.(map[string]interface{})
+			exprMap, ok := expr.(map[string]any)
 			if !ok {
 				continue
 			}
@@ -311,7 +311,7 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 			// 如果是修改操作，并且 key 匹配，修改该 matchExpression 的 values
 			if action == "modify" && exprMap["key"] == rule.Key {
 				// 修改新值，不修改原值，直接添加到新列表
-				newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
+				newMatchExpressions = append(newMatchExpressions, map[string]any{
 					"key":      rule.Key,
 					"operator": rule.Operator,
 					"values":   rule.Values,
@@ -319,7 +319,7 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 				continue
 			}
 			// 否则，保留原有的 matchExpression
-			newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
+			newMatchExpressions = append(newMatchExpressions, map[string]any{
 				"key":      exprMap["key"],
 				"operator": exprMap["operator"],
 				"values":   exprMap["values"],
@@ -328,11 +328,11 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 
 		// 如果是新增操作，增加新的 matchExpression
 		if action == "add" {
-			if !slice.ContainBy(newMatchExpressions, func(item interface{}) bool {
-				m := item.(map[string]interface{})
+			if !slice.ContainBy(newMatchExpressions, func(item any) bool {
+				m := item.(map[string]any)
 				return m["key"] == rule.Key
 			}) {
-				newMatchExpressions = append(newMatchExpressions, map[string]interface{}{
+				newMatchExpressions = append(newMatchExpressions, map[string]any{
 					"key":      rule.Key,
 					"operator": rule.Operator,
 					"values":   rule.Values,
@@ -352,7 +352,7 @@ func getNodeSelectorTerms(kind string, item *unstructured.Unstructured, action s
 }
 
 // 生成动态的 patch 数据
-func generateRequiredNodeAffinityDynamicPatch(kind string, rules []interface{}) (map[string]interface{}, error) {
+func generateRequiredNodeAffinityDynamicPatch(kind string, rules []any) (map[string]any, error) {
 	// 打印rules
 	klog.V(6).Infof("generateRequiredNodeAffinityDynamicPatch rules:\n%+v len=%d\n", rules, len(rules))
 
@@ -374,15 +374,15 @@ func generateRequiredNodeAffinityDynamicPatch(kind string, rules []interface{}) 
 	requiredAffinityPath := append(paths, "affinity", "nodeAffinity", "requiredDuringSchedulingIgnoredDuringExecution")
 
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	current := patch
 
 	// 按层级动态生成嵌套结构
 	for _, path := range requiredAffinityPath {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 
 	current["nodeSelectorTerms"] = rules
@@ -398,15 +398,15 @@ func makeDeleteNodeAffinityDynamicPatch(kind string, rules []any) (map[string]an
 	requiredAffinityPath := append(paths, "affinity", "nodeAffinity")
 
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	current := patch
 
 	// 按层级动态生成嵌套结构
 	for _, path := range requiredAffinityPath {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 
 	current = nil

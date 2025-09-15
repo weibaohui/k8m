@@ -73,12 +73,12 @@ func (tc *TolerationController) List(c *gin.Context) {
 	}
 	if !found {
 		// 没有的话，返回一个空列表
-		amis.WriteJsonList(c, []interface{}{})
+		amis.WriteJsonList(c, []any{})
 		return
 	}
 
 	// 强制转换为数组
-	tolerationsList, ok := tolerations.([]interface{})
+	tolerationsList, ok := tolerations.([]any)
 	if !ok {
 		amis.WriteJsonError(c, fmt.Errorf("nodeSelectorTerms is not an array"))
 		return
@@ -181,7 +181,7 @@ func processTolerations(c *gin.Context, action string) {
 	}
 	patchJSON := utils.ToJSON(patchData)
 	klog.V(6).Infof("Update Patch JSON :\n%s\n", patchJSON)
-	var obj interface{}
+	var obj any
 	err = kom.Cluster(selectedCluster).
 		WithContext(ctx).
 		CRD(group, version, kind).
@@ -191,7 +191,7 @@ func processTolerations(c *gin.Context, action string) {
 }
 
 // action : modify\update\add
-func getTolerationList(kind string, item *unstructured.Unstructured, action string, rule Tolerations) ([]interface{}, error) {
+func getTolerationList(kind string, item *unstructured.Unstructured, action string, rule Tolerations) ([]any, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -205,11 +205,11 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 	}
 	if !found {
 		// 没有的话，返回一个空列表
-		tolerations = make([]interface{}, 0)
+		tolerations = make([]any, 0)
 	}
 
 	// 强制转换为数组
-	tolerationsList, ok := tolerations.([]interface{})
+	tolerationsList, ok := tolerations.([]any)
 	if !ok {
 		return nil, fmt.Errorf("tolerations is not an array")
 
@@ -222,8 +222,8 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 	// ]
 	// 其长度为8
 	if (len(tolerationsList) == 0 || len(x) == 8) && action == "add" {
-		tolerationsList = []interface{}{
-			map[string]interface{}{
+		tolerationsList = []any{
+			map[string]any{
 				"key":               rule.Key,
 				"operator":          rule.Operator,
 				"value":             rule.Value,
@@ -235,9 +235,9 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 	}
 
 	// 进行操作：删除或新增
-	var newTolerationsList []interface{}
+	var newTolerationsList []any
 	for _, term := range tolerationsList {
-		termMap, ok := term.(map[string]interface{})
+		termMap, ok := term.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -248,7 +248,7 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 		}
 		// 如果是修改操作，并且 key 匹配， 那么修改，如果不是，那么直接添加
 		if action == "modify" && termMap["key"] == rule.Key {
-			newTolerationsList = append(newTolerationsList, map[string]interface{}{
+			newTolerationsList = append(newTolerationsList, map[string]any{
 				"key":               rule.Key,
 				"operator":          rule.Operator,
 				"value":             rule.Value,
@@ -262,11 +262,11 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 	// 如果是新增操作，增加
 	if action == "add" {
 		// 需要判断下是否已经存在
-		if !slice.ContainBy(tolerationsList, func(item interface{}) bool {
-			m := item.(map[string]interface{})
+		if !slice.ContainBy(tolerationsList, func(item any) bool {
+			m := item.(map[string]any)
 			return m["key"] == rule.Key && m["value"] == rule.Value && m["effect"] == rule.Effect
 		}) {
-			newTolerationsList = append(tolerationsList, map[string]interface{}{
+			newTolerationsList = append(tolerationsList, map[string]any{
 				"key":               rule.Key,
 				"operator":          rule.Operator,
 				"value":             rule.Value,
@@ -280,7 +280,7 @@ func getTolerationList(kind string, item *unstructured.Unstructured, action stri
 }
 
 // 生成动态的 patch 数据
-func generateRequiredTolerationsDynamicPatch(kind string, rules []interface{}) (map[string]interface{}, error) {
+func generateRequiredTolerationsDynamicPatch(kind string, rules []any) (map[string]any, error) {
 	// 获取资源路径
 	paths, err := getResourcePaths(kind)
 	if err != nil {
@@ -288,15 +288,15 @@ func generateRequiredTolerationsDynamicPatch(kind string, rules []interface{}) (
 	}
 
 	// 动态构造 patch 数据
-	patch := make(map[string]interface{})
+	patch := make(map[string]any)
 	current := patch
 
 	// 按层级动态生成嵌套结构
 	for _, path := range paths {
 		if _, exists := current[path]; !exists {
-			current[path] = make(map[string]interface{})
+			current[path] = make(map[string]any)
 		}
-		current = current[path].(map[string]interface{})
+		current = current[path].(map[string]any)
 	}
 
 	current["tolerations"] = rules

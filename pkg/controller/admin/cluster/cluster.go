@@ -46,9 +46,9 @@ func (a *Controller) FileOptionList(c *gin.Context) {
 		fileNames = append(fileNames, cluster.FileName)
 	}
 	fileNames = slice.Unique(fileNames)
-	var options []map[string]interface{}
+	var options []map[string]any
 	for _, fn := range fileNames {
-		options = append(options, map[string]interface{}{
+		options = append(options, map[string]any{
 			"label": fn,
 			"value": fn,
 		})

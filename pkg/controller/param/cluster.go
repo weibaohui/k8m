@@ -42,14 +42,14 @@ func (pc *Controller) ClusterOptionList(c *gin.Context) {
 		})
 	}
 
-	var options []map[string]interface{}
+	var options []map[string]any
 	for _, cluster := range clusters {
 		name := cluster.GetClusterID()
 		flag := "✅"
 		if cluster.ClusterConnectStatus != constants.ClusterConnectStatusConnected {
 			flag = "⚠️"
 		}
-		options = append(options, map[string]interface{}{
+		options = append(options, map[string]any{
 			"label": fmt.Sprintf("%s %s", flag, name),
 			"value": name,
 			// "disabled": cluster.ServerVersion == "",

@@ -32,7 +32,7 @@ type userService struct {
 func (u *userService) GetGroupMenuData(groupNameList []string) (any, error) {
 	if len(groupNameList) == 0 {
 		// 返回默认空菜单结构
-		return []interface{}{}, nil
+		return []any{}, nil
 	}
 
 	// 尝试从所有用户组中获取菜单数据
@@ -57,23 +57,23 @@ func (u *userService) GetGroupMenuData(groupNameList []string) (any, error) {
 				if !errors.Is(err, gorm.ErrRecordNotFound) {
 					return nil, err
 				}
-				return []interface{}{}, nil
+				return []any{}, nil
 			}
 
 			if item.MenuData != "" {
 				// 将JSON字符串解析为Go对象
-				var menuData interface{}
+				var menuData any
 				if err := json.Unmarshal([]byte(item.MenuData), &menuData); err == nil {
 					if menuData == nil {
-						return []interface{}{}, nil
+						return []any{}, nil
 					}
 					return menuData, nil
 				}
 				// 如果解析失败，返回空数组
-				return []interface{}{}, nil
+				return []any{}, nil
 			}
 
-			return []interface{}{}, nil
+			return []any{}, nil
 		})
 
 		// 如果找到了有效的菜单数据，直接返回
@@ -83,7 +83,7 @@ func (u *userService) GetGroupMenuData(groupNameList []string) (any, error) {
 	}
 
 	// 如果没有找到任何菜单数据，返回默认空菜单结构
-	return []interface{}{}, nil
+	return []any{}, nil
 }
 
 // addCacheKey 添加缓存key到列表中（并发安全）
@@ -94,7 +94,7 @@ func (u *userService) addCacheKey(key string) {
 // getCacheKeys 获取所有缓存key（并发安全）
 func (u *userService) getCacheKeys() []string {
 	var keys []string
-	u.cacheKeys.Range(func(key, value interface{}) bool {
+	u.cacheKeys.Range(func(key, value any) bool {
 		if k, ok := key.(string); ok {
 			keys = append(keys, k)
 		}
@@ -104,7 +104,7 @@ func (u *userService) getCacheKeys() []string {
 }
 
 // formatCacheKey 格式化缓存key并添加到列表中（并发安全）
-func (u *userService) formatCacheKey(format string, a ...interface{}) string {
+func (u *userService) formatCacheKey(format string, a ...any) string {
 	key := fmt.Sprintf(format, a...)
 	u.addCacheKey(key)
 	return key

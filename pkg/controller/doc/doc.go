@@ -57,7 +57,7 @@ func (cc *Controller) Doc(c *gin.Context) {
 	node := docs.FetchByGVK(apiVersion, kind)
 
 	amis.WriteJsonData(c, gin.H{
-		"options": []interface{}{
+		"options": []any{
 			node,
 		},
 	})

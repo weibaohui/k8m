@@ -38,7 +38,7 @@ func (d *DingtalkSender) Send(msg string, receiver *Receiver) (*SendResult, erro
 		finalURL = fmt.Sprintf("%s&%s", finalURL, params.Encode())
 	}
 
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"msgtype": "text",
 		"text": map[string]string{
 			"content": msg,

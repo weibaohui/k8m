@@ -319,7 +319,7 @@ func (m *MCPHost) GetServerNameByToolName(toolName string) string {
 }
 
 // LogToolExecution 记录工具执行日志
-func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName string, parameters interface{}, result models.MCPToolCallResult, executeTime int64) {
+func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName string, parameters any, result models.MCPToolCallResult, executeTime int64) {
 
 	log := &models.MCPToolLog{
 		ToolName:    toolName,
@@ -382,7 +382,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			}
 
 			// 解析参数
-			var args map[string]interface{}
+			var args map[string]any
 			if arguments != "" && arguments != "{}" && arguments != "null" {
 
 				if err := json.Unmarshal([]byte(arguments), &args); err != nil {

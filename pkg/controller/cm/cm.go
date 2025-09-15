@@ -178,7 +178,7 @@ func (cc *Controller) Create(c *gin.Context) {
 			Name      string            `json:"name"`
 			Labels    map[string]string `json:"labels,omitempty"`
 		} `json:"metadata"`
-		Data map[string]interface{} `json:"data"` // 修改为 interface{} 类型
+		Data map[string]any `json:"data"` // 修改为 any 类型
 	}
 
 	if err = c.ShouldBindJSON(&requestBody); err != nil {

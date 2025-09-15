@@ -28,7 +28,7 @@ func GetJWTClaims(c *gin.Context, jwtTokenSecret string) (jwt.MapClaims, error) 
 
 	var jwtSecret = []byte(jwtTokenSecret)
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return jwtSecret, nil
 	})
 	if err != nil || !token.Valid {
@@ -78,7 +78,7 @@ func GetJwtMapClaimsFromToken(authToken string, jwtTokenSecret string) (jwt.MapC
 
 	var jwtSecret = []byte(jwtTokenSecret)
 
-	token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(authToken, func(token *jwt.Token) (any, error) {
 		return jwtSecret, nil
 	})
 	if err != nil || !token.Valid {

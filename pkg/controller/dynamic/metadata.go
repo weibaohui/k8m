@@ -155,7 +155,7 @@ func (mc *MetadataController) ListAnnotations(c *gin.Context) {
 // @Param version path string true "资源版本"
 // @Param ns path string true "命名空间"
 // @Param name path string true "资源名称"
-// @Param annotations body map[string]interface{} true "注解键值对"
+// @Param annotations body map[string]any true "注解键值对"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_annotations/ns/{ns}/name/{name} [post]
 func (mc *MetadataController) UpdateAnnotations(c *gin.Context) {
@@ -172,7 +172,7 @@ func (mc *MetadataController) UpdateAnnotations(c *gin.Context) {
 	}
 
 	var req struct {
-		Annotations map[string]interface{} `json:"annotations"`
+		Annotations map[string]any `json:"annotations"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)

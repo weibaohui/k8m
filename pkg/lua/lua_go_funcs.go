@@ -22,8 +22,8 @@ func logFunc(L *lua.LState) int {
 	return 0
 }
 
-// Lua LValue 转 Go interface{}，递归处理 table
-func lValueToGoValue(val lua.LValue) interface{} {
+// Lua LValue 转 Go any，递归处理 table
+func lValueToGoValue(val lua.LValue) any {
 	switch v := val.(type) {
 	case lua.LBool:
 		return bool(v)
@@ -33,8 +33,8 @@ func lValueToGoValue(val lua.LValue) interface{} {
 		return string(v)
 	case *lua.LTable:
 		// 判断是数组还是 map
-		var arr []interface{}
-		mp := map[string]interface{}{}
+		var arr []any
+		mp := map[string]any{}
 		isArray := true
 		maxIdx := 0
 		v.ForEach(func(key, value lua.LValue) {
@@ -63,10 +63,10 @@ func lValueToGoValue(val lua.LValue) interface{} {
 }
 
 // Go -> Lua 转换
-func toLValue(L *lua.LState, v interface{}) lua.LValue {
+func toLValue(L *lua.LState, v any) lua.LValue {
 	switch val := v.(type) {
 	case []*unstructured.Unstructured:
-		items := make([]interface{}, len(val))
+		items := make([]any, len(val))
 		for i, item := range val {
 			items[i] = item.Object
 		}
@@ -99,13 +99,13 @@ func toLValue(L *lua.LState, v interface{}) lua.LValue {
 		return lua.LNumber(val)
 	case bool:
 		return lua.LBool(val)
-	case []interface{}:
+	case []any:
 		tbl := L.NewTable()
 		for _, item := range val {
 			tbl.Append(toLValue(L, item))
 		}
 		return tbl
-	case map[string]interface{}:
+	case map[string]any:
 		tbl := L.NewTable()
 		for k, v := range val {
 			tbl.RawSetString(k, toLValue(L, v))

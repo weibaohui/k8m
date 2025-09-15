@@ -21,7 +21,7 @@ func GenericQuery[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *
 			OrderDir: "desc",
 			Page:     1,
 			PerPage:  15,
-			Queries:  make(map[string]interface{}),
+			Queries:  make(map[string]any),
 		}
 	}
 
@@ -80,7 +80,7 @@ func GenericGetOne[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) 
 	// 如果params为nil，创建一个默认的params
 	if params == nil {
 		params = &Params{
-			Queries: make(map[string]interface{}),
+			Queries: make(map[string]any),
 		}
 	}
 
@@ -111,7 +111,7 @@ func GenericSave[T any](params *Params, model T, queryFuncs ...func(*gorm.DB) *g
 	// 如果params为nil，创建一个默认的params
 	if params == nil {
 		params = &Params{
-			Queries: make(map[string]interface{}),
+			Queries: make(map[string]any),
 		}
 	}
 
@@ -140,7 +140,7 @@ func GenericDelete[T any](params *Params, model T, ids []int64, queryFuncs ...fu
 	// 如果params为nil，创建一个默认的params
 	if params == nil {
 		params = &Params{
-			Queries: make(map[string]interface{}),
+			Queries: make(map[string]any),
 		}
 	}
 
@@ -171,7 +171,7 @@ func GenericBatchSave[T any](params *Params, models []T, batchSize int, queryFun
 	// 如果params为nil，创建一个默认的params
 	if params == nil {
 		params = &Params{
-			Queries:  make(map[string]interface{}),
+			Queries:  make(map[string]any),
 			UserName: "",
 		}
 	}
@@ -211,7 +211,7 @@ func GenericBatchSave[T any](params *Params, models []T, batchSize int, queryFun
 }
 
 // GetTableName 使用 GORM 的 Statement 获取模型对应的表名
-func GetTableName(model interface{}) (string, error) {
+func GetTableName(model any) (string, error) {
 	stmt := &gorm.Statement{DB: DB()}
 	err := stmt.Parse(model)
 	if err != nil {
@@ -224,7 +224,7 @@ func GetTableName(model interface{}) (string, error) {
 var fieldCache sync.Map
 
 // GetTableFieldsWithCache 获取表字段并缓存结果
-func GetTableFieldsWithCache(model interface{}) (map[string]bool, error) {
+func GetTableFieldsWithCache(model any) (map[string]bool, error) {
 	// 获取表名
 	tableName, _ := GetTableName(model)
 
@@ -245,7 +245,7 @@ func GetTableFieldsWithCache(model interface{}) (map[string]bool, error) {
 }
 
 // GetTableFields 自动获取表名并从数据库中获取表的字段
-func GetTableFields(model interface{}) (map[string]bool, error) {
+func GetTableFields(model any) (map[string]bool, error) {
 	validFields := make(map[string]bool)
 
 	// 使用 Statement 自动获取表名
