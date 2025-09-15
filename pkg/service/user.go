@@ -64,6 +64,9 @@ func (u *userService) GetGroupMenuData(groupNameList []string) (any, error) {
 				// 将JSON字符串解析为Go对象
 				var menuData interface{}
 				if err := json.Unmarshal([]byte(item.MenuData), &menuData); err == nil {
+					if menuData == nil {
+						return []interface{}{}, nil
+					}
 					return menuData, nil
 				}
 				// 如果解析失败，返回空数组
