@@ -24,8 +24,14 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
     const [displayName, setDisplayName] = useState('');
     const [displayNameError, setDisplayNameError] = useState<string | null>(null);
 
+    /**
+     * 验证显示名称是否有效
+     * 支持中文字符、英文字母、数字、下划线和连字符
+     * @param name 要验证的名称
+     * @returns 是否有效
+     */
     const validateDisplayName = (name: string): boolean => {
-        const regex = /^[a-zA-Z0-9_]+$/;
+        const regex = /^[\u4e00-\u9fa5a-zA-Z0-9_-]+$/;
         return regex.test(name);
     };
 
@@ -63,7 +69,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
         setDisplayName(newDisplayName);
 
         if (!validateDisplayName(newDisplayName) && newDisplayName.trim() !== '') {
-            setDisplayNameError('集群名称只能包含英文字母、数字和下划线');
+            setDisplayNameError('集群名称只能包含中文、英文字母、数字、下划线和连字符');
         } else {
             setDisplayNameError(null);
         }
@@ -146,7 +152,7 @@ const KubeConfigEditorComponent = React.forwardRef<HTMLDivElement, KubeConfigPro
                             flex: 1,
                             border: (!displayName.trim() || displayNameError) ? '1px solid #ff4d4f' : '1px solid #d9d9d9'
                         }}
-                        placeholder="请输入集群显示名称（仅限英文字母、数字和下划线）"
+                        placeholder="请输入集群显示名称（支持中文、英文字母、数字、下划线和连字符）"
                     />
                 </div>
                 {displayNameError && (

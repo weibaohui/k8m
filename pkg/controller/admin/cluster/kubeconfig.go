@@ -29,7 +29,8 @@ func (a *Controller) SaveKubeConfig(c *gin.Context) {
 		return
 	}
 
-	m.DisplayName = strings.NewReplacer("/", "-", "\\", "-", " ").Replace(strings.TrimSpace(m.DisplayName))
+	// 清理显示名称，将特殊字符替换为连字符，支持中文字符
+	m.DisplayName = strings.NewReplacer("/", "-", "\\", "-", " ", "-").Replace(strings.TrimSpace(m.DisplayName))
 
 	if m.DisplayName == "" {
 		m.DisplayName = m.Cluster
@@ -137,7 +138,7 @@ func (a *Controller) SaveAWSEKSCluster(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	req.DisplayName = strings.NewReplacer("/", "-", "\\", "-", " ").Replace(strings.TrimSpace(req.DisplayName))
+	req.DisplayName = strings.NewReplacer("/", "-", "\\", "-", " ", "-").Replace(strings.TrimSpace(req.DisplayName))
 
 	// 如果没有提供显示名称，使用集群名称
 	if req.DisplayName == "" {

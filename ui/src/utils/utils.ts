@@ -72,8 +72,10 @@ function parseLocalStorageExpression(expression: string): string | null {
 
 
 export function toUrlSafeBase64(str: string) {
-    const base64 = btoa(str); // 标准 Base64
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // 转为 URL-safe
+// 先转 UTF-8，再 btoa
+    const utf8Str = unescape(encodeURIComponent(str));
+    const base64 = btoa(utf8Str);
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 export function ProcessK8sUrlWithCluster(url: string): string {
