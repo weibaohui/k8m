@@ -56,7 +56,7 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
 
     switch (method.toLowerCase()) {
         case 'get':
-            // 将 data 作为查询参数透传，合并已有的 config.params
+            // 将 data 作为查询参数透传
             const finalConfig = {
                 ...config,
                 params: {
@@ -70,11 +70,17 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
                     console.error('Empty response from server for URL:', url);
                     throw new Error('服务器返回空响应');
                 }
-                if (response.data === undefined || response.data === null || response.data === '') {
-                    console.error('Response data is null/undefined/empty for URL:', url, 'data:', response.data);
+                const status = response.status;
+                const methodLower = (response.config?.method || 'get').toLowerCase();
+                const skipEmptyCheck = status === 204 || status === 205 || methodLower === 'head';
+                if (!skipEmptyCheck && (response.data === undefined || response.data === null || response.data === '')) {
+                    console.error('Response data is null/undefined/empty for URL:', response.config?.url, 'data:', response.data);
                     throw new Error('响应数据为空');
                 }
-                console.log('Fetcher response for', url, ':', response);
+                if (process.env.NODE_ENV !== 'production') {
+                    // eslint-disable-next-line no-console
+                    console.debug('Fetcher response', { url: response.config?.url, status: response.status });
+                }
                 return response;
             });
         case 'post':
@@ -84,11 +90,17 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
                     console.error('Empty response from server for URL:', url);
                     throw new Error('服务器返回空响应');
                 }
-                if (response.data === undefined || response.data === null || response.data === '') {
-                    console.error('Response data is null/undefined/empty for URL:', url, 'data:', response.data);
+                const status = response.status;
+                const methodLower = (response.config?.method || 'post').toLowerCase();
+                const skipEmptyCheck = status === 204 || status === 205 || methodLower === 'head';
+                if (!skipEmptyCheck && (response.data === undefined || response.data === null || response.data === '')) {
+                    console.error('Response data is null/undefined/empty for URL:', response.config?.url, 'data:', response.data);
                     throw new Error('响应数据为空');
                 }
-                console.log('Fetcher response for', url, ':', response);
+                if (process.env.NODE_ENV !== 'production') {
+                    // eslint-disable-next-line no-console
+                    console.debug('Fetcher response', { url: response.config?.url, status: response.status });
+                }
                 return response;
             });
         default:
@@ -98,11 +110,17 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
                     console.error('Empty response from server for URL:', url);
                     throw new Error('服务器返回空响应');
                 }
-                if (response.data === undefined || response.data === null || response.data === '') {
-                    console.error('Response data is null/undefined/empty for URL:', url, 'data:', response.data);
+                const status = response.status;
+                const methodLower = (response.config?.method || 'post').toLowerCase();
+                const skipEmptyCheck = status === 204 || status === 205 || methodLower === 'head';
+                if (!skipEmptyCheck && (response.data === undefined || response.data === null || response.data === '')) {
+                    console.error('Response data is null/undefined/empty for URL:', response.config?.url, 'data:', response.data);
                     throw new Error('响应数据为空');
                 }
-                console.log('Fetcher response for', url, ':', response);
+                if (process.env.NODE_ENV !== 'production') {
+                    // eslint-disable-next-line no-console
+                    console.debug('Fetcher response', { url: response.config?.url, status: response.status });
+                }
                 return response;
             });
     }

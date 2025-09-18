@@ -101,7 +101,10 @@ export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string):
     // 选择覆盖的 cluster，否则使用本地已选 cluster
     const originCluster = (overrideCluster && String(overrideCluster)) || localStorage.getItem('cluster') || '';
     const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
-
+    // 未选择集群时，不插入 cluster 段，避免生成 /k8s/cluster//...
+    if (!cluster) {
+        return url;
+    }
     const parts = url.split('/');
     parts.splice(2, 0, 'cluster', cluster);
     return parts.join('/');
