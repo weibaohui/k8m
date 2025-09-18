@@ -76,16 +76,35 @@ export function toUrlSafeBase64(str: string) {
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // 转为 URL-safe
 }
 
-export function ProcessK8sUrlWithCluster(url: string): string {
-    const originCluster = localStorage.getItem('cluster') || '';
+export function fromUrlSafeBase64(str: string): string {
+    try {
+        const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+        // 补足 '='
+        const padLength = (4 - (base64.length % 4)) % 4;
+        const padded = base64 + '='.repeat(padLength);
+        return atob(padded);
+    } catch (e) {
+        return '';
+    }
+}
+
+export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string): string {
+    // 仅处理 /k8s 开头的接口
+    if (!url.startsWith('/k8s')) {
+        return url;
+    }
+    // 已经带有 /k8s/cluster/:cluster 的，避免重复插入
+    if (url.startsWith('/k8s/cluster/')) {
+        return url;
+    }
+
+    // 选择覆盖的 cluster，否则使用本地已选 cluster
+    const originCluster = (overrideCluster && String(overrideCluster)) || localStorage.getItem('cluster') || '';
     const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
 
-    if (url.startsWith('/k8s')) {
-        const parts = url.split('/');
-        parts.splice(2, 0, 'cluster', cluster);
-        return parts.join('/');
-    }
-    return url;
+    const parts = url.split('/');
+    parts.splice(2, 0, 'cluster', cluster);
+    return parts.join('/');
 }
 
 // 解析路径,逐层获取值
