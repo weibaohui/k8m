@@ -20,7 +20,12 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
     ajax.interceptors.request.use(
         config => {
             if (config.url) {
-                config.url = ProcessK8sUrlWithCluster(config.url);
+                const overrideCluster = (config.headers && (config.headers as any)['x-k8m-target-cluster']) || (config.params && (config.params as any).__cluster);
+                config.url = ProcessK8sUrlWithCluster(config.url, overrideCluster as string | undefined);
+                if (config.params && (config.params as any).__cluster) {
+                    const { __cluster, ...rest } = config.params as any;
+                    config.params = rest;
+                }
             }
             return config;
         },
@@ -51,10 +56,72 @@ export const fetcher = ({url, method = 'get', data, config}: FetcherConfig): Pro
 
     switch (method.toLowerCase()) {
         case 'get':
-            return ajax.get(url, config);
+            // 将 data 作为查询参数透传
+            const finalConfig = {
+                ...config,
+                params: {
+                    ...(config?.params || {}),
+                    ...(data && typeof data === 'object' ? data : {}),
+                }
+            };
+            return ajax.get(url, finalConfig).then(response => {
+                // 检查响应是否为空或无效
+                if (!response) {
+                    console.error('Empty response from server for URL:', url);
+                    throw new Error('服务器返回空响应');
+                }
+                const status = response.status;
+                const methodLower = (response.config?.method || 'get').toLowerCase();
+                const skipEmptyCheck = status === 204 || status === 205 || methodLower === 'head';
+                if (!skipEmptyCheck && (response.data === undefined || response.data === null || response.data === '')) {
+                    console.error('Response data is null/undefined/empty for URL:', response.config?.url, 'data:', response.data);
+                    throw new Error('响应数据为空');
+                }
+                if (process.env.NODE_ENV !== 'production') {
+                    // eslint-disable-next-line no-console
+                    console.debug('Fetcher response', { url: response.config?.url, status: response.status });
+                }
+                return response;
+            });
         case 'post':
-            return ajax.post(url, data || null, config);
+            return ajax.post(url, data || null, config).then(response => {
+                // 检查响应是否为空或无效
+                if (!response) {
+                    console.error('Empty response from server for URL:', url);
+                    throw new Error('服务器返回空响应');
+                }
+                const status = response.status;
+                const methodLower = (response.config?.method || 'post').toLowerCase();
+                const skipEmptyCheck = status === 204 || status === 205 || methodLower === 'head';
+                if (!skipEmptyCheck && (response.data === undefined || response.data === null || response.data === '')) {
+                    console.error('Response data is null/undefined/empty for URL:', response.config?.url, 'data:', response.data);
+                    throw new Error('响应数据为空');
+                }
+                if (process.env.NODE_ENV !== 'production') {
+                    // eslint-disable-next-line no-console
+                    console.debug('Fetcher response', { url: response.config?.url, status: response.status });
+                }
+                return response;
+            });
         default:
-            return ajax.post(url, data || null, config);
+            return ajax.post(url, data || null, config).then(response => {
+                // 检查响应是否为空或无效
+                if (!response) {
+                    console.error('Empty response from server for URL:', url);
+                    throw new Error('服务器返回空响应');
+                }
+                const status = response.status;
+                const methodLower = (response.config?.method || 'post').toLowerCase();
+                const skipEmptyCheck = status === 204 || status === 205 || methodLower === 'head';
+                if (!skipEmptyCheck && (response.data === undefined || response.data === null || response.data === '')) {
+                    console.error('Response data is null/undefined/empty for URL:', response.config?.url, 'data:', response.data);
+                    throw new Error('响应数据为空');
+                }
+                if (process.env.NODE_ENV !== 'production') {
+                    // eslint-disable-next-line no-console
+                    console.debug('Fetcher response', { url: response.config?.url, status: response.status });
+                }
+                return response;
+            });
     }
 };

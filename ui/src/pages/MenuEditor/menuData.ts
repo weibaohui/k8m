@@ -862,6 +862,14 @@ export const initialMenu: MenuItem[] = [
                 order: 9,
             },
             {
+                key: 'crd_link_generator',
+                title: 'CRD菜单生成器',
+                icon: 'fa-solid fa-link',
+                eventType: 'custom',
+                customEvent: '() => loadJsonPage("/admin/config/crd_link_generator")',
+                order: 9.5,
+            },
+            {
                 key: 'sso_config',
                 title: '单点登录',
                 icon: 'fa-solid fa-right-to-bracket',

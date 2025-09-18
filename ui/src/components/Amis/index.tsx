@@ -103,12 +103,25 @@ interface Props {
     schema: Schema
 }
 
+// 解析 hash 中的查询参数为对象
+function parseHashQuery(): Record<string, any> {
+    const hash = window.location.hash || '';
+    const qIndex = hash.indexOf('?');
+    if (qIndex === -1) return {};
+    const search = hash.substring(qIndex + 1);
+    const params = new URLSearchParams(search);
+    const data: Record<string, any> = {};
+    params.forEach((value, key) => {
+        data[key] = value;
+    });
+    return data;
+}
 
 const Amis = ({schema}: Props) => {
     const theme = 'cxd';
     const locale = 'zh-CN';
-
-
+    const initialData = parseHashQuery();
+    
     return <>
         <GlobalTextSelector/>
 
@@ -122,7 +135,7 @@ const Amis = ({schema}: Props) => {
         {
 
             renderAmis(schema,
-                {},
+                initialData,
                 {
                     theme: 'cxd',
                     updateLocation: () => {

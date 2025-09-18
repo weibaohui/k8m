@@ -22,7 +22,19 @@ export const useUserRole = () => {
                 if (response.data && typeof response.data === 'object') {
                     const role = response.data.data as UserRoleResponse;
                     setUserRole(role.role);
-                    setMenuData(role.menu_data);
+                    const menuDataString = role.menu_data;
+                    if (menuDataString && typeof menuDataString === 'string' && menuDataString.trim()) {
+                        try {
+                            // 验证是否为有效的JSON
+                            JSON.parse(menuDataString);
+                            setMenuData(menuDataString);
+                        } catch (error) {
+                            console.warn('Invalid menu_data JSON from server, using empty string:', error);
+                            setMenuData('');
+                        }
+                    } else {
+                        setMenuData('');
+                    }
 
                     const originCluster = localStorage.getItem('cluster') || '';
                     if (originCluster === "" && role.cluster !== "") {

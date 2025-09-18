@@ -1,0 +1,190 @@
+{
+  "type": "page",
+  "title": "CRD 菜单生成器",
+  "body": [
+    {
+      "type": "form",
+      "title": "CRD 菜单链接生成器 - 手动填写",
+      "mode": "horizontal",
+      "wrapWithPanel": true,
+      "data": {
+        "target_cluster": "",
+        "group": "",
+        "kind": "",
+        "version": "",
+        "scope": "Namespaced",
+        "mode": "append"
+      },
+      "body": [
+        {
+          "type": "select",
+          "name": "target_cluster",
+          "label": "目标集群",
+          "searchable": true,
+          "clearable": true,
+          "source": "/params/cluster/option_list",
+          "placeholder": "选择集群查看其CRD列表",
+          "description": "选择集群后将自动加载该集群的CRD信息",
+          "onEvent": {
+            "change": {
+              "actions": [
+                {
+                  "actionType": "setValue",
+                  "componentId": "group_selector",
+                  "data": { "value": "" }
+                },
+                {
+                  "actionType": "setValue",
+                  "componentId": "kind_selector", 
+                  "data": { "value": "" }
+                },
+                {
+                  "actionType": "setValue",
+                  "componentId": "version_selector",
+                  "data": { "value": "" }
+                },
+                {
+                  "actionType": "setValue",
+                  "componentId": "scope_selector",
+                  "data": { "value": "Namespaced" }
+                }
+              ]
+            }
+          }
+        },
+        
+        {
+          "type": "divider",
+          "title": "手动填写 G/V/K 信息",
+          "titlePosition": "center"
+        },
+        {
+          "type": "select",
+          "name": "group",
+          "id": "group_selector",
+          "label": "Group",
+          "searchable": true,
+          "clearable": true,
+          "source": {
+            "method": "get",
+            "url": "/k8s/crd/group/option_list",
+            "headers": { "x-k8m-target-cluster": "${target_cluster}" }
+          },
+          "required": true,
+          "disabledOn": "${!target_cluster}",
+          "placeholder": "请先选择集群"
+        },
+        {
+          "type": "select",
+          "name": "kind",
+          "id": "kind_selector",
+          "label": "Kind",
+          "searchable": true,
+          "clearable": true,
+          "required": true,
+          "source": {
+            "method": "get",
+            "url": "/k8s/crd/kind/option_list?spec.group=${group}",
+            "headers": { "x-k8m-target-cluster": "${target_cluster}" }
+          },
+          "disabledOn": "${!target_cluster || !group}",
+          "placeholder": "请先选择集群和Group"
+        },
+        {
+          "type": "select",
+          "name": "version",
+          "id": "version_selector",
+          "label": "Version",
+          "searchable": true,
+          "clearable": true,
+          "required": true,
+          "source": {
+            "method": "post",
+            "url": "/k8s/CustomResourceDefinition/group/apiextensions.k8s.io/version/v1/list",
+            "headers": { "x-k8m-target-cluster": "${target_cluster}" },
+            "data": { "spec.group": "${group}", "spec.names.kind": "${kind}" },
+            "adaptor": "const rows = payload?.data?.rows || []; let versions = []; if (rows.length>0) { const vs = rows[0]?.spec?.versions || []; versions = vs.map(v=>({label: v.name, value: v.name}))} return { status: payload.status, msg: payload.msg, data: { options: versions } }"
+          },
+          "disabledOn": "${!target_cluster || !group || !kind}",
+          "placeholder": "请先选择集群、Group和Kind"
+        },
+        {
+          "type": "radios",
+          "name": "scope",
+          "id": "scope_selector",
+          "label": "作用域",
+          "options": [
+            { "label": "命名空间 Namespaced", "value": "Namespaced" },
+            { "label": "集群 Cluster", "value": "Cluster" }
+          ],
+          "value": "Namespaced"
+        },
+        {
+          "type": "select",
+          "name": "ns",
+          "label": "命名空间",
+          "visibleOn": "${scope == 'Namespaced'}",
+          "multiple": true,
+          "maxTagCount": 1,
+          "searchable": true,
+          "checkAll": true,
+          "clearable": true,
+          "source": { "method": "get", "url": "/k8s/ns/option_list", "headers": { "x-k8m-target-cluster": "${target_cluster}" } },
+          "value": "${ls:selectedNs||'default'}",
+          "onEvent": {
+            "change": {
+              "actions": [
+                { "actionType": "custom", "script": "localStorage.setItem('selectedNs', event.data.ns)" }
+              ]
+            }
+          }
+        },
+        {
+          "type": "textarea",
+          "name": "cols",
+          "label": "自定义列(JSON或Base64)",
+          "minRows": 3,
+          "placeholder": "如需控制表格列，可填入 JSON 数组或其 Base64 形式。示例：\n[ { \"name\": \"spec.chart\", \"label\": \"Chart\", \"type\": \"text\" } ]"
+        },
+        {
+          "type": "radios",
+          "name": "mode",
+          "label": "列合并模式",
+          "options": [
+            { "label": "追加 append", "value": "append" },
+            { "label": "替换 replace", "value": "replace" }
+          ],
+          "value": "append"
+        },
+        {
+          "type": "tpl",
+          "label": "菜单链接",
+          "tpl": "/${scope == 'Namespaced' ? 'crd/namespaced_cr' : 'crd/cluster_cr'}?kind=${kind}&group=${group}&version=${version}${target_cluster ? '&cluster=' + encodeURIComponent(target_cluster) : ''}${ns && scope == 'Namespaced' ? '&ns=' + (typeof ns === 'string' ? ns : (Array.isArray(ns) ? ns.join(',') : '')) : ''}${cols ? '&cols=' + encodeURIComponent(cols) : ''}${mode && mode !== 'append' ? '&mode=' + mode : ''}",
+          "visibleOn": "${kind && group && version}",
+          "className": "text-primary"
+        },
+        {
+          "type": "button",
+          "label": "复制链接",
+          "level": "primary",
+          "onEvent": {
+            "click": {
+              "actions": [
+                {
+                  "actionType": "custom",
+                  "script": "const formData = event.data;\nconst scope = formData.scope || 'Namespaced';\nconst { kind, group, version } = formData;\nlet { cols, mode, ns } = formData;\n\nif (!kind || !group || !version) {\n  event.context.env.notify('error', '请先填写完整的 Group、Kind 和 Version 信息');\n  return;\n}\n\nconst base = scope === 'Namespaced' ? '/crd/namespaced_cr' : '/crd/cluster_cr';\nconst params = new URLSearchParams({ kind, group, version });\nif (formData.target_cluster) { params.set('cluster', formData.target_cluster); }\nif (scope === 'Namespaced') {\n  let hasNs = Array.isArray(ns) ? ns.length > 0 : !!ns;\n  if (hasNs) {\n    const nsStr = Array.isArray(ns) ? ns.join(',') : String(ns);\n    params.set('ns', nsStr);\n  }\n}\nif (cols && typeof cols === 'string' && cols.trim()) {\n  params.set('cols', cols.trim());\n}\nif (mode && mode !== 'append') {\n  params.set('mode', mode);\n}\nconst url = `${base}?${params.toString()}`;\n\nconst copyToClipboard = async () => {\n  try {\n    if (navigator.clipboard && window.isSecureContext) {\n      await navigator.clipboard.writeText(url);\n    } else {\n      const textArea = document.createElement('textarea');\n      textArea.value = url;\n      textArea.style.position = 'fixed';\n      textArea.style.top = '-9999px';\n      textArea.style.left = '-9999px';\n      textArea.setAttribute('readonly', '');\n      document.body.appendChild(textArea);\n      textArea.focus();\n      textArea.select();\n      textArea.setSelectionRange(0, textArea.value.length);\n      const successful = document.execCommand('copy');\n      document.body.removeChild(textArea);\n      if (!successful) {\n        throw new Error('execCommand copy failed');\n      }\n    }\n    \n    event.context.env.notify('success', '链接已复制到剪贴板');\n  } catch (error) {\n    console.error('复制失败:', error);\n    event.context.env.notify('error', `复制失败，请手动复制链接: ${url}`);\n  }\n};\n\ncopyToClipboard();"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "alert",
+          "level": "info",
+          "showIcon": true,
+          "body": "将生成的链接填入菜单编辑器的自定义事件，形如: () => loadJsonPage('链接')。支持附加 cols、mode 控制表格列。"
+        }
+      ]
+    }
+  ]
+}
