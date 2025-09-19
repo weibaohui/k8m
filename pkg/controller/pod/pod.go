@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,7 @@ func RegisterLogRoutes(api *gin.RouterGroup) {
 	ctrl := &LogController{}
 	api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.StreamLogs)
 	api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.DownloadLogs)
+	api.GET("/pod/name/option_list", ctrl.PodNameOptionList)
 }
 
 // StreamLogs 通过SSE流式传输Pod日志
@@ -275,4 +277,61 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 	}()
 
 	sse.DownloadLog(c, containerName, pr)
+}
+
+// PodNameOptionList 返回指定命名空间下的 Pod 名称选项
+// @Summary 获取Pod名称选项列表
+// @Security BearerAuth
+// @Param cluster query string true "集群名称"
+// @Param ns query string false "命名空间，为空则返回所有命名空间的Pod"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/pod/name/option_list [get]
+func (lc *LogController) PodNameOptionList(c *gin.Context) {
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	ctx := amis.GetContextWithUser(c)
+
+	ns := c.Query("ns")
+
+	var pods []v1.Pod
+	q := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{})
+	if ns != "" {
+		q = q.Namespace(ns)
+	}
+	// 可选按 node 过滤
+	if node := c.Query("node_name"); node != "" {
+		options := metav1.ListOptions{FieldSelector: fmt.Sprintf("spec.nodeName=%s", node)}
+		if ns != "" {
+			if err := q.List(&pods, options).Error; err != nil {
+				amis.WriteJsonData(c, gin.H{"options": make([]map[string]string, 0)})
+				return
+			}
+		} else {
+			// 遍历所有命名空间
+			if err := q.List(&pods, options).Error; err != nil {
+				amis.WriteJsonData(c, gin.H{"options": make([]map[string]string, 0)})
+				return
+			}
+		}
+	} else {
+		if err := q.List(&pods).Error; err != nil {
+			amis.WriteJsonData(c, gin.H{"options": make([]map[string]string, 0)})
+			return
+		}
+	}
+
+	names := make([]string, 0, len(pods))
+	for _, p := range pods {
+		names = append(names, p.Name)
+	}
+	sort.Strings(names)
+
+	options := make([]map[string]string, 0, len(names))
+	for _, n := range names {
+		options = append(options, map[string]string{"label": n, "value": n})
+	}
+	amis.WriteJsonData(c, gin.H{"options": options})
 }
