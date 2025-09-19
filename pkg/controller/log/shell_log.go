@@ -13,6 +13,7 @@ func RegisterLogRoutes(mgm *gin.RouterGroup) {
 	ctrl := &Controller{}
 	mgm.GET("/log/shell/list", ctrl.ListShell)
 	mgm.GET("/log/operation/list", ctrl.ListOperation)
+	mgm.GET("/log/global/list", ctrl.ListGlobalLog)
 }
 
 // @Summary Shell日志列表
