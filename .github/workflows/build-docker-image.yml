@@ -22,10 +22,10 @@ on:
         description: "Test scenario tags"
 
 env:
-  DOCKERHUB_USERNAME: weibh
+  DOCKERHUB_USERNAME: eryajf
   ALIHUB_URL: registry.cn-hangzhou.aliyuncs.com
-  ALIHUB_USERNAME: weibh
-  ALIHUB_IMAGE_REPONAME: minik8m
+  ALIHUB_USERNAME: eryajf
+  ALIHUB_IMAGE_REPONAME: k8m
   IMAGE_REPONAME: k8m
   OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
   OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
@@ -52,24 +52,6 @@ jobs:
           cd ui
           pnpm install
           pnpm build
-
-      - name: 上传到共享
-        uses: actions/upload-artifact@v4
-        with:
-          name: workspace
-          path: ui/dist
-
-  buildImage:
-    needs: buildx
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: 从共享下载
-        uses: actions/download-artifact@v4
-        with:
-          name: workspace
-          path: ui/dist # 覆盖当前目录
 
       - name: 设置go环境
         uses: actions/setup-go@v5
