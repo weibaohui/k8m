@@ -9,18 +9,15 @@ env:
 jobs:
   build-release:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [ 18 ]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
           version: latest
-      - name: 使用 Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: 使用 Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18
           cache: "pnpm"
           cache-dependency-path: "ui/pnpm-lock.yaml"
 
