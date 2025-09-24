@@ -71,6 +71,24 @@ jobs:
           name: workspace
           path: ui/dist # 覆盖当前目录
 
+      - name: 设置go环境
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache-dependency-path: "go.sum"
+
+      - name: 安装 UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+
+      - name: Set build time variable
+        run: echo "BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+
+      - name: 编译后端
+        run: |
+          make build-linux GIT_COMMIT=${{ github.sha }} GIT_TAG=${{ github.ref_name }} GIT_REPOSITORY=${{ github.repository }} BUILD_DATE=${{ env.BUILD_TIME }} VERSION=${{ github.ref_name }} MODEL=${{ env.OPENAI_API_MODEL }} API_KEY=${{ secrets.OPENAI_API_KEY }} API_URL=${{ env.OPENAI_API_URL }}
+
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
 
