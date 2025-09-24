@@ -25,7 +25,7 @@ env:
   DOCKERHUB_USERNAME: eryajf
   ALIHUB_URL: registry.cn-hangzhou.aliyuncs.com
   ALIHUB_USERNAME: eryajf
-  ALIHUB_IMAGE_REPONAME: k8m
+  ALIHUB_IMAGE_REPONAME: eryajf
   IMAGE_REPONAME: k8m
   OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
   OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
@@ -34,7 +34,7 @@ jobs:
   build-docker-image:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           version: latest
@@ -76,24 +76,24 @@ jobs:
         run: echo "::set-output name=today::$(date +'%Y%m%d-%H%M')"
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # 镜像推送到 ghcr 仓库
       # - name: Login to the ghcr Registry
-      #   uses: docker/login-action@v2
+      #   uses: docker/login-action@v3
       #   with:
       #     registry: ghcr.io
       #     username: ${{ github.actor }}
@@ -101,7 +101,7 @@ jobs:
 
       # 镜像推送到 阿里云仓库
       - name: Login to the Ali Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.ALIHUB_URL }}
           username: ${{ env.ALIHUB_USERNAME }}
