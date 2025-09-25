@@ -25,7 +25,7 @@
     "amis-ui": "^6.12.0",
     "ansi-to-html": "^0.7.2",
     "antd": "^5.25.1",
-    "axios": "^1.9.0",
+    "axios": "^1.12.0",
     "copy-to-clipboard": "^3.3.3",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
@@ -57,7 +57,7 @@
     "fs-extra": "^11.3.0",
     "sass": "^1.87.0",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5",
+    "vite": "^6.3.6",
     "vite-plugin-monaco-editor": "^1.1.0"
   }
 }
