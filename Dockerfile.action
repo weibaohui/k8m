@@ -12,7 +12,7 @@ ADD reload.sh reload.sh
 COPY ./bin/${BINARY_NAME}-${TARGETOS}-${TARGETARCH} ${BINARY_NAME}
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk upgrade && apk add --no-cache curl bash inotify-tools alpine-conf busybox-extras tzdata  aws-cli helm tar gzip\
+    && apk upgrade && apk add --no-cache curl bash inotify-tools alpine-conf busybox-extras tzdata  aws-cli ca-certificates helm tar gzip\
     && apk del alpine-conf && rm -rf /var/cache/* && chmod +x k8m && chmod +x /app/reload.sh 
 
 #k8m Server
