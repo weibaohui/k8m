@@ -20,7 +20,7 @@ func (pc *Controller) UserRole(c *gin.Context) {
 		amis.WriteJsonData(c, gin.H{
 			"role":      role,
 			"cluster":   "",
-			"menu_data": "",
+			"menu_data": []any{},
 		})
 		return
 	}
