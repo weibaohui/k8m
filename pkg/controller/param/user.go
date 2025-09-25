@@ -14,6 +14,17 @@ import (
 // @Router /params/user/role [get]
 func (pc *Controller) UserRole(c *gin.Context) {
 	user, role := amis.GetLoginUser(c)
+
+	//如果是平台管理员,可以看到所有菜单
+	if amis.IsCurrentUserPlatformAdmin(c) {
+		amis.WriteJsonData(c, gin.H{
+			"role":      role,
+			"cluster":   "",
+			"menu_data": "",
+		})
+		return
+	}
+
 	clusters := amis.GetLoginUserClusters(c)
 	var cluster string
 	if len(clusters) == 1 {
@@ -24,6 +35,7 @@ func (pc *Controller) UserRole(c *gin.Context) {
 			cluster = service.ClusterService().FirstClusterID()
 		}
 	}
+
 	groupNames, err := service.UserService().GetGroupNames(user)
 	if err != nil {
 		amis.WriteJsonError(c, err)
