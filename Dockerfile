@@ -15,13 +15,11 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/k8m /app/k8m
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk upgrade && apk add --no-cache curl bash inotify-tools alpine-conf busybox-extras tzdata aws-cli  tar gzip\
+    && apk upgrade && apk add --no-cache curl bash inotify-tools alpine-conf busybox-extras tzdata aws-cli ca-certificates helm tar gzip\
     && apk del alpine-conf && rm -rf /var/cache/* && chmod +x k8m
 ADD reload.sh /app/reload.sh
 RUN chmod +x /app/reload.sh
 
-RUN export VERIFY_CHECKSUM=false&&curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-RUN helm version
 
 
 #k8m Server
