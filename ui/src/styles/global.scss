@@ -37,6 +37,24 @@ body {
 .cxd-Page-body {
   overflow: auto;
 }
+.cxd-Table-content {
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.cxd-Table {
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cxd-Table-wrapper {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
 
 .pointer {
   cursor: pointer;
