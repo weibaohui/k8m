@@ -185,7 +185,38 @@
           "name": "created_at",
           "label": "创建时间",
           "type": "datetime",
-          "sortable": true
+          "sortable": true,
+          "searchable": {
+            "type": "input-datetime-range",
+            "name": "created_at_range",
+            "clearable": true,
+            "label": "创建时间",
+            "placeholder": "请选择时间范围",
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "inputFormat": "YYYY-MM-DD HH:mm:ss",
+            "ranges": [
+              {
+                "label": "今天",
+                "startDate": "DATEMODIFY(NOW(), 0, 'days')",
+                "endDate": "NOW()"
+              },
+              {
+                "label": "昨天",
+                "startDate": "DATEMODIFY(NOW(), -1, 'days')",
+                "endDate": "DATEMODIFY(NOW(), 0, 'days')"
+              },
+              {
+                "label": "最近7天",
+                "startDate": "DATEMODIFY(NOW(), -7, 'days')",
+                "endDate": "NOW()"
+              },
+              {
+                "label": "最近30天",
+                "startDate": "DATEMODIFY(NOW(), -30, 'days')",
+                "endDate": "NOW()"
+              }
+            ]
+          }
         }
       ]
     }

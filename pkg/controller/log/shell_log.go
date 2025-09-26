@@ -77,7 +77,37 @@ func (lc *Controller) ListOperation(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.OperationLog{}
 
-	items, total, err := m.List(params)
+	// 处理时间范围查询
+	var queryFuncs []func(*gorm.DB) *gorm.DB
+	if createdAtRange, exists := params.Queries["created_at_range"]; exists && createdAtRange != "" {
+		// 解析时间范围参数，格式为 "startTime,endTime"
+		timeRange := fmt.Sprintf("%v", createdAtRange)
+		if strings.Contains(timeRange, ",") {
+			times := strings.Split(timeRange, ",")
+			if len(times) == 2 {
+				startTimeStr := strings.TrimSpace(times[0])
+				endTimeStr := strings.TrimSpace(times[1])
+				
+				queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
+					if startTimeStr != "" {
+						if startTime, err := time.Parse("2006-01-02 15:04:05", startTimeStr); err == nil {
+							db = db.Where("created_at >= ?", startTime)
+						}
+					}
+					if endTimeStr != "" {
+						if endTime, err := time.Parse("2006-01-02 15:04:05", endTimeStr); err == nil {
+							db = db.Where("created_at <= ?", endTime)
+						}
+					}
+					return db
+				})
+			}
+		}
+		// 从查询参数中移除 created_at_range，避免在通用查询中被处理
+		delete(params.Queries, "created_at_range")
+	}
+
+	items, total, err := m.List(params, queryFuncs...)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
