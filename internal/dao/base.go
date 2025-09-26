@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -269,4 +270,44 @@ func GetTableFields(model any) (map[string]bool, error) {
 	}
 
 	return validFields, nil
+}
+
+// BuildCreatedAtQuery 构建时间范围查询函数
+// 解析时间范围参数并返回对应的查询函数
+// 这是一个通用方法，可以被任何需要时间范围过滤的控制器使用
+// paramName: 可选参数，指定查询参数名称，不提供则默认使用 "created_at_range"
+func BuildCreatedAtQuery(params *Params, paramName ...string) (func(*gorm.DB) *gorm.DB, bool) {
+	// 确定参数名称，默认为 "created_at_range"
+	queryParam := "created_at_range"
+	if len(paramName) > 0 && paramName[0] != "" {
+		queryParam = paramName[0]
+	}
+	
+	v, ok := params.Queries[queryParam]
+	if !ok || v == "" {
+		return nil, false
+	}
+	timeRange := fmt.Sprintf("%v", v)
+	if !strings.Contains(timeRange, ",") {
+		return nil, false
+	}
+	parts := strings.SplitN(timeRange, ",", 2)
+	if len(parts) != 2 {
+		return nil, false
+	}
+	startStr, endStr := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+	delete(params.Queries, queryParam)
+	return func(db *gorm.DB) *gorm.DB {
+		if startStr != "" {
+			if t, err := time.ParseInLocation("2006-01-02 15:04:05", startStr, time.Local); err == nil {
+				db = db.Where("created_at >= ?", t)
+			}
+		}
+		if endStr != "" {
+			if t, err := time.ParseInLocation("2006-01-02 15:04:05", endStr, time.Local); err == nil {
+				db = db.Where("created_at <= ?", t)
+			}
+		}
+		return db
+	}, true
 }
