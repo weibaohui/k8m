@@ -165,7 +165,39 @@
           "name": "created_at",
           "label": "创建时间",
           "type": "datetime",
-          "sortable": true
+          "sortable": true,
+          "searchable": {
+            "type": "input-datetime-range",
+            "name": "created_at_range",
+            "clearable": true,
+            "label": "创建时间范围",
+            "placeholder": "请选择时间范围",
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "inputFormat": "YYYY-MM-DD HH:mm:ss",
+            "displayFormat": "YYYY-MM-DD HH:mm:ss",
+            "ranges": [
+              {
+                "label": "今天",
+                "startDate": "${DATETOSTR(STARTOF(NOW(), 'day'), 'YYYY-MM-DD HH:mm:ss')}",
+                "endDate": "${DATETOSTR(ENDOF(NOW(), 'day'), 'YYYY-MM-DD HH:mm:ss')}"
+              },
+              {
+                "label": "昨天",
+                "startDate": "${DATETOSTR(STARTOF(DATEMODIFY(NOW(), -1, 'days'), 'day'), 'YYYY-MM-DD HH:mm:ss')}",
+                "endDate": "${DATETOSTR(ENDOF(DATEMODIFY(NOW(), -1, 'days'), 'day'), 'YYYY-MM-DD HH:mm:ss')}"
+              },
+              {
+                "label": "最近7天",
+                "startDate": "${DATETOSTR(DATEMODIFY(NOW(), -7, 'days'), 'YYYY-MM-DD HH:mm:ss')}",
+                "endDate": "${DATETOSTR(NOW(), 'YYYY-MM-DD HH:mm:ss')}"
+              },
+              {
+                "label": "最近30天",
+                "startDate": "${DATETOSTR(DATEMODIFY(NOW(), -30, 'days'), 'YYYY-MM-DD HH:mm:ss')}",
+                "endDate": "${DATETOSTR(NOW(), 'YYYY-MM-DD HH:mm:ss')}"
+              }
+            ]
+          }
         }
       ]
     }
