@@ -277,6 +277,11 @@ func GetTableFields(model any) (map[string]bool, error) {
 // 这是一个通用方法，可以被任何需要时间范围过滤的控制器使用
 // paramName: 可选参数，指定查询参数名称，不提供则默认使用 "created_at_range"
 func BuildCreatedAtQuery(params *Params, paramName ...string) (func(*gorm.DB) *gorm.DB, bool) {
+	// 空指针守卫，避免 panic
+	if params == nil || params.Queries == nil {
+		return nil, false
+	}
+	
 	// 确定参数名称，默认为 "created_at_range"
 	queryParam := "created_at_range"
 	if len(paramName) > 0 && paramName[0] != "" {
