@@ -11,20 +11,25 @@ import (
 
 // KubeConfig 用户导入kubeconfig
 type KubeConfig struct {
-	ID              uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
-	Content         string    `gorm:"type:text" json:"content,omitempty"`           // 模板内容，支持大文本存储
-	Server          string    `gorm:"index" json:"server,omitempty"`
-	User            string    `gorm:"index" json:"user,omitempty"`
-	Cluster         string    `gorm:"index" json:"cluster,omitempty"` // 类型，最大长度 100
-	Namespace       string    `gorm:"index" json:"namespace,omitempty"`
-	DisplayName     string    `gorm:"index" json:"display_name,omitempty"`
-	AccessKey       string    `json:"-"`                    // AWS Access Key ID
-	SecretAccessKey string    `json:"-"`                    // AWS Secret Access Key
-	ClusterName     string    `json:"cluster_name"`         // AWS EKS 集群名称
-	Region          string    `json:"region"`               // AWS 区域
-	IsAWSEKS        bool      `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
-	CreatedAt       time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt       time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ID          uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
+	Content     string `gorm:"type:text" json:"content,omitempty"`           // 模板内容，支持大文本存储
+	Server      string `json:"server,omitempty"`
+	User        string `json:"user,omitempty"`
+	Cluster     string `json:"cluster,omitempty"` // 类型，最大长度 100
+	Namespace   string `json:"namespace,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	// aws 集群相关
+	AccessKey       string `json:"-"`                    // AWS Access Key ID
+	SecretAccessKey string `json:"-"`                    // AWS Secret Access Key
+	ClusterName     string `json:"cluster_name"`         // AWS EKS 集群名称
+	Region          string `json:"region"`               // AWS 区域
+	IsAWSEKS        bool   `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
+	// token 纳管相关 server\token\cadata
+	Token  string `gorm:"type:text" json:"token,omitempty"`   // token 内容，支持大文本存储
+	CACert string `gorm:"type:text" json:"ca_data,omitempty"` // ca 证书内容，支持大文本存储
+
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 
 func (c *KubeConfig) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*KubeConfig, int64, error) {

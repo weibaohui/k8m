@@ -96,6 +96,9 @@ func (pc *Controller) ClusterTableList(c *gin.Context) {
 				cluster.NotAfter = &notAfter
 			}
 		}
+		if cluster.NotAfter != nil && cluster.NotAfter.IsZero() {
+			cluster.NotAfter = nil
+		}
 	}
 	amis.WriteJsonData(c, clusters)
 }
