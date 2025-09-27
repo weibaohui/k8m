@@ -20,282 +20,286 @@
           "api": "post:/admin/cluster/scan"
         },
         {
-          "type": "button",
+          "type": "dropdown-button",
           "label": "纳管集群",
           "level": "primary",
-          "actionType": "drawer",
-          "drawer": {
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "size": "xl",
-            "title": "新增集群 kubeconfig (ESC 关闭)",
-            "body": [
-              {
-                "type": "kubeConfigEditor"
-              }
-            ],
-            "actions": []
-          }
-        },
-        {
-          "type": "button",
-          "label": "纳管AWS EKS集群",
-          "level": "primary",
-          "actionType": "drawer",
-          "drawer": {
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "size": "lg",
-            "title": "纳管AWS EKS集群 (ESC 关闭)",
-            "body": [
-              {
-                "type": "form",
-                "api": "post:/admin/cluster/aws/save",
+          "buttons": [
+            {
+              "type": "button",
+              "label": "Kubeconfig文件",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "新增集群 kubeconfig (ESC 关闭)",
                 "body": [
                   {
-                    "type": "input-text",
-                    "name": "accessKey",
-                    "label": "Access Key",
-                    "placeholder": "请输入AWS Access Key",
-                    "required": true
-                  },
+                    "type": "kubeConfigEditor"
+                  }
+                ],
+                "actions": []
+              }
+            },
+            {
+              "type": "button",
+              "label": "AWS EKS集群",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "纳管AWS EKS集群 (ESC 关闭)",
+                "body": [
                   {
-                    "type": "input-password",
-                    "name": "secretKey",
-                    "label": "Secret Key",
-                    "placeholder": "请输入AWS Secret Key",
-                    "required": true
-                  },
-                  {
-                    "placeholder": "请输入AWS Region，例如：us-west-2qq",
-                    "required": true,
-                    "type": "select",
-                    "name": "region",
-                    "label": "AWS 区域",
-                    "searchable": true,
-                    "clearable": true,
-                    "options": [
+                    "type": "form",
+                    "api": "post:/admin/cluster/aws/save",
+                    "body": [
                       {
-                        "label": "美国东部（弗吉尼亚北部） - us-east-1",
-                        "value": "us-east-1"
+                        "type": "input-text",
+                        "name": "accessKey",
+                        "label": "Access Key",
+                        "placeholder": "请输入AWS Access Key",
+                        "required": true
                       },
                       {
-                        "label": "美国东部（俄亥俄） - us-east-2",
-                        "value": "us-east-2"
+                        "type": "input-password",
+                        "name": "secretKey",
+                        "label": "Secret Key",
+                        "placeholder": "请输入AWS Secret Key",
+                        "required": true
                       },
                       {
-                        "label": "美国西部（加利福尼亚北部） - us-west-1",
-                        "value": "us-west-1"
+                        "placeholder": "请输入AWS Region，例如：us-west-2qq",
+                        "required": true,
+                        "type": "select",
+                        "name": "region",
+                        "label": "AWS 区域",
+                        "searchable": true,
+                        "clearable": true,
+                        "options": [
+                          {
+                            "label": "美国东部（弗吉尼亚北部） - us-east-1",
+                            "value": "us-east-1"
+                          },
+                          {
+                            "label": "美国东部（俄亥俄） - us-east-2",
+                            "value": "us-east-2"
+                          },
+                          {
+                            "label": "美国西部（加利福尼亚北部） - us-west-1",
+                            "value": "us-west-1"
+                          },
+                          {
+                            "label": "美国西部（俄勒冈） - us-west-2",
+                            "value": "us-west-2"
+                          },
+                          {
+                            "label": "AWS GovCloud（美国东部） - us-gov-east-1",
+                            "value": "us-gov-east-1"
+                          },
+                          {
+                            "label": "AWS GovCloud（美国西部） - us-gov-west-1",
+                            "value": "us-gov-west-1"
+                          },
+                          {
+                            "label": "加拿大（中部，蒙特利尔） - ca-central-1",
+                            "value": "ca-central-1"
+                          },
+                          {
+                            "label": "加拿大（西部，卡尔加里） - ca-west-1",
+                            "value": "ca-west-1"
+                          },
+                          {
+                            "label": "墨西哥（中部，克雷塔罗） - mx-central-1",
+                            "value": "mx-central-1"
+                          },
+                          {
+                            "label": "南美洲（圣保罗，巴西） - sa-east-1",
+                            "value": "sa-east-1"
+                          },
+                          {
+                            "label": "欧洲（爱尔兰） - eu-west-1",
+                            "value": "eu-west-1"
+                          },
+                          {
+                            "label": "欧洲（伦敦，英国） - eu-west-2",
+                            "value": "eu-west-2"
+                          },
+                          {
+                            "label": "欧洲（巴黎，法国） - eu-west-3",
+                            "value": "eu-west-3"
+                          },
+                          {
+                            "label": "欧洲（法兰克福，德国） - eu-central-1",
+                            "value": "eu-central-1"
+                          },
+                          {
+                            "label": "欧洲（苏黎世，瑞士） - eu-central-2",
+                            "value": "eu-central-2"
+                          },
+                          {
+                            "label": "欧洲（斯德哥尔摩，瑞典） - eu-north-1",
+                            "value": "eu-north-1"
+                          },
+                          {
+                            "label": "欧洲（米兰，意大利） - eu-south-1",
+                            "value": "eu-south-1"
+                          },
+                          {
+                            "label": "欧洲（西班牙，马德里） - eu-south-2",
+                            "value": "eu-south-2"
+                          },
+                          {
+                            "label": "中东（巴林） - me-south-1",
+                            "value": "me-south-1"
+                          },
+                          {
+                            "label": "中东（阿联酋，迪拜） - me-central-1",
+                            "value": "me-central-1"
+                          },
+                          {
+                            "label": "中东（以色列，特拉维夫） - il-central-1",
+                            "value": "il-central-1"
+                          },
+                          {
+                            "label": "非洲（开普敦，南非） - af-south-1",
+                            "value": "af-south-1"
+                          },
+                          {
+                            "label": "亚太（东京，日本） - ap-northeast-1",
+                            "value": "ap-northeast-1"
+                          },
+                          {
+                            "label": "亚太（首尔，韩国） - ap-northeast-2",
+                            "value": "ap-northeast-2"
+                          },
+                          {
+                            "label": "亚太（大阪，日本） - ap-northeast-3",
+                            "value": "ap-northeast-3"
+                          },
+                          {
+                            "label": "亚太（香港，中国） - ap-east-1",
+                            "value": "ap-east-1"
+                          },
+                          {
+                            "label": "亚太（台北，台湾，规划中） - ap-east-2",
+                            "value": "ap-east-2"
+                          },
+                          {
+                            "label": "亚太（新加坡） - ap-southeast-1",
+                            "value": "ap-southeast-1"
+                          },
+                          {
+                            "label": "亚太（悉尼，澳大利亚） - ap-southeast-2",
+                            "value": "ap-southeast-2"
+                          },
+                          {
+                            "label": "亚太（雅加达，印度尼西亚） - ap-southeast-3",
+                            "value": "ap-southeast-3"
+                          },
+                          {
+                            "label": "亚太（墨尔本，澳大利亚） - ap-southeast-4",
+                            "value": "ap-southeast-4"
+                          },
+                          {
+                            "label": "亚太（马来西亚，吉隆坡） - ap-southeast-5",
+                            "value": "ap-southeast-5"
+                          },
+                          {
+                            "label": "亚太（新西兰，奥克兰） - ap-southeast-6",
+                            "value": "ap-southeast-6"
+                          },
+                          {
+                            "label": "亚太（孟买，印度） - ap-south-1",
+                            "value": "ap-south-1"
+                          },
+                          {
+                            "label": "亚太（海得拉巴，印度） - ap-south-2",
+                            "value": "ap-south-2"
+                          }
+                        ]
                       },
                       {
-                        "label": "美国西部（俄勒冈） - us-west-2",
-                        "value": "us-west-2"
+                        "type": "input-text",
+                        "name": "clusterName",
+                        "label": "集群名称",
+                        "placeholder": "请输入EKS集群名称",
+                        "required": true
                       },
                       {
-                        "label": "AWS GovCloud（美国东部） - us-gov-east-1",
-                        "value": "us-gov-east-1"
-                      },
-                      {
-                        "label": "AWS GovCloud（美国西部） - us-gov-west-1",
-                        "value": "us-gov-west-1"
-                      },
-                      {
-                        "label": "加拿大（中部，蒙特利尔） - ca-central-1",
-                        "value": "ca-central-1"
-                      },
-                      {
-                        "label": "加拿大（西部，卡尔加里） - ca-west-1",
-                        "value": "ca-west-1"
-                      },
-                      {
-                        "label": "墨西哥（中部，克雷塔罗） - mx-central-1",
-                        "value": "mx-central-1"
-                      },
-                      {
-                        "label": "南美洲（圣保罗，巴西） - sa-east-1",
-                        "value": "sa-east-1"
-                      },
-                      {
-                        "label": "欧洲（爱尔兰） - eu-west-1",
-                        "value": "eu-west-1"
-                      },
-                      {
-                        "label": "欧洲（伦敦，英国） - eu-west-2",
-                        "value": "eu-west-2"
-                      },
-                      {
-                        "label": "欧洲（巴黎，法国） - eu-west-3",
-                        "value": "eu-west-3"
-                      },
-                      {
-                        "label": "欧洲（法兰克福，德国） - eu-central-1",
-                        "value": "eu-central-1"
-                      },
-                      {
-                        "label": "欧洲（苏黎世，瑞士） - eu-central-2",
-                        "value": "eu-central-2"
-                      },
-                      {
-                        "label": "欧洲（斯德哥尔摩，瑞典） - eu-north-1",
-                        "value": "eu-north-1"
-                      },
-                      {
-                        "label": "欧洲（米兰，意大利） - eu-south-1",
-                        "value": "eu-south-1"
-                      },
-                      {
-                        "label": "欧洲（西班牙，马德里） - eu-south-2",
-                        "value": "eu-south-2"
-                      },
-                      {
-                        "label": "中东（巴林） - me-south-1",
-                        "value": "me-south-1"
-                      },
-                      {
-                        "label": "中东（阿联酋，迪拜） - me-central-1",
-                        "value": "me-central-1"
-                      },
-                      {
-                        "label": "中东（以色列，特拉维夫） - il-central-1",
-                        "value": "il-central-1"
-                      },
-                      {
-                        "label": "非洲（开普敦，南非） - af-south-1",
-                        "value": "af-south-1"
-                      },
-                      {
-                        "label": "亚太（东京，日本） - ap-northeast-1",
-                        "value": "ap-northeast-1"
-                      },
-                      {
-                        "label": "亚太（首尔，韩国） - ap-northeast-2",
-                        "value": "ap-northeast-2"
-                      },
-                      {
-                        "label": "亚太（大阪，日本） - ap-northeast-3",
-                        "value": "ap-northeast-3"
-                      },
-                      {
-                        "label": "亚太（香港，中国） - ap-east-1",
-                        "value": "ap-east-1"
-                      },
-                      {
-                        "label": "亚太（台北，台湾，规划中） - ap-east-2",
-                        "value": "ap-east-2"
-                      },
-                      {
-                        "label": "亚太（新加坡） - ap-southeast-1",
-                        "value": "ap-southeast-1"
-                      },
-                      {
-                        "label": "亚太（悉尼，澳大利亚） - ap-southeast-2",
-                        "value": "ap-southeast-2"
-                      },
-                      {
-                        "label": "亚太（雅加达，印度尼西亚） - ap-southeast-3",
-                        "value": "ap-southeast-3"
-                      },
-                      {
-                        "label": "亚太（墨尔本，澳大利亚） - ap-southeast-4",
-                        "value": "ap-southeast-4"
-                      },
-                      {
-                        "label": "亚太（马来西亚，吉隆坡） - ap-southeast-5",
-                        "value": "ap-southeast-5"
-                      },
-                      {
-                        "label": "亚太（新西兰，奥克兰） - ap-southeast-6",
-                        "value": "ap-southeast-6"
-                      },
-                      {
-                        "label": "亚太（孟买，印度） - ap-south-1",
-                        "value": "ap-south-1"
-                      },
-                      {
-                        "label": "亚太（海得拉巴，印度） - ap-south-2",
-                        "value": "ap-south-2"
+                        "type": "input-text",
+                        "name": "displayName",
+                        "label": "显示名称",
+                        "placeholder": "请输入显示名称（可选）"
                       }
                     ]
-                  },
-                  {
-                    "type": "input-text",
-                    "name": "clusterName",
-                    "label": "集群名称",
-                    "placeholder": "请输入EKS集群名称",
-                    "required": true
-                  },
-                  {
-                    "type": "input-text",
-                    "name": "displayName",
-                    "label": "显示名称",
-                    "placeholder": "请输入显示名称（可选）"
                   }
                 ]
               }
-            ]
-          }
-        },
-        {
-          "type": "button",
-          "label": "Token方式纳管集群",
-          "level": "primary",
-          "actionType": "drawer",
-          "drawer": {
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "size": "lg",
-            "title": "Token方式纳管集群 (ESC 关闭)",
-            "body": [
-              {
-                "type": "form",
-                "api": "post:/admin/cluster/token/save",
+            },
+            {
+              "type": "button",
+              "label": "Token方式",
+              "actionType": "drawer",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "Token方式纳管集群 (ESC 关闭)",
                 "body": [
                   {
-                    "type": "input-text",
-                    "name": "server",
-                    "label": "服务器地址",
-                    "placeholder": "请输入Kubernetes API服务器地址，例如：https://kubernetes.example.com:6443",
-                    "required": true,
-                    "validations": {
-                      "isUrl": true
-                    }
-                  },
-                  {
-                    "type": "input-password",
-                    "name": "token",
-                    "label": "访问Token",
-                    "placeholder": "请输入Kubernetes访问Token",
-                    "required": true
-                  },
-                  {
-                    "type": "textarea",
-                    "name": "caData",
-                    "label": "CA证书数据",
-                    "placeholder": "请输入CA证书数据（可选，Base64编码）",
-                    "required": false,
-                    "minRows": 3,
-                    "maxRows": 8
-                  },
-                  {
-                    "type": "input-text",
-                    "name": "displayName",
-                    "label": "显示名称",
-                    "placeholder": "请输入集群显示名称",
-                    "required": true
-                  },
-                  {
-                    "type": "textarea",
-                    "name": "description",
-                    "label": "集群描述",
-                    "placeholder": "请输入集群描述信息（可选）",
-                    "required": false,
-                    "minRows": 2,
-                    "maxRows": 4
+                    "type": "form",
+                    "api": "post:/admin/cluster/token/save",
+                    "body": [
+                      {
+                        "type": "input-text",
+                        "name": "server",
+                        "label": "服务器地址",
+                        "placeholder": "请输入Kubernetes API服务器地址，例如：https://kubernetes.example.com:6443",
+                        "required": true,
+                        "validations": {
+                          "isUrl": true
+                        }
+                      },
+                      {
+                        "type": "input-password",
+                        "name": "token",
+                        "label": "访问Token",
+                        "placeholder": "请输入Kubernetes访问Token",
+                        "required": true
+                      },
+                      {
+                        "type": "textarea",
+                        "name": "caData",
+                        "label": "CA证书数据",
+                        "placeholder": "请输入CA证书数据（可选，Base64编码）",
+                        "required": false,
+                        "minRows": 3,
+                        "maxRows": 8
+                      },
+                      {
+                        "type": "input-text",
+                        "name": "displayName",
+                        "label": "显示名称",
+                        "placeholder": "请输入集群显示名称",
+                        "required": true
+                      },
+                      {
+                        "type": "textarea",
+                        "name": "description",
+                        "label": "集群描述",
+                        "placeholder": "请输入集群描述信息（可选）",
+                        "required": false,
+                        "minRows": 2,
+                        "maxRows": 4
+                      }
+                    ]
                   }
                 ]
               }
-            ]
-          }
+            }
+          ]
         },
         {
           "type": "columns-toggler",
