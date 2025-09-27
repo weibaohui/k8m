@@ -236,6 +236,68 @@
           }
         },
         {
+          "type": "button",
+          "label": "Token方式纳管集群",
+          "level": "primary",
+          "actionType": "drawer",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "Token方式纳管集群 (ESC 关闭)",
+            "body": [
+              {
+                "type": "form",
+                "api": "post:/admin/cluster/token/save",
+                "body": [
+                  {
+                    "type": "input-text",
+                    "name": "server",
+                    "label": "服务器地址",
+                    "placeholder": "请输入Kubernetes API服务器地址，例如：https://kubernetes.example.com:6443",
+                    "required": true,
+                    "validations": {
+                      "isUrl": true
+                    }
+                  },
+                  {
+                    "type": "input-password",
+                    "name": "token",
+                    "label": "访问Token",
+                    "placeholder": "请输入Kubernetes访问Token",
+                    "required": true
+                  },
+                  {
+                    "type": "textarea",
+                    "name": "caData",
+                    "label": "CA证书数据",
+                    "placeholder": "请输入CA证书数据（可选，Base64编码）",
+                    "required": false,
+                    "minRows": 3,
+                    "maxRows": 8
+                  },
+                  {
+                    "type": "input-text",
+                    "name": "displayName",
+                    "label": "显示名称",
+                    "placeholder": "请输入集群显示名称",
+                    "required": true
+                  },
+                  {
+                    "type": "textarea",
+                    "name": "description",
+                    "label": "集群描述",
+                    "placeholder": "请输入集群描述信息（可选）",
+                    "required": false,
+                    "minRows": 2,
+                    "maxRows": 4
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
           "type": "columns-toggler",
           "align": "right",
           "draggable": true,
