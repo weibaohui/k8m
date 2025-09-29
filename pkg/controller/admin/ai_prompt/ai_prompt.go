@@ -26,6 +26,7 @@ func RegisterAdminAIPromptRoutes(admin *gin.RouterGroup) {
 	admin.GET("/ai_prompt/option_list", ctrl.AIPromptOptionList)
 	admin.GET("/ai_prompt/types", ctrl.AIPromptTypes)
 	admin.GET("/ai_prompt/categories", ctrl.AIPromptCategories)
+	admin.GET("/ai_prompt/category_list", ctrl.AIPromptCategories) // 添加category_list路由
 }
 
 // @Summary 获取AI提示词列表
