@@ -1,0 +1,331 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "aiPromptCRUD",
+      "name": "aiPromptCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建提示词",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "xl",
+            "title": "新建AI提示词 (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/admin/ai_prompt/save",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "name",
+                  "label": "提示词名称",
+                  "required": true,
+                  "placeholder": "请输入提示词名称",
+                  "validateOnChange": true,
+                  "validations": {
+                    "minLength": 2,
+                    "maxLength": 128
+                  },
+                  "validationErrors": {
+                    "minLength": "提示词名称至少 2 个字符",
+                    "maxLength": "提示词名称最多 128 个字符"
+                  }
+                },
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "提示词描述",
+                  "placeholder": "请输入提示词描述"
+                },
+                {
+                  "type": "select",
+                  "name": "prompt_type",
+                  "label": "提示词类型",
+                  "required": true,
+                  "source": "get:/admin/ai_prompt/type_list",
+                  "placeholder": "请选择提示词类型"
+                },
+                {
+                  "type": "input-text",
+                  "name": "prompt_code",
+                  "label": "提示词代码",
+                  "placeholder": "请输入提示词代码，全局唯一编码",
+                  "required": true
+                },
+                {
+                  "type": "textarea",
+                  "name": "content",
+                  "label": "提示词内容",
+                  "required": true,
+                  "placeholder": "请输入提示词内容，支持变量替换",
+                  "minRows": 5,
+                  "maxRows": 15
+                },
+                {
+                  "type": "input-text",
+                  "name": "variables",
+                  "label": "变量说明",
+                  "placeholder": "请输入变量说明，如：{{resource}} - 资源信息，{{error}} - 错误信息"
+                },
+                {
+                  "type": "select",
+                  "name": "category",
+                  "label": "分类",
+                  "source": "get:/admin/ai_prompt/category_list",
+                  "placeholder": "请选择分类"
+                },
+                {
+                  "type": "input-text",
+                  "name": "version",
+                  "label": "版本",
+                  "placeholder": "请输入版本",
+                  "value": "v1"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "aiPromptCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "reload",
+        "bulkActions",
+        {
+          "type": "button",
+          "label": "重置内置提示词",
+          "actionType": "ajax",
+          "confirmText": "该操作将先删除所有自定义提示词，然后重新加载内置提示词，是否执行?",
+          "api": "post:/admin/ai_prompt/load"
+        }
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "post:/admin/ai_prompt/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/admin/ai_prompt/list",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑提示词",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "编辑AI提示词 (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/ai_prompt/save",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "hidden",
+                      "name": "prompt_type_builtin"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "name",
+                      "label": "提示词名称",
+                      "required": true,
+                      "placeholder": "请输入提示词名称",
+                      "validateOnChange": true,
+                      "validations": {
+                        "minLength": 2,
+                        "maxLength": 128
+                      },
+                      "validationErrors": {
+                        "minLength": "提示词名称至少 2 个字符",
+                        "maxLength": "提示词名称最多 128 个字符"
+                      }
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "description",
+                      "label": "提示词描述",
+                      "placeholder": "请输入提示词描述"
+                    },
+                    {
+                      "type": "select",
+                      "name": "prompt_type",
+                      "label": "提示词类型",
+                      "required": true,
+                      "source": "get:/admin/ai_prompt/type_list",
+                      "placeholder": "请选择提示词类型"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "prompt_code",
+                      "label": "提示词代码",
+                      "placeholder": "请输入提示词代码，全局唯一编码",
+                      "required": true
+                    },
+                    {
+                      "type": "textarea",
+                      "name": "content",
+                      "label": "提示词内容",
+                      "required": true,
+                      "placeholder": "请输入提示词内容，支持变量替换",
+                      "minRows": 5,
+                      "maxRows": 15
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "variables",
+                      "label": "变量说明",
+                      "placeholder": "请输入变量说明，如：{{resource}} - 资源信息，{{error}} - 错误信息"
+                    },
+                    {
+                      "type": "select",
+                      "name": "category",
+                      "label": "分类",
+                      "source": "get:/admin/ai_prompt/category_list",
+                      "placeholder": "请选择分类"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "version",
+                      "label": "版本",
+                      "placeholder": "请输入版本"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "aiPromptCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "name",
+          "label": "提示词名称",
+          "type": "text",
+          "width": "180px"
+        },
+        {
+          "name": "prompt_code",
+          "label": "提示词编码",
+          "type": "text"
+        },
+        {
+          "name": "description",
+          "label": "提示词描述",
+          "type": "text",
+          "width": "200px"
+        },
+        {
+          "name": "prompt_type",
+          "label": "类型",
+          "type": "mapping",
+          "map": {
+            "Event": "事件诊断",
+            "Describe": "资源描述",
+            "Log": "日志分析",
+            "Status": "状态分析",
+            "K8sGPT": "K8sGPT分析",
+            "Any": "任意分析",
+            "Question": "问题解答",
+            "CronJob": "CronJob分析"
+          }
+        },
+        {
+          "name": "category",
+          "label": "分类",
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "label": "版本",
+          "type": "text"
+        },
+        {
+          "name": "prompt_type_builtin",
+          "label": "来源",
+          "type": "mapping",
+          "map": {
+            "Builtin": "系统提示词",
+            "Custom": "用户提示词"
+          }
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}
