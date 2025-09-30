@@ -118,6 +118,15 @@
                           "placeholder": "请输入提示词内容，支持变量替换",
                           "minRows": 5,
                           "maxRows": 15
+                        },
+                        {
+                          "type": "switch",
+                          "name": "is_enabled",
+                          "label": "启用状态",
+                          "value": true,
+                          "trueValue": true,
+                          "falseValue": false,
+                          "description": "是否启用此提示词"
                         }
                       ],
                       "submitText": "保存",
@@ -241,6 +250,14 @@
                               "placeholder": "请输入提示词内容，支持变量替换",
                               "minRows": 5,
                               "maxRows": 15
+                            },
+                            {
+                              "type": "switch",
+                              "name": "is_enabled",
+                              "label": "启用状态",
+                              "trueValue": true,
+                              "falseValue": false,
+                              "description": "是否启用此提示词"
                             }
                           ],
                           "submitText": "保存",
@@ -284,6 +301,38 @@
                   "label": "类型",
                   "type": "mapping",
                   "source": "get:/admin/ai_prompt/types"
+                },
+                {
+                  "name": "is_builtin",
+                  "label": "内置",
+                  "type": "status",
+                  "map": {
+                    "true": {
+                      "value": "是",
+                      "status": "success"
+                    },
+                    "false": {
+                      "value": "否",
+                      "status": "default"
+                    }
+                  },
+                  "width": "80px"
+                },
+                {
+                  "name": "is_enabled",
+                  "label": "启用状态",
+                  "type": "status",
+                  "map": {
+                    "true": {
+                      "value": "启用",
+                      "status": "success"
+                    },
+                    "false": {
+                      "value": "禁用",
+                      "status": "fail"
+                    }
+                  },
+                  "width": "100px"
                 },
                 {
                   "name": "created_at",
