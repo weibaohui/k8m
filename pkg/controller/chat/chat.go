@@ -266,11 +266,14 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *gin.Context) {
-	prompt, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeAnyQuestion)
+	prompt, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeAnySelection)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	klog.V(4).Infof("prompt: %s", prompt)
+	klog.V(4).Infof("prompt: %s", prompt)
+	klog.V(4).Infof("prompt: %s", prompt)
 	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(prompt, d.Question)
