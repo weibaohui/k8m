@@ -196,4 +196,18 @@ var BuiltinAIPrompts = []AIPrompt{
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
+	{
+		Name:        "任意选择",
+		Description: "对任意选择的文字内容进行详细解释",
+		PromptType:  constants.AIPromptTypeAnySelection,
+		Content: `请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： ${Question} 。
+		\n注意：
+		\n- 使用中文进行回答
+		\n- 你我之间只进行这一轮交互，后面不要再问问题了
+		\n- 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
+		\n- 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
+		\n- 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
+		IsBuiltin: true,
+		IsEnabled: true,
+	},
 }
