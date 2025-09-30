@@ -16,6 +16,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 	"github.com/weibaohui/k8m/pkg/controller/admin/inspection"
@@ -349,6 +350,8 @@ func main() {
 		config.RegisterConfigRoutes(admin)
 		// 大模型列表管理
 		config.RegisterAIModelConfigRoutes(admin)
+		// AI提示词管理
+		ai_prompt.RegisterAdminAIPromptRoutes(admin)
 		// 集群巡检定时任务
 		inspection.RegisterAdminScheduleRoutes(admin)
 		// 集群巡检记录

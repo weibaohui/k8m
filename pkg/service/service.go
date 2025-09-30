@@ -32,6 +32,11 @@ var localOperationLogService = NewOperationLogService()
 var localShellLogService = &shellLogService{}
 var localAiService = &aiService{}
 var localMcpService = &mcpService{}
+var localPromptService = &promptService{}
+
+func PromptService() *promptService {
+	return localPromptService
+}
 
 func ChatService() *chatService {
 	return localChatService

@@ -29,6 +29,7 @@ func init() {
 	_ = AddInnerAdminUser()
 	_ = MigrateAIModel()
 	_ = AddBuiltinLuaScripts()
+	_ = InitBuiltinAIPrompts()
 }
 func AutoMigrate() error {
 
@@ -124,6 +125,9 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&Menu{}); err != nil {
 		errs = append(errs, err)
 	}
+	if err := dao.DB().AutoMigrate(&AIPrompt{}); err != nil {
+		errs = append(errs, err)
+	}
 	// 删除 user 表 name 字段，已弃用
 	if dao.DB().Migrator().HasColumn(&User{}, "Role") {
 		if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
@@ -144,6 +148,7 @@ func AutoMigrate() error {
 
 	return nil
 }
+
 func AddBuiltinLuaScripts() error {
 	// 检查数据库中记录的内置脚本版本
 	db := dao.DB()
@@ -389,5 +394,32 @@ func MigrateAIModel() error {
 
 	// 更新config表，记录ModelID
 	dao.DB().Model(&Config{}).Update("model_id", model.ID)
+	return nil
+}
+
+// InitBuiltinAIPrompts 初始化内置AI提示词
+func InitBuiltinAIPrompts() error {
+	// 检查是否已经存在内置提示词
+	var count int64
+	dao.DB().Model(&AIPrompt{}).Where("is_builtin = ?", true).Count(&count)
+	if count > 0 {
+		return nil // 已经初始化过了
+	}
+
+	// 使用已定义的内置提示词
+	for _, prompt := range BuiltinAIPrompts {
+		// 检查是否已存在相同的提示词名称和类型
+		var existing AIPrompt
+		err := dao.DB().Where("name = ? AND prompt_type = ?", prompt.Name, prompt.PromptType).First(&existing).Error
+		if err == nil {
+			continue // 已存在，跳过
+		}
+
+		// 创建新的提示词
+		if err := dao.DB().Create(&prompt).Error; err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

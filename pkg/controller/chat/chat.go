@@ -1,12 +1,15 @@
 package chat
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
@@ -86,6 +89,34 @@ func handleRequest(c *gin.Context, promptFunc func(data any) string) {
 	sse.WriteWebSocketChatCompletionStream(c, stream)
 }
 
+// renderTemplate 通用的模板处理函数
+// templateStr: 模板字符串
+// contextBuilder: 根据ResourceData构建上下文的函数
+func renderTemplate(templateStr string, data any, contextBuilder func(ResourceData) map[string]any) string {
+	d, ok := data.(ResourceData)
+	if !ok {
+		klog.V(6).Infof("Error: data is not ResourceData type")
+		return ""
+	}
+	eng := htpl.NewEngine()
+	// 解析模板
+	tpl, err := eng.ParseString(templateStr)
+	if err != nil {
+		klog.V(6).Infof("Error Parse template:%v\n\n", err)
+		return ""
+	}
+
+	ctx := contextBuilder(d)
+
+	// 渲染模板
+	result, err := tpl.Render(ctx)
+	if err != nil {
+		klog.V(6).Infof("Error Render template:%v\n\n", err)
+		return ""
+	}
+	return result
+}
+
 // @Summary 分析K8s事件
 // @Security BearerAuth
 // @Param note query string false "事件备注"
@@ -96,15 +127,20 @@ func handleRequest(c *gin.Context, promptFunc func(data any) string) {
 // @Success 200 {object} string
 // @Router /ai/chat/event [get]
 func (cc *Controller) Event(c *gin.Context) {
+
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
-			"note":   d.Note,
-			"source": d.Source,
-			"reason": d.Reason,
-			"type":   d.Type,
-			"kind":   d.RegardingKind,
-		}))
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeEvent)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Note":          d.Note,
+				"Source":        d.Source,
+				"Reason":        d.Reason,
+				"Type":          d.Type,
+				"RegardingKind": d.RegardingKind,
+			}
+		})
 	})
 }
 
@@ -137,19 +173,16 @@ func (cc *Controller) Describe(c *gin.Context) {
 		Describe(&describe)
 
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在查看关于k8s %s %s 资源的Describe (kubectl describe )信息。
-		请你作为kubernetes k8s 技术专家，对这个describe的文本进行分析。
-		\n 请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
-		\n\nDescribe信息如下：%s`,
-			d.Group, d.Kind, string(describe))
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeDescribe)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Group":        d.Group,
+				"Kind":         d.Kind,
+				"DescribeInfo": string(describe),
+			}
+		})
 	})
 }
 
@@ -162,20 +195,16 @@ func (cc *Controller) Describe(c *gin.Context) {
 // @Router /ai/chat/example [get]
 func (cc *Controller) Example(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 技术专家，给我一份关于这个k8s资源的使用指南。
-		\n要求包括资源说明、使用场景（举例说明）、最佳实践、典型示例（配合前面的场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
-		\n最后给出一份关于这个资源的yaml样例。
-		\n要求先假设一个简单场景、一个复杂场景。1、分别概要介绍这两个场景，2、为这两个场景书写yaml文件，每一行yaml都增加简体中文注释。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version)
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeExample)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Kind":    d.Kind,
+				"Group":   d.Group,
+				"Version": d.Version,
+			}
+		})
 	})
 }
 
@@ -189,18 +218,17 @@ func (cc *Controller) Example(c *gin.Context) {
 // @Router /ai/chat/example/field [get]
 func (cc *Controller) FieldExample(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 技术专家，给出一份关于  %s  这个具体字段的使用场景。请在回答中使用 “该字段” 代替这个具体的字段。
-		请详细解释该字段的含义、用法、并给出一个假设的使用场景，为这个场景书写yaml文件，每一行yaml都增加简体中文注释。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version, d.Field)
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeFieldExample)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Kind":    d.Kind,
+				"Group":   d.Group,
+				"Version": d.Version,
+				"Field":   d.Field,
+			}
+		})
 	})
 }
 
@@ -213,18 +241,16 @@ func (cc *Controller) FieldExample(c *gin.Context) {
 // @Router /ai/chat/resource [get]
 func (cc *Controller) Resource(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 技术专家，给我一份关于这个k8s资源的使用指南。
-		要求包括资源说明、使用场景（举例说明）、最佳实践、典型示例（配合前面的场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version)
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeResource)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Kind":    d.Kind,
+				"Group":   d.Group,
+				"Version": d.Version,
+			}
+		})
 	})
 }
 
@@ -238,24 +264,17 @@ func (cc *Controller) Resource(c *gin.Context) {
 // @Router /ai/chat/k8s_gpt/resource [get]
 func (cc *Controller) K8sGPTResource(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-			简化以下由三个破折号分隔的Kubernetes错误信息，
-	错误内容：--- %s ---。
-	资源名称：--- %s ---。
-	资源类型：--- %s ---。
-	相关字段k8s官方文档解释：--- %s ---。
-	请以分步形式提供最可能的解决方案，字符数不超过280。
-	输出格式：
-	错误信息: {此处解释错误}
-	解决方案: {此处分步说明解决方案}
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Data, d.Name, d.Kind, d.Field)
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeK8sGPTResource)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Data":  d.Data,
+				"Name":  d.Name,
+				"Kind":  d.Kind,
+				"Field": d.Field,
+			}
+		})
 	})
 }
 
@@ -266,16 +285,14 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 // @Router /ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		\n请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： %s 。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Question)
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeAnySelection)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Question": d.Question,
+			}
+		})
 	})
 }
 
@@ -289,18 +306,17 @@ func (cc *Controller) AnySelection(c *gin.Context) {
 // @Router /ai/chat/any_question [get]
 func (cc *Controller) AnyQuestion(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 技术专家，请你详细解释下我的疑问： %s 。
-		要求包括关键名词解释、作用、典型示例（以场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version, d.Question)
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeAnyQuestion)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Kind":     d.Kind,
+				"Group":    d.Group,
+				"Version":  d.Version,
+				"Question": d.Question,
+			}
+		})
 	})
 }
 
@@ -311,16 +327,14 @@ func (cc *Controller) AnyQuestion(c *gin.Context) {
 // @Router /ai/chat/cron [get]
 func (cc *Controller) Cron(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`我正在查看k8s cronjob 中的schedule 表达式：%s。
-		\n请你作为k8s技术专家，对 %s 这个表达式进行分析，给出详细的解释。
-		\n注意：
-		\n0、使用中文进行回答。
-		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
-		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Cron, d.Cron)
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeCron)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Cron": d.Cron,
+			}
+		})
 	})
 }
 
@@ -331,7 +345,29 @@ func (cc *Controller) Cron(c *gin.Context) {
 // @Router /ai/chat/log [get]
 func (cc *Controller) Log(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(d.Data))
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeLog)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Data": utils.ToJSON(d.Data),
+			}
+		})
 	})
+}
+
+// getPromptWithFallback 根据提示类型从数据库获取模板，若失败则回退到内置模板。
+// 参数说明：
+// - ctx: 请求上下文，用于数据库或服务调用的上下文传递。
+// - promptType: 提示词类型常量（如 constants.AIPromptTypeEvent 等）。
+// 返回值：
+// - 模板字符串，如果数据库查询失败则返回内置模板内容。
+func getPromptWithFallback(ctx context.Context, promptType constants.AIPromptType) string {
+	templateStr, err := service.PromptService().GetPrompt(ctx, promptType)
+	if err != nil {
+		klog.Errorf("获取%s prompt模板失败: %v", promptType, err)
+		// 如果获取失败，使用内置模板
+		templateStr = models.GetBuiltinPromptContent(promptType)
+	}
+	return templateStr
 }
