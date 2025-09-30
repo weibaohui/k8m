@@ -254,7 +254,7 @@
                               "name": "prompt_type",
                               "label": "提示词类型",
                               "required": true,
-                              "source": "get:/admin/ai_prompt/type_list",
+                              "source": "get:/admin/ai_prompt/types",
                               "placeholder": "请选择提示词类型"
                             },
                             {
