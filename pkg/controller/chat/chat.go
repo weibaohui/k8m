@@ -7,7 +7,6 @@ import (
 	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
@@ -127,11 +126,7 @@ func (cc *Controller) Event(c *gin.Context) {
 			klog.V(6).Infof("Error Render template:%v\n\n", err)
 			return ""
 		}
-		klog.V(4).Infof("Render template:%s\n\n", result)
-		klog.V(4).Infof("Render template:%s\n\n", result)
-		klog.V(4).Infof("Render template:%s\n\n", result)
-		klog.V(4).Infof("Render template:%s\n\n", result)
-		klog.V(4).Infof("Render template:%s\n\n", result)
+
 		return fmt.Sprintf(result, utils.ToJSON(gin.H{
 			"note":   d.Note,
 			"source": d.Source,
@@ -299,14 +294,13 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *gin.Context) {
-	prompt, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeAnySelection)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	klog.V(4).Infof("prompt: %s", prompt)
-	klog.V(4).Infof("prompt: %s", prompt)
-	klog.V(4).Infof("prompt: %s", prompt)
+	prompt := `请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： %s 。
+注意：
+- 使用中文进行回答
+- 你我之间只进行这一轮交互，后面不要再问问题了
+- 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
+- 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
+- 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`
 	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(prompt, d.Question)
