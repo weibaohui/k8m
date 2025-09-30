@@ -205,6 +205,14 @@
                               "name": "id"
                             },
                             {
+                              "type": "hidden",
+                              "name": "is_enabled"
+                            },
+                            {
+                              "type": "hidden",
+                              "name": "is_builtin"
+                            },
+                            {
                               "type": "input-text",
                               "name": "name",
                               "label": "提示词名称",
