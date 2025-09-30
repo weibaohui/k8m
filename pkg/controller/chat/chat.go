@@ -1,6 +1,8 @@
 package chat
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -128,12 +130,7 @@ func (cc *Controller) Event(c *gin.Context) {
 
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeEvent)
-		if err != nil {
-			klog.Errorf("获取Event prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeEvent)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeEvent)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -177,12 +174,7 @@ func (cc *Controller) Describe(c *gin.Context) {
 
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeDescribe)
-		if err != nil {
-			klog.Errorf("获取Describe prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeDescribe)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeDescribe)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -204,12 +196,7 @@ func (cc *Controller) Describe(c *gin.Context) {
 func (cc *Controller) Example(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeExample)
-		if err != nil {
-			klog.Errorf("获取Example prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeExample)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeExample)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -232,12 +219,7 @@ func (cc *Controller) Example(c *gin.Context) {
 func (cc *Controller) FieldExample(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeFieldExample)
-		if err != nil {
-			klog.Errorf("获取FieldExample prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeFieldExample)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeFieldExample)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -260,12 +242,7 @@ func (cc *Controller) FieldExample(c *gin.Context) {
 func (cc *Controller) Resource(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeResource)
-		if err != nil {
-			klog.Errorf("获取Resource prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeResource)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeResource)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -288,12 +265,7 @@ func (cc *Controller) Resource(c *gin.Context) {
 func (cc *Controller) K8sGPTResource(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeK8sGPTResource)
-		if err != nil {
-			klog.Errorf("获取K8sGPTResource prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeK8sGPTResource)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeK8sGPTResource)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -314,12 +286,7 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 func (cc *Controller) AnySelection(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeAnySelection)
-		if err != nil {
-			klog.Errorf("获取AnySelection prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeAnySelection)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeAnySelection)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -340,12 +307,7 @@ func (cc *Controller) AnySelection(c *gin.Context) {
 func (cc *Controller) AnyQuestion(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeAnyQuestion)
-		if err != nil {
-			klog.Errorf("获取AnyQuestion prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeAnyQuestion)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeAnyQuestion)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -366,12 +328,7 @@ func (cc *Controller) AnyQuestion(c *gin.Context) {
 func (cc *Controller) Cron(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeCron)
-		if err != nil {
-			klog.Errorf("获取Cron prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeCron)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeCron)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -389,12 +346,7 @@ func (cc *Controller) Cron(c *gin.Context) {
 func (cc *Controller) Log(c *gin.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
-		templateStr, err := service.PromptService().GetPrompt(c.Request.Context(), constants.AIPromptTypeLog)
-		if err != nil {
-			klog.Errorf("获取Log prompt模板失败: %v", err)
-			// 如果获取失败，使用内置模板
-			templateStr = models.GetBuiltinPromptContent(constants.AIPromptTypeLog)
-		}
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeLog)
 
 		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
 			return map[string]any{
@@ -402,4 +354,20 @@ func (cc *Controller) Log(c *gin.Context) {
 			}
 		})
 	})
+}
+
+// getPromptWithFallback 根据提示类型从数据库获取模板，若失败则回退到内置模板。
+// 参数说明：
+// - ctx: 请求上下文，用于数据库或服务调用的上下文传递。
+// - promptType: 提示词类型常量（如 constants.AIPromptTypeEvent 等）。
+// 返回值：
+// - 模板字符串，如果数据库查询失败则返回内置模板内容。
+func getPromptWithFallback(ctx context.Context, promptType constants.AIPromptType) string {
+	templateStr, err := service.PromptService().GetPrompt(ctx, promptType)
+	if err != nil {
+		klog.Errorf("获取%s prompt模板失败: %v", promptType, err)
+		// 如果获取失败，使用内置模板
+		templateStr = models.GetBuiltinPromptContent(promptType)
+	}
+	return templateStr
 }
