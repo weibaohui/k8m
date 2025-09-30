@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -97,9 +98,41 @@ func handleRequest(c *gin.Context, promptFunc func(data any) string) {
 // @Success 200 {object} string
 // @Router /ai/chat/event [get]
 func (cc *Controller) Event(c *gin.Context) {
+
 	handleRequest(c, func(data any) string {
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`请你作为k8s专家，对下面的Event做出分析:\n
+				note:   ${Note},
+				source: ${Source},
+				reason: ${Reason},
+				type:   ${Type},
+				kind:   ${RegardingKind},
+		\n`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
 		d := data.(ResourceData)
-		return fmt.Sprintf("请你作为k8s专家，对下面的Event做出分析:\n%s", utils.ToJSON(gin.H{
+		ctx := map[string]any{
+			"Note":          d.Note,
+			"Source":        d.Source,
+			"Reason":        d.Reason,
+			"Type":          d.Type,
+			"RegardingKind": d.RegardingKind,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		klog.V(4).Infof("Render template:%s\n\n", result)
+		klog.V(4).Infof("Render template:%s\n\n", result)
+		klog.V(4).Infof("Render template:%s\n\n", result)
+		klog.V(4).Infof("Render template:%s\n\n", result)
+		klog.V(4).Infof("Render template:%s\n\n", result)
+		return fmt.Sprintf(result, utils.ToJSON(gin.H{
 			"note":   d.Note,
 			"source": d.Source,
 			"reason": d.Reason,
