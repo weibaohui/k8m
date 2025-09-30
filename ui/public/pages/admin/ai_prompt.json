@@ -110,13 +110,7 @@
                           "source": "get:/admin/ai_prompt/types",
                           "placeholder": "请选择提示词类型"
                         },
-                        {
-                          "type": "input-text",
-                          "name": "prompt_code",
-                          "label": "提示词代码",
-                          "placeholder": "请输入提示词代码，全局唯一编码",
-                          "required": true
-                        },
+
                         {
                           "type": "textarea",
                           "name": "content",
@@ -125,21 +119,8 @@
                           "placeholder": "请输入提示词内容，支持变量替换",
                           "minRows": 5,
                           "maxRows": 15
-                        },
-                        {
-                          "type": "input-text",
-                          "name": "variables",
-                          "label": "变量说明",
-                          "placeholder": "请输入变量说明，如：{{resource}} - 资源信息，{{error}} - 错误信息"
-                        },
-                        {
-                          "type": "input-text",
-                          "name": "version",
-                          "label": "版本",
-                          "placeholder": "请输入版本",
-                          "value": "v1"
                         }
-                      ],
+                       ],
                       "submitText": "保存",
                       "resetText": "重置",
                       "messages": {
@@ -257,13 +238,7 @@
                               "source": "get:/admin/ai_prompt/types",
                               "placeholder": "请选择提示词类型"
                             },
-                            {
-                              "type": "input-text",
-                              "name": "prompt_code",
-                              "label": "提示词代码",
-                              "placeholder": "请输入提示词代码，全局唯一编码",
-                              "required": true
-                            },
+
                             {
                               "type": "textarea",
                               "name": "content",
@@ -272,20 +247,8 @@
                               "placeholder": "请输入提示词内容，支持变量替换",
                               "minRows": 5,
                               "maxRows": 15
-                            },
-                            {
-                              "type": "input-text",
-                              "name": "variables",
-                              "label": "变量说明",
-                              "placeholder": "请输入变量说明，如：{{resource}} - 资源信息，{{error}} - 错误信息"
-                            },
-                            {
-                              "type": "input-text",
-                              "name": "version",
-                              "label": "版本",
-                              "placeholder": "请输入版本"
                             }
-                          ],
+                           ],
                           "submitText": "保存",
                           "resetText": "重置",
                           "messages": {
@@ -316,11 +279,7 @@
                   "type": "text",
                   "width": "180px"
                 },
-                {
-                  "name": "prompt_code",
-                  "label": "提示词编码",
-                  "type": "text"
-                },
+
                 {
                   "name": "description",
                   "label": "提示词描述",
@@ -333,11 +292,7 @@
                   "type": "mapping",
                   "source": "get:/admin/ai_prompt/types"
                 },
-                {
-                  "name": "version",
-                  "label": "版本",
-                  "type": "text"
-                },
+
                 {
                   "name": "prompt_type_builtin",
                   "label": "来源",

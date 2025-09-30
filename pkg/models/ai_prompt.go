@@ -16,11 +16,7 @@ type AIPrompt struct {
 	Name        string                     `json:"name" gorm:"size:100;not null"`                    // 提示词名称
 	Description string                     `json:"description" gorm:"size:500"`                      // 提示词描述
 	PromptType  constants.AIPromptType     `json:"prompt_type" gorm:"size:50;not null;index"`        // 提示词类型
-	PromptCode  string                     `json:"prompt_code" gorm:"size:100;uniqueIndex;not null"` // 提示词唯一标识码
 	Content     string                     `json:"content" gorm:"type:text;not null"`                // 提示词内容
-	Variables   string                     `json:"variables" gorm:"type:text"`                       // 变量定义(JSON格式)
-
-	Version     string                     `json:"version" gorm:"size:20"`                           // 版本号
 	IsBuiltin   bool                       `json:"is_builtin" gorm:"default:false;index"`            // 是否为内置提示词
 	IsEnabled   bool                       `json:"is_enabled" gorm:"default:true;index"`             // 是否启用
 	CreatedAt   time.Time                  `json:"created_at,omitempty" gorm:"<-:create"`
@@ -52,15 +48,7 @@ func (m *AIPrompt) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm
 	return dao.GenericGetOne(params, m, queryFuncs...)
 }
 
-// GetByCode 根据提示词代码获取AI提示词
-func (m *AIPrompt) GetByCode(code string) (*AIPrompt, error) {
-	var item AIPrompt
-	err := dao.DB().Where("prompt_code = ? AND is_enabled = ?", code, true).First(&item).Error
-	if err != nil {
-		return nil, err
-	}
-	return &item, nil
-}
+
 
 // BuiltinAIPrompts 内置AI提示词
 var BuiltinAIPrompts = []AIPrompt{
@@ -68,7 +56,6 @@ var BuiltinAIPrompts = []AIPrompt{
 		Name:        "K8s事件分析",
 		Description: "分析Kubernetes事件信息，提供问题诊断和解决建议",
 		PromptType:  constants.AIPromptTypeEvent,
-		PromptCode:  "k8s_event_analysis",
 		Content: `请你作为k8s专家，对下面的Event做出分析:
 {{.EventData}}
 
@@ -82,8 +69,6 @@ var BuiltinAIPrompts = []AIPrompt{
 - 使用中文进行回答
 - 回答要直接，不要加入啰嗦的信息
 - 不要向我提问或确认信息`,
-		Variables: "EventData: 事件数据JSON格式",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -91,7 +76,6 @@ var BuiltinAIPrompts = []AIPrompt{
 		Name:        "K8s资源描述分析",
 		Description: "分析Kubernetes资源的describe信息，识别问题并提供解决方案",
 		PromptType:  constants.AIPromptTypeDescribe,
-		PromptCode:  "k8s_describe_analysis",
 		Content: `我正在查看关于k8s {{.Group}} {{.Kind}} 资源的Describe信息。
 请你作为kubernetes k8s 技术专家，对这个describe的文本进行分析。
 
@@ -105,8 +89,6 @@ var BuiltinAIPrompts = []AIPrompt{
 - 请不要向我提问，也不要向我确认信息
 
 Describe信息如下：{{.DescribeContent}}`,
-		Variables: "Group: 资源组, Kind: 资源类型, DescribeContent: describe命令输出内容",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -114,7 +96,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "K8s资源使用示例",
 		Description: "提供Kubernetes资源的详细使用指南和YAML示例",
 		PromptType:  constants.AIPromptTypeExample,
-		PromptCode:  "k8s_resource_example",
 		Content: `我正在浏览k8s资源管理页面，资源定义Kind={{.Kind}},Group={{.Group}},version={{.Version}}。
 
 请你作为kubernetes k8s 技术专家，给我一份关于这个k8s资源的使用指南。
@@ -130,8 +111,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
-		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -139,7 +118,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "K8s字段使用示例",
 		Description: "详细解释Kubernetes资源中特定字段的用法和示例",
 		PromptType:  constants.AIPromptTypeFieldExample,
-		PromptCode:  "k8s_field_example",
 		Content: `我正在浏览k8s资源管理页面，资源定义Kind={{.Kind}},Group={{.Group}},version={{.Version}}。
 
 请你作为kubernetes k8s 技术专家，给出一份关于 {{.Field}} 这个具体字段的使用场景。请在回答中使用 "该字段" 代替这个具体的字段。
@@ -152,8 +130,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
-		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本, Field: 字段名称",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -161,7 +137,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "K8s资源使用指南",
 		Description: "提供Kubernetes资源的完整使用指南",
 		PromptType:  constants.AIPromptTypeResource,
-		PromptCode:  "k8s_resource_guide",
 		Content: `我正在浏览k8s资源管理页面，资源定义Kind={{.Kind}},Group={{.Group}},version={{.Version}}。
 
 请你作为kubernetes k8s 技术专家，给我一份关于这个k8s资源的使用指南。
@@ -174,8 +149,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
-		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -183,7 +156,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "K8s错误信息分析",
 		Description: "分析Kubernetes错误信息并提供解决方案",
 		PromptType:  constants.AIPromptTypeK8sGPTResource,
-		PromptCode:  "k8s_error_analysis",
 		Content: `简化以下由三个破折号分隔的Kubernetes错误信息，
 错误内容：--- {{.Data}} ---。
 资源名称：--- {{.Name}} ---。
@@ -202,8 +174,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
-		Variables: "Data: 错误内容, Name: 资源名称, Kind: 资源类型, Field: 相关字段",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -211,7 +181,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "内容解释",
 		Description: "解释选中的文本内容",
 		PromptType:  constants.AIPromptTypeAnySelection,
-		PromptCode:  "content_explanation",
 		Content: `请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： {{.Question}} 。
 
 注意：
@@ -220,8 +189,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
-		Variables: "Question: 要解释的内容",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -229,7 +196,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "K8s问题解答",
 		Description: "回答Kubernetes相关的任意问题",
 		PromptType:  constants.AIPromptTypeAnyQuestion,
-		PromptCode:  "k8s_question_answer",
 		Content: `我正在浏览k8s资源管理页面，资源定义Kind={{.Kind}},Group={{.Group}},version={{.Version}}。
 
 请你作为kubernetes k8s 技术专家，请你详细解释下我的疑问： {{.Question}} 。
@@ -242,8 +208,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
-		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本, Question: 问题内容",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -251,7 +215,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "Cron表达式分析",
 		Description: "分析和解释Cron表达式的含义",
 		PromptType:  constants.AIPromptTypeCron,
-		PromptCode:  "cron_expression_analysis",
 		Content: `我正在查看k8s cronjob 中的schedule 表达式：{{.Cron}}。
 
 请你作为k8s技术专家，对 {{.Cron}} 这个表达式进行分析，给出详细的解释。
@@ -262,8 +225,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
-		Variables: "Cron: Cron表达式",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -271,7 +232,6 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "日志分析",
 		Description: "分析应用程序或系统日志",
 		PromptType:  constants.AIPromptTypeLog,
-		PromptCode:  "log_analysis",
 		Content: `请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:
 {{.Data}}
 
@@ -285,8 +245,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 使用中文进行回答
 - 回答要直接，不要加入啰嗦的信息
 - 不要向我提问或确认信息`,
-		Variables: "Data: 日志内容",
-		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
 	},

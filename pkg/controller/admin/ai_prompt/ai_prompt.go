@@ -136,8 +136,7 @@ func (s *AdminAIPromptController) AIPromptOptionList(c *gin.Context) {
 	for _, n := range list {
 		prompts = append(prompts, map[string]string{
 			"label":       n.Name,
-			"value":       n.PromptCode,
-			"prompt_code": n.PromptCode,
+			"value":       n.Name,
 			"name":        n.Name,
 			"description": n.Description,
 			"prompt_type": string(n.PromptType),
