@@ -57,6 +57,15 @@
           },
           "body": [
             {
+              "type": "alert",
+              "level": "info",
+              "showIcon": true,
+              "body": "💡 <strong>使用提示：</strong>建议参考内置提示词进行调整。<p>$ {XX} 为内置参数，可以调整位置，但是改为其他参数可能无法正确识别。</p><p>每个类型只能开启一个提示词</p>",
+              "style": {
+                "marginBottom": "16px"
+              }
+            },
+            {
               "type": "crud",
               "id": "aiPromptCRUD",
               "name": "aiPromptCRUD",
