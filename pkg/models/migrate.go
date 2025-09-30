@@ -148,6 +148,7 @@ func AutoMigrate() error {
 
 	return nil
 }
+
 func AddBuiltinLuaScripts() error {
 	// 检查数据库中记录的内置脚本版本
 	db := dao.DB()

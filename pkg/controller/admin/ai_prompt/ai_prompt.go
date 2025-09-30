@@ -25,8 +25,7 @@ func RegisterAdminAIPromptRoutes(admin *gin.RouterGroup) {
 	admin.POST("/ai_prompt/load", ctrl.AIPromptLoad)
 	admin.GET("/ai_prompt/option_list", ctrl.AIPromptOptionList)
 	admin.GET("/ai_prompt/types", ctrl.AIPromptTypes)
-	admin.GET("/ai_prompt/categories", ctrl.AIPromptCategories)
-	admin.GET("/ai_prompt/category_list", ctrl.AIPromptCategories) // 添加category_list路由
+
 	admin.POST("/ai_prompt/toggle/:id", ctrl.AIPromptToggle)       // 添加启用/禁用路由
 }
 
@@ -142,7 +141,6 @@ func (s *AdminAIPromptController) AIPromptOptionList(c *gin.Context) {
 			"name":        n.Name,
 			"description": n.Description,
 			"prompt_type": string(n.PromptType),
-			"category":    string(n.Category),
 		})
 	}
 	slice.SortBy(prompts, func(a, b map[string]string) bool {
@@ -196,22 +194,7 @@ func (s *AdminAIPromptController) AIPromptTypes(c *gin.Context) {
 	})
 }
 
-// @Summary 获取AI提示词分类列表
-// @Security BearerAuth
-// @Success 200 {object} string
-// @Router /admin/ai_prompt/categories [get]
-func (s *AdminAIPromptController) AIPromptCategories(c *gin.Context) {
-	categories := []map[string]string{
-		{"label": "诊断分析", "value": string(constants.AIPromptCategoryDiagnosis)},
-		{"label": "操作指南", "value": string(constants.AIPromptCategoryGuide)},
-		{"label": "错误处理", "value": string(constants.AIPromptCategoryError)},
-		{"label": "通用功能", "value": string(constants.AIPromptCategoryGeneral)},
-		{"label": "工具辅助", "value": string(constants.AIPromptCategoryTool)},
-	}
-	amis.WriteJsonData(c, gin.H{
-		"options": categories,
-	})
-}
+
 
 // @Summary 启用/禁用AI提示词
 // @Security BearerAuth

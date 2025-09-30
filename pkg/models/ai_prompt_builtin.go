@@ -30,11 +30,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 4. 预防措施
 
 请用中文回答，并提供具体的kubectl命令示例。`,
-		Variables:   "Type: 事件类型, Reason: 事件原因, Message: 事件消息, InvolvedObject: 涉及对象, FirstTimestamp: 发生时间",
-		Category:    constants.AIPromptCategoryDiagnosis,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "Type: 事件类型, Reason: 事件原因, Message: 事件消息, InvolvedObject: 涉及对象, FirstTimestamp: 发生时间",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "资源描述分析",
@@ -61,11 +60,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 5. 相关的故障排查步骤
 
 请用中文回答，并提供具体的kubectl命令和YAML配置示例。`,
-		Variables:   "Kind: 资源类型, Name: 资源名称, Namespace: 命名空间, Status: 资源状态, Spec: 资源配置, Events: 事件信息",
-		Category:    constants.AIPromptCategoryDiagnosis,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "Kind: 资源类型, Name: 资源名称, Namespace: 命名空间, Status: 资源状态, Spec: 资源配置, Events: 事件信息",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "配置示例生成",
@@ -87,11 +85,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 5. 常见的配置陷阱和注意事项
 
 请确保配置符合生产环境的安全和性能要求，用中文提供详细说明。`,
-		Variables:   "ResourceType: 资源类型, AppName: 应用名称, Namespace: 命名空间, Requirements: 特殊要求",
-		Category:    constants.AIPromptCategoryGuide,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "ResourceType: 资源类型, AppName: 应用名称, Namespace: 命名空间, Requirements: 特殊要求",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "字段配置指导",
@@ -114,11 +111,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 5. 与其他字段的关联关系
 
 请用中文回答，并提供具体的配置示例。`,
-		Variables:   "ResourceType: 资源类型, FieldPath: 字段路径, FieldDescription: 字段描述, CurrentValue: 当前值, UseCase: 使用场景",
-		Category:    constants.AIPromptCategoryGuide,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "ResourceType: 资源类型, FieldPath: 字段路径, FieldDescription: 字段描述, CurrentValue: 当前值, UseCase: 使用场景",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "资源状态分析",
@@ -144,11 +140,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 5. 维护和优化建议
 
 请用中文回答，并提供具体的诊断和修复命令。`,
-		Variables:   "Kind: 资源类型, Name: 资源名称, Namespace: 命名空间, Status: 当前状态, DesiredState: 期望状态, Age: 资源年龄, Labels: 标签, Annotations: 注解",
-		Category:    constants.AIPromptCategoryDiagnosis,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "Kind: 资源类型, Name: 资源名称, Namespace: 命名空间, Status: 当前状态, DesiredState: 期望状态, Age: 资源年龄, Labels: 标签, Annotations: 注解",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "K8sGPT资源分析",
@@ -182,11 +177,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 - 监控和告警设置
 
 请用中文回答，提供具体可执行的命令和配置。`,
-		Variables:   "ProblemType: 问题类型, ResourceInfo: 资源信息, ErrorDetails: 错误详情, Logs: 相关日志, ClusterInfo: 集群环境",
-		Category:    constants.AIPromptCategoryError,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "ProblemType: 问题类型, ResourceInfo: 资源信息, ErrorDetails: 错误详情, Logs: 相关日志, ClusterInfo: 集群环境",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "任意选择分析",
@@ -209,11 +203,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 5. 进一步的学习资源推荐
 
 请用中文回答，并根据内容类型提供相应的示例和命令。`,
-		Variables:   "SelectedContent: 选择内容, Context: 上下文信息, UserIntent: 用户意图",
-		Category:    constants.AIPromptCategoryGeneral,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "SelectedContent: 选择内容, Context: 上下文信息, UserIntent: 用户意图",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "任意问题解答",
@@ -235,11 +228,10 @@ var BuiltinAIPromptsExtended = []AIPrompt{
 6. 进阶学习建议
 
 请用中文回答，根据用户技能水平调整回答的深度和复杂度。如果涉及具体操作，请提供完整的kubectl命令和YAML配置示例。`,
-		Variables:   "Question: 用户问题, Context: 相关上下文, UserLevel: 用户技能水平",
-		Category:    constants.AIPromptCategoryGeneral,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "Question: 用户问题, Context: 相关上下文, UserLevel: 用户技能水平",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "CronJob分析",
@@ -266,11 +258,10 @@ CronJob名称：{{.Name}}
 5. 故障排查指导
 
 请用中文回答，并提供相关的kubectl命令示例。`,
-		Variables:   "Name: CronJob名称, Namespace: 命名空间, Schedule: 调度表达式, Suspend: 暂停状态, ConcurrencyPolicy: 并发策略, SuccessfulJobsHistoryLimit: 成功历史限制, FailedJobsHistoryLimit: 失败历史限制, LastScheduleTime: 最后调度时间, ActiveJobs: 活跃Job数量",
-		Category:    constants.AIPromptCategoryDiagnosis,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "Name: CronJob名称, Namespace: 命名空间, Schedule: 调度表达式, Suspend: 暂停状态, ConcurrencyPolicy: 并发策略, SuccessfulJobsHistoryLimit: 成功历史限制, FailedJobsHistoryLimit: 失败历史限制, LastScheduleTime: 最后调度时间, ActiveJobs: 活跃Job数量",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 	{
 		Name:        "日志分析",
@@ -296,10 +287,9 @@ CronJob名称：{{.Name}}
 6. 日志监控和告警配置建议
 
 请用中文回答，重点关注异常模式和性能瓶颈，提供具体的诊断和修复命令。`,
-		Variables:   "Source: 日志来源, TimeRange: 时间范围, LogLevel: 日志级别, LogContent: 日志内容, Context: 相关上下文",
-		Category:    constants.AIPromptCategoryDiagnosis,
-		Version:     "v1",
-		IsBuiltin:   true,
-		IsEnabled:   true,
+		Variables: "Source: 日志来源, TimeRange: 时间范围, LogLevel: 日志级别, LogContent: 日志内容, Context: 相关上下文",
+		Version:   "v1",
+		IsBuiltin: true,
+		IsEnabled: true,
 	},
 }

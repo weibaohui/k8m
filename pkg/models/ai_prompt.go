@@ -19,7 +19,7 @@ type AIPrompt struct {
 	PromptCode  string                     `json:"prompt_code" gorm:"size:100;uniqueIndex;not null"` // 提示词唯一标识码
 	Content     string                     `json:"content" gorm:"type:text;not null"`                // 提示词内容
 	Variables   string                     `json:"variables" gorm:"type:text"`                       // 变量定义(JSON格式)
-	Category    constants.AIPromptCategory `json:"category" gorm:"size:50;index"`                    // 提示词分类
+
 	Version     string                     `json:"version" gorm:"size:20"`                           // 版本号
 	IsBuiltin   bool                       `json:"is_builtin" gorm:"default:false;index"`            // 是否为内置提示词
 	IsEnabled   bool                       `json:"is_enabled" gorm:"default:true;index"`             // 是否启用
@@ -83,7 +83,6 @@ var BuiltinAIPrompts = []AIPrompt{
 - 回答要直接，不要加入啰嗦的信息
 - 不要向我提问或确认信息`,
 		Variables: "EventData: 事件数据JSON格式",
-		Category:  "诊断分析",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -107,7 +106,6 @@ var BuiltinAIPrompts = []AIPrompt{
 
 Describe信息如下：{{.DescribeContent}}`,
 		Variables: "Group: 资源组, Kind: 资源类型, DescribeContent: describe命令输出内容",
-		Category:  "诊断分析",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -133,7 +131,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
 		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本",
-		Category:  "使用指南",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -156,7 +153,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
 		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本, Field: 字段名称",
-		Category:  "使用指南",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -179,7 +175,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
 		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本",
-		Category:  "使用指南",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -208,7 +203,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
 		Variables: "Data: 错误内容, Name: 资源名称, Kind: 资源类型, Field: 相关字段",
-		Category:  "错误诊断",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -227,7 +221,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
 		Variables: "Question: 要解释的内容",
-		Category:  "通用问答",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -250,7 +243,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
 		Variables: "Kind: 资源类型, Group: 资源组, Version: 资源版本, Question: 问题内容",
-		Category:  "通用问答",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -271,7 +263,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 - 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
 		Variables: "Cron: Cron表达式",
-		Category:  "工具分析",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -295,7 +286,6 @@ Describe信息如下：{{.DescribeContent}}`,
 - 回答要直接，不要加入啰嗦的信息
 - 不要向我提问或确认信息`,
 		Variables: "Data: 日志内容",
-		Category:  "诊断分析",
 		Version:   "1.0",
 		IsBuiltin: true,
 		IsEnabled: true,

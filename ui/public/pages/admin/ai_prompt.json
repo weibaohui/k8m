@@ -189,13 +189,7 @@
                           "label": "变量说明",
                           "placeholder": "请输入变量说明，如：{{resource}} - 资源信息，{{error}} - 错误信息"
                         },
-                        {
-                          "type": "select",
-                          "name": "category",
-                          "label": "分类",
-                          "source": "get:/admin/ai_prompt/category_list",
-                          "placeholder": "请选择分类"
-                        },
+
                         {
                           "type": "input-text",
                           "name": "version",
@@ -343,13 +337,7 @@
                               "label": "变量说明",
                               "placeholder": "请输入变量说明，如：{{resource}} - 资源信息，{{error}} - 错误信息"
                             },
-                            {
-                              "type": "select",
-                              "name": "category",
-                              "label": "分类",
-                              "source": "get:/admin/ai_prompt/category_list",
-                              "placeholder": "请选择分类"
-                            },
+
                             {
                               "type": "input-text",
                               "name": "version",
@@ -413,11 +401,7 @@
                     "CronJob": "CronJob分析"
                   }
                 },
-                {
-                  "name": "category",
-                  "label": "分类",
-                  "type": "text"
-                },
+
                 {
                   "name": "version",
                   "label": "版本",
