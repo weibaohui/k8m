@@ -98,11 +98,11 @@
                           "validateOnChange": true,
                           "validations": {
                             "minLength": 2,
-                            "maxLength": 128
+                            "maxLength": 100
                           },
                           "validationErrors": {
                             "minLength": "提示词名称至少 2 个字符",
-                            "maxLength": "提示词名称最多 128 个字符"
+                            "maxLength": "提示词名称最多 100 个字符"
                           }
                         },
                         {
@@ -230,11 +230,11 @@
                               "validateOnChange": true,
                               "validations": {
                                 "minLength": 2,
-                                "maxLength": 128
+                                "maxLength": 100
                               },
                               "validationErrors": {
                                 "minLength": "提示词名称至少 2 个字符",
-                                "maxLength": "提示词名称最多 128 个字符"
+                                "maxLength": "提示词名称最多 100 个字符"
                               }
                             },
                             {
