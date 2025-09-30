@@ -30,7 +30,6 @@ func init() {
 	_ = MigrateAIModel()
 	_ = AddBuiltinLuaScripts()
 	_ = InitBuiltinAIPrompts()
-	_ = RemoveAIPromptFields()
 }
 func AutoMigrate() error {
 
@@ -147,42 +146,6 @@ func AutoMigrate() error {
 		}
 	}
 
-	return nil
-}
-
-// RemoveAIPromptFields 删除 AI Prompt 表中不再使用的字段
-func RemoveAIPromptFields() error {
-	// 删除 prompt_code 字段
-	if dao.DB().Migrator().HasColumn(&AIPrompt{}, "prompt_code") {
-		if err := dao.DB().Migrator().DropColumn(&AIPrompt{}, "prompt_code"); err != nil {
-			// 如果字段不存在，不报错
-			if !strings.Contains(err.Error(), "check that column/key exists") {
-				klog.Errorf("删除 prompt_code 字段失败: %v", err.Error())
-			}
-		}
-	}
-
-	// 删除 variables 字段
-	if dao.DB().Migrator().HasColumn(&AIPrompt{}, "variables") {
-		if err := dao.DB().Migrator().DropColumn(&AIPrompt{}, "variables"); err != nil {
-			// 如果字段不存在，不报错
-			if !strings.Contains(err.Error(), "check that column/key exists") {
-				klog.Errorf("删除 variables 字段失败: %v", err.Error())
-			}
-		}
-	}
-
-	// 删除 version 字段
-	if dao.DB().Migrator().HasColumn(&AIPrompt{}, "version") {
-		if err := dao.DB().Migrator().DropColumn(&AIPrompt{}, "version"); err != nil {
-			// 如果字段不存在，不报错
-			if !strings.Contains(err.Error(), "check that column/key exists") {
-				klog.Errorf("删除 version 字段失败: %v", err.Error())
-			}
-		}
-	}
-
-	klog.V(4).Info("AI Prompt 字段删除迁移完成")
 	return nil
 }
 
