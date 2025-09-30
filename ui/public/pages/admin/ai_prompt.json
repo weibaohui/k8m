@@ -2,14 +2,132 @@
   "type": "page",
   "body": [
     {
-      "type": "crud",
-      "id": "aiPromptCRUD",
-      "name": "aiPromptCRUD",
-      "autoFillHeight": true,
-      "autoGenerateFilter": {
-        "columnsNum": 4,
-        "showBtnToolbar": false
+      "type": "flex",
+      "direction": "row",
+      "style": {
+        "height": "100vh"
       },
+      "items": [
+        {
+          "type": "wrapper",
+          "size": "xs",
+          "style": {
+            "width": "280px",
+            "minWidth": "280px",
+            "borderRight": "1px solid #e8e9ea",
+            "padding": "16px",
+            "backgroundColor": "#f8f9fa"
+          },
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "<h5 style='margin-bottom: 16px; color: #495057;'>提示词类型</h5>"
+            },
+            {
+              "type": "nav",
+              "id": "typeNav",
+              "stacked": true,
+              "className": "type-nav",
+              "style": {
+                "border": "none"
+              },
+              "links": [
+                {
+                  "label": "全部类型",
+                  "key": "all",
+                  "icon": "fas fa-list",
+                  "active": true
+                },
+                {
+                  "label": "事件分析",
+                  "key": "Event",
+                  "icon": "fas fa-exclamation-triangle"
+                },
+                {
+                  "label": "资源描述",
+                  "key": "Describe", 
+                  "icon": "fas fa-info-circle"
+                },
+                {
+                  "label": "示例说明",
+                  "key": "Example",
+                  "icon": "fas fa-lightbulb"
+                },
+                {
+                  "label": "字段示例",
+                  "key": "FieldExample",
+                  "icon": "fas fa-code"
+                },
+                {
+                  "label": "资源分析",
+                  "key": "Resource",
+                  "icon": "fas fa-cube"
+                },
+                {
+                  "label": "K8sGPT资源",
+                  "key": "K8sGPTResource",
+                  "icon": "fas fa-robot"
+                },
+                {
+                  "label": "任意选择",
+                  "key": "AnySelection",
+                  "icon": "fas fa-hand-pointer"
+                },
+                {
+                  "label": "任意问题",
+                  "key": "AnyQuestion",
+                  "icon": "fas fa-question-circle"
+                },
+                {
+                  "label": "定时任务",
+                  "key": "Cron",
+                  "icon": "fas fa-clock"
+                },
+                {
+                  "label": "日志分析",
+                  "key": "Log",
+                  "icon": "fas fa-file-alt"
+                }
+              ],
+              "onEvent": {
+                "change": {
+                  "actions": [
+                    {
+                      "actionType": "setValue",
+                      "componentId": "aiPromptCRUD",
+                      "args": {
+                        "value": {
+                          "prompt_type": "${event.data.key === 'all' ? '' : event.data.key}"
+                        }
+                      }
+                    },
+                    {
+                      "actionType": "reload",
+                      "componentId": "aiPromptCRUD"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "wrapper",
+          "size": "auto",
+          "style": {
+            "flex": "1",
+            "padding": "16px"
+          },
+          "body": [
+            {
+              "type": "crud",
+              "id": "aiPromptCRUD",
+              "name": "aiPromptCRUD",
+              "autoFillHeight": true,
+              "autoGenerateFilter": {
+                "columnsNum": 3,
+                "showBtnToolbar": false
+              },
       "headerToolbar": [
         {
           "type": "button",
@@ -324,6 +442,10 @@
           "name": "created_at",
           "label": "创建时间",
           "type": "datetime"
+        }
+      ]
+            }
+          ]
         }
       ]
     }
