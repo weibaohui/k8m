@@ -48,6 +48,21 @@ func (m *AIPrompt) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm
 	return dao.GenericGetOne(params, m, queryFuncs...)
 }
 
+// GetBuiltinPromptContent 根据提示词类型获取内置提示词内容
+// 参数:
+//   - promptType: 提示词类型
+//
+// 返回值:
+//   - string: 提示词内容，如果未找到则返回空字符串
+func GetBuiltinPromptContent(promptType constants.AIPromptType) string {
+	for _, prompt := range BuiltinAIPrompts {
+		if prompt.PromptType == promptType {
+			return prompt.Content
+		}
+	}
+	return ""
+}
+
 // BuiltinAIPrompts 内置AI提示词
 var BuiltinAIPrompts = []AIPrompt{
 	{
