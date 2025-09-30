@@ -188,6 +188,7 @@
                 }
               ],
               "api": "get:/admin/ai_prompt/list",
+              "quickSaveItemApi": "/admin/ai_prompt/id/${id}/enabled/${is_enabled}",
               "columns": [
                 {
                   "type": "operation",
@@ -321,16 +322,16 @@
                 {
                   "name": "is_enabled",
                   "label": "启用状态",
-                  "type": "status",
-                  "map": {
-                    "true": {
-                      "value": "启用",
-                      "status": "success"
-                    },
-                    "false": {
-                      "value": "禁用",
-                      "status": "fail"
-                    }
+                  "type": "switch",
+                  "onText": "开启",
+                  "offText": "关闭",
+                  "quickEdit": {
+                    "mode": "inline",
+                    "type": "switch",
+                    "onText": "开启",
+                    "offText": "关闭",
+                    "saveImmediately": true,
+                    "resetOnFailed": true
                   },
                   "width": "100px"
                 },

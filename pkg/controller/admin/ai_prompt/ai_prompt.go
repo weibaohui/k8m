@@ -27,6 +27,7 @@ func RegisterAdminAIPromptRoutes(admin *gin.RouterGroup) {
 	admin.GET("/ai_prompt/types", ctrl.AIPromptTypes)
 
 	admin.POST("/ai_prompt/toggle/:id", ctrl.AIPromptToggle)       // 添加启用/禁用路由
+	admin.POST("/ai_prompt/id/:id/enabled/:enabled", ctrl.AIPromptQuickSave) // 快捷保存启用状态
 }
 
 // @Summary 获取AI提示词列表
@@ -77,6 +78,35 @@ func (s *AdminAIPromptController) AIPromptSave(c *gin.Context) {
 
 	err = m.Save(params)
 	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOK(c)
+}
+
+// @Summary 快捷保存AI提示词启用状态
+// @Security BearerAuth
+// @Param id path string true "提示词ID"
+// @Param enabled path string true "启用状态，true或false"
+// @Success 200 {object} string
+// @Router /admin/ai_prompt/id/{id}/enabled/{enabled} [post]
+func (s *AdminAIPromptController) AIPromptQuickSave(c *gin.Context) {
+	id := c.Param("id")
+	enabled := c.Param("enabled")
+	
+	// 转换启用状态
+	var isEnabled bool
+	if enabled == "true" {
+		isEnabled = true
+	} else {
+		isEnabled = false
+	}
+	
+	// 直接更新启用状态
+	err := dao.DB().Model(&models.AIPrompt{}).Where("id = ?", id).Update("is_enabled", isEnabled).Error
+	if err != nil {
+		klog.Errorf("更新提示词启用状态失败: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
