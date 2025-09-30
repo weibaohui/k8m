@@ -91,6 +91,11 @@ func handleRequest(c *gin.Context, promptFunc func(data any) string) {
 // templateStr: 模板字符串
 // contextBuilder: 根据ResourceData构建上下文的函数
 func renderTemplate(templateStr string, data any, contextBuilder func(ResourceData) map[string]any) string {
+	d, ok := data.(ResourceData)
+	if !ok {
+		klog.V(6).Infof("Error: data is not ResourceData type")
+		return ""
+	}
 	eng := htpl.NewEngine()
 	// 解析模板
 	tpl, err := eng.ParseString(templateStr)
@@ -99,7 +104,6 @@ func renderTemplate(templateStr string, data any, contextBuilder func(ResourceDa
 		return ""
 	}
 
-	d := data.(ResourceData)
 	ctx := contextBuilder(d)
 
 	// 渲染模板
