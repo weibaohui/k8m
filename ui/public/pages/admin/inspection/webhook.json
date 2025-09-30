@@ -168,13 +168,27 @@
                   "key": "wechat",
                   "body": [
                     {
-                      "type": "hidden",
-                      "name": "platform",
-                      "value": "wechat"
-                    },
-                    {
-                      "type": "static",
-                      "value": "企业微信专用表单，后续补充"
+                      "type": "form",
+                      "api": "post:/admin/inspection/webhook/save",
+                      "wrapWithPanel": false,
+                      "body": [
+                        { "type": "hidden", "name": "id" },
+                        { "type": "hidden", "name": "platform", "value": "wechat" },
+                        { "type": "input-text", "name": "name", "label": "名称", "required": true, "placeholder": "如企业微信群" },
+                        { "type": "input-url", "name": "target_url", "label": "群机器人URL", "required": true },
+                        { "type": "editor", "name": "template", "label": "消息模板", "language": "json", "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。" }
+                      ],
+                      "submitText": "保存",
+                      "resetText": "重置",
+                      "messages": { "saveSuccess": "保存成功", "saveFailed": "保存失败" },
+                      "onEvent": {
+                        "submitSucc": {
+                          "actions": [
+                            { "actionType": "reload", "componentId": "webhookCRUD" },
+                            { "actionType": "closeDrawer" }
+                          ]
+                        }
+                      }
                     }
                   ]
                 },
@@ -270,6 +284,10 @@
                         {
                           "label": "钉钉",
                           "value": "dingtalk"
+                        },
+                        {
+                          "label": "企业微信",
+                          "value": "wechat"
                         }
                       ],
                       "placeholder": "请选择平台"
@@ -338,6 +356,7 @@
           "map": {
             "dingtalk": "<span class='label label-success'>钉钉群机器人</span>",
             "feishu": "<span class='label label-warning'>飞书群机器人</span>",
+            "wechat": "<span class='label label-info'>企业微信群机器人</span>",
             "*": "<span class='label label-success'>未知</span>"
           }
         },
