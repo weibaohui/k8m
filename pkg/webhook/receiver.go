@@ -46,6 +46,20 @@ func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
 	}
 }
 
+// NewWechatReceiver 快捷创建企业微信 Receiver（群机器人）
+func NewWechatReceiver(targetURL string) *Receiver {
+	return &Receiver{
+		Platform:      "wechat",
+		TargetURL:     targetURL,
+		Method:        "POST",
+		Headers:       map[string]string{},
+		Template:      `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
+		SignSecret:    "",
+		SignAlgo:      "",
+		SignHeaderKey: "",
+	}
+}
+
 // Validate 校验 Receiver 配置合法性
 func (r *Receiver) Validate() error {
 	if r.Platform == "" {
@@ -70,6 +84,10 @@ func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 	}
 	if receiver.Platform == "dingtalk" {
 		rr := NewDingtalkReceiver(receiver.TargetURL, receiver.SignSecret)
+		return rr
+	}
+	if receiver.Platform == "wechat" {
+		rr := NewWechatReceiver(receiver.TargetURL)
 		return rr
 	}
 	return nil
