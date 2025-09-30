@@ -204,10 +204,6 @@
                               "name": "id"
                             },
                             {
-                              "type": "hidden",
-                              "name": "prompt_type_builtin"
-                            },
-                            {
                               "type": "input-text",
                               "name": "name",
                               "label": "提示词名称",
@@ -288,15 +284,6 @@
                   "label": "类型",
                   "type": "mapping",
                   "source": "get:/admin/ai_prompt/types"
-                },
-                {
-                  "name": "prompt_type_builtin",
-                  "label": "来源",
-                  "type": "mapping",
-                  "map": {
-                    "Builtin": "系统提示词",
-                    "Custom": "用户提示词"
-                  }
                 },
                 {
                   "name": "created_at",
