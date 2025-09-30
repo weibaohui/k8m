@@ -110,7 +110,6 @@
                           "source": "get:/admin/ai_prompt/types",
                           "placeholder": "请选择提示词类型"
                         },
-
                         {
                           "type": "textarea",
                           "name": "content",
@@ -120,7 +119,7 @@
                           "minRows": 5,
                           "maxRows": 15
                         }
-                       ],
+                      ],
                       "submitText": "保存",
                       "resetText": "重置",
                       "messages": {
@@ -149,7 +148,7 @@
                   "type": "button",
                   "label": "重置内置提示词",
                   "actionType": "ajax",
-                  "confirmText": "该操作将先删除所有自定义提示词，然后重新加载内置提示词，是否执行?",
+                  "confirmText": "该操作将先删除所有内置提示词，然后重新加载内置提示词，用户添加提示词不受影响。是否执行?",
                   "api": "post:/admin/ai_prompt/load"
                 }
               ],
@@ -238,7 +237,6 @@
                               "source": "get:/admin/ai_prompt/types",
                               "placeholder": "请选择提示词类型"
                             },
-
                             {
                               "type": "textarea",
                               "name": "content",
@@ -248,7 +246,7 @@
                               "minRows": 5,
                               "maxRows": 15
                             }
-                           ],
+                          ],
                           "submitText": "保存",
                           "resetText": "重置",
                           "messages": {
@@ -279,7 +277,6 @@
                   "type": "text",
                   "width": "180px"
                 },
-
                 {
                   "name": "description",
                   "label": "提示词描述",
@@ -292,7 +289,6 @@
                   "type": "mapping",
                   "source": "get:/admin/ai_prompt/types"
                 },
-
                 {
                   "name": "prompt_type_builtin",
                   "label": "来源",
