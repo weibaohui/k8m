@@ -179,7 +179,7 @@ Describe信息如下：{{.DescribeContent}}`,
 		Name:        "内容解释",
 		Description: "解释选中的文本内容",
 		PromptType:  constants.AIPromptTypeAnySelection,
-		Content: `请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： {{.Question}} 。
+		Content: `请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： %s 。
 
 注意：
 - 使用中文进行回答
