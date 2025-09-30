@@ -271,7 +271,6 @@ func (cc *Controller) AnySelection(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	klog.V(4).Infof("prompt: %s", prompt)
 	handleRequest(c, func(data any) string {
 		d := data.(ResourceData)
 		return fmt.Sprintf(prompt, d.Question)

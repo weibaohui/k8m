@@ -196,7 +196,7 @@ Describe信息如下：{{.DescribeContent}}`,
 		PromptType:  constants.AIPromptTypeAnyQuestion,
 		Content: `我正在浏览k8s资源管理页面，资源定义Kind={{.Kind}},Group={{.Group}},version={{.Version}}。
 
-请你作为kubernetes k8s 技术专家，请你详细解释下我的疑问： {{.Question}} 。
+请你作为kubernetes k8s 技术专家，请你详细解释下我的疑问： %s 。
 
 要求包括关键名词解释、作用、典型示例（以场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
 
