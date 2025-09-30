@@ -40,7 +40,11 @@ func (p *promptService) GetPrompt(ctx context.Context, promptType constants.AIPr
 
 	// 查询数据库中匹配该类型的第一个提示词
 	var prompt models.AIPrompt
-	result, err := dao.GenericGetOne(&params, &prompt)
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Where("prompt_type = ? AND is_enabled = ?", promptType, true)
+	}
+
+	result, err := prompt.GetOne(&params, queryFunc)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", fmt.Errorf("未找到类型为 '%s' 的提示词", promptType)

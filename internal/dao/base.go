@@ -281,13 +281,13 @@ func BuildCreatedAtQuery(params *Params, paramName ...string) (func(*gorm.DB) *g
 	if params == nil || params.Queries == nil {
 		return nil, false
 	}
-	
+
 	// 确定参数名称，默认为 "created_at_range"
 	queryParam := "created_at_range"
 	if len(paramName) > 0 && paramName[0] != "" {
 		queryParam = paramName[0]
 	}
-	
+
 	v, ok := params.Queries[queryParam]
 	if !ok || v == "" {
 		return nil, false
