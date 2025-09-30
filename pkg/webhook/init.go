@@ -4,6 +4,7 @@ package webhook
 func RegisterAllSenders() {
 	RegisterSender("feishu", &FeishuSender{})
 	RegisterSender("dingtalk", &DingtalkSender{})
+	RegisterSender("wechat", &WechatSender{})
 	RegisterSender("default", &DefaultSender{})
 	// 未来可在此注册更多 Sender
 }
