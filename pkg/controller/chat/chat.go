@@ -166,10 +166,9 @@ func (cc *Controller) Describe(c *gin.Context) {
 		Describe(&describe)
 
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在查看关于k8s %s %s 资源的Describe (kubectl describe )信息。
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`我正在查看关于k8s ${Group} ${Kind} 资源的Describe (kubectl describe )信息。
 		请你作为kubernetes k8s 技术专家，对这个describe的文本进行分析。
 		\n 请给出分析结论，如果有问题，请指出问题，并给出可能得解决方案。
 		\n注意：
@@ -177,8 +176,24 @@ func (cc *Controller) Describe(c *gin.Context) {
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
-		\n\nDescribe信息如下：%s`,
-			d.Group, d.Kind, string(describe))
+		\n\nDescribe信息如下：${DescribeInfo}`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
+		d := data.(ResourceData)
+		ctx := map[string]any{
+			"Group":        d.Group,
+			"Kind":         d.Kind,
+			"DescribeInfo": string(describe),
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -191,10 +206,9 @@ func (cc *Controller) Describe(c *gin.Context) {
 // @Router /ai/chat/example [get]
 func (cc *Controller) Example(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`我正在浏览k8s资源管理页面，资源定义Kind=${Kind},Group=${Group},version=${Version}。
 		\n请你作为kubernetes k8s 技术专家，给我一份关于这个k8s资源的使用指南。
 		\n要求包括资源说明、使用场景（举例说明）、最佳实践、典型示例（配合前面的场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
 		\n最后给出一份关于这个资源的yaml样例。
@@ -203,8 +217,24 @@ func (cc *Controller) Example(c *gin.Context) {
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version)
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
+		d := data.(ResourceData)
+		ctx := map[string]any{
+			"Kind":    d.Kind,
+			"Group":   d.Group,
+			"Version": d.Version,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -218,18 +248,34 @@ func (cc *Controller) Example(c *gin.Context) {
 // @Router /ai/chat/example/field [get]
 func (cc *Controller) FieldExample(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 技术专家，给出一份关于  %s  这个具体字段的使用场景。请在回答中使用 “该字段” 代替这个具体的字段。
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`我正在浏览k8s资源管理页面，资源定义Kind=${Kind},Group=${Group},version=${Version}。
+		\n请你作为kubernetes k8s 技术专家，给出一份关于  ${Field}  这个具体字段的使用场景。请在回答中使用 "该字段" 代替这个具体的字段。
 		请详细解释该字段的含义、用法、并给出一个假设的使用场景，为这个场景书写yaml文件，每一行yaml都增加简体中文注释。
 		\n注意：
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version, d.Field)
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
+		d := data.(ResourceData)
+		ctx := map[string]any{
+			"Kind":    d.Kind,
+			"Group":   d.Group,
+			"Version": d.Version,
+			"Field":   d.Field,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -242,18 +288,33 @@ func (cc *Controller) FieldExample(c *gin.Context) {
 // @Router /ai/chat/resource [get]
 func (cc *Controller) Resource(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`我正在浏览k8s资源管理页面，资源定义Kind=${Kind},Group=${Group},version=${Version}。
 		\n请你作为kubernetes k8s 技术专家，给我一份关于这个k8s资源的使用指南。
 		要求包括资源说明、使用场景（举例说明）、最佳实践、典型示例（配合前面的场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
 		\n注意：
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version)
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
+		d := data.(ResourceData)
+		ctx := map[string]any{
+			"Kind":    d.Kind,
+			"Group":   d.Group,
+			"Version": d.Version,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -267,14 +328,13 @@ func (cc *Controller) Resource(c *gin.Context) {
 // @Router /ai/chat/k8s_gpt/resource [get]
 func (cc *Controller) K8sGPTResource(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-			简化以下由三个破折号分隔的Kubernetes错误信息，
-	错误内容：--- %s ---。
-	资源名称：--- %s ---。
-	资源类型：--- %s ---。
-	相关字段k8s官方文档解释：--- %s ---。
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`简化以下由三个破折号分隔的Kubernetes错误信息，
+	错误内容：--- ${Data} ---。
+	资源名称：--- ${Name} ---。
+	资源类型：--- ${Kind} ---。
+	相关字段k8s官方文档解释：--- ${Field} ---。
 	请以分步形式提供最可能的解决方案，字符数不超过280。
 	输出格式：
 	错误信息: {此处解释错误}
@@ -283,8 +343,25 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Data, d.Name, d.Kind, d.Field)
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
+		d := data.(ResourceData)
+		ctx := map[string]any{
+			"Data":  d.Data,
+			"Name":  d.Name,
+			"Kind":  d.Kind,
+			"Field": d.Field,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -294,16 +371,31 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *gin.Context) {
-	prompt := `请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： %s 。
+	handleRequest(c, func(data any) string {
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`请你作为kubernetes k8s 技术专家，请你详细解释下面的文字： ${Question} 。
 注意：
 - 使用中文进行回答
 - 你我之间只进行这一轮交互，后面不要再问问题了
 - 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 - 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
-- 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`
-	handleRequest(c, func(data any) string {
+- 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
 		d := data.(ResourceData)
-		return fmt.Sprintf(prompt, d.Question)
+		ctx := map[string]any{
+			"Question": d.Question,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -317,18 +409,34 @@ func (cc *Controller) AnySelection(c *gin.Context) {
 // @Router /ai/chat/any_question [get]
 func (cc *Controller) AnyQuestion(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`
-		我正在浏览k8s资源管理页面，资源定义Kind=%s,Gropu=%s,version=%s。
-		\n请你作为kubernetes k8s 技术专家，请你详细解释下我的疑问： %s 。
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`我正在浏览k8s资源管理页面，资源定义Kind=${Kind},Group=${Group},version=${Version}。
+		\n请你作为kubernetes k8s 技术专家，请你详细解释下我的疑问： ${Question} 。
 		要求包括关键名词解释、作用、典型示例（以场景举例，编写yaml文件，每一行yaml都增加简体中文注释）、关键字段及其含义、常见问题、官方文档链接、引用文档链接等你认为对我有帮助的信息。
 		\n注意：
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Group, d.Kind, d.Version, d.Question)
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
+		d := data.(ResourceData)
+		ctx := map[string]any{
+			"Kind":     d.Kind,
+			"Group":    d.Group,
+			"Version":  d.Version,
+			"Question": d.Question,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -339,16 +447,30 @@ func (cc *Controller) AnyQuestion(c *gin.Context) {
 // @Router /ai/chat/cron [get]
 func (cc *Controller) Cron(c *gin.Context) {
 	handleRequest(c, func(data any) string {
-		d := data.(ResourceData)
-		return fmt.Sprintf(
-			`我正在查看k8s cronjob 中的schedule 表达式：%s。
-		\n请你作为k8s技术专家，对 %s 这个表达式进行分析，给出详细的解释。
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString(`我正在查看k8s cronjob 中的schedule 表达式：${Cron}。
+		\n请你作为k8s技术专家，对 ${Cron} 这个表达式进行分析，给出详细的解释。
 		\n注意：
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
-			d.Cron, d.Cron)
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`)
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
+		d := data.(ResourceData)
+		ctx := map[string]any{
+			"Cron": d.Cron,
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
 
@@ -359,7 +481,23 @@ func (cc *Controller) Cron(c *gin.Context) {
 // @Router /ai/chat/log [get]
 func (cc *Controller) Log(c *gin.Context) {
 	handleRequest(c, func(data any) string {
+		eng := htpl.NewEngine()
+		// 解析模板
+		tpl, err := eng.ParseString("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n${Data}")
+		if err != nil {
+			klog.V(6).Infof("Error Parse template:%v\n\n", err)
+			return ""
+		}
 		d := data.(ResourceData)
-		return fmt.Sprintf("请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:\n%s", utils.ToJSON(d.Data))
+		ctx := map[string]any{
+			"Data": utils.ToJSON(d.Data),
+		}
+		// 渲染模板
+		result, err := tpl.Render(ctx)
+		if err != nil {
+			klog.V(6).Infof("Error Render template:%v\n\n", err)
+			return ""
+		}
+		return result
 	})
 }
