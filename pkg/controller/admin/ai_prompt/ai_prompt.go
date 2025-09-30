@@ -26,7 +26,7 @@ func RegisterAdminAIPromptRoutes(admin *gin.RouterGroup) {
 	admin.GET("/ai_prompt/option_list", ctrl.AIPromptOptionList)
 	admin.GET("/ai_prompt/types", ctrl.AIPromptTypes)
 
-	admin.POST("/ai_prompt/toggle/:id", ctrl.AIPromptToggle)       // 添加启用/禁用路由
+	admin.POST("/ai_prompt/toggle/:id", ctrl.AIPromptToggle)                 // 添加启用/禁用路由
 	admin.POST("/ai_prompt/id/:id/enabled/:enabled", ctrl.AIPromptQuickSave) // 快捷保存启用状态
 }
 
@@ -40,7 +40,7 @@ func (s *AdminAIPromptController) AIPromptList(c *gin.Context) {
 
 	// 构建查询函数，支持按类型筛选
 	var queryFuncs []func(*gorm.DB) *gorm.DB
-	
+
 	// 检查是否有类型筛选参数
 	if promptType := c.Query("prompt_type"); promptType != "" {
 		queryFuncs = append(queryFuncs, func(db *gorm.DB) *gorm.DB {
@@ -75,7 +75,10 @@ func (s *AdminAIPromptController) AIPromptSave(c *gin.Context) {
 	if m.ID == 0 && !m.IsBuiltin {
 		m.IsBuiltin = false
 	}
-
+	// 如果是新增，默认关闭
+	if m.ID == 0 {
+		m.IsEnabled = false
+	}
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -94,7 +97,8 @@ func (s *AdminAIPromptController) AIPromptSave(c *gin.Context) {
 func (s *AdminAIPromptController) AIPromptQuickSave(c *gin.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
-	
+	params := dao.BuildParams(c)
+
 	// 转换启用状态
 	var isEnabled bool
 	if enabled == "true" {
@@ -102,8 +106,32 @@ func (s *AdminAIPromptController) AIPromptQuickSave(c *gin.Context) {
 	} else {
 		isEnabled = false
 	}
-	
-	// 直接更新启用状态
+
+	// 如果要启用此提示词，需要先获取提示词信息并禁用同类型的其他提示词
+	if isEnabled {
+		// 获取当前提示词信息
+		m := &models.AIPrompt{}
+		currentPrompt, err := m.GetOne(params, func(db *gorm.DB) *gorm.DB {
+			return db.Where("id = ?", id)
+		})
+		if err != nil {
+			klog.Errorf("获取提示词信息失败: %v", err)
+			amis.WriteJsonError(c, err)
+			return
+		}
+
+		// 禁用同类型的其他提示词
+		err = dao.DB().Model(&models.AIPrompt{}).
+			Where("prompt_type = ? AND id != ? AND is_enabled = ?", currentPrompt.PromptType, id, true).
+			Update("is_enabled", false).Error
+		if err != nil {
+			klog.Errorf("禁用同类型提示词失败: %v", err)
+			amis.WriteJsonError(c, err)
+			return
+		}
+	}
+
+	// 更新当前提示词的启用状态
 	err := dao.DB().Model(&models.AIPrompt{}).Where("id = ?", id).Update("is_enabled", isEnabled).Error
 	if err != nil {
 		klog.Errorf("更新提示词启用状态失败: %v", err)
@@ -223,8 +251,6 @@ func (s *AdminAIPromptController) AIPromptTypes(c *gin.Context) {
 	})
 }
 
-
-
 // @Summary 启用/禁用AI提示词
 // @Security BearerAuth
 // @Param id path string true "提示词ID"
@@ -233,7 +259,7 @@ func (s *AdminAIPromptController) AIPromptTypes(c *gin.Context) {
 func (s *AdminAIPromptController) AIPromptToggle(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
-	
+
 	// 获取当前提示词
 	m := &models.AIPrompt{}
 	currentPrompt, err := m.GetOne(params, func(db *gorm.DB) *gorm.DB {

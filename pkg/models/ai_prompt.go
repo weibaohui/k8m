@@ -12,15 +12,15 @@ import (
 // AIPrompt AI提示词模型
 // 用于存储和管理AI提示词的配置信息
 type AIPrompt struct {
-	ID          uint                       `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name        string                     `json:"name" gorm:"size:100;not null"`                    // 提示词名称
-	Description string                     `json:"description" gorm:"size:500"`                      // 提示词描述
-	PromptType  constants.AIPromptType     `json:"prompt_type" gorm:"size:50;not null;index"`        // 提示词类型
-	Content     string                     `json:"content" gorm:"type:text;not null"`                // 提示词内容
-	IsBuiltin   bool                       `json:"is_builtin" gorm:"default:false;index"`            // 是否为内置提示词
-	IsEnabled   bool                       `json:"is_enabled" gorm:"default:true;index"`             // 是否启用
-	CreatedAt   time.Time                  `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt   time.Time                  `json:"updated_at,omitempty"`
+	ID          uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Name        string                 `json:"name" gorm:"size:100;not null"`             // 提示词名称
+	Description string                 `json:"description" gorm:"size:500"`               // 提示词描述
+	PromptType  constants.AIPromptType `json:"prompt_type" gorm:"size:50;not null;index"` // 提示词类型
+	Content     string                 `json:"content" gorm:"type:text;not null"`         // 提示词内容
+	IsBuiltin   bool                   `json:"is_builtin" gorm:"default:false;index"`     // 是否为内置提示词
+	IsEnabled   bool                   `json:"is_enabled" gorm:"default:false;index"`     // 是否启用
+	CreatedAt   time.Time              `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt   time.Time              `json:"updated_at,omitempty"`
 }
 
 // TableName 表名
@@ -47,8 +47,6 @@ func (m *AIPrompt) Delete(params *dao.Params, ids string, queryFuncs ...func(*go
 func (m *AIPrompt) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*AIPrompt, error) {
 	return dao.GenericGetOne(params, m, queryFuncs...)
 }
-
-
 
 // BuiltinAIPrompts 内置AI提示词
 var BuiltinAIPrompts = []AIPrompt{

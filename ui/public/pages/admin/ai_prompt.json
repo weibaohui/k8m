@@ -118,15 +118,6 @@
                           "placeholder": "请输入提示词内容，支持变量替换",
                           "minRows": 5,
                           "maxRows": 15
-                        },
-                        {
-                          "type": "switch",
-                          "name": "is_enabled",
-                          "label": "启用状态",
-                          "value": true,
-                          "trueValue": true,
-                          "falseValue": false,
-                          "description": "是否启用此提示词"
                         }
                       ],
                       "submitText": "保存",
@@ -251,14 +242,6 @@
                               "placeholder": "请输入提示词内容，支持变量替换",
                               "minRows": 5,
                               "maxRows": 15
-                            },
-                            {
-                              "type": "switch",
-                              "name": "is_enabled",
-                              "label": "启用状态",
-                              "trueValue": true,
-                              "falseValue": false,
-                              "description": "是否启用此提示词"
                             }
                           ],
                           "submitText": "保存",
