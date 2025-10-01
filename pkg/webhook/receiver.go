@@ -1,80 +1,45 @@
 package webhook
 
 import (
-	"fmt"
-
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
 // Receiver represents a user-defined webhook endpoint.
 type Receiver struct {
-	Platform      string
-	TargetURL     string
-	Method        string
-	Headers       map[string]string
-	Template      string
-	SignSecret    string
-	SignAlgo      string // e.g. "hmac-sha256", "feishu", "dingtalk"
-	SignHeaderKey string // e.g. "X-Signature" or unused
+	Platform     string
+	TargetURL    string
+	BodyTemplate string
+	SignSecret   string
 }
 
 // NewFeishuReceiver 快捷创建飞书 Receiver
 func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
 	return &Receiver{
-		Platform:      "feishu",
-		TargetURL:     targetURL,
-		Method:        "POST",
-		Headers:       map[string]string{},
-		Template:      `{"msg_type":"text","content":{"text":"%s"}}`,
-		SignSecret:    signSecret,
-		SignAlgo:      "feishu",
-		SignHeaderKey: "", // 飞书不需要 header 签名，是 URL 参数
+		Platform:     "feishu",
+		TargetURL:    targetURL,
+		BodyTemplate: `{"msg_type":"text","content":{"text":"%s"}}`,
+		SignSecret:   signSecret,
 	}
 }
 
 // NewDingtalkReceiver 快捷创建钉钉 Receiver
 func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
 	return &Receiver{
-		Platform:      "dingtalk",
-		TargetURL:     targetURL,
-		Method:        "POST",
-		Headers:       map[string]string{},
-		Template:      `{"msgtype":"text","text":{"content":"%s"}}`,
-		SignSecret:    signSecret,
-		SignAlgo:      "dingtalk",
-		SignHeaderKey: "", // 钉钉不需要 header 签名，是 URL 参数
+		Platform:     "dingtalk",
+		TargetURL:    targetURL,
+		BodyTemplate: `{"msgtype":"text","text":{"content":"%s"}}`,
+		SignSecret:   signSecret,
 	}
 }
 
 // NewWechatReceiver 快捷创建企业微信 Receiver（群机器人）
 func NewWechatReceiver(targetURL string) *Receiver {
 	return &Receiver{
-		Platform:      "wechat",
-		TargetURL:     targetURL,
-		Method:        "POST",
-		Headers:       map[string]string{},
-		Template:      `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
-		SignSecret:    "",
-		SignAlgo:      "",
-		SignHeaderKey: "",
+		Platform:     "wechat",
+		TargetURL:    targetURL,
+		BodyTemplate: `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
+		SignSecret:   "",
 	}
-}
-
-// Validate 校验 Receiver 配置合法性
-func (r *Receiver) Validate() error {
-	if r.Platform == "" {
-		return fmt.Errorf("platform is required")
-	}
-	if r.TargetURL == "" {
-		return fmt.Errorf("target url is required")
-	}
-	if r.Method == "" {
-		return fmt.Errorf("http method is required")
-	}
-	if r.Template == "" {
-		return fmt.Errorf("template is required")
-	}
-	return nil
 }
 
 func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
@@ -89,6 +54,16 @@ func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 	if receiver.Platform == "wechat" {
 		rr := NewWechatReceiver(receiver.TargetURL)
 		return rr
+	}
+	// 自定义 default 平台：通用映射
+	if receiver.Platform == "default" {
+
+		return &Receiver{
+			Platform:     "default",
+			TargetURL:    receiver.TargetURL,
+			BodyTemplate: receiver.BodyTemplate,
+			SignSecret:   receiver.SignSecret,
+		}
 	}
 	return nil
 }

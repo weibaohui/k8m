@@ -24,7 +24,7 @@ func (d *DingtalkSender) Name() string {
 func (d *DingtalkSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
 	// Add Dingtalk signature if enabled
 	finalURL := receiver.TargetURL
-	if receiver.SignAlgo == "dingtalk" && receiver.SignSecret != "" {
+	if receiver.SignSecret != "" {
 		timestamp := time.Now().UnixNano() / 1e6 // 钉钉使用毫秒时间戳
 		timestampStr := strconv.FormatInt(timestamp, 10)
 		signature, err := GenDingtalkSign(receiver.SignSecret, timestamp)
@@ -55,9 +55,6 @@ func (d *DingtalkSender) Send(msg string, receiver *Receiver) (*SendResult, erro
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	for k, v := range receiver.Headers {
-		req.Header.Set(k, v)
-	}
 
 	client := &http.Client{Timeout: 60 * time.Second}
 	resp, err := client.Do(req)

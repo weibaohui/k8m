@@ -48,9 +48,6 @@ func (w *WechatSender) Send(msg string, receiver *Receiver) (*SendResult, error)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	for k, v := range receiver.Headers {
-		req.Header.Set(k, v)
-	}
 
 	client := &http.Client{Timeout: 60 * time.Second}
 	resp, err := client.Do(req)

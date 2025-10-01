@@ -25,7 +25,7 @@ func (f *FeishuSender) Send(msg string, receiver *Receiver) (*SendResult, error)
 
 	// Add Feishu signature if enabled
 	finalURL := receiver.TargetURL
-	if receiver.SignAlgo == "feishu" && receiver.SignSecret != "" {
+	if receiver.SignSecret != "" {
 		timestamp := time.Now().Unix()
 		timestampStr := strconv.FormatInt(timestamp, 10)
 		signature, err := GenSign(receiver.SignSecret, timestamp)
@@ -52,9 +52,6 @@ func (f *FeishuSender) Send(msg string, receiver *Receiver) (*SendResult, error)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	for k, v := range receiver.Headers {
-		req.Header.Set(k, v)
-	}
 
 	client := &http.Client{Timeout: 60 * time.Second}
 	resp, err := client.Do(req)

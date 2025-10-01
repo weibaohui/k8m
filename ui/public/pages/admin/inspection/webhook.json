@@ -64,7 +64,7 @@
                         {
                           "type": "editor",
                           "name": "template",
-                          "label": "消息模板",
+                          "label": "AI总结提示词模板",
                           "language": "json",
                           "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
@@ -136,7 +136,7 @@
                         {
                           "type": "editor",
                           "name": "template",
-                          "label": "消息模板",
+                          "label": "AI总结提示词模板",
                           "language": "json",
                           "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
@@ -172,20 +172,52 @@
                       "api": "post:/admin/inspection/webhook/save",
                       "wrapWithPanel": false,
                       "body": [
-                        { "type": "hidden", "name": "id" },
-                        { "type": "hidden", "name": "platform", "value": "wechat" },
-                        { "type": "input-text", "name": "name", "label": "名称", "required": true, "placeholder": "如企业微信群" },
-                        { "type": "input-url", "name": "target_url", "label": "群机器人URL", "required": true },
-                        { "type": "editor", "name": "template", "label": "消息模板", "language": "json", "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。" }
+                        {
+                          "type": "hidden",
+                          "name": "id"
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "platform",
+                          "value": "wechat"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "name",
+                          "label": "名称",
+                          "required": true,
+                          "placeholder": "如企业微信群"
+                        },
+                        {
+                          "type": "input-url",
+                          "name": "target_url",
+                          "label": "群机器人URL",
+                          "required": true
+                        },
+                        {
+                          "type": "editor",
+                          "name": "template",
+                          "label": "AI总结提示词模板",
+                          "language": "json",
+                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
+                        }
                       ],
                       "submitText": "保存",
                       "resetText": "重置",
-                      "messages": { "saveSuccess": "保存成功", "saveFailed": "保存失败" },
+                      "messages": {
+                        "saveSuccess": "保存成功",
+                        "saveFailed": "保存失败"
+                      },
                       "onEvent": {
                         "submitSucc": {
                           "actions": [
-                            { "actionType": "reload", "componentId": "webhookCRUD" },
-                            { "actionType": "closeDrawer" }
+                            {
+                              "actionType": "reload",
+                              "componentId": "webhookCRUD"
+                            },
+                            {
+                              "actionType": "closeDrawer"
+                            }
                           ]
                         }
                       }
@@ -197,13 +229,77 @@
                   "key": "other",
                   "body": [
                     {
-                      "type": "hidden",
-                      "name": "platform",
-                      "value": "other"
-                    },
-                    {
-                      "type": "static",
-                      "value": "其他平台专用表单，后续补充"
+                      "type": "form",
+                      "api": "post:/admin/inspection/webhook/save",
+                      "wrapWithPanel": false,
+                      "body": [
+                        {
+                          "type": "alert",
+                          "level": "info",
+                          "body": "程序默认会以POST方式发送JSON Body体到指定的URL"
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "id"
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "platform",
+                          "value": "default"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "name",
+                          "label": "名称",
+                          "required": true,
+                          "placeholder": "如自定义Webhook"
+                        },
+                        {
+                          "type": "input-url",
+                          "name": "target_url",
+                          "label": "目标URL",
+                          "required": true,
+                          "placeholder": "请输入Webhook地址"
+                        },
+                        {
+                          "type": "alert",
+                          "level": "info",
+                          "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别"
+                        },
+                        {
+                          "type": "editor",
+                          "name": "body_template",
+                          "label": "JSON模板",
+                          "language": "json",
+                          "value": "{\n    \"msgtype\": \"markdown\",\n    \"markdown\": {\n        \"content\": \"{{msg}}\"\n    }\n}"
+                        },
+                        {
+                          "type": "editor",
+                          "name": "template",
+                          "label": "AI总结提示词模板",
+                          "language": "json",
+                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
+                        }
+                      ],
+                      "submitText": "保存",
+                      "resetText": "重置",
+                      "messages": {
+                        "saveSuccess": "保存成功",
+                        "saveFailed": "保存失败"
+                      },
+                      "onEvent": {
+                        "submitSucc": {
+                          "actions": [
+                            {
+                              "actionType": "reload",
+                              "componentId": "webhookCRUD"
+                            },
+                            {
+                              "actionType": "closeDrawer"
+                            }
+                          ]
+                        }
+                      }
                     }
                   ]
                 }
@@ -288,6 +384,10 @@
                         {
                           "label": "企业微信",
                           "value": "wechat"
+                        },
+                        {
+                          "label": "自定义",
+                          "value": "default"
                         }
                       ],
                       "placeholder": "请选择平台"
@@ -303,12 +403,26 @@
                       "type": "input-text",
                       "name": "sign_secret",
                       "label": "签名密钥",
-                      "placeholder": "如有签名需求请填写"
+                      "placeholder": "如有签名需求请填写",
+                      "visibleOn": "platform === 'feishu' || platform === 'dingtalk'"
+                    },
+                    {
+                      "type": "alert",
+                      "level": "info",
+                      "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别",
+                      "visibleOn": "platform === 'default'"
+                    },
+                    {
+                      "type": "editor",
+                      "name": "body_template",
+                      "label": "JSON模板",
+                      "language": "json",
+                      "visibleOn": "platform === 'default'"
                     },
                     {
                       "type": "editor",
                       "name": "template",
-                      "label": "消息模板",
+                      "label": "AI总结提示词模板",
                       "language": "json"
                     }
                   ],
@@ -357,40 +471,15 @@
             "dingtalk": "<span class='label label-success'>钉钉群机器人</span>",
             "feishu": "<span class='label label-warning'>飞书群机器人</span>",
             "wechat": "<span class='label label-info'>企业微信群机器人</span>",
+            "default": "<span class='label label-primary'>自定义Webhook</span>",
             "*": "<span class='label label-success'>未知</span>"
           }
         },
         {
-          "name": "details",
-          "label": "详细信息",
-          "type": "button",
-          "btnLevel": "link",
-          "actionType": "dialog",
-          "dialog": {
-            "title": "Webhook 详细信息",
-            "body": {
-              "type": "form",
-              "body": [
-                {
-                  "type": "input-url",
-                  "name": "target_url",
-                  "label": "Webhook地址",
-                  "disabled": true
-                },
-                {
-                  "type": "input-text",
-                  "name": "sign_secret",
-                  "label": "签名密钥",
-                  "disabled": true
-                }
-              ]
-            }
-          }
-        },
-        {
           "name": "template",
-          "label": "消息模板",
-          "type": "text"
+          "label": "AI总结提示词模板",
+          "type": "text",
+          "width": "250px"
         },
         {
           "name": "created_at",
