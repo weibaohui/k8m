@@ -176,22 +176,27 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 }
 func (c *chatService) Chat(ctx *gin.Context, chat string) string {
 	ctxInst := amis.GetContextWithUser(ctx)
-	return c.ChatWithCtx(ctxInst, chat)
+	result, err := c.ChatWithCtx(ctxInst, chat)
+	if err != nil {
+		klog.V(2).Infof("ChatWithCtx error: %v\n", err)
+		return ""
+	}
+	return result
 }
-func (c *chatService) ChatWithCtx(ctx context.Context, chat string) string {
+func (c *chatService) ChatWithCtx(ctx context.Context, chat string) (string, error) {
 	client, err := AIService().DefaultClient()
 
 	if err != nil {
 		klog.V(2).Infof("获取AI服务错误 : %v\n", err)
-		return ""
+		return "", fmt.Errorf("获取AI服务错误 : %v", err)
 	}
 
 	result, err := client.GetCompletion(ctx, chat)
 	if err != nil {
 		klog.V(2).Infof("ChatCompletion error: %v\n", err)
-		return ""
+		return "", fmt.Errorf("ChatCompletion error: %v", err)
 	}
-	return result
+	return result, nil
 }
 
 // CleanCmd 提取Markdown包裹的命令正文

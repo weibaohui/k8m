@@ -23,10 +23,8 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 
 	var results []*webhook.SendResult
 	for _, receiver := range receivers {
-		AISummary, err := s.SummaryByAI(ctx, msg, receiver.Template)
-		if err != nil {
-			AISummary += err.Error()
-		}
+		AISummary := s.SummaryByAI(ctx, msg, receiver.Template)
+
 		_ = s.SaveSummaryBack(recordID, AISummary)
 
 		ret := webhook.PushMsgToSingleTarget(AISummary, receiver)

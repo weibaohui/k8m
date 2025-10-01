@@ -67,8 +67,9 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 
 // SummaryByAI
 // 参数：format 自定义格式
-func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any, format string) (string, error) {
+func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any, format string) string {
 	summary := ""
+	var err error
 	defaultFormat := `
 	请按下面的格式给出汇总：
 		检测集群：xxx名称
@@ -92,13 +93,17 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 		%s
 		`
 		prompt = fmt.Sprintf(prompt, defaultFormat, utils.ToJSON(msg))
-		summary = service.ChatService().ChatWithCtx(ctx, prompt)
+		summary, err = service.ChatService().ChatWithCtx(ctx, prompt)
+
+		if err != nil {
+			summary = err.Error()
+		}
 
 	} else {
 		summary = "AI功能未开启"
 	}
 
-	return summary, nil
+	return summary
 }
 
 func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string) error {
