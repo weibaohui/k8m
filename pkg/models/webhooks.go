@@ -16,6 +16,7 @@ type WebhookReceiver struct {
 	TargetURL     string    `json:"target_url,omitempty"`
 	Method        string    `json:"method,omitempty"`
 	Template      string    `gorm:"type:text" json:"template,omitempty"`
+	BodyTemplate  string    `gorm:"type:text" json:"body_template,omitempty"` // 发送到webhook的body模板
 	SignSecret    string    `json:"sign_secret,omitempty"`
 	SignAlgo      string    `json:"sign_algo,omitempty"`       // e.g. "hmac-sha256", "feishu"
 	SignHeaderKey string    `json:"sign_header_key,omitempty"` // e.g. "X-Signature" or unused
@@ -62,7 +63,7 @@ func (c *WebhookReceiver) ListByRecordID(recordID uint) ([]*WebhookReceiver, err
 	if strings.TrimSpace(schedule.Webhooks) == "" {
 		return []*WebhookReceiver{}, nil
 	}
-	
+
 	receiver := &WebhookReceiver{}
 	receivers, _, err := receiver.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
 		return db.Where("id in ?", strings.Split(schedule.Webhooks, ","))

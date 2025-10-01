@@ -101,7 +101,7 @@ func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 			TargetURL:     receiver.TargetURL,
 			Method:        method,
 			Headers:       map[string]string{},
-			BodyTemplate:  receiver.Template,
+			BodyTemplate:  receiver.BodyTemplate,
 			SignSecret:    receiver.SignSecret,
 			SignAlgo:      receiver.SignAlgo,
 			SignHeaderKey: receiver.SignHeaderKey,
