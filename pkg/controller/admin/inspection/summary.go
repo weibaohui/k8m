@@ -238,9 +238,9 @@ func (s *AdminScheduleController) SummaryByRecordID(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	summary := sb.SummaryByAI(context.Background(), msg, "")
+	summary, summaryErr := sb.SummaryByAI(context.Background(), msg, "")
 
-	err = sb.SaveSummaryBack(recordID, summary)
+	err = sb.SaveSummaryBack(recordID, summary, summaryErr)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
