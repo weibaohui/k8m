@@ -267,7 +267,7 @@
                           "name": "body_template",
                           "label": "JSON模板",
                           "language": "json",
-                          "value": "{'body': '%s'}"
+                          "value": "{\n    \"msgtype\": \"markdown\",\n    \"markdown\": {\n        \"content\": \"{{msg}}\"\n    }\n}"
                         },
                         {
                           "type": "editor",

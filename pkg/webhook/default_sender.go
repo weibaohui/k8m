@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/weibaohui/htpl"
@@ -30,6 +31,7 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 	// 1. 通过 htpl 渲染模板，构造最终请求体；若模板为空或渲染失败，使用原始 msg
 	finalBody := msg
 	if receiver.BodyTemplate != "" {
+		receiver.BodyTemplate = strings.ReplaceAll(receiver.BodyTemplate, "{{msg}}", "${msg}")
 		eng := htpl.NewEngine()
 		tpl, err := eng.ParseString(receiver.BodyTemplate)
 		if err == nil {
