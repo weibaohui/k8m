@@ -25,7 +25,7 @@ func (f *FeishuSender) Send(msg string, receiver *Receiver) (*SendResult, error)
 
 	// Add Feishu signature if enabled
 	finalURL := receiver.TargetURL
-	if receiver.SignAlgo == "feishu" && receiver.SignSecret != "" {
+	if receiver.SignSecret != "" {
 		timestamp := time.Now().Unix()
 		timestampStr := strconv.FormatInt(timestamp, 10)
 		signature, err := GenSign(receiver.SignSecret, timestamp)
