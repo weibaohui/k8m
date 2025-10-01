@@ -90,5 +90,22 @@ func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 		rr := NewWechatReceiver(receiver.TargetURL)
 		return rr
 	}
+	// 自定义 default 平台：通用映射
+	if receiver.Platform == "default" {
+		method := receiver.Method
+		if method == "" {
+			method = "POST"
+		}
+		return &Receiver{
+			Platform:      "default",
+			TargetURL:     receiver.TargetURL,
+			Method:        method,
+			Headers:       map[string]string{},
+			Template:      receiver.Template,
+			SignSecret:    receiver.SignSecret,
+			SignAlgo:      receiver.SignAlgo,
+			SignHeaderKey: receiver.SignHeaderKey,
+		}
+	}
 	return nil
 }
