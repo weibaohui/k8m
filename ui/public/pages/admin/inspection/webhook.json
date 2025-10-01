@@ -476,48 +476,10 @@
           }
         },
         {
-          "name": "details",
-          "label": "详细信息",
-          "type": "button",
-          "btnLevel": "link",
-          "actionType": "dialog",
-          "dialog": {
-            "title": "Webhook 详细信息",
-            "body": {
-              "type": "form",
-              "body": [
-                {
-                  "type": "input-url",
-                  "name": "target_url",
-                  "label": "Webhook地址",
-                  "disabled": true
-                },
-                {
-                  "type": "input-text",
-                  "name": "sign_algo",
-                  "label": "签名算法",
-                  "disabled": true
-                },
-                {
-                  "type": "input-text",
-                  "name": "sign_header_key",
-                  "label": "签名Header键",
-                  "disabled": true
-                },
-                {
-                  "type": "input-text",
-                  "name": "sign_secret",
-                  "label": "签名密钥",
-                  "disabled": true
-                }
-              ]
-            }
-          }
-        },
-        {
           "name": "template",
           "label": "AI总结提示词模板",
-          "type": "text"
+          "type": "text",
+          "width": "250px"
         },
         {
           "name": "created_at",
