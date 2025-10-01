@@ -34,11 +34,16 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 		bodyTemplate := strings.ReplaceAll(receiver.BodyTemplate, "{{msg}}", "${msg}")
 		eng := htpl.NewEngine()
 		tpl, err := eng.ParseString(bodyTemplate)
-		if err == nil {
+		if err != nil {
+			klog.Errorf("Webhook DefaultSender 模板解析失败: platform=%s target=%s template=%q error=%v", receiver.Platform, receiver.TargetURL, bodyTemplate, err)
+		} else {
 			ctx := map[string]any{
 				"msg": msg,
 			}
-			if rendered, rErr := tpl.Render(ctx); rErr == nil && rendered != "" {
+			rendered, rErr := tpl.Render(ctx)
+			if rErr != nil {
+				klog.Errorf("Webhook DefaultSender 模板渲染失败: platform=%s target=%s template=%q error=%v", receiver.Platform, receiver.TargetURL, bodyTemplate, rErr)
+			} else if rendered != "" {
 				finalBody = rendered
 			}
 		}
@@ -53,7 +58,7 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 	req.Header.Set("Content-Type", "application/json")
 
 	// 为方便调试，将请求体打印到日志
-	klog.V(6).Infof(" Sending POST request to %s with body: %s", receiver.TargetURL, finalBody)
+	klog.V(8).Infof(" Sending POST request to %s with body: %s", receiver.TargetURL, finalBody)
 
 	// 4. 发送请求
 	client := &http.Client{Timeout: 5 * time.Second}
