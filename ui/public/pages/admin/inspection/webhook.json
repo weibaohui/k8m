@@ -407,13 +407,21 @@
                       "type": "input-text",
                       "name": "sign_secret",
                       "label": "签名密钥",
-                      "placeholder": "如有签名需求请填写"
+                      "placeholder": "如有签名需求请填写",
+                      "visibleOn": "platform === 'feishu' || platform === 'dingtalk'"
+                    },
+                    {
+                      "type": "alert",
+                      "level": "info",
+                      "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别",
+                      "visibleOn": "platform === 'default'"
                     },
                     {
                       "type": "editor",
                       "name": "body_template",
                       "label": "JSON模板",
-                      "language": "json"
+                      "language": "json",
+                      "visibleOn": "platform === 'default'"
                     },
                     {
                       "type": "editor",
