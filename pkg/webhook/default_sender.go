@@ -2,9 +2,6 @@ package webhook
 
 import (
 	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"io"
 	"net/http"
 	"time"
@@ -58,14 +55,6 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 	req.Header.Set("Content-Type", "application/json")
 	for k, v := range receiver.Headers {
 		req.Header.Set(k, v)
-	}
-
-	// 3. 可选签名：HMAC-SHA256
-	if receiver.SignAlgo == "hmac-sha256" && receiver.SignSecret != "" && receiver.SignHeaderKey != "" {
-		h := hmac.New(sha256.New, []byte(receiver.SignSecret))
-		h.Write([]byte(finalBody))
-		signature := hex.EncodeToString(h.Sum(nil))
-		req.Header.Set(receiver.SignHeaderKey, signature)
 	}
 
 	// 为方便调试，将请求体打印到日志

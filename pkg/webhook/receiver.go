@@ -8,55 +8,47 @@ import (
 
 // Receiver represents a user-defined webhook endpoint.
 type Receiver struct {
-	Platform      string
-	TargetURL     string
-	Method        string
-	Headers       map[string]string
-	BodyTemplate  string
-	SignSecret    string
-	SignAlgo      string // e.g. "hmac-sha256", "feishu", "dingtalk"
-	SignHeaderKey string // e.g. "X-Signature" or unused
+	Platform     string
+	TargetURL    string
+	Method       string
+	Headers      map[string]string
+	BodyTemplate string
+	SignSecret   string
 }
 
 // NewFeishuReceiver 快捷创建飞书 Receiver
 func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
 	return &Receiver{
-		Platform:      "feishu",
-		TargetURL:     targetURL,
-		Method:        "POST",
-		Headers:       map[string]string{},
-		BodyTemplate:  `{"msg_type":"text","content":{"text":"%s"}}`,
-		SignSecret:    signSecret,
-		SignAlgo:      "feishu",
-		SignHeaderKey: "", // 飞书不需要 header 签名，是 URL 参数
+		Platform:     "feishu",
+		TargetURL:    targetURL,
+		Method:       "POST",
+		Headers:      map[string]string{},
+		BodyTemplate: `{"msg_type":"text","content":{"text":"%s"}}`,
+		SignSecret:   signSecret,
 	}
 }
 
 // NewDingtalkReceiver 快捷创建钉钉 Receiver
 func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
 	return &Receiver{
-		Platform:      "dingtalk",
-		TargetURL:     targetURL,
-		Method:        "POST",
-		Headers:       map[string]string{},
-		BodyTemplate:  `{"msgtype":"text","text":{"content":"%s"}}`,
-		SignSecret:    signSecret,
-		SignAlgo:      "dingtalk",
-		SignHeaderKey: "", // 钉钉不需要 header 签名，是 URL 参数
+		Platform:     "dingtalk",
+		TargetURL:    targetURL,
+		Method:       "POST",
+		Headers:      map[string]string{},
+		BodyTemplate: `{"msgtype":"text","text":{"content":"%s"}}`,
+		SignSecret:   signSecret,
 	}
 }
 
 // NewWechatReceiver 快捷创建企业微信 Receiver（群机器人）
 func NewWechatReceiver(targetURL string) *Receiver {
 	return &Receiver{
-		Platform:      "wechat",
-		TargetURL:     targetURL,
-		Method:        "POST",
-		Headers:       map[string]string{},
-		BodyTemplate:  `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
-		SignSecret:    "",
-		SignAlgo:      "",
-		SignHeaderKey: "",
+		Platform:     "wechat",
+		TargetURL:    targetURL,
+		Method:       "POST",
+		Headers:      map[string]string{},
+		BodyTemplate: `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
+		SignSecret:   "",
 	}
 }
 
@@ -97,14 +89,12 @@ func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 			method = "POST"
 		}
 		return &Receiver{
-			Platform:      "default",
-			TargetURL:     receiver.TargetURL,
-			Method:        method,
-			Headers:       map[string]string{},
-			BodyTemplate:  receiver.BodyTemplate,
-			SignSecret:    receiver.SignSecret,
-			SignAlgo:      receiver.SignAlgo,
-			SignHeaderKey: receiver.SignHeaderKey,
+			Platform:     "default",
+			TargetURL:    receiver.TargetURL,
+			Method:       method,
+			Headers:      map[string]string{},
+			BodyTemplate: receiver.BodyTemplate,
+			SignSecret:   receiver.SignSecret,
 		}
 	}
 	return nil
