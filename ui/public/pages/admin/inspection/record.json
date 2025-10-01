@@ -212,6 +212,10 @@
                     "width": "250px"
                 },
                 {
+                    "name": "ai_summary_err",
+                    "label": "AI总结错误"
+                },
+                {
                     "name": "start_time",
                     "label": "开始时间",
                     "type": "datetime"
