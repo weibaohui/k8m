@@ -42,18 +42,18 @@
                         {
                             "type": "button",
                             "actionType": "ajax",
-                            "label": "AI总结",
+                            "label": "重新AI总结",
                             "api": "post:/admin/inspection/schedule/record/id/$id/summary"
                         },
                         {
                             "type": "button",
                             "actionType": "drawer",
-                            "label": "查看明细",
+                            "label": "查看结果详情",
                             "drawer": {
                                 "closeOnEsc": true,
                                 "closeOnOutside": true,
                                 "size": "xl",
-                                "title": "查看巡检明细 (ESC 关闭)",
+                                "title": "查看巡检结果明细 (ESC 关闭)",
                                 "body": [
                                     {
                                         "type": "inspectionEventList",
@@ -65,7 +65,7 @@
                         {
                             "type": "button",
                             "actionType": "drawer",
-                            "label": "运行输出",
+                            "label": "查看脚本运行日志",
                             "drawer": {
                                 "closeOnEsc": true,
                                 "closeOnOutside": true,
@@ -172,7 +172,7 @@
                         {
                             "type": "button",
                             "actionType": "ajax",
-                            "label": "发送webhook",
+                            "label": "重新触发webhook",
                             "api": "post:/admin/inspection/schedule/record/id/$id/push"
                         }
                     ]
