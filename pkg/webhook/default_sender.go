@@ -34,8 +34,8 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 		tpl, err := eng.ParseString(receiver.BodyTemplate)
 		if err == nil {
 			ctx := map[string]any{
-				"summary": msg,
-				"time":    time.Now().Format(time.RFC3339),
+				"msg":  msg,
+				"time": time.Now().Format(time.RFC3339),
 			}
 			if rendered, rErr := tpl.Render(ctx); rErr == nil && rendered != "" {
 				finalBody = rendered
