@@ -13,11 +13,11 @@ import (
 
 type DefaultSender struct{}
 
-// DefaultSender 以通用方式发送 Webhook 请求，支持可选的 HMAC-SHA256 签名
+// DefaultSender 以通用方式发送 Webhook 请求
 // 功能：
 // 1) 使用 Receiver.BodyTemplate 作为 htpl 模板渲染请求体
-// 2) 使用 Receiver.Method/TargetURL 作为 HTTP 方法与地址
-// 3) 当 SignAlgo=="hmac-sha256" 时，按 SignSecret 计算签名并写入 SignHeaderKey
+// 2) 使用 POST 方法发送到 Receiver.TargetURL
+// 3) 不支持签名功能（签名由各平台专用 Sender 处理）
 func (d *DefaultSender) Name() string {
 	return "default"
 }
@@ -31,13 +31,12 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 	// 1. 通过 htpl 渲染模板，构造最终请求体；若模板为空或渲染失败，使用原始 msg
 	finalBody := msg
 	if receiver.BodyTemplate != "" {
-		receiver.BodyTemplate = strings.ReplaceAll(receiver.BodyTemplate, "{{msg}}", "${msg}")
+		bodyTemplate := strings.ReplaceAll(receiver.BodyTemplate, "{{msg}}", "${msg}")
 		eng := htpl.NewEngine()
-		tpl, err := eng.ParseString(receiver.BodyTemplate)
+		tpl, err := eng.ParseString(bodyTemplate)
 		if err == nil {
 			ctx := map[string]any{
-				"msg":  msg,
-				"time": time.Now().Format(time.RFC3339),
+				"msg": msg,
 			}
 			if rendered, rErr := tpl.Render(ctx); rErr == nil && rendered != "" {
 				finalBody = rendered

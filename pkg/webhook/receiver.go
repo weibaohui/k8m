@@ -1,8 +1,6 @@
 package webhook
 
 import (
-	"fmt"
-
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
@@ -42,21 +40,6 @@ func NewWechatReceiver(targetURL string) *Receiver {
 		BodyTemplate: `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
 		SignSecret:   "",
 	}
-}
-
-// Validate 校验 Receiver 配置合法性
-func (r *Receiver) Validate() error {
-	if r.Platform == "" {
-		return fmt.Errorf("platform is required")
-	}
-	if r.TargetURL == "" {
-		return fmt.Errorf("target url is required")
-	}
-
-	if r.BodyTemplate == "" {
-		return fmt.Errorf("template is required")
-	}
-	return nil
 }
 
 func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
