@@ -258,11 +258,6 @@ pnpm run dev
 
 ## 微信群
 ![输入图片说明](https://foruda.gitee.com/images/1759234568793520473/ccfc8a18_77493.png "屏幕截图")
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fweibaohui%2Fk8m.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fweibaohui%2Fk8m?ref=badge_shield)
 ## QQ群
 ![输入图片说明](https://foruda.gitee.com/images/1753099785542398999/184a765a_77493.png "屏幕截图")
 
-
-
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fweibaohui%2Fk8m.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fweibaohui%2Fk8m?ref=badge_large)
