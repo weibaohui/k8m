@@ -12,7 +12,7 @@ type Receiver struct {
 	TargetURL     string
 	Method        string
 	Headers       map[string]string
-	Template      string
+	BodyTemplate  string
 	SignSecret    string
 	SignAlgo      string // e.g. "hmac-sha256", "feishu", "dingtalk"
 	SignHeaderKey string // e.g. "X-Signature" or unused
@@ -25,7 +25,7 @@ func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
 		TargetURL:     targetURL,
 		Method:        "POST",
 		Headers:       map[string]string{},
-		Template:      `{"msg_type":"text","content":{"text":"%s"}}`,
+		BodyTemplate:  `{"msg_type":"text","content":{"text":"%s"}}`,
 		SignSecret:    signSecret,
 		SignAlgo:      "feishu",
 		SignHeaderKey: "", // 飞书不需要 header 签名，是 URL 参数
@@ -39,7 +39,7 @@ func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
 		TargetURL:     targetURL,
 		Method:        "POST",
 		Headers:       map[string]string{},
-		Template:      `{"msgtype":"text","text":{"content":"%s"}}`,
+		BodyTemplate:  `{"msgtype":"text","text":{"content":"%s"}}`,
 		SignSecret:    signSecret,
 		SignAlgo:      "dingtalk",
 		SignHeaderKey: "", // 钉钉不需要 header 签名，是 URL 参数
@@ -53,7 +53,7 @@ func NewWechatReceiver(targetURL string) *Receiver {
 		TargetURL:     targetURL,
 		Method:        "POST",
 		Headers:       map[string]string{},
-		Template:      `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
+		BodyTemplate:  `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
 		SignSecret:    "",
 		SignAlgo:      "",
 		SignHeaderKey: "",
@@ -71,7 +71,7 @@ func (r *Receiver) Validate() error {
 	if r.Method == "" {
 		return fmt.Errorf("http method is required")
 	}
-	if r.Template == "" {
+	if r.BodyTemplate == "" {
 		return fmt.Errorf("template is required")
 	}
 	return nil
@@ -101,7 +101,7 @@ func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 			TargetURL:     receiver.TargetURL,
 			Method:        method,
 			Headers:       map[string]string{},
-			Template:      receiver.Template,
+			BodyTemplate:  receiver.Template,
 			SignSecret:    receiver.SignSecret,
 			SignAlgo:      receiver.SignAlgo,
 			SignHeaderKey: receiver.SignHeaderKey,

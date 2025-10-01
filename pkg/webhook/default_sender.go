@@ -17,7 +17,7 @@ type DefaultSender struct{}
 
 // DefaultSender 以通用方式发送 Webhook 请求，支持可选的 HMAC-SHA256 签名
 // 功能：
-// 1) 使用 Receiver.Template 作为 htpl 模板渲染请求体
+// 1) 使用 Receiver.BodyTemplate 作为 htpl 模板渲染请求体
 // 2) 使用 Receiver.Method/TargetURL 作为 HTTP 方法与地址
 // 3) 当 SignAlgo=="hmac-sha256" 时，按 SignSecret 计算签名并写入 SignHeaderKey
 func (d *DefaultSender) Name() string {
@@ -32,9 +32,9 @@ func (d *DefaultSender) Name() string {
 func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
 	// 1. 通过 htpl 渲染模板，构造最终请求体；若模板为空或渲染失败，使用原始 msg
 	finalBody := msg
-	if receiver.Template != "" {
+	if receiver.BodyTemplate != "" {
 		eng := htpl.NewEngine()
-		tpl, err := eng.ParseString(receiver.Template)
+		tpl, err := eng.ParseString(receiver.BodyTemplate)
 		if err == nil {
 			ctx := map[string]any{
 				"summary": msg,
@@ -68,7 +68,7 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 		req.Header.Set(receiver.SignHeaderKey, signature)
 	}
 
-	//为方便调试，将请求体打印到日志
+	// 为方便调试，将请求体打印到日志
 	klog.V(6).Infof("Sending %s request to %s with body: %s", method, receiver.TargetURL, finalBody)
 
 	// 4. 发送请求
