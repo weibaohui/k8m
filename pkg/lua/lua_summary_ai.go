@@ -69,6 +69,7 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 // 参数：format 自定义格式
 func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any, format string) (string, error) {
 	summary := ""
+	var err error
 	defaultFormat := `
 	请按下面的格式给出汇总：
 		检测集群：xxx名称
@@ -92,16 +93,20 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 		%s
 		`
 		prompt = fmt.Sprintf(prompt, defaultFormat, utils.ToJSON(msg))
-		summary = service.ChatService().ChatWithCtx(ctx, prompt)
+		summary, err = service.ChatService().ChatWithCtx(ctx, prompt)
+
+		if err != nil {
+			return "", err
+		}
 
 	} else {
 		summary = "AI功能未开启"
 	}
 
-	return summary, nil
+	return summary, err
 }
 
-func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string) error {
+func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string, summaryErr error) error {
 	recordModel := &models.InspectionRecord{}
 	record, err := recordModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", id)
@@ -109,9 +114,12 @@ func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string) error {
 	if err != nil {
 		return fmt.Errorf("未找到对应的巡检记录: %v", err)
 	}
+	if summaryErr != nil {
+		record.AISummaryErr = summaryErr.Error()
+	}
 
 	record.AISummary = summary
-	err = dao.DB().Model(&record).Select("ai_summary").Updates(record).Error
+	err = dao.DB().Model(&record).Select("ai_summary_err", "ai_summary").Updates(record).Error
 	if err != nil {
 		return fmt.Errorf("保存巡检记录的AI总结失败: %v", err)
 	}
