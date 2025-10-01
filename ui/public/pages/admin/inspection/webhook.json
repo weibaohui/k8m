@@ -172,20 +172,52 @@
                       "api": "post:/admin/inspection/webhook/save",
                       "wrapWithPanel": false,
                       "body": [
-                        { "type": "hidden", "name": "id" },
-                        { "type": "hidden", "name": "platform", "value": "wechat" },
-                        { "type": "input-text", "name": "name", "label": "名称", "required": true, "placeholder": "如企业微信群" },
-                        { "type": "input-url", "name": "target_url", "label": "群机器人URL", "required": true },
-                        { "type": "editor", "name": "template", "label": "消息模板", "language": "json", "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。" }
+                        {
+                          "type": "hidden",
+                          "name": "id"
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "platform",
+                          "value": "wechat"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "name",
+                          "label": "名称",
+                          "required": true,
+                          "placeholder": "如企业微信群"
+                        },
+                        {
+                          "type": "input-url",
+                          "name": "target_url",
+                          "label": "群机器人URL",
+                          "required": true
+                        },
+                        {
+                          "type": "editor",
+                          "name": "template",
+                          "label": "消息模板",
+                          "language": "json",
+                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
+                        }
                       ],
                       "submitText": "保存",
                       "resetText": "重置",
-                      "messages": { "saveSuccess": "保存成功", "saveFailed": "保存失败" },
+                      "messages": {
+                        "saveSuccess": "保存成功",
+                        "saveFailed": "保存失败"
+                      },
                       "onEvent": {
                         "submitSucc": {
                           "actions": [
-                            { "actionType": "reload", "componentId": "webhookCRUD" },
-                            { "actionType": "closeDrawer" }
+                            {
+                              "actionType": "reload",
+                              "componentId": "webhookCRUD"
+                            },
+                            {
+                              "actionType": "closeDrawer"
+                            }
                           ]
                         }
                       }
@@ -201,32 +233,86 @@
                       "api": "post:/admin/inspection/webhook/save",
                       "wrapWithPanel": false,
                       "body": [
-                        { "type": "hidden", "name": "id" },
-                        { "type": "hidden", "name": "platform", "value": "default" },
-                        { "type": "input-text", "name": "name", "label": "名称", "required": true, "placeholder": "如自定义Webhook" },
-                        { "type": "input-url", "name": "target_url", "label": "目标URL", "required": true, "placeholder": "请输入Webhook地址" },
-                        { "type": "select", "name": "method", "label": "HTTP方法", "options": [
-                          { "label": "POST", "value": "POST" },
-                          { "label": "GET", "value": "GET" },
-                          { "label": "PUT", "value": "PUT" },
-                          { "label": "DELETE", "value": "DELETE" }
-                        ], "value": "POST" },
-                        { "type": "input-kv", "name": "headers", "label": "请求头", "description": "可选，键值对格式" },
-                        { "type": "select", "name": "sign_algo", "label": "签名算法", "options": [
-                          { "label": "无", "value": "" },
-                          { "label": "HMAC-SHA256", "value": "hmac-sha256" }
-                        ], "clearable": true },
-                        { "type": "input-text", "name": "sign_header_key", "label": "签名Header键", "placeholder": "如 X-Signature" },
-                        { "type": "input-text", "name": "sign_secret", "label": "签名密钥", "placeholder": "如有签名需求请填写" },
-                        { "type": "editor", "name": "template", "label": "消息模板", "language": "json", "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。" }
+                        {
+                          "type": "hidden",
+                          "name": "id"
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "platform",
+                          "value": "default"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "name",
+                          "label": "名称",
+                          "required": true,
+                          "placeholder": "如自定义Webhook"
+                        },
+                        {
+                          "type": "input-url",
+                          "name": "target_url",
+                          "label": "目标URL",
+                          "required": true,
+                          "placeholder": "请输入Webhook地址"
+                        },
+                        {
+                          "type": "select",
+                          "name": "method",
+                          "label": "HTTP方法",
+                          "options": [
+                            {
+                              "label": "POST",
+                              "value": "POST"
+                            },
+                            {
+                              "label": "GET",
+                              "value": "GET"
+                            },
+                            {
+                              "label": "PUT",
+                              "value": "PUT"
+                            },
+                            {
+                              "label": "DELETE",
+                              "value": "DELETE"
+                            }
+                          ],
+                          "value": "POST"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "sign_secret",
+                          "label": "签名密钥",
+                          "placeholder": "如有签名需求请填写"
+                        },
+                        {
+                          "type": "editor",
+                          "name": "template",
+                          "label": "消息模板",
+                          "language": "json",
+                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
+                        }
                       ],
                       "submitText": "保存",
                       "resetText": "重置",
-                      "messages": { "saveSuccess": "保存成功", "saveFailed": "保存失败" },
-                      "onEvent": { "submitSucc": { "actions": [
-                        { "actionType": "reload", "componentId": "webhookCRUD" },
-                        { "actionType": "closeDrawer" }
-                      ] } }
+                      "messages": {
+                        "saveSuccess": "保存成功",
+                        "saveFailed": "保存失败"
+                      },
+                      "onEvent": {
+                        "submitSucc": {
+                          "actions": [
+                            {
+                              "actionType": "reload",
+                              "componentId": "webhookCRUD"
+                            },
+                            {
+                              "actionType": "closeDrawer"
+                            }
+                          ]
+                        }
+                      }
                     }
                   ]
                 },
@@ -335,10 +421,22 @@
                       "name": "method",
                       "label": "HTTP方法",
                       "options": [
-                        { "label": "POST", "value": "POST" },
-                        { "label": "GET", "value": "GET" },
-                        { "label": "PUT", "value": "PUT" },
-                        { "label": "DELETE", "value": "DELETE" }
+                        {
+                          "label": "POST",
+                          "value": "POST"
+                        },
+                        {
+                          "label": "GET",
+                          "value": "GET"
+                        },
+                        {
+                          "label": "PUT",
+                          "value": "PUT"
+                        },
+                        {
+                          "label": "DELETE",
+                          "value": "DELETE"
+                        }
                       ],
                       "clearable": true
                     },
@@ -353,8 +451,14 @@
                       "name": "sign_algo",
                       "label": "签名算法",
                       "options": [
-                        { "label": "无", "value": "" },
-                        { "label": "HMAC-SHA256", "value": "hmac-sha256" }
+                        {
+                          "label": "无",
+                          "value": ""
+                        },
+                        {
+                          "label": "HMAC-SHA256",
+                          "value": "hmac-sha256"
+                        }
                       ],
                       "clearable": true
                     },
