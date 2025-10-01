@@ -234,6 +234,11 @@
                       "wrapWithPanel": false,
                       "body": [
                         {
+                          "type": "alert",
+                          "level": "info",
+                          "body": "程序默认会以POST方式发送JSON Body体到指定的URL"
+                        },
+                        {
                           "type": "hidden",
                           "name": "id"
                         },
@@ -257,10 +262,9 @@
                           "placeholder": "请输入Webhook地址"
                         },
                         {
-                          "type": "input-text",
-                          "name": "sign_secret",
-                          "label": "签名密钥",
-                          "placeholder": "如有签名需求请填写"
+                          "type": "alert",
+                          "level": "info",
+                          "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别"
                         },
                         {
                           "type": "editor",
