@@ -64,7 +64,7 @@
                         {
                           "type": "editor",
                           "name": "template",
-                          "label": "消息模板",
+                          "label": "AI总结提示词模板",
                           "language": "json",
                           "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
@@ -136,7 +136,7 @@
                         {
                           "type": "editor",
                           "name": "template",
-                          "label": "消息模板",
+                          "label": "AI总结提示词模板",
                           "language": "json",
                           "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
@@ -197,7 +197,7 @@
                         {
                           "type": "editor",
                           "name": "template",
-                          "label": "消息模板",
+                          "label": "AI总结提示词模板",
                           "language": "json",
                           "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
@@ -257,30 +257,6 @@
                           "placeholder": "请输入Webhook地址"
                         },
                         {
-                          "type": "select",
-                          "name": "method",
-                          "label": "HTTP方法",
-                          "options": [
-                            {
-                              "label": "POST",
-                              "value": "POST"
-                            },
-                            {
-                              "label": "GET",
-                              "value": "GET"
-                            },
-                            {
-                              "label": "PUT",
-                              "value": "PUT"
-                            },
-                            {
-                              "label": "DELETE",
-                              "value": "DELETE"
-                            }
-                          ],
-                          "value": "POST"
-                        },
-                        {
                           "type": "input-text",
                           "name": "sign_secret",
                           "label": "签名密钥",
@@ -288,8 +264,15 @@
                         },
                         {
                           "type": "editor",
+                          "name": "body_template",
+                          "label": "JSON模板",
+                          "language": "json",
+                          "value": "{'body': '%s'}"
+                        },
+                        {
+                          "type": "editor",
                           "name": "template",
-                          "label": "消息模板",
+                          "label": "AI总结提示词模板",
                           "language": "json",
                           "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
@@ -417,58 +400,6 @@
                       "placeholder": "请输入Webhook地址"
                     },
                     {
-                      "type": "select",
-                      "name": "method",
-                      "label": "HTTP方法",
-                      "options": [
-                        {
-                          "label": "POST",
-                          "value": "POST"
-                        },
-                        {
-                          "label": "GET",
-                          "value": "GET"
-                        },
-                        {
-                          "label": "PUT",
-                          "value": "PUT"
-                        },
-                        {
-                          "label": "DELETE",
-                          "value": "DELETE"
-                        }
-                      ],
-                      "clearable": true
-                    },
-                    {
-                      "type": "input-kv",
-                      "name": "headers",
-                      "label": "请求头",
-                      "description": "可选，键值对格式"
-                    },
-                    {
-                      "type": "select",
-                      "name": "sign_algo",
-                      "label": "签名算法",
-                      "options": [
-                        {
-                          "label": "无",
-                          "value": ""
-                        },
-                        {
-                          "label": "HMAC-SHA256",
-                          "value": "hmac-sha256"
-                        }
-                      ],
-                      "clearable": true
-                    },
-                    {
-                      "type": "input-text",
-                      "name": "sign_header_key",
-                      "label": "签名Header键",
-                      "placeholder": "如 X-Signature"
-                    },
-                    {
                       "type": "input-text",
                       "name": "sign_secret",
                       "label": "签名密钥",
@@ -476,8 +407,14 @@
                     },
                     {
                       "type": "editor",
+                      "name": "body_template",
+                      "label": "JSON模板",
+                      "language": "json"
+                    },
+                    {
+                      "type": "editor",
                       "name": "template",
-                      "label": "消息模板",
+                      "label": "AI总结提示词模板",
                       "language": "json"
                     }
                   ],
@@ -549,12 +486,6 @@
                 },
                 {
                   "type": "input-text",
-                  "name": "method",
-                  "label": "HTTP方法",
-                  "disabled": true
-                },
-                {
-                  "type": "input-text",
                   "name": "sign_algo",
                   "label": "签名算法",
                   "disabled": true
@@ -577,7 +508,7 @@
         },
         {
           "name": "template",
-          "label": "消息模板",
+          "label": "AI总结提示词模板",
           "type": "text"
         },
         {

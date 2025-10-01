@@ -44,21 +44,15 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 	}
 
 	// 2. 构造 HTTP 请求
-	method := receiver.Method
-	if method == "" {
-		method = "POST"
-	}
-	req, err := http.NewRequest(method, receiver.TargetURL, bytes.NewReader([]byte(finalBody)))
+
+	req, err := http.NewRequest("POST", receiver.TargetURL, bytes.NewReader([]byte(finalBody)))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	for k, v := range receiver.Headers {
-		req.Header.Set(k, v)
-	}
 
 	// 为方便调试，将请求体打印到日志
-	klog.V(6).Infof("Sending %s request to %s with body: %s", method, receiver.TargetURL, finalBody)
+	klog.V(6).Infof(" Sending POST request to %s with body: %s", receiver.TargetURL, finalBody)
 
 	// 4. 发送请求
 	client := &http.Client{Timeout: 5 * time.Second}

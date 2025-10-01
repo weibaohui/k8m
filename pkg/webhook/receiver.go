@@ -10,8 +10,6 @@ import (
 type Receiver struct {
 	Platform     string
 	TargetURL    string
-	Method       string
-	Headers      map[string]string
 	BodyTemplate string
 	SignSecret   string
 }
@@ -21,8 +19,6 @@ func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
 	return &Receiver{
 		Platform:     "feishu",
 		TargetURL:    targetURL,
-		Method:       "POST",
-		Headers:      map[string]string{},
 		BodyTemplate: `{"msg_type":"text","content":{"text":"%s"}}`,
 		SignSecret:   signSecret,
 	}
@@ -33,8 +29,6 @@ func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
 	return &Receiver{
 		Platform:     "dingtalk",
 		TargetURL:    targetURL,
-		Method:       "POST",
-		Headers:      map[string]string{},
 		BodyTemplate: `{"msgtype":"text","text":{"content":"%s"}}`,
 		SignSecret:   signSecret,
 	}
@@ -45,8 +39,6 @@ func NewWechatReceiver(targetURL string) *Receiver {
 	return &Receiver{
 		Platform:     "wechat",
 		TargetURL:    targetURL,
-		Method:       "POST",
-		Headers:      map[string]string{},
 		BodyTemplate: `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
 		SignSecret:   "",
 	}
@@ -60,9 +52,7 @@ func (r *Receiver) Validate() error {
 	if r.TargetURL == "" {
 		return fmt.Errorf("target url is required")
 	}
-	if r.Method == "" {
-		return fmt.Errorf("http method is required")
-	}
+
 	if r.BodyTemplate == "" {
 		return fmt.Errorf("template is required")
 	}
@@ -84,15 +74,10 @@ func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
 	}
 	// 自定义 default 平台：通用映射
 	if receiver.Platform == "default" {
-		method := receiver.Method
-		if method == "" {
-			method = "POST"
-		}
+
 		return &Receiver{
 			Platform:     "default",
 			TargetURL:    receiver.TargetURL,
-			Method:       method,
-			Headers:      map[string]string{},
 			BodyTemplate: receiver.BodyTemplate,
 			SignSecret:   receiver.SignSecret,
 		}
