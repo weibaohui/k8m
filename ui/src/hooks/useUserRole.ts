@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { fetcher } from '@/components/Amis/fetcher';
 
+import { MenuItem } from '@/types/menu';
+
 interface UserRoleResponse {
     role: string;
     cluster: string;
-    menu_data: string;
+    menu_data: MenuItem[] | string;
 }
 
 export const useUserRole = () => {
     const [userRole, setUserRole] = useState<string>('');
-    const [menuData, setMenuData] = useState<string>('');
+    const [menuData, setMenuData] = useState<MenuItem[] | string>([]);
 
     useEffect(() => {
         const fetchUserRole = async () => {
