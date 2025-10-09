@@ -71,7 +71,7 @@ const Sidebar = () => {
                 if (item.customEvent) {
                     const path = getPathFromCustomEvent(item.customEvent);
                     const url = getUrlFromCustomEvent(item.customEvent);
-                    
+
                     if (path) {
                         // 处理 loadJsonPage 类型的事件
                         (menuItem as any).onClick = () => loadJsonPage(path);
@@ -105,14 +105,24 @@ const Sidebar = () => {
     // 解析菜单数据，优先使用 menuData，如果无效则使用 initialMenu
     const getMenuData = (): MenuItem[] => {
         if (menuData) {
-            try {
-                const parsedMenuData = JSON.parse(menuData);
-                // 检查解析后的数据是否为有效的数组
-                if (Array.isArray(parsedMenuData) && parsedMenuData.length > 0) {
-                    return parsedMenuData;
+            // 如果是数组，直接使用
+            if (Array.isArray(menuData) && menuData.length > 0) {
+                return menuData as MenuItem[];
+            }
+
+            // 如果是字符串，尝试解析
+            if (typeof menuData === 'string') {
+                const raw = menuData.trim();
+                if (raw && raw !== '[object Object]') {
+                    try {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            return parsed as MenuItem[];
+                        }
+                    } catch (error) {
+                        console.warn('Failed to parse menuData string, falling back to initialMenu:', error);
+                    }
                 }
-            } catch (error) {
-                console.warn('Failed to parse menuData, falling back to initialMenu:', error);
             }
         }
         return initialMenu;
