@@ -43,7 +43,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 						if not err and pods then
 							for _, _ in pairs(pods) do count = count + 1 end
 						end
-						if count = 0 then
+						if count == 0 then
 							check_event("失败", "Service " .. svc.metadata.name .. " selector " .. labelSelector .. " 应该至少一个pod, 但是现在没有。" .. "spec.selector定义" .. doc, {name=svc.metadata.name, selector=labelSelector, namespace=svc.metadata.namespace})
 						end
 					end
