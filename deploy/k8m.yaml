@@ -151,9 +151,9 @@ spec:
     spec:
       containers:
         - name: k8m
-          # image: docker.io/weibh/k8m:v0.0.165
-          # image: ghcr.io/weibaohui/k8m:v0.0.165
-          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.0.165
+          # image: docker.io/weibh/k8m:v0.0.168
+          # image: ghcr.io/weibaohui/k8m:v0.0.168
+          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.0.168
           env:
             # 是否开启debug模式
             - name: DEBUG
