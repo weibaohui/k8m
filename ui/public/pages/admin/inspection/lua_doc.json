@@ -1,0 +1,34 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "html",
+      "className": "mb-2",
+      "html": "<h1>K8m Lua 巡检脚本编写与使用说明</h1>\n<p>参考内置脚本位置：<code>pkg/models/lua_scripts_builtin.go</code></p>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>概览</h2>\n<ul>\n<li>巡检脚本用于对 K8s 资源进行规则化检查并输出事件。</li>\n<li>支持两类脚本：<ul>\n<li>内置脚本（ScriptType=BuiltIn）：随版本统一升级管理；升级时会删除后重新插入最新版本。</li>\n<li>自定义脚本（ScriptType=Custom）：由用户新增，升级不变动。</li>\n</ul></li>\n<li>每条规则需要一个全局唯一的 <code>script_code</code>，巡检计划通过该编码绑定执行规则。</li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>运行环境与核心对象</h2>\n<ul>\n<li>提供 <code>kubectl</code> 对象，采用 <strong>GVK 链式调用</strong>：</li>\n<li><code>kubectl:GVK(group, version, kind)</code>：指定资源类型。例如 <code>kubectl:GVK(\"apps\", \"v1\", \"Deployment\")</code></li>\n<li>命名空间：<code>Namespace(ns)</code> / <code>AllNamespace()</code></li>\n<li>过滤与性能：<code>WithLabelSelector(selector)</code>、<code>Cache(seconds)</code></li>\n<li>数据操作：<code>List()</code> / <code>Get()</code> / <code>Name(name)</code> / <code>Doc(path)</code> / <code>GetLogs(opts)</code></li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>事件与日志</h2>\n<ul>\n<li><code>check_event(status, message, extra_table)</code>：记录巡检事件（状态、消息、附加信息）。</li>\n<li><code>print(\"...\")</code>：执行日志输出。</li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>通用代码范式</h2>\n<pre><code>-- 1. 获取字段说明（可选）\nlocal doc, err = kubectl:GVK(group, version, kind):Cache(10):Doc(\"spec.xxx\")\nif err then print(\"获取 Doc 失败\" .. tostring(err)) end\n\n-- 2. 拉取资源列表（可跨命名空间）\nlocal items, err = kubectl:GVK(group, version, kind):AllNamespace():List()\nif err then print(\"获取资源失败\" .. tostring(err)); return end\n\n-- 3. 遍历并进行规则判断\nfor _, item in ipairs(items) do\n  local ns = item.metadata and item.metadata.namespace or \"default\"\n  local name = item.metadata and item.metadata.name or \"\"\n  if not item.spec or not item.spec.selector then\n    check_event(\"失败\", \"缺少 selector\", {namespace=ns, name=name, doc=doc})\n  end\nend\nprint(\"脚本执行完成\")\n</code></pre>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>读取 K8s 资源用例写法一览</h2>\n<p>以下示例覆盖巡检脚本中常用的资源读取调用方式（均返回 <code>结果, 错误</code> 两个值）。</p>\n<pre><code>-- 1) 列表（命名空间内）\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):Namespace(\"default\"):List()\nif err ~= nil then print(\"error:\", err) else log(items) end\n\n-- 2) 列表（跨命名空间）\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"ConfigMap\"):AllNamespace():List()\n\n-- 3) 列表 + 标签选择器\nlocal items, err = kubectl:GVK(\"apps\", \"v1\", \"Deployment\"):Namespace(\"default\"):WithLabelSelector(\"app=myapp\"):List()\n\n-- 4) 单资源查询（Get）\nlocal item, err = kubectl:GVK(\"\", \"v1\", \"Service\"):Namespace(\"default\"):Name(\"svc-name\"):Get()\n\n-- 5) 缓存 + 列表（提升高频读取性能）\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):Namespace(\"default\"):Cache(10):List()\n\n-- 6) 字段说明（Doc）\nlocal doc, err = kubectl:GVK(\"apps\", \"v1\", \"Deployment\"):Cache(10):Doc(\"spec.replicas\")\n\n-- 7) Pod 日志读取（支持 container/tailLines）\nlocal logs, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):Namespace(\"default\"):Name(\"mypod\"):GetLogs({tailLines=200, container=\"app\"})\nif err ~= nil then print(\"error:\", err) else print(logs) end\n\n-- 8) 跨命名空间 + 复合标签选择器\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):AllNamespace():WithLabelSelector(\"env=prod,app=web\"):List()\n</code></pre>\n<p>注意：</p>\n<ul>\n<li><code>Name(\"xxx\")</code> 适用于 <code>Get()</code>/<code>GetLogs()</code> 等单资源查询。</li>\n<li><code>WithLabelSelector()</code> 仅用于列表类查询（<code>List()</code>）。</li>\n<li><code>Doc()</code> 返回资源字段的说明字符串，可用于生成提示信息。</li>\n<li>所有调用均返回 <code>err</code>，请务必判空并优先处理错误。</li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>AI 辅助编写 Prompt</h2>\n<p>将以下提示词复制到你使用的大模型中，按需替换占位符（如 <code>{{group}}</code>、<code>{{version}}</code>、<code>{{kind}}</code>、<code>{{namespace}}</code>），即可生成与内置示例风格一致的 Lua 巡检脚本。</p>\n<pre><code>你是一名擅长为 K8M 生成 Lua 巡检脚本的助手。\n\n【目标】\n为 Kubernetes 资源 {{group}}/{{version}}/{{kind}} 生成一个可直接运行的 Lua 脚本，用于巡检：{{rule_brief}}。\n\n【必须满足的约束】\n- 仅输出 Lua 代码，不要任何解释或注释说明。\n- 使用以下 API 链式模式：\n  - kubectl:GVK(\"{{group}}\", \"{{version}}\", \"{{kind}}\")\n  - Namespace(\"{{namespace}}\") 或 AllNamespace()\n  - 可选：WithLabelSelector(\"key=value[,k2=v2]\")\n  - 可选：Cache(10)（高频读取时）\n  - 读取：List() / Get()；可选：Doc(\"spec.xxx\")；可选：Name(\"res-name\")；可选：GetLogs({tailLines=200, container=\"app\"})\n- 必须进行错误处理：对 List()/Get()/Doc()/GetLogs() 的 err 判空并适时 return。\n- 必须进行空值防御：访问深层字段前判空（如 obj.spec && obj.spec.selector）。\n- 事件输出统一用：check_event(\"失败\", \"问题描述\", {namespace=ns, name=name, ...})。\n- 日志输出用：print(\"...\")，脚本结束时 print(\"检查完成\")。\n- 标签选择器如需从 map 构造，请拼接为 \"k=v,k2=v2\" 字符串。\n- 数值转换使用 tonumber(x) 或 0 的安全写法。\n- 关联检查尽量限定在同命名空间内（例如 Service 的 selector 仅匹配同命名空间 Pod）。\n- 不要输出 UI 元信息（name/description/group/version/kind/script_code），仅输出脚本本体。\n- 如需存在性判断，优先使用 Name(...):Get() 并以 err 是否为 nil 判定。\n\n【示例参考（风格要求）】\n- Service selector 必须至少匹配一个 Pod（同 ns）。\n- ConfigMap 未被 Pod 引用则报事件。\n- Deployment 的 spec.replicas 与 status.readyReplicas 不一致时报事件。\n- CronJob 的 schedule 合法性、suspend、startingDeadlineSeconds 检查。\n- Gateway/GatewayClass 的第一个 condition 为 True。\n- HPA 的 conditions 与 scaleTargetRef 指向对象存在性。\n\n【输出要求】\n- 仅输出 Lua 脚本，无需额外说明。\n</code></pre>"
+    }
+  ]
+}
