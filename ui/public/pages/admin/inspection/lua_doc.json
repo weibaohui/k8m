@@ -1,0 +1,42 @@
+{
+  "type": "page",
+  "body": [
+    
+    {
+      "type": "html",
+      "className": "mb-2",
+      "html": "<h1>K8m Lua 巡检脚本编写与使用说明</h1>\n<p>参考内置脚本位置：<code>pkg/models/lua_scripts_builtin.go</code></p>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>概览</h2>\n<ul>\n<li>巡检脚本用于对 K8s 资源进行规则化检查并输出事件。</li>\n<li>支持两类脚本：<ul>\n<li>内置脚本（ScriptType=BuiltIn）：随版本统一升级管理；升级时会删除后重新插入最新版本。</li>\n<li>自定义脚本（ScriptType=Custom）：由用户新增，升级不变动。</li>\n</ul></li>\n<li>每条规则需要一个全局唯一的 <code>script_code</code>，巡检计划通过该编码绑定执行规则。</li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>运行环境与核心对象</h2>\n<ul>\n<li>提供 <code>kubectl</code> 对象，采用 <strong>GVK 链式调用</strong>：</li>\n<li><code>kubectl:GVK(group, version, kind)</code>：指定资源类型。例如 <code>kubectl:GVK(\"apps\", \"v1\", \"Deployment\")</code></li>\n<li>命名空间：<code>Namespace(ns)</code> / <code>AllNamespace()</code></li>\n<li>过滤与性能：<code>WithLabelSelector(selector)</code>、<code>Cache(seconds)</code></li>\n<li>数据操作：<code>List()</code> / <code>Get()</code> / <code>Name(name)</code> / <code>Doc(path)</code> / <code>GetLogs(opts)</code></li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>事件与日志</h2>\n<ul>\n<li><code>check_event(status, message, extra_table)</code>：记录巡检事件（状态、消息、附加信息）。</li>\n<li><code>print(\"...\")</code>：执行日志输出。</li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>通用代码范式</h2>\n<pre><code>-- 1. 获取字段说明（可选）\nlocal doc, err = kubectl:GVK(group, version, kind):Cache(10):Doc(\"spec.xxx\")\nif err then print(\"获取 Doc 失败\" .. tostring(err)) end\n\n-- 2. 拉取资源列表（可跨命名空间）\nlocal items, err = kubectl:GVK(group, version, kind):AllNamespace():List()\nif err then print(\"获取资源失败\" .. tostring(err)); return end\n\n-- 3. 遍历并进行规则判断\nfor _, item in ipairs(items) do\n  local ns = item.metadata and item.metadata.namespace or \"default\"\n  local name = item.metadata and item.metadata.name or \"\"\n  if not item.spec or not item.spec.selector then\n    check_event(\"失败\", \"缺少 selector\", {namespace=ns, name=name, doc=doc})\n  end\nend\nprint(\"脚本执行完成\")\n</code></pre>"
+    },
+   
+   
+   
+    {
+      "type": "html",
+      "html": "<h2>读取 K8s 资源用例写法一览</h2>\n<p>以下示例覆盖巡检脚本中常用的资源读取调用方式（均返回 <code>结果, 错误</code> 两个值）。</p>\n<pre><code>-- 1) 列表（命名空间内）\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):Namespace(\"default\"):List()\nif err ~= nil then print(\"error:\", err) else log(items) end\n\n-- 2) 列表（跨命名空间）\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"ConfigMap\"):AllNamespace():List()\n\n-- 3) 列表 + 标签选择器\nlocal items, err = kubectl:GVK(\"apps\", \"v1\", \"Deployment\"):Namespace(\"default\"):WithLabelSelector(\"app=myapp\"):List()\n\n-- 4) 单资源查询（Get）\nlocal item, err = kubectl:GVK(\"\", \"v1\", \"Service\"):Namespace(\"default\"):Name(\"svc-name\"):Get()\n\n-- 5) 缓存 + 列表（提升高频读取性能）\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):Namespace(\"default\"):Cache(10):List()\n\n-- 6) 字段说明（Doc）\nlocal doc, err = kubectl:GVK(\"apps\", \"v1\", \"Deployment\"):Cache(10):Doc(\"spec.replicas\")\n\n-- 7) Pod 日志读取（支持 container/tailLines）\nlocal logs, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):Namespace(\"default\"):Name(\"mypod\"):GetLogs({tailLines=200, container=\"app\"})\nif err ~= nil then print(\"error:\", err) else print(logs) end\n\n-- 8) 跨命名空间 + 复合标签选择器\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"Pod\"):AllNamespace():WithLabelSelector(\"env=prod,app=web\"):List()\n</code></pre>\n<p>注意：</p>\n<ul>\n<li><code>Name(\"xxx\")</code> 适用于 <code>Get()</code>/<code>GetLogs()</code> 等单资源查询。</li>\n<li><code>WithLabelSelector()</code> 仅用于列表类查询（<code>List()</code>）。</li>\n<li><code>Doc()</code> 返回资源字段的说明字符串，可用于生成提示信息。</li>\n<li>所有调用均返回 <code>err</code>，请务必判空并优先处理错误。</li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>从 UI 新增与管理脚本</h2>\n<ul>\n<li>入口：菜单 → \"巡检规则\" 页面。</li>\n<li>新建或编辑：填写 <code>name</code>/<code>description</code>/<code>group</code>/<code>version</code>/<code>kind</code>/<code>script</code>(Lua)/<code>script_code</code>。</li>\n<li>保存成功后：在 \"巡检计划\" 页面选择对应 <code>script_code</code> 进行调度。</li>\n<li>内置规则提示：升级会重置内置规则，用户自定义规则不受影响。</li>\n</ul>"
+    },
+    {
+      "type": "html",
+      "html": "<h2>简易模板</h2>\n<pre><code>-- 元信息（放在 UI 中填写）\n-- name: 我的巡检规则\n-- script_code: My_Custom_001\n-- kind/group/version: 按需设置\n\n-- 示例：检查某资源的关键字段是否为空\nlocal items, err = kubectl:GVK(\"\", \"v1\", \"ConfigMap\"):AllNamespace():List()\nif err then print(\"获取失败\" .. tostring(err)) return end\nfor _, cm in ipairs(items) do\n  local ns = cm.metadata and cm.metadata.namespace or \"default\"\n  local name = cm.metadata and cm.metadata.name or \"\"\n  local empty = true\n  if cm.data then for k, v in pairs(cm.data) do empty=false break end end\n  if cm.binaryData then for k, v in pairs(cm.binaryData) do empty=false break end end\n  if empty then\n    check_event(\"失败\", \"ConfigMap 空数据\", {namespace=ns, name=name})\n  end\nend\nprint(\"检查完成\")\n</code></pre>\n<p>如需更复杂校验，可参考内置脚本，复用 <code>GVK</code>、<code>Doc</code>、<code>WithLabelSelector</code>、<code>Name</code> 等能力组合实现。</p>"
+    }
+  ]
+}
