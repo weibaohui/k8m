@@ -3,7 +3,7 @@
   "body": [
     {
       "type": "alert",
-      "level": "info",
+      "level": "warning",
       "showIcon": true,
       "className": "mb-2",
       "body": "提示：内置脚本规则在自动升级时会删除后重新插入；用户新增规则在升级时不会变动。"
