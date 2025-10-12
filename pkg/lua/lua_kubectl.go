@@ -1,11 +1,13 @@
 package lua
 
 import (
+	"io"
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/kom/kom"
 	lua "github.com/yuin/gopher-lua"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 )
@@ -214,6 +216,67 @@ func getDoc(L *lua.LState) int {
 
 	// 返回查询结果
 	L.Push(table)
+	L.Push(lua.LNil)
+	return 2
+}
+
+// 实现 kubectl:GetLogs({tailLines=100, container="xxx"}) 方法
+// 返回日志文本和错误信息（若有）
+// - local logs, err = kubectl.GVK("", "v1", "Pod").Namespace("default").Name("mypod").GetLogs({tailLines=200, container="app"})
+// - if err ~= nil then print("error:", err) else print(logs) end
+func getLogs(L *lua.LState) int {
+	ud := L.CheckUserData(1)
+	obj, ok := ud.Value.(*Kubectl)
+	if !ok {
+		L.ArgError(1, "expected kubectl")
+		return 0
+	}
+
+	// 解析可选参数表
+	var opt v1.PodLogOptions
+	if L.GetTop() >= 2 {
+		if tbl, ok := L.Get(2).(*lua.LTable); ok {
+			// container 字段
+			if v := tbl.RawGetString("container"); v.Type() == lua.LTString {
+				opt.Container = v.String()
+			} else if v := tbl.RawGetString("Container"); v.Type() == lua.LTString {
+				opt.Container = v.String()
+			}
+			// tailLines 字段
+			if v := tbl.RawGetString("tailLines"); v.Type() == lua.LTNumber {
+				t := int64(lua.LVAsNumber(v))
+				opt.TailLines = &t
+			} else if v := tbl.RawGetString("TailLines"); v.Type() == lua.LTNumber {
+				t := int64(lua.LVAsNumber(v))
+				opt.TailLines = &t
+			}
+		}
+	}
+
+	var stream io.ReadCloser
+	err := obj.k.Ctl().Pod().GetLogs(&stream, &opt).Error
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+	if stream == nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString("empty log stream"))
+		return 2
+	}
+	defer stream.Close()
+
+	// 读取全部日志内容
+	data, rerr := io.ReadAll(stream)
+	if rerr != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(rerr.Error()))
+		return 2
+	}
+
+	// 返回字符串
+	L.Push(toLValue(L, string(data)))
 	L.Push(lua.LNil)
 	return 2
 }

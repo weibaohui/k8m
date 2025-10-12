@@ -33,6 +33,8 @@ func NewLuaInspection(schedule *models.InspectionSchedule, cluster string) *Insp
 	instance.registerKubectlFunc()
 	return instance
 }
+
+// 调用方法可参考pkg/models/lua_scripts_builtin.go中的示例
 func (p *Inspection) registerKubectlFunc() {
 	p.lua.SetGlobal("log", p.lua.NewFunction(logFunc))
 
@@ -54,6 +56,7 @@ func (p *Inspection) registerKubectlFunc() {
 		"List":              listResource,
 		"Doc":               getDoc,
 		"Get":               getResource,
+		"GetLogs":           getLogs,
 	}))
 	p.lua.SetMetatable(ud, mt)
 }
