@@ -51,6 +51,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			else
 				print("Service 列表获取失败: " .. tostring(err))
 			end
+			print("Service Selector 检查完成")
 		`,
 	},
 
@@ -1261,6 +1262,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			if not foundError then
 				print("Deployment '" .. namespace .. "/" .. deployName .. "' 关联 Pod 的日志检查完成，未发现 '" .. keyword .. "'")
 			end
+			print("Pod 日志错误检测完成")
 		`,
 	},
 }
