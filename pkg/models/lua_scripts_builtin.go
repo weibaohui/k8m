@@ -43,7 +43,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 						if not err and pods then
 							for _, _ in pairs(pods) do count = count + 1 end
 						end
-						if count = 0 then
+						if count == 0 then
 							check_event("失败", "Service " .. svc.metadata.name .. " selector " .. labelSelector .. " 应该至少一个pod, 但是现在没有。" .. "spec.selector定义" .. doc, {name=svc.metadata.name, selector=labelSelector, namespace=svc.metadata.namespace})
 						end
 					end
@@ -51,6 +51,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			else
 				print("Service 列表获取失败: " .. tostring(err))
 			end
+			print("Service Selector 检查完成")
 		`,
 	},
 
@@ -276,7 +277,41 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_CronJob_006",
 		Script: `
-			local cron = require("cron")
+			-- 内置 Cron 表达式基本校验（Kubernetes 使用标准 5 字段）
+			local function split_fields(expr)
+				local fields = {}
+				for token in string.gmatch(expr or "", "%S+") do table.insert(fields, token) end
+				return fields
+			end
+			local function validate_part(part, min, max, allow_names)
+				if part == "*" then return true end
+				local step = string.match(part, "^%*/(%d+)$")
+				if step then return tonumber(step) and tonumber(step) >= 1 end
+				local a,b = string.match(part, "^(%d+)%-(%d+)$")
+				if a and b then a=tonumber(a); b=tonumber(b); return a and b and a>=min and b<=max and a<=b end
+				local num = tonumber(part)
+				if num and num>=min and num<=max then return true end
+				if allow_names and string.match(part, "^[A-Za-z]+$") then return true end
+				return false
+			end
+			local function validate_field(field, min, max, allow_names)
+				for part in string.gmatch(field, "[^,]+") do
+					if not validate_part(part, min, max, allow_names) then return false end
+				end
+				return true
+			end
+			local function is_valid_cron(expr)
+				if not expr or expr == "" then return false, "表达式为空" end
+				if string.match(expr, "^@%w+$") then return true end -- 支持 @yearly 等描述符
+				local f = split_fields(expr)
+				if #f ~= 5 then return false, "字段数不是5" end
+				if not validate_field(f[1], 0, 59, false) then return false, "分钟字段非法" end
+				if not validate_field(f[2], 0, 23, false) then return false, "小时字段非法" end
+				if not validate_field(f[3], 1, 31, false) then return false, "日字段非法" end
+				if not validate_field(f[4], 1, 12, true) then return false, "月字段非法" end
+				if not validate_field(f[5], 0, 7, true) then return false, "周字段非法" end
+				return true
+			end
 			local cronjobs, err = kubectl:GVK("batch", "v1", "CronJob"):AllNamespace(""):List()
 			if err then
 				print("获取 CronJob 失败: " .. tostring(err))
@@ -291,6 +326,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 				-- 检查挂起
 				if cj.spec and cj.spec.suspend == true then
 					check_event("失败", "CronJob " .. name .. " 已被挂起", {namespace=ns, name=name, doc=doc_suspend})
+				end
+				-- 检查调度表达式合法性（5 字段）
+				if cj.spec and cj.spec.schedule ~= nil then
+					local ok, reason = is_valid_cron(cj.spec.schedule)
+					if not ok then
+						check_event("失败", "CronJob " .. name .. " 的调度表达式非法: " .. tostring(reason), {namespace=ns, name=name, value=cj.spec.schedule, doc=doc_schedule})
+					end
 				end
 				-- 检查 startingDeadlineSeconds
 				if cj.spec and cj.spec.startingDeadlineSeconds ~= nil then
@@ -1143,6 +1185,84 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 				end
 			end
 			print("ValidatingWebhookConfiguration 合规性检查完成")
+		`,
+	},
+	{
+		Name:        "Pod 日志错误检测",
+		Description: "检查某一个 Pod 的最近日志是否包含指定关键字，若包含则认为检测失败。",
+		Group:       "",
+		Version:     "v1",
+		Kind:        "Pod",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Pod_Log_Error_031",
+		Script: `
+			-- 示例：根据已知 Deployment 名称与命名空间，按其 selector 获取 Pod 列表并检查日志
+			-- 请按需修改以下四个变量
+			local deployName = "your-deploy-name"
+			local namespace = "default"
+			local keyword = "ERROR"  -- 默认关键字为 "ERROR"，可按需改为要检测的关键字
+			local tailLines = 200    -- 默认读取最近 200 行日志，按需调整
+
+			-- 获取 Deployment 对象
+			local dep, derr = kubectl:GVK("apps", "v1", "Deployment"):Namespace(namespace):Name(deployName):Get()
+			if derr ~= nil or not dep then
+				print("获取 Deployment 失败: " .. tostring(derr))
+				return
+			end
+
+			-- 从 Deployment 的 selector.matchLabels 构建 LabelSelector
+			local matchLabels = dep.spec and dep.spec.selector and dep.spec.selector.matchLabels or nil
+			if not matchLabels then
+				print("Deployment 未定义 selector.matchLabels，无法按标签筛选 Pod")
+				return
+			end
+			local labelSelector = ""
+			for k, v in pairs(matchLabels) do
+				if labelSelector ~= "" then labelSelector = labelSelector .. "," end
+				labelSelector = labelSelector .. k .. "=" .. v
+			end
+
+			-- 按 Deployment 的 selector 在同一命名空间获取 Pod 列表
+			local pods, perr = kubectl:GVK("", "v1", "Pod"):Namespace(namespace):Cache(10):WithLabelSelector(labelSelector):List()
+			if perr ~= nil then
+				print("获取 Pod 列表失败: " .. tostring(perr))
+				return
+			end
+			if not pods or #pods == 0 then
+				print("未找到与 Deployment 匹配的 Pod: " .. namespace .. "/" .. deployName .. ", selector=" .. labelSelector)
+				return
+			end
+
+			local foundError = false
+			for _, pod in ipairs(pods) do
+				local ns = pod.metadata.namespace
+				local name = pod.metadata.name
+				local containerName = nil
+				if pod.spec and pod.spec.containers and #pod.spec.containers > 0 then
+					containerName = pod.spec.containers[1].name
+				end
+				local opts = { tailLines = tailLines }
+				if containerName ~= nil then
+					opts.container = containerName
+				end
+				local logs, lerr = kubectl:GVK("", "v1", "Pod"):Namespace(ns):Name(name):GetLogs(opts)
+				if lerr ~= nil then
+					print("获取 Pod 日志失败: " .. tostring(lerr))
+				else
+					local logStr = (type(logs) == "string") and logs or tostring(logs)
+					if logStr and string.find(logStr, keyword) ~= nil then
+						foundError = true
+						check_event("失败", "Pod 日志包含关键字 '" .. keyword .. "'", {namespace=ns, name=name, container=containerName, keyword=keyword})
+					else
+						print("Pod " .. ns .. "/" .. name .. " 最近日志未发现 '" .. keyword .. "'")
+					end
+				end
+			end
+
+			if not foundError then
+				print("Deployment '" .. namespace .. "/" .. deployName .. "' 关联 Pod 的日志检查完成，未发现 '" .. keyword .. "'")
+			end
+			print("Pod 日志错误检测完成")
 		`,
 	},
 }
