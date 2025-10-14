@@ -75,6 +75,8 @@ var BuiltinAIPrompts = []AIPrompt{
 				reason: ${Reason},
 				type:   ${Type},
 				kind:   ${RegardingKind},
+		\n注意：
+		\n- 不要使用工具tools
 `,
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -91,6 +93,7 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
 		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n4、不要使用工具tools。
 		\n\nDescribe信息如下：${DescribeInfo}`,
 		IsBuiltin: true,
 		IsEnabled: true,
@@ -108,7 +111,8 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n4、不要使用工具tools。`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -123,7 +127,8 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n4、不要使用工具tools。`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -138,7 +143,8 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n4、不要使用工具tools。`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -147,19 +153,20 @@ var BuiltinAIPrompts = []AIPrompt{
 		Description: "分析Kubernetes错误信息并提供解决方案",
 		PromptType:  constants.AIPromptTypeK8sGPTResource,
 		Content: `简化以下由三个破折号分隔的Kubernetes错误信息，
-	错误内容：--- ${Data} ---。
-	资源名称：--- ${Name} ---。
-	资源类型：--- ${Kind} ---。
-	相关字段k8s官方文档解释：--- ${Field} ---。
-	请以分步形式提供最可能的解决方案，字符数不超过280。
-	输出格式：
-	错误信息: {此处解释错误}
-	解决方案: {此处分步说明解决方案}
+		错误内容：--- ${Data} ---。
+		资源名称：--- ${Name} ---。
+		资源类型：--- ${Kind} ---。
+		相关字段k8s官方文档解释：--- ${Field} ---。
+		请以分步形式提供最可能的解决方案，字符数不超过280。
+		输出格式：
+		错误信息: {此处解释错误}
+		解决方案: {此处分步说明解决方案}
 		\n注意：
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n4、不要使用工具tools。`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -175,7 +182,8 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n4、不要使用工具tools。`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -189,7 +197,8 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n0、使用中文进行回答。
 		\n1、你我之间只进行这一轮交互，后面不要再问问题了。
 		\n2、请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回。回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息。
-		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确`,
+		\n3、请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式，不要让我确认markdown格式是否正确。
+		\n4、不要使用工具tools。`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -207,7 +216,8 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n注意：
 		\n- 使用中文进行回答
 		\n- 回答要直接，不要加入啰嗦的信息
-		\n- 不要向我提问或确认信息`,
+		\n- 不要向我提问或确认信息
+		\n- 不要使用工具tools`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
@@ -221,7 +231,8 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n- 你我之间只进行这一轮交互，后面不要再问问题了
 		\n- 请你在给出答案前反思下回答是否逻辑正确，如有问题请先修正，再返回
 		\n- 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
-		\n- 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式`,
+		\n- 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式
+		\n- 不要使用工具tools`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
