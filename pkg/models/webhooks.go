@@ -14,7 +14,6 @@ type WebhookReceiver struct {
 	Name         string    `json:"name,omitempty"`     // webhook名称
 	Platform     string    `json:"platform,omitempty"` // feishu,dingtalk
 	TargetURL    string    `json:"target_url,omitempty"`
-	Template     string    `gorm:"type:text" json:"template,omitempty"`
 	BodyTemplate string    `gorm:"type:text" json:"body_template,omitempty"` // 发送到webhook的body模板
 	SignSecret   string    `json:"sign_secret,omitempty"`
 	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"`

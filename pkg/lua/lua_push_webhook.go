@@ -8,6 +8,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/webhook"
 )
 
+// SummaryAndPushToHooksByRecordID 为指定巡检记录生成AI总结并推送到所有关联的webhook
+// 现在使用 schedule 中的 AIPromptTemplate 而不是 webhook 中的 Template 字段
 func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context, recordID uint) ([]*webhook.SendResult, error) {
 	// 查询webhooks
 	receiver := &models.WebhookReceiver{}
@@ -23,7 +25,9 @@ func (s *ScheduleBackground) SummaryAndPushToHooksByRecordID(ctx context.Context
 
 	var results []*webhook.SendResult
 	for _, receiver := range receivers {
-		AISummary, summaryErr := s.SummaryByAI(ctx, msg, receiver.Template)
+		// 使用 schedule 中的 AIPromptTemplate，不再使用 receiver.Template
+		// SummaryByAI 方法会自动从 msg 中获取 ai_prompt_template
+		AISummary, summaryErr := s.SummaryByAI(ctx, msg, "")
 
 		_ = s.SaveSummaryBack(recordID, AISummary, summaryErr)
 
