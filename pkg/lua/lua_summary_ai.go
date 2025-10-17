@@ -152,7 +152,9 @@ func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string, summaryErr
 }
 
 // AutoGenerateSummaryIfEnabled 如果启用了AI总结，则自动生成总结
-// 该方法在巡检执行完成后被调用
+// 该方法在巡检执行完成后被调用，生成的AI总结会保存到数据库中
+// 调用时机：巡检完成后立即调用，在发送webhook之前
+// 设计原则：AI总结生成与webhook发送分离，确保职责单一
 func (s *ScheduleBackground) AutoGenerateSummaryIfEnabled(recordID uint) {
 	// 获取巡检数据和AI配置
 	msg, err := s.GetSummaryMsg(recordID)
