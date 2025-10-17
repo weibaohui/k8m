@@ -149,6 +149,26 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 		return
 	}
 
+	// 验证AI总结配置
+	if m.AIEnabled {
+		// 检查AI提示词模板长度
+		if len(m.AIPromptTemplate) > 2000 {
+			amis.WriteJsonError(c, fmt.Errorf("AI提示词模板长度不能超过2000个字符"))
+			return
+		}
+		
+		// 可以添加更多AI配置验证逻辑
+		// 例如：检查模板格式、关键词等
+		if strings.TrimSpace(m.AIPromptTemplate) != "" {
+			// 简单验证：确保模板不包含危险字符
+			if strings.Contains(m.AIPromptTemplate, "<script>") || 
+			   strings.Contains(m.AIPromptTemplate, "javascript:") {
+				amis.WriteJsonError(c, fmt.Errorf("AI提示词模板包含不安全的内容"))
+				return
+			}
+		}
+	}
+
 	// 保存webhookNames
 	receiver := models.WebhookReceiver{}
 	if names, err := receiver.GetNamesByIds(m.Webhooks); err == nil {

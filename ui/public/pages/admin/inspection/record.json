@@ -37,14 +37,24 @@
                 {
                     "type": "operation",
                     "label": "操作",
-                    "width": 120,
+                    "width": 200,
                     "buttons": [
                         {
                             "type": "button",
                             "actionType": "ajax",
-                            "label": "重新AI总结",
-                            "api": "post:/admin/inspection/schedule/record/id/$id/summary"
+                            "label": "生成AI总结",
+                            "icon": "fas fa-robot",
+                            "level": "primary",
+                            "size": "sm",
+                            "api": "post:/admin/inspection/schedule/record/id/$id/summary",
+                            "confirmText": "确定要生成AI总结吗？",
+                            "reload": "recordCRUD",
+                            "messages": {
+                                "success": "AI总结生成成功",
+                                "failed": "AI总结生成失败"
+                            }
                         },
+                     
                         {
                             "type": "button",
                             "actionType": "drawer",

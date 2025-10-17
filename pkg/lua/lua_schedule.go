@@ -131,6 +131,12 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 
 	// TODO 记录发送结果
 	_, _ = s.SummaryAndPushToHooksByRecordID(context.Background(), record.ID)
+	
+	// 自动触发AI总结（如果启用）
+	go func() {
+		s.AutoGenerateSummaryIfEnabled(record.ID)
+	}()
+	
 	return record, nil
 }
 

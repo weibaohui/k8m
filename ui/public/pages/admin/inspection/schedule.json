@@ -85,6 +85,34 @@
                   "name": "description",
                   "label": "计划描述",
                   "placeholder": "请输入计划描述"
+                },
+                {
+                  "type": "divider",
+                  "title": "AI总结配置"
+                },
+                {
+                  "type": "switch",
+                  "name": "ai_enabled",
+                  "label": "启用AI总结",
+                  "onText": "启用",
+                  "offText": "禁用",
+                  "value": false,
+                  "description": "开启后将在巡检完成时自动生成AI总结"
+                },
+                {
+                  "type": "textarea",
+                  "name": "ai_prompt_template",
+                  "label": "AI提示词模板",
+                  "placeholder": "请输入自定义的AI总结提示词模板（可选）",
+                  "description": "留空将使用默认模板。支持自定义AI总结的格式和内容要求",
+                  "rows": 4,
+                  "visibleOn": "${ai_enabled}",
+                  "validations": {
+                    "maxLength": 2000
+                  },
+                  "validationErrors": {
+                    "maxLength": "提示词模板最多 2000 个字符"
+                  }
                 }
               ],
               "submitText": "保存",
@@ -227,6 +255,33 @@
                       "name": "description",
                       "label": "计划描述",
                       "placeholder": "请输入计划描述"
+                    },
+                    {
+                      "type": "divider",
+                      "title": "AI总结配置"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "ai_enabled",
+                      "label": "启用AI总结",
+                      "onText": "启用",
+                      "offText": "禁用",
+                      "description": "开启后将在巡检完成时自动生成AI总结"
+                    },
+                    {
+                      "type": "textarea",
+                      "name": "ai_prompt_template",
+                      "label": "AI提示词模板",
+                      "placeholder": "请输入自定义的AI总结提示词模板（可选）",
+                      "description": "留空将使用默认模板。支持自定义AI总结的格式和内容要求",
+                      "rows": 4,
+                      "visibleOn": "${ai_enabled}",
+                      "validations": {
+                        "maxLength": 2000
+                      },
+                      "validationErrors": {
+                        "maxLength": "提示词模板最多 2000 个字符"
+                      }
                     }
                   ],
                   "submitText": "保存",
