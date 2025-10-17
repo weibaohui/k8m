@@ -54,7 +54,6 @@
                                 "failed": "AI总结生成失败"
                             }
                         },
-                     
                         {
                             "type": "button",
                             "actionType": "drawer",
@@ -190,15 +189,15 @@
                 {
                     "name": "id",
                     "label": "ID",
-                    "type": "text",
-                    "width": "100px"
+                    "type": "text"
                 },
                 {
                     "name": "schedule_id",
-                    "label": "计划ID",
-                    "type": "text",
+                    "label": "巡检计划名称",
+                    "type": "tpl",
                     "width": "100px",
-                    "searchable": true
+                    "searchable": true,
+                    "tpl": "${schedule_name}[${schedule_id}]"
                 },
                 {
                     "name": "cluster",
@@ -217,13 +216,51 @@
                     "label": "错误数量"
                 },
                 {
-                    "name": "ai_summary",
+                    "name": "ai_summary_combined",
                     "label": "AI总结",
-                    "width": "250px"
-                },
-                {
-                    "name": "ai_summary_err",
-                    "label": "AI总结错误"
+                    "type": "container",
+                    "width": "250px",
+                    "body": [
+                        {
+                            "type": "tpl",
+                            "tpl": "${ai_summary}",
+                            "style": {
+                                "display": "inline-block",
+                                "marginRight": "8px"
+                            }
+                        },
+                        {
+                            "type": "tpl",
+                            "tpl": "<% if (data.ai_summary_err) { %><i class='fa fa-exclamation-triangle text-danger'></i><% } %>",
+                            "onEvent": {
+                                "click": {
+                                    "actions": [
+                                        {
+                                            "actionType": "dialog",
+                                            "dialog": {
+                                                "title": "AI总结错误详情 (ESC 关闭)",
+                                                "name": "dialog_ai_summary_err",
+                                                "body": [
+                                                    {
+                                                        "type": "alert",
+                                                        "level": "danger",
+                                                        "body": "${ai_summary_err}"
+                                                    }
+                                                ],
+                                                "size": "lg",
+                                                "closeOnEsc": true,
+                                                "closeOnOutside": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "style": {
+                                "cursor": "pointer",
+                                "display": "inline-block"
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "start_time",
