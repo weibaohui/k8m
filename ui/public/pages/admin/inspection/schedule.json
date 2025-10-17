@@ -100,12 +100,12 @@
                   "description": "开启后将在巡检完成时自动生成AI总结"
                 },
                 {
-                  "type": "textarea",
+                  "type": "editor",
                   "name": "ai_prompt_template",
                   "label": "AI提示词模板",
-                  "placeholder": "请输入自定义的AI总结提示词模板（可选）",
+                  "language": "text",
+                  "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。",
                   "description": "留空将使用默认模板。支持自定义AI总结的格式和内容要求",
-                  "rows": 4,
                   "visibleOn": "${ai_enabled}",
                   "validations": {
                     "maxLength": 2000
@@ -269,12 +269,12 @@
                       "description": "开启后将在巡检完成时自动生成AI总结"
                     },
                     {
-                      "type": "textarea",
+                      "type": "editor",
                       "name": "ai_prompt_template",
                       "label": "AI提示词模板",
-                      "placeholder": "请输入自定义的AI总结提示词模板（可选）",
+                      "language": "text",
+                      "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。",
                       "description": "留空将使用默认模板。支持自定义AI总结的格式和内容要求",
-                      "rows": 4,
                       "visibleOn": "${ai_enabled}",
                       "validations": {
                         "maxLength": 2000
