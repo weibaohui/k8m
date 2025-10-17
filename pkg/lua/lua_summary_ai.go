@@ -2,6 +2,7 @@ package lua
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -131,7 +132,8 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 }
 
 // SaveSummaryBack 保存AI总结结果到数据库
-func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string, summaryErr error) error {
+// 参数：id 巡检记录ID，summary AI总结内容，summaryErr AI总结错误，resultRaw 原始巡检结果JSON字符串
+func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string, summaryErr error, resultRaw string) error {
 	recordModel := &models.InspectionRecord{}
 	record, err := recordModel.GetOne(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", id)
@@ -144,7 +146,12 @@ func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string, summaryErr
 	}
 
 	record.AISummary = summary
-	err = dao.DB().Model(&record).Select("ai_summary_err", "ai_summary").Updates(record).Error
+	// 更新原始巡检结果
+	if resultRaw != "" {
+		record.ResultRaw = resultRaw
+	}
+	
+	err = dao.DB().Model(&record).Select("ai_summary_err", "ai_summary", "result_raw").Updates(record).Error
 	if err != nil {
 		return fmt.Errorf("保存巡检记录的AI总结失败: %v", err)
 	}
@@ -170,11 +177,19 @@ func (s *ScheduleBackground) AutoGenerateSummaryIfEnabled(recordID uint) {
 		return
 	}
 
+	// 将原始巡检结果转换为JSON字符串
+	resultRawBytes, err := json.Marshal(msg)
+	if err != nil {
+		klog.Errorf("序列化原始巡检结果失败: %v", err)
+		resultRawBytes = []byte("{}")
+	}
+	resultRaw := string(resultRawBytes)
+
 	// 检查AI服务是否可用
 	if !service.AIService().IsEnabled() {
 		klog.V(6).Infof("AI服务未启用，跳过自动生成总结")
-		// 保存错误信息
-		s.SaveSummaryBack(recordID, "", fmt.Errorf("AI服务未启用"))
+		// 保存错误信息和原始结果
+		s.SaveSummaryBack(recordID, "", fmt.Errorf("AI服务未启用"), resultRaw)
 		return
 	}
 
@@ -183,8 +198,8 @@ func (s *ScheduleBackground) AutoGenerateSummaryIfEnabled(recordID uint) {
 	// 生成AI总结
 	summary, summaryErr := s.SummaryByAI(context.Background(), msg, "")
 
-	// 保存总结结果
-	err = s.SaveSummaryBack(recordID, summary, summaryErr)
+	// 保存总结结果和原始巡检结果
+	err = s.SaveSummaryBack(recordID, summary, summaryErr, resultRaw)
 	if err != nil {
 		klog.Errorf("保存AI总结失败: %v", err)
 	} else {

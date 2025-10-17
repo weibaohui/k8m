@@ -28,6 +28,7 @@ type InspectionRecord struct {
 	ErrorCount   int        `json:"error_count"`
 	AISummary    string     `json:"ai_summary,omitempty"`     // AI生成的巡检总结
 	AISummaryErr string     `json:"ai_summary_err,omitempty"` // AI生成错误
+	ResultRaw    string     `json:"result_raw,omitempty"`     // AI总结前的原始巡检结果，JSON字符串格式
 	CreatedAt    time.Time  `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 
