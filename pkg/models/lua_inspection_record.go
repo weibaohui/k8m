@@ -88,6 +88,31 @@ func (c *InspectionRecord) GetAISummaryById(recordID uint) (string, error) {
 	return record.AISummary, nil
 }
 
+// GetRecordContentById 获取巡检记录的内容，优先返回AI总结，如果没有则返回原始结果
+// 返回值：content 内容，isAISummary 是否为AI总结（true）还是原始结果（false），error 错误
+func (c *InspectionRecord) GetRecordContentById(recordID uint) (string, bool, error) {
+	record := &InspectionRecord{}
+	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", recordID)
+	})
+	if err != nil {
+		return "", false, fmt.Errorf("未找到对应的巡检记录: %d", recordID)
+	}
+	
+	// 优先返回AI总结
+	if record.AISummary != "" {
+		return record.AISummary, true, nil
+	}
+	
+	// 如果没有AI总结，返回原始结果
+	if record.ResultRaw != "" {
+		return record.ResultRaw, false, nil
+	}
+	
+	// 如果都没有，返回空内容
+	return "", false, nil
+}
+
 // List 返回符合条件的 InspectionScriptResult 列表及总数
 func (c *InspectionScriptResult) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*InspectionScriptResult, int64, error) {
 	return dao.GenericQuery(params, c, queryFuncs...)

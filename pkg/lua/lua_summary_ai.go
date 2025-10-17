@@ -72,23 +72,36 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 // 参数：msg 包含巡检数据和AI配置的消息
 // 参数：format 自定义格式（已废弃，使用msg中的ai_prompt_template）
 func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any, format string) (string, error) {
-	summary := ""
-	var err error
-	
 	// 检查是否启用AI总结
 	aiEnabled, ok := msg["ai_enabled"].(bool)
 	if !ok || !aiEnabled {
+		return "", fmt.Errorf("AI服务未启用")
+	}
+
+	// 检查AI服务是否可用
+	if !service.AIService().IsEnabled() {
+		klog.V(6).Infof("AI服务未启用，跳过自动生成总结")
+		// 保存错误信息和原始结果
+		return "", fmt.Errorf("AI服务未启用")
+	}
+
+	summary := ""
+	var err error
+
+	// 检查是否启用AI总结
+	aiEnabled, ok = msg["ai_enabled"].(bool)
+	if !ok || !aiEnabled {
 		return "", fmt.Errorf("该巡检计划未启用AI总结功能")
 	}
-	
+
 	// 验证必要的数据
-	if  len(msg) == 0 {
+	if len(msg) == 0 {
 		return "", fmt.Errorf("巡检数据为空，无法生成AI总结")
 	}
-	
+
 	// 获取自定义提示词模板
 	customTemplate, _ := msg["ai_prompt_template"].(string)
-	
+
 	defaultFormat := `
 	请按下面的格式给出汇总：
 		检测集群：xxx名称
@@ -97,7 +110,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 		时间：月日时间
 		总结：简短汇总
 	`
-	
+
 	// 优先使用巡检计划中配置的自定义模板
 	if customTemplate != "" {
 		klog.V(6).Infof("使用巡检计划中配置的自定义Prompt模板")
@@ -150,7 +163,7 @@ func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string, summaryErr
 	if resultRaw != "" {
 		record.ResultRaw = resultRaw
 	}
-	
+
 	err = dao.DB().Model(&record).Select("ai_summary_err", "ai_summary", "result_raw").Updates(record).Error
 	if err != nil {
 		return fmt.Errorf("保存巡检记录的AI总结失败: %v", err)
@@ -170,13 +183,6 @@ func (s *ScheduleBackground) AutoGenerateSummaryIfEnabled(recordID uint) {
 		return
 	}
 
-	// 检查是否启用AI总结
-	aiEnabled, ok := msg["ai_enabled"].(bool)
-	if !ok || !aiEnabled {
-		klog.V(6).Infof("巡检记录 %d 未启用AI总结功能，跳过自动生成", recordID)
-		return
-	}
-
 	// 将原始巡检结果转换为JSON字符串
 	resultRawBytes, err := json.Marshal(msg)
 	if err != nil {
@@ -185,16 +191,7 @@ func (s *ScheduleBackground) AutoGenerateSummaryIfEnabled(recordID uint) {
 	}
 	resultRaw := string(resultRawBytes)
 
-	// 检查AI服务是否可用
-	if !service.AIService().IsEnabled() {
-		klog.V(6).Infof("AI服务未启用，跳过自动生成总结")
-		// 保存错误信息和原始结果
-		s.SaveSummaryBack(recordID, "", fmt.Errorf("AI服务未启用"), resultRaw)
-		return
-	}
-
 	klog.V(6).Infof("开始为巡检记录 %d 自动生成AI总结", recordID)
-
 	// 生成AI总结
 	summary, summaryErr := s.SummaryByAI(context.Background(), msg, "")
 

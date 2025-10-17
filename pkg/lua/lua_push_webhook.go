@@ -20,9 +20,9 @@ func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.Se
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
 	record := &models.InspectionRecord{}
-	summary, err := record.GetAISummaryById(recordID)
+	summary, _, err := record.GetRecordContentById(recordID)
 	if err != nil {
-		return nil, fmt.Errorf("获取巡检记录id=%d的AI总结失败", recordID)
+		return nil, fmt.Errorf("获取巡检记录id=%d的内容失败: %v", recordID, err)
 	}
 
 	results := webhook.PushMsgToAllTargets(summary, receivers)
