@@ -201,7 +201,7 @@
                 },
                 {
                     "name": "cluster",
-                    "label": "集群"
+                    "label": "目标集群"
                 },
                 {
                     "name": "trigger_type",
