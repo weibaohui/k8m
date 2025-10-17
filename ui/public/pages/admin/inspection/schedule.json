@@ -172,7 +172,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 120,
+          "width": 130,
           "buttons": [
             {
               "type": "button",
@@ -314,55 +314,55 @@
               "api": "post:/admin/inspection/schedule/start/id/$id"
             },
             {
-              "type": "dropdown-button",
-              "level": "link",
-              "buttons": [
-                {
-                  "type": "button",
-                  "icon": "fas fa-list text-primary",
-                  "label": "管理规则",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "size": "xl",
-                    "title": "选择巡检计划要执行的规则",
-                    "body": {
-                      "type": "form",
-                      "wrapWithPanel": false,
-                      "labelWidth": "0",
-                      "style": {
-                        "height": "500px"
-                      },
-                      "api": "post:/admin/inspection/schedule/id/$id/update_script_code",
-                      "body": [
+              "type": "button",
+              "icon": "fas fa-list text-primary",
+              "actionType": "drawer",
+              "tooltip": "管理规则",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "选择巡检计划要执行的规则",
+                "body": {
+                  "type": "form",
+                  "wrapWithPanel": false,
+                  "labelWidth": "0",
+                  "style": {
+                    "height": "500px"
+                  },
+                  "api": "post:/admin/inspection/schedule/id/$id/update_script_code",
+                  "body": [
+                    {
+                      "type": "transfer",
+                      "name": "script_codes",
+                      "source": "get:/admin/inspection/script/option_list",
+                      "searchable": true,
+                      "statistics": true,
+                      "resultListModeFollowSelect": true,
+                      "selectMode": "table",
+                      "columns": [
                         {
-                          "type": "transfer",
-                          "name": "script_codes",
-                          "source": "get:/admin/inspection/script/option_list",
-                          "searchable": true,
-                          "statistics": true,
-                          "resultListModeFollowSelect": true,
-                          "selectMode": "table",
-                          "columns": [
-                            {
-                              "name": "script_code",
-                              "label": "规则编码"
-                            },
-                            {
-                              "name": "name",
-                              "label": "规则名称"
-                            },
-                            {
-                              "name": "description",
-                              "label": "规则描述"
-                            }
-                          ]
+                          "name": "script_code",
+                          "label": "规则编码"
+                        },
+                        {
+                          "name": "name",
+                          "label": "规则名称"
+                        },
+                        {
+                          "name": "description",
+                          "label": "规则描述"
                         }
                       ]
                     }
-                  }
-                },
+                  ]
+                }
+              }
+            },
+            {
+              "type": "dropdown-button",
+              "level": "link",
+              "buttons": [
                 {
                   "type": "link",
                   "icon": "fa-solid fa-clipboard-list text-primary",
