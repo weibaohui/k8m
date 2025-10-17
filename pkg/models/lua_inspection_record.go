@@ -25,11 +25,12 @@ type InspectionRecord struct {
 	Status       string     `json:"status"`                                       // 执行状态（pending/running/success/failed）
 	StartTime    time.Time  `json:"start_time"`
 	EndTime      *time.Time `json:"end_time,omitempty"`
-	CreatedAt    time.Time  `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 	ErrorCount   int        `json:"error_count"`
 	AISummary    string     `json:"ai_summary,omitempty"`     // AI生成的巡检总结
 	AISummaryErr string     `json:"ai_summary_err,omitempty"` // AI生成错误
+	CreatedAt    time.Time  `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+
 }
 
 // InspectionScriptResult 记录每个巡检脚本的执行结果，关联到 InspectionRecord

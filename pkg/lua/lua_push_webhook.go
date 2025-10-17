@@ -6,7 +6,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
 )
- 
+
 // PushToHooksByRecordID 根据巡检记录ID发送webhook通知
 // 该方法从数据库中获取已生成的AI总结，然后发送到所有关联的webhook
 // 调用时机：在AutoGenerateSummaryIfEnabled()完成后调用
