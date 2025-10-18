@@ -94,7 +94,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 	// 第二步：检查是否开启AI汇总
 	aiEnabled, ok := msg["ai_enabled"].(bool)
 	if !ok || !aiEnabled {
-		klog.V(6).Infof("AI汇总未启用，返回基础汇总")
+		klog.V(6).Infof("巡检配置AI汇总未启用，返回基础汇总")
 		return basicSummary, nil
 	}
 
