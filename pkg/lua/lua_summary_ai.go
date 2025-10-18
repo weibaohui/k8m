@@ -154,7 +154,7 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, e
 	if failedCount == 0 {
 		resultMsg = "✅ 巡检完成，未发现问题。"
 	} else {
-		resultMsg = fmt.Sprintf("✅ 巡检完成，共发现 %d 个问题需要关注。", failedCount)
+		resultMsg = fmt.Sprintf("⚠️ 巡检完成，共发现 %d 个问题需要关注。", failedCount)
 	}
 
 	// 使用统一的模板生成汇总
