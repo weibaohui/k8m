@@ -134,14 +134,14 @@ export default defineConfig(({mode}) => {
                 configureServer(server: any) {
                     server.middlewares.use((req: any, res: any, next: any) => {
                         // 只处理 POST 请求
-                        if (req.method === 'POST') {
+                        if (req.method === 'POST' && req.url === '/echo') {
                             let body = '';
-                            
+
                             // 收集请求体数据
                             req.on('data', (chunk: any) => {
                                 body += chunk.toString();
                             });
-                            
+
                             // 请求体接收完成后处理
                             req.on('end', () => {
                                 console.log('=== POST 请求信息 ===');
@@ -149,9 +149,9 @@ export default defineConfig(({mode}) => {
                                 console.log('Content-Type:', req.headers['content-type'] || 'undefined');
                                 console.log('Body:', body);
                                 console.log('========================');
-                                
+
                                 // 返回响应
-                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                res.writeHead(200, {'Content-Type': 'application/json'});
                                 res.end(JSON.stringify({
                                     message: 'POST 请求已接收并打印',
                                     url: req.url,
