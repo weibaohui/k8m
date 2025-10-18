@@ -175,25 +175,7 @@ func (s *ScheduleBackground) StartFromDB() {
 	}
 	var count int
 	for _, schedule := range list {
-		if schedule.Cron != "" {
-			klog.V(6).Infof("注册定时任务: %s", schedule.Cron)
-			// 注册定时任务
-			// 遍历集群
-			cur := schedule
-			entryID, err := localCron.AddFunc(cur.Cron, func() {
-				for _, cluster := range strings.Split(cur.Clusters, ",") {
-					_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)
-				}
-			})
-			if err != nil {
-				klog.Errorf("定时任务注册失败%v", err)
-				return
-			}
-			// 更新EntryID
-			schedule.CronRunID = entryID
-			_ = schedule.Save(nil)
-			count += 1
-		}
+		s.Add(schedule.ID)
 	}
 	klog.V(6).Infof("启动集群巡检任务完成，共启动%d个", count)
 }
