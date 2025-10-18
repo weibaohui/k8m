@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -16,6 +15,15 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// GetSummaryMsg 获取巡检记录的汇总信息
+// 该函数根据记录ID查询巡检记录详情，包括关联的调度任务信息和失败事件统计
+// 返回的数据中，record_date字段会将原始的UTC时间转换为本地时间，以便前端正确显示
+// 参数:
+//   - recordID: 巡检记录的唯一标识符
+//
+// 返回值:
+//   - map[string]any: 包含巡检汇总信息的映射，包括记录日期、调度信息、错误统计等
+//   - error: 如果查询失败或记录不存在则返回错误
 func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error) {
 
 	// 1. 查询 InspectionRecord
@@ -55,8 +63,15 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 		failedCount = len(events)
 	}
 
+	// 将结束时间转换为本地时间字符串
+	recordDate := ""
+	if record.EndTime != nil {
+		localTime := record.EndTime.Local()
+		recordDate = localTime.Format("2006-01-02 15:04:05")
+	}
+
 	result := gin.H{
-		"record_date":        record.EndTime,
+		"record_date":        recordDate,
 		"record_id":          recordID,
 		"schedule_id":        record.ScheduleID,
 		"schedule_name":      schedule.Name,
@@ -134,10 +149,8 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (summary s
 	// 处理巡检时间
 	recordDate := ""
 	if date, ok := msg["record_date"]; ok {
-		if timePtr, ok := date.(*time.Time); ok && timePtr != nil {
-			// 转换为本地时间并格式化为易读格式
-			localTime := timePtr.Local()
-			recordDate = localTime.Format("2006-01-02 15:04:05")
+		if dateStr, ok := date.(string); ok && dateStr != "" {
+			recordDate = dateStr
 		} else {
 			recordDate = fmt.Sprintf("%v", date)
 		}
