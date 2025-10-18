@@ -187,7 +187,7 @@ func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg *Summary
 	if customTemplate == "" {
 		customTemplate = "无特殊要求"
 	}
-	
+
 	prompt := `以下是k8s集群巡检记录，请你进行总结。
 	
 		基本要求：
@@ -203,7 +203,7 @@ func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg *Summary
 		`
 	prompt = fmt.Sprintf(prompt, customTemplate, utils.ToJSON(msg))
 
-	summary, err := service.ChatService().ChatWithCtx(ctx, prompt)
+	summary, err := service.ChatService().ChatWithCtxNoHistory(ctx, prompt)
 	if err != nil {
 		return "", fmt.Errorf("AI汇总请求失败: %v", err)
 	}

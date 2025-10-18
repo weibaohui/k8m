@@ -183,6 +183,24 @@ func (c *chatService) Chat(ctx *gin.Context, chat string) string {
 	}
 	return result
 }
+func (c *chatService) ChatWithCtxNoHistory(ctx context.Context, chat string) (string, error) {
+	client, err := AIService().DefaultClient()
+
+	if err != nil {
+		klog.V(2).Infof("获取AI服务错误 : %v\n", err)
+		return "", fmt.Errorf("获取AI服务错误 : %v", err)
+	}
+	err = client.ClearHistory(ctx)
+	if err != nil {
+		return "", fmt.Errorf("清理历史会话记录错误: %v", err)
+	}
+	result, err := client.GetCompletion(ctx, chat)
+	if err != nil {
+		klog.V(2).Infof("ChatCompletion error: %v\n", err)
+		return "", fmt.Errorf("ChatCompletion error: %v", err)
+	}
+	return result, nil
+}
 func (c *chatService) ChatWithCtx(ctx context.Context, chat string) (string, error) {
 	client, err := AIService().DefaultClient()
 
@@ -190,7 +208,6 @@ func (c *chatService) ChatWithCtx(ctx context.Context, chat string) (string, err
 		klog.V(2).Infof("获取AI服务错误 : %v\n", err)
 		return "", fmt.Errorf("获取AI服务错误 : %v", err)
 	}
-
 	result, err := client.GetCompletion(ctx, chat)
 	if err != nil {
 		klog.V(2).Infof("ChatCompletion error: %v\n", err)
