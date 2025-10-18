@@ -175,25 +175,7 @@ func (s *ScheduleBackground) StartFromDB() {
 	}
 	var count int
 	for _, schedule := range list {
-		if schedule.Cron != "" {
-			klog.V(6).Infof("注册定时任务: %s", schedule.Cron)
-			// 注册定时任务
-			// 遍历集群
-			cur := schedule
-			entryID, err := localCron.AddFunc(cur.Cron, func() {
-				for _, cluster := range strings.Split(cur.Clusters, ",") {
-					_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)
-				}
-			})
-			if err != nil {
-				klog.Errorf("定时任务注册失败%v", err)
-				return
-			}
-			// 更新EntryID
-			schedule.CronRunID = entryID
-			_ = schedule.Save(nil)
-			count += 1
-		}
+		s.Add(schedule.ID)
 	}
 	klog.V(6).Infof("启动集群巡检任务完成，共启动%d个", count)
 }
@@ -208,9 +190,20 @@ func (s *ScheduleBackground) Remove(scheduleID uint) {
 		return
 	}
 	if item.CronRunID != 0 {
+		// 首先标记任务为已删除状态，防止正在执行的任务继续运行
+		taskControlManager.MarkTaskDeleted(scheduleID)
+
+		// 从cron调度器中移除任务
 		localCron.Remove(item.CronRunID)
+
+		// 清理任务控制信息
+		taskControlManager.RemoveTask(scheduleID)
+
+		// 清空数据库中的CronRunID
+		item.CronRunID = 0
+		_ = item.Save(nil)
 	}
-	klog.V(6).Infof("删除集群定时巡检任务[id=%d]", scheduleID)
+	klog.V(6).Infof("移除集群定时巡检任务[id=%d]", scheduleID)
 
 }
 func (s *ScheduleBackground) Add(scheduleID uint) {
@@ -227,15 +220,32 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 	// 先清除，再添加执行
 	if item.CronRunID != 0 && localCron != nil {
 		localCron.Remove(item.CronRunID)
+		// 同时清理任务控制信息
+		taskControlManager.RemoveTask(scheduleID)
 	}
 	if item.Cron != "" && localCron != nil {
 		klog.V(6).Infof("注册定时任务item: %s", item.Cron)
 		// 注册定时任务
 		// 遍历集群
 		cur := item
-		klog.V(6).Infof("注册定时任务cur: %s", cur.Cron)
+
+		// 在AddFunc执行前生成随机字符串
+		randomToken := utils.RandNLengthString(8)
+
 		entryID, err := localCron.AddFunc(cur.Cron, func() {
+			// 在任务执行前检查是否已被删除
+			if taskControlManager.IsTaskDeleted(randomToken) {
+				klog.V(6).Infof("任务已被删除，跳过执行: scheduleID=%d, token=%s", cur.ID, randomToken)
+				return
+			}
+
+			klog.V(6).Infof("开始执行定时任务: scheduleID=%d, token=%s", cur.ID, randomToken)
 			for _, cluster := range strings.Split(cur.Clusters, ",") {
+				// 在每个集群执行前再次检查任务是否已被删除
+				if taskControlManager.IsTaskDeleted(randomToken) {
+					klog.V(6).Infof("任务在执行过程中被删除，停止执行: scheduleID=%d, cluster=%s, token=%s", cur.ID, cluster, randomToken)
+					break
+				}
 				_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)
 			}
 		})
@@ -243,6 +253,10 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 			klog.Errorf("定时任务注册失败%v", err)
 			return
 		}
+
+		// 注册任务控制信息，建立随机字符串与EntryID的映射关系
+		taskControlManager.RegisterTask(scheduleID, entryID, randomToken)
+
 		// 更新EntryID
 		item.CronRunID = entryID
 		_ = item.Save(nil)

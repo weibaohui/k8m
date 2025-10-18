@@ -57,10 +57,8 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 
 	// 获取cluster参数
 	clusterBase64 := c.Param("cluster")
-	klog.V(6).Infof("clusterBase64=%s ", clusterBase64)
 
 	if clusterDecode, err := utils.UrlSafeBase64Decode(clusterBase64); err == nil {
-		klog.V(6).Infof("cluster=%s ", cluster)
 		cluster = string(clusterDecode)
 	} else {
 		klog.V(6).Infof("cluster=%s,%v ", cluster, err)
