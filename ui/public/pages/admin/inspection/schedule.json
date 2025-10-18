@@ -105,7 +105,7 @@
                   "label": "AI提示词模板",
                   "language": "text",
                   "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。",
-                  "description": "留空将使用默认模板。支持自定义AI总结的格式和内容要求",
+                  "description": "以上填写的prompt将作为附加要求。内置基本要求：1、仅做汇总，不要解释2、不需要解决方案。3、可以合理使用表情符号。",
                   "visibleOn": "${ai_enabled}",
                   "validations": {
                     "maxLength": 2000
@@ -274,7 +274,7 @@
                       "label": "AI提示词模板",
                       "language": "text",
                       "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。",
-                      "description": "留空将使用默认模板。支持自定义AI总结的格式和内容要求",
+                      "description": "以上填写的prompt将作为附加要求。内置基本要求：1、仅做汇总，不要解释2、不需要解决方案。3、可以合理使用表情符号。",
                       "visibleOn": "${ai_enabled}",
                       "validations": {
                         "maxLength": 2000
