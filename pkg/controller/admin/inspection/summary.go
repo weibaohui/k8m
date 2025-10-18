@@ -239,7 +239,7 @@ func (s *AdminScheduleController) SummaryByRecordID(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	
+
 	// 将原始巡检结果转换为JSON字符串
 	resultRawBytes, err := json.Marshal(msg)
 	if err != nil {
@@ -247,8 +247,8 @@ func (s *AdminScheduleController) SummaryByRecordID(c *gin.Context) {
 		resultRawBytes = []byte("{}")
 	}
 	resultRaw := string(resultRawBytes)
-	
-	summary, summaryErr := sb.SummaryByAI(context.Background(), msg, "")
+
+	summary, summaryErr := sb.SummaryByAI(context.Background(), msg)
 
 	err = sb.SaveSummaryBack(recordID, summary, summaryErr, resultRaw)
 	if err != nil {

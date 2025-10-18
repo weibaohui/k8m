@@ -68,80 +68,126 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 	return result, nil
 }
 
-// SummaryByAI 生成AI总结
+// SummaryByAI 生成巡检总结
 // 参数：msg 包含巡检数据和AI配置的消息
 // 参数：format 自定义格式（已废弃，使用msg中的ai_prompt_template）
-func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any, format string) (string, error) {
-	// 检查是否启用AI总结
+// 返回：总结内容和错误信息
+func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any) (string, error) {
+	// msg 参考格式
+	// result := gin.H{
+	//		"record_date":        record.EndTime,
+	//		"record_id":          recordID,
+	//		"schedule_id":        record.ScheduleID,
+	//		"cluster":            record.Cluster,
+	//		"total_rules":        totalRules,
+	//		"failed_rules":       failCount,
+	//		"failed_list":        events,
+	//		"ai_enabled":         schedule.AIEnabled,
+	//		"ai_prompt_template": schedule.AIPromptTemplate,
+	//	}
+
+	// 验证必要的数据
+	if len(msg) == 0 {
+		return "", fmt.Errorf("巡检数据为空，无法生成总结")
+	}
+
+	// 第一步：生成基础统计汇总
+	basicSummary, err := s.generateBasicSummary(msg)
+	if err != nil {
+		return "", fmt.Errorf("生成基础汇总失败: %v", err)
+	}
+
+	// 第二步：检查是否开启AI汇总
 	aiEnabled, ok := msg["ai_enabled"].(bool)
 	if !ok || !aiEnabled {
-		return "", fmt.Errorf("AI服务未启用")
+		klog.V(6).Infof("AI汇总未启用，返回基础汇总")
+		return basicSummary, nil
 	}
 
 	// 检查AI服务是否可用
 	if !service.AIService().IsEnabled() {
-		klog.V(6).Infof("AI服务未启用，跳过自动生成总结")
-		// 保存错误信息和原始结果
-		return "", fmt.Errorf("AI服务未启用")
+		klog.V(6).Infof("AI服务未启用，返回基础汇总")
+		return basicSummary, nil
 	}
 
-	summary := ""
-	var err error
-
-	// 检查是否启用AI总结
-	aiEnabled, ok = msg["ai_enabled"].(bool)
-	if !ok || !aiEnabled {
-		return "", fmt.Errorf("该巡检计划未启用AI总结功能")
+	// 使用AI进行汇总
+	aiSummary, err := s.generateAISummary(ctx, msg)
+	if err != nil {
+		klog.Errorf("AI汇总失败，返回基础汇总: %v", err)
+		return basicSummary, nil
 	}
 
-	// 验证必要的数据
-	if len(msg) == 0 {
-		return "", fmt.Errorf("巡检数据为空，无法生成AI总结")
+	return aiSummary, nil
+}
+
+// generateBasicSummary 生成基础统计汇总
+// 参数：msg 包含巡检数据的消息
+// 返回：基础汇总内容和错误信息
+func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, error) {
+	// 提取基础信息
+	cluster, _ := msg["cluster"].(string)
+	if cluster == "" {
+		cluster = "未知集群"
 	}
 
+	totalRules, _ := msg["total_rules"].(int)
+	failedRules, _ := msg["failed_rules"].(int)
+
+	// 处理巡检时间
+	recordDate := ""
+	if date, ok := msg["record_date"]; ok {
+		recordDate = fmt.Sprintf("%v", date)
+	}
+	if recordDate == "" {
+		recordDate = "未知时间"
+	}
+
+	// 生成基础汇总
+	summary := fmt.Sprintf(`📊 巡检汇总报告
+
+🔍 巡检集群：%s
+📋 执行规则：%d条
+❌ 失败规则：%d条
+⏰ 巡检时间：%s
+
+✅ 巡检完成，共发现 %d 个问题需要关注。`,
+		cluster,
+		totalRules,
+		failedRules,
+		recordDate,
+		failedRules,
+	)
+
+	return summary, nil
+}
+
+// generateAISummary 使用AI生成智能汇总
+// 参数：ctx 上下文，msg 巡检数据，format 自定义格式
+// 返回：AI汇总内容和错误信息
+func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg map[string]any) (string, error) {
 	// 获取自定义提示词模板
 	customTemplate, _ := msg["ai_prompt_template"].(string)
-
-	defaultFormat := `
-	请按下面的格式给出汇总：
-		检测集群：xxx名称
-		执行规则数：x个
-		问题数：x个
-		时间：月日时间
-		总结：简短汇总
-	`
-
-	// 优先使用巡检计划中配置的自定义模板
-	if customTemplate != "" {
-		klog.V(6).Infof("使用巡检计划中配置的自定义Prompt模板")
-		defaultFormat = customTemplate
-	} else if format != "" {
-		// 兼容旧的format参数
-		klog.V(6).Infof("使用传入的自定义Prompt %s", format)
-		defaultFormat = format
-	}
-	if service.AIService().IsEnabled() {
-		prompt := `下面是k8s集群巡检记录，请你进行总结，字数控制在200字以内。
-		%s
-		要求：
+	prompt := `以下是k8s集群巡检记录，请你进行总结。
+	
+		基本要求：
 		1、仅做汇总，不要解释
 		2、不需要解决方案。
 		3、可以合理使用表情符号。
+	
+	    附加要求：
+		%s
+		
 		以下是JSON格式的巡检结果：
 		%s
 		`
-		prompt = fmt.Sprintf(prompt, defaultFormat, utils.ToJSON(msg))
-		summary, err = service.ChatService().ChatWithCtx(ctx, prompt)
+	prompt = fmt.Sprintf(customTemplate, utils.ToJSON(msg))
 
-		if err != nil {
-			return "", err
-		}
-
-	} else {
-		summary = "AI功能未开启"
+	summary, err := service.ChatService().ChatWithCtx(ctx, prompt)
+	if err != nil {
+		return "", fmt.Errorf("AI汇总请求失败: %v", err)
 	}
 
-	return summary, err
+	return summary, nil
 }
 
 // SaveSummaryBack 保存AI总结结果到数据库
@@ -171,11 +217,11 @@ func (s *ScheduleBackground) SaveSummaryBack(id uint, summary string, summaryErr
 	return nil
 }
 
-// AutoGenerateSummaryIfEnabled 如果启用了AI总结，则自动生成总结
+// AutoGenerateSummary 如果启用了AI总结，则自动生成总结
 // 该方法在巡检执行完成后被调用，生成的AI总结会保存到数据库中
 // 调用时机：巡检完成后立即调用，在发送webhook之前
 // 设计原则：AI总结生成与webhook发送分离，确保职责单一
-func (s *ScheduleBackground) AutoGenerateSummaryIfEnabled(recordID uint) {
+func (s *ScheduleBackground) AutoGenerateSummary(recordID uint) {
 	// 获取巡检数据和AI配置
 	msg, err := s.GetSummaryMsg(recordID)
 	if err != nil {
@@ -193,7 +239,7 @@ func (s *ScheduleBackground) AutoGenerateSummaryIfEnabled(recordID uint) {
 
 	klog.V(6).Infof("开始为巡检记录 %d 自动生成AI总结", recordID)
 	// 生成AI总结
-	summary, summaryErr := s.SummaryByAI(context.Background(), msg, "")
+	summary, summaryErr := s.SummaryByAI(context.Background(), msg)
 
 	// 保存总结结果和原始巡检结果
 	err = s.SaveSummaryBack(recordID, summary, summaryErr, resultRaw)

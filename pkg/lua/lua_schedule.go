@@ -129,14 +129,14 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		return db.Select("last_run_time", "error_count")
 	})
 
-	// 自动生成AI总结（如果启用）
-	s.AutoGenerateSummaryIfEnabled(record.ID)
-	
+	// 自动生成总结，包括使用AI
+	s.AutoGenerateSummary(record.ID)
+
 	// 发送webhook通知
 	go func() {
 		_, _ = s.PushToHooksByRecordID(record.ID)
 	}()
-	
+
 	return record, nil
 }
 
