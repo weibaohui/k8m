@@ -176,6 +176,7 @@ func (s *ScheduleBackground) StartFromDB() {
 	var count int
 	for _, schedule := range list {
 		s.Add(schedule.ID)
+		count += 1
 	}
 	klog.V(6).Infof("启动集群巡检任务完成，共启动%d个", count)
 }
