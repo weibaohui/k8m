@@ -430,6 +430,15 @@
           ]
         },
         {
+          "name": "ai_enabled",
+          "label": "AI总结",
+          "type": "mapping",
+          "map": {
+            "true": "<span class='label label-success'>启用</span>",
+            "false": "<span class='label label-danger'>关闭</span>"
+          }
+        },
+        {
           "name": "webhook_names",
           "label": "webhook",
           "type": "tpl",
