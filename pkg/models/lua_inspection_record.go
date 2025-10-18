@@ -26,9 +26,9 @@ type InspectionRecord struct {
 	StartTime    time.Time  `json:"start_time"`
 	EndTime      *time.Time `json:"end_time,omitempty"`
 	ErrorCount   int        `json:"error_count"`
-	AISummary    string     `json:"ai_summary,omitempty"`     // AI生成的巡检总结
-	AISummaryErr string     `json:"ai_summary_err,omitempty"` // AI生成错误
-	ResultRaw    string     `json:"result_raw,omitempty"`     // AI总结前的原始巡检结果，JSON字符串格式
+	AISummary    string     `gorm:"type:longtext" json:"ai_summary,omitempty"` // AI生成的巡检总结
+	AISummaryErr string     `json:"ai_summary_err,omitempty"`                  // AI生成错误
+	ResultRaw    string     `gorm:"type:longtext" json:"result_raw,omitempty"` // AI总结前的原始巡检结果，JSON字符串格式
 	CreatedAt    time.Time  `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 
@@ -87,6 +87,7 @@ func (c *InspectionRecord) GetAISummaryById(recordID uint) (string, error) {
 	}
 	return record.AISummary, nil
 }
+
 // GetRecordContentById 获取巡检记录的内容，优先返回AI总结，如果没有则返回原始结果
 // 返回值：content 内容，isAISummary 是否为AI总结（true）还是原始结果（false），error 错误
 func (c *InspectionRecord) GetRecordContentById(recordID uint) (string, bool, error) {
@@ -97,17 +98,17 @@ func (c *InspectionRecord) GetRecordContentById(recordID uint) (string, bool, er
 	if err != nil {
 		return "", false, fmt.Errorf("未找到对应的巡检记录: %d", recordID)
 	}
-	
+
 	// 优先返回AI总结
 	if record.AISummary != "" {
 		return record.AISummary, true, nil
 	}
-	
+
 	// 如果没有AI总结，返回原始结果
 	if record.ResultRaw != "" {
 		return record.ResultRaw, false, nil
 	}
-	
+
 	// 如果都没有，返回空内容
 	return "", false, nil
 }
@@ -123,7 +124,7 @@ func (c *InspectionRecord) GetRecordBothContentById(recordID uint) (string, stri
 	if err != nil {
 		return "", "", fmt.Errorf("未找到对应的巡检记录: %d", recordID)
 	}
-	
+
 	// 返回AI总结和原始结果，允许为空
 	return record.AISummary, record.ResultRaw, nil
 }
