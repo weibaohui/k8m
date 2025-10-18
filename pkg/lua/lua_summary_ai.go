@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -22,9 +21,9 @@ import (
 //   - recordID: 巡检记录的唯一标识符
 //
 // 返回值:
-//   - map[string]any: 包含巡检汇总信息的映射，包括记录日期、调度信息、错误统计等
+//   - *SummaryMsg: 包含巡检汇总信息的结构体，包括记录日期、调度信息、错误统计等
 //   - error: 如果查询失败或记录不存在则返回错误
-func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error) {
+func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (*SummaryMsg, error) {
 
 	// 1. 查询 InspectionRecord
 	recordModel := &models.InspectionRecord{}
@@ -70,17 +69,17 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 		recordDate = localTime.Format("2006-01-02 15:04:05")
 	}
 
-	result := gin.H{
-		"record_date":        recordDate,
-		"record_id":          recordID,
-		"schedule_id":        record.ScheduleID,
-		"schedule_name":      schedule.Name,
-		"cluster":            record.Cluster,
-		"total_rules":        totalRules,
-		"failed_count":       failedCount,
-		"failed_list":        events,
-		"ai_enabled":         schedule.AIEnabled,
-		"ai_prompt_template": schedule.AIPromptTemplate,
+	result := &SummaryMsg{
+		RecordDate:       recordDate,
+		RecordID:         recordID,
+		ScheduleID:       record.ScheduleID,
+		ScheduleName:     schedule.Name,
+		Cluster:          record.Cluster,
+		TotalRules:       totalRules,
+		FailedCount:      failedCount,
+		FailedList:       events,
+		AIEnabled:        schedule.AIEnabled,
+		AIPromptTemplate: schedule.AIPromptTemplate,
 	}
 	return result, nil
 }
@@ -88,10 +87,10 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 // SummaryByAI 生成巡检总结
 // 参数：msg 包含巡检数据和AI配置的消息
 // 返回：总结内容和错误信息
-func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any) (string, error) {
+func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg *SummaryMsg) (string, error) {
 
 	// 验证必要的数据
-	if len(msg) == 0 {
+	if msg == nil {
 		return "", fmt.Errorf("巡检数据为空，无法生成总结")
 	}
 
@@ -107,8 +106,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 	}
 
 	// 第二步：检查是否开启AI汇总
-	aiEnabled, ok := msg["ai_enabled"].(bool)
-	if !ok || !aiEnabled {
+	if !msg.AIEnabled {
 		klog.V(6).Infof("巡检配置AI汇总未启用，返回基础汇总")
 		return basicSummary, nil
 	}
@@ -132,29 +130,22 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 // generateBasicSummary 生成基础统计汇总
 // 参数：msg 包含巡检数据的消息
 // 返回：基础汇总内容和错误信息
-func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (summary string, failedCount int, err error) {
+func (s *ScheduleBackground) generateBasicSummary(msg *SummaryMsg) (summary string, failedCount int, err error) {
 	// 提取基础信息
-	cluster, _ := msg["cluster"].(string)
+	cluster := msg.Cluster
 	if cluster == "" {
 		cluster = "未知集群"
 	}
-	scheduleName, _ := msg["schedule_name"].(string)
+	scheduleName := msg.ScheduleName
 	if scheduleName == "" {
 		scheduleName = "未知计划"
 	}
 
-	totalRules, _ := msg["total_rules"].(int)
-	failedCount, _ = msg["failed_count"].(int)
+	totalRules := msg.TotalRules
+	failedCount = msg.FailedCount
 
 	// 处理巡检时间
-	recordDate := ""
-	if date, ok := msg["record_date"]; ok {
-		if dateStr, ok := date.(string); ok && dateStr != "" {
-			recordDate = dateStr
-		} else {
-			recordDate = fmt.Sprintf("%v", date)
-		}
-	}
+	recordDate := msg.RecordDate
 	if recordDate == "" {
 		recordDate = "未知时间"
 	}
@@ -188,11 +179,15 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (summary s
 }
 
 // generateAISummary 使用AI生成智能汇总
-// 参数：ctx 上下文，msg 巡检数据，format 自定义格式
+// 参数：ctx 上下文，msg 巡检数据
 // 返回：AI汇总内容和错误信息
-func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg map[string]any) (string, error) {
+func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg *SummaryMsg) (string, error) {
 	// 获取自定义提示词模板
-	customTemplate, _ := msg["ai_prompt_template"].(string)
+	customTemplate := msg.AIPromptTemplate
+	if customTemplate == "" {
+		customTemplate = "无特殊要求"
+	}
+	
 	prompt := `以下是k8s集群巡检记录，请你进行总结。
 	
 		基本要求：
@@ -206,7 +201,7 @@ func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg map[stri
 		以下是JSON格式的巡检结果：
 		%s
 		`
-	prompt = fmt.Sprintf(customTemplate, utils.ToJSON(msg))
+	prompt = fmt.Sprintf(prompt, customTemplate, utils.ToJSON(msg))
 
 	summary, err := service.ChatService().ChatWithCtx(ctx, prompt)
 	if err != nil {
