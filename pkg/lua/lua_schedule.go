@@ -31,7 +31,7 @@ const TriggerTypeCron = "cron"
 // triggerType: 触发类型（manual/cron）
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
 
-	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
+	klog.V(6).Infof("开始巡检, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果scheduleID 不为空，
 	// 从数据库中读取scheduleName
 	var scheduleName string
@@ -129,8 +129,14 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		return db.Select("last_run_time", "error_count")
 	})
 
-	// TODO 记录发送结果
-	_, _ = s.SummaryAndPushToHooksByRecordID(context.Background(), record.ID)
+	// 自动生成总结，包括使用AI
+	s.AutoGenerateSummary(record.ID)
+
+	// 发送webhook通知
+	go func() {
+		_, _ = s.PushToHooksByRecordID(record.ID)
+	}()
+
 	return record, nil
 }
 
@@ -219,15 +225,15 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 		return
 	}
 	// 先清除，再添加执行
-	if item.CronRunID != 0 {
+	if item.CronRunID != 0 && localCron != nil {
 		localCron.Remove(item.CronRunID)
 	}
-	if item.Cron != "" {
-		klog.V(6).Infof("注册定时任务: %s", item.Cron)
+	if item.Cron != "" && localCron != nil {
+		klog.V(6).Infof("注册定时任务item: %s", item.Cron)
 		// 注册定时任务
 		// 遍历集群
 		cur := item
-
+		klog.V(6).Infof("注册定时任务cur: %s", cur.Cron)
 		entryID, err := localCron.AddFunc(cur.Cron, func() {
 			for _, cluster := range strings.Split(cur.Clusters, ",") {
 				_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)

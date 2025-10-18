@@ -1,11 +1,12 @@
 package webhook
 
 import (
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
-func PushMsgToSingleTarget(msg string, receiver *models.WebhookReceiver) *SendResult {
+func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookReceiver) *SendResult {
 	sender, err := getSender(receiver.Platform)
 	var results *SendResult
 	if err != nil {
@@ -14,21 +15,19 @@ func PushMsgToSingleTarget(msg string, receiver *models.WebhookReceiver) *SendRe
 		return results
 	}
 	stdTarget := getStdTarget(receiver)
-	results, err = sender.Send(msg, stdTarget)
+	results, err = sender.Send(msg, raw, stdTarget)
 	if err != nil {
 		results = &SendResult{Status: "failed", RespBody: err.Error()}
 	}
 	return results
 }
 
-func PushMsgToAllTargets(msg string, receivers []*models.WebhookReceiver) []*SendResult {
+func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookReceiver) []*SendResult {
 	var results []*SendResult
 	for _, receiver := range receivers {
-		result := PushMsgToSingleTarget(msg, receiver)
+		result := PushMsgToSingleTarget(msg, raw, receiver)
+		klog.V(6).Infof("Push to [%s] %s ,result= [%v] \n", receiver.Platform, receiver.TargetURL, utils.ToJSON(result))
 		results = append(results, result)
-	}
-	for _, result := range results {
-		klog.V(6).Infof("Push event result: %v \n", result)
 	}
 	return results
 }

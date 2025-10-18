@@ -85,6 +85,34 @@
                   "name": "description",
                   "label": "计划描述",
                   "placeholder": "请输入计划描述"
+                },
+                {
+                  "type": "divider",
+                  "title": "AI总结配置"
+                },
+                {
+                  "type": "switch",
+                  "name": "ai_enabled",
+                  "label": "启用AI总结",
+                  "onText": "启用",
+                  "offText": "禁用",
+                  "value": false,
+                  "description": "开启后将在巡检完成时自动生成AI总结"
+                },
+                {
+                  "type": "editor",
+                  "name": "ai_prompt_template",
+                  "label": "AI提示词模板",
+                  "language": "text",
+                  "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。",
+                  "description": "以上填写的prompt将作为附加要求。内置基本要求：1、仅做汇总，不要解释2、不需要解决方案。3、可以合理使用表情符号。",
+                  "visibleOn": "${ai_enabled}",
+                  "validations": {
+                    "maxLength": 2000
+                  },
+                  "validationErrors": {
+                    "maxLength": "提示词模板最多 2000 个字符"
+                  }
                 }
               ],
               "submitText": "保存",
@@ -144,7 +172,7 @@
         {
           "type": "operation",
           "label": "操作",
-          "width": 120,
+          "width": 130,
           "buttons": [
             {
               "type": "button",
@@ -227,6 +255,33 @@
                       "name": "description",
                       "label": "计划描述",
                       "placeholder": "请输入计划描述"
+                    },
+                    {
+                      "type": "divider",
+                      "title": "AI总结配置"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "ai_enabled",
+                      "label": "启用AI总结",
+                      "onText": "启用",
+                      "offText": "禁用",
+                      "description": "开启后将在巡检完成时自动生成AI总结"
+                    },
+                    {
+                      "type": "editor",
+                      "name": "ai_prompt_template",
+                      "label": "AI提示词模板",
+                      "language": "text",
+                      "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。",
+                      "description": "以上填写的prompt将作为附加要求。内置基本要求：1、仅做汇总，不要解释2、不需要解决方案。3、可以合理使用表情符号。",
+                      "visibleOn": "${ai_enabled}",
+                      "validations": {
+                        "maxLength": 2000
+                      },
+                      "validationErrors": {
+                        "maxLength": "提示词模板最多 2000 个字符"
+                      }
                     }
                   ],
                   "submitText": "保存",
@@ -259,55 +314,55 @@
               "api": "post:/admin/inspection/schedule/start/id/$id"
             },
             {
-              "type": "dropdown-button",
-              "level": "link",
-              "buttons": [
-                {
-                  "type": "button",
-                  "icon": "fas fa-list text-primary",
-                  "label": "管理规则",
-                  "actionType": "drawer",
-                  "drawer": {
-                    "closeOnEsc": true,
-                    "closeOnOutside": true,
-                    "size": "xl",
-                    "title": "选择巡检计划要执行的规则",
-                    "body": {
-                      "type": "form",
-                      "wrapWithPanel": false,
-                      "labelWidth": "0",
-                      "style": {
-                        "height": "500px"
-                      },
-                      "api": "post:/admin/inspection/schedule/id/$id/update_script_code",
-                      "body": [
+              "type": "button",
+              "icon": "fas fa-list text-primary",
+              "actionType": "drawer",
+              "tooltip": "管理规则",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "xl",
+                "title": "选择巡检计划要执行的规则",
+                "body": {
+                  "type": "form",
+                  "wrapWithPanel": false,
+                  "labelWidth": "0",
+                  "style": {
+                    "height": "500px"
+                  },
+                  "api": "post:/admin/inspection/schedule/id/$id/update_script_code",
+                  "body": [
+                    {
+                      "type": "transfer",
+                      "name": "script_codes",
+                      "source": "get:/admin/inspection/script/option_list",
+                      "searchable": true,
+                      "statistics": true,
+                      "resultListModeFollowSelect": true,
+                      "selectMode": "table",
+                      "columns": [
                         {
-                          "type": "transfer",
-                          "name": "script_codes",
-                          "source": "get:/admin/inspection/script/option_list",
-                          "searchable": true,
-                          "statistics": true,
-                          "resultListModeFollowSelect": true,
-                          "selectMode": "table",
-                          "columns": [
-                            {
-                              "name": "script_code",
-                              "label": "规则编码"
-                            },
-                            {
-                              "name": "name",
-                              "label": "规则名称"
-                            },
-                            {
-                              "name": "description",
-                              "label": "规则描述"
-                            }
-                          ]
+                          "name": "script_code",
+                          "label": "规则编码"
+                        },
+                        {
+                          "name": "name",
+                          "label": "规则名称"
+                        },
+                        {
+                          "name": "description",
+                          "label": "规则描述"
                         }
                       ]
                     }
-                  }
-                },
+                  ]
+                }
+              }
+            },
+            {
+              "type": "dropdown-button",
+              "level": "link",
+              "buttons": [
                 {
                   "type": "link",
                   "icon": "fa-solid fa-clipboard-list text-primary",
@@ -373,6 +428,15 @@
               }
             }
           ]
+        },
+        {
+          "name": "ai_enabled",
+          "label": "AI总结",
+          "type": "mapping",
+          "map": {
+            "true": "<span class='label label-success'>启用</span>",
+            "false": "<span class='label label-danger'>关闭</span>"
+          }
         },
         {
           "name": "webhook_names",

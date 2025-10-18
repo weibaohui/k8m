@@ -25,11 +25,13 @@ type InspectionRecord struct {
 	Status       string     `json:"status"`                                       // 执行状态（pending/running/success/failed）
 	StartTime    time.Time  `json:"start_time"`
 	EndTime      *time.Time `json:"end_time,omitempty"`
+	ErrorCount   int        `json:"error_count"`
+	AISummary    string     `gorm:"type:longtext" json:"ai_summary,omitempty"` // AI生成的巡检总结
+	AISummaryErr string     `json:"ai_summary_err,omitempty"`                  // AI生成错误
+	ResultRaw    string     `gorm:"type:longtext" json:"result_raw,omitempty"` // AI总结前的原始巡检结果，JSON字符串格式
 	CreatedAt    time.Time  `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time  `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	ErrorCount   int        `json:"error_count"`
-	AISummary    string     `json:"ai_summary,omitempty"`     // AI生成的巡检总结
-	AISummaryErr string     `json:"ai_summary_err,omitempty"` // AI生成错误
+
 }
 
 // InspectionScriptResult 记录每个巡检脚本的执行结果，关联到 InspectionRecord
@@ -45,12 +47,13 @@ type InspectionScriptResult struct {
 	ScriptDesc string    `json:"script_desc"` // 脚本描述
 	StartTime  time.Time `json:"start_time"`
 	EndTime    time.Time `json:"end_time"`
-	StdOutput  string    `json:"std_output"`          // 脚本标准输出
-	ErrorMsg   string    `json:"error_msg,omitempty"` // 错误信息
-	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt  time.Time `json:"updated_at,omitempty"`  // Automatically managed by GORM for update time
+	StdOutput  string    `json:"std_output"`            // 脚本标准输出
+	ErrorMsg   string    `json:"error_msg,omitempty"`   // 错误信息
 	Cluster    string    `json:"cluster"`               // 目标集群
 	ScheduleID *uint     `json:"schedule_id,omitempty"` // 巡检计划ID
+	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+
 }
 
 // List 返回符合条件的 InspectionRecord 列表及总数
@@ -83,6 +86,47 @@ func (c *InspectionRecord) GetAISummaryById(recordID uint) (string, error) {
 		return "", fmt.Errorf("未找到对应的巡检记录: %d", recordID)
 	}
 	return record.AISummary, nil
+}
+
+// GetRecordContentById 获取巡检记录的内容，优先返回AI总结，如果没有则返回原始结果
+// 返回值：content 内容，isAISummary 是否为AI总结（true）还是原始结果（false），error 错误
+func (c *InspectionRecord) GetRecordContentById(recordID uint) (string, bool, error) {
+	record := &InspectionRecord{}
+	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", recordID)
+	})
+	if err != nil {
+		return "", false, fmt.Errorf("未找到对应的巡检记录: %d", recordID)
+	}
+
+	// 优先返回AI总结
+	if record.AISummary != "" {
+		return record.AISummary, true, nil
+	}
+
+	// 如果没有AI总结，返回原始结果
+	if record.ResultRaw != "" {
+		return record.ResultRaw, false, nil
+	}
+
+	// 如果都没有，返回空内容
+	return "", false, nil
+}
+
+// GetRecordBothContentById 获取巡检记录的完整内容，同时返回AI总结和原始结果
+// 参数：recordID 巡检记录ID
+// 返回值：aiSummary AI总结内容，resultRaw 原始结果内容，error 错误
+func (c *InspectionRecord) GetRecordBothContentById(recordID uint) (string, string, error) {
+	record := &InspectionRecord{}
+	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", recordID)
+	})
+	if err != nil {
+		return "", "", fmt.Errorf("未找到对应的巡检记录: %d", recordID)
+	}
+
+	// 返回AI总结和原始结果，允许为空
+	return record.AISummary, record.ResultRaw, nil
 }
 
 // List 返回符合条件的 InspectionScriptResult 列表及总数

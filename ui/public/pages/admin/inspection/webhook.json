@@ -60,13 +60,6 @@
                           "name": "sign_secret",
                           "label": "群机器人签名密钥",
                           "required": true
-                        },
-                        {
-                          "type": "editor",
-                          "name": "template",
-                          "label": "AI总结提示词模板",
-                          "language": "json",
-                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
                       ],
                       "submitText": "保存",
@@ -132,13 +125,6 @@
                           "name": "sign_secret",
                           "label": "群机器人签名密钥",
                           "required": true
-                        },
-                        {
-                          "type": "editor",
-                          "name": "template",
-                          "label": "AI总结提示词模板",
-                          "language": "json",
-                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
                       ],
                       "submitText": "保存",
@@ -193,13 +179,6 @@
                           "name": "target_url",
                           "label": "群机器人URL",
                           "required": true
-                        },
-                        {
-                          "type": "editor",
-                          "name": "template",
-                          "label": "AI总结提示词模板",
-                          "language": "json",
-                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
                       ],
                       "submitText": "保存",
@@ -264,7 +243,7 @@
                         {
                           "type": "alert",
                           "level": "info",
-                          "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别"
+                          "body": "JSON模板中的 {{msg}} 会被替换为汇总消息（统计信息或者AI总结信息）。 {{raw}} 会被替换为原始JSON巡检结果。"
                         },
                         {
                           "type": "editor",
@@ -272,13 +251,6 @@
                           "label": "JSON模板",
                           "language": "json",
                           "value": "{\n    \"msgtype\": \"markdown\",\n    \"markdown\": {\n        \"content\": \"{{msg}}\"\n    }\n}"
-                        },
-                        {
-                          "type": "editor",
-                          "name": "template",
-                          "label": "AI总结提示词模板",
-                          "language": "json",
-                          "value": "请按下面的格式给出汇总：\n检测集群：{{cluster_name}}\n执行规则数：{{rule_count}}个\n问题数：{{issue_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次巡检结果。"
                         }
                       ],
                       "submitText": "保存",
@@ -409,7 +381,7 @@
                     {
                       "type": "alert",
                       "level": "info",
-                      "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别",
+                      "body": "JSON模板中的 {{msg}} 会被替换为汇总消息（统计信息或者AI总结信息）。 {{raw}} 会被替换为原始JSON巡检结果。",
                       "visibleOn": "platform === 'default'"
                     },
                     {
@@ -418,12 +390,6 @@
                       "label": "JSON模板",
                       "language": "json",
                       "visibleOn": "platform === 'default'"
-                    },
-                    {
-                      "type": "editor",
-                      "name": "template",
-                      "label": "AI总结提示词模板",
-                      "language": "json"
                     }
                   ],
                   "submitText": "保存",
@@ -468,18 +434,12 @@
           "label": "平台",
           "type": "mapping",
           "map": {
-            "dingtalk": "<span class='label label-success'>钉钉群机器人</span>",
-            "feishu": "<span class='label label-warning'>飞书群机器人</span>",
-            "wechat": "<span class='label label-info'>企业微信群机器人</span>",
+            "feishu": "<span class='label label-info'>飞书</span>",
+            "dingtalk": "<span class='label label-warning'>钉钉</span>",
+            "wechat": "<span class='label label-success'>企业微信</span>",
             "default": "<span class='label label-primary'>自定义Webhook</span>",
             "*": "<span class='label label-success'>未知</span>"
           }
-        },
-        {
-          "name": "template",
-          "label": "AI总结提示词模板",
-          "type": "text",
-          "width": "250px"
         },
         {
           "name": "created_at",

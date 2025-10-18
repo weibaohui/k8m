@@ -21,13 +21,14 @@ func (w *WechatSender) Name() string {
 // Send 发送消息到企业微信群机器人。
 // 参数 msg 为最终要发送的文本内容；receiver 为统一的目标配置。
 // 默认使用 markdown 消息体结构：
-// {
-//   "msgtype": "markdown",
-//   "markdown": {
-//     "content": "..."
-//   }
-// }
-func (w *WechatSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
+//
+//	{
+//	  "msgtype": "markdown",
+//	  "markdown": {
+//	    "content": "..."
+//	  }
+//	}
+func (w *WechatSender) Send(msg string, raw string, receiver *Receiver) (*SendResult, error) {
 	finalURL := receiver.TargetURL
 
 	// 构造企业微信 markdown 消息体

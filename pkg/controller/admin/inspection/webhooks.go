@@ -67,7 +67,7 @@ func (s *Controller) WebhookTest(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	ret := webhook.PushMsgToSingleTarget("test", m)
+	ret := webhook.PushMsgToSingleTarget("test", "", m)
 	if ret != nil {
 		amis.WriteJsonOKMsg(c, ret.RespBody)
 		return
