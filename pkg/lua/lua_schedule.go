@@ -21,11 +21,11 @@ import (
 // TaskExecutionControl 任务执行控制结构体
 // 用于管理定时任务的执行状态，防止已删除的任务继续执行
 type TaskExecutionControl struct {
-	RandomToken string        `json:"random_token"` // 随机字符串，用于在AddFunc中标识任务
-	EntryID     cron.EntryID  `json:"entry_id"`     // cron任务的EntryID
-	IsDeleted   bool          `json:"is_deleted"`   // 是否已删除
-	ScheduleID  uint          `json:"schedule_id"`  // 关联的巡检计划ID
-	CreatedAt   time.Time     `json:"created_at"`   // 创建时间
+	RandomToken string       `json:"random_token"` // 随机字符串，用于在AddFunc中标识任务
+	EntryID     cron.EntryID `json:"entry_id"`     // cron任务的EntryID
+	IsDeleted   bool         `json:"is_deleted"`   // 是否已删除
+	ScheduleID  uint         `json:"schedule_id"`  // 关联的巡检计划ID
+	CreatedAt   time.Time    `json:"created_at"`   // 创建时间
 }
 
 // TaskControlManager 任务控制管理器
@@ -325,13 +325,13 @@ func (s *ScheduleBackground) Remove(scheduleID uint) {
 	if item.CronRunID != 0 {
 		// 首先标记任务为已删除状态，防止正在执行的任务继续运行
 		taskControlManager.MarkTaskDeleted(scheduleID)
-		
+
 		// 从cron调度器中移除任务
 		localCron.Remove(item.CronRunID)
-		
+
 		// 清理任务控制信息
 		taskControlManager.RemoveTask(scheduleID)
-		
+
 		// 清空数据库中的CronRunID
 		item.CronRunID = 0
 		_ = item.Save(nil)
@@ -361,18 +361,17 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 		// 注册定时任务
 		// 遍历集群
 		cur := item
-		klog.V(6).Infof("注册定时任务cur9: %s", cur.Cron)
-		
+
 		// 在AddFunc执行前生成随机字符串
 		randomToken := generateRandomToken()
-		
+
 		entryID, err := localCron.AddFunc(cur.Cron, func() {
 			// 在任务执行前检查是否已被删除
 			if taskControlManager.IsTaskDeleted(randomToken) {
 				klog.V(6).Infof("任务已被删除，跳过执行: scheduleID=%d, token=%s", cur.ID, randomToken)
 				return
 			}
-			
+
 			klog.V(6).Infof("开始执行定时任务: scheduleID=%d, token=%s", cur.ID, randomToken)
 			for _, cluster := range strings.Split(cur.Clusters, ",") {
 				// 在每个集群执行前再次检查任务是否已被删除
@@ -387,10 +386,10 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 			klog.Errorf("定时任务注册失败%v", err)
 			return
 		}
-		
+
 		// 注册任务控制信息，建立随机字符串与EntryID的映射关系
 		taskControlManager.RegisterTask(scheduleID, entryID, randomToken)
-		
+
 		// 更新EntryID
 		item.CronRunID = entryID
 		_ = item.Save(nil)
