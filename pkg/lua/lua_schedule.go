@@ -31,7 +31,7 @@ const TriggerTypeCron = "cron"
 // triggerType: 触发类型（manual/cron）
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
 
-	klog.V(6).Infof("StartInspection, scheduleID: %v, cluster: %s", scheduleID, cluster)
+	klog.V(6).Infof("开始巡检, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果scheduleID 不为空，
 	// 从数据库中读取scheduleName
 	var scheduleName string

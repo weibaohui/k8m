@@ -1,6 +1,7 @@
 package webhook
 
 import (
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
@@ -26,9 +27,8 @@ func PushMsgToAllTargets(msg string, receivers []*models.WebhookReceiver) []*Sen
 	for _, receiver := range receivers {
 		result := PushMsgToSingleTarget(msg, receiver)
 		results = append(results, result)
-	}
-	for _, result := range results {
-		klog.V(6).Infof("Push event result: %v \n", result)
+		klog.V(6).Infof("Push to [%s] %s ,result= [%v] \n", receiver.Platform, receiver.TargetURL, utils.ToJSON(result))
+
 	}
 	return results
 }
