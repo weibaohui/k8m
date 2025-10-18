@@ -46,22 +46,23 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 
 	// 4. 统计失败数
 	eventModel := &models.InspectionCheckEvent{}
-	failCount := 0
+	failedCount := 0
 	events, _, err := eventModel.List(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("record_id = ? AND event_status = ?", recordID, constants.LuaEventStatusFailed)
 	})
 
 	if err == nil {
-		failCount = len(events)
+		failedCount = len(events)
 	}
 
 	result := gin.H{
 		"record_date":        record.EndTime,
 		"record_id":          recordID,
 		"schedule_id":        record.ScheduleID,
+		"schedule_name":      schedule.Name,
 		"cluster":            record.Cluster,
 		"total_rules":        totalRules,
-		"failed_rules":       failCount,
+		"failed_count":       failedCount,
 		"failed_list":        events,
 		"ai_enabled":         schedule.AIEnabled,
 		"ai_prompt_template": schedule.AIPromptTemplate,
@@ -71,21 +72,8 @@ func (s *ScheduleBackground) GetSummaryMsg(recordID uint) (map[string]any, error
 
 // SummaryByAI 生成巡检总结
 // 参数：msg 包含巡检数据和AI配置的消息
-// 参数：format 自定义格式（已废弃，使用msg中的ai_prompt_template）
 // 返回：总结内容和错误信息
 func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any) (string, error) {
-	// msg 参考格式
-	// result := gin.H{
-	//		"record_date":        record.EndTime,
-	//		"record_id":          recordID,
-	//		"schedule_id":        record.ScheduleID,
-	//		"cluster":            record.Cluster,
-	//		"total_rules":        totalRules,
-	//		"failed_rules":       failCount,
-	//		"failed_list":        events,
-	//		"ai_enabled":         schedule.AIEnabled,
-	//		"ai_prompt_template": schedule.AIPromptTemplate,
-	//	}
 
 	// 验证必要的数据
 	if len(msg) == 0 {
@@ -130,9 +118,13 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, e
 	if cluster == "" {
 		cluster = "未知集群"
 	}
+	scheduleName, _ := msg["schedule_name"].(string)
+	if scheduleName == "" {
+		scheduleName = "未知计划"
+	}
 
 	totalRules, _ := msg["total_rules"].(int)
-	failedRules, _ := msg["failed_rules"].(int)
+	failedCount, _ := msg["failed_count"].(int)
 
 	// 处理巡检时间
 	recordDate := ""
@@ -149,20 +141,29 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, e
 		recordDate = "未知时间"
 	}
 
-	// 生成基础汇总
-	summary := fmt.Sprintf(`📊 巡检汇总报告
-
-🔍 巡检集群：%s
-📋 执行规则：%d条
-❌ 失败规则：%d条
+	// 生成基础汇总 - 提取公共模板部分
+	baseTemplate := `📊 巡检汇总报告
+📋 巡检计划：%s
+☸️ 巡检集群：%s
 ⏰ 巡检时间：%s
+📋 执行规则：%d条
+%s`
 
-✅ 巡检完成，共发现 %d 个问题需要关注。`,
+	// 根据失败规则数量生成不同的结果消息
+	var resultMsg string
+	if failedCount == 0 {
+		resultMsg = "✅ 巡检完成，未发现问题。"
+	} else {
+		resultMsg = fmt.Sprintf("✅ 巡检完成，共发现 %d 个问题需要关注。", failedCount)
+	}
+
+	// 使用统一的模板生成汇总
+	summary := fmt.Sprintf(baseTemplate,
+		scheduleName,
 		cluster,
-		totalRules,
-		failedRules,
 		recordDate,
-		failedRules,
+		totalRules,
+		resultMsg,
 	)
 
 	return summary, nil
