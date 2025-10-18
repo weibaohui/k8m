@@ -56,7 +56,7 @@ func (r *AdminRecordController) Push(c *gin.Context) {
 	recordIDStr := c.Param("id")
 	recordID := utils.ToUInt(recordIDStr)
 	record := &models.InspectionRecord{}
-	summary, err := record.GetAISummaryById(recordID)
+	summary, resultRaw, err := record.GetRecordBothContentById(recordID)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -69,7 +69,7 @@ func (r *AdminRecordController) Push(c *gin.Context) {
 		return
 	}
 
-	webhook.PushMsgToAllTargets(summary, receivers)
+	webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
 
 	amis.WriteJsonOK(c)
 }

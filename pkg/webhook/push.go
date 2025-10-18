@@ -22,7 +22,7 @@ func PushMsgToSingleTarget(msg string, receiver *models.WebhookReceiver) *SendRe
 	return results
 }
 
-func PushMsgToAllTargets(msg string, receivers []*models.WebhookReceiver) []*SendResult {
+func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookReceiver) []*SendResult {
 	var results []*SendResult
 	for _, receiver := range receivers {
 		result := PushMsgToSingleTarget(msg, receiver)
