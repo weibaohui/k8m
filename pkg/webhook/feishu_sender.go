@@ -21,7 +21,7 @@ func (f *FeishuSender) Name() string {
 	return "feishu"
 }
 
-func (f *FeishuSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
+func (f *FeishuSender) Send(msg string, raw string, receiver *Receiver) (*SendResult, error) {
 
 	// Add Feishu signature if enabled
 	finalURL := receiver.TargetURL

@@ -21,7 +21,7 @@ func (d *DingtalkSender) Name() string {
 	return "dingtalk"
 }
 
-func (d *DingtalkSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
+func (d *DingtalkSender) Send(msg string, raw string, receiver *Receiver) (*SendResult, error) {
 	// Add Dingtalk signature if enabled
 	finalURL := receiver.TargetURL
 	if receiver.SignSecret != "" {

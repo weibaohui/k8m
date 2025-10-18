@@ -6,7 +6,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func PushMsgToSingleTarget(msg string, receiver *models.WebhookReceiver) *SendResult {
+func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookReceiver) *SendResult {
 	sender, err := getSender(receiver.Platform)
 	var results *SendResult
 	if err != nil {
@@ -15,7 +15,7 @@ func PushMsgToSingleTarget(msg string, receiver *models.WebhookReceiver) *SendRe
 		return results
 	}
 	stdTarget := getStdTarget(receiver)
-	results, err = sender.Send(msg, stdTarget)
+	results, err = sender.Send(msg, raw, stdTarget)
 	if err != nil {
 		results = &SendResult{Status: "failed", RespBody: err.Error()}
 	}
@@ -25,10 +25,9 @@ func PushMsgToSingleTarget(msg string, receiver *models.WebhookReceiver) *SendRe
 func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookReceiver) []*SendResult {
 	var results []*SendResult
 	for _, receiver := range receivers {
-		result := PushMsgToSingleTarget(msg, receiver)
-		results = append(results, result)
+		result := PushMsgToSingleTarget(msg, raw, receiver)
 		klog.V(6).Infof("Push to [%s] %s ,result= [%v] \n", receiver.Platform, receiver.TargetURL, utils.ToJSON(result))
-
+		results = append(results, result)
 	}
 	return results
 }

@@ -27,11 +27,12 @@ func (d *DefaultSender) Name() string {
 // - msg: 原始消息字符串，作为模板上下文中的 summary 字段
 // - receiver: Webhook 接收端配置（包含模板、签名算法、HTTP 方法等）
 // 返回：发送结果与错误
-func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error) {
+func (d *DefaultSender) Send(msg string, raw string, receiver *Receiver) (*SendResult, error) {
 	// 1. 通过 htpl 渲染模板，构造最终请求体；若模板为空或渲染失败，使用原始 msg
 	finalBody := msg
 	if receiver.BodyTemplate != "" {
 		bodyTemplate := strings.ReplaceAll(receiver.BodyTemplate, "{{msg}}", "${msg}")
+		bodyTemplate = strings.ReplaceAll(bodyTemplate, "{{raw}}", "${raw}")
 		eng := htpl.NewEngine()
 		tpl, err := eng.ParseString(bodyTemplate)
 		if err != nil {
@@ -39,6 +40,7 @@ func (d *DefaultSender) Send(msg string, receiver *Receiver) (*SendResult, error
 		} else {
 			ctx := map[string]any{
 				"msg": msg,
+				"raw": raw,
 			}
 			rendered, rErr := tpl.Render(ctx)
 			if rErr != nil {
