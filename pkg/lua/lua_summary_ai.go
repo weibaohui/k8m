@@ -81,9 +81,14 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 	}
 
 	// 第一步：生成基础统计汇总
-	basicSummary, err := s.generateBasicSummary(msg)
+	basicSummary, failedCount, err := s.generateBasicSummary(msg)
 	if err != nil {
 		return "", fmt.Errorf("生成基础汇总失败: %v", err)
+	}
+
+	// 如果没有错误，不需要进行AI汇总
+	if failedCount == 0 {
+		return basicSummary, nil
 	}
 
 	// 第二步：检查是否开启AI汇总
@@ -112,7 +117,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg map[string]any
 // generateBasicSummary 生成基础统计汇总
 // 参数：msg 包含巡检数据的消息
 // 返回：基础汇总内容和错误信息
-func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, error) {
+func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (summary string, failedCount int, err error) {
 	// 提取基础信息
 	cluster, _ := msg["cluster"].(string)
 	if cluster == "" {
@@ -124,7 +129,7 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, e
 	}
 
 	totalRules, _ := msg["total_rules"].(int)
-	failedCount, _ := msg["failed_count"].(int)
+	failedCount, _ = msg["failed_count"].(int)
 
 	// 处理巡检时间
 	recordDate := ""
@@ -158,7 +163,7 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, e
 	}
 
 	// 使用统一的模板生成汇总
-	summary := fmt.Sprintf(baseTemplate,
+	summary = fmt.Sprintf(baseTemplate,
 		scheduleName,
 		cluster,
 		recordDate,
@@ -166,7 +171,7 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, e
 		resultMsg,
 	)
 
-	return summary, nil
+	return summary, failedCount, nil
 }
 
 // generateAISummary 使用AI生成智能汇总

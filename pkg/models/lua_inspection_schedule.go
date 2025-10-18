@@ -15,22 +15,23 @@ import (
 // 支持配置AI总结功能的开关和自定义提示词模板
 // 可结合数据库或配置管理进行持久化
 type InspectionSchedule struct {
-	ID           uint         `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name         string       `json:"name"`                          // 巡检任务名称
-	Description  string       `json:"description"`                   // 巡检任务描述
-	Clusters     string       `json:"clusters"`                      // 目标集群列表
-	Webhooks     string       `json:"webhooks"`                      // webhook列表
-	WebhookNames string       `json:"webhook_names"`                 // webhook 名称列表
-	Cron         string       `json:"cron"`                          // cron表达式，定时周期
-	ScriptCodes     string       `gorm:"type:text" json:"script_codes"`     // 每个脚本唯一标识码
-	Enabled         bool         `json:"enabled"`                           // 是否启用该任务
-	AIEnabled       bool         `json:"ai_enabled"`                        // 是否启用AI总结功能
-	AIPromptTemplate string      `gorm:"type:text" json:"ai_prompt_template"` // AI总结提示词模板
-	CreatedAt       time.Time    `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt       time.Time    `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
-	CronRunID       cron.EntryID `json:"cron_run_id"`          // cron 运行ID，可用于删除
-	LastRunTime     *time.Time   `json:"last_run_time"`        // 上次运行时间
-	ErrorCount      int          `json:"error_count"`          // 错误次数
+	ID               uint         `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Name             string       `json:"name"`                                // 巡检任务名称
+	Description      string       `json:"description"`                         // 巡检任务描述
+	Clusters         string       `json:"clusters"`                            // 目标集群列表
+	Webhooks         string       `json:"webhooks"`                            // webhook列表
+	WebhookNames     string       `json:"webhook_names"`                       // webhook 名称列表
+	Cron             string       `json:"cron"`                                // cron表达式，定时周期
+	ScriptCodes      string       `gorm:"type:text" json:"script_codes"`       // 每个脚本唯一标识码
+	Enabled          bool         `json:"enabled"`                             // 是否启用该任务
+	AIEnabled        bool         `json:"ai_enabled"`                          // 是否启用AI总结功能
+	AIPromptTemplate string       `gorm:"type:text" json:"ai_prompt_template"` // AI总结提示词模板
+	CronRunID        cron.EntryID `json:"cron_run_id"`                         // cron 运行ID，可用于删除
+	LastRunTime      *time.Time   `json:"last_run_time"`                       // 上次运行时间
+	ErrorCount       int          `json:"error_count"`                         // 错误次数
+	CreatedAt        time.Time    `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt        time.Time    `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+
 }
 
 // List 返回符合条件的 InspectionSchedule 列表及总数
