@@ -243,7 +243,7 @@
                         {
                           "type": "alert",
                           "level": "info",
-                          "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别"
+                          "body": "JSON模板中的 {{msg}} 会被替换为汇总消息（统计信息或者AI总结信息）。 {{raw}} 会被替换为原始JSON巡检结果"
                         },
                         {
                           "type": "editor",
@@ -381,7 +381,7 @@
                     {
                       "type": "alert",
                       "level": "info",
-                      "body": "JSON模板中会将 {{msg}} 替换为真正的内容，仅支持这一种写法，其他格式不识别",
+                      "body": "JSON模板中的 {{msg}} 会被替换为汇总消息（统计信息或者AI总结信息）。 {{raw}} 会被替换为原始JSON巡检结果",
                       "visibleOn": "platform === 'default'"
                     },
                     {
