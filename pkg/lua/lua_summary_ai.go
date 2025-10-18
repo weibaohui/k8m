@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -136,7 +137,13 @@ func (s *ScheduleBackground) generateBasicSummary(msg map[string]any) (string, e
 	// 处理巡检时间
 	recordDate := ""
 	if date, ok := msg["record_date"]; ok {
-		recordDate = fmt.Sprintf("%v", date)
+		if timePtr, ok := date.(*time.Time); ok && timePtr != nil {
+			// 转换为本地时间并格式化为易读格式
+			localTime := timePtr.Local()
+			recordDate = localTime.Format("2006-01-02 15:04:05")
+		} else {
+			recordDate = fmt.Sprintf("%v", date)
+		}
 	}
 	if recordDate == "" {
 		recordDate = "未知时间"
