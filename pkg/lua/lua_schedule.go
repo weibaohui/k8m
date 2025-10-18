@@ -225,15 +225,15 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 		return
 	}
 	// 先清除，再添加执行
-	if item.CronRunID != 0 {
+	if item.CronRunID != 0 && localCron != nil {
 		localCron.Remove(item.CronRunID)
 	}
-	if item.Cron != "" {
-		klog.V(6).Infof("注册定时任务: %s", item.Cron)
+	if item.Cron != "" && localCron != nil {
+		klog.V(6).Infof("注册定时任务item: %s", item.Cron)
 		// 注册定时任务
 		// 遍历集群
 		cur := item
-
+		klog.V(6).Infof("注册定时任务cur: %s", cur.Cron)
 		entryID, err := localCron.AddFunc(cur.Cron, func() {
 			for _, cluster := range strings.Split(cur.Clusters, ",") {
 				_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)
