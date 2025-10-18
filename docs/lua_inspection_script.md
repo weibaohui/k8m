@@ -13,6 +13,7 @@
    - 可选地设置命名空间、名称、标签选择器等。
    - 调用 `List` 或 `Get` 获取资源。
    - 可用 `Doc` 获取字段文档说明。
+   - 可用 `GetLogs` 获取 Pod 日志内容。
 
 ### 示例脚本
 
@@ -119,7 +120,33 @@ print("ConfigMap 空数据检测完成")
 - 返回：Lua 表（文档内容）。
 - 示例：`:Doc("spec.replicas")`
 
-### 10. `check_event(status, msg, extra?)`
+### 10. `GetLogs(options?)`
+- 说明：获取 Pod 的日志内容。仅适用于 Pod 资源。
+- 参数：可选的选项表，支持以下字段：
+  - `tailLines` (number)：获取最近的行数，如 `200`。
+  - `container` (string)：指定容器名称，如 `"app"`。如不指定，默认获取第一个容器的日志。
+- 返回：日志文本字符串和错误信息。
+- 示例：
+```lua
+-- 获取 Pod 最近 100 行日志
+local logs, err = kubectl:GVK("", "v1", "Pod"):Namespace("default"):Name("mypod"):GetLogs({tailLines=100})
+
+-- 获取指定容器的日志
+local logs, err = kubectl:GVK("", "v1", "Pod"):Namespace("default"):Name("mypod"):GetLogs({tailLines=200, container="app"})
+
+-- 处理日志内容
+if err then
+    print("获取日志失败：", err)
+else
+    print("日志内容：", logs)
+    -- 检查日志中是否包含错误关键字
+    if string.find(logs, "ERROR") then
+        check_event("失败", "Pod 日志包含错误信息", {namespace="default", name="mypod"})
+    end
+end
+```
+
+### 11. `check_event(status, msg, extra?)`
 - 说明：用于在 Lua 检测脚本中上报结构化检测事件，便于巡检系统收集、展示和统计异常或告警信息。
 - 参数：
   - `status` (string)：事件状态，通常为 `失败`（失败）。
@@ -155,7 +182,7 @@ end
 
 
 请帮我用 Lua 语言，基于如下链式 API，编写一个 Kubernetes 资源检测脚本：
--- 入口对象为 kubectl，支持 GVK、Namespace、AllNamespace、WithLabelSelector、List、Get、Doc、check_event 等方法。
+-- 入口对象为 kubectl，支持 GVK、Namespace、AllNamespace、WithLabelSelector、List、Get、Doc、GetLogs、check_event 等方法。
 -- 目标：检测所有命名空间下副本数不一致的 Deployment，正常情况下应该是deployment.spec.replicas == deployment.status.replicas。
 
 要求：
