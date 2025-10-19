@@ -207,6 +207,15 @@ func (s *ScheduleBackground) Remove(scheduleID uint) {
 	klog.V(6).Infof("移除集群定时巡检任务[id=%d]", scheduleID)
 
 }
+// Add 添加一个新的定时巡检任务到cron调度器中
+// 该方法会从数据库读取指定的巡检计划，并创建对应的定时任务
+// 
+// 重要：为了避免Go闭包变量捕获问题，该方法会创建局部变量副本
+// 这确保每个定时任务都有自己独立的数据副本，不会被后续的Add调用影响
+// 如果不这样做，多个巡检计划可能会错误地使用相同的集群配置
+//
+// 参数:
+//   scheduleID - 要添加的巡检计划ID
 func (s *ScheduleBackground) Add(scheduleID uint) {
 	// 1、读取数据库中的定义，然后创建
 	sch := models.InspectionSchedule{}
@@ -227,27 +236,30 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 	if item.Cron != "" && localCron != nil {
 		klog.V(6).Infof("注册定时任务item: %s", item.Cron)
 		// 注册定时任务
-		// 遍历集群
-		cur := item
+		// 创建局部副本以避免闭包变量捕获问题
+		// 这样确保每个定时任务都有自己独立的数据副本，不会被后续的Add调用影响
+		scheduleIDCopy := item.ID
+		clustersCopy := item.Clusters
+		cronExpr := item.Cron
 
 		// 在AddFunc执行前生成随机字符串
 		randomToken := utils.RandNLengthString(8)
 
-		entryID, err := localCron.AddFunc(cur.Cron, func() {
+		entryID, err := localCron.AddFunc(cronExpr, func() {
 			// 在任务执行前检查是否已被删除
 			if taskControlManager.IsTaskDeleted(randomToken) {
-				klog.V(6).Infof("任务已被删除，跳过执行: scheduleID=%d, token=%s", cur.ID, randomToken)
+				klog.V(6).Infof("任务已被删除，跳过执行: scheduleID=%d, token=%s", scheduleIDCopy, randomToken)
 				return
 			}
 
-			klog.V(6).Infof("开始执行定时任务: scheduleID=%d, token=%s", cur.ID, randomToken)
-			for _, cluster := range strings.Split(cur.Clusters, ",") {
+			klog.V(6).Infof("开始执行定时任务: scheduleID=%d, token=%s", scheduleIDCopy, randomToken)
+			for _, cluster := range strings.Split(clustersCopy, ",") {
 				// 在每个集群执行前再次检查任务是否已被删除
 				if taskControlManager.IsTaskDeleted(randomToken) {
-					klog.V(6).Infof("任务在执行过程中被删除，停止执行: scheduleID=%d, cluster=%s, token=%s", cur.ID, cluster, randomToken)
+					klog.V(6).Infof("任务在执行过程中被删除，停止执行: scheduleID=%d, cluster=%s, token=%s", scheduleIDCopy, cluster, randomToken)
 					break
 				}
-				_, _ = s.RunByCluster(context.Background(), &cur.ID, cluster, TriggerTypeCron)
+				_, _ = s.RunByCluster(context.Background(), &scheduleIDCopy, cluster, TriggerTypeCron)
 			}
 		})
 		if err != nil {
