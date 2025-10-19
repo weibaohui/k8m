@@ -197,7 +197,7 @@
                     "type": "tpl",
                     "width": "100px",
                     "searchable": true,
-                    "tpl": "${schedule_name}[${schedule_id}]"
+                    "tpl": "${schedule_name}<span class='text-gray-500 text-xs'>[${schedule_id}]</span>"
                 },
                 {
                     "name": "cluster",
@@ -205,11 +205,22 @@
                 },
                 {
                     "name": "trigger_type",
-                    "label": "触发类型"
+                    "label": "触发类型",
+                    "type": "mapping",
+                    "map": {
+                        "cron": "<span class='label label-success'>定时任务</span>",
+                        "manual": "<span class='label label-danger'>手动触发</span>"
+                    }
                 },
                 {
                     "name": "status",
-                    "label": "状态"
+                    "label": "状态",
+                    "type": "mapping",
+                    "map": {
+                        "success": "<span class='label label-success'>成功</span>",
+                        "failed": "<span class='label label-danger'>失败</span>",
+                        "running": "<span class='label label-warning'>运行中</span>"
+                    }
                 },
                 {
                     "name": "error_count",
