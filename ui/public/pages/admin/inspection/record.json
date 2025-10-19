@@ -197,7 +197,7 @@
                     "type": "tpl",
                     "width": "100px",
                     "searchable": true,
-                    "tpl": "${schedule_name}[${schedule_id}]"
+                    "tpl": "${schedule_name}<span class='text-gray-500 text-xs'>[${schedule_id}]</span>"
                 },
                 {
                     "name": "cluster",
