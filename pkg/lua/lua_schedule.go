@@ -12,6 +12,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
+	"github.com/weibaohui/kom/kom"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -30,6 +32,17 @@ const TriggerTypeCron = "cron"
 // cluster: 目标集群
 // triggerType: 触发类型（manual/cron）
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
+	k := kom.Cluster(cluster)
+	if k == nil {
+		klog.V(6).Infof("巡检 集群【%s】，但是该集群未连接，尝试连接该集群", cluster)
+		service.ClusterService().Connect(cluster)
+		k = kom.Cluster(cluster)
+		if k == nil {
+			klog.Errorf("巡检 集群【%s】，但是该集群未连接，尝试连接该集群失败，跳过执行", cluster)
+			return nil, fmt.Errorf("巡检 集群【%s】未连接，尝试连接未成功，跳过执行", cluster)
+		}
+		klog.V(6).Infof("巡检 集群【%s】，已连接", cluster)
+	}
 
 	klog.V(6).Infof("开始巡检, scheduleID: %v, cluster: %s", scheduleID, cluster)
 	// 如果scheduleID 不为空，
@@ -207,15 +220,17 @@ func (s *ScheduleBackground) Remove(scheduleID uint) {
 	klog.V(6).Infof("移除集群定时巡检任务[id=%d]", scheduleID)
 
 }
+
 // Add 添加一个新的定时巡检任务到cron调度器中
 // 该方法会从数据库读取指定的巡检计划，并创建对应的定时任务
-// 
+//
 // 重要：为了避免Go闭包变量捕获问题，该方法会创建局部变量副本
 // 这确保每个定时任务都有自己独立的数据副本，不会被后续的Add调用影响
 // 如果不这样做，多个巡检计划可能会错误地使用相同的集群配置
 //
 // 参数:
-//   scheduleID - 要添加的巡检计划ID
+//
+//	scheduleID - 要添加的巡检计划ID
 func (s *ScheduleBackground) Add(scheduleID uint) {
 	// 1、读取数据库中的定义，然后创建
 	sch := models.InspectionSchedule{}
