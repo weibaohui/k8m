@@ -38,7 +38,10 @@ func NewLuaInspection(schedule *models.InspectionSchedule, cluster string) *Insp
 func (p *Inspection) registerKubectlFunc() {
 	p.lua.SetGlobal("log", p.lua.NewFunction(logFunc))
 
-	k := kom.DefaultCluster()
+	k := kom.Cluster(p.Cluster)
+	if k == nil {
+		klog.Errorf("巡检 集群【%s】，但是该集群未连接，巡检结果为失败", p.Cluster)
+	}
 
 	ud := p.lua.NewUserData()
 	ud.Value = &Kubectl{k}
