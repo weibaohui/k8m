@@ -28,6 +28,8 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { Deployment } from '@/store/deployment';
 import { Container } from '@/store/pod';
+import { fetcher } from '@/components/Amis/fetcher';
+
 
 
 const { Text } = Typography;
@@ -277,9 +279,13 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             // 这里应该调用实际的API
             // await api.batchUpdateImages(batchRequest);
 
-            // 模拟API调用
-            await new Promise(resolve => setTimeout(resolve, 2000));
 
+            // 调用后端API
+            const response = await fetcher({
+                url: '/k8s/deployment/batch_update_images',
+                method: 'post',
+                data: batchRequest
+            });
             message.success(`成功更新 ${containersToUpdate.length} 个容器的镜像`);
 
             // 重置选择状态
