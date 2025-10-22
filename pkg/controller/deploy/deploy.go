@@ -34,6 +34,7 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 	api.GET("/deploy/ns/:ns/name/:name/events/all", ctrl.Event)
 	api.GET("/deploy/ns/:ns/name/:name/hpa", ctrl.HPA)
 	api.POST("/deploy/create", ctrl.Create)
+	api.POST("/deployment/batch_update_images", ctrl.BatchUpdateImages)
 
 }
 
@@ -558,5 +559,84 @@ func (nc *ActionController) Create(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	amis.WriteJsonOK(c)
+}
+
+// @Summary 批量更新Deployment镜像
+// @Security BearerAuth
+// @Param cluster path string true "集群名称"
+// @Param deployments body object true "Deployment镜像更新配置"
+// @Success 200 {object} string
+// @Router /k8s/cluster/{cluster}/deployment/batch_update_images [post]
+func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
+	ctx := amis.GetContextWithUser(c)
+	selectedCluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	var req struct {
+		Deployments []struct {
+			Name       string `json:"name"`
+			Namespace  string `json:"namespace"`
+			Containers []struct {
+				Name  string `json:"name"`
+				Image string `json:"image"`
+			} `json:"containers"`
+		} `json:"deployments"`
+	}
+
+	if err = c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 批量更新每个Deployment的镜像
+	for _, deployment := range req.Deployments {
+		// 获取现有的Deployment
+		var existingDeployment v1.Deployment
+		err = kom.Cluster(selectedCluster).WithContext(ctx).
+			Resource(&v1.Deployment{}).
+			Namespace(deployment.Namespace).
+			Name(deployment.Name).
+			Get(&existingDeployment).Error
+		if err != nil {
+			klog.V(6).Infof("获取Deployment失败 %s/%s: %v", deployment.Namespace, deployment.Name, err)
+			amis.WriteJsonError(c, fmt.Errorf("Deployment %s/%s 不存在: %v", deployment.Namespace, deployment.Name, err))
+			return
+		}
+
+		// 更新容器镜像
+		for _, containerUpdate := range deployment.Containers {
+			found := false
+			for i := range existingDeployment.Spec.Template.Spec.Containers {
+				if existingDeployment.Spec.Template.Spec.Containers[i].Name == containerUpdate.Name {
+					existingDeployment.Spec.Template.Spec.Containers[i].Image = containerUpdate.Image
+					found = true
+					break
+				}
+			}
+			if !found {
+				klog.V(6).Infof("容器 %s 在Deployment %s/%s 中未找到", containerUpdate.Name, deployment.Namespace, deployment.Name)
+				amis.WriteJsonError(c, fmt.Errorf("容器 %s 在Deployment %s/%s 中未找到", containerUpdate.Name, deployment.Namespace, deployment.Name))
+				return
+			}
+		}
+
+		// 更新Deployment
+		err = kom.Cluster(selectedCluster).WithContext(ctx).
+			Resource(&existingDeployment).
+			Namespace(deployment.Namespace).
+			Update(&existingDeployment).Error
+		if err != nil {
+			klog.V(6).Infof("更新Deployment失败 %s/%s: %v", deployment.Namespace, deployment.Name, err)
+			amis.WriteJsonError(c, fmt.Errorf("更新Deployment %s/%s 失败: %v", deployment.Namespace, deployment.Name, err))
+			return
+		}
+
+		klog.V(6).Infof("成功更新Deployment %s/%s 的镜像", deployment.Namespace, deployment.Name)
+	}
+
 	amis.WriteJsonOK(c)
 }

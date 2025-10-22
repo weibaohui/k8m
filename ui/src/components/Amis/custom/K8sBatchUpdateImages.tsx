@@ -660,9 +660,8 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                             ghost
                             onClick={handleBatchSetTag}
                             disabled={!batchTagValue.trim() || stats.selectedForUpdate === 0}
-                            icon={<TagOutlined />}
                         >
-                            更新标签
+                            应用
                         </Button>
                     </Col>
 
