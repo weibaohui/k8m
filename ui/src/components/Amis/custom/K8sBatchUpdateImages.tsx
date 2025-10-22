@@ -30,47 +30,8 @@ import type { ColumnsType } from 'antd/es/table';
 import { Deployment } from '@/store/deployment';
 import { Container } from '@/store/pod';
 
-// 添加样式
-const styles = `
-.deployment-group-header {
-    background-color: #fafafa !important;
-    border-top: 2px solid #1890ff;
-}
 
-.container-row {
-    background-color: #fdfdfd;
-}
-
-.container-row:hover {
-    background-color: #f0f9ff !important;
-}
-
-.deployment-group-header:hover {
-    background-color: #f0f9ff !important;
-}
-
-.selected-row {
-    background-color: #e6f7ff !important;
-}
-
-.ant-table-tbody > tr.deployment-group-header > td {
-    border-top: 2px solid #1890ff;
-    font-weight: 500;
-}
-
-.ant-table-tbody > tr.container-row > td {
-    border-top: 1px solid #f0f0f0;
-}
-`;
-
-// 注入样式
-if (typeof document !== 'undefined') {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = styles;
-    document.head.appendChild(styleElement);
-}
-
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface ContainerUpdateInfo {
     deploymentName: string;
@@ -456,12 +417,12 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
     // 为表格数据添加分组信息
     const tableDataWithGrouping = useMemo(() => {
         const data = Object.values(containerUpdates);
-        const groupedData: (ContainerUpdateInfo & { 
-            isFirstInGroup?: boolean; 
+        const groupedData: (ContainerUpdateInfo & {
+            isFirstInGroup?: boolean;
             groupRowSpan?: number;
             deploymentKey?: string;
         })[] = [];
-        
+
         // 按Deployment分组
         const deploymentGroups: Record<string, ContainerUpdateInfo[]> = {};
         data.forEach(container => {
@@ -489,169 +450,159 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
     }, [containerUpdates]);
 
     // 表格列定义
-    const columns: ColumnsType<ContainerUpdateInfo & { 
-        isFirstInGroup?: boolean; 
+    const columns: ColumnsType<ContainerUpdateInfo & {
+        isFirstInGroup?: boolean;
         groupRowSpan?: number;
         deploymentKey?: string;
     }> = [
-        {
-            title: (
-                <Space>
-                    <AppstoreOutlined />
-                    <span>Deployment</span>
-                </Space>
-            ),
-            key: 'deployment',
-            width: 200,
-            render: (_, record) => {
-                // 只在每组的第一行显示Deployment信息
-                if (!record.isFirstInGroup) {
-                    return null;
-                }
-                
-                const containerCount = deploymentContainerCounts[record.deploymentKey || ''] || 1;
-                
-                return {
-                    children: (
-                        <div style={{ 
-                            padding: '8px 0',
-                            borderLeft: '3px solid #1890ff',
-                            paddingLeft: '12px',
-                            backgroundColor: '#f0f9ff'
+            {
+                title: (
+                    <Space>
+                        <AppstoreOutlined />
+                        <span>Deployment</span>
+                    </Space>
+                ),
+                key: 'deployment',
+                width: 200,
+                render: (_, record) => {
+
+
+                    const containerCount = deploymentContainerCounts[record.deploymentKey || ''] || 1;
+
+                    return {
+                        children: (
+                            <div >
+                                <div style={{
+                                    fontWeight: 600,
+                                    color: '#1890ff',
+                                    fontSize: '14px',
+                                    marginBottom: '4px'
+                                }}>
+                                    {record.deploymentName}
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    marginBottom: '4px'
+                                }}>
+                                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                                        {record.namespace}
+                                    </Text>
+                                    <Tag color="blue" style={{ fontSize: '11px' }}>
+                                        {containerCount} 个容器
+                                    </Tag>
+                                </div>
+                            </div>
+                        ),
+                        props: {
+                            rowSpan: record.groupRowSpan,
+                        },
+                    };
+                },
+            },
+            {
+                title: (
+                    <Space>
+                        <ContainerOutlined />
+                        <span>容器名称</span>
+                    </Space>
+                ),
+                dataIndex: 'containerName',
+                key: 'containerName',
+                width: 180,
+                render: (containerName: string, record) => (
+                    <div >
+                        <ContainerOutlined style={{
+                            color: '#52c41a',
+                            fontSize: '14px'
+                        }} />
+                        <Text strong style={{
+                            color: '#52c41a',
+                            margin: 0,
+                            padding: 0
                         }}>
-                            <div style={{ 
-                                fontWeight: 600, 
-                                color: '#1890ff',
-                                fontSize: '14px',
-                                marginBottom: '4px'
-                            }}>
-                                {record.deploymentName}
-                            </div>
-                            <div style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '8px',
-                                marginBottom: '4px'
-                            }}>
-                                <Text type="secondary" style={{ fontSize: '12px' }}>
-                                    {record.namespace}
-                                </Text>
-                                <Tag color="blue" style={{ fontSize: '11px' }}>
-                                    {containerCount} 个容器
-                                </Tag>
-                            </div>
-                        </div>
-                    ),
-                    props: {
-                        rowSpan: record.groupRowSpan,
-                    },
-                };
+                            {containerName}
+                        </Text>
+                    </div>
+                ),
             },
-        },
-        {
-            title: (
-                <Space>
-                    <ContainerOutlined />
-                    <span>容器名称</span>
-                </Space>
-            ),
-            dataIndex: 'containerName',
-            key: 'containerName',
-            width: 180,
-            render: (containerName: string, record) => (
-                <div style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                }}>
-                    <ContainerOutlined style={{ 
-                        color: '#52c41a',
-                        fontSize: '14px'
-                    }} />
-                    <Text strong style={{ 
-                        color: '#52c41a'
-                    }}>
-                        {containerName}
-                    </Text>
-                </div>
-            ),
-        },
-        {
-            title: '当前镜像',
-            dataIndex: 'currentImage',
-            key: 'currentImage',
-            width: 300,
-            render: (image) => (
-                <>
-                    {image}
-                </>
-            ),
-        },
-        {
-            title: (
-                <Space>
-                    <CheckCircleOutlined />
-                    <span>更新</span>
-                </Space>
-            ),
-            key: 'shouldUpdate',
-            width: 80,
-            align: 'center',
-            render: (_: any, record) => {
-                const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
-                const containerUpdate = containerUpdates[key];
+            {
+                title: '当前镜像',
+                dataIndex: 'currentImage',
+                key: 'currentImage',
+                width: 300,
+                render: (image) => (
+                    <>
+                        {image}
+                    </>
+                ),
+            },
+            {
+                title: (
+                    <Space>
+                        <CheckCircleOutlined />
+                        <span>更新</span>
+                    </Space>
+                ),
+                key: 'shouldUpdate',
+                width: 80,
+                align: 'center',
+                render: (_: any, record) => {
+                    const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
+                    const containerUpdate = containerUpdates[key];
 
-                return (
-                    <Checkbox
-                        checked={containerUpdate?.shouldUpdate || false}
-                        onChange={(e) => updateContainerInfo(key, 'shouldUpdate', e.target.checked)}
-                    />
-                );
+                    return (
+                        <Checkbox
+                            checked={containerUpdate?.shouldUpdate || false}
+                            onChange={(e) => updateContainerInfo(key, 'shouldUpdate', e.target.checked)}
+                        />
+                    );
+                },
             },
-        },
-        {
-            title: '镜像地址',
-            key: 'imageAddress',
-            width: 250,
-            render: (_: any, record) => {
-                const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
-                const containerUpdate = containerUpdates[key];
+            {
+                title: '镜像地址',
+                key: 'imageAddress',
+                width: 250,
+                render: (_: any, record) => {
+                    const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
+                    const containerUpdate = containerUpdates[key];
 
-                return (
-                    <Input
-                        placeholder="输入镜像地址"
-                        value={containerUpdate?.imageAddress || ''}
-                        disabled={!containerUpdate?.shouldUpdate}
-                        onChange={(e) => updateContainerInfo(key, 'imageAddress', e.target.value)}
-                        style={{
-                            backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
-                        }}
-                    />
-                );
+                    return (
+                        <Input
+                            placeholder="输入镜像地址"
+                            value={containerUpdate?.imageAddress || ''}
+                            disabled={!containerUpdate?.shouldUpdate}
+                            onChange={(e) => updateContainerInfo(key, 'imageAddress', e.target.value)}
+                            style={{
+                                backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
+                            }}
+                        />
+                    );
+                },
             },
-        },
-        {
-            title: '标签',
-            key: 'imageTag',
-            width: 150,
-            render: (_: any, record) => {
-                const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
-                const containerUpdate = containerUpdates[key];
+            {
+                title: '标签',
+                key: 'imageTag',
+                width: 150,
+                render: (_: any, record) => {
+                    const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
+                    const containerUpdate = containerUpdates[key];
 
-                return (
-                    <Input
-                        placeholder="输入标签"
-                        value={containerUpdate?.imageTag || ''}
-                        disabled={!containerUpdate?.shouldUpdate}
-                        onChange={(e) => updateContainerInfo(key, 'imageTag', e.target.value)}
-                        style={{
-                            backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
-                        }}
-                    />
-                );
+                    return (
+                        <Input
+                            placeholder="输入标签"
+                            value={containerUpdate?.imageTag || ''}
+                            disabled={!containerUpdate?.shouldUpdate}
+                            onChange={(e) => updateContainerInfo(key, 'imageTag', e.target.value)}
+                            style={{
+                                backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
+                            }}
+                        />
+                    );
+                },
             },
-        },
-    ];
+        ];
 
     // 表格数据
     const tableData = Object.values(containerUpdates);
@@ -689,27 +640,6 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                 size="small"
                 style={{ marginBottom: '16px' }}
             >
-                <Row gutter={16} align="middle" style={{ marginBottom: '12px' }}>
-                    <Col span={4}>
-                        <Button
-                            type={isAllSelected ? "default" : "primary"}
-                            ghost={!isAllSelected}
-                            onClick={handleSelectAll}
-                            icon={isAllSelected ? <UndoOutlined /> : <SelectOutlined />}
-                            disabled={Object.keys(containerUpdates).length === 0}
-                        >
-                            {isAllSelected ? '取消全选' : '全选'}
-                        </Button>
-                    </Col>
-                    <Col span={20}>
-                        <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                            {isAllSelected
-                                ? '已选中所有容器，点击可取消全选'
-                                : `共 ${Object.keys(containerUpdates).length} 个容器，点击可全选`
-                            }
-                        </Typography.Text>
-                    </Col>
-                </Row>
                 <Row gutter={16} align="middle">
                     <Col span={6}>
                         <Typography.Text strong>批量设置标签:</Typography.Text>
@@ -733,26 +663,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                             应用标签
                         </Button>
                     </Col>
-                    <Col span={6}>
-                        <Space>
-                            <Button
-                                onClick={handleReset}
-                                icon={<ReloadOutlined />}
-                                disabled={stats.selectedForUpdate === 0}
-                            >
-                                重置
-                            </Button>
-                            <Button
-                                type="primary"
-                                onClick={handleBatchUpdate}
-                                loading={loading}
-                                disabled={stats.selectedForUpdate === 0}
-                                icon={<CloudUploadOutlined />}
-                            >
-                                批量更新 ({stats.selectedForUpdate})
-                            </Button>
-                        </Space>
-                    </Col>
+
                 </Row>
             </Card>
 
@@ -767,6 +678,15 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                 }
                 extra={
                     <Space>
+                        <Button
+                            type={isAllSelected ? "default" : "primary"}
+                            ghost={!isAllSelected}
+                            onClick={handleSelectAll}
+                            icon={isAllSelected ? <UndoOutlined /> : <SelectOutlined />}
+                            disabled={Object.keys(containerUpdates).length === 0}
+                        >
+                            {isAllSelected ? '取消全选' : '全选'}
+                        </Button>
                         <Button
                             icon={<ReloadOutlined />}
                             onClick={handleReset}
