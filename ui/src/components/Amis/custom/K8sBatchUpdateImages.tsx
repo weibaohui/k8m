@@ -22,7 +22,9 @@ import {
   ContainerOutlined, 
   AppstoreOutlined,
   CheckCircleOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  SettingOutlined,
+  TagOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { Deployment } from '../../../store/deployment';
@@ -100,7 +102,8 @@ const combineImageAddressAndTag = (address: string, tag: string): string => {
 
 const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDeployments, data }) => {
   const [containerUpdates, setContainerUpdates] = useState<Record<string, ContainerUpdateInfo>>({});
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [batchTagValue, setBatchTagValue] = useState<string>('');
 
   // Get deployments from either prop or data object
   const deployments = useMemo(() => {
@@ -317,8 +320,39 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
       });
       return updated;
     });
+    setBatchTagValue('');
     message.info('已重置所有选择');
   }, []);
+
+  // 批量设置标签
+  const handleBatchSetTag = useCallback(() => {
+    if (!batchTagValue.trim()) {
+      message.warning('请输入要设置的标签值');
+      return;
+    }
+
+    const selectedContainers = Object.entries(containerUpdates).filter(([_, update]) => update.shouldUpdate);
+    
+    if (selectedContainers.length === 0) {
+      message.warning('请先选择要更新的容器');
+      return;
+    }
+
+    setContainerUpdates(prev => {
+      const updated = { ...prev };
+      selectedContainers.forEach(([key, _]) => {
+        if (updated[key]) {
+          updated[key] = {
+            ...updated[key],
+            imageTag: batchTagValue.trim()
+          };
+        }
+      });
+      return updated;
+    });
+
+    message.success(`已为 ${selectedContainers.length} 个容器设置标签: ${batchTagValue.trim()}`);
+  }, [batchTagValue, containerUpdates]);
 
     // 表格列定义
     const columns: ColumnsType<ContainerUpdateInfo> = [
@@ -504,6 +538,48 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                                 </div>
                             </div>
                         </Space>
+                    </Col>
+                </Row>
+            </Card>
+
+            {/* 批量操作工具栏 */}
+            <Card 
+                title={
+                    <Space>
+                        <SettingOutlined />
+                        批量操作
+                    </Space>
+                }
+                size="small"
+                style={{ marginBottom: '16px' }}
+            >
+                <Row gutter={16} align="middle">
+                    <Col span={6}>
+                        <Typography.Text strong>批量设置标签:</Typography.Text>
+                    </Col>
+                    <Col span={8}>
+                        <Input
+                            placeholder="输入标签值 (如: v0.6)"
+                            value={batchTagValue}
+                            onChange={(e) => setBatchTagValue(e.target.value)}
+                            onPressEnter={handleBatchSetTag}
+                        />
+                    </Col>
+                    <Col span={4}>
+                        <Button 
+                            type="primary"
+                            ghost
+                            onClick={handleBatchSetTag}
+                            disabled={!batchTagValue.trim() || stats.selectedForUpdate === 0}
+                            icon={<TagOutlined />}
+                        >
+                            应用标签
+                        </Button>
+                    </Col>
+                    <Col span={6}>
+                        <Typography.Text type="secondary">
+                            将为 {stats.selectedForUpdate} 个选中容器设置标签
+                        </Typography.Text>
                     </Col>
                 </Row>
             </Card>
