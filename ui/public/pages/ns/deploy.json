@@ -518,6 +518,183 @@
               "ns_list": "${selectedItems | pick:metadata.namespace }"
             }
           }
+        },
+        {
+          "type": "button",
+          "actionType": "dialog",
+          "label": "批量更新镜像",
+          "icon": "fas fa-sync-alt",
+          "dialog": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "size": "lg",
+            "title": "批量更新镜像",
+            "body": [
+              {
+                "type": "form",
+                "title": "批量更新镜像",
+                "name": "batch-update-form",
+                "actions": [
+                  {
+                    "type": "button",
+                    "label": "取消",
+                    "actionType": "cancel"
+                  },
+                  {
+                    "type": "button",
+                    "label": "预览更新",
+                    "level": "primary",
+                    "actionType": "dialog",
+                    "dialog": {
+                      "title": "预览批量更新",
+                      "size": "lg",
+                      "body": {
+                        "type": "service",
+                        "api": "post:/k8s/deploy/batch/preview_update_image",
+                        "body": {
+                          "type": "tpl",
+                          "tpl": "<div class='alert alert-warning mb-3'><i class='fas fa-exclamation-triangle'></i> 即将更新以下镜像，请确认无误后执行</div><div class='each-container'><% for(var i = 0; i < data.preview.length; i++) { var item = data.preview[i]; %><div class='border p-3 mb-3'><h6 class='text-primary'><i class='fas fa-cube'></i> <%= item.deployment_name %> <small class='text-muted'>(<%= item.namespace %>)</small></h6><div class='row'><div class='col-md-6'><strong>容器:</strong> <%= item.container_name %></div><div class='col-md-6'><strong>镜像拉取策略:</strong> <%= item.image_pull_policy %></div></div><div class='row mt-2'><div class='col-md-6'><strong>当前镜像:</strong><br><code class='text-muted'><%= item.current_image %></code></div><div class='col-md-6'><strong>新镜像:</strong><br><code class='text-success'><%= item.new_image %></code></div></div></div><% } %></div>"
+                        }
+                      },
+                      "actions": [
+                        {
+                          "type": "button",
+                          "label": "返回修改",
+                          "actionType": "cancel"
+                        },
+                        {
+                          "type": "button",
+                          "label": "确认执行更新",
+                          "level": "danger",
+                          "confirmText": "确定要执行批量镜像更新吗？此操作将触发滚动更新，可能会影响服务可用性。",
+                          "onEvent": {
+                            "click": {
+                              "actions": [
+                                {
+                                  "actionType": "ajax",
+                                  "api": "post:/k8s/deploy/batch/update_image"
+                                },
+                                {
+                                  "actionType": "dialog",
+                                  "dialog": {
+                                    "title": "批量更新结果",
+                                    "size": "lg",
+                                    "body": {
+                                      "type": "tpl",
+                                      "tpl": "<div class='alert alert-success mb-3'><i class='fas fa-check-circle'></i> 批量镜像更新已完成</div><div class='each-container'><% for(var i = 0; i < data.updateResult.results.length; i++) { var result = data.updateResult.results[i]; %><div class='border p-3 mb-3'><h6 class='<%= result.success ? \"text-success\" : \"text-danger\" %>'><i class='fas fa-<%= result.success ? \"check\" : \"times\" %>'></i> <%= result.deployment_name %> <small class='text-muted'>(<%= result.namespace %>)</small></h6><% if(result.success) { %><div class='text-success'><strong>状态:</strong> 更新成功</div><div class='mt-2'><strong>更新的容器:</strong><ul><% for(var j = 0; j < result.updated_containers.length; j++) { var container = result.updated_containers[j]; %><li><strong><%= container.container_name %>:</strong><br>旧镜像: <code class='text-muted'><%= container.old_image %></code><br>新镜像: <code class='text-success'><%= container.new_image %></code><br>拉取策略: <%= container.image_pull_policy %></li><% } %></ul></div><% } else { %><div class='text-danger'><strong>错误:</strong> <%= result.error %></div><% } %></div><% } %></div><div class='alert alert-info'><i class='fas fa-info-circle'></i> 滚动更新正在进行中，请稍后查看Pod状态确认更新完成</div>"
+                                    },
+                                    "actions": [
+                                      {
+                                        "type": "button",
+                                        "label": "关闭",
+                                        "actionType": "cancel"
+                                      },
+                                      {
+                                        "type": "button",
+                                        "label": "刷新页面",
+                                        "actionType": "reload"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "each",
+                    "name": "selectedItems",
+                    "items": {
+                      "type": "group",
+                      "body": [
+                        {
+                          "type": "tpl",
+                          "tpl": "<h5 class='text-primary mb-3'><i class='fas fa-cube'></i> ${metadata.name} <small class='text-muted'>(${metadata.namespace})</small></h5>"
+                        },
+                        {
+                          "type": "panel",
+                          "title": "当前运行镜像",
+                          "body": {
+                            "name": "spec.template.spec.containers",
+                            "type": "each",
+                            "items": {
+                              "type": "tpl",
+                              "tpl": "<div style='margin-bottom: 10px;'>容器：<strong class='text-green-500 font-black'>${name}</strong><br>镜像： ${image|simpleImageName}</div>"
+                            }
+                          }
+                        },
+                        {
+                          "type": "select",
+                          "name": "updates[${index}].container_name",
+                          "label": "选择要更新的容器",
+                          "source": "${spec.template.spec.containers | pick:name | map: {label: item, value: item}}",
+                          "placeholder": "请选择容器",
+                          "clearable": true
+                        },
+                        {
+                          "type": "service",
+                          "api": "/k8s/$kind/group/$group/version/$version/container_info/ns/${metadata.namespace}/name/${metadata.name}/container/${updates[index].container_name}",
+                          "body": [
+                            {
+                              "type": "input-text",
+                              "name": "updates[${index}].image",
+                              "label": "镜像名称",
+                              "required": true,
+                              "visibleOn": "${updates[index].container_name}"
+                            },
+                            {
+                              "type": "input-text",
+                              "name": "updates[${index}].tag",
+                              "label": "版本标签",
+                              "required": true,
+                              "visibleOn": "${updates[index].container_name}"
+                            },
+                            {
+                              "type": "select",
+                              "name": "updates[${index}].image_pull_policy",
+                              "label": "镜像拉取策略",
+                              "required": true,
+                              "visibleOn": "${updates[index].container_name}",
+                              "options": [
+                                {
+                                  "label": "始终拉取",
+                                  "value": "Always"
+                                },
+                                {
+                                  "label": "从不拉取",
+                                  "value": "Never"
+                                },
+                                {
+                                  "label": "不存在时拉取",
+                                  "value": "IfNotPresent"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "updates[${index}].deployment_name",
+                          "value": "${metadata.name}"
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "updates[${index}].namespace",
+                          "value": "${metadata.namespace}"
+                        }
+                      ],
+                      "className": "border-left border-primary pl-4 mb-4"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "footerToolbar": [
