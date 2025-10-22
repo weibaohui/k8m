@@ -697,7 +697,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                             onClick={handleBatchUpdate}
                             disabled={stats.selectedForUpdate === 0}
                         >
-                            提交保存 {stats.selectedForUpdate > 0 && `(${stats.selectedForUpdate})`}
+                            确定更新 {stats.selectedForUpdate > 0 && `(${stats.selectedForUpdate})`}
                         </Button>
                     </Space>
                 }
@@ -722,19 +722,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                 />
             </Card>
 
-            <style dangerouslySetInnerHTML={{
-                __html: `
-          .ant-table-tbody > tr.table-row-light > td {
-            background-color: #fafafa;
-          }
-          .ant-table-tbody > tr.table-row-dark > td {
-            background-color: #ffffff;
-          }
-          .ant-table-tbody > tr:hover > td {
-            background-color: #e6f7ff !important;
-          }
-        `
-            }} />
+
         </div>
     );
 };

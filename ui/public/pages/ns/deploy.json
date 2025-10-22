@@ -528,12 +528,13 @@
             "closeOnEsc": true,
             "closeOnOutside": true,
             "size": "lg",
-            "title": "批量更新镜像",
+            "title": "批量更新镜像（ESC关闭）",
             "body": [
               {
                 "type": "imageBatchUpdate"
               }
-            ]
+            ],
+            "actions": []
           }
         }
       ],
