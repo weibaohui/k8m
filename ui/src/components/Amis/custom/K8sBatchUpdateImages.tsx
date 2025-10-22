@@ -9,7 +9,6 @@ import {
     Space,
     Typography,
     Tag,
-    Badge,
     Empty,
     Row,
     Col
@@ -604,9 +603,6 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             },
         ];
 
-    // 表格数据
-    const tableData = Object.values(containerUpdates);
-
     if (!deployments || deployments.length === 0) {
         return (
             <Card>
@@ -660,7 +656,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                             disabled={!batchTagValue.trim() || stats.selectedForUpdate === 0}
                             icon={<TagOutlined />}
                         >
-                            应用标签
+                            更新标签
                         </Button>
                     </Col>
 
@@ -673,7 +669,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                     <Space>
                         <InfoCircleOutlined />
                         <span>容器镜像列表</span>
-                        <Text type="secondary">({tableData.length} 个容器)</Text>
+                        <Text type="secondary">({tableDataWithGrouping.length} 个容器)</Text>
                     </Space>
                 }
                 extra={
@@ -701,7 +697,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                             onClick={handleBatchUpdate}
                             disabled={stats.selectedForUpdate === 0}
                         >
-                            批量更新 {stats.selectedForUpdate > 0 && `(${stats.selectedForUpdate})`}
+                            提交保存 {stats.selectedForUpdate > 0 && `(${stats.selectedForUpdate})`}
                         </Button>
                     </Space>
                 }
@@ -711,12 +707,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                     columns={columns}
                     dataSource={tableDataWithGrouping}
                     rowKey={(record) => `${record.namespace}-${record.deploymentName}-${record.containerName}`}
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        showQuickJumper: true,
-                        showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
-                    }}
+                    pagination={false}
                     scroll={{ x: 1000 }}
                     size="middle"
                     rowClassName={(record, index) => {
