@@ -357,14 +357,14 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
     // 全选/取消全选处理函数
     const handleSelectAll = useCallback(() => {
         const allSelected = Object.values(containerUpdates).every(update => update.shouldUpdate);
-        
+
         setContainerUpdates(prev => {
             const updated = { ...prev };
             Object.keys(updated).forEach(key => {
                 const container = containerInfos.find(c =>
                     `${c.namespace}-${c.deploymentName}-${c.containerName}` === key
                 );
-                
+
                 if (container) {
                     if (allSelected) {
                         // 如果全部已选中，则取消全选
@@ -542,54 +542,6 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
 
     return (
         <div style={{ padding: '16px' }}>
-            {/* 统计信息卡片 */}
-            <Card
-                style={{ marginBottom: '16px' }}
-                bodyStyle={{ padding: '16px 24px' }}
-            >
-                <Row gutter={24} align="middle">
-                    <Col flex="auto">
-                        <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
-                            <CloudUploadOutlined style={{ marginRight: '8px' }} />
-                            批量更新容器镜像
-                        </Title>
-                    </Col>
-                    <Col>
-                        <Space size="large">
-                            <div style={{ textAlign: 'center' }}>
-                                <Badge count={stats.deploymentCount} color="#52c41a">
-                                    <div style={{ padding: '4px 8px' }}>
-                                        <AppstoreOutlined style={{ fontSize: '16px', color: '#52c41a' }} />
-                                    </div>
-                                </Badge>
-                                <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                    Deployments
-                                </div>
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <Badge count={stats.totalContainers} color="#1890ff">
-                                    <div style={{ padding: '4px 8px' }}>
-                                        <ContainerOutlined style={{ fontSize: '16px', color: '#1890ff' }} />
-                                    </div>
-                                </Badge>
-                                <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                    容器总数
-                                </div>
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <Badge count={stats.selectedForUpdate} color="#f5222d">
-                                    <div style={{ padding: '4px 8px' }}>
-                                        <CheckCircleOutlined style={{ fontSize: '16px', color: '#f5222d' }} />
-                                    </div>
-                                </Badge>
-                                <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                    待更新
-                                </div>
-                            </div>
-                        </Space>
-                    </Col>
-                </Row>
-            </Card>
 
             {/* 批量操作工具栏 */}
             <Card
@@ -616,8 +568,8 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                     </Col>
                     <Col span={20}>
                         <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                            {isAllSelected 
-                                ? '已选中所有容器，点击可取消全选' 
+                            {isAllSelected
+                                ? '已选中所有容器，点击可取消全选'
                                 : `共 ${Object.keys(containerUpdates).length} 个容器，点击可全选`
                             }
                         </Typography.Text>
