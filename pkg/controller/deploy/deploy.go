@@ -592,8 +592,14 @@ func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
 		return
 	}
 
+	// 用于收集错误和成功信息
+	var errors []string
+	var successCount int
+
 	// 批量更新每个Deployment的镜像
 	for _, deployment := range req.Deployments {
+		deploymentKey := fmt.Sprintf("%s/%s", deployment.Namespace, deployment.Name)
+		
 		// 获取现有的Deployment
 		var existingDeployment v1.Deployment
 		err = kom.Cluster(selectedCluster).WithContext(ctx).
@@ -602,10 +608,14 @@ func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
 			Name(deployment.Name).
 			Get(&existingDeployment).Error
 		if err != nil {
-			klog.V(6).Infof("获取Deployment失败 %s/%s: %v", deployment.Namespace, deployment.Name, err)
-			amis.WriteJsonError(c, fmt.Errorf("Deployment %s/%s 不存在: %v", deployment.Namespace, deployment.Name, err))
-			return
+			errorMsg := fmt.Sprintf("Deployment %s 不存在: %v", deploymentKey, err)
+			errors = append(errors, errorMsg)
+			klog.V(6).Infof("获取Deployment失败 %s: %v", deploymentKey, err)
+			continue
 		}
+
+		// 标记当前Deployment是否有错误
+		hasError := false
 
 		// 更新容器镜像
 		for _, containerUpdate := range deployment.Containers {
@@ -618,10 +628,16 @@ func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
 				}
 			}
 			if !found {
-				klog.V(6).Infof("容器 %s 在Deployment %s/%s 中未找到", containerUpdate.Name, deployment.Namespace, deployment.Name)
-				amis.WriteJsonError(c, fmt.Errorf("容器 %s 在Deployment %s/%s 中未找到", containerUpdate.Name, deployment.Namespace, deployment.Name))
-				return
+				errorMsg := fmt.Sprintf("容器 %s 在Deployment %s 中未找到", containerUpdate.Name, deploymentKey)
+				errors = append(errors, errorMsg)
+				klog.V(6).Infof("容器 %s 在Deployment %s 中未找到", containerUpdate.Name, deploymentKey)
+				hasError = true
 			}
+		}
+
+		// 如果容器更新有错误，跳过这个Deployment的更新
+		if hasError {
+			continue
 		}
 
 		// 更新Deployment
@@ -630,13 +646,28 @@ func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
 			Namespace(deployment.Namespace).
 			Update(&existingDeployment).Error
 		if err != nil {
-			klog.V(6).Infof("更新Deployment失败 %s/%s: %v", deployment.Namespace, deployment.Name, err)
-			amis.WriteJsonError(c, fmt.Errorf("更新Deployment %s/%s 失败: %v", deployment.Namespace, deployment.Name, err))
-			return
+			errorMsg := fmt.Sprintf("更新Deployment %s 失败: %v", deploymentKey, err)
+			errors = append(errors, errorMsg)
+			klog.V(6).Infof("更新Deployment失败 %s: %v", deploymentKey, err)
+			continue
 		}
 
-		klog.V(6).Infof("成功更新Deployment %s/%s 的镜像", deployment.Namespace, deployment.Name)
+		successCount++
+		klog.V(6).Infof("成功更新Deployment %s 的镜像", deploymentKey)
 	}
 
-	amis.WriteJsonOK(c)
+	// 构建返回结果
+	if len(errors) == 0 {
+		// 全部成功
+		amis.WriteJsonOKMsg(c, fmt.Sprintf("成功更新 %d 个Deployment的镜像", successCount))
+	} else if successCount == 0 {
+		// 全部失败
+		errorMsg := fmt.Sprintf("批量更新失败，共 %d 个错误：\n%s", len(errors), strings.Join(errors, "\n"))
+		amis.WriteJsonError(c, fmt.Errorf(errorMsg))
+	} else {
+		// 部分成功
+		resultMsg := fmt.Sprintf("批量更新完成：成功 %d 个，失败 %d 个。\n失败详情：\n%s", 
+			successCount, len(errors), strings.Join(errors, "\n"))
+		amis.WriteJsonOKMsg(c, resultMsg)
+	}
 }
