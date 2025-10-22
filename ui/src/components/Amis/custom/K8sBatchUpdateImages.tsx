@@ -22,11 +22,13 @@ import {
     CheckCircleOutlined,
     InfoCircleOutlined,
     SettingOutlined,
-    TagOutlined
+    TagOutlined,
+    SelectOutlined,
+    UndoOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { Deployment } from '../../../store/deployment';
-import { Container } from '../../../store/pod';
+import { Deployment } from '@/store/deployment';
+import { Container } from '@/store/pod';
 
 const { Title, Text } = Typography;
 
@@ -352,6 +354,55 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
         message.success(`已为 ${selectedContainers.length} 个容器设置标签: ${batchTagValue.trim()}`);
     }, [batchTagValue, containerUpdates]);
 
+    // 全选/取消全选处理函数
+    const handleSelectAll = useCallback(() => {
+        const allSelected = Object.values(containerUpdates).every(update => update.shouldUpdate);
+        
+        setContainerUpdates(prev => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach(key => {
+                const container = containerInfos.find(c =>
+                    `${c.namespace}-${c.deploymentName}-${c.containerName}` === key
+                );
+                
+                if (container) {
+                    if (allSelected) {
+                        // 如果全部已选中，则取消全选
+                        updated[key] = {
+                            ...updated[key],
+                            shouldUpdate: false,
+                            imageAddress: '',
+                            imageTag: ''
+                        };
+                    } else {
+                        // 如果未全选，则全选并自动解析镜像地址和标签
+                        const { address, tag } = parseImageAddressAndTag(container.currentImage);
+                        updated[key] = {
+                            ...updated[key],
+                            shouldUpdate: true,
+                            imageAddress: address,
+                            imageTag: tag
+                        };
+                    }
+                }
+            });
+            return updated;
+        });
+
+        if (allSelected) {
+            message.info('已取消全选');
+        } else {
+            message.success(`已全选 ${Object.keys(containerUpdates).length} 个容器`);
+        }
+    }, [containerUpdates, containerInfos]);
+
+    // 判断是否全选状态
+    const isAllSelected = useMemo(() => {
+        const totalContainers = Object.keys(containerUpdates).length;
+        if (totalContainers === 0) return false;
+        return Object.values(containerUpdates).every(update => update.shouldUpdate);
+    }, [containerUpdates]);
+
     // 表格列定义
     const columns: ColumnsType<ContainerUpdateInfo> = [
         {
@@ -551,6 +602,27 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                 size="small"
                 style={{ marginBottom: '16px' }}
             >
+                <Row gutter={16} align="middle" style={{ marginBottom: '12px' }}>
+                    <Col span={4}>
+                        <Button
+                            type={isAllSelected ? "default" : "primary"}
+                            ghost={!isAllSelected}
+                            onClick={handleSelectAll}
+                            icon={isAllSelected ? <UndoOutlined /> : <SelectOutlined />}
+                            disabled={Object.keys(containerUpdates).length === 0}
+                        >
+                            {isAllSelected ? '取消全选' : '全选'}
+                        </Button>
+                    </Col>
+                    <Col span={20}>
+                        <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                            {isAllSelected 
+                                ? '已选中所有容器，点击可取消全选' 
+                                : `共 ${Object.keys(containerUpdates).length} 个容器，点击可全选`
+                            }
+                        </Typography.Text>
+                    </Col>
+                </Row>
                 <Row gutter={16} align="middle">
                     <Col span={6}>
                         <Typography.Text strong>批量设置标签:</Typography.Text>
@@ -575,9 +647,24 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                         </Button>
                     </Col>
                     <Col span={6}>
-                        <Typography.Text type="secondary">
-                            将为 {stats.selectedForUpdate} 个选中容器设置标签
-                        </Typography.Text>
+                        <Space>
+                            <Button
+                                onClick={handleReset}
+                                icon={<ReloadOutlined />}
+                                disabled={stats.selectedForUpdate === 0}
+                            >
+                                重置
+                            </Button>
+                            <Button
+                                type="primary"
+                                onClick={handleBatchUpdate}
+                                loading={loading}
+                                disabled={stats.selectedForUpdate === 0}
+                                icon={<CloudUploadOutlined />}
+                            >
+                                批量更新 ({stats.selectedForUpdate})
+                            </Button>
+                        </Space>
                     </Col>
                 </Row>
             </Card>
