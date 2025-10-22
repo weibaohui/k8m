@@ -279,7 +279,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             // 这里应该调用实际的API
             // await api.batchUpdateImages(batchRequest);
 
-
+            console.log('批量更新请求:', JSON.stringify(batchRequest));
             // 调用后端API
             const response = await fetcher({
                 url: '/k8s/deployment/batch_update_images',
