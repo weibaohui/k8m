@@ -30,6 +30,46 @@ import type { ColumnsType } from 'antd/es/table';
 import { Deployment } from '@/store/deployment';
 import { Container } from '@/store/pod';
 
+// 添加样式
+const styles = `
+.deployment-group-header {
+    background-color: #fafafa !important;
+    border-top: 2px solid #1890ff;
+}
+
+.container-row {
+    background-color: #fdfdfd;
+}
+
+.container-row:hover {
+    background-color: #f0f9ff !important;
+}
+
+.deployment-group-header:hover {
+    background-color: #f0f9ff !important;
+}
+
+.selected-row {
+    background-color: #e6f7ff !important;
+}
+
+.ant-table-tbody > tr.deployment-group-header > td {
+    border-top: 2px solid #1890ff;
+    font-weight: 500;
+}
+
+.ant-table-tbody > tr.container-row > td {
+    border-top: 1px solid #f0f0f0;
+}
+`;
+
+// 注入样式
+if (typeof document !== 'undefined') {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = styles;
+    document.head.appendChild(styleElement);
+}
+
 const { Title, Text } = Typography;
 
 interface ContainerUpdateInfo {
@@ -403,8 +443,57 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
         return Object.values(containerUpdates).every(update => update.shouldUpdate);
     }, [containerUpdates]);
 
+    // 计算每个Deployment的容器数量，用于rowSpan
+    const deploymentContainerCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        Object.values(containerUpdates).forEach(container => {
+            const key = `${container.namespace}-${container.deploymentName}`;
+            counts[key] = (counts[key] || 0) + 1;
+        });
+        return counts;
+    }, [containerUpdates]);
+
+    // 为表格数据添加分组信息
+    const tableDataWithGrouping = useMemo(() => {
+        const data = Object.values(containerUpdates);
+        const groupedData: (ContainerUpdateInfo & { 
+            isFirstInGroup?: boolean; 
+            groupRowSpan?: number;
+            deploymentKey?: string;
+        })[] = [];
+        
+        // 按Deployment分组
+        const deploymentGroups: Record<string, ContainerUpdateInfo[]> = {};
+        data.forEach(container => {
+            const key = `${container.namespace}-${container.deploymentName}`;
+            if (!deploymentGroups[key]) {
+                deploymentGroups[key] = [];
+            }
+            deploymentGroups[key].push(container);
+        });
+
+        // 为每组的第一个容器标记分组信息
+        Object.entries(deploymentGroups).forEach(([deploymentKey, containers]) => {
+            containers.forEach((container, index) => {
+                const enhancedContainer = {
+                    ...container,
+                    isFirstInGroup: index === 0,
+                    groupRowSpan: index === 0 ? containers.length : 0,
+                    deploymentKey
+                };
+                groupedData.push(enhancedContainer);
+            });
+        });
+
+        return groupedData;
+    }, [containerUpdates]);
+
     // 表格列定义
-    const columns: ColumnsType<ContainerUpdateInfo> = [
+    const columns: ColumnsType<ContainerUpdateInfo & { 
+        isFirstInGroup?: boolean; 
+        groupRowSpan?: number;
+        deploymentKey?: string;
+    }> = [
         {
             title: (
                 <Space>
@@ -414,16 +503,50 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             ),
             key: 'deployment',
             width: 200,
-            render: (_, record) => (
-                <div>
-                    <div style={{ fontWeight: 500, color: '#1890ff' }}>
-                        {record.deploymentName}
-                    </div>
-                    <Text type="secondary" style={{ fontSize: '12px' }}>
-                        {record.namespace}
-                    </Text>
-                </div>
-            ),
+            render: (_, record) => {
+                // 只在每组的第一行显示Deployment信息
+                if (!record.isFirstInGroup) {
+                    return null;
+                }
+                
+                const containerCount = deploymentContainerCounts[record.deploymentKey || ''] || 1;
+                
+                return {
+                    children: (
+                        <div style={{ 
+                            padding: '8px 0',
+                            borderLeft: '3px solid #1890ff',
+                            paddingLeft: '12px',
+                            backgroundColor: '#f0f9ff'
+                        }}>
+                            <div style={{ 
+                                fontWeight: 600, 
+                                color: '#1890ff',
+                                fontSize: '14px',
+                                marginBottom: '4px'
+                            }}>
+                                {record.deploymentName}
+                            </div>
+                            <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px',
+                                marginBottom: '4px'
+                            }}>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                    {record.namespace}
+                                </Text>
+                                <Tag color="blue" style={{ fontSize: '11px' }}>
+                                    {containerCount} 个容器
+                                </Tag>
+                            </div>
+                        </div>
+                    ),
+                    props: {
+                        rowSpan: record.groupRowSpan,
+                    },
+                };
+            },
         },
         {
             title: (
@@ -434,11 +557,23 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             ),
             dataIndex: 'containerName',
             key: 'containerName',
-            width: 150,
-            render: (name) => (
-                <Tag color="blue" style={{ margin: 0 }}>
-                    {name}
-                </Tag>
+            width: 180,
+            render: (containerName: string, record) => (
+                <div style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                }}>
+                    <ContainerOutlined style={{ 
+                        color: '#52c41a',
+                        fontSize: '14px'
+                    }} />
+                    <Text strong style={{ 
+                        color: '#52c41a'
+                    }}>
+                        {containerName}
+                    </Text>
+                </div>
             ),
         },
         {
@@ -654,7 +789,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             >
                 <Table
                     columns={columns}
-                    dataSource={tableData}
+                    dataSource={tableDataWithGrouping}
                     rowKey={(record) => `${record.namespace}-${record.deploymentName}-${record.containerName}`}
                     pagination={{
                         pageSize: 10,
@@ -664,7 +799,15 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                     }}
                     scroll={{ x: 1000 }}
                     size="middle"
-                    rowClassName={(_, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}
+                    rowClassName={(record, index) => {
+                        let className = record.shouldUpdate ? 'selected-row' : '';
+                        if (record.isFirstInGroup) {
+                            className += ' deployment-group-header';
+                        } else {
+                            className += ' container-row';
+                        }
+                        return className;
+                    }}
                 />
             </Card>
 
