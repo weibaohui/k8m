@@ -523,7 +523,6 @@
           "type": "button",
           "actionType": "dialog",
           "label": "批量更新镜像",
-          "icon": "fas fa-sync-alt",
           "dialog": {
             "closeOnEsc": true,
             "closeOnOutside": true,
