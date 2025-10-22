@@ -1,30 +1,28 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { 
-  Table, 
-  Checkbox, 
-  Input, 
-  Button, 
-  message, 
-  Card, 
-  Space, 
-  Typography, 
-  Tag, 
-  Badge, 
-  Divider,
-  Empty,
-  Tooltip,
-  Row,
-  Col
+import {
+    Table,
+    Checkbox,
+    Input,
+    Button,
+    message,
+    Card,
+    Space,
+    Typography,
+    Tag,
+    Badge,
+    Empty,
+    Row,
+    Col
 } from 'antd';
-import { 
-  ReloadOutlined, 
-  CloudUploadOutlined, 
-  ContainerOutlined, 
-  AppstoreOutlined,
-  CheckCircleOutlined,
-  InfoCircleOutlined,
-  SettingOutlined,
-  TagOutlined
+import {
+    ReloadOutlined,
+    CloudUploadOutlined,
+    ContainerOutlined,
+    AppstoreOutlined,
+    CheckCircleOutlined,
+    InfoCircleOutlined,
+    SettingOutlined,
+    TagOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { Deployment } from '../../../store/deployment';
@@ -33,326 +31,326 @@ import { Container } from '../../../store/pod';
 const { Title, Text } = Typography;
 
 interface ContainerUpdateInfo {
-  deploymentName: string;
-  namespace: string;
-  containerName: string;
-  currentImage: string;
-  shouldUpdate: boolean;
-  newImage: string;
-  imageAddress: string;
-  imageTag: string;
+    deploymentName: string;
+    namespace: string;
+    containerName: string;
+    currentImage: string;
+    shouldUpdate: boolean;
+    newImage: string;
+    imageAddress: string;
+    imageTag: string;
 }
 
 interface BatchUpdateImageRequest {
-  deployments: Array<{
-    name: string;
-    namespace: string;
-    containers: Array<{
-      name: string;
-      image: string;
+    deployments: Array<{
+        name: string;
+        namespace: string;
+        containers: Array<{
+            name: string;
+            image: string;
+        }>;
     }>;
-  }>;
 }
 
 interface K8sBatchUpdateImagesProps {
-  selectedDeployments?: Deployment[];
-  data?: {
-    selectedItems?: Deployment[];
-  };
+    selectedDeployments?: Deployment[];
+    data?: {
+        selectedItems?: Deployment[];
+    };
 }
 
 // 解析镜像地址和标签的工具函数
 const parseImageAddressAndTag = (image: string): { address: string; tag: string } => {
-  if (!image) {
-    return { address: '', tag: '' };
-  }
-  
-  const lastColonIndex = image.lastIndexOf(':');
-  
-  // 如果没有冒号，整个字符串都是地址，标签为空
-  if (lastColonIndex === -1) {
-    return { address: image, tag: '' };
-  }
-  
-  // 检查冒号后面的部分是否包含斜杠，如果包含则可能是端口号而不是标签
-  const potentialTag = image.substring(lastColonIndex + 1);
-  if (potentialTag.includes('/')) {
-    return { address: image, tag: '' };
-  }
-  
-  // 拆分地址和标签
-  const address = image.substring(0, lastColonIndex);
-  const tag = potentialTag;
-  
-  return { address, tag };
+    if (!image) {
+        return { address: '', tag: '' };
+    }
+
+    const lastColonIndex = image.lastIndexOf(':');
+
+    // 如果没有冒号，整个字符串都是地址，标签为空
+    if (lastColonIndex === -1) {
+        return { address: image, tag: '' };
+    }
+
+    // 检查冒号后面的部分是否包含斜杠，如果包含则可能是端口号而不是标签
+    const potentialTag = image.substring(lastColonIndex + 1);
+    if (potentialTag.includes('/')) {
+        return { address: image, tag: '' };
+    }
+
+    // 拆分地址和标签
+    const address = image.substring(0, lastColonIndex);
+    const tag = potentialTag;
+
+    return { address, tag };
 };
 
 // 合并镜像地址和标签的工具函数
 const combineImageAddressAndTag = (address: string, tag: string): string => {
-  if (!address) {
-    return '';
-  }
-  
-  if (!tag) {
-    return address;
-  }
-  
-  return `${address}:${tag}`;
+    if (!address) {
+        return '';
+    }
+
+    if (!tag) {
+        return address;
+    }
+
+    return `${address}:${tag}`;
 };
 
 const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDeployments, data }) => {
-  const [containerUpdates, setContainerUpdates] = useState<Record<string, ContainerUpdateInfo>>({});
+    const [containerUpdates, setContainerUpdates] = useState<Record<string, ContainerUpdateInfo>>({});
     const [loading, setLoading] = useState(false);
     const [batchTagValue, setBatchTagValue] = useState<string>('');
 
-  // Get deployments from either prop or data object
-  const deployments = useMemo(() => {
-    return selectedDeployments || data?.selectedItems || [];
-  }, [selectedDeployments, data]);
+    // Get deployments from either prop or data object
+    const deployments = useMemo(() => {
+        return selectedDeployments || data?.selectedItems || [];
+    }, [selectedDeployments, data]);
 
-  // 解析容器信息
-  const containerInfos = useMemo(() => {
-    const infos: ContainerUpdateInfo[] = [];
-    
-    if (!deployments || !Array.isArray(deployments)) {
-      return infos;
-    }
-    
-    deployments.forEach(deployment => {
-      if (!deployment || !deployment.spec) {
-        return;
-      }
-      
-      const containers: Container[] = deployment.spec?.template?.spec?.containers || [];
-      containers.forEach(container => {
-        if (!container) {
-          return;
+    // 解析容器信息
+    const containerInfos = useMemo(() => {
+        const infos: ContainerUpdateInfo[] = [];
+
+        if (!deployments || !Array.isArray(deployments)) {
+            return infos;
         }
-        
-        const key = `${deployment.metadata?.namespace || 'default'}-${deployment.metadata?.name || 'unknown'}-${container.name || 'unknown'}`;
-        infos.push({
-          deploymentName: deployment.metadata?.name || 'Unknown',
-          namespace: deployment.metadata?.namespace || 'default',
-          containerName: container.name || 'Unknown',
-          currentImage: container.image || 'Unknown',
-          shouldUpdate: false,
-          newImage: '',
-          imageAddress: '',
-          imageTag: ''
-        });
-      });
-    });
-    
-    return infos;
-  }, [deployments]);
 
-  // 初始化容器更新状态
-  useEffect(() => {
-    const updates: Record<string, ContainerUpdateInfo> = {};
-    containerInfos.forEach(info => {
-      const key = `${info.namespace}-${info.deploymentName}-${info.containerName}`;
-      updates[key] = { ...info };
-    });
-    setContainerUpdates(updates);
-  }, [containerInfos]);
-
-  // 统计信息
-  const stats = useMemo(() => {
-    const totalContainers = Object.keys(containerUpdates).length;
-    const selectedForUpdate = Object.values(containerUpdates).filter(c => c.shouldUpdate).length;
-    const deploymentCount = deployments.length;
-    
-    return {
-      deploymentCount,
-      totalContainers,
-      selectedForUpdate
-    };
-  }, [containerUpdates, deployments]);
-
-  // 更新容器信息
-  const updateContainerInfo = useCallback((key: string, field: keyof ContainerUpdateInfo, value: any) => {
-    setContainerUpdates(prev => {
-      const currentUpdate = prev[key];
-      
-      // 如果是切换shouldUpdate状态，需要特殊处理
-      if (field === 'shouldUpdate' && value && !currentUpdate?.shouldUpdate) {
-        // 当启用更新时，自动解析当前镜像的地址和标签
-        const container = containerInfos.find(c => 
-          `${c.namespace}-${c.deploymentName}-${c.containerName}` === key
-        );
-        if (container) {
-          const { address, tag } = parseImageAddressAndTag(container.currentImage);
-          return {
-            ...prev,
-            [key]: {
-              ...currentUpdate,
-              shouldUpdate: value,
-              imageAddress: address,
-              imageTag: tag
+        deployments.forEach(deployment => {
+            if (!deployment || !deployment.spec) {
+                return;
             }
-          };
-        }
-      }
-      
-      const updated = { ...prev };
-      updated[key] = {
-        ...updated[key],
-        [field]: value
-      };
-      
-      // 当更新imageAddress或imageTag时，同时更新newImage
-      if (field === 'imageAddress' || field === 'imageTag') {
-        const container = updated[key];
-        const address = field === 'imageAddress' ? value : container.imageAddress;
-        const tag = field === 'imageTag' ? value : container.imageTag;
-        updated[key].newImage = combineImageAddressAndTag(address, tag);
-      }
-      
-      return updated;
-    });
-  }, [containerInfos]);
 
-  // 批量更新处理
-  const handleBatchUpdate = useCallback(async () => {
-    // 过滤出需要更新的容器
-    const containersToUpdate = containerInfos.filter(container => {
-      const key = `${container.namespace}-${container.deploymentName}-${container.containerName}`;
-      const updateInfo = containerUpdates[key];
-      return updateInfo?.shouldUpdate && updateInfo?.imageAddress?.trim();
-    });
+            const containers: Container[] = deployment.spec?.template?.spec?.containers || [];
+            containers.forEach(container => {
+                if (!container) {
+                    return;
+                }
 
-    if (containersToUpdate.length === 0) {
-      message.warning('请选择要更新的容器并输入镜像地址');
-      return;
-    }
-
-    // 验证镜像地址格式
-    const invalidContainers = containersToUpdate.filter(container => {
-      const key = `${container.namespace}-${container.deploymentName}-${container.containerName}`;
-      const updateInfo = containerUpdates[key];
-      const imageAddress = updateInfo?.imageAddress?.trim();
-      return !imageAddress || imageAddress.length === 0;
-    });
-
-    if (invalidContainers.length > 0) {
-      message.error('请为所有选中的容器输入有效的镜像地址');
-      return;
-    }
-
-    const selectedContainers = Object.values(containerUpdates).filter(c => c.shouldUpdate);
-
-    setLoading(true);
-    
-    try {
-      // 按 deployment 分组
-      const deploymentGroups = selectedContainers.reduce((groups, container) => {
-        const key = `${container.namespace}-${container.deploymentName}`;
-        if (!groups[key]) {
-          groups[key] = {
-            name: container.deploymentName,
-            namespace: container.namespace,
-            containers: []
-          };
-        }
-        
-        // 合并镜像地址和标签为完整镜像名
-        const newImage = combineImageAddressAndTag(
-          container.imageAddress || '',
-          container.imageTag || ''
-        );
-        
-        groups[key].containers.push({
-          name: container.containerName,
-          image: newImage
+                const key = `${deployment.metadata?.namespace || 'default'}-${deployment.metadata?.name || 'unknown'}-${container.name || 'unknown'}`;
+                infos.push({
+                    deploymentName: deployment.metadata?.name || 'Unknown',
+                    namespace: deployment.metadata?.namespace || 'default',
+                    containerName: container.name || 'Unknown',
+                    currentImage: container.image || 'Unknown',
+                    shouldUpdate: false,
+                    newImage: '',
+                    imageAddress: '',
+                    imageTag: ''
+                });
+            });
         });
-        return groups;
-      }, {} as Record<string, any>);
 
-      const batchRequest: BatchUpdateImageRequest = {
-        deployments: Object.values(deploymentGroups)
-      };
+        return infos;
+    }, [deployments]);
 
-      console.log('批量更新请求:', batchRequest);
-      
-      // 这里应该调用实际的API
-      // await api.batchUpdateImages(batchRequest);
-      
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      message.success(`成功更新 ${containersToUpdate.length} 个容器的镜像`);
-      
-      // 重置选择状态
-      setContainerUpdates(prev => {
-        const updated = { ...prev };
-        Object.keys(updated).forEach(key => {
-          updated[key] = {
-            ...updated[key],
-            shouldUpdate: false,
-            newImage: '',
-            imageAddress: '',
-            imageTag: ''
-          };
+    // 初始化容器更新状态
+    useEffect(() => {
+        const updates: Record<string, ContainerUpdateInfo> = {};
+        containerInfos.forEach(info => {
+            const key = `${info.namespace}-${info.deploymentName}-${info.containerName}`;
+            updates[key] = { ...info };
         });
-        return updated;
-      });
-      
-    } catch (error) {
-      console.error('批量更新失败:', error);
-      message.error('批量更新失败，请重试');
-    } finally {
-      setLoading(false);
-    }
-  }, [containerUpdates, containerInfos]);
+        setContainerUpdates(updates);
+    }, [containerInfos]);
 
-  // 重置所有选择
-  const handleReset = useCallback(() => {
-    setContainerUpdates(prev => {
-      const updated = { ...prev };
-      Object.keys(updated).forEach(key => {
-        updated[key] = {
-          ...updated[key],
-          shouldUpdate: false,
-          newImage: '',
-          imageAddress: '',
-          imageTag: ''
+    // 统计信息
+    const stats = useMemo(() => {
+        const totalContainers = Object.keys(containerUpdates).length;
+        const selectedForUpdate = Object.values(containerUpdates).filter(c => c.shouldUpdate).length;
+        const deploymentCount = deployments.length;
+
+        return {
+            deploymentCount,
+            totalContainers,
+            selectedForUpdate
         };
-      });
-      return updated;
-    });
-    setBatchTagValue('');
-    message.info('已重置所有选择');
-  }, []);
+    }, [containerUpdates, deployments]);
 
-  // 批量设置标签
-  const handleBatchSetTag = useCallback(() => {
-    if (!batchTagValue.trim()) {
-      message.warning('请输入要设置的标签值');
-      return;
-    }
+    // 更新容器信息
+    const updateContainerInfo = useCallback((key: string, field: keyof ContainerUpdateInfo, value: any) => {
+        setContainerUpdates(prev => {
+            const currentUpdate = prev[key];
 
-    const selectedContainers = Object.entries(containerUpdates).filter(([_, update]) => update.shouldUpdate);
-    
-    if (selectedContainers.length === 0) {
-      message.warning('请先选择要更新的容器');
-      return;
-    }
+            // 如果是切换shouldUpdate状态，需要特殊处理
+            if (field === 'shouldUpdate' && value && !currentUpdate?.shouldUpdate) {
+                // 当启用更新时，自动解析当前镜像的地址和标签
+                const container = containerInfos.find(c =>
+                    `${c.namespace}-${c.deploymentName}-${c.containerName}` === key
+                );
+                if (container) {
+                    const { address, tag } = parseImageAddressAndTag(container.currentImage);
+                    return {
+                        ...prev,
+                        [key]: {
+                            ...currentUpdate,
+                            shouldUpdate: value,
+                            imageAddress: address,
+                            imageTag: tag
+                        }
+                    };
+                }
+            }
 
-    setContainerUpdates(prev => {
-      const updated = { ...prev };
-      selectedContainers.forEach(([key, _]) => {
-        if (updated[key]) {
-          updated[key] = {
-            ...updated[key],
-            imageTag: batchTagValue.trim()
-          };
+            const updated = { ...prev };
+            updated[key] = {
+                ...updated[key],
+                [field]: value
+            };
+
+            // 当更新imageAddress或imageTag时，同时更新newImage
+            if (field === 'imageAddress' || field === 'imageTag') {
+                const container = updated[key];
+                const address = field === 'imageAddress' ? value : container.imageAddress;
+                const tag = field === 'imageTag' ? value : container.imageTag;
+                updated[key].newImage = combineImageAddressAndTag(address, tag);
+            }
+
+            return updated;
+        });
+    }, [containerInfos]);
+
+    // 批量更新处理
+    const handleBatchUpdate = useCallback(async () => {
+        // 过滤出需要更新的容器
+        const containersToUpdate = containerInfos.filter(container => {
+            const key = `${container.namespace}-${container.deploymentName}-${container.containerName}`;
+            const updateInfo = containerUpdates[key];
+            return updateInfo?.shouldUpdate && updateInfo?.imageAddress?.trim();
+        });
+
+        if (containersToUpdate.length === 0) {
+            message.warning('请选择要更新的容器并输入镜像地址');
+            return;
         }
-      });
-      return updated;
-    });
 
-    message.success(`已为 ${selectedContainers.length} 个容器设置标签: ${batchTagValue.trim()}`);
-  }, [batchTagValue, containerUpdates]);
+        // 验证镜像地址格式
+        const invalidContainers = containersToUpdate.filter(container => {
+            const key = `${container.namespace}-${container.deploymentName}-${container.containerName}`;
+            const updateInfo = containerUpdates[key];
+            const imageAddress = updateInfo?.imageAddress?.trim();
+            return !imageAddress || imageAddress.length === 0;
+        });
+
+        if (invalidContainers.length > 0) {
+            message.error('请为所有选中的容器输入有效的镜像地址');
+            return;
+        }
+
+        const selectedContainers = Object.values(containerUpdates).filter(c => c.shouldUpdate);
+
+        setLoading(true);
+
+        try {
+            // 按 deployment 分组
+            const deploymentGroups = selectedContainers.reduce((groups, container) => {
+                const key = `${container.namespace}-${container.deploymentName}`;
+                if (!groups[key]) {
+                    groups[key] = {
+                        name: container.deploymentName,
+                        namespace: container.namespace,
+                        containers: []
+                    };
+                }
+
+                // 合并镜像地址和标签为完整镜像名
+                const newImage = combineImageAddressAndTag(
+                    container.imageAddress || '',
+                    container.imageTag || ''
+                );
+
+                groups[key].containers.push({
+                    name: container.containerName,
+                    image: newImage
+                });
+                return groups;
+            }, {} as Record<string, any>);
+
+            const batchRequest: BatchUpdateImageRequest = {
+                deployments: Object.values(deploymentGroups)
+            };
+
+            console.log('批量更新请求:', batchRequest);
+
+            // 这里应该调用实际的API
+            // await api.batchUpdateImages(batchRequest);
+
+            // 模拟API调用
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            message.success(`成功更新 ${containersToUpdate.length} 个容器的镜像`);
+
+            // 重置选择状态
+            setContainerUpdates(prev => {
+                const updated = { ...prev };
+                Object.keys(updated).forEach(key => {
+                    updated[key] = {
+                        ...updated[key],
+                        shouldUpdate: false,
+                        newImage: '',
+                        imageAddress: '',
+                        imageTag: ''
+                    };
+                });
+                return updated;
+            });
+
+        } catch (error) {
+            console.error('批量更新失败:', error);
+            message.error('批量更新失败，请重试');
+        } finally {
+            setLoading(false);
+        }
+    }, [containerUpdates, containerInfos]);
+
+    // 重置所有选择
+    const handleReset = useCallback(() => {
+        setContainerUpdates(prev => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach(key => {
+                updated[key] = {
+                    ...updated[key],
+                    shouldUpdate: false,
+                    newImage: '',
+                    imageAddress: '',
+                    imageTag: ''
+                };
+            });
+            return updated;
+        });
+        setBatchTagValue('');
+        message.info('已重置所有选择');
+    }, []);
+
+    // 批量设置标签
+    const handleBatchSetTag = useCallback(() => {
+        if (!batchTagValue.trim()) {
+            message.warning('请输入要设置的标签值');
+            return;
+        }
+
+        const selectedContainers = Object.entries(containerUpdates).filter(([_, update]) => update.shouldUpdate);
+
+        if (selectedContainers.length === 0) {
+            message.warning('请先选择要更新的容器');
+            return;
+        }
+
+        setContainerUpdates(prev => {
+            const updated = { ...prev };
+            selectedContainers.forEach(([key, _]) => {
+                if (updated[key]) {
+                    updated[key] = {
+                        ...updated[key],
+                        imageTag: batchTagValue.trim()
+                    };
+                }
+            });
+            return updated;
+        });
+
+        message.success(`已为 ${selectedContainers.length} 个容器设置标签: ${batchTagValue.trim()}`);
+    }, [batchTagValue, containerUpdates]);
 
     // 表格列定义
     const columns: ColumnsType<ContainerUpdateInfo> = [
@@ -543,7 +541,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             </Card>
 
             {/* 批量操作工具栏 */}
-            <Card 
+            <Card
                 title={
                     <Space>
                         <SettingOutlined />
@@ -566,7 +564,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                         />
                     </Col>
                     <Col span={4}>
-                        <Button 
+                        <Button
                             type="primary"
                             ghost
                             onClick={handleBatchSetTag}
