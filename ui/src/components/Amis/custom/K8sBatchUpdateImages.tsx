@@ -281,12 +281,23 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
 
             console.log('批量更新请求:', JSON.stringify(batchRequest));
             // 调用后端API
-            const response = await fetcher({
+            const fetcherResult = await fetcher({
                 url: '/k8s/deployment/batch_update_images',
                 method: 'post',
                 data: batchRequest
             });
-            message.success(`成功更新 ${containersToUpdate.length} 个容器的镜像`);
+
+            console.log('API响应:', fetcherResult);
+            
+            // 检查响应状态
+            if (fetcherResult.data && fetcherResult.data.status === 0) {
+                message.success(fetcherResult.data.msg || `成功更新 ${containersToUpdate.length} 个容器的镜像`);
+            } else {
+                // 如果status不为0，说明有错误
+                const errorMsg = fetcherResult.data?.msg || '更新失败，请重试';
+                message.error(`批量更新失败: ${errorMsg}`);
+                return; // 如果失败，不执行后续的重置操作
+            }
 
             // 重置选择状态
             setContainerUpdates(prev => {
