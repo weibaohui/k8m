@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, {useState, useCallback, useMemo, useEffect} from 'react';
 import {
     Table,
     Checkbox,
@@ -21,18 +21,16 @@ import {
     CheckCircleOutlined,
     InfoCircleOutlined,
     SettingOutlined,
-    TagOutlined,
     SelectOutlined,
     UndoOutlined
 } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
-import { Deployment } from '@/store/deployment';
-import { Container } from '@/store/pod';
-import { fetcher } from '@/components/Amis/fetcher';
+import type {ColumnsType} from 'antd/es/table';
+import {Deployment} from '@/store/deployment';
+import {Container} from '@/store/pod';
+import {fetcher} from '@/components/Amis/fetcher';
 
 
-
-const { Text } = Typography;
+const {Text} = Typography;
 
 interface ContainerUpdateInfo {
     deploymentName: string;
@@ -66,27 +64,27 @@ interface K8sBatchUpdateImagesProps {
 // 解析镜像地址和标签的工具函数
 const parseImageAddressAndTag = (image: string): { address: string; tag: string } => {
     if (!image) {
-        return { address: '', tag: '' };
+        return {address: '', tag: ''};
     }
 
     const lastColonIndex = image.lastIndexOf(':');
 
     // 如果没有冒号，整个字符串都是地址，标签为空
     if (lastColonIndex === -1) {
-        return { address: image, tag: '' };
+        return {address: image, tag: ''};
     }
 
     // 检查冒号后面的部分是否包含斜杠，如果包含则可能是端口号而不是标签
     const potentialTag = image.substring(lastColonIndex + 1);
     if (potentialTag.includes('/')) {
-        return { address: image, tag: '' };
+        return {address: image, tag: ''};
     }
 
     // 拆分地址和标签
     const address = image.substring(0, lastColonIndex);
     const tag = potentialTag;
 
-    return { address, tag };
+    return {address, tag};
 };
 
 // 合并镜像地址和标签的工具函数
@@ -102,7 +100,7 @@ const combineImageAddressAndTag = (address: string, tag: string): string => {
     return `${address}:${tag}`;
 };
 
-const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDeployments, data }) => {
+const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({selectedDeployments, data}) => {
     const [containerUpdates, setContainerUpdates] = useState<Record<string, ContainerUpdateInfo>>({});
     const [loading, setLoading] = useState(false);
     const [batchTagValue, setBatchTagValue] = useState<string>('');
@@ -131,7 +129,6 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                     return;
                 }
 
-                const key = `${deployment.metadata?.namespace || 'default'}-${deployment.metadata?.name || 'unknown'}-${container.name || 'unknown'}`;
                 infos.push({
                     deploymentName: deployment.metadata?.name || 'Unknown',
                     namespace: deployment.metadata?.namespace || 'default',
@@ -153,7 +150,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
         const updates: Record<string, ContainerUpdateInfo> = {};
         containerInfos.forEach(info => {
             const key = `${info.namespace}-${info.deploymentName}-${info.containerName}`;
-            updates[key] = { ...info };
+            updates[key] = {...info};
         });
         setContainerUpdates(updates);
     }, [containerInfos]);
@@ -183,7 +180,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                     `${c.namespace}-${c.deploymentName}-${c.containerName}` === key
                 );
                 if (container) {
-                    const { address, tag } = parseImageAddressAndTag(container.currentImage);
+                    const {address, tag} = parseImageAddressAndTag(container.currentImage);
                     return {
                         ...prev,
                         [key]: {
@@ -196,7 +193,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                 }
             }
 
-            const updated = { ...prev };
+            const updated = {...prev};
             updated[key] = {
                 ...updated[key],
                 [field]: value
@@ -288,7 +285,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             });
 
             console.log('API响应:', fetcherResult);
-            
+
             // 检查响应状态
             if (fetcherResult.data && fetcherResult.data.status === 0) {
                 message.success(fetcherResult.data.msg || `成功更新 ${containersToUpdate.length} 个容器的镜像`);
@@ -301,7 +298,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
 
             // 重置选择状态
             setContainerUpdates(prev => {
-                const updated = { ...prev };
+                const updated = {...prev};
                 Object.keys(updated).forEach(key => {
                     updated[key] = {
                         ...updated[key],
@@ -325,7 +322,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
     // 重置所有选择
     const handleReset = useCallback(() => {
         setContainerUpdates(prev => {
-            const updated = { ...prev };
+            const updated = {...prev};
             Object.keys(updated).forEach(key => {
                 updated[key] = {
                     ...updated[key],
@@ -356,7 +353,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
         }
 
         setContainerUpdates(prev => {
-            const updated = { ...prev };
+            const updated = {...prev};
             selectedContainers.forEach(([key, _]) => {
                 if (updated[key]) {
                     updated[key] = {
@@ -376,7 +373,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
         const allSelected = Object.values(containerUpdates).every(update => update.shouldUpdate);
 
         setContainerUpdates(prev => {
-            const updated = { ...prev };
+            const updated = {...prev};
             Object.keys(updated).forEach(key => {
                 const container = containerInfos.find(c =>
                     `${c.namespace}-${c.deploymentName}-${c.containerName}` === key
@@ -393,7 +390,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                         };
                     } else {
                         // 如果未全选，则全选并自动解析镜像地址和标签
-                        const { address, tag } = parseImageAddressAndTag(container.currentImage);
+                        const {address, tag} = parseImageAddressAndTag(container.currentImage);
                         updated[key] = {
                             ...updated[key],
                             shouldUpdate: true,
@@ -471,154 +468,154 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
         groupRowSpan?: number;
         deploymentKey?: string;
     }> = [
-            {
-                title: (
-                    <Space>
-                        <AppstoreOutlined />
-                        <span>Deployment</span>
-                    </Space>
-                ),
-                key: 'deployment',
-                width: 200,
-                render: (_, record) => {
+        {
+            title: (
+                <Space>
+                    <AppstoreOutlined/>
+                    <span>Deployment</span>
+                </Space>
+            ),
+            key: 'deployment',
+            width: 200,
+            render: (_, record) => {
 
 
-                    const containerCount = deploymentContainerCounts[record.deploymentKey || ''] || 1;
+                const containerCount = deploymentContainerCounts[record.deploymentKey || ''] || 1;
 
-                    return {
-                        children: (
-                            <div >
-                                <div style={{
-                                    fontWeight: 600,
-                                    color: '#1890ff',
-                                    fontSize: '14px',
-                                    marginBottom: '4px'
-                                }}>
-                                    {record.deploymentName}
-                                </div>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    marginBottom: '4px'
-                                }}>
-                                    <Text type="secondary" style={{ fontSize: '12px' }}>
-                                        {record.namespace}
-                                    </Text>
-                                    <Tag color="blue" style={{ fontSize: '11px' }}>
-                                        {containerCount} 个容器
-                                    </Tag>
-                                </div>
+                return {
+                    children: (
+                        <div>
+                            <div style={{
+                                fontWeight: 600,
+                                color: '#1890ff',
+                                fontSize: '14px',
+                                marginBottom: '4px'
+                            }}>
+                                {record.deploymentName}
                             </div>
-                        ),
-                        props: {
-                            rowSpan: record.groupRowSpan,
-                        },
-                    };
-                },
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '4px'
+                            }}>
+                                <Text type="secondary" style={{fontSize: '12px'}}>
+                                    {record.namespace}
+                                </Text>
+                                <Tag color="blue" style={{fontSize: '11px'}}>
+                                    {containerCount} 个容器
+                                </Tag>
+                            </div>
+                        </div>
+                    ),
+                    props: {
+                        rowSpan: record.groupRowSpan,
+                    },
+                };
             },
-            {
-                title: (
-                    <Space>
-                        <ContainerOutlined />
-                        <span>容器名称</span>
-                    </Space>
-                ),
-                dataIndex: 'containerName',
-                key: 'containerName',
-                width: 180,
-                render: (containerName: string, record) => (
-                    <div >
-                        <ContainerOutlined style={{
-                            color: '#52c41a',
-                            fontSize: '14px'
-                        }} />
-                        <Text strong style={{
-                            color: '#52c41a',
-                            margin: 0,
-                            padding: 0
-                        }}>
-                            {containerName}
-                        </Text>
-                    </div>
-                ),
-            },
-            {
-                title: '当前镜像',
-                dataIndex: 'currentImage',
-                key: 'currentImage',
-                width: 300,
-                render: (image) => (
-                    <>
-                        {image}
-                    </>
-                ),
-            },
-            {
-                title: (
-                    <Space>
-                        <CheckCircleOutlined />
-                        <span>更新</span>
-                    </Space>
-                ),
-                key: 'shouldUpdate',
-                width: 80,
-                align: 'center',
-                render: (_: any, record) => {
-                    const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
-                    const containerUpdate = containerUpdates[key];
+        },
+        {
+            title: (
+                <Space>
+                    <ContainerOutlined/>
+                    <span>容器名称</span>
+                </Space>
+            ),
+            dataIndex: 'containerName',
+            key: 'containerName',
+            width: 180,
+            render: (containerName: string, _) => (
+                <div>
+                    <ContainerOutlined style={{
+                        color: '#52c41a',
+                        fontSize: '14px'
+                    }}/>
+                    <Text strong style={{
+                        color: '#52c41a',
+                        margin: 0,
+                        padding: 0
+                    }}>
+                        {containerName}
+                    </Text>
+                </div>
+            ),
+        },
+        {
+            title: '当前镜像',
+            dataIndex: 'currentImage',
+            key: 'currentImage',
+            width: 300,
+            render: (image) => (
+                <>
+                    {image}
+                </>
+            ),
+        },
+        {
+            title: (
+                <Space>
+                    <CheckCircleOutlined/>
+                    <span>更新</span>
+                </Space>
+            ),
+            key: 'shouldUpdate',
+            width: 80,
+            align: 'center',
+            render: (_: any, record) => {
+                const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
+                const containerUpdate = containerUpdates[key];
 
-                    return (
-                        <Checkbox
-                            checked={containerUpdate?.shouldUpdate || false}
-                            onChange={(e) => updateContainerInfo(key, 'shouldUpdate', e.target.checked)}
-                        />
-                    );
-                },
+                return (
+                    <Checkbox
+                        checked={containerUpdate?.shouldUpdate || false}
+                        onChange={(e) => updateContainerInfo(key, 'shouldUpdate', e.target.checked)}
+                    />
+                );
             },
-            {
-                title: '镜像地址',
-                key: 'imageAddress',
-                width: 250,
-                render: (_: any, record) => {
-                    const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
-                    const containerUpdate = containerUpdates[key];
+        },
+        {
+            title: '镜像地址',
+            key: 'imageAddress',
+            width: 250,
+            render: (_: any, record) => {
+                const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
+                const containerUpdate = containerUpdates[key];
 
-                    return (
-                        <Input
-                            placeholder="输入镜像地址"
-                            value={containerUpdate?.imageAddress || ''}
-                            disabled={!containerUpdate?.shouldUpdate}
-                            onChange={(e) => updateContainerInfo(key, 'imageAddress', e.target.value)}
-                            style={{
-                                backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
-                            }}
-                        />
-                    );
-                },
+                return (
+                    <Input
+                        placeholder="输入镜像地址"
+                        value={containerUpdate?.imageAddress || ''}
+                        disabled={!containerUpdate?.shouldUpdate}
+                        onChange={(e) => updateContainerInfo(key, 'imageAddress', e.target.value)}
+                        style={{
+                            backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
+                        }}
+                    />
+                );
             },
-            {
-                title: '标签',
-                key: 'imageTag',
-                width: 150,
-                render: (_: any, record) => {
-                    const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
-                    const containerUpdate = containerUpdates[key];
+        },
+        {
+            title: '标签',
+            key: 'imageTag',
+            width: 150,
+            render: (_: any, record) => {
+                const key = `${record.namespace}-${record.deploymentName}-${record.containerName}`;
+                const containerUpdate = containerUpdates[key];
 
-                    return (
-                        <Input
-                            placeholder="输入标签"
-                            value={containerUpdate?.imageTag || ''}
-                            disabled={!containerUpdate?.shouldUpdate}
-                            onChange={(e) => updateContainerInfo(key, 'imageTag', e.target.value)}
-                            style={{
-                                backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
-                            }}
-                        />
-                    );
-                },
+                return (
+                    <Input
+                        placeholder="输入标签"
+                        value={containerUpdate?.imageTag || ''}
+                        disabled={!containerUpdate?.shouldUpdate}
+                        onChange={(e) => updateContainerInfo(key, 'imageTag', e.target.value)}
+                        style={{
+                            backgroundColor: containerUpdate?.shouldUpdate ? '#fff' : '#f5f5f5'
+                        }}
+                    />
+                );
             },
-        ];
+        },
+    ];
 
     if (!deployments || deployments.length === 0) {
         return (
@@ -628,8 +625,8 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                     description={
                         <div>
                             <Text type="secondary">请先选择需要更新的 Deployment</Text>
-                            <br />
-                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                            <br/>
+                            <Text type="secondary" style={{fontSize: '12px'}}>
                                 选择后将显示所有容器的镜像信息
                             </Text>
                         </div>
@@ -640,18 +637,18 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
     }
 
     return (
-        <div style={{ padding: '16px' }}>
+        <div style={{padding: '16px'}}>
 
             {/* 批量操作工具栏 */}
             <Card
                 title={
                     <Space>
-                        <SettingOutlined />
+                        <SettingOutlined/>
                         批量操作
                     </Space>
                 }
                 size="small"
-                style={{ marginBottom: '16px' }}
+                style={{marginBottom: '16px'}}
             >
                 <Row gutter={16} align="middle">
                     <Col span={6}>
@@ -683,7 +680,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
             <Card
                 title={
                     <Space>
-                        <InfoCircleOutlined />
+                        <InfoCircleOutlined/>
                         <span>容器镜像列表</span>
                         <Text type="secondary">({tableDataWithGrouping.length} 个容器)</Text>
                     </Space>
@@ -694,13 +691,13 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                             type={isAllSelected ? "default" : "primary"}
                             ghost={!isAllSelected}
                             onClick={handleSelectAll}
-                            icon={isAllSelected ? <UndoOutlined /> : <SelectOutlined />}
+                            icon={isAllSelected ? <UndoOutlined/> : <SelectOutlined/>}
                             disabled={Object.keys(containerUpdates).length === 0}
                         >
                             {isAllSelected ? '取消全选' : '全选'}
                         </Button>
                         <Button
-                            icon={<ReloadOutlined />}
+                            icon={<ReloadOutlined/>}
                             onClick={handleReset}
                             disabled={loading}
                         >
@@ -708,7 +705,7 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                         </Button>
                         <Button
                             type="primary"
-                            icon={<CloudUploadOutlined />}
+                            icon={<CloudUploadOutlined/>}
                             loading={loading}
                             onClick={handleBatchUpdate}
                             disabled={stats.selectedForUpdate === 0}
@@ -717,16 +714,16 @@ const K8sBatchUpdateImages: React.FC<K8sBatchUpdateImagesProps> = ({ selectedDep
                         </Button>
                     </Space>
                 }
-                bodyStyle={{ padding: '0' }}
+                bodyStyle={{padding: '0'}}
             >
                 <Table
                     columns={columns}
                     dataSource={tableDataWithGrouping}
                     rowKey={(record) => `${record.namespace}-${record.deploymentName}-${record.containerName}`}
                     pagination={false}
-                    scroll={{ x: 1000 }}
+                    scroll={{x: 1000}}
                     size="middle"
-                    rowClassName={(record, index) => {
+                    rowClassName={(record, _) => {
                         let className = record.shouldUpdate ? 'selected-row' : '';
                         if (record.isFirstInGroup) {
                             className += ' deployment-group-header';
