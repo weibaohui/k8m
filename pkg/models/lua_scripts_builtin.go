@@ -1283,6 +1283,21 @@ local podName = "k8m-c6dccfb-qm7cp"  -- 要检查的 Pod 名称
 local podNamespace = "k8m"           -- Pod 所在的命名空间
 
 -- =============================
+-- 可配置的告警阈值
+-- =============================
+-- 
+-- 配置说明：
+-- - cpuThreshold: CPU 使用率告警阈值，取值范围 0.0-1.0（例如：0.8 表示 80%）
+-- - memoryThreshold: 内存使用率告警阈值，取值范围 0.0-1.0（例如：0.9 表示 90%）
+-- 
+-- 建议值：
+-- - 生产环境：CPU 0.7-0.8，内存 0.8-0.9
+-- - 测试环境：CPU 0.8-0.9，内存 0.9-0.95
+-- - 开发环境：可适当放宽至 CPU 0.9，内存 0.95
+local cpuThreshold = 0.8    -- CPU 使用率告警阈值（80%）
+local memoryThreshold = 0.9 -- 内存使用率告警阈值（90%）
+
+-- =============================
 -- 工具函数
 -- =============================
 
@@ -1388,7 +1403,7 @@ if resourceUsage.cpu then
             cpuUsage = cpuUsage / 100
         end
         print(string.format("CPU 使用率: %.2f%%", cpuUsage * 100))
-        if cpuUsage > 0.8 then
+        if cpuUsage > cpuThreshold then
             check_event("警告", "Pod " .. podNamespace .. "/" .. podName .. " CPU 使用率过高: " .. string.format("%.2f%%", cpuUsage * 100), {namespace=podNamespace, name=podName, cpuUsage=cpuUsage})
         end
     end
@@ -1434,7 +1449,7 @@ if resourceUsage.memory or resourceUsage.allocatable then
 
     if recomputedFraction then
         print(string.format("内存使用率: %.2f%%", recomputedFraction * 100))
-        if recomputedFraction > 0.9 then
+        if recomputedFraction > memoryThreshold then
             check_event("警告", "Pod " .. podNamespace .. "/" .. podName .. " 内存使用率过高: " .. string.format("%.2f%%", recomputedFraction * 100), {namespace=podNamespace, name=podName, memoryUsage=recomputedFraction})
         end
     else
@@ -1449,7 +1464,7 @@ if resourceUsage.memory or resourceUsage.allocatable then
             else
                 print(string.format("内存使用率: %.2f%%", rawUF * 100))
             end
-            if rawUF > 0.9 then
+            if rawUF > memoryThreshold then
                 check_event("警告", "Pod " .. podNamespace .. "/" .. podName .. " 内存使用率过高: " .. string.format("%.2f%%", rawUF * 100), {namespace=podNamespace, name=podName, memoryUsage=rawUF})
             end
         else
