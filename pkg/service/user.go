@@ -237,8 +237,9 @@ func (u *userService) GenerateJWTTokenOnlyUserName(username string, duration tim
 	name := constants.JwtUserName
 
 	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		name:  username,
-		"exp": time.Now().Add(duration).Unix(),
+		name:              username,
+		"isPlatformAdmin": u.IsUserPlatformAdmin(username), //前端展示平台管理员使用，没有其他用处
+		"exp":             time.Now().Add(duration).Unix(),
 	})
 	cfg := flag.Init()
 	var jwtSecret = []byte(cfg.JwtTokenSecret)
