@@ -176,7 +176,7 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 			}
 		}
 	}
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=%s,  resource=[%s/%s] ",
+	klog.V(6).Infof("cb: cluster= %s,user= %s,  operation=%s,  resource=[%s/%s] ",
 		cluster, username, action, ns, name)
 	return err
 }
