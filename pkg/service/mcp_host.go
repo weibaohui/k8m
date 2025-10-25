@@ -158,7 +158,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Cli
 		return nil, fmt.Errorf("server config not found: %s", serverName)
 	}
 
-	username, _ := m.getUserRoleFromMCPCtx(ctx)
+	username := m.getUserFromMCPCtx(ctx)
 	jwt, err := UserService().GenerateJWTTokenOnlyUserName(username, time.Hour*1)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate JWT token for %s: %v", serverName, err)
@@ -195,17 +195,12 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Cli
 
 }
 
-func (m *MCPHost) getUserRoleFromMCPCtx(ctx context.Context) (string, string) {
-	// 重新连接
+func (m *MCPHost) getUserFromMCPCtx(ctx context.Context) string {
 	username := ""
 	if usernameVal, ok := ctx.Value(constants.JwtUserName).(string); ok {
 		username = usernameVal
 	}
-	role := ""
-	if roleVal, ok := ctx.Value(constants.JwtUserRole).(string); ok {
-		role = roleVal
-	}
-	return username, role
+	return username
 }
 
 // Close 关闭所有连接
@@ -331,7 +326,7 @@ func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName str
 		Error:       result.Error,
 	}
 
-	username, _ := m.getUserRoleFromMCPCtx(ctx)
+	username := m.getUserFromMCPCtx(ctx)
 	log.CreatedBy = username
 
 	prompt := ""

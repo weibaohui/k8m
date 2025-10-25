@@ -9,6 +9,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/service"
 )
 
 // AuthMiddleware 登录校验
@@ -43,11 +44,6 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 设置信息传递，后面才能从ctx中获取到用户信息
 		c.Set(constants.JwtUserName, claims[constants.JwtUserName])
-		c.Set(constants.JwtUserRole, claims[constants.JwtUserRole])
-		c.Set(constants.JwtClusters, claims[constants.JwtClusters])
-		// 判断 claims[constants.JwtClusterUserRoles]的类型，应该是[]models.ClusterUserRole
-		// 为什么会出现string？
-		c.Set(constants.JwtClusterUserRoles, claims[constants.JwtClusterUserRoles])
 		c.Next()
 	}
 }
@@ -62,10 +58,10 @@ func PlatformAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		role := claims[constants.JwtUserRole].(string)
 
+		username := claims[constants.JwtUserName].(string)
+		roles, err := service.UserService().GetRolesByUserName(username)
 		// 权限检查
-		roles := strings.Split(role, ",")
 		if !slices.Contains(roles, constants.RolePlatformAdmin) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "平台管理员权限校验失败"})
 			c.Abort()
@@ -74,9 +70,6 @@ func PlatformAuthMiddleware() gin.HandlerFunc {
 
 		// 设置信息传递，后面才能从ctx中获取到用户信息
 		c.Set(constants.JwtUserName, claims[constants.JwtUserName])
-		c.Set(constants.JwtUserRole, claims[constants.JwtUserRole])
-		c.Set(constants.JwtClusters, claims[constants.JwtClusters])
-		c.Set(constants.JwtClusterUserRoles, claims[constants.JwtClusterUserRoles])
 		c.Next()
 	}
 }

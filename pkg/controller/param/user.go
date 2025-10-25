@@ -3,6 +3,7 @@ package param
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -13,27 +14,16 @@ import (
 // @Success 200 {object} string
 // @Router /params/user/role [get]
 func (pc *Controller) UserRole(c *gin.Context) {
-	user, role := amis.GetLoginUser(c)
+	user := amis.GetLoginOnlyUserName(c)
 
-	//如果是平台管理员,可以看到所有菜单
-	if amis.IsCurrentUserPlatformAdmin(c) {
+	// 如果是平台管理员,可以看到所有菜单
+	if service.UserService().IsUserPlatformAdmin(user) {
 		amis.WriteJsonData(c, gin.H{
-			"role":      role,
+			"role":      constants.RolePlatformAdmin,
 			"cluster":   "",
 			"menu_data": []any{},
 		})
 		return
-	}
-
-	clusters := amis.GetLoginUserClusters(c)
-	var cluster string
-	if len(clusters) == 1 {
-		cluster = clusters[0]
-	}
-	if cluster == "" {
-		if amis.IsCurrentUserPlatformAdmin(c) {
-			cluster = service.ClusterService().FirstClusterID()
-		}
 	}
 
 	groupNames, err := service.UserService().GetGroupNames(user)
@@ -46,9 +36,19 @@ func (pc *Controller) UserRole(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	roles, err := service.UserService().GetRolesByUserName(user)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	cluster, err := amis.GetSelectedCluster(c)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	amis.WriteJsonData(c, gin.H{
-		"role":      role,
-		"cluster":   cluster,
+		"role":      roles,   // todo 这个地方是不是应该改成role_list，代表role列表?roles代表复数字符串，role代表单一集群名称
+		"cluster":   cluster, // todo 这个cluster 是干什么的，是不是当前登录集群？
 		"menu_data": menuData,
 	})
 }

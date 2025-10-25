@@ -28,12 +28,8 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 	if username == "" {
 		return "", nil, fmt.Errorf("用户为空%v，默认阻止", nil)
 	}
-
-	roleString := service.UserService().GetPlatformRolesByName(username)
-
 	var err error
-
-	roles, _ := service.UserService().GetClusterRole(cluster, username, roleString)
+	roles, _ := service.UserService().GetClusterRole(cluster, username)
 	// 先看是不是平台管理员
 	if slice.Contain(roles, constants.RolePlatformAdmin) {
 		// 平台管理员，可以执行任何操作
@@ -181,7 +177,7 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 		}
 	}
 
-	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s，roleString=%v, operation=%s,  resource=[%s/%s] ",
-		cluster, username, roleString, roles, action, ns, name)
+	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=%s,  resource=[%s/%s] ",
+		cluster, username, roles, action, ns, name)
 	return username, roles, err
 }

@@ -19,7 +19,7 @@ import (
 // @Success 200 {object} string
 // @Router /params/cluster/option_list [get]
 func (pc *Controller) ClusterOptionList(c *gin.Context) {
-	user, _ := amis.GetLoginUser(c)
+	user := amis.GetLoginOnlyUserName(c)
 
 	clusters := service.ClusterService().AllClusters()
 
@@ -29,7 +29,7 @@ func (pc *Controller) ClusterOptionList(c *gin.Context) {
 		})
 		return
 	}
-	if !amis.IsCurrentUserPlatformAdmin(c) {
+	if !service.UserService().IsUserPlatformAdmin(user) {
 		userCluster, err := service.UserService().GetClusterNames(user)
 		if err != nil {
 			amis.WriteJsonData(c, gin.H{
@@ -67,10 +67,10 @@ func (pc *Controller) ClusterOptionList(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /params/cluster/all [get]
 func (pc *Controller) ClusterTableList(c *gin.Context) {
-	user, _ := amis.GetLoginUser(c)
+	user := amis.GetLoginOnlyUserName(c)
 
 	clusters := service.ClusterService().AllClusters()
-	if !amis.IsCurrentUserPlatformAdmin(c) {
+	if !service.UserService().IsUserPlatformAdmin(user) {
 		userCluster, err := service.UserService().GetClusterNames(user)
 		if err != nil {
 			amis.WriteJsonData(c, gin.H{

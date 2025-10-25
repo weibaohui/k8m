@@ -7,7 +7,6 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
@@ -59,17 +58,10 @@ func (ac *Controller) Create(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 func generateAPIKey(username string) string {
-	cfg := flag.Init()
-	groupNames, _ := service.UserService().GetGroupNames(username)
-
-	roles, _ := service.UserService().GetRolesByGroupNames(groupNames)
-	if username == cfg.AdminUserName {
-		roles = []string{constants.RolePlatformAdmin}
-	}
 	// 查询用户对应的集群
-	clusters, _ := service.UserService().GetClusters(username)
+	// todo 有效期应该是一个可配置项
 	duration := time.Hour * 24 * 365
-	token, _ := service.UserService().GenerateJWTToken(username, roles, clusters, duration)
+	token, _ := service.UserService().GenerateJWTTokenOnlyUserName(username, duration)
 	return token
 }
 

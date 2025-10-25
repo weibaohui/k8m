@@ -15,7 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/totp"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
@@ -85,7 +84,7 @@ func (lc *Controller) LoginByPassword(c *gin.Context) {
 			return
 		}
 		// Admin用户不需要2FA验证
-		token, _ := service.UserService().GenerateJWTToken(req.Username, []string{constants.RolePlatformAdmin}, nil, time.Hour*24)
+		token, _ := service.UserService().GenerateJWTTokenOnlyUserName(req.Username, time.Hour*24)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 		return
 	} else {
@@ -139,7 +138,7 @@ func (lc *Controller) LoginByPassword(c *gin.Context) {
 					}
 				}
 
-				token, _ := service.UserService().GenerateJWTTokenByUserName(v.Username, 24*time.Hour)
+				token, _ := service.UserService().GenerateJWTTokenOnlyUserName(v.Username, 24*time.Hour)
 				c.JSON(http.StatusOK, gin.H{"token": token})
 				return
 			}
@@ -212,7 +211,7 @@ func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.
 	}
 
 	// 5. 生成token
-	token, _ := service.UserService().GenerateJWTTokenByUserName(username, 24*time.Hour)
+	token, _ := service.UserService().GenerateJWTTokenOnlyUserName(username, 24*time.Hour)
 	c.JSON(http.StatusOK, gin.H{"token": token})
 	return nil
 }

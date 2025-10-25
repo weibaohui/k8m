@@ -104,7 +104,7 @@ func (au *AuthController) HandleCallback(c *gin.Context) {
 	username := GetUsername(claims, strings.Split(client.DBConfig.PreferUserNameKeys, ","))
 	groups := GetUserGroups(claims)
 	_ = service.UserService().CheckAndCreateUser(username, name, groups)
-	userLoginToken, _ := service.UserService().GenerateJWTTokenByUserName(username, 24*time.Hour)
+	userLoginToken, _ := service.UserService().GenerateJWTTokenOnlyUserName(username, 24*time.Hour)
 
 	// 返回 HTML + JS，用于写入 localStorage
 	html := fmt.Sprintf(`

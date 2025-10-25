@@ -1,15 +1,13 @@
 package middleware
 
 import (
-	"net/http"
 	"path/filepath"
 	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -71,25 +69,18 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		cfg := flag.Init()
-		claims, err := utils.GetJWTClaims(c, cfg.JwtTokenSecret)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-			c.Abort()
-			return
-		}
-		// 注意，这里的role，可能是一个数组，需要处理一下
-		role := claims[constants.JwtUserRole].(string)
-		cst := claims[constants.JwtClusters].(string)
-		roles := strings.Split(role, ",")
-		csts := strings.Split(cst, ",")
+		username := amis.GetLoginOnlyUserName(c)
 		// 如果不是平台管理员，检查是否有权限访问该集群
-		if !slices.Contains(roles, constants.RolePlatformAdmin) && !slices.Contains(csts, clusterID) {
-			c.JSON(512, gin.H{
-				"msg": "无权限访问集群: " + clusterID,
-			})
-			c.Abort()
-			return
+		if !service.UserService().IsUserPlatformAdmin(username) {
+			csts, _ := service.UserService().GetClusterNames(username)
+			if !slices.Contains(csts, clusterID) {
+				c.JSON(512, gin.H{
+					"msg": "无权限访问集群: " + clusterID,
+				})
+				c.Abort()
+				return
+			}
+
 		}
 
 		// 如果设置了clusterID，但是集群未连接

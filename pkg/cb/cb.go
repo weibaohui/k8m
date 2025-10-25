@@ -2,6 +2,7 @@ package cb
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/weibaohui/k8m/pkg/comm"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -79,7 +80,8 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 	cluster := k8s.ID
 	ctx := stmt.Context
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+
+	roles, err := service.UserService().GetRolesByUserName(username)
 
 	log := models.OperationLog{
 		Action:       action,
@@ -89,7 +91,7 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 		Namespace:    stmt.Namespace,
 		UserName:     username,
 		Group:        stmt.GVK.Group,
-		Role:         roleString,
+		Role:         strings.Join(roles, ","),
 		ActionResult: "success",
 	}
 
