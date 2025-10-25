@@ -1275,11 +1275,11 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		ScriptCode:  "Builtin_Pod_ResourceUsage_032",
 		Script: `
 			-- 请修改以下变量为您要检查的 Pod 信息
-			local podName = "coredns-ccb96694c-jprpf"  -- 要检查的 Pod 名称
-			local podNamespace = "kube-system"         -- Pod 所在的命名空间
+			local podName = "k8m-c6dccfb-qm7cp"  -- 要检查的 Pod 名称
+			local podNamespace = "k8m"         -- Pod 所在的命名空间
 
 			-- 获取 Pod 资源用量信息
-			local resourceUsage, err = kubectl:GVK("", "v1", "Pod"):Namespace(podNamespace):Name(podName):GetResourceUsage()
+			local resourceUsage, err = kubectl:GVK("", "v1", "Pod"):Namespace(podNamespace):Name(podName):GetPodResourceUsage()
 			if err then
 				print("获取 Pod 资源用量失败: " .. tostring(err))
 				return

@@ -281,9 +281,9 @@ func getLogs(L *lua.LState) int {
 	return 2
 }
 
-// 实现 kubectl:GetResourceUsage() 方法
+// 实现 kubectl:GetPodResourceUsage() 方法
 // 用于获取Pod的资源使用情况，返回 Lua 表和错误信息
-// 使用方式：local usage, err = kubectl:GVK("", "v1", "Pod"):Namespace("kube-system"):Name("coredns-ccb96694c-jprpf"):GetResourceUsage()
+// 使用方式：local usage, err = kubectl:GVK("", "v1", "Pod"):Namespace("kube-system"):Name("coredns-ccb96694c-jprpf"):GetPodResourceUsage()
 func getPodResourceUsage(L *lua.LState) int {
 	ud := L.CheckUserData(1)
 	obj, ok := ud.Value.(*Kubectl)
