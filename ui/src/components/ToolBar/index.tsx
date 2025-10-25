@@ -7,7 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 
 interface DecodedToken {
     username: string;
-    role: string;
+    isPlatformAdmin: boolean;
     // JWT标准字段
     exp: number;
     iat: number;
@@ -22,10 +22,9 @@ const Toolbar = () => {
         if (token) {
             try {
                 const decoded = jwtDecode<DecodedToken>(token);
-                //role 可能为guest,platform_admin，也可能为guset
                 setUserInfo({
                     username: decoded.username || '',
-                    role: decoded.role.includes('platform_admin') ? '平台管理员' : '普通用户'
+                    role: decoded.isPlatformAdmin ? '平台管理员' : '普通用户'
                 });
             } catch (error) {
                 console.error('Failed to decode token:', error);
