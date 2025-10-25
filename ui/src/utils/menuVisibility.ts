@@ -1,8 +1,8 @@
-import { Parser } from 'expr-eval';
-import { MenuItem } from '@/types/menu';
+import {Parser} from 'expr-eval';
+import {MenuItem} from '@/types/menu';
 
 interface MenuVisibilityContext {
-    userRole: string;
+    userRole: string[];
     isGatewayAPISupported: boolean;
     isOpenKruiseSupported: boolean;
     isIstioSupported: boolean;
@@ -20,7 +20,7 @@ export const shouldShowMenuItem = (item: MenuItem, context: MenuVisibilityContex
     if (typeof item.show === 'string') {
         try {
             const evalContext = {
-                user: { role: 'user' },
+                user: {role: 'user'},
             };
 
             const parser = new Parser();
@@ -46,16 +46,16 @@ export const shouldShowMenuItem = (item: MenuItem, context: MenuVisibilityContex
             };
 
             parser.functions.isPlatformAdmin = function () {
-                return context.userRole === 'platform_admin';
+                return context.userRole.includes('platform_admin');
             };
 
             parser.functions.isUserHasRole = function (role: string) {
-                return context.userRole === role;
+                return context.userRole.includes(role);
             };
 
             const expr = parser.parse(item.show);
             const result = expr.evaluate(evalContext);
-            
+
             return Boolean(result);
         } catch (error) {
             console.error('评估显示表达式错误:', error);
