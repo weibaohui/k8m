@@ -1,4 +1,10 @@
 ## 更新日志
+
+**v0.0.172**
+lua巡检脚本增加GetPodResourceUsage方法，可获取POD资源情况，包括limit request配置值以及实时值
+精简JWT token结构,仅保留必要用户信息
+新增deployment批量更新镜像及tag功能，可为所有选中容器，批量一次性更新tag，可更新为统一版本号
+
 **v0.0.171**
 修复巡检集群时集群连接错位问题
 
