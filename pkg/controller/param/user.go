@@ -14,7 +14,7 @@ import (
 // @Success 200 {object} string
 // @Router /params/user/role [get]
 func (pc *Controller) UserRole(c *gin.Context) {
-	user := amis.GetLoginOnlyUserName(c)
+	user := amis.GetLoginUser(c)
 
 	// 如果是平台管理员,可以看到所有菜单
 	if service.UserService().IsUserPlatformAdmin(user) {
@@ -47,8 +47,8 @@ func (pc *Controller) UserRole(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, gin.H{
-		"role":      roles,   // todo 这个地方是不是应该改成role_list，代表role列表?roles代表复数字符串，role代表单一集群名称
-		"cluster":   cluster, // todo 这个cluster 是干什么的，是不是当前登录集群？
+		"role":      roles, // todo 这个地方是不是应该改成role_list，代表role列表?roles代表复数字符串，role代表单一集群名称
+		"cluster":   cluster,
 		"menu_data": menuData,
 	})
 }

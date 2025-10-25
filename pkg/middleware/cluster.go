@@ -69,7 +69,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		username := amis.GetLoginOnlyUserName(c)
+		username := amis.GetLoginUser(c)
 		// 如果不是平台管理员，检查是否有权限访问该集群
 		if !service.UserService().IsUserPlatformAdmin(username) {
 			csts, _ := service.UserService().GetClusterNames(username)

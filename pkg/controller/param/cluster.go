@@ -19,7 +19,7 @@ import (
 // @Success 200 {object} string
 // @Router /params/cluster/option_list [get]
 func (pc *Controller) ClusterOptionList(c *gin.Context) {
-	user := amis.GetLoginOnlyUserName(c)
+	user := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
 
@@ -67,7 +67,7 @@ func (pc *Controller) ClusterOptionList(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /params/cluster/all [get]
 func (pc *Controller) ClusterTableList(c *gin.Context) {
-	user := amis.GetLoginOnlyUserName(c)
+	user := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
 	if !service.UserService().IsUserPlatformAdmin(user) {

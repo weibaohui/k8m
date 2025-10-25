@@ -33,7 +33,7 @@ func getHelmWithNoCluster() (helm.Helm, error) {
 func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, repoName string) error {
 	cluster, _ := amis.GetSelectedCluster(c)
 
-	username := amis.GetLoginOnlyUserName(c)
+	username := amis.GetLoginUser(c)
 	roles, err := service.UserService().GetRolesByUserName(username)
 
 	log := models.OperationLog{

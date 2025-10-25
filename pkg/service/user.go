@@ -290,7 +290,7 @@ func (u *userService) GenerateJWTTokenOnlyUserName(username string, duration tim
 // GetGroupNames 获取用户所在的用户组
 // return: 用户组名称列表
 func (u *userService) GetGroupNames(username string) ([]string, error) {
-	cacheKey := u.formatCacheKey("user:groupnames:%s", username)
+	cacheKey := u.formatCacheKey("user:group‘’names:%s", username)
 
 	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
 		params := &dao.Params{}
@@ -499,7 +499,6 @@ func (u *userService) LoginWithLdap(username string, password string, cfg *flag.
 }
 
 // GetRolesByUserName 通过用户名获取用户的角色
-// todo 加缓存
 func (u *userService) GetRolesByUserName(username string) ([]string, error) {
 	// 先判断是否不是最大的临时管理员账户
 	cfg := flag.Init()

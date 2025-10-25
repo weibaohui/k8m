@@ -91,7 +91,7 @@ func cmdLogger(c *gin.Context, cmd string) {
 		return
 	}
 	cmd = utils.CleanANSISequences(cmd)
-	username := amis.GetLoginOnlyUserName(c)
+	username := amis.GetLoginUser(c)
 	roles, err := service.UserService().GetRolesByUserName(username)
 	if err != nil {
 		return
