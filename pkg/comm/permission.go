@@ -14,7 +14,7 @@ import (
 )
 
 // CheckPermissionLogic
-// return username,roles,err
+// return err
 func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, ns, name, action string) error {
 
 	// 内部监听增加一个认证机制，不用做权限校验
