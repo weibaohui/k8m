@@ -50,16 +50,17 @@ func (p *Inspection) registerKubectlFunc() {
 	// 设置元方法
 	mt := p.lua.NewTypeMetatable("kubectl")
 	p.lua.SetField(mt, "__index", p.lua.SetFuncs(p.lua.NewTable(), map[string]lua.LGFunction{
-		"GVK":               gvkFunc, // kubectl.GVK(group, version, kind) Kind首字母大写
-		"WithLabelSelector": withLabelSelectorFunc,
-		"Name":              withNameFunc,
-		"Namespace":         withNamespaceFunc,
-		"AllNamespace":      withAllNamespaceFunc,
-		"Cache":             withCacheFunc,
-		"List":              listResource,
-		"Doc":               getDoc,
-		"Get":               getResource,
-		"GetLogs":           getLogs,
+		"GVK":                 gvkFunc, // kubectl.GVK(group, version, kind) Kind首字母大写
+		"WithLabelSelector":   withLabelSelectorFunc,
+		"Name":                withNameFunc,
+		"Namespace":           withNamespaceFunc,
+		"AllNamespace":        withAllNamespaceFunc,
+		"Cache":               withCacheFunc,
+		"List":                listResource,
+		"Doc":                 getDoc,
+		"Get":                 getResource,
+		"GetLogs":             getLogs,
+		"GetPodResourceUsage": getPodResourceUsage,
 	}))
 	p.lua.SetMetatable(ud, mt)
 }

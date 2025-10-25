@@ -1265,4 +1265,97 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			print("Pod 日志错误检测完成")
 		`,
 	},
+	{
+		Name:        "Pod 资源用量检查",
+		Description: "检查指定 Pod 的资源用量情况，包括 CPU 和内存的请求、限制、实时用量等信息",
+		Group:       "",
+		Version:     "v1",
+		Kind:        "Pod",
+		ScriptType:  constants.LuaScriptTypeBuiltin,
+		ScriptCode:  "Builtin_Pod_ResourceUsage_032",
+		Script: `
+			-- 请修改以下变量为您要检查的 Pod 信息
+			local podName = "coredns-ccb96694c-jprpf"  -- 要检查的 Pod 名称
+			local podNamespace = "kube-system"         -- Pod 所在的命名空间
+
+			-- 获取 Pod 资源用量信息
+			local resourceUsage, err = kubectl:GVK("", "v1", "Pod"):Namespace(podNamespace):Name(podName):GetResourceUsage()
+			if err then
+				print("获取 Pod 资源用量失败: " .. tostring(err))
+				return
+			end
+
+			if not resourceUsage then
+				print("Pod " .. podNamespace .. "/" .. podName .. " 资源用量信息为空")
+				return
+			end
+
+			print("=== Pod 资源用量检查结果 ===")
+			print("Pod: " .. podNamespace .. "/" .. podName)
+
+			-- 检查 CPU 资源
+			if resourceUsage.cpu then
+				print("\n--- CPU 资源 ---")
+				if resourceUsage.cpu.requests then
+					print("CPU 请求量: " .. tostring(resourceUsage.cpu.requests))
+				end
+				if resourceUsage.cpu.limits then
+					print("CPU 限制量: " .. tostring(resourceUsage.cpu.limits))
+				end
+				if resourceUsage.cpu.realtime then
+					print("CPU 实时用量: " .. tostring(resourceUsage.cpu.realtime))
+				end
+				if resourceUsage.cpu.allocatable then
+					print("CPU 可分配量: " .. tostring(resourceUsage.cpu.allocatable))
+				end
+				if resourceUsage.cpu.usageFractions then
+					print("CPU 使用率: " .. tostring(resourceUsage.cpu.usageFractions))
+					-- 检查 CPU 使用率是否过高
+					local cpuUsage = tonumber(resourceUsage.cpu.usageFractions)
+					if cpuUsage and cpuUsage > 0.8 then
+						check_event("警告", "Pod " .. podNamespace .. "/" .. podName .. " CPU 使用率过高: " .. string.format("%.2f%%", cpuUsage * 100), {namespace=podNamespace, name=podName, cpuUsage=cpuUsage})
+					end
+				end
+			end
+
+			-- 检查内存资源
+			if resourceUsage.memory then
+				print("\n--- 内存资源 ---")
+				if resourceUsage.memory.requests then
+					print("内存请求量: " .. tostring(resourceUsage.memory.requests))
+				end
+				if resourceUsage.memory.limits then
+					print("内存限制量: " .. tostring(resourceUsage.memory.limits))
+				end
+				if resourceUsage.memory.realtime then
+					print("内存实时用量: " .. tostring(resourceUsage.memory.realtime))
+				end
+				if resourceUsage.memory.allocatable then
+					print("内存可分配量: " .. tostring(resourceUsage.memory.allocatable))
+				end
+				if resourceUsage.memory.usageFractions then
+					print("内存使用率: " .. tostring(resourceUsage.memory.usageFractions))
+					-- 检查内存使用率是否过高
+					local memUsage = tonumber(resourceUsage.memory.usageFractions)
+					if memUsage and memUsage > 0.9 then
+						check_event("警告", "Pod " .. podNamespace .. "/" .. podName .. " 内存使用率过高: " .. string.format("%.2f%%", memUsage * 100), {namespace=podNamespace, name=podName, memoryUsage=memUsage})
+					end
+				end
+			end
+
+			-- 检查是否配置了资源请求和限制
+			local hasRequests = (resourceUsage.cpu and resourceUsage.cpu.requests) or (resourceUsage.memory and resourceUsage.memory.requests)
+			local hasLimits = (resourceUsage.cpu and resourceUsage.cpu.limits) or (resourceUsage.memory and resourceUsage.memory.limits)
+
+			if not hasRequests then
+				check_event("失败", "Pod " .. podNamespace .. "/" .. podName .. " 未配置资源请求量 (requests)", {namespace=podNamespace, name=podName})
+			end
+
+			if not hasLimits then
+				check_event("失败", "Pod " .. podNamespace .. "/" .. podName .. " 未配置资源限制量 (limits)", {namespace=podNamespace, name=podName})
+			end
+
+			print("\nPod 资源用量检查完成")
+		`,
+	},
 }

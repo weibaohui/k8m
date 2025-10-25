@@ -280,3 +280,31 @@ func getLogs(L *lua.LState) int {
 	L.Push(lua.LNil)
 	return 2
 }
+
+// 实现 kubectl:GetResourceUsage() 方法
+// 用于获取Pod的资源使用情况，返回 Lua 表和错误信息
+// 使用方式：local usage, err = kubectl:GVK("", "v1", "Pod"):Namespace("kube-system"):Name("coredns-ccb96694c-jprpf"):GetResourceUsage()
+func getPodResourceUsage(L *lua.LState) int {
+	ud := L.CheckUserData(1)
+	obj, ok := ud.Value.(*Kubectl)
+	if !ok {
+		L.ArgError(1, "expected kubectl")
+		return 0
+	}
+
+	// 调用kom库的ResourceUsage方法
+	result, err := obj.k.Ctl().Pod().ResourceUsage()
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	// 转换为 Lua 表
+	table := toLValue(L, result)
+
+	// 返回查询结果
+	L.Push(table)
+	L.Push(lua.LNil)
+	return 2
+}
