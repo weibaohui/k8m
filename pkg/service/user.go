@@ -290,7 +290,7 @@ func (u *userService) GenerateJWTTokenOnlyUserName(username string, duration tim
 // GetGroupNames 获取用户所在的用户组
 // return: 用户组名称列表
 func (u *userService) GetGroupNames(username string) ([]string, error) {
-	cacheKey := u.formatCacheKey("user:group‘’names:%s", username)
+	cacheKey := u.formatCacheKey("user:groupnames:%s", username)
 
 	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
 		params := &dao.Params{}
