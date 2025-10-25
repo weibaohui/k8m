@@ -167,7 +167,6 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Cli
 	newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
 		"Authorization": jwt,
 	}))
-	// klog.V(6).Infof("访问MCP 服务器 [%s:%s] 携带信息%s %s", serverName, config.URL, username, role)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new client for %s: %v", serverName, err)
 	}
