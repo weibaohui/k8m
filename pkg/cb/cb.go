@@ -63,7 +63,7 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 // 返回：
 //
 //	用户名、角色列表，以及权限不足或异常时的错误信息。
-func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error) {
+func handleCommonLogic(k8s *kom.Kubectl, action string) error {
 	stmt := k8s.Statement
 	cluster := k8s.ID
 	ctx := stmt.Context
@@ -103,47 +103,47 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 
 }
 func handleDelete(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "delete")
+	err := handleCommonLogic(k8s, "delete")
 	saveLog2DB(k8s, "delete", err)
 	return err
 }
 
 func handleUpdate(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "update")
+	err := handleCommonLogic(k8s, "update")
 	saveLog2DB(k8s, "update", err)
 	return err
 }
 
 func handlePatch(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "patch")
+	err := handleCommonLogic(k8s, "patch")
 	saveLog2DB(k8s, "patch", err)
 	return err
 }
 
 func handleCreate(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "create")
+	err := handleCommonLogic(k8s, "create")
 	saveLog2DB(k8s, "create", err)
 	return err
 }
 func handleExec(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "exec")
+	err := handleCommonLogic(k8s, "exec")
 	saveLog2DB(k8s, "exec", err)
 	return err
 }
 
 func handleList(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "list")
+	err := handleCommonLogic(k8s, "list")
 	return err
 }
 func handleDescribe(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "describe")
+	err := handleCommonLogic(k8s, "describe")
 	return err
 }
 func handleLogs(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "logs")
+	err := handleCommonLogic(k8s, "logs")
 	return err
 }
 func handleGet(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "get")
+	err := handleCommonLogic(k8s, "get")
 	return err
 }

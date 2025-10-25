@@ -58,6 +58,6 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 func check(c *gin.Context, cluster, ns, name, action string) error {
 	ctx := amis.GetContextWithUser(c)
 	nsList := []string{ns}
-	_, _, err := comm.CheckPermissionLogic(ctx, cluster, nsList, ns, name, action)
+	err := comm.CheckPermissionLogic(ctx, cluster, nsList, ns, name, action)
 	return err
 }

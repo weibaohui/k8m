@@ -15,40 +15,40 @@ import (
 
 // CheckPermissionLogic
 // return username,roles,err
-func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, ns, name, action string) (string, []string, error) {
+func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, ns, name, action string) error {
 
 	// 内部监听增加一个认证机制，不用做权限校验
 	// 比如node watch
 	if constants.RolePlatformAdmin == ctx.Value(constants.RolePlatformAdmin) {
-		return constants.RolePlatformAdmin, []string{constants.RolePlatformAdmin}, nil
+		return nil
 	}
 
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 
 	if username == "" {
-		return "", nil, fmt.Errorf("用户为空%v，默认阻止", nil)
+		return fmt.Errorf("用户为空%v，默认阻止", nil)
 	}
 	var err error
-	roles, _ := service.UserService().GetClusterRole(cluster, username)
 	// 先看是不是平台管理员
-	if slice.Contain(roles, constants.RolePlatformAdmin) {
+	if service.UserService().IsUserPlatformAdmin(username) {
 		// 平台管理员，可以执行任何操作
-		return username, roles, nil
+		return nil
 	}
+
 	clusterUserRoles, err := service.UserService().GetClusters(username)
 
 	if err != nil || len(clusterUserRoles) == 0 {
 		// 没有集群权限，报错
-		return "", nil, fmt.Errorf("用户[%s]获取集群授权错误，默认阻止", username)
+		return fmt.Errorf("用户[%s]获取集群授权错误，默认阻止", username)
 	}
 
 	if clusterUserRoles != nil && len(clusterUserRoles) == 0 {
-		return "", nil, fmt.Errorf("用户[%s]没有集群授权", username)
+		return fmt.Errorf("用户[%s]没有集群授权", username)
 	}
 	if _, ok := slice.FindBy(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 		return item.Cluster == cluster
 	}); !ok {
-		return "", nil, fmt.Errorf("用户[%s]没有集群[%s]访问权限", username, cluster)
+		return fmt.Errorf("用户[%s]没有集群[%s]访问权限", username, cluster)
 	}
 
 	// 下面都是有集群的访问权限的情况，需要进一步区分是什么类型的操作。
@@ -72,13 +72,13 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 				return item.Cluster == cluster && item.Role == constants.RoleClusterReadonly
 			})
 			if len(rdOnlyClusters) == 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 只读权限", username, cluster)
+				return fmt.Errorf("用户[%s]没有集群[%s] 只读权限", username, cluster)
 			}
 			execClusters := slice.Filter(clusterUserRoles, func(index int, item *models.ClusterUserRole) bool {
 				return item.Cluster == cluster && item.Role == constants.RoleClusterPodExec
 			})
 			if len(execClusters) == 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] Exec权限", username, cluster)
+				return fmt.Errorf("用户[%s]没有集群[%s] Exec权限", username, cluster)
 			}
 			if len(nsList) > 0 {
 				// 具备只读+Exec权限了，那么继续看是否有该ns的权限.
@@ -89,13 +89,13 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 					return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 				})
 				if len(execClustersWithBNs) > 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+					return fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 				}
 				execClustersWithNs := slice.Filter(execClusters, func(index int, item *models.ClusterUserRole) bool {
 					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 				})
 				if len(execClustersWithNs) == 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
+					return fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 				}
 			}
 		} else {
@@ -107,7 +107,7 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 					return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 				})
 				if len(execClustersWithBNs) > 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+					return fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 				}
 
 				// ns为空，或者ns列表中含有当前ns，那么就允许执行。
@@ -115,7 +115,7 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 					return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 				})
 				if len(execClustersWithNs) == 0 {
-					return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
+					return fmt.Errorf("用户[%s]没有集群[%s] [%s] Exec权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 				}
 			}
 		}
@@ -125,7 +125,7 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 			return item.Cluster == cluster && item.Role == constants.RoleClusterAdmin
 		})
 		if len(changeClusters) == 0 {
-			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 操作权限", username, cluster)
+			return fmt.Errorf("用户[%s]没有集群[%s] 操作权限", username, cluster)
 		}
 		if len(nsList) > 0 {
 			// 具备操作权限了，那么继续看是否有该ns的权限.
@@ -136,14 +136,14 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 				return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 			})
 			if len(execClustersWithBNs) > 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+				return fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 			}
 
 			changeClustersWithNs := slice.Filter(changeClusters, func(index int, item *models.ClusterUserRole) bool {
 				return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 			})
 			if len(changeClustersWithNs) == 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
+				return fmt.Errorf("用户[%s]没有集群[%s] [%s] 操作权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 			}
 		}
 	default:
@@ -154,7 +154,7 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 			return item.Cluster == cluster && (item.Role == constants.RoleClusterReadonly || item.Role == constants.RoleClusterAdmin)
 		})
 		if len(readClusters) == 0 {
-			return "", nil, fmt.Errorf("用户[%s]没有集群[%s] 读取/管理员 权限", username, cluster)
+			return fmt.Errorf("用户[%s]没有集群[%s] 读取/管理员 权限", username, cluster)
 		}
 		if len(nsList) > 0 {
 			// 具备操作权限了，那么继续看是否有该ns的权限.
@@ -165,19 +165,18 @@ func CheckPermissionLogic(ctx context.Context, cluster string, nsList []string, 
 				return item.BlacklistNamespaces != "" && utils.AnyIn(nsList, strings.Split(item.BlacklistNamespaces, ","))
 			})
 			if len(execClustersWithBNs) > 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
+				return fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限-进入命名空间黑名单", username, cluster, strings.Join(nsList, ","))
 			}
 
 			readClustersWithNs := slice.Filter(readClusters, func(index int, item *models.ClusterUserRole) bool {
 				return item.Namespaces == "" || utils.AllIn(nsList, strings.Split(item.Namespaces, ","))
 			})
 			if len(readClustersWithNs) == 0 {
-				return "", nil, fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
+				return fmt.Errorf("用户[%s]没有集群[%s] [%s] 读取权限-不在命名空间白名单", username, cluster, strings.Join(nsList, ","))
 			}
 		}
 	}
-
 	klog.V(6).Infof("cb: cluster= %s,user= %s, role= %s, operation=%s,  resource=[%s/%s] ",
-		cluster, username, roles, action, ns, name)
-	return username, roles, err
+		cluster, username, action, ns, name)
+	return err
 }
