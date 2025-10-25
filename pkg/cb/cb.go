@@ -81,7 +81,7 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 	ctx := stmt.Context
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
 
-	roles, err := service.UserService().GetRolesByUserName(username)
+	roles, roleErr := service.UserService().GetRolesByUserName(username)
 
 	log := models.OperationLog{
 		Action:       action,
@@ -97,6 +97,10 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 
 	if err != nil {
 		log.ActionResult = err.Error()
+	}
+	if roleErr != nil {
+		log.ActionResult = roleErr.Error()
+		return
 	}
 
 	service.OperationLogService().Add(&log)

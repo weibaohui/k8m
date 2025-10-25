@@ -88,7 +88,7 @@ func handleNormalUser(c *gin.Context, selectedCluster string) ([]map[string]stri
 		return make([]map[string]string, 0), true
 	}
 	if clusterUserRoles == nil {
-		return nil, false
+		return make([]map[string]string, 0), true
 	}
 
 	// 筛选带有ns的授权列表

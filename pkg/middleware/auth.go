@@ -61,6 +61,11 @@ func PlatformAuthMiddleware() gin.HandlerFunc {
 
 		username := claims[constants.JwtUserName].(string)
 		roles, err := service.UserService().GetRolesByUserName(username)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "角色查询失败"})
+			c.Abort()
+			return
+		}
 		// 权限检查
 		if !slices.Contains(roles, constants.RolePlatformAdmin) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "平台管理员权限校验失败"})
