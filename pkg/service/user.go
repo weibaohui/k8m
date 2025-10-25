@@ -123,6 +123,32 @@ func (u *userService) List() ([]*models.User, error) {
 	return list, nil
 }
 
+// GetRolesByUserName 通过用户名获取用户的角色
+func (u *userService) GetRolesByUserName(username string) ([]string, error) {
+	// 先判断是否不是最大的临时管理员账户
+	cfg := flag.Init()
+	if cfg.EnableTempAdmin && username == cfg.AdminUserName {
+		return []string{constants.RolePlatformAdmin}, nil
+	}
+	groupNames, err := u.GetGroupNames(username)
+	if err != nil {
+		return nil, err
+	}
+	roles, err := u.GetRolesByGroupNames(groupNames)
+	if err != nil {
+		return nil, err
+	}
+	// 平台管理员账户最大，返回最大角色
+	for _, role := range roles {
+		if role == constants.RolePlatformAdmin {
+			return []string{role}, nil
+		}
+	}
+
+	return roles, nil
+
+}
+
 // GetRolesByGroupNames 获取用户的角色
 func (u *userService) GetRolesByGroupNames(groupNames []string) ([]string, error) {
 	if len(groupNames) == 0 {
@@ -500,32 +526,6 @@ func (u *userService) LoginWithLdap(username string, password string, cfg *flag.
 	}
 
 	return userInfo, nil
-}
-
-// GetRolesByUserName 通过用户名获取用户的角色
-func (u *userService) GetRolesByUserName(username string) ([]string, error) {
-	// 先判断是否不是最大的临时管理员账户
-	cfg := flag.Init()
-	if cfg.EnableTempAdmin && username == cfg.AdminUserName {
-		return []string{constants.RolePlatformAdmin}, nil
-	}
-	groupNames, err := u.GetGroupNames(username)
-	if err != nil {
-		return nil, err
-	}
-	roles, err := u.GetRolesByGroupNames(groupNames)
-	if err != nil {
-		return nil, err
-	}
-	// 平台管理员账户最大，返回最大角色
-	for _, role := range roles {
-		if role == constants.RolePlatformAdmin {
-			return []string{role}, nil
-		}
-	}
-
-	return roles, nil
-
 }
 
 func (u *userService) IsUserPlatformAdmin(user string) bool {
