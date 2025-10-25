@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/weibaohui/kom/kom"
 	lua "github.com/yuin/gopher-lua"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
@@ -65,6 +66,62 @@ func lValueToGoValue(val lua.LValue) any {
 // Go -> Lua 转换
 func toLValue(L *lua.LState, v any) lua.LValue {
 	switch val := v.(type) {
+	case *kom.ResourceUsageResult:
+		if val == nil {
+			return lua.LNil
+		}
+		tbl := L.NewTable()
+		
+		// 转换 Requests
+		if val.Requests != nil {
+			requestsTbl := L.NewTable()
+			for name, quantity := range val.Requests {
+				requestsTbl.RawSetString(string(name), lua.LNumber(quantity.AsApproximateFloat64()))
+			}
+			tbl.RawSetString("requests", requestsTbl)
+		}
+		
+		// 转换 Limits
+		if val.Limits != nil {
+			limitsTbl := L.NewTable()
+			for name, quantity := range val.Limits {
+				limitsTbl.RawSetString(string(name), lua.LNumber(quantity.AsApproximateFloat64()))
+			}
+			tbl.RawSetString("limits", limitsTbl)
+		}
+		
+		// 转换 Realtime
+		if val.Realtime != nil {
+			realtimeTbl := L.NewTable()
+			for name, quantity := range val.Realtime {
+				realtimeTbl.RawSetString(string(name), lua.LNumber(quantity.AsApproximateFloat64()))
+			}
+			tbl.RawSetString("realtime", realtimeTbl)
+		}
+		
+		// 转换 Allocatable
+		if val.Allocatable != nil {
+			allocatableTbl := L.NewTable()
+			for name, quantity := range val.Allocatable {
+				allocatableTbl.RawSetString(string(name), lua.LNumber(quantity.AsApproximateFloat64()))
+			}
+			tbl.RawSetString("allocatable", allocatableTbl)
+		}
+		
+		// 转换 UsageFractions
+		if val.UsageFractions != nil {
+			usageFractionsTbl := L.NewTable()
+			for name, fraction := range val.UsageFractions {
+				fractionTbl := L.NewTable()
+				fractionTbl.RawSetString("requestFraction", lua.LString(fraction.RequestFraction))
+				fractionTbl.RawSetString("limitFraction", lua.LString(fraction.LimitFraction))
+				fractionTbl.RawSetString("realtimeFraction", lua.LString(fraction.RealtimeFraction))
+				usageFractionsTbl.RawSetString(string(name), fractionTbl)
+			}
+			tbl.RawSetString("usageFractions", usageFractionsTbl)
+		}
+		
+		return tbl
 	case []*unstructured.Unstructured:
 		items := make([]any, len(val))
 		for i, item := range val {
