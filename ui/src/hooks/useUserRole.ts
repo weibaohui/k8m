@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { fetcher } from '@/components/Amis/fetcher';
+import {useState, useEffect} from 'react';
+import {fetcher} from '@/components/Amis/fetcher';
 
-import { MenuItem } from '@/types/menu';
+import {MenuItem} from '@/types/menu';
 
 interface UserRoleResponse {
-    role: string;
+    roles: string[];
     cluster: string;
     menu_data: MenuItem[] | string;
 }
 
 export const useUserRole = () => {
-    const [userRole, setUserRole] = useState<string>('');
+    const [userRole, setUserRole] = useState<string[]>([]);
     const [menuData, setMenuData] = useState<MenuItem[] | string>([]);
 
     useEffect(() => {
@@ -23,7 +23,7 @@ export const useUserRole = () => {
 
                 if (response.data && typeof response.data === 'object') {
                     const role = response.data.data as UserRoleResponse;
-                    setUserRole(role.role);
+                    setUserRole(role.roles);
                     setMenuData(role.menu_data);
 
                     const originCluster = localStorage.getItem('cluster') || '';
@@ -39,5 +39,5 @@ export const useUserRole = () => {
         fetchUserRole();
     }, []);
 
-    return { userRole, menuData };
+    return {userRole, menuData};
 };

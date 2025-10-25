@@ -19,7 +19,7 @@ func (pc *Controller) UserRole(c *gin.Context) {
 	// 如果是平台管理员,可以看到所有菜单
 	if service.UserService().IsUserPlatformAdmin(user) {
 		amis.WriteJsonData(c, gin.H{
-			"role":      constants.RolePlatformAdmin,
+			"roles":     []string{constants.RolePlatformAdmin},
 			"cluster":   "",
 			"menu_data": []any{},
 		})
@@ -47,7 +47,7 @@ func (pc *Controller) UserRole(c *gin.Context) {
 		return
 	}
 	amis.WriteJsonData(c, gin.H{
-		"role":      roles, // todo 这个地方是不是应该改成role_list，代表role列表?roles代表复数字符串，role代表单一集群名称
+		"role":      roles,
 		"cluster":   cluster,
 		"menu_data": menuData,
 	})

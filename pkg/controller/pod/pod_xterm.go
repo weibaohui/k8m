@@ -94,7 +94,8 @@ func cmdLogger(c *gin.Context, cmd string) {
 	username := amis.GetLoginUser(c)
 	roles, err := service.UserService().GetRolesByUserName(username)
 	if err != nil {
-		return
+		klog.Errorf("获取用户 %s 的角色失败: %v，仍将记录命令", username, err)
+		roles = []string{"unknown"}
 	}
 	log := models.ShellLog{
 		Cluster:       selectedCluster,
