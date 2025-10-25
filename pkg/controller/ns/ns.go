@@ -69,7 +69,8 @@ func handleRestrictedNamespace(selectedCluster string) ([]map[string]string, boo
 }
 
 func handlePlatformAdmin(c *gin.Context, selectedCluster string) ([]map[string]string, bool) {
-	if amis.IsCurrentUserPlatformAdmin(c) {
+	user := amis.GetLoginUser(c)
+	if service.UserService().IsUserPlatformAdmin(user) {
 		ctx := amis.GetContextWithUser(c)
 		nsList, err := getClusterNsList(ctx, selectedCluster)
 		if err != nil {
@@ -81,13 +82,13 @@ func handlePlatformAdmin(c *gin.Context, selectedCluster string) ([]map[string]s
 }
 
 func handleNormalUser(c *gin.Context, selectedCluster string) ([]map[string]string, bool) {
-	user, _ := amis.GetLoginUser(c)
+	user := amis.GetLoginUser(c)
 	clusterUserRoles, err := service.UserService().GetClusters(user)
 	if err != nil {
 		return make([]map[string]string, 0), true
 	}
 	if clusterUserRoles == nil {
-		return nil, false
+		return make([]map[string]string, 0), true
 	}
 
 	// 筛选带有ns的授权列表
@@ -130,7 +131,7 @@ func handleUserWithoutNamespaceRestriction(ctx context.Context, selectedCluster 
 }
 
 func handleBlacklist(c *gin.Context, selectedCluster string, list []map[string]string) ([]map[string]string, bool) {
-	user, _ := amis.GetLoginUser(c)
+	user := amis.GetLoginUser(c)
 	clusterUserRoles, err := service.UserService().GetClusters(user)
 	if err != nil {
 		return list, true

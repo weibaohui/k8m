@@ -2,6 +2,7 @@ package cb
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/weibaohui/k8m/pkg/comm"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -48,11 +49,8 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 }
 
 // handleCommonLogic 根据用户在指定集群上的角色和命名空间权限，校验其是否有执行指定 Kubernetes 操作（如读取、变更、Exec 等）的权限。
-// 返回用户名、角色列表和权限校验错误（如无权限则返回错误）。
-// handleCommonLogic 根据用户在平台和集群中的角色，校验其对指定 Kubernetes 集群和命名空间的操作权限。
 // 平台管理员拥有所有权限，集群管理员拥有全部操作权限，特定操作（如 Exec、只读）需具备对应角色及命名空间权限。
 // 若为内部监听（如 node watch），则跳过权限校验。
-// 返回用户名、角色列表及权限校验错误（如无权限或未授权）。
 //
 // 参数：
 //
@@ -61,8 +59,8 @@ func RegisterDefaultCallbacks(cluster *service.ClusterConfig) func() {
 //
 // 返回：
 //
-//	用户名、角色列表，以及权限不足或异常时的错误信息。
-func handleCommonLogic(k8s *kom.Kubectl, action string) (string, []string, error) {
+//	权限不足或异常时的错误信息。
+func handleCommonLogic(k8s *kom.Kubectl, action string) error {
 	stmt := k8s.Statement
 	cluster := k8s.ID
 	ctx := stmt.Context
@@ -79,7 +77,8 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 	cluster := k8s.ID
 	ctx := stmt.Context
 	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	roleString := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+
+	roles, roleErr := service.UserService().GetRolesByUserName(username)
 
 	log := models.OperationLog{
 		Action:       action,
@@ -89,59 +88,63 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 		Namespace:    stmt.Namespace,
 		UserName:     username,
 		Group:        stmt.GVK.Group,
-		Role:         roleString,
+		Role:         strings.Join(roles, ","),
 		ActionResult: "success",
 	}
 
 	if err != nil {
 		log.ActionResult = err.Error()
 	}
+	if roleErr != nil {
+		log.ActionResult = roleErr.Error()
+		klog.Errorf("get roles by username %s failed: %v", username, roleErr)
+	}
 
 	service.OperationLogService().Add(&log)
 
 }
 func handleDelete(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "delete")
+	err := handleCommonLogic(k8s, "delete")
 	saveLog2DB(k8s, "delete", err)
 	return err
 }
 
 func handleUpdate(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "update")
+	err := handleCommonLogic(k8s, "update")
 	saveLog2DB(k8s, "update", err)
 	return err
 }
 
 func handlePatch(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "patch")
+	err := handleCommonLogic(k8s, "patch")
 	saveLog2DB(k8s, "patch", err)
 	return err
 }
 
 func handleCreate(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "create")
+	err := handleCommonLogic(k8s, "create")
 	saveLog2DB(k8s, "create", err)
 	return err
 }
 func handleExec(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "exec")
+	err := handleCommonLogic(k8s, "exec")
 	saveLog2DB(k8s, "exec", err)
 	return err
 }
 
 func handleList(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "list")
+	err := handleCommonLogic(k8s, "list")
 	return err
 }
 func handleDescribe(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "describe")
+	err := handleCommonLogic(k8s, "describe")
 	return err
 }
 func handleLogs(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "logs")
+	err := handleCommonLogic(k8s, "logs")
 	return err
 }
 func handleGet(k8s *kom.Kubectl) error {
-	_, _, err := handleCommonLogic(k8s, "get")
+	err := handleCommonLogic(k8s, "get")
 	return err
 }

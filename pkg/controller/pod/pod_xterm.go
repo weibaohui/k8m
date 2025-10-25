@@ -91,7 +91,12 @@ func cmdLogger(c *gin.Context, cmd string) {
 		return
 	}
 	cmd = utils.CleanANSISequences(cmd)
-	username, role := amis.GetLoginUser(c)
+	username := amis.GetLoginUser(c)
+	roles, err := service.UserService().GetRolesByUserName(username)
+	if err != nil {
+		klog.Errorf("获取用户 %s 的角色失败: %v，仍将记录命令", username, err)
+		roles = []string{"unknown"}
+	}
 	log := models.ShellLog{
 		Cluster:       selectedCluster,
 		Command:       cmd,
@@ -99,7 +104,7 @@ func cmdLogger(c *gin.Context, cmd string) {
 		PodName:       podName,
 		ContainerName: containerName,
 		UserName:      username,
-		Role:          role,
+		Role:          strings.Join(roles, ","),
 	}
 	service.ShellLogService().Add(&log)
 

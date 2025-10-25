@@ -42,7 +42,7 @@ func (hr *ReleaseController) ListReleaseHistory(c *gin.Context) {
 	ns := c.Param("ns")
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "list", releaseName, ns, "")
+	err := handleCommonLogic(c, "list", releaseName, ns, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -67,7 +67,7 @@ func (hr *ReleaseController) ListReleaseHistory(c *gin.Context) {
 // @Router /k8s/cluster/{cluster}/helm/release/list [get]
 func (hr *ReleaseController) ListRelease(c *gin.Context) {
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "list", "", "", "")
+	err := handleCommonLogic(c, "list", "", "", "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -128,7 +128,7 @@ func (hr *ReleaseController) InstallRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "create", releaseName, req.Namespace, repoName)
+	err := handleCommonLogic(c, "create", releaseName, req.Namespace, repoName)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -165,7 +165,7 @@ func (hr *ReleaseController) UninstallRelease(c *gin.Context) {
 	ns := c.Param("ns")
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "delete", releaseName, ns, "")
+	err := handleCommonLogic(c, "delete", releaseName, ns, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -197,7 +197,7 @@ func (hr *ReleaseController) GetReleaseNote(c *gin.Context) {
 	revision := c.Param("revision")
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "get", releaseName, ns, "")
+	err := handleCommonLogic(c, "get", releaseName, ns, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -238,7 +238,7 @@ func (hr *ReleaseController) GetReleaseInstallLog(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err = handleCommonLogic(c, "get", releaseName, ns, "")
+	err = handleCommonLogic(c, "get", releaseName, ns, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -266,7 +266,7 @@ func (hr *ReleaseController) GetReleaseValues(c *gin.Context) {
 	ns := c.Param("ns")
 	revision := c.Param("revision")
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "get", releaseName, ns, "")
+	err := handleCommonLogic(c, "get", releaseName, ns, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -320,7 +320,7 @@ func (hr *ReleaseController) BatchUninstallRelease(c *gin.Context) {
 		}
 
 		// 检查权限
-		_, _, err = handleCommonLogic(c, "delete", name, ns, "")
+		err = handleCommonLogic(c, "delete", name, ns, "")
 		if err != nil {
 			amis.WriteJsonError(c, err)
 			return
@@ -355,7 +355,7 @@ func (hr *ReleaseController) UpgradeRelease(c *gin.Context) {
 	}
 
 	// 检查权限
-	_, _, err := handleCommonLogic(c, "update", req.Name, req.Namespace, "")
+	err := handleCommonLogic(c, "update", req.Name, req.Namespace, "")
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

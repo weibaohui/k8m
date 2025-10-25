@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -122,6 +123,32 @@ func (u *userService) List() ([]*models.User, error) {
 	return list, nil
 }
 
+// GetRolesByUserName 通过用户名获取用户的角色
+func (u *userService) GetRolesByUserName(username string) ([]string, error) {
+	// 先判断是否不是最大的临时管理员账户
+	cfg := flag.Init()
+	if cfg.EnableTempAdmin && username == cfg.AdminUserName {
+		return []string{constants.RolePlatformAdmin}, nil
+	}
+	groupNames, err := u.GetGroupNames(username)
+	if err != nil {
+		return nil, err
+	}
+	roles, err := u.GetRolesByGroupNames(groupNames)
+	if err != nil {
+		return nil, err
+	}
+	// 平台管理员账户最大，返回最大角色
+	for _, role := range roles {
+		if role == constants.RolePlatformAdmin {
+			return []string{role}, nil
+		}
+	}
+
+	return roles, nil
+
+}
+
 // GetRolesByGroupNames 获取用户的角色
 func (u *userService) GetRolesByGroupNames(groupNames []string) ([]string, error) {
 	if len(groupNames) == 0 {
@@ -139,57 +166,6 @@ func (u *userService) GetRolesByGroupNames(groupNames []string) ([]string, error
 		var roles []string
 		for _, ug := range ugList {
 			roles = append(roles, ug.Role)
-		}
-		return roles, nil
-	})
-
-	return result, err
-}
-
-// GetClusterRole 获取用户在指定集群中的角色权限
-// cluster: 集群名称
-// username: 用户名
-// jwtUserRole: JWT用户角色,从context传递
-// 返回值：角色列表 [平台角色，集群角色合并了，后续考虑拆开]
-// 包含用户本身的集群角色、以及所在用户组的集群角色
-func (u *userService) GetClusterRole(cluster string, username string, jwtUserRoles string) ([]string, error) {
-	// jwtUserRoles的检查逻辑保持不变
-	if jwtUserRoles != "" {
-		roles := strings.SplitSeq(jwtUserRoles, ",")
-		for role := range roles {
-			// 只有平台管理员才返回，这是最大权限了
-			// 不是平台管理员就是普通用户，这是权限系统的设定，只有这两种角色
-			// 普通用户需要接受集群权限授权，那么就往下执行，查看是否具有集群授权
-			if role == constants.RolePlatformAdmin {
-				return []string{role}, nil
-			}
-		}
-	}
-
-	cacheKey := u.formatCacheKey("user:clusterrole:%s:%s", username, cluster)
-
-	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
-		// 查找用户本身、用户所在组，两个层面的集群权限。先形成查询名称的列表
-		var unionNames []string
-		if groupNames, err := u.GetGroupNames(username); err == nil {
-			unionNames = append(unionNames, groupNames...)
-		}
-		unionNames = append(unionNames, username)
-
-		// 查找用户本身、用户所在组，两个层面的集群权限。
-		params := &dao.Params{}
-		params.PerPage = 10000000
-		clusterRole := &models.ClusterUserRole{}
-		queryFunc := func(db *gorm.DB) *gorm.DB {
-			return db.Distinct("role").Where("cluster = ? AND username in ?", cluster, unionNames)
-		}
-		items, _, err := clusterRole.List(params, queryFunc)
-		if err != nil {
-			return []string{}, err
-		}
-		var roles []string
-		for _, item := range items {
-			roles = append(roles, item.Role)
 		}
 		return roles, nil
 	})
@@ -237,11 +213,11 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 		// 以上为授权类型为用户的情况
 		// 以下为授权类型为用户组的情况
 		// 先获取用户所在用户组名称，可能多个
-		if goupNameList, err := u.GetGroupNames(username); err == nil {
-			if len(goupNameList) > 0 {
+		if groupNameList, err := u.GetGroupNames(username); err == nil {
+			if len(groupNameList) > 0 {
 				// 查找用户组对应的授权
 				if items2, _, err := clusterRole.List(params, func(db *gorm.DB) *gorm.DB {
-					return db.Where("authorization_type=? and  username in ? ", constants.ClusterAuthorizationTypeUserGroup, goupNameList)
+					return db.Where("authorization_type=? and  username in ? ", constants.ClusterAuthorizationTypeUserGroup, groupNameList)
 				}); err == nil {
 					items = append(items, items2...)
 				}
@@ -253,68 +229,16 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 	return result, err
 }
 
-// GenerateJWTTokenByUserName  生成 Token
-func (u *userService) GenerateJWTTokenByUserName(username string, duration time.Duration) (string, error) {
-	role := constants.JwtUserRole
-	name := constants.JwtUserName
-	cst := constants.JwtClusters
-	cstUserRoles := constants.JwtClusterUserRoles
-
-	groupNames, _ := u.GetGroupNames(username)
-	roles, _ := u.GetRolesByGroupNames(groupNames)
-	// 查询用户对应的集群
-	clusters, _ := u.GetClusters(username)
-
-	var clusterNames []string
-
-	for _, cluster := range clusters {
-		clusterNames = append(clusterNames, cluster.Cluster)
-	}
-
-	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		name:         username,
-		role:         strings.Join(roles, ","),        // 角色列表
-		cst:          strings.Join(clusterNames, ","), // 集群名称列表
-		cstUserRoles: utils.ToJSON(clusters),          // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
-		"exp":        time.Now().Add(duration).Unix(),
-	})
-	cfg := flag.Init()
-	var jwtSecret = []byte(cfg.JwtTokenSecret)
-	return token.SignedString(jwtSecret)
-}
-
 // GenerateJWTTokenOnlyUserName  生成 Token，仅包含Username
 func (u *userService) GenerateJWTTokenOnlyUserName(username string, duration time.Duration) (string, error) {
+	if username == "" {
+		return "", errors.New("username cannot be empty")
+	}
 	name := constants.JwtUserName
 
 	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		name:  username,
 		"exp": time.Now().Add(duration).Unix(),
-	})
-	cfg := flag.Init()
-	var jwtSecret = []byte(cfg.JwtTokenSecret)
-	return token.SignedString(jwtSecret)
-}
-
-// GenerateJWTToken 生成 Token
-func (u *userService) GenerateJWTToken(username string, roles []string, clusters []*models.ClusterUserRole, duration time.Duration) (string, error) {
-	role := constants.JwtUserRole
-	name := constants.JwtUserName
-	cst := constants.JwtClusters
-	cstUserRoles := constants.JwtClusterUserRoles
-
-	var clusterNames []string
-
-	for _, cluster := range clusters {
-		clusterNames = append(clusterNames, cluster.Cluster)
-	}
-
-	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		name:         username,
-		role:         strings.Join(roles, ","),        // 角色列表
-		cst:          strings.Join(clusterNames, ","), // 集群名称列表
-		cstUserRoles: utils.ToJSON(clusters),          // 集群用户角色列表 可以反序列化为[]*models.ClusterUserRole
-		"exp":        time.Now().Add(duration).Unix(), // 国企时间
 	})
 	cfg := flag.Init()
 	var jwtSecret = []byte(cfg.JwtTokenSecret)
@@ -419,20 +343,6 @@ func (u *userService) CheckAndCreateUser(username, source, groups string) error 
 	return nil
 }
 
-// GetPlatformRolesByName 通过用户名获取用户的平台角色
-func (u *userService) GetPlatformRolesByName(username string) string {
-	cfg := flag.Init()
-	if cfg.EnableTempAdmin && username == cfg.AdminUserName {
-		return constants.RolePlatformAdmin
-	}
-	if names, err := u.GetGroupNames(username); err == nil {
-		if rolesByGroupNames, err := u.GetRolesByGroupNames(names); err == nil {
-			return strings.Join(rolesByGroupNames, ",")
-		}
-	}
-	return ""
-}
-
 // ClearCacheByKey 清除指定关键字的所有相关缓存
 func (u *userService) ClearCacheByKey(cacheKey string) {
 	// 遍历所有已使用的缓存key
@@ -503,7 +413,7 @@ func (u *userService) searchRequest(conn *ldap.Conn, username string, config *mo
 	return cur.Entries[0], nil
 }
 
-// 登录ldap
+// LoginWithLdap 登录ldap
 func (u *userService) LoginWithLdap(username string, password string, cfg *flag.Config) (*ldap.Entry, error) {
 	// 从数据库获取启用的LDAP配置
 	ldapConfig := &models.LDAPConfig{}
@@ -544,4 +454,12 @@ func (u *userService) LoginWithLdap(username string, password string, cfg *flag.
 	}
 
 	return userInfo, nil
+}
+
+func (u *userService) IsUserPlatformAdmin(user string) bool {
+	roles, err := u.GetRolesByUserName(user)
+	if err != nil {
+		return false
+	}
+	return slices.Contains(roles, constants.RolePlatformAdmin)
 }

@@ -1,12 +1,11 @@
 package helm
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -31,11 +30,14 @@ func getHelmWithNoCluster() (helm.Helm, error) {
 	return cmd, nil
 }
 
-func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, repoName string) (string, string, error) {
+func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, repoName string) error {
 	cluster, _ := amis.GetSelectedCluster(c)
-	ctx := amis.GetContextWithUser(c)
-	username := fmt.Sprintf("%s", ctx.Value(constants.JwtUserName))
-	role := fmt.Sprintf("%s", ctx.Value(constants.JwtUserRole))
+
+	username := amis.GetLoginUser(c)
+	roles, err := service.UserService().GetRolesByUserName(username)
+	if err != nil {
+		return err
+	}
 
 	log := models.OperationLog{
 		Action:       action,
@@ -45,20 +47,23 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 		Namespace:    namespace,
 		UserName:     username,
 		Group:        repoName,
-		Role:         role,
+		Role:         strings.Join(roles, ","),
 		ActionResult: "success",
 	}
 
-	err := check(c, cluster, namespace, releaseName, action)
+	err = check(c, cluster, namespace, releaseName, action)
 	if err != nil {
 		log.ActionResult = err.Error()
 	}
 	go service.OperationLogService().Add(&log)
-	return username, role, err
+	return err
 }
 func check(c *gin.Context, cluster, ns, name, action string) error {
 	ctx := amis.GetContextWithUser(c)
-	nsList := []string{ns}
-	_, _, err := comm.CheckPermissionLogic(ctx, cluster, nsList, ns, name, action)
+	var nsList []string
+	if ns != "" {
+		nsList = append(nsList, ns)
+	}
+	err := comm.CheckPermissionLogic(ctx, cluster, nsList, ns, name, action)
 	return err
 }
