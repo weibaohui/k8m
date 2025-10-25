@@ -172,7 +172,7 @@ func (u *userService) GetRolesByGroupNames(groupNames []string) ([]string, error
 
 	return result, err
 }
- 
+
 // GetClusterNames 获取用户有权限的集群名称数组
 // username: 用户名
 func (u *userService) GetClusterNames(username string) ([]string, error) {

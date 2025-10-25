@@ -100,7 +100,7 @@ func saveLog2DB(k8s *kom.Kubectl, action string, err error) {
 	}
 	if roleErr != nil {
 		log.ActionResult = roleErr.Error()
-		return
+		klog.Errorf("get roles by username %s failed: %v", username, roleErr)
 	}
 
 	service.OperationLogService().Add(&log)
