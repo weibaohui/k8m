@@ -70,10 +70,22 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		}
 
 		username := amis.GetLoginUser(c)
+		if username == "" {
+			c.JSON(512, gin.H{
+				"msg": "未获取到登录用户名，请先登录",
+			})
+			c.Abort()
+			return
+		}
 		// 如果不是平台管理员，检查是否有权限访问该集群
 		if !service.UserService().IsUserPlatformAdmin(username) {
-			csts, _ := service.UserService().GetClusterNames(username)
-			if !slices.Contains(csts, clusterID) {
+			clusters, err := service.UserService().GetClusterNames(username)
+			if err != nil {
+				c.JSON(512, gin.H{"msg": "获取集群授权失败"})
+				c.Abort()
+				return
+			}
+			if !slices.Contains(clusters, clusterID) {
 				c.JSON(512, gin.H{
 					"msg": "无权限访问集群: " + clusterID,
 				})

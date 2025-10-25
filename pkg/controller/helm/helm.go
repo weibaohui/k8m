@@ -35,6 +35,9 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 
 	username := amis.GetLoginUser(c)
 	roles, err := service.UserService().GetRolesByUserName(username)
+	if err != nil {
+		return err
+	}
 
 	log := models.OperationLog{
 		Action:       action,
@@ -57,7 +60,10 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 }
 func check(c *gin.Context, cluster, ns, name, action string) error {
 	ctx := amis.GetContextWithUser(c)
-	nsList := []string{ns}
+	var nsList []string
+	if ns != "" {
+		nsList = append(nsList, ns)
+	}
 	err := comm.CheckPermissionLogic(ctx, cluster, nsList, ns, name, action)
 	return err
 }

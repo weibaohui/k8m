@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -154,7 +155,7 @@ func (u *userService) GetRolesByGroupNames(groupNames []string) ([]string, error
 // 包含用户本身的集群角色、以及所在用户组的集群角色
 func (u *userService) GetClusterRole(cluster string, username string) ([]string, error) {
 
-	cacheKey := u.formatCacheKey("user:clusterrole:%s:%s", username, cluster)
+	cacheKey := u.formatCacheKey("user:clusterrolestring:%s:%s", username, cluster)
 
 	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]string, error) {
 		// 查找用户本身、用户所在组，两个层面的集群权限。先形成查询名称的列表
@@ -190,7 +191,7 @@ func (u *userService) GetClusterRole(cluster string, username string) ([]string,
 // username: 用户名
 func (u *userService) GetClusterRoleByUserName(cluster string, username string) ([]*models.ClusterUserRole, error) {
 
-	cacheKey := u.formatCacheKey("user:clusterrole:%s:%s", username, cluster)
+	cacheKey := u.formatCacheKey("user:clusterrolemodel:%s:%s", username, cluster)
 
 	result, err := utils.GetOrSetCache(CacheService().CacheInstance(), cacheKey, 5*time.Minute, func() ([]*models.ClusterUserRole, error) {
 		// 查找用户本身、用户所在组，两个层面的集群权限。先形成查询名称的列表
@@ -276,6 +277,9 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 
 // GenerateJWTTokenOnlyUserName  生成 Token，仅包含Username
 func (u *userService) GenerateJWTTokenOnlyUserName(username string, duration time.Duration) (string, error) {
+	if username == "" {
+		return "", errors.New("username cannot be empty")
+	}
 	name := constants.JwtUserName
 
 	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -529,10 +533,5 @@ func (u *userService) IsUserPlatformAdmin(user string) bool {
 	if err != nil {
 		return false
 	}
-	for _, role := range roles {
-		if role == constants.RolePlatformAdmin {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(roles, constants.RolePlatformAdmin)
 }

@@ -1,6 +1,7 @@
 package apikey
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 type Controller struct{}
@@ -48,7 +50,10 @@ func (ac *Controller) Create(c *gin.Context) {
 		Key:         generateAPIKey(username),
 		Description: req.Description,
 	}
-
+	if apiKey.Key == "" {
+		amis.WriteJsonError(c, fmt.Errorf("生成API密钥失败"))
+		return
+	}
 	// 保存到数据库
 	if err := apiKey.Save(params); err != nil {
 		amis.WriteJsonError(c, err)
@@ -61,7 +66,11 @@ func generateAPIKey(username string) string {
 	// 查询用户对应的集群
 	// todo 有效期应该是一个可配置项
 	duration := time.Hour * 24 * 365
-	token, _ := service.UserService().GenerateJWTTokenOnlyUserName(username, duration)
+	token, err := service.UserService().GenerateJWTTokenOnlyUserName(username, duration)
+	if err != nil {
+		klog.Errorf("generateAPIKey error: %v", err)
+		return ""
+	}
 	return token
 }
 
