@@ -91,7 +91,7 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 
 	// Create a logged client with specific receiver info for this request
 	receiverID := fmt.Sprintf("%s:%s", config.Platform, config.TargetURL)
-	loggedClient := NewLoggedHTTPClient(c.timeout, "k8m-webhook", receiverID)
+	loggedClient := NewLoggedHTTPClient(c.timeout, config.WebhookName, receiverID)
 
 	// Send request
 	resp, webhookLog, err := loggedClient.DoWithLogging(req)
@@ -103,7 +103,7 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 		}, err
 	}
 	defer resp.Body.Close()
-	
+
 	// Log webhook details if available
 	_ = webhookLog // webhookLog is already handled by LoggedHTTPClient
 

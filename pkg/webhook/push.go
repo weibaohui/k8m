@@ -2,7 +2,7 @@ package webhook
 
 import (
 	"context"
-	
+
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
@@ -13,18 +13,12 @@ var defaultClient = NewWebhookClient()
 
 // PushMsgToSingleTarget sends a message to a single webhook receiver using the new architecture.
 func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookReceiver) *SendResult {
-	// Convert WebhookReceiver to WebhookConfig
-	config := &WebhookConfig{
-		Platform:     receiver.Platform,
-		TargetURL:    receiver.TargetURL,
-		BodyTemplate: receiver.BodyTemplate,
-		SignSecret:   receiver.SignSecret,
-	}
+	config := NewWebhookConfig(receiver)
 
 	// Use the new WebhookClient
 	result, err := defaultClient.Send(context.Background(), msg, raw, config)
 	if err != nil {
-		klog.Errorf("[webhook] Failed to send to [%s] %s: %v", 
+		klog.Errorf("[webhook] Failed to send to [%s] %s: %v",
 			receiver.Platform, receiver.TargetURL, err)
 		if result == nil {
 			result = &SendResult{
@@ -34,10 +28,10 @@ func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookRecei
 			}
 		}
 	}
-	
-	klog.V(6).Infof("[webhook] Push to [%s] %s, result=[%v]", 
+
+	klog.V(6).Infof("[webhook] Push to [%s] %s, result=[%v]",
 		receiver.Platform, receiver.TargetURL, utils.ToJSON(result))
-	
+
 	return result
 }
 

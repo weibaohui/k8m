@@ -2,13 +2,15 @@ package webhook
 
 import (
 	"net/url"
-	
+
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
 // WebhookConfig represents the configuration for a webhook endpoint.
 // This replaces the old Channel concept with clearer naming and responsibilities.
 type WebhookConfig struct {
+	WebhookId    uint   // WebhookName of the webhook configuration
+	WebhookName  string // WebhookName of the webhook configuration
 	Platform     string // Platform identifier (feishu, dingtalk, wechat, default)
 	TargetURL    string // The webhook endpoint URL
 	BodyTemplate string // Message body template (optional, platform defaults will be used if empty)
@@ -18,6 +20,8 @@ type WebhookConfig struct {
 // NewWebhookConfig creates a new webhook configuration from a WebhookReceiver model.
 func NewWebhookConfig(receiver *models.WebhookReceiver) *WebhookConfig {
 	return &WebhookConfig{
+		WebhookId:    receiver.ID,
+		WebhookName:  receiver.Name,
 		Platform:     receiver.Platform,
 		TargetURL:    receiver.TargetURL,
 		BodyTemplate: receiver.BodyTemplate,
@@ -57,7 +61,7 @@ func (c *WebhookConfig) Validate() error {
 	if c.Platform == "" {
 		return ErrInvalidPlatform
 	}
-	
+
 	// Validate platform is supported
 	validPlatforms := map[string]bool{
 		"dingtalk": true,
@@ -68,25 +72,25 @@ func (c *WebhookConfig) Validate() error {
 	if !validPlatforms[c.Platform] {
 		return ErrInvalidPlatform
 	}
-	
+
 	if c.TargetURL == "" {
 		return ErrInvalidURL
 	}
-	
+
 	// Validate URL format
 	parsedURL, err := url.Parse(c.TargetURL)
 	if err != nil {
 		return ErrInvalidURL
 	}
-	
+
 	// Ensure it's a valid HTTP/HTTPS URL
 	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
 		return ErrInvalidURL
 	}
-	
+
 	if parsedURL.Host == "" {
 		return ErrInvalidURL
 	}
-	
+
 	return nil
 }
