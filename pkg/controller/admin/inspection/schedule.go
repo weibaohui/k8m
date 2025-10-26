@@ -184,16 +184,13 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 		return
 	}
 
-	// 存储后，先删除现有的cron任务，再根据开关状态确定是否重新添加
-	// 这样确保cron表达式变更时能够生效
 	sb := lua.ScheduleBackground{}
-	// 无论启用状态如何，都先删除现有任务
-	sb.Remove(m.ID)
-	// 如果启用，则重新添加任务
 	if m.Enabled {
-		sb.Add(m.ID)
+		go func() {
+			sb.Update(m.ID)
+		}()
 	}
-	sb.Restart()
+
 	amis.WriteJsonOK(c)
 }
 
@@ -207,10 +204,12 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 	params := dao.BuildParams(c)
 	// 清除定时 任务
 	intIds := utils.ToInt64Slice(ids)
-	for _, id := range intIds {
-		sb := lua.ScheduleBackground{}
-		sb.Remove(uint(id))
-	}
+	go func() {
+		for _, id := range intIds {
+			sb := lua.ScheduleBackground{}
+			sb.Remove(uint(id))
+		}
+	}()
 
 	// 查询到需清除的执行记录
 	var records []*models.InspectionRecord
@@ -265,17 +264,20 @@ func (s *AdminScheduleController) QuickSave(c *gin.Context) {
 		return
 	}
 
-	// 存储后，按照开关状态确定执行cron
-	sb := lua.ScheduleBackground{}
-	if entity.Enabled {
-		sb.Add(entity.ID)
-	} else {
-		sb.Remove(entity.ID)
-	}
+	go func() {
+		// 存储后，按照开关状态确定执行cron
+		sb := lua.ScheduleBackground{}
+		if entity.Enabled {
+			sb.Update(entity.ID)
+		} else {
+			sb.Remove(entity.ID)
+		}
+	}()
+
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-// @Summary 启动巡检计划
+// @Summary 启动巡检计划，马上执行一次
 // @Security BearerAuth
 // @Param id path int true "巡检计划ID"
 // @Success 200 {object} string
@@ -296,6 +298,7 @@ func (s *AdminScheduleController) Start(c *gin.Context) {
 		return
 	}
 	go func() {
+		//立马执行一次
 		sb := lua.ScheduleBackground{}
 		clusters := strings.Split(one.Clusters, ",")
 		for _, cluster := range clusters {
@@ -336,5 +339,11 @@ func (s *AdminScheduleController) UpdateScriptCode(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	go func() {
+		sb := lua.ScheduleBackground{}
+		sb.Remove(m.ID)
+		sb.Add(m.ID)
+	}()
+
 	amis.WriteJsonOK(c)
 }

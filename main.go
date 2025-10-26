@@ -136,6 +136,7 @@ func Init() {
 
 	// 启动watch
 	go func() {
+		lua.InitClusterInspection()
 		service.McpService().Init()
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
