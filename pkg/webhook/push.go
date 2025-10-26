@@ -29,7 +29,7 @@ func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookRecei
 		}
 	}
 
-	klog.V(6).Infof("[webhook] Push to [%s] %s, result=[%v]",
+	klog.V(8).Infof("[webhook] Push to [%s] %s, result=[%v]",
 		receiver.Platform, receiver.TargetURL, utils.ToJSON(result))
 
 	return result

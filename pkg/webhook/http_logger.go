@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
@@ -274,15 +275,15 @@ func (c *LoggedHTTPClient) generateSummary(req HTTPRequestLog, resp HTTPResponse
 	)
 }
 
-// outputLog 输出日志到不同级别
+// outputLog 输出日志到不同级别并存储到数据库
 func (c *LoggedHTTPClient) outputLog(log *WebhookLog) {
 	// 输出摘要到INFO级别
-	klog.Infof("Webhook Send: %s", log.Summary)
+	klog.V(8).Infof("Webhook Send: %s", log.Summary)
 
 	// 输出详细信息到V(6)级别
-	if klog.V(6).Enabled() {
+	if klog.V(8).Enabled() {
 		if logBytes, err := json.MarshalIndent(log, "", "  "); err == nil {
-			klog.V(6).Infof("Webhook Detail Log:\n%s", string(logBytes))
+			klog.V(8).Infof("Webhook Detail Log:\n%s", string(logBytes))
 		}
 	}
 
@@ -293,5 +294,38 @@ func (c *LoggedHTTPClient) outputLog(log *WebhookLog) {
 			log.Response.ErrorMessage,
 			log.Response.Body,
 		)
+	}
+
+	// 存储到数据库
+	c.saveToDatabase(log)
+}
+
+// saveToDatabase 将webhook日志保存到数据库
+func (c *LoggedHTTPClient) saveToDatabase(log *WebhookLog) {
+	// 创建数据库记录
+	record := &models.WebhookLogRecord{
+		WebhookID:    c.webhookId,
+		WebhookName:  c.webhookName,
+		ReceiverID:   c.receiverID,
+		Method:       log.Request.Method,
+		URL:          log.Request.URL,
+		StatusCode:   log.Response.StatusCode,
+		Success:      log.Response.Success,
+		Duration:     log.Response.Duration.Nanoseconds(),
+		ErrorMessage: log.Response.ErrorMessage,
+		Summary:      log.Summary,
+		RequestTime:  log.Request.Timestamp,
+	}
+
+	// 将完整的日志转换为JSON存储在Detail字段
+	if detailBytes, err := json.Marshal(log); err == nil {
+		record.Detail = string(detailBytes)
+	}
+
+	// 保存到数据库
+	if err := record.Save(nil); err != nil {
+		klog.Errorf("Failed to save webhook log to database: %v", err)
+	} else {
+		klog.V(4).Infof("Webhook log saved to database with ID: %d", record.ID)
 	}
 }
