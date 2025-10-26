@@ -26,19 +26,18 @@ var localTaskManager *TaskManager
 
 func InitClusterInspection() {
 	once.Do(func() {
+		localScheduleBackground = &ScheduleBackground{}
 		localTaskManager = NewTaskManager()
-		defer localTaskManager.Stop()
+		// 启动TaskManager
+		localTaskManager.Start()
 
-		sb := ScheduleBackground{}
+		// 从数据库加载并启动定时任务
+		sb := NewScheduleBackground()
 		sb.StartFromDB()
 		klog.V(6).Infof("新增 集群巡检 定时任务 ")
-		localTaskManager.Start()
 	})
 }
 func NewScheduleBackground() *ScheduleBackground {
-	once.Do(func() {
-		localScheduleBackground = &ScheduleBackground{}
-	})
 	return localScheduleBackground
 }
 
@@ -196,22 +195,7 @@ func (s *ScheduleBackground) StartFromDB() {
 	}
 	var count int
 	for _, schedule := range list {
-		addErr := localTaskManager.Add(fmt.Sprintf("%d", schedule.ID), schedule.Cron, func(ctx context.Context) {
-			klog.V(6).Infof("巡检任务 [%s] 开始", schedule.Name)
-			select {
-			case <-ctx.Done():
-				klog.V(6).Infof("巡检任务 [%s] 正在执行，执行取消命令", schedule.Name)
-				return
-			default:
-				// 执行巡检任务
-				s.Add(schedule.ID)
-			}
-			klog.V(6).Infof("巡检任务 [%s] 完成", schedule.Name)
-		})
-		if addErr != nil {
-			klog.Errorf("添加巡检任务[id=%d]失败  %v", schedule.ID, addErr)
-			return
-		}
+		s.Add(schedule.ID)
 		count += 1
 	}
 	klog.V(6).Infof("启动集群巡检任务完成，共启动%d个", count)
@@ -239,14 +223,28 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 		scheduleIDCopy := item.ID
 		clustersCopy := item.Clusters
 		cronExpr := item.Cron
-		klog.V(6).Infof("开始执行定时任务: scheduleID=%d, cronExpr=%s", scheduleIDCopy, cronExpr)
-		for cluster := range strings.SplitSeq(clustersCopy, ",") {
-			_, _ = s.RunByCluster(context.Background(), &scheduleIDCopy, cluster, TriggerTypeCron)
-		}
 
+		// 添加定时任务到TaskManager，而不是立即执行
+		addErr := localTaskManager.Add(fmt.Sprintf("%d", scheduleIDCopy), cronExpr, func(ctx context.Context) {
+			klog.V(6).Infof("定时巡检任务 [%s] 开始执行", item.Name)
+			select {
+			case <-ctx.Done():
+				klog.V(6).Infof("定时巡检任务 [%s] 正在执行，执行取消命令", item.Name)
+				return
+			default:
+				// 执行巡检任务
+				for cluster := range strings.SplitSeq(clustersCopy, ",") {
+					_, _ = s.RunByCluster(context.Background(), &scheduleIDCopy, cluster, TriggerTypeCron)
+				}
+			}
+			klog.V(6).Infof("定时巡检任务 [%s] 完成", item.Name)
+		})
+		if addErr != nil {
+			klog.Errorf("添加巡检任务[id=%d]失败  %v", scheduleID, addErr)
+			return
+		}
 	}
 	klog.V(6).Infof("启动巡检任务[id=%d]", scheduleID)
-
 }
 func (s *ScheduleBackground) Update(scheduleID uint) {
 	s.Add(scheduleID)

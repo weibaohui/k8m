@@ -145,8 +145,6 @@ func Init() {
 			service.PVService().Watch()
 			service.IngressService().Watch()
 			service.McpService().Start()
-			// 启动集群巡检
-			lua.InitClusterInspection()
 			// 启动helm 更新repo定时任务
 			helm2.StartUpdateHelmRepoInBackground()
 		})
