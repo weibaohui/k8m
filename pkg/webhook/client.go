@@ -13,16 +13,12 @@ import (
 
 // WebhookClient provides a unified HTTP transport layer for webhook sending.
 type WebhookClient struct {
-	httpClient *http.Client
-	timeout    time.Duration
+	timeout time.Duration
 }
 
 // NewWebhookClient creates a new webhook client with default settings.
 func NewWebhookClient() *WebhookClient {
 	return &WebhookClient{
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
 		timeout: 30 * time.Second,
 	}
 }
@@ -30,9 +26,6 @@ func NewWebhookClient() *WebhookClient {
 // NewWebhookClientWithTimeout creates a new webhook client with custom timeout.
 func NewWebhookClientWithTimeout(timeout time.Duration) *WebhookClient {
 	return &WebhookClient{
-		httpClient: &http.Client{
-			Timeout: timeout,
-		},
 		timeout: timeout,
 	}
 }
@@ -96,8 +89,12 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 	req.Header.Set("Content-Type", adapter.GetContentType())
 	req.Header.Set("User-Agent", "k8m-webhook-client/1.0")
 
+	// Create a logged client with specific receiver info for this request
+	receiverID := fmt.Sprintf("%s:%s", config.Platform, config.TargetURL)
+	loggedClient := NewLoggedHTTPClient(c.timeout, "k8m-webhook", receiverID)
+
 	// Send request
-	resp, err := c.httpClient.Do(req)
+	resp, webhookLog, err := loggedClient.DoWithLogging(req)
 	if err != nil {
 		return &SendResult{
 			Status:   "failed",
@@ -106,6 +103,9 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 		}, err
 	}
 	defer resp.Body.Close()
+	
+	// Log webhook details if available
+	_ = webhookLog // webhookLog is already handled by LoggedHTTPClient
 
 	// Read response
 	respBody, err := io.ReadAll(resp.Body)
