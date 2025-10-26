@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"time"
 
 	"k8s.io/klog/v2"
@@ -72,8 +71,8 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 	// Prepare URL with signature if needed
 	finalURL := config.TargetURL
 	if config.HasSignature() {
-		signedURL, err := adapter.SignRequest(config.TargetURL, body, config.SignSecret)
-		if err != nil {
+		signedURL, sErr := adapter.SignRequest(config.TargetURL, body, config.SignSecret)
+		if sErr != nil {
 			return &SendResult{
 				Status:   "failed",
 				RespBody: fmt.Sprintf("sign request error: %v", err),
@@ -128,73 +127,4 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 		RespBody:   string(respBody),
 		Error:      err,
 	}, err
-}
-
-// SendToSingleTarget sends a message to a single webhook target.
-// This is a convenience method that creates a WebhookConfig from WebhookReceiver.
-func (c *WebhookClient) SendToSingleTarget(ctx context.Context, msg, raw string, receiver interface{}) (*SendResult, error) {
-	var config *WebhookConfig
-	
-	// Handle different receiver types for backward compatibility
-	switch r := receiver.(type) {
-	case *WebhookConfig:
-		config = r
-	default:
-		// Try to convert from models.WebhookReceiver if available
-		// This would need to be implemented based on your models
-		return nil, fmt.Errorf("unsupported receiver type: %T", receiver)
-	}
-
-	return c.Send(ctx, msg, raw, config)
-}
-
-// SendToMultipleTargets sends a message to multiple webhook targets concurrently.
-func (c *WebhookClient) SendToMultipleTargets(ctx context.Context, msg, raw string, configs []*WebhookConfig) []*SendResult {
-	results := make([]*SendResult, len(configs))
-	
-	// Use a channel to collect results
-	type indexedResult struct {
-		index  int
-		result *SendResult
-	}
-	
-	resultChan := make(chan indexedResult, len(configs))
-	
-	// Send to all targets concurrently
-	for i, config := range configs {
-		go func(index int, cfg *WebhookConfig) {
-			result, _ := c.Send(ctx, msg, raw, cfg)
-			resultChan <- indexedResult{index: index, result: result}
-		}(i, config)
-	}
-	
-	// Collect results
-	for i := 0; i < len(configs); i++ {
-		indexedRes := <-resultChan
-		results[indexedRes.index] = indexedRes.result
-		
-		// Log result
-		klog.V(6).Infof("Webhook sent to [%s] %s, result: [%s] status_code: %d", 
-			configs[indexedRes.index].Platform, 
-			configs[indexedRes.index].TargetURL, 
-			indexedRes.result.Status,
-			indexedRes.result.StatusCode)
-	}
-	
-	return results
-}
-
-// buildSignedURL builds a URL with signature parameters.
-func buildSignedURL(baseURL, timestamp, signature string) (string, error) {
-	u, err := url.Parse(baseURL)
-	if err != nil {
-		return "", err
-	}
-	
-	params := u.Query()
-	params.Set("timestamp", timestamp)
-	params.Set("sign", signature)
-	u.RawQuery = params.Encode()
-	
-	return u.String(), nil
 }

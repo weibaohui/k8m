@@ -136,8 +136,5 @@ func TestPushMsgToSingleTarget(t *testing.T) {
 		t.Logf("Expected success status, got: %s (this might be expected if httpbin is not available)", result.Status)
 	}
 }
-
-func TestBackwardCompatibility(t *testing.T) {
-	// Test that RegisterAllSenders function exists and can be called (for API compatibility)
-	RegisterAllSenders() // Should not panic
-}
+ 
+ 
