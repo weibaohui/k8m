@@ -184,7 +184,7 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 		return
 	}
 
-	sb := lua.ScheduleBackground{}
+	sb := lua.NewScheduleBackground()
 	if m.Enabled {
 		go func() {
 			sb.Update(m.ID)
@@ -206,7 +206,7 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 	intIds := utils.ToInt64Slice(ids)
 	go func() {
 		for _, id := range intIds {
-			sb := lua.ScheduleBackground{}
+			sb := lua.NewScheduleBackground()
 			sb.Remove(uint(id))
 		}
 	}()
@@ -266,7 +266,7 @@ func (s *AdminScheduleController) QuickSave(c *gin.Context) {
 
 	go func() {
 		// 存储后，按照开关状态确定执行cron
-		sb := lua.ScheduleBackground{}
+		sb := lua.NewScheduleBackground()
 		if entity.Enabled {
 			sb.Update(entity.ID)
 		} else {
@@ -299,7 +299,7 @@ func (s *AdminScheduleController) Start(c *gin.Context) {
 	}
 	go func() {
 		//立马执行一次
-		sb := lua.ScheduleBackground{}
+		sb := lua.NewScheduleBackground()
 		clusters := strings.Split(one.Clusters, ",")
 		for _, cluster := range clusters {
 			_, _ = sb.RunByCluster(context.Background(), &one.ID, cluster, lua.TriggerTypeManual)
@@ -340,7 +340,7 @@ func (s *AdminScheduleController) UpdateScriptCode(c *gin.Context) {
 		return
 	}
 	go func() {
-		sb := lua.ScheduleBackground{}
+		sb := lua.NewScheduleBackground()
 		sb.Remove(m.ID)
 		sb.Add(m.ID)
 	}()
