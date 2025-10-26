@@ -827,6 +827,14 @@ export const initialMenu: MenuItem[] = [
                         customEvent: '() => loadJsonPage("/admin/inspection/webhook")',
                         order: 5,
                     },
+                    {
+                        key: 'webhook_record',
+                        title: 'webhook记录',
+                        icon: 'fa-solid fa-file-lines',
+                        eventType: 'custom',
+                        customEvent: '() => loadJsonPage("/admin/inspection/webhook_record")',
+                        order: 6,
+                    },
                 ],
             },
             {
