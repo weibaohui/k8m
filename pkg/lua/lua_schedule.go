@@ -28,7 +28,7 @@ var sbOnce sync.Once // 仅负责保证 ScheduleBackground 单例非空的 once
 
 // init 在包被导入时执行，用于初始化并启动 TaskManager
 // 注意：init 的执行时机由 Go 运行时决定，无法保证一定在其他组件之前；
-// 若需严格顺序，请使用显式的初始化函数。
+// TaskManager必须先启动，否则在TM中添加、更新、删除任务时会报错
 func init() {
 	localTaskManager = NewTaskManager()
 	// 启动TaskManager
