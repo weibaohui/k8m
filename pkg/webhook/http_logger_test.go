@@ -24,7 +24,7 @@ func TestLoggedHTTPClient(t *testing.T) {
 	defer testServer.Close()
 
 	// 创建带日志记录的HTTP客户端
-	client := NewLoggedHTTPClient(5*time.Second, "test-sender", "test-receiver")
+	client := NewLoggedHTTPClient(5*time.Second, 0, "test-sender", "test-receiver")
 
 	// 准备测试请求
 	requestBody := map[string]interface{}{
@@ -34,7 +34,7 @@ func TestLoggedHTTPClient(t *testing.T) {
 		},
 	}
 	bodyBytes, _ := json.Marshal(requestBody)
-	
+
 	req, err := http.NewRequest("POST", testServer.URL, bytes.NewReader(bodyBytes))
 	if err != nil {
 		t.Fatalf("创建请求失败: %v", err)
@@ -63,8 +63,8 @@ func TestLoggedHTTPClient(t *testing.T) {
 		t.Errorf("期望请求方法为 POST, 实际得到 %s", webhookLog.Request.Method)
 	}
 
-	if webhookLog.Request.SenderName != "test-sender" {
-		t.Errorf("期望发送器名称为 test-sender, 实际得到 %s", webhookLog.Request.SenderName)
+	if webhookLog.Request.WebhookName != "test-sender" {
+		t.Errorf("期望发送器名称为 test-sender, 实际得到 %s", webhookLog.Request.WebhookName)
 	}
 
 	if webhookLog.Request.BodySize == 0 {
@@ -94,7 +94,7 @@ func TestLoggedHTTPClient(t *testing.T) {
 
 func TestSanitizeURL(t *testing.T) {
 	client := &LoggedHTTPClient{}
-	
+
 	testCases := []struct {
 		input    string
 		expected string
@@ -123,7 +123,7 @@ func TestSanitizeURL(t *testing.T) {
 
 func TestSanitizeHeader(t *testing.T) {
 	client := &LoggedHTTPClient{}
-	
+
 	testCases := []struct {
 		key      string
 		value    string

@@ -20,7 +20,7 @@ type HTTPRequestLog struct {
 	Headers     map[string]string `json:"headers"`
 	Body        string            `json:"body"`
 	BodySize    int               `json:"body_size"`
-	SenderName  string            `json:"sender_name"`
+	WebhookName string            `json:"webhook_name"`
 	ReceiverID  string            `json:"receiver_id,omitempty"`
 }
 
@@ -46,45 +46,47 @@ type WebhookLog struct {
 
 // LoggedHTTPClient 带日志记录功能的HTTP客户端包装器
 type LoggedHTTPClient struct {
-	client     *http.Client
-	senderName string
-	receiverID string
+	client      *http.Client
+	webhookId   uint
+	webhookName string
+	receiverID  string
 }
 
 // NewLoggedHTTPClient 创建一个新的带日志记录的HTTP客户端
-func NewLoggedHTTPClient(timeout time.Duration, senderName, receiverID string) *LoggedHTTPClient {
+func NewLoggedHTTPClient(timeout time.Duration, webhookId uint, webhookName, receiverID string) *LoggedHTTPClient {
 	return &LoggedHTTPClient{
-		client:     &http.Client{Timeout: timeout},
-		senderName: senderName,
-		receiverID: receiverID,
+		client:      &http.Client{Timeout: timeout},
+		webhookId:   webhookId,
+		webhookName: webhookName,
+		receiverID:  receiverID,
 	}
 }
 
 // DoWithLogging 执行HTTP请求并记录详细日志
 func (c *LoggedHTTPClient) DoWithLogging(req *http.Request) (*http.Response, *WebhookLog, error) {
 	startTime := time.Now()
-	
+
 	// 记录请求信息
 	requestLog := c.logRequest(req, startTime)
-	
+
 	// 执行请求
 	resp, err := c.client.Do(req)
 	endTime := time.Now()
 	duration := endTime.Sub(startTime)
-	
+
 	// 记录响应信息
 	responseLog := c.logResponse(resp, err, endTime, duration)
-	
+
 	// 创建完整的webhook日志
 	webhookLog := &WebhookLog{
 		Request:  requestLog,
 		Response: responseLog,
 		Summary:  c.generateSummary(requestLog, responseLog),
 	}
-	
+
 	// 输出日志
 	c.outputLog(webhookLog)
-	
+
 	return resp, webhookLog, err
 }
 
@@ -102,7 +104,7 @@ func (c *LoggedHTTPClient) logRequest(req *http.Request, timestamp time.Time) HT
 			req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 		}
 	}
-	
+
 	// 收集请求头（脱敏处理）
 	headers := make(map[string]string)
 	for key, values := range req.Header {
@@ -110,19 +112,19 @@ func (c *LoggedHTTPClient) logRequest(req *http.Request, timestamp time.Time) HT
 			headers[key] = c.sanitizeHeader(key, values[0])
 		}
 	}
-	
+
 	// 脱敏URL中的敏感信息
 	sanitizedURL := c.sanitizeURL(req.URL.String())
-	
+
 	return HTTPRequestLog{
-		Timestamp:  timestamp,
-		Method:     req.Method,
-		URL:        sanitizedURL,
-		Headers:    headers,
-		Body:       c.sanitizeBody(bodyContent),
-		BodySize:   bodySize,
-		SenderName: c.senderName,
-		ReceiverID: c.receiverID,
+		Timestamp:   timestamp,
+		Method:      req.Method,
+		URL:         sanitizedURL,
+		Headers:     headers,
+		Body:        c.sanitizeBody(bodyContent),
+		BodySize:    bodySize,
+		WebhookName: c.webhookName,
+		ReceiverID:  c.receiverID,
 	}
 }
 
@@ -133,25 +135,25 @@ func (c *LoggedHTTPClient) logResponse(resp *http.Response, err error, timestamp
 		Duration:  duration,
 		Success:   err == nil && resp != nil && resp.StatusCode < 400,
 	}
-	
+
 	if err != nil {
 		responseLog.ErrorMessage = err.Error()
 		responseLog.StatusCode = 0
 		responseLog.Status = "request_failed"
 		return responseLog
 	}
-	
+
 	if resp == nil {
 		responseLog.ErrorMessage = "response is nil"
 		responseLog.StatusCode = 0
 		responseLog.Status = "no_response"
 		return responseLog
 	}
-	
+
 	// 记录响应基本信息
 	responseLog.StatusCode = resp.StatusCode
 	responseLog.Status = resp.Status
-	
+
 	// 收集响应头
 	headers := make(map[string]string)
 	for key, values := range resp.Header {
@@ -160,7 +162,7 @@ func (c *LoggedHTTPClient) logResponse(resp *http.Response, err error, timestamp
 		}
 	}
 	responseLog.Headers = headers
-	
+
 	// 读取响应体（需要重新设置以供后续使用）
 	if resp.Body != nil {
 		bodyBytes, readErr := io.ReadAll(resp.Body)
@@ -173,7 +175,7 @@ func (c *LoggedHTTPClient) logResponse(resp *http.Response, err error, timestamp
 			responseLog.ErrorMessage = fmt.Sprintf("failed to read response body: %v", readErr)
 		}
 	}
-	
+
 	return responseLog
 }
 
@@ -246,7 +248,7 @@ func (c *LoggedHTTPClient) sanitizeBody(body string) string {
 			return string(sanitizedBytes)
 		}
 	}
-	
+
 	// 如果不是JSON或解析失败，直接截断过长内容
 	if len(body) > 1000 {
 		return body[:1000] + "..."
@@ -260,9 +262,10 @@ func (c *LoggedHTTPClient) generateSummary(req HTTPRequestLog, resp HTTPResponse
 	if !resp.Success {
 		status = "FAILED"
 	}
-	
-	return fmt.Sprintf("[%s] %s %s -> %d %s (%.2fms)",
-		c.senderName,
+
+	return fmt.Sprintf("[%d-%s] %s %s -> %d %s (%.2fms)",
+		c.webhookId,
+		c.webhookName,
 		req.Method,
 		req.URL,
 		resp.StatusCode,
@@ -275,14 +278,14 @@ func (c *LoggedHTTPClient) generateSummary(req HTTPRequestLog, resp HTTPResponse
 func (c *LoggedHTTPClient) outputLog(log *WebhookLog) {
 	// 输出摘要到INFO级别
 	klog.Infof("Webhook Send: %s", log.Summary)
-	
+
 	// 输出详细信息到V(6)级别
 	if klog.V(6).Enabled() {
 		if logBytes, err := json.MarshalIndent(log, "", "  "); err == nil {
 			klog.V(6).Infof("Webhook Detail Log:\n%s", string(logBytes))
 		}
 	}
-	
+
 	// 如果发送失败，输出错误信息
 	if !log.Response.Success {
 		klog.Errorf("Webhook Send Failed: %s, Error: %s, Response: %s",
