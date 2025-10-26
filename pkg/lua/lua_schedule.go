@@ -20,13 +20,15 @@ import (
 type ScheduleBackground struct {
 }
 
-var localScheduleBackground *ScheduleBackground
 var once sync.Once
 var localTaskManager *TaskManager
 
+var localScheduleBackground *ScheduleBackground
+var sbOnce sync.Once // 仅负责保证 ScheduleBackground 单例非空的 once
+
 // init 在包被导入时执行，用于初始化并启动 TaskManager
 // 注意：init 的执行时机由 Go 运行时决定，无法保证一定在其他组件之前；
-// 若需严格顺序，请使用显式的初始化函数。
+// TaskManager必须先启动，否则在TM中添加、更新、删除任务时会报错
 func init() {
 	localTaskManager = NewTaskManager()
 	// 启动TaskManager
@@ -34,13 +36,18 @@ func init() {
 }
 func InitClusterInspection() {
 	once.Do(func() {
-		// 从数据库加载并启动定时任务
-		localScheduleBackground = &ScheduleBackground{}
-		localScheduleBackground.AddCronJobFromDB()
+		// 确保实例非空后再加载 DB 任务
+		sb := NewScheduleBackground()
+		sb.AddCronJobFromDB()
 		klog.V(6).Infof("新增 集群巡检 定时任务 ")
 	})
 }
 func NewScheduleBackground() *ScheduleBackground {
+	sbOnce.Do(func() {
+		if localScheduleBackground == nil {
+			localScheduleBackground = &ScheduleBackground{}
+		}
+	})
 	return localScheduleBackground
 }
 
@@ -230,15 +237,20 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 		// 添加定时任务到TaskManager，而不是立即执行
 		addErr := localTaskManager.Add(fmt.Sprintf("%d", scheduleIDCopy), cronExpr, func(ctx context.Context) {
 			klog.V(6).Infof("定时巡检任务 [%s] 开始执行", item.Name)
-			select {
-			case <-ctx.Done():
-				klog.V(6).Infof("定时巡检任务 [%s] 正在执行，执行取消命令", item.Name)
-				return
-			default:
-				// 执行巡检任务
-				for cluster := range strings.SplitSeq(clustersCopy, ",") {
-					_, _ = s.RunByCluster(ctx, &scheduleIDCopy, cluster, TriggerTypeCron)
+			// 执行巡检任务：逐项检查取消信号，并清洗 cluster 列表
+			clusters := strings.Split(clustersCopy, ",")
+			for _, cluster := range clusters {
+				select {
+				case <-ctx.Done():
+					klog.V(6).Infof("定时巡检任务 [%s] 被取消，停止后续集群", item.Name)
+					return
+				default:
 				}
+				cluster = strings.TrimSpace(cluster)
+				if cluster == "" {
+					continue
+				}
+				_, _ = s.RunByCluster(ctx, &scheduleIDCopy, cluster, TriggerTypeCron)
 			}
 			klog.V(6).Infof("定时巡检任务 [%s] 执行完成", item.Name)
 		})
