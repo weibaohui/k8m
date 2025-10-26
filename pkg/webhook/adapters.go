@@ -121,10 +121,15 @@ func (f *FeishuAdapter) SignRequest(baseURL string, body []byte, secret string) 
 
 func (f *FeishuAdapter) generateSignature(secret string, timestamp int64) (string, error) {
 	timestampStr := strconv.FormatInt(timestamp, 10)
+	// Feishu signature format: timestamp + "\n" + secret
 	stringToSign := timestampStr + "\n" + secret
 	
-	h := hmac.New(sha256.New, []byte(secret))
-	h.Write([]byte(stringToSign))
+	var data []byte
+	h := hmac.New(sha256.New, []byte(stringToSign))
+	_, err := h.Write(data)
+	if err != nil {
+		return "", err
+	}
 	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
 	
 	return signature, nil
