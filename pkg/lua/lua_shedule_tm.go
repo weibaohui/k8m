@@ -37,7 +37,12 @@ type TaskManager struct {
 }
 
 func NewTaskManager() *TaskManager {
-	c := cron.New()
+	c := cron.New(
+		cron.WithChain(
+			cron.Recover(cron.DefaultLogger),
+			cron.SkipIfStillRunning(cron.DefaultLogger),
+		),
+	)
 	return &TaskManager{
 		c:     c,
 		tasks: make(map[string]cron.EntryID),

@@ -51,7 +51,7 @@ const TriggerTypeManual = "manual"
 const TriggerTypeCron = "cron"
 
 // RunByCluster 启动一次巡检任务，并记录执行及每个脚本的结果到数据库
-// scheduleID: 可选，定时任务ID（手动触发时为nil）
+// scheduleID: 定时任务ID
 // cluster: 目标集群
 // triggerType: 触发类型（manual/cron）
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
