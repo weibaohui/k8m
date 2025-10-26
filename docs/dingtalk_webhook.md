@@ -29,8 +29,8 @@
 ### 2. 配置Webhook接收器
 
 ```go
-// 创建钉钉接收器
-receiver := webhook.NewDingtalkReceiver(
+// 创建钉钉通道
+channel := webhook.NewDingtalkChannel(
     "https://oapi.dingtalk.com/robot/send?access_token=YOUR_ACCESS_TOKEN",
     "SECyour_secret_here", // 加签密钥
 )
@@ -46,7 +46,7 @@ if err != nil {
 }
 
 // 发送消息
-result, err := sender.Send("这是一条测试消息", receiver)
+result, err := sender.Send("这是一条测试消息", channel)
 if err != nil {
     log.Fatalf("发送消息失败: %v", err)
 }

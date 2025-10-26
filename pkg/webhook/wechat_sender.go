@@ -28,8 +28,8 @@ func (w *WechatSender) Name() string {
 //	    "content": "..."
 //	  }
 //	}
-func (w *WechatSender) Send(msg string, raw string, receiver *Receiver) (*SendResult, error) {
-	finalURL := receiver.TargetURL
+func (w *WechatSender) Send(msg string, raw string, channel *Channel) (*SendResult, error) {
+	finalURL := channel.TargetURL
 
 	// 构造企业微信 markdown 消息体
 	payload := map[string]any{
@@ -50,13 +50,17 @@ func (w *WechatSender) Send(msg string, raw string, receiver *Receiver) (*SendRe
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 60 * time.Second}
-	resp, err := client.Do(req)
+	// 使用带日志记录的HTTP客户端
+	loggedClient := NewLoggedHTTPClient(60*time.Second, "wechat", channel.TargetURL)
+	resp, webhookLog, err := loggedClient.DoWithLogging(req)
 	if err != nil {
 		return &SendResult{Status: "failed"}, err
 	}
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(resp.Body)
+
+	// 记录webhook日志到结果中（可选，用于后续查询）
+	_ = webhookLog
 
 	status := "success"
 	if resp.StatusCode >= 400 {

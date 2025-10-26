@@ -4,17 +4,17 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 )
 
-// Receiver represents a user-defined webhook endpoint.
-type Receiver struct {
+// Channel represents a user-defined webhook endpoint.
+type Channel struct {
 	Platform     string
 	TargetURL    string
 	BodyTemplate string
 	SignSecret   string
 }
 
-// NewFeishuReceiver 快捷创建飞书 Receiver
-func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
-	return &Receiver{
+// NewFeishuChannel 快捷创建飞书 Channel
+func NewFeishuChannel(targetURL, signSecret string) *Channel {
+	return &Channel{
 		Platform:     "feishu",
 		TargetURL:    targetURL,
 		BodyTemplate: `{"msg_type":"text","content":{"text":"%s"}}`,
@@ -22,9 +22,9 @@ func NewFeishuReceiver(targetURL, signSecret string) *Receiver {
 	}
 }
 
-// NewDingtalkReceiver 快捷创建钉钉 Receiver
-func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
-	return &Receiver{
+// NewDingtalkChannel 快捷创建钉钉 Channel
+func NewDingtalkChannel(targetURL, signSecret string) *Channel {
+	return &Channel{
 		Platform:     "dingtalk",
 		TargetURL:    targetURL,
 		BodyTemplate: `{"msgtype":"text","text":{"content":"%s"}}`,
@@ -32,9 +32,9 @@ func NewDingtalkReceiver(targetURL, signSecret string) *Receiver {
 	}
 }
 
-// NewWechatReceiver 快捷创建企业微信 Receiver（群机器人）
-func NewWechatReceiver(targetURL string) *Receiver {
-	return &Receiver{
+// NewWechatChannel 快捷创建企业微信 Channel（群机器人）
+func NewWechatChannel(targetURL string) *Channel {
+	return &Channel{
 		Platform:     "wechat",
 		TargetURL:    targetURL,
 		BodyTemplate: `{"msgtype":"markdown","markdown":{"content":"%s"}}`,
@@ -42,23 +42,23 @@ func NewWechatReceiver(targetURL string) *Receiver {
 	}
 }
 
-func getStdTarget(receiver *models.WebhookReceiver) *Receiver {
+func getStdTarget(receiver *models.WebhookReceiver) *Channel {
 	if receiver.Platform == "feishu" {
-		rr := NewFeishuReceiver(receiver.TargetURL, receiver.SignSecret)
+		rr := NewFeishuChannel(receiver.TargetURL, receiver.SignSecret)
 		return rr
 	}
 	if receiver.Platform == "dingtalk" {
-		rr := NewDingtalkReceiver(receiver.TargetURL, receiver.SignSecret)
+		rr := NewDingtalkChannel(receiver.TargetURL, receiver.SignSecret)
 		return rr
 	}
 	if receiver.Platform == "wechat" {
-		rr := NewWechatReceiver(receiver.TargetURL)
+		rr := NewWechatChannel(receiver.TargetURL)
 		return rr
 	}
 	// 自定义 default 平台：通用映射
 	if receiver.Platform == "default" {
 
-		return &Receiver{
+		return &Channel{
 			Platform:     "default",
 			TargetURL:    receiver.TargetURL,
 			BodyTemplate: receiver.BodyTemplate,

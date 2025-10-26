@@ -21,13 +21,13 @@ func (d *DingtalkSender) Name() string {
 	return "dingtalk"
 }
 
-func (d *DingtalkSender) Send(msg string, raw string, receiver *Receiver) (*SendResult, error) {
+func (d *DingtalkSender) Send(msg string, raw string, channel *Channel) (*SendResult, error) {
 	// Add Dingtalk signature if enabled
-	finalURL := receiver.TargetURL
-	if receiver.SignSecret != "" {
+	finalURL := channel.TargetURL
+	if channel.SignSecret != "" {
 		timestamp := time.Now().UnixNano() / 1e6 // 钉钉使用毫秒时间戳
 		timestampStr := strconv.FormatInt(timestamp, 10)
-		signature, err := GenDingtalkSign(receiver.SignSecret, timestamp)
+		signature, err := GenDingtalkSign(channel.SignSecret, timestamp)
 		if err != nil {
 			return nil, err
 		}
@@ -56,13 +56,17 @@ func (d *DingtalkSender) Send(msg string, raw string, receiver *Receiver) (*Send
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 60 * time.Second}
-	resp, err := client.Do(req)
+	// 使用带日志记录的HTTP客户端
+	loggedClient := NewLoggedHTTPClient(60*time.Second, "dingtalk", channel.TargetURL)
+	resp, webhookLog, err := loggedClient.DoWithLogging(req)
 	if err != nil {
 		return &SendResult{Status: "failed"}, err
 	}
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(resp.Body)
+
+	// 记录webhook日志到结果中（可选，用于后续查询）
+	_ = webhookLog
 
 	status := "success"
 	if resp.StatusCode >= 400 {
