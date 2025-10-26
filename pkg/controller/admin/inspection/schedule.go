@@ -156,13 +156,13 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 			amis.WriteJsonError(c, fmt.Errorf("AI提示词模板长度不能超过2000个字符"))
 			return
 		}
-		
+
 		// 可以添加更多AI配置验证逻辑
 		// 例如：检查模板格式、关键词等
 		if strings.TrimSpace(m.AIPromptTemplate) != "" {
 			// 简单验证：确保模板不包含危险字符
-			if strings.Contains(m.AIPromptTemplate, "<script>") || 
-			   strings.Contains(m.AIPromptTemplate, "javascript:") {
+			if strings.Contains(m.AIPromptTemplate, "<script>") ||
+				strings.Contains(m.AIPromptTemplate, "javascript:") {
 				amis.WriteJsonError(c, fmt.Errorf("AI提示词模板包含不安全的内容"))
 				return
 			}
@@ -171,23 +171,29 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 
 	// 保存webhookNames
 	receiver := models.WebhookReceiver{}
-	if names, err := receiver.GetNamesByIds(m.Webhooks); err == nil {
+	if names, nErr := receiver.GetNamesByIds(m.Webhooks); nErr == nil {
 		m.WebhookNames = strings.Join(names, ",")
+	} else {
+		amis.WriteJsonError(c, nErr)
+		return
 	}
+
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	// 存储后，按照开关状态确定执行cron
+	// 存储后，先删除现有的cron任务，再根据开关状态确定是否重新添加
+	// 这样确保cron表达式变更时能够生效
 	sb := lua.ScheduleBackground{}
+	// 无论启用状态如何，都先删除现有任务
+	sb.Remove(m.ID)
+	// 如果启用，则重新添加任务
 	if m.Enabled {
 		sb.Add(m.ID)
-	} else {
-		sb.Remove(m.ID)
 	}
-
+	sb.Restart()
 	amis.WriteJsonOK(c)
 }
 
@@ -266,7 +272,6 @@ func (s *AdminScheduleController) QuickSave(c *gin.Context) {
 	} else {
 		sb.Remove(entity.ID)
 	}
-
 	amis.WriteJsonErrorOrOK(c, err)
 }
 

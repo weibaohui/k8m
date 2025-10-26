@@ -172,6 +172,11 @@ func InitClusterInspection() {
 func (s *ScheduleBackground) IsEventStatusPass(status string) bool {
 	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
 }
+func (s *ScheduleBackground) Restart() bool {
+	localCron.Stop()
+	localCron.Start()
+	return true
+}
 
 // StartFromDB  后台自动执行调度
 func (s *ScheduleBackground) StartFromDB() {
@@ -216,6 +221,7 @@ func (s *ScheduleBackground) Remove(scheduleID uint) {
 		// 清空数据库中的CronRunID
 		item.CronRunID = 0
 		_ = item.Save(nil)
+
 	}
 	klog.V(6).Infof("移除集群定时巡检任务[id=%d]", scheduleID)
 
