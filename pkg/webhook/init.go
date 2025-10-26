@@ -1,14 +1,24 @@
 package webhook
 
-// RegisterAllSenders 集中注册所有平台 Sender
+// RegisterAllAdapters registers all platform adapters.
+func RegisterAllAdapters() {
+	RegisterAdapter("feishu", &FeishuAdapter{})
+	RegisterAdapter("dingtalk", &DingtalkAdapter{})
+	RegisterAdapter("wechat", &WechatAdapter{})
+	RegisterAdapter("default", &DefaultAdapter{})
+	// Future adapters can be registered here
+}
+
+// RegisterAllSenders registers all legacy senders for backward compatibility.
+// Deprecated: Use RegisterAllAdapters instead.
+// Note: Legacy sender implementations have been removed. This function is kept for API compatibility.
 func RegisterAllSenders() {
-	RegisterSender("feishu", &FeishuSender{})
-	RegisterSender("dingtalk", &DingtalkSender{})
-	RegisterSender("wechat", &WechatSender{})
-	RegisterSender("default", &DefaultSender{})
-	// 未来可在此注册更多 Sender
+	// Legacy sender implementations have been removed in favor of the new adapter architecture.
+	// This function is kept empty to maintain backward compatibility.
+	// Use RegisterAllAdapters() and the new WebhookClient instead.
 }
 
 func init() {
-	RegisterAllSenders()
+	RegisterAllAdapters()
+	RegisterAllSenders() // Keep for backward compatibility
 }
