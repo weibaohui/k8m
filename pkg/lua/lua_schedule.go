@@ -26,14 +26,13 @@ var localTaskManager *TaskManager
 
 func InitClusterInspection() {
 	once.Do(func() {
-		localScheduleBackground = &ScheduleBackground{}
 		localTaskManager = NewTaskManager()
 		// 启动TaskManager
 		localTaskManager.Start()
 
 		// 从数据库加载并启动定时任务
-		sb := NewScheduleBackground()
-		sb.StartFromDB()
+		localScheduleBackground = &ScheduleBackground{}
+		localScheduleBackground.AddCronJobFromDB()
 		klog.V(6).Infof("新增 集群巡检 定时任务 ")
 	})
 }
@@ -180,8 +179,8 @@ func (s *ScheduleBackground) IsEventStatusPass(status string) bool {
 	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
 }
 
-// StartFromDB  后台自动执行调度
-func (s *ScheduleBackground) StartFromDB() {
+// AddCronJobFromDB  后台自动执行调度
+func (s *ScheduleBackground) AddCronJobFromDB() {
 
 	// 1、读取数据库中的定义，然后创建
 	sch := models.InspectionSchedule{}
@@ -237,14 +236,14 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 					_, _ = s.RunByCluster(context.Background(), &scheduleIDCopy, cluster, TriggerTypeCron)
 				}
 			}
-			klog.V(6).Infof("定时巡检任务 [%s] 完成", item.Name)
+			klog.V(6).Infof("定时巡检任务 [%s] 执行完成", item.Name)
 		})
 		if addErr != nil {
 			klog.Errorf("添加巡检任务[id=%d]失败  %v", scheduleID, addErr)
 			return
 		}
 	}
-	klog.V(6).Infof("启动巡检任务[id=%d]", scheduleID)
+	klog.V(6).Infof("添加巡检任务[id=%d]", scheduleID)
 }
 func (s *ScheduleBackground) Update(scheduleID uint) {
 	s.Add(scheduleID)
