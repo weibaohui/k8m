@@ -156,13 +156,13 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 			amis.WriteJsonError(c, fmt.Errorf("AI提示词模板长度不能超过2000个字符"))
 			return
 		}
-		
+
 		// 可以添加更多AI配置验证逻辑
 		// 例如：检查模板格式、关键词等
 		if strings.TrimSpace(m.AIPromptTemplate) != "" {
 			// 简单验证：确保模板不包含危险字符
-			if strings.Contains(m.AIPromptTemplate, "<script>") || 
-			   strings.Contains(m.AIPromptTemplate, "javascript:") {
+			if strings.Contains(m.AIPromptTemplate, "<script>") ||
+				strings.Contains(m.AIPromptTemplate, "javascript:") {
 				amis.WriteJsonError(c, fmt.Errorf("AI提示词模板包含不安全的内容"))
 				return
 			}
@@ -171,21 +171,24 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 
 	// 保存webhookNames
 	receiver := models.WebhookReceiver{}
-	if names, err := receiver.GetNamesByIds(m.Webhooks); err == nil {
+	if names, nErr := receiver.GetNamesByIds(m.Webhooks); nErr == nil {
 		m.WebhookNames = strings.Join(names, ",")
+	} else {
+		amis.WriteJsonError(c, nErr)
+		return
 	}
+
 	err = m.Save(params)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	// 存储后，按照开关状态确定执行cron
-	sb := lua.ScheduleBackground{}
+	sb := lua.NewScheduleBackground()
 	if m.Enabled {
-		sb.Add(m.ID)
-	} else {
-		sb.Remove(m.ID)
+		go func() {
+			sb.Update(m.ID)
+		}()
 	}
 
 	amis.WriteJsonOK(c)
@@ -200,11 +203,12 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	// 清除定时 任务
-	intIds := utils.ToInt64Slice(ids)
-	for _, id := range intIds {
-		sb := lua.ScheduleBackground{}
-		sb.Remove(uint(id))
-	}
+	go func() {
+		for id := range strings.SplitSeq(ids, ",") {
+			sb := lua.NewScheduleBackground()
+			sb.Remove(utils.ToUInt(id))
+		}
+	}()
 
 	// 查询到需清除的执行记录
 	var records []*models.InspectionRecord
@@ -220,6 +224,7 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 		dao.DB().Model(&scriptResult).Where("record_id in (?)", recordIds).Delete(&scriptResult)
 
 		// 再清除执行记录
+		intIds := utils.ToInt64Slice(ids)
 		dao.DB().Model(&records).Where("schedule_id in (?)", intIds).Delete(&records)
 	}
 
@@ -259,18 +264,20 @@ func (s *AdminScheduleController) QuickSave(c *gin.Context) {
 		return
 	}
 
-	// 存储后，按照开关状态确定执行cron
-	sb := lua.ScheduleBackground{}
-	if entity.Enabled {
-		sb.Add(entity.ID)
-	} else {
-		sb.Remove(entity.ID)
-	}
+	go func() {
+		// 存储后，按照开关状态确定执行cron
+		sb := lua.NewScheduleBackground()
+		if entity.Enabled {
+			sb.Update(entity.ID)
+		} else {
+			sb.Remove(entity.ID)
+		}
+	}()
 
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
-// @Summary 启动巡检计划
+// @Summary 启动巡检计划，马上执行一次
 // @Security BearerAuth
 // @Param id path int true "巡检计划ID"
 // @Success 200 {object} string
@@ -291,7 +298,8 @@ func (s *AdminScheduleController) Start(c *gin.Context) {
 		return
 	}
 	go func() {
-		sb := lua.ScheduleBackground{}
+		// 立马执行一次
+		sb := lua.NewScheduleBackground()
 		clusters := strings.Split(one.Clusters, ",")
 		for _, cluster := range clusters {
 			_, _ = sb.RunByCluster(context.Background(), &one.ID, cluster, lua.TriggerTypeManual)
@@ -331,5 +339,11 @@ func (s *AdminScheduleController) UpdateScriptCode(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	go func() {
+		sb := lua.NewScheduleBackground()
+		sb.Remove(m.ID)
+		sb.Add(m.ID)
+	}()
+
 	amis.WriteJsonOK(c)
 }

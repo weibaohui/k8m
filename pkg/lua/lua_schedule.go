@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -21,6 +20,30 @@ import (
 type ScheduleBackground struct {
 }
 
+var localScheduleBackground *ScheduleBackground
+var once sync.Once
+var localTaskManager *TaskManager
+
+// init 在包被导入时执行，用于初始化并启动 TaskManager
+// 注意：init 的执行时机由 Go 运行时决定，无法保证一定在其他组件之前；
+// 若需严格顺序，请使用显式的初始化函数。
+func init() {
+	localTaskManager = NewTaskManager()
+	// 启动TaskManager
+	localTaskManager.Start()
+}
+func InitClusterInspection() {
+	once.Do(func() {
+		// 从数据库加载并启动定时任务
+		localScheduleBackground = &ScheduleBackground{}
+		localScheduleBackground.AddCronJobFromDB()
+		klog.V(6).Infof("新增 集群巡检 定时任务 ")
+	})
+}
+func NewScheduleBackground() *ScheduleBackground {
+	return localScheduleBackground
+}
+
 // TriggerTypeManual 表示手动触发
 const TriggerTypeManual = "manual"
 
@@ -28,7 +51,7 @@ const TriggerTypeManual = "manual"
 const TriggerTypeCron = "cron"
 
 // RunByCluster 启动一次巡检任务，并记录执行及每个脚本的结果到数据库
-// scheduleID: 可选，定时任务ID（手动触发时为nil）
+// scheduleID: 定时任务ID
 // cluster: 目标集群
 // triggerType: 触发类型（manual/cron）
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
@@ -153,19 +176,6 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 	return record, nil
 }
 
-var localCron *cron.Cron
-var once sync.Once
-
-func InitClusterInspection() {
-	once.Do(func() {
-		localCron = cron.New()
-		localCron.Start()
-		klog.V(6).Infof("集群巡检启动")
-		sb := ScheduleBackground{}
-		sb.StartFromDB()
-	})
-}
-
 // IsEventStatusPass 判断事件状态是否为通过
 // 这里的通过状态包括：正常、pass、ok、success、通过
 // 入库前将状态描述文字统一为正常、失败两种
@@ -173,8 +183,8 @@ func (s *ScheduleBackground) IsEventStatusPass(status string) bool {
 	return status == "正常" || status == "pass" || status == "ok" || status == "success" || status == "通过"
 }
 
-// StartFromDB  后台自动执行调度
-func (s *ScheduleBackground) StartFromDB() {
+// AddCronJobFromDB  后台自动执行调度
+func (s *ScheduleBackground) AddCronJobFromDB() {
 
 	// 1、读取数据库中的定义，然后创建
 	sch := models.InspectionSchedule{}
@@ -194,43 +204,10 @@ func (s *ScheduleBackground) StartFromDB() {
 	klog.V(6).Infof("启动集群巡检任务完成，共启动%d个", count)
 }
 func (s *ScheduleBackground) Remove(scheduleID uint) {
-	sch := models.InspectionSchedule{}
-	sch.ID = scheduleID
-	item, err := sch.GetOne(nil, func(db *gorm.DB) *gorm.DB {
-		return db
-	})
-	if err != nil {
-		klog.Errorf("读取定时任务[id=%d]失败  %v", scheduleID, err)
-		return
-	}
-	if item.CronRunID != 0 {
-		// 首先标记任务为已删除状态，防止正在执行的任务继续运行
-		taskControlManager.MarkTaskDeleted(scheduleID)
-
-		// 从cron调度器中移除任务
-		localCron.Remove(item.CronRunID)
-
-		// 清理任务控制信息
-		taskControlManager.RemoveTask(scheduleID)
-
-		// 清空数据库中的CronRunID
-		item.CronRunID = 0
-		_ = item.Save(nil)
-	}
-	klog.V(6).Infof("移除集群定时巡检任务[id=%d]", scheduleID)
-
+	localTaskManager.Remove(fmt.Sprintf("%d", scheduleID))
+	klog.V(6).Infof("移除巡检任务[id=%d]", scheduleID)
 }
 
-// Add 添加一个新的定时巡检任务到cron调度器中
-// 该方法会从数据库读取指定的巡检计划，并创建对应的定时任务
-//
-// 重要：为了避免Go闭包变量捕获问题，该方法会创建局部变量副本
-// 这确保每个定时任务都有自己独立的数据副本，不会被后续的Add调用影响
-// 如果不这样做，多个巡检计划可能会错误地使用相同的集群配置
-//
-// 参数:
-//
-//	scheduleID - 要添加的巡检计划ID
 func (s *ScheduleBackground) Add(scheduleID uint) {
 	// 1、读取数据库中的定义，然后创建
 	sch := models.InspectionSchedule{}
@@ -239,56 +216,39 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 		return db.Where("enabled is true")
 	})
 	if err != nil {
-		klog.Errorf("读取定时任务[id=%d]失败  %v", scheduleID, err)
+		klog.Errorf("读取巡检任务[id=%d]失败  %v", scheduleID, err)
 		return
 	}
-	// 先清除，再添加执行
-	if item.CronRunID != 0 && localCron != nil {
-		localCron.Remove(item.CronRunID)
-		// 同时清理任务控制信息
-		taskControlManager.RemoveTask(scheduleID)
-	}
-	if item.Cron != "" && localCron != nil {
-		klog.V(6).Infof("注册定时任务item: %s", item.Cron)
-		// 注册定时任务
+
+	if item.Cron != "" {
 		// 创建局部副本以避免闭包变量捕获问题
 		// 这样确保每个定时任务都有自己独立的数据副本，不会被后续的Add调用影响
 		scheduleIDCopy := item.ID
 		clustersCopy := item.Clusters
 		cronExpr := item.Cron
 
-		// 在AddFunc执行前生成随机字符串
-		randomToken := utils.RandNLengthString(8)
-
-		entryID, err := localCron.AddFunc(cronExpr, func() {
-			// 在任务执行前检查是否已被删除
-			if taskControlManager.IsTaskDeleted(randomToken) {
-				klog.V(6).Infof("任务已被删除，跳过执行: scheduleID=%d, token=%s", scheduleIDCopy, randomToken)
+		// 添加定时任务到TaskManager，而不是立即执行
+		addErr := localTaskManager.Add(fmt.Sprintf("%d", scheduleIDCopy), cronExpr, func(ctx context.Context) {
+			klog.V(6).Infof("定时巡检任务 [%s] 开始执行", item.Name)
+			select {
+			case <-ctx.Done():
+				klog.V(6).Infof("定时巡检任务 [%s] 正在执行，执行取消命令", item.Name)
 				return
-			}
-
-			klog.V(6).Infof("开始执行定时任务: scheduleID=%d, token=%s", scheduleIDCopy, randomToken)
-			for _, cluster := range strings.Split(clustersCopy, ",") {
-				// 在每个集群执行前再次检查任务是否已被删除
-				if taskControlManager.IsTaskDeleted(randomToken) {
-					klog.V(6).Infof("任务在执行过程中被删除，停止执行: scheduleID=%d, cluster=%s, token=%s", scheduleIDCopy, cluster, randomToken)
-					break
+			default:
+				// 执行巡检任务
+				for cluster := range strings.SplitSeq(clustersCopy, ",") {
+					_, _ = s.RunByCluster(ctx, &scheduleIDCopy, cluster, TriggerTypeCron)
 				}
-				_, _ = s.RunByCluster(context.Background(), &scheduleIDCopy, cluster, TriggerTypeCron)
 			}
+			klog.V(6).Infof("定时巡检任务 [%s] 执行完成", item.Name)
 		})
-		if err != nil {
-			klog.Errorf("定时任务注册失败%v", err)
+		if addErr != nil {
+			klog.Errorf("添加巡检任务[id=%d]失败  %v", scheduleID, addErr)
 			return
 		}
-
-		// 注册任务控制信息，建立随机字符串与EntryID的映射关系
-		taskControlManager.RegisterTask(scheduleID, entryID, randomToken)
-
-		// 更新EntryID
-		item.CronRunID = entryID
-		_ = item.Save(nil)
 	}
-	klog.V(6).Infof("启动集群定时巡检任务[id=%d]", scheduleID)
-
+	klog.V(6).Infof("添加巡检任务[id=%d]", scheduleID)
+}
+func (s *ScheduleBackground) Update(scheduleID uint) {
+	s.Add(scheduleID)
 }
