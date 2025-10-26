@@ -14,8 +14,8 @@ func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookRecei
 		results = &SendResult{Status: "failed", RespBody: err.Error()}
 		return results
 	}
-	stdTarget := getStdTarget(receiver)
-	results, err = sender.Send(msg, raw, stdTarget)
+	ch := getSendChannel(receiver)
+	results, err = sender.Send(msg, raw, ch)
 	if err != nil {
 		results = &SendResult{Status: "failed", RespBody: err.Error()}
 	}

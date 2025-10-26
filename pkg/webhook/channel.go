@@ -42,7 +42,7 @@ func NewWechatChannel(targetURL string) *Channel {
 	}
 }
 
-func getStdTarget(receiver *models.WebhookReceiver) *Channel {
+func getSendChannel(receiver *models.WebhookReceiver) *Channel {
 	if receiver.Platform == "feishu" {
 		rr := NewFeishuChannel(receiver.TargetURL, receiver.SignSecret)
 		return rr
