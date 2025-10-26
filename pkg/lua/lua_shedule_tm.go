@@ -7,7 +7,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-// 可取消的任务包装
+// CancellableJob 可取消的任务包装
 type CancellableJob struct {
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -28,7 +28,7 @@ func (cj *CancellableJob) Cancel() {
 	cj.cancel()
 }
 
-// 任务管理
+// TaskManager 任务管理
 type TaskManager struct {
 	c     *cron.Cron
 	mu    sync.Mutex

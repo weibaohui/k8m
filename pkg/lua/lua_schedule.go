@@ -24,12 +24,16 @@ var localScheduleBackground *ScheduleBackground
 var once sync.Once
 var localTaskManager *TaskManager
 
+// init 在包被导入时执行，用于初始化并启动 TaskManager
+// 注意：init 的执行时机由 Go 运行时决定，无法保证一定在其他组件之前；
+// 若需严格顺序，请使用显式的初始化函数。
+func init() {
+	localTaskManager = NewTaskManager()
+	// 启动TaskManager
+	localTaskManager.Start()
+}
 func InitClusterInspection() {
 	once.Do(func() {
-		localTaskManager = NewTaskManager()
-		// 启动TaskManager
-		localTaskManager.Start()
-
 		// 从数据库加载并启动定时任务
 		localScheduleBackground = &ScheduleBackground{}
 		localScheduleBackground.AddCronJobFromDB()
