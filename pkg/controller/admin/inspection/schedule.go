@@ -298,7 +298,7 @@ func (s *AdminScheduleController) Start(c *gin.Context) {
 		return
 	}
 	go func() {
-		//立马执行一次
+		// 立马执行一次
 		sb := lua.NewScheduleBackground()
 		clusters := strings.Split(one.Clusters, ",")
 		for _, cluster := range clusters {

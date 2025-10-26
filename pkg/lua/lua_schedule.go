@@ -233,7 +233,7 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 			default:
 				// 执行巡检任务
 				for cluster := range strings.SplitSeq(clustersCopy, ",") {
-					_, _ = s.RunByCluster(context.Background(), &scheduleIDCopy, cluster, TriggerTypeCron)
+					_, _ = s.RunByCluster(ctx, &scheduleIDCopy, cluster, TriggerTypeCron)
 				}
 			}
 			klog.V(6).Infof("定时巡检任务 [%s] 执行完成", item.Name)
