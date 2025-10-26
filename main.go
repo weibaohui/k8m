@@ -136,7 +136,6 @@ func Init() {
 
 	// 启动watch
 	go func() {
-		lua.InitClusterInspection()
 		service.McpService().Init()
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
@@ -145,6 +144,7 @@ func Init() {
 			service.PVService().Watch()
 			service.IngressService().Watch()
 			service.McpService().Start()
+			lua.InitClusterInspection()
 			// 启动helm 更新repo定时任务
 			helm2.StartUpdateHelmRepoInBackground()
 		})
