@@ -142,17 +142,6 @@
           }
         },
         {
-          "name": "summary",
-          "label": "执行摘要",
-          "type": "text",
-          "width": "250px",
-          "tpl": "${summary|truncate:50|default:'-'}",
-          "popOver": {
-            "body": "${summary}",
-            "trigger": "hover"
-          }
-        },
-        {
           "name": "status_code",
           "label": "HTTP状态",
           "type": "text",
