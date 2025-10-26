@@ -203,11 +203,10 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	// 清除定时 任务
-	intIds := utils.ToInt64Slice(ids)
 	go func() {
-		for _, id := range intIds {
+		for id := range strings.SplitSeq(ids, ",") {
 			sb := lua.NewScheduleBackground()
-			sb.Remove(uint(id))
+			sb.Remove(utils.ToUInt(id))
 		}
 	}()
 
@@ -225,6 +224,7 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 		dao.DB().Model(&scriptResult).Where("record_id in (?)", recordIds).Delete(&scriptResult)
 
 		// 再清除执行记录
+		intIds := utils.ToInt64Slice(ids)
 		dao.DB().Model(&records).Where("schedule_id in (?)", intIds).Delete(&records)
 	}
 
