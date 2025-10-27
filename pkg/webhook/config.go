@@ -62,14 +62,8 @@ func (c *WebhookConfig) Validate() error {
 		return ErrInvalidPlatform
 	}
 
-	// Validate platform is supported
-	validPlatforms := map[string]bool{
-		"dingtalk": true,
-		"feishu":   true,
-		"wechat":   true,
-		"default":  true,
-	}
-	if !validPlatforms[c.Platform] {
+	// Validate platform by registry
+	if _, err := GetAdapter(c.Platform); err != nil {
 		return ErrInvalidPlatform
 	}
 
