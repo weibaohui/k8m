@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/weibaohui/k8m/pkg/models"
 )
@@ -58,6 +59,7 @@ func (c *WebhookConfig) HasSignature() bool {
 
 // Validate checks if the configuration is valid.
 func (c *WebhookConfig) Validate() error {
+	c.Platform = strings.ToLower(strings.TrimSpace(c.Platform))
 	if c.Platform == "" {
 		return ErrInvalidPlatform
 	}
