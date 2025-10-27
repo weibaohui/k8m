@@ -21,7 +21,7 @@ type WebhookLogRecord struct {
 	Duration     int64     `json:"duration,omitempty"`                    // 请求耗时(纳秒)
 	ErrorMessage string    `json:"error_message,omitempty"`               // 错误信息
 	Summary      string    `json:"summary,omitempty"`                     // 日志摘要
-	Detail       string    `gorm:"type:longtext" json:"detail,omitempty"` // 完整日志详情(JSON格式)
+	Detail       string    `gorm:"type:text" json:"detail,omitempty"`     // 完整日志详情(JSON格式)
 	RequestTime  time.Time `json:"request_time,omitempty" gorm:"index"`   // 请求时间
 	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"` // 创建时间
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`                  // 更新时间
