@@ -68,9 +68,9 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 		if sErr != nil {
 			return &SendResult{
 				Status:   "failed",
-				RespBody: fmt.Sprintf("sign request error: %v", err),
-				Error:    err,
-			}, err
+				RespBody: fmt.Sprintf("sign request error: %v", sErr),
+				Error:    sErr,
+			}, sErr
 		}
 		finalURL = signedURL
 	}
@@ -90,8 +90,7 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 	req.Header.Set("User-Agent", "k8m-webhook-client/1.0")
 
 	// Create a logged client with specific receiver info for this request
-	receiverID := fmt.Sprintf("%s:%s", config.Platform, config.TargetURL)
-	loggedClient := NewLoggedHTTPClient(c.timeout, config.WebhookId, config.WebhookName, receiverID)
+	loggedClient := NewLoggedHTTPClient(c.timeout, config.WebhookId, config.WebhookName, config.Platform)
 
 	// Send request
 	resp, webhookLog, err := loggedClient.DoWithLogging(req)

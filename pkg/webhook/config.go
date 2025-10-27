@@ -9,7 +9,7 @@ import (
 // WebhookConfig represents the configuration for a webhook endpoint.
 // This replaces the old Channel concept with clearer naming and responsibilities.
 type WebhookConfig struct {
-	WebhookId    uint   // WebhookName of the webhook configuration
+	WebhookId    uint   // WebhookID of the webhook configuration
 	WebhookName  string // WebhookName of the webhook configuration
 	Platform     string // Platform identifier (feishu, dingtalk, wechat, default)
 	TargetURL    string // The webhook endpoint URL

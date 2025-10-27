@@ -42,7 +42,7 @@ func (d *DingtalkAdapter) SignRequest(baseURL string, body []byte, secret string
 
 	timestamp := time.Now().UnixNano() / 1e6 // DingTalk uses millisecond timestamp
 	timestampStr := strconv.FormatInt(timestamp, 10)
-	
+
 	signature, err := d.generateSignature(secret, timestamp)
 	if err != nil {
 		return "", err
@@ -64,11 +64,11 @@ func (d *DingtalkAdapter) SignRequest(baseURL string, body []byte, secret string
 func (d *DingtalkAdapter) generateSignature(secret string, timestamp int64) (string, error) {
 	timestampStr := strconv.FormatInt(timestamp, 10)
 	stringToSign := timestampStr + "\n" + secret
-	
+
 	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(stringToSign))
 	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	
+
 	return url.QueryEscape(signature), nil
 }
 
@@ -100,7 +100,7 @@ func (f *FeishuAdapter) SignRequest(baseURL string, body []byte, secret string) 
 
 	timestamp := time.Now().Unix()
 	timestampStr := strconv.FormatInt(timestamp, 10)
-	
+
 	signature, err := f.generateSignature(secret, timestamp)
 	if err != nil {
 		return "", err
@@ -123,7 +123,7 @@ func (f *FeishuAdapter) generateSignature(secret string, timestamp int64) (strin
 	timestampStr := strconv.FormatInt(timestamp, 10)
 	// Feishu signature format: timestamp + "\n" + secret
 	stringToSign := timestampStr + "\n" + secret
-	
+
 	var data []byte
 	h := hmac.New(sha256.New, []byte(stringToSign))
 	_, err := h.Write(data)
@@ -131,7 +131,7 @@ func (f *FeishuAdapter) generateSignature(secret string, timestamp int64) (strin
 		return "", err
 	}
 	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	
+
 	return signature, nil
 }
 
@@ -174,20 +174,23 @@ func (d *DefaultAdapter) GetContentType() string {
 
 func (d *DefaultAdapter) FormatMessage(msg, raw string, config *WebhookConfig) ([]byte, error) {
 	template := config.GetEffectiveTemplate()
-	
+
 	// If no template, return plain message
 	if template == "" || template == "%s" {
-		return []byte(msg), nil
+		return json.Marshal(map[string]string{
+			"message": msg,
+			"raw":     raw,
+		})
 	}
 
 	// Use htpl for template rendering
 	bodyTemplate := strings.ReplaceAll(template, "{{msg}}", "${msg}")
 	bodyTemplate = strings.ReplaceAll(bodyTemplate, "{{raw}}", "${raw}")
-	
+
 	eng := htpl.NewEngine()
 	tpl, err := eng.ParseString(bodyTemplate)
 	if err != nil {
-		klog.Errorf("Webhook DefaultAdapter template parse failed: platform=%s target=%s template=%q error=%v", 
+		klog.Errorf("Webhook DefaultAdapter template parse failed: platform=%s target=%s template=%q error=%v",
 			config.Platform, config.TargetURL, bodyTemplate, err)
 		return []byte(msg), nil // Fallback to plain message
 	}
@@ -196,10 +199,10 @@ func (d *DefaultAdapter) FormatMessage(msg, raw string, config *WebhookConfig) (
 		"msg": msg,
 		"raw": raw,
 	}
-	
+
 	rendered, err := tpl.Render(ctx)
 	if err != nil {
-		klog.Errorf("Webhook DefaultAdapter template render failed: platform=%s target=%s template=%q error=%v", 
+		klog.Errorf("Webhook DefaultAdapter template render failed: platform=%s target=%s template=%q error=%v",
 			config.Platform, config.TargetURL, bodyTemplate, err)
 		return []byte(msg), nil // Fallback to plain message
 	}
