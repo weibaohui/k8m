@@ -122,6 +122,9 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&WebhookReceiver{}); err != nil {
 		errs = append(errs, err)
 	}
+	if err := dao.DB().AutoMigrate(&WebhookLogRecord{}); err != nil {
+		errs = append(errs, err)
+	}
 	if err := dao.DB().AutoMigrate(&Menu{}); err != nil {
 		errs = append(errs, err)
 	}
