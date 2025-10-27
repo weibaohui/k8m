@@ -280,7 +280,7 @@ func (c *LoggedHTTPClient) outputLog(log *WebhookLog) {
 	// 输出摘要到INFO级别
 	klog.V(8).Infof("Webhook Send: %s", log.Summary)
 
-	// 输出详细信息到V(6)级别
+	// 输出详细信息到V(8)级别
 	if klog.V(8).Enabled() {
 		if logBytes, err := json.MarshalIndent(log, "", "  "); err == nil {
 			klog.V(8).Infof("Webhook Detail Log:\n%s", string(logBytes))

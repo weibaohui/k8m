@@ -13,6 +13,10 @@ var defaultClient = NewWebhookClient()
 
 // PushMsgToSingleTarget sends a message to a single webhook receiver using the new architecture.
 func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookReceiver) *SendResult {
+	if receiver == nil {
+		klog.Errorf("[webhook] nil receiver")
+		return &SendResult{Status: "failed", Error: ErrInvalidConfig}
+	}
 	config := NewWebhookConfig(receiver)
 
 	// Use the new WebhookClient
