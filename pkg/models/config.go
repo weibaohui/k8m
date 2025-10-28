@@ -18,8 +18,9 @@ type Config struct {
 	ImagePullTimeout     int       `gorm:"default:30" json:"image_pull_timeout,omitempty"` // 镜像拉取超时时间（秒）
 	AnySelect            bool      `gorm:"default:true" json:"any_select"`
 	PrintConfig          bool      `json:"print_config"`
-	EnableAI             bool      `gorm:"default:true" json:"enable_ai"` // 是否启用AI功能，默认开启
-	UseBuiltInModel      bool      `gorm:"default:true" json:"use_built_in_model"`
+	EnableAI             bool      `gorm:"default:true" json:"enable_ai"`                      // 是否启用AI功能，默认开启
+	EnableSwagger        bool      `gorm:"default:true" json:"enable_swagger"`                 // 是否启用Swagger文档，默认开启
+	UseBuiltInModel      bool      `gorm:"default:true" json:"use_built_in_model"`             // 是否使用内置模型，默认开启
 	MaxIterations        int32     `json:"max_iterations"`                                     //  模型自动对话的最大轮数
 	MaxHistory           int32     `json:"max_history"`                                        //  模型对话上下文历史记录数
 	ResourceCacheTimeout int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"` // 资源缓存时间（秒）

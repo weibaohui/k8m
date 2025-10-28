@@ -43,6 +43,7 @@ type Config struct {
 	GitRepo              string  // git仓库地址, 由编译时自动注入
 	BuildDate            string  // 编译时间, 由编译时自动注入
 	EnableAI             bool    // 是否启用AI功能，默认开启
+	EnableSwagger        bool    // 是否启用Swagger文档，默认开启
 	ConnectCluster       bool    // 启动程序后，是否自动连接发现的集群，默认关闭
 	UseBuiltInModel      bool    // 是否使用内置大模型参数，默认开启
 	ProductName          string  // 产品名称，默认为K8M
@@ -179,6 +180,8 @@ func (c *Config) InitFlags() {
 	defaultPrintConfig := getEnvAsBool("PRINT_CONFIG", false)
 	// 默认开启AI功能
 	defaultEnableAI := getEnvAsBool("ENABLE_AI", true)
+	// 默认开启Swagger文档
+	defaultEnableSwagger := getEnvAsBool("ENABLE_SWAGGER", true)
 	// 默认关闭启动连接集群
 	defaultConnectCluster := getEnvAsBool("CONNECT_CLUSTER", false)
 	// 默认使用内置大模型参数
@@ -252,6 +255,7 @@ func (c *Config) InitFlags() {
 
 	// AI配置
 	pflag.BoolVar(&c.EnableAI, "enable-ai", defaultEnableAI, "是否启用AI功能，默认开启")
+	pflag.BoolVar(&c.EnableSwagger, "enable-swagger", defaultEnableSwagger, "是否启用Swagger文档，默认开启")
 	pflag.BoolVar(&c.AnySelect, "any-select", defaultAnySelect, "是否开启任意选择，默认开启")
 	pflag.BoolVar(&c.Think, "think", defaultThink, "AI是否开启思考过程输出，true时显示思考过程，建议生产环境开启")
 	pflag.Int32Var(&c.MaxIterations, "max-iterations", defaultMaxIterations, "模型自动对话的最大轮数，默认10轮")
