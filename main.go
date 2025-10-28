@@ -205,7 +205,16 @@ func main() {
 	// @in header
 	// @name Authorization
 	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/swagger/*any", func(c *gin.Context) {
+		if cfg.EnableSwagger {
+			ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
+		} else {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "Swagger documentation is disabled",
+				"message": "Swagger文档已被禁用，请联系管理员启用",
+			})
+		}
+	})
 
 	// 直接返回 index.html
 	r.GET("/", func(c *gin.Context) {

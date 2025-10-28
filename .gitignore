@@ -1,3 +1,4 @@
+.trae/
 .idea/
 cmake-build-*/
 *.iws
