@@ -57,7 +57,7 @@
     "fs-extra": "^11.3.0",
     "sass": "^1.87.0",
     "typescript": "^5.8.3",
-    "vite": "^6.3.6",
+    "vite": "^6.4.1",
     "vite-plugin-monaco-editor": "^1.1.0"
   }
 }
