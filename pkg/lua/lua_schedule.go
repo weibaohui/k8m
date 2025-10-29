@@ -120,7 +120,10 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		record.ErrorCount = finalErrorCount
 
 		// 强制保存状态，即使出错也要记录
-		if saveErr := record.Save(nil); saveErr != nil {
+		// 使用选择性更新，避免覆盖AI总结字段
+		if saveErr := record.Save(nil, func(db *gorm.DB) *gorm.DB {
+			return db.Select("status", "end_time", "error_count")
+		}); saveErr != nil {
 			klog.Errorf("更新巡检记录状态失败，记录ID=%d, 错误: %v", record.ID, saveErr)
 		} else {
 			klog.V(6).Infof("巡检记录ID=%d 状态已更新为: %s", record.ID, finalStatus)
