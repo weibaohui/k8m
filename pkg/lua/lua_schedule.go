@@ -103,6 +103,39 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		return nil, fmt.Errorf("保存巡检计划执行记录失败: %w", err)
 	}
 
+	// 使用defer确保无论如何都会更新记录状态
+	var finalStatus = "success"
+	var finalErrorCount int
+	defer func() {
+		// 捕获panic并设置为失败状态
+		if r := recover(); r != nil {
+			finalStatus = "failed"
+			klog.Errorf("巡检记录ID=%d 发生panic: %v", record.ID, r)
+		}
+
+		// 确保状态被更新
+		endTime := time.Now()
+		record.Status = finalStatus
+		record.EndTime = &endTime
+		record.ErrorCount = finalErrorCount
+
+		// 强制保存状态，即使出错也要记录
+		if saveErr := record.Save(nil); saveErr != nil {
+			klog.Errorf("更新巡检记录状态失败，记录ID=%d, 错误: %v", record.ID, saveErr)
+		} else {
+			klog.V(6).Infof("巡检记录ID=%d 状态已更新为: %s", record.ID, finalStatus)
+		}
+
+		// 更新集群巡检计划运行结果
+		schedule.LastRunTime = &endTime
+		schedule.ErrorCount = finalErrorCount
+		if saveErr := schedule.Save(nil, func(db *gorm.DB) *gorm.DB {
+			return db.Select("last_run_time", "error_count")
+		}); saveErr != nil {
+			klog.Errorf("更新巡检计划运行结果失败，计划ID=%d, 错误: %v", schedule.ID, saveErr)
+		}
+	}()
+
 	// 执行所有巡检脚本
 	inspection := NewLuaInspection(schedule, cluster)
 	results := inspection.Start()
@@ -142,6 +175,7 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 				ce.EventStatus = string(constants.LuaEventStatusNormal) // 统一状态描述为正常
 			} else {
 				errorCount += 1
+				finalErrorCount = errorCount // 同步更新finalErrorCount
 				ce.EventStatus = string(constants.LuaEventStatusFailed)
 			}
 			checkEvents = append(checkEvents, ce)
@@ -149,28 +183,19 @@ func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint,
 		}
 	}
 	// 保存脚本运行中产生的事件记录
-	_ = dao.GenericBatchSave(nil, checkEvents, 100)
+	if err := dao.GenericBatchSave(nil, checkEvents, 100); err != nil {
+		klog.Errorf("批量保存检查事件失败，记录ID=%d, 错误: %v", record.ID, err)
+		finalStatus = "failed"
+	}
 	// 保存脚本本身执行结果
-	_ = dao.GenericBatchSave(nil, scriptResults, 100)
+	if err := dao.GenericBatchSave(nil, scriptResults, 100); err != nil {
+		klog.Errorf("批量保存脚本结果失败，记录ID=%d, 错误: %v", record.ID, err)
+		finalStatus = "failed"
+	}
 
-	// 统计错误数
-
-	//  更新执行记录
-	endTime := time.Now()
-	record.Status = "success"
-	record.EndTime = &endTime
-	record.ErrorCount = errorCount
-
-	_ = record.Save(nil)
+	// 统计错误数完成，状态更新由defer函数处理
 
 	klog.V(6).Infof("集群巡检完成。集群巡检记录ID=%d", record.ID)
-
-	// 更新集群巡检计划运行结果
-	schedule.LastRunTime = &endTime
-	schedule.ErrorCount = errorCount
-	_ = schedule.Save(nil, func(db *gorm.DB) *gorm.DB {
-		return db.Select("last_run_time", "error_count")
-	})
 
 	// 自动生成总结，包括使用AI
 	s.AutoGenerateSummary(record.ID)
