@@ -27,9 +27,10 @@ func (d *DingtalkAdapter) GetContentType() string {
 
 func (d *DingtalkAdapter) FormatMessage(msg, raw string, config *WebhookConfig) ([]byte, error) {
 	payload := map[string]any{
-		"msgtype": "text",
-		"text": map[string]string{
-			"content": msg,
+		"msgtype": "markdown",
+		"markdown": map[string]string{
+			"title": "通知",
+			"text":  msg,
 		},
 	}
 	return json.Marshal(payload)
