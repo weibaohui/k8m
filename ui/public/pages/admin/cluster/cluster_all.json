@@ -1136,7 +1136,7 @@
                           "name": "timeout",
                           "label": "超时时间 (Timeout)",
                           "placeholder": "30",
-                          "min": 1,
+                          "min": 0,
                           "max": 300,
                           "description": "集群连接的超时时间，单位：秒。0表示无限制。"
                         },
@@ -1145,7 +1145,7 @@
                           "name": "qps",
                           "label": "QPS限制",
                           "placeholder": "200",
-                          "min": 1,
+                          "min": 0,
                           "max": 1000,
                           "description": "每秒查询次数限制，控制对集群API的访问频率。0表示无限制。"
                         },
@@ -1154,7 +1154,7 @@
                           "name": "burst",
                           "label": "突发限制 (Burst)",
                           "placeholder": "2000",
-                          "min": 1,
+                          "min": 0,
                           "max": 2000,
                           "description": "突发请求的最大数量，通常设置为QPS的2倍。0表示无限制。"
                         }
