@@ -65,6 +65,12 @@ type ClusterConfig struct {
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
 	AWSConfig               *komaws.EKSAuthConfig          `json:"aws_config,omitempty"` // AWS EKS配置信息
 	IsAWSEKS                bool                           `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
+	
+	// kom 集群注册配置项
+	ProxyURL                string                         `json:"proxy_url,omitempty"`  // HTTP 代理，例如 http://127.0.0.1:7890
+	Timeout                 int                            `json:"timeout,omitempty"`    // 请求超时时间，单位为秒，默认为 30 秒
+	QPS                     float32                        `json:"qps,omitempty"`        // 每秒查询数限制，默认为 200
+	Burst                   int                            `json:"burst,omitempty"`      // 突发请求数限制，默认为 2000
 }
 type ClusterConfigSource string
 
@@ -495,6 +501,11 @@ func (c *clusterService) ScanClustersInDB() {
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
+						// 从数据库中读取 kom 配置项
+						ProxyURL:             item.ProxyURL,
+						Timeout:              item.Timeout,
+						QPS:                  item.QPS,
+						Burst:                item.Burst,
 					}
 					if item.DisplayName != "" {
 						clusterConfig.FileName = item.DisplayName
@@ -609,8 +620,10 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
+		// 构建注册选项
+		opts := c.buildRegisterOptions(clusterConfig)
 		// 使用带 ID 的注册确保幂等
-		if _, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID); err != nil {
+		if _, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID, opts...); err != nil {
 			klog.V(4).Infof("注册 AWS 集群[%s]失败: %v", clusterID, err)
 			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 			clusterConfig.Err = err.Error()
@@ -641,7 +654,9 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 		}
 	} else {
 		// 集群外模式
-		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
+		// 构建注册选项
+		opts := c.buildRegisterOptions(clusterConfig)
+		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID, opts...)
 
 		if err != nil {
 			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
@@ -822,8 +837,10 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 		}
 		clusterID := clusterConfig.GetClusterID()
 
+		// 构建注册选项（使用默认值，因为此方法没有传入 kom 配置项）
+		opts := c.buildRegisterOptions(clusterConfig)
 		// 使用kom统一的AWS EKS集群注册方法
-		_, err = kom.Clusters().RegisterAWSClusterWithID(eksAuthConfig, clusterID)
+		_, err = kom.Clusters().RegisterAWSClusterWithID(eksAuthConfig, clusterID, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("注册AWS EKS集群失败: %w", err)
 		}
@@ -835,4 +852,31 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 	}
 
 	return clusterConfig, nil
+}
+
+// buildRegisterOptions 根据 ClusterConfig 构建 kom 注册选项
+func (c *clusterService) buildRegisterOptions(clusterConfig *ClusterConfig) []kom.RegisterOption {
+	var opts []kom.RegisterOption
+	
+	// 设置代理
+	if clusterConfig.ProxyURL != "" {
+		opts = append(opts, kom.RegisterProxyURL(clusterConfig.ProxyURL))
+	}
+	
+	// 设置超时时间
+	if clusterConfig.Timeout > 0 {
+		opts = append(opts, kom.RegisterTimeout(time.Duration(clusterConfig.Timeout)*time.Second))
+	}
+	
+	// 设置 QPS
+	if clusterConfig.QPS > 0 {
+		opts = append(opts, kom.RegisterQPS(clusterConfig.QPS))
+	}
+	
+	// 设置 Burst
+	if clusterConfig.Burst > 0 {
+		opts = append(opts, kom.RegisterBurst(clusterConfig.Burst))
+	}
+	
+	return opts
 }
