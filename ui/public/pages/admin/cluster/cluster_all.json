@@ -1097,6 +1097,74 @@
                   "actionType": "url",
                   "blank": false,
                   "url": "/#/log/operation?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
+                },
+                {
+                  "type": "button",
+                  "label": "参数配置",
+                  "icon": "fas fa-cogs text-primary",
+                  "actionType": "dialog",
+                  "visibleOn": "source==='DB'",
+                  "dialog": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "title": "集群参数配置 - ${clusterName}",
+                    "size": "lg",
+                    "body": {
+                      "type": "form",
+                      "api": "post:/admin/cluster/config/save",
+                      "initApi": "get:/admin/cluster/config/${id}",
+                      "body": [
+                        {
+                          "type": "alert",
+                          "level": "info",
+                          "body": "配置集群的kom相关参数，这些参数将影响集群的连接和性能表现。"
+                        },
+                        {
+                          "type": "hidden",
+                          "name": "id",
+                          "value": "${id}"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "proxyURL",
+                          "label": "代理地址 (ProxyURL)",
+                          "placeholder": "http://proxy.example.com:8080",
+                          "description": "集群连接使用的代理服务器地址，格式：http://host:port"
+                        },
+                        {
+                          "type": "input-number",
+                          "name": "timeout",
+                          "label": "超时时间 (Timeout)",
+                          "placeholder": "30",
+                          "suffix": "秒",
+                          "min": 1,
+                          "max": 300,
+                          "value": 30,
+                          "description": "集群连接的超时时间，单位：秒"
+                        },
+                        {
+                          "type": "input-number",
+                          "name": "qps",
+                          "label": "QPS限制",
+                          "placeholder": "200",
+                          "min": 1,
+                          "max": 1000,
+                          "value": 200,
+                          "description": "每秒查询次数限制，控制对集群API的访问频率"
+                        },
+                        {
+                          "type": "input-number",
+                          "name": "burst",
+                          "label": "突发限制 (Burst)",
+                          "placeholder": "2000",
+                          "min": 1,
+                          "max": 2000,
+                          "value": 2000,
+                          "description": "突发请求的最大数量，通常设置为QPS的2倍"
+                        }
+                      ]
+                    }
+                  }
                 }
               ]
             }

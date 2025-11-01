@@ -65,12 +65,13 @@ type ClusterConfig struct {
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
 	AWSConfig               *komaws.EKSAuthConfig          `json:"aws_config,omitempty"` // AWS EKS配置信息
 	IsAWSEKS                bool                           `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
-	
+
 	// kom 集群注册配置项
-	ProxyURL                string                         `json:"proxy_url,omitempty"`  // HTTP 代理，例如 http://127.0.0.1:7890
-	Timeout                 int                            `json:"timeout,omitempty"`    // 请求超时时间，单位为秒，默认为 30 秒
-	QPS                     float32                        `json:"qps,omitempty"`        // 每秒查询数限制，默认为 200
-	Burst                   int                            `json:"burst,omitempty"`      // 突发请求数限制，默认为 2000
+	DBID     uint    `json:"id,omitempty"`        // 数据库ID
+	ProxyURL string  `json:"proxy_url,omitempty"` // HTTP 代理，例如 http://127.0.0.1:7890
+	Timeout  int     `json:"timeout,omitempty"`   // 请求超时时间，单位为秒，默认为 30 秒
+	QPS      float32 `json:"qps,omitempty"`       // 每秒查询数限制，默认为 200
+	Burst    int     `json:"burst,omitempty"`     // 突发请求数限制，默认为 2000
 }
 type ClusterConfigSource string
 
@@ -502,10 +503,11 @@ func (c *clusterService) ScanClustersInDB() {
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
 						// 从数据库中读取 kom 配置项
-						ProxyURL:             item.ProxyURL,
-						Timeout:              item.Timeout,
-						QPS:                  item.QPS,
-						Burst:                item.Burst,
+						ProxyURL: item.ProxyURL,
+						Timeout:  item.Timeout,
+						QPS:      item.QPS,
+						Burst:    item.Burst,
+						DBID:     item.ID,
 					}
 					if item.DisplayName != "" {
 						clusterConfig.FileName = item.DisplayName
@@ -856,27 +858,41 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 
 // buildRegisterOptions 根据 ClusterConfig 构建 kom 注册选项
 func (c *clusterService) buildRegisterOptions(clusterConfig *ClusterConfig) []kom.RegisterOption {
+	klog.V(6).Infof("开始构建集群 %s 的注册选项配置", clusterConfig.ClusterID)
 	var opts []kom.RegisterOption
-	
+
 	// 设置代理
 	if clusterConfig.ProxyURL != "" {
+		klog.V(6).Infof("设置集群 %s 代理URL: %s", clusterConfig.ClusterID, clusterConfig.ProxyURL)
 		opts = append(opts, kom.RegisterProxyURL(clusterConfig.ProxyURL))
+	} else {
+		klog.V(6).Infof("集群 %s 未设置代理URL", clusterConfig.ClusterID)
 	}
-	
+
 	// 设置超时时间
 	if clusterConfig.Timeout > 0 {
+		klog.V(6).Infof("设置集群 %s 超时时间: %d 秒", clusterConfig.ClusterID, clusterConfig.Timeout)
 		opts = append(opts, kom.RegisterTimeout(time.Duration(clusterConfig.Timeout)*time.Second))
+	} else {
+		klog.V(6).Infof("集群 %s 使用默认超时时间", clusterConfig.ClusterID)
 	}
-	
+
 	// 设置 QPS
 	if clusterConfig.QPS > 0 {
+		klog.V(6).Infof("设置集群 %s QPS 限制: %.2f", clusterConfig.ClusterID, clusterConfig.QPS)
 		opts = append(opts, kom.RegisterQPS(clusterConfig.QPS))
+	} else {
+		klog.V(6).Infof("集群 %s 使用默认 QPS 限制", clusterConfig.ClusterID)
 	}
-	
+
 	// 设置 Burst
 	if clusterConfig.Burst > 0 {
+		klog.V(6).Infof("设置集群 %s Burst 限制: %d", clusterConfig.ClusterID, clusterConfig.Burst)
 		opts = append(opts, kom.RegisterBurst(clusterConfig.Burst))
+	} else {
+		klog.V(6).Infof("集群 %s 使用默认 Burst 限制", clusterConfig.ClusterID)
 	}
-	
+
+	klog.V(6).Infof("集群 %s 注册选项配置完成，共配置 %d 个选项", clusterConfig.ClusterID, len(opts))
 	return opts
 }
