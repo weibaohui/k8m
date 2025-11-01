@@ -2,6 +2,7 @@ package lua
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -116,6 +117,7 @@ func (p *Inspection) Start() []CheckResult {
 	return results
 }
 
+// runLuaCheck 执行单个Lua脚本检查，支持超时控制和脚本中断
 func (p *Inspection) runLuaCheck(item *models.InspectionLuaScript) CheckResult {
 	var buf bytes.Buffer
 	origStdout := os.Stdout
@@ -126,8 +128,58 @@ func (p *Inspection) runLuaCheck(item *models.InspectionLuaScript) CheckResult {
 	var events []CheckEvent
 	p.registerCheckEvent(&events, item)
 
+	// 获取超时时间，如果未设置或为0，则使用默认60秒
+	timeoutSeconds := item.TimeoutSeconds
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = 60
+	}
+	timeout := time.Duration(timeoutSeconds) * time.Second
+
 	start := time.Now()
-	err := p.lua.DoString(item.Script)
+	
+	// 创建可取消的上下文
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	
+	// 为 Lua 状态设置上下文，使其能够响应取消信号
+	p.lua.SetContext(ctx)
+	
+	// 使用channel来处理超时
+	type result struct {
+		err error
+	}
+	resultChan := make(chan result, 1)
+	
+	// 在goroutine中执行Lua脚本
+	go func() {
+		defer func() {
+			// 捕获可能的 panic，防止程序崩溃
+			if r := recover(); r != nil {
+				klog.Warningf("Lua脚本 [%s] 执行时发生panic: %v", item.Name, r)
+				resultChan <- result{err: fmt.Errorf("脚本执行发生panic: %v", r)}
+			}
+		}()
+		
+		err := p.lua.DoString(item.Script)
+		resultChan <- result{err: err}
+	}()
+
+	var err error
+	// 等待脚本执行完成或超时
+	select {
+	case res := <-resultChan:
+		err = res.err
+	case <-ctx.Done():
+		// 上下文被取消（超时或手动取消）
+		if ctx.Err() == context.DeadlineExceeded {
+			err = fmt.Errorf("脚本执行超时（%d秒）", timeoutSeconds)
+			klog.Warningf("Lua脚本 [%s] 执行超时，超时时间: %d秒，脚本已被中断", item.Name, timeoutSeconds)
+		} else {
+			err = fmt.Errorf("脚本执行被取消: %v", ctx.Err())
+			klog.Warningf("Lua脚本 [%s] 执行被取消: %v", item.Name, ctx.Err())
+		}
+	}
+
 	_ = w.Close()
 	os.Stdout = origStdout
 

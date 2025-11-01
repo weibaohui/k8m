@@ -10,13 +10,14 @@ const BuiltinLuaScriptsVersion = "v1"
 // BuiltinLuaScripts 内置检查脚本列表
 var BuiltinLuaScripts = []InspectionLuaScript{
 	{
-		Name:        "Service Selector 检查",
-		Description: "检查每个 Service 的 selector 是否有对应 Pod",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "Service",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Service_001",
+		Name:           "Service Selector 检查",
+		Description:    "检查每个 Service 的 selector 是否有对应 Pod",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "Service",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Service_001",
+		TimeoutSeconds: 30, // Service检查相对简单，30秒足够
 		Script: `
 		    -- 获取Selector 定义文档
 			local doc, err = kubectl:GVK("", "v1", "Service"):Cache(10):Doc("spec.selector")
@@ -56,13 +57,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 	},
 
 	{
-		Name:        "ConfigMap 未被使用检测",
-		Description: "检测所有未被 Pod 使用的 ConfigMap",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "ConfigMap",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_ConfigMap_002",
+		Name:           "ConfigMap 未被使用检测",
+		Description:    "检测所有未被 Pod 使用的 ConfigMap",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "ConfigMap",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_ConfigMap_002",
+		TimeoutSeconds: 90, // 需要遍历所有Pod和ConfigMap，时间较长
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -117,13 +119,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "ConfigMap 空数据检测",
-		Description: "检测所有 data 和 binaryData 字段都为空的 ConfigMap",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "ConfigMap",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_ConfigMap_003",
+		Name:           "ConfigMap 空数据检测",
+		Description:    "检测所有 data 和 binaryData 字段都为空的 ConfigMap",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "ConfigMap",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_ConfigMap_003",
+		TimeoutSeconds: 30, // 简单的数据检查，30秒足够
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -154,13 +157,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "ConfigMap 超大检测",
-		Description: "检测所有超过 1MB 的 ConfigMap",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "ConfigMap",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_ConfigMap_004",
+		Name:           "ConfigMap 超大检测",
+		Description:    "检测所有超过 1MB 的 ConfigMap",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "ConfigMap",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_ConfigMap_004",
+		TimeoutSeconds: 45, // 需要计算数据大小，稍微复杂一些
 		Script: `
 			local configmaps, err = kubectl:GVK("", "v1", "ConfigMap"):AllNamespace(""):List()
 			if err then
@@ -196,13 +200,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 	},
 
 	{
-		Name:        "Deployment 配置检查",
-		Description: "分析 Deployment 配置问题",
-		Group:       "apps",
-		Version:     "v1",
-		Kind:        "Deployment",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Deployment_005",
+		Name:           "Deployment 配置检查",
+		Description:    "分析 Deployment 配置问题",
+		Group:          "apps",
+		Version:        "v1",
+		Kind:           "Deployment",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Deployment_005",
+		TimeoutSeconds: 60, // 需要检查状态和条件，使用默认60秒
 		Script: `
 			local doc, err = kubectl:GVK("apps", "v1", "Deployment"):Cache(10):Doc("spec.replicas")
 			if err then
@@ -269,13 +274,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "CronJob 合规性检查",
-		Description: "检查 CronJob 是否被挂起、调度表达式是否合法、startingDeadlineSeconds 是否为负数",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "CronJob",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_CronJob_006",
+		Name:           "CronJob 合规性检查",
+		Description:    "检查 CronJob 是否被挂起、调度表达式是否合法、startingDeadlineSeconds 是否为负数",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "CronJob",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_CronJob_006",
+		TimeoutSeconds: 45, // 包含复杂的Cron表达式验证逻辑
 		Script: `
 			-- 内置 Cron 表达式基本校验（Kubernetes 使用标准 5 字段）
 			local function split_fields(expr)
@@ -345,13 +351,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Gateway 合规性检查",
-		Description: "检查 Gateway 关联的 GatewayClass 是否存在，以及 Gateway 状态是否被接受",
-		Group:       "gateway.networking.k8s.io",
-		Version:     "v1",
-		Kind:        "Gateway",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Gateway_007",
+		Name:           "Gateway 合规性检查",
+		Description:    "检查 Gateway 关联的 GatewayClass 是否存在，以及 Gateway 状态是否被接受",
+		Group:          "gateway.networking.k8s.io",
+		Version:        "v1",
+		Kind:           "Gateway",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Gateway_007",
+		TimeoutSeconds: 45, // 需要检查GatewayClass存在性和状态
 		Script: `
 			local gateways, err = kubectl:GVK("gateway.networking.k8s.io", "v1", "Gateway"):AllNamespace(""):List()
 			if err then
@@ -384,13 +391,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "GatewayClass 合规性检查",
-		Description: "检查 GatewayClass 的第一个 Condition 状态是否为 True，否则报告未被接受及 message。",
-		Group:       "gateway.networking.k8s.io",
-		Version:     "v1",
-		Kind:        "GatewayClass",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_GatewayClass_008",
+		Name:           "GatewayClass 合规性检查",
+		Description:    "检查 GatewayClass 的第一个 Condition 状态是否为 True，否则报告未被接受及 message。",
+		Group:          "gateway.networking.k8s.io",
+		Version:        "v1",
+		Kind:           "GatewayClass",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_GatewayClass_008",
+		TimeoutSeconds: 45, // 需要检查Gateway引用和状态
 		Script: `
 			local gatewayclasses, err = kubectl:GVK("gateway.networking.k8s.io", "v1", "GatewayClass"):AllNamespace(""):List()
 			if err then
@@ -410,13 +418,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "HPA Condition 检查",
-		Description: "检查 HorizontalPodAutoscaler 的 Condition 状态，ScalingLimited 为 True 或其他 Condition 为 False 时报警。",
-		Group:       "autoscaling",
-		Version:     "v2",
-		Kind:        "HorizontalPodAutoscaler",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_HPA_Condition_009",
+		Name:           "HPA Condition 检查",
+		Description:    "检查 HorizontalPodAutoscaler 的 Condition 状态，ScalingLimited 为 True 或其他 Condition 为 False 时报警。",
+		Group:          "autoscaling",
+		Version:        "v2",
+		Kind:           "HorizontalPodAutoscaler",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_HPA_Condition_009",
+		TimeoutSeconds: 45, // HPA状态检查，需要一定时间
 		Script: `
 			local hpas, err = kubectl:GVK("autoscaling", "v2", "HorizontalPodAutoscaler"):AllNamespace(""):List()
 			if err then print("获取 HPA 失败: " .. tostring(err)) return end
@@ -435,13 +444,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "HPA ScaleTargetRef 存在性检查",
-		Description: "检查 HorizontalPodAutoscaler 的 ScaleTargetRef 指向的对象是否存在。",
-		Group:       "autoscaling",
-		Version:     "v2",
-		Kind:        "HorizontalPodAutoscaler",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_HPA_ScaleTargetRef_010",
+		Name:           "HPA ScaleTargetRef 存在性检查",
+		Description:    "检查 HorizontalPodAutoscaler 的 ScaleTargetRef 指向的对象是否存在。",
+		Group:          "autoscaling",
+		Version:        "v2",
+		Kind:           "HorizontalPodAutoscaler",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_HPA_ScaleTargetRef_010",
+		TimeoutSeconds: 60, // 需要检查多种资源类型的存在性
 		Script: `
 			local hpas, err = kubectl:GVK("autoscaling", "v2", "HorizontalPodAutoscaler"):AllNamespace(""):List()
 			if err then print("获取 HPA 失败: " .. tostring(err)) return end
@@ -469,13 +479,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "HPA 资源配置检查",
-		Description: "检查 HPA 关联对象的 Pod 模板中所有容器是否配置了 requests 和 limits。",
-		Group:       "autoscaling",
-		Version:     "v2",
-		Kind:        "HorizontalPodAutoscaler",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_HPA_Resource_011",
+		Name:           "HPA 资源配置检查",
+		Description:    "检查 HPA 关联对象的 Pod 模板中所有容器是否配置了 requests 和 limits。",
+		Group:          "autoscaling",
+		Version:        "v2",
+		Kind:           "HorizontalPodAutoscaler",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_HPA_Resource_011",
+		TimeoutSeconds: 75, // 需要检查HPA和关联的Deployment/StatefulSet等资源
 		Script: `
 			local hpas, err = kubectl:GVK("autoscaling", "v2", "HorizontalPodAutoscaler"):AllNamespace(""):List()
 			if err then print("获取 HPA 失败: " .. tostring(err)) return end
@@ -507,13 +518,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			print("HPA 资源配置检查完成")
 		`,
 	}, {
-		Name:        "HTTPRoute Backend Service 存在性与端口检查",
-		Description: "检查 HTTPRoute 所引用的后端 Service 是否存在，以及端口是否匹配 Service 的端口。",
-		Group:       "gateway.networking.k8s.io",
-		Version:     "v1",
-		Kind:        "HTTPRoute",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_HTTPRoute_Backend_012",
+		Name:           "HTTPRoute Backend Service 存在性与端口检查",
+		Description:    "检查 HTTPRoute 所引用的后端 Service 是否存在，以及端口是否匹配 Service 的端口。",
+		Group:          "gateway.networking.k8s.io",
+		Version:        "v1",
+		Kind:           "HTTPRoute",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_HTTPRoute_Backend_012",
+		TimeoutSeconds: 60, // 需要检查HTTPRoute和Service的存在性及端口匹配
 		Script: `
 			local httproutes, err = kubectl:GVK("gateway.networking.k8s.io", "v1", "HTTPRoute"):AllNamespace(""):List()
 			if err then print("获取 HTTPRoute 失败: " .. tostring(err)) return end
@@ -544,13 +556,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			print("HTTPRoute Backend Service 检查完成")
 		`,
 	}, {
-		Name:        "HTTPRoute Backend Service 存在性与端口检查",
-		Description: "检查 HTTPRoute 所引用的后端 Service 是否存在，以及端口是否匹配 Service 的端口。",
-		Group:       "gateway.networking.k8s.io",
-		Version:     "v1",
-		Kind:        "HTTPRoute",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_HTTPRoute_Backend_013",
+		Name:           "HTTPRoute Backend Service 存在性与端口检查",
+		Description:    "检查 HTTPRoute 所引用的后端 Service 是否存在，以及端口是否匹配 Service 的端口。",
+		Group:          "gateway.networking.k8s.io",
+		Version:        "v1",
+		Kind:           "HTTPRoute",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_HTTPRoute_Backend_013",
+		TimeoutSeconds: 60, // 需要检查HTTPRoute和Service的存在性及端口匹配
 		Script: `
 			local httproutes, err = kubectl:GVK("gateway.networking.k8s.io", "v1", "HTTPRoute"):AllNamespace(""):List()
 			if err then print("获取 HTTPRoute 失败: " .. tostring(err)) return end
@@ -581,13 +594,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 			print("HTTPRoute Backend Service 检查完成")
 		`,
 	}, {
-		Name:        "HTTPRoute Gateway 存在性与命名空间策略检查",
-		Description: "检查 HTTPRoute 所引用的 Gateway 是否存在，以及 Gateway 的 AllowedRoutes 策略是否允许该 HTTPRoute。",
-		Group:       "gateway.networking.k8s.io",
-		Version:     "v1",
-		Kind:        "HTTPRoute",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_HTTPRoute_Gateway_014",
+		Name:           "HTTPRoute Gateway 存在性与命名空间策略检查",
+		Description:    "检查 HTTPRoute 所引用的 Gateway 是否存在，以及 Gateway 的 AllowedRoutes 策略是否允许该 HTTPRoute。",
+		Group:          "gateway.networking.k8s.io",
+		Version:        "v1",
+		Kind:           "HTTPRoute",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_HTTPRoute_Gateway_014",
+		TimeoutSeconds: 75, // 需要检查HTTPRoute、Gateway存在性和复杂的命名空间策略
 		Script: `
 			local httproutes, err = kubectl:GVK("gateway.networking.k8s.io", "v1", "HTTPRoute"):AllNamespace(""):List()
 			if err then print("获取 HTTPRoute 失败: " .. tostring(err)) return end
@@ -626,13 +640,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Ingress 合规性检查",
-		Description: "检查 Ingress 是否指定 IngressClass，引用的 IngressClass/Service/Secret 是否存在。",
-		Group:       "networking",
-		Version:     "v1",
-		Kind:        "Ingress",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Ingress_015",
+		Name:           "Ingress 合规性检查",
+		Description:    "检查 Ingress 是否指定 IngressClass，引用的 IngressClass/Service/Secret 是否存在。",
+		Group:          "networking",
+		Version:        "v1",
+		Kind:           "Ingress",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Ingress_015",
+		TimeoutSeconds: 75, // 需要检查Ingress、IngressClass、Service和Secret的存在性
 		Script: `
 			local ingresses, err = kubectl:GVK("networking.k8s.io", "v1", "Ingress"):AllNamespace(""):List()
 			if err then print("获取 Ingress 失败: " .. tostring(err)) return end
@@ -678,13 +693,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Job 合规性检查",
-		Description: "检查 Job 是否被挂起（suspend）以及是否有失败（status.failed > 0）",
-		Group:       "batch",
-		Version:     "v1",
-		Kind:        "Job",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Job_016",
+		Name:           "Job 合规性检查",
+		Description:    "检查 Job 是否被挂起（suspend）以及是否有失败（status.failed > 0）",
+		Group:          "batch",
+		Version:        "v1",
+		Kind:           "Job",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Job_016",
+		TimeoutSeconds: 45, // Job状态检查相对简单
 		Script: `
 			local jobs, err = kubectl:GVK("batch", "v1", "Job"):AllNamespace(""):List()
 			if err then print("获取 Job 失败: " .. tostring(err)) return end
@@ -707,6 +723,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "MutatingWebhookConfiguration",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_MutatingWebhook_017",
+		TimeoutSeconds: 90, // 需要检查Service和Pod状态，较为复杂
 		Script: `
 			local mwcs, err = kubectl:GVK("admissionregistration.k8s.io", "v1", "MutatingWebhookConfiguration"):AllNamespace(""):List()
 			if err then print("获取 MutatingWebhookConfiguration 失败: " .. tostring(err)) return end
@@ -753,6 +770,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "NetworkPolicy",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_NetworkPolicy_018",
+		TimeoutSeconds: 60, // 需要检查Pod选择器匹配
 		Script: `
 			local nps, err = kubectl:GVK("networking.k8s.io", "v1", "NetworkPolicy"):AllNamespace(""):List()
 			if err then print("获取 NetworkPolicy 失败: " .. tostring(err)) return end
@@ -786,6 +804,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "Node",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Node_019",
+		TimeoutSeconds: 45, // Node状态检查相对简单
 		Script: `
 			local nodes, err = kubectl:GVK("", "v1", "Node"):AllNamespace(""):List()
 			if err then print("获取 Node 失败: " .. tostring(err)) return end
@@ -817,6 +836,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "Pod",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Pod_020",
+		TimeoutSeconds: 120, // Pod状态检查复杂，需要检查多种状态
 		Script: `
 			local pods, err = kubectl:GVK("", "v1", "Pod"):AllNamespace(""):List()
 			if err then print("获取 Pod 失败: " .. tostring(err)) return end
@@ -860,6 +880,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "PersistentVolumeClaim",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_PVC_021",
+		TimeoutSeconds: 60, // 需要检查Event事件
 		Script: `
 			local pvcs, err = kubectl:GVK("", "v1", "PersistentVolumeClaim"):AllNamespace(""):List()
 			if err then print("获取 PVC 失败: " .. tostring(err)) return end
@@ -886,6 +907,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "ReplicaSet",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_ReplicaSet_022",
+		TimeoutSeconds: 45, // ReplicaSet状态检查相对简单
 		Script: `
 			local rss, err = kubectl:GVK("apps", "v1", "ReplicaSet"):AllNamespace(""):List()
 			if err then print("获取 ReplicaSet 失败: " .. tostring(err)) return end
@@ -909,6 +931,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "ServiceAccount",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Security_SA_023",
+		TimeoutSeconds: 60, // 需要检查Pod使用情况
 		Script: `
 			local sas, err = kubectl:GVK("", "v1", "ServiceAccount"):AllNamespace(""):List()
 			if err then print("获取 ServiceAccount 失败: " .. tostring(err)) return end
@@ -939,6 +962,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "RoleBinding",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Security_RoleBinding_024",
+		TimeoutSeconds: 75, // 需要检查Role权限规则
 		Script: `
 			local rbs, err = kubectl:GVK("rbac.authorization.k8s.io", "v1", "RoleBinding"):AllNamespace(""):List()
 			if err then print("获取 RoleBinding 失败: " .. tostring(err)) return end
@@ -970,6 +994,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "Pod",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_Security_Pod_025",
+		TimeoutSeconds: 90, // 需要检查所有Pod的安全上下文
 		Script: `
 			local pods, err = kubectl:GVK("", "v1", "Pod"):AllNamespace(""):List()
 			if err then print("获取 Pod 失败: " .. tostring(err)) return end
@@ -999,6 +1024,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "StatefulSet",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_StatefulSet_026",
+		TimeoutSeconds: 120, // 需要检查Service、StorageClass和Pod状态，较为复杂
 		Script: `
 			local stss, err = kubectl:GVK("apps", "v1", "StatefulSet"):AllNamespace(""):List()
 			if err then print("获取 StatefulSet 失败: " .. tostring(err)) return end
@@ -1054,6 +1080,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "StorageClass",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_StorageClass_027",
+		TimeoutSeconds: 30, // StorageClass检查相对简单
 		Script: `
 			local scs, err = kubectl:GVK("storage.k8s.io", "v1", "StorageClass"):AllNamespace(""):List()
 			if err then print("获取 StorageClass 失败: " .. tostring(err)) return end
@@ -1080,6 +1107,7 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		Kind:        "PersistentVolume",
 		ScriptType:  constants.LuaScriptTypeBuiltin,
 		ScriptCode:  "Builtin_PV_028",
+		TimeoutSeconds: 45, // PV状态和容量检查
 		Script: `
 			local pvs, err = kubectl:GVK("", "v1", "PersistentVolume"):AllNamespace(""):List()
 			if err then print("获取 PersistentVolume 失败: " .. tostring(err)) return end
@@ -1266,13 +1294,14 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Pod 资源用量检查",
-		Description: "检查指定 Pod 的资源用量情况，包括 CPU 和内存的请求、限制、实时用量等信息",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "Pod",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Pod_ResourceUsage_032",
+		Name:           "Pod 资源用量检查",
+		Description:    "检查指定 Pod 的资源用量情况，包括 CPU 和内存的请求、限制、实时用量等信息",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "Pod",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Pod_ResourceUsage_032",
+		TimeoutSeconds: 90, // 需要获取Pod资源用量数据，包含复杂的计算逻辑
 		Script: `
 			-- =============================
 -- 🧩 Pod 资源用量检查脚本（JSON格式输出 + 比例修正）
