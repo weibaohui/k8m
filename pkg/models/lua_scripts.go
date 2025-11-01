@@ -22,6 +22,7 @@ type InspectionLuaScript struct {
 	ScriptType  constants.LuaScriptType `json:"script_type"`                            // 脚本类型 内置/自定义
 	Script      string                  `gorm:"type:text" json:"script"`                // 脚本内容
 	ScriptCode  string                  `gorm:"uniqueIndex;size:64" json:"script_code"` // 脚本唯一标识码，每个脚本唯一
+	TimeoutSeconds int                  `json:"timeout_seconds" gorm:"default:60"`      // 脚本执行超时时间（秒），默认60秒
 	CreatedAt   time.Time               `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time               `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 

@@ -2,6 +2,7 @@ package lua
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -116,6 +117,7 @@ func (p *Inspection) Start() []CheckResult {
 	return results
 }
 
+// runLuaCheck 执行单个Lua脚本检查，支持超时控制
 func (p *Inspection) runLuaCheck(item *models.InspectionLuaScript) CheckResult {
 	var buf bytes.Buffer
 	origStdout := os.Stdout
@@ -126,8 +128,40 @@ func (p *Inspection) runLuaCheck(item *models.InspectionLuaScript) CheckResult {
 	var events []CheckEvent
 	p.registerCheckEvent(&events, item)
 
+	// 获取超时时间，如果未设置或为0，则使用默认60秒
+	timeoutSeconds := item.TimeoutSeconds
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = 60
+	}
+	timeout := time.Duration(timeoutSeconds) * time.Second
+
 	start := time.Now()
-	err := p.lua.DoString(item.Script)
+	
+	// 使用channel来处理超时
+	type result struct {
+		err error
+	}
+	resultChan := make(chan result, 1)
+	
+	// 在goroutine中执行Lua脚本
+	go func() {
+		err := p.lua.DoString(item.Script)
+		resultChan <- result{err: err}
+	}()
+
+	var err error
+	// 等待脚本执行完成或超时
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	
+	select {
+	case res := <-resultChan:
+		err = res.err
+	case <-ctx.Done():
+		err = fmt.Errorf("脚本执行超时（%d秒）", timeoutSeconds)
+		klog.Warningf("Lua脚本 [%s] 执行超时，超时时间: %d秒", item.Name, timeoutSeconds)
+	}
+
 	_ = w.Close()
 	os.Stdout = origStdout
 
