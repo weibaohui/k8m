@@ -28,6 +28,16 @@ type KubeConfig struct {
 	Token  string `gorm:"type:text" json:"token,omitempty"`   // token 内容，支持大文本存储
 	CACert string `gorm:"type:text" json:"ca_data,omitempty"` // ca 证书内容，支持大文本存储
 
+	// kom 集群注册配置项
+	// ProxyURL 设置 HTTP 代理，例如 http://127.0.0.1:7890
+	ProxyURL string `gorm:"type:varchar(255)" json:"proxy_url,omitempty"`
+	// Timeout 设置请求超时时间，单位为秒，默认为 30 秒
+	Timeout int `gorm:"default:30" json:"timeout,omitempty"`
+	// QPS 设置每秒查询数限制，默认为 200
+	QPS float32 `gorm:"default:200" json:"qps,omitempty"`
+	// Burst 设置突发请求数限制，默认为 2000
+	Burst int `gorm:"default:2000" json:"burst,omitempty"`
+
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
