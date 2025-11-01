@@ -65,6 +65,13 @@ type ClusterConfig struct {
 	NotAfter                *time.Time                     `json:"not_after,omitempty"`
 	AWSConfig               *komaws.EKSAuthConfig          `json:"aws_config,omitempty"` // AWS EKS配置信息
 	IsAWSEKS                bool                           `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
+
+	// kom 集群注册配置项
+	DBID     uint    `json:"id,omitempty"`        // 数据库ID
+	ProxyURL string  `json:"proxy_url,omitempty"` // HTTP 代理，例如 http://127.0.0.1:7890
+	Timeout  int     `json:"timeout,omitempty"`   // 请求超时时间，单位为秒，默认为 30 秒
+	QPS      float32 `json:"qps,omitempty"`       // 每秒查询数限制，默认为 200
+	Burst    int     `json:"burst,omitempty"`     // 突发请求数限制，默认为 2000
 }
 type ClusterConfigSource string
 
@@ -295,6 +302,9 @@ func (c *clusterService) Disconnect(clusterID string) {
 	if cc == nil {
 		return
 	}
+	if !c.IsConnected(clusterID) {
+		return
+	}
 	cc.ServerVersion = ""
 	cc.restConfig = nil
 	cc.Err = ""
@@ -495,6 +505,12 @@ func (c *clusterService) ScanClustersInDB() {
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
+						// 从数据库中读取 kom 配置项
+						ProxyURL: item.ProxyURL,
+						Timeout:  item.Timeout,
+						QPS:      item.QPS,
+						Burst:    item.Burst,
+						DBID:     item.ID,
 					}
 					if item.DisplayName != "" {
 						clusterConfig.FileName = item.DisplayName
@@ -609,8 +625,10 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
+		// 构建注册选项
+		opts := c.buildRegisterOptions(clusterConfig)
 		// 使用带 ID 的注册确保幂等
-		if _, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID); err != nil {
+		if _, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID, opts...); err != nil {
 			klog.V(4).Infof("注册 AWS 集群[%s]失败: %v", clusterID, err)
 			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 			clusterConfig.Err = err.Error()
@@ -641,7 +659,9 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 		}
 	} else {
 		// 集群外模式
-		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID)
+		// 构建注册选项
+		opts := c.buildRegisterOptions(clusterConfig)
+		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID, opts...)
 
 		if err != nil {
 			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
@@ -822,8 +842,10 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 		}
 		clusterID := clusterConfig.GetClusterID()
 
+		// 构建注册选项（使用默认值，因为此方法没有传入 kom 配置项）
+		opts := c.buildRegisterOptions(clusterConfig)
 		// 使用kom统一的AWS EKS集群注册方法
-		_, err = kom.Clusters().RegisterAWSClusterWithID(eksAuthConfig, clusterID)
+		_, err = kom.Clusters().RegisterAWSClusterWithID(eksAuthConfig, clusterID, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("注册AWS EKS集群失败: %w", err)
 		}
@@ -835,4 +857,111 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 	}
 
 	return clusterConfig, nil
+}
+
+// buildRegisterOptions 根据 ClusterConfig 构建 kom 注册选项
+func (c *clusterService) buildRegisterOptions(clusterConfig *ClusterConfig) []kom.RegisterOption {
+	klog.V(6).Infof("开始构建集群 %s 的注册选项配置", clusterConfig.ClusterID)
+	var opts []kom.RegisterOption
+
+	// 设置代理
+	if clusterConfig.ProxyURL != "" {
+		klog.V(6).Infof("设置集群 %s 代理URL: %s", clusterConfig.ClusterID, clusterConfig.ProxyURL)
+		opts = append(opts, kom.RegisterProxyURL(clusterConfig.ProxyURL))
+	} else {
+		klog.V(6).Infof("集群 %s 未设置代理URL", clusterConfig.ClusterID)
+	}
+
+	// 设置超时时间
+	if clusterConfig.Timeout > 0 {
+		klog.V(6).Infof("设置集群 %s 超时时间: %d 秒", clusterConfig.ClusterID, clusterConfig.Timeout)
+		opts = append(opts, kom.RegisterTimeout(time.Duration(clusterConfig.Timeout)*time.Second))
+	} else {
+		klog.V(6).Infof("集群 %s 使用默认超时时间", clusterConfig.ClusterID)
+	}
+
+	// 设置 QPS
+	if clusterConfig.QPS > 0 {
+		klog.V(6).Infof("设置集群 %s QPS 限制: %.2f", clusterConfig.ClusterID, clusterConfig.QPS)
+		opts = append(opts, kom.RegisterQPS(clusterConfig.QPS))
+	} else {
+		klog.V(6).Infof("集群 %s 使用默认 QPS 限制", clusterConfig.ClusterID)
+	}
+
+	// 设置 Burst
+	if clusterConfig.Burst > 0 {
+		klog.V(6).Infof("设置集群 %s Burst 限制: %d", clusterConfig.ClusterID, clusterConfig.Burst)
+		opts = append(opts, kom.RegisterBurst(clusterConfig.Burst))
+	} else {
+		klog.V(6).Infof("集群 %s 使用默认 Burst 限制", clusterConfig.ClusterID)
+	}
+
+	klog.V(6).Infof("集群 %s 注册选项配置完成，共配置 %d 个选项", clusterConfig.ClusterID, len(opts))
+	return opts
+}
+
+// UpdateClusterConfig 更新已加载集群的配置参数
+// @Description 根据数据库ID更新已加载集群的ProxyURL、Timeout、QPS、Burst配置，并重新注册已连接的集群
+// @Param dbID 数据库中的集群配置ID
+// @Param proxyURL HTTP代理URL
+// @Param timeout 请求超时时间（秒）
+// @Param qps 每秒查询数限制
+// @Param burst 突发请求数限制
+func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout int, qps float32, burst int) error {
+	klog.V(6).Infof("开始更新集群配置，数据库ID: %d", dbID)
+
+	// 查找对应的集群配置
+	var targetCluster *ClusterConfig
+	for _, cluster := range c.clusterConfigs {
+		if cluster.DBID == dbID {
+			targetCluster = cluster
+			break
+		}
+	}
+
+	if targetCluster == nil {
+		klog.V(4).Infof("未找到数据库ID为 %d 的集群配置", dbID)
+		return fmt.Errorf("未找到数据库ID为 %d 的集群配置", dbID)
+	}
+
+	klog.V(6).Infof("找到集群配置: %s [%s]", targetCluster.ClusterID, targetCluster.Server)
+
+	// 记录原始配置用于日志
+	oldProxyURL := targetCluster.ProxyURL
+	oldTimeout := targetCluster.Timeout
+	oldQPS := targetCluster.QPS
+	oldBurst := targetCluster.Burst
+
+	// 更新配置参数
+	targetCluster.ProxyURL = proxyURL
+	targetCluster.Timeout = timeout
+	targetCluster.QPS = qps
+	targetCluster.Burst = burst
+
+	klog.V(6).Infof("集群 %s 配置更新: ProxyURL [%s->%s], Timeout [%d->%d], QPS [%.2f->%.2f], Burst [%d->%d]",
+		targetCluster.ClusterID, oldProxyURL, proxyURL, oldTimeout, timeout, oldQPS, qps, oldBurst, burst)
+
+	// 如果集群已连接，需要重新注册以应用新配置
+	if targetCluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected {
+		klog.V(6).Infof("集群 %s 已连接，开始重新注册以应用新配置", targetCluster.ClusterID)
+
+		if c.IsConnected(targetCluster.ClusterID) {
+			// 先断开连接
+			c.Disconnect(targetCluster.ClusterID)
+			// 等待一小段时间确保断开完成
+			time.Sleep(100 * time.Millisecond)
+		}
+
+		// 重新连接，这会使用新的配置参数
+		go func() {
+			time.Sleep(200 * time.Millisecond) // 稍微延迟一下再重连
+			c.Connect(targetCluster.ClusterID)
+		}()
+
+		klog.V(4).Infof("集群 %s 配置更新完成，已启动重新连接", targetCluster.ClusterID)
+	} else {
+		klog.V(6).Infof("集群 %s 未连接，配置更新完成，下次连接时将使用新配置", targetCluster.ClusterID)
+	}
+
+	return nil
 }

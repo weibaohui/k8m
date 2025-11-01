@@ -1,11 +1,16 @@
 package cluster
 
 import (
+	"errors"
+
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
+	"gorm.io/gorm"
 )
 
 type Controller struct {
@@ -20,6 +25,8 @@ func RegisterAdminClusterRoutes(admin *gin.RouterGroup) {
 	admin.POST("/cluster/:cluster/disconnect", ctrl.Disconnect)
 	admin.POST("/cluster/aws/save", ctrl.SaveAWSEKSCluster)
 	admin.POST("/cluster/token/save", ctrl.SaveTokenCluster)
+	admin.GET("/cluster/config/:id", ctrl.GetClusterConfig)
+	admin.POST("/cluster/config/save", ctrl.SaveClusterConfig)
 }
 func RegisterUserClusterRoutes(mgm *gin.RouterGroup) {
 	ctrl := &Controller{}
@@ -102,4 +109,107 @@ func (a *Controller) Disconnect(c *gin.Context) {
 	}
 	service.ClusterService().Disconnect(clusterID)
 	amis.WriteJsonOKMsg(c, "已执行，请稍后刷新")
+}
+
+// GetClusterConfig 获取集群配置参数
+// @Summary 获取集群配置参数
+// @Description 根据集群ID获取kom相关配置参数
+// @Tags cluster
+// @Accept json
+// @Produce json
+// @Param id path string true "集群ID"
+// @Security BearerAuth
+// @Success 200 {object} models.KubeConfig
+// @Router /admin/cluster/config/{id} [get]
+func (a *Controller) GetClusterConfig(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		amis.WriteJsonError(c, errors.New("集群ID不能为空"))
+		return
+	}
+
+	params := dao.BuildParams(c)
+	kubeConfig := &models.KubeConfig{}
+
+	// 根据ID查询集群配置
+	config, err := kubeConfig.GetOne(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", id)
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 只返回配置相关的字段
+	configData := map[string]any{
+		"id":       config.ID,
+		"proxyURL": config.ProxyURL,
+		"timeout":  config.Timeout,
+		"qps":      config.QPS,
+		"burst":    config.Burst,
+	}
+
+	amis.WriteJsonData(c, configData)
+}
+
+// SaveClusterConfig 保存集群配置参数
+// @Summary 保存集群配置参数
+// @Description 保存集群的kom相关配置参数
+// @Tags cluster
+// @Accept json
+// @Produce json
+// @Param config body object true "集群配置参数"
+// @Security BearerAuth
+// @Success 200 {object} string
+// @Router /admin/cluster/config/save [post]
+func (a *Controller) SaveClusterConfig(c *gin.Context) {
+	var configData struct {
+		ID       uint    `json:"id" binding:"required"`
+		ProxyURL string  `json:"proxyURL"`
+		Timeout  int     `json:"timeout"`
+		QPS      float32 `json:"qps"`
+		Burst    int     `json:"burst"`
+	}
+
+	if err := c.ShouldBindJSON(&configData); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	params := dao.BuildParams(c)
+	kubeConfig := &models.KubeConfig{}
+
+	// 根据ID查询现有配置
+	config, err := kubeConfig.GetOne(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", configData.ID)
+	})
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 更新配置字段
+	config.ProxyURL = configData.ProxyURL
+	config.Timeout = configData.Timeout
+	config.QPS = configData.QPS
+	config.Burst = configData.Burst
+
+	// 保存更新
+	if err := config.Save(params); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	
+	// 更新已加载集群的配置参数
+	if err := service.ClusterService().UpdateClusterConfig(configData.ID, configData.ProxyURL, configData.Timeout, configData.QPS, configData.Burst); err != nil {
+		// 记录错误但不影响保存操作的成功响应
+		// 因为数据库已经保存成功，只是内存中的集群配置更新失败
+		// 下次重新扫描时会自动同步
+		// 这里可以考虑记录日志
+	}
+	
+	// 执行一下扫描
+	service.ClusterService().ScanClustersInDB()
+
+	amis.WriteJsonOKMsg(c, "配置保存成功")
 }
