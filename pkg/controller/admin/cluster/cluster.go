@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"errors"
+
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -129,7 +130,7 @@ func (a *Controller) GetClusterConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	kubeConfig := &models.KubeConfig{}
-	
+
 	// 根据ID查询集群配置
 	config, err := kubeConfig.GetOne(params, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", id)
@@ -138,9 +139,18 @@ func (a *Controller) GetClusterConfig(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
+	//对零值进行默认值填充
+	if config.Timeout == 0 {
+		config.Timeout = 30
+	}
+	if config.QPS == 0 {
+		config.QPS = 100
+	}
+	if config.Burst == 0 {
+		config.Burst = 200
+	}
 	// 只返回配置相关的字段
-	configData := map[string]interface{}{
+	configData := map[string]any{
 		"id":       config.ID,
 		"proxyURL": config.ProxyURL,
 		"timeout":  config.Timeout,
@@ -148,11 +158,7 @@ func (a *Controller) GetClusterConfig(c *gin.Context) {
 		"burst":    config.Burst,
 	}
 
-	c.JSON(200, gin.H{
-		"status": 0,
-		"msg":    "ok",
-		"data":   configData,
-	})
+	amis.WriteJsonData(c, configData)
 }
 
 // SaveClusterConfig 保存集群配置参数
@@ -181,7 +187,7 @@ func (a *Controller) SaveClusterConfig(c *gin.Context) {
 
 	params := dao.BuildParams(c)
 	kubeConfig := &models.KubeConfig{}
-	
+
 	// 根据ID查询现有配置
 	config, err := kubeConfig.GetOne(params, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", configData.ID)
