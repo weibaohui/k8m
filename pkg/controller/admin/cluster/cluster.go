@@ -139,16 +139,7 @@ func (a *Controller) GetClusterConfig(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	//对零值进行默认值填充
-	if config.Timeout == 0 {
-		config.Timeout = 30
-	}
-	if config.QPS == 0 {
-		config.QPS = 100
-	}
-	if config.Burst == 0 {
-		config.Burst = 200
-	}
+
 	// 只返回配置相关的字段
 	configData := map[string]any{
 		"id":       config.ID,
@@ -208,6 +199,17 @@ func (a *Controller) SaveClusterConfig(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	
+	// 更新已加载集群的配置参数
+	if err := service.ClusterService().UpdateClusterConfig(configData.ID, configData.ProxyURL, configData.Timeout, configData.QPS, configData.Burst); err != nil {
+		// 记录错误但不影响保存操作的成功响应
+		// 因为数据库已经保存成功，只是内存中的集群配置更新失败
+		// 下次重新扫描时会自动同步
+		// 这里可以考虑记录日志
+	}
+	
+	// 执行一下扫描
+	service.ClusterService().ScanClustersInDB()
 
 	amis.WriteJsonOKMsg(c, "配置保存成功")
 }

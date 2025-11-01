@@ -302,6 +302,9 @@ func (c *clusterService) Disconnect(clusterID string) {
 	if cc == nil {
 		return
 	}
+	if !c.IsConnected(clusterID) {
+		return
+	}
 	cc.ServerVersion = ""
 	cc.restConfig = nil
 	cc.Err = ""
@@ -895,4 +898,70 @@ func (c *clusterService) buildRegisterOptions(clusterConfig *ClusterConfig) []ko
 
 	klog.V(6).Infof("集群 %s 注册选项配置完成，共配置 %d 个选项", clusterConfig.ClusterID, len(opts))
 	return opts
+}
+
+// UpdateClusterConfig 更新已加载集群的配置参数
+// @Description 根据数据库ID更新已加载集群的ProxyURL、Timeout、QPS、Burst配置，并重新注册已连接的集群
+// @Param dbID 数据库中的集群配置ID
+// @Param proxyURL HTTP代理URL
+// @Param timeout 请求超时时间（秒）
+// @Param qps 每秒查询数限制
+// @Param burst 突发请求数限制
+func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout int, qps float32, burst int) error {
+	klog.V(6).Infof("开始更新集群配置，数据库ID: %d", dbID)
+
+	// 查找对应的集群配置
+	var targetCluster *ClusterConfig
+	for _, cluster := range c.clusterConfigs {
+		if cluster.DBID == dbID {
+			targetCluster = cluster
+			break
+		}
+	}
+
+	if targetCluster == nil {
+		klog.V(4).Infof("未找到数据库ID为 %d 的集群配置", dbID)
+		return fmt.Errorf("未找到数据库ID为 %d 的集群配置", dbID)
+	}
+
+	klog.V(6).Infof("找到集群配置: %s [%s]", targetCluster.ClusterID, targetCluster.Server)
+
+	// 记录原始配置用于日志
+	oldProxyURL := targetCluster.ProxyURL
+	oldTimeout := targetCluster.Timeout
+	oldQPS := targetCluster.QPS
+	oldBurst := targetCluster.Burst
+
+	// 更新配置参数
+	targetCluster.ProxyURL = proxyURL
+	targetCluster.Timeout = timeout
+	targetCluster.QPS = qps
+	targetCluster.Burst = burst
+
+	klog.V(6).Infof("集群 %s 配置更新: ProxyURL [%s->%s], Timeout [%d->%d], QPS [%.2f->%.2f], Burst [%d->%d]",
+		targetCluster.ClusterID, oldProxyURL, proxyURL, oldTimeout, timeout, oldQPS, qps, oldBurst, burst)
+
+	// 如果集群已连接，需要重新注册以应用新配置
+	if targetCluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected {
+		klog.V(6).Infof("集群 %s 已连接，开始重新注册以应用新配置", targetCluster.ClusterID)
+
+		if c.IsConnected(targetCluster.ClusterID) {
+			// 先断开连接
+			c.Disconnect(targetCluster.ClusterID)
+			// 等待一小段时间确保断开完成
+			time.Sleep(100 * time.Millisecond)
+		}
+
+		// 重新连接，这会使用新的配置参数
+		go func() {
+			time.Sleep(200 * time.Millisecond) // 稍微延迟一下再重连
+			c.Connect(targetCluster.ClusterID)
+		}()
+
+		klog.V(4).Infof("集群 %s 配置更新完成，已启动重新连接", targetCluster.ClusterID)
+	} else {
+		klog.V(6).Infof("集群 %s 未连接，配置更新完成，下次连接时将使用新配置", targetCluster.ClusterID)
+	}
+
+	return nil
 }
