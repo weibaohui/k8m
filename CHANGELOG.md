@@ -1,4 +1,13 @@
 ## 更新日志
+**v0.0.178**
+调整集群UI方法方式，可在同一个浏览器中，一个tab页一个集群同时操作了
+集群新增代理QPS等配置项
+lua 巡检集群设置执行超时时间，超时取消避免卡住全部巡检
+巡检webhook将Dingtalk消息格式从text改为markdown
+新增webhook发送历史记录
+重构定时任务管理并修复集群巡检逻辑
+升级cron机制，支持动态管理，包括调整cron表达式、启停等。
+新增Swagger开关，可动态开启与关闭。
 
 **v0.0.172**
 lua巡检脚本增加GetPodResourceUsage方法，可获取POD资源情况，包括limit request配置值以及实时值
