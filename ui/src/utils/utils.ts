@@ -160,10 +160,45 @@ export function getCurrentClusterId(): string {
 }
 
 /**
- * 设置当前选中的集群ID
+ * 设置当前选中的集群ID，并跳转到对应的集群页面，保持当前页面路径
  * @param {string} clusterId - 要设置的集群ID
  */
 export function setCurrentClusterId(clusterId: string): void {
+    localStorage.setItem('cluster', clusterId);
+    
+    // 将集群ID进行base64编码并跳转，保持当前页面路径
+    if (typeof window !== 'undefined' && clusterId) {
+        const clusterIdBase64 = toUrlSafeBase64(clusterId);
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+        
+        // 如果当前路径已经包含 /cluster/，则替换集群ID部分
+        if (currentPath.startsWith('/cluster/')) {
+            // 提取当前路径中集群ID后面的部分
+            const pathParts = currentPath.split('/');
+            if (pathParts.length > 2) {
+                // 重新构建路径：/cluster/新集群ID/原有路径
+                const remainingPath = pathParts.slice(3).join('/');
+                const newPath = `/cluster/${clusterIdBase64}/${remainingPath}`;
+                window.location.href = newPath + currentHash;
+            } else {
+                // 如果只有 /cluster/集群ID，则直接替换
+                window.location.href = `/cluster/${clusterIdBase64}${currentHash}`;
+            }
+        } else {
+            // 如果当前路径不包含集群信息，则跳转到集群首页
+            window.location.href = `/cluster/${clusterIdBase64}${currentHash}`;
+        }
+        
+        console.log("执行集群切换跳转，新集群ID:", clusterId);
+    }
+}
+
+/**
+ * 仅设置当前选中的集群ID，不进行页面跳转
+ * @param {string} clusterId - 要设置的集群ID
+ */
+export function setCurrentClusterIdOnly(clusterId: string): void {
     localStorage.setItem('cluster', clusterId);
 }
 
@@ -179,6 +214,7 @@ declare global {
     interface Window {
         getCurrentClusterId: typeof getCurrentClusterId;
         setCurrentClusterId: typeof setCurrentClusterId;
+        setCurrentClusterIdOnly: typeof setCurrentClusterIdOnly;
         clearCurrentClusterId: typeof clearCurrentClusterId;
     }
 }
@@ -186,5 +222,6 @@ declare global {
 if (typeof window !== 'undefined') {
     window.getCurrentClusterId = getCurrentClusterId;
     window.setCurrentClusterId = setCurrentClusterId;
+    window.setCurrentClusterIdOnly = setCurrentClusterIdOnly;
     window.clearCurrentClusterId = clearCurrentClusterId;
 }

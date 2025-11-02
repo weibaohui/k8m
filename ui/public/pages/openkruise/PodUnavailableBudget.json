@@ -254,10 +254,6 @@
                         {
                           "actionType": "custom",
                           "script": "window.setCurrentClusterId(event.data.value)"
-                        },
-                        {
-                          "actionType": "custom",
-                          "script": "window.location.reload();"
                         }
                       ]
                     }
