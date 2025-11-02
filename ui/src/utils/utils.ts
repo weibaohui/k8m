@@ -213,25 +213,17 @@ export function setCurrentClusterId(clusterId: string): void {
     }
 }
 
-
-/**
- * 清除当前集群ID
- */
-export function clearCurrentClusterId(): void {
-    localStorage.removeItem('cluster');
-}
+ 
 
 // 将方法暴露到window对象上，以便在脚本中使用
 declare global {
     interface Window {
         getCurrentClusterId: typeof getCurrentClusterId;
         setCurrentClusterId: typeof setCurrentClusterId;
-        clearCurrentClusterId: typeof clearCurrentClusterId;
     }
 }
 
 if (typeof window !== 'undefined') {
     window.getCurrentClusterId = getCurrentClusterId;
     window.setCurrentClusterId = setCurrentClusterId;
-    window.clearCurrentClusterId = clearCurrentClusterId;
 }
