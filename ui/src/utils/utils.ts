@@ -183,7 +183,6 @@ export function getCurrentClusterId(): string {
  * @param {string} clusterId - 要设置的集群ID
  */
 export function setCurrentClusterId(clusterId: string): void {
-    localStorage.setItem('cluster', clusterId);
     
     // 将集群ID进行base64编码并跳转，保持当前页面路径
     if (typeof window !== 'undefined' && clusterId) {
@@ -213,17 +212,58 @@ export function setCurrentClusterId(clusterId: string): void {
     }
 }
 
- 
+/**
+ * 获取当前选中的命名空间（按集群维度隔离）
+ * - 从 localStorage 读取 `selectedNS_${clusterId}`
+ * - 若未设置或无法读取则返回空字符串
+ * @param {string} [overrideClusterId] 可选，指定集群ID，默认读取当前URL中的集群ID
+ * @returns {string} 当前选中的命名空间
+ */
+export function getSelectedNS(overrideClusterId?: string): string {
+    const clusterId = (overrideClusterId && String(overrideClusterId)) || getCurrentClusterId();
+    if (!clusterId) return '';
+    const key = `selectedNS_${clusterId}`;
+    try {
+        const value = localStorage.getItem(key);
+        return value || '';
+    } catch (e) {
+        console.warn('无法读取选中的命名空间:', e);
+        return '';
+    }
+}
+
+/**
+ * 设置当前选中的命名空间（按集群维度隔离）
+ * - 将命名空间写入 localStorage 的 `selectedNS_${clusterId}` 键
+ * @param {string} ns 要设置的命名空间
+ * @param {string} [overrideClusterId] 可选，指定集群ID，默认读取当前URL中的集群ID
+ */
+export function setSelectedNS(ns: string, overrideClusterId?: string): void {
+    const clusterId = (overrideClusterId && String(overrideClusterId)) || getCurrentClusterId();
+    if (!clusterId) return;
+    const key = `selectedNS_${clusterId}`;
+    try {
+        localStorage.setItem(key, ns);
+    } catch (e) {
+        console.warn('无法保存选中的命名空间:', e);
+    }
+}
+
+
 
 // 将方法暴露到window对象上，以便在脚本中使用
 declare global {
     interface Window {
         getCurrentClusterId: typeof getCurrentClusterId;
         setCurrentClusterId: typeof setCurrentClusterId;
+        getSelectedNS: typeof getSelectedNS;
+        setSelectedNS: typeof setSelectedNS;
     }
 }
 
 if (typeof window !== 'undefined') {
     window.getCurrentClusterId = getCurrentClusterId;
     window.setCurrentClusterId = setCurrentClusterId;
+    window.getSelectedNS = getSelectedNS;
+    window.setSelectedNS = setSelectedNS;
 }
