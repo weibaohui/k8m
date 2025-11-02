@@ -26,11 +26,6 @@ export const useUserRole = () => {
                     const role = response.data.data as UserRoleResponse;
                     setUserRole(role.roles);
                     setMenuData(role.menu_data);
-
-                    const originCluster = getCurrentClusterId();
-                    if (originCluster === "" && role.cluster !== "") {
-                        setCurrentClusterId(role.cluster);
-                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch user role:', error);

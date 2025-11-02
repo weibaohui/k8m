@@ -45,10 +45,10 @@
             "method": "get",
             "url": "/k8s/ns/option_list",
             "data": {
-              "__cluster": "${cluster || ls:cluster}"
+              "__cluster": "${ ''|selectedCluster}"
             }
           },
-          "disabledOn": "!this.cluster && !ls:cluster"
+          "disabledOn": "!this.cluster && !''|selectedCluster"
         },
         {
           "type": "select",
@@ -61,10 +61,10 @@
             "method": "get",
             "url": "/k8s/node/name/option_list",
             "data": {
-              "__cluster": "${cluster || ls:cluster}"
+              "__cluster": "${ ''|selectedCluster}"
             }
           },
-          "disabledOn": "!this.cluster && !ls:cluster"
+          "disabledOn": "!this.cluster && !(''|selectedCluster)"
         },
         {
           "type": "select",
@@ -73,14 +73,14 @@
           "label": "Pod名称",
           "searchable": true,
           "clearable": true,
-          "visibleOn": "(this.namespace && (this.cluster || ls:cluster)) || (this.node_name && (this.cluster || ls:cluster))",
+          "visibleOn": "(this.namespace && (this.cluster || window.getCurrentClusterId)) || (this.node_name && (this.cluster || window.getCurrentClusterId))",
           "source": {
             "method": "get",
             "url": "/k8s/pod/name/option_list",
             "data": {
               "ns": "${namespace}",
               "node_name": "${node_name}",
-              "__cluster": "${cluster || ls:cluster}"
+              "__cluster": "${ ''|selectedCluster}"
             }
           }
         },
@@ -164,7 +164,7 @@
         "method": "get",
         "url": "/mgm/log/global/list",
         "data": {
-          "cluster": "${cluster || ls:cluster}",
+          "cluster": "${ ''|selectedCluster}",
           "namespace": "$namespace",
           "node_name": "$node_name",
           "pod_name": "$pod_name",

@@ -299,7 +299,7 @@ function buildDynamicCRDSchema(props: {
                                         id: 'cluster',
                                         searchable: true,
                                         source: '/params/cluster/option_list',
-                                        value: '${ls:cluster}',
+                                        value: "${''|selectedCluster}",
                                         onEvent: {
                                             change: {
                                                 actions: [
