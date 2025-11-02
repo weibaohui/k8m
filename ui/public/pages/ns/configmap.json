@@ -1,7 +1,7 @@
 {
   "type": "page",
   "data": {
-    "ns": "${ls:selectedNs||'default'}",
+    "ns": "${'default'|selectedNs}",
     "kind": "ConfigMap",
     "version": "v1",
     "group": ""
@@ -220,7 +220,7 @@
                   "searchable": true,
                   "checkAll": true,
                   "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
+                  "value": "${'default'|selectedNs}",
                   "onEvent": {
                     "change": {
                       "actions": [
@@ -233,7 +233,7 @@
                         },
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                          "script": "window.setSelectedNS(event.data.ns)"
                         }
                       ]
                     }
@@ -247,17 +247,13 @@
                   "id": "cluster",
                   "searchable": true,
                   "source": "/params/cluster/option_list",
-                  "value": "${ls:cluster}",
+                  "value": "${''|selectedCluster}",
                   "onEvent": {
                     "change": {
                       "actions": [
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('cluster', event.data.value)"
-                        },
-                        {
-                          "actionType": "custom",
-                          "script": "window.location.reload();"
+                          "script": "window.setCurrentClusterId(event.data.value)"
                         }
                       ]
                     }
@@ -321,7 +317,7 @@
                         "name": "metadata.namespace",
                         "source": "/k8s/ns/option_list",
                         "required": true,
-                        "value": "${ls:selectedNs||'default'}",
+                        "value": "${'default'|selectedNs}",
                         "description": "选择配置部署的命名空间"
                       },
                       {

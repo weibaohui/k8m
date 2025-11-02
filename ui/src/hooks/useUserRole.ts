@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
 import {fetcher} from '@/components/Amis/fetcher';
+import {getCurrentClusterId, setCurrentClusterId} from '@/utils/utils';
 
 import {MenuItem} from '@/types/menu';
 
@@ -25,11 +26,6 @@ export const useUserRole = () => {
                     const role = response.data.data as UserRoleResponse;
                     setUserRole(role.roles);
                     setMenuData(role.menu_data);
-
-                    const originCluster = localStorage.getItem('cluster') || '';
-                    if (originCluster === "" && role.cluster !== "") {
-                        localStorage.setItem('cluster', role.cluster);
-                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch user role:', error);

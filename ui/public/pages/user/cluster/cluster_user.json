@@ -66,11 +66,7 @@
                   "actions": [
                     {
                       "actionType": "custom",
-                      "script": "localStorage.setItem('cluster', event.data.cluster_id)"
-                    },
-                    {
-                      "actionType": "custom",
-                      "script": "window.location.reload();"
+                      "script": "window.setCurrentClusterId(event.data.cluster_id)"
                     }
                   ]
                 }
@@ -106,7 +102,7 @@
           "name": "current",
           "label": "是否当前集群",
           "type": "tpl",
-          "tpl": "<% if (localStorage.getItem('cluster') === data.cluster_id) { %><span class='label label-success'>当前集群</span><% if (data.clusterConnectStatus !== 'connected') { %> ⚠️ <% } %><% } %>"
+          "tpl": "<% if (window.getCurrentClusterId() === data.cluster_id) { %><span class='label label-success'>当前集群</span><% if (data.clusterConnectStatus !== 'connected') { %> ⚠️ <% } %><% } %>"
         },
         {
           "name": "clusterConnectStatus",

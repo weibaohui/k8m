@@ -16,5 +16,6 @@
 - [自定义菜单配置](custom-menu.md) - 如何为用户组配置自定义菜单，包括菜单编辑器的使用方法。
 - [变量配置选项说明](param-config.md) - 配置选项的说明。
 - [路由结构图](route_structure.md) - K8M系统的API路由结构图。
+ - [集群与命名空间切换说明](cluster-namespace.md) - 前端获取/设置集群与命名空间、AMIS 过滤器用法及示例。
 
   

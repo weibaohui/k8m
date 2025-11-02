@@ -1,6 +1,7 @@
 import {create} from 'zustand'
 import {Schema} from 'amis'
 import ajax from '@/utils/ajax'
+import {getCurrentClusterId, setCurrentClusterId} from '@/utils/utils'
 
 interface Store {
     schema: Schema
@@ -32,9 +33,9 @@ const useStore = create<Store>((set) => ({
 
                 // 如果链接中携带 cluster，则切换并刷新
                 if (linkCluster) {
-                    const originCluster = localStorage.getItem('cluster') || '';
+                    const originCluster = getCurrentClusterId();
                     if (originCluster !== linkCluster) {
-                        localStorage.setItem('cluster', linkCluster);
+                        setCurrentClusterId(linkCluster);
                         // 刷新后会重新构建页面
                         window.location.reload();
                         return;
@@ -274,7 +275,7 @@ function buildDynamicCRDSchema(props: {
             version,
             scope,
             // 初始 ns：URL 提供优先，否则沿用本地选择
-            ns: ns || "${ls:selectedNs||''}"
+            ns: ns || "${'default'|selectedNs}"
         },
         body: [
             {
@@ -298,11 +299,11 @@ function buildDynamicCRDSchema(props: {
                                         id: 'cluster',
                                         searchable: true,
                                         source: '/params/cluster/option_list',
-                                        value: '${ls:cluster}',
+                                        value: "${''|selectedCluster}",
                                         onEvent: {
                                             change: {
                                                 actions: [
-                                                    { actionType: 'custom', script: "localStorage.setItem('cluster', event.data.value)" },
+                                                    { actionType: 'custom', script: "window.setCurrentClusterId(event.data.value)" },
                                                     { actionType: 'custom', script: 'window.location.reload();' }
                                                 ]
                                             }

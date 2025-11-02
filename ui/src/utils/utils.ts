@@ -101,7 +101,7 @@ export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string):
     }
 
     // 选择覆盖的 cluster，否则使用本地已选 cluster
-    const originCluster = (overrideCluster && String(overrideCluster)) || localStorage.getItem('cluster') || '';
+    const originCluster = (overrideCluster && String(overrideCluster)) || getCurrentClusterId();
     const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
     // 未选择集群时，不插入 cluster 段，避免生成 /k8s/cluster//...
     if (!cluster) {
@@ -149,4 +149,121 @@ export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T
         return defaultValue as T;
     }
     return result;
+}
+
+/**
+ * 获取当前选中的集群ID，从URL路径中提取并解码
+ * @returns {string} 当前集群ID，如果未选择则返回空字符串
+ */
+export function getCurrentClusterId(): string {
+    if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        
+        // 检查路径是否以 /cluster/ 开头
+        if (currentPath.startsWith('/cluster/')) {
+            const pathParts = currentPath.split('/');
+            if (pathParts.length >= 3 && pathParts[2]) {
+                // 提取base64编码的集群ID并解码
+                const clusterIdBase64 = pathParts[2];
+                try {
+                    return fromUrlSafeBase64(clusterIdBase64);
+                } catch (error) {
+                    console.warn('无法解码集群ID:', clusterIdBase64, error);
+                    return '';
+                }
+            }
+        }
+    }
+    
+    return  '';
+}
+
+/**
+ * 设置当前选中的集群ID，并跳转到对应的集群页面，保持当前页面路径
+ * @param {string} clusterId - 要设置的集群ID
+ */
+export function setCurrentClusterId(clusterId: string): void {
+    
+    // 将集群ID进行base64编码并跳转，保持当前页面路径
+    if (typeof window !== 'undefined' && clusterId) {
+        const clusterIdBase64 = toUrlSafeBase64(clusterId);
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+        
+        // 如果当前路径已经包含 /cluster/，则替换集群ID部分
+        if (currentPath.startsWith('/cluster/')) {
+            // 提取当前路径中集群ID后面的部分
+            const pathParts = currentPath.split('/');
+            if (pathParts.length > 2) {
+                // 重新构建路径：/cluster/新集群ID/原有路径
+                const remainingPath = pathParts.slice(3).join('/');
+                const newPath = `/cluster/${clusterIdBase64}/${remainingPath}`;
+                window.location.href = newPath + currentHash;
+            } else {
+                // 如果只有 /cluster/集群ID，则直接替换
+                window.location.href = `/cluster/${clusterIdBase64}${currentHash}`;
+            }
+        } else {
+            // 如果当前路径不包含集群信息，则跳转到集群首页
+            window.location.href = `/cluster/${clusterIdBase64}${currentHash}`;
+        }
+        
+        console.log("执行集群切换跳转，新集群ID:", clusterId);
+    }
+}
+
+/**
+ * 获取当前选中的命名空间（按集群维度隔离）
+ * - 从 localStorage 读取 `selectedNS_${clusterId}`
+ * - 若未设置或无法读取则返回空字符串
+ * @param {string} [overrideClusterId] 可选，指定集群ID，默认读取当前URL中的集群ID
+ * @returns {string} 当前选中的命名空间
+ */
+export function getSelectedNS(overrideClusterId?: string): string {
+    const clusterId = (overrideClusterId && String(overrideClusterId)) || getCurrentClusterId();
+    if (!clusterId) return '';
+    const key = `selectedNS_${clusterId}`;
+    try {
+        const value = localStorage.getItem(key);
+        return value || '';
+    } catch (e) {
+        console.warn('无法读取选中的命名空间:', e);
+        return '';
+    }
+}
+
+/**
+ * 设置当前选中的命名空间（按集群维度隔离）
+ * - 将命名空间写入 localStorage 的 `selectedNS_${clusterId}` 键
+ * @param {string} ns 要设置的命名空间
+ * @param {string} [overrideClusterId] 可选，指定集群ID，默认读取当前URL中的集群ID
+ */
+export function setSelectedNS(ns: string, overrideClusterId?: string): void {
+    const clusterId = (overrideClusterId && String(overrideClusterId)) || getCurrentClusterId();
+    if (!clusterId) return;
+    const key = `selectedNS_${clusterId}`;
+    try {
+        localStorage.setItem(key, ns);
+    } catch (e) {
+        console.warn('无法保存选中的命名空间:', e);
+    }
+}
+
+
+
+// 将方法暴露到window对象上，以便在脚本中使用
+declare global {
+    interface Window {
+        getCurrentClusterId: typeof getCurrentClusterId;
+        setCurrentClusterId: typeof setCurrentClusterId;
+        getSelectedNS: typeof getSelectedNS;
+        setSelectedNS: typeof setSelectedNS;
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.getCurrentClusterId = getCurrentClusterId;
+    window.setCurrentClusterId = setCurrentClusterId;
+    window.getSelectedNS = getSelectedNS;
+    window.setSelectedNS = setSelectedNS;
 }

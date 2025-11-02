@@ -1,7 +1,7 @@
 {
   "type": "page",
   "data": {
-    "ns": "${ls:selectedNs||'default'}",
+    "ns": "${'default'|selectedNs}",
     "kind": "Deployment",
     "group": "apps",
     "version": "v1"
@@ -240,7 +240,7 @@
                   "searchable": true,
                   "checkAll": true,
                   "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
+                  "value": "${'default'|selectedNs}",
                   "onEvent": {
                     "change": {
                       "actions": [
@@ -253,7 +253,7 @@
                         },
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                          "script": "window.setSelectedNS(event.data.ns)"
                         }
                       ]
                     }
@@ -267,17 +267,13 @@
                   "id": "cluster",
                   "searchable": true,
                   "source": "/params/cluster/option_list",
-                  "value": "${ls:cluster}",
+                  "value": "${''|selectedCluster}",
                   "onEvent": {
                     "change": {
                       "actions": [
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('cluster', event.data.value)"
-                        },
-                        {
-                          "actionType": "custom",
-                          "script": "window.location.reload();"
+                          "script": "window.setCurrentClusterId(event.data.value)"
                         }
                       ]
                     }
@@ -342,7 +338,7 @@
                         "source": "/k8s/ns/option_list",
                         "multiple": false,
                         "required": true,
-                        "value": "${ls:selectedNs||'default'}",
+                        "value": "${'default'|selectedNs}",
                         "description": "选择deployment部署的命名空间",
                         "validations": {
                           "maxLength": 63,

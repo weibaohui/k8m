@@ -211,17 +211,13 @@
                   "id": "cluster",
                   "searchable": true,
                   "source": "/params/cluster/option_list",
-                  "value": "${ls:cluster}",
+                  "value": "${''|selectedCluster}",
                   "onEvent": {
                     "change": {
                       "actions": [
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('cluster', event.data.value)"
-                        },
-                        {
-                          "actionType": "custom",
-                          "script": "window.location.reload();"
+                          "script": "window.setCurrentClusterId(event.data.value)"
                         }
                       ]
                     }

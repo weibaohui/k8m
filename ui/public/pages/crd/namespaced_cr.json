@@ -214,7 +214,7 @@
                   "searchable": true,
                   "checkAll": true,
                   "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
+                  "value": "${'default'|selectedNs}",
                   "onEvent": {
                     "change": {
                       "actions": [
@@ -227,7 +227,7 @@
                         },
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                          "script": "window.setSelectedNS(event.data.ns)"
                         }
                       ]
                     }
@@ -241,17 +241,13 @@
                   "id": "cluster",
                   "searchable": true,
                   "source": "/params/cluster/option_list",
-                  "value": "${ls:cluster}",
+                  "value": "${''|selectedCluster}",
                   "onEvent": {
                     "change": {
                       "actions": [
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('cluster', event.data.value)"
-                        },
-                        {
-                          "actionType": "custom",
-                          "script": "window.location.reload();"
+                          "script": "window.setCurrentClusterId(event.data.value)"
                         }
                       ]
                     }
@@ -341,7 +337,7 @@
         }
       ],
       "data": {
-        "ns": "${ls:selectedNs||'default'}",
+        "ns": "${'default'|selectedNs}",
         "kind": "${kind}",
         "group": "${group}",
         "version": "${version}"
