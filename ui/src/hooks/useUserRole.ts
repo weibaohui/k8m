@@ -1,6 +1,5 @@
 import {useState, useEffect} from 'react';
 import {fetcher} from '@/components/Amis/fetcher';
-import {getCurrentClusterId, setCurrentClusterId} from '@/utils/utils';
 
 import {MenuItem} from '@/types/menu';
 
