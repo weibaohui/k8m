@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
 import {fetcher} from '@/components/Amis/fetcher';
+import {getCurrentClusterId, setCurrentClusterId} from '@/utils/utils';
 
 import {MenuItem} from '@/types/menu';
 
@@ -26,9 +27,9 @@ export const useUserRole = () => {
                     setUserRole(role.roles);
                     setMenuData(role.menu_data);
 
-                    const originCluster = localStorage.getItem('cluster') || '';
+                    const originCluster = getCurrentClusterId();
                     if (originCluster === "" && role.cluster !== "") {
-                        localStorage.setItem('cluster', role.cluster);
+                        setCurrentClusterId(role.cluster);
                     }
                 }
             } catch (error) {

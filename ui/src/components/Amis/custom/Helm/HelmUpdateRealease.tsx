@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Col, Form, Row, Typography, message } from 'antd';
 import Editor from '@monaco-editor/react';
 import { fetcher } from '@/components/Amis/fetcher';
+import { getCurrentClusterId } from '@/utils/utils';
 
 interface HelmUpdateReleaseProps {
     data: Record<string, any>
@@ -13,7 +14,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
     const [clusterInfo, setClusterInfo] = useState('');
 
     useEffect(() => {
-        const originCluster = localStorage.getItem('cluster') || '';
+        const originCluster = getCurrentClusterId();
         setClusterInfo(originCluster ? originCluster : '未选择集群');
     }, []);
 

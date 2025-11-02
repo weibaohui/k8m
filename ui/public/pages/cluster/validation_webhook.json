@@ -246,7 +246,7 @@
                       "actions": [
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('cluster', event.data.value)"
+                          "script": "window.setCurrentClusterId(event.data.value)"
                         },
                         {
                           "actionType": "custom",

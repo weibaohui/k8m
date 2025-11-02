@@ -101,7 +101,7 @@ export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string):
     }
 
     // 选择覆盖的 cluster，否则使用本地已选 cluster
-    const originCluster = (overrideCluster && String(overrideCluster)) || localStorage.getItem('cluster') || '';
+    const originCluster = (overrideCluster && String(overrideCluster)) || getCurrentClusterId();
     const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
     // 未选择集群时，不插入 cluster 段，避免生成 /k8s/cluster//...
     if (!cluster) {
@@ -149,4 +149,42 @@ export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T
         return defaultValue as T;
     }
     return result;
+}
+
+/**
+ * 获取当前选中的集群ID
+ * @returns {string} 当前集群ID，如果未选择则返回空字符串
+ */
+export function getCurrentClusterId(): string {
+    return localStorage.getItem('cluster') || '';
+}
+
+/**
+ * 设置当前选中的集群ID
+ * @param {string} clusterId - 要设置的集群ID
+ */
+export function setCurrentClusterId(clusterId: string): void {
+    localStorage.setItem('cluster', clusterId);
+}
+
+/**
+ * 清除当前集群ID
+ */
+export function clearCurrentClusterId(): void {
+    localStorage.removeItem('cluster');
+}
+
+// 将方法暴露到window对象上，以便在脚本中使用
+declare global {
+    interface Window {
+        getCurrentClusterId: typeof getCurrentClusterId;
+        setCurrentClusterId: typeof setCurrentClusterId;
+        clearCurrentClusterId: typeof clearCurrentClusterId;
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.getCurrentClusterId = getCurrentClusterId;
+    window.setCurrentClusterId = setCurrentClusterId;
+    window.clearCurrentClusterId = clearCurrentClusterId;
 }
