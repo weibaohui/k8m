@@ -1,7 +1,7 @@
 {
   "type": "page",
   "data": {
-    "ns": "${ls:selectedNs||'default'}",
+    "ns": "${'default'|selectedNs}",
     "kind": "Pod",
     "group": "",
     "version": "v1"
