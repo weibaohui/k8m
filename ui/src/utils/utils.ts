@@ -152,11 +152,30 @@ export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T
 }
 
 /**
- * 获取当前选中的集群ID
+ * 获取当前选中的集群ID，从URL路径中提取并解码
  * @returns {string} 当前集群ID，如果未选择则返回空字符串
  */
 export function getCurrentClusterId(): string {
-    return localStorage.getItem('cluster') || '';
+    if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        
+        // 检查路径是否以 /cluster/ 开头
+        if (currentPath.startsWith('/cluster/')) {
+            const pathParts = currentPath.split('/');
+            if (pathParts.length >= 3 && pathParts[2]) {
+                // 提取base64编码的集群ID并解码
+                const clusterIdBase64 = pathParts[2];
+                try {
+                    return fromUrlSafeBase64(clusterIdBase64);
+                } catch (error) {
+                    console.warn('无法解码集群ID:', clusterIdBase64, error);
+                    return '';
+                }
+            }
+        }
+    }
+    
+    return  '';
 }
 
 /**
@@ -194,13 +213,6 @@ export function setCurrentClusterId(clusterId: string): void {
     }
 }
 
-/**
- * 仅设置当前选中的集群ID，不进行页面跳转
- * @param {string} clusterId - 要设置的集群ID
- */
-export function setCurrentClusterIdOnly(clusterId: string): void {
-    localStorage.setItem('cluster', clusterId);
-}
 
 /**
  * 清除当前集群ID
@@ -214,7 +226,6 @@ declare global {
     interface Window {
         getCurrentClusterId: typeof getCurrentClusterId;
         setCurrentClusterId: typeof setCurrentClusterId;
-        setCurrentClusterIdOnly: typeof setCurrentClusterIdOnly;
         clearCurrentClusterId: typeof clearCurrentClusterId;
     }
 }
@@ -222,6 +233,5 @@ declare global {
 if (typeof window !== 'undefined') {
     window.getCurrentClusterId = getCurrentClusterId;
     window.setCurrentClusterId = setCurrentClusterId;
-    window.setCurrentClusterIdOnly = setCurrentClusterIdOnly;
     window.clearCurrentClusterId = clearCurrentClusterId;
 }
