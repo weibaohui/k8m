@@ -1,7 +1,7 @@
 {
   "type": "page",
   "data": {
-    "ns": "${ls:selectedNs||'default'}",
+    "ns": "${'default'|selectedNs}",
     "kind": "ReplicationController",
     "group": "",
     "version": "v1"
@@ -233,7 +233,7 @@
                         },
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                          "script": "window.setSelectedNS(event.data.ns)"
                         }
                       ]
                     }

@@ -31,28 +31,35 @@
                 {
                   "actionType": "setValue",
                   "componentId": "group_selector",
-                  "data": { "value": "" }
+                  "data": {
+                    "value": ""
+                  }
                 },
                 {
                   "actionType": "setValue",
-                  "componentId": "kind_selector", 
-                  "data": { "value": "" }
+                  "componentId": "kind_selector",
+                  "data": {
+                    "value": ""
+                  }
                 },
                 {
                   "actionType": "setValue",
                   "componentId": "version_selector",
-                  "data": { "value": "" }
+                  "data": {
+                    "value": ""
+                  }
                 },
                 {
                   "actionType": "setValue",
                   "componentId": "scope_selector",
-                  "data": { "value": "Namespaced" }
+                  "data": {
+                    "value": "Namespaced"
+                  }
                 }
               ]
             }
           }
         },
-        
         {
           "type": "divider",
           "title": "手动填写 G/V/K 信息",
@@ -68,7 +75,9 @@
           "source": {
             "method": "get",
             "url": "/k8s/crd/group/option_list",
-            "headers": { "x-k8m-target-cluster": "${target_cluster}" }
+            "headers": {
+              "x-k8m-target-cluster": "${target_cluster}"
+            }
           },
           "required": true,
           "disabledOn": "${!target_cluster}",
@@ -85,7 +94,9 @@
           "source": {
             "method": "get",
             "url": "/k8s/crd/kind/option_list?spec.group=${group}",
-            "headers": { "x-k8m-target-cluster": "${target_cluster}" }
+            "headers": {
+              "x-k8m-target-cluster": "${target_cluster}"
+            }
           },
           "disabledOn": "${!target_cluster || !group}",
           "placeholder": "请先选择集群和Group"
@@ -101,8 +112,13 @@
           "source": {
             "method": "post",
             "url": "/k8s/CustomResourceDefinition/group/apiextensions.k8s.io/version/v1/list",
-            "headers": { "x-k8m-target-cluster": "${target_cluster}" },
-            "data": { "spec.group": "${group}", "spec.names.kind": "${kind}" },
+            "headers": {
+              "x-k8m-target-cluster": "${target_cluster}"
+            },
+            "data": {
+              "spec.group": "${group}",
+              "spec.names.kind": "${kind}"
+            },
             "adaptor": "const rows = payload?.data?.rows || []; let versions = []; if (rows.length>0) { const vs = rows[0]?.spec?.versions || []; versions = vs.map(v=>({label: v.name, value: v.name}))} return { status: payload.status, msg: payload.msg, data: { options: versions } }"
           },
           "disabledOn": "${!target_cluster || !group || !kind}",
@@ -114,8 +130,14 @@
           "id": "scope_selector",
           "label": "作用域",
           "options": [
-            { "label": "命名空间 Namespaced", "value": "Namespaced" },
-            { "label": "集群 Cluster", "value": "Cluster" }
+            {
+              "label": "命名空间 Namespaced",
+              "value": "Namespaced"
+            },
+            {
+              "label": "集群 Cluster",
+              "value": "Cluster"
+            }
           ],
           "value": "Namespaced"
         },
@@ -129,12 +151,21 @@
           "searchable": true,
           "checkAll": true,
           "clearable": true,
-          "source": { "method": "get", "url": "/k8s/ns/option_list", "headers": { "x-k8m-target-cluster": "${target_cluster}" } },
+          "source": {
+            "method": "get",
+            "url": "/k8s/ns/option_list",
+            "headers": {
+              "x-k8m-target-cluster": "${target_cluster}"
+            }
+          },
           "value": "${ls:selectedNs||'default'}",
           "onEvent": {
             "change": {
               "actions": [
-                { "actionType": "custom", "script": "localStorage.setItem('selectedNs', event.data.ns)" }
+                {
+                  "actionType": "custom",
+                  "script": "window.setSelectedNS(event.data.ns)"
+                }
               ]
             }
           }
@@ -151,8 +182,14 @@
           "name": "mode",
           "label": "列合并模式",
           "options": [
-            { "label": "追加 append", "value": "append" },
-            { "label": "替换 replace", "value": "replace" }
+            {
+              "label": "追加 append",
+              "value": "append"
+            },
+            {
+              "label": "替换 replace",
+              "value": "replace"
+            }
           ],
           "value": "append"
         },

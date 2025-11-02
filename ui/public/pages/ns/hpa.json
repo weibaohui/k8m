@@ -1,7 +1,7 @@
 {
   "type": "page",
   "data": {
-    "ns": "${ls:selectedNs||'default'}",
+    "ns": "${'default'|selectedNs}",
     "kind": "HorizontalPodAutoscaler",
     "group": "autoscaling",
     "version": "v2"
@@ -253,7 +253,7 @@
                         },
                         {
                           "actionType": "custom",
-                          "script": "localStorage.setItem('selectedNs', event.data.ns)"
+                          "script": "window.setSelectedNS(event.data.ns)"
                         }
                       ]
                     }
