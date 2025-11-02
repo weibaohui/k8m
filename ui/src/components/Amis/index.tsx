@@ -12,6 +12,7 @@ import FormatBytes from "@/components/Amis/custom/FormatBytes.ts";
 import FormatLsShortDate from "@/components/Amis/custom/FormatLsShortDate.ts";
 import K8sDate from '@/components/Amis/custom/K8sDate.ts';
 import SelectedNs from "@/components/Amis/custom/SelectedNs.ts";
+import SelectedCluster from "@/components/Amis/custom/SelectedCluster.ts";
 import XTermComponent from "@/components/Amis/custom/XTerm.tsx";
 import K8sAgeComponent from "@/components/Amis/custom/K8sAge.tsx";
 import K8sPodReadyComponent from "@/components/Amis/custom/K8sPodReady.tsx";
@@ -104,6 +105,7 @@ registerFilter("formatBytes", FormatBytes)
 registerFilter("formatLsShortDate", FormatLsShortDate)
 registerFilter("k8sDate", K8sDate)
 registerFilter("selectedNs", SelectedNs)
+registerFilter("selectedCluster", SelectedCluster)
 
 interface Props {
     schema: Schema

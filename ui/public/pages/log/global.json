@@ -18,7 +18,7 @@
           "searchable": true,
           "clearable": true,
           "required": false,
-          "value": "${ls:cluster}",
+          "value": "${''|selectedCluster}",
           "onEvent": {
             "change": {
               "actions": [
@@ -44,7 +44,9 @@
           "source": {
             "method": "get",
             "url": "/k8s/ns/option_list",
-            "data": { "__cluster": "${cluster || ls:cluster}" }
+            "data": {
+              "__cluster": "${cluster || ls:cluster}"
+            }
           },
           "disabledOn": "!this.cluster && !ls:cluster"
         },
@@ -58,7 +60,9 @@
           "source": {
             "method": "get",
             "url": "/k8s/node/name/option_list",
-            "data": { "__cluster": "${cluster || ls:cluster}" }
+            "data": {
+              "__cluster": "${cluster || ls:cluster}"
+            }
           },
           "disabledOn": "!this.cluster && !ls:cluster"
         },
@@ -87,10 +91,22 @@
           "placeholder": "选择级别",
           "clearable": true,
           "options": [
-            { "label": "DEBUG", "value": "DEBUG" },
-            { "label": "INFO", "value": "INFO" },
-            { "label": "WARN", "value": "WARN" },
-            { "label": "ERROR", "value": "ERROR" }
+            {
+              "label": "DEBUG",
+              "value": "DEBUG"
+            },
+            {
+              "label": "INFO",
+              "value": "INFO"
+            },
+            {
+              "label": "WARN",
+              "value": "WARN"
+            },
+            {
+              "label": "ERROR",
+              "value": "ERROR"
+            }
           ]
         },
         {
@@ -100,9 +116,18 @@
           "placeholder": "选择来源",
           "clearable": true,
           "options": [
-            { "label": "Pod容器", "value": "pod" },
-            { "label": "系统节点", "value": "node" },
-            { "label": "K8s组件", "value": "system" }
+            {
+              "label": "Pod容器",
+              "value": "pod"
+            },
+            {
+              "label": "系统节点",
+              "value": "node"
+            },
+            {
+              "label": "K8s组件",
+              "value": "system"
+            }
           ]
         },
         {
@@ -128,7 +153,9 @@
         }
       ]
     },
-    { "type": "divider" },
+    {
+      "type": "divider"
+    },
     {
       "type": "crud",
       "name": "globalLogTable",
@@ -167,8 +194,14 @@
         "reload"
       ],
       "footerToolbar": [
-        { "type": "pagination", "align": "right" },
-        { "type": "switch-per-page", "align": "right" }
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
       ],
       "perPage": 50,
       "columns": [
@@ -186,17 +219,42 @@
           "type": "text",
           "width": 100
         },
-        { "name": "log_level", "label": "级别", "type": "text", "width": 80 },
-        { "name": "source", "label": "来源", "type": "text", "width": 80 },
+        {
+          "name": "log_level",
+          "label": "级别",
+          "type": "text",
+          "width": 80
+        },
+        {
+          "name": "source",
+          "label": "来源",
+          "type": "text",
+          "width": 80
+        },
         {
           "name": "namespace",
           "label": "命名空间",
           "type": "text",
           "width": 120
         },
-        { "name": "node_name", "label": "节点", "type": "text", "width": 120 },
-        { "name": "pod_name", "label": "Pod", "type": "text", "width": 140 },
-        { "name": "container", "label": "容器", "type": "text", "width": 120 },
+        {
+          "name": "node_name",
+          "label": "节点",
+          "type": "text",
+          "width": 120
+        },
+        {
+          "name": "pod_name",
+          "label": "Pod",
+          "type": "text",
+          "width": 140
+        },
+        {
+          "name": "container",
+          "label": "容器",
+          "type": "text",
+          "width": 120
+        },
         {
           "name": "message",
           "label": "日志内容",

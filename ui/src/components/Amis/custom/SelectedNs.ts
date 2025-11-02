@@ -13,7 +13,6 @@ import { getSelectedNS } from "@/utils/utils.ts";
  */
 const SelectedNs = (fallback?: unknown): string => {
     try {
-        console.log('selectedNs fallback:', fallback);
         // 按集群维度读取命名空间，来源于 utils.getSelectedNS
         const raw = (typeof window !== 'undefined') ? getSelectedNS() : '';
         const ns = (raw ?? '').trim();
