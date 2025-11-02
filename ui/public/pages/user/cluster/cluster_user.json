@@ -75,6 +75,21 @@
                   ]
                 }
               }
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-external-link-alt text-success",
+              "label": "跳转",
+              "onEvent": {
+                "click": {
+                  "actions": [
+                    {
+                      "actionType": "custom",
+                      "script": "window.location.href = '/cluster/' + event.data.cluster_id_base64;"
+                    }
+                  ]
+                }
+              }
             }
           ],
           "toggled": true
