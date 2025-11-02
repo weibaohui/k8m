@@ -240,7 +240,7 @@
                   "searchable": true,
                   "checkAll": true,
                   "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
+                  "value": "${'default'|selectedNs}",
                   "onEvent": {
                     "change": {
                       "actions": [
@@ -374,7 +374,7 @@
                     "align": "right"
                   }
                 ],
-                "api": "get:/k8s/pod/top/ns/${ls:selectedNs||'default'}/list",
+                "api": "get:/k8s/pod/top/ns/${'default'|selectedNs}/list",
                 "columns": [
                   {
                     "name": "namespace",

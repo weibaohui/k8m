@@ -240,7 +240,7 @@
                   "searchable": true,
                   "checkAll": true,
                   "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
+                  "value": "${'default'|selectedNs}",
                   "onEvent": {
                     "change": {
                       "actions": [

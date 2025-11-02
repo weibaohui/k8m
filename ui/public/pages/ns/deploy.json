@@ -240,7 +240,7 @@
                   "searchable": true,
                   "checkAll": true,
                   "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
+                  "value": "${'default'|selectedNs}",
                   "onEvent": {
                     "change": {
                       "actions": [
@@ -338,7 +338,7 @@
                         "source": "/k8s/ns/option_list",
                         "multiple": false,
                         "required": true,
-                        "value": "${ls:selectedNs||'default'}",
+                        "value": "${'default'|selectedNs}",
                         "description": "选择deployment部署的命名空间",
                         "validations": {
                           "maxLength": 63,

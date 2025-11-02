@@ -275,7 +275,7 @@ function buildDynamicCRDSchema(props: {
             version,
             scope,
             // 初始 ns：URL 提供优先，否则沿用本地选择
-            ns: ns || "${ls:selectedNs||''}"
+            ns: ns || "${'default'|selectedNs}"
         },
         body: [
             {

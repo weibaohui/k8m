@@ -240,7 +240,7 @@
                   "searchable": true,
                   "checkAll": true,
                   "source": "/k8s/ns/option_list",
-                  "value": "${ls:selectedNs||'default'}",
+                  "value": "${'default'|selectedNs}",
                   "onEvent": {
                     "change": {
                       "actions": [
@@ -337,7 +337,7 @@
                         "name": "metadata.namespace",
                         "source": "/k8s/ns/option_list",
                         "required": true,
-                        "value": "${ls:selectedNs||'default'}",
+                        "value": "${'default'|selectedNs}",
                         "description": "选择服务部署的命名空间"
                       },
                       {

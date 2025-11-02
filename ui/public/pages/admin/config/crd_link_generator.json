@@ -158,7 +158,7 @@
               "x-k8m-target-cluster": "${target_cluster}"
             }
           },
-          "value": "${ls:selectedNs||'default'}",
+          "value": "${'default'|selectedNs}",
           "onEvent": {
             "change": {
               "actions": [
