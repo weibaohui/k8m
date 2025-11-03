@@ -193,7 +193,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "/#/apply/apply?kind=${kind}"
+          "url": "#/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -550,7 +550,7 @@
                   "icon": "fas fa-list text-primary",
                   "body": "实例列表",
                   "blank": true,
-                  "href": "/#/crd/namespaced_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "href": "#/crd/namespaced_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
                   "visibleOn": "spec.scope=='Namespaced'"
                 },
                 {
@@ -558,7 +558,7 @@
                   "icon": "fas fa-list text-primary",
                   "body": "实例列表",
                   "blank": true,
-                  "href": "/#/crd/cluster_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "href": "#/crd/cluster_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
                   "visibleOn": "spec.scope=='Cluster'"
                 }
               ]

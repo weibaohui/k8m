@@ -193,7 +193,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "/#/apply/apply?kind=${kind}"
+          "url": "#/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -579,7 +579,7 @@
               "type": "link",
               "body": "${metadata.annotations['ingress.count']||'-'}",
               "blank": false,
-              "href": "/#/ns/ing?spec[ingressClassName]=${metadata.name}"
+              "href": "#/ns/ing?spec[ingressClassName]=${metadata.name}"
             }
           ]
         },

@@ -193,7 +193,7 @@
                     "level": "link",
                     "actionType": "url",
                     "blank": true,
-                    "url": "/#/apply/apply?kind=${kind}"
+                    "url": "#/apply/apply?kind=${kind}"
                 }
             ]
         },
@@ -568,7 +568,7 @@
                             "type": "link",
                             "body": "${metadata.annotations['gateway.count']||'-'}",
                             "blank": false,
-                            "href": "/#/ns/gateway?spec[gatewayClassName]=${metadata.name}"
+                            "href": "#/ns/gateway?spec[gatewayClassName]=${metadata.name}"
                         }
                     ]
                 },

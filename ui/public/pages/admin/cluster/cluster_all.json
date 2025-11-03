@@ -1079,7 +1079,7 @@
                   "label": "kubectl终端",
                   "icon": "fas fa-terminal  text-primary",
                   "actionType": "url",
-                  "url": "/#/NodeExec?type=KubectlShell&&clusterID=${cluster_id_base64}",
+                  "url": "#/NodeExec?type=KubectlShell&&clusterID=${cluster_id_base64}",
                   "blank": true
                 },
                 {
@@ -1088,7 +1088,7 @@
                   "icon": "fas fa-file-code text-primary",
                   "actionType": "url",
                   "blank": false,
-                  "url": "/#/log/shell?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
+                  "url": "#/log/shell?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
                 },
                 {
                   "type": "button",
@@ -1096,7 +1096,7 @@
                   "icon": "fas fa-history  text-primary",
                   "actionType": "url",
                   "blank": false,
-                  "url": "/#/log/operation?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
+                  "url": "#/log/operation?cluster=${source === 'InCluster' ? 'InCluster' : `${fileName}/${contextName}`}"
                 },
                 {
                   "type": "button",

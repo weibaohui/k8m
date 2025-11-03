@@ -194,7 +194,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "/#/apply/apply?kind=${kind}"
+          "url": "#/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -638,7 +638,7 @@
                                 "type": "link",
                                 "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
                                 "body": "查看",
-                                "href": "/#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
+                                "href": "#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
                                 "blank": false,
                                 "visibleOn": "targetRef"
                               }
@@ -695,7 +695,7 @@
                                 "type": "link",
                                 "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
                                 "body": "查看",
-                                "href": "/#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
+                                "href": "#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
                                 "blank": false,
                                 "visibleOn": "targetRef"
                               }

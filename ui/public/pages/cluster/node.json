@@ -744,14 +744,14 @@
                   "icon": "fa-brands fa-docker text-primary",
                   "body": "容器列表",
                   "blank": false,
-                  "href": "/#/ns/pod?spec[nodeName]=${metadata.name}"
+                  "href": "#/ns/pod?spec[nodeName]=${metadata.name}"
                 },
                 {
                   "type": "link",
                   "icon": "fa fa-terminal text-primary",
                   "body": "节点终端",
                   "blank": true,
-                  "href": "/#/NodeExec?nodeName=${metadata.name}"
+                  "href": "#/NodeExec?nodeName=${metadata.name}"
                 },
                 {
                   "label": "资源用量",
