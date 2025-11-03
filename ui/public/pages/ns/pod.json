@@ -214,7 +214,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "/#/apply/apply?kind=${kind}"
+          "url": "#/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -750,7 +750,7 @@
               "actionType": "url",
               "icon": "fa fa-terminal text-primary",
               "blank": true,
-              "url": "/#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+              "url": "#/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
             },
             {
               "tooltip": "日志",
@@ -759,7 +759,7 @@
               "level": "link",
               "actionType": "url",
               "blank": true,
-              "url": "/#/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
+              "url": "#/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
             },
             {
               "type": "button",
