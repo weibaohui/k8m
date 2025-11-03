@@ -193,7 +193,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "/#/apply/apply?kind=${kind}"
+          "url": "#/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -566,7 +566,7 @@
               "type": "link",
               "body": "<strong class='text-green-500 font-black'>[${roleRef.kind}]</strong>${roleRef.name}",
               "blank": false,
-              "href": "/#/cluster/cluster_role?metadata[name]=${roleRef.name}"
+              "href": "#/cluster/cluster_role?metadata[name]=${roleRef.name}"
             }
           ],
           "searchable": {
@@ -587,7 +587,7 @@
                 "type": "link",
                 "body": "<strong class='text-green-500 font-black'>[${kind}]</strong>${name}",
                 "blank": false,
-                "href": "${kind == 'ServiceAccount' ? '/#/ns/service_account?metadata[name]=' + name : ''}"
+                "href": "${kind == 'ServiceAccount' ? '#/ns/service_account?metadata[name]=' + name : ''}"
               }
             ]
           },

@@ -193,7 +193,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "/#/apply/apply?kind=${kind}"
+          "url": "#/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -773,7 +773,7 @@
               "type": "link",
               "body": "${spec.claimRef ? spec.claimRef.namespace + '/' + spec.claimRef.name : ''}",
               "blank": false,
-              "href": "/#/ns/pvc?metadata.name=${spec.claimRef.name}"
+              "href": "#/ns/pvc?metadata.name=${spec.claimRef.name}"
             }
           ],
           "searchable": {
