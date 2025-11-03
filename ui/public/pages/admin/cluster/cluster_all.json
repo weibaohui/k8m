@@ -1079,7 +1079,7 @@
                   "label": "kubectl终端",
                   "icon": "fas fa-terminal  text-primary",
                   "actionType": "url",
-                  "url": "#/NodeExec?type=KubectlShell&&clusterID=${cluster_id_base64}",
+                  "url": "#/NodeExec?type=KubectlShell",
                   "blank": true
                 },
                 {

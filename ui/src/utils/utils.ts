@@ -178,6 +178,10 @@ export function getCurrentClusterId(): string {
     return  '';
 }
 
+export function getCurrentClusterIdInBase64(): string {
+    return  getCurrentClusterId() ? toUrlSafeBase64(getCurrentClusterId()) : '';
+}
+
 /**
  * 设置当前选中的集群ID，并跳转到对应的集群页面，保持当前页面路径
  * @param {string} clusterId - 要设置的集群ID
