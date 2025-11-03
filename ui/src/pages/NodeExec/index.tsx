@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { fetcher } from '@/components/Amis/fetcher.ts';
 import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExplorer';
 import { Pod } from '@/store/pod';
-import { getCurrentClusterId, getCurrentClusterIdInBase64 } from '@/utils/utils';
+import { getCurrentClusterIdInBase64 } from '@/utils/utils';
 
 
 interface PodShell {
