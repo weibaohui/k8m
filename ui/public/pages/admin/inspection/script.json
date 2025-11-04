@@ -124,7 +124,7 @@
           "label": "Lua脚本说明",
           "icon": "fas fa-book text-primary",
           "actionType": "url",
-          "url": "#/admin/inspection/lua_doc",
+          "url": "/#/k/${''|selectedClusterBase64}/admin/inspection/lua_doc",
           "blank": false
         },
         "reload",
