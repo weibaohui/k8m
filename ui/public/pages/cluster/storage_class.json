@@ -193,7 +193,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "#/apply/apply?kind=${kind}"
+          "url": "/#/k/${''|selectedClusterBase64}/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -580,7 +580,7 @@
               "type": "link",
               "body": "${metadata.annotations['pvc.count']||'-'}",
               "blank": false,
-              "href": "#/ns/pvc?spec[storageClassName]=${metadata.name}"
+              "href": "/#/k/${''|selectedClusterBase64}/ns/pvc?spec[storageClassName]=${metadata.name}"
             }
           ]
         },
@@ -593,7 +593,7 @@
               "type": "link",
               "body": "${metadata.annotations['pv.count']||'-'}",
               "blank": false,
-              "href": "#/cluster/pv?spec[storageClassName]=${metadata.name}"
+              "href": "/#/k/${''|selectedClusterBase64}/cluster/pv?spec[storageClassName]=${metadata.name}"
             }
           ]
         },

@@ -194,7 +194,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "#/apply/apply?kind=${kind}"
+          "url": "/#/k/${''|selectedClusterBase64}/apply/apply?kind=${kind}"
         }
       ]
     },

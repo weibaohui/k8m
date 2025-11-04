@@ -368,7 +368,7 @@
                   "icon": "fa-solid fa-clipboard-list text-primary",
                   "body": "巡检记录",
                   "blank": false,
-                  "href": "#/admin/inspection/record?schedule_id=${id}"
+                  "href": "/#/k/${''|selectedClusterBase64}/admin/inspection/record?schedule_id=${id}"
                 }
               ]
             }
