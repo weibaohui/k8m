@@ -152,30 +152,31 @@ export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T
 }
 
 /**
- * 获取当前选中的集群ID，从URL路径中提取并解码
- * @returns {string} 当前集群ID，如果未选择则返回空字符串
+ * 获取当前选中的集群ID（从 URL 哈希路径中解析）
+ * 解析位置形如：`#/k/ClusterID/xxxx/yyy`，其中第二段为集群ID。
+ * 使用 URL 安全 Base64 解码，不兼容旧的 `#/cluster/...` 路径。
+ * @returns {string} 当前集群ID，未选择时返回空字符串
  */
 export function getCurrentClusterId(): string {
-    if (typeof window !== 'undefined') {
-        const currentPath = window.location.pathname;
-        
-        // 检查路径是否以 /cluster/ 开头
-        if (currentPath.startsWith('/cluster/')) {
-            const pathParts = currentPath.split('/');
-            if (pathParts.length >= 3 && pathParts[2]) {
-                // 提取base64编码的集群ID并解码
-                const clusterIdBase64 = pathParts[2];
-                try {
-                    return fromUrlSafeBase64(clusterIdBase64);
-                } catch (error) {
-                    console.warn('无法解码集群ID:', clusterIdBase64, error);
-                    return '';
-                }
-            }
-        }
+    if (typeof window === 'undefined') return '';
+
+    // 读取哈希并去除查询参数
+    const rawHash = window.location.hash || '';
+    const hashBody = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash;
+    const pathOnly = hashBody.split('?')[0] || '';
+
+    // 统一成以 '/' 开头的路径，便于分段
+    const normPath = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
+    const parts = normPath.split('/');
+    const idx = parts.indexOf('k');
+
+    if (idx >= 0 && parts.length > idx + 1 && parts[idx + 1]) {
+        const encoded = parts[idx + 1];
+        const decoded = fromUrlSafeBase64(encoded);
+        // 严格按 Base64 解码，失败则视为未选择
+        return decoded || '';
     }
-    
-    return  '';
+    return '';
 }
 
 export function getCurrentClusterIdInBase64(): string {
@@ -183,37 +184,37 @@ export function getCurrentClusterIdInBase64(): string {
 }
 
 /**
- * 设置当前选中的集群ID，并跳转到对应的集群页面，保持当前页面路径
- * @param {string} clusterId - 要设置的集群ID
+ * 设置当前选中的集群ID（写入到 URL 哈希路径）
+ * 目标位置：`#/k/ClusterID/xxxx/yyy`。若已有 k 段则替换其后 ID；
+ * 若不存在，则在现有哈希路径前插入 `k/ClusterID`，保留剩余路径与查询参数。
+ * @param {string} clusterId 要设置的集群ID
  */
 export function setCurrentClusterId(clusterId: string): void {
-    
-    // 将集群ID进行base64编码并跳转，保持当前页面路径
-    if (typeof window !== 'undefined' && clusterId) {
-        const clusterIdBase64 = toUrlSafeBase64(clusterId);
-        const currentPath = window.location.pathname;
-        const currentHash = window.location.hash;
-        
-        // 如果当前路径已经包含 /cluster/，则替换集群ID部分
-        if (currentPath.startsWith('/cluster/')) {
-            // 提取当前路径中集群ID后面的部分
-            const pathParts = currentPath.split('/');
-            if (pathParts.length > 2) {
-                // 重新构建路径：/cluster/新集群ID/原有路径
-                const remainingPath = pathParts.slice(3).join('/');
-                const newPath = `/cluster/${clusterIdBase64}/${remainingPath}`;
-                window.location.href = newPath + currentHash;
-            } else {
-                // 如果只有 /cluster/集群ID，则直接替换
-                window.location.href = `/cluster/${clusterIdBase64}${currentHash}`;
-            }
-        } else {
-            // 如果当前路径不包含集群信息，则跳转到集群首页
-            window.location.href = `/cluster/${clusterIdBase64}${currentHash}`;
-        }
-        
-        console.log("执行集群切换跳转，新集群ID:", clusterId);
+    if (typeof window === 'undefined' || !clusterId) return;
+
+    const encoded = toUrlSafeBase64(clusterId);
+    const rawHash = window.location.hash || '';
+    const hashBody = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash;
+
+    const hasQuery = hashBody.includes('?');
+    const queryPart = hasQuery ? hashBody.slice(hashBody.indexOf('?')) : '';
+    let pathOnly = (hasQuery ? hashBody.slice(0, hashBody.indexOf('?')) : hashBody) || '';
+
+    // 统一为以 '/' 开头的路径
+    pathOnly = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
+    // 去掉前导 '/'
+    const segs = pathOnly.replace(/^\/+/,'').split('/').filter(s => s.length > 0);
+    const idx = segs.indexOf('k');
+    if (idx >= 0) {
+        // 如果存在 k 段，移除该段以及紧随其后的 ID 段（若存在）
+        segs.splice(idx, (segs.length > idx + 1) ? 2 : 1);
     }
+    // 始终将 k/encoded 放到最前面
+    const newSegs = ['k', encoded, ...segs];
+    const newPath = '/' + newSegs.join('/');
+
+    window.location.hash = `#${newPath}${queryPart}`;
+    console.info('已切换到指定集群，更新哈希路径');
 }
 
 /**
