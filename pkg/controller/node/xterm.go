@@ -1,7 +1,6 @@
 package node
 
 import (
-	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -28,7 +27,7 @@ type ShellController struct{}
 func RegisterShellRoutes(api *gin.RouterGroup) {
 	ctrl := &ShellController{}
 	api.POST("/node/name/:node_name/create_node_shell", ctrl.CreateNodeShell)
-	api.POST("/node/name/:node_name/cluster_id/:cluster_id/create_kubectl_shell", ctrl.CreateKubectlShell)
+	api.POST("/node/name/:node_name/create_kubectl_shell", ctrl.CreateKubectlShell)
 
 }
 
@@ -77,23 +76,19 @@ func (nc *ShellController) CreateNodeShell(c *gin.Context) {
 // @Param node_name path string true "节点名称"
 // @Param cluster_id path string true "集群ID，base64编码"
 // @Success 200 {object} string
-// @Router /k8s/cluster/{cluster}/node/name/{node_name}/cluster_id/{cluster_id}/create_kubectl_shell [post]
+// @Router /k8s/cluster/{cluster}/node/name/{node_name}/create_kubectl_shell [post]
 func (nc *ShellController) CreateKubectlShell(c *gin.Context) {
-	ctx := amis.GetContextWithUser(c)
-	name := c.Param("node_name")             // NodeName
-	clusterIDBase64 := c.Param("cluster_id") // 集群ID，base64编码
-	// base64 解码
-	clusterIDBytes, err := base64.StdEncoding.DecodeString(clusterIDBase64)
+	clusterID, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	clusterID := string(clusterIDBytes)
-
 	if clusterID == "" {
 		amis.WriteJsonError(c, fmt.Errorf("集群ID不能为空"))
 		return
 	}
+	ctx := amis.GetContextWithUser(c)
+	name := c.Param("node_name") // NodeName
 
 	// 当前限制为kubectl 安装到本集群中，那么要先检查是否可连接。
 	if !service.ClusterService().IsConnected(clusterID) {

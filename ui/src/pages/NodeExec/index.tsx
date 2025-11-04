@@ -31,7 +31,7 @@ const NodeExec: React.FC = () => {
         }
 
         //单独处理下InCluster模式的特殊命名
-        url = `/k8s/node/name/${nodeName}/cluster_id/${clusterID}/create_kubectl_shell`
+        url = `/k8s/node/name/${nodeName}/create_kubectl_shell`
     } else {
         if (!nodeName) {
             return <div>请在URL中提供节点名称参数</div>;
