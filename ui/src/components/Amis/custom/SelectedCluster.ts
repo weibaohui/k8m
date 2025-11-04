@@ -1,4 +1,4 @@
-import { getCurrentClusterId } from "@/utils/utils.ts";
+import { getCurrentClusterId, getCurrentClusterIdInBase64 } from "@/utils/utils.ts";
 
 /**
  * 读取当前选择的集群ID（selectedCluster）。
@@ -14,7 +14,7 @@ import { getCurrentClusterId } from "@/utils/utils.ts";
  */
 const SelectedCluster = (fallback?: unknown): string => {
     try {
-        const raw = (typeof window !== 'undefined') ? getCurrentClusterId() : '';
+        const raw = (typeof window !== 'undefined') ? getCurrentClusterIdInBase64() : '';
         const cluster = (raw ?? '').trim();
         if (cluster) return cluster;
 
@@ -23,6 +23,22 @@ const SelectedCluster = (fallback?: unknown): string => {
     } catch {
         const fb = (typeof fallback === 'string') ? (fallback as string).trim() : '';
         return fb || '';
+    }
+}
+
+/**
+ * 读取当前选择的集群ID（Base64 编码）。
+ *
+ * 作为 AMIS 过滤器使用时，可直接返回 `getCurrentClusterIdInBase64()` 的结果，
+ * 无兜底参数，未选择集群时返回空字符串。
+ *
+ * @returns Base64（URL 安全）编码的当前集群ID；未选择时返回空字符串
+ */
+export const SelectedClusterBase64 = (): string => {
+    try {
+        return (typeof window !== 'undefined') ? getCurrentClusterIdInBase64() : '';
+    } catch {
+        return '';
     }
 }
 

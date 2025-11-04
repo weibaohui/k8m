@@ -194,7 +194,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "#/apply/apply?kind=${kind}"
+          "url": "/#/k/${''|selectedClusterBase64}/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -589,7 +589,7 @@
               "level": "link",
               "actionType": "url",
               "blank": false,
-              "url": "#/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
+              "url": "/#/k/${''|selectedClusterBase64}/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
             },
             {
               "type": "button",

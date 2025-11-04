@@ -194,7 +194,7 @@
           "level": "link",
           "actionType": "url",
           "blank": true,
-          "url": "#/apply/apply?kind=${kind}"
+          "url": "/#/k/${''|selectedClusterBase64}/apply/apply?kind=${kind}"
         }
       ]
     },
@@ -638,7 +638,7 @@
                             "type": "link",
                             "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
                             "body": "查看",
-                            "href": "#/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
+                            "href": "/#/k/${''|selectedClusterBase64}/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
                             "blank": false
                           }
                         ]
