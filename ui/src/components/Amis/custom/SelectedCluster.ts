@@ -14,7 +14,7 @@ import { getCurrentClusterId, getCurrentClusterIdInBase64 } from "@/utils/utils.
  */
 const SelectedCluster = (fallback?: unknown): string => {
     try {
-        const raw = (typeof window !== 'undefined') ? getCurrentClusterIdInBase64() : '';
+        const raw = (typeof window !== 'undefined') ? getCurrentClusterId() : '';
         const cluster = (raw ?? '').trim();
         if (cluster) return cluster;
 
