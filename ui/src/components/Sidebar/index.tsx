@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useCRDStatus } from '@/hooks/useCRDStatus';
 import { shouldShowMenuItem } from '@/utils/menuVisibility';
+import { getCurrentClusterId, toUrlSafeBase64 } from '@/utils/utils';
 
 type AntdMenuItem = Required<MenuProps>['items'][number];
 
@@ -35,8 +36,21 @@ const Sidebar = () => {
             .filter(item => shouldShowMenuItem(item, visibilityContext)) // 第一层过滤：根据show属性过滤
             .sort((a, b) => (a.order || 0) - (b.order || 0))
             .map((item): AntdMenuItem => {
+                /**
+                 * 跳转到指定页面路径
+                 * 在跳转前，始终在路径前加上 `k/<clusterID>` 前缀（clusterID 为 URL 安全 Base64 编码）。
+                 * 例如：传入 `/admin`，最终跳转为 `#/k/<clusterID>/admin`。
+                 * 若未选择集群，则按原路径跳转。
+                 */
                 const loadJsonPage = (path: string) => {
-                    navigate(path);
+                    const clusterId = getCurrentClusterId();
+                    if (clusterId) {
+                        const encoded = toUrlSafeBase64(clusterId);
+                        const purePath = path.startsWith('/') ? path : `/${path}`;
+                        navigate(`/k/${encoded}${purePath}`);
+                    } else {
+                        navigate(path);
+                    }
                 };
 
                 /**
