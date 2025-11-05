@@ -251,15 +251,16 @@ func (c *ClusterConfig) GetCertificateExpiry() time.Time {
 
 // IsConnected 判断集群是否连接
 func (c *clusterService) IsConnected(selectedCluster string) bool {
-	cluster := c.GetClusterByID(selectedCluster)
-	if cluster == nil {
-		return false
-	}
-	if cluster.ClusterConnectStatus == "" {
-		return false
-	}
-	connected := cluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected
-	return connected
+    cluster := c.GetClusterByID(selectedCluster)
+    if cluster == nil {
+        return false
+    }
+    if cluster.ClusterConnectStatus == "" {
+        return false
+    }
+    // 加强语义：必须已成功获取过 ServerVersion 才认为“已连接”
+    connected := cluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected && cluster.ServerVersion != ""
+    return connected
 }
 
 func (c *clusterService) DelayStartFunc(f func()) {
@@ -634,6 +635,11 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
+		// 注册成功并不代表连通成功，统一进行连通性校验
+		if err := c.LoadRestConfig(clusterConfig); err != nil {
+			// LoadRestConfig 内部已写入 Failed 与错误
+			return false, err
+		}
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 		if c.callbackRegisterFunc != nil {
 			c.callbackRegisterFunc(clusterConfig)
@@ -684,8 +690,14 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	var restConfig *rest.Config
 	var err error
 	if config.IsInCluster {
-		// 集群内模式
-		restConfig, _ = rest.InClusterConfig()
+		// 集群内模式（严格处理错误，避免误判为连通）
+		restConfig, err = rest.InClusterConfig()
+		if err != nil {
+			klog.V(6).Infof("加载 InCluster 配置失败 %s: %v", config.GetClusterID(), err)
+			config.Err = err.Error()
+			config.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			return err
+		}
 	} else {
 		// 集群外模式
 		lines := strings.Split(string(config.kubeConfig), "\n")
@@ -835,7 +847,7 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 			Server:               cluster.Server,
 			kubeConfig:           []byte(content),
 			watchStatus:          make(map[string]*clusterWatchStatus),
-			ClusterConnectStatus: constants.ClusterConnectStatusConnected,
+			ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 			Source:               ClusterConfigSourceAWS,
 			IsAWSEKS:             true,
 			AWSConfig:            config,
