@@ -329,24 +329,24 @@ func (c *clusterService) DelayStartFunc(f func()) {
 // 连接过程会先清理旧的连接资源，再尝试重新注册。注意此函数不负责重试逻辑，重试由上层的自动重连循环处理。
 func (c *clusterService) Connect(clusterID string) {
 	klog.V(4).Infof("连接集群 %s 开始", clusterID)
-	
+
 	cc := c.GetClusterByID(clusterID)
 	if cc == nil {
 		klog.V(4).Infof("集群[%s] 不存在，无法连接", clusterID)
 		return
 	}
-	
+
 	// 只有当集群不是"已连接"或"连接中"状态时，才执行连接操作
-	if !(cc.ClusterConnectStatus == constants.ClusterConnectStatusConnected || 
-		 cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting) {
+	if !(cc.ClusterConnectStatus == constants.ClusterConnectStatusConnected ||
+		cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting) {
 		klog.V(4).Infof("集群[%s] 当前状态为[%s]，开始连接操作", clusterID, cc.ClusterConnectStatus)
-		
+
 		// 清理连接资源，但不停止自动重连（第二个参数为 false）
 		c.disconnectWithOption(clusterID, false)
-		
+
 		// 更新状态为"连接中"
 		cc.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
-		
+
 		// 尝试注册集群
 		_, err := c.RegisterCluster(cc)
 		if err != nil {
@@ -712,7 +712,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
-		
+
 		// 构建注册选项
 		opts := c.buildRegisterOptions(clusterConfig)
 		// 使用带 ID 的注册确保幂等
@@ -721,7 +721,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 			clusterConfig.Err = err.Error()
 			return false, err // 保持"连接中"状态
 		}
-		
+
 		// 注册成功后校验连通性
 		if err := c.LoadRestConfig(clusterConfig); err != nil {
 			clusterConfig.Err = err.Error()
@@ -756,7 +756,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 	clusterConfig.Err = "" // 清除错误信息
-	
+
 	// 启动心跳监测
 	c.StartHeartbeat(clusterID)
 
@@ -1057,17 +1057,13 @@ func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout
 	return nil
 }
 
-// StartHeartbeat 启动指定集群的心跳任务
-// @Description 每隔固定时间尝试读取该集群的 ServerVersion 以校验连通性；
-// 若连续失败达到阈值，则将状态切换为 Disconnected 并记录错误。
-// 日志使用中文，便于观察运行态。
 // StartHeartbeat 启动心跳任务
 // @Description 周期性检测集群连通性并记录心跳历史；当心跳失败次数达到阈值时，自动取消当前心跳、清理历史并执行重连。
 // @Param clusterID 集群ID
 func (c *clusterService) StartHeartbeat(clusterID string) {
 	// 初始化心跳配置默认值
 	if c.HeartbeatIntervalSeconds <= 0 {
-		c.HeartbeatIntervalSeconds = 5
+		c.HeartbeatIntervalSeconds = 30
 	}
 	if c.HeartbeatFailureThreshold <= 0 {
 		c.HeartbeatFailureThreshold = 3
@@ -1206,7 +1202,7 @@ func (c *clusterService) StartReconnect(clusterID string) {
 	go func(id string) {
 		attempt := 0
 		backoff := 1 // 初始退避秒数
-		max := c.ReconnectMaxIntervalSeconds
+		maxIntervalSeconds := c.ReconnectMaxIntervalSeconds
 
 		for {
 			select {
@@ -1239,7 +1235,7 @@ func (c *clusterService) StartReconnect(clusterID string) {
 			}
 
 			// 指数退避，封顶
-			backoff = min(backoff*2, max)
+			backoff = min(backoff*2, maxIntervalSeconds)
 			klog.V(6).Infof("集群 %s 自动重连失败，%ds 后重试", id, backoff)
 			time.Sleep(time.Duration(backoff) * time.Second)
 		}
