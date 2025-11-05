@@ -327,11 +327,10 @@ func (c *clusterService) Connect(clusterID string) {
 	cc := c.GetClusterByID(clusterID)
 	if cc != nil && !(cc.ClusterConnectStatus == constants.ClusterConnectStatusConnected || cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting) {
 		klog.V(4).Infof("集群[%s] Connect时状态为[%s] 非连接中，非已连接状态，清理", clusterID, cc.ClusterConnectStatus)
-		cc.ServerVersion = ""
-		cc.restConfig = nil
-		cc.Err = ""
-		cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
+		c.Disconnect(clusterID)
 		_, _ = c.RegisterCluster(cc)
+	} else {
+		klog.V(4).Infof("集群[%s] 状态为[%s]", clusterID, cc.ClusterConnectStatus)
 	}
 
 	klog.V(4).Infof("连接集群 %s 完毕", clusterID)
@@ -1040,7 +1039,7 @@ func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout
 func (c *clusterService) StartHeartbeat(clusterID string) {
 	// 初始化心跳配置默认值
 	if c.HeartbeatIntervalSeconds <= 0 {
-		c.HeartbeatIntervalSeconds = 30
+		c.HeartbeatIntervalSeconds = 10
 	}
 	if c.HeartbeatFailureThreshold <= 0 {
 		c.HeartbeatFailureThreshold = 3
