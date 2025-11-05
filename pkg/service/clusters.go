@@ -325,16 +325,38 @@ func (c *clusterService) DelayStartFunc(f func()) {
 }
 
 // Connect 重新连接集群
+// 中文函数注释：尝试连接指定集群。仅在集群不在"已连接"或"连接中"状态时执行实际连接操作。
+// 连接过程会先清理旧的连接资源，再尝试重新注册。注意此函数不负责重试逻辑，重试由上层的自动重连循环处理。
 func (c *clusterService) Connect(clusterID string) {
 	klog.V(4).Infof("连接集群 %s 开始", clusterID)
-	// 先清除原来的状态
+	
 	cc := c.GetClusterByID(clusterID)
-	if cc != nil && !(cc.ClusterConnectStatus == constants.ClusterConnectStatusConnected || cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting) {
-		klog.V(4).Infof("集群[%s] Connect时状态为[%s] 非连接中，非已连接状态，清理", clusterID, cc.ClusterConnectStatus)
-		c.Disconnect(clusterID)
-		_, _ = c.RegisterCluster(cc)
+	if cc == nil {
+		klog.V(4).Infof("集群[%s] 不存在，无法连接", clusterID)
+		return
+	}
+	
+	// 只有当集群不是"已连接"或"连接中"状态时，才执行连接操作
+	if !(cc.ClusterConnectStatus == constants.ClusterConnectStatusConnected || 
+		 cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting) {
+		klog.V(4).Infof("集群[%s] 当前状态为[%s]，开始连接操作", clusterID, cc.ClusterConnectStatus)
+		
+		// 清理连接资源，但不停止自动重连（第二个参数为 false）
+		c.disconnectWithOption(clusterID, false)
+		
+		// 更新状态为"连接中"
+		cc.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
+		
+		// 尝试注册集群
+		_, err := c.RegisterCluster(cc)
+		if err != nil {
+			klog.V(4).Infof("集群[%s] 连接失败: %v，等待下一次重试", clusterID, err)
+			// 注意：这里不设置状态，让上层重试循环继续工作
+		} else {
+			klog.V(4).Infof("集群[%s] 连接成功", clusterID)
+		}
 	} else {
-		klog.V(4).Infof("集群[%s] 状态为[%s]", clusterID, cc.ClusterConnectStatus)
+		klog.V(4).Infof("集群[%s] 当前状态为[%s]，跳过连接操作", clusterID, cc.ClusterConnectStatus)
 	}
 
 	klog.V(4).Infof("连接集群 %s 完毕", clusterID)
@@ -672,77 +694,76 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 }
 
 // RegisterCluster 从已扫描的集群列表中注册指定的某个集群
+// 中文函数注释：负责单次注册尝试，不处理重试逻辑。连接失败时返回错误但保持"连接中"状态，
+// 以配合上层的重试机制。只有在遇到致命错误（如配置错误）时才直接设置为失败状态。
 func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, error) {
+	if clusterConfig == nil {
+		return false, fmt.Errorf("集群配置为空")
+	}
 
-	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnecting
 	clusterID := clusterConfig.GetClusterID()
+	klog.V(6).Infof("开始注册集群 %s [来源：%s]", clusterID, clusterConfig.Source)
 
+	// AWS EKS 集群处理
 	if clusterConfig.IsAWSEKS {
 		if clusterConfig.AWSConfig == nil {
 			err := fmt.Errorf("AWS EKS 集群[%s]缺少 AWSConfig", clusterID)
-			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed // 配置错误属于致命错误
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
+		
 		// 构建注册选项
 		opts := c.buildRegisterOptions(clusterConfig)
 		// 使用带 ID 的注册确保幂等
 		if _, err := kom.Clusters().RegisterAWSClusterWithID(clusterConfig.AWSConfig, clusterID, opts...); err != nil {
 			klog.V(4).Infof("注册 AWS 集群[%s]失败: %v", clusterID, err)
-			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 			clusterConfig.Err = err.Error()
-			return false, err
+			return false, err // 保持"连接中"状态
 		}
-		// 注册成功并不代表连通成功，统一进行连通性校验
+		
+		// 注册成功后校验连通性
 		if err := c.LoadRestConfig(clusterConfig); err != nil {
-			// LoadRestConfig 内部已写入 Failed 与错误
-			return false, err
-		}
-		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
-		// 启动心跳，持续校验连接性
-		c.StartHeartbeat(clusterID)
-		if c.callbackRegisterFunc != nil {
-			c.callbackRegisterFunc(clusterConfig)
-		}
-
-		return true, nil
-	}
-
-	err := c.LoadRestConfig(clusterConfig)
-	if err != nil {
-		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
-		clusterConfig.Err = err.Error()
-		return false, err
-	}
-	if clusterConfig.IsInCluster {
-		// InCluster模式
-		_, err := kom.Clusters().RegisterInCluster()
-		if err != nil {
-			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
-			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
 			clusterConfig.Err = err.Error()
-			return false, err
+			return false, err // 保持"连接中"状态
 		}
 	} else {
-		// 集群外模式
-		// 构建注册选项
-		opts := c.buildRegisterOptions(clusterConfig)
-		_, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID, opts...)
-
-		if err != nil {
-			klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
-			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+		// 非 AWS 集群处理
+		if err := c.LoadRestConfig(clusterConfig); err != nil {
 			clusterConfig.Err = err.Error()
-			return false, err
+			return false, err // 保持"连接中"状态
+		}
+
+		if clusterConfig.IsInCluster {
+			// InCluster 模式
+			if _, err := kom.Clusters().RegisterInCluster(); err != nil {
+				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
+				clusterConfig.Err = err.Error()
+				return false, err // 保持"连接中"状态
+			}
+		} else {
+			// 集群外模式
+			opts := c.buildRegisterOptions(clusterConfig)
+			if _, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID, opts...); err != nil {
+				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
+				clusterConfig.Err = err.Error()
+				return false, err // 保持"连接中"状态
+			}
 		}
 	}
+
+	// 所有注册步骤成功完成，更新状态
 	klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
-	// 启动心跳，持续校验连接性
+	clusterConfig.Err = "" // 清除错误信息
+	
+	// 启动心跳监测
 	c.StartHeartbeat(clusterID)
 
-	// 先连接了，再执行回调注册，因为是绑定在kom上的， 只有上面的代码执行后，才会连接，才会有kom.Clusters()
-	c.callbackRegisterFunc(clusterConfig)
+	// 执行回调注册
+	if c.callbackRegisterFunc != nil {
+		c.callbackRegisterFunc(clusterConfig)
+	}
 
 	return true, nil
 }
