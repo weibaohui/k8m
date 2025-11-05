@@ -36,6 +36,10 @@ type clusterService struct {
 	HeartbeatIntervalSeconds  int                           // 心跳间隔秒数，默认30
 	HeartbeatFailureThreshold int                           // 心跳失败阈值，默认3
 
+	// 自动重连管理
+	reconnectCancel             map[string]context.CancelFunc // 自动重连取消函数
+	ReconnectMaxIntervalSeconds int                           // 自动重连最大退避秒数，默认60
+
 }
 
 func (c *clusterService) SetRegisterCallbackFunc(callback func(cluster *ClusterConfig) func()) {
@@ -336,19 +340,23 @@ func (c *clusterService) Connect(clusterID string) {
 	klog.V(4).Infof("连接集群 %s 完毕", clusterID)
 }
 
-// Disconnect 断开连接
-// 中文函数注释：幂等清理指定集群的连接状态与资源，包括停止心跳、重置版本信息、清理restConfig、停止所有watch并解除kom注册；
-// 即便当前状态非“已连接”，也会进行必要的清理以确保后续重连不受残留资源影响。
-func (c *clusterService) Disconnect(clusterID string) {
-	klog.V(6).Infof("Disconnect 开始清理集群 %s 原始信息", clusterID)
+// disconnectWithOption 断开连接（可选是否停止自动重连）
+// 中文函数注释：幂等清理指定集群的连接状态与资源；当 stopReconnect 为 true 时，连同自动重连循环一并停止，
+// 为 false 时仅做资源清理以便在自动重连循环内使用，避免自我取消导致循环中断。
+func (c *clusterService) disconnectWithOption(clusterID string, stopReconnect bool) {
+	klog.V(6).Infof("Disconnect 开始清理集群 %s 原始信息（停止自动重连：%t）", clusterID, stopReconnect)
 
-	// 先清除原来的状态
 	cc := c.GetClusterByID(clusterID)
 	if cc == nil {
 		return
 	}
 	// 停止心跳
 	c.StopHeartbeat(clusterID)
+	// 根据需要停止自动重连
+	if stopReconnect {
+		c.StopReconnect(clusterID)
+	}
+	// 清理本地状态
 	cc.ServerVersion = ""
 	cc.restConfig = nil
 	cc.Err = ""
@@ -362,6 +370,12 @@ func (c *clusterService) Disconnect(clusterID string) {
 	// 从kom解除
 	kom.Clusters().RemoveClusterById(clusterID)
 	klog.V(6).Infof("Disconnect 完成清理集群 %s", clusterID)
+}
+
+// Disconnect 断开连接
+// 中文函数注释：幂等清理指定集群的连接状态与资源，并停止自动重连；用于外部显式断开场景。
+func (c *clusterService) Disconnect(clusterID string) {
+	c.disconnectWithOption(clusterID, true)
 }
 
 // Scan 扫描集群
@@ -1008,13 +1022,6 @@ func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout
 	if targetCluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected {
 		klog.V(6).Infof("集群 %s 已连接，开始重新注册以应用新配置", targetCluster.ClusterID)
 
-		if c.IsConnected(targetCluster.ClusterID) {
-			// 先断开连接
-			c.Disconnect(targetCluster.ClusterID)
-			// 等待一小段时间确保断开完成
-			time.Sleep(100 * time.Millisecond)
-		}
-
 		// 重新连接，这会使用新的配置参数
 		go func() {
 			time.Sleep(200 * time.Millisecond) // 稍微延迟一下再重连
@@ -1039,7 +1046,7 @@ func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout
 func (c *clusterService) StartHeartbeat(clusterID string) {
 	// 初始化心跳配置默认值
 	if c.HeartbeatIntervalSeconds <= 0 {
-		c.HeartbeatIntervalSeconds = 10
+		c.HeartbeatIntervalSeconds = 5
 	}
 	if c.HeartbeatFailureThreshold <= 0 {
 		c.HeartbeatFailureThreshold = 3
@@ -1123,24 +1130,15 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 				}
 
 				if failureCount >= c.HeartbeatFailureThreshold {
-					// 达到失败阈值，切换为断开并停止心跳，并尝试自动重连
+					// 达到失败阈值，切换为断开并停止心跳，并启动独立的自动重连循环
 					cluster.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-					klog.V(6).Infof("集群 %s 心跳连续失败达到阈值，状态切换为未连接，开始自动重连", clusterID)
+					klog.V(6).Infof("集群 %s 心跳连续失败达到阈值，状态切换为未连接，启动自动重连循环", clusterID)
 
 					// 停止当前心跳循环
 					cancel()
 
-					// 异步触发重连，避免阻塞当前 goroutine
-					go func(id string) {
-						// 稍作延迟，给断开流程留出时间
-						time.Sleep(500 * time.Millisecond)
-						klog.V(6).Infof("集群 %s 自动重连任务：先断开清理后再重连", id)
-						// 显式断开清理，确保无残留资源
-						c.Disconnect(id)
-						// 执行重连
-						c.Connect(id)
-					}(clusterID)
-
+					// 启动自动重连循环（退避重试直到成功或被停止）
+					c.StartReconnect(clusterID)
 					return
 				}
 			}
@@ -1158,5 +1156,84 @@ func (c *clusterService) StopHeartbeat(clusterID string) {
 		cancel()
 		delete(c.heartbeatCancel, clusterID)
 		klog.V(6).Infof("集群 %s 心跳任务已停止", clusterID)
+	}
+}
+
+// StartReconnect 启动指定集群的自动重连循环
+// 中文函数注释：当集群处于不可用状态时，周期性地执行“先断开清理、再尝试连接”，并采用指数退避策略（最大退避秒数可配置）；
+// 当检测到集群成功连接后，自动结束重连循环。日志均为中文，便于观察。
+func (c *clusterService) StartReconnect(clusterID string) {
+	// 初始化重连配置默认值
+	if c.ReconnectMaxIntervalSeconds <= 0 {
+		c.ReconnectMaxIntervalSeconds = 60
+	}
+	if c.reconnectCancel == nil {
+		c.reconnectCancel = make(map[string]context.CancelFunc)
+	}
+
+	// 若已有自动重连任务，先停止
+	if cancel, ok := c.reconnectCancel[clusterID]; ok && cancel != nil {
+		cancel()
+		delete(c.reconnectCancel, clusterID)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	c.reconnectCancel[clusterID] = cancel
+
+	klog.V(6).Infof("集群 %s 自动重连循环启动（最大退避 %ds）", clusterID, c.ReconnectMaxIntervalSeconds)
+
+	go func(id string) {
+		attempt := 0
+		backoff := 1 // 初始退避秒数
+		max := c.ReconnectMaxIntervalSeconds
+
+		for {
+			select {
+			case <-ctx.Done():
+				klog.V(6).Infof("集群 %s 自动重连循环已停止", id)
+				return
+			default:
+			}
+
+			// 若已连接则结束重连
+			if c.IsConnected(id) {
+				klog.V(6).Infof("集群 %s 已连接，自动重连循环结束", id)
+				cancel()
+				delete(c.reconnectCancel, id)
+				return
+			}
+
+			attempt++
+			klog.V(6).Infof("集群 %s 自动重连第 %d 次尝试：先断开清理后重连", id, attempt)
+
+			// 尝试连接
+			c.Connect(id)
+
+			// 若连接成功，结束重连循环
+			if c.IsConnected(id) {
+				klog.V(6).Infof("集群 %s 自动重连成功", id)
+				cancel()
+				delete(c.reconnectCancel, id)
+				return
+			}
+
+			// 指数退避，封顶
+			backoff = min(backoff*2, max)
+			klog.V(6).Infof("集群 %s 自动重连失败，%ds 后重试", id, backoff)
+			time.Sleep(time.Duration(backoff) * time.Second)
+		}
+	}(clusterID)
+}
+
+// StopReconnect 停止指定集群的自动重连循环
+// 中文函数注释：若自动重连循环存在则停止，并清理取消函数。
+func (c *clusterService) StopReconnect(clusterID string) {
+	if c.reconnectCancel == nil {
+		return
+	}
+	if cancel, ok := c.reconnectCancel[clusterID]; ok && cancel != nil {
+		cancel()
+		delete(c.reconnectCancel, clusterID)
+		klog.V(6).Infof("集群 %s 自动重连循环已停止", clusterID)
 	}
 }
