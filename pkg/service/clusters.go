@@ -1182,7 +1182,7 @@ func (c *clusterService) StopHeartbeat(clusterID string) {
 func (c *clusterService) StartReconnect(clusterID string) {
 	// 初始化重连配置默认值
 	if c.ReconnectMaxIntervalSeconds <= 0 {
-		c.ReconnectMaxIntervalSeconds = 60
+		c.ReconnectMaxIntervalSeconds = 3600
 	}
 	if c.reconnectCancel == nil {
 		c.reconnectCancel = make(map[string]context.CancelFunc)
