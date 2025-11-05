@@ -1,13 +1,14 @@
 package service
 
 import (
-	"encoding/base64"
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-	"sync"
-	"time"
+    "context"
+    "encoding/base64"
+    "fmt"
+    "os"
+    "path/filepath"
+    "strings"
+    "sync"
+    "time"
 
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/robfig/cron/v3"
@@ -27,9 +28,13 @@ import (
 )
 
 type clusterService struct {
-	clusterConfigs        []*ClusterConfig                    // 文件名+context名称 -> 集群配置
-	AggregateDelaySeconds int                                 // 聚合延迟时间
-	callbackRegisterFunc  func(cluster *ClusterConfig) func() // 用来注册回调参数的回调方法
+    clusterConfigs        []*ClusterConfig                    // 文件名+context名称 -> 集群配置
+    AggregateDelaySeconds int                                 // 聚合延迟时间
+    callbackRegisterFunc  func(cluster *ClusterConfig) func() // 用来注册回调参数的回调方法
+    // 心跳管理
+    heartbeatCancel           map[string]context.CancelFunc // 心跳取消函数
+    HeartbeatIntervalSeconds  int                           // 心跳间隔秒数，默认30
+    HeartbeatFailureThreshold int                           // 心跳失败阈值，默认3
 
 }
 
@@ -83,10 +88,10 @@ var ClusterConfigSourceAWS ClusterConfigSource = "AWS"
 // 记录每个集群的watch 启动情况
 // watch 有多种类型，需要记录
 type clusterWatchStatus struct {
-	WatchType   string          `json:"watchType,omitempty"`
-	Started     bool            `json:"started,omitempty"`
-	StartedTime time.Time       `json:"startedTime,omitempty"`
-	Watcher     watch.Interface `json:"-"`
+    WatchType   string          `json:"watchType,omitempty"`
+    Started     bool            `json:"started,omitempty"`
+    StartedTime time.Time       `json:"startedTime,omitempty"`
+    Watcher     watch.Interface `json:"-"`
 }
 
 // SetClusterWatchStarted 设置集群Watch启动状态
@@ -296,28 +301,30 @@ func (c *clusterService) Connect(clusterID string) {
 
 // Disconnect 断开连接
 func (c *clusterService) Disconnect(clusterID string) {
-	klog.V(4).Infof("Disconnect 清理集群 %s 原始信息", clusterID)
+    klog.V(4).Infof("Disconnect 清理集群 %s 原始信息", clusterID)
 
-	// 先清除原来的状态
-	cc := c.GetClusterByID(clusterID)
-	if cc == nil {
-		return
-	}
-	if !c.IsConnected(clusterID) {
-		return
-	}
-	cc.ServerVersion = ""
-	cc.restConfig = nil
-	cc.Err = ""
-	cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-	for _, v := range cc.watchStatus {
-		if v.Watcher != nil {
-			v.Watcher.Stop()
-			klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
-		}
-	}
-	// 从kom解除
-	kom.Clusters().RemoveClusterById(clusterID)
+    // 先清除原来的状态
+    cc := c.GetClusterByID(clusterID)
+    if cc == nil {
+        return
+    }
+    if !c.IsConnected(clusterID) {
+        return
+    }
+    // 停止心跳
+    c.StopHeartbeat(clusterID)
+    cc.ServerVersion = ""
+    cc.restConfig = nil
+    cc.Err = ""
+    cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
+    for _, v := range cc.watchStatus {
+        if v.Watcher != nil {
+            v.Watcher.Stop()
+            klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
+        }
+    }
+    // 从kom解除
+    kom.Clusters().RemoveClusterById(clusterID)
 }
 
 // Scan 扫描集群
@@ -635,15 +642,17 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 			clusterConfig.Err = err.Error()
 			return false, err
 		}
-		// 注册成功并不代表连通成功，统一进行连通性校验
-		if err := c.LoadRestConfig(clusterConfig); err != nil {
-			// LoadRestConfig 内部已写入 Failed 与错误
-			return false, err
-		}
-		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
-		if c.callbackRegisterFunc != nil {
-			c.callbackRegisterFunc(clusterConfig)
-		}
+        // 注册成功并不代表连通成功，统一进行连通性校验
+        if err := c.LoadRestConfig(clusterConfig); err != nil {
+            // LoadRestConfig 内部已写入 Failed 与错误
+            return false, err
+        }
+        clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+        // 启动心跳，持续校验连接性
+        c.StartHeartbeat(clusterID)
+        if c.callbackRegisterFunc != nil {
+            c.callbackRegisterFunc(clusterConfig)
+        }
 
 		return true, nil
 	}
@@ -676,13 +685,15 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 			return false, err
 		}
 	}
-	klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
-	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+    klog.V(4).Infof("成功注册集群: %s [%s]", clusterID, clusterConfig.Server)
+    clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+    // 启动心跳，持续校验连接性
+    c.StartHeartbeat(clusterID)
 
-	// 先连接了，再执行回调注册，因为是绑定在kom上的， 只有上面的代码执行后，才会连接，才会有kom.Clusters()
-	c.callbackRegisterFunc(clusterConfig)
+    // 先连接了，再执行回调注册，因为是绑定在kom上的， 只有上面的代码执行后，才会连接，才会有kom.Clusters()
+    c.callbackRegisterFunc(clusterConfig)
 
-	return true, nil
+    return true, nil
 }
 
 // LoadRestConfig 校验集群是否可连接，并更新状态
@@ -979,4 +990,109 @@ func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout
 	}
 
 	return nil
+}
+// StartHeartbeat 启动指定集群的心跳任务
+// @Description 每隔固定时间尝试读取该集群的 ServerVersion 以校验连通性；
+// 若连续失败达到阈值，则将状态切换为 Disconnected 并记录错误。
+// 日志使用中文，便于观察运行态。
+func (c *clusterService) StartHeartbeat(clusterID string) {
+    // 初始化心跳配置默认值
+    if c.HeartbeatIntervalSeconds <= 0 {
+        c.HeartbeatIntervalSeconds = 30
+    }
+    if c.HeartbeatFailureThreshold <= 0 {
+        c.HeartbeatFailureThreshold = 3
+    }
+    if c.heartbeatCancel == nil {
+        c.heartbeatCancel = make(map[string]context.CancelFunc)
+    }
+
+    // 如果已有心跳，先停止
+    if cancel, ok := c.heartbeatCancel[clusterID]; ok && cancel != nil {
+        cancel()
+        delete(c.heartbeatCancel, clusterID)
+    }
+
+    cluster := c.GetClusterByID(clusterID)
+    if cluster == nil {
+        klog.V(6).Infof("启动心跳失败：未找到集群 %s", clusterID)
+        return
+    }
+    // 仅在已连接时启动心跳
+    if cluster.ClusterConnectStatus != constants.ClusterConnectStatusConnected {
+        klog.V(6).Infof("集群 %s 非已连接状态，心跳不启动", clusterID)
+        return
+    }
+
+    ctx, cancel := context.WithCancel(context.Background())
+    c.heartbeatCancel[clusterID] = cancel
+
+    interval := time.Duration(c.HeartbeatIntervalSeconds) * time.Second
+    ticker := time.NewTicker(interval)
+    klog.V(6).Infof("集群 %s 心跳启动，间隔 %ds，失败阈值 %d", clusterID, c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold)
+
+    go func() {
+        defer ticker.Stop()
+        failureCount := 0
+        for {
+            select {
+            case <-ctx.Done():
+                klog.V(6).Infof("集群 %s 心跳已停止", clusterID)
+                return
+            case <-ticker.C:
+                // 若集群不再是已连接状态，则停止心跳
+                if cluster.ClusterConnectStatus != constants.ClusterConnectStatusConnected {
+                    klog.V(6).Infof("集群 %s 心跳检测：状态已非已连接，停止心跳", clusterID)
+                    cancel()
+                    return
+                }
+                // restConfig 必须存在
+                if cluster.restConfig == nil {
+                    failureCount++
+                    klog.V(6).Infof("集群 %s 心跳检测失败：restConfig 不存在（累计失败 %d）", clusterID, failureCount)
+                } else {
+                    clientset, err := kubernetes.NewForConfig(cluster.restConfig)
+                    if err != nil {
+                        failureCount++
+                        klog.V(6).Infof("集群 %s 创建 clientset 失败：%v（累计失败 %d）", clusterID, err, failureCount)
+                    } else {
+                        sv, err := clientset.Discovery().ServerVersion()
+                        if err != nil {
+                            failureCount++
+                            klog.V(6).Infof("集群 %s 心跳检测读取版本失败：%v（累计失败 %d）", clusterID, err, failureCount)
+                            cluster.Err = err.Error()
+                        } else {
+                            // 成功，重置失败计数并同步版本
+                            failureCount = 0
+                            if sv != nil {
+                                cluster.ServerVersion = sv.GitVersion
+                            }
+                            klog.V(6).Infof("集群 %s 心跳检测成功，当前版本：%s", clusterID, cluster.ServerVersion)
+                        }
+                    }
+                }
+
+                if failureCount >= c.HeartbeatFailureThreshold {
+                    // 达到失败阈值，切换为断开并停止心跳
+                    cluster.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
+                    klog.V(6).Infof("集群 %s 心跳连续失败达到阈值，状态切换为 Disconnected", clusterID)
+                    cancel()
+                    return
+                }
+            }
+        }
+    }()
+}
+
+// StopHeartbeat 停止指定集群的心跳任务
+// @Description 若心跳存在则停止并清理取消函数。
+func (c *clusterService) StopHeartbeat(clusterID string) {
+    if c.heartbeatCancel == nil {
+        return
+    }
+    if cancel, ok := c.heartbeatCancel[clusterID]; ok && cancel != nil {
+        cancel()
+        delete(c.heartbeatCancel, clusterID)
+        klog.V(6).Infof("集群 %s 心跳任务已停止", clusterID)
+    }
 }
