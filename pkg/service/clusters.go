@@ -251,16 +251,16 @@ func (c *ClusterConfig) GetCertificateExpiry() time.Time {
 
 // IsConnected 判断集群是否连接
 func (c *clusterService) IsConnected(selectedCluster string) bool {
-    cluster := c.GetClusterByID(selectedCluster)
-    if cluster == nil {
-        return false
-    }
-    if cluster.ClusterConnectStatus == "" {
-        return false
-    }
-    // 加强语义：必须已成功获取过 ServerVersion 才认为“已连接”
-    connected := cluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected && cluster.ServerVersion != ""
-    return connected
+	cluster := c.GetClusterByID(selectedCluster)
+	if cluster == nil {
+		return false
+	}
+	if cluster.ClusterConnectStatus == "" {
+		return false
+	}
+	// 加强语义：必须已成功获取过 ServerVersion 才认为“已连接”
+	connected := cluster.ClusterConnectStatus == constants.ClusterConnectStatusConnected && cluster.ServerVersion != ""
+	return connected
 }
 
 func (c *clusterService) DelayStartFunc(f func()) {
@@ -859,12 +859,15 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 		// 使用kom统一的AWS EKS集群注册方法
 		_, err = kom.Clusters().RegisterAWSClusterWithID(eksAuthConfig, clusterID, opts...)
 		if err != nil {
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
 			return nil, fmt.Errorf("注册AWS EKS集群失败: %w", err)
 		}
 
 		// 添加到集群列表
 		c.AddToClusterList(clusterConfig)
-
+		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
+		clusterConfig.Err = ""
 		klog.V(4).Infof("成功注册AWS EKS集群: %s [%s]", config.ClusterName, clusterID)
 	}
 
