@@ -1124,7 +1124,6 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 					// 达到失败阈值，切换为断开并停止心跳
 					cluster.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
 					klog.V(6).Infof("集群 %s 心跳连续失败达到阈值，状态切换为 Disconnected", clusterID)
-					c.Disconnect(clusterID)
 					cancel()
 					return
 				}
