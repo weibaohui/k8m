@@ -326,7 +326,7 @@ func (c *clusterService) Connect(clusterID string) {
 	// 先清除原来的状态
 	cc := c.GetClusterByID(clusterID)
 	if cc != nil && !(cc.ClusterConnectStatus == constants.ClusterConnectStatusConnected || cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting) {
-		klog.V(4).Infof("Connect 发现原集群,非连接中，非已连接状态，清理集群 %s  原始信息", clusterID)
+		klog.V(4).Infof("集群[%s] Connect时状态为[%s] 非连接中，非已连接状态，清理", clusterID, cc.ClusterConnectStatus)
 		cc.ServerVersion = ""
 		cc.restConfig = nil
 		cc.Err = ""
@@ -341,28 +341,28 @@ func (c *clusterService) Connect(clusterID string) {
 // 中文函数注释：幂等清理指定集群的连接状态与资源，包括停止心跳、重置版本信息、清理restConfig、停止所有watch并解除kom注册；
 // 即便当前状态非“已连接”，也会进行必要的清理以确保后续重连不受残留资源影响。
 func (c *clusterService) Disconnect(clusterID string) {
-    klog.V(6).Infof("Disconnect 开始清理集群 %s 原始信息", clusterID)
+	klog.V(6).Infof("Disconnect 开始清理集群 %s 原始信息", clusterID)
 
-    // 先清除原来的状态
-    cc := c.GetClusterByID(clusterID)
-    if cc == nil {
-        return
-    }
-    // 停止心跳
-    c.StopHeartbeat(clusterID)
-    cc.ServerVersion = ""
-    cc.restConfig = nil
-    cc.Err = ""
-    cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-    for _, v := range cc.watchStatus {
-        if v.Watcher != nil {
-            v.Watcher.Stop()
-            klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
-        }
-    }
-    // 从kom解除
-    kom.Clusters().RemoveClusterById(clusterID)
-    klog.V(6).Infof("Disconnect 完成清理集群 %s", clusterID)
+	// 先清除原来的状态
+	cc := c.GetClusterByID(clusterID)
+	if cc == nil {
+		return
+	}
+	// 停止心跳
+	c.StopHeartbeat(clusterID)
+	cc.ServerVersion = ""
+	cc.restConfig = nil
+	cc.Err = ""
+	cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
+	for _, v := range cc.watchStatus {
+		if v.Watcher != nil {
+			v.Watcher.Stop()
+			klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
+		}
+	}
+	// 从kom解除
+	kom.Clusters().RemoveClusterById(clusterID)
+	klog.V(6).Infof("Disconnect 完成清理集群 %s", clusterID)
 }
 
 // Scan 扫描集群
@@ -1123,27 +1123,27 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 					}
 				}
 
-                if failureCount >= c.HeartbeatFailureThreshold {
-                    // 达到失败阈值，切换为断开并停止心跳，并尝试自动重连
-                    cluster.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-                    klog.V(6).Infof("集群 %s 心跳连续失败达到阈值，状态切换为未连接，开始自动重连", clusterID)
+				if failureCount >= c.HeartbeatFailureThreshold {
+					// 达到失败阈值，切换为断开并停止心跳，并尝试自动重连
+					cluster.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
+					klog.V(6).Infof("集群 %s 心跳连续失败达到阈值，状态切换为未连接，开始自动重连", clusterID)
 
-                    // 停止当前心跳循环
-                    cancel()
+					// 停止当前心跳循环
+					cancel()
 
-                    // 异步触发重连，避免阻塞当前 goroutine
-                    go func(id string) {
-                        // 稍作延迟，给断开流程留出时间
-                        time.Sleep(500 * time.Millisecond)
-                        klog.V(6).Infof("集群 %s 自动重连任务：先断开清理后再重连", id)
-                        // 显式断开清理，确保无残留资源
-                        c.Disconnect(id)
-                        // 执行重连
-                        c.Connect(id)
-                    }(clusterID)
+					// 异步触发重连，避免阻塞当前 goroutine
+					go func(id string) {
+						// 稍作延迟，给断开流程留出时间
+						time.Sleep(500 * time.Millisecond)
+						klog.V(6).Infof("集群 %s 自动重连任务：先断开清理后再重连", id)
+						// 显式断开清理，确保无残留资源
+						c.Disconnect(id)
+						// 执行重连
+						c.Connect(id)
+					}(clusterID)
 
-                    return
-                }
+					return
+				}
 			}
 		}
 	}()
