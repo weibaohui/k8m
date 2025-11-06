@@ -121,7 +121,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg *SummaryMsg) (
 	aiSummary, err := s.generateAISummary(ctx, msg)
 	if err != nil {
 		klog.Errorf("AI汇总失败，返回基础汇总: %v", err)
-		return basicSummary, nil
+		return basicSummary + "[AI FBK]", nil
 	}
 
 	return aiSummary, nil

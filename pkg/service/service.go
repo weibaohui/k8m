@@ -10,10 +10,8 @@ var localNodeService = &nodeService{
 	nodeLabels: make(map[string][]*NodeLabels),
 }
 var localDeploymentService = &deployService{}
-var localClusterService = &clusterService{
-	clusterConfigs:        []*ClusterConfig{},
-	AggregateDelaySeconds: 61, // 没有秒级支持，所以大于1分钟
-}
+
+var localClusterService = newClusterService()
 var localStorageClassService = &storageClassService{}
 var localIngressClassService = &ingressClassService{}
 var localPVCService = &pvcService{
