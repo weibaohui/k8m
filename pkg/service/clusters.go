@@ -977,6 +977,14 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 
 		// 添加到集群列表
 		c.AddToClusterList(clusterConfig)
+		
+		// 校验连通性并设置ServerVersion
+		if err := c.LoadRestConfig(clusterConfig); err != nil {
+			clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			clusterConfig.Err = err.Error()
+			return nil, fmt.Errorf("AWS EKS集群连通性校验失败: %w", err)
+		}
+		
 		clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 		clusterConfig.Err = ""
 		klog.V(4).Infof("成功注册AWS EKS集群: %s [%s]", config.ClusterName, clusterID)
