@@ -23,10 +23,13 @@ type Config struct {
 	UseBuiltInModel      bool      `gorm:"default:true" json:"use_built_in_model"`             // 是否使用内置模型，默认开启
 	MaxIterations        int32     `json:"max_iterations"`                                     //  模型自动对话的最大轮数
 	MaxHistory           int32     `json:"max_history"`                                        //  模型对话上下文历史记录数
-	ResourceCacheTimeout int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"` // 资源缓存时间（秒）
-	ModelID              uint      `json:"model_id"`
-	CreatedAt            time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt            time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ResourceCacheTimeout      int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"`      // 资源缓存时间（秒）
+	HeartbeatIntervalSeconds  int       `gorm:"default:30" json:"heartbeat_interval_seconds,omitempty"`  // 心跳间隔时间（秒）
+	HeartbeatFailureThreshold int       `gorm:"default:3" json:"heartbeat_failure_threshold,omitempty"`  // 心跳失败阈值
+	ReconnectMaxIntervalSeconds int     `gorm:"default:3600" json:"reconnect_max_interval_seconds,omitempty"` // 重连最大间隔时间（秒）
+	ModelID                   uint      `json:"model_id"`
+	CreatedAt                time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt                time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 
 func (c *Config) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*Config, int64, error) {
