@@ -47,6 +47,8 @@ func (s *configService) UpdateConfig(config *models.Config) error {
 	if err != nil {
 		return err
 	}
+	// 让新修改的集群重连参数生效
+	ClusterService().UpdateHeartbeatSettings()
 	return nil
 }
 
@@ -117,6 +119,20 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	}
 	if m.MaxIterations > 0 {
 		cfg.MaxIterations = m.MaxIterations
+	}
+
+	// 集群管理参数
+	if m.HeartbeatIntervalSeconds > 0 {
+		cfg.HeartbeatIntervalSeconds = m.HeartbeatIntervalSeconds
+	}
+	if m.HeartbeatFailureThreshold > 0 {
+		cfg.HeartbeatFailureThreshold = m.HeartbeatFailureThreshold
+	}
+	if m.ReconnectMaxIntervalSeconds > 0 {
+		cfg.ReconnectMaxIntervalSeconds = m.ReconnectMaxIntervalSeconds
+	}
+	if m.MaxRetryAttempts > 0 {
+		cfg.MaxRetryAttempts = m.MaxRetryAttempts
 	}
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理

@@ -49,6 +49,5 @@ func (cc *Controller) Update(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	_ = service.ConfigService().UpdateFlagFromDBConfig()
 	amis.WriteJsonOK(c)
 }
