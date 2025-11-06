@@ -32,9 +32,9 @@ type clusterService struct {
 	AggregateDelaySeconds int                                 // 聚合延迟时间
 	callbackRegisterFunc  func(cluster *ClusterConfig) func() // 用来注册回调参数的回调方法
 	// 心跳管理
-	heartbeatCancel           map[string]context.CancelFunc // 心跳取消函数
-	HeartbeatIntervalSeconds  int                           // 心跳间隔秒数，默认30
-	HeartbeatFailureThreshold int                           // 心跳失败阈值，默认3
+	heartbeatCancel           sync.Map // 心跳取消函数，改为sync.Map
+	HeartbeatIntervalSeconds  int      // 心跳间隔秒数，默认30
+	HeartbeatFailureThreshold int      // 心跳失败阈值，默认3
 
 	// 自动重连管理
 	reconnectCancel             sync.Map // 自动重连取消函数，改为sync.Map
@@ -51,7 +51,6 @@ func newClusterService() *clusterService {
 	return &clusterService{
 		clusterConfigs:              []*ClusterConfig{},
 		AggregateDelaySeconds:       61,
-		heartbeatCancel:             make(map[string]context.CancelFunc),
 		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
 		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
 		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
@@ -1098,14 +1097,13 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 	if c.HeartbeatFailureThreshold <= 0 {
 		c.HeartbeatFailureThreshold = 3
 	}
-	if c.heartbeatCancel == nil {
-		c.heartbeatCancel = make(map[string]context.CancelFunc)
-	}
 
 	// 如果已有心跳，先停止
-	if cancel, ok := c.heartbeatCancel[clusterID]; ok && cancel != nil {
-		cancel()
-		delete(c.heartbeatCancel, clusterID)
+	if cancelInterface, ok := c.heartbeatCancel.Load(clusterID); ok {
+		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
+			cancel()
+		}
+		c.heartbeatCancel.Delete(clusterID)
 	}
 
 	cluster := c.GetClusterByID(clusterID)
@@ -1120,7 +1118,7 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	c.heartbeatCancel[clusterID] = cancel
+	c.heartbeatCancel.Store(clusterID, cancel)
 
 	interval := time.Duration(c.HeartbeatIntervalSeconds) * time.Second
 	ticker := time.NewTicker(interval)
@@ -1196,12 +1194,11 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 // StopHeartbeat 停止指定集群的心跳任务
 // @Description 若心跳存在则停止并清理取消函数。
 func (c *clusterService) StopHeartbeat(clusterID string) {
-	if c.heartbeatCancel == nil {
-		return
-	}
-	if cancel, ok := c.heartbeatCancel[clusterID]; ok && cancel != nil {
-		cancel()
-		delete(c.heartbeatCancel, clusterID)
+	if cancelInterface, ok := c.heartbeatCancel.Load(clusterID); ok {
+		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
+			cancel()
+		}
+		c.heartbeatCancel.Delete(clusterID)
 		klog.V(6).Infof("集群 %s 心跳任务已停止", clusterID)
 	}
 }
