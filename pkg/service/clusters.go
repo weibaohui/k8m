@@ -90,10 +90,9 @@ type ClusterConfig struct {
 	IngressStatusAggregated bool                           `json:"ingressStatusAggregated,omitempty"` // 是否已聚合ingress状态
 	ClusterConnectStatus    constants.ClusterConnectStatus `json:"clusterConnectStatus,omitempty"`    // 集群连接状态
 	IsInCluster             bool                           `json:"isInCluster,omitempty"`             // 是否为集群内运行获取到的配置
-	watchStatus             map[string]*clusterWatchStatus // watch 类型为key，比如pod,deploy,node,pvc,sc
+	watchStatus             sync.Map                       // watch 类型为key，比如pod,deploy,node,pvc,sc
 	restConfig              *rest.Config                   // 直连rest.Config
 	kubeConfig              []byte                         // 集群配置.kubeconfig原始文件内容
-	watchStatusLock         sync.RWMutex                   // watch状态读写锁
 	Source                  ClusterConfigSource            `json:"source,omitempty"`                 // 配置文件来源
 	K8sGPTProblemsCount     int                            `json:"k8s_gpt_problems_count,omitempty"` // k8sGPT 扫描结果
 	K8sGPTProblemsResult    *analysis.ResultWithStatus     `json:"k8s_gpt_problems,omitempty"`       // k8sGPT 扫描结果
@@ -163,23 +162,22 @@ func (c *clusterService) appendHeartbeatRecord(cluster *ClusterConfig, success b
 
 // SetClusterWatchStarted 设置集群Watch启动状态
 func (c *ClusterConfig) SetClusterWatchStarted(watchType string, watcher watch.Interface) {
-	c.watchStatusLock.Lock()
-	defer c.watchStatusLock.Unlock()
-	c.watchStatus[watchType] = &clusterWatchStatus{
+	c.watchStatus.Store(watchType, &clusterWatchStatus{
 		WatchType:   watchType,
 		Started:     true,
 		StartedTime: time.Now(),
 		Watcher:     watcher,
-	}
+	})
 }
 
 // GetClusterWatchStatus 获取集群Watch状态
 func (c *ClusterConfig) GetClusterWatchStatus(watchType string) bool {
-	watcher := c.watchStatus[watchType]
-	if watcher == nil {
-		return false
+	if value, ok := c.watchStatus.Load(watchType); ok {
+		if watcher, ok := value.(*clusterWatchStatus); ok {
+			return watcher.Started
+		}
 	}
-	return watcher.Started
+	return false
 }
 func (c *ClusterConfig) GetKubeconfig() string {
 	return string(c.kubeConfig)
@@ -411,12 +409,15 @@ func (c *clusterService) disconnectWithOption(clusterID string, stopReconnect bo
 	cc.restConfig = nil
 	cc.Err = ""
 	cc.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-	for _, v := range cc.watchStatus {
-		if v.Watcher != nil {
-			v.Watcher.Stop()
-			klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
+	cc.watchStatus.Range(func(key, value interface{}) bool {
+		if v, ok := value.(*clusterWatchStatus); ok {
+			if v.Watcher != nil {
+				v.Watcher.Stop()
+				klog.V(6).Infof("%s 停止 Watch  %s", cc.ClusterName, v.WatchType)
+			}
 		}
-	}
+		return true
+	})
 	// 从kom解除
 	kom.Clusters().RemoveClusterById(clusterID)
 	klog.V(6).Infof("Disconnect 完成清理集群 %s", clusterID)
@@ -541,7 +542,6 @@ func (c *clusterService) ScanClustersInDir(path string) {
 				ClusterName:          context.Cluster,
 				Namespace:            context.Namespace,
 				kubeConfig:           content,
-				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 				Source:               ClusterConfigSourceFile,
 			}
@@ -610,7 +610,6 @@ func (c *clusterService) ScanClustersInDB() {
 						ClusterName:          context.Cluster,
 						Namespace:            context.Namespace,
 						kubeConfig:           []byte(item.Content),
-						watchStatus:          make(map[string]*clusterWatchStatus),
 						ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 						Server:               cluster.Server,
 						Source:               ClusterConfigSourceDB,
@@ -701,7 +700,6 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 				ClusterName:          context.Cluster,
 				Namespace:            context.Namespace,
 				kubeConfig:           content,
-				watchStatus:          make(map[string]*clusterWatchStatus),
 				ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 				Source:               ClusterConfigSourceFile,
 			}
@@ -867,7 +865,6 @@ func (c *clusterService) RegisterInCluster() {
 		Server:               config.Host,
 		IsInCluster:          true,
 		restConfig:           config,
-		watchStatus:          make(map[string]*clusterWatchStatus),
 		ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 		Source:               ClusterConfigSourceInCluster,
 	}
@@ -958,7 +955,6 @@ func (c *clusterService) RegisterAWSEKSCluster(config *komaws.EKSAuthConfig) (*C
 			Namespace:            context.Namespace,
 			Server:               cluster.Server,
 			kubeConfig:           []byte(content),
-			watchStatus:          make(map[string]*clusterWatchStatus),
 			ClusterConnectStatus: constants.ClusterConnectStatusDisconnected,
 			Source:               ClusterConfigSourceAWS,
 			IsAWSEKS:             true,
