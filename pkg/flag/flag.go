@@ -92,9 +92,10 @@ type Config struct {
 	HelmUpdateCron      string // Helm更新定时执行 cron 表达式
 
 	// 集群管理参数
-	HeartbeatIntervalSeconds     int // 心跳间隔时间（秒）
-	HeartbeatFailureThreshold    int // 心跳失败阈值
-	ReconnectMaxIntervalSeconds  int // 重连最大间隔时间（秒）
+	HeartbeatIntervalSeconds    int // 心跳间隔时间（秒）
+	HeartbeatFailureThreshold   int // 心跳失败阈值
+	ReconnectMaxIntervalSeconds int // 重连最大间隔时间（秒）
+	MaxRetryAttempts            int // 最大重试次数，默认100次
 }
 
 func Init() *Config {
@@ -303,6 +304,7 @@ func (c *Config) InitFlags() {
 	pflag.IntVar(&c.HeartbeatIntervalSeconds, "heartbeat-interval", getEnvAsInt("HEARTBEAT_INTERVAL", 30), "心跳间隔时间（秒），默认30秒")
 	pflag.IntVar(&c.HeartbeatFailureThreshold, "heartbeat-failure-threshold", getEnvAsInt("HEARTBEAT_FAILURE_THRESHOLD", 3), "心跳失败阈值，默认3次")
 	pflag.IntVar(&c.ReconnectMaxIntervalSeconds, "reconnect-max-interval", getEnvAsInt("RECONNECT_MAX_INTERVAL", 3600), "重连最大间隔时间（秒），默认3600秒")
+	pflag.IntVar(&c.MaxRetryAttempts, "max-retry-attempts", getEnvAsInt("MAX_RETRY_ATTEMPTS", 100), "最大重试次数，默认100次")
 
 	// 其他配置-打印配置信息
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")

@@ -131,6 +131,9 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	if m.ReconnectMaxIntervalSeconds > 0 {
 		cfg.ReconnectMaxIntervalSeconds = m.ReconnectMaxIntervalSeconds
 	}
+	if m.MaxRetryAttempts > 0 {
+		cfg.MaxRetryAttempts = m.MaxRetryAttempts
+	}
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret

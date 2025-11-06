@@ -39,6 +39,7 @@ type clusterService struct {
 	// 自动重连管理
 	reconnectCancel             sync.Map // 自动重连取消函数，改为sync.Map
 	ReconnectMaxIntervalSeconds int      // 自动重连最大退避秒数，默认3600
+	MaxRetryAttempts            int      // 最大重试次数，默认100次
 
 }
 
@@ -54,6 +55,7 @@ func newClusterService() *clusterService {
 		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
 		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
 		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
+		MaxRetryAttempts:            cfg.MaxRetryAttempts,
 	}
 }
 
@@ -63,8 +65,9 @@ func (c *clusterService) UpdateHeartbeatSettings() {
 	c.HeartbeatIntervalSeconds = cfg.HeartbeatIntervalSeconds
 	c.HeartbeatFailureThreshold = cfg.HeartbeatFailureThreshold
 	c.ReconnectMaxIntervalSeconds = cfg.ReconnectMaxIntervalSeconds
-	klog.V(4).Infof("更新集群心跳和重连配置：心跳间隔 %d 秒，心跳失败阈值 %d，重连最大间隔 %d 秒",
-		c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold, c.ReconnectMaxIntervalSeconds)
+	c.MaxRetryAttempts = cfg.MaxRetryAttempts
+	klog.V(4).Infof("更新集群心跳和重连配置：心跳间隔 %d 秒，心跳失败阈值 %d，重连最大间隔 %d 秒，最大重试次数 %d",
+		c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold, c.ReconnectMaxIntervalSeconds, c.MaxRetryAttempts)
 }
 
 func (c *clusterService) SetRegisterCallbackFunc(callback func(cluster *ClusterConfig) func()) {
@@ -1219,12 +1222,17 @@ func (c *clusterService) StartReconnect(clusterID string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.reconnectCancel.Store(clusterID, cancel)
 
-	klog.V(6).Infof("集群 %s 自动重连循环启动（最大退避 %ds）", clusterID, c.ReconnectMaxIntervalSeconds)
+	klog.V(6).Infof("集群 %s 自动重连循环启动（最大退避 %ds，最大重试次数 %d）", clusterID, c.ReconnectMaxIntervalSeconds, c.MaxRetryAttempts)
 
 	go func(id string) {
 		attempt := 0
 		backoff := 1 // 初始退避秒数
 		maxIntervalSeconds := c.ReconnectMaxIntervalSeconds
+		maxRetryAttempts := c.MaxRetryAttempts
+		// 如果最大重试次数小于等于0，则设置默认值100
+		if maxRetryAttempts <= 0 {
+			maxRetryAttempts = 100
+		}
 
 		for {
 			select {
@@ -1243,6 +1251,14 @@ func (c *clusterService) StartReconnect(clusterID string) {
 			}
 
 			attempt++
+			// 检查是否超过最大重试次数
+			if attempt > maxRetryAttempts {
+				klog.V(6).Infof("集群 %s 自动重连已达到最大重试次数 %d，停止重连", id, maxRetryAttempts)
+				cancel()
+				c.reconnectCancel.Delete(id)
+				return
+			}
+
 			klog.V(6).Infof("集群 %s 自动重连第 %d 次尝试：先断开清理后重连", id, attempt)
 
 			// 尝试连接
