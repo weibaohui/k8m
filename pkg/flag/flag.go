@@ -90,6 +90,11 @@ type Config struct {
 	LdapLogin2AuthClose bool   // LDAP登录后是否关闭认证
 	HelmCachePath       string // Helm缓存路径
 	HelmUpdateCron      string // Helm更新定时执行 cron 表达式
+
+	// 集群管理参数
+	HeartbeatIntervalSeconds     int // 心跳间隔时间（秒）
+	HeartbeatFailureThreshold    int // 心跳失败阈值
+	ReconnectMaxIntervalSeconds  int // 重连最大间隔时间（秒）
 }
 
 func Init() *Config {
@@ -293,6 +298,11 @@ func (c *Config) InitFlags() {
 	// Helm 配置
 	pflag.StringVar(&c.HelmCachePath, "helm-cache-path", defaultHelmCachePath, "Helm缓存路径")
 	pflag.StringVar(&c.HelmUpdateCron, "helm-update-cron", defaultHelmUpdateCron, "Helm更新定时执行 cron 表达式")
+
+	// 集群管理参数
+	pflag.IntVar(&c.HeartbeatIntervalSeconds, "heartbeat-interval", getEnvAsInt("HEARTBEAT_INTERVAL", 30), "心跳间隔时间（秒），默认30秒")
+	pflag.IntVar(&c.HeartbeatFailureThreshold, "heartbeat-failure-threshold", getEnvAsInt("HEARTBEAT_FAILURE_THRESHOLD", 3), "心跳失败阈值，默认3次")
+	pflag.IntVar(&c.ReconnectMaxIntervalSeconds, "reconnect-max-interval", getEnvAsInt("RECONNECT_MAX_INTERVAL", 3600), "重连最大间隔时间（秒），默认3600秒")
 
 	// 其他配置-打印配置信息
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")

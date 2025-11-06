@@ -127,8 +127,8 @@
                       "type": "input-number",
                       "suffix": "秒",
                       "label": "集群心跳间隔时间",
-                      "value": 10,
-                      "desc": "集群心跳检测的时间间隔（单位：秒），默认10秒。"
+                      "value": 30,
+                      "desc": "集群心跳检测的时间间隔（单位：秒），默认30秒。"
                     },
                     {
                       "name": "heartbeat_failure_threshold",
