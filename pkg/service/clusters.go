@@ -724,8 +724,9 @@ func (c *clusterService) RegisterClustersInDir(path string) {
 }
 
 // RegisterCluster 从已扫描的集群列表中注册指定的某个集群
-// 中文函数注释：负责单次注册尝试，不处理重试逻辑。连接失败时返回错误但保持"连接中"状态，
-// 以配合上层的重试机制。只有在遇到致命错误（如配置错误）时才直接设置为失败状态。
+// 负责单次注册尝试，不处理重试逻辑。连接失败时返回错误，
+// 由调用方（Connect 方法）负责设置状态为 Failed 以配合上层的重试机制。
+// 致命错误（如配置错误）会直接在本方法中设置为失败状态。
 func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, error) {
 	if clusterConfig == nil {
 		return false, fmt.Errorf("集群配置为空")
