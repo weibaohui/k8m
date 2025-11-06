@@ -151,7 +151,6 @@ func Init() {
 
 			// 启动Leader选举，成功后再启动定时任务
 			leaderCfg := leader.Config{
-				ClusterID:     "config/rancher-desktop",
 				LockName:      "k8m-leader-lock",
 				LeaseDuration: 60 * time.Second, // 增加到60秒
 				RenewDeadline: 50 * time.Second, // 增加到50秒

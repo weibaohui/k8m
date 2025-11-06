@@ -46,7 +46,7 @@ func Run(ctx context.Context, cfg Config) error {
 
 	// 非集群模式：既没有指定集群可用，也不是 InCluster，也没有本地 kubeconfig
 	if !hasCluster {
-		klog.V(6).Infof("[leader] 无可用的 K8s 集群，直接作为 Leader 运行（不进行选举）")
+		klog.V(2).Infof("[leader] 无可用的 K8s 集群，直接作为 Leader 运行（不进行选举）")
 		if cfg.OnStartedLeading != nil {
 			cfg.OnStartedLeading(ctx)
 		}
@@ -65,7 +65,7 @@ func Run(ctx context.Context, cfg Config) error {
 
 	id, _ := os.Hostname()
 	id = fmt.Sprintf("%s-%s", id, utils.RandNLengthString(3))
-	klog.V(4).Infof("[leader] 我的选举 ID：%s", id)
+	klog.V(2).Infof("[leader] 我的选举 ID：%s", id)
 	lock := &resourcelock.LeaseLock{
 		LeaseMeta: metav1.ObjectMeta{
 			Name:      cfg.LockName,
@@ -96,15 +96,15 @@ func Run(ctx context.Context, cfg Config) error {
 			},
 			OnNewLeader: func(identity string) {
 				if identity == id {
-					klog.V(6).Infof("[leader] 我成为新的 Leader：%s", id)
+					klog.V(2).Infof("[leader] 我成为新的 Leader：%s", id)
 				} else {
-					klog.V(6).Infof("[leader] 选举产生新的 Leader：%s", identity)
+					klog.V(2).Infof("[leader] 选举产生新的 Leader：%s", identity)
 				}
 			},
 		},
 	}
 
-	klog.V(6).Infof("[leader] 开始进行 Leader 选举（锁=%s/%s）", cfg.Namespace, cfg.LockName)
+	klog.V(2).Infof("[leader] 开始进行 Leader 选举（锁=%s/%s）", cfg.Namespace, cfg.LockName)
 	leaderelection.RunOrDie(ctx, leaderelectionCfg)
 	return nil
 }
