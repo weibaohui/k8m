@@ -42,6 +42,28 @@ type clusterService struct {
 
 }
 
+func newClusterService() *clusterService {
+	cfg := flag.Init()
+	return &clusterService{
+		clusterConfigs:              []*ClusterConfig{},
+		AggregateDelaySeconds:       61,
+		heartbeatCancel:             make(map[string]context.CancelFunc),
+		reconnectCancel:             make(map[string]context.CancelFunc),
+		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
+		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
+		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
+	}
+}
+
+func (c *clusterService) UpdateHeartbeatSettings() {
+	cfg := flag.Init()
+	c.HeartbeatIntervalSeconds = cfg.HeartbeatIntervalSeconds
+	c.HeartbeatFailureThreshold = cfg.HeartbeatFailureThreshold
+	c.ReconnectMaxIntervalSeconds = cfg.ReconnectMaxIntervalSeconds
+	klog.V(4).Infof("更新集群心跳和重连配置：心跳间隔 %d 秒，心跳失败阈值 %d，重连最大间隔 %d 秒",
+		c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold, c.ReconnectMaxIntervalSeconds)
+}
+
 func (c *clusterService) SetRegisterCallbackFunc(callback func(cluster *ClusterConfig) func()) {
 	c.callbackRegisterFunc = callback
 }
@@ -1097,7 +1119,7 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 
 	interval := time.Duration(c.HeartbeatIntervalSeconds) * time.Second
 	ticker := time.NewTicker(interval)
-	klog.V(6).Infof("集群 %s 心跳启动，间隔 %ds，失败阈值 %d", clusterID, c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold)
+	klog.V(6).Infof("集群 %s 心跳启动，间隔 %ds，失败阈值 %d，自动重连最大退避秒数 %ds", clusterID, c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold, c.ReconnectMaxIntervalSeconds)
 
 	go func() {
 		defer ticker.Stop()
