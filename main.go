@@ -61,6 +61,7 @@ import (
 	_ "github.com/weibaohui/k8m/swagger"
 	"github.com/weibaohui/kom/callbacks"
 	"k8s.io/klog/v2"
+	"time"
 )
 
 //go:embed ui/dist/*
@@ -149,7 +150,11 @@ func Init() {
 
 			// 启动Leader选举，成功后再启动定时任务
 			leaderCfg := leader.Config{
-				LockName: "k8m-leader-lock",
+				ClusterID:     "config/rancher-desktop",
+				LockName:      "k8m-leader-lock",
+				LeaseDuration: 60 * time.Second,  // 增加到60秒
+				RenewDeadline: 50 * time.Second,  // 增加到50秒
+				RetryPeriod:   10 * time.Second,  // 增加到10秒
 				OnStartedLeading: func(ctx context.Context) {
 					klog.V(2).Infof("[leader] 成为Leader，启动定时任务")
 					lua.InitClusterInspection()
@@ -160,6 +165,7 @@ func Init() {
 					klog.V(2).Infof("[leader] 不再是Leader")
 				},
 			}
+
 			// 使用后台context
 			ctx := context.Background()
 			if err := leader.Run(ctx, leaderCfg); err != nil {
