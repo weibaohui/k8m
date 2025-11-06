@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/service"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -18,6 +19,7 @@ import (
 
 // Config Leader 选举配置
 // 包含命名空间、锁名称、选举时长、续租截止、重试周期以及领导开始/结束回调。
+// LeaseDuration > RenewDeadline > RetryPeriod * 3
 type Config struct {
 	Namespace        string
 	LockName         string
@@ -62,6 +64,8 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	id, _ := os.Hostname()
+	id = fmt.Sprintf("%s-%s", id, utils.RandNLengthString(3))
+	klog.V(4).Infof("[leader] 我的选举 ID：%s", id)
 	lock := &resourcelock.LeaseLock{
 		LeaseMeta: metav1.ObjectMeta{
 			Name:      cfg.LockName,
