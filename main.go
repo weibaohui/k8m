@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 
+	"time"
+
 	"github.com/fatih/color"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
@@ -61,7 +63,6 @@ import (
 	_ "github.com/weibaohui/k8m/swagger"
 	"github.com/weibaohui/kom/callbacks"
 	"k8s.io/klog/v2"
-	"time"
 )
 
 //go:embed ui/dist/*
@@ -152,17 +153,21 @@ func Init() {
 			leaderCfg := leader.Config{
 				ClusterID:     "config/rancher-desktop",
 				LockName:      "k8m-leader-lock",
-				LeaseDuration: 60 * time.Second,  // 增加到60秒
-				RenewDeadline: 50 * time.Second,  // 增加到50秒
-				RetryPeriod:   10 * time.Second,  // 增加到10秒
+				LeaseDuration: 60 * time.Second, // 增加到60秒
+				RenewDeadline: 50 * time.Second, // 增加到50秒
+				RetryPeriod:   10 * time.Second, // 增加到10秒
 				OnStartedLeading: func(ctx context.Context) {
-					klog.V(2).Infof("[leader] 成为Leader，启动定时任务")
+					klog.V(2).Infof("[leader] 成为Leader，启动定时任务（集群巡检、Helm仓库更新）")
 					lua.InitClusterInspection()
 					// 启动helm 更新repo定时任务
 					helm2.StartUpdateHelmRepoInBackground()
 				},
 				OnStoppedLeading: func() {
-					klog.V(2).Infof("[leader] 不再是Leader")
+					klog.V(2).Infof("[leader] 不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
+					// 停止集群巡检任务
+					lua.StopClusterInspection()
+					// 停止helm更新任务
+					helm2.StopUpdateHelmRepoInBackground()
 				},
 			}
 

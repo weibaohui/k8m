@@ -34,6 +34,7 @@ func init() {
 	// 启动TaskManager
 	localTaskManager.Start()
 }
+
 func InitClusterInspection() {
 	once.Do(func() {
 		// 确保实例非空后再加载 DB 任务
@@ -42,6 +43,16 @@ func InitClusterInspection() {
 		klog.V(6).Infof("新增 集群巡检 定时任务 ")
 	})
 }
+
+// StopClusterInspection 停止集群巡检定时任务
+func StopClusterInspection() {
+	if localTaskManager != nil {
+		klog.V(6).Infof("停止 集群巡检 定时任务 ")
+		// 取消所有任务
+		localTaskManager.Stop()
+	}
+}
+
 func NewScheduleBackground() *ScheduleBackground {
 	sbOnce.Do(func() {
 		if localScheduleBackground == nil {
