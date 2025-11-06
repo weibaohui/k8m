@@ -37,8 +37,8 @@ type clusterService struct {
 	HeartbeatFailureThreshold int                           // 心跳失败阈值，默认3
 
 	// 自动重连管理
-	reconnectCancel             map[string]context.CancelFunc // 自动重连取消函数
-	ReconnectMaxIntervalSeconds int                           // 自动重连最大退避秒数，默认3600
+	reconnectCancel             sync.Map // 自动重连取消函数，改为sync.Map
+	ReconnectMaxIntervalSeconds int      // 自动重连最大退避秒数，默认3600
 
 }
 
@@ -52,7 +52,6 @@ func newClusterService() *clusterService {
 		clusterConfigs:              []*ClusterConfig{},
 		AggregateDelaySeconds:       61,
 		heartbeatCancel:             make(map[string]context.CancelFunc),
-		reconnectCancel:             make(map[string]context.CancelFunc),
 		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
 		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
 		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
@@ -1215,18 +1214,17 @@ func (c *clusterService) StartReconnect(clusterID string) {
 	if c.ReconnectMaxIntervalSeconds <= 0 {
 		c.ReconnectMaxIntervalSeconds = 3600
 	}
-	if c.reconnectCancel == nil {
-		c.reconnectCancel = make(map[string]context.CancelFunc)
-	}
 
 	// 若已有自动重连任务，先停止
-	if cancel, ok := c.reconnectCancel[clusterID]; ok && cancel != nil {
-		cancel()
-		delete(c.reconnectCancel, clusterID)
+	if cancelInterface, ok := c.reconnectCancel.Load(clusterID); ok {
+		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
+			cancel()
+		}
+		c.reconnectCancel.Delete(clusterID)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	c.reconnectCancel[clusterID] = cancel
+	c.reconnectCancel.Store(clusterID, cancel)
 
 	klog.V(6).Infof("集群 %s 自动重连循环启动（最大退避 %ds）", clusterID, c.ReconnectMaxIntervalSeconds)
 
@@ -1247,7 +1245,7 @@ func (c *clusterService) StartReconnect(clusterID string) {
 			if c.IsConnected(id) {
 				klog.V(6).Infof("集群 %s 已连接，自动重连循环结束", id)
 				cancel()
-				delete(c.reconnectCancel, id)
+				c.reconnectCancel.Delete(id)
 				return
 			}
 
@@ -1261,7 +1259,7 @@ func (c *clusterService) StartReconnect(clusterID string) {
 			if c.IsConnected(id) {
 				klog.V(6).Infof("集群 %s 自动重连成功", id)
 				cancel()
-				delete(c.reconnectCancel, id)
+				c.reconnectCancel.Delete(id)
 				return
 			}
 
@@ -1276,12 +1274,11 @@ func (c *clusterService) StartReconnect(clusterID string) {
 // StopReconnect 停止指定集群的自动重连循环
 // 中文函数注释：若自动重连循环存在则停止，并清理取消函数。
 func (c *clusterService) StopReconnect(clusterID string) {
-	if c.reconnectCancel == nil {
-		return
-	}
-	if cancel, ok := c.reconnectCancel[clusterID]; ok && cancel != nil {
-		cancel()
-		delete(c.reconnectCancel, clusterID)
+	if cancelInterface, ok := c.reconnectCancel.Load(clusterID); ok {
+		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
+			cancel()
+		}
+		c.reconnectCancel.Delete(clusterID)
 		klog.V(6).Infof("集群 %s 自动重连循环已停止", clusterID)
 	}
 }
