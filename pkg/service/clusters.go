@@ -352,6 +352,9 @@ func (c *clusterService) Connect(clusterID string) {
 		if err != nil {
 			klog.V(4).Infof("集群[%s] 连接失败: %v，等待下一次重试", clusterID, err)
 			// 注意：这里不设置状态，让上层重试循环继续工作
+			if cc.ClusterConnectStatus == constants.ClusterConnectStatusConnecting {
+				cc.ClusterConnectStatus = constants.ClusterConnectStatusFailed
+			}
 		} else {
 			klog.V(4).Infof("集群[%s] 连接成功", clusterID)
 		}
