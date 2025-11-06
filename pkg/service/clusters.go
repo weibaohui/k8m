@@ -38,7 +38,7 @@ type clusterService struct {
 
 	// 自动重连管理
 	reconnectCancel             map[string]context.CancelFunc // 自动重连取消函数
-	ReconnectMaxIntervalSeconds int                           // 自动重连最大退避秒数，默认60
+	ReconnectMaxIntervalSeconds int                           // 自动重连最大退避秒数，默认3600
 
 }
 
