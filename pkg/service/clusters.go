@@ -44,6 +44,10 @@ type clusterService struct {
 
 func newClusterService() *clusterService {
 	cfg := flag.Init()
+	// Service.ClusterService()使用了init启动，那么会优先于main函数中的执行逻辑（config update from db）
+	// 导致return 实例的时候，使用的是cfg中的默认值
+	// 因此我们在下面加载下数据库中的配置，确保在后台管理界面中设置的值，是生效的
+	_ = ConfigService().UpdateFlagFromDBConfig()
 	return &clusterService{
 		clusterConfigs:              []*ClusterConfig{},
 		AggregateDelaySeconds:       61,
@@ -57,6 +61,7 @@ func newClusterService() *clusterService {
 
 func (c *clusterService) UpdateHeartbeatSettings() {
 	cfg := flag.Init()
+
 	c.HeartbeatIntervalSeconds = cfg.HeartbeatIntervalSeconds
 	c.HeartbeatFailureThreshold = cfg.HeartbeatFailureThreshold
 	c.ReconnectMaxIntervalSeconds = cfg.ReconnectMaxIntervalSeconds
