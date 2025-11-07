@@ -69,9 +69,11 @@ func (m *mcpService) AddServers(ctx context.Context, servers []models.MCPServerC
 		}
 
 		if server.Enabled {
+
 			ctxc, cancel := context.WithTimeout(ctx, 30*time.Second)
+			defer cancel()
 			err := m.host.ConnectServer(ctxc, server.Name)
-			cancel()
+
 			if err != nil {
 				klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
 				continue
