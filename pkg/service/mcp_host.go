@@ -142,7 +142,7 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 	}
 
 	// 在锁外同步服务器能力
-	if err := m.SyncServerCapabilities(context.Background(), serverName); err != nil {
+	if err := m.SyncServerCapabilities(ctx, serverName); err != nil {
 		return fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
@@ -26,7 +27,7 @@ func (m *mcpService) Init() {
 func (m *mcpService) Host() *MCPHost {
 	return m.host
 }
-func (m *mcpService) AddServer(server models.MCPServerConfig) {
+func (m *mcpService) AddServer(ctx context.Context, server models.MCPServerConfig) {
 	// 将server转换为mcp.ServerConfig
 	serverConfig := ServerConfig{
 		ID:      server.ID,
@@ -41,9 +42,9 @@ func (m *mcpService) AddServer(server models.MCPServerConfig) {
 	}
 
 	if server.Enabled {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctxc, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
-		err := m.host.ConnectServer(ctx, server.Name)
+		err := m.host.ConnectServer(ctxc, server.Name)
 		if err != nil {
 			klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
 			return
@@ -52,7 +53,7 @@ func (m *mcpService) AddServer(server models.MCPServerConfig) {
 	}
 
 }
-func (m *mcpService) AddServers(servers []models.MCPServerConfig) {
+func (m *mcpService) AddServers(ctx context.Context, servers []models.MCPServerConfig) {
 	for _, server := range servers {
 		// 将server转换为mcp.ServerConfig
 		serverConfig := ServerConfig{
@@ -68,9 +69,11 @@ func (m *mcpService) AddServers(servers []models.MCPServerConfig) {
 		}
 
 		if server.Enabled {
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			err := m.host.ConnectServer(ctx, server.Name)
-			cancel()
+
+			ctxc, cancel := context.WithTimeout(ctx, 30*time.Second)
+			defer cancel()
+			err := m.host.ConnectServer(ctxc, server.Name)
+
 			if err != nil {
 				klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
 				continue
@@ -96,20 +99,20 @@ func (m *mcpService) Start() {
 	if err != nil {
 		return
 	}
-	m.AddServers(mcpServers)
+	ctx := amis.GetContextForAdmin()
+	m.AddServers(ctx, mcpServers)
 }
 
 func (m *mcpService) RemoveServerById(server models.MCPServerConfig) {
 	m.host.RemoveServerById(server.ID)
 }
 
-func (m *mcpService) UpdateServer(entity models.MCPServerConfig) {
+func (m *mcpService) UpdateServer(ctx context.Context, entity models.MCPServerConfig) {
 	m.RemoveServerById(entity)
-	m.AddServer(entity)
+	m.AddServer(ctx, entity)
 }
 
-func (m *mcpService) GetTools(entity models.MCPServerConfig) ([]mcp2.Tool, error) {
-	ctx := context.Background()
+func (m *mcpService) GetTools(ctx context.Context, entity models.MCPServerConfig) ([]mcp2.Tool, error) {
 	return m.Host().GetTools(ctx, entity.Name)
 }
 

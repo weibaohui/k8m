@@ -1,6 +1,8 @@
 package mcp
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -42,7 +44,8 @@ func (m *ServerController) List(c *gin.Context) {
 // @Router /admin/mcp/connect/{name} [post]
 func (m *ServerController) Connect(c *gin.Context) {
 	name := c.Param("name")
-	err := service.McpService().Host().ConnectServer(c.Request.Context(), name)
+	ctx := amis.GetContextWithUser(c)
+	err := service.McpService().Host().ConnectServer(ctx, name)
 	amis.WriteJsonErrorOrOK(c, err)
 }
 
@@ -89,10 +92,11 @@ func (m *ServerController) Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-
-	service.McpService().UpdateServer(entity)
+	ctx := amis.GetContextWithUser(c)
+	service.McpService().UpdateServer(ctx, entity)
 	removeTools(entity)
-	addTools(params, entity)
+
+	addTools(ctx, params, entity)
 
 	amis.WriteJsonErrorOrOK(c, err)
 }
@@ -127,9 +131,10 @@ func (m *ServerController) QuickSave(c *gin.Context) {
 	}
 
 	removeTools(entity)
-	service.McpService().UpdateServer(entity)
+	ctx := amis.GetContextWithUser(c)
+	service.McpService().UpdateServer(ctx, entity)
 	if status == "true" {
-		addTools(params, entity)
+		addTools(ctx, params, entity)
 	}
 
 	amis.WriteJsonErrorOrOK(c, err)
@@ -146,9 +151,9 @@ func (m *ServerController) MCPLogList(c *gin.Context) {
 	amis.WriteJsonListTotalWithError(c, count, list, err)
 }
 
-func addTools(params *dao.Params, entity models.MCPServerConfig) bool {
+func addTools(ctx context.Context, params *dao.Params, entity models.MCPServerConfig) bool {
 	// 获取Tools列表
-	if tools, err := service.McpService().GetTools(entity); err == nil {
+	if tools, err := service.McpService().GetTools(ctx, entity); err == nil {
 		for _, tool := range tools {
 			mt := models.MCPTool{
 				ServerName:  entity.Name,
