@@ -29,3 +29,10 @@ func GetContextWithUser(c *gin.Context) context.Context {
 
 	return ctx
 }
+
+func GetContextForAdmin() context.Context {
+	// cfg := flag.Init()
+	// todo 内部使用逻辑
+	ctx := context.WithValue(context.Background(), constants.JwtUserName, "admin")
+	return ctx
+}
