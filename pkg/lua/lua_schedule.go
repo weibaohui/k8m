@@ -39,14 +39,13 @@ func init() {
 // InitClusterInspection initializes the cluster inspection system
 // This function is now idempotent and can be called multiple times
 func InitClusterInspection() {
-	initMutex.Lock()
-	defer initMutex.Unlock()
-
 	// Check if we need to reinitialize the task manager
+	initMutex.Lock()
 	if localTaskManager == nil {
 		localTaskManager = NewTaskManager()
 		localTaskManager.Start()
 	}
+	initMutex.Unlock()
 
 	// 确保实例非空后再加载 DB 任务
 	sb := NewScheduleBackground()
