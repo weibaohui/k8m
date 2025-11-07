@@ -20,7 +20,8 @@ import (
 type ScheduleBackground struct {
 }
 
-var once sync.Once
+// Use a mutex to protect the initialization state
+var initMutex sync.Mutex
 var localTaskManager *TaskManager
 
 var localScheduleBackground *ScheduleBackground
@@ -34,14 +35,38 @@ func init() {
 	// 启动TaskManager
 	localTaskManager.Start()
 }
+
+// InitClusterInspection initializes the cluster inspection system
+// This function is now idempotent and can be called multiple times
 func InitClusterInspection() {
-	once.Do(func() {
-		// 确保实例非空后再加载 DB 任务
-		sb := NewScheduleBackground()
-		sb.AddCronJobFromDB()
-		klog.V(6).Infof("新增 集群巡检 定时任务 ")
-	})
+	// Check if we need to reinitialize the task manager
+	initMutex.Lock()
+	if localTaskManager == nil {
+		localTaskManager = NewTaskManager()
+		localTaskManager.Start()
+	}
+	initMutex.Unlock()
+
+	// 确保实例非空后再加载 DB 任务
+	sb := NewScheduleBackground()
+	sb.AddCronJobFromDB()
+	klog.V(6).Infof("新增 集群巡检 定时任务 ")
 }
+
+// StopClusterInspection 停止集群巡检定时任务
+func StopClusterInspection() {
+	initMutex.Lock()
+	defer initMutex.Unlock()
+
+	if localTaskManager != nil {
+		klog.V(6).Infof("停止 集群巡检 定时任务 ")
+		// 取消所有任务
+		localTaskManager.Stop()
+		// Clear the task manager to allow reinitialization
+		localTaskManager = nil
+	}
+}
+
 func NewScheduleBackground() *ScheduleBackground {
 	sbOnce.Do(func() {
 		if localScheduleBackground == nil {
@@ -220,7 +245,6 @@ func (s *ScheduleBackground) IsEventStatusPass(status string) bool {
 
 // AddCronJobFromDB  后台自动执行调度
 func (s *ScheduleBackground) AddCronJobFromDB() {
-
 	// 1、读取数据库中的定义，然后创建
 	sch := models.InspectionSchedule{}
 
@@ -238,12 +262,27 @@ func (s *ScheduleBackground) AddCronJobFromDB() {
 	}
 	klog.V(6).Infof("启动集群巡检任务完成，共启动%d个", count)
 }
+
 func (s *ScheduleBackground) Remove(scheduleID uint) {
-	localTaskManager.Remove(fmt.Sprintf("%d", scheduleID))
-	klog.V(6).Infof("移除巡检任务[id=%d]", scheduleID)
+	initMutex.Lock()
+	defer initMutex.Unlock()
+
+	if localTaskManager != nil {
+		localTaskManager.Remove(fmt.Sprintf("%d", scheduleID))
+		klog.V(6).Infof("移除巡检任务[id=%d]", scheduleID)
+	}
 }
 
 func (s *ScheduleBackground) Add(scheduleID uint) {
+	initMutex.Lock()
+	defer initMutex.Unlock()
+
+	// Check if task manager is available
+	if localTaskManager == nil {
+		klog.V(6).Infof("任务管理器未初始化，跳过添加巡检任务[id=%d]", scheduleID)
+		return
+	}
+
 	// 1、读取数据库中的定义，然后创建
 	sch := models.InspectionSchedule{}
 	sch.ID = scheduleID
@@ -289,6 +328,7 @@ func (s *ScheduleBackground) Add(scheduleID uint) {
 	}
 	klog.V(6).Infof("添加巡检任务[id=%d]", scheduleID)
 }
+
 func (s *ScheduleBackground) Update(scheduleID uint) {
 	s.Add(scheduleID)
 }
