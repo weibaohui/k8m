@@ -57,6 +57,7 @@ func (mc *Controller) Create(c *gin.Context) {
 		McpKey:      utils.RandNLengthString(8),
 		Jwt:         jwt,
 		Description: req.Description,
+		LastUsedAt:  time.Now(),
 	}
 
 	// 保存到数据库
