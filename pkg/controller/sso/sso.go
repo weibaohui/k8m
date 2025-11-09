@@ -25,7 +25,7 @@ import (
 func (au *AuthController) GetSSOConfig(c *gin.Context) {
 	// 获取所有的SSO配置
 	var ssoConfigs []models.SSOConfig
-	err := dao.DB().Select([]string{"name", "type"}).Where("enabled == true").Find(&ssoConfigs).Error
+	err := dao.DB().Select([]string{"name", "type"}).Where("enabled = ? ", true).Find(&ssoConfigs).Error
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

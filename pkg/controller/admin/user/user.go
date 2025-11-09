@@ -181,11 +181,10 @@ func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB
 // @Success 200 {object} map[string]any
 // @Router /admin/user/option_list [get]
 func (a *AdminUserController) UserOptionList(c *gin.Context) {
-	params := dao.BuildParams(c)
-	m := &models.User{}
-	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
-		return db.Distinct("username")
-	})
+
+	var items []models.User
+	err := dao.DB().Model(&models.User{}).Select("username", "id").Distinct("username").Scan(&items).Error
+
 	if err != nil {
 		amis.WriteJsonData(c, gin.H{
 			"options": make([]map[string]string, 0),
