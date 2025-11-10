@@ -828,7 +828,7 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 	if config.IsAWSEKS {
 		theaws := kom.Clusters().GetClusterById(config.ClusterID)
 		if theaws != nil {
-			if token, _, err := theaws.AWSAuthProvider.GetToken(context.Background()); err == nil {
+			if token, _, errT := theaws.AWSAuthProvider.GetToken(context.Background()); errT == nil {
 				config.restConfig.BearerToken = token
 			}
 		}
