@@ -827,10 +827,15 @@ func (c *clusterService) LoadRestConfig(config *ClusterConfig) error {
 
 	if config.IsAWSEKS {
 		theaws := kom.Clusters().GetClusterById(config.ClusterID)
-		if theaws != nil {
+		if theaws != nil && theaws.AWSAuthProvider != nil {
 			if token, _, errT := theaws.AWSAuthProvider.GetToken(context.Background()); errT == nil {
 				config.restConfig.BearerToken = token
+				klog.V(6).Infof("成功为 AWS EKS 集群[%s]设置 Bearer Token", config.ClusterID)
+			} else {
+				klog.V(4).Infof("获取 AWS EKS 集群[%s] Token 失败: %v", config.ClusterID, errT)
 			}
+		} else {
+			klog.V(4).Infof("无法为 AWS EKS 集群[%s]获取 Token：集群或 AWSAuthProvider 不可用", config.ClusterID)
 		}
 	}
 
