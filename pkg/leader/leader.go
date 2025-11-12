@@ -35,7 +35,7 @@ type Config struct {
 // 支持集群优先级：指定 ClusterID -> InCluster -> 本地 kubeconfig。
 // 仅当以上方式均不可用时，降级为本地 Leader（不进行选举）。
 func Run(ctx context.Context, cfg Config) error {
-	clientset, hasCluster, err := getClientset(cfg.ClusterID)
+	clientset, hasCluster, err := GetClientSet(cfg.ClusterID)
 	if err != nil {
 		return fmt.Errorf("get clientset failed: %w", err)
 	}
@@ -109,13 +109,13 @@ func Run(ctx context.Context, cfg Config) error {
 	return nil
 }
 
-// getClientset 获取 Kubernetes ClientSet
+// GetClientset 获取 Kubernetes ClientSet
 // 优先顺序：
 // 1. 指定 ClusterID（外部集群）
 // 2. InCluster 配置
 // 3. 本地 KUBECONFIG 或 ~/.kube/config
 // 返回值第二个布尔含义：是否存在可用集群（用于决定是否进行选举）
-func getClientset(clusterID string) (*kubernetes.Clientset, bool, error) {
+func GetClientSet(clusterID string) (*kubernetes.Clientset, bool, error) {
 	// 如果提供了 ClusterID，优先尝试使用指定集群的配置
 	if clusterID != "" {
 		klog.V(6).Infof("[leader] 尝试使用指定的 ClusterID 获取配置：%s", clusterID)

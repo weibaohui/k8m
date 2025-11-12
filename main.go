@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-
 	"time"
 
 	"github.com/fatih/color"
@@ -56,6 +55,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/flag"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/leader"
+	"github.com/weibaohui/k8m/pkg/lease"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
@@ -141,6 +141,18 @@ func Init() {
 	// 启动watch和定时任务（仅在成为Leader时执行）
 	go func() {
 		service.McpService().Init()
+		// 初始化 Lease 同步（监听器与后续 Leader 清理）
+		cfg := flag.Init()
+		leaseOpts := lease.Options{
+			Namespace:                 cfg.LeaseNamespace,
+			Enable:                    cfg.EnableLeaseSync,
+			LeaseDurationSeconds:      cfg.LeaseDurationSeconds,
+			LeaseRenewIntervalSeconds: cfg.LeaseRenewIntervalSeconds,
+			ResyncPeriod:              30 * time.Second,
+			ClusterID:                 "config/rancher-desktop",
+		}
+		_ = service.LeaseManager().Init(context.Background(), leaseOpts)
+		_ = service.LeaseManager().StartWatcher(context.Background(), service.ClusterService().Connect, service.ClusterService().Disconnect)
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
@@ -160,6 +172,8 @@ func Init() {
 					lua.InitClusterInspection()
 					// 启动helm 更新repo定时任务
 					helm2.StartUpdateHelmRepoInBackground()
+					// 启动 Lease 过期清理（Leader）
+					_ = service.LeaseManager().StartLeaderCleanup(ctx)
 				},
 				OnStoppedLeading: func() {
 					klog.V(2).Infof("[leader] 不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
