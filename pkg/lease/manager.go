@@ -2,10 +2,13 @@ package lease
 
 import (
 	"context"
+	"crypto/sha1"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/flag"
 	coordinationv1 "k8s.io/api/coordination/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -153,7 +156,7 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 		return nil
 	}
 	// 仅监听指定命名空间和标签
-	selector := labels.SelectorFromSet(labels.Set{"app": "k8m", "k8m.weibaohui.cn/type": "cluster"})
+	selector := labels.SelectorFromSet(labels.Set{"app": "k8m"})
 	factory := informers.NewSharedInformerFactoryWithOptions(m.clientset, m.resyncPeriod,
 		informers.WithNamespace(m.namespace), informers.WithTweakListOptions(func(lo *metav1.ListOptions) {
 			lo.LabelSelector = selector.String()
@@ -161,7 +164,7 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 	informer := factory.Coordination().V1().Leases().Informer()
 
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
+		AddFunc: func(obj any) {
 			l := obj.(*coordinationv1.Lease)
 			if !isLeaseValid(l, m.durationSec) {
 				return
@@ -204,7 +207,7 @@ func (m *manager) StartLeaderCleanup(ctx context.Context) error {
 				return
 			case <-ticker.C:
 				lc := m.clientset.CoordinationV1().Leases(m.namespace)
-				ls, err := lc.List(ctx, metav1.ListOptions{LabelSelector: "app=k8m,k8m.weibaohui.cn/type=cluster"})
+				ls, err := lc.List(ctx, metav1.ListOptions{LabelSelector: "app=k8m"})
 				if err != nil {
 					klog.V(6).Infof("清理过期 Lease 失败：%v", err)
 					continue
@@ -222,9 +225,11 @@ func (m *manager) StartLeaderCleanup(ctx context.Context) error {
 	return nil
 }
 
-// 内部方法与工具
 func (m *manager) leaseName(clusterID string) string {
-	return fmt.Sprintf("k8m-cluster-%s", utils.RandNLengthString(4))
+	cfg := flag.Init()
+	prefix := strings.ToLower(cfg.ProductName)
+	sum := sha1.Sum([]byte(clusterID))
+	return fmt.Sprintf("%s-cluster-%x", prefix, sum[:4])
 }
 
 func (m *manager) renewLoop(ctx context.Context, name string) {
