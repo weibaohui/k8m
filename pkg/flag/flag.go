@@ -313,7 +313,7 @@ func (c *Config) InitFlags() {
 	pflag.IntVar(&c.MaxRetryAttempts, "max-retry-attempts", getEnvAsInt("MAX_RETRY_ATTEMPTS", 100), "最大重试次数，默认100次")
 
 	// Lease 同步参数
-	pflag.StringVar(&c.HostClusterID, "host-cluster-id", getEnv("HOST_CLUSTER_ID", ""), "为空会优先使用InCluster模式，否则会使用HostClusterID指定的集群。集群ID从k8m界面-多集群管理中复制")
+	pflag.StringVar(&c.HostClusterID, "host-cluster-id", getEnv("HOST_CLUSTER_ID", ""), "为空会使用InCluster模式，否则会使用HostClusterID指定的集群。集群ID从k8m界面-多集群管理中复制")
 	pflag.StringVar(&c.LeaseNamespace, "lease-namespace", getEnv("LEASE_NAMESPACE", ""), "Lease 命名空间，默认自动检测")
 	pflag.IntVar(&c.LeaseDurationSeconds, "lease-duration-seconds", getEnvAsInt("LEASE_DURATION_SECONDS", 60), "Lease 有效时长（秒），默认60")
 	pflag.IntVar(&c.LeaseRenewIntervalSeconds, "lease-renew-interval-seconds", getEnvAsInt("LEASE_RENEW_INTERVAL_SECONDS", 20), "Lease 续约间隔（秒），默认20")
