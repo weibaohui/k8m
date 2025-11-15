@@ -17,5 +17,6 @@
 - [变量配置选项说明](param-config.md) - 配置选项的说明。
 - [路由结构图](route_structure.md) - K8M系统的API路由结构图。
  - [集群与命名空间切换说明](cluster-namespace.md) - 前端获取/设置集群与命名空间、AMIS 过滤器用法及示例。
+ - [多实例部署与协同](multi-instance.md) - 多实例模式的原理与参数设置。
 
   
