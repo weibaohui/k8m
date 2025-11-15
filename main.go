@@ -150,8 +150,14 @@ func Init() {
 			ResyncPeriod:              30 * time.Second,
 			ClusterID:                 cfg.HostClusterID,
 		}
-		_ = service.LeaseManager().Init(context.Background(), leaseOpts)
-		_ = service.LeaseManager().StartWatcher(context.Background(), service.ClusterService().Connect, service.ClusterService().Disconnect)
+		err = service.LeaseManager().Init(context.Background(), leaseOpts)
+		if err != nil {
+			klog.Errorf("初始化 Lease 管理器失败: %v", err)
+		}
+		err = service.LeaseManager().StartWatcher(context.Background(), service.ClusterService().Connect, service.ClusterService().Disconnect)
+		if err != nil {
+			klog.Errorf("启动 Lease 管理器监听器失败: %v", err)
+		}
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
