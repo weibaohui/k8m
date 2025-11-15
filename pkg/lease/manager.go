@@ -114,6 +114,7 @@ func (m *manager) EnsureOnConnect(ctx context.Context, clusterID string) error {
 			Namespace: m.namespace,
 			Labels: map[string]string{
 				"app":       "k8m",
+				"type":      "cluster-sync",
 				"clusterID": string(clusterIDBase64),
 			},
 		},
@@ -156,7 +157,7 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 		return nil
 	}
 	// 仅监听指定命名空间和标签
-	selector := labels.SelectorFromSet(labels.Set{"app": "k8m"})
+	selector := labels.SelectorFromSet(labels.Set{"app": "k8m", "type": "cluster-sync"})
 	factory := informers.NewSharedInformerFactoryWithOptions(m.clientset, m.resyncPeriod,
 		informers.WithNamespace(m.namespace), informers.WithTweakListOptions(func(lo *metav1.ListOptions) {
 			lo.LabelSelector = selector.String()
@@ -175,16 +176,16 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 				return
 			}
 			klog.V(6).Infof("有效 Lease 新增，外部连接集群：%s", clusterID)
-			go onConnect(cid)
+			go onConnect(clusterID)
 		},
 
-		DeleteFunc: func(obj interface{}) {
+		DeleteFunc: func(obj any) {
 			l := obj.(*coordinationv1.Lease)
 			cid := l.Labels["clusterID"]
 			clusterID := utils.MustDecodeBase64(cid)
 
 			klog.V(6).Infof("Lease 删除，断开本地集群：%s", clusterID)
-			go onDisconnect(cid)
+			go onDisconnect(clusterID)
 		},
 	})
 
@@ -207,7 +208,7 @@ func (m *manager) StartLeaderCleanup(ctx context.Context) error {
 				return
 			case <-ticker.C:
 				lc := m.clientset.CoordinationV1().Leases(m.namespace)
-				ls, err := lc.List(ctx, metav1.ListOptions{LabelSelector: "app=k8m"})
+				ls, err := lc.List(ctx, metav1.ListOptions{LabelSelector: "app=k8m,type=cluster-sync"})
 				if err != nil {
 					klog.V(6).Infof("清理过期 Lease 失败：%v", err)
 					continue
