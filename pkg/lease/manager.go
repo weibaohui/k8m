@@ -165,7 +165,11 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 				return
 			}
 			cid := l.Labels["clusterID"]
-			clusterID := utils.MustDecodeBase64(cid)
+			clusterID, err := utils.UrlSafeBase64Decode(cid)
+			if err != nil {
+				klog.V(6).Infof("解码 Lease 标签 clusterID 失败：%v", err)
+				return
+			}
 			if deref(l.Spec.HolderIdentity) == m.instanceID {
 				return
 			}
@@ -176,7 +180,11 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 		DeleteFunc: func(obj any) {
 			l := obj.(*coordinationv1.Lease)
 			cid := l.Labels["clusterID"]
-			clusterID := utils.MustDecodeBase64(cid)
+			clusterID, err := utils.UrlSafeBase64Decode(cid)
+			if err != nil {
+				klog.V(6).Infof("解码 Lease 标签 clusterID 失败：%v", err)
+				return
+			}
 
 			klog.V(6).Infof("Lease 删除，断开本地集群：%s", clusterID)
 			go onDisconnect(clusterID)
@@ -188,7 +196,7 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 	return nil
 }
 
-// StartLeaderCleanup 中文函数注释：仅由 Leader 调用，定期清理过期 Lease；通过 Delete 事件驱动所有实例断开。
+// StartLeaderCleanup 仅由 Leader 调用，定期清理过期 Lease；通过 Delete 事件驱动所有实例断开。
 func (m *manager) StartLeaderCleanup(ctx context.Context) error {
 	if m.clientset == nil {
 		return nil
