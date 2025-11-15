@@ -26,10 +26,20 @@ func EncodeBase64(str string) string {
 	return base64.StdEncoding.EncodeToString([]byte(str))
 }
 
-func UrlSafeBase64Decode(s string) ([]byte, error) {
+func UrlSafeBase64Encode(s string) string {
+	encoded := base64.URLEncoding.EncodeToString([]byte(s))
+	// 去掉填充的等号，使其更URL安全
+	encoded = strings.TrimRight(encoded, "=")
+	return encoded
+}
+func UrlSafeBase64Decode(s string) (string, error) {
 	// 补等号
 	if m := len(s) % 4; m != 0 {
 		s += strings.Repeat("=", 4-m)
 	}
-	return base64.URLEncoding.DecodeString(s)
+	decodedBytes, err := base64.URLEncoding.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+	return string(decodedBytes), nil
 }

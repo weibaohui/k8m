@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-
 	"time"
 
 	"github.com/fatih/color"
@@ -56,6 +55,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/flag"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/leader"
+	"github.com/weibaohui/k8m/pkg/lease"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
@@ -141,6 +141,30 @@ func Init() {
 	// 启动watch和定时任务（仅在成为Leader时执行）
 	go func() {
 		service.McpService().Init()
+		// 初始化 Lease 同步（监听器与后续 Leader 清理）
+		cfg := flag.Init()
+		leaseOpts := lease.Options{
+			Namespace:                 cfg.LeaseNamespace,
+			LeaseDurationSeconds:      cfg.LeaseDurationSeconds,
+			LeaseRenewIntervalSeconds: cfg.LeaseRenewIntervalSeconds,
+			ResyncPeriod:              30 * time.Second,
+			ClusterID:                 cfg.HostClusterID,
+		}
+		leaseCtx := context.Background()
+		if err = service.LeaseManager().Init(leaseCtx, leaseOpts); err == nil {
+			err = service.LeaseManager().StartWatcher(leaseCtx, service.ClusterService().Connect, service.ClusterService().Disconnect)
+			if err != nil {
+				klog.Errorf("启动 Lease 管理器监听器失败: %v", err)
+			}
+			// 启动 Lease 过期清理（Leader）
+			err = service.LeaseManager().StartLeaderCleanup(leaseCtx)
+			if err != nil {
+				klog.Errorf("启动 Lease 管理器过期清理失败: %v", err)
+			}
+		} else {
+			klog.Errorf("初始化 Lease 管理器失败: %v", err)
+		}
+
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()

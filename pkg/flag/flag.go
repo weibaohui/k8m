@@ -96,6 +96,12 @@ type Config struct {
 	HeartbeatFailureThreshold   int // 心跳失败阈值
 	ReconnectMaxIntervalSeconds int // 重连最大间隔时间（秒）
 	MaxRetryAttempts            int // 最大重试次数，默认100次
+
+	// Lease 同步参数
+	LeaseNamespace            string // Lease 所在命名空间，默认自动检测
+	LeaseDurationSeconds      int    // Lease 有效时长（秒），默认60
+	LeaseRenewIntervalSeconds int    // Lease 续约间隔（秒），默认20
+	HostClusterID             string // 宿主集群ID
 }
 
 func Init() *Config {
@@ -305,6 +311,12 @@ func (c *Config) InitFlags() {
 	pflag.IntVar(&c.HeartbeatFailureThreshold, "heartbeat-failure-threshold", getEnvAsInt("HEARTBEAT_FAILURE_THRESHOLD", 3), "心跳失败阈值，默认3次")
 	pflag.IntVar(&c.ReconnectMaxIntervalSeconds, "reconnect-max-interval", getEnvAsInt("RECONNECT_MAX_INTERVAL", 3600), "重连最大间隔时间（秒），默认3600秒")
 	pflag.IntVar(&c.MaxRetryAttempts, "max-retry-attempts", getEnvAsInt("MAX_RETRY_ATTEMPTS", 100), "最大重试次数，默认100次")
+
+	// Lease 同步参数
+	pflag.StringVar(&c.HostClusterID, "host-cluster-id", getEnv("HOST_CLUSTER_ID", ""), "为空会优先使用InCluster模式，否则会使用HostClusterID指定的集群。集群ID从k8m界面-多集群管理中复制")
+	pflag.StringVar(&c.LeaseNamespace, "lease-namespace", getEnv("LEASE_NAMESPACE", ""), "Lease 命名空间，默认自动检测")
+	pflag.IntVar(&c.LeaseDurationSeconds, "lease-duration-seconds", getEnvAsInt("LEASE_DURATION_SECONDS", 60), "Lease 有效时长（秒），默认60")
+	pflag.IntVar(&c.LeaseRenewIntervalSeconds, "lease-renew-interval-seconds", getEnvAsInt("LEASE_RENEW_INTERVAL_SECONDS", 20), "Lease 续约间隔（秒），默认20")
 
 	// 其他配置-打印配置信息
 	pflag.BoolVar(&c.PrintConfig, "print-config", defaultPrintConfig, "是否打印配置信息，默认关闭")

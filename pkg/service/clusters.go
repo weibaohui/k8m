@@ -430,6 +430,8 @@ func (c *clusterService) disconnectWithOption(clusterID string, stopReconnect bo
 // 中文函数注释：幂等清理指定集群的连接状态与资源，并停止自动重连；用于外部显式断开场景。
 func (c *clusterService) Disconnect(clusterID string) {
 	c.disconnectWithOption(clusterID, true)
+	// 集成 Lease（断开后删除租约，仅责任者删除）
+	_ = LeaseManager().EnsureOnDisconnect(context.Background(), clusterID)
 }
 
 // Scan 扫描集群
@@ -794,6 +796,9 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	if c.callbackRegisterFunc != nil {
 		c.callbackRegisterFunc(clusterConfig)
 	}
+
+	// 集成 Lease（连接成功后创建租约并占有）
+	_ = LeaseManager().EnsureOnConnect(context.Background(), clusterID)
 
 	return true, nil
 }
