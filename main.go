@@ -150,14 +150,21 @@ func Init() {
 			ResyncPeriod:              30 * time.Second,
 			ClusterID:                 cfg.HostClusterID,
 		}
-		err = service.LeaseManager().Init(context.Background(), leaseOpts)
-		if err != nil {
+		leaseCtx := context.Background()
+		if err = service.LeaseManager().Init(leaseCtx, leaseOpts); err == nil {
+			err = service.LeaseManager().StartWatcher(leaseCtx, service.ClusterService().Connect, service.ClusterService().Disconnect)
+			if err != nil {
+				klog.Errorf("启动 Lease 管理器监听器失败: %v", err)
+			}
+			// 启动 Lease 过期清理（Leader）
+			err = service.LeaseManager().StartLeaderCleanup(leaseCtx)
+			if err != nil {
+				klog.Errorf("启动 Lease 管理器过期清理失败: %v", err)
+			}
+		} else {
 			klog.Errorf("初始化 Lease 管理器失败: %v", err)
 		}
-		err = service.LeaseManager().StartWatcher(context.Background(), service.ClusterService().Connect, service.ClusterService().Disconnect)
-		if err != nil {
-			klog.Errorf("启动 Lease 管理器监听器失败: %v", err)
-		}
+
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
@@ -177,8 +184,6 @@ func Init() {
 					lua.InitClusterInspection()
 					// 启动helm 更新repo定时任务
 					helm2.StartUpdateHelmRepoInBackground()
-					// 启动 Lease 过期清理（Leader）
-					_ = service.LeaseManager().StartLeaderCleanup(ctx)
 				},
 				OnStoppedLeading: func() {
 					klog.V(2).Infof("[leader] 不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
