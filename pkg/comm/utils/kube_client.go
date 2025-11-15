@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 
 	"k8s.io/client-go/kubernetes"
@@ -62,4 +63,13 @@ func DetectNamespace() string {
 		return string(data)
 	}
 	return "default"
+}
+
+// GenerateInstanceID 生成当前实例的唯一身份标识，规则为 hostname-随机3位。
+func GenerateInstanceID() string {
+	id, err := os.Hostname()
+	if err != nil || id == "" {
+		id = "unknown-host"
+	}
+	return fmt.Sprintf("%s-%s", id, RandNLengthString(3))
 }

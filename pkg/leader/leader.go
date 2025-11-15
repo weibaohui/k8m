@@ -1,16 +1,15 @@
 package leader
 
 import (
-    "context"
-    "fmt"
-    "os"
-    "time"
+	"context"
+	"fmt"
+	"time"
 
-    "github.com/weibaohui/k8m/pkg/comm/utils"
-    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "k8s.io/client-go/tools/leaderelection"
-    "k8s.io/client-go/tools/leaderelection/resourcelock"
-    "k8s.io/klog/v2"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/leaderelection"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
+	"k8s.io/klog/v2"
 )
 
 // Config Leader 选举配置
@@ -31,14 +30,14 @@ type Config struct {
 // 支持集群优先级：指定 ClusterID -> InCluster -> 本地 kubeconfig。
 // 仅当以上方式均不可用时，降级为本地 Leader（不进行选举）。
 func Run(ctx context.Context, cfg Config) error {
-    clientset, hasCluster, err := utils.GetClientSet(cfg.ClusterID)
-    if err != nil {
-        return fmt.Errorf("get clientset failed: %w", err)
-    }
+	clientset, hasCluster, err := utils.GetClientSet(cfg.ClusterID)
+	if err != nil {
+		return fmt.Errorf("get clientset failed: %w", err)
+	}
 
-    if cfg.Namespace == "" {
-        cfg.Namespace = utils.DetectNamespace()
-    }
+	if cfg.Namespace == "" {
+		cfg.Namespace = utils.DetectNamespace()
+	}
 
 	// 非集群模式：既没有指定集群可用，也不是 InCluster，也没有本地 kubeconfig
 	if !hasCluster {
@@ -59,8 +58,7 @@ func Run(ctx context.Context, cfg Config) error {
 		cfg.RetryPeriod = 2 * time.Second
 	}
 
-	id, _ := os.Hostname()
-	id = fmt.Sprintf("%s-%s", id, utils.RandNLengthString(3))
+	id := utils.GenerateInstanceID()
 	klog.V(2).Infof("[leader] 我的选举 ID：%s", id)
 	lock := &resourcelock.LeaseLock{
 		LeaseMeta: metav1.ObjectMeta{

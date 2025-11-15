@@ -75,7 +75,7 @@ func (m *manager) Init(ctx context.Context, opts Options) error {
 	} else {
 		m.resyncPeriod = opts.ResyncPeriod
 	}
-	m.instanceID = GenerateInstanceID()
+	m.instanceID = utils.GenerateInstanceID()
 	klog.V(6).Infof("Lease 管理器初始化完成，ns=%s, duration=%ds, renew=%ds, instance=%s", m.namespace, m.durationSec, m.renewSec, m.instanceID)
 	return nil
 }
