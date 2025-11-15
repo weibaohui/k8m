@@ -42,13 +42,7 @@ func NewManager() Manager { return &manager{} }
 // Init 中文函数注释：初始化 Lease 管理器，设置宿主 ClientSet、命名空间与续约参数。
 func (m *manager) Init(ctx context.Context, opts Options) error {
 	klog.V(6).Infof("Init lease")
-	if !opts.Enable {
-		klog.V(6).Infof("未启用 Lease 同步，跳过初始化")
-		return nil
-	}
-	klog.V(6).Infof("Init lease opts.Enable")
-
-    cs, hasCluster, err := utils.GetClientSet(opts.ClusterID)
+	cs, hasCluster, err := utils.GetClientSet(opts.ClusterID)
 	if err != nil {
 		klog.V(6).Infof("GetClientSet %v", err.Error())
 		return fmt.Errorf("初始化宿主 GetClientSet 失败: %w", err)
@@ -60,11 +54,11 @@ func (m *manager) Init(ctx context.Context, opts Options) error {
 	}
 
 	m.clientset = cs
-    if opts.Namespace == "" {
-        m.namespace = utils.DetectNamespace()
-    } else {
-        m.namespace = opts.Namespace
-    }
+	if opts.Namespace == "" {
+		m.namespace = utils.DetectNamespace()
+	} else {
+		m.namespace = opts.Namespace
+	}
 	m.durationSec = opts.LeaseDurationSeconds
 	if m.durationSec <= 0 {
 		m.durationSec = 60

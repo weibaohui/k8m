@@ -145,11 +145,10 @@ func Init() {
 		cfg := flag.Init()
 		leaseOpts := lease.Options{
 			Namespace:                 cfg.LeaseNamespace,
-			Enable:                    cfg.EnableLeaseSync,
 			LeaseDurationSeconds:      cfg.LeaseDurationSeconds,
 			LeaseRenewIntervalSeconds: cfg.LeaseRenewIntervalSeconds,
 			ResyncPeriod:              30 * time.Second,
-			ClusterID:                 "config/rancher-desktop",
+			ClusterID:                 cfg.HostClusterID,
 		}
 		_ = service.LeaseManager().Init(context.Background(), leaseOpts)
 		_ = service.LeaseManager().StartWatcher(context.Background(), service.ClusterService().Connect, service.ClusterService().Disconnect)

@@ -5,7 +5,6 @@ import "time"
 // Options 中文函数注释：Lease 管理器的初始化选项，包含命名空间、续约与时长设置、开关等。
 type Options struct {
 	Namespace                 string
-	Enable                    bool
 	LeaseDurationSeconds      int
 	LeaseRenewIntervalSeconds int
 	ResyncPeriod              time.Duration
