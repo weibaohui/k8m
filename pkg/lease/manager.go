@@ -178,7 +178,16 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 		},
 
 		DeleteFunc: func(obj any) {
-			l := obj.(*coordinationv1.Lease)
+			var l *coordinationv1.Lease
+			if dfo, ok := obj.(cache.DeletedFinalStateUnknown); ok {
+				l, _ = dfo.Obj.(*coordinationv1.Lease)
+			} else {
+				l, _ = obj.(*coordinationv1.Lease)
+			}
+			if l == nil {
+				return
+			}
+
 			cid := l.Labels["clusterID"]
 			clusterID, err := utils.UrlSafeBase64Decode(cid)
 			if err != nil {
