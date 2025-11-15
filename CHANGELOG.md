@@ -1,4 +1,10 @@
 ## 更新日志
+
+
+**v0.0.185**
+1. 增加多实例选主（集群巡检只有主实例执行）、多集群状态同步（多副本间集群连接状态同步）
+   
+
 **v0.0.183**
 1. 修复数据库兼容性问题，包括sso、授权、api开放等几处问题修复
 1. 修复mcp服务tools失效问题 
@@ -8,20 +14,20 @@
 
 **v0.0.181**
 
-调整集群UI方法方式，可在同一个浏览器中，一个tab页一个集群同时操作了
-集群新增代理QPS等配置项
-lua 巡检集群设置执行超时时间，超时取消避免卡住全部巡检
-巡检webhook将Dingtalk消息格式从text改为markdown
-新增webhook发送历史记录
-重构定时任务管理并修复集群巡检逻辑
-升级cron机制，支持动态管理，包括调整cron表达式、启停等。
-新增Swagger开关，可动态开启与关闭。
+1. 调整集群UI方法方式，可在同一个浏览器中，一个tab页一个集群同时操作了
+1. 集群新增代理QPS等配置项
+1. lua 巡检集群设置执行超时时间，超时取消避免卡住全部巡检
+1. 巡检webhook将Dingtalk消息格式从text改为markdown
+1. 新增webhook发送历史记录
+1. 重构定时任务管理并修复集群巡检逻辑
+1. 升级cron机制，支持动态管理，包括调整cron表达式、启停等。
+1. 新增Swagger开关，可动态开启与关闭。
 
 **v0.0.172**
 
-lua巡检脚本增加GetPodResourceUsage方法，可获取POD资源情况，包括limit request配置值以及实时值
-精简JWT token结构,仅保留必要用户信息
-新增deployment批量更新镜像及tag功能，可为所有选中容器，批量一次性更新tag，可更新为统一版本号
+1. lua巡检脚本增加GetPodResourceUsage方法，可获取POD资源情况，包括limit request配置值以及实时值
+1. 精简JWT token结构,仅保留必要用户信息
+1. 新增deployment批量更新镜像及tag功能，可为所有选中容器，批量一次性更新tag，可更新为统一版本号
 
 **v0.0.171**
 
@@ -29,140 +35,140 @@ lua巡检脚本增加GetPodResourceUsage方法，可获取POD资源情况，包�
 
 **v0.0.170**
 
-修复集群巡并发启动时巡检检错位问题
-修复AI巡检总结携带历史会话问题
-修复已启动的定时任务停止失效问题
-kubectl lua脚本添加 GetLogs 方法并更新文档说明
-优化调整巡检结果发送相关功能，只有出现错误才会触发AI总结
-自定位webhook可使用{{msg}}和{{raw}}两个变量，分别表示消息及原始json内容
-为内置AI提示添加禁止使用工具的说明
-增加lua巡检规则的脚本编写说明
+1. 修复集群巡并发启动时巡检检错位问题
+1. 修复AI巡检总结携带历史会话问题
+1. 修复已启动的定时任务停止失效问题
+1. kubectl lua脚本添加 GetLogs 方法并更新文档说明
+1. 优化调整巡检结果发送相关功能，只有出现错误才会触发AI总结
+1. 自定位webhook可使用{{msg}}和{{raw}}两个变量，分别表示消息及原始json内容
+1. 为内置AI提示添加禁止使用工具的说明
+1. 增加lua巡检规则的脚本编写说明
 
 **v0.0.168**
 
-新增内置大模型Prompt提示词管理页面。
-新增巡检自定义webhook功能、新增企业微信群机器人通知功能
-修复内置规则：Service Selector 检查、CronJob 检测运行报错。
-新增lua巡检功能中使用命令获取Pod日志功能，并增加内置规则示例。
-请升级新版本后，点击重置内置规则。可参考名为“Pod 日志错误检测”的规则。其中包含了具体的使用示例，可照葫芦画瓢使用。
+1. 新增内置大模型Prompt提示词管理页面。
+1. 新增巡检自定义webhook功能、新增企业微信群机器人通知功能
+1. 修复内置规则：Service Selector 检查、CronJob 检测运行报错。
+1. 新增lua巡检功能中使用命令获取Pod日志功能，并增加内置规则示例。
+1. 请升级新版本后，点击重置内置规则。可参考名为“Pod 日志错误检测”的规则。其中包含了具体的使用示例，可照葫芦画瓢使用。
 
 
 **v0.0.164**
 
-支持按token方式纳管集群（共inCluster、kuebconfig、token、aws）
-支持全局日志查询
-新增CRD菜单生成器，可为CRD动态生成独立的基本管理界面
+1. 支持按token方式纳管集群（共inCluster、kuebconfig、token、aws）
+1. 支持全局日志查询
+1. 新增CRD菜单生成器，可为CRD动态生成独立的基本管理界面
 
 
 **v0.0.159**
 
-纳管集群可以使用中文集群名称
-支持钉钉发送巡检结果
+1. 纳管集群可以使用中文集群名称
+1. 支持钉钉发送巡检结果
 
 
 
 **v0.0.156**
 
-修复Diff Editor加载不出来问题 
-增强密码修改逻辑
+1. 修复Diff Editor加载不出来问题 
+1. 增强密码修改逻辑
 
 **v0.0.155**
 
-增加多个Pod聚合日志功能
+1. 增加多个Pod聚合日志功能
 
 
 **v0.0.154**
-增加 aws eks 集群支持
+1. 增加 aws eks 集群支持
 
 **v0.0.149**
-增加 自定义菜单支持。可按用户组角色设置菜单
+1. 增加 自定义菜单支持。可按用户组角色设置菜单
 
 **v0.0.137**
-修复HELM管理问题
-新增定时更新HELM仓库功能
-新增HELM仓库修复功能
+1. 修复HELM管理问题
+1. 新增定时更新HELM仓库功能
+1. 新增HELM仓库修复功能
 
 **v0.0.135**
 增加Ldap登录
 
 **v0.0.133**
-增加对OpenKruise的支持：
-advancedcronjobs.apps.kruise.io                
-broadcastjobs.apps.kruise.io                   
-clonesets.apps.kruise.io                       
-containerrecreaterequests.apps.kruise.io       
-daemonsets.apps.kruise.io                      
-imagelistpulljobs.apps.kruise.io               
-imagepulljobs.apps.kruise.io                   
-nodeimages.apps.kruise.io                      
-nodepodprobes.apps.kruise.io                   
-persistentpodstates.apps.kruise.io             
-podprobemarkers.apps.kruise.io                 
-podunavailablebudgets.policy.kruise.io         
-resourcedistributions.apps.kruise.io           
-sidecarsets.apps.kruise.io                     
-statefulsets.apps.kruise.io                    
-uniteddeployments.apps.kruise.io               
-workloadspreads.apps.kruise.io                 
+1. 增加对OpenKruise的支持：
+1. advancedcronjobs.apps.kruise.io                
+1. broadcastjobs.apps.kruise.io                   
+1. clonesets.apps.kruise.io                       
+1. containerrecreaterequests.apps.kruise.io       
+1. daemonsets.apps.kruise.io                      
+1. imagelistpulljobs.apps.kruise.io               
+1. imagepulljobs.apps.kruise.io                   
+1. nodeimages.apps.kruise.io                      
+1. nodepodprobes.apps.kruise.io                   
+1. persistentpodstates.apps.kruise.io             
+1. podprobemarkers.apps.kruise.io                 
+1. podunavailablebudgets.policy.kruise.io         
+1. resourcedistributions.apps.kruise.io           
+1. sidecarsets.apps.kruise.io                     
+1. statefulsets.apps.kruise.io                    
+1. uniteddeployments.apps.kruise.io               
+1. workloadspreads.apps.kruise.io                 
 
 **v0.0.132**
-支持用户禁用，禁用后不可登录、不可API访问、不可MCP访问
+1. 支持用户禁用，禁用后不可登录、不可API访问、不可MCP访问
 
 **v0.0.130**
-增加自定义规则巡检功能。
-支持使用lua脚本编写自定义规则。
-支持设置webhook接收通知。
-支持AI总结巡检结果。 
+1. 增加自定义规则巡检功能。
+1. 支持使用lua脚本编写自定义规则。
+1. 支持设置webhook接收通知。
+1. 支持AI总结巡检结果。 
 
 **v0.0.128**
-新增命名空间黑白名单管控
-白名单命名空间：置空表示不限制，可访问该集群下所有的命名空间。如果填写了，那么用户就只能访问指定的命名空间了。
-黑名单命名空间：置空表示不限制，如果填写了，那么用户将不能访问该命名空间。黑名单可否定白名单。黑名单权限最高。
+1. 新增命名空间黑白名单管控
+1. 白名单命名空间：置空表示不限制，可访问该集群下所有的命名空间。如果填写了，那么用户就只能访问指定的命名空间了。
+1. 黑名单命名空间：置空表示不限制，如果填写了，那么用户将不能访问该命名空间。黑名单可否定白名单。黑名单权限最高。
 
 
 **v0.0.124**
-新增模型配置管理，可以增加多个大模型配置。
+1. 新增模型配置管理，可以增加多个大模型配置。
 
 **v0.0.123**
-本版本优化了内存占用
+1. 本版本优化了内存占用
 
 **v0.0.120**
-Fix 修复用户组权限类型错误问题
-feat(AI): 添加关闭AI思考过程输出的功能
+1. Fix 修复用户组权限类型错误问题
+1. feat(AI): 添加关闭AI思考过程输出的功能
 
 **v0.0.119**
-新增Mysql、Postgresql数据库支持
+1. 新增Mysql、Postgresql数据库支持
 
 **v0.0.118**
-Fix shell 等待超时问题
+1. Fix shell 等待超时问题
 
 **v0.0.117**
-新增权限缓存，降低sql压力
+1. 新增权限缓存，降低sql压力
 
 **v0.0.116**
-修复大模型对话记录跟其他单轮解释互相影响的问题
+1. 修复大模型对话记录跟其他单轮解释互相影响的问题
 
 **v0.0.115**
-Fix probe 探测失败导致无法访问的问题
+1. Fix probe 探测失败导致无法访问的问题
 
 **v0.0.114**
-新增Github Copilot MCP 功能支持
+1. 新增Github Copilot MCP 功能支持
 
 **v0.0.113**
-MCP 访问路径兼容动态路径/mcp/k8m/xxxx/sse格式，适用于不支持设置Header的MCP客户端
+1. MCP 访问路径兼容动态路径/mcp/k8m/xxxx/sse格式，适用于不支持设置Header的MCP客户端
 
 **v0.0.112**
-新增Github Copilot MCP 功能支持
+1. 新增Github Copilot MCP 功能支持
 
 **v0.0.111**
-新增大模型保存yaml为模板功能。聊天过程中，将大模型给出的yaml示例，保存为模板。
-在资源新建页面，可以选择这个模板直接使用。
+1. 新增大模型保存yaml为模板功能。聊天过程中，将大模型给出的yaml示例，保存为模板。
+1. 在资源新建页面，可以选择这个模板直接使用。
 
 **v0.0.108**
-AI聊天窗口增加清空历史记录按钮。
+1. AI聊天窗口增加清空历史记录按钮。
 
 **v0.0.107**
-新增AI多轮对话功能。可由大模型在对话中进行规划，并按步骤执行MCP工具，完成目标。
+1. 新增AI多轮对话功能。可由大模型在对话中进行规划，并按步骤执行MCP工具，完成目标。
 
 **v0.0.106**
 新增端口转发功能
