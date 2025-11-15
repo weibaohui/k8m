@@ -48,7 +48,7 @@ func (m *manager) Init(ctx context.Context, opts Options) error {
 	}
 	klog.V(6).Infof("Init lease opts.Enable")
 
-	cs, hasCluster, err := GetClientSet(opts.ClusterID)
+    cs, hasCluster, err := utils.GetClientSet(opts.ClusterID)
 	if err != nil {
 		klog.V(6).Infof("GetClientSet %v", err.Error())
 		return fmt.Errorf("初始化宿主 GetClientSet 失败: %w", err)
@@ -60,11 +60,11 @@ func (m *manager) Init(ctx context.Context, opts Options) error {
 	}
 
 	m.clientset = cs
-	if opts.Namespace == "" {
-		m.namespace = DetectNamespace()
-	} else {
-		m.namespace = opts.Namespace
-	}
+    if opts.Namespace == "" {
+        m.namespace = utils.DetectNamespace()
+    } else {
+        m.namespace = opts.Namespace
+    }
 	m.durationSec = opts.LeaseDurationSeconds
 	if m.durationSec <= 0 {
 		m.durationSec = 60

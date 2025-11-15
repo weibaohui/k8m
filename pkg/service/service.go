@@ -3,6 +3,7 @@ package service
 import (
     "sync"
 
+    "github.com/weibaohui/k8m/pkg/comm/utils"
     "github.com/weibaohui/k8m/pkg/lease"
     "k8s.io/client-go/rest"
 )
@@ -40,7 +41,7 @@ var localLeaseManager = lease.NewManager()
 
 // init 中文函数注释：在 service 初始化时向 lease 包注入 ClusterID → RestConfig 的解析器，避免循环引入。
 func init() {
-    lease.GetRestConfigByClusterID = func(clusterID string) *rest.Config {
+    utils.GetRestConfigByClusterID = func(clusterID string) *rest.Config {
         c := localClusterService.GetClusterByID(clusterID)
         if c == nil {
             return nil
