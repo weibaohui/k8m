@@ -3383,7 +3383,7 @@
             },
             {
               "type": "tpl",
-              "tpl": "<div class='text-left'>-</div>",
+              "tpl": "<div class='text-left'>♾️</div>",
               "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['cpu.realtimeFraction'] && Number(this.metadata.annotations['cpu.realtimeFraction']) !== 0)"
             }
           ]
@@ -3454,7 +3454,7 @@
             },
             {
               "type": "tpl",
-              "tpl": "<div class='text-left'>-</div>",
+              "tpl": "<div class='text-left'>♾️</div>",
               "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['memory.realtimeFraction'] && Number(this.metadata.annotations['memory.realtimeFraction']) !== 0)"
             }
           ]

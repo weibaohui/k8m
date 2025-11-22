@@ -195,7 +195,7 @@ func (p *podService) SetAllocatedStatusOnPod(selectedCluster string, item *unstr
 	ctx := utils2.GetContextWithAdmin()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodAllocatedStatus", ns, podName, version)
 	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() ([]*kom.ResourceUsageRow, error) {
-		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable(kom.DenominatorLimit)
 		return tb, err
 	})
 	if err != nil {
@@ -265,7 +265,7 @@ func (p *podService) CacheAllocatedStatus(selectedCluster string, item *v1.Pod) 
 	cacheKey := p.CacheKey(item)
 	ctx := utils2.GetContextWithAdmin()
 	_, _ = utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() ([]*kom.ResourceUsageRow, error) {
-		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable()
+		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(podName).Namespace(ns).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsageTable(kom.DenominatorLimit)
 		return tb, err
 	})
 

@@ -293,7 +293,7 @@ func getPodResourceUsage(L *lua.LState) int {
 	}
 
 	// 调用kom库的ResourceUsage方法
-	result, err := obj.k.Ctl().Pod().ResourceUsage()
+	result, err := obj.k.Ctl().Pod().ResourceUsage(kom.DenominatorLimit)
 	if err != nil {
 		L.Push(lua.LNil)
 		L.Push(lua.LString(err.Error()))

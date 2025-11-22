@@ -327,8 +327,8 @@ github.com/ugorji/go/codec v1.3.1 h1:waO7eEiFDwidsBN6agj1vJQ4AG7lh2yqXyOXqhgQuyY
 github.com/ugorji/go/codec v1.3.1/go.mod h1:pRBVtBSKl77K30Bv8R2P+cLSGaTtex6fsA2Wjqmfxj4=
 github.com/weibaohui/htpl v0.0.2 h1:V/sLp/18Kd4ObZT7VBNaZg+xgs81ryeaKXUHKkfZiJk=
 github.com/weibaohui/htpl v0.0.2/go.mod h1:1vAKi/mCaf9AG+molkHy7uJNPk/RwkJGhg5Px8t2BlE=
-github.com/weibaohui/kom v0.2.69 h1:kZxtqcKXck37wMZV7ylS4Kvs5BJWana1pA6MpnAJAoA=
-github.com/weibaohui/kom v0.2.69/go.mod h1:coceOeTSIb8Yt+33f1byaA+X32RK2uSyjCm646sP+Qs=
+github.com/weibaohui/kom v0.2.70 h1:auNso44rRMQYnOGb047jZPKWVAf9nBoBxv9wwGbzDRA=
+github.com/weibaohui/kom v0.2.70/go.mod h1:coceOeTSIb8Yt+33f1byaA+X32RK2uSyjCm646sP+Qs=
 github.com/wk8/go-ordered-map/v2 v2.1.8 h1:5h/BUHu93oj4gIdvHHHGsScSTMijfx5PeYkE/fJgbpc=
 github.com/wk8/go-ordered-map/v2 v2.1.8/go.mod h1:5nJHM5DyteebpVlHnWMV0rPz6Zp7+xBAnxjb1X5vnTw=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
