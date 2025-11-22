@@ -7,6 +7,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 // InspectionSchedule 用于描述定时巡检任务的元数据，包括任务名称、描述、目标集群、cron表达式等
@@ -57,13 +58,18 @@ func (c *InspectionSchedule) GetOne(params *dao.Params, queryFuncs ...func(*gorm
 // CheckSkipZeroFailedCount 检查巡检计划是否配置了跳过0失败的条目
 func (c *InspectionSchedule) CheckSkipZeroFailedCount(id *uint) bool {
 	if id == nil {
+		klog.V(6).Infof("巡检计划 配置了跳过0失败的条目,id == nil")
 		return false
 	}
-	schedule := &InspectionSchedule{}
-	schedule.ID = *id
-	schedule, err := schedule.GetOne(nil)
+
+	schedule, err := dao.GenericGetOne(nil, c, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", id)
+	})
 	if err != nil {
+		klog.V(6).Infof("巡检计划id=%d配置了跳过0失败的条目=%v,获取失败: %v", id, false, err)
 		return false
 	}
-	return schedule.SkipZeroFailedCount
+	skip := schedule.SkipZeroFailedCount
+	klog.V(4).Infof("巡检计划id=%d配置了跳过0失败的条目=%v", *id, skip)
+	return skip
 }
