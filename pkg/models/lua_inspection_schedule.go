@@ -70,6 +70,6 @@ func (c *InspectionSchedule) CheckSkipZeroFailedCount(id *uint) bool {
 		return false
 	}
 	skip := schedule.SkipZeroFailedCount
-	klog.V(4).Infof("巡检计划id=%d配置了跳过0失败的条目=%v", *id, skip)
+	klog.V(6).Infof("巡检计划id=%d配置了跳过0失败的条目=%v", *id, skip)
 	return skip
 }
