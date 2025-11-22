@@ -49,7 +49,7 @@ func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 	ctx := utils2.GetContextWithAdmin()
 	cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodResourceUsage", pod.Namespace, pod.Name, pod.ResourceVersion)
 	table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() (*kom.ResourceUsageResult, error) {
-		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
+		tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage(kom.DenominatorLimit)
 		return tb, err
 	})
 	if err != nil {
@@ -143,7 +143,7 @@ func (p *podService) ReducePodCount(selectedCluster string, pod *corev1.Pod) {
 		ctx := utils2.GetContextWithAdmin()
 		cacheKey := fmt.Sprintf("%s/%s/%s/%s", "PodResourceUsage", pod.Namespace, pod.Name, pod.ResourceVersion)
 		table, err := utils.GetOrSetCache(kom.Cluster(selectedCluster).ClusterCache(), cacheKey, p.getTTL(), func() (*kom.ResourceUsageResult, error) {
-			tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage()
+			tb, err := kom.Cluster(selectedCluster).WithContext(ctx).Name(pod.Name).Namespace(pod.Namespace).Resource(&v1.Pod{}).Ctl().Pod().ResourceUsage(kom.DenominatorLimit)
 			return tb, err
 		})
 		if err != nil {
