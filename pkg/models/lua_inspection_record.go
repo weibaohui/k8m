@@ -115,18 +115,18 @@ func (c *InspectionRecord) GetRecordContentById(recordID uint) (string, bool, er
 
 // GetRecordBothContentById 获取巡检记录的完整内容，同时返回AI总结和原始结果
 // 参数：recordID 巡检记录ID
-// 返回值：aiSummary AI总结内容，resultRaw 原始结果内容，error 错误
-func (c *InspectionRecord) GetRecordBothContentById(recordID uint) (string, string, error) {
+// 返回值：aiSummary AI总结内容，resultRaw 原始结果内容，巡检失败项个数,error 错误
+func (c *InspectionRecord) GetRecordBothContentById(recordID uint) (string, string, int, *uint, error) {
 	record := &InspectionRecord{}
 	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", recordID)
 	})
 	if err != nil {
-		return "", "", fmt.Errorf("未找到对应的巡检记录: %d", recordID)
+		return "", "", 0, nil, fmt.Errorf("未找到对应的巡检记录: %d", recordID)
 	}
 
 	// 返回AI总结和原始结果，允许为空
-	return record.AISummary, record.ResultRaw, nil
+	return record.AISummary, record.ResultRaw, record.ErrorCount, record.ScheduleID, nil
 }
 
 // List 返回符合条件的 InspectionScriptResult 列表及总数

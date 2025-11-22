@@ -88,8 +88,21 @@
                 },
                 {
                   "type": "divider",
+                  "title": "Webhook选项"
+                },
+                {
+                  "type": "switch",
+                  "name": "skip_zero_failed_count",
+                  "label": "跳过0失败",
+                  "onText": "跳过",
+                  "offText": "不跳过",
+                  "description": "开启后，没有失败项的巡检记录不会触发webhook"
+                },
+                {
+                  "type": "divider",
                   "title": "AI总结配置"
                 },
+               
                 {
                   "type": "switch",
                   "name": "ai_enabled",
@@ -258,8 +271,21 @@
                     },
                     {
                       "type": "divider",
+                      "title": "Webhook选项"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "skip_zero_failed_count",
+                      "label": "跳过0失败",
+                      "onText": "跳过",
+                      "offText": "不跳过",
+                      "description": "开启后，没有失败项的巡检记录不会触发webhook"
+                    },
+                    {
+                      "type": "divider",
                       "title": "AI总结配置"
                     },
+                    
                     {
                       "type": "switch",
                       "name": "ai_enabled",

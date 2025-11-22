@@ -5,6 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
+	"k8s.io/klog/v2"
 )
 
 // PushToHooksByRecordID 根据巡检记录ID发送webhook通知
@@ -20,9 +21,20 @@ func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.Se
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
 	record := &models.InspectionRecord{}
-	summary, resultRaw, err := record.GetRecordBothContentById(recordID)
+	summary, resultRaw, failedCount, scheduleID, err := record.GetRecordBothContentById(recordID)
 	if err != nil {
 		return nil, fmt.Errorf("获取巡检记录id=%d的内容失败: %v", recordID, err)
+	}
+
+	// 通过failedCount==0时，检查计划中的开关配置，是否开启跳过0失败的条目。
+	if failedCount == 0 {
+		klog.V(6).Infof("巡检记录id=%d失败项数为0", recordID)
+		schedule := &models.InspectionSchedule{}
+		// 如果跳过0失败的条目
+		if schedule.CheckSkipZeroFailedCount(scheduleID) {
+			klog.V(4).Infof("巡检计划id=%d配置了跳过0失败的条目[巡检记录id=%d]，不发送webhook", *scheduleID, recordID)
+			return nil, nil
+		}
 	}
 
 	results := webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
