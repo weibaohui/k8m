@@ -56,7 +56,7 @@ func (r *AdminRecordController) Push(c *gin.Context) {
 	recordIDStr := c.Param("id")
 	recordID := utils.ToUInt(recordIDStr)
 	record := &models.InspectionRecord{}
-	summary, resultRaw, err := record.GetRecordBothContentById(recordID)
+	summary, resultRaw, _, err := record.GetRecordBothContentById(recordID)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
