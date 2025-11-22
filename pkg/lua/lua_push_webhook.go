@@ -28,7 +28,7 @@ func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.Se
 
 	// 通过failedCount==0时，检查计划中的开关配置，是否开启跳过0失败的条目。
 	if failedCount == 0 {
-
+		klog.V(4).InfoS("巡检记录id=%d失败项数为0", recordID)
 		schedule := &models.InspectionSchedule{}
 		// 如果跳过
 		if schedule.CheckSkipZeroFailedCount(record.ScheduleID) {
