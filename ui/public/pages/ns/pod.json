@@ -3390,7 +3390,7 @@
         },
         {
           "name": "resource",
-          "label": "1内存资源<br><span class='text-gray-500 text-xs'>需求可用Node总量比例<br>上限可用Node总量比例<br>实时/上限比例</span>",
+          "label": "内存资源<br><span class='text-gray-500 text-xs'>需求可用Node总量比例<br>上限可用Node总量比例<br>实时/上限比例</span>",
           "type": "container",
           "width": "150px",
           "body": [
