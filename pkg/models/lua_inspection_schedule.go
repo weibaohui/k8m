@@ -58,7 +58,7 @@ func (c *InspectionSchedule) GetOne(params *dao.Params, queryFuncs ...func(*gorm
 // CheckSkipZeroFailedCount 检查巡检计划是否配置了跳过0失败的条目
 func (c *InspectionSchedule) CheckSkipZeroFailedCount(id *uint) bool {
 	if id == nil {
-		klog.V(6).Infof("巡检计划 配置了跳过0失败的条目,id == nil")
+		klog.V(6).Infof("无法检查跳过0失败配置: id == nil")
 		return false
 	}
 
@@ -66,7 +66,7 @@ func (c *InspectionSchedule) CheckSkipZeroFailedCount(id *uint) bool {
 		return db.Where("id = ?", id)
 	})
 	if err != nil {
-		klog.V(6).Infof("巡检计划id=%d配置了跳过0失败的条目=%v,获取失败: %v", id, false, err)
+		klog.V(6).Infof("获取巡检计划id=%d失败: %v", *id, err)
 		return false
 	}
 	skip := schedule.SkipZeroFailedCount
