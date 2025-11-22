@@ -29,7 +29,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/weibaohui/htpl v0.0.2
-	github.com/weibaohui/kom v0.2.67
+	github.com/weibaohui/kom v0.2.68
 	github.com/yuin/gopher-lua v1.1.1
 	golang.org/x/net v0.46.0
 	golang.org/x/oauth2 v0.32.0
