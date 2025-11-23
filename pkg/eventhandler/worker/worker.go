@@ -11,7 +11,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/eventhandler/model"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
-	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
 
@@ -81,9 +80,9 @@ func (w *EventWorker) processBatch() error {
 	w.processMutex.Lock()
 	defer w.processMutex.Unlock()
 
-	// 获取未处理的事件（使用 dao.DB()）
-	var k8sEvents []models.K8sEvent
-	err := dao.DB().Where("processed = ?", false).Order("timestamp ASC").Limit(w.config.Worker.BatchSize).Find(&k8sEvents).Error
+	// 获取未处理的事件（通过模型方法）
+	var modelEvent models.K8sEvent
+	k8sEvents, err := modelEvent.ListUnprocessed(w.config.Worker.BatchSize)
 	if err != nil {
 		return fmt.Errorf("获取未处理事件失败: %w", err)
 	}
@@ -95,11 +94,11 @@ func (w *EventWorker) processBatch() error {
 	klog.V(6).Infof("开始处理事件批次: %d个事件", len(k8sEvents))
 
 	for _, ke := range k8sEvents {
-		event := convertToEvent(&ke)
+		event := convertToEvent(ke)
 		if err := w.processEvent(event); err != nil {
 			klog.Errorf("处理事件失败: %v", err)
 			// 增加重试次数
-			if err := dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).UpdateColumn("attempts", gorm.Expr("attempts + ?", 1)).Error; err != nil {
+			if err := modelEvent.IncrementAttemptsByID(event.ID); err != nil {
 				klog.Errorf("增加重试次数失败: %v", err)
 			}
 		}
@@ -115,13 +114,15 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 	// 检查重试次数
 	if event.Attempts >= w.config.Worker.MaxRetries {
 		klog.Warningf("事件达到最大重试次数，标记为已处理: %s", event.EvtKey)
-		return dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).Update("processed", true).Error
+		var m models.K8sEvent
+		return m.MarkProcessedByID(event.ID, true)
 	}
 
 	// 应用二次过滤（聚合、去重、限流等）
 	if w.shouldFilterEvent(event) {
 		klog.V(6).Infof("事件被过滤: %s", event.EvtKey)
-		return dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).Update("processed", true).Error
+		var m models.K8sEvent
+		return m.MarkProcessedByID(event.ID, true)
 	}
 
 	// 推送Webhook
@@ -136,7 +137,8 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 	klog.V(6).Infof("事件处理完成，准备推送: %s", event.EvtKey)
 
 	// 标记为已处理
-	return dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).Update("processed", true).Error
+	var m models.K8sEvent
+	return m.MarkProcessedByID(event.ID, true)
 }
 
 // shouldFilterEvent 判断是否应该过滤事件
