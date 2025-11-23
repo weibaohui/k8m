@@ -32,7 +32,8 @@ func LoadAllFromDB() *EventHandlerConfig {
 	// 如果有多个重叠的配置，只会保留最后一个，前面的会被覆盖
 	for _, it := range items {
 		var namespaces []string
-		var labels map[string]string
+		var names []string
+		var labels []string
 		var reasons []string
 		var types []string
 
@@ -43,10 +44,17 @@ func LoadAllFromDB() *EventHandlerConfig {
 				namespaces = nil
 			}
 		}
+		//关键字列表，多个用逗号分隔
+		if it.RuleNames != "" {
+			if err := json.Unmarshal([]byte(it.RuleNames), &names); err != nil {
+				klog.V(6).Infof("解析规则命名失败，将使用空列表: %v", err)
+				names = nil
+			}
+		}
 		//关键字列表，多个用逗号分隔，app=k8m,env=dev
 		if it.RuleLabels != "" {
 			if err := json.Unmarshal([]byte(it.RuleLabels), &labels); err != nil {
-				klog.V(6).Infof("解析规则标签失败，将使用空映射: %v", err)
+				klog.V(6).Infof("解析规则标签失败，将使用空列表: %v", err)
 				labels = nil
 			}
 		}
