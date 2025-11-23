@@ -273,7 +273,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 		if service.AIService().IsEnabled() {
 			customTemplate := aiTemplate
 			if strings.TrimSpace(customTemplate) == "" {
-				customTemplate = `请先输出统计数据
+				customTemplate = `请先输出统计数据（含集群名称、规则名称、数量等基本信息）
 再逐条列出关键错误信息
 附加简单的分析
 总体不超过300字`

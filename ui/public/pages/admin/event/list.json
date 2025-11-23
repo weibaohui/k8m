@@ -134,7 +134,7 @@
                                     "name": "ai_prompt_template",
                                     "label": "AI提示词模板",
                                     "language": "text",
-                                    "value": "请按下面的格式给出汇总：\n集群：{{cluster_name}}\n事件数：{{event_count}}个\n时间：{{time}}\n总结：{{summary}}\n---\n附一首小诗（四行），表达本次事件处理结果。",
+                                    "value": "请先输出统计数据（含集群名称、规则名称、数量等基本信息）\n再逐条列出关键错误信息\n附加简单的分析\n总体不超过300字",
                                     "description": "以上填写的prompt将作为附加要求。内置基本要求：1、仅做汇总，不要解释。2、不需要解决方案。3、可以合理使用表情符号。",
                                     "visibleOn": "${ai_enabled}",
                                     "validations": {
