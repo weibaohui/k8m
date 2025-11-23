@@ -8,48 +8,40 @@ import (
 
 	"github.com/robfig/cron/v3"
 	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/eventhandler/model"
+	"github.com/weibaohui/k8m/pkg/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	eventsv1 "k8s.io/api/events/v1"
 	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 )
 
 // EventWatcher 事件监听器
 type EventWatcher struct {
-	client       kubernetes.Interface
-	config       *model.EventHandlerConfig
+	cfg          *config.EventHandlerConfig
 	ruleMatcher  *RuleMatcher
-	eventCh      chan *model.Event
+	eventCh      chan *config.Event
 	ctx          context.Context
 	cancel       context.CancelFunc
 	resyncPeriod time.Duration
 }
 
 // NewEventWatcher 创建事件监听器
-func NewEventWatcher(client kubernetes.Interface, config *model.EventHandlerConfig) *EventWatcher {
+func NewEventWatcher() *EventWatcher {
 	ctx, cancel := context.WithCancel(context.Background())
-
+	cfg := config.DefaultEventHandlerConfig()
 	return &EventWatcher{
-		client:       client,
-		config:       config,
-		ruleMatcher:  NewRuleMatcher(&config.RuleConfig),
-		eventCh:      make(chan *model.Event, config.Watcher.BufferSize),
-		ctx:          ctx,
-		cancel:       cancel,
-		resyncPeriod: time.Duration(config.Watcher.ResyncInterval) * time.Second,
+		cfg:         cfg,
+		ruleMatcher: NewRuleMatcher(&cfg.RuleConfig),
+		eventCh:     make(chan *config.Event, cfg.Watcher.BufferSize),
+		ctx:         ctx,
+		cancel:      cancel,
 	}
 }
 
 // Start 启动事件监听器
-func (w *EventWatcher) Start() error {
-	if !w.config.Watcher.Enabled {
-		klog.V(6).Infof("事件监听器未启用")
-		return nil
-	}
+func (w *EventWatcher) Start() {
 
 	klog.V(6).Infof("启动事件监听器")
 
@@ -59,7 +51,6 @@ func (w *EventWatcher) Start() error {
 	// 启动事件监听
 	go w.watchEvents()
 
-	return nil
 }
 
 // Stop 停止事件监听器
@@ -89,65 +80,16 @@ func (w *EventWatcher) doWatch() error {
 	// 中文函数注释：使用定时任务每分钟检查所有已连接集群，未开启事件Watch则为其启动，并将告警事件入队处理
 	klog.V(6).Infof("开始监听Kubernetes事件")
 
-	ctx := utils2.GetContextWithAdmin()
-
 	inst := cron.New()
 	_, err := inst.AddFunc("@every 1m", func() {
 		clusters := service.ClusterService().ConnectedClusters()
 		for _, cluster := range clusters {
 			if !cluster.GetClusterWatchStatus("event") {
 				selectedCluster := service.ClusterService().ClusterID(cluster)
-
-				var watcher watch.Interface
-				var evt eventsv1.Event
-				err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&evt).AllNamespace().Watch(&watcher).Error
-				if err != nil {
-					klog.Errorf("%s 创建Event监听器失败 %v", selectedCluster, err)
-					continue
+				watcher := w.watchSingleCluster(selectedCluster)
+				if watcher != nil {
+					cluster.SetClusterWatchStarted("event", watcher)
 				}
-
-				go func(clusterID string) {
-					klog.V(6).Infof("%s 开始事件监听", clusterID)
-					defer watcher.Stop()
-					for e := range watcher.ResultChan() {
-						if err := kom.Cluster(clusterID).WithContext(ctx).Tools().ConvertRuntimeObjectToTypedObject(e.Object, &evt); err != nil {
-							klog.V(6).Infof("%s 无法将对象转换为 *events.v1.Event 类型: %v", clusterID, err)
-							return
-						}
-
-						m := &model.Event{
-							Type:   evt.Type,
-							Reason: evt.Reason,
-							Level: func() string {
-								if evt.Type == "Warning" {
-									return "warning"
-								}
-								return "normal"
-							}(),
-							Namespace: evt.Regarding.Namespace,
-							Name:      evt.Regarding.Name,
-							Message:   evt.Note,
-							Timestamp: evt.EventTime.Time,
-							Processed: false,
-							Attempts:  0,
-						}
-						if m.EvtKey == "" {
-							if string(evt.UID) != "" {
-								m.EvtKey = string(evt.UID)
-							} else {
-								m.EvtKey = model.GenerateEvtKey(m.Namespace, "Event", m.Name, m.Reason, m.Message)
-							}
-						}
-
-						if err := w.HandleEvent(m); err != nil {
-							klog.V(6).Infof("%s 事件处理失败: %v", clusterID, err)
-						} else {
-							klog.V(6).Infof("%s 入队事件 [ %s/%s ] 类型=%s 原因=%s", clusterID, m.Namespace, m.Name, m.Type, m.Reason)
-						}
-					}
-				}(selectedCluster)
-
-				cluster.SetClusterWatchStarted("event", watcher)
 			}
 		}
 	})
@@ -160,6 +102,62 @@ func (w *EventWatcher) doWatch() error {
 	<-w.ctx.Done()
 	inst.Stop()
 	return nil
+}
+
+// watchSingleCluster 启动单个集群的事件监听
+func (w *EventWatcher) watchSingleCluster(selectedCluster string) watch.Interface {
+	ctx := utils2.GetContextWithAdmin()
+
+	var watcher watch.Interface
+	var evt eventsv1.Event
+	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&evt).AllNamespace().Watch(&watcher).Error
+	if err != nil {
+		klog.Errorf("%s 创建Event监听器失败 %v", selectedCluster, err)
+		return nil
+	}
+
+	go func() {
+		klog.V(6).Infof("%s 开始事件监听", selectedCluster)
+		defer watcher.Stop()
+		for e := range watcher.ResultChan() {
+			if err := kom.Cluster(selectedCluster).WithContext(ctx).Tools().ConvertRuntimeObjectToTypedObject(e.Object, &evt); err != nil {
+				klog.V(6).Infof("%s 无法将对象转换为 *events.v1.Event 类型: %v", selectedCluster, err)
+				return
+			}
+
+			m := &config.Event{
+				Type:   evt.Type,
+				Reason: evt.Reason,
+				Level: func() string {
+					if evt.Type == "Warning" {
+						return "warning"
+					}
+					return "normal"
+				}(),
+				Namespace: evt.Regarding.Namespace,
+				Name:      evt.Regarding.Name,
+				Message:   evt.Note,
+				Timestamp: evt.EventTime.Time,
+				Processed: false,
+				Attempts:  0,
+			}
+			if m.EvtKey == "" {
+				if string(evt.UID) != "" {
+					m.EvtKey = string(evt.UID)
+				} else {
+					m.EvtKey = config.GenerateEvtKey(m.Namespace, "Event", m.Name, m.Reason, m.Message)
+				}
+			}
+
+			if err := w.HandleEvent(m); err != nil {
+				klog.V(6).Infof("%s 事件处理失败: %v", selectedCluster, err)
+			} else {
+				klog.V(6).Infof("%s 入队事件 [ %s/%s ] 类型=%s 原因=%s", selectedCluster, m.Namespace, m.Name, m.Type, m.Reason)
+			}
+		}
+	}()
+
+	return watcher
 }
 
 // processEvents 处理接收到的事件
@@ -199,7 +197,7 @@ func (w *EventWatcher) processEvents() {
 }
 
 // shouldProcessEvent 判断是否应该处理事件
-func (w *EventWatcher) shouldProcessEvent(event *model.Event) bool {
+func (w *EventWatcher) shouldProcessEvent(event *config.Event) bool {
 	// 只处理警告类型事件
 	if !event.IsWarning() {
 		return false
@@ -210,14 +208,14 @@ func (w *EventWatcher) shouldProcessEvent(event *model.Event) bool {
 }
 
 // HandleEvent 处理单个事件（供外部调用）
-func (w *EventWatcher) HandleEvent(event *model.Event) error {
+func (w *EventWatcher) HandleEvent(event *config.Event) error {
 	if event == nil {
 		return fmt.Errorf("事件不能为空")
 	}
 
 	// 设置事件键
 	if event.EvtKey == "" {
-		event.EvtKey = model.GenerateEvtKey(event.Namespace, "Event", event.Name, event.Reason, event.Message)
+		event.EvtKey = config.GenerateEvtKey(event.Namespace, "Event", event.Name, event.Reason, event.Message)
 	}
 
 	// 检查事件是否已经存在

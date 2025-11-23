@@ -1,5 +1,4 @@
-// Package model 定义事件处理相关的数据模型
-package model
+package config
 
 import (
 	"crypto/md5"

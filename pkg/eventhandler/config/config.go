@@ -1,5 +1,4 @@
-// Package model 定义事件处理器的配置模型
-package model
+package config
 
 // EventHandlerConfig 定义事件处理器的完整配置
 type EventHandlerConfig struct {
@@ -7,13 +6,6 @@ type EventHandlerConfig struct {
 	Watcher    WatcherConfig `json:"watcher" yaml:"watcher"`         // Watcher配置
 	Worker     WorkerConfig  `json:"worker" yaml:"worker"`           // Worker配置
 	RuleConfig RuleConfig    `json:"rule_config" yaml:"rule_config"` // 规则配置
-}
-
-// DatabaseConfig 数据库配置
-type DatabaseConfig struct {
-	Type     string `json:"type" yaml:"type"`           // 数据库类型: sqlite, postgres, mysql
-	DSN      string `json:"dsn" yaml:"dsn"`             // 数据库连接字符串
-	MaxConns int    `json:"max_conns" yaml:"max_conns"` // 最大连接数
 }
 
 // WatcherConfig Watcher配置
@@ -30,6 +22,7 @@ type WorkerConfig struct {
 
 // DefaultEventHandlerConfig 创建默认的事件处理器配置
 func DefaultEventHandlerConfig() *EventHandlerConfig {
+	// TODO 从配置界面中、数据库中加载配置选项
 	return &EventHandlerConfig{
 		Enabled: true,
 

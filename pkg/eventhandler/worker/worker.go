@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
-	"github.com/weibaohui/k8m/pkg/eventhandler/model"
+	"github.com/weibaohui/k8m/pkg/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
 	"k8s.io/klog/v2"
@@ -16,7 +16,7 @@ import (
 
 // EventWorker 事件处理Worker
 type EventWorker struct {
-	config       *model.EventHandlerConfig
+	cfg          *config.EventHandlerConfig
 	ctx          context.Context
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
@@ -24,29 +24,25 @@ type EventWorker struct {
 }
 
 // NewEventWorker 创建事件处理Worker
-func NewEventWorker(config *model.EventHandlerConfig) *EventWorker {
+func NewEventWorker() *EventWorker {
 	ctx, cancel := context.WithCancel(context.Background())
+	cfg := config.DefaultEventHandlerConfig()
 
 	return &EventWorker{
-		config: config,
+		cfg:    cfg,
 		ctx:    ctx,
 		cancel: cancel,
 	}
 }
 
 // Start 启动Worker
-func (w *EventWorker) Start() error {
-	if !w.config.Worker.Enabled {
-		klog.V(6).Infof("事件处理Worker未启用")
-		return nil
-	}
+func (w *EventWorker) Start() {
 
 	klog.V(6).Infof("启动事件处理Worker")
 
 	w.wg.Add(1)
 	go w.processLoop()
 
-	return nil
 }
 
 // Stop 停止Worker
@@ -60,7 +56,7 @@ func (w *EventWorker) Stop() {
 func (w *EventWorker) processLoop() {
 	defer w.wg.Done()
 
-	ticker := time.NewTicker(time.Duration(w.config.Worker.ProcessInterval) * time.Millisecond)
+	ticker := time.NewTicker(time.Duration(w.cfg.Worker.ProcessInterval) * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -82,7 +78,7 @@ func (w *EventWorker) processBatch() error {
 
 	// 获取未处理的事件（通过模型方法）
 	var modelEvent models.K8sEvent
-	k8sEvents, err := modelEvent.ListUnprocessed(w.config.Worker.BatchSize)
+	k8sEvents, err := modelEvent.ListUnprocessed(w.cfg.Worker.BatchSize)
 	if err != nil {
 		return fmt.Errorf("获取未处理事件失败: %w", err)
 	}
@@ -108,11 +104,11 @@ func (w *EventWorker) processBatch() error {
 }
 
 // processEvent 处理单个事件
-func (w *EventWorker) processEvent(event *model.Event) error {
+func (w *EventWorker) processEvent(event *config.Event) error {
 	klog.V(6).Infof("处理事件: %s", event.EvtKey)
 
 	// 检查重试次数
-	if event.Attempts >= w.config.Worker.MaxRetries {
+	if event.Attempts >= w.cfg.Worker.MaxRetries {
 		klog.Warningf("事件达到最大重试次数，标记为已处理: %s", event.EvtKey)
 		var m models.K8sEvent
 		return m.MarkProcessedByID(event.ID, true)
@@ -133,10 +129,10 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 }
 
 // pushWebhook 推送Webhook通知
-func (w *EventWorker) pushWebhook(event *model.Event) error {
+func (w *EventWorker) pushWebhook(event *config.Event) error {
 
 	// 查询所有已配置的Webhook接收器
-	//TODO 做一个配置表，选择使用的webhook接收器
+	// TODO 做一个配置表，选择使用的webhook接收器
 	receiver := &models.WebhookReceiver{}
 	receivers, _, err := receiver.List(dao.BuildDefaultParams())
 	if err != nil {
@@ -179,8 +175,8 @@ func containsSubstring(s, substr string) bool {
 }
 
 // convertToEvent 将K8sEvent转换为Event
-func convertToEvent(k8sEvent *models.K8sEvent) *model.Event {
-	return &model.Event{
+func convertToEvent(k8sEvent *models.K8sEvent) *config.Event {
+	return &config.Event{
 		ID:        k8sEvent.ID,
 		EvtKey:    k8sEvent.EvtKey,
 		Type:      k8sEvent.Type,

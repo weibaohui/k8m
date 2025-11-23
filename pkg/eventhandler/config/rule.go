@@ -1,5 +1,4 @@
-// Package model 定义规则配置相关的数据模型
-package model
+package config
 
 // RuleConfig 定义事件过滤规则配置
 type RuleConfig struct {
