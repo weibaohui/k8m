@@ -136,11 +136,21 @@ func (w *EventWatcher) watchSingleCluster(selectedCluster string) watch.Interfac
 				Namespace: evt.Regarding.Namespace,
 				Name:      evt.Regarding.Name,
 				Message:   evt.Note,
-				Timestamp: evt.EventTime.Time,
+				Timestamp: func() time.Time {
+					// 事件时间优先使用 EventTime；若为零值则回退到对象创建时间；仍为空则使用当前时间
+					if !evt.EventTime.IsZero() {
+						return evt.EventTime.Time
+					}
+					if !evt.ObjectMeta.CreationTimestamp.IsZero() {
+						return evt.ObjectMeta.CreationTimestamp.Time
+					}
+					return time.Now()
+				}(),
 				Processed: false,
 				Attempts:  0,
 				EvtKey:    string(evt.UID),
 			}
+			klog.V(6).Infof("")
 
 			if err := w.HandleEvent(m); err != nil {
 				klog.V(6).Infof("%s 事件处理失败: %v", selectedCluster, err)

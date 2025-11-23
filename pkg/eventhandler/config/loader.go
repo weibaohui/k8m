@@ -102,10 +102,11 @@ func LoadAllFromDB() *EventHandlerConfig {
 		}
 	}
 
+	//todo 全局的这些参数，放到flag中，放到集群参数设置的页面中
 	cfg := &EventHandlerConfig{
 		Enabled:      true,
 		Watcher:      WatcherConfig{BufferSize: 1000},
-		Worker:       WorkerConfig{BatchSize: 50, ProcessInterval: 1, MaxRetries: 3},
+		Worker:       WorkerConfig{BatchSize: 50, ProcessInterval: 10, MaxRetries: 3},
 		ClusterRules: clusterRules,
 		Webhooks:     clusterWebhooks,
 	}
