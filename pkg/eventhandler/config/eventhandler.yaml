@@ -1,0 +1,46 @@
+# 事件处理器配置示例
+enabled: true
+
+# 数据库配置
+database:
+  type: sqlite                    # 数据库类型: sqlite, postgres, mysql
+  dsn: k8s_events.db              # 数据库连接字符串
+  max_conns: 10                   # 最大连接数
+
+# Watcher配置
+watcher:
+  enabled: true                   # 是否启用Watcher
+  resync_interval: 300            # 重新同步间隔(秒)
+  buffer_size: 1000               # 事件缓冲区大小
+
+# Worker配置
+worker:
+  enabled: true                   # 是否启用Worker
+  batch_size: 100                 # 批处理大小
+  process_interval: 5000          # 处理间隔(毫秒)
+  max_retries: 3                  # 最大重试次数
+
+# 规则配置
+rule_config:
+  enabled: true                   # 是否启用规则匹配
+  reverse: false                  # 是否反向选择(匹配不通过的事件)
+  namespaces:                     # 命名空间白名单
+    - default
+    - kube-system
+  reasons:                        # 事件原因白名单
+    - FailedMount
+    - ImagePullBackOff
+    - CrashLoopBackOff
+  types:                          # 事件类型白名单
+    - Warning
+
+# Webhook配置
+webhook:
+  enabled: false                  # 是否启用Webhook推送
+  url: "https://example.com/webhook"  # Webhook URL
+  method: "POST"                  # HTTP方法
+  headers:                        # 自定义请求头
+    Authorization: "Bearer token"
+    Content-Type: "application/json"
+  timeout: 30                     # 超时时间(秒)
+  retries: 3                      # 重试次数
