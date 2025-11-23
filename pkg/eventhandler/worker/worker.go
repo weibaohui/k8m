@@ -149,7 +149,8 @@ func (w *EventWorker) pushWebhook(event *models.K8sEvent) error {
 	}
 
 	// 准备消息内容
-	summary := fmt.Sprintf("K8s事件:[%s] %s/%s - %s", event.Cluster, event.Namespace, event.Name, event.Reason)
+	summary := fmt.Sprintf("Event Warning 事件\n集群：[%s]\n资源：%s/%s\n类型：%s\n原因：%s\n消息：%s",
+		event.Cluster, event.Namespace, event.Name, event.Type, event.Reason, event.Message)
 	resultRaw := utils.ToJSON(event)
 	// 使用统一模式推送到所有目标
 	results := webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
