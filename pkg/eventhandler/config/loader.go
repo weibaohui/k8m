@@ -36,24 +36,29 @@ func LoadAllFromDB() *EventHandlerConfig {
 		var reasons []string
 		var types []string
 
+		//关键字列表，多个用逗号分隔
 		if it.RuleNamespaces != "" {
 			if err := json.Unmarshal([]byte(it.RuleNamespaces), &namespaces); err != nil {
 				klog.V(6).Infof("解析规则命名空间失败，将使用空列表: %v", err)
 				namespaces = nil
 			}
 		}
+		//关键字列表，多个用逗号分隔，app=k8m,env=dev
 		if it.RuleLabels != "" {
 			if err := json.Unmarshal([]byte(it.RuleLabels), &labels); err != nil {
 				klog.V(6).Infof("解析规则标签失败，将使用空映射: %v", err)
 				labels = nil
 			}
 		}
+		//关键字列表，多个用逗号分隔
 		if it.RuleReasons != "" {
 			if err := json.Unmarshal([]byte(it.RuleReasons), &reasons); err != nil {
 				klog.V(6).Infof("解析规则原因失败，将使用空列表: %v", err)
 				reasons = nil
 			}
 		}
+
+		// 关键字列表，多个用逗号分隔
 		if it.RuleTypes != "" {
 			if err := json.Unmarshal([]byte(it.RuleTypes), &types); err != nil {
 				klog.V(6).Infof("解析规则类型失败，将使用空列表: %v", err)
