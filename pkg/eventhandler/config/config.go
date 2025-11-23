@@ -39,7 +39,6 @@ func (r *RuleConfig) IsEmpty() bool {
 
 // DefaultEventHandlerConfig 创建默认的事件处理器配置
 func DefaultEventHandlerConfig() *EventHandlerConfig {
-	// TODO 从配置界面中、数据库中加载配置选项
 	if cfg := LoadAllFromDB(); cfg != nil {
 		return cfg
 	}

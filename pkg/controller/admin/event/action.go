@@ -9,6 +9,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/eventhandler/worker"
 	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 )
@@ -116,6 +117,11 @@ func (s *AdminEventController) Save(c *gin.Context) {
 		return
 	}
 
+	// 保存成功后，通知事件处理Worker刷新配置，立即生效
+	if w := worker.Instance(); w != nil {
+		w.UpdateConfig()
+	}
+
 	amis.WriteJsonOK(c)
 }
 
@@ -131,7 +137,15 @@ func (s *AdminEventController) Delete(c *gin.Context) {
 
 	m := &models.K8sEventConfig{}
 	err := m.Delete(params, ids)
-	amis.WriteJsonErrorOrOK(c, err)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	// 删除成功后刷新Worker配置
+	if w := worker.Instance(); w != nil {
+		w.UpdateConfig()
+	}
+	amis.WriteJsonOK(c)
 }
 
 // QuickSave 快速更新事件配置启用状态
@@ -153,6 +167,10 @@ func (s *AdminEventController) QuickSave(c *gin.Context) {
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+	// 快速启用/禁用后刷新Worker配置
+	if w := worker.Instance(); w != nil {
+		w.UpdateConfig()
 	}
 	amis.WriteJsonOK(c)
 }

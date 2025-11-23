@@ -28,17 +28,22 @@ type EventWorker struct {
 	processMutex sync.Mutex
 }
 
+var defaultWorker *EventWorker
+
 // NewEventWorker 创建事件处理Worker
 func NewEventWorker() *EventWorker {
 	ctx, cancel := context.WithCancel(context.Background())
 	cfg := config.DefaultEventHandlerConfig()
 
-	return &EventWorker{
+	ew := &EventWorker{
 		cfg:         cfg,
 		ruleMatcher: watcher.NewRuleMatcher(cfg.ClusterRules),
 		ctx:         ctx,
 		cancel:      cancel,
 	}
+	// 注册为全局实例，便于控制器更新配置后即时生效
+	defaultWorker = ew
+	return ew
 }
 
 // Start 启动Worker
@@ -80,6 +85,35 @@ func (w *EventWorker) processLoop() {
 			}
 		}
 	}
+}
+
+// UpdateConfig 动态刷新事件处理配置（从数据库重新加载）
+// 中文函数注释：用于在管理界面更新事件规则或Webhook后，立即让Worker生效，无需重启。
+func (w *EventWorker) UpdateConfig() {
+	if w == nil {
+		return
+	}
+	// 重新加载配置
+	newCfg := config.DefaultEventHandlerConfig()
+	if newCfg == nil {
+		return
+	}
+	// 原子更新配置与匹配器
+	w.processMutex.Lock()
+	w.cfg = newCfg
+	if w.ruleMatcher == nil {
+		w.ruleMatcher = watcher.NewRuleMatcher(newCfg.ClusterRules)
+	} else {
+		w.ruleMatcher.UpdateRules(newCfg.ClusterRules)
+	}
+	w.processMutex.Unlock()
+	klog.V(6).Infof("事件处理配置已更新，立即生效")
+}
+
+// Instance 获取全局事件处理Worker实例
+// 中文函数注释：用于控制器在保存配置后调用刷新方法。
+func Instance() *EventWorker {
+	return defaultWorker
 }
 
 // processBatch 按批次获取未处理事件，逐条过滤并按集群分组后批量推送
