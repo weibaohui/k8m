@@ -9,6 +9,8 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/eventhandler/model"
 	"github.com/weibaohui/k8m/pkg/eventhandler/store"
+	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/webhook"
 	"k8s.io/klog/v2"
 )
 
@@ -122,7 +124,14 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 	}
 
 	// 推送Webhook
-	// TODO: 集成webhook推送功能
+	if w.config.Webhook.Enabled {
+		if err := w.pushWebhook(event); err != nil {
+			klog.Errorf("Webhook推送失败: %v", err)
+			// 推送失败不标记为已处理，让重试机制处理
+			return err
+		}
+	}
+
 	klog.V(6).Infof("事件处理完成，准备推送: %s", event.EvtKey)
 
 	// 标记为已处理
@@ -145,6 +154,36 @@ func (w *EventWorker) shouldFilterEvent(event *model.Event) bool {
 	}
 
 	return false
+}
+
+// pushWebhook 推送Webhook通知
+func (w *EventWorker) pushWebhook(event *model.Event) error {
+	if !w.config.Webhook.Enabled {
+		return nil
+	}
+
+	// 创建webhook接收者配置
+	receiver := &models.WebhookReceiver{
+		Platform:     "webhook",
+		TargetURL:    w.config.Webhook.URL,
+		SignSecret:   "", // 从配置中获取密钥
+		BodyTemplate: "", // 使用默认模板
+	}
+
+	// 准备消息内容
+	summary := fmt.Sprintf("K8s事件: %s/%s - %s", event.Namespace, event.Name, event.Reason)
+	resultRaw := fmt.Sprintf("类型: %s\n原因: %s\n消息: %s\n时间: %s",
+		event.Type, event.Reason, event.Message, event.Timestamp.Format("2006-01-02 15:04:05"))
+
+	// 使用webhook推送
+	results := webhook.PushMsgToAllTargets(summary, resultRaw, []*models.WebhookReceiver{receiver})
+
+	if len(results) > 0 && results[0].Error != nil {
+		return fmt.Errorf("webhook推送失败: %w", results[0].Error)
+	}
+
+	klog.V(6).Infof("Webhook推送成功: %s", event.EvtKey)
+	return nil
 }
 
 // contains 检查字符串是否包含子字符串

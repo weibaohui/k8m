@@ -10,14 +10,11 @@
 //
 // 使用示例：
 //
-//	// 加载配置
-//	cfg, err := config.LoadConfigFromFile("eventhandler.yaml")
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
+//	// 加载配置（使用flag.Init()）
+//	cfg := config.LoadConfigFromFlags()
 //	
-//	// 创建存储层
-//	eventStore, err := store.NewStore(cfg.Database.Type, cfg.Database.DSN)
+//	// 创建存储层（使用GORM和dao.DB()）
+//	eventStore, err := store.NewStore()
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
