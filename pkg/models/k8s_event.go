@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
@@ -27,18 +26,23 @@ type K8sEvent struct {
 }
 
 // TableName 设置表名
-func (K8sEvent) TableName() string {
+func (e *K8sEvent) TableName() string {
 	return "k8s_events"
 }
 
-// IsWarning 判断是否为警告事件
+// IsWarning 判断是否为警告类型事件
 func (e *K8sEvent) IsWarning() bool {
-	return e.Type == "Warning" || e.Level == "warning"
+	return e.Type == "Warning"
 }
 
-// GenerateEvtKey 生成事件键
-func GenerateEvtKey(namespace, kind, name, reason, message string) string {
-	return fmt.Sprintf("%s/%s/%s/%s/%s", namespace, kind, name, reason, message)
+// IsNormal 判断是否为正常类型事件
+func (e *K8sEvent) IsNormal() bool {
+	return e.Type == "Normal"
+}
+
+// ShouldProcess 判断事件是否应该被处理
+func (e *K8sEvent) ShouldProcess() bool {
+	return !e.Processed && e.IsWarning()
 }
 
 // List 列出事件记录
