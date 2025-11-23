@@ -13,6 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/k8m/pkg/webhook"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -265,7 +266,49 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 			e.Namespace, e.Name, e.Type, e.Reason, e.Message, e.Timestamp.Format("2006-01-02 15:04:05")))
 	}
 	summary := sb.String()
-	resultRaw := utils.ToJSON(events)
+	resultRaw := utils.ToJSONCompact(events)
+
+	// AI总结：启用且事件数量>0时尝试；失败则回退并在结尾追加【AI总结失败】
+	if aiEnabled && len(events) > 0 {
+		if service.AIService().IsEnabled() {
+			customTemplate := aiTemplate
+			if strings.TrimSpace(customTemplate) == "" {
+				customTemplate = `请先输出统计数据
+再逐条列出关键错误信息
+附加简单的分析
+总体不超过300字`
+			}
+			prompt := `以下是k8s集群事件记录，请你进行总结。
+        基本要求：
+        1、仅做汇总，不要解释
+        2、不需要解决方案。
+        3、可以合理使用表情符号。
+
+        附加要求：
+        %s
+
+        以下是JSON格式的事件列表：
+        %s
+        `
+			prompt = fmt.Sprintf(prompt, customTemplate, resultRaw)
+
+			aiSummary, err := service.ChatService().ChatWithCtxNoHistory(w.ctx, prompt)
+			if err != nil {
+				klog.Errorf("AI总结失败，回退到字符串拼接: %v", err)
+				summary = summary + "【AI总结失败】"
+			} else {
+				summary = aiSummary
+			}
+		} else {
+			klog.V(6).Infof("AI服务未启用，跳过AI总结")
+		}
+	} else {
+		if !aiEnabled {
+			klog.V(6).Infof("规则AI总结未开启，跳过AI总结")
+		} else if len(events) == 0 {
+			klog.V(6).Infof("事件数量为0，跳过AI总结")
+		}
+	}
 
 	// 使用统一模式推送到所有目标
 	results := webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
