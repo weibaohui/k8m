@@ -2,6 +2,11 @@
     "type": "page",
     "body": [
         {
+            "type": "alert",
+            "level": "success",
+            "body": "<div class='alert alert-info'><p><strong>k8s Event 事件转发 到 Webhook</strong></p><p>1 仅转发 <code>Warning</code> 类型事件 2 命名空间精确匹配 3 资源名称包含匹配 4 原因关键字匹配 <code>Reason</code>/<code>Message</code> 5 可使用反选匹配</p></div>"
+        },
+        {
             "type": "crud",
             "id": "eventConfigCRUD",
             "name": "eventConfigCRUD",
