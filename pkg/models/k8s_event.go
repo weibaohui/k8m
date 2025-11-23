@@ -99,6 +99,6 @@ func (e *K8sEvent) ListUnprocessed(limit int) ([]*K8sEvent, error) {
 	return list, err
 }
 
-func (e *K8sEvent) UpsertByEvtKey() error {
+func (e *K8sEvent) SaveEvent() error {
 	return e.Save(dao.BuildDefaultParams())
 }

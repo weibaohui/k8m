@@ -56,7 +56,9 @@ func (w *EventWatcher) Stop() {
 	if w.cfg.Enabled {
 		klog.V(6).Infof("停止事件监听器")
 		w.cancel()
-		close(w.eventCh)
+		// close(w.eventCh)
+		// 不主动关闭 eventCh，避免并发写入导致 panic；
+		// 依赖 w.ctx.Done() 让 processEvents 与 HandleEvent 自然退出。
 	}
 
 }
@@ -107,8 +109,7 @@ func (w *EventWatcher) doWatch() error {
 
 // watchSingleCluster 启动单个集群的事件监听
 func (w *EventWatcher) watchSingleCluster(selectedCluster string) watch.Interface {
-	ctx := utils2.GetContextWithAdmin()
-
+	ctx := utils2.GetContextWithAdminFromCtx(w.ctx)
 	var watcher watch.Interface
 	var evt eventsv1.Event
 	err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&evt).AllNamespace().Watch(&watcher).Error
@@ -214,7 +215,7 @@ func (w *EventWatcher) processEvents() {
 
 			// 初步过滤事件
 
-			if err := event.UpsertByEvtKey(); err != nil {
+			if err := event.SaveEvent(); err != nil {
 				klog.Errorf("存储/更新事件失败: %v", err)
 			} else {
 				klog.V(6).Infof("事件存储成功: %s", event.EvtKey)

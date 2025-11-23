@@ -11,8 +11,8 @@ import (
 // K8sEventConfig Event 监听 转发 发送webhook配置表
 type K8sEventConfig struct {
 	ID               uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name             string `json:"name"`                                // 巡检任务名称
-	Description      string `json:"description"`                         // 巡检任务描述
+	Name             string `json:"name"`                                // 事件转发配置名称
+	Description      string `json:"description"`                         // 事件转发配置描述
 	Clusters         string `json:"clusters"`                            // 目标集群列表
 	Webhooks         string `json:"webhooks"`                            // webhook列表
 	WebhookNames     string `json:"webhook_names"`                       // webhook 名称列表
