@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// K8sEventConfig Event 监听 转发 发送webhook配置表
 type K8sEventConfig struct {
 	ID               uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Name             string `json:"name"`                                // 巡检任务名称
@@ -18,14 +19,6 @@ type K8sEventConfig struct {
 	Enabled          bool   `json:"enabled"`                             // 是否启用该任务
 	AIEnabled        bool   `json:"ai_enabled"`                          // 是否启用AI总结功能
 	AIPromptTemplate string `gorm:"type:text" json:"ai_prompt_template"` // AI总结提示词模板
-
-	// 事件处理器 Watcher 配置
-	WatcherBufferSize int `json:"watcher_buffer_size" gorm:"default:1000"`
-
-	// 事件处理器 Worker 配置
-	WorkerBatchSize       int `json:"worker_batch_size" gorm:"default:50"`
-	WorkerProcessInterval int `json:"worker_process_interval" gorm:"default:1"` // 秒
-	WorkerMaxRetries      int `json:"worker_max_retries" gorm:"default:3"`
 
 	// 事件处理器 规则配置（JSON 字符串保存）
 	RuleNamespaces string `json:"rule_namespaces" gorm:"type:text"` // []string JSON
