@@ -126,12 +126,10 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 	}
 
 	// 推送Webhook
-	if w.config.Webhook.Enabled {
-		if err := w.pushWebhook(event); err != nil {
-			klog.Errorf("Webhook推送失败: %v", err)
-			// 推送失败不标记为已处理，让重试机制处理
-			return err
-		}
+	if err := w.pushWebhook(event); err != nil {
+		klog.Errorf("Webhook推送失败: %v", err)
+		// 推送失败不标记为已处理，让重试机制处理
+		return err
 	}
 
 	klog.V(6).Infof("事件处理完成，准备推送: %s", event.EvtKey)
@@ -161,11 +159,9 @@ func (w *EventWorker) shouldFilterEvent(event *model.Event) bool {
 
 // pushWebhook 推送Webhook通知
 func (w *EventWorker) pushWebhook(event *model.Event) error {
-	if !w.config.Webhook.Enabled {
-		return nil
-	}
 
 	// 查询所有已配置的Webhook接收器
+	//TODO 做一个配置表，选择使用的webhook接收器
 	receiver := &models.WebhookReceiver{}
 	receivers, _, err := receiver.List(dao.BuildDefaultParams())
 	if err != nil {
