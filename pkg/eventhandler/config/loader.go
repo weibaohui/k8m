@@ -27,7 +27,7 @@ func LoadAllFromDB() *EventHandlerConfig {
 	}
 
 	clusterRules := make(map[string]RuleConfig)
-
+	clusterWebhooks := make(map[string][]string)
 	// 解析每条记录的规则并分配到集群
 	// 如果有多个重叠的配置，只会保留最后一个，前面的会被覆盖
 	for _, it := range items {
@@ -91,6 +91,15 @@ func LoadAllFromDB() *EventHandlerConfig {
 			// 如果有多个重叠的配置，只会保留最后一个，前面的会被覆盖
 			clusterRules[cluster] = rule
 		}
+
+		// 按集群分配WebhookID
+		for _, c := range strings.Split(it.Clusters, ",") {
+			cluster := strings.TrimSpace(c)
+			if cluster == "" {
+				continue
+			}
+			clusterWebhooks[cluster] = append(clusterWebhooks[cluster], strings.Split(it.Webhooks, ",")...)
+		}
 	}
 
 	cfg := &EventHandlerConfig{
@@ -98,6 +107,7 @@ func LoadAllFromDB() *EventHandlerConfig {
 		Watcher:      WatcherConfig{BufferSize: 1000},
 		Worker:       WorkerConfig{BatchSize: 50, ProcessInterval: 1, MaxRetries: 3},
 		ClusterRules: clusterRules,
+		Webhooks:     clusterWebhooks,
 	}
 
 	klog.V(6).Infof("已从数据库加载事件处理器配置，共计规则条目: %d", len(clusterRules))

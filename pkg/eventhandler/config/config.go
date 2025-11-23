@@ -2,11 +2,12 @@ package config
 
 // EventHandlerConfig 定义事件处理器的完整配置
 type EventHandlerConfig struct {
-	Enabled bool          `json:"enabled" yaml:"enabled"` // 是否启用事件处理器
-	Watcher WatcherConfig `json:"watcher" yaml:"watcher"` // Watcher配置
-	Worker  WorkerConfig  `json:"worker" yaml:"worker"`   // Worker配置
+	Enabled bool          // 是否启用事件处理器
+	Watcher WatcherConfig // Watcher配置
+	Worker  WorkerConfig  // Worker配置
 	// 集群级规则配置；key 为集群ID/名称，value 为该集群的事件过滤规则
-	ClusterRules map[string]RuleConfig `json:"cluster_rules" yaml:"cluster_rules"`
+	ClusterRules map[string]RuleConfig
+	Webhooks     map[string][]string // WebhookID列表，key 为集群ID/名称，value 为该集群的WebhookID列表
 }
 
 // WatcherConfig Watcher配置

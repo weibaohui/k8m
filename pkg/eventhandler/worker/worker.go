@@ -13,6 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/eventhandler/watcher"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
+	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
 
@@ -136,8 +137,6 @@ func (w *EventWorker) processEvent(event *models.K8sEvent) error {
 		return err
 	}
 
-	klog.V(6).Infof("事件处理完成，准备推送: %s", event.EvtKey)
-
 	// 标记为已处理
 	var m models.K8sEvent
 	return m.MarkProcessedByID(event.ID, true)
@@ -145,11 +144,18 @@ func (w *EventWorker) processEvent(event *models.K8sEvent) error {
 
 // pushWebhook 推送Webhook通知
 func (w *EventWorker) pushWebhook(event *models.K8sEvent) error {
+	// 按集群获取WebhookID列表
+	webhookIDs, ok := w.cfg.Webhooks[event.Cluster]
+	if !ok || len(webhookIDs) == 0 {
+		klog.V(6).Infof("集群 %s 未配置Webhook，跳过推送", event.Cluster)
+		return nil
+	}
 
 	// 查询所有已配置的Webhook接收器
-	// TODO 做一个配置表，选择使用的webhook接收器
 	receiver := &models.WebhookReceiver{}
-	receivers, _, err := receiver.List(dao.BuildDefaultParams())
+	receivers, _, err := receiver.List(dao.BuildDefaultParams(), func(d *gorm.DB) *gorm.DB {
+		return d.Where("id IN ?", webhookIDs)
+	})
 	if err != nil {
 		return fmt.Errorf("查询webhook接收器失败: %w", err)
 	}
