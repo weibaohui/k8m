@@ -56,6 +56,6 @@ func DefaultEventHandlerConfig() *EventHandlerConfig {
 			ProcessInterval: 1,
 			MaxRetries:      3,
 		},
-		ClusterRules: map[string]RuleConfig{},
+		EventConfigs: []models.K8sEventConfig{},
 	}
 }
