@@ -206,13 +206,11 @@ func (w *EventWatcher) processEvents() {
 			}
 
 			// 初步过滤事件
-			if w.shouldProcessEvent(event) {
 
-				if err := event.UpsertByEvtKey(); err != nil {
-					klog.Errorf("存储/更新事件失败: %v", err)
-				} else {
-					klog.V(6).Infof("事件存储成功: %s", event.EvtKey)
-				}
+			if err := event.UpsertByEvtKey(); err != nil {
+				klog.Errorf("存储/更新事件失败: %v", err)
+			} else {
+				klog.V(6).Infof("事件存储成功: %s", event.EvtKey)
 			}
 		}
 	}

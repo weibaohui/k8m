@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
@@ -148,10 +149,8 @@ func (w *EventWorker) pushWebhook(event *models.K8sEvent) error {
 	}
 
 	// 准备消息内容
-	summary := fmt.Sprintf("K8s事件: %s/%s - %s", event.Namespace, event.Name, event.Reason)
-	resultRaw := fmt.Sprintf("类型: %s\n原因: %s\n消息: %s\n时间: %s",
-		event.Type, event.Reason, event.Message, event.Timestamp.Format("2006-01-02 15:04:05"))
-
+	summary := fmt.Sprintf("K8s事件:[%s] %s/%s - %s", event.Cluster, event.Namespace, event.Name, event.Reason)
+	resultRaw := utils.ToJSON(event)
 	// 使用统一模式推送到所有目标
 	results := webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
 
@@ -161,19 +160,4 @@ func (w *EventWorker) pushWebhook(event *models.K8sEvent) error {
 
 	klog.V(6).Infof("Webhook推送成功: %s", event.EvtKey)
 	return nil
-}
-
-// contains 检查字符串是否包含子字符串
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && (s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || containsSubstring(s, substr)))
-}
-
-// containsSubstring 检查字符串是否包含子字符串（内部实现）
-func containsSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
