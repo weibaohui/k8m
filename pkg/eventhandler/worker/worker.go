@@ -153,23 +153,19 @@ func (w *EventWorker) processBatch() error {
 		}
 
 		// 解析规则 JSON 字段为 RuleConfig
-		var namespaces, names, labels, reasons, types []string
+		var namespaces, names, reasons []string
 		if ec.RuleNamespaces != "" {
 			_ = json.Unmarshal([]byte(ec.RuleNamespaces), &namespaces)
 		}
 		if ec.RuleNames != "" { // 目前不参与匹配，但保留解析
 			_ = json.Unmarshal([]byte(ec.RuleNames), &names)
 		}
-		if ec.RuleLabels != "" { // 目前不参与匹配，但保留解析
-			_ = json.Unmarshal([]byte(ec.RuleLabels), &labels)
-		}
+
 		if ec.RuleReasons != "" {
 			_ = json.Unmarshal([]byte(ec.RuleReasons), &reasons)
 		}
-		if ec.RuleTypes != "" {
-			_ = json.Unmarshal([]byte(ec.RuleTypes), &types)
-		}
-		rule := config.RuleConfig{Namespaces: namespaces, Labels: labels, Reasons: reasons, Types: types, Reverse: ec.RuleReverse}
+
+		rule := config.RuleConfig{Namespaces: namespaces, Names: names, Reasons: reasons, Reverse: ec.RuleReverse}
 
 		// 逐条事件，按当前规则筛选并按集群分组
 		grouped := make(map[string][]*models.K8sEvent)

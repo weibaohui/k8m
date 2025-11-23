@@ -69,23 +69,23 @@ func (r *RuleMatcher) Match(event *models.K8sEvent) bool {
 		matched = matched || reasonMatched
 	}
 
-	// 类型匹配
-	if len(rule.Types) > 0 {
-		typeMatched := false
-		for _, eventType := range rule.Types {
-			if event.Type == eventType {
-				typeMatched = true
+	//增加名称匹配，包含匹配，不要求精确名称匹配
+	if len(rule.Names) > 0 {
+		nameMatched := false
+		for _, name := range rule.Names {
+			if strings.Contains(event.Name, name) {
+				nameMatched = true
 				break
 			}
 		}
-		if !typeMatched && !rule.Reverse {
+		if !nameMatched && !rule.Reverse {
 			return false
 		}
-		matched = matched || typeMatched
+		matched = matched || nameMatched
 	}
 
 	// 未设置匹配条件时默认匹配
-	if !matched && len(rule.Namespaces) == 0 && len(rule.Reasons) == 0 && len(rule.Types) == 0 {
+	if !matched && len(rule.Namespaces) == 0 && len(rule.Names) == 0 && len(rule.Reasons) == 0 {
 		matched = true
 	}
 

@@ -107,9 +107,7 @@ func (s *AdminEventController) Save(c *gin.Context) {
 
 	m.RuleNamespaces = normalize(m.RuleNamespaces)
 	m.RuleNames = normalize(m.RuleNames)
-	m.RuleLabels = normalize(m.RuleLabels)
 	m.RuleReasons = normalize(m.RuleReasons)
-	m.RuleTypes = normalize(m.RuleTypes)
 
 	err = m.Save(params)
 	if err != nil {

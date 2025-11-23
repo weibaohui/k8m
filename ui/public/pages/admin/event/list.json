@@ -84,7 +84,7 @@
                                     "label": "命名空间",
                                     "delimiter": ",",
                                     "joinValues": true,
-                                    "placeholder": "输入命名空间，按回车添加"
+                                    "placeholder": "命名空间，精确匹配，多个逗号分割"
                                 },
                                 {
                                     "type": "input-text",
@@ -92,15 +92,7 @@
                                     "label": "资源名称",
                                     "delimiter": ",",
                                     "joinValues": true,
-                                    "placeholder": "输入名称，按回车添加"
-                                },
-                                {
-                                    "type": "input-text",
-                                    "name": "rule_labels",
-                                    "label": "标签",
-                                    "delimiter": ",",
-                                    "joinValues": true,
-                                    "placeholder": "输入标签键或键值，按回车添加"
+                                    "placeholder": "名称关键字，包含匹配，多个逗号分割"
                                 },
                                 {
                                     "type": "input-text",
@@ -108,15 +100,7 @@
                                     "label": "事件原因",
                                     "delimiter": ",",
                                     "joinValues": true,
-                                    "placeholder": "输入事件原因，按回车添加"
-                                },
-                                {
-                                    "type": "input-text",
-                                    "name": "rule_types",
-                                    "label": "事件类型",
-                                    "delimiter": ",",
-                                    "joinValues": true,
-                                    "placeholder": "输入事件类型，按回车添加"
+                                    "placeholder": "事件关键字，包含匹配，多个逗号分割"
                                 },
                                 {
                                     "type": "switch",
@@ -290,35 +274,24 @@
                                             "name": "rule_namespaces",
                                             "label": "命名空间",
                                             "delimiter": ",",
-                                            "joinValues": true
+                                            "joinValues": true,
+                                            "placeholder": "命名空间，精确匹配，多个逗号分割"
                                         },
                                         {
                                             "type": "input-text",
                                             "name": "rule_names",
                                             "label": "资源名称",
                                             "delimiter": ",",
-                                            "joinValues": true
-                                        },
-                                        {
-                                            "type": "input-text",
-                                            "name": "rule_labels",
-                                            "label": "标签",
-                                            "delimiter": ",",
-                                            "joinValues": true
+                                            "joinValues": true,
+                                            "placeholder": "名称关键字，包含匹配，多个逗号分割"
                                         },
                                         {
                                             "type": "input-text",
                                             "name": "rule_reasons",
                                             "label": "事件原因",
                                             "delimiter": ",",
-                                            "joinValues": true
-                                        },
-                                        {
-                                            "type": "input-text",
-                                            "name": "rule_types",
-                                            "label": "事件类型",
-                                            "delimiter": ",",
-                                            "joinValues": true
+                                            "joinValues": true,
+                                            "placeholder": "事件关键字，包含匹配，多个逗号分割"
                                         },
                                         {
                                             "type": "switch",

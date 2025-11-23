@@ -21,11 +21,9 @@ type K8sEventConfig struct {
 	AIPromptTemplate string `gorm:"type:text" json:"ai_prompt_template"` // AI总结提示词模板
 
 	// 事件处理器 规则配置（JSON 字符串保存）
-	RuleNamespaces string `json:"rule_namespaces" gorm:"type:text"` // []string
-	RuleNames      string `json:"rule_names" gorm:"type:text"`      // []string
-	RuleLabels     string `json:"rule_labels" gorm:"type:text"`     // []string
-	RuleReasons    string `json:"rule_reasons" gorm:"type:text"`    // []string
-	RuleTypes      string `json:"rule_types" gorm:"type:text"`      // []string
+	RuleNamespaces string `json:"rule_namespaces" gorm:"type:text"` // []string 精确匹配命名空间
+	RuleNames      string `json:"rule_names" gorm:"type:text"`      // []string 包含匹配名称
+	RuleReasons    string `json:"rule_reasons" gorm:"type:text"`    // []string 包含匹配Reason、Message两个字段
 	RuleReverse    bool   `json:"rule_reverse" gorm:"default:false"`
 
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
