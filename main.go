@@ -21,6 +21,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
+	"github.com/weibaohui/k8m/pkg/controller/admin/event"
 	"github.com/weibaohui/k8m/pkg/controller/admin/inspection"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
@@ -52,6 +53,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
+	"github.com/weibaohui/k8m/pkg/eventhandler/watcher"
+	"github.com/weibaohui/k8m/pkg/eventhandler/worker"
 	"github.com/weibaohui/k8m/pkg/flag"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/leader"
@@ -184,6 +187,9 @@ func Init() {
 					lua.InitClusterInspection()
 					// 启动helm 更新repo定时任务
 					helm2.StartUpdateHelmRepoInBackground()
+					// leader 启动对event的webhook处理
+					watcher.NewEventWatcher().Start()
+					worker.NewEventWorker().Start()
 				},
 				OnStoppedLeading: func() {
 					klog.V(2).Infof("[leader] 不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
@@ -191,6 +197,10 @@ func Init() {
 					lua.StopClusterInspection()
 					// 停止helm更新任务
 					helm2.StopUpdateHelmRepoInBackground()
+					// leader 启动对event的webhook处理
+					worker.NewEventWorker().Stop()
+					watcher.NewEventWatcher().Stop()
+
 				},
 			}
 
@@ -414,6 +424,8 @@ func main() {
 		ai_prompt.RegisterAdminAIPromptRoutes(admin)
 		// 集群巡检定时任务
 		inspection.RegisterAdminScheduleRoutes(admin)
+		// K8s事件转发配置
+		event.RegisterAdminEventRoutes(admin)
 		// 集群巡检记录
 		inspection.RegisterAdminRecordRoutes(admin)
 		// 集群巡检脚本lua脚本管理

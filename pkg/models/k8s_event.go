@@ -1,0 +1,104 @@
+package models
+
+import (
+	"errors"
+	"time"
+
+	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"gorm.io/gorm"
+)
+
+// K8sEvent 事件处理器使用的K8s事件模型
+type K8sEvent struct {
+	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
+	EvtKey    string    `gorm:"uniqueIndex;" json:"evt_key"`
+	Cluster   string    `gorm:"type:varchar(128);" json:"cluster"`
+	Namespace string    `gorm:"type:varchar(64);index" json:"namespace"`
+	Name      string    `gorm:"type:varchar(128);" json:"name"`
+	Type      string    `gorm:"type:varchar(16);" json:"type"`
+	Reason    string    `gorm:"type:varchar(128);" json:"reason"`
+	Level     string    `gorm:"type:varchar(16);" json:"level"`
+	Message   string    `gorm:"type:text;" json:"message"`
+	Timestamp time.Time `gorm:"index" json:"timestamp"`
+	Processed bool      `gorm:"default:false;index" json:"processed"`
+	Attempts  int       `gorm:"default:0" json:"-"`
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt time.Time `json:"-"`
+}
+
+// TableName 设置表名
+func (e *K8sEvent) TableName() string {
+	return "k8s_events"
+}
+
+// IsWarning 判断是否为警告类型事件
+func (e *K8sEvent) IsWarning() bool {
+	return e.Type == "Warning"
+}
+
+// IsNormal 判断是否为正常类型事件
+func (e *K8sEvent) IsNormal() bool {
+	return e.Type == "Normal"
+}
+
+// ShouldProcess 判断事件是否应该被处理
+func (e *K8sEvent) ShouldProcess() bool {
+	return !e.Processed && e.IsWarning()
+}
+
+// List 列出事件记录
+// 参数使用统一的 Params 和可选查询方法
+func (e *K8sEvent) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*K8sEvent, int64, error) {
+	return dao.GenericQuery(params, e, queryFuncs...)
+}
+
+// Save 保存事件记录
+// 支持根据查询函数限制可更新的字段
+func (e *K8sEvent) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericSave(params, e, queryFuncs...)
+}
+
+// Delete 根据ID删除事件记录
+func (e *K8sEvent) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
+	return dao.GenericDelete(params, e, utils.ToInt64Slice(ids), queryFuncs...)
+}
+
+// GetOne 获取单条事件记录
+func (e *K8sEvent) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*K8sEvent, error) {
+	return dao.GenericGetOne(params, e, queryFuncs...)
+}
+
+// GetByEvtKey 根据事件键获取事件
+func (e *K8sEvent) GetByEvtKey(evtKey string) (*K8sEvent, error) {
+	var item K8sEvent
+	err := dao.DB().Where("evt_key = ?", evtKey).First(&item).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// MarkProcessedByID 根据ID更新处理状态
+func (e *K8sEvent) MarkProcessedByID(id int64, processed bool) error {
+	return dao.DB().Model(&K8sEvent{}).Where("id = ?", id).Update("processed", processed).Error
+}
+
+// IncrementAttemptsByID 根据ID增加重试次数
+func (e *K8sEvent) IncrementAttemptsByID(id int64) error {
+	return dao.DB().Model(&K8sEvent{}).Where("id = ?", id).UpdateColumn("attempts", gorm.Expr("attempts + ?", 1)).Error
+}
+
+// ListUnprocessed 列出未处理的事件，按时间升序，限制条数
+func (e *K8sEvent) ListUnprocessed(limit int) ([]*K8sEvent, error) {
+	var list []*K8sEvent
+	err := dao.DB().Where("processed = ?", false).Order("timestamp ASC").Limit(limit).Find(&list).Error
+	return list, err
+}
+
+func (e *K8sEvent) SaveEvent() error {
+	return e.Save(dao.BuildDefaultParams())
+}

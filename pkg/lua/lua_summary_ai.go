@@ -201,7 +201,7 @@ func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg *Summary
 		以下是JSON格式的巡检结果：
 		%s
 		`
-	prompt = fmt.Sprintf(prompt, customTemplate, utils.ToJSON(msg))
+	prompt = fmt.Sprintf(prompt, customTemplate, utils.ToJSONCompact(msg))
 
 	summary, err := service.ChatService().ChatWithCtxNoHistory(ctx, prompt)
 	if err != nil {
