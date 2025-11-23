@@ -21,7 +21,7 @@ import (
 type EventWatcher struct {
 	cfg          *config.EventHandlerConfig
 	ruleMatcher  *RuleMatcher
-	eventCh      chan *config.Event
+	eventCh      chan *models.K8sEvent
 	ctx          context.Context
 	cancel       context.CancelFunc
 	resyncPeriod time.Duration
@@ -34,7 +34,7 @@ func NewEventWatcher() *EventWatcher {
 	return &EventWatcher{
 		cfg:         cfg,
 		ruleMatcher: NewRuleMatcher(&cfg.RuleConfig),
-		eventCh:     make(chan *config.Event, cfg.Watcher.BufferSize),
+		eventCh:     make(chan *models.K8sEvent, cfg.Watcher.BufferSize),
 		ctx:         ctx,
 		cancel:      cancel,
 	}
@@ -125,7 +125,7 @@ func (w *EventWatcher) watchSingleCluster(selectedCluster string) watch.Interfac
 				return
 			}
 
-			m := &config.Event{
+			m := &models.K8sEvent{
 				Type:   evt.Type,
 				Reason: evt.Reason,
 				Level: func() string {
@@ -142,11 +142,7 @@ func (w *EventWatcher) watchSingleCluster(selectedCluster string) watch.Interfac
 				Attempts:  0,
 			}
 			if m.EvtKey == "" {
-				if string(evt.UID) != "" {
-					m.EvtKey = string(evt.UID)
-				} else {
-					m.EvtKey = config.GenerateEvtKey(m.Namespace, "Event", m.Name, m.Reason, m.Message)
-				}
+				m.EvtKey = string(evt.UID)
 			}
 
 			if err := w.HandleEvent(m); err != nil {
@@ -158,6 +154,32 @@ func (w *EventWatcher) watchSingleCluster(selectedCluster string) watch.Interfac
 	}()
 
 	return watcher
+}
+
+// HandleEvent 处理单个事件（供外部调用）
+func (w *EventWatcher) HandleEvent(event *models.K8sEvent) error {
+	if event == nil {
+		return fmt.Errorf("事件不能为空")
+	}
+
+	// 检查事件是否已经存在
+	var m models.K8sEvent
+	existing, err := m.GetByEvtKey(event.EvtKey)
+	if err != nil {
+		return fmt.Errorf("查询事件失败: %w", err)
+	}
+	if existing != nil {
+		klog.V(6).Infof("事件已存在，跳过: %s", event.EvtKey)
+		return nil
+	}
+
+	// 发送到事件通道
+	select {
+	case w.eventCh <- event:
+		return nil
+	case <-time.After(1 * time.Second):
+		return fmt.Errorf("事件通道已满，发送超时")
+	}
 }
 
 // processEvents 处理接收到的事件
@@ -197,7 +219,7 @@ func (w *EventWatcher) processEvents() {
 }
 
 // shouldProcessEvent 判断是否应该处理事件
-func (w *EventWatcher) shouldProcessEvent(event *config.Event) bool {
+func (w *EventWatcher) shouldProcessEvent(event *models.K8sEvent) bool {
 	// 只处理警告类型事件
 	if !event.IsWarning() {
 		return false
@@ -205,35 +227,4 @@ func (w *EventWatcher) shouldProcessEvent(event *config.Event) bool {
 
 	// 应用规则匹配
 	return w.ruleMatcher.Match(event)
-}
-
-// HandleEvent 处理单个事件（供外部调用）
-func (w *EventWatcher) HandleEvent(event *config.Event) error {
-	if event == nil {
-		return fmt.Errorf("事件不能为空")
-	}
-
-	// 设置事件键
-	if event.EvtKey == "" {
-		event.EvtKey = config.GenerateEvtKey(event.Namespace, "Event", event.Name, event.Reason, event.Message)
-	}
-
-	// 检查事件是否已经存在
-	var m models.K8sEvent
-	existing, err := m.GetByEvtKey(event.EvtKey)
-	if err != nil {
-		return fmt.Errorf("查询事件失败: %w", err)
-	}
-	if existing != nil {
-		klog.V(6).Infof("事件已存在，跳过: %s", event.EvtKey)
-		return nil
-	}
-
-	// 发送到事件通道
-	select {
-	case w.eventCh <- event:
-		return nil
-	case <-time.After(1 * time.Second):
-		return fmt.Errorf("事件通道已满，发送超时")
-	}
 }

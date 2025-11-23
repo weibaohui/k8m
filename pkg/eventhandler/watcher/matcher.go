@@ -3,6 +3,7 @@ package watcher
 
 import (
 	"github.com/weibaohui/k8m/pkg/eventhandler/config"
+	"github.com/weibaohui/k8m/pkg/models"
 )
 
 // RuleMatcher 规则匹配器
@@ -18,7 +19,7 @@ func NewRuleMatcher(config *config.RuleConfig) *RuleMatcher {
 }
 
 // Match 判断事件是否匹配规则
-func (r *RuleMatcher) Match(event *config.Event) bool {
+func (r *RuleMatcher) Match(event *models.K8sEvent) bool {
 	// todo 增加对关键字的规则自定义。
 	// todo 这些规则存数据库，统一管理页面
 	// 如果规则配置为空，则匹配所有事件

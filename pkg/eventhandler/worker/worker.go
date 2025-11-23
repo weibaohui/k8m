@@ -89,8 +89,7 @@ func (w *EventWorker) processBatch() error {
 
 	klog.V(6).Infof("开始处理事件批次: %d个事件", len(k8sEvents))
 
-	for _, ke := range k8sEvents {
-		event := convertToEvent(ke)
+	for _, event := range k8sEvents {
 		if err := w.processEvent(event); err != nil {
 			klog.Errorf("处理事件失败: %v", err)
 			// 增加重试次数
@@ -104,7 +103,7 @@ func (w *EventWorker) processBatch() error {
 }
 
 // processEvent 处理单个事件
-func (w *EventWorker) processEvent(event *config.Event) error {
+func (w *EventWorker) processEvent(event *models.K8sEvent) error {
 	klog.V(6).Infof("处理事件: %s", event.EvtKey)
 
 	// 检查重试次数
@@ -129,7 +128,7 @@ func (w *EventWorker) processEvent(event *config.Event) error {
 }
 
 // pushWebhook 推送Webhook通知
-func (w *EventWorker) pushWebhook(event *config.Event) error {
+func (w *EventWorker) pushWebhook(event *models.K8sEvent) error {
 
 	// 查询所有已配置的Webhook接收器
 	// TODO 做一个配置表，选择使用的webhook接收器
@@ -172,23 +171,4 @@ func containsSubstring(s, substr string) bool {
 		}
 	}
 	return false
-}
-
-// convertToEvent 将K8sEvent转换为Event
-func convertToEvent(k8sEvent *models.K8sEvent) *config.Event {
-	return &config.Event{
-		ID:        k8sEvent.ID,
-		EvtKey:    k8sEvent.EvtKey,
-		Type:      k8sEvent.Type,
-		Reason:    k8sEvent.Reason,
-		Level:     k8sEvent.Level,
-		Namespace: k8sEvent.Namespace,
-		Name:      k8sEvent.Name,
-		Message:   k8sEvent.Message,
-		Timestamp: k8sEvent.Timestamp,
-		Processed: k8sEvent.Processed,
-		Attempts:  k8sEvent.Attempts,
-		CreatedAt: k8sEvent.CreatedAt,
-		UpdatedAt: k8sEvent.UpdatedAt,
-	}
 }
