@@ -820,9 +820,26 @@ export const initialMenu: MenuItem[] = [
                         order: 4,
                     },
 
+
+                ],
+            },
+            {
+                key: 'event_webhook_config',
+                title: '集群事件转发',
+                icon: 'fa-solid fa-plug-circle-bolt',
+                eventType: 'custom',
+                customEvent: '() => loadJsonPage("/admin/event/list")',
+                order: 2,
+            },
+            {
+                key: 'webhook_management',
+                title: 'webhook管理',
+                icon: 'fa-solid fa-clipboard-list',
+                order: 4,
+                children: [
                     {
                         key: 'webhook_management',
-                        title: 'webhook管理',
+                        title: 'webhook列表',
                         icon: 'fa-solid fa-bell-concierge',
                         eventType: 'custom',
                         customEvent: '() => loadJsonPage("/admin/inspection/webhook")',
@@ -839,20 +856,12 @@ export const initialMenu: MenuItem[] = [
                 ],
             },
             {
-                key: 'event_webhook_config',
-                title: '集群事件转发',
-                icon: 'fa-solid fa-share-nodes',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/event/list")',
-                order: 2,
-            },
-            {
                 key: 'ai_model_config',
                 title: 'AI模型配置',
                 icon: 'fa-solid fa-sliders',
                 eventType: 'custom',
                 customEvent: '() => loadJsonPage("/admin/config/ai_model_config")',
-                order: 4,
+                order: 5,
             },
             {
                 key: 'ai_prompt_management',
