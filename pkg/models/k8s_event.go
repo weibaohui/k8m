@@ -22,9 +22,9 @@ type K8sEvent struct {
 	Message   string    `gorm:"type:text;" json:"message"`
 	Timestamp time.Time `gorm:"index" json:"timestamp"`
 	Processed bool      `gorm:"default:false;index" json:"processed"`
-	Attempts  int       `gorm:"default:0" json:"attempts"`
+	Attempts  int       `gorm:"default:0" json:"-"`
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // TableName 设置表名
