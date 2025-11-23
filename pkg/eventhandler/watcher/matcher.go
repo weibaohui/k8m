@@ -19,6 +19,8 @@ func NewRuleMatcher(config *model.RuleConfig) *RuleMatcher {
 
 // Match 判断事件是否匹配规则
 func (r *RuleMatcher) Match(event *model.Event) bool {
+	//todo 增加对关键字的规则自定义。
+	//todo 这些规则存数据库，统一管理页面
 	// 如果规则配置为空，则匹配所有事件
 	if r.config.IsEmpty() {
 		return true

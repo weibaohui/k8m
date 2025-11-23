@@ -118,13 +118,6 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 		return m.MarkProcessedByID(event.ID, true)
 	}
 
-	// 应用二次过滤（聚合、去重、限流等）
-	if w.shouldFilterEvent(event) {
-		klog.V(6).Infof("事件被过滤: %s", event.EvtKey)
-		var m models.K8sEvent
-		return m.MarkProcessedByID(event.ID, true)
-	}
-
 	// 推送Webhook
 	if err := w.pushWebhook(event); err != nil {
 		klog.Errorf("Webhook推送失败: %v", err)
@@ -137,24 +130,6 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 	// 标记为已处理
 	var m models.K8sEvent
 	return m.MarkProcessedByID(event.ID, true)
-}
-
-// shouldFilterEvent 判断是否应该过滤事件
-func (w *EventWorker) shouldFilterEvent(event *model.Event) bool {
-	// TODO: 实现更复杂的过滤逻辑
-	// 1. 聚合规则：同一资源的相似事件可以聚合
-	// 2. 限流规则：防止同一事件频繁推送
-	// 3. 去重规则：避免重复推送相同事件
-
-	// 简单的示例：如果事件消息包含特定关键词，则过滤
-	filterKeywords := []string{"test", "debug"}
-	for _, keyword := range filterKeywords {
-		if contains(event.Message, keyword) {
-			return true
-		}
-	}
-
-	return false
 }
 
 // pushWebhook 推送Webhook通知
