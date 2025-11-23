@@ -159,24 +159,38 @@ func (w *EventWatcher) HandleEvent(event *models.K8sEvent) error {
 	if event == nil {
 		return fmt.Errorf("事件不能为空")
 	}
-
-	// 检查事件是否已经存在
-	var m models.K8sEvent
-	existing, err := m.GetByEvtKey(event.EvtKey)
-	if err != nil {
-		return fmt.Errorf("查询事件失败: %w", err)
-	}
-	if existing != nil {
-		klog.V(6).Infof("事件已存在，跳过: %s", event.EvtKey)
+	if !w.shouldProcessEvent(event) {
+		klog.V(6).Infof("事件 %s 不满足规则，跳过", event.EvtKey)
 		return nil
 	}
 
-	// 发送到事件通道
-	select {
-	case w.eventCh <- event:
-		return nil
-	case <-time.After(1 * time.Second):
-		return fmt.Errorf("事件通道已满，发送超时")
+	timer := time.NewTimer(1 * time.Second)
+	defer timer.Stop()
+	// 中文函数注释：将事件发送到处理通道；若通道满则每1秒重试，直至发送成功或监听器停止
+	for {
+		// 优先响应停止信号，避免在通道关闭后发送导致panic
+		select {
+		case <-w.ctx.Done():
+			return fmt.Errorf("监听器已停止，取消事件发送: %s", event.EvtKey)
+		default:
+		}
+
+		select {
+		case w.eventCh <- event:
+			return nil
+		default:
+			// 通道满，等待一秒后重试
+			klog.V(6).Infof("事件通道繁忙，等待重试发送: %s", event.EvtKey)
+			select {
+			case <-timer.C:
+				// 继续下一轮重试
+			case <-w.ctx.Done():
+				if !timer.Stop() {
+					<-timer.C
+				}
+				return fmt.Errorf("监听器已停止，取消事件发送: %s", event.EvtKey)
+			}
+		}
 	}
 }
 
@@ -193,20 +207,8 @@ func (w *EventWatcher) processEvents() {
 
 			// 初步过滤事件
 			if w.shouldProcessEvent(event) {
-				// 落库事件（统一使用模型方法）
-				ke := &models.K8sEvent{
-					EvtKey:    event.EvtKey,
-					Type:      event.Type,
-					Reason:    event.Reason,
-					Level:     event.Level,
-					Namespace: event.Namespace,
-					Name:      event.Name,
-					Message:   event.Message,
-					Timestamp: event.Timestamp,
-					Processed: event.Processed,
-					Attempts:  event.Attempts,
-				}
-				if err := ke.UpsertByEvtKey(); err != nil {
+
+				if err := event.UpsertByEvtKey(); err != nil {
 					klog.Errorf("存储/更新事件失败: %v", err)
 				} else {
 					klog.V(6).Infof("事件存储成功: %s", event.EvtKey)

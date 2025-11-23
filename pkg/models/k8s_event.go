@@ -99,19 +99,6 @@ func (e *K8sEvent) ListUnprocessed(limit int) ([]*K8sEvent, error) {
 	return list, err
 }
 
-// UpsertByEvtKey 通过事件键进行插入或更新（幂等）
-// 已存在则更新时间与消息，不存在则创建
 func (e *K8sEvent) UpsertByEvtKey() error {
-	var existing K8sEvent
-	err := dao.DB().Where("evt_key = ?", e.EvtKey).First(&existing).Error
-	if err == nil {
-		return dao.DB().Model(&K8sEvent{}).Where("evt_key = ?", e.EvtKey).Updates(map[string]any{
-			"timestamp": e.Timestamp,
-			"message":   e.Message,
-		}).Error
-	}
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-	return dao.DB().Create(e).Error
+	return e.Save(dao.BuildDefaultParams())
 }
