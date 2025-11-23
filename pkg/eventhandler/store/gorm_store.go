@@ -28,19 +28,12 @@ func NewGORMStore() *GORMStore {
 	return &GORMStore{db: db}
 }
 
-// Init 初始化数据库表
+// Init 兼容旧接口，迁移逻辑统一在 models.AutoMigrate 中处理
 func (s *GORMStore) Init() error {
 	if s.db == nil {
 		return fmt.Errorf("数据库连接为空")
 	}
-
-	err := s.db.AutoMigrate(&models.K8sEvent{})
-	if err != nil {
-		klog.Errorf("创建事件表失败: %v", err)
-		return fmt.Errorf("创建事件表失败: %w", err)
-	}
-
-	klog.V(6).Infof("事件表初始化成功")
+	klog.V(6).Infof("事件存储已就绪，使用统一的数据库迁移方式")
 	return nil
 }
 

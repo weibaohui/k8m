@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/eventhandler/model"
 	"github.com/weibaohui/k8m/pkg/eventhandler/store"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -162,12 +163,15 @@ func (w *EventWorker) pushWebhook(event *model.Event) error {
 		return nil
 	}
 
-	// 创建webhook接收者配置
-	receiver := &models.WebhookReceiver{
-		Platform:     "webhook",
-		TargetURL:    w.config.Webhook.URL,
-		SignSecret:   "", // 从配置中获取密钥
-		BodyTemplate: "", // 使用默认模板
+	// 查询所有已配置的Webhook接收器
+	receiver := &models.WebhookReceiver{}
+	receivers, _, err := receiver.List(dao.BuildDefaultParams())
+	if err != nil {
+		return fmt.Errorf("查询webhook接收器失败: %w", err)
+	}
+	if len(receivers) == 0 {
+		klog.V(6).Infof("未配置webhook接收器，跳过推送")
+		return nil
 	}
 
 	// 准备消息内容
@@ -175,8 +179,8 @@ func (w *EventWorker) pushWebhook(event *model.Event) error {
 	resultRaw := fmt.Sprintf("类型: %s\n原因: %s\n消息: %s\n时间: %s",
 		event.Type, event.Reason, event.Message, event.Timestamp.Format("2006-01-02 15:04:05"))
 
-	// 使用webhook推送
-	results := webhook.PushMsgToAllTargets(summary, resultRaw, []*models.WebhookReceiver{receiver})
+	// 使用统一模式推送到所有目标
+	results := webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
 
 	if len(results) > 0 && results[0].Error != nil {
 		return fmt.Errorf("webhook推送失败: %w", results[0].Error)
