@@ -18,33 +18,27 @@ type DatabaseConfig struct {
 
 // WatcherConfig Watcher配置
 type WatcherConfig struct {
-	Enabled        bool `json:"enabled" yaml:"enabled"`                 // 是否启用Watcher
-	ResyncInterval int  `json:"resync_interval" yaml:"resync_interval"` // 重新同步间隔(秒)
-	BufferSize     int  `json:"buffer_size" yaml:"buffer_size"`         // 事件缓冲区大小
+	BufferSize int `json:"buffer_size" yaml:"buffer_size"` // 事件缓冲区大小
 }
 
 // WorkerConfig Worker配置
 type WorkerConfig struct {
-	Enabled         bool `json:"enabled" yaml:"enabled"`                   // 是否启用Worker
-	BatchSize       int  `json:"batch_size" yaml:"batch_size"`             // 批处理大小
-	ProcessInterval int  `json:"process_interval" yaml:"process_interval"` // 处理间隔(毫秒)
-	MaxRetries      int  `json:"max_retries" yaml:"max_retries"`           // 最大重试次数
+	BatchSize       int `json:"batch_size" yaml:"batch_size"`             // 批处理大小
+	ProcessInterval int `json:"process_interval" yaml:"process_interval"` // 处理间隔(秒)
+	MaxRetries      int `json:"max_retries" yaml:"max_retries"`           // 最大重试次数
 }
 
-// NewEventHandlerConfig 创建默认的事件处理器配置
-func NewEventHandlerConfig() *EventHandlerConfig {
+// DefaultEventHandlerConfig 创建默认的事件处理器配置
+func DefaultEventHandlerConfig() *EventHandlerConfig {
 	return &EventHandlerConfig{
 		Enabled: true,
 
 		Watcher: WatcherConfig{
-			Enabled:        true,
-			ResyncInterval: 300,
-			BufferSize:     1000,
+			BufferSize: 1000,
 		},
 		Worker: WorkerConfig{
-			Enabled:         true,
 			BatchSize:       50,
-			ProcessInterval: 500,
+			ProcessInterval: 1,
 			MaxRetries:      3,
 		},
 		RuleConfig: *NewRuleConfig(),
