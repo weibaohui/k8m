@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/eventhandler/model"
-	"github.com/weibaohui/k8m/pkg/eventhandler/store"
+	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 )
@@ -15,7 +16,6 @@ import (
 // EventWatcher 事件监听器
 type EventWatcher struct {
 	client       kubernetes.Interface
-	store        store.EventStore
 	config       *model.EventHandlerConfig
 	ruleMatcher  *RuleMatcher
 	eventCh      chan *model.Event
@@ -25,12 +25,11 @@ type EventWatcher struct {
 }
 
 // NewEventWatcher 创建事件监听器
-func NewEventWatcher(client kubernetes.Interface, store store.EventStore, config *model.EventHandlerConfig) *EventWatcher {
+func NewEventWatcher(client kubernetes.Interface, config *model.EventHandlerConfig) *EventWatcher {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &EventWatcher{
 		client:       client,
-		store:        store,
 		config:       config,
 		ruleMatcher:  NewRuleMatcher(&config.RuleConfig),
 		eventCh:      make(chan *model.Event, config.Watcher.BufferSize),
@@ -115,11 +114,40 @@ func (w *EventWatcher) processEvents() {
 
 			// 初步过滤事件
 			if w.shouldProcessEvent(event) {
-				// 存储事件
-				if err := w.store.Create(w.ctx, event); err != nil {
-					klog.Errorf("存储事件失败: %v", err)
+				// 落库事件（统一使用 dao.DB()）
+				ke := &models.K8sEvent{
+					EvtKey:    event.EvtKey,
+					Type:      event.Type,
+					Reason:    event.Reason,
+					Level:     event.Level,
+					Namespace: event.Namespace,
+					Name:      event.Name,
+					Message:   event.Message,
+					Timestamp: event.Timestamp,
+					Processed: event.Processed,
+					Attempts:  event.Attempts,
+				}
+
+				// 先查是否存在，避免重复
+				var existing models.K8sEvent
+				err := dao.DB().Where("evt_key = ?", ke.EvtKey).First(&existing).Error
+				if err == nil {
+					// 已存在，更新时间和消息
+					if uErr := dao.DB().Model(&models.K8sEvent{}).Where("evt_key = ?", ke.EvtKey).Updates(map[string]any{
+						"timestamp": ke.Timestamp,
+						"message":   ke.Message,
+					}).Error; uErr != nil {
+						klog.Errorf("更新事件失败: %v", uErr)
+					} else {
+						klog.V(6).Infof("事件更新成功: %s", event.EvtKey)
+					}
 				} else {
-					klog.V(6).Infof("事件存储成功: %s", event.EvtKey)
+					// 不存在则创建
+					if cErr := dao.DB().Create(ke).Error; cErr != nil {
+						klog.Errorf("创建事件失败: %v", cErr)
+					} else {
+						klog.V(6).Infof("事件存储成功: %s", event.EvtKey)
+					}
 				}
 			}
 		}
@@ -149,12 +177,9 @@ func (w *EventWatcher) HandleEvent(event *model.Event) error {
 	}
 
 	// 检查事件是否已经存在
-	existing, err := w.store.GetByKey(w.ctx, event.EvtKey)
-	if err != nil {
-		return fmt.Errorf("查询事件失败: %w", err)
-	}
-
-	if existing != nil {
+	var existing models.K8sEvent
+	err := dao.DB().Where("evt_key = ?", event.EvtKey).First(&existing).Error
+	if err == nil {
 		klog.V(6).Infof("事件已存在，跳过: %s", event.EvtKey)
 		return nil
 	}

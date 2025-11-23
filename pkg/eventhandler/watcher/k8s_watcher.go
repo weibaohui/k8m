@@ -2,14 +2,13 @@
 package watcher
 
 import (
-	"fmt"
-	"time"
+    "fmt"
+    "time"
 
-	"github.com/weibaohui/k8m/pkg/eventhandler/model"
-	"github.com/weibaohui/k8m/pkg/eventhandler/store"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/kubernetes"
+    "github.com/weibaohui/k8m/pkg/eventhandler/model"
+    corev1 "k8s.io/api/core/v1"
+    "k8s.io/apimachinery/pkg/watch"
+    "k8s.io/client-go/kubernetes"
 )
 
 // K8sEventWatcher Kubernetes事件监听器
@@ -18,10 +17,10 @@ type K8sEventWatcher struct {
 }
 
 // NewK8sEventWatcher 创建Kubernetes事件监听器
-func NewK8sEventWatcher(client kubernetes.Interface, store store.EventStore, config *model.EventHandlerConfig) *K8sEventWatcher {
-	return &K8sEventWatcher{
-		watcher: NewEventWatcher(client, store, config),
-	}
+func NewK8sEventWatcher(client kubernetes.Interface, config *model.EventHandlerConfig) *K8sEventWatcher {
+    return &K8sEventWatcher{
+        watcher: NewEventWatcher(client, config),
+    }
 }
 
 // Start 启动监听器

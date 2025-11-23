@@ -9,15 +9,14 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/eventhandler/model"
-	"github.com/weibaohui/k8m/pkg/eventhandler/store"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
+	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
 
 // EventWorker 事件处理Worker
 type EventWorker struct {
-	store        store.EventStore
 	config       *model.EventHandlerConfig
 	ctx          context.Context
 	cancel       context.CancelFunc
@@ -26,11 +25,10 @@ type EventWorker struct {
 }
 
 // NewEventWorker 创建事件处理Worker
-func NewEventWorker(store store.EventStore, config *model.EventHandlerConfig) *EventWorker {
+func NewEventWorker(config *model.EventHandlerConfig) *EventWorker {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &EventWorker{
-		store:  store,
 		config: config,
 		ctx:    ctx,
 		cancel: cancel,
@@ -83,23 +81,25 @@ func (w *EventWorker) processBatch() error {
 	w.processMutex.Lock()
 	defer w.processMutex.Unlock()
 
-	// 获取未处理的事件
-	events, err := w.store.GetUnprocessed(w.ctx, w.config.Worker.BatchSize)
+	// 获取未处理的事件（使用 dao.DB()）
+	var k8sEvents []models.K8sEvent
+	err := dao.DB().Where("processed = ?", false).Order("timestamp ASC").Limit(w.config.Worker.BatchSize).Find(&k8sEvents).Error
 	if err != nil {
 		return fmt.Errorf("获取未处理事件失败: %w", err)
 	}
 
-	if len(events) == 0 {
+	if len(k8sEvents) == 0 {
 		return nil
 	}
 
-	klog.V(6).Infof("开始处理事件批次: %d个事件", len(events))
+	klog.V(6).Infof("开始处理事件批次: %d个事件", len(k8sEvents))
 
-	for _, event := range events {
+	for _, ke := range k8sEvents {
+		event := convertToEvent(&ke)
 		if err := w.processEvent(event); err != nil {
 			klog.Errorf("处理事件失败: %v", err)
 			// 增加重试次数
-			if err := w.store.IncrementAttempts(w.ctx, event.ID); err != nil {
+			if err := dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).UpdateColumn("attempts", gorm.Expr("attempts + ?", 1)).Error; err != nil {
 				klog.Errorf("增加重试次数失败: %v", err)
 			}
 		}
@@ -115,13 +115,13 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 	// 检查重试次数
 	if event.Attempts >= w.config.Worker.MaxRetries {
 		klog.Warningf("事件达到最大重试次数，标记为已处理: %s", event.EvtKey)
-		return w.store.UpdateProcessed(w.ctx, event.ID, true)
+		return dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).Update("processed", true).Error
 	}
 
 	// 应用二次过滤（聚合、去重、限流等）
 	if w.shouldFilterEvent(event) {
 		klog.V(6).Infof("事件被过滤: %s", event.EvtKey)
-		return w.store.UpdateProcessed(w.ctx, event.ID, true)
+		return dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).Update("processed", true).Error
 	}
 
 	// 推送Webhook
@@ -136,7 +136,7 @@ func (w *EventWorker) processEvent(event *model.Event) error {
 	klog.V(6).Infof("事件处理完成，准备推送: %s", event.EvtKey)
 
 	// 标记为已处理
-	return w.store.UpdateProcessed(w.ctx, event.ID, true)
+	return dao.DB().Model(&models.K8sEvent{}).Where("id = ?", event.ID).Update("processed", true).Error
 }
 
 // shouldFilterEvent 判断是否应该过滤事件
@@ -203,4 +203,23 @@ func containsSubstring(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+// convertToEvent 将K8sEvent转换为Event
+func convertToEvent(k8sEvent *models.K8sEvent) *model.Event {
+	return &model.Event{
+		ID:        k8sEvent.ID,
+		EvtKey:    k8sEvent.EvtKey,
+		Type:      k8sEvent.Type,
+		Reason:    k8sEvent.Reason,
+		Level:     k8sEvent.Level,
+		Namespace: k8sEvent.Namespace,
+		Name:      k8sEvent.Name,
+		Message:   k8sEvent.Message,
+		Timestamp: k8sEvent.Timestamp,
+		Processed: k8sEvent.Processed,
+		Attempts:  k8sEvent.Attempts,
+		CreatedAt: k8sEvent.CreatedAt,
+		UpdatedAt: k8sEvent.UpdatedAt,
+	}
 }
