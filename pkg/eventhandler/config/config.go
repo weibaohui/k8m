@@ -2,10 +2,11 @@ package config
 
 // EventHandlerConfig 定义事件处理器的完整配置
 type EventHandlerConfig struct {
-	Enabled    bool          `json:"enabled" yaml:"enabled"`         // 是否启用事件处理器
-	Watcher    WatcherConfig `json:"watcher" yaml:"watcher"`         // Watcher配置
-	Worker     WorkerConfig  `json:"worker" yaml:"worker"`           // Worker配置
-	RuleConfig RuleConfig    `json:"rule_config" yaml:"rule_config"` // 规则配置
+	Enabled bool          `json:"enabled" yaml:"enabled"` // 是否启用事件处理器
+	Watcher WatcherConfig `json:"watcher" yaml:"watcher"` // Watcher配置
+	Worker  WorkerConfig  `json:"worker" yaml:"worker"`   // Worker配置
+	// 集群级规则配置；key 为集群ID/名称，value 为该集群的事件过滤规则
+	ClusterRules map[string]RuleConfig `json:"cluster_rules" yaml:"cluster_rules"`
 }
 
 // WatcherConfig Watcher配置
@@ -37,7 +38,7 @@ func (r *RuleConfig) IsEmpty() bool {
 // DefaultEventHandlerConfig 创建默认的事件处理器配置
 func DefaultEventHandlerConfig() *EventHandlerConfig {
 	// TODO 从配置界面中、数据库中加载配置选项
-	if cfg := LoadFromDB(); cfg != nil {
+	if cfg := LoadAllFromDB(); cfg != nil {
 		return cfg
 	}
 	return &EventHandlerConfig{
@@ -50,12 +51,6 @@ func DefaultEventHandlerConfig() *EventHandlerConfig {
 			ProcessInterval: 1,
 			MaxRetries:      3,
 		},
-		RuleConfig: RuleConfig{
-			Namespaces: []string{},
-			Labels:     make(map[string]string),
-			Reasons:    []string{},
-			Types:      []string{},
-			Reverse:    false,
-		},
+		ClusterRules: map[string]RuleConfig{},
 	}
 }

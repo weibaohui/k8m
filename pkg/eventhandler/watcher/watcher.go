@@ -29,15 +29,15 @@ type EventWatcher struct {
 
 // NewEventWatcher 创建事件监听器
 func NewEventWatcher() *EventWatcher {
-	ctx, cancel := context.WithCancel(context.Background())
-	cfg := config.DefaultEventHandlerConfig()
-	return &EventWatcher{
-		cfg:         cfg,
-		ruleMatcher: NewRuleMatcher(&cfg.RuleConfig),
-		eventCh:     make(chan *models.K8sEvent, cfg.Watcher.BufferSize),
-		ctx:         ctx,
-		cancel:      cancel,
-	}
+    ctx, cancel := context.WithCancel(context.Background())
+    cfg := config.DefaultEventHandlerConfig()
+    return &EventWatcher{
+        cfg:         cfg,
+        ruleMatcher: NewRuleMatcher(cfg.ClusterRules),
+        eventCh:     make(chan *models.K8sEvent, cfg.Watcher.BufferSize),
+        ctx:         ctx,
+        cancel:      cancel,
+    }
 }
 
 // Start 启动事件监听器
@@ -218,11 +218,11 @@ func (w *EventWatcher) processEvents() {
 
 // shouldProcessEvent 判断是否应该处理事件
 func (w *EventWatcher) shouldProcessEvent(event *models.K8sEvent) bool {
-	// 只处理警告类型事件
-	if !event.IsWarning() {
-		return false
-	}
+    // 只处理警告类型事件
+    if !event.IsWarning() {
+        return false
+    }
 
-	// 应用规则匹配
-	return w.ruleMatcher.Match(event)
+    // 应用规则匹配
+    return w.ruleMatcher.Match(event)
 }

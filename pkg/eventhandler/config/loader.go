@@ -2,73 +2,92 @@ package config
 
 import (
     "encoding/json"
+    "strings"
 
     "github.com/weibaohui/k8m/internal/dao"
     "github.com/weibaohui/k8m/pkg/models"
     "k8s.io/klog/v2"
 )
 
-// LoadFromDB 从数据库加载事件处理器配置，并转换为可用的配置结构
-// 中文函数注释：读取启用的事件处理器配置（最新一条），将JSON格式的规则字段解析为切片/映射。
-// 若数据库未配置或解析失败，打印中文日志并返回nil，由调用方使用内置默认值。
-func LoadFromDB() *EventHandlerConfig {
-    var item models.K8sEventConfig
-    err := dao.DB().Where("enabled = ?", true).Order("id desc").Limit(1).First(&item).Error
-    if err != nil {
+// LoadAllFromDB 从数据库加载所有启用的事件处理器配置（多条），并按集群组装规则
+// 中文函数注释：
+// 1. 读取所有启用的 K8sEventConfig 记录；
+// 2. 将每条记录的规则字段(JSON)解析为 RuleConfig；
+// 3. 根据记录中的 Clusters 字段（逗号分隔）分配到对应集群的规则；
+// 4. Worker/Watcher 等运行参数取最近一条记录的值（如不存在则走默认）。
+func LoadAllFromDB() *EventHandlerConfig {
+    var items []models.K8sEventConfig
+    if err := dao.DB().Where("enabled = ?", true).Order("id asc").Find(&items).Error; err != nil {
         klog.V(6).Infof("事件处理器配置未从数据库加载，使用默认配置。错误: %v", err)
         return nil
     }
-
-    var namespaces []string
-    var labels map[string]string
-    var reasons []string
-    var types []string
-
-    if item.RuleNamespaces != "" {
-        if err := json.Unmarshal([]byte(item.RuleNamespaces), &namespaces); err != nil {
-            klog.V(6).Infof("解析规则命名空间失败，将使用空列表: %v", err)
-            namespaces = nil
-        }
-    }
-    if item.RuleLabels != "" {
-        if err := json.Unmarshal([]byte(item.RuleLabels), &labels); err != nil {
-            klog.V(6).Infof("解析规则标签失败，将使用空映射: %v", err)
-            labels = nil
-        }
-    }
-    if item.RuleReasons != "" {
-        if err := json.Unmarshal([]byte(item.RuleReasons), &reasons); err != nil {
-            klog.V(6).Infof("解析规则原因失败，将使用空列表: %v", err)
-            reasons = nil
-        }
-    }
-    if item.RuleTypes != "" {
-        if err := json.Unmarshal([]byte(item.RuleTypes), &types); err != nil {
-            klog.V(6).Infof("解析规则类型失败，将使用空列表: %v", err)
-            types = nil
-        }
+    if len(items) == 0 {
+        klog.V(6).Infof("数据库中不存在启用的事件处理器配置，使用默认配置")
+        return nil
     }
 
-    cfg := &EventHandlerConfig{
-        Enabled: item.Enabled,
-        Watcher: WatcherConfig{
-            BufferSize: item.WatcherBufferSize,
-        },
-        Worker: WorkerConfig{
-            BatchSize:       item.WorkerBatchSize,
-            ProcessInterval: item.WorkerProcessInterval,
-            MaxRetries:      item.WorkerMaxRetries,
-        },
-        RuleConfig: RuleConfig{
+    clusterRules := make(map[string]RuleConfig)
+
+    // 最近一条记录用于承载运行参数
+    last := items[len(items)-1]
+
+    // 解析每条记录的规则并分配到集群
+    for _, it := range items {
+        var namespaces []string
+        var labels map[string]string
+        var reasons []string
+        var types []string
+
+        if it.RuleNamespaces != "" {
+            if err := json.Unmarshal([]byte(it.RuleNamespaces), &namespaces); err != nil {
+                klog.V(6).Infof("解析规则命名空间失败，将使用空列表: %v", err)
+                namespaces = nil
+            }
+        }
+        if it.RuleLabels != "" {
+            if err := json.Unmarshal([]byte(it.RuleLabels), &labels); err != nil {
+                klog.V(6).Infof("解析规则标签失败，将使用空映射: %v", err)
+                labels = nil
+            }
+        }
+        if it.RuleReasons != "" {
+            if err := json.Unmarshal([]byte(it.RuleReasons), &reasons); err != nil {
+                klog.V(6).Infof("解析规则原因失败，将使用空列表: %v", err)
+                reasons = nil
+            }
+        }
+        if it.RuleTypes != "" {
+            if err := json.Unmarshal([]byte(it.RuleTypes), &types); err != nil {
+                klog.V(6).Infof("解析规则类型失败，将使用空列表: %v", err)
+                types = nil
+            }
+        }
+
+        rule := RuleConfig{
             Namespaces: namespaces,
             Labels:     labels,
             Reasons:    reasons,
             Types:      types,
-            Reverse:    item.RuleReverse,
-        },
+            Reverse:    it.RuleReverse,
+        }
+
+        // 按集群分配
+        for _, c := range strings.Split(it.Clusters, ",") {
+            cluster := strings.TrimSpace(c)
+            if cluster == "" {
+                continue
+            }
+            clusterRules[cluster] = rule
+        }
     }
 
-    klog.V(6).Infof("已从数据库加载事件处理器配置: Enabled=%v, BufferSize=%d, BatchSize=%d", cfg.Enabled, cfg.Watcher.BufferSize, cfg.Worker.BatchSize)
+    cfg := &EventHandlerConfig{
+        Enabled: last.Enabled,
+        Watcher: WatcherConfig{BufferSize: last.WatcherBufferSize},
+        Worker:  WorkerConfig{BatchSize: last.WorkerBatchSize, ProcessInterval: last.WorkerProcessInterval, MaxRetries: last.WorkerMaxRetries},
+        ClusterRules: clusterRules,
+    }
+
+    klog.V(6).Infof("已从数据库加载事件处理器配置，共计规则条目: %d", len(clusterRules))
     return cfg
 }
-

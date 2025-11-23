@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/eventhandler/config"
+	"github.com/weibaohui/k8m/pkg/eventhandler/watcher"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/webhook"
 	"k8s.io/klog/v2"
@@ -18,6 +19,7 @@ import (
 // EventWorker 事件处理Worker
 type EventWorker struct {
 	cfg          *config.EventHandlerConfig
+	ruleMatcher  *watcher.RuleMatcher
 	ctx          context.Context
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
@@ -30,9 +32,10 @@ func NewEventWorker() *EventWorker {
 	cfg := config.DefaultEventHandlerConfig()
 
 	return &EventWorker{
-		cfg:    cfg,
-		ctx:    ctx,
-		cancel: cancel,
+		cfg:         cfg,
+		ruleMatcher: watcher.NewRuleMatcher(cfg.ClusterRules),
+		ctx:         ctx,
+		cancel:      cancel,
 	}
 }
 
@@ -115,6 +118,13 @@ func (w *EventWorker) processEvent(event *models.K8sEvent) error {
 	// 检查重试次数
 	if event.Attempts >= w.cfg.Worker.MaxRetries {
 		klog.Warningf("事件达到最大重试次数，标记为已处理: %s", event.EvtKey)
+		var m models.K8sEvent
+		return m.MarkProcessedByID(event.ID, true)
+	}
+
+	// 按集群规则进行过滤；不匹配的直接标记为已处理，避免重复进入队列
+	if !w.ruleMatcher.Match(event) {
+		klog.V(6).Infof("事件不匹配集群规则，跳过推送: 集群=%s 键=%s", event.Cluster, event.EvtKey)
 		var m models.K8sEvent
 		return m.MarkProcessedByID(event.ID, true)
 	}

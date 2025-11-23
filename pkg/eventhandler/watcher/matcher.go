@@ -2,90 +2,93 @@
 package watcher
 
 import (
-	"github.com/weibaohui/k8m/pkg/eventhandler/config"
-	"github.com/weibaohui/k8m/pkg/models"
+    "github.com/weibaohui/k8m/pkg/eventhandler/config"
+    "github.com/weibaohui/k8m/pkg/models"
 )
 
-// RuleMatcher 规则匹配器
+// RuleMatcher 规则匹配器（支持按集群匹配）
 type RuleMatcher struct {
-	config *config.RuleConfig
+    rules map[string]config.RuleConfig
 }
 
-// NewRuleMatcher 创建规则匹配器
-func NewRuleMatcher(config *config.RuleConfig) *RuleMatcher {
-	return &RuleMatcher{
-		config: config,
-	}
+// NewRuleMatcher 创建规则匹配器（按集群规则）
+func NewRuleMatcher(rules map[string]config.RuleConfig) *RuleMatcher {
+    return &RuleMatcher{rules: rules}
 }
 
-// Match 判断事件是否匹配规则
+// getRule 返回当前事件所属集群的规则；若不存在则返回空规则（表示不过滤）
+func (r *RuleMatcher) getRule(cluster string) config.RuleConfig {
+    if r == nil || r.rules == nil {
+        return config.RuleConfig{}
+    }
+    if rc, ok := r.rules[cluster]; ok {
+        return rc
+    }
+    return config.RuleConfig{}
+}
+
+// Match 判断事件是否匹配对应集群规则
 func (r *RuleMatcher) Match(event *models.K8sEvent) bool {
-	// todo 增加对关键字的规则自定义。
-	// todo 这些规则存数据库，统一管理页面
-	// 如果规则配置为空，则匹配所有事件
-	if r.config.IsEmpty() {
-		return true
-	}
+    rule := r.getRule(event.Cluster)
+    if rule.IsEmpty() {
+        return true
+    }
 
-	matched := false
+    matched := false
 
-	// 检查命名空间匹配
-	if len(r.config.Namespaces) > 0 {
-		for _, ns := range r.config.Namespaces {
-			if event.Namespace == ns {
-				matched = true
-				break
-			}
-		}
-		if !matched && !r.config.Reverse {
-			return false
-		}
-	}
+    // 命名空间匹配
+    if len(rule.Namespaces) > 0 {
+        for _, ns := range rule.Namespaces {
+            if event.Namespace == ns {
+                matched = true
+                break
+            }
+        }
+        if !matched && !rule.Reverse {
+            return false
+        }
+    }
 
-	// 检查原因匹配
-	if len(r.config.Reasons) > 0 {
-		reasonMatched := false
-		for _, reason := range r.config.Reasons {
-			if event.Reason == reason {
-				reasonMatched = true
-				break
-			}
-		}
-		if !reasonMatched && !r.config.Reverse {
-			return false
-		}
-		matched = matched || reasonMatched
-	}
+    // 原因匹配
+    if len(rule.Reasons) > 0 {
+        reasonMatched := false
+        for _, reason := range rule.Reasons {
+            if event.Reason == reason {
+                reasonMatched = true
+                break
+            }
+        }
+        if !reasonMatched && !rule.Reverse {
+            return false
+        }
+        matched = matched || reasonMatched
+    }
 
-	// 检查类型匹配
-	if len(r.config.Types) > 0 {
-		typeMatched := false
-		for _, eventType := range r.config.Types {
-			if event.Type == eventType {
-				typeMatched = true
-				break
-			}
-		}
-		if !typeMatched && !r.config.Reverse {
-			return false
-		}
-		matched = matched || typeMatched
-	}
+    // 类型匹配
+    if len(rule.Types) > 0 {
+        typeMatched := false
+        for _, eventType := range rule.Types {
+            if event.Type == eventType {
+                typeMatched = true
+                break
+            }
+        }
+        if !typeMatched && !rule.Reverse {
+            return false
+        }
+        matched = matched || typeMatched
+    }
 
-	// 如果没有设置任何匹配条件，则根据反向开关决定
-	if !matched && len(r.config.Namespaces) == 0 && len(r.config.Reasons) == 0 && len(r.config.Types) == 0 {
-		matched = true
-	}
+    // 未设置匹配条件时默认匹配
+    if !matched && len(rule.Namespaces) == 0 && len(rule.Reasons) == 0 && len(rule.Types) == 0 {
+        matched = true
+    }
 
-	// 应用反向选择
-	if r.config.Reverse {
-		return !matched
-	}
-
-	return matched
+    if rule.Reverse {
+        return !matched
+    }
+    return matched
 }
 
-// UpdateConfig 更新规则配置
-func (r *RuleMatcher) UpdateConfig(config *config.RuleConfig) {
-	r.config = config
-}
+// UpdateRules 更新整套规则
+func (r *RuleMatcher) UpdateRules(rules map[string]config.RuleConfig) { r.rules = rules }
