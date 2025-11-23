@@ -1,4 +1,4 @@
-import {MenuItem} from '@/types/menu';
+import { MenuItem } from '@/types/menu';
 
 export const initialMenu: MenuItem[] = [
     {
@@ -819,6 +819,7 @@ export const initialMenu: MenuItem[] = [
                         customEvent: '() => loadJsonPage("/admin/inspection/script")',
                         order: 4,
                     },
+
                     {
                         key: 'webhook_management',
                         title: 'webhook管理',
@@ -836,6 +837,14 @@ export const initialMenu: MenuItem[] = [
                         order: 6,
                     },
                 ],
+            },
+            {
+                key: 'event_webhook_config',
+                title: '集群事件转发',
+                icon: 'fa-solid fa-share-nodes',
+                eventType: 'custom',
+                customEvent: '() => loadJsonPage("/admin/event/list")',
+                order: 2,
             },
             {
                 key: 'ai_model_config',
