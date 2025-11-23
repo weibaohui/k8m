@@ -2,6 +2,8 @@
 package worker
 
 import (
+	"strings"
+
 	"github.com/weibaohui/k8m/pkg/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/models"
 )
@@ -49,11 +51,14 @@ func (r *RuleMatcher) Match(event *models.K8sEvent) bool {
 		}
 	}
 
-	// 原因匹配 包括message
+	// 原因匹配 包括message。
 	if len(rule.Reasons) > 0 {
 		reasonMatched := false
+		er := strings.ToLower(event.Reason)
+		em := strings.ToLower(event.Message)
 		for _, reason := range rule.Reasons {
-			if event.Reason == reason {
+			kw := strings.ToLower(reason)
+			if kw != "" && (strings.Contains(er, kw) || strings.Contains(em, kw)) {
 				reasonMatched = true
 				break
 			}
