@@ -37,19 +37,24 @@ func NewEventWorker() *EventWorker {
 
 // Start 启动Worker
 func (w *EventWorker) Start() {
-
-	klog.V(6).Infof("启动事件处理Worker")
-
-	w.wg.Add(1)
-	go w.processLoop()
+	if w.cfg.Enabled {
+		klog.V(6).Infof("启动事件处理Worker")
+		w.wg.Add(1)
+		go w.processLoop()
+	} else {
+		klog.V(6).Infof("事件转发功能未开启")
+	}
 
 }
 
 // Stop 停止Worker
 func (w *EventWorker) Stop() {
-	klog.V(6).Infof("停止事件处理Worker")
-	w.cancel()
-	w.wg.Wait()
+	if w.cfg.Enabled {
+		klog.V(6).Infof("停止事件处理Worker")
+		w.cancel()
+		w.wg.Wait()
+	}
+
 }
 
 // processLoop 处理循环

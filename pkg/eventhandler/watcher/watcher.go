@@ -42,22 +42,26 @@ func NewEventWatcher() *EventWatcher {
 
 // Start 启动事件监听器
 func (w *EventWatcher) Start() {
-
-	klog.V(6).Infof("启动事件监听器")
-
-	// 启动事件处理goroutine
-	go w.processEvents()
-
-	// 启动事件监听
-	go w.watchEvents()
+	if w.cfg.Enabled {
+		klog.V(6).Infof("启动事件监听器")
+		// 启动事件处理goroutine
+		go w.processEvents()
+		// 启动事件监听
+		go w.watchEvents()
+	} else {
+		klog.V(6).Infof("事件转发功能未开启")
+	}
 
 }
 
 // Stop 停止事件监听器
 func (w *EventWatcher) Stop() {
-	klog.V(6).Infof("停止事件监听器")
-	w.cancel()
-	close(w.eventCh)
+	if w.cfg.Enabled {
+		klog.V(6).Infof("停止事件监听器")
+		w.cancel()
+		close(w.eventCh)
+	}
+
 }
 
 // watchEvents 监听Kubernetes事件
