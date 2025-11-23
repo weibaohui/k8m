@@ -260,7 +260,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 
 	// 生成批量摘要与原始JSON数组
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Event Warning 批量事件\n规则：[%s]\n集群：[%s]\n数量：%d\n\n", ruleName, cluster, len(events)))
+	sb.WriteString(fmt.Sprintf("Event Warning 事件\n规则：[%s]\n集群：[%s]\n数量：%d\n\n", ruleName, cluster, len(events)))
 	for _, e := range events {
 		sb.WriteString(fmt.Sprintf("资源：%s/%s\n类型：%s\n原因：%s\n消息：%s\n时间：%s\n\n",
 			e.Namespace, e.Name, e.Type, e.Reason, e.Message, e.Timestamp.Format("2006-01-02 15:04:05")))
