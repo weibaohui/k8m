@@ -202,7 +202,7 @@ func (w *EventWorker) processBatch() error {
 
 		// 按当前规则的 webhookIDs 进行批量推送
 		for cluster, events := range grouped {
-			if err := w.pushWebhookBatchForIDs(cluster, webhookIDs, events, ec.Name); err != nil {
+			if err := w.pushWebhookBatchForIDs(cluster, webhookIDs, events, ec.Name, ec.AIEnabled, ec.AIPromptTemplate); err != nil {
 				klog.Errorf("批量Webhook推送失败: 规则=%s 集群=%s 错误=%v", ec.Name, cluster, err)
 				for _, e := range events {
 					if err := modelEvent.IncrementAttemptsByID(e.ID); err != nil {
@@ -238,7 +238,7 @@ func (w *EventWorker) processBatch() error {
 
 // pushWebhookBatchForIDs 根据指定的 webhookID 列表批量推送事件
 // 中文函数注释：用于按单条事件配置指定的 webhook 目标推送消息，不再依赖全局按集群的 webhook 映射。
-func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string, events []*models.K8sEvent, ruleName string) error {
+func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string, events []*models.K8sEvent, ruleName string, aiEnabled bool, aiTemplate string) error {
 	if len(webhookIDs) == 0 {
 		klog.V(6).Infof("规则 %s 未配置Webhook，跳过推送", ruleName)
 		return nil
