@@ -19,6 +19,21 @@ type K8sEventConfig struct {
 	AIEnabled        bool   `json:"ai_enabled"`                          // 是否启用AI总结功能
 	AIPromptTemplate string `gorm:"type:text" json:"ai_prompt_template"` // AI总结提示词模板
 
+	// 事件处理器 Watcher 配置
+	WatcherBufferSize int `json:"watcher_buffer_size" gorm:"default:1000"`
+
+	// 事件处理器 Worker 配置
+	WorkerBatchSize       int `json:"worker_batch_size" gorm:"default:50"`
+	WorkerProcessInterval int `json:"worker_process_interval" gorm:"default:1"` // 秒
+	WorkerMaxRetries      int `json:"worker_max_retries" gorm:"default:3"`
+
+	// 事件处理器 规则配置（JSON 字符串保存）
+	RuleNamespaces string `json:"rule_namespaces" gorm:"type:text"` // []string JSON
+	RuleLabels     string `json:"rule_labels" gorm:"type:text"`     // map[string]string JSON
+	RuleReasons    string `json:"rule_reasons" gorm:"type:text"`    // []string JSON
+	RuleTypes      string `json:"rule_types" gorm:"type:text"`      // []string JSON
+	RuleReverse    bool   `json:"rule_reverse" gorm:"default:false"`
+
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
