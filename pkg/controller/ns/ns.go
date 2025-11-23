@@ -11,7 +11,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/klog/v2"
 )
 
 type Controller struct{}
@@ -180,7 +179,6 @@ func sortAndRespond(c *gin.Context, list []map[string]string) {
 	for _, item := range uniqMap {
 		list = append(list, item)
 	}
-	klog.V(6).Infof("ns list: %v", list)
 
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

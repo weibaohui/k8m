@@ -40,7 +40,7 @@ func (rc *ResourceController) Usage(c *gin.Context) {
 		Resource(&v1.Pod{}).
 		Namespace(ns).
 		Name(name).
-		Ctl().Pod().ResourceUsageTable()
+		Ctl().Pod().ResourceUsageTable(kom.DenominatorLimit)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

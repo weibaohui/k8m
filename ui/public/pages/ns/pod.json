@@ -317,7 +317,7 @@
         "reload",
         {
           "type": "button",
-          "label": "资源用量",
+          "label": "TOP资源用量",
           "actionType": "drawer",
           "tooltip": "资源用量 kubectl top pods -n xx",
           "drawer": {
@@ -3291,7 +3291,7 @@
         {
           "name": "spec.containers",
           "label": "容器镜像<br><span class='text-gray-500 text-xs'>容器名称=>镜像:版本</span>",
-          "width": "150px",
+          "width": "250px",
           "type": "each",
           "items": {
             "type": "tpl",
@@ -3319,7 +3319,7 @@
         },
         {
           "name": "resource",
-          "label": "CPU资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比<br>实时用量占比</span>",
+          "label": "CPU资源<br><span class='text-gray-500 text-xs'>需求可用Node总量比例<br>上限可用Node总量比例<br>实时/上限比例</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -3337,7 +3337,12 @@
                 "bg-warning",
                 "bg-danger"
               ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.requestFraction']"
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.requestFraction'] && Number(this.metadata.annotations['cpu.requestFraction']) !== 0"
+            },
+            {
+              "type": "tpl",
+              "tpl": "<div class='text-left'>♾️</div>",
+              "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['cpu.requestFraction'] && Number(this.metadata.annotations['cpu.requestFraction']) !== 0)"
             },
             {
               "type": "progress",
@@ -3353,7 +3358,12 @@
                 "bg-warning",
                 "bg-danger"
               ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.limitFraction']"
+              "visibleOn": "(this.metadata.annotations && this.metadata.annotations['cpu.limitFraction'] && Number(this.metadata.annotations['cpu.limitFraction']) !== 0)"
+            },
+            {
+              "type": "tpl",
+              "tpl": "<div class='text-left'>♾️</div>",
+              "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['cpu.limitFraction'] && Number(this.metadata.annotations['cpu.limitFraction']) !== 0)"
             },
             {
               "type": "progress",
@@ -3369,13 +3379,18 @@
                 "bg-warning",
                 "bg-danger"
               ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['cpu.realtimeFraction']"
+              "visibleOn": "(this.metadata.annotations && this.metadata.annotations['cpu.realtimeFraction'] && Number(this.metadata.annotations['cpu.realtimeFraction']) !== 0)"
+            },
+            {
+              "type": "tpl",
+              "tpl": "<div class='text-left'>♾️</div>",
+              "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['cpu.realtimeFraction'] && Number(this.metadata.annotations['cpu.realtimeFraction']) !== 0)"
             }
           ]
         },
         {
           "name": "resource",
-          "label": "内存资源<br><span class='text-gray-500 text-xs'>请求用量占比<br>上限用量占比<br>实时用量占比</span>",
+          "label": "内存资源<br><span class='text-gray-500 text-xs'>需求可用Node总量比例<br>上限可用Node总量比例<br>实时/上限比例</span>",
           "type": "container",
           "width": "150px",
           "body": [
@@ -3393,7 +3408,12 @@
                 "bg-warning",
                 "bg-danger"
               ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.requestFraction']"
+              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.requestFraction'] && Number(this.metadata.annotations['memory.requestFraction']) !== 0"
+            },
+            {
+              "type": "tpl",
+              "tpl": "<div class='text-left'>♾️</div>",
+              "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['memory.requestFraction'] && Number(this.metadata.annotations['memory.requestFraction']) !== 0)"
             },
             {
               "type": "progress",
@@ -3409,7 +3429,12 @@
                 "bg-warning",
                 "bg-danger"
               ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.limitFraction']"
+              "visibleOn": "(this.metadata.annotations && this.metadata.annotations['memory.limitFraction'] && Number(this.metadata.annotations['memory.limitFraction']) !== 0)"
+            },
+            {
+              "type": "tpl",
+              "tpl": "<div class='text-left'>♾️</div>",
+              "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['memory.limitFraction'] && Number(this.metadata.annotations['memory.limitFraction']) !== 0)"
             },
             {
               "type": "progress",
@@ -3425,7 +3450,12 @@
                 "bg-warning",
                 "bg-danger"
               ],
-              "visibleOn": "this.metadata.annotations && this.metadata.annotations['memory.realtimeFraction']"
+              "visibleOn": "(this.metadata.annotations && this.metadata.annotations['memory.realtimeFraction'] && Number(this.metadata.annotations['memory.realtimeFraction']) !== 0)"
+            },
+            {
+              "type": "tpl",
+              "tpl": "<div class='text-left'>♾️</div>",
+              "visibleOn": "!(this.metadata.annotations && this.metadata.annotations['memory.realtimeFraction'] && Number(this.metadata.annotations['memory.realtimeFraction']) !== 0)"
             }
           ]
         },
