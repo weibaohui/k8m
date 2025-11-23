@@ -12,17 +12,17 @@
 //
 //	// 加载配置（使用flag.Init()）
 //	cfg := config.LoadConfigFromFlags()
-//	
+//
 //	// 创建存储层（使用GORM和dao.DB()）
 //	eventStore, err := store.NewStore()
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-//	
+//
 //	// 创建Watcher和Worker
 //	eventWatcher := watcher.NewEventWatcher(client, eventStore, cfg)
 //	eventWorker := worker.NewEventWorker(eventStore, cfg)
-//	
+//
 //	// 启动服务
 //	if err := eventWatcher.Start(); err != nil {
 //	    log.Fatal(err)
