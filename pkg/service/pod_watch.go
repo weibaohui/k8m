@@ -81,7 +81,7 @@ func (p *podService) IncreasePodCount(selectedCluster string, pod *corev1.Pod) {
 					sc.MemoryLimit += quantity.AsApproximateFloat64()
 				}
 			}
-			for name, quantity := range table.Limits {
+			for name, quantity := range table.Realtime {
 				switch name {
 				case "cpu":
 					sc.CPURealtime += quantity.AsApproximateFloat64()
