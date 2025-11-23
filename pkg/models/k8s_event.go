@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
@@ -12,11 +13,12 @@ import (
 type K8sEvent struct {
 	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	EvtKey    string    `gorm:"uniqueIndex;" json:"evt_key"`
+	Cluster   string    `gorm:"type:varchar(128);" json:"cluster"`
+	Namespace string    `gorm:"type:varchar(64);index" json:"namespace"`
+	Name      string    `gorm:"type:varchar(128);" json:"name"`
 	Type      string    `gorm:"type:varchar(16);" json:"type"`
 	Reason    string    `gorm:"type:varchar(128);" json:"reason"`
 	Level     string    `gorm:"type:varchar(16);" json:"level"`
-	Namespace string    `gorm:"type:varchar(64);;index" json:"namespace"`
-	Name      string    `gorm:"type:varchar(128);" json:"name"`
 	Message   string    `gorm:"type:text;" json:"message"`
 	Timestamp time.Time `gorm:"index" json:"timestamp"`
 	Processed bool      `gorm:"default:false;index" json:"processed"`
@@ -72,7 +74,7 @@ func (e *K8sEvent) GetByEvtKey(evtKey string) (*K8sEvent, error) {
 	var item K8sEvent
 	err := dao.DB().Where("evt_key = ?", evtKey).First(&item).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err

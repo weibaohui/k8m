@@ -130,23 +130,17 @@ func (w *EventWatcher) watchSingleCluster(selectedCluster string) watch.Interfac
 			}
 
 			m := &models.K8sEvent{
-				Type:   evt.Type,
-				Reason: evt.Reason,
-				Level: func() string {
-					if evt.Type == "Warning" {
-						return "warning"
-					}
-					return "normal"
-				}(),
+				Type:      evt.Type,
+				Reason:    evt.Reason,
+				Cluster:   selectedCluster,
+				Level:     evt.Type,
 				Namespace: evt.Regarding.Namespace,
 				Name:      evt.Regarding.Name,
 				Message:   evt.Note,
 				Timestamp: evt.EventTime.Time,
 				Processed: false,
 				Attempts:  0,
-			}
-			if m.EvtKey == "" {
-				m.EvtKey = string(evt.UID)
+				EvtKey:    string(evt.UID),
 			}
 
 			if err := w.HandleEvent(m); err != nil {
