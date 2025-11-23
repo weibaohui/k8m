@@ -6,8 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/robfig/cron/v3"
+	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/eventhandler/model"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/service"
+	"github.com/weibaohui/kom/kom"
+	eventsv1 "k8s.io/api/events/v1"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 )
@@ -80,24 +86,80 @@ func (w *EventWatcher) watchEvents() {
 
 // doWatch 执行事件监听
 func (w *EventWatcher) doWatch() error {
-	// 这里应该使用实际的Kubernetes事件监听
-	// 由于需要集成到现有项目，我们先创建一个模拟的事件源
+	// 中文函数注释：使用定时任务每分钟检查所有已连接集群，未开启事件Watch则为其启动，并将告警事件入队处理
 	klog.V(6).Infof("开始监听Kubernetes事件")
 
-	// 模拟事件监听循环
-	ticker := time.NewTicker(w.resyncPeriod)
-	defer ticker.Stop()
+	ctx := utils2.GetContextWithAdmin()
 
-	for {
-		select {
-		case <-w.ctx.Done():
-			return nil
-		case <-ticker.C:
-			// 这里应该调用实际的Kubernetes API获取事件
-			// 暂时跳过，等集成时再实现
-			continue
+	inst := cron.New()
+	_, err := inst.AddFunc("@every 1m", func() {
+		clusters := service.ClusterService().ConnectedClusters()
+		for _, cluster := range clusters {
+			if !cluster.GetClusterWatchStatus("event") {
+				selectedCluster := service.ClusterService().ClusterID(cluster)
+
+				var watcher watch.Interface
+				var evt eventsv1.Event
+				err := kom.Cluster(selectedCluster).WithContext(ctx).Resource(&evt).AllNamespace().Watch(&watcher).Error
+				if err != nil {
+					klog.Errorf("%s 创建Event监听器失败 %v", selectedCluster, err)
+					continue
+				}
+
+				go func(clusterID string) {
+					klog.V(6).Infof("%s 开始事件监听", clusterID)
+					defer watcher.Stop()
+					for e := range watcher.ResultChan() {
+						if err := kom.Cluster(clusterID).WithContext(ctx).Tools().ConvertRuntimeObjectToTypedObject(e.Object, &evt); err != nil {
+							klog.V(6).Infof("%s 无法将对象转换为 *events.v1.Event 类型: %v", clusterID, err)
+							return
+						}
+
+						m := &model.Event{
+							Type:   evt.Type,
+							Reason: evt.Reason,
+							Level: func() string {
+								if evt.Type == "Warning" {
+									return "warning"
+								}
+								return "normal"
+							}(),
+							Namespace: evt.Regarding.Namespace,
+							Name:      evt.Regarding.Name,
+							Message:   evt.Note,
+							Timestamp: evt.EventTime.Time,
+							Processed: false,
+							Attempts:  0,
+						}
+						if m.EvtKey == "" {
+							if string(evt.UID) != "" {
+								m.EvtKey = string(evt.UID)
+							} else {
+								m.EvtKey = model.GenerateEvtKey(m.Namespace, "Event", m.Name, m.Reason, m.Message)
+							}
+						}
+
+						if err := w.HandleEvent(m); err != nil {
+							klog.V(6).Infof("%s 事件处理失败: %v", clusterID, err)
+						} else {
+							klog.V(6).Infof("%s 入队事件 [ %s/%s ] 类型=%s 原因=%s", clusterID, m.Namespace, m.Name, m.Type, m.Reason)
+						}
+					}
+				}(selectedCluster)
+
+				cluster.SetClusterWatchStarted("event", watcher)
+			}
 		}
+	})
+	if err != nil {
+		klog.Errorf("新增Event状态定时更新任务报错: %v\n", err)
 	}
+	inst.Start()
+	klog.V(6).Infof("新增Event状态定时更新任务【@every 1m】\n")
+
+	<-w.ctx.Done()
+	inst.Stop()
+	return nil
 }
 
 // processEvents 处理接收到的事件
