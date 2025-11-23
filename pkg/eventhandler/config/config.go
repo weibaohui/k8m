@@ -1,13 +1,17 @@
 package config
 
+import (
+	"github.com/weibaohui/k8m/pkg/models"
+)
+
 // EventHandlerConfig 定义事件处理器的完整配置
 type EventHandlerConfig struct {
-	Enabled bool          // 是否启用事件处理器
-	Watcher WatcherConfig // Watcher配置
-	Worker  WorkerConfig  // Worker配置
-	// 集群级规则配置；key 为集群ID/名称，value 为该集群的事件过滤规则
-	ClusterRules map[string]RuleConfig
-	Webhooks     map[string][]string // WebhookID列表，key 为集群ID/名称，value 为该集群的WebhookID列表
+	Enabled      bool                    // 是否启用事件处理器
+	Watcher      WatcherConfig           // Watcher配置
+	Worker       WorkerConfig            // Worker配置
+	EventConfigs []models.K8sEventConfig // 规则列表
+	ClusterRules map[string]RuleConfig   // 集群级规则配置；key 为集群ID/名称，value 为该集群的事件过滤规则
+	Webhooks     map[string][]string     // WebhookID列表，key 为集群ID/名称，value 为该集群的WebhookID列表
 }
 
 // WatcherConfig Watcher配置

@@ -37,28 +37,28 @@ func LoadAllFromDB() *EventHandlerConfig {
 		var reasons []string
 		var types []string
 
-		//关键字列表，多个用逗号分隔
+		// 关键字列表，多个用逗号分隔
 		if it.RuleNamespaces != "" {
 			if err := json.Unmarshal([]byte(it.RuleNamespaces), &namespaces); err != nil {
 				klog.V(6).Infof("解析规则命名空间失败，将使用空列表: %v", err)
 				namespaces = nil
 			}
 		}
-		//关键字列表，多个用逗号分隔
+		// 关键字列表，多个用逗号分隔
 		if it.RuleNames != "" {
 			if err := json.Unmarshal([]byte(it.RuleNames), &names); err != nil {
 				klog.V(6).Infof("解析规则命名失败，将使用空列表: %v", err)
 				names = nil
 			}
 		}
-		//关键字列表，多个用逗号分隔，app=k8m,env=dev
+		// 关键字列表，多个用逗号分隔，app=k8m,env=dev
 		if it.RuleLabels != "" {
 			if err := json.Unmarshal([]byte(it.RuleLabels), &labels); err != nil {
 				klog.V(6).Infof("解析规则标签失败，将使用空列表: %v", err)
 				labels = nil
 			}
 		}
-		//关键字列表，多个用逗号分隔
+		// 关键字列表，多个用逗号分隔
 		if it.RuleReasons != "" {
 			if err := json.Unmarshal([]byte(it.RuleReasons), &reasons); err != nil {
 				klog.V(6).Infof("解析规则原因失败，将使用空列表: %v", err)
@@ -102,11 +102,12 @@ func LoadAllFromDB() *EventHandlerConfig {
 		}
 	}
 
-	//todo 全局的这些参数，放到flag中，放到集群参数设置的页面中
+	// todo 全局的这些参数，放到flag中，放到集群参数设置的页面中
 	cfg := &EventHandlerConfig{
 		Enabled:      true,
 		Watcher:      WatcherConfig{BufferSize: 1000},
 		Worker:       WorkerConfig{BatchSize: 50, ProcessInterval: 10, MaxRetries: 3},
+		EventConfigs: items,
 		ClusterRules: clusterRules,
 		Webhooks:     clusterWebhooks,
 	}
