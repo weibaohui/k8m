@@ -11,7 +11,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -89,14 +88,47 @@ const TriggerTypeCron = "cron"
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
 	k := kom.Cluster(cluster)
 	if k == nil {
-		klog.V(6).Infof("巡检 集群【%s】，但是该集群未连接，尝试连接该集群", cluster)
-		service.ClusterService().Connect(cluster)
-		k = kom.Cluster(cluster)
-		if k == nil {
-			klog.Errorf("巡检 集群【%s】，但是该集群未连接，尝试连接该集群失败，跳过执行", cluster)
-			return nil, fmt.Errorf("巡检 集群【%s】未连接，尝试连接未成功，跳过执行", cluster)
+		klog.V(6).Infof("巡检 集群【%s】未连接，跳过执行", cluster)
+		if scheduleID == nil {
+			return nil, fmt.Errorf("参数错误，scheduleID不能为空")
 		}
-		klog.V(6).Infof("巡检 集群【%s】，已连接", cluster)
+
+		// 获取巡检计划名称快照
+		schedule := &models.InspectionSchedule{}
+		schedule.ID = *scheduleID
+		schedule, err := schedule.GetOne(nil)
+		if err != nil {
+			return nil, fmt.Errorf("根据ID获取巡检计划失败: %w", err)
+		}
+
+		// 创建一条“跳过”记录
+		end := time.Now()
+		record := &models.InspectionRecord{
+			ScheduleID:   scheduleID,
+			ScheduleName: schedule.Name,
+			Cluster:      cluster,
+			TriggerType:  triggerType,
+			Status:       "skipped",
+			StartTime:    end,
+			EndTime:      &end,
+			ErrorCount:   0,
+			ResultRaw:    fmt.Sprintf("巡检因集群未连接而跳过：%s", cluster),
+		}
+		if err := record.Save(nil); err != nil {
+			return nil, fmt.Errorf("保存巡检跳过记录失败: %w", err)
+		}
+
+		// 更新巡检计划的最近一次运行时间与错误数
+		schedule.LastRunTime = &end
+		schedule.ErrorCount = 0
+		if saveErr := schedule.Save(nil, func(db *gorm.DB) *gorm.DB {
+			return db.Select("last_run_time", "error_count")
+		}); saveErr != nil {
+			klog.Errorf("更新巡检计划运行结果失败，计划ID=%d, 错误: %v", schedule.ID, saveErr)
+		}
+
+		klog.V(6).Infof("巡检 集群【%s】未连接，已记录跳过状态，记录ID=%d", cluster, record.ID)
+		return record, nil
 	}
 
 	klog.V(6).Infof("开始巡检, scheduleID: %v, cluster: %s", scheduleID, cluster)
