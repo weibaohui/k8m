@@ -11,7 +11,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -89,14 +88,8 @@ const TriggerTypeCron = "cron"
 func (s *ScheduleBackground) RunByCluster(ctx context.Context, scheduleID *uint, cluster string, triggerType string) (*models.InspectionRecord, error) {
 	k := kom.Cluster(cluster)
 	if k == nil {
-		klog.V(6).Infof("巡检 集群【%s】，但是该集群未连接，尝试连接该集群", cluster)
-		service.ClusterService().Connect(cluster)
-		k = kom.Cluster(cluster)
-		if k == nil {
-			klog.Errorf("巡检 集群【%s】，但是该集群未连接，尝试连接该集群失败，跳过执行", cluster)
-			return nil, fmt.Errorf("巡检 集群【%s】未连接，尝试连接未成功，跳过执行", cluster)
-		}
-		klog.V(6).Infof("巡检 集群【%s】，已连接", cluster)
+		klog.V(6).Infof("巡检 集群【%s】未连接，跳过执行", cluster)
+		return nil, nil
 	}
 
 	klog.V(6).Infof("开始巡检, scheduleID: %v, cluster: %s", scheduleID, cluster)
