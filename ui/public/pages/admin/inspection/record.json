@@ -219,6 +219,7 @@
                     "map": {
                         "success": "<span class='label label-success'>成功</span>",
                         "failed": "<span class='label label-danger'>失败</span>",
+                        "skipped": "<span class='label label-warning'>跳过</span>",
                         "running": "<span class='label label-warning'>运行中</span>"
                     }
                 },
