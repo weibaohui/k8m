@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	lock         sync.Mutex
-	currentWatch *watcher.EventWatcher
-	currentWork  *worker.EventWorker
-	lastSnapshot struct {
+	lock             sync.Mutex
+	currentWatch     *watcher.EventWatcher
+	currentWork      *worker.EventWorker
+	lastSnapshot     struct {
 		enabled       bool
 		watcherBuffer int
 		batchSize     int
@@ -86,7 +86,10 @@ func SyncEventForwardingFromConfig() {
 		return
 	}
 	// 开关变化：直接启停
-	if cfg.EventForwardEnabled != lastSnapshot.enabled {
+	lock.Lock()
+	enabledSnapshot := lastSnapshot.enabled
+	lock.Unlock()
+	if cfg.EventForwardEnabled != enabledSnapshot {
 		if cfg.EventForwardEnabled {
 			_ = StartEventForwarding()
 		} else {
@@ -115,12 +118,13 @@ func SyncEventForwardingFromConfig() {
 				currentWork = worker.NewEventWorker()
 				currentWork.Start()
 			}
-			lock.Unlock()
+
 			lastSnapshot.enabled = true
 			lastSnapshot.watcherBuffer = cfg.EventWatcherBufferSize
 			lastSnapshot.batchSize = cfg.EventWorkerBatchSize
 			lastSnapshot.intervalSec = cfg.EventWorkerProcessInterval
 			lastSnapshot.maxRetries = cfg.EventWorkerMaxRetries
+			lock.Unlock()
 			klog.V(6).Infof("已按最新平台配置同步事件转发参数并生效")
 		}
 	}
