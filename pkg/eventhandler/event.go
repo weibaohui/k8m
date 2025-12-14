@@ -159,9 +159,8 @@ func StartEventForwardingWatch() {
 // StopEventForwardingWatch 停止事件转发配置监听
 // 中文函数注释：优雅停止定时任务，避免重复任务或资源泄漏。
 func StopEventForwardingWatch() {
-	StopEventForwarding()
 	cronLock.Lock()
-	defer cronLock.Unlock()
+
 	if eventForwardCron != nil {
 		eventForwardCron.Stop()
 		eventForwardCron = nil
@@ -169,4 +168,7 @@ func StopEventForwardingWatch() {
 	} else {
 		klog.V(6).Infof("事件转发配置定时任务未运行")
 	}
+	cronLock.Unlock()
+	StopEventForwarding()
+
 }
