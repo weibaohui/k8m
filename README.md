@@ -225,7 +225,7 @@ go mod tidy
 #运行
 air
 #或者
-go run main.go 
+go run *.go 
 # 监听localhost:3618端口
 ```
 
