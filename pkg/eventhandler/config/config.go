@@ -44,8 +44,10 @@ func DefaultEventHandlerConfig() *EventHandlerConfig {
 	if cfg := LoadAllFromDB(); cfg != nil {
 		return cfg
 	}
+
+	// 如果是nil，说明数据库中没有配置，返回默认配置，但是应是关闭的
 	return &EventHandlerConfig{
-		Enabled: true,
+		Enabled: false,
 		Watcher: WatcherConfig{
 			BufferSize: 1000,
 		},

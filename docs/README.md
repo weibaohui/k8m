@@ -16,7 +16,8 @@
 - [自定义菜单配置](custom-menu.md) - 如何为用户组配置自定义菜单，包括菜单编辑器的使用方法。
 - [变量配置选项说明](param-config.md) - 配置选项的说明。
 - [路由结构图](route_structure.md) - K8M系统的API路由结构图。
- - [集群与命名空间切换说明](cluster-namespace.md) - 前端获取/设置集群与命名空间、AMIS 过滤器用法及示例。
- - [多实例部署与协同](multi-instance.md) - 多实例模式的原理与参数设置。
+- [集群与命名空间切换说明](cluster-namespace.md) - 前端获取/设置集群与命名空间、AMIS 过滤器用法及示例。
+- [多实例部署与协同](multi-instance.md) - 多实例模式的原理与参数设置。
+- [事件转发配置与原理](event-forwarding.md) - 如何配置事件转发及其运行机制说明。
 
   

@@ -157,6 +157,58 @@
               ]
             },
             {
+              "title": "事件转发",
+              "body": [
+                {
+                  "type": "fieldSet",
+                  "title": "事件转发配置",
+                  "body": [
+                    {
+                      "type": "alert",
+                      "level": "info",
+                      "className": "mb-2",
+                      "body": "<div class='alert alert-info'><p><strong>提示：</strong>事件转发的配置变更不会立即生效，需等待下一个周期（约1-2分钟）生效。</p></div>"
+                    },
+                    {
+                      "name": "event_forward_enabled",
+                      "type": "switch",
+                      "label": "事件转发开关",
+                      "desc": "启用后将按规则转发K8s事件到Webhook"
+                    },
+                    {
+                      "name": "event_worker_process_interval",
+                      "type": "input-number",
+                      "suffix": "秒",
+                      "label": "处理周期",
+                      "value": 10,
+                      "desc": "事件处理批次的时间间隔，默认10秒"
+                    },
+                    {
+                      "name": "event_worker_batch_size",
+                      "type": "input-number",
+                      "label": "批处理大小",
+                      "value": 50,
+                      "desc": "每次处理的事件条数，默认50条"
+                    },
+                    {
+                      "name": "event_worker_max_retries",
+                      "type": "input-number",
+                      "label": "最大重试次数",
+                      "value": 3,
+                      "desc": "事件推送失败时的最大重试次数，默认3次"
+                    },
+                    {
+                      "name": "event_watcher_buffer_size",
+                      "type": "input-number",
+                      "label": "Watcher缓存大小",
+                      "value": 1000,
+                      "desc": "事件监听通道容量，默认1000"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
               "title": "显示设置",
               "body": [
                 {
