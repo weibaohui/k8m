@@ -138,12 +138,12 @@ func SyncEventForwardingFromConfig() {
 // 启停或更新：根据平台配置开关状态，启动或停止事件监听与处理；若开关或参数变化，更新配置。
 func StartEventForwardingWatch() {
 	// 设置一个定时器，后台不断更新事件转发配置
-	cronLock.Lock()
-	defer cronLock.Unlock()
+
 	if eventForwardCron != nil {
 		klog.V(6).Infof("事件转发配置定时任务已在运行，跳过重复启动")
 		return
 	}
+	cronLock.Lock()
 	eventForwardCron = cron.New(
 		cron.WithChain(
 			cron.Recover(cron.DefaultLogger),
@@ -154,6 +154,8 @@ func StartEventForwardingWatch() {
 		// 延迟启动cron
 		SyncEventForwardingFromConfig()
 	})
+	cronLock.Unlock()
+
 	if err != nil {
 		klog.Errorf("新增事件转发配置定时任务报错: %v\n", err)
 	}
