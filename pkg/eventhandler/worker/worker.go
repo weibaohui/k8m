@@ -68,10 +68,19 @@ func (w *EventWorker) Stop() {
 }
 
 // processLoop 处理循环
+// 中文函数注释：根据当前配置的处理周期动态运行批处理任务，
+// 当配置更新后会在下一次tick后动态调整定时器间隔，无需重启。
 func (w *EventWorker) processLoop() {
 	defer w.wg.Done()
 
-	ticker := time.NewTicker(time.Duration(w.cfg.Worker.ProcessInterval) * time.Second)
+	// 初始化定时器
+	w.processMutex.Lock()
+	interval := w.cfg.Worker.ProcessInterval
+	w.processMutex.Unlock()
+	if interval <= 0 {
+		interval = 10
+	}
+	ticker := time.NewTicker(time.Duration(interval) * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -81,6 +90,19 @@ func (w *EventWorker) processLoop() {
 		case <-ticker.C:
 			if err := w.processBatch(); err != nil {
 				klog.Errorf("处理事件批次失败: %v", err)
+			}
+			// 动态调整定时器间隔
+			w.processMutex.Lock()
+			newInterval := w.cfg.Worker.ProcessInterval
+			w.processMutex.Unlock()
+			if newInterval <= 0 {
+				newInterval = 10
+			}
+			if newInterval != interval {
+				ticker.Stop()
+				interval = newInterval
+				ticker = time.NewTicker(time.Duration(interval) * time.Second)
+				klog.V(6).Infof("事件处理器批次处理周期已更新为: %d 秒", interval)
 			}
 		}
 	}

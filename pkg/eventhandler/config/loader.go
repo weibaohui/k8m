@@ -23,14 +23,33 @@ func LoadAllFromDB() *EventHandlerConfig {
 		return nil
 	}
 
-	// todo 全局的这些参数，放到flag中，放到集群参数设置的页面中
+	// 从平台全局配置中加载事件转发参数
+	var platformCfg models.Config
+	if err := dao.DB().First(&platformCfg).Error; err != nil {
+		klog.V(6).Infof("读取平台全局配置失败，使用默认事件转发参数。错误: %v", err)
+	}
 	cfg := &EventHandlerConfig{
-		Enabled:      true,
-		Watcher:      WatcherConfig{BufferSize: 1000},
-		Worker:       WorkerConfig{BatchSize: 50, ProcessInterval: 10, MaxRetries: 3},
+		Enabled: platformCfg.EventForwardEnabled || platformCfg.ID == 0,
+		Watcher: WatcherConfig{
+			BufferSize: defaultInt(platformCfg.EventWatcherBufferSize, 1000),
+		},
+		Worker: WorkerConfig{
+			BatchSize:       defaultInt(platformCfg.EventWorkerBatchSize, 50),
+			ProcessInterval: defaultInt(platformCfg.EventWorkerProcessInterval, 10),
+			MaxRetries:      defaultInt(platformCfg.EventWorkerMaxRetries, 3),
+		},
 		EventConfigs: items,
 	}
 
 	klog.V(6).Infof("已从数据库加载事件处理器配置，共计规则条目: %d", len(items))
 	return cfg
+}
+
+// defaultInt 返回有效值或默认值
+// 中文函数注释：当传入的数值为0或小于0时，返回提供的默认值。
+func defaultInt(v int, def int) int {
+	if v <= 0 {
+		return def
+	}
+	return v
 }

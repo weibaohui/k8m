@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/eventhandler/worker"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/service"
 )
@@ -48,6 +49,10 @@ func (cc *Controller) Update(c *gin.Context) {
 	if err := service.ConfigService().UpdateConfig(&config); err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+	// 更新事件处理器配置，使事件转发相关参数即时生效
+	if w := worker.Instance(); w != nil {
+		w.UpdateConfig()
 	}
 	amis.WriteJsonOK(c)
 }
