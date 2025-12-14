@@ -196,7 +196,7 @@ func Init() {
 					// 停止helm更新任务
 					helm2.StopUpdateHelmRepoInBackground()
 					// leader 启动对event的webhook处理
-					eventhandler.StopEventForwarding()
+					eventhandler.StopEventForwardingWatch()
 				},
 			}
 

@@ -12,8 +12,10 @@ import (
 
 var (
 	lock             sync.Mutex
+	cronLock         sync.Mutex
 	currentWatch     *watcher.EventWatcher
 	currentWork      *worker.EventWorker
+	eventForwardCron *cron.Cron
 	lastSnapshot     struct {
 		enabled       bool
 		watcherBuffer int
@@ -136,14 +138,35 @@ func SyncEventForwardingFromConfig() {
 // 启停或更新：根据平台配置开关状态，启动或停止事件监听与处理；若开关或参数变化，更新配置。
 func StartEventForwardingWatch() {
 	// 设置一个定时器，后台不断更新事件转发配置
-	inst := cron.New()
-	_, err := inst.AddFunc("@every 1m", func() {
+	cronLock.Lock()
+	defer cronLock.Unlock()
+	if eventForwardCron != nil {
+		klog.V(6).Infof("事件转发配置定时任务已在运行，跳过重复启动")
+		return
+	}
+	eventForwardCron = cron.New()
+	_, err := eventForwardCron.AddFunc("@every 1m", func() {
 		// 延迟启动cron
 		SyncEventForwardingFromConfig()
 	})
 	if err != nil {
 		klog.Errorf("新增事件转发配置定时任务报错: %v\n", err)
 	}
-	inst.Start()
+	eventForwardCron.Start()
 	klog.V(6).Infof("新增事件转发配置定时任务【@every 1m】\n")
+}
+
+// StopEventForwardingWatch 停止事件转发配置监听
+// 中文函数注释：优雅停止定时任务，避免重复任务或资源泄漏。
+func StopEventForwardingWatch() {
+	StopEventForwarding()
+	cronLock.Lock()
+	defer cronLock.Unlock()
+	if eventForwardCron != nil {
+		eventForwardCron.Stop()
+		eventForwardCron = nil
+		klog.V(6).Infof("事件转发配置定时任务已停止")
+	} else {
+		klog.V(6).Infof("事件转发配置定时任务未运行")
+	}
 }
