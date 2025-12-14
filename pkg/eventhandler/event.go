@@ -144,7 +144,12 @@ func StartEventForwardingWatch() {
 		klog.V(6).Infof("事件转发配置定时任务已在运行，跳过重复启动")
 		return
 	}
-	eventForwardCron = cron.New()
+	eventForwardCron = cron.New(
+		cron.WithChain(
+			cron.Recover(cron.DefaultLogger),
+			cron.SkipIfStillRunning(cron.DefaultLogger),
+		),
+	)
 	_, err := eventForwardCron.AddFunc("@every 1m", func() {
 		// 延迟启动cron
 		SyncEventForwardingFromConfig()
