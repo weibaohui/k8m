@@ -52,14 +52,17 @@ func (w *EventWatcher) Start() {
 }
 
 // Stop 停止事件监听器
+// 中文函数注释：无论当前配置开关状态如何，均立即停止监听器上下文，避免因开关变更导致无法停止的问题。
 func (w *EventWatcher) Stop() {
-	if w.cfg.Enabled {
-		klog.V(6).Infof("停止事件监听器")
-		w.cancel()
-		// close(w.eventCh)
-		// 不主动关闭 eventCh，避免并发写入导致 panic；
-		// 依赖 w.ctx.Done() 让 processEvents 与 HandleEvent 自然退出。
+	if w == nil {
+		return
 	}
+	klog.V(6).Infof("停止事件监听器")
+	if w.cancel != nil {
+		w.cancel()
+	}
+	// 不主动关闭 eventCh，避免并发写入导致 panic；
+	// 依赖 w.ctx.Done() 让 processEvents 与 HandleEvent 自然退出。
 
 }
 

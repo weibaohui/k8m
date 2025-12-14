@@ -58,13 +58,16 @@ func (w *EventWorker) Start() {
 }
 
 // Stop 停止Worker
+// 中文函数注释：无论当前配置开关状态如何，均立即停止事件处理循环并等待退出，确保不会因为配置变更导致无法停止。
 func (w *EventWorker) Stop() {
-	if w.cfg.Enabled {
-		klog.V(6).Infof("停止事件处理Worker")
-		w.cancel()
-		w.wg.Wait()
+	if w == nil {
+		return
 	}
-
+	klog.V(6).Infof("停止事件处理Worker")
+	if w.cancel != nil {
+		w.cancel()
+	}
+	w.wg.Wait()
 }
 
 // processLoop 处理循环
