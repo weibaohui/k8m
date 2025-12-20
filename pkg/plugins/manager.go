@@ -103,13 +103,6 @@ func (m *Manager) Enable(name string) error {
 	m.status[name] = StatusEnabled
 	klog.V(6).Infof("启用插件成功: %s", name)
 
-	// 动态注册路由：如果已经有API路由组记录，则为当前插件注册路由
-	if mod.Router != nil && len(m.apiGroups) > 0 {
-		for _, grp := range m.apiGroups {
-			klog.V(6).Infof("动态注册插件路由: %s", name)
-			mod.Router(grp)
-		}
-	}
 	return nil
 }
 

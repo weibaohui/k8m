@@ -4,13 +4,28 @@
   "body": [
     {
       "type": "crud",
-      "api": "get:/api/plugins/demo/items",
+      "api": "get:/k8s/api/plugins/demo/items",
       "columns": [
-        { "name": "id", "label": "ID" },
-        { "name": "name", "label": "名称" },
-        { "name": "description", "label": "描述" },
-        { "name": "created_at", "label": "创建时间" },
-        { "name": "updated_at", "label": "更新时间" }
+        {
+          "name": "id",
+          "label": "ID"
+        },
+        {
+          "name": "name",
+          "label": "名称"
+        },
+        {
+          "name": "description",
+          "label": "描述"
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间"
+        },
+        {
+          "name": "updated_at",
+          "label": "更新时间"
+        }
       ],
       "headerToolbar": [
         {
@@ -22,10 +37,19 @@
             "title": "新增",
             "body": {
               "type": "form",
-              "api": "post:/api/plugins/demo/items",
+              "api": "post:/k8s/api/plugins/demo/items",
               "controls": [
-                { "type": "text", "name": "name", "label": "名称", "required": true },
-                { "type": "textarea", "name": "description", "label": "描述" }
+                {
+                  "type": "text",
+                  "name": "name",
+                  "label": "名称",
+                  "required": true
+                },
+                {
+                  "type": "textarea",
+                  "name": "description",
+                  "label": "描述"
+                }
               ]
             }
           }
@@ -40,10 +64,19 @@
             "title": "编辑",
             "body": {
               "type": "form",
-              "api": "put:/api/plugins/demo/items/${id}",
+              "api": "put:/k8s/api/plugins/demo/items/${id}",
               "controls": [
-                { "type": "text", "name": "name", "label": "名称", "required": true },
-                { "type": "textarea", "name": "description", "label": "描述" }
+                {
+                  "type": "text",
+                  "name": "name",
+                  "label": "名称",
+                  "required": true
+                },
+                {
+                  "type": "textarea",
+                  "name": "description",
+                  "label": "描述"
+                }
               ]
             }
           }
@@ -54,7 +87,7 @@
           "label": "删除",
           "level": "danger",
           "confirmText": "确认删除该项？",
-          "api": "delete:/api/plugins/demo/items/${id}"
+          "api": "delete:/k8s/api/plugins/demo/items/${id}"
         }
       ]
     }

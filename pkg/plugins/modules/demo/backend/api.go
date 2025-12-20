@@ -22,6 +22,8 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	grp.PUT("/items/:id", Update)
 	// 删除
 	grp.DELETE("/items/:id", Delete)
+
+	klog.V(6).Infof("注册插件路由: %s", "/items/:id")
 }
 
 // Page 返回AMIS页面Schema
@@ -160,4 +162,3 @@ func Delete(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-
