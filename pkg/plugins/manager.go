@@ -66,6 +66,7 @@ func (m *Manager) Install(name string) error {
 	}
 	if mod.Lifecycle != nil {
 		ctx := installContextImpl{baseContextImpl{meta: mod.Meta}}
+
 		if err := mod.Lifecycle.Install(ctx); err != nil {
 			klog.V(6).Infof("安装插件失败: %s，错误: %v", name, err)
 			return err
