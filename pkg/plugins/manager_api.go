@@ -27,6 +27,8 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 
 	// 列出所有已注册插件的Meta和状态
 	grp.GET("/list", m.ListPlugins)
+	// 获取已启用插件的菜单数据
+	grp.GET("/menus", m.ListPluginMenus)
 	// 安装插件
 	grp.POST("/install/:name", m.InstallPlugin)
 	// 卸载插件
@@ -52,6 +54,48 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 	}
 	klog.V(6).Infof("获取插件列表，共计%d个", len(items))
 	amis.WriteJsonListWithTotal(c, int64(len(items)), items)
+}
+
+// ListPluginMenus 获取所有已启用插件的菜单定义
+// 返回前端可直接使用的菜单JSON（与前端 MenuItem 结构一致）
+func (m *Manager) ListPluginMenus(c *gin.Context) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	type MenuVO struct {
+		Key         string   `json:"key,omitempty"`
+		Title       string   `json:"title"`
+		Icon        string   `json:"icon,omitempty"`
+		URL         string   `json:"url,omitempty"`
+		EventType   string   `json:"eventType,omitempty"`
+		CustomEvent string   `json:"customEvent,omitempty"`
+		Order       float64  `json:"order,omitempty"`
+		Children    []MenuVO `json:"children,omitempty"`
+		Show        string   `json:"show,omitempty"`
+		Permission  string   `json:"permission,omitempty"`
+	}
+
+	var result []MenuVO
+	for name, mod := range m.modules {
+		if m.status[name] != StatusEnabled {
+			continue
+		}
+		for _, menu := range mod.Menus {
+			result = append(result, MenuVO{
+				Key:         menu.Key,
+				Title:       menu.Title,
+				Icon:        menu.Icon,
+				URL:         menu.URL,
+				EventType:   menu.EventType,
+				CustomEvent: menu.CustomEvent,
+				Order:       menu.Order,
+				Show:        menu.Show,
+				Permission:  menu.Permission,
+			})
+		}
+	}
+	klog.V(6).Infof("获取插件菜单列表，共计%d个", len(result))
+	amis.WriteJsonData(c, result)
 }
 
 // InstallPlugin 安装指定名称的插件

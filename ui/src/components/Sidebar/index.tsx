@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { MenuItem } from '@/types/menu';
 import { initialMenu } from '@/pages/MenuEditor/menuData';
 import type { MenuProps } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useCRDStatus } from '@/hooks/useCRDStatus';
 import { shouldShowMenuItem } from '@/utils/menuVisibility';
 import { getCurrentClusterId, toUrlSafeBase64 } from '@/utils/utils';
+import { fetcher } from '@/components/Amis/fetcher';
 
 type AntdMenuItem = Required<MenuProps>['items'][number];
 
@@ -19,6 +20,7 @@ const Sidebar = () => {
     // 使用自定义hooks
     const { userRole, menuData } = useUserRole();
     const { isGatewayAPISupported, isOpenKruiseSupported, isIstioSupported } = useCRDStatus();
+    const [pluginMenus, setPluginMenus] = useState<MenuItem[]>([]);
 
     // 创建菜单可见性上下文
     const visibilityContext = {
@@ -28,6 +30,38 @@ const Sidebar = () => {
         isOpenKruiseSupported,
         isIstioSupported
     };
+
+    // 拉取插件菜单并缓存
+    useEffect(() => {
+        const fetchPluginMenus = async () => {
+            try {
+                const resp = await fetcher({
+                    url: '/admin/plugin/menus',
+                    method: 'get'
+                });
+                if (resp?.data && typeof resp.data === 'object') {
+                    const data = resp.data.data as MenuItem[] | string | null | undefined;
+                    if (Array.isArray(data)) {
+                        setPluginMenus(data);
+                    } else if (typeof data === 'string') {
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (Array.isArray(parsed)) {
+                                setPluginMenus(parsed as MenuItem[]);
+                            }
+                        } catch (e) {
+                            // ignore parse error
+                        }
+                    }
+                }
+            } catch (error) {
+                // 非平台管理员或接口不可用时，忽略错误
+                console.warn('获取插件菜单失败，将不合并插件菜单:', error);
+                setPluginMenus([]);
+            }
+        };
+        fetchPluginMenus();
+    }, []);
 
 
     // 转换函数：将 initialMenu 格式转换为 Antd Menu 格式
@@ -121,7 +155,7 @@ const Sidebar = () => {
         if (menuData) {
             // 如果是数组，直接使用
             if (Array.isArray(menuData) && menuData.length > 0) {
-                return menuData as MenuItem[];
+                return [...(menuData as MenuItem[]), ...pluginMenus];
             }
 
             // 如果是字符串，尝试解析
@@ -131,7 +165,7 @@ const Sidebar = () => {
                     try {
                         const parsed = JSON.parse(raw);
                         if (Array.isArray(parsed) && parsed.length > 0) {
-                            return parsed as MenuItem[];
+                            return [...(parsed as MenuItem[]), ...pluginMenus];
                         }
                     } catch (error) {
                         console.warn('Failed to parse menuData string, falling back to initialMenu:', error);
@@ -139,7 +173,7 @@ const Sidebar = () => {
                 }
             }
         }
-        return initialMenu;
+        return [...initialMenu, ...pluginMenus];
     };
 
     // 使用 useMemo 缓存转换结果，依赖状态变化
