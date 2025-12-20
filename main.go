@@ -53,8 +53,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
-	"github.com/weibaohui/k8m/pkg/plugins"
-	demoplugin "github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/eventhandler"
 	"github.com/weibaohui/k8m/pkg/flag"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
@@ -63,6 +61,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
+	_ "github.com/weibaohui/k8m/pkg/pluginregistry"
+	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/service"
 	_ "github.com/weibaohui/k8m/swagger"
 	"github.com/weibaohui/kom/callbacks"
@@ -310,11 +310,10 @@ func main() {
 	{
 		chat.RegisterChatRoutes(ai)
 	}
-	// 初始化插件管理器，并注册插件
+
+	// 初始化插件管理器并启动（集中注册与默认启用策略在 Start 中完成）
 	mgr := plugins.NewManager()
-	demoplugin.Register(mgr)
-	// 默认启用 demo 插件
-	_ = mgr.Enable("demo")
+	mgr.Start()
 
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
@@ -454,6 +453,9 @@ func main() {
 
 		// 菜单自定义
 		menu.RegisterAdminMenuRoutes(admin)
+
+		// 插件路由注册交由 Manager 统一处理
+		mgr.RegisterAdminRoutes(admin)
 	}
 
 	showBootInfo(Version, cfg.Port)

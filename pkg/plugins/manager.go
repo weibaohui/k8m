@@ -37,6 +37,12 @@ func NewManager() *Manager {
 	}
 }
 
+// RegisterAdminRoutes 注册插件的管理员路由
+// 管理员路由通常用于插件的配置、管理和操作接口，需要较高的权限才能访问。
+func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
+	//todo 注册插件的管理员路由
+}
+
 // Register 注册插件模块，默认状态为已发现
 func (m *Manager) Register(module Module) error {
 	m.mu.Lock()
@@ -148,6 +154,39 @@ func (m *Manager) StatusOf(name string) (Status, bool) {
 	defer m.mu.RUnlock()
 	s, ok := m.status[name]
 	return s, ok
+}
+
+// registrar 集中注册器，由外部包绑定，Start 时调用
+var registrar func(*Manager)
+
+// SetRegistrar 绑定集中注册器（仅设置，不做启停）
+func SetRegistrar(f func(*Manager)) {
+	registrar = f
+}
+
+// Start 启动插件管理：集中注册 + 默认启用策略
+func (m *Manager) Start() {
+	if registrar != nil {
+		registrar(m)
+	}
+	m.EnableAll()
+}
+
+// EnableAll 启用所有已注册插件（用于默认策略或初始化）
+func (m *Manager) EnableAll() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for name, mod := range m.modules {
+		if mod.Lifecycle != nil {
+			ctx := enableContextImpl{baseContextImpl{meta: mod.Meta}}
+			if err := mod.Lifecycle.Enable(ctx); err != nil {
+				klog.V(6).Infof("启用插件失败: %s，错误: %v", name, err)
+				continue
+			}
+		}
+		m.status[name] = StatusEnabled
+		klog.V(6).Infof("启用插件成功: %s", name)
+	}
 }
 
 // RegisterRoutes 扫描已启用插件并注册其路由
