@@ -18,7 +18,7 @@ var ModuleDef = plugins.Module{
 			Title:       "演示插件",
 			Icon:        "fa-solid fa-puzzle-piece",
 			EventType:   "custom",
-			CustomEvent: `() => loadJsonPage("/api/plugins/demo/page")`,
+			CustomEvent: `() => loadJsonPage("/plugins/demo/page")`,
 			Order:       100,
 			Permission:  "demo.view",
 		},
