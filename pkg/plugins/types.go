@@ -55,29 +55,3 @@ type Permission struct {
 	// Title 权限展示名称
 	Title string
 }
-
-// APIRoute 后端 API 路由声明（不含实现）
-type APIRoute struct {
-	// Method HTTP 方法，如 GET/POST/PUT/DELETE
-	Method string
-	// Path API 路径，需以 /api/plugins/<plugin-name>/ 开头
-	Path string
-	// RequiredPermission 访问该 API 所需权限名称（可选）
-	RequiredPermission string
-}
-
-// FrontendResource 前端 AMIS JSON 资源声明
-type FrontendResource struct {
-	// Name 资源标识
-	Name string
-	// Path 资源路径，通常位于插件 frontend/ 目录下
-	Path string
-}
-
-// Table 数据表结构声明（仅定义，不做具体实现）
-type Table struct {
-	// Name 表名称，建议包含插件名前缀
-	Name string
-	// Schema 表结构定义（例如 DDL 片段或结构化描述）
-	Schema string
-}
