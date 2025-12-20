@@ -35,3 +35,16 @@ var ModuleDef = plugins.Module{
 	Lifecycle: &DemoLifecycle{},
 	Router:    backend.RegisterRoutes,
 }
+
+func Permissions() []plugins.Permission {
+	return []plugins.Permission{
+		{Name: "demo.view", Title: "查看演示列表"},
+		{Name: "demo.edit", Title: "编辑演示列表"},
+	}
+}
+
+func Menus() []plugins.Menu {
+	return []plugins.Menu{
+		{ID: "demo.list", Title: "演示列表", Path: "/api/plugins/demo/page", Permission: "demo.view"},
+	}
+}
