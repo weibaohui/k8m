@@ -98,47 +98,6 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 		amis.WriteJsonOK(c)
 	})
 
-	// 返回AMIS页面Schema，用于管理插件
-	grp.GET("/page", func(c *gin.Context) {
-		schema := gin.H{
-			"type":  "page",
-			"title": "插件管理",
-			"body": []any{
-				gin.H{
-					"type": "crud",
-					"api":  "get:/admin/plugin/list",
-					"columns": []any{
-						gin.H{"name": "name", "label": "标识"},
-						gin.H{"name": "title", "label": "名称"},
-						gin.H{"name": "version", "label": "版本"},
-						gin.H{"name": "description", "label": "描述"},
-						gin.H{"name": "status", "label": "状态"},
-					},
-					"itemActions": []any{
-						gin.H{
-							"type":        "button",
-							"actionType":  "ajax",
-							"label":       "安装",
-							"level":       "primary",
-							"visibleOn":   "this.status == '已发现' || this.status == '已禁用'",
-							"confirmText": "确认安装该插件？",
-							"api":         "post:/admin/plugin/install/${name}",
-						},
-						gin.H{
-							"type":        "button",
-							"actionType":  "ajax",
-							"label":       "卸载",
-							"level":       "danger",
-							"visibleOn":   "this.status != '已发现'",
-							"confirmText": "确认卸载该插件？卸载后需要重新注册才可再次安装。",
-							"api":         "post:/admin/plugin/uninstall/${name}",
-						},
-					},
-				},
-			},
-		}
-		amis.WriteJsonData(c, schema)
-	})
 }
 
 // Register 注册插件模块，默认状态为已发现
@@ -233,8 +192,8 @@ func (m *Manager) Uninstall(name string) error {
 			return err
 		}
 	}
-	delete(m.modules, name)
-	delete(m.status, name)
+	// 卸载后保留插件条目，使其仍然显示在列表中并可再次安装
+	m.status[name] = StatusDiscovered
 	klog.V(6).Infof("卸载插件成功: %s", name)
 	return nil
 }
