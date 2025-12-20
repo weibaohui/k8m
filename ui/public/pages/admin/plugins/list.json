@@ -1,0 +1,52 @@
+{
+    "type": "page",
+    "title": "插件管理",
+    "body": [
+        {
+            "type": "crud",
+            "api": "get:/admin/plugin/list",
+            "columns": [
+                {
+                    "name": "name",
+                    "label": "标识"
+                },
+                {
+                    "name": "title",
+                    "label": "名称"
+                },
+                {
+                    "name": "version",
+                    "label": "版本"
+                },
+                {
+                    "name": "description",
+                    "label": "描述"
+                },
+                {
+                    "name": "status",
+                    "label": "状态"
+                }
+            ],
+            "itemActions": [
+                {
+                    "type": "button",
+                    "actionType": "ajax",
+                    "label": "安装",
+                    "level": "primary",
+                    "visibleOn": "this.status == '已发现' || this.status == '已禁用'",
+                    "confirmText": "确认安装该插件？",
+                    "api": "post:/admin/plugin/install/${name}"
+                },
+                {
+                    "type": "button",
+                    "actionType": "ajax",
+                    "label": "卸载",
+                    "level": "danger",
+                    "visibleOn": "this.status != '已发现'",
+                    "confirmText": "确认卸载该插件？卸载后需要重新注册才可再次安装。",
+                    "api": "post:/admin/plugin/uninstall/${name}"
+                }
+            ]
+        }
+    ]
+}

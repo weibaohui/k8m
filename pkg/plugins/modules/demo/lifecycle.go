@@ -1,8 +1,8 @@
 package demo
 
 import (
-	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/backend"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/backend"
 	"k8s.io/klog/v2"
 )
 

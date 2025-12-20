@@ -1011,6 +1011,14 @@ export const initialMenu: MenuItem[] = [
         order: 19,
     },
     {
+        key: 'plugins_mgr',
+        title: '插件管理',
+        icon: 'fa-solid fa-code-branch',
+        eventType: 'custom',
+        customEvent: '() => loadJsonPage("/admin/plugins/list")',
+        order: 19,
+    },
+    {
         key: 'about',
         title: '关于',
         icon: 'fa-solid fa-circle-info',

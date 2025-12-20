@@ -62,6 +62,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
+	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
 	"github.com/weibaohui/k8m/pkg/service"
 	_ "github.com/weibaohui/k8m/swagger"
 	"github.com/weibaohui/kom/callbacks"
