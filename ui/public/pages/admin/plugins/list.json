@@ -42,16 +42,23 @@
                     "actionType": "ajax",
                     "label": "启用",
                     "level": "primary",
-                    "visibleOn": "this.status == '已安装' || this.status == '已禁用'",
                     "confirmText": "确认启用该插件？",
                     "api": "post:/admin/plugin/enable/${name}"
                 },
                 {
                     "type": "button",
                     "actionType": "ajax",
+                    "label": "关闭",
+                    "level": "warning",
+                    "visibleOn": "this.status == '已启用'",
+                    "confirmText": "确认关闭该插件？",
+                    "api": "post:/admin/plugin/disable/${name}"
+                },
+                {
+                    "type": "button",
+                    "actionType": "ajax",
                     "label": "卸载",
                     "level": "danger",
-                    "visibleOn": "this.status != '已发现'",
                     "confirmText": "确认卸载该插件？卸载后需要重新注册才可再次安装。",
                     "api": "post:/admin/plugin/uninstall/${name}"
                 }

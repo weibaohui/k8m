@@ -33,6 +33,8 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 	grp.POST("/install/:name", m.InstallPlugin)
 	// 启用插件
 	grp.POST("/enable/:name", m.EnablePlugin)
+	// 禁用插件
+	grp.POST("/disable/:name", m.DisablePlugin)
 	// 卸载插件
 	grp.POST("/uninstall/:name", m.UninstallPlugin)
 }
@@ -130,6 +132,18 @@ func (m *Manager) UninstallPlugin(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("卸载插件请求: %s", name)
 	if err := m.Uninstall(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+// DisablePlugin 禁用指定名称的插件
+// 路径参数为插件名，禁用失败时返回错误
+func (m *Manager) DisablePlugin(c *gin.Context) {
+	name := c.Param("name")
+	klog.V(6).Infof("禁用插件请求: %s", name)
+	if err := m.Disable(name); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
