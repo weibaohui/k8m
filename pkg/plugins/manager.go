@@ -13,6 +13,8 @@ type Manager struct {
 	mu      sync.RWMutex
 	modules map[string]Module
 	status  map[string]Status
+	// apiGroups 已注册的后端API路由分组引用，用于支持启用时动态注册路由
+	apiGroups []*gin.RouterGroup
 }
 
 // Status 插件状态
@@ -32,8 +34,9 @@ const (
 // NewManager 创建并返回插件管理器
 func NewManager() *Manager {
 	return &Manager{
-		modules: make(map[string]Module),
-		status:  make(map[string]Status),
+		modules:   make(map[string]Module),
+		status:    make(map[string]Status),
+		apiGroups: make([]*gin.RouterGroup, 0),
 	}
 }
 
@@ -94,6 +97,14 @@ func (m *Manager) Enable(name string) error {
 	}
 	m.status[name] = StatusEnabled
 	klog.V(6).Infof("启用插件成功: %s", name)
+
+	// 动态注册路由：如果已经有API路由组记录，则为当前插件注册路由
+	if mod.Router != nil && len(m.apiGroups) > 0 {
+		for _, grp := range m.apiGroups {
+			klog.V(6).Infof("动态注册插件路由: %s", name)
+			mod.Router(grp)
+		}
+	}
 	return nil
 }
 
@@ -186,10 +197,22 @@ func (m *Manager) EnableAll() {
 	}
 }
 
-// RegisterRoutes 扫描已启用插件并注册其路由
+// RegisterRoutes 扫描已启用插件并注册其路由，并记录路由分组用于后续动态注册
 func (m *Manager) RegisterRoutes(api *gin.RouterGroup) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	// 记录路由分组（去重）
+	already := false
+	for _, g := range m.apiGroups {
+		if g == api {
+			already = true
+			break
+		}
+	}
+	if !already {
+		m.apiGroups = append(m.apiGroups, api)
+	}
+	// 为已启用插件注册路由
 	for name, mod := range m.modules {
 		if m.status[name] == StatusEnabled && mod.Router != nil {
 			klog.V(6).Infof("注册插件路由: %s", name)
