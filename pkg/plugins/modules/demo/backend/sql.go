@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
+	"k8s.io/klog/v2"
 )
 
 // Item 演示数据模型（使用数据库存储）
@@ -26,3 +27,16 @@ func InitDB() error {
 	return dao.DB().AutoMigrate(&Item{})
 }
 
+// DropDB 删除Demo插件相关的表及数据
+// 通过GORM Migrator执行删除操作，兼容多种数据库
+func DropDB() error {
+	db := dao.DB()
+	if db.Migrator().HasTable(&Item{}) {
+		if err := db.Migrator().DropTable(&Item{}); err != nil {
+			klog.V(6).Infof("删除 Demo 插件表失败: %v", err)
+			return err
+		}
+		klog.V(6).Infof("已删除 Demo 插件表及数据")
+	}
+	return nil
+}
