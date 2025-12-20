@@ -13,7 +13,15 @@ var ModuleDef = plugins.Module{
 		Description: "演示固定列表与CRUD功能",
 	},
 	Menus: []plugins.Menu{
-		{ID: "demo.list", Title: "演示列表", Path: "/api/plugins/demo/page", Permission: "demo.view"},
+		{
+			Key:         "plugin_demo",
+			Title:       "演示插件",
+			Icon:        "fa-solid fa-puzzle-piece",
+			EventType:   "custom",
+			CustomEvent: `() => loadJsonPage("/api/plugins/demo/page")`,
+			Order:       100,
+			Permission:  "demo.view",
+		},
 	},
 	Permissions: []plugins.Permission{
 		{Name: "demo.view", Title: "查看演示列表"},
@@ -45,6 +53,14 @@ func Permissions() []plugins.Permission {
 
 func Menus() []plugins.Menu {
 	return []plugins.Menu{
-		{ID: "demo.list", Title: "演示列表", Path: "/api/plugins/demo/page", Permission: "demo.view"},
+		{
+			Key:         "plugin_demo",
+			Title:       "演示插件",
+			Icon:        "fa-solid fa-puzzle-piece",
+			EventType:   "custom",
+			CustomEvent: `() => loadJsonPage("/api/plugins/demo/page")`,
+			Order:       100,
+			Permission:  "demo.view",
+		},
 	}
 }

@@ -12,16 +12,40 @@ type Meta struct {
 	Description string
 }
 
-// Menu 菜单模型定义，仅用于声明结构
+// Menu 菜单模型定义
+// 该结构与前端 `MenuItem` 类型保持一致，支持动态融合到前端菜单中
+// 字段说明：
+// - key：菜单唯一标识
+// - title：菜单展示标题
+// - icon：Font Awesome 图标（可选）
+// - url：URL跳转地址（可选，通常与 eventType=url 搭配）
+// - eventType：事件类型，可选值 'url' | 'custom'
+// - customEvent：自定义事件字符串，如 '() => loadJsonPage(\"/path\")'
+// - order：排序号，支持小数（如 6.5）
+// - children：子菜单列表
+// - show：显示表达式，字符串形式的 JS 表达式
+// - permission：访问所需权限名称（可选）
 type Menu struct {
-	// ID 菜单唯一标识
-	ID string
+	// Key 菜单唯一标识
+	Key string `json:"key,omitempty"`
 	// Title 菜单展示标题
-	Title string
-	// Path 指向 AMIS 页面路径
-	Path string
+	Title string `json:"title"`
+	// Icon 图标（Font Awesome 类名）
+	Icon string `json:"icon,omitempty"`
+	// URL 跳转地址
+	URL string `json:"url,omitempty"`
+	// EventType 事件类型：'url' 或 'custom'
+	EventType string `json:"eventType,omitempty"`
+	// CustomEvent 自定义事件，如：'() => loadJsonPage("/path")'
+	CustomEvent string `json:"customEvent,omitempty"`
+	// Order 排序号
+	Order float64 `json:"order,omitempty"`
+	// Children 子菜单
+	Children []Menu `json:"children,omitempty"`
+	// Show 显示表达式（字符串形式的JS表达式）
+	Show string `json:"show,omitempty"`
 	// Permission 访问所需权限名称
-	Permission string
+	Permission string `json:"permission,omitempty"`
 }
 
 // Permission 权限定义
@@ -57,4 +81,3 @@ type Table struct {
 	// Schema 表结构定义（例如 DDL 片段或结构化描述）
 	Schema string
 }
-

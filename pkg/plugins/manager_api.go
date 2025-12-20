@@ -22,7 +22,6 @@ type PluginItemVO struct {
 // 1. 插件列表（显示Meta信息与状态）
 // 2. 安装插件
 // 3. 卸载插件
-// 4. 页面Schema（AMIS）
 func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 	grp := admin.Group("/plugin")
 
