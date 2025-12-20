@@ -31,6 +31,8 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 	grp.GET("/menus", m.ListPluginMenus)
 	// 安装插件
 	grp.POST("/install/:name", m.InstallPlugin)
+	// 启用插件
+	grp.POST("/enable/:name", m.EnablePlugin)
 	// 卸载插件
 	grp.POST("/uninstall/:name", m.UninstallPlugin)
 }
@@ -104,6 +106,18 @@ func (m *Manager) InstallPlugin(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("安装插件请求: %s", name)
 	if err := m.Install(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonOK(c)
+}
+
+// EnablePlugin 启用指定名称的插件
+// 路径参数为插件名，启用失败时返回错误
+func (m *Manager) EnablePlugin(c *gin.Context) {
+	name := c.Param("name")
+	klog.V(6).Infof("启用插件请求: %s", name)
+	if err := m.Enable(name); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

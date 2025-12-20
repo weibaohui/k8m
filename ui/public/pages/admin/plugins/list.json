@@ -40,6 +40,15 @@
                 {
                     "type": "button",
                     "actionType": "ajax",
+                    "label": "启用",
+                    "level": "primary",
+                    "visibleOn": "this.status == '已安装' || this.status == '已禁用'",
+                    "confirmText": "确认启用该插件？",
+                    "api": "post:/admin/plugin/enable/${name}"
+                },
+                {
+                    "type": "button",
+                    "actionType": "ajax",
                     "label": "卸载",
                     "level": "danger",
                     "visibleOn": "this.status != '已发现'",
