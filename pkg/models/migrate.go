@@ -132,6 +132,11 @@ func AutoMigrate() error {
 		errs = append(errs, err)
 	}
 
+	// 插件配置表
+	if err := dao.DB().AutoMigrate(&PluginConfig{}); err != nil {
+		errs = append(errs, err)
+	}
+
 	// 事件处理器配置表
 	if err := dao.DB().AutoMigrate(&K8sEventConfig{}); err != nil {
 		errs = append(errs, err)

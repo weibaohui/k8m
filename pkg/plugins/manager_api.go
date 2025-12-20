@@ -2,7 +2,9 @@ package plugins
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
 )
 
@@ -46,8 +48,20 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 	defer m.mu.RUnlock()
 
 	items := make([]PluginItemVO, 0, len(m.modules))
+	// 读取数据库中的配置状态
+	params := dao.BuildDefaultParams()
+	cfgs, _, _ := (&models.PluginConfig{}).List(params)
+	cfgMap := make(map[string]string, len(cfgs))
+	for _, cfg := range cfgs {
+		cfgMap[cfg.Name] = cfg.Status
+	}
 	for name, mod := range m.modules {
-		status := m.status[name]
+		// 优先使用数据库中的配置状态；若不存在则显示默认启用
+		statusStr, ok := cfgMap[name]
+		if !ok {
+			statusStr = "enabled"
+		}
+		status := statusFromString(statusStr)
 		items = append(items, PluginItemVO{
 			Name:        mod.Meta.Name,
 			Title:       mod.Meta.Title,
@@ -106,48 +120,52 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 // 路径参数为插件名，安装失败时返回错误
 func (m *Manager) InstallPlugin(c *gin.Context) {
 	name := c.Param("name")
-	klog.V(6).Infof("安装插件请求: %s", name)
-	if err := m.Install(name); err != nil {
+	klog.V(6).Infof("安装插件配置请求: %s", name)
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusInstalled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonOK(c)
+	amis.WriteJsonOKMsg(c, "已保存插件为已安装，需重启后生效")
 }
 
 // EnablePlugin 启用指定名称的插件
 // 路径参数为插件名，启用失败时返回错误
 func (m *Manager) EnablePlugin(c *gin.Context) {
 	name := c.Param("name")
-	klog.V(6).Infof("启用插件请求: %s", name)
-	if err := m.Enable(name); err != nil {
+	klog.V(6).Infof("启用插件配置请求: %s", name)
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonOK(c)
+	amis.WriteJsonOKMsg(c, "已保存插件为已启用，需重启后生效")
 }
 
 // UninstallPlugin 卸载指定名称的插件
 // 路径参数为插件名，卸载失败时返回错误
 func (m *Manager) UninstallPlugin(c *gin.Context) {
 	name := c.Param("name")
-	klog.V(6).Infof("卸载插件请求: %s", name)
-	if err := m.Uninstall(name); err != nil {
+	klog.V(6).Infof("卸载插件配置请求: %s", name)
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusDiscovered, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonOK(c)
+	amis.WriteJsonOKMsg(c, "已保存插件为未安装（已发现），需重启后生效")
 }
 
 // DisablePlugin 禁用指定名称的插件
 // 路径参数为插件名，禁用失败时返回错误
 func (m *Manager) DisablePlugin(c *gin.Context) {
 	name := c.Param("name")
-	klog.V(6).Infof("禁用插件请求: %s", name)
-	if err := m.Disable(name); err != nil {
+	klog.V(6).Infof("禁用插件配置请求: %s", name)
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusDisabled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonOK(c)
+	amis.WriteJsonOKMsg(c, "已保存插件为已禁用，需重启后生效")
 }
 
 // statusToCN 状态转中文字符串
