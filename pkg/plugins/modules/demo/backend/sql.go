@@ -1,4 +1,4 @@
-package demo
+package backend
 
 import (
 	"time"
@@ -21,8 +21,8 @@ func (Item) TableName() string {
 	return "demo_items"
 }
 
-// InitDB 初始化数据库表
-// 使用GORM自动迁移创建表结构
+// InitDB 初始化数据库表（GORM自动迁移）
 func InitDB() error {
 	return dao.DB().AutoMigrate(&Item{})
 }
+

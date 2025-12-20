@@ -1,6 +1,7 @@
 package demo
 
 import (
+	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/backend"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"k8s.io/klog/v2"
 )
@@ -10,7 +11,7 @@ type DemoLifecycle struct{}
 
 // Install 安装Demo插件，初始化数据库表
 func (d *DemoLifecycle) Install(ctx plugins.InstallContext) error {
-	if err := InitDB(); err != nil {
+	if err := backend.InitDB(); err != nil {
 		klog.V(6).Infof("安装Demo插件失败: %v", err)
 		return err
 	}
@@ -41,4 +42,3 @@ func (d *DemoLifecycle) Uninstall(ctx plugins.InstallContext) error {
 	klog.V(6).Infof("卸载Demo插件")
 	return nil
 }
-

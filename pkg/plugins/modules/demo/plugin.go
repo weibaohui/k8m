@@ -1,6 +1,9 @@
 package demo
 
-import "github.com/weibaohui/k8m/pkg/plugins"
+import (
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/backend"
+)
 
 var ModuleDef = plugins.Module{
 	Meta: plugins.Meta{
@@ -30,5 +33,5 @@ var ModuleDef = plugins.Module{
 		{Name: "demo_items", Schema: "ID, Name, Description, CreatedAt, UpdatedAt, CreatedBy"},
 	},
 	Lifecycle: &DemoLifecycle{},
-	Router:    RegisterRoutes,
+	Router:    backend.RegisterRoutes,
 }

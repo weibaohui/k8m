@@ -1,4 +1,4 @@
-package demo
+package backend
 
 import (
 	"strconv"
@@ -9,7 +9,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// RegisterRoutes 注册Demo插件的路由
+// RegisterRoutes 注册Demo插件的后端路由
 func RegisterRoutes(api *gin.RouterGroup) {
 	grp := api.Group("/plugins/demo")
 	// 页面Schema
@@ -160,3 +160,4 @@ func Delete(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
+
