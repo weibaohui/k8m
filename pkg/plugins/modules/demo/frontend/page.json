@@ -4,7 +4,7 @@
   "body": [
     {
       "type": "crud",
-      "api": "get:/k8s/api/plugins/demo/items",
+      "api": "get:/k8s/plugins/demo/items",
       "columns": [
         {
           "name": "id",
@@ -37,7 +37,7 @@
             "title": "新增",
             "body": {
               "type": "form",
-              "api": "post:/k8s/api/plugins/demo/items",
+              "api": "post:/k8s/plugins/demo/items",
               "controls": [
                 {
                   "type": "text",
@@ -64,7 +64,7 @@
             "title": "编辑",
             "body": {
               "type": "form",
-              "api": "put:/k8s/api/plugins/demo/items/${id}",
+              "api": "put:/k8s/plugins/demo/items/${id}",
               "controls": [
                 {
                   "type": "text",
@@ -87,7 +87,7 @@
           "label": "删除",
           "level": "danger",
           "confirmText": "确认删除该项？",
-          "api": "delete:/k8s/api/plugins/demo/items/${id}"
+          "api": "delete:/k8s/plugins/demo/remove/items/${id}"
         }
       ]
     }

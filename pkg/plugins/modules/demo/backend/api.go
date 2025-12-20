@@ -12,83 +12,17 @@ import (
 // RegisterRoutes 注册Demo插件的后端路由
 func RegisterRoutes(api *gin.RouterGroup) {
 	grp := api.Group("/plugins/demo")
-	// 页面Schema
-	grp.GET("/page", Page)
+
 	// 列表
 	grp.GET("/items", List)
 	// 新增
 	grp.POST("/items", Create)
 	// 更新
-	grp.PUT("/items/:id", Update)
+	grp.POST("/items/:id", Update)
 	// 删除
-	grp.DELETE("/items/:id", Delete)
+	grp.POST("/remove/items/:id", Delete)
 
 	klog.V(6).Infof("注册插件路由: %s", "/items/:id")
-}
-
-// Page 返回AMIS页面Schema
-func Page(c *gin.Context) {
-	schema := gin.H{
-		"type":  "page",
-		"title": "Demo 列表",
-		"body": []any{
-			gin.H{
-				"type": "crud",
-				"api":  "get:/api/plugins/demo/items",
-				"columns": []any{
-					gin.H{"name": "id", "label": "ID"},
-					gin.H{"name": "name", "label": "名称"},
-					gin.H{"name": "description", "label": "描述"},
-				},
-				"headerToolbar": []any{
-					gin.H{
-						"type":       "button",
-						"actionType": "dialog",
-						"label":      "新增",
-						"level":      "primary",
-						"dialog": gin.H{
-							"title": "新增",
-							"body": gin.H{
-								"type": "form",
-								"api":  "post:/api/plugins/demo/items",
-								"controls": []any{
-									gin.H{"type": "text", "name": "name", "label": "名称", "required": true},
-									gin.H{"type": "textarea", "name": "description", "label": "描述"},
-								},
-							},
-						},
-					},
-				},
-				"itemActions": []any{
-					gin.H{
-						"type":       "button",
-						"actionType": "dialog",
-						"label":      "编辑",
-						"dialog": gin.H{
-							"title": "编辑",
-							"body": gin.H{
-								"type": "form",
-								"api":  "put:/api/plugins/demo/items/${id}",
-								"controls": []any{
-									gin.H{"type": "text", "name": "name", "label": "名称", "required": true},
-									gin.H{"type": "textarea", "name": "description", "label": "描述"},
-								},
-							},
-						},
-					},
-					gin.H{
-						"type":        "button",
-						"actionType":  "ajax",
-						"label":       "删除",
-						"level":       "danger",
-						"confirmText": "确认删除该项？",
-						"api":         "delete:/api/plugins/demo/items/${id}",
-					},
-				},
-			},
-		},
-	}
-	amis.WriteJsonData(c, schema)
 }
 
 // List 返回演示列表数据
