@@ -61,7 +61,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
-	_ "github.com/weibaohui/k8m/pkg/pluginregistry"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/service"
 	_ "github.com/weibaohui/k8m/swagger"
