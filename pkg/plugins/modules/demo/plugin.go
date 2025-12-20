@@ -29,4 +29,6 @@ var ModuleDef = plugins.Module{
 	Tables: []plugins.Table{
 		{Name: "demo_items", Schema: "ID, Name, Description, CreatedAt, UpdatedAt, CreatedBy"},
 	},
+	Lifecycle: &DemoLifecycle{},
+	Router:    RegisterRoutes,
 }

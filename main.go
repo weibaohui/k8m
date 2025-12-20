@@ -53,6 +53,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	demoplugin "github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/eventhandler"
 	"github.com/weibaohui/k8m/pkg/flag"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
@@ -308,6 +310,12 @@ func main() {
 	{
 		chat.RegisterChatRoutes(ai)
 	}
+	// 初始化插件管理器，并注册插件
+	mgr := plugins.NewManager()
+	demoplugin.Register(mgr)
+	// 默认启用 demo 插件
+	_ = mgr.Enable("demo")
+
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
 
@@ -385,6 +393,8 @@ func main() {
 		// helm release
 		helm.RegisterHelmReleaseRoutes(api)
 
+		// 插件路由注册交由 Manager 统一处理
+		mgr.RegisterRoutes(api)
 	}
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
