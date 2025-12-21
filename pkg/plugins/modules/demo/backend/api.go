@@ -1,13 +1,11 @@
 package backend
 
 import (
-	"errors"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
@@ -30,20 +28,6 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // List 返回演示列表数据
 func List(c *gin.Context) {
 	klog.V(6).Infof("获取演示列表")
-
-	u := amis.GetLoginUser(c)
-	klog.V(6).Infof("更新演示项请求，用户=%s", u)
-	group, err := service.UserService().GetGroupNames(u)
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	klog.V(6).Infof("更新演示项请求，用户=%s, 组=%v", u, group)
-
-	if service.UserService().IsUserPlatformAdmin(u) {
-		amis.WriteJsonError(c, errors.New("非平台管理员用户，无权限获取演示列表"))
-		return
-	}
 
 	params := dao.BuildParams(c)
 	m := &Item{}

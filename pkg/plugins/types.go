@@ -55,3 +55,29 @@ type Permission struct {
 	// Title 权限展示名称
 	Title string
 }
+
+// RouteAccessKind 路由访问控制类型
+// any：任何已登录用户可访问
+// platform_admin：仅平台管理员可访问
+// roles：指定角色列表可访问（平台管理员也视为拥有所有角色）
+type RouteAccessKind string
+
+const (
+	AccessAnyUser       RouteAccessKind = "any"
+	AccessPlatformAdmin RouteAccessKind = "platform_admin"
+	AccessRoles         RouteAccessKind = "roles"
+)
+
+// RouteRule 路由访问控制规则
+// 用于描述某个HTTP方法+路径的访问要求
+type RouteRule struct {
+	// Method HTTP方法，如 GET/POST
+	Method string `json:"method"`
+	// Path 路径，可写相对路径（不含插件前缀）或完整路径
+	// 示例："/items" 或 "/plugins/demo/items"
+	Path string `json:"path"`
+	// Kind 访问控制类型
+	Kind RouteAccessKind `json:"kind"`
+	// Roles 指定角色列表（当 Kind=roles 时生效）
+	Roles []string `json:"roles,omitempty"`
+}
