@@ -81,9 +81,10 @@
                                             "label": "名称"
                                         },
                                         {
-                                            "type": "static",
+                                            "type": "tpl",
                                             "name": "version",
-                                            "label": "版本"
+                                            "label": "版本",
+                                            "tpl": "插件：${version}，数据库：${dbVersion|default:-}"
                                         },
                                         {
                                             "type": "static",
@@ -106,8 +107,10 @@
                     "label": "名称"
                 },
                 {
+                    "type": "tpl",
                     "name": "version",
-                    "label": "版本"
+                    "label": "版本",
+                    "tpl": "<span class='label label-default'>插件</span> ${version} &nbsp; <span class='label label-info'>数据库</span> ${dbVersion|default:-}"
                 },
                 {
                     "name": "description",

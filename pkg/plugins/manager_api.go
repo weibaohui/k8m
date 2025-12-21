@@ -18,6 +18,7 @@ type PluginItemVO struct {
 	Name        string `json:"name"`
 	Title       string `json:"title"`
 	Version     string `json:"version"`
+	DbVersion   string `json:"dbVersion,omitempty"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
 }
@@ -58,8 +59,10 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 	params := dao.BuildDefaultParams()
 	cfgs, _, _ := (&models.PluginConfig{}).List(params)
 	cfgMap := make(map[string]string, len(cfgs))
+	cfgVerMap := make(map[string]string, len(cfgs))
 	for _, cfg := range cfgs {
 		cfgMap[cfg.Name] = cfg.Status
+		cfgVerMap[cfg.Name] = cfg.Version
 	}
 	for name, mod := range m.modules {
 		// 优先使用数据库中的配置状态；若不存在则显示为已发现
@@ -72,6 +75,7 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			Name:        mod.Meta.Name,
 			Title:       mod.Meta.Title,
 			Version:     mod.Meta.Version,
+			DbVersion:   cfgVerMap[name],
 			Description: mod.Meta.Description,
 			Status:      statusToCN(status),
 		})
