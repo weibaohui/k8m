@@ -14,6 +14,7 @@ type PluginConfig struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Name        string    `gorm:"uniqueIndex;not null" json:"name,omitempty"`        // 插件名称，唯一
 	Status      string    `gorm:"type:varchar(32);not null" json:"status,omitempty"` // 状态：discovered/installed/enabled/disabled
+	Version     string    `gorm:"type:varchar(64)" json:"version,omitempty"`         // 当前数据库记录的插件版本
 	Description string    `json:"description,omitempty"`                             // 描述信息
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`

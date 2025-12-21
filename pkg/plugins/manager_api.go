@@ -1,10 +1,14 @@
 package plugins
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
 
@@ -39,6 +43,8 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 	grp.POST("/disable/:name", m.DisablePlugin)
 	// 卸载插件
 	grp.POST("/uninstall/:name", m.UninstallPlugin)
+	// 升级插件
+	grp.POST("/upgrade/:name", m.UpgradePlugin)
 }
 
 // ListPlugins 获取所有已注册插件的Meta与状态
@@ -187,4 +193,56 @@ func (m *Manager) DisablePlugin(c *gin.Context) {
 	}
 
 	amis.WriteJsonOKMsg(c, "已保存插件为已禁用，需重启后生效")
+}
+
+// UpgradePlugin 升级指定名称的插件（当代码版本高于数据库记录版本时）
+// 路径参数为插件名，升级失败时返回错误
+func (m *Manager) UpgradePlugin(c *gin.Context) {
+	name := c.Param("name")
+	klog.V(6).Infof("升级插件配置请求: %s", name)
+
+	// 获取模块与当前版本
+	m.mu.RLock()
+	mod, ok := m.modules[name]
+	m.mu.RUnlock()
+	if !ok {
+		amis.WriteJsonError(c, fmt.Errorf("插件未注册: %s", name))
+		return
+	}
+	toVersion := mod.Meta.Version
+
+	// 从数据库读取当前记录版本
+	params := dao.BuildParams(c)
+	cfg, err := (&models.PluginConfig{}).GetOne(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where("name = ?", name)
+	})
+	if err != nil && err != gorm.ErrRecordNotFound {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	fromVersion := ""
+	if cfg != nil {
+		fromVersion = cfg.Version
+	}
+
+	// 比较版本，只有代码版本大于数据库版本才允许升级
+	if !utils.CompareVersions(toVersion, fromVersion) {
+		amis.WriteJsonOKMsg(c, "无需升级，版本相同或更低")
+		return
+	}
+
+	if err := m.Upgrade(name, fromVersion, toVersion); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 持久化当前状态与新版本
+	// 保持现有状态不变，仅更新版本字段
+	st, _ := m.StatusOf(name)
+	if err := m.PersistStatus(name, st, params); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOKMsg(c, "插件升级成功，已记录新版本，需重启后生效")
 }

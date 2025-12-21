@@ -29,7 +29,6 @@ func NewManager() *Manager {
 	}
 }
 
-
 func (m *Manager) Register(module Module) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -87,6 +86,30 @@ func (m *Manager) Enable(name string) error {
 	m.status[name] = StatusEnabled
 	klog.V(6).Infof("启用插件成功: %s", name)
 
+	return nil
+}
+
+// Upgrade 升级指定插件（版本变更触发），调用生命周期的 Upgrade
+// 该方法不改变当前状态，仅执行安全迁移逻辑
+func (m *Manager) Upgrade(name string, fromVersion string, toVersion string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	mod, ok := m.modules[name]
+	if !ok {
+		return fmt.Errorf("插件未注册: %s", name)
+	}
+	if mod.Lifecycle != nil {
+		ctx := upgradeContextImpl{
+			baseContextImpl: baseContextImpl{meta: mod.Meta},
+			from:            fromVersion,
+			to:              toVersion,
+		}
+		if err := mod.Lifecycle.Upgrade(ctx); err != nil {
+			klog.V(6).Infof("升级插件失败: %s，从 %s 到 %s，错误: %v", name, fromVersion, toVersion, err)
+			return err
+		}
+	}
+	klog.V(6).Infof("升级插件成功: %s，从 %s 到 %s", name, fromVersion, toVersion)
 	return nil
 }
 
@@ -189,8 +212,9 @@ func (m *Manager) PersistStatus(name string, status Status, params *dao.Params) 
 		return fmt.Errorf("插件未注册: %s", name)
 	}
 	cfg := &models.PluginConfig{
-		Name:   name,
-		Status: statusToString(status),
+		Name:    name,
+		Status:  statusToString(status),
+		Version: m.modules[name].Meta.Version,
 	}
 	return cfg.SaveByName(params)
 }
@@ -287,3 +311,19 @@ func (c enableContextImpl) PermissionRegistry() PermissionRegistry { return nil 
 
 // PageRegistry 返回页面注册接口占位
 func (c enableContextImpl) PageRegistry() AmisPageRegistry { return nil }
+
+// upgradeContextImpl 升级期上下文实现
+type upgradeContextImpl struct {
+	baseContextImpl
+	from string
+	to   string
+}
+
+// FromVersion 返回旧版本
+func (c upgradeContextImpl) FromVersion() string { return c.from }
+
+// ToVersion 返回新版本
+func (c upgradeContextImpl) ToVersion() string { return c.to }
+
+// DB 返回升级期迁移接口占位
+func (c upgradeContextImpl) DB() MigrationOperator { return nil }
