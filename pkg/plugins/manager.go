@@ -20,20 +20,6 @@ type Manager struct {
 	apiGroups []*gin.RouterGroup
 }
 
-// Status 插件状态
-type Status int
-
-const (
-	// StatusDiscovered 已发现
-	StatusDiscovered Status = iota
-	// StatusInstalled 已安装未启用
-	StatusInstalled
-	// StatusEnabled 已启用
-	StatusEnabled
-	// StatusDisabled 已禁用
-	StatusDisabled
-)
-
 // NewManager 创建并返回插件管理器
 func NewManager() *Manager {
 	return &Manager{
@@ -181,23 +167,6 @@ func (m *Manager) Start() {
 	m.ApplyConfigFromDB()
 }
 
-// EnableAll 启用所有已注册插件（用于默认策略或初始化）
-func (m *Manager) EnableAll() {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for name, mod := range m.modules {
-		if mod.Lifecycle != nil {
-			ctx := enableContextImpl{baseContextImpl{meta: mod.Meta}}
-			if err := mod.Lifecycle.Enable(ctx); err != nil {
-				klog.V(6).Infof("启用插件失败: %s，错误: %v", name, err)
-				continue
-			}
-		}
-		m.status[name] = StatusEnabled
-		klog.V(6).Infof("启用插件成功: %s", name)
-	}
-}
-
 // RegisterRoutes 扫描已启用插件并注册其路由，并记录路由分组用于后续动态注册
 func (m *Manager) RegisterRoutes(api *gin.RouterGroup) {
 	m.mu.Lock()
@@ -251,9 +220,8 @@ func (m *Manager) ApplyConfigFromDB() {
 	for name, mod := range m.modules {
 		st, ok := cfgMap[name]
 		if !ok {
-			// 默认启用并写入数据库
-			st = StatusEnabled
-			_ = (&models.PluginConfig{Name: name, Status: statusToString(st)}).SaveByName(params)
+			// 默认标记为已发现，不写入数据库
+			st = StatusDiscovered
 		}
 		m.status[name] = st
 
