@@ -23,30 +23,27 @@
                     "buttons": [
                         {
                             "type": "button",
-                            "icon": "fas fa-download text-primary",
+                            "icon": "fas fa-check-double text-primary",
                             "actionType": "ajax",
                             "label": "安装",
-                            "level": "primary",
                             "visibleOn": "this.status == '已发现'",
                             "confirmText": "确认安装该插件？",
                             "api": "post:/admin/plugin/install/${name}"
                         },
                         {
                             "type": "button",
-                            "icon": "fas fa-toggle-on text-success",
+                            "icon": "fas fa-play-circle text-success",
                             "actionType": "ajax",
                             "label": "启用",
-                            "level": "primary",
                             "visibleOn": "this.status == '已安装' || this.status == '已禁用'",
                             "confirmText": "确认启用该插件？",
                             "api": "post:/admin/plugin/enable/${name}"
                         },
                         {
                             "type": "button",
-                            "icon": "fas fa-toggle-off text-warning",
+                            "icon": "fas fa-stop-circle text-warning",
                             "actionType": "ajax",
                             "label": "关闭",
-                            "level": "warning",
                             "visibleOn": "this.status == '已启用'",
                             "confirmText": "确认关闭该插件？",
                             "api": "post:/admin/plugin/disable/${name}"
@@ -56,7 +53,6 @@
                             "icon": "fas fa-trash text-danger",
                             "actionType": "ajax",
                             "label": "卸载",
-                            "level": "danger",
                             "visibleOn": "this.status == '已禁用'",
                             "confirmText": "确认卸载该插件？卸载后需要重新注册才可再次安装。",
                             "api": "post:/admin/plugin/uninstall/${name}"
@@ -106,18 +102,6 @@
                     ]
                 },
                 {
-                    "name": "name",
-                    "label": "标识",
-                    "sortable": true,
-                    "searchable": {
-                        "type": "input-text",
-                        "name": "name",
-                        "clearable": true,
-                        "label": "标识",
-                        "placeholder": "请输入插件标识"
-                    }
-                },
-                {
                     "name": "title",
                     "label": "名称"
                 },
@@ -139,31 +123,6 @@
                         "已启用": "<span class='label label-success'>已启用</span>",
                         "已禁用": "<span class='label label-warning'>已禁用</span>",
                         "未知": "<span class='label label-danger'>未知</span>"
-                    },
-                    "searchable": {
-                        "type": "select",
-                        "name": "status",
-                        "clearable": true,
-                        "label": "状态",
-                        "placeholder": "请选择状态",
-                        "options": [
-                            {
-                                "label": "已发现",
-                                "value": "已发现"
-                            },
-                            {
-                                "label": "已安装",
-                                "value": "已安装"
-                            },
-                            {
-                                "label": "已启用",
-                                "value": "已启用"
-                            },
-                            {
-                                "label": "已禁用",
-                                "value": "已禁用"
-                            }
-                        ]
                     }
                 }
             ],
