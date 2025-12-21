@@ -8,10 +8,6 @@ type Module struct {
 	Meta Meta
 	// Menus 菜单声明（0..n）
 	Menus []Menu
-	// Permissions 权限声明（0..n）
-	Permissions []Permission
-	// RouteRules 路由访问控制规则（0..n）
-	RouteRules []RouteRule
 
 	// Lifecycle 生命周期实现（由系统调度调用）
 	Lifecycle Lifecycle

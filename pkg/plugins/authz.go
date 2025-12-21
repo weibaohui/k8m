@@ -42,13 +42,11 @@ func RouteAccessMiddlewareFactory(modules map[string]Module) gin.HandlerFunc {
 		if relative == "" {
 			relative = "/"
 		}
-		// 查找匹配规则：同时融合静态与动态注册的规则；优先按相对路径，其次按完整路径
+		// 查找匹配规则：仅使用启动期注册的动态规则（由 SecuredGroup 注册）
 		var matched *RouteRule
 		var rules []RouteRule
-		if len(mod.RouteRules) > 0 {
-			rules = append(rules, mod.RouteRules...)
-		}
-		if dyn := GetRouteRules(mod.Meta.Name); len(dyn) > 0 {
+		dyn := GetRouteRules(mod.Meta.Name)
+		if len(dyn) > 0 {
 			rules = append(rules, dyn...)
 		}
 		for i := range rules {
@@ -58,6 +56,7 @@ func RouteAccessMiddlewareFactory(modules map[string]Module) gin.HandlerFunc {
 			}
 			if pathEquals(relative, r.Path) || pathEquals(full, r.Path) {
 				matched = r
+				klog.V(6).Infof("匹配到路由权限规则：%s %s，类型=%s，角色=%v", r.Method, r.Path, r.Kind, r.Roles)
 				break
 			}
 		}
