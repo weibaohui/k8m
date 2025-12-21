@@ -121,11 +121,17 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 func (m *Manager) InstallPlugin(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("安装插件配置请求: %s", name)
+
+	if err := m.Install(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	params := dao.BuildParams(c)
 	if err := m.PersistStatus(name, StatusInstalled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
 	amis.WriteJsonOKMsg(c, "已保存插件为已安装，需重启后生效")
 }
 
@@ -134,11 +140,16 @@ func (m *Manager) InstallPlugin(c *gin.Context) {
 func (m *Manager) EnablePlugin(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("启用插件配置请求: %s", name)
+	if err := m.Enable(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	params := dao.BuildParams(c)
 	if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
 	amis.WriteJsonOKMsg(c, "已保存插件为已启用，需重启后生效")
 }
 
@@ -147,11 +158,16 @@ func (m *Manager) EnablePlugin(c *gin.Context) {
 func (m *Manager) UninstallPlugin(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("卸载插件配置请求: %s", name)
+	if err := m.Uninstall(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	params := dao.BuildParams(c)
 	if err := m.PersistStatus(name, StatusDiscovered, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
 	amis.WriteJsonOKMsg(c, "已保存插件为未安装（已发现），需重启后生效")
 }
 
@@ -160,10 +176,15 @@ func (m *Manager) UninstallPlugin(c *gin.Context) {
 func (m *Manager) DisablePlugin(c *gin.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("禁用插件配置请求: %s", name)
+	if err := m.Disable(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	params := dao.BuildParams(c)
 	if err := m.PersistStatus(name, StatusDisabled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
 	amis.WriteJsonOKMsg(c, "已保存插件为已禁用，需重启后生效")
 }

@@ -38,5 +38,6 @@ func DropDB() error {
 		}
 		klog.V(6).Infof("已删除 Demo 插件表及数据")
 	}
+	klog.V(6).Infof("Demo 插件表不存在，无需删除")
 	return nil
 }
