@@ -195,8 +195,6 @@ func (m *Manager) RegisterRoutes(api *gin.RouterGroup) {
 	already := slices.Contains(m.apiGroups, api)
 	if !already {
 		m.apiGroups = append(m.apiGroups, api)
-		// 挂载全局插件路由访问控制中间件（仅挂载一次）
-		api.Use(RouteAccessMiddlewareFactory(m.modules))
 	}
 	// 为已启用插件注册路由
 	for name, mod := range m.modules {

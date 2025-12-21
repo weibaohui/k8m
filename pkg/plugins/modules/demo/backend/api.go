@@ -12,15 +12,15 @@ import (
 
 // RegisterRoutes 注册Demo插件的后端路由
 func RegisterRoutes(api *gin.RouterGroup) {
-	sg := plugins.NewSecuredGroup(api, "demo")
+	g := api.Group("/plugins/demo")
 	// 列表
-	sg.GET("/items", plugins.AccessRoles, List, "user")
+	g.GET("/items", List)
 	// 新增
-	sg.POST("/items", plugins.AccessPlatformAdmin, Create)
+	g.POST("/items", Create)
 	// 更新
-	sg.POST("/items/:id", plugins.AccessPlatformAdmin, Update)
+	g.POST("/items/:id", Update)
 	// 删除
-	sg.POST("/remove/items/:id", plugins.AccessPlatformAdmin, Delete)
+	g.POST("/remove/items/:id", Delete)
 
 	klog.V(6).Infof("注册插件路由: %s", "/items/:id")
 }
@@ -46,6 +46,10 @@ func List(c *gin.Context) {
 
 // Create 新增演示项
 func Create(c *gin.Context) {
+	// 平台管理员校验
+	if !plugins.EnsurePlatformAdmin(c) {
+		return
+	}
 	var req Item
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
@@ -63,6 +67,10 @@ func Create(c *gin.Context) {
 
 // Update 更新演示项
 func Update(c *gin.Context) {
+	// 平台管理员校验
+	if !plugins.EnsurePlatformAdmin(c) {
+		return
+	}
 
 	idStr := c.Param("id")
 	id64, err := strconv.ParseUint(idStr, 10, 64)
@@ -88,6 +96,10 @@ func Update(c *gin.Context) {
 
 // Delete 删除演示项
 func Delete(c *gin.Context) {
+	// 平台管理员校验
+	if !plugins.EnsurePlatformAdmin(c) {
+		return
+	}
 	idStr := c.Param("id")
 	id64, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
