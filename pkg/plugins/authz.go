@@ -42,6 +42,8 @@ func RouteAccessMiddlewareFactory(modules map[string]Module) gin.HandlerFunc {
 		if relative == "" {
 			relative = "/"
 		}
+		klog.V(6).Infof("检查路由权限：插件=%s，方法=%s，相对路径=%s，完整路径=%s", mod.Meta.Name, method, relative, full)
+
 		// 查找匹配规则：仅使用启动期注册的动态规则（由 SecuredGroup 注册）
 		var matched *RouteRule
 		var rules []RouteRule
@@ -54,6 +56,7 @@ func RouteAccessMiddlewareFactory(modules map[string]Module) gin.HandlerFunc {
 			if !methodEquals(method, r.Method) {
 				continue
 			}
+			klog.V(6).Infof("检查路由权限规则：%s %s，类型=%s，角色=%v", r.Method, r.Path, r.Kind, r.Roles)
 			if pathEquals(relative, r.Path) || pathEquals(full, r.Path) {
 				matched = r
 				klog.V(6).Infof("匹配到路由权限规则：%s %s，类型=%s，角色=%v", r.Method, r.Path, r.Kind, r.Roles)
@@ -153,5 +156,34 @@ func hasIntersect(a, b []string) bool {
 			return true
 		}
 	}
+	return false
+}
+
+// EnsureRoles 方法内角色校验，支持平台管理员通行
+// 该函数用于在具体的处理方法内进行角色权限校验，避免仅依赖路径规则。
+// - 当用户为平台管理员时，直接放行
+// - 当用户拥有指定角色集合的任意一个时，放行
+// - 其他情况写入错误响应并中止请求
+func EnsureRoles(c *gin.Context, roles ...string) bool {
+	user := amis.GetLoginUser(c)
+	// 平台管理员拥有所有权限
+	if service.UserService().IsUserPlatformAdmin(user) {
+		return true
+	}
+	// 查询用户角色
+	rolesOfUser, err := service.UserService().GetRolesByUserName(user)
+	if err != nil {
+		klog.V(6).Infof("权限校验失败：获取用户角色错误，用户=%s，错误=%v", user, err)
+		amis.WriteJsonError(c, err)
+		c.Abort()
+		return false
+	}
+	// 角色匹配
+	if hasIntersect(rolesOfUser, roles) {
+		return true
+	}
+	klog.V(6).Infof("权限校验失败：需要角色=%v，用户=%s，用户角色=%v，路径=%s", roles, user, rolesOfUser, c.FullPath())
+	amis.WriteJsonError(c, errors.New("无权限访问该路由"))
+	c.Abort()
 	return false
 }

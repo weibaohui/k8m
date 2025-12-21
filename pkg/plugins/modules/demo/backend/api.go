@@ -26,7 +26,12 @@ func RegisterRoutes(api *gin.RouterGroup) {
 }
 
 // List 返回演示列表数据
+// 方法内进行角色校验，仅允许“user”角色访问（平台管理员通行）
 func List(c *gin.Context) {
+	// 方法内角色校验
+	if !plugins.EnsureRoles(c, "user") {
+		return
+	}
 	klog.V(6).Infof("获取演示列表")
 
 	params := dao.BuildParams(c)
