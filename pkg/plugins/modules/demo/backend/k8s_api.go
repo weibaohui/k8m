@@ -10,8 +10,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// RegisterRoutes 注册Demo插件的后端路由
-func RegisterRoutes(api *gin.RouterGroup) {
+// RegisterClusterRoutes 注册Demo插件的集群相关路由
+func RegisterClusterRoutes(api *gin.RouterGroup) {
 	g := api.Group("/plugins/demo")
 	// 列表
 	g.GET("/items", List)
@@ -22,7 +22,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 	// 删除
 	g.POST("/remove/items/:id", Delete)
 
-	klog.V(6).Infof("注册插件路由: %s", "/items/:id")
+	klog.V(6).Infof("注册插件集群路由: %s", "/items/:id")
 }
 
 // List 返回演示列表数据

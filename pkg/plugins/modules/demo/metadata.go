@@ -25,5 +25,5 @@ var Metadata = plugins.Module{
 	},
 
 	Lifecycle: &DemoLifecycle{},
-	Router:    backend.RegisterRoutes,
+	Router:    backend.RegisterClusterRoutes,
 }
