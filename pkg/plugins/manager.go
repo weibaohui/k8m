@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -202,13 +203,7 @@ func (m *Manager) RegisterRoutes(api *gin.RouterGroup) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// 记录路由分组（去重）
-	already := false
-	for _, g := range m.apiGroups {
-		if g == api {
-			already = true
-			break
-		}
-	}
+	already := slices.Contains(m.apiGroups, api)
 	if !already {
 		m.apiGroups = append(m.apiGroups, api)
 	}
