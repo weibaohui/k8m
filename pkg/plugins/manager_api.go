@@ -183,3 +183,35 @@ func statusToCN(s Status) string {
 		return "未知"
 	}
 }
+
+// statusToString 状态转字符串
+func statusToString(s Status) string {
+	switch s {
+	case StatusDiscovered:
+		return "discovered"
+	case StatusInstalled:
+		return "installed"
+	case StatusEnabled:
+		return "enabled"
+	case StatusDisabled:
+		return "disabled"
+	default:
+		return "unknown"
+	}
+}
+
+// statusFromString 字符串转状态
+func statusFromString(s string) Status {
+	switch s {
+	case "discovered":
+		return StatusDiscovered
+	case "installed":
+		return StatusInstalled
+	case "enabled":
+		return StatusEnabled
+	case "disabled":
+		return StatusDisabled
+	default:
+		return StatusDiscovered
+	}
+}

@@ -3,12 +3,6 @@
     "title": "插件管理",
     "body": [
         {
-            "type": "alert",
-            "level": "info",
-            "body": "<div class='alert alert-info'><p><strong>插件状态与操作说明：</strong></p><ul><li><strong>已发现：</strong>系统已发现但未安装的插件，可进行安装</li><li><strong>已启用：</strong>插件已安装并启用，可进行关闭操作</li><li><strong>已禁用：</strong>插件已安装但禁用，可进行启用或重新安装</li><li><strong>卸载：</strong>卸载后需要重新注册后方可再次安装</li></ul></div>",
-            "className": "mb-3"
-        },
-        {
             "type": "crud",
             "id": "pluginCRUD",
             "name": "pluginCRUD",
@@ -33,7 +27,7 @@
                             "actionType": "ajax",
                             "label": "安装",
                             "level": "primary",
-                            "visibleOn": "this.status == '已发现' || this.status == '已禁用'",
+                            "visibleOn": "this.status == '已发现'",
                             "confirmText": "确认安装该插件？",
                             "api": "post:/admin/plugin/install/${name}"
                         },
@@ -43,7 +37,7 @@
                             "actionType": "ajax",
                             "label": "启用",
                             "level": "primary",
-                            "visibleOn": "this.status == '已禁用'",
+                            "visibleOn": "this.status == '已安装' || this.status == '已禁用'",
                             "confirmText": "确认启用该插件？",
                             "api": "post:/admin/plugin/enable/${name}"
                         },
@@ -63,7 +57,7 @@
                             "actionType": "ajax",
                             "label": "卸载",
                             "level": "danger",
-                            "visibleOn": "this.status != '已启用'",
+                            "visibleOn": "this.status == '已禁用'",
                             "confirmText": "确认卸载该插件？卸载后需要重新注册才可再次安装。",
                             "api": "post:/admin/plugin/uninstall/${name}"
                         },
@@ -141,8 +135,10 @@
                     "type": "mapping",
                     "map": {
                         "已发现": "<span class='label label-info'>已发现</span>",
+                        "已安装": "<span class='label label-default'>已安装</span>",
                         "已启用": "<span class='label label-success'>已启用</span>",
-                        "已禁用": "<span class='label label-warning'>已禁用</span>"
+                        "已禁用": "<span class='label label-warning'>已禁用</span>",
+                        "未知": "<span class='label label-danger'>未知</span>"
                     },
                     "searchable": {
                         "type": "select",
@@ -154,6 +150,10 @@
                             {
                                 "label": "已发现",
                                 "value": "已发现"
+                            },
+                            {
+                                "label": "已安装",
+                                "value": "已安装"
                             },
                             {
                                 "label": "已启用",

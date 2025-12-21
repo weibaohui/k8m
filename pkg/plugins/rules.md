@@ -97,6 +97,10 @@ Discover → Install → Enable → Disable → Uninstall
 * 删除初始化数据
 * 清理插件注册信息
 
+### 转换关系
+
+* Discover → Install → Enable → Disable → Uninstall
+
 ---
 
 ## 4. 插件描述方式（核心约束）
