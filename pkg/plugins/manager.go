@@ -29,10 +29,7 @@ func NewManager() *Manager {
 	}
 }
 
-// 管理相关API与页面Schema已迁移至 manager_api.go
 
-// Register 注册插件模块，默认状态为已发现
-// 仅在内存中标记为已发现，不进行任何持久化操作
 func (m *Manager) Register(module Module) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()

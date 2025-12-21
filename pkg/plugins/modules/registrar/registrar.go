@@ -10,11 +10,10 @@ import (
 // 在系统启动时设置plugins的集中注册函数，统一注册各插件
 func init() {
 	plugins.SetRegistrar(func(m *plugins.Manager) {
-		if err := m.Register(demo.ModuleDef); err != nil {
+		if err := m.Register(demo.Metadata); err != nil {
 			klog.V(6).Infof("注册demo插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册demo插件成功")
 		}
 	})
 }
-

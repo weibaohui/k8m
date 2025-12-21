@@ -5,7 +5,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/backend"
 )
 
-var ModuleDef = plugins.Module{
+var Metadata = plugins.Module{
 	Meta: plugins.Meta{
 		Name:        "demo",
 		Title:       "演示插件",
