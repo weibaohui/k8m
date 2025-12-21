@@ -2,7 +2,7 @@ package demo
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/backend"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/models"
 	"k8s.io/klog/v2"
 )
 
@@ -11,7 +11,7 @@ type DemoLifecycle struct{}
 
 // Install 安装Demo插件，初始化数据库表
 func (d *DemoLifecycle) Install(ctx plugins.InstallContext) error {
-	if err := backend.InitDB(); err != nil {
+	if err := models.InitDB(); err != nil {
 		klog.V(6).Infof("安装Demo插件失败: %v", err)
 		return err
 	}
@@ -22,7 +22,7 @@ func (d *DemoLifecycle) Install(ctx plugins.InstallContext) error {
 // Upgrade 升级Demo插件，执行数据库迁移
 func (d *DemoLifecycle) Upgrade(ctx plugins.UpgradeContext) error {
 	klog.V(6).Infof("升级Demo插件：从版本 %s 到版本 %s", ctx.FromVersion(), ctx.ToVersion())
-	if err := backend.UpgradeDB(ctx.FromVersion(), ctx.ToVersion()); err != nil {
+	if err := models.UpgradeDB(ctx.FromVersion(), ctx.ToVersion()); err != nil {
 		return err
 	}
 	return nil
@@ -43,7 +43,7 @@ func (d *DemoLifecycle) Disable(ctx plugins.BaseContext) error {
 // Uninstall 卸载Demo插件，删除相关的表及数据
 func (d *DemoLifecycle) Uninstall(ctx plugins.InstallContext) error {
 	klog.V(6).Infof("卸载Demo插件，删除相关的表及数据")
-	if err := backend.DropDB(); err != nil {
+	if err := models.DropDB(); err != nil {
 		return err
 	}
 	klog.V(6).Infof("卸载Demo插件完成，已删除相关表及数据")

@@ -11,6 +11,17 @@ type Module struct {
 
 	// Lifecycle 生命周期实现（由系统调度调用）
 	Lifecycle Lifecycle
-	// Router 路由注册回调（启用后由Manager统一挂载）
-	Router func(api *gin.RouterGroup)
+	// ClusterRouter 路由注册回调（启用后由Manager统一挂载）
+	// 该类API接口以/k8s/cluster/clusterID/plugins/xxx的形式暴露，带有集群ID
+	// 通常是集群相关的操作页面，要求必须是已登录用户
+	ClusterRouter func(cluster *gin.RouterGroup)
+	// ManagementRouter 管理操作路由注册回调（启用后由Manager统一挂载）
+	// 该类API接口以/mgm/plugins/xxx的形式暴露，不带集群ID
+	// 通常是管理类的操作页面，要求必须是已登录用户
+	ManagementRouter func(mgm *gin.RouterGroup)
+
+	// PluginAdminRouter 插件管理员操作路由注册回调（启用后由Manager统一挂载）
+	// 该类API接口以/admin/plugins/xxx的形式暴露，不带集群ID
+	// 通常是插件管理员相关的操作页面,要求必须是平台管理员
+	PluginAdminRouter func(admin *gin.RouterGroup)
 }

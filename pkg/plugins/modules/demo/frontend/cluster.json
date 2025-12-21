@@ -1,6 +1,6 @@
 {
   "type": "page",
-  "title": "Demo 列表",
+  "title": "Demo 列表 (集群)",
   "body": [
     {
       "type": "crud",

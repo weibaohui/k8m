@@ -393,8 +393,8 @@ func main() {
 		// helm release
 		helm.RegisterHelmReleaseRoutes(api)
 
-		// 插件路由注册交由 Manager 统一处理
-		mgr.RegisterRoutes(api)
+		// 集群操作相关的插件路由注册交由 Manager 统一处理
+		mgr.RegisterClusterRoutes(api)
 	}
 
 	mgm := r.Group("/mgm", middleware.AuthMiddleware())
@@ -412,6 +412,9 @@ func main() {
 		cluster.RegisterUserClusterRoutes(mgm)
 		// helm chart
 		helm.RegisterHelmChartRoutes(mgm)
+
+		// 管理操作相关的插件路由注册交由 Manager 统一处理
+		mgr.RegisterPluginAdminRoutes(mgm)
 	}
 
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
@@ -455,8 +458,11 @@ func main() {
 		// 菜单自定义
 		menu.RegisterAdminMenuRoutes(admin)
 
-		// 插件路由注册交由 Manager 统一处理
+		// 插件管理器自身的管理页面的操作注册
 		mgr.RegisterAdminRoutes(admin)
+
+		// 平台管理员级别管理插件路由注册交由 Manager 统一处理
+		mgr.RegisterPluginAdminRoutes(admin)
 	}
 
 	showBootInfo(Version, cfg.Port)

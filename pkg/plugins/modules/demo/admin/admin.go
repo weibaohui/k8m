@@ -1,4 +1,4 @@
-package backend
+package admin
 
 import (
 	"strconv"
@@ -7,22 +7,29 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/models"
 	"k8s.io/klog/v2"
 )
 
-// RegisterMgmRoutes 注册Demo插件的管理类（mgm）路由
-func RegisterMgmRoutes(mgm *gin.RouterGroup) {
-	g := mgm.Group("/plugins/demo")
-	// 列表
-	g.GET("/items", List)
-	// 新增
-	g.POST("/items", Create)
-	// 更新
-	g.POST("/items/:id", Update)
-	// 删除
-	g.POST("/remove/items/:id", Delete)
+// List 返回演示列表数据
+// 方法内进行角色校验，仅允许“user”角色访问（平台管理员通行）
+func List(c *gin.Context) {
+	// 方法内角色校验
+	ok, err := plugins.EnsureUserIsLogined(c)
+	if !ok {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	klog.V(6).Infof("获取演示列表")
 
-	klog.V(6).Infof("注册插件管理路由(mgm): %s", "/items/:id")
+	params := dao.BuildParams(c)
+	m := &models.Item{}
+	items, total, err := dao.GenericQuery(params, m)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonListWithTotal(c, total, items)
 }
 
 // Create 新增演示项
@@ -33,7 +40,7 @@ func Create(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	var req Item
+	var req models.Item
 	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -63,7 +70,7 @@ func Update(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	var req Item
+	var req models.Item
 	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -95,7 +102,7 @@ func Delete(c *gin.Context) {
 	}
 	klog.V(6).Infof("删除演示项请求，ID=%d", id64)
 	params := dao.BuildParams(c)
-	err = dao.GenericDelete(params, &Item{}, []int64{int64(id64)})
+	err = dao.GenericDelete(params, &models.Item{}, []int64{int64(id64)})
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

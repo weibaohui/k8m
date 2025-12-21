@@ -1,0 +1,96 @@
+{
+  "type": "page",
+  "title": "Demo 列表 (mgm管理)",
+  "body": [
+    {
+      "type": "crud",
+      "api": "get:/mgm/plugins/demo/items",
+      "columns": [
+        {
+          "name": "id",
+          "label": "ID"
+        },
+        {
+          "name": "name",
+          "label": "名称"
+        },
+        {
+          "name": "description",
+          "label": "描述"
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间"
+        },
+        {
+          "name": "updated_at",
+          "label": "更新时间"
+        }
+      ],
+      "headerToolbar": [
+        {
+          "type": "button",
+          "actionType": "dialog",
+          "label": "新增",
+          "level": "primary",
+          "dialog": {
+            "title": "新增",
+            "body": {
+              "type": "form",
+              "api": "post:/mgm/plugins/demo/items",
+              "controls": [
+                {
+                  "type": "text",
+                  "name": "name",
+                  "label": "名称",
+                  "required": true
+                },
+                {
+                  "type": "textarea",
+                  "name": "description",
+                  "label": "描述"
+                }
+              ]
+            }
+          }
+        },
+        "reload"
+      ],
+      "itemActions": [
+        {
+          "type": "button",
+          "actionType": "dialog",
+          "label": "编辑",
+          "dialog": {
+            "title": "编辑",
+            "body": {
+              "type": "form",
+              "api": "put:/mgm/plugins/demo/items/${id}",
+              "controls": [
+                {
+                  "type": "text",
+                  "name": "name",
+                  "label": "名称",
+                  "required": true
+                },
+                {
+                  "type": "textarea",
+                  "name": "description",
+                  "label": "描述"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "button",
+          "actionType": "ajax",
+          "label": "删除",
+          "level": "danger",
+          "confirmText": "确认删除该项？",
+          "api": "delete:/mgm/plugins/demo/remove/items/${id}"
+        }
+      ]
+    }
+  ]
+}
