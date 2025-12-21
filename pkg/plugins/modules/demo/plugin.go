@@ -31,24 +31,3 @@ var ModuleDef = plugins.Module{
 	Lifecycle: &DemoLifecycle{},
 	Router:    backend.RegisterRoutes,
 }
-
-func Permissions() []plugins.Permission {
-	return []plugins.Permission{
-		{Name: "demo.view", Title: "查看演示列表"},
-		{Name: "demo.edit", Title: "编辑演示列表"},
-	}
-}
-
-func Menus() []plugins.Menu {
-	return []plugins.Menu{
-		{
-			Key:         "plugin_demo",
-			Title:       "演示插件",
-			Icon:        "fa-solid fa-puzzle-piece",
-			EventType:   "custom",
-			CustomEvent: `() => loadJsonPage("/api/plugins/demo/page")`,
-			Order:       100,
-			Permission:  "demo.view",
-		},
-	}
-}
