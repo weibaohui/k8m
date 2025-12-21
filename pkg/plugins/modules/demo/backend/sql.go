@@ -27,6 +27,19 @@ func InitDB() error {
 	return dao.DB().AutoMigrate(&Item{})
 }
 
+// UpgradeDB 升级Demo插件数据库结构与数据
+// 根据版本进行安全迁移，确保表结构与最新模型一致
+func UpgradeDB(fromVersion string, toVersion string) error {
+	klog.V(6).Infof("开始升级 Demo 插件数据库：从版本 %s 到版本 %s", fromVersion, toVersion)
+	// 目前演示插件未涉及复杂变更，采用GORM自动迁移对结构进行同步
+	if err := dao.DB().AutoMigrate(&Item{}); err != nil {
+		klog.V(6).Infof("自动迁移 Demo 插件数据库失败: %v", err)
+		return err
+	}
+	klog.V(6).Infof("升级 Demo 插件数据库完成")
+	return nil
+}
+
 // DropDB 删除Demo插件相关的表及数据
 // 通过GORM Migrator执行删除操作，兼容多种数据库
 func DropDB() error {

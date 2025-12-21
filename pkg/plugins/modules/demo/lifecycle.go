@@ -19,9 +19,12 @@ func (d *DemoLifecycle) Install(ctx plugins.InstallContext) error {
 	return nil
 }
 
-// Upgrade 升级Demo插件，当前未实现
+// Upgrade 升级Demo插件，执行数据库迁移
 func (d *DemoLifecycle) Upgrade(ctx plugins.UpgradeContext) error {
 	klog.V(6).Infof("升级Demo插件：从版本 %s 到版本 %s", ctx.FromVersion(), ctx.ToVersion())
+	if err := backend.UpgradeDB(ctx.FromVersion(), ctx.ToVersion()); err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -9,7 +9,7 @@ var Metadata = plugins.Module{
 	Meta: plugins.Meta{
 		Name:        "demo",
 		Title:       "演示插件",
-		Version:     "1.0.0",
+		Version:     "1.0.12",
 		Description: "演示固定列表与CRUD功能",
 	},
 	Menus: []plugins.Menu{

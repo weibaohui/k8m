@@ -119,7 +119,7 @@
                     "type": "tpl",
                     "name": "version",
                     "label": "版本",
-                    "tpl": "<span class='label label-default'>插件</span> ${version} &nbsp; <span class='label label-info'>数据库</span> ${dbVersion|default:-}"
+                    "tpl": "<span class='label label-default'>插&nbsp;&nbsp;&nbsp;&nbsp;件</span> ${version} <br><span class='label label-info'>数据库</span> ${dbVersion|default:-}"
                 },
                 {
                     "name": "description",
