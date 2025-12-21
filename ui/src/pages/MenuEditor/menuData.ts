@@ -1013,7 +1013,7 @@ export const initialMenu: MenuItem[] = [
     {
         key: 'plugins_mgr',
         title: '插件管理',
-        icon: 'fa-solid fa-code-branch',
+        icon: 'fa-solid fa-plug',
         eventType: 'custom',
         customEvent: '() => loadJsonPage("/admin/plugins/list")',
         order: 19,
