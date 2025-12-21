@@ -6,21 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/plugins"
 	"k8s.io/klog/v2"
 )
 
 // RegisterRoutes 注册Demo插件的后端路由
 func RegisterRoutes(api *gin.RouterGroup) {
-	grp := api.Group("/plugins/demo")
-
+	sg := plugins.NewSecuredGroup(api, "demo")
 	// 列表
-	grp.GET("/items", List)
+	sg.GET("/items", plugins.AccessRoles, List, "user")
 	// 新增
-	grp.POST("/items", Create)
+	sg.POST("/items", plugins.AccessPlatformAdmin, Create)
 	// 更新
-	grp.POST("/items/:id", Update)
+	sg.POST("/items/:id", plugins.AccessPlatformAdmin, Update)
 	// 删除
-	grp.POST("/remove/items/:id", Delete)
+	sg.POST("/remove/items/:id", plugins.AccessPlatformAdmin, Delete)
 
 	klog.V(6).Infof("注册插件路由: %s", "/items/:id")
 }

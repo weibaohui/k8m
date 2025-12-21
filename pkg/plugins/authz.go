@@ -42,10 +42,17 @@ func RouteAccessMiddlewareFactory(modules map[string]Module) gin.HandlerFunc {
 		if relative == "" {
 			relative = "/"
 		}
-		// 查找匹配规则：优先按相对路径，其次按完整路径
+		// 查找匹配规则：同时融合静态与动态注册的规则；优先按相对路径，其次按完整路径
 		var matched *RouteRule
-		for i := range mod.RouteRules {
-			r := &mod.RouteRules[i]
+		var rules []RouteRule
+		if len(mod.RouteRules) > 0 {
+			rules = append(rules, mod.RouteRules...)
+		}
+		if dyn := GetRouteRules(mod.Meta.Name); len(dyn) > 0 {
+			rules = append(rules, dyn...)
+		}
+		for i := range rules {
+			r := &rules[i]
 			if !methodEquals(method, r.Method) {
 				continue
 			}

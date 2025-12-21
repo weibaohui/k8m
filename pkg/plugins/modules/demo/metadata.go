@@ -12,12 +12,6 @@ var Metadata = plugins.Module{
 		Version:     "1.0.12",
 		Description: "演示固定列表与CRUD功能",
 	},
-	RouteRules: []plugins.RouteRule{
-		{Method: "GET", Path: "/items", Kind: plugins.AccessAnyUser},
-		{Method: "POST", Path: "/items", Kind: plugins.AccessPlatformAdmin},
-		{Method: "POST", Path: "/items/:id", Kind: plugins.AccessPlatformAdmin},
-		{Method: "POST", Path: "/remove/items/:id", Kind: plugins.AccessPlatformAdmin},
-	},
 	Menus: []plugins.Menu{
 		{
 			Key:         "plugin_demo",
