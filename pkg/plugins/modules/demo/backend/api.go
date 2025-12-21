@@ -29,7 +29,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // 方法内进行角色校验，仅允许“user”角色访问（平台管理员通行）
 func List(c *gin.Context) {
 	// 方法内角色校验
-	ok, err := plugins.EnsureUserHasRoles(c, "guest")
+	ok, err := plugins.EnsureUserIsLogined(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return

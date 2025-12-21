@@ -62,7 +62,7 @@ func EnsureUserIsPlatformAdmin(c *gin.Context) (bool, error) {
 	klog.V(6).Infof("权限校验失败：仅平台管理员可访问，用户=%s", user)
 	return false, errors.New("仅平台管理员可访问")
 }
-func EnsureLoginedUser(c *gin.Context) (bool, error) {
+func EnsureUserIsLogined(c *gin.Context) (bool, error) {
 	user := amis.GetLoginUser(c)
 	if user == "" {
 		return false, errors.New("未登录用户")
