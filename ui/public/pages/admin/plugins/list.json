@@ -3,12 +3,125 @@
     "title": "插件管理",
     "body": [
         {
+            "type": "alert",
+            "level": "info",
+            "body": "<div class='alert alert-info'><p><strong>插件状态与操作说明：</strong></p><ul><li><strong>已发现：</strong>系统已发现但未安装的插件，可进行安装</li><li><strong>已启用：</strong>插件已安装并启用，可进行关闭操作</li><li><strong>已禁用：</strong>插件已安装但禁用，可进行启用或重新安装</li><li><strong>卸载：</strong>卸载后需要重新注册后方可再次安装</li></ul></div>",
+            "className": "mb-3"
+        },
+        {
             "type": "crud",
+            "id": "pluginCRUD",
+            "name": "pluginCRUD",
+            "autoFillHeight": true,
+            "autoGenerateFilter": {
+                "columnsNum": 4,
+                "showBtnToolbar": false
+            },
+            "headerToolbar": [
+                "reload",
+                "bulkActions"
+            ],
             "api": "get:/admin/plugin/list",
             "columns": [
                 {
+                    "type": "operation",
+                    "label": "操作",
+                    "buttons": [
+                        {
+                            "type": "button",
+                            "icon": "fas fa-download text-primary",
+                            "actionType": "ajax",
+                            "label": "安装",
+                            "level": "primary",
+                            "visibleOn": "this.status == '已发现' || this.status == '已禁用'",
+                            "confirmText": "确认安装该插件？",
+                            "api": "post:/admin/plugin/install/${name}"
+                        },
+                        {
+                            "type": "button",
+                            "icon": "fas fa-toggle-on text-success",
+                            "actionType": "ajax",
+                            "label": "启用",
+                            "level": "primary",
+                            "visibleOn": "this.status == '已禁用'",
+                            "confirmText": "确认启用该插件？",
+                            "api": "post:/admin/plugin/enable/${name}"
+                        },
+                        {
+                            "type": "button",
+                            "icon": "fas fa-toggle-off text-warning",
+                            "actionType": "ajax",
+                            "label": "关闭",
+                            "level": "warning",
+                            "visibleOn": "this.status == '已启用'",
+                            "confirmText": "确认关闭该插件？",
+                            "api": "post:/admin/plugin/disable/${name}"
+                        },
+                        {
+                            "type": "button",
+                            "icon": "fas fa-trash text-danger",
+                            "actionType": "ajax",
+                            "label": "卸载",
+                            "level": "danger",
+                            "visibleOn": "this.status != '已启用'",
+                            "confirmText": "确认卸载该插件？卸载后需要重新注册才可再次安装。",
+                            "api": "post:/admin/plugin/uninstall/${name}"
+                        },
+                        {
+                            "type": "button",
+                            "icon": "fas fa-info-circle text-info",
+                            "actionType": "dialog",
+                            "label": "详情",
+                            "dialog": {
+                                "closeOnEsc": true,
+                                "closeOnOutside": true,
+                                "title": "插件详情 （ESC 关闭）",
+                                "body": {
+                                    "type": "form",
+                                    "mode": "horizontal",
+                                    "body": [
+                                        {
+                                            "type": "static",
+                                            "name": "name",
+                                            "label": "标识"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "name": "title",
+                                            "label": "名称"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "name": "version",
+                                            "label": "版本"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "name": "description",
+                                            "label": "描述"
+                                        },
+                                        {
+                                            "type": "static",
+                                            "name": "status",
+                                            "label": "状态"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "name",
-                    "label": "标识"
+                    "label": "标识",
+                    "sortable": true,
+                    "searchable": {
+                        "type": "input-text",
+                        "name": "name",
+                        "clearable": true,
+                        "label": "标识",
+                        "placeholder": "请输入插件标识"
+                    }
                 },
                 {
                     "name": "title",
@@ -24,45 +137,37 @@
                 },
                 {
                     "name": "status",
-                    "label": "状态"
+                    "label": "状态",
+                    "type": "mapping",
+                    "map": {
+                        "已发现": "<span class='label label-info'>已发现</span>",
+                        "已启用": "<span class='label label-success'>已启用</span>",
+                        "已禁用": "<span class='label label-warning'>已禁用</span>"
+                    },
+                    "searchable": {
+                        "type": "select",
+                        "name": "status",
+                        "clearable": true,
+                        "label": "状态",
+                        "placeholder": "请选择状态",
+                        "options": [
+                            {
+                                "label": "已发现",
+                                "value": "已发现"
+                            },
+                            {
+                                "label": "已启用",
+                                "value": "已启用"
+                            },
+                            {
+                                "label": "已禁用",
+                                "value": "已禁用"
+                            }
+                        ]
+                    }
                 }
             ],
-            "itemActions": [
-                {
-                    "type": "button",
-                    "actionType": "ajax",
-                    "label": "安装",
-                    "level": "primary",
-                    "visibleOn": "this.status == '已发现' || this.status == '已禁用'",
-                    "confirmText": "确认安装该插件？",
-                    "api": "post:/admin/plugin/install/${name}"
-                },
-                {
-                    "type": "button",
-                    "actionType": "ajax",
-                    "label": "启用",
-                    "level": "primary",
-                    "confirmText": "确认启用该插件？",
-                    "api": "post:/admin/plugin/enable/${name}"
-                },
-                {
-                    "type": "button",
-                    "actionType": "ajax",
-                    "label": "关闭",
-                    "level": "warning",
-                    "visibleOn": "this.status == '已启用'",
-                    "confirmText": "确认关闭该插件？",
-                    "api": "post:/admin/plugin/disable/${name}"
-                },
-                {
-                    "type": "button",
-                    "actionType": "ajax",
-                    "label": "卸载",
-                    "level": "danger",
-                    "confirmText": "确认卸载该插件？卸载后需要重新注册才可再次安装。",
-                    "api": "post:/admin/plugin/uninstall/${name}"
-                }
-            ]
+            "bulkActions": []
         }
     ]
 }
