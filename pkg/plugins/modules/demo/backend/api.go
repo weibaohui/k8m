@@ -29,7 +29,9 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // 方法内进行角色校验，仅允许“user”角色访问（平台管理员通行）
 func List(c *gin.Context) {
 	// 方法内角色校验
-	if !plugins.EnsureRoles(c, "user") {
+	ok, err := plugins.EnsureRoles(c, "user")
+	if !ok {
+		amis.WriteJsonError(c, err)
 		return
 	}
 	klog.V(6).Infof("获取演示列表")
@@ -47,17 +49,19 @@ func List(c *gin.Context) {
 // Create 新增演示项
 func Create(c *gin.Context) {
 	// 平台管理员校验
-	if !plugins.EnsurePlatformAdmin(c) {
+	ok, err := plugins.EnsurePlatformAdmin(c)
+	if !ok {
+		amis.WriteJsonError(c, err)
 		return
 	}
 	var req Item
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 	klog.V(6).Infof("新增演示项请求，名称=%s", req.Name)
 	params := dao.BuildParams(c)
-	err := dao.GenericSave(params, &req)
+	err = dao.GenericSave(params, &req)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -68,7 +72,9 @@ func Create(c *gin.Context) {
 // Update 更新演示项
 func Update(c *gin.Context) {
 	// 平台管理员校验
-	if !plugins.EnsurePlatformAdmin(c) {
+	ok, err := plugins.EnsurePlatformAdmin(c)
+	if !ok {
+		amis.WriteJsonError(c, err)
 		return
 	}
 
@@ -97,7 +103,9 @@ func Update(c *gin.Context) {
 // Delete 删除演示项
 func Delete(c *gin.Context) {
 	// 平台管理员校验
-	if !plugins.EnsurePlatformAdmin(c) {
+	ok, err := plugins.EnsurePlatformAdmin(c)
+	if !ok {
+		amis.WriteJsonError(c, err)
 		return
 	}
 	idStr := c.Param("id")
