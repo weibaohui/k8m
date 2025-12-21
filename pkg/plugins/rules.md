@@ -125,15 +125,7 @@ Discover → Install → Enable → Disable → Uninstall
 ```text
 modules/
  └── <plugin-name>/
-     ├── plugin.go        插件元信息（必选）
-     ├── menu.go          菜单定义（可选）
-     ├── permission.go    权限定义（可选）
-     ├── api.go           后端 API（可选）
-     ├── sql.go           表结构 / SQL（可选）
-     ├── init.go          插件注册入口（必选）
-     └── frontend/
-          ├── page.json   AMIS 页面（可选）
-          └── *.json
+     TODO 更新目录结构
 ```
 
 ---
@@ -196,21 +188,15 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 ---
 
 ## 9. 权限模型（RBAC）
+分为三类操作权限
+3. 集群类操作，访问路径自动添加具体的集群ID。/k8s/cluster/<cluster-id>/plugins/<plugin-name>/xxxx的路径。要求必须是登录用户。
+适合针对集群操作的插件，如：集群监控、集群配置等。
 
-插件可定义自己的权限集合。
+3. 管理类操作，访问路径自动添加具体的插件名称。/mgm/plugins/<plugin-name>/xxxx的路径。要求必须是登录用户。无法获取到集群ID。
+适合一般的管理类插件，如巡检配置等。
 
-权限用于：
-
-* 菜单显示控制
-* API 访问控制
-* 前端按钮可见性控制
-
-权限具备：
-
-* 全局唯一名称
-* 展示名称
-
-权限在插件 Install 阶段注册，在 Disable 阶段不删除。
+3. 平台管理员类操作，访问路径自动添加具体的插件名称。/admin/plugins/<plugin-name>/xxxx的路径。要求必须是平台管理员用户。无法获取到集群ID。
+适合对整个平台进行操作的插件，如分布式功能。
 
 ---
 
@@ -218,7 +204,9 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 
 插件后端 API 必须满足：
 
-* 路径以 `/api/plugins/<plugin-name>/` 开头
+* 路径以 `/mgm/plugins/<plugin-name>/` 开头
+* 路径以 `/k8s/cluster/<cluster-id>/plugins/<plugin-name>/` 开头
+* 路径以 `/admin/plugins/<plugin-name>/` 开头
 * API 在 Enable 阶段注册
 * API 在 Disable 阶段不可访问
 
@@ -252,7 +240,7 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 ## 13. 插件管理原则（重要）
 
 * 插件不是热插拔组件
-* 插件启停属于**运维级操作**
+* 插件启停属于**运维级操作**，且启用、关闭需要重启k8m生效。
 * 稳定性优先于动态性
 
 ---
