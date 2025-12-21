@@ -85,7 +85,7 @@ func Update(c *gin.Context) {
 		return
 	}
 	var req Item
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
