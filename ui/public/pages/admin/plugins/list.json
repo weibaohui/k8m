@@ -59,6 +59,15 @@
                         },
                         {
                             "type": "button",
+                            "icon": "fas fa-level-up-alt text-info",
+                            "actionType": "ajax",
+                            "label": "升级",
+                            "visibleOn": "this.canUpgrade && this.status != '已发现'",
+                            "confirmText": "确认升级该插件？",
+                            "api": "post:/admin/plugin/upgrade/${name}"
+                        },
+                        {
+                            "type": "button",
                             "icon": "fas fa-info-circle text-info",
                             "actionType": "dialog",
                             "label": "详情",

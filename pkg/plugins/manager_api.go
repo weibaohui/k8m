@@ -19,6 +19,7 @@ type PluginItemVO struct {
 	Title       string `json:"title"`
 	Version     string `json:"version"`
 	DbVersion   string `json:"dbVersion,omitempty"`
+	CanUpgrade  bool   `json:"canUpgrade,omitempty"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
 }
@@ -71,11 +72,14 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			statusStr = "discovered"
 		}
 		status := statusFromString(statusStr)
+		dbVer := cfgVerMap[name]
+		canUpgrade := statusStr != "discovered" && utils.CompareVersions(mod.Meta.Version, dbVer)
 		items = append(items, PluginItemVO{
 			Name:        mod.Meta.Name,
 			Title:       mod.Meta.Title,
 			Version:     mod.Meta.Version,
-			DbVersion:   cfgVerMap[name],
+			DbVersion:   dbVer,
+			CanUpgrade:  canUpgrade,
 			Description: mod.Meta.Description,
 			Status:      statusToCN(status),
 		})
