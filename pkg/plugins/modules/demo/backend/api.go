@@ -29,7 +29,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // 方法内进行角色校验，仅允许“user”角色访问（平台管理员通行）
 func List(c *gin.Context) {
 	// 方法内角色校验
-	ok, err := plugins.EnsureRoles(c, "user")
+	ok, err := plugins.EnsureUserHasRoles(c, "guest")
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
@@ -49,7 +49,7 @@ func List(c *gin.Context) {
 // Create 新增演示项
 func Create(c *gin.Context) {
 	// 平台管理员校验
-	ok, err := plugins.EnsurePlatformAdmin(c)
+	ok, err := plugins.EnsureUserIsPlatformAdmin(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
@@ -72,7 +72,7 @@ func Create(c *gin.Context) {
 // Update 更新演示项
 func Update(c *gin.Context) {
 	// 平台管理员校验
-	ok, err := plugins.EnsurePlatformAdmin(c)
+	ok, err := plugins.EnsureUserIsPlatformAdmin(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
@@ -103,7 +103,7 @@ func Update(c *gin.Context) {
 // Delete 删除演示项
 func Delete(c *gin.Context) {
 	// 平台管理员校验
-	ok, err := plugins.EnsurePlatformAdmin(c)
+	ok, err := plugins.EnsureUserIsPlatformAdmin(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
