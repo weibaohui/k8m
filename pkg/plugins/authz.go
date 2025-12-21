@@ -34,7 +34,6 @@ func EnsureRoles(c *gin.Context, roles ...string) (bool, error) {
 	user := amis.GetLoginUser(c)
 	// 平台管理员拥有所有权限
 	if service.UserService().IsUserPlatformAdmin(user) {
-		klog.V(6).Infof("权限校验：用户=%s，为平台管理员", user)
 		return true, nil
 	}
 	// 查询用户角色
