@@ -178,6 +178,17 @@ func (m *Manager) IsEnabled(name string) bool {
 	return m.status[name] == StatusEnabled
 }
 
+// IsPluginEnabled 查询指定插件是否启用（开启）
+// 当插件未注册时返回错误；已注册时返回是否启用的布尔值
+func (m *Manager) IsPluginEnabled(name string) (bool, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	if _, ok := m.modules[name]; !ok {
+		return false, fmt.Errorf("插件未注册: %s", name)
+	}
+	return m.status[name] == StatusEnabled, nil
+}
+
 // StatusOf 获取插件当前状态
 func (m *Manager) StatusOf(name string) (Status, bool) {
 	m.mu.RLock()
