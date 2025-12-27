@@ -51,9 +51,10 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 
 	// 定时任务管理
 	grp.GET("/cron/:name", m.ListPluginCrons)
-	grp.POST("/cron/:name/enable", m.EnablePluginCron)
 	grp.POST("/cron/:name/run_once", m.RunPluginCronOnce)
-	grp.POST("/cron/:name/disable", m.DisablePluginCron)
+	// 统一开关接口（生效/关闭）
+	grp.POST("/cron/name/:name/spec/:spec/enabled/:enabled", m.SetPluginCronEnabled)
+
 }
 
 // ListPlugins 获取所有已注册插件的Meta与状态
@@ -401,21 +402,27 @@ func (m *Manager) StopPluginCron(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-// DisablePluginCron 关闭指定插件的一条定时任务（别名）
-func (m *Manager) DisablePluginCron(c *gin.Context) {
+// SetPluginCronEnabled 设置插件定时任务开关（生效/关闭）
+// 路径参数：name 插件名、spec cron 表达式、enabled true/false
+// 行为：enabled=true 则生效（注册并调度）；enabled=false 则关闭（移除调度）
+func (m *Manager) SetPluginCronEnabled(c *gin.Context) {
 	name := c.Param("name")
-	spec := c.Query("spec")
-	if spec == "" {
-		var body struct {
-			Spec string `json:"spec"`
-		}
-		_ = c.ShouldBindJSON(&body)
-		spec = body.Spec
-	}
-	if spec == "" {
-		amis.WriteJsonError(c, fmt.Errorf("缺少参数: spec"))
+	spec := c.Param("spec")
+	enabled := c.Param("enabled")
+	if name == "" || spec == "" || enabled == "" {
+		amis.WriteJsonError(c, fmt.Errorf("缺少参数: name/spec/enabled"))
 		return
 	}
+	if enabled == "true" || enabled == "1" || enabled == "yes" {
+		if err := m.EnsureCron(name, spec); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		klog.V(6).Infof("生效插件定时任务成功: %s，表达式: %s", name, spec)
+		amis.WriteJsonOK(c)
+		return
+	}
+	// 其他情况视为关闭
 	m.RemoveCron(name, spec)
 	klog.V(6).Infof("关闭插件定时任务成功: %s，表达式: %s", name, spec)
 	amis.WriteJsonOK(c)

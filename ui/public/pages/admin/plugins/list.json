@@ -80,6 +80,7 @@
                                     {
                                         "type": "crud",
                                         "api": "get:/admin/plugin/cron/${name}",
+                                        "quickSaveItemApi": "/admin/plugin/cron/name/${name}/spec/${spec}/enabled/${registered}",
                                         "syncLocation": false,
                                         "loadDataOnce": false,
                                         "headerToolbar": [
@@ -93,10 +94,14 @@
                                             {
                                                 "name": "registered",
                                                 "label": "生效",
-                                                "type": "mapping",
-                                                "map": {
-                                                    "true": "<span class='label label-success'>是</span>",
-                                                    "false": "<span class='label label-default'>否</span>"
+                                                "type": "switch",
+                                                "onText": "开启",
+                                                "offText": "关闭",
+                                                "quickEdit": {
+                                                    "mode": "inline",
+                                                    "type": "switch",
+                                                    "saveImmediately": true,
+                                                    "resetOnFailed": true
                                                 }
                                             },
                                             {
@@ -126,23 +131,6 @@
                                                         "label": "执行一次",
                                                         "actionType": "ajax",
                                                         "api": "post:/admin/plugin/cron/${name}/run_once?spec=${spec}"
-                                                    },
-                                                    {
-                                                        "type": "button",
-                                                        "icon": "fas fa-check text-success",
-                                                        "label": "生效",
-                                                        "visibleOn": "this.registered == false",
-                                                        "actionType": "ajax",
-                                                        "api": "post:/admin/plugin/cron/${name}/enable?spec=${spec}"
-                                                    },
-                                                    {
-                                                        "type": "button",
-                                                        "icon": "fas fa-times-circle text-danger",
-                                                        "label": "关闭",
-                                                        "visibleOn": "this.registered == true",
-                                                        "actionType": "ajax",
-                                                        "confirmText": "确认关闭该定时任务？",
-                                                        "api": "post:/admin/plugin/cron/${name}/disable?spec=${spec}"
                                                     }
                                                 ]
                                             }
