@@ -53,12 +53,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
 	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
-	"github.com/weibaohui/k8m/pkg/eventhandler"
 	"github.com/weibaohui/k8m/pkg/flag"
-	helm2 "github.com/weibaohui/k8m/pkg/helm"
-	"github.com/weibaohui/k8m/pkg/leader"
 	"github.com/weibaohui/k8m/pkg/lease"
-	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
@@ -177,36 +173,7 @@ func Init() {
 			service.IngressService().Watch()
 			service.McpService().Start()
 
-			// 启动Leader选举，成功后再启动定时任务
-			leaderCfg := leader.Config{
-				LockName:      "k8m-leader-lock",
-				LeaseDuration: 60 * time.Second, // 增加到60秒
-				RenewDeadline: 50 * time.Second, // 增加到50秒
-				RetryPeriod:   10 * time.Second, // 增加到10秒
-				OnStartedLeading: func(ctx context.Context) {
-					klog.V(2).Infof("[leader] 成为Leader，启动定时任务（集群巡检、Helm仓库更新）")
-					lua.InitClusterInspection()
-					// 启动helm 更新repo定时任务
-					helm2.StartUpdateHelmRepoInBackground()
-					// leader 启动对event的webhook处理
-					eventhandler.StartEventForwardingWatch()
-				},
-				OnStoppedLeading: func() {
-					klog.V(2).Infof("[leader] 不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
-					// 停止集群巡检任务
-					lua.StopClusterInspection()
-					// 停止helm更新任务
-					helm2.StopUpdateHelmRepoInBackground()
-					// leader 启动对event的webhook处理
-					eventhandler.StopEventForwardingWatch()
-				},
-			}
-
-			// 使用后台context
-			ctx := context.Background()
-			if err := leader.Run(ctx, leaderCfg); err != nil {
-				klog.Errorf("[leader] Leader选举失败: %v", err)
-			}
+			// Leader选举迁移为插件启动，主流程不再重复启动
 		})
 	}()
 
