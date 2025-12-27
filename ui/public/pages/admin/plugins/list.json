@@ -215,6 +215,18 @@
                     "tpl": "<span class='label label-default'>插&nbsp;&nbsp;&nbsp;&nbsp;件</span> ${version} <br><span class='label label-info'>数据库</span> ${dbVersion|default:-}"
                 },
                 {
+                    "name": "menuCount",
+                    "label": "菜单数",
+                    "type": "tpl",
+                    "tpl": "${menuCount}"
+                },
+                {
+                    "name": "cronCount",
+                    "label": "定时任务数",
+                    "type": "tpl",
+                    "tpl": "${cronCount}"
+                },
+                {
                     "name": "description",
                     "label": "描述"
                 },

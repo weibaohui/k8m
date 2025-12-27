@@ -23,6 +23,8 @@ type PluginItemVO struct {
 	Description string `json:"description"`
 	Status      string `json:"status"`
 	Menus       []Menu `json:"menus,omitempty"`
+	MenuCount   int    `json:"menuCount,omitempty"`
+	CronCount   int    `json:"cronCount,omitempty"`
 }
 
 // RegisterAdminRoutes 注册插件的管理员路由
@@ -91,6 +93,8 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			Description: mod.Meta.Description,
 			Status:      statusToCN(status),
 			Menus:       mod.Menus,
+			MenuCount:   len(mod.Menus),
+			CronCount:   len(mod.Crons),
 		})
 	}
 	klog.V(6).Infof("获取插件列表，共计%d个", len(items))
