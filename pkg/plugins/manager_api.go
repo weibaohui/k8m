@@ -22,6 +22,7 @@ type PluginItemVO struct {
 	CanUpgrade  bool   `json:"canUpgrade,omitempty"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
+	Menus       []Menu `json:"menus,omitempty"`
 }
 
 // RegisterAdminRoutes 注册插件的管理员路由
@@ -82,6 +83,7 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			CanUpgrade:  canUpgrade,
 			Description: mod.Meta.Description,
 			Status:      statusToCN(status),
+			Menus:       mod.Menus,
 		})
 	}
 	klog.V(6).Infof("获取插件列表，共计%d个", len(items))

@@ -104,6 +104,38 @@
                                             "type": "static",
                                             "name": "status",
                                             "label": "状态"
+                                        },
+                                        {
+                                            "type": "tpl",
+                                            "label": "菜单数量",
+                                            "tpl": "${menus && menus.length ? menus.length : 0}"
+                                        },
+                                        {
+                                            "type": "table",
+                                            "title": "菜单列表",
+                                            "source": "${menus}",
+                                            "columns": [
+                                                {
+                                                    "name": "title",
+                                                    "label": "名称"
+                                                },
+                                                {
+                                                    "name": "icon",
+                                                    "label": "图标"
+                                                },
+                                                {
+                                                    "name": "eventType",
+                                                    "label": "事件"
+                                                },
+                                                {
+                                                    "name": "url",
+                                                    "label": "URL"
+                                                },
+                                                {
+                                                    "name": "order",
+                                                    "label": "排序"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
