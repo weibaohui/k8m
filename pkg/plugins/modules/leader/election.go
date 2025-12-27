@@ -12,42 +12,42 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// Config Leader 选举配置
+// Config Leader选举配置
 // 包含命名空间、锁名称、选举时长、续租截止、重试周期以及领导开始/结束回调。
-// LeaseDuration > RenewDeadline > RetryPeriod * 3
+// 要求：LeaseDuration > RenewDeadline > RetryPeriod * 3
 type Config struct {
 	Namespace        string
 	LockName         string
-	LeaseDuration    time.Duration // 租约持续时间，默认 15s
-	RenewDeadline    time.Duration // 续租截止时间，默认 10s
-	RetryPeriod      time.Duration // 重试周期，默认 2s
-	ClusterID        string        // ClusterID 指定的集群唯一ID（文件名/Context），优先使用该集群的配置
+	LeaseDuration    time.Duration // 租约持续时间
+	RenewDeadline    time.Duration // 续租截止时间
+	RetryPeriod      time.Duration // 重试周期
+	ClusterID        string        // 指定用于选举的宿主集群ID，留空时自动检测
 	OnStartedLeading func(ctx context.Context)
 	OnStoppedLeading func()
 }
 
-// Run 启动 Leader 选举逻辑
-// 支持集群优先级：指定 ClusterID -> InCluster -> 本地 kubeconfig。
-// 仅当以上方式均不可用时，降级为本地 Leader（不进行选举）。
+// Run 启动Leader选举逻辑
+// 选择优先级：指定ClusterID -> InCluster -> 本地kubeconfig；均不可用时退化为本地Leader（不进行选举）
 func Run(ctx context.Context, cfg Config) error {
 	clientset, hasCluster, err := utils.GetClientSet(cfg.ClusterID)
 	if err != nil {
-		return fmt.Errorf("get clientset failed: %w", err)
+		return fmt.Errorf("获取ClientSet失败: %w", err)
 	}
 
 	if cfg.Namespace == "" {
 		cfg.Namespace = utils.DetectNamespace()
 	}
 
-	// 非集群模式：既没有指定集群可用，也不是 InCluster，也没有本地 kubeconfig
+	// 非集群模式：没有指定集群、不是InCluster、也没有本地kubeconfig
 	if !hasCluster {
-		klog.V(2).Infof("[leader] 无可用的 K8s 集群，直接作为 Leader 运行（不进行选举）")
+		klog.V(6).Infof("无可用的K8s集群，直接作为Leader运行（不进行选举）")
 		if cfg.OnStartedLeading != nil {
 			cfg.OnStartedLeading(ctx)
 		}
 		return nil
 	}
 
+	// 默认参数
 	if cfg.LeaseDuration == 0 {
 		cfg.LeaseDuration = 15 * time.Second
 	}
@@ -59,7 +59,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	id := utils.GenerateInstanceID()
-	klog.V(2).Infof("[leader] 我的选举 ID：%s", id)
+	klog.V(6).Infof("当前实例选举ID: %s", id)
 	lock := &resourcelock.LeaseLock{
 		LeaseMeta: metav1.ObjectMeta{
 			Name:      cfg.LockName,
@@ -78,27 +78,32 @@ func Run(ctx context.Context, cfg Config) error {
 		RenewDeadline:   cfg.RenewDeadline,
 		RetryPeriod:     cfg.RetryPeriod,
 		Callbacks: leaderelection.LeaderCallbacks{
+			// 成为Leader
 			OnStartedLeading: func(c context.Context) {
+				klog.V(6).Infof("开始作为Leader运行")
 				if cfg.OnStartedLeading != nil {
 					cfg.OnStartedLeading(c)
 				}
 			},
+			// 失去Leader
 			OnStoppedLeading: func() {
+				klog.V(6).Infof("停止作为Leader运行")
 				if cfg.OnStoppedLeading != nil {
 					cfg.OnStoppedLeading()
 				}
 			},
+			// 新Leader产生
 			OnNewLeader: func(identity string) {
 				if identity == id {
-					klog.V(2).Infof("[leader] 我成为新的 Leader：%s", id)
+					klog.V(6).Infof("我成为新的Leader：%s", id)
 				} else {
-					klog.V(2).Infof("[leader] 选举产生新的 Leader：%s", identity)
+					klog.V(6).Infof("选举产生新的Leader：%s", identity)
 				}
 			},
 		},
 	}
 
-	klog.V(2).Infof("[leader] 开始进行 Leader 选举（锁=%s/%s）", cfg.Namespace, cfg.LockName)
+	klog.V(6).Infof("开始进行Leader选举（锁=%s/%s）", cfg.Namespace, cfg.LockName)
 	leaderelection.RunOrDie(ctx, leaderelectionCfg)
 	return nil
 }

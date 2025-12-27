@@ -6,7 +6,6 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/eventhandler"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
-	"github.com/weibaohui/k8m/pkg/leader"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"k8s.io/klog/v2"
@@ -56,7 +55,7 @@ func (l *LeaderLifecycle) Uninstall(ctx plugins.InstallContext) error {
 func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动Leader选举插件后台任务")
 	go func() {
-		leaderCfg := leader.Config{
+		leaderCfg := Config{
 			LockName:      "k8m-leader-lock",
 			LeaseDuration: 60 * time.Second,
 			RenewDeadline: 50 * time.Second,
@@ -75,7 +74,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			},
 		}
 		bg := context.Background()
-		if err := leader.Run(bg, leaderCfg); err != nil {
+		if err := Run(bg, leaderCfg); err != nil {
 			klog.V(6).Infof("Leader选举失败: %v", err)
 		}
 	}()
@@ -86,4 +85,3 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 func (l *LeaderLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
-
