@@ -13,7 +13,7 @@ var Metadata = plugins.Module{
 		Description: "演示固定列表与CRUD功能",
 	},
 	Crons: []string{
-		"*/5 * * * *",
+		"* * * * *",
 	},
 	Menus: []plugins.Menu{
 		{
