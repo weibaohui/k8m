@@ -12,6 +12,9 @@ var Metadata = plugins.Module{
 		Version:     "1.0.12",
 		Description: "演示固定列表与CRUD功能",
 	},
+	Crons: []string{
+		"*/5 * * * *",
+	},
 	Menus: []plugins.Menu{
 		{
 			Key:         "plugin_demo_cluster",

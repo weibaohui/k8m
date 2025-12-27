@@ -11,6 +11,8 @@ type Module struct {
 
 	// Lifecycle 生命周期实现（由系统调度调用）
 	Lifecycle Lifecycle
+	// Crons 插件的定时任务调度表达式（5段 cron）
+	Crons []string
 	// ClusterRouter 路由注册回调（启用后由Manager统一挂载）
 	// 该类API接口以/k8s/cluster/clusterID/plugins/xxx的形式暴露，带有集群ID
 	// 通常是集群相关的操作页面，要求必须是已登录用户

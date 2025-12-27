@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
 	"k8s.io/klog/v2"
@@ -18,6 +19,8 @@ type Manager struct {
 	status  map[string]Status
 	// apiGroups 已注册的后端API路由分组引用，用于支持启用时动态注册路由
 	apiGroups []*gin.RouterGroup
+	// cron 定时任务调度器
+	cron *cron.Cron
 }
 
 // NewManager 创建并返回插件管理器
@@ -26,6 +29,12 @@ func NewManager() *Manager {
 		modules:   make(map[string]Module),
 		status:    make(map[string]Status),
 		apiGroups: make([]*gin.RouterGroup, 0),
+		cron: cron.New(
+			cron.WithChain(
+				cron.Recover(cron.DefaultLogger),
+				cron.SkipIfStillRunning(cron.DefaultLogger),
+			),
+		),
 	}
 }
 
@@ -197,6 +206,33 @@ func (m *Manager) Start() {
 			}
 		}
 	}
+
+	//逐个启动插件中定义的cron表达式的定时任务
+	for name, mod := range m.modules {
+		if mod.Lifecycle == nil || len(mod.Crons) == 0 {
+			continue
+		}
+		ctx := baseContextImpl{meta: mod.Meta}
+		for _, spec := range mod.Crons {
+			if _, err := cron.ParseStandard(spec); err != nil {
+				klog.V(6).Infof("插件 %s 的 cron 表达式非法: %s，错误: %v", name, spec, err)
+				continue
+			}
+			_, err := m.cron.AddFunc(spec, func() {
+				if err := mod.Lifecycle.StartCron(ctx, spec); err != nil {
+					klog.V(6).Infof("执行插件定时任务失败: %s，表达式: %s，错误: %v", name, spec, err)
+				} else {
+					klog.V(6).Infof("执行插件定时任务成功: %s，表达式: %s", name, spec)
+				}
+			})
+			if err != nil {
+				klog.V(6).Infof("注册插件定时任务失败: %s，表达式: %s，错误: %v", name, spec, err)
+			} else {
+				klog.V(6).Infof("注册插件定时任务成功: %s，表达式: %s", name, spec)
+			}
+		}
+	}
+	m.cron.Start()
 }
 
 // RegisterClusterRoutes 某个插件的集群操作相关的路由注册
