@@ -24,6 +24,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			strings.HasPrefix(path, "/monacoeditorwork/") ||
 			strings.HasPrefix(path, "/swagger/") ||
 			strings.HasPrefix(path, "/debug/") ||
+			strings.HasPrefix(path, "/health/") ||
 			strings.HasPrefix(path, "/mcp/") ||
 			strings.HasPrefix(path, "/auth/") ||
 			strings.HasPrefix(path, "/assets/") ||
