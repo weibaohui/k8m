@@ -214,7 +214,7 @@ func (m *Manager) Start() {
 	//增加插件启动任务管理
 	//逐个启动插件中注册的后台任务。不阻塞
 	for name, mod := range m.modules {
-		if mod.Lifecycle != nil {
+		if mod.Lifecycle != nil && m.status[name] == StatusEnabled {
 			ctx := baseContextImpl{meta: mod.Meta}
 			if err := mod.Lifecycle.Start(ctx); err != nil {
 				klog.V(6).Infof("启动插件后台任务失败: %s，错误: %v", name, err)
@@ -226,7 +226,7 @@ func (m *Manager) Start() {
 
 	//逐个启动插件中定义的cron表达式的定时任务
 	for name, mod := range m.modules {
-		if mod.Lifecycle == nil || len(mod.Crons) == 0 {
+		if mod.Lifecycle == nil || len(mod.Crons) == 0 || m.status[name] != StatusEnabled {
 			continue
 		}
 		ctx := baseContextImpl{meta: mod.Meta}
