@@ -20,6 +20,7 @@
                 {
                     "type": "operation",
                     "label": "操作",
+                    "width": "240px",
                     "buttons": [
                         {
                             "type": "button",
@@ -207,13 +208,27 @@
                 },
                 {
                     "name": "title",
-                    "label": "名称"
+                    "label": "名称",
+                    "width": "240px"
                 },
                 {
                     "type": "tpl",
                     "name": "version",
+                    "width": "140px",
                     "label": "版本",
                     "tpl": "<span class='label label-default'>插&nbsp;&nbsp;&nbsp;&nbsp;件</span> ${version} <br><span class='label label-info'>数据库</span> ${dbVersion|default:-}"
+                },
+                {
+                    "name": "status",
+                    "label": "状态",
+                    "type": "mapping",
+                    "map": {
+                        "已发现": "<span class='label label-info'>已发现</span>",
+                        "已安装": "<span class='label label-default'>已安装</span>",
+                        "已启用": "<span class='label label-success'>已启用</span>",
+                        "已禁用": "<span class='label label-warning'>已禁用</span>",
+                        "未知": "<span class='label label-danger'>未知</span>"
+                    }
                 },
                 {
                     "name": "menuCount",
@@ -228,21 +243,16 @@
                     "tpl": "${cronCount}"
                 },
                 {
+                    "name": "dependencies",
+                    "label": "依赖",
+                    "type": "tpl",
+                    "tpl": "${dependencies|join:', '}",
+                    "width": "240px"
+                },
+                {
                     "name": "description",
                     "label": "描述",
                     "width": "300px"
-                },
-                {
-                    "name": "status",
-                    "label": "状态",
-                    "type": "mapping",
-                    "map": {
-                        "已发现": "<span class='label label-info'>已发现</span>",
-                        "已安装": "<span class='label label-default'>已安装</span>",
-                        "已启用": "<span class='label label-success'>已启用</span>",
-                        "已禁用": "<span class='label label-warning'>已禁用</span>",
-                        "未知": "<span class='label label-danger'>未知</span>"
-                    }
                 }
             ],
             "bulkActions": []
