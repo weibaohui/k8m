@@ -6,10 +6,9 @@ import "github.com/weibaohui/k8m/pkg/plugins"
 var Metadata = plugins.Module{
 	Meta: plugins.Meta{
 		Name:        "leader",
-		Title:       "Leader选举插件",
+		Title:       "主备高可用插件",
 		Version:     "1.0.0",
-		Description: "负责进行Leader选举，并在成为Leader时启动平台的后台任务",
+		Description: "提供主备高可用能力：多实例部署时仅一个为主节点，通过 Kubernetes 原生机制完成选主。使用前请务必启用 /readiness 就绪探针。",
 	},
 	Lifecycle: &LeaderLifecycle{},
 }
-

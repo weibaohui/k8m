@@ -228,7 +228,8 @@
                 },
                 {
                     "name": "description",
-                    "label": "描述"
+                    "label": "描述",
+                    "width": "300px"
                 },
                 {
                     "name": "status",
