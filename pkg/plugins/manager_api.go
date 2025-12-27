@@ -413,6 +413,11 @@ func (m *Manager) SetPluginCronEnabled(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("缺少参数: name/spec/enabled"))
 		return
 	}
+	spec, err := utils.UrlSafeBase64Decode(spec)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	if enabled == "true" || enabled == "1" || enabled == "yes" {
 		if err := m.EnsureCron(name, spec); err != nil {
 			amis.WriteJsonError(c, err)

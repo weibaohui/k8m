@@ -80,7 +80,7 @@
                                     {
                                         "type": "crud",
                                         "api": "get:/admin/plugin/cron/${name}",
-                                        "quickSaveItemApi": "/admin/plugin/cron/name/${name}/spec/${spec}/enabled/${registered}",
+                                        "quickSaveItemApi": "/admin/plugin/cron/name/${name}/spec/${spec|base64Encode}/enabled/${registered}",
                                         "syncLocation": false,
                                         "loadDataOnce": false,
                                         "headerToolbar": [
@@ -105,6 +105,14 @@
                                                 }
                                             },
                                             {
+                                                "name": "next",
+                                                "label": "下次执行"
+                                            },
+                                            {
+                                                "name": "prev",
+                                                "label": "上次执行"
+                                            },
+                                            {
                                                 "name": "running",
                                                 "label": "运行中",
                                                 "type": "mapping",
@@ -112,14 +120,6 @@
                                                     "true": "<span class='label label-success'>是</span>",
                                                     "false": "<span class='label label-default'>否</span>"
                                                 }
-                                            },
-                                            {
-                                                "name": "next",
-                                                "label": "下次执行"
-                                            },
-                                            {
-                                                "name": "prev",
-                                                "label": "上次执行"
                                             },
                                             {
                                                 "type": "operation",
