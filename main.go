@@ -55,6 +55,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
 	"github.com/weibaohui/k8m/pkg/service"
 	_ "github.com/weibaohui/k8m/swagger"
@@ -257,6 +258,21 @@ func main() {
 	mgr := plugins.NewManager()
 	//这里应该是主要注册路径，真正的启动应该剥离出去
 	mgr.Start()
+
+	//增加动态的readiness探测路径
+	r.GET("/health/ready", func(c *gin.Context) {
+		// 未启用leader插件，默认就绪
+		if !mgr.IsEnabled("leader") {
+			c.Status(http.StatusOK)
+			return
+		}
+		// 启用leader插件时，仅主实例返回200，否则503
+		if leader.IsCurrentLeader() {
+			c.Status(http.StatusOK)
+		} else {
+			c.Status(http.StatusServiceUnavailable)
+		}
+	})
 
 	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
 	{
