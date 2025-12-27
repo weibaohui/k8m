@@ -74,71 +74,61 @@
                             "dialog": {
                                 "closeOnEsc": true,
                                 "closeOnOutside": true,
+                                "size": "lg",
                                 "title": "插件详情 （ESC 关闭）",
-                                "body": {
-                                    "type": "form",
-                                    "mode": "horizontal",
-                                    "body": [
-                                        {
-                                            "type": "static",
-                                            "name": "name",
-                                            "label": "标识"
-                                        },
-                                        {
-                                            "type": "static",
-                                            "name": "title",
-                                            "label": "名称"
-                                        },
-                                        {
-                                            "type": "tpl",
-                                            "name": "version",
-                                            "label": "版本",
-                                            "tpl": "插件：${version}，数据库：${dbVersion|default:-}"
-                                        },
-                                        {
-                                            "type": "static",
-                                            "name": "description",
-                                            "label": "描述"
-                                        },
-                                        {
-                                            "type": "static",
-                                            "name": "status",
-                                            "label": "状态"
-                                        },
-                                        {
-                                            "type": "tpl",
-                                            "label": "菜单数量",
-                                            "tpl": "${menus && menus.length ? menus.length : 0}"
-                                        },
-                                        {
-                                            "type": "table",
-                                            "title": "菜单列表",
-                                            "source": "${menus}",
-                                            "columns": [
-                                                {
-                                                    "name": "title",
-                                                    "label": "名称"
-                                                },
-                                                {
-                                                    "name": "icon",
-                                                    "label": "图标"
-                                                },
-                                                {
-                                                    "name": "eventType",
-                                                    "label": "事件"
-                                                },
-                                                {
-                                                    "name": "url",
-                                                    "label": "URL"
-                                                },
-                                                {
-                                                    "name": "order",
-                                                    "label": "排序"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
+                                "body": [
+                                    {
+                                        "type": "static",
+                                        "name": "name",
+                                        "label": "标识"
+                                    },
+                                    {
+                                        "type": "static",
+                                        "name": "title",
+                                        "label": "名称"
+                                    },
+                                    {
+                                        "type": "static",
+                                        "name": "version",
+                                        "label": "版本",
+                                        "tpl": "插件：${version}，数据库：${dbVersion|default:-}"
+                                    },
+                                    {
+                                        "type": "static",
+                                        "name": "description",
+                                        "label": "描述"
+                                    },
+                                    {
+                                        "type": "static",
+                                        "name": "status",
+                                        "label": "状态"
+                                    },
+                                    {
+                                        "type": "table",
+                                        "title": "菜单列表",
+                                        "source": "${menus}",
+                                        "columns": [
+                                            {
+                                                "name": "title",
+                                                "label": "名称"
+                                            },
+                                            {
+                                                "name": "icon",
+                                                "label": "图标"
+                                            },
+                                            {
+                                                "name": "eventType",
+                                                "label": "点击",
+                                                "type": "tpl",
+                                                "tpl": "${customEvent?customEvent:url}"
+                                            },
+                                            {
+                                                "name": "order",
+                                                "label": "排序"
+                                            }
+                                        ]
+                                    }
+                                ]
                             }
                         }
                     ]
