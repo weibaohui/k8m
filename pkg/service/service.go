@@ -1,11 +1,10 @@
 package service
 
 import (
-    "sync"
+	"sync"
 
-    "github.com/weibaohui/k8m/pkg/comm/utils"
-    "github.com/weibaohui/k8m/pkg/lease"
-    "k8s.io/client-go/rest"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"k8s.io/client-go/rest"
 )
 
 var localPodService = &podService{
@@ -37,17 +36,16 @@ var localShellLogService = &shellLogService{}
 var localAiService = &aiService{}
 var localMcpService = &mcpService{}
 var localPromptService = &promptService{}
-var localLeaseManager = lease.NewManager()
 
 // init 中文函数注释：在 service 初始化时向 lease 包注入 ClusterID → RestConfig 的解析器，避免循环引入。
 func init() {
-    utils.GetRestConfigByClusterID = func(clusterID string) *rest.Config {
-        c := localClusterService.GetClusterByID(clusterID)
-        if c == nil {
-            return nil
-        }
-        return c.GetRestConfig()
-    }
+	utils.GetRestConfigByClusterID = func(clusterID string) *rest.Config {
+		c := localClusterService.GetClusterByID(clusterID)
+		if c == nil {
+			return nil
+		}
+		return c.GetRestConfig()
+	}
 }
 
 func PromptService() *promptService {
@@ -102,13 +100,9 @@ func AIService() *aiService {
 
 func McpService() *mcpService {
 
-    return localMcpService
+	return localMcpService
 }
 
 func ConfigService() *configService {
-    return NewConfigService()
-}
-
-func LeaseManager() lease.Manager {
-    return localLeaseManager
+	return NewConfigService()
 }

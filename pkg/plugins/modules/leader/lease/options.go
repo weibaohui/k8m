@@ -9,5 +9,5 @@ type Options struct {
 	LeaseRenewIntervalSeconds int
 	ResyncPeriod              time.Duration
 	ClusterID                 string // ClusterID 指定的集群唯一ID（文件名/Context），优先使用该集群的配置
-
 }
+

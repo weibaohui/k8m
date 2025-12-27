@@ -80,68 +80,39 @@ func (m *manager) Init(ctx context.Context, opts Options) error {
 	return nil
 }
 
-// EnsureOnConnect 中文函数注释：在连接前确保租约占有；若有效 Lease 已存在则返回提示；若不存在或已过期则创建并占有。
+// EnsureOnConnect 中文函数注释：在连接某个集群前确保该集群的 Lease 存在并进入续约循环；若已存在则仅提示并返回。
 func (m *manager) EnsureOnConnect(ctx context.Context, clusterID string) error {
-
-	klog.V(6).Infof("EnsureOnConnect %s", clusterID)
 	if m.clientset == nil {
 		return nil
 	}
-	name := m.leaseName(clusterID)
-	lc := m.clientset.CoordinationV1().Leases(m.namespace)
-	l, err := lc.Get(ctx, name, metav1.GetOptions{})
-	if err == nil {
-		if isLeaseValid(l, m.durationSec) {
-			klog.V(6).Infof("集群[%s]已连接，责任者：%s，跳过创建 Lease", clusterID, deref(l.Spec.HolderIdentity))
-			return fmt.Errorf("cluster already connected by %s", deref(l.Spec.HolderIdentity))
-		}
-		// 存在但已过期：由 Leader 清理，这里不更新，直接返回
-		klog.V(6).Infof("集群[%s] Lease 已过期但仍存在，等待 Leader 清理", clusterID)
-		return fmt.Errorf("lease exists but expired")
-	}
-	now := metav1.MicroTime{Time: time.Now()}
-	clusterIDBase64 := utils.UrlSafeBase64Encode(clusterID)
 
-	lease := &coordinationv1.Lease{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: m.namespace,
-			Labels: map[string]string{
-				"app":       "k8m",
-				"type":      "cluster-sync",
-				"clusterID": string(clusterIDBase64),
-			},
-		},
-		Spec: coordinationv1.LeaseSpec{
-			HolderIdentity:       ptrString(m.instanceID),
-			LeaseDurationSeconds: ptrInt32(int32(m.durationSec)),
-			RenewTime:            &now,
-		},
+	lc := m.clientset.CoordinationV1().Leases(m.namespace)
+	name := m.leaseName(clusterID)
+	_, err := lc.Get(ctx, name, metav1.GetOptions{})
+	if err == nil {
+		klog.V(6).Infof("Lease 已存在，跳过创建：%s", name)
+		return nil
 	}
-	if _, err := lc.Create(ctx, lease, metav1.CreateOptions{}); err != nil {
-		klog.V(6).Infof("创建集群[%s] Lease 失败：%v", clusterID, err)
-		return err
+	labels := map[string]string{
+		"app":       "k8m",
+		"type":      "cluster-sync",
+		"clusterID": utils.UrlSafeBase64Encode(clusterID),
 	}
-	klog.V(6).Infof("创建集群[%s] Lease 成功，由当前实例负责续约", clusterID)
-	go m.renewLoop(context.Background(), name)
+
+	m.createOrUpdateLease(ctx, name, labels)
+	go m.loopRenewLease(name, labels, m.durationSec, m.renewSec, m.instanceID)
 	return nil
 }
 
-// EnsureOnDisconnect 中文函数注释：断开集群时，若当前实例是责任者则删除 Lease；否则跳过删除。
+// EnsureOnDisconnect 中文函数注释：在断开某个集群前确保删除对应的 Lease；若不存在则跳过。
 func (m *manager) EnsureOnDisconnect(ctx context.Context, clusterID string) error {
 	if m.clientset == nil {
 		return nil
 	}
-	name := m.leaseName(clusterID)
 	lc := m.clientset.CoordinationV1().Leases(m.namespace)
-	l, err := lc.Get(ctx, name, metav1.GetOptions{})
-	if err == nil && deref(l.Spec.HolderIdentity) == m.instanceID {
-		if err := lc.Delete(ctx, name, metav1.DeleteOptions{}); err != nil {
-			klog.V(6).Infof("删除 Lease 失败：%v", err)
-			return err
-		}
-		klog.V(6).Infof("删除 Lease 成功：%s", name)
-	}
+	name := m.leaseName(clusterID)
+	_ = lc.Delete(ctx, name, metav1.DeleteOptions{})
+	klog.V(6).Infof("删除 Lease：%s", name)
 	return nil
 }
 
@@ -237,40 +208,62 @@ func (m *manager) StartLeaderCleanup(ctx context.Context) error {
 	return nil
 }
 
-func (m *manager) leaseName(clusterID string) string {
-	cfg := flag.Init()
-	prefix := strings.ToLower(cfg.ProductName)
-	sum := sha1.Sum([]byte(clusterID))
-	return fmt.Sprintf("%s-cluster-%x", prefix, sum[:4])
+// createOrUpdateLease 中文函数注释：创建 Lease；若已存在则更新其续约时间与持有者。
+func (m *manager) createOrUpdateLease(ctx context.Context, name string, labels map[string]string) {
+	lc := m.clientset.CoordinationV1().Leases(m.namespace)
+	n := time.Now()
+	ld := int32(m.durationSec)
+	l := &coordinationv1.Lease{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   name,
+			Labels: labels,
+		},
+		Spec: coordinationv1.LeaseSpec{
+			HolderIdentity:       ptrString(m.instanceID),
+			LeaseDurationSeconds: &ld,
+			RenewTime:            &metav1.MicroTime{Time: n},
+			LeaseTransitions:     ptrInt32(1),
+		},
+	}
+	_, err := lc.Create(ctx, l, metav1.CreateOptions{})
+	if err != nil && strings.Contains(err.Error(), "already exists") {
+		// 已存在则更新
+		_, _ = lc.Update(ctx, l, metav1.UpdateOptions{})
+	}
 }
 
-func (m *manager) renewLoop(ctx context.Context, name string) {
-	ticker := time.NewTicker(time.Duration(m.renewSec) * time.Second)
-	defer ticker.Stop()
+// loopRenewLease 中文函数注释：循环续约 Lease，更新续约时间与持有者信息。
+func (m *manager) loopRenewLease(name string, labels map[string]string, durationSec int, renewSec int, instanceID string) {
 	lc := m.clientset.CoordinationV1().Leases(m.namespace)
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			l, err := lc.Get(ctx, name, metav1.GetOptions{})
-			if err != nil {
-				klog.V(6).Infof("续约退出：Lease 不存在或网络错误：%v", err)
-				return
-			}
-			if deref(l.Spec.HolderIdentity) != m.instanceID {
-				klog.V(6).Infof("续约退出：责任已转移至[%s]", deref(l.Spec.HolderIdentity))
-				return
-			}
-			now := metav1.MicroTime{Time: time.Now()}
-			l.Spec.RenewTime = &now
-			if _, err := lc.Update(ctx, l, metav1.UpdateOptions{}); err != nil {
-				klog.V(6).Infof("续约失败：%v", err)
-			} else {
-				klog.V(6).Infof("续约成功：%s", name)
-			}
+	t := time.NewTicker(time.Duration(renewSec) * time.Second)
+	defer t.Stop()
+	for range t.C {
+		n := time.Now()
+		ld := int32(durationSec)
+		l := &coordinationv1.Lease{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   name,
+				Labels: labels,
+			},
+			Spec: coordinationv1.LeaseSpec{
+				HolderIdentity:       ptrString(instanceID),
+				LeaseDurationSeconds: &ld,
+				RenewTime:            &metav1.MicroTime{Time: n},
+			},
+		}
+		_, err := lc.Update(context.Background(), l, metav1.UpdateOptions{})
+		if err != nil {
+			klog.V(6).Infof("续约 Lease 失败：%v", err)
 		}
 	}
+}
+
+// leaseName 中文函数注释：生成 Lease 名称，格式：<product>-cluster-<sha1(clusterID)前4字节>
+func (m *manager) leaseName(clusterID string) string {
+	s := sha1.Sum([]byte(clusterID))
+	first4 := s[:4]
+	product := flag.Init().ProductName
+	return fmt.Sprintf("%s-cluster-%x", product, first4)
 }
 
 // isLeaseValid 中文函数注释：判断 Lease 是否仍在有效期内。

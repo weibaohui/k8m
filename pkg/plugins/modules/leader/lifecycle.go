@@ -5,12 +5,9 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/eventhandler"
-	"github.com/weibaohui/k8m/pkg/flag"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
-	"github.com/weibaohui/k8m/pkg/lease"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/plugins"
-	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
@@ -61,26 +58,27 @@ func (l *LeaderLifecycle) Uninstall(ctx plugins.InstallContext) error {
 func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动Leader选举插件后台任务")
 	// 启动 Lease 同步（监听器）任务：仅当启用leader插件时启动
-	go func() {
-		cfg := flag.Init()
-		leaseOpts := lease.Options{
-			Namespace:                 cfg.LeaseNamespace,
-			LeaseDurationSeconds:      cfg.LeaseDurationSeconds,
-			LeaseRenewIntervalSeconds: cfg.LeaseRenewIntervalSeconds,
-			ResyncPeriod:              30 * time.Second,
-			ClusterID:                 cfg.HostClusterID,
-		}
-		leaseCtx := context.Background()
-		if err := service.LeaseManager().Init(leaseCtx, leaseOpts); err == nil {
-			if err := service.LeaseManager().StartWatcher(leaseCtx, service.ClusterService().Connect, service.ClusterService().Disconnect); err != nil {
-				klog.V(6).Infof("启动 Lease 管理器监听器失败: %v", err)
-			} else {
-				klog.V(6).Infof("启动 Lease 管理器监听器成功")
-			}
-		} else {
-			klog.V(6).Infof("初始化 Lease 管理器失败: %v", err)
-		}
-	}()
+	// 启用主备模式，不再同步集群状态 TODO clean
+	// go func() {
+	// 	cfg := flag.Init()
+	// 	leaseOpts := lease.Options{
+	// 		Namespace:                 cfg.LeaseNamespace,
+	// 		LeaseDurationSeconds:      cfg.LeaseDurationSeconds,
+	// 		LeaseRenewIntervalSeconds: cfg.LeaseRenewIntervalSeconds,
+	// 		ResyncPeriod:              30 * time.Second,
+	// 		ClusterID:                 cfg.HostClusterID,
+	// 	}
+	// 	leaseCtx := context.Background()
+	// 	if err := service.LeaseManager().Init(leaseCtx, leaseOpts); err == nil {
+	// 		if err := service.LeaseManager().StartWatcher(leaseCtx, service.ClusterService().Connect, service.ClusterService().Disconnect); err != nil {
+	// 			klog.V(6).Infof("启动 Lease 管理器监听器失败: %v", err)
+	// 		} else {
+	// 			klog.V(6).Infof("启动 Lease 管理器监听器成功")
+	// 		}
+	// 	} else {
+	// 		klog.V(6).Infof("初始化 Lease 管理器失败: %v", err)
+	// 	}
+	// }()
 
 	// 启动 Leader 选举逻辑
 	go func() {
@@ -92,24 +90,26 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			OnStartedLeading: func(c context.Context) {
 				klog.V(6).Infof("成为Leader，启动定时任务（集群巡检、Helm仓库更新、事件转发）")
 				// 启动 Lease 过期清理（仅Leader）
-				cleanupCtx, cancel := context.WithCancel(context.Background())
-				l.cleanupCancel = cancel
-				if err := service.LeaseManager().StartLeaderCleanup(cleanupCtx); err != nil {
-					klog.V(6).Infof("启动 Lease 管理器过期清理失败: %v", err)
-				} else {
-					klog.V(6).Infof("启动 Lease 管理器过期清理成功")
-				}
+				// cleanupCtx, cancel := context.WithCancel(context.Background())
+				// l.cleanupCancel = cancel
+				// if err := service.LeaseManager().StartLeaderCleanup(cleanupCtx); err != nil {
+				// 	klog.V(6).Infof("启动 Lease 管理器过期清理失败: %v", err)
+				// } else {
+				// 	klog.V(6).Infof("启动 Lease 管理器过期清理成功")
+				// }
+				// 启用主备模式，不再同步集群状态 TODO clean
 				lua.InitClusterInspection()
 				helm2.StartUpdateHelmRepoInBackground()
 				eventhandler.StartEventForwardingWatch()
 			},
 			OnStoppedLeading: func() {
 				klog.V(6).Infof("不再是Leader，停止定时任务（集群巡检、Helm仓库更新、事件转发）")
-				// 停止 Lease 过期清理
-				if l.cleanupCancel != nil {
-					l.cleanupCancel()
-					l.cleanupCancel = nil
-				}
+				// 启用主备模式，不再同步集群状态 TODO clean
+				// // 停止 Lease 过期清理
+				// if l.cleanupCancel != nil {
+				// 	l.cleanupCancel()
+				// 	l.cleanupCancel = nil
+				// }
 				lua.StopClusterInspection()
 				helm2.StopUpdateHelmRepoInBackground()
 				eventhandler.StopEventForwardingWatch()
