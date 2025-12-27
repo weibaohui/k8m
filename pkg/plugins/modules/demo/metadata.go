@@ -14,6 +14,7 @@ var Metadata = plugins.Module{
 	},
 	Crons: []string{
 		"* * * * *",
+		"*/2 * * * *",
 	},
 	Menus: []plugins.Menu{
 		{
