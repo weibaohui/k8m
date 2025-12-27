@@ -69,6 +69,7 @@
                         {
                             "type": "button",
                             "icon": "fas fa-clock text-info",
+                            "visibleOn": "this.cronCount && this.cronCount >0",
                             "actionType": "drawer",
                             "label": "定时任务",
                             "drawer": {
