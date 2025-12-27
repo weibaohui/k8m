@@ -48,6 +48,12 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 	grp.POST("/uninstall/:name", m.UninstallPlugin)
 	// 升级插件
 	grp.POST("/upgrade/:name", m.UpgradePlugin)
+
+	// 定时任务管理
+	grp.GET("/cron/:name", m.ListPluginCrons)
+	grp.POST("/cron/:name/start", m.StartPluginCron)
+	grp.POST("/cron/:name/run_once", m.RunPluginCronOnce)
+	grp.POST("/cron/:name/stop", m.StopPluginCron)
 }
 
 // ListPlugins 获取所有已注册插件的Meta与状态
@@ -255,4 +261,119 @@ func (m *Manager) UpgradePlugin(c *gin.Context) {
 	}
 
 	amis.WriteJsonOKMsg(c, "插件升级成功，已记录新版本，需重启后生效")
+}
+
+// CronItemVO 定时任务状态展示结构体
+type CronItemVO struct {
+	Spec       string `json:"spec"`
+	Registered bool   `json:"registered"`
+	Running    bool   `json:"running"`
+	Next       string `json:"next,omitempty"`
+	Prev       string `json:"prev,omitempty"`
+}
+
+// ListPluginCrons 获取指定插件的定时任务定义与状态
+func (m *Manager) ListPluginCrons(c *gin.Context) {
+	name := c.Param("name")
+	m.mu.RLock()
+	mod, ok := m.modules[name]
+	m.mu.RUnlock()
+	if !ok {
+		amis.WriteJsonError(c, fmt.Errorf("插件未注册: %s", name))
+		return
+	}
+	items := make([]CronItemVO, 0, len(mod.Crons))
+	for _, spec := range mod.Crons {
+		entry, exists := m.getCronEntry(name, spec)
+		running := false
+		m.mu.RLock()
+		if rm, ok := m.cronRunning[name]; ok {
+			running = rm[spec]
+		}
+		m.mu.RUnlock()
+		var nextStr, prevStr string
+		if exists {
+			if !entry.Next.IsZero() {
+				nextStr = entry.Next.Format("2006-01-02 15:04:05")
+			}
+			if !entry.Prev.IsZero() {
+				prevStr = entry.Prev.Format("2006-01-02 15:04:05")
+			}
+		}
+		items = append(items, CronItemVO{
+			Spec:       spec,
+			Registered: exists,
+			Running:    running,
+			Next:       nextStr,
+			Prev:       prevStr,
+		})
+	}
+	klog.V(6).Infof("获取插件定时任务列表: %s，共计%d个", name, len(items))
+	amis.WriteJsonListWithTotal(c, int64(len(items)), items)
+}
+
+// StartPluginCron 手动启动（注册）指定插件的一条定时任务
+func (m *Manager) StartPluginCron(c *gin.Context) {
+	name := c.Param("name")
+	spec := c.Query("spec")
+	if spec == "" {
+		var body struct {
+			Spec string `json:"spec"`
+		}
+		_ = c.ShouldBindJSON(&body)
+		spec = body.Spec
+	}
+	if spec == "" {
+		amis.WriteJsonError(c, fmt.Errorf("缺少参数: spec"))
+		return
+	}
+	if err := m.EnsureCron(name, spec); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	klog.V(6).Infof("手动启动插件定时任务成功: %s，表达式: %s", name, spec)
+	amis.WriteJsonOK(c)
+}
+
+// RunPluginCronOnce 立即执行指定插件的一条定时任务一次
+func (m *Manager) RunPluginCronOnce(c *gin.Context) {
+	name := c.Param("name")
+	spec := c.Query("spec")
+	if spec == "" {
+		var body struct {
+			Spec string `json:"spec"`
+		}
+		_ = c.ShouldBindJSON(&body)
+		spec = body.Spec
+	}
+	if spec == "" {
+		amis.WriteJsonError(c, fmt.Errorf("缺少参数: spec"))
+		return
+	}
+	if err := m.RunCronOnce(name, spec); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	klog.V(6).Infof("手动执行插件定时任务一次成功: %s，表达式: %s", name, spec)
+	amis.WriteJsonOK(c)
+}
+
+// StopPluginCron 强制停止（移除）指定插件的一条定时任务
+func (m *Manager) StopPluginCron(c *gin.Context) {
+	name := c.Param("name")
+	spec := c.Query("spec")
+	if spec == "" {
+		var body struct {
+			Spec string `json:"spec"`
+		}
+		_ = c.ShouldBindJSON(&body)
+		spec = body.Spec
+	}
+	if spec == "" {
+		amis.WriteJsonError(c, fmt.Errorf("缺少参数: spec"))
+		return
+	}
+	m.RemoveCron(name, spec)
+	klog.V(6).Infof("强制停止插件定时任务成功: %s，表达式: %s", name, spec)
+	amis.WriteJsonOK(c)
 }

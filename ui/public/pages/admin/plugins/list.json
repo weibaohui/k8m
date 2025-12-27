@@ -68,6 +68,89 @@
                         },
                         {
                             "type": "button",
+                            "icon": "fas fa-clock text-info",
+                            "actionType": "drawer",
+                            "label": "定时任务",
+                            "drawer": {
+                                "closeOnEsc": true,
+                                "closeOnOutside": true,
+                                "size": "lg",
+                                "title": "插件定时任务 (${title})",
+                                "body": [
+                                    {
+                                        "type": "crud",
+                                        "api": "get:/admin/plugin/cron/${name}",
+                                        "syncLocation": false,
+                                        "loadDataOnce": false,
+                                        "headerToolbar": [
+                                            "reload"
+                                        ],
+                                        "columns": [
+                                            {
+                                                "name": "spec",
+                                                "label": "Cron表达式"
+                                            },
+                                            {
+                                                "name": "registered",
+                                                "label": "已注册",
+                                                "type": "mapping",
+                                                "map": {
+                                                    "true": "<span class='label label-success'>是</span>",
+                                                    "false": "<span class='label label-default'>否</span>"
+                                                }
+                                            },
+                                            {
+                                                "name": "running",
+                                                "label": "运行中",
+                                                "type": "mapping",
+                                                "map": {
+                                                    "true": "<span class='label label-success'>是</span>",
+                                                    "false": "<span class='label label-default'>否</span>"
+                                                }
+                                            },
+                                            {
+                                                "name": "next",
+                                                "label": "下次执行"
+                                            },
+                                            {
+                                                "name": "prev",
+                                                "label": "上次执行"
+                                            },
+                                            {
+                                                "type": "operation",
+                                                "label": "操作",
+                                                "buttons": [
+                                                    {
+                                                        "type": "button",
+                                                        "icon": "fas fa-play text-success",
+                                                        "label": "启动",
+                                                        "actionType": "ajax",
+                                                        "api": "post:/admin/plugin/cron/${name}/start?spec=${spec}"
+                                                    },
+                                                    {
+                                                        "type": "button",
+                                                        "icon": "fas fa-bolt text-primary",
+                                                        "label": "执行一次",
+                                                        "actionType": "ajax",
+                                                        "api": "post:/admin/plugin/cron/${name}/run_once?spec=${spec}"
+                                                    },
+                                                    {
+                                                        "type": "button",
+                                                        "icon": "fas fa-stop text-danger",
+                                                        "label": "强制停止",
+                                                        "actionType": "ajax",
+                                                        "confirmText": "确认强制停止该定时任务？",
+                                                        "api": "post:/admin/plugin/cron/${name}/stop?spec=${spec}"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "button",
                             "icon": "fas fa-info-circle text-info",
                             "actionType": "dialog",
                             "label": "详情",
