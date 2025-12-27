@@ -329,6 +329,7 @@ func (m *Manager) RemoveCron(name, spec string) {
 	if runMap, ok := m.cronRunning[name]; ok {
 		delete(runMap, spec)
 	}
+	klog.V(6).Infof("强制停止插件定时任务: %s，表达式: %s", name, spec)
 }
 
 // RunCronOnce 立即执行一次某条 cron 的任务

@@ -92,7 +92,7 @@
                                             },
                                             {
                                                 "name": "registered",
-                                                "label": "已注册",
+                                                "label": "生效",
                                                 "type": "mapping",
                                                 "map": {
                                                     "true": "<span class='label label-success'>是</span>",
@@ -122,13 +122,6 @@
                                                 "buttons": [
                                                     {
                                                         "type": "button",
-                                                        "icon": "fas fa-play text-success",
-                                                        "label": "启动",
-                                                        "actionType": "ajax",
-                                                        "api": "post:/admin/plugin/cron/${name}/start?spec=${spec}"
-                                                    },
-                                                    {
-                                                        "type": "button",
                                                         "icon": "fas fa-bolt text-primary",
                                                         "label": "执行一次",
                                                         "actionType": "ajax",
@@ -136,11 +129,20 @@
                                                     },
                                                     {
                                                         "type": "button",
-                                                        "icon": "fas fa-stop text-danger",
-                                                        "label": "强制停止",
+                                                        "icon": "fas fa-check text-success",
+                                                        "label": "生效",
+                                                        "visibleOn": "this.registered == false",
                                                         "actionType": "ajax",
-                                                        "confirmText": "确认强制停止该定时任务？",
-                                                        "api": "post:/admin/plugin/cron/${name}/stop?spec=${spec}"
+                                                        "api": "post:/admin/plugin/cron/${name}/enable?spec=${spec}"
+                                                    },
+                                                    {
+                                                        "type": "button",
+                                                        "icon": "fas fa-times-circle text-danger",
+                                                        "label": "关闭",
+                                                        "visibleOn": "this.registered == true",
+                                                        "actionType": "ajax",
+                                                        "confirmText": "确认关闭该定时任务？",
+                                                        "api": "post:/admin/plugin/cron/${name}/disable?spec=${spec}"
                                                     }
                                                 ]
                                             }
