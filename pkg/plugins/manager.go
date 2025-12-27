@@ -185,6 +185,18 @@ func (m *Manager) Start() {
 		registrar(m)
 	}
 	m.ApplyConfigFromDB()
+	//增加插件启动任务管理
+	//逐个启动插件中注册的后台任务。不阻塞
+	for name, mod := range m.modules {
+		if mod.Lifecycle != nil {
+			ctx := baseContextImpl{meta: mod.Meta}
+			if err := mod.Lifecycle.Start(ctx); err != nil {
+				klog.V(6).Infof("启动插件后台任务失败: %s，错误: %v", name, err)
+			} else {
+				klog.V(6).Infof("启动插件后台任务成功: %s", name)
+			}
+		}
+	}
 }
 
 // RegisterClusterRoutes 某个插件的集群操作相关的路由注册

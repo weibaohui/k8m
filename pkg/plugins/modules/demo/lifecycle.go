@@ -4,6 +4,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/models"
 	"k8s.io/klog/v2"
+	"time"
 )
 
 // DemoLifecycle Demo插件生命周期实现
@@ -47,5 +48,19 @@ func (d *DemoLifecycle) Uninstall(ctx plugins.InstallContext) error {
 		return err
 	}
 	klog.V(6).Infof("卸载Demo插件完成，已删除相关表及数据")
+	return nil
+}
+
+// Start 启动Demo插件的后台任务（不可阻塞）
+// 该方法由系统在 Manager.Start 时统一调用，用于启动非阻塞的后台协程或定时任务
+func (d *DemoLifecycle) Start(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("启动Demo插件后台任务")
+	// 启动一个简单的定时任务示例：定期输出运行日志
+	go func(meta plugins.Meta) {
+		ticker := time.NewTicker(30 * time.Second)
+		for range ticker.C {
+			klog.V(6).Infof("Demo插件后台任务运行中，插件: %s，版本: %s", meta.Name, meta.Version)
+		}
+	}(ctx.Meta())
 	return nil
 }

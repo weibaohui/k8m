@@ -12,4 +12,6 @@ type Lifecycle interface {
 	Disable(ctx BaseContext) error
 	// Uninstall 卸载阶段（可选）；清理插件资源（如允许可删除表与初始化数据）
 	Uninstall(ctx InstallContext) error
+	// Start 启动后台任务入口；由系统在 Manager.Start 中调用；不可阻塞
+	Start(ctx BaseContext) error
 }
