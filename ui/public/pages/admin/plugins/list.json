@@ -75,7 +75,7 @@
                                 "closeOnEsc": true,
                                 "closeOnOutside": true,
                                 "size": "lg",
-                                "title": "插件定时任务 (${title})",
+                                "title": "${title} 任务详情（ESC 关闭）",
                                 "body": [
                                     {
                                         "type": "crud",
@@ -142,13 +142,13 @@
                         {
                             "type": "button",
                             "icon": "fas fa-info-circle text-info",
-                            "actionType": "dialog",
+                            "actionType": "drawer",
                             "label": "详情",
-                            "dialog": {
+                            "drawer": {
                                 "closeOnEsc": true,
                                 "closeOnOutside": true,
                                 "size": "lg",
-                                "title": "插件详情 （ESC 关闭）",
+                                "title": "${title} 详情 （ESC 关闭）",
                                 "body": [
                                     {
                                         "type": "static",
