@@ -109,12 +109,10 @@
                                         "source": "${menus}",
                                         "columns": [
                                             {
-                                                "name": "title",
-                                                "label": "名称"
-                                            },
-                                            {
-                                                "name": "icon",
-                                                "label": "图标"
+                                                "name": "menu",
+                                                "label": "菜单",
+                                                "type": "tpl",
+                                                "tpl": "${icon ? `<i class='${icon}'></i> ` : ''}${title}"
                                             },
                                             {
                                                 "name": "eventType",
