@@ -8,6 +8,8 @@ type Module struct {
 	Meta Meta
 	// Menus 菜单声明（0..n）
 	Menus []Menu
+	// Dependencies 插件依赖的其他插件名称列表；启用前需确保均已启用
+	Dependencies []string
 
 	// Lifecycle 生命周期实现（由系统调度调用）
 	Lifecycle Lifecycle

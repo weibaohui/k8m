@@ -91,6 +91,15 @@ func (m *Manager) Enable(name string) error {
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
+	// 依赖检查：启用前必须确保所有依赖插件均已启用
+	if len(mod.Dependencies) > 0 {
+		for _, dep := range mod.Dependencies {
+			if m.status[dep] != StatusEnabled {
+				klog.V(6).Infof("启用插件失败: %s，依赖未启用: %s", name, dep)
+				return fmt.Errorf("依赖插件未启用: %s", dep)
+			}
+		}
+	}
 	if mod.Lifecycle != nil {
 		ctx := enableContextImpl{baseContextImpl{meta: mod.Meta}}
 		if err := mod.Lifecycle.Enable(ctx); err != nil {
