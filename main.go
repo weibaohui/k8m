@@ -55,7 +55,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
 	"github.com/weibaohui/k8m/pkg/service"
 	_ "github.com/weibaohui/k8m/swagger"
@@ -267,7 +266,7 @@ func main() {
 			return
 		}
 		// 启用leader插件时，仅主实例返回200，否则503
-		if leader.IsCurrentLeader() {
+		if service.LeaderService().IsCurrentLeader() {
 			c.Status(http.StatusOK)
 		} else {
 			c.Status(http.StatusServiceUnavailable)

@@ -8,6 +8,7 @@ import (
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
@@ -89,7 +90,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			RetryPeriod:   10 * time.Second,
 			OnStartedLeading: func(c context.Context) {
 				klog.V(6).Infof("成为Leader，启动定时任务（集群巡检、Helm仓库更新、事件转发）")
-				setCurrentLeader(true)
+				service.LeaderService().SetCurrentLeader(true)
 				// 启动 Lease 过期清理（仅Leader）
 				// cleanupCtx, cancel := context.WithCancel(context.Background())
 				// l.cleanupCancel = cancel
@@ -105,7 +106,8 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			},
 			OnStoppedLeading: func() {
 				klog.V(6).Infof("不再是Leader，停止定时任务（集群巡检、Helm仓库更新、事件转发）")
-				setCurrentLeader(false)
+				service.LeaderService().SetCurrentLeader(false)
+
 				// 启用主备模式，不再同步集群状态 TODO clean
 				// // 停止 Lease 过期清理
 				// if l.cleanupCancel != nil {

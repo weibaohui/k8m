@@ -36,6 +36,7 @@ var localShellLogService = &shellLogService{}
 var localAiService = &aiService{}
 var localMcpService = &mcpService{}
 var localPromptService = &promptService{}
+var localLeaderService = &leaderService{}
 
 // init 中文函数注释：在 service 初始化时向 lease 包注入 ClusterID → RestConfig 的解析器，避免循环引入。
 func init() {
@@ -50,6 +51,11 @@ func init() {
 
 func PromptService() *promptService {
 	return localPromptService
+}
+
+// LeaderService 中文函数注释：获取 Leader 服务实例。
+func LeaderService() *leaderService {
+	return localLeaderService
 }
 
 func ChatService() *chatService {
