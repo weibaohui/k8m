@@ -198,6 +198,10 @@
                                             {
                                                 "name": "order",
                                                 "label": "排序"
+                                            },
+                                            {
+                                                "name": "show",
+                                                "label": "显示条件"
                                             }
                                         ]
                                     }
