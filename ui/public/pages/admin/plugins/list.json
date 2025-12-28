@@ -284,6 +284,8 @@
                 {
                     "name": "title",
                     "label": "名称",
+                    "type": "tpl",
+                    "tpl": "${title}(${name})",
                     "width": "240px"
                 },
                 {

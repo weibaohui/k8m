@@ -137,17 +137,18 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 		dbVer := cfgVerMap[name]
 		canUpgrade := statusStr != "discovered" && utils.CompareVersions(mod.Meta.Version, dbVer)
 		items = append(items, PluginItemVO{
-			Name:        mod.Meta.Name,
-			Title:       mod.Meta.Title,
-			Version:     mod.Meta.Version,
-			DbVersion:   dbVer,
-			CanUpgrade:  canUpgrade,
-			Description: mod.Meta.Description,
-			Status:      statusToCN(status),
-			Menus:       mod.Menus,
-			MenuCount:   len(mod.Menus),
-			CronCount:   len(mod.Crons),
-			Routes:      m.collectPluginRouteCategories(mod.Meta.Name),
+			Name:         mod.Meta.Name,
+			Title:        mod.Meta.Title,
+			Version:      mod.Meta.Version,
+			DbVersion:    dbVer,
+			CanUpgrade:   canUpgrade,
+			Description:  mod.Meta.Description,
+			Status:       statusToCN(status),
+			Menus:        mod.Menus,
+			MenuCount:    len(mod.Menus),
+			CronCount:    len(mod.Crons),
+			Dependencies: mod.Dependencies,
+			Routes:       m.collectPluginRouteCategories(mod.Meta.Name),
 		})
 	}
 	klog.V(6).Infof("获取插件列表，共计%d个", len(items))
