@@ -245,6 +245,7 @@ func main() {
 
 	// 初始化插件管理器并启动（集中注册与默认启用策略在 Start 中完成）
 	mgr := plugins.NewManager()
+	mgr.SetEngine(r)
 	//这里应该是主要注册路径，真正的启动应该剥离出去
 	mgr.Start()
 

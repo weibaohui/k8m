@@ -2,6 +2,8 @@ package plugins
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
@@ -67,6 +69,7 @@ func (m *Manager) RegisterParamRoutes(params *gin.RouterGroup) {
 	grp := params.Group("/plugin")
 	// 获取已启用插件的菜单数据
 	grp.GET("/menus", m.ListPluginMenus)
+
 }
 
 // ListPlugins 获取所有已注册插件的Meta与状态
@@ -159,6 +162,95 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 		result = append(result, convertMenusToVO(mod.Menus)...)
 	}
 	klog.V(6).Infof("获取插件菜单列表，共计%d个", len(result))
+	amis.WriteJsonData(c, result)
+}
+
+// ListPluginRoutes 返回各插件在三类分组下已注册的路由列表
+// 通过扫描 Gin 引擎的所有路由，按 /k8s/cluster、/mgm、/admin 三类分组，
+// 并从 /plugins/{name}/ 提取插件名进行归类
+func (m *Manager) ListPluginRoutes(c *gin.Context) {
+	m.mu.RLock()
+	engine := m.engine
+	m.mu.RUnlock()
+	if engine == nil {
+		amis.WriteJsonError(c, fmt.Errorf("Gin 引擎未设置"))
+		return
+	}
+
+	type RouteItem struct {
+		Method  string `json:"method"`
+		Path    string `json:"path"`
+		Handler string `json:"handler,omitempty"`
+	}
+	type PluginRouteVO struct {
+		Name       string      `json:"name"`
+		Cluster    []RouteItem `json:"cluster,omitempty"`
+		Management []RouteItem `json:"mgm,omitempty"`
+		Admin      []RouteItem `json:"admin,omitempty"`
+	}
+
+	routes := engine.Routes()
+	byPlugin := make(map[string]*PluginRouteVO)
+
+	for _, ri := range routes {
+		p := ri.Path
+		if !strings.Contains(p, "/plugins/") {
+			continue
+		}
+		idx := strings.Index(p, "/plugins/")
+		if idx < 0 {
+			continue
+		}
+		rest := p[idx+len("/plugins/"):]
+		if rest == "" {
+			continue
+		}
+		slash := strings.Index(rest, "/")
+		var pluginName string
+		if slash >= 0 {
+			pluginName = rest[:slash]
+		} else {
+			pluginName = rest
+		}
+		if pluginName == "" {
+			continue
+		}
+		// 仅列出已注册的模块名，避免误归类
+		m.mu.RLock()
+		_, exists := m.modules[pluginName]
+		m.mu.RUnlock()
+		if !exists {
+			continue
+		}
+		if _, ok := byPlugin[pluginName]; !ok {
+			byPlugin[pluginName] = &PluginRouteVO{Name: pluginName}
+		}
+		item := RouteItem{Method: ri.Method, Path: ri.Path, Handler: ri.Handler}
+		if strings.HasPrefix(p, "/k8s/cluster/") {
+			byPlugin[pluginName].Cluster = append(byPlugin[pluginName].Cluster, item)
+			continue
+		}
+		if strings.HasPrefix(p, "/mgm/") || p == "/mgm" {
+			byPlugin[pluginName].Management = append(byPlugin[pluginName].Management, item)
+			continue
+		}
+		if strings.HasPrefix(p, "/admin/") || p == "/admin" {
+			byPlugin[pluginName].Admin = append(byPlugin[pluginName].Admin, item)
+			continue
+		}
+	}
+
+	// 输出为稳定顺序
+	names := make([]string, 0, len(byPlugin))
+	for name := range byPlugin {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	result := make([]PluginRouteVO, 0, len(byPlugin))
+	for _, name := range names {
+		result = append(result, *byPlugin[name])
+	}
+	klog.V(6).Infof("统计插件已注册路由，共计%d个插件", len(result))
 	amis.WriteJsonData(c, result)
 }
 

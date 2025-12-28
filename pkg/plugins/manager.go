@@ -19,6 +19,8 @@ type Manager struct {
 	status  map[string]Status
 	// apiGroups 已注册的后端API路由分组引用，用于支持启用时动态注册路由
 	apiGroups []*gin.RouterGroup
+	// engine Gin 引擎引用，用于统计已注册路由
+	engine *gin.Engine
 	// cron 定时任务调度器
 	cron *cron.Cron
 	// cronIDs 记录每个插件每条 cron 的 EntryID
@@ -214,6 +216,14 @@ func SetRegistrar(f func(*Manager)) {
 	registrar = f
 }
 
+// SetEngine 设置 Gin 引擎
+// 便于后续统计与展示插件已注册的路由
+func (m *Manager) SetEngine(e *gin.Engine) {
+	m.mu.Lock()
+	m.engine = e
+	m.mu.Unlock()
+}
+
 // Start 启动插件管理：集中注册 + 默认启用策略
 func (m *Manager) Start() {
 	if registrar != nil {
@@ -298,7 +308,7 @@ func (m *Manager) RegisterManagementRoutes(api *gin.RouterGroup) {
 	}
 	// 为已启用插件注册路由
 	for name, mod := range m.modules {
-		if m.status[name] == StatusEnabled && mod.ClusterRouter != nil {
+		if m.status[name] == StatusEnabled && mod.ManagementRouter != nil {
 			klog.V(6).Infof("注册插件路由: %s", name)
 			mod.ManagementRouter(api)
 		}
@@ -316,7 +326,7 @@ func (m *Manager) RegisterPluginAdminRoutes(api *gin.RouterGroup) {
 	}
 	// 为已启用插件注册路由
 	for name, mod := range m.modules {
-		if m.status[name] == StatusEnabled && mod.ClusterRouter != nil {
+		if m.status[name] == StatusEnabled && mod.PluginAdminRouter != nil {
 			klog.V(6).Infof("注册插件路由: %s", name)
 			mod.PluginAdminRouter(api)
 		}
