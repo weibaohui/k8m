@@ -39,8 +39,7 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 
 	// 列出所有已注册插件的Meta和状态
 	grp.GET("/list", m.ListPlugins)
-	// 获取已启用插件的菜单数据
-	grp.GET("/menus", m.ListPluginMenus)
+
 	// 安装插件
 	grp.POST("/install/:name", m.InstallPlugin)
 	// 启用插件
@@ -58,6 +57,16 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 	// 统一开关接口（生效/关闭）
 	grp.POST("/cron/name/:name/spec/:spec/enabled/:enabled", m.SetPluginCronEnabled)
 
+}
+
+// RegisterParamRoutes 注册插件的参数路由
+// 参数路由用于插件的参数配置接口，只要登录即可访问，类似公共参数。
+// 提供功能：
+// 1. 获取已启用插件的菜单数据
+func (m *Manager) RegisterParamRoutes(params *gin.RouterGroup) {
+	grp := params.Group("/plugin")
+	// 获取已启用插件的菜单数据
+	grp.GET("/menus", m.ListPluginMenus)
 }
 
 // ListPlugins 获取所有已注册插件的Meta与状态

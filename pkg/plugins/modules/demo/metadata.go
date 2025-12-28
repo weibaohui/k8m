@@ -43,6 +43,7 @@ var Metadata = plugins.Module{
 					Key:         "plugin_demo_admin",
 					Title:       "演示插件Admin",
 					Icon:        "fa-solid fa-puzzle-piece",
+					Show:        "isPlatformAdmin()==true",
 					EventType:   "custom",
 					CustomEvent: `() => loadJsonPage("/plugins/demo/admin")`,
 					Order:       102,

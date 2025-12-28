@@ -36,7 +36,7 @@ const Sidebar = () => {
         const fetchPluginMenus = async () => {
             try {
                 const resp = await fetcher({
-                    url: '/admin/plugin/menus',
+                    url: '/params/plugin/menus',
                     method: 'get'
                 });
                 if (resp?.data && typeof resp.data === 'object') {
