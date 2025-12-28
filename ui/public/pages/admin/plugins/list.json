@@ -156,7 +156,7 @@
                                         "type": "static",
                                         "name": "version",
                                         "label": "标识",
-                                        "tpl": "${name} ${title} [${status}]"
+                                        "tpl": "${name} ${title} (${status})"
                                     },
                                     {
                                         "type": "static",
