@@ -19,7 +19,7 @@ func (m *Manager) RegisterClusterRoutes(api *gin.RouterGroup) {
 	// 为已启用插件注册路由
 	for name, mod := range m.modules {
 		if m.status[name] == StatusEnabled && mod.ClusterRouter != nil {
-			klog.V(6).Infof("注册插件路由: %s", name)
+			klog.V(6).Infof("注册插件 集群 路由: %s", name)
 			mod.ClusterRouter(api)
 		}
 	}
@@ -37,7 +37,7 @@ func (m *Manager) RegisterManagementRoutes(api *gin.RouterGroup) {
 	// 为已启用插件注册路由
 	for name, mod := range m.modules {
 		if m.status[name] == StatusEnabled && mod.ManagementRouter != nil {
-			klog.V(6).Infof("注册插件路由: %s", name)
+			klog.V(6).Infof("注册插件 管理 路由: %s", name)
 			mod.ManagementRouter(api)
 		}
 	}
@@ -55,7 +55,7 @@ func (m *Manager) RegisterPluginAdminRoutes(api *gin.RouterGroup) {
 	// 为已启用插件注册路由
 	for name, mod := range m.modules {
 		if m.status[name] == StatusEnabled && mod.PluginAdminRouter != nil {
-			klog.V(6).Infof("注册插件路由: %s", name)
+			klog.V(6).Infof("注册插件 插件管理 路由: %s", name)
 			mod.PluginAdminRouter(api)
 		}
 	}

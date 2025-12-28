@@ -2,12 +2,13 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/admin"
 	"k8s.io/klog/v2"
 )
 
 func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
-	g := arg.Group("/plugins/webhook")
+	g := arg.Group("/plugins/" + modules.PluginNameWebhook)
 	ctrl := &admin.Controller{}
 
 	g.GET("/list", ctrl.WebhookList)
