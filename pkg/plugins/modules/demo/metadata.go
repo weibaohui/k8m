@@ -57,8 +57,11 @@ var Metadata = plugins.Module{
 		"leader",
 	},
 
-	Lifecycle:         &DemoLifecycle{},
-	ClusterRouter:     route.RegisterClusterRoutes,
-	ManagementRouter:  route.RegisterManagementRoutes,
+	Lifecycle: &DemoLifecycle{},
+	//集群类操作API，要求是登录用户，一般用于集群相关操作，路径会自动注入集群ID
+	ClusterRouter: route.RegisterClusterRoutes,
+	//管理类操作API，要求是登录用户，可用于各类操作，但是拿不到集群ID
+	ManagementRouter: route.RegisterManagementRoutes,
+	//插件管理员类操作API，要求是平台管理员，一般用于本插件的参数设置等管理功能
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 }
