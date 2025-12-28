@@ -7,18 +7,17 @@
   - Worker：按批次读取未处理事件、执行过滤与转发、记录处理结果
 
 ## 配置入口
-- 平台参数（全局）：
-  - 路径：界面「配置管理 → 事件转发」
-  - 接口：`get:/admin/config/all`、`post:/admin/config/update`
+- 插件参数（eventhandler）：
+  - 路径：界面「事件转发插件 → 事件转发参数」
+  - 接口：`get:/admin/plugins/eventhandler/setting/get`、`post:/admin/plugins/eventhandler/setting/update`
   - 字段：
-    - `event_forward_enabled`：总开关
     - `event_worker_process_interval`：处理周期（秒）
     - `event_worker_batch_size`：批处理大小
     - `event_worker_max_retries`：最大重试次数
     - `event_watcher_buffer_size`：Watcher 缓存大小
 - 规则配置（按集群与Webhook）：
-  - 路径：界面「配置 → 事件转发」
-  - 接口：`/admin/event/list`、`/admin/event/save`、`/admin/event/delete/:ids`
+  - 路径：界面「事件转发插件 → 事件转发规则」
+  - 接口：`/admin/plugins/eventhandler/list`、`/admin/plugins/eventhandler/save`、`/admin/plugins/eventhandler/delete/:ids`
   - 字段包含：目标集群、Webhook、命名空间/名称/原因过滤、反选、AI总结等
 
 ## 原理流程
@@ -29,19 +28,19 @@
    - 周期性批量获取未处理事件（按全局批大小）
    - 按每条转发规则进行过滤与推送（Webhook），成功后标记已处理
 3. 配置加载
-   - `pkg/eventhandler/config/loader.go` 从数据库加载启用的事件规则
-   - 全局参数从 `models.Config` 读取：总开关、处理周期、批大小、重试次数、缓存大小
+   - `pkg/plugins/modules/eventhandler/config/loader.go` 从数据库加载启用的事件规则
+   - 插件参数从 `eventhandler_event_forward_settings` 读取：处理周期、批大小、重试次数、缓存大小
 
 ## 启停与多实例协同
 - Leader 节点负责启动/停止 Watcher 与 Worker，并负责参数动态更新：
-  - 启动时按 `event_forward_enabled` 决定是否启动事件转发
-  - 定期同步平台配置（推荐每 1 分钟），若开关或参数变化则启停/更新
+  - 启动时若存在启用的转发规则，则启动事件转发
+  - 定期同步插件参数（推荐每 1 分钟），若参数变化则更新
 - 推荐入口方法（统一调用）：
-  - 文件：`pkg/eventhandler/event.go`
+  - 文件：`pkg/plugins/modules/eventhandler/event.go`
   - 方法：
-    - `StartEventForwarding()`：按总开关启动 Watcher/Worker
+    - `StartEventForwarding()`：按启用规则启动 Watcher/Worker
     - `StopEventForwarding()`：停止 Watcher/Worker
-    - `SyncEventForwardingFromConfig()`：按最新配置同步（开关或参数变化时生效）
+    - `SyncEventForwardingFromConfig()`：按最新配置同步（参数变化时生效）
   - 使用方式：
     - Leader 入口 `OnStartedLeading`：调用 `StartEventForwarding()` 并定时执行 `SyncEventForwardingFromConfig()`
     - Leader 退出 `OnStoppedLeading`：调用 `StopEventForwarding()`
@@ -53,13 +52,11 @@
   - 缓存大小改变需要重启 Watcher 以应用新的通道容量
 
 ## 前端提示
-- 事件转发列表页顶部会提示当前总开关状态：
-  - 若关闭：提示规则不会生效，并引导前往全局开关页面
-  - 若开启：显示当前生效参数（处理周期、批大小、重试次数、缓存大小）
+- 事件转发列表页顶部会显示当前生效参数（处理周期、批大小、重试次数、缓存大小）
 
 ## 常见问题
 - 规则配置已填写但不生效：
-  - 检查平台总开关 `event_forward_enabled` 是否开启
+  - 检查是否存在“启用”的规则
   - 检查 Leader 节点是否运行事件转发
 - 参数更新后未即时生效：
   - Worker 处理周期会在下一次 Tick 自动应用
