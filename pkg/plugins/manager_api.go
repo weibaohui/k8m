@@ -2,7 +2,6 @@ package plugins
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -17,17 +16,33 @@ import (
 // PluginItemVO 插件列表展示结构体
 // 用于在管理员接口中返回插件的基础信息与当前状态
 type PluginItemVO struct {
-	Name         string   `json:"name"`
-	Title        string   `json:"title"`
-	Version      string   `json:"version"`
-	DbVersion    string   `json:"dbVersion,omitempty"`
-	CanUpgrade   bool     `json:"canUpgrade,omitempty"`
-	Description  string   `json:"description"`
-	Status       string   `json:"status"`
-	Menus        []Menu   `json:"menus,omitempty"`
-	MenuCount    int      `json:"menuCount,omitempty"`
-	CronCount    int      `json:"cronCount,omitempty"`
-	Dependencies []string `json:"dependencies,omitempty"`
+	Name         string            `json:"name"`
+	Title        string            `json:"title"`
+	Version      string            `json:"version"`
+	DbVersion    string            `json:"dbVersion,omitempty"`
+	CanUpgrade   bool              `json:"canUpgrade,omitempty"`
+	Description  string            `json:"description"`
+	Status       string            `json:"status"`
+	Menus        []Menu            `json:"menus,omitempty"`
+	MenuCount    int               `json:"menuCount,omitempty"`
+	CronCount    int               `json:"cronCount,omitempty"`
+	Dependencies []string          `json:"dependencies,omitempty"`
+	Routes       []RouteCategoryVO `json:"routes,omitempty"`
+}
+
+// RouteItem 路由条目
+// 展示 HTTP 方法、路径、处理器名
+type RouteItem struct {
+	Method  string `json:"method"`
+	Path    string `json:"path"`
+	Handler string `json:"handler,omitempty"`
+}
+
+// RouteCategoryVO 路由类别
+// 类别为 cluster/mgm/admin，routes 为该类别下的路由列表
+type RouteCategoryVO struct {
+	Category string      `json:"category"`
+	Routes   []RouteItem `json:"routes"`
 }
 
 // RegisterAdminRoutes 注册插件的管理员路由
@@ -98,17 +113,17 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 		dbVer := cfgVerMap[name]
 		canUpgrade := statusStr != "discovered" && utils.CompareVersions(mod.Meta.Version, dbVer)
 		items = append(items, PluginItemVO{
-			Name:         mod.Meta.Name,
-			Title:        mod.Meta.Title,
-			Version:      mod.Meta.Version,
-			DbVersion:    dbVer,
-			CanUpgrade:   canUpgrade,
-			Description:  mod.Meta.Description,
-			Status:       statusToCN(status),
-			Menus:        mod.Menus,
-			MenuCount:    len(mod.Menus),
-			CronCount:    len(mod.Crons),
-			Dependencies: mod.Dependencies,
+			Name:        mod.Meta.Name,
+			Title:       mod.Meta.Title,
+			Version:     mod.Meta.Version,
+			DbVersion:   dbVer,
+			CanUpgrade:  canUpgrade,
+			Description: mod.Meta.Description,
+			Status:      statusToCN(status),
+			Menus:       mod.Menus,
+			MenuCount:   len(mod.Menus),
+			CronCount:   len(mod.Crons),
+			Routes:      m.collectPluginRouteCategories(mod.Meta.Name),
 		})
 	}
 	klog.V(6).Infof("获取插件列表，共计%d个", len(items))
@@ -177,81 +192,100 @@ func (m *Manager) ListPluginRoutes(c *gin.Context) {
 		return
 	}
 
-	type RouteItem struct {
-		Method  string `json:"method"`
-		Path    string `json:"path"`
-		Handler string `json:"handler,omitempty"`
-	}
-	type PluginRouteVO struct {
-		Name       string      `json:"name"`
-		Cluster    []RouteItem `json:"cluster,omitempty"`
-		Management []RouteItem `json:"mgm,omitempty"`
-		Admin      []RouteItem `json:"admin,omitempty"`
-	}
+	cluster := make([]RouteItem, 0)
+	mgm := make([]RouteItem, 0)
+	admin := make([]RouteItem, 0)
 
-	routes := engine.Routes()
-	byPlugin := make(map[string]*PluginRouteVO)
-
-	for _, ri := range routes {
+	for _, ri := range engine.Routes() {
 		p := ri.Path
 		if !strings.Contains(p, "/plugins/") {
 			continue
 		}
-		idx := strings.Index(p, "/plugins/")
-		if idx < 0 {
-			continue
-		}
-		rest := p[idx+len("/plugins/"):]
-		if rest == "" {
-			continue
-		}
-		slash := strings.Index(rest, "/")
-		var pluginName string
-		if slash >= 0 {
-			pluginName = rest[:slash]
-		} else {
-			pluginName = rest
-		}
-		if pluginName == "" {
-			continue
-		}
-		// 仅列出已注册的模块名，避免误归类
-		m.mu.RLock()
-		_, exists := m.modules[pluginName]
-		m.mu.RUnlock()
-		if !exists {
-			continue
-		}
-		if _, ok := byPlugin[pluginName]; !ok {
-			byPlugin[pluginName] = &PluginRouteVO{Name: pluginName}
-		}
 		item := RouteItem{Method: ri.Method, Path: ri.Path, Handler: ri.Handler}
 		if strings.HasPrefix(p, "/k8s/cluster/") {
-			byPlugin[pluginName].Cluster = append(byPlugin[pluginName].Cluster, item)
+			cluster = append(cluster, item)
 			continue
 		}
 		if strings.HasPrefix(p, "/mgm/") || p == "/mgm" {
-			byPlugin[pluginName].Management = append(byPlugin[pluginName].Management, item)
+			mgm = append(mgm, item)
 			continue
 		}
 		if strings.HasPrefix(p, "/admin/") || p == "/admin" {
-			byPlugin[pluginName].Admin = append(byPlugin[pluginName].Admin, item)
+			admin = append(admin, item)
 			continue
 		}
 	}
 
-	// 输出为稳定顺序
-	names := make([]string, 0, len(byPlugin))
-	for name := range byPlugin {
-		names = append(names, name)
+	result := []RouteCategoryVO{
+		{Category: "cluster", Routes: cluster},
+		{Category: "mgm", Routes: mgm},
+		{Category: "admin", Routes: admin},
 	}
-	sort.Strings(names)
-	result := make([]PluginRouteVO, 0, len(byPlugin))
-	for _, name := range names {
-		result = append(result, *byPlugin[name])
-	}
-	klog.V(6).Infof("统计插件已注册路由，共计%d个插件", len(result))
+	klog.V(6).Infof("统计插件路由类别: cluster=%d, mgm=%d, admin=%d", len(cluster), len(mgm), len(admin))
 	amis.WriteJsonData(c, result)
+}
+
+// collectPluginRouteCategories 收集指定插件的三类路由数组
+// 仅统计路径中包含 /plugins/{name}/ 的路由，并按类别归集
+func (m *Manager) collectPluginRouteCategories(name string) []RouteCategoryVO {
+	m.mu.RLock()
+	engine := m.engine
+	m.mu.RUnlock()
+	if engine == nil || name == "" {
+		return nil
+	}
+	cluster := make([]RouteItem, 0)
+	mgm := make([]RouteItem, 0)
+	admin := make([]RouteItem, 0)
+
+	prefix := "/plugins/" + name
+	for _, ri := range engine.Routes() {
+		p := ri.Path
+		if !strings.Contains(p, "/plugins/") {
+			continue
+		}
+		// 严格匹配插件名
+		if !(strings.Contains(p, prefix+"/") || p == prefix) {
+			// 回退到解析插件名方式，避免遗漏
+			idx := strings.Index(p, "/plugins/")
+			if idx < 0 {
+				continue
+			}
+			rest := p[idx+len("/plugins/"):]
+			if rest == "" {
+				continue
+			}
+			slash := strings.Index(rest, "/")
+			var pluginName string
+			if slash >= 0 {
+				pluginName = rest[:slash]
+			} else {
+				pluginName = rest
+			}
+			if pluginName != name {
+				continue
+			}
+		}
+		item := RouteItem{Method: ri.Method, Path: ri.Path, Handler: ri.Handler}
+		if strings.HasPrefix(p, "/k8s/cluster/") {
+			cluster = append(cluster, item)
+			continue
+		}
+		if strings.HasPrefix(p, "/mgm/") || p == "/mgm" {
+			mgm = append(mgm, item)
+			continue
+		}
+		if strings.HasPrefix(p, "/admin/") || p == "/admin" {
+			admin = append(admin, item)
+			continue
+		}
+	}
+	klog.V(6).Infof("插件 %s 路由类别统计: cluster=%d, mgm=%d, admin=%d", name, len(cluster), len(mgm), len(admin))
+	return []RouteCategoryVO{
+		{Category: "cluster", Routes: cluster},
+		{Category: "mgm", Routes: mgm},
+		{Category: "admin", Routes: admin},
+	}
 }
 
 // InstallPlugin 安装指定名称的插件
