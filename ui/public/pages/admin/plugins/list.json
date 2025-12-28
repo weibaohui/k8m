@@ -170,11 +170,6 @@
                                         "label": "描述"
                                     },
                                     {
-                                        "type": "static",
-                                        "name": "status",
-                                        "label": "状态"
-                                    },
-                                    {
                                         "type": "table",
                                         "title": "菜单列表",
                                         "source": "${menus}",
