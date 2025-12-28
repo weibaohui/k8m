@@ -204,6 +204,80 @@
                                                 "label": "显示条件"
                                             }
                                         ]
+                                    },
+                                    {
+                                        "type": "tabs",
+                                        "tabs": [
+                                            {
+                                                "title": "集群 API",
+                                                "body": {
+                                                    "type": "table",
+                                                    "source": "${(routes || []).find(r => r.category === 'cluster')?.routes || []}",
+                                                    "columns": [
+                                                        {
+                                                            "name": "method",
+                                                            "label": "方法",
+                                                            "width": "100px"
+                                                        },
+                                                        {
+                                                            "name": "path",
+                                                            "label": "路径"
+                                                        },
+                                                        {
+                                                            "name": "handler",
+                                                            "label": "处理器",
+                                                            "width": "280px"
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "title": "管理 API",
+                                                "body": {
+                                                    "type": "table",
+                                                    "source": "${(routes || []).find(r => r.category === 'mgm')?.routes || []}",
+                                                    "columns": [
+                                                        {
+                                                            "name": "method",
+                                                            "label": "方法",
+                                                            "width": "100px"
+                                                        },
+                                                        {
+                                                            "name": "path",
+                                                            "label": "路径"
+                                                        },
+                                                        {
+                                                            "name": "handler",
+                                                            "label": "处理器",
+                                                            "width": "280px"
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "title": "管理员 API",
+                                                "body": {
+                                                    "type": "table",
+                                                    "source": "${(routes || []).find(r => r.category === 'admin')?.routes || []}",
+                                                    "columns": [
+                                                        {
+                                                            "name": "method",
+                                                            "label": "方法",
+                                                            "width": "100px"
+                                                        },
+                                                        {
+                                                            "name": "path",
+                                                            "label": "路径"
+                                                        },
+                                                        {
+                                                            "name": "handler",
+                                                            "label": "处理器",
+                                                            "width": "280px"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
                                     }
                                 ]
                             }
