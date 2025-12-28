@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/plugins"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
 )
@@ -15,11 +13,6 @@ import (
 // 调用时机：在AutoGenerateSummaryIfEnabled()完成后调用
 // 设计原则：单纯的webhook发送功能，不负责AI总结生成
 func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.SendResult, error) {
-	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
-		klog.V(4).Infof("webhook插件未启用，跳过发送webhook.调用方法PushToHooksByRecordID 参数recordID=%d", recordID)
-		return nil, fmt.Errorf("webhook插件未启用")
-	}
 
 	// 查询webhooks
 	receiver := &models.WebhookReceiver{}

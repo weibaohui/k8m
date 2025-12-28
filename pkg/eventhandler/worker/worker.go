@@ -13,8 +13,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/plugins"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
@@ -267,11 +265,6 @@ func (w *EventWorker) processBatch() error {
 // pushWebhookBatchForIDs 根据指定的 webhookID 列表批量推送事件
 // 中文函数注释：用于按单条事件配置指定的 webhook 目标推送消息，不再依赖全局按集群的 webhook 映射。
 func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string, events []*models.K8sEvent, ruleName string, aiEnabled bool, aiTemplate string) error {
-	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
-		klog.V(4).Infof("webhook插件未启用，跳过发送webhook.调用方法pushWebhookBatchForIDs 参数cluster=%s, ruleName=%s", cluster, ruleName)
-		return fmt.Errorf("webhook插件未启用")
-	}
 
 	if len(webhookIDs) == 0 {
 		klog.V(6).Infof("规则 %s 未配置Webhook，跳过推送", ruleName)
