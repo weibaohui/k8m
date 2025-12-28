@@ -13,8 +13,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"github.com/weibaohui/k8m/pkg/service"
-	"github.com/weibaohui/k8m/pkg/webhook"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )

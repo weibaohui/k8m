@@ -1,4 +1,4 @@
-package webhook
+package core
 
 import (
 	"net/url"

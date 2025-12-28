@@ -1,4 +1,4 @@
-package webhook
+package core
 
 import (
 	"bytes"
@@ -10,23 +10,19 @@ import (
 )
 
 func TestLoggedHTTPClient(t *testing.T) {
-	// 创建测试服务器
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 模拟webhook响应
 		response := map[string]interface{}{
 			"errcode": 0,
 			"errmsg":  "ok",
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 	defer testServer.Close()
 
-	// 创建带日志记录的HTTP客户端
 	client := NewLoggedHTTPClient(5*time.Second, 0, "test-sender", "test-receiver")
 
-	// 准备测试请求
 	requestBody := map[string]interface{}{
 		"msgtype": "text",
 		"text": map[string]string{
@@ -41,24 +37,20 @@ func TestLoggedHTTPClient(t *testing.T) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	// 执行请求并记录日志
 	resp, webhookLog, err := client.DoWithLogging(req)
 	if err != nil {
 		t.Fatalf("请求执行失败: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// 验证响应
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("期望状态码 200, 实际得到 %d", resp.StatusCode)
 	}
 
-	// 验证日志记录
 	if webhookLog == nil {
 		t.Fatal("webhook日志不应该为空")
 	}
 
-	// 验证请求日志
 	if webhookLog.Request.Method != "POST" {
 		t.Errorf("期望请求方法为 POST, 实际得到 %s", webhookLog.Request.Method)
 	}
@@ -71,7 +63,6 @@ func TestLoggedHTTPClient(t *testing.T) {
 		t.Error("请求体大小不应该为0")
 	}
 
-	// 验证响应日志
 	if webhookLog.Response.StatusCode != http.StatusOK {
 		t.Errorf("期望响应状态码为 200, 实际得到 %d", webhookLog.Response.StatusCode)
 	}
@@ -84,12 +75,9 @@ func TestLoggedHTTPClient(t *testing.T) {
 		t.Error("响应时间不应该为0")
 	}
 
-	// 验证摘要
 	if webhookLog.Summary == "" {
 		t.Error("日志摘要不应该为空")
 	}
-
-	t.Logf("测试成功，日志摘要: %s", webhookLog.Summary)
 }
 
 func TestSanitizeURL(t *testing.T) {

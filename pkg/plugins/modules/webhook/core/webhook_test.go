@@ -1,6 +1,8 @@
-package webhook
+package core
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -9,9 +11,9 @@ import (
 
 func TestWebhookConfig(t *testing.T) {
 	tests := []struct {
-		name     string
-		config   *WebhookConfig
-		wantErr  bool
+		name    string
+		config  *WebhookConfig
+		wantErr bool
 	}{
 		{
 			name: "valid dingtalk config",
@@ -58,41 +60,38 @@ func TestWebhookConfig(t *testing.T) {
 }
 
 func TestPlatformAdapters(t *testing.T) {
-	// Ensure adapters are registered
 	RegisterAllAdapters()
 
 	platforms := []string{"dingtalk", "feishu", "wechat", "default"}
-	
+
 	for _, platform := range platforms {
 		t.Run(platform, func(t *testing.T) {
 			adapter, err := GetAdapter(platform)
 			if err != nil {
 				t.Fatalf("GetAdapter(%s) failed: %v", platform, err)
 			}
-			
+
 			if adapter.Name() != platform {
 				t.Errorf("Expected adapter name %s, got %s", platform, adapter.Name())
 			}
-			
-			// Test message formatting
+
 			config := &WebhookConfig{
 				Platform:  platform,
 				TargetURL: "https://example.com/webhook",
 			}
-			
+
 			msg := "Test message"
 			raw := "Raw test data"
-			
+
 			body, err := adapter.FormatMessage(msg, raw, config)
 			if err != nil {
 				t.Errorf("FormatMessage failed for %s: %v", platform, err)
 			}
-			
+
 			if len(body) == 0 {
 				t.Errorf("FormatMessage returned empty body for %s", platform)
 			}
-			
-			// Test content type
+
 			contentType := adapter.GetContentType()
 			if contentType == "" {
 				t.Errorf("GetContentType returned empty string for %s", platform)
@@ -106,7 +105,7 @@ func TestWebhookClient(t *testing.T) {
 	if client == nil {
 		t.Fatal("NewWebhookClient() returned nil")
 	}
-	
+
 	clientWithTimeout := NewWebhookClientWithTimeout(10 * time.Second)
 	if clientWithTimeout == nil {
 		t.Fatal("NewWebhookClientWithTimeout() returned nil")
@@ -114,27 +113,22 @@ func TestWebhookClient(t *testing.T) {
 }
 
 func TestPushMsgToSingleTarget(t *testing.T) {
-	// Test with a mock receiver
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	defer ts.Close()
+
 	receiver := &models.WebhookReceiver{
 		Platform:  "default",
-		TargetURL: "https://httpbin.org/post", // Using httpbin for testing
+		TargetURL: ts.URL,
 	}
-	
+
 	msg := "Test webhook message"
 	raw := "Raw test data"
-	
-	// This will make an actual HTTP request to httpbin
-	// In a real test environment, you might want to mock this
+
 	result := PushMsgToSingleTarget(msg, raw, receiver)
-	
 	if result == nil {
 		t.Fatal("PushMsgToSingleTarget returned nil result")
 	}
-	
-	// For httpbin, we expect success
-	if result.Status != "success" {
-		t.Logf("Expected success status, got: %s (this might be expected if httpbin is not available)", result.Status)
-	}
 }
- 
- 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/webhook"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
 )
 

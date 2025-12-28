@@ -35,7 +35,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/admin/inspection/webhook/records",
+      "api": "get:/admin/plugins/webhook/records",
       "columns": [
         {
           "type": "operation",
@@ -188,3 +188,4 @@
     }
   ]
 }
+

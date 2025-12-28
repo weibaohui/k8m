@@ -1,4 +1,4 @@
-package webhook
+package core
 
 // RegisterAllAdapters registers all platform adapters.
 func RegisterAllAdapters() {
@@ -7,8 +7,4 @@ func RegisterAllAdapters() {
 	RegisterAdapter("wechat", &WechatAdapter{})
 	RegisterAdapter("default", &DefaultAdapter{})
 	// Future adapters can be registered here
-}
-
-func init() {
-	RegisterAllAdapters()
 }

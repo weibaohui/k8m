@@ -4,6 +4,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
 )
 
@@ -20,6 +21,11 @@ func init() {
 			klog.V(6).Infof("注册leader插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册leader插件成功")
+		}
+		if err := m.Register(webhook.Metadata); err != nil {
+			klog.V(6).Infof("注册webhook插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册webhook插件成功")
 		}
 	})
 }

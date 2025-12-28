@@ -399,8 +399,6 @@ func main() {
 		inspection.RegisterAdminRecordRoutes(admin)
 		// 集群巡检脚本lua脚本管理
 		inspection.RegisterAdminLuaScriptRoutes(admin)
-		// 集群巡检webhook管理
-		inspection.RegisterAdminWebhookRoutes(admin)
 		// MCP配置
 		mcp.RegisterMCPServerRoutes(admin)
 		mcp.RegisterMCPToolRoutes(admin)
