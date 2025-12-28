@@ -3,6 +3,12 @@
     "title": "插件管理",
     "body": [
         {
+            "type": "alert",
+            "level": "warning",
+            "className": "mb-2",
+            "body": "<div class='alert alert-info'><p><strong>特别提醒：</strong>插件的安装、启用、停止、卸载等操作不会立即生效，需要重启生效。</p></div>"
+        },
+        {
             "type": "crud",
             "id": "pluginCRUD",
             "name": "pluginCRUD",
