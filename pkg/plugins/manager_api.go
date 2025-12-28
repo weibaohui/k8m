@@ -45,6 +45,29 @@ type RouteCategoryVO struct {
 	Routes   []RouteItem `json:"routes"`
 }
 
+// extractPluginName 从路由路径中提取插件名
+// 规则：寻找 "/plugins/" 段，返回其后第一个路径段作为插件名
+// 示例：
+// - /k8s/cluster/:cluster/plugins/demo/items    -> demo
+// - /admin/plugins/demo/remove/items/:id       -> demo
+// - /mgm/plugins/demo                          -> demo
+func extractPluginName(p string) (string, bool) {
+	idx := strings.Index(p, "/plugins/")
+	if idx < 0 {
+		return "", false
+	}
+	rest := p[idx+len("/plugins/"):]
+	if rest == "" {
+		return "", false
+	}
+	slash := strings.IndexByte(rest, '/')
+	if slash >= 0 {
+		return rest[:slash], true
+	}
+	klog.V(6).Infof("提取插件名: %s", rest)
+	return rest, true
+}
+
 // RegisterAdminRoutes 注册插件的管理员路由
 // 管理员路由通常用于插件的配置、管理和操作接口，需要较高的权限才能访问。
 // 提供功能：
@@ -238,33 +261,16 @@ func (m *Manager) collectPluginRouteCategories(name string) []RouteCategoryVO {
 	mgm := make([]RouteItem, 0)
 	admin := make([]RouteItem, 0)
 
-	prefix := "/plugins/" + name
 	for _, ri := range engine.Routes() {
 		p := ri.Path
+		klog.V(6).Infof("路由路径: %s", p)
 		if !strings.Contains(p, "/plugins/") {
 			continue
 		}
-		// 严格匹配插件名
-		if !(strings.Contains(p, prefix+"/") || p == prefix) {
-			// 回退到解析插件名方式，避免遗漏
-			idx := strings.Index(p, "/plugins/")
-			if idx < 0 {
-				continue
-			}
-			rest := p[idx+len("/plugins/"):]
-			if rest == "" {
-				continue
-			}
-			slash := strings.Index(rest, "/")
-			var pluginName string
-			if slash >= 0 {
-				pluginName = rest[:slash]
-			} else {
-				pluginName = rest
-			}
-			if pluginName != name {
-				continue
-			}
+		// 提取插件名并进行精确匹配
+		pluginName, ok := extractPluginName(p)
+		if !ok || pluginName != name {
+			continue
 		}
 		item := RouteItem{Method: ri.Method, Path: ri.Path, Handler: ri.Handler}
 		if strings.HasPrefix(p, "/k8s/cluster/") {
