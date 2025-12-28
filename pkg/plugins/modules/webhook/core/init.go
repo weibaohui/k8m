@@ -1,4 +1,4 @@
-package webhook
+package core
 
 // RegisterAllAdapters registers all platform adapters.
 func RegisterAllAdapters() {
@@ -12,3 +12,4 @@ func RegisterAllAdapters() {
 func init() {
 	RegisterAllAdapters()
 }
+

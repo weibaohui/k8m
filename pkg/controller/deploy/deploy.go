@@ -599,7 +599,7 @@ func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
 	// 批量更新每个Deployment的镜像
 	for _, deployment := range req.Deployments {
 		deploymentKey := fmt.Sprintf("%s/%s", deployment.Namespace, deployment.Name)
-		
+
 		// 获取现有的Deployment
 		var existingDeployment v1.Deployment
 		err = kom.Cluster(selectedCluster).WithContext(ctx).
@@ -663,10 +663,10 @@ func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
 	} else if successCount == 0 {
 		// 全部失败
 		errorMsg := fmt.Sprintf("批量更新失败，共 %d 个错误：\n%s", len(errors), strings.Join(errors, "\n"))
-		amis.WriteJsonError(c, fmt.Errorf(errorMsg))
+		amis.WriteJsonError(c, fmt.Errorf("%s", errorMsg))
 	} else {
 		// 部分成功
-		resultMsg := fmt.Sprintf("批量更新完成：成功 %d 个，失败 %d 个。\n失败详情：\n%s", 
+		resultMsg := fmt.Sprintf("批量更新完成：成功 %d 个，失败 %d 个。\n失败详情：\n%s",
 			successCount, len(errors), strings.Join(errors, "\n"))
 		amis.WriteJsonOKMsg(c, resultMsg)
 	}

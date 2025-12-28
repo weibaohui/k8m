@@ -1,4 +1,4 @@
-package webhook
+package core
 
 import (
 	"context"
@@ -48,3 +48,4 @@ func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookRece
 	}
 	return results
 }
+

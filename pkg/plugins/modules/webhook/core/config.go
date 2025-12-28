@@ -1,4 +1,4 @@
-package webhook
+package core
 
 import (
 	"net/url"
@@ -90,3 +90,4 @@ func (c *WebhookConfig) Validate() error {
 
 	return nil
 }
+

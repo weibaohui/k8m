@@ -1,4 +1,4 @@
-package webhook
+package core
 
 import (
 	"bytes"
@@ -329,3 +329,4 @@ func (c *LoggedHTTPClient) saveToDatabase(log *WebhookLog) {
 		klog.V(4).Infof("Webhook log saved to database with ID: %d", record.ID)
 	}
 }
+

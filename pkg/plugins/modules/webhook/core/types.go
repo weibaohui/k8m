@@ -1,4 +1,4 @@
-package webhook
+package core
 
 import (
 	"fmt"
@@ -64,3 +64,4 @@ func GetRegisteredPlatforms() []string {
 	}
 	return platforms
 }
+

@@ -832,30 +832,6 @@ export const initialMenu: MenuItem[] = [
                 order: 2,
             },
             {
-                key: 'webhook_management',
-                title: 'webhook管理',
-                icon: 'fa-solid fa-clipboard-list',
-                order: 4,
-                children: [
-                    {
-                        key: 'webhook_management',
-                        title: 'webhook列表',
-                        icon: 'fa-solid fa-bell-concierge',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/webhook")',
-                        order: 5,
-                    },
-                    {
-                        key: 'webhook_record',
-                        title: 'webhook记录',
-                        icon: 'fa-solid fa-file-lines',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/webhook_record")',
-                        order: 6,
-                    },
-                ],
-            },
-            {
                 key: 'ai_model_config',
                 title: 'AI模型配置',
                 icon: 'fa-solid fa-sliders',
