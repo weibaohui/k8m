@@ -7,13 +7,13 @@ import (
 
 // InitDB 中文函数注释：初始化数据库表（GORM自动迁移）。
 func InitDB() error {
-	return dao.DB().AutoMigrate(&K8sEventConfig{}, &K8sEvent{})
+	return dao.DB().AutoMigrate(&K8sEventConfig{}, &K8sEvent{}, &EventForwardSetting{})
 }
 
 // UpgradeDB 中文函数注释：升级事件转发插件数据库结构与数据。
 func UpgradeDB(fromVersion string, toVersion string) error {
 	klog.V(6).Infof("开始升级事件转发插件数据库：从版本 %s 到版本 %s", fromVersion, toVersion)
-	if err := dao.DB().AutoMigrate(&K8sEventConfig{}, &K8sEvent{}); err != nil {
+	if err := dao.DB().AutoMigrate(&K8sEventConfig{}, &K8sEvent{}, &EventForwardSetting{}); err != nil {
 		klog.V(6).Infof("自动迁移事件转发插件数据库失败: %v", err)
 		return err
 	}
@@ -36,7 +36,12 @@ func DropDB() error {
 			return err
 		}
 	}
+	if db.Migrator().HasTable(&EventForwardSetting{}) {
+		if err := db.Migrator().DropTable(&EventForwardSetting{}); err != nil {
+			klog.V(6).Infof("删除事件转发插件表失败: %v", err)
+			return err
+		}
+	}
 	klog.V(6).Infof("已删除事件转发插件表及数据")
 	return nil
 }
-

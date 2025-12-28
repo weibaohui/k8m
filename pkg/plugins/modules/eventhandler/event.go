@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/watcher"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/worker"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -81,12 +82,12 @@ func StopLeaderWatch() {
 
 // StartEventForwarding 中文函数注释：读取平台配置，仅在开启总开关时启动 Watcher 与 Worker；若已运行则跳过。
 func StartEventForwarding() error {
-	cfg, err := service.ConfigService().GetConfig()
-	if err != nil || cfg == nil {
-		klog.V(6).Infof("读取平台配置失败，事件转发未启动：%v", err)
+	setting, err := models.GetOrCreateEventForwardSetting()
+	if err != nil || setting == nil {
+		klog.V(6).Infof("读取事件转发插件配置失败，事件转发未启动：%v", err)
 		return err
 	}
-	if !cfg.EventForwardEnabled {
+	if !setting.EventForwardEnabled {
 		klog.V(6).Infof("事件转发总开关关闭，未启动事件监听与处理")
 		return nil
 	}
@@ -103,10 +104,10 @@ func StartEventForwarding() error {
 		currentWork.UpdateConfig()
 	}
 	lastSnapshot.enabled = true
-	lastSnapshot.watcherBuffer = cfg.EventWatcherBufferSize
-	lastSnapshot.batchSize = cfg.EventWorkerBatchSize
-	lastSnapshot.intervalSec = cfg.EventWorkerProcessInterval
-	lastSnapshot.maxRetries = cfg.EventWorkerMaxRetries
+	lastSnapshot.watcherBuffer = setting.EventWatcherBufferSize
+	lastSnapshot.batchSize = setting.EventWorkerBatchSize
+	lastSnapshot.intervalSec = setting.EventWorkerProcessInterval
+	lastSnapshot.maxRetries = setting.EventWorkerMaxRetries
 	klog.V(6).Infof("事件监听与处理已启动")
 	return nil
 }
@@ -133,27 +134,27 @@ func StopEventForwarding() {
 
 // SyncEventForwardingFromConfig 中文函数注释：每次调用均读取数据库最新配置；若开关或参数变化，则执行启停或更新，保持与平台配置一致。
 func SyncEventForwardingFromConfig() {
-	cfg, err := service.ConfigService().GetConfig()
-	if err != nil || cfg == nil {
-		klog.V(6).Infof("读取平台配置失败，跳过事件转发同步：%v", err)
+	setting, err := models.GetOrCreateEventForwardSetting()
+	if err != nil || setting == nil {
+		klog.V(6).Infof("读取事件转发插件配置失败，跳过事件转发同步：%v", err)
 		return
 	}
 	lock.Lock()
 	enabledSnapshot := lastSnapshot.enabled
 	lock.Unlock()
-	if cfg.EventForwardEnabled != enabledSnapshot {
-		if cfg.EventForwardEnabled {
+	if setting.EventForwardEnabled != enabledSnapshot {
+		if setting.EventForwardEnabled {
 			_ = StartEventForwarding()
 		} else {
 			StopEventForwarding()
 		}
 		return
 	}
-	if cfg.EventForwardEnabled {
-		changed := cfg.EventWatcherBufferSize != lastSnapshot.watcherBuffer ||
-			cfg.EventWorkerBatchSize != lastSnapshot.batchSize ||
-			cfg.EventWorkerProcessInterval != lastSnapshot.intervalSec ||
-			cfg.EventWorkerMaxRetries != lastSnapshot.maxRetries
+	if setting.EventForwardEnabled {
+		changed := setting.EventWatcherBufferSize != lastSnapshot.watcherBuffer ||
+			setting.EventWorkerBatchSize != lastSnapshot.batchSize ||
+			setting.EventWorkerProcessInterval != lastSnapshot.intervalSec ||
+			setting.EventWorkerMaxRetries != lastSnapshot.maxRetries
 		if changed {
 			lock.Lock()
 			if currentWatch != nil {
@@ -169,12 +170,12 @@ func SyncEventForwardingFromConfig() {
 			}
 
 			lastSnapshot.enabled = true
-			lastSnapshot.watcherBuffer = cfg.EventWatcherBufferSize
-			lastSnapshot.batchSize = cfg.EventWorkerBatchSize
-			lastSnapshot.intervalSec = cfg.EventWorkerProcessInterval
-			lastSnapshot.maxRetries = cfg.EventWorkerMaxRetries
+			lastSnapshot.watcherBuffer = setting.EventWatcherBufferSize
+			lastSnapshot.batchSize = setting.EventWorkerBatchSize
+			lastSnapshot.intervalSec = setting.EventWorkerProcessInterval
+			lastSnapshot.maxRetries = setting.EventWorkerMaxRetries
 			lock.Unlock()
-			klog.V(6).Infof("已按最新平台配置同步事件转发参数并生效")
+			klog.V(6).Infof("已按最新事件转发插件配置同步参数并生效")
 		}
 	}
 }
@@ -217,4 +218,3 @@ func StopEventForwardingWatch() {
 	cronLock.Unlock()
 	StopEventForwarding()
 }
-

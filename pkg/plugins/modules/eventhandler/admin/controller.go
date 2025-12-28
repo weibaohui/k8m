@@ -18,6 +18,46 @@ import (
 // Controller 中文函数注释：事件转发配置管理控制器。
 type Controller struct{}
 
+// GetSetting 中文函数注释：获取事件转发总开关与运行参数配置。
+func (s *Controller) GetSetting(c *gin.Context) {
+	setting, err := models.GetOrCreateEventForwardSetting()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	amis.WriteJsonData(c, setting)
+}
+
+// UpdateSetting 中文函数注释：更新事件转发总开关与运行参数配置。
+func (s *Controller) UpdateSetting(c *gin.Context) {
+	var in models.EventForwardSetting
+	if err := c.ShouldBindJSON(&in); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	if in.EventWorkerProcessInterval <= 0 {
+		in.EventWorkerProcessInterval = 10
+	}
+	if in.EventWorkerBatchSize <= 0 {
+		in.EventWorkerBatchSize = 50
+	}
+	if in.EventWorkerMaxRetries <= 0 {
+		in.EventWorkerMaxRetries = 3
+	}
+	if in.EventWatcherBufferSize <= 0 {
+		in.EventWatcherBufferSize = 1000
+	}
+
+	if _, err := models.UpdateEventForwardSetting(&in); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	if w := worker.Instance(); w != nil {
+		w.UpdateConfig()
+	}
+	amis.WriteJsonOK(c)
+}
+
 // List 中文函数注释：获取事件配置列表。
 func (s *Controller) List(c *gin.Context) {
 	params := dao.BuildParams(c)
@@ -130,4 +170,3 @@ func (s *Controller) QuickSave(c *gin.Context) {
 	}
 	amis.WriteJsonOK(c)
 }
-

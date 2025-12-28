@@ -4,7 +4,7 @@
         {
             "type": "service",
             "id": "eventForwardStatus",
-            "api": "get:/admin/config/all",
+            "api": "get:/admin/plugins/eventhandler/setting/get",
             "body": [
                 {
                     "type": "alert",
@@ -432,4 +432,3 @@
         }
     ]
 }
-

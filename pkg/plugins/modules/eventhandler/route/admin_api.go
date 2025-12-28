@@ -12,6 +12,9 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 	g := arg.Group("/plugins/" + modules.PluginNameEventHandler)
 	ctrl := &admin.Controller{}
 
+	g.GET("/setting/get", ctrl.GetSetting)
+	g.POST("/setting/update", ctrl.UpdateSetting)
+
 	g.GET("/list", ctrl.List)
 	g.POST("/save", ctrl.Save)
 	g.POST("/delete/:ids", ctrl.Delete)
@@ -19,4 +22,3 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 
 	klog.V(6).Infof("注册事件转发插件管理路由(admin)")
 }
-

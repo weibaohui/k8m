@@ -21,6 +21,15 @@ var Metadata = plugins.Module{
 			Order: 60,
 			Children: []plugins.Menu{
 				{
+					Key:         "plugin_eventhandler_setting",
+					Title:       "事件转发参数",
+					Icon:        "fa-solid fa-sliders",
+					Show:        "isPlatformAdmin()==true",
+					EventType:   "custom",
+					CustomEvent: `() => loadJsonPage("/plugins/eventhandler/setting")`,
+					Order:       90,
+				},
+				{
 					Key:         "plugin_eventhandler_admin",
 					Title:       "事件转发规则",
 					Icon:        "fa-solid fa-plug-circle-bolt",

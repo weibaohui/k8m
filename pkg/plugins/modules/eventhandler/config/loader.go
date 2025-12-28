@@ -2,14 +2,13 @@ package config
 
 import (
 	"github.com/weibaohui/k8m/internal/dao"
-	coremodels "github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"k8s.io/klog/v2"
 )
 
 // LoadAllFromDB 中文函数注释：
 // 1. 读取所有启用的 K8sEventConfig 记录；
-// 2. Worker/Watcher 等运行参数从平台全局配置中加载；
+// 2. Worker/Watcher 等运行参数从插件配置表中加载；
 // 3. 若不存在启用规则，则返回 nil 交由上层使用默认配置。
 func LoadAllFromDB() *EventHandlerConfig {
 	var items []models.K8sEventConfig
@@ -22,19 +21,20 @@ func LoadAllFromDB() *EventHandlerConfig {
 		return nil
 	}
 
-	var platformCfg coremodels.Config
-	if err := dao.DB().First(&platformCfg).Error; err != nil {
-		klog.V(6).Infof("读取平台全局配置失败，使用默认事件转发参数。错误: %v", err)
+	setting, err := models.GetOrCreateEventForwardSetting()
+	if err != nil || setting == nil {
+		klog.V(6).Infof("读取事件转发插件配置失败，使用默认事件转发参数。错误: %v", err)
+		setting = models.DefaultEventForwardSetting()
 	}
 	cfg := &EventHandlerConfig{
-		Enabled: platformCfg.EventForwardEnabled || platformCfg.ID == 0,
+		Enabled: setting.EventForwardEnabled,
 		Watcher: WatcherConfig{
-			BufferSize: defaultInt(platformCfg.EventWatcherBufferSize, 1000),
+			BufferSize: defaultInt(setting.EventWatcherBufferSize, 1000),
 		},
 		Worker: WorkerConfig{
-			BatchSize:       defaultInt(platformCfg.EventWorkerBatchSize, 50),
-			ProcessInterval: defaultInt(platformCfg.EventWorkerProcessInterval, 10),
-			MaxRetries:      defaultInt(platformCfg.EventWorkerMaxRetries, 3),
+			BatchSize:       defaultInt(setting.EventWorkerBatchSize, 50),
+			ProcessInterval: defaultInt(setting.EventWorkerProcessInterval, 10),
+			MaxRetries:      defaultInt(setting.EventWorkerMaxRetries, 3),
 		},
 		EventConfigs: items,
 	}
@@ -50,4 +50,3 @@ func defaultInt(v int, def int) int {
 	}
 	return v
 }
-
