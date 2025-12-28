@@ -47,7 +47,7 @@ type Menu struct {
 	// - isPlatformAdmin()：判断是否为平台管理员
 	// - isUserHasRole('role')：判断用户是否有指定角色（role为字符串） guest platform_admin 两种
 	// - isUserInGroup('group')：判断用户是否在指定组（group为字符串） 自定义的各种用户组名称
-	// 返回值：true/false，用于判断是否显示该菜单
+	// 字符串true/false，是否显示该菜单
 	Show string `json:"show,omitempty"`
 	// Permission 访问所需权限名称
 	Permission string `json:"permission,omitempty"`
