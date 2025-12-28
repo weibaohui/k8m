@@ -45,7 +45,7 @@
                         "title": "新建事件转发配置 (ESC 关闭)",
                         "body": {
                             "type": "form",
-                            "api": "post:/admin/event/save",
+                            "api": "post:/admin/plugins/eventhandler/save",
                             "body": [
                                 {
                                     "type": "input-text",
@@ -197,7 +197,7 @@
                     "label": "批量删除",
                     "actionType": "ajax",
                     "confirmText": "确定要批量删除?",
-                    "api": "post:/admin/event/delete/${ids}"
+                    "api": "post:/admin/plugins/eventhandler/delete/${ids}"
                 }
             ],
             "footerToolbar": [
@@ -214,8 +214,8 @@
                     "align": "right"
                 }
             ],
-            "api": "get:/admin/event/list",
-            "quickSaveItemApi": "/admin/event/save/id/${id}/status/${enabled}",
+            "api": "get:/admin/plugins/eventhandler/list",
+            "quickSaveItemApi": "/admin/plugins/eventhandler/save/id/${id}/status/${enabled}",
             "columns": [
                 {
                     "type": "operation",
@@ -233,7 +233,7 @@
                                 "title": "编辑事件转发配置 (ESC 关闭)",
                                 "body": {
                                     "type": "form",
-                                    "api": "post:/admin/event/save",
+                                    "api": "post:/admin/plugins/eventhandler/save",
                                     "body": [
                                         {
                                             "type": "hidden",
@@ -432,3 +432,4 @@
         }
     ]
 }
+

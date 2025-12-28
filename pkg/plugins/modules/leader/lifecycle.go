@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/weibaohui/k8m/pkg/eventhandler"
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/plugins"
@@ -89,7 +88,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			RenewDeadline: 50 * time.Second,
 			RetryPeriod:   10 * time.Second,
 			OnStartedLeading: func(c context.Context) {
-				klog.V(6).Infof("成为Leader，启动定时任务（集群巡检、Helm仓库更新、事件转发）")
+				klog.V(6).Infof("成为Leader，启动定时任务（集群巡检、Helm仓库更新）")
 				service.LeaderService().SetCurrentLeader(true)
 				// 启动 Lease 过期清理（仅Leader）
 				// cleanupCtx, cancel := context.WithCancel(context.Background())
@@ -102,10 +101,9 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				// 启用主备模式，不再同步集群状态 TODO clean
 				lua.InitClusterInspection()
 				helm2.StartUpdateHelmRepoInBackground()
-				eventhandler.StartEventForwardingWatch()
 			},
 			OnStoppedLeading: func() {
-				klog.V(6).Infof("不再是Leader，停止定时任务（集群巡检、Helm仓库更新、事件转发）")
+				klog.V(6).Infof("不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
 				service.LeaderService().SetCurrentLeader(false)
 
 				// 启用主备模式，不再同步集群状态 TODO clean
@@ -116,7 +114,6 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				// }
 				lua.StopClusterInspection()
 				helm2.StopUpdateHelmRepoInBackground()
-				eventhandler.StopEventForwardingWatch()
 			},
 		}
 		bg := context.Background()

@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// K8sEvent 事件处理器使用的K8s事件模型
+// K8sEvent 中文函数注释：事件转发插件使用的K8s事件模型。
 type K8sEvent struct {
 	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	EvtKey    string    `gorm:"uniqueIndex;" json:"evt_key"`
@@ -27,49 +27,47 @@ type K8sEvent struct {
 	UpdatedAt time.Time `json:"-"`
 }
 
-// TableName 设置表名
+// TableName 中文函数注释：设置表名。
 func (e *K8sEvent) TableName() string {
 	return "k8s_events"
 }
 
-// IsWarning 判断是否为警告类型事件
+// IsWarning 中文函数注释：判断是否为警告类型事件。
 func (e *K8sEvent) IsWarning() bool {
 	return e.Type == "Warning"
 }
 
-// IsNormal 判断是否为正常类型事件
+// IsNormal 中文函数注释：判断是否为正常类型事件。
 func (e *K8sEvent) IsNormal() bool {
 	return e.Type == "Normal"
 }
 
-// ShouldProcess 判断事件是否应该被处理
+// ShouldProcess 中文函数注释：判断事件是否应该被处理。
 func (e *K8sEvent) ShouldProcess() bool {
 	return !e.Processed && e.IsWarning()
 }
 
-// List 列出事件记录
-// 参数使用统一的 Params 和可选查询方法
+// List 中文函数注释：列出事件记录。
 func (e *K8sEvent) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*K8sEvent, int64, error) {
 	return dao.GenericQuery(params, e, queryFuncs...)
 }
 
-// Save 保存事件记录
-// 支持根据查询函数限制可更新的字段
+// Save 中文函数注释：保存事件记录。
 func (e *K8sEvent) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericSave(params, e, queryFuncs...)
 }
 
-// Delete 根据ID删除事件记录
+// Delete 中文函数注释：根据ID删除事件记录。
 func (e *K8sEvent) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericDelete(params, e, utils.ToInt64Slice(ids), queryFuncs...)
 }
 
-// GetOne 获取单条事件记录
+// GetOne 中文函数注释：获取单条事件记录。
 func (e *K8sEvent) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*K8sEvent, error) {
 	return dao.GenericGetOne(params, e, queryFuncs...)
 }
 
-// GetByEvtKey 根据事件键获取事件
+// GetByEvtKey 中文函数注释：根据事件键获取事件。
 func (e *K8sEvent) GetByEvtKey(evtKey string) (*K8sEvent, error) {
 	var item K8sEvent
 	err := dao.DB().Where("evt_key = ?", evtKey).First(&item).Error
@@ -82,23 +80,25 @@ func (e *K8sEvent) GetByEvtKey(evtKey string) (*K8sEvent, error) {
 	return &item, nil
 }
 
-// MarkProcessedByID 根据ID更新处理状态
+// MarkProcessedByID 中文函数注释：根据ID更新处理状态。
 func (e *K8sEvent) MarkProcessedByID(id int64, processed bool) error {
 	return dao.DB().Model(&K8sEvent{}).Where("id = ?", id).Update("processed", processed).Error
 }
 
-// IncrementAttemptsByID 根据ID增加重试次数
+// IncrementAttemptsByID 中文函数注释：根据ID增加重试次数。
 func (e *K8sEvent) IncrementAttemptsByID(id int64) error {
 	return dao.DB().Model(&K8sEvent{}).Where("id = ?", id).UpdateColumn("attempts", gorm.Expr("attempts + ?", 1)).Error
 }
 
-// ListUnprocessed 列出未处理的事件，按时间升序，限制条数
+// ListUnprocessed 中文函数注释：列出未处理的事件，按时间升序，限制条数。
 func (e *K8sEvent) ListUnprocessed(limit int) ([]*K8sEvent, error) {
 	var list []*K8sEvent
 	err := dao.DB().Where("processed = ?", false).Order("timestamp ASC").Limit(limit).Find(&list).Error
 	return list, err
 }
 
+// SaveEvent 中文函数注释：以默认参数保存事件记录。
 func (e *K8sEvent) SaveEvent() error {
 	return e.Save(dao.BuildDefaultParams())
 }
+

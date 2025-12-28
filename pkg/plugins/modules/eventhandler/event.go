@@ -1,11 +1,13 @@
 package eventhandler
 
 import (
+	"context"
 	"sync"
+	"time"
 
 	"github.com/robfig/cron/v3"
-	"github.com/weibaohui/k8m/pkg/eventhandler/watcher"
-	"github.com/weibaohui/k8m/pkg/eventhandler/worker"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/watcher"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/worker"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
@@ -23,10 +25,61 @@ var (
 		intervalSec   int
 		maxRetries    int
 	}
+
+	leaderWatchMu     sync.Mutex
+	leaderWatchCancel context.CancelFunc
 )
 
-// StartEventForwarding 启动事件监听与处理（受平台开关控制）
-// 中文函数注释：读取平台配置，仅在开启总开关时启动 Watcher 与 Worker；若已运行则跳过。
+// StartLeaderWatch 中文函数注释：启动主备状态监听，根据主节点状态启停事件转发。
+func StartLeaderWatch() {
+	leaderWatchMu.Lock()
+	defer leaderWatchMu.Unlock()
+
+	if leaderWatchCancel != nil {
+		return
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	leaderWatchCancel = cancel
+
+	go func() {
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+
+		last := false
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				isLeader := service.LeaderService().IsCurrentLeader()
+				if isLeader && !last {
+					klog.V(6).Infof("检测到当前实例成为Leader，启动事件转发")
+					StartEventForwardingWatch()
+				}
+				if !isLeader && last {
+					klog.V(6).Infof("检测到当前实例不再是Leader，停止事件转发")
+					StopEventForwardingWatch()
+				}
+				last = isLeader
+			}
+		}
+	}()
+}
+
+// StopLeaderWatch 中文函数注释：停止主备状态监听，并停止事件转发。
+func StopLeaderWatch() {
+	leaderWatchMu.Lock()
+	cancel := leaderWatchCancel
+	leaderWatchCancel = nil
+	leaderWatchMu.Unlock()
+
+	if cancel != nil {
+		cancel()
+	}
+	StopEventForwardingWatch()
+}
+
+// StartEventForwarding 中文函数注释：读取平台配置，仅在开启总开关时启动 Watcher 与 Worker；若已运行则跳过。
 func StartEventForwarding() error {
 	cfg, err := service.ConfigService().GetConfig()
 	if err != nil || cfg == nil {
@@ -58,8 +111,7 @@ func StartEventForwarding() error {
 	return nil
 }
 
-// StopEventForwarding 停止事件监听与处理
-// 中文函数注释：停止当前运行的 Watcher 与 Worker，并清理内部引用。
+// StopEventForwarding 中文函数注释：停止当前运行的 Watcher 与 Worker，并清理内部引用。
 func StopEventForwarding() {
 	lock.Lock()
 	defer lock.Unlock()
@@ -79,15 +131,13 @@ func StopEventForwarding() {
 	klog.V(6).Infof("事件监听与处理已停止")
 }
 
-// SyncEventForwardingFromConfig 按最新平台配置同步事件转发状态与参数
-// 中文函数注释：每次调用均读取数据库最新配置；若开关或参数变化，则执行启停或更新，保持与平台配置一致。
+// SyncEventForwardingFromConfig 中文函数注释：每次调用均读取数据库最新配置；若开关或参数变化，则执行启停或更新，保持与平台配置一致。
 func SyncEventForwardingFromConfig() {
 	cfg, err := service.ConfigService().GetConfig()
 	if err != nil || cfg == nil {
 		klog.V(6).Infof("读取平台配置失败，跳过事件转发同步：%v", err)
 		return
 	}
-	// 开关变化：直接启停
 	lock.Lock()
 	enabledSnapshot := lastSnapshot.enabled
 	lock.Unlock()
@@ -99,7 +149,6 @@ func SyncEventForwardingFromConfig() {
 		}
 		return
 	}
-	// 参数变化：在开启状态下更新
 	if cfg.EventForwardEnabled {
 		changed := cfg.EventWatcherBufferSize != lastSnapshot.watcherBuffer ||
 			cfg.EventWorkerBatchSize != lastSnapshot.batchSize ||
@@ -107,13 +156,11 @@ func SyncEventForwardingFromConfig() {
 			cfg.EventWorkerMaxRetries != lastSnapshot.maxRetries
 		if changed {
 			lock.Lock()
-			// Watcher 无法动态更新缓存大小，需重启
 			if currentWatch != nil {
 				currentWatch.Stop()
 			}
 			currentWatch = watcher.NewEventWatcher()
 			currentWatch.Start()
-			// Worker 支持动态更新
 			if currentWork != nil {
 				currentWork.UpdateConfig()
 			} else {
@@ -132,13 +179,8 @@ func SyncEventForwardingFromConfig() {
 	}
 }
 
-// StartEventForwardingWatch 启动事件转发配置监听
-// 中文函数注释：设置一个定时器，后台不断更新事件转发配置，保持与平台配置一致。
-// 动作：每 1 分钟调用一次 SyncEventForwardingFromConfig 函数，同步事件转发配置。
-// 启停或更新：根据平台配置开关状态，启动或停止事件监听与处理；若开关或参数变化，更新配置。
+// StartEventForwardingWatch 中文函数注释：设置一个定时器，后台不断更新事件转发配置，保持与平台配置一致。
 func StartEventForwardingWatch() {
-	// 设置一个定时器，后台不断更新事件转发配置
-
 	if eventForwardCron != nil {
 		klog.V(6).Infof("事件转发配置定时任务已在运行，跳过重复启动")
 		return
@@ -151,23 +193,20 @@ func StartEventForwardingWatch() {
 		),
 	)
 	_, err := eventForwardCron.AddFunc("@every 1m", func() {
-		// 延迟启动cron
 		SyncEventForwardingFromConfig()
 	})
 	cronLock.Unlock()
 
 	if err != nil {
-		klog.Errorf("新增事件转发配置定时任务报错: %v\n", err)
+		klog.V(6).Infof("新增事件转发配置定时任务失败: %v", err)
 	}
 	eventForwardCron.Start()
-	klog.V(6).Infof("新增事件转发配置定时任务【@every 1m】\n")
+	klog.V(6).Infof("新增事件转发配置定时任务【@every 1m】")
 }
 
-// StopEventForwardingWatch 停止事件转发配置监听
-// 中文函数注释：优雅停止定时任务，避免重复任务或资源泄漏。
+// StopEventForwardingWatch 中文函数注释：优雅停止定时任务，避免重复任务或资源泄漏。
 func StopEventForwardingWatch() {
 	cronLock.Lock()
-
 	if eventForwardCron != nil {
 		eventForwardCron.Stop()
 		eventForwardCron = nil
@@ -177,5 +216,5 @@ func StopEventForwardingWatch() {
 	}
 	cronLock.Unlock()
 	StopEventForwarding()
-
 }
+

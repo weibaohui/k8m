@@ -824,14 +824,6 @@ export const initialMenu: MenuItem[] = [
                 ],
             },
             {
-                key: 'event_webhook_config',
-                title: '集群事件转发',
-                icon: 'fa-solid fa-plug-circle-bolt',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/event/list")',
-                order: 2,
-            },
-            {
                 key: 'ai_model_config',
                 title: 'AI模型配置',
                 icon: 'fa-solid fa-sliders',
