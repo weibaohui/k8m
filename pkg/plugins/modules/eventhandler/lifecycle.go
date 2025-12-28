@@ -1,0 +1,71 @@
+package eventhandler
+
+import (
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
+	"k8s.io/klog/v2"
+)
+
+// EventHandlerLifecycle 中文函数注释：事件转发插件生命周期实现。
+type EventHandlerLifecycle struct{}
+
+// Install 中文函数注释：安装事件转发插件，初始化数据库表结构。
+func (l *EventHandlerLifecycle) Install(ctx plugins.InstallContext) error {
+	if err := models.InitDB(); err != nil {
+		klog.V(6).Infof("安装事件转发插件失败: %v", err)
+		return err
+	}
+	klog.V(6).Infof("安装事件转发插件成功")
+	return nil
+}
+
+// Upgrade 中文函数注释：升级事件转发插件，执行必要的数据库迁移。
+func (l *EventHandlerLifecycle) Upgrade(ctx plugins.UpgradeContext) error {
+	klog.V(6).Infof("升级事件转发插件：从版本 %s 到版本 %s", ctx.FromVersion(), ctx.ToVersion())
+	if err := models.UpgradeDB(ctx.FromVersion(), ctx.ToVersion()); err != nil {
+		klog.V(6).Infof("升级事件转发插件失败: %v", err)
+		return err
+	}
+	return nil
+}
+
+// Enable 中文函数注释：启用事件转发插件，确保数据库表存在。
+func (l *EventHandlerLifecycle) Enable(ctx plugins.EnableContext) error {
+	if err := models.InitDB(); err != nil {
+		klog.V(6).Infof("启用事件转发插件失败: %v", err)
+		return err
+	}
+	klog.V(6).Infof("启用事件转发插件")
+	return nil
+}
+
+// Disable 中文函数注释：禁用事件转发插件，停止后台任务与事件转发。
+func (l *EventHandlerLifecycle) Disable(ctx plugins.BaseContext) error {
+	StopLeaderWatch()
+	klog.V(6).Infof("禁用事件转发插件")
+	return nil
+}
+
+// Uninstall 中文函数注释：卸载事件转发插件，停止后台任务并删除相关表。
+func (l *EventHandlerLifecycle) Uninstall(ctx plugins.InstallContext) error {
+	StopLeaderWatch()
+	if err := models.DropDB(); err != nil {
+		klog.V(6).Infof("卸载事件转发插件失败: %v", err)
+		return err
+	}
+	klog.V(6).Infof("卸载事件转发插件成功")
+	return nil
+}
+
+// Start 中文函数注释：启动事件转发插件后台任务（不可阻塞），按主备状态控制事件转发启停。
+func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
+	StartLeaderWatch()
+	klog.V(6).Infof("启动事件转发插件后台任务")
+	return nil
+}
+
+// StartCron 中文函数注释：事件转发插件不使用插件级 cron，留空实现。
+func (l *EventHandlerLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
+	return nil
+}
+
