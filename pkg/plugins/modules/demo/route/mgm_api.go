@@ -2,13 +2,15 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/mgm"
 	"k8s.io/klog/v2"
 )
 
 // RegisterMgmRoutes 注册Demo插件的管理类（mgm）路由
 func RegisterManagementRoutes(mrg *gin.RouterGroup) {
-	g := mrg.Group("/plugins/demo")
+	g := mrg.Group("/plugins/" + modules.PluginNameDemo)
+
 	// 列表
 	g.GET("/items", mgm.List)
 	// 新增
