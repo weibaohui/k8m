@@ -49,16 +49,6 @@ type Menu struct {
 	// - isUserInGroup('group')：判断用户是否在指定组（group为字符串） 自定义的各种用户组名称
 	// 字符串true/false，是否显示该菜单
 	Show string `json:"show,omitempty"`
-	// Permission 访问所需权限名称
-	Permission string `json:"permission,omitempty"`
-}
-
-// Permission 权限定义
-type Permission struct {
-	// Name 权限唯一名称（全局唯一）
-	Name string
-	// Title 权限展示名称
-	Title string
 }
 
 // RouteAccessKind 路由访问控制类型

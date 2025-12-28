@@ -128,7 +128,6 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 		Order       float64  `json:"order,omitempty"`
 		Children    []MenuVO `json:"children,omitempty"`
 		Show        string   `json:"show,omitempty"`
-		Permission  string   `json:"permission,omitempty"`
 	}
 
 	// 递归转换插件菜单为前端结构
@@ -146,7 +145,6 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 				Order:       menu.Order,
 				Children:    convertMenusToVO(menu.Children),
 				Show:        menu.Show,
-				Permission:  menu.Permission,
 			})
 		}
 		return children
