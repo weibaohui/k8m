@@ -33,6 +33,8 @@ func (w *WebhookLifecycle) Uninstall(ctx plugins.InstallContext) error {
 }
 
 func (w *WebhookLifecycle) Start(ctx plugins.BaseContext) error {
+	RegisterAllAdapters()
+	klog.V(6).Infof("启动Webhook插件成功")
 	return nil
 }
 

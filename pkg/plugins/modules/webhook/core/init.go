@@ -8,7 +8,3 @@ func RegisterAllAdapters() {
 	RegisterAdapter("default", &DefaultAdapter{})
 	// Future adapters can be registered here
 }
-
-func init() {
-	RegisterAllAdapters()
-}
