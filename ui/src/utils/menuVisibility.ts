@@ -1,8 +1,9 @@
-import {Parser} from 'expr-eval';
-import {MenuItem} from '@/types/menu';
+import { Parser } from 'expr-eval';
+import { MenuItem } from '@/types/menu';
 
 interface MenuVisibilityContext {
     userRole: string[];
+    groups: string[];
     isGatewayAPISupported: boolean;
     isOpenKruiseSupported: boolean;
     isIstioSupported: boolean;
@@ -20,7 +21,7 @@ export const shouldShowMenuItem = (item: MenuItem, context: MenuVisibilityContex
     if (typeof item.show === 'string') {
         try {
             const evalContext = {
-                user: {role: 'user'},
+                user: { role: 'user' },
             };
 
             const parser = new Parser();
@@ -51,6 +52,10 @@ export const shouldShowMenuItem = (item: MenuItem, context: MenuVisibilityContex
 
             parser.functions.isUserHasRole = function (role: string) {
                 return context.userRole.includes(role);
+            };
+
+            parser.functions.isUserInGroup = function (group: string) {
+                return context.groups.includes(group);
             };
 
             const expr = parser.parse(item.show);

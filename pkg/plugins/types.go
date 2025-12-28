@@ -43,7 +43,10 @@ type Menu struct {
 	// Children 子菜单
 	Children []Menu `json:"children,omitempty"`
 	// Show 显示表达式（字符串形式的JS表达式）
-	// 可用变量：isPlatformAdmin()、isUserHasRole('name')
+	// 表达式中可使用的全局函数：
+	// - isPlatformAdmin()：判断是否为平台管理员
+	// - isUserHasRole('role')：判断用户是否有指定角色（role为字符串） guest platform_admin 两种
+	// - isUserInGroup('group')：判断用户是否在指定组（group为字符串） 自定义的各种用户组名称
 	// 返回值：true/false，用于判断是否显示该菜单
 	Show string `json:"show,omitempty"`
 	// Permission 访问所需权限名称

@@ -18,13 +18,14 @@ const Sidebar = () => {
     const navigate = useNavigate();
 
     // 使用自定义hooks
-    const { userRole, menuData } = useUserRole();
+    const { userRole, menuData, groups } = useUserRole();
     const { isGatewayAPISupported, isOpenKruiseSupported, isIstioSupported } = useCRDStatus();
     const [pluginMenus, setPluginMenus] = useState<MenuItem[]>([]);
 
     // 创建菜单可见性上下文
     const visibilityContext = {
         userRole,
+        groups,
         menuData,
         isGatewayAPISupported,
         isOpenKruiseSupported,

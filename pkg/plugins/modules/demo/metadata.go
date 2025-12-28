@@ -35,7 +35,7 @@ var Metadata = plugins.Module{
 					Key:         "plugin_demo_mgm",
 					Title:       "演示插件Mgm",
 					Icon:        "fa-solid fa-puzzle-piece",
-					Show:        "isUserHasRole('特尔是')",
+					Show:        "isUserInGroup('特尔是')",
 					EventType:   "custom",
 					CustomEvent: `() => loadJsonPage("/plugins/demo/mgm")`,
 					Order:       101,
