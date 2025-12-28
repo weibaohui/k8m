@@ -21,7 +21,7 @@ var Metadata = plugins.Module{
 			Key:   "plugin_demo_index",
 			Title: "演示插件",
 			Icon:  "fa-solid fa-cube",
-			Order: 100,
+			Order: 1,
 			Children: []plugins.Menu{
 				{
 					Key:         "plugin_demo_cluster",
@@ -35,6 +35,7 @@ var Metadata = plugins.Module{
 					Key:         "plugin_demo_mgm",
 					Title:       "演示插件Mgm",
 					Icon:        "fa-solid fa-puzzle-piece",
+					Show:        "isUserHasRole('特尔是')",
 					EventType:   "custom",
 					CustomEvent: `() => loadJsonPage("/plugins/demo/mgm")`,
 					Order:       101,

@@ -958,7 +958,15 @@ export const initialMenu: MenuItem[] = [
                         order: 2,
                     },
                 ],
-            }
+            },
+            {
+                key: 'plugins_mgr',
+                title: '插件管理',
+                icon: 'fa-solid fa-plug',
+                eventType: 'custom',
+                customEvent: '() => loadJsonPage("/admin/plugins/list")',
+                order: 19,
+            },
 
         ],
     },
@@ -1010,14 +1018,7 @@ export const initialMenu: MenuItem[] = [
         customEvent: '() => open("/swagger/index.html")',
         order: 19,
     },
-    {
-        key: 'plugins_mgr',
-        title: '插件管理',
-        icon: 'fa-solid fa-plug',
-        eventType: 'custom',
-        customEvent: '() => loadJsonPage("/admin/plugins/list")',
-        order: 19,
-    },
+
     {
         key: 'about',
         title: '关于',

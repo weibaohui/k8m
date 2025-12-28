@@ -43,6 +43,8 @@ type Menu struct {
 	// Children 子菜单
 	Children []Menu `json:"children,omitempty"`
 	// Show 显示表达式（字符串形式的JS表达式）
+	// 可用变量：isPlatformAdmin()、isUserHasRole('name')
+	// 返回值：true/false，用于判断是否显示该菜单
 	Show string `json:"show,omitempty"`
 	// Permission 访问所需权限名称
 	Permission string `json:"permission,omitempty"`
