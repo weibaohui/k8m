@@ -39,4 +39,3 @@ func (w *WebhookLifecycle) Start(ctx plugins.BaseContext) error {
 func (w *WebhookLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
-

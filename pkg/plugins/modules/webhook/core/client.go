@@ -127,4 +127,3 @@ func (c *WebhookClient) Send(ctx context.Context, msg, raw string, config *Webho
 		Error:      err,
 	}, err
 }
-

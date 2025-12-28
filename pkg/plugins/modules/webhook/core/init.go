@@ -12,4 +12,3 @@ func RegisterAllAdapters() {
 func init() {
 	RegisterAllAdapters()
 }
-

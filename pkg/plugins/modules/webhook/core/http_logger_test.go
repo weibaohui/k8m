@@ -130,4 +130,3 @@ func TestSanitizeHeader(t *testing.T) {
 		}
 	}
 }
-

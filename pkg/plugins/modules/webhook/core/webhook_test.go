@@ -132,4 +132,3 @@ func TestPushMsgToSingleTarget(t *testing.T) {
 		t.Fatal("PushMsgToSingleTarget returned nil result")
 	}
 }
-

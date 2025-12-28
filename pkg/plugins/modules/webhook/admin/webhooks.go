@@ -164,4 +164,3 @@ func (s *Controller) WebhookRecordStatistics(c *gin.Context) {
 
 	amis.WriteJsonData(c, statistics)
 }
-

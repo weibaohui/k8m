@@ -220,4 +220,3 @@ func (d *DefaultAdapter) SignRequest(baseURL string, body []byte, secret string)
 	// Custom signing should be implemented by specific adapters
 	return baseURL, nil
 }
-

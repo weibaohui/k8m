@@ -35,4 +35,3 @@ func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookRecei
 func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookReceiver) []*SendResult {
 	return core.PushMsgToAllTargets(msg, raw, receivers)
 }
-

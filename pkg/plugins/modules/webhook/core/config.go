@@ -90,4 +90,3 @@ func (c *WebhookConfig) Validate() error {
 
 	return nil
 }
-

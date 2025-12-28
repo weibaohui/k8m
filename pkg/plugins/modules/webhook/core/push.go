@@ -48,4 +48,3 @@ func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookRece
 	}
 	return results
 }
-

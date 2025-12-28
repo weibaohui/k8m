@@ -22,4 +22,3 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 
 	klog.V(6).Infof("注册webhook插件管理路由(admin)")
 }
-

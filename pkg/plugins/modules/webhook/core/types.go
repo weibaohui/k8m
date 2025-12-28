@@ -64,4 +64,3 @@ func GetRegisteredPlatforms() []string {
 	}
 	return platforms
 }
-

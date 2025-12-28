@@ -10,4 +10,3 @@ var (
 	ErrSendFailed      = errors.New("failed to send webhook")
 	ErrInvalidConfig   = errors.New("invalid webhook configuration")
 )
-
