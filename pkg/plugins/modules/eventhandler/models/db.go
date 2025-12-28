@@ -13,6 +13,9 @@ func InitDB() error {
 // UpgradeDB 中文函数注释：升级事件转发插件数据库结构与数据。
 func UpgradeDB(fromVersion string, toVersion string) error {
 	klog.V(6).Infof("开始升级事件转发插件数据库：从版本 %s 到版本 %s", fromVersion, toVersion)
+	if dao.DB().Migrator().HasColumn("eventhandler_event_forward_settings", "event_forward_enabled") {
+		_ = dao.DB().Migrator().DropColumn("eventhandler_event_forward_settings", "event_forward_enabled")
+	}
 	if err := dao.DB().AutoMigrate(&K8sEventConfig{}, &K8sEvent{}, &EventForwardSetting{}); err != nil {
 		klog.V(6).Infof("自动迁移事件转发插件数据库失败: %v", err)
 		return err

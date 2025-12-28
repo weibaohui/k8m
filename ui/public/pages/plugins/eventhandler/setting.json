@@ -14,12 +14,6 @@
           "body": "<div class='alert alert-info'><p><strong>提示：</strong>事件转发的配置变更不会立即生效，需等待下一个周期（约1-2分钟）生效。</p></div>"
         },
         {
-          "name": "event_forward_enabled",
-          "type": "switch",
-          "label": "事件转发开关",
-          "desc": "启用后将按规则转发K8s事件到Webhook"
-        },
-        {
           "name": "event_worker_process_interval",
           "type": "input-number",
           "suffix": "秒",

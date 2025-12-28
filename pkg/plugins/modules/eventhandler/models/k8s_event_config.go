@@ -49,3 +49,11 @@ func (c *K8sEventConfig) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB)
 	return dao.GenericGetOne(params, c, queryFuncs...)
 }
 
+// HasEnabledEventConfigs 中文函数注释：判断是否存在已启用的事件规则。
+func HasEnabledEventConfigs() (bool, error) {
+	var cnt int64
+	if err := dao.DB().Model(&K8sEventConfig{}).Where("enabled = ?", true).Count(&cnt).Error; err != nil {
+		return false, err
+	}
+	return cnt > 0, nil
+}

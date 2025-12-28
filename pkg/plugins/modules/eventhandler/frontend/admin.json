@@ -8,19 +8,10 @@
             "body": [
                 {
                     "type": "alert",
-                    "level": "warning",
-                    "className": "mb-2",
-                    "title": "事件转发未开启",
-                    "body": "<div class='alert alert-warning'><p><strong>提示：</strong>平台参数中的 <code>事件转发开关</code> 当前为 <strong>关闭</strong>，下面的事件转发规则不会生效。</p><p>请前往 <em>平台设置 → 参数设置 → 事件转发</em> 开启总开关并设置相关参数。</p></div>",
-                    "visibleOn": "${event_forward_enabled == false}"
-                },
-                {
-                    "type": "alert",
                     "level": "success",
                     "className": "mb-2",
-                    "title": "事件转发已开启",
-                    "body": "<div class='alert alert-success'><p><strong>当前生效参数：</strong><span class='mr-2'>处理周期：<code>${event_worker_process_interval}</code> 秒</span><span class='mr-2'>批处理大小：<code>${event_worker_batch_size}</code></span><span class='mr-2'>最大重试次数：<code>${event_worker_max_retries}</code></span><span>Watcher缓存大小：<code>${event_watcher_buffer_size}</code></span></p><p>1 仅转发 <code>Warning</code> 类型事件 2 命名空间精确匹配 3 资源名称包含匹配 4 原因关键字匹配 <code>Reason</code>/<code>Message</code> 5 可使用反选匹配</p></div>",
-                    "visibleOn": "${event_forward_enabled}"
+                    "title": "事件转发参数",
+                    "body": "<div class='alert alert-success'><p><strong>当前生效参数：</strong><span class='mr-2'>处理周期：<code>${event_worker_process_interval}</code> 秒</span><span class='mr-2'>批处理大小：<code>${event_worker_batch_size}</code></span><span class='mr-2'>最大重试次数：<code>${event_worker_max_retries}</code></span><span>Watcher缓存大小：<code>${event_watcher_buffer_size}</code></span></p><p>1 仅转发 <code>Warning</code> 类型事件 2 命名空间精确匹配 3 资源名称包含匹配 4 原因关键字匹配 <code>Reason</code>/<code>Message</code> 5 可使用反选匹配</p></div>"
                 }
             ]
         },

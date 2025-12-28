@@ -12,11 +12,10 @@ import (
 type EventForwardSetting struct {
 	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 
-	EventForwardEnabled        bool `json:"event_forward_enabled"`
-	EventWorkerProcessInterval int  `json:"event_worker_process_interval"`
-	EventWorkerBatchSize       int  `json:"event_worker_batch_size"`
-	EventWorkerMaxRetries      int  `json:"event_worker_max_retries"`
-	EventWatcherBufferSize     int  `json:"event_watcher_buffer_size"`
+	EventWorkerProcessInterval int `json:"event_worker_process_interval"`
+	EventWorkerBatchSize       int `json:"event_worker_batch_size"`
+	EventWorkerMaxRetries      int `json:"event_worker_max_retries"`
+	EventWatcherBufferSize     int `json:"event_watcher_buffer_size"`
 
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
@@ -30,7 +29,6 @@ func (EventForwardSetting) TableName() string {
 // DefaultEventForwardSetting 中文函数注释：返回默认配置（默认关闭）。
 func DefaultEventForwardSetting() *EventForwardSetting {
 	return &EventForwardSetting{
-		EventForwardEnabled:        false,
 		EventWorkerProcessInterval: 10,
 		EventWorkerBatchSize:       50,
 		EventWorkerMaxRetries:      3,
@@ -65,7 +63,6 @@ func UpdateEventForwardSetting(in *EventForwardSetting) (*EventForwardSetting, e
 		return nil, err
 	}
 
-	cur.EventForwardEnabled = in.EventForwardEnabled
 	cur.EventWorkerProcessInterval = in.EventWorkerProcessInterval
 	cur.EventWorkerBatchSize = in.EventWorkerBatchSize
 	cur.EventWorkerMaxRetries = in.EventWorkerMaxRetries

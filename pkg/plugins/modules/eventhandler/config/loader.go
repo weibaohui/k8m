@@ -2,6 +2,8 @@ package config
 
 import (
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"k8s.io/klog/v2"
 )
@@ -27,7 +29,7 @@ func LoadAllFromDB() *EventHandlerConfig {
 		setting = models.DefaultEventForwardSetting()
 	}
 	cfg := &EventHandlerConfig{
-		Enabled: setting.EventForwardEnabled,
+		Enabled: plugins.ManagerInstance().IsEnabled(modules.PluginNameEventHandler),
 		Watcher: WatcherConfig{
 			BufferSize: defaultInt(setting.EventWatcherBufferSize, 1000),
 		},

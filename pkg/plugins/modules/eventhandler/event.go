@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/watcher"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/worker"
@@ -82,14 +83,22 @@ func StopLeaderWatch() {
 
 // StartEventForwarding 中文函数注释：读取平台配置，仅在开启总开关时启动 Watcher 与 Worker；若已运行则跳过。
 func StartEventForwarding() error {
+	cfg := config.LoadAllFromDB()
+	if cfg == nil || !cfg.Enabled {
+		lock.Lock()
+		wasEnabled := lastSnapshot.enabled
+		lock.Unlock()
+		if wasEnabled {
+			StopEventForwarding()
+		}
+		klog.V(6).Infof("事件转发无可用规则，未启动事件监听与处理")
+		return nil
+	}
+
 	setting, err := models.GetOrCreateEventForwardSetting()
 	if err != nil || setting == nil {
 		klog.V(6).Infof("读取事件转发插件配置失败，事件转发未启动：%v", err)
 		return err
-	}
-	if !setting.EventForwardEnabled {
-		klog.V(6).Infof("事件转发总开关关闭，未启动事件监听与处理")
-		return nil
 	}
 	lock.Lock()
 	defer lock.Unlock()
@@ -134,6 +143,21 @@ func StopEventForwarding() {
 
 // SyncEventForwardingFromConfig 中文函数注释：每次调用均读取数据库最新配置；若开关或参数变化，则执行启停或更新，保持与平台配置一致。
 func SyncEventForwardingFromConfig() {
+	hasRules, err := models.HasEnabledEventConfigs()
+	if err != nil {
+		klog.V(6).Infof("读取事件规则失败，跳过事件转发同步：%v", err)
+		return
+	}
+	if !hasRules {
+		lock.Lock()
+		enabledSnapshot := lastSnapshot.enabled
+		lock.Unlock()
+		if enabledSnapshot {
+			StopEventForwarding()
+		}
+		return
+	}
+
 	setting, err := models.GetOrCreateEventForwardSetting()
 	if err != nil || setting == nil {
 		klog.V(6).Infof("读取事件转发插件配置失败，跳过事件转发同步：%v", err)
@@ -142,41 +166,35 @@ func SyncEventForwardingFromConfig() {
 	lock.Lock()
 	enabledSnapshot := lastSnapshot.enabled
 	lock.Unlock()
-	if setting.EventForwardEnabled != enabledSnapshot {
-		if setting.EventForwardEnabled {
-			_ = StartEventForwarding()
-		} else {
-			StopEventForwarding()
-		}
+	if !enabledSnapshot {
+		_ = StartEventForwarding()
 		return
 	}
-	if setting.EventForwardEnabled {
-		changed := setting.EventWatcherBufferSize != lastSnapshot.watcherBuffer ||
-			setting.EventWorkerBatchSize != lastSnapshot.batchSize ||
-			setting.EventWorkerProcessInterval != lastSnapshot.intervalSec ||
-			setting.EventWorkerMaxRetries != lastSnapshot.maxRetries
-		if changed {
-			lock.Lock()
-			if currentWatch != nil {
-				currentWatch.Stop()
-			}
-			currentWatch = watcher.NewEventWatcher()
-			currentWatch.Start()
-			if currentWork != nil {
-				currentWork.UpdateConfig()
-			} else {
-				currentWork = worker.NewEventWorker()
-				currentWork.Start()
-			}
-
-			lastSnapshot.enabled = true
-			lastSnapshot.watcherBuffer = setting.EventWatcherBufferSize
-			lastSnapshot.batchSize = setting.EventWorkerBatchSize
-			lastSnapshot.intervalSec = setting.EventWorkerProcessInterval
-			lastSnapshot.maxRetries = setting.EventWorkerMaxRetries
-			lock.Unlock()
-			klog.V(6).Infof("已按最新事件转发插件配置同步参数并生效")
+	changed := setting.EventWatcherBufferSize != lastSnapshot.watcherBuffer ||
+		setting.EventWorkerBatchSize != lastSnapshot.batchSize ||
+		setting.EventWorkerProcessInterval != lastSnapshot.intervalSec ||
+		setting.EventWorkerMaxRetries != lastSnapshot.maxRetries
+	if changed {
+		lock.Lock()
+		if currentWatch != nil {
+			currentWatch.Stop()
 		}
+		currentWatch = watcher.NewEventWatcher()
+		currentWatch.Start()
+		if currentWork != nil {
+			currentWork.UpdateConfig()
+		} else {
+			currentWork = worker.NewEventWorker()
+			currentWork.Start()
+		}
+
+		lastSnapshot.enabled = true
+		lastSnapshot.watcherBuffer = setting.EventWatcherBufferSize
+		lastSnapshot.batchSize = setting.EventWorkerBatchSize
+		lastSnapshot.intervalSec = setting.EventWorkerProcessInterval
+		lastSnapshot.maxRetries = setting.EventWorkerMaxRetries
+		lock.Unlock()
+		klog.V(6).Infof("已按最新事件转发插件配置同步参数并生效")
 	}
 }
 

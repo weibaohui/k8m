@@ -1,14 +1,16 @@
 package config
 
 import (
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 )
 
 // EventHandlerConfig 中文函数注释：定义事件处理器的完整配置。
 type EventHandlerConfig struct {
-	Enabled      bool                  // 是否启用事件处理器
-	Watcher      WatcherConfig         // Watcher配置
-	Worker       WorkerConfig          // Worker配置
+	Enabled      bool          // 是否启用事件处理器
+	Watcher      WatcherConfig // Watcher配置
+	Worker       WorkerConfig  // Worker配置
 	EventConfigs []models.K8sEventConfig
 	ClusterRules map[string]RuleConfig // 集群级规则配置；key 为集群ID/名称，value 为该集群的事件过滤规则
 	Webhooks     map[string][]string   // WebhookID列表，key 为集群ID/名称，value 为该集群的WebhookID列表
@@ -45,7 +47,7 @@ func DefaultEventHandlerConfig() *EventHandlerConfig {
 		return cfg
 	}
 	return &EventHandlerConfig{
-		Enabled: false,
+		Enabled: plugins.ManagerInstance().IsEnabled(modules.PluginNameEventHandler),
 		Watcher: WatcherConfig{
 			BufferSize: 1000,
 		},
@@ -57,4 +59,3 @@ func DefaultEventHandlerConfig() *EventHandlerConfig {
 		EventConfigs: []models.K8sEventConfig{},
 	}
 }
-
