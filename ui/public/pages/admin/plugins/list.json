@@ -154,13 +154,9 @@
                                 "body": [
                                     {
                                         "type": "static",
-                                        "name": "name",
-                                        "label": "标识"
-                                    },
-                                    {
-                                        "type": "static",
-                                        "name": "title",
-                                        "label": "名称"
+                                        "name": "version",
+                                        "label": "标识",
+                                        "tpl": "${name} ${title} [${status}]"
                                     },
                                     {
                                         "type": "static",
