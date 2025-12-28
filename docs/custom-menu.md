@@ -51,11 +51,13 @@ K8M 支持为不同用户组配置自定义菜单，通过可视化菜单编辑�
 显示表达式支持以下预定义函数和表达式：
 
 - `true` 或 `false`：直接控制显示/隐藏
-- `isUserInGroup('xxx')`：检查用户是否属于指定用户组
 - `isGatewayAPISupported()==true`：检查集群是否支持Gateway API
 - `isIstioSupported()==true`：检查集群是否支持Istio
 - `isOpenKruiseSupported()==true`：检查集群是否支持OpenKruise
 - `isPlatformAdmin()==true`：检查用户是否为平台管理员
+- `isUserHasRole('admin')`：检查用户是否具有指定角色。必须是guest admin 两种角色之一
+- `isUserInGroup('xxx')`：检查用户是否属于指定用户组
+
 
 ### 4. 高级功能
 
