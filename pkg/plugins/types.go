@@ -14,17 +14,7 @@ type Meta struct {
 
 // Menu 菜单模型定义
 // 该结构与前端 `MenuItem` 类型保持一致，支持动态融合到前端菜单中
-// 字段说明：
-// - key：菜单唯一标识
-// - title：菜单展示标题
-// - icon：Font Awesome 图标（可选）
-// - url：URL跳转地址（可选，通常与 eventType=url 搭配）
-// - eventType：事件类型，可选值 'url' | 'custom'
-// - customEvent：自定义事件字符串，如 '() => loadJsonPage(\"/path\")'
-// - order：排序号，支持小数（如 6.5）
-// - children：子菜单列表
-// - show：显示表达式，字符串形式的 JS 表达式
-// - permission：访问所需权限名称（可选）
+
 type Menu struct {
 	// Key 菜单唯一标识
 	Key string `json:"key,omitempty"`
@@ -54,28 +44,35 @@ type Menu struct {
 	Show string `json:"show,omitempty"`
 }
 
-// RouteAccessKind 路由访问控制类型
-// any：任何已登录用户可访问
-// platform_admin：仅平台管理员可访问
-// roles：指定角色列表可访问（平台管理员也视为拥有所有角色）
-type RouteAccessKind string
+// PluginItemVO 插件列表展示结构体
+// 用于在管理员接口中返回插件的基础信息与当前状态
+type PluginItemVO struct {
+	Name         string          `json:"name"`
+	Title        string          `json:"title"`
+	Version      string          `json:"version"`
+	DbVersion    string          `json:"dbVersion,omitempty"`
+	CanUpgrade   bool            `json:"canUpgrade,omitempty"`
+	Description  string          `json:"description"`
+	Status       string          `json:"status"`
+	Menus        []Menu          `json:"menus,omitempty"`
+	MenuCount    int             `json:"menuCount,omitempty"`
+	CronCount    int             `json:"cronCount,omitempty"`
+	Dependencies []string        `json:"dependencies,omitempty"`
+	Routes       RouteCategoryVO `json:"routes,omitempty"`
+}
 
-const (
-	AccessAnyUser       RouteAccessKind = "any"
-	AccessPlatformAdmin RouteAccessKind = "platform_admin"
-	AccessRoles         RouteAccessKind = "roles"
-)
+// RouteCategoryVO 路由类别
+// 类别为 cluster/mgm/admin，routes 为该类别下的路由列表
+type RouteCategoryVO struct {
+	Cluster []RouteItem `json:"cluster,omitempty"`
+	Admin   []RouteItem `json:"admin,omitempty"`
+	Mgm     []RouteItem `json:"mgm,omitempty"`
+}
 
-// RouteRule 路由访问控制规则
-// 用于描述某个HTTP方法+路径的访问要求
-type RouteRule struct {
-	// Method HTTP方法，如 GET/POST
-	Method string `json:"method"`
-	// Path 路径，可写相对路径（不含插件前缀）或完整路径
-	// 示例："/items" 或 "/plugins/demo/items"
-	Path string `json:"path"`
-	// Kind 访问控制类型
-	Kind RouteAccessKind `json:"kind"`
-	// Roles 指定角色列表（当 Kind=roles 时生效）
-	Roles []string `json:"roles,omitempty"`
+// RouteItem 路由条目
+// 展示 HTTP 方法、路径、处理器名
+type RouteItem struct {
+	Method  string `json:"method"`
+	Path    string `json:"path"`
+	Handler string `json:"handler,omitempty"`
 }

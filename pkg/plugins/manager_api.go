@@ -13,39 +13,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// PluginItemVO 插件列表展示结构体
-// 用于在管理员接口中返回插件的基础信息与当前状态
-type PluginItemVO struct {
-	Name         string          `json:"name"`
-	Title        string          `json:"title"`
-	Version      string          `json:"version"`
-	DbVersion    string          `json:"dbVersion,omitempty"`
-	CanUpgrade   bool            `json:"canUpgrade,omitempty"`
-	Description  string          `json:"description"`
-	Status       string          `json:"status"`
-	Menus        []Menu          `json:"menus,omitempty"`
-	MenuCount    int             `json:"menuCount,omitempty"`
-	CronCount    int             `json:"cronCount,omitempty"`
-	Dependencies []string        `json:"dependencies,omitempty"`
-	Routes       RouteCategoryVO `json:"routes,omitempty"`
-}
-
-// RouteItem 路由条目
-// 展示 HTTP 方法、路径、处理器名
-type RouteItem struct {
-	Method  string `json:"method"`
-	Path    string `json:"path"`
-	Handler string `json:"handler,omitempty"`
-}
-
-// RouteCategoryVO 路由类别
-// 类别为 cluster/mgm/admin，routes 为该类别下的路由列表
-type RouteCategoryVO struct {
-	Cluster []RouteItem `json:"cluster,omitempty"`
-	Admin   []RouteItem `json:"admin,omitempty"`
-	Mgm     []RouteItem `json:"mgm,omitempty"`
-}
-
 // extractPluginName 从路由路径中提取插件名
 // 规则：寻找 "/plugins/" 段，返回其后第一个路径段作为插件名
 // 示例：
