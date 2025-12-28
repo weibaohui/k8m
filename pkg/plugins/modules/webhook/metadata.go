@@ -2,12 +2,13 @@ package webhook
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/route"
 )
 
 var Metadata = plugins.Module{
 	Meta: plugins.Meta{
-		Name:        "webhook",
+		Name:        modules.PluginNameWebhook,
 		Title:       "Webhook插件",
 		Version:     "1.0.0",
 		Description: "Webhook接收器管理、测试发送与发送记录查询",

@@ -55,6 +55,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
 	"github.com/weibaohui/k8m/pkg/service"
 	_ "github.com/weibaohui/k8m/swagger"
@@ -264,7 +265,7 @@ func main() {
 	//增加动态的readiness探测路径
 	r.GET("/health/ready", func(c *gin.Context) {
 		// 未启用leader插件，默认就绪
-		if !mgr.IsEnabled("leader") {
+		if !mgr.IsEnabled(modules.PluginNameLeader) {
 			c.Status(http.StatusOK)
 			return
 		}

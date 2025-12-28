@@ -2,12 +2,13 @@ package demo
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/route"
 )
 
 var Metadata = plugins.Module{
 	Meta: plugins.Meta{
-		Name:        "demo",
+		Name:        modules.PluginNameDemo,
 		Title:       "演示插件",
 		Version:     "1.0.12",
 		Description: "演示固定列表与CRUD功能",
@@ -54,7 +55,7 @@ var Metadata = plugins.Module{
 	},
 	// Dependencies 插件依赖的其他插件名称列表；启用前需确保均已启用
 	Dependencies: []string{
-		"leader",
+		modules.PluginNameLeader,
 	},
 
 	Lifecycle: &DemoLifecycle{},
