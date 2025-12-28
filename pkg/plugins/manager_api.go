@@ -187,7 +187,7 @@ func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
 
 	for _, ri := range engine.Routes() {
 		p := ri.Path
-		klog.V(6).Infof("路由路径: %s", p)
+		klog.V(8).Infof("路由路径: %s", p)
 		if !strings.Contains(p, "/plugins/") {
 			continue
 		}

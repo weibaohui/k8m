@@ -375,7 +375,7 @@ func main() {
 		helm.RegisterHelmChartRoutes(mgm)
 
 		// 管理操作相关的插件路由注册交由 Manager 统一处理
-		mgr.RegisterPluginAdminRoutes(mgm)
+		mgr.RegisterManagementRoutes(mgm)
 	}
 
 	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
