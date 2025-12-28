@@ -1,11 +1,15 @@
 package inspection
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"gorm.io/gorm"
 )
@@ -53,7 +57,15 @@ func (r *AdminRecordController) RecordList(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /admin/inspection/schedule/record/id/{id}/push [post]
 func (r *AdminRecordController) Push(c *gin.Context) {
+
 	recordIDStr := c.Param("id")
+
+	// 检查插件是否已启用
+	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
+		amis.WriteJsonError(c, fmt.Errorf("webhook插件未启用"))
+		return
+	}
+
 	recordID := utils.ToUInt(recordIDStr)
 	record := &models.InspectionRecord{}
 	summary, resultRaw, _, _, err := record.GetRecordBothContentById(recordID)
