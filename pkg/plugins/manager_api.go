@@ -16,18 +16,18 @@ import (
 // PluginItemVO 插件列表展示结构体
 // 用于在管理员接口中返回插件的基础信息与当前状态
 type PluginItemVO struct {
-	Name         string            `json:"name"`
-	Title        string            `json:"title"`
-	Version      string            `json:"version"`
-	DbVersion    string            `json:"dbVersion,omitempty"`
-	CanUpgrade   bool              `json:"canUpgrade,omitempty"`
-	Description  string            `json:"description"`
-	Status       string            `json:"status"`
-	Menus        []Menu            `json:"menus,omitempty"`
-	MenuCount    int               `json:"menuCount,omitempty"`
-	CronCount    int               `json:"cronCount,omitempty"`
-	Dependencies []string          `json:"dependencies,omitempty"`
-	Routes       []RouteCategoryVO `json:"routes,omitempty"`
+	Name         string          `json:"name"`
+	Title        string          `json:"title"`
+	Version      string          `json:"version"`
+	DbVersion    string          `json:"dbVersion,omitempty"`
+	CanUpgrade   bool            `json:"canUpgrade,omitempty"`
+	Description  string          `json:"description"`
+	Status       string          `json:"status"`
+	Menus        []Menu          `json:"menus,omitempty"`
+	MenuCount    int             `json:"menuCount,omitempty"`
+	CronCount    int             `json:"cronCount,omitempty"`
+	Dependencies []string        `json:"dependencies,omitempty"`
+	Routes       RouteCategoryVO `json:"routes,omitempty"`
 }
 
 // RouteItem 路由条目
@@ -41,8 +41,9 @@ type RouteItem struct {
 // RouteCategoryVO 路由类别
 // 类别为 cluster/mgm/admin，routes 为该类别下的路由列表
 type RouteCategoryVO struct {
-	Category string      `json:"category"`
-	Routes   []RouteItem `json:"routes"`
+	Cluster []RouteItem `json:"cluster,omitempty"`
+	Admin   []RouteItem `json:"admin,omitempty"`
+	Mgm     []RouteItem `json:"mgm,omitempty"`
 }
 
 // extractPluginName 从路由路径中提取插件名
@@ -203,59 +204,14 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 	amis.WriteJsonData(c, result)
 }
 
-// ListPluginRoutes 返回各插件在三类分组下已注册的路由列表
-// 通过扫描 Gin 引擎的所有路由，按 /k8s/cluster、/mgm、/admin 三类分组，
-// 并从 /plugins/{name}/ 提取插件名进行归类
-func (m *Manager) ListPluginRoutes(c *gin.Context) {
-	m.mu.RLock()
-	engine := m.engine
-	m.mu.RUnlock()
-	if engine == nil {
-		amis.WriteJsonError(c, fmt.Errorf("Gin 引擎未设置"))
-		return
-	}
-
-	cluster := make([]RouteItem, 0)
-	mgm := make([]RouteItem, 0)
-	admin := make([]RouteItem, 0)
-
-	for _, ri := range engine.Routes() {
-		p := ri.Path
-		if !strings.Contains(p, "/plugins/") {
-			continue
-		}
-		item := RouteItem{Method: ri.Method, Path: ri.Path, Handler: ri.Handler}
-		if strings.HasPrefix(p, "/k8s/cluster/") {
-			cluster = append(cluster, item)
-			continue
-		}
-		if strings.HasPrefix(p, "/mgm/") || p == "/mgm" {
-			mgm = append(mgm, item)
-			continue
-		}
-		if strings.HasPrefix(p, "/admin/") || p == "/admin" {
-			admin = append(admin, item)
-			continue
-		}
-	}
-
-	result := []RouteCategoryVO{
-		{Category: "cluster", Routes: cluster},
-		{Category: "mgm", Routes: mgm},
-		{Category: "admin", Routes: admin},
-	}
-	klog.V(6).Infof("统计插件路由类别: cluster=%d, mgm=%d, admin=%d", len(cluster), len(mgm), len(admin))
-	amis.WriteJsonData(c, result)
-}
-
 // collectPluginRouteCategories 收集指定插件的三类路由数组
 // 仅统计路径中包含 /plugins/{name}/ 的路由，并按类别归集
-func (m *Manager) collectPluginRouteCategories(name string) []RouteCategoryVO {
+func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
 	m.mu.RLock()
 	engine := m.engine
 	m.mu.RUnlock()
 	if engine == nil || name == "" {
-		return nil
+		return RouteCategoryVO{}
 	}
 	cluster := make([]RouteItem, 0)
 	mgm := make([]RouteItem, 0)
@@ -287,10 +243,10 @@ func (m *Manager) collectPluginRouteCategories(name string) []RouteCategoryVO {
 		}
 	}
 	klog.V(6).Infof("插件 %s 路由类别统计: cluster=%d, mgm=%d, admin=%d", name, len(cluster), len(mgm), len(admin))
-	return []RouteCategoryVO{
-		{Category: "cluster", Routes: cluster},
-		{Category: "mgm", Routes: mgm},
-		{Category: "admin", Routes: admin},
+	return RouteCategoryVO{
+		Cluster: cluster,
+		Mgm:     mgm,
+		Admin:   admin,
 	}
 }
 
