@@ -15,16 +15,16 @@ import (
 // PluginItemVO 插件列表展示结构体
 // 用于在管理员接口中返回插件的基础信息与当前状态
 type PluginItemVO struct {
-	Name        string `json:"name"`
-	Title       string `json:"title"`
-	Version     string `json:"version"`
-	DbVersion   string `json:"dbVersion,omitempty"`
-	CanUpgrade  bool   `json:"canUpgrade,omitempty"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
-	Menus       []Menu `json:"menus,omitempty"`
-	MenuCount   int    `json:"menuCount,omitempty"`
-	CronCount   int    `json:"cronCount,omitempty"`
+	Name         string   `json:"name"`
+	Title        string   `json:"title"`
+	Version      string   `json:"version"`
+	DbVersion    string   `json:"dbVersion,omitempty"`
+	CanUpgrade   bool     `json:"canUpgrade,omitempty"`
+	Description  string   `json:"description"`
+	Status       string   `json:"status"`
+	Menus        []Menu   `json:"menus,omitempty"`
+	MenuCount    int      `json:"menuCount,omitempty"`
+	CronCount    int      `json:"cronCount,omitempty"`
 	Dependencies []string `json:"dependencies,omitempty"`
 }
 
@@ -86,16 +86,16 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 		dbVer := cfgVerMap[name]
 		canUpgrade := statusStr != "discovered" && utils.CompareVersions(mod.Meta.Version, dbVer)
 		items = append(items, PluginItemVO{
-			Name:        mod.Meta.Name,
-			Title:       mod.Meta.Title,
-			Version:     mod.Meta.Version,
-			DbVersion:   dbVer,
-			CanUpgrade:  canUpgrade,
-			Description: mod.Meta.Description,
-			Status:      statusToCN(status),
-			Menus:       mod.Menus,
-			MenuCount:   len(mod.Menus),
-			CronCount:   len(mod.Crons),
+			Name:         mod.Meta.Name,
+			Title:        mod.Meta.Title,
+			Version:      mod.Meta.Version,
+			DbVersion:    dbVer,
+			CanUpgrade:   canUpgrade,
+			Description:  mod.Meta.Description,
+			Status:       statusToCN(status),
+			Menus:        mod.Menus,
+			MenuCount:    len(mod.Menus),
+			CronCount:    len(mod.Crons),
 			Dependencies: mod.Dependencies,
 		})
 	}
@@ -122,13 +122,12 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 		Permission  string   `json:"permission,omitempty"`
 	}
 
-	var result []MenuVO
-	for name, mod := range m.modules {
-		if m.status[name] != StatusEnabled {
-			continue
-		}
-		for _, menu := range mod.Menus {
-			result = append(result, MenuVO{
+	// 递归转换插件菜单为前端结构
+	var convertMenusToVO func([]Menu) []MenuVO
+	convertMenusToVO = func(ms []Menu) []MenuVO {
+		children := make([]MenuVO, 0, len(ms))
+		for _, menu := range ms {
+			children = append(children, MenuVO{
 				Key:         menu.Key,
 				Title:       menu.Title,
 				Icon:        menu.Icon,
@@ -136,10 +135,21 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 				EventType:   menu.EventType,
 				CustomEvent: menu.CustomEvent,
 				Order:       menu.Order,
+				Children:    convertMenusToVO(menu.Children),
 				Show:        menu.Show,
 				Permission:  menu.Permission,
 			})
 		}
+		return children
+	}
+
+	// 顶层按插件名称分组，将每个插件的菜单作为其子菜单
+	var result []MenuVO
+	for name, mod := range m.modules {
+		if m.status[name] != StatusEnabled {
+			continue
+		}
+		result = append(result, convertMenusToVO(mod.Menus)...)
 	}
 	klog.V(6).Infof("获取插件菜单列表，共计%d个", len(result))
 	amis.WriteJsonData(c, result)
