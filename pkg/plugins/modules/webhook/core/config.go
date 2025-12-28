@@ -3,9 +3,17 @@ package core
 import (
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/weibaohui/k8m/pkg/models"
 )
+
+var registerAdaptersOnce sync.Once
+
+// ensureAdaptersRegistered 确保默认平台适配器已完成注册
+func ensureAdaptersRegistered() {
+	registerAdaptersOnce.Do(RegisterAllAdapters)
+}
 
 // WebhookConfig represents the configuration for a webhook endpoint.
 // This replaces the old Channel concept with clearer naming and responsibilities.
@@ -65,6 +73,7 @@ func (c *WebhookConfig) Validate() error {
 	}
 
 	// Validate platform by registry
+	ensureAdaptersRegistered()
 	if _, err := GetAdapter(c.Platform); err != nil {
 		return ErrInvalidPlatform
 	}

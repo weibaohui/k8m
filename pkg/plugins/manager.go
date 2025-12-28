@@ -26,8 +26,26 @@ type Manager struct {
 	cronRunning map[string]map[string]bool
 }
 
-// NewManager 创建并返回插件管理器
+var (
+	managerOnce     sync.Once
+	managerInstance *Manager
+)
+
+// ManagerInstance 返回全局唯一的插件管理器实例
+func ManagerInstance() *Manager {
+	managerOnce.Do(func() {
+		managerInstance = newManager()
+	})
+	return managerInstance
+}
+
+// NewManager 创建并返回插件管理器（单例）
 func NewManager() *Manager {
+	return ManagerInstance()
+}
+
+// newManager 创建并返回插件管理器
+func newManager() *Manager {
 	return &Manager{
 		modules:   make(map[string]Module),
 		status:    make(map[string]Status),
