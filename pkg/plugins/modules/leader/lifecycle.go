@@ -7,6 +7,7 @@ import (
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
@@ -98,21 +99,20 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				// } else {
 				// 	klog.V(6).Infof("启动 Lease 管理器过期清理成功")
 				// }
-				// 启用主备模式，不再同步集群状态 TODO clean
-				lua.InitClusterInspection()
+				// 只有当集群巡检插件启用时才启动巡检定时任务
+				if plugins.ManagerInstance().IsEnabled(modules.PluginNameInspection) {
+					lua.InitClusterInspection()
+				}
 				helm2.StartUpdateHelmRepoInBackground()
 			},
 			OnStoppedLeading: func() {
 				klog.V(6).Infof("不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
 				service.LeaderService().SetCurrentLeader(false)
 
-				// 启用主备模式，不再同步集群状态 TODO clean
-				// // 停止 Lease 过期清理
-				// if l.cleanupCancel != nil {
-				// 	l.cleanupCancel()
-				// 	l.cleanupCancel = nil
-				// }
-				lua.StopClusterInspection()
+				// 只有当集群巡检插件启用时才停止巡检定时任务
+				if plugins.ManagerInstance().IsEnabled(modules.PluginNameInspection) {
+					lua.StopClusterInspection()
+				}
 				helm2.StopUpdateHelmRepoInBackground()
 			},
 		}

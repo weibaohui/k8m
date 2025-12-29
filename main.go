@@ -19,7 +19,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
-	"github.com/weibaohui/k8m/pkg/controller/admin/inspection"
 	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
@@ -391,12 +390,6 @@ func main() {
 		config.RegisterAIModelConfigRoutes(admin)
 		// AI提示词管理
 		ai_prompt.RegisterAdminAIPromptRoutes(admin)
-		// 集群巡检定时任务
-		inspection.RegisterAdminScheduleRoutes(admin)
-		// 集群巡检记录
-		inspection.RegisterAdminRecordRoutes(admin)
-		// 集群巡检脚本lua脚本管理
-		inspection.RegisterAdminLuaScriptRoutes(admin)
 		// MCP配置
 		mcp.RegisterMCPServerRoutes(admin)
 		mcp.RegisterMCPToolRoutes(admin)
