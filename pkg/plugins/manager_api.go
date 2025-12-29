@@ -117,6 +117,8 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			Menus:        mod.Menus,
 			MenuCount:    len(mod.Menus),
 			CronCount:    len(mod.Crons),
+			Tables:       mod.Tables,
+			TableCount:   len(mod.Tables),
 			Dependencies: mod.Dependencies,
 			Routes:       m.collectPluginRouteCategories(mod.Meta.Name),
 		})

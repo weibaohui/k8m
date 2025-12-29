@@ -15,6 +15,8 @@ type Module struct {
 	Lifecycle Lifecycle
 	// Crons 插件的定时任务调度表达式（5段 cron）
 	Crons []string
+	// Tables 插件使用的数据库表名列表
+	Tables []string
 
 	// ClusterRouter 路由注册回调（启用后由Manager统一挂载）
 	// 该类API接口以/k8s/cluster/clusterID/plugins/xxx的形式暴露，带有集群ID

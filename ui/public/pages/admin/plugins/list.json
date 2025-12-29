@@ -84,6 +84,17 @@
                                         ]
                                     },
                                     {
+                                        "type": "table",
+                                        "title": "数据库表列表",
+                                        "source": "${tables}",
+                                        "columns": [
+                                            {
+                                                "name": "name",
+                                                "label": "表名"
+                                            }
+                                        ]
+                                    },
+                                    {
                                         "type": "panel",
                                         "title": "路由列表",
                                         "body": [
@@ -327,6 +338,12 @@
                     "label": "菜单数",
                     "type": "tpl",
                     "tpl": "${menuCount}"
+                },
+                {
+                    "name": "tableCount",
+                    "label": "表数",
+                    "type": "tpl",
+                    "tpl": "${tableCount}"
                 },
                 {
                     "name": "cronCount",

@@ -57,6 +57,8 @@ type PluginItemVO struct {
 	Menus        []Menu          `json:"menus,omitempty"`
 	MenuCount    int             `json:"menuCount,omitempty"`
 	CronCount    int             `json:"cronCount,omitempty"`
+	Tables       []string        `json:"tables,omitempty"`
+	TableCount   int             `json:"tableCount,omitempty"`
 	Dependencies []string        `json:"dependencies,omitempty"`
 	Routes       RouteCategoryVO `json:"routes,omitempty"`
 }
