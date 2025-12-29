@@ -28,7 +28,6 @@ func init() {
 	_ = AddInnerAdminUserGroup()
 	_ = AddInnerAdminUser()
 	_ = MigrateAIModel()
-	_ = AddBuiltinLuaScripts()
 	_ = InitBuiltinAIPrompts()
 }
 func AutoMigrate() error {

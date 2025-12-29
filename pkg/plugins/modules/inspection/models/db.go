@@ -6,16 +6,24 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// InitDB 初始化集群巡检相关数据库表（GORM 自动迁移）。
+// InitDB 初始化集群巡检相关数据库表（GORM 自动迁移），并写入内置脚本。
 func InitDB() error {
-	return dao.DB().AutoMigrate(
+	if err := dao.DB().AutoMigrate(
 		&basemodels.InspectionCheckEvent{},
 		&basemodels.InspectionRecord{},
 		&basemodels.InspectionSchedule{},
 		&basemodels.InspectionScriptResult{},
 		&basemodels.InspectionLuaScript{},
 		&basemodels.InspectionLuaScriptBuiltinVersion{},
-	)
+	); err != nil {
+		return err
+	}
+	// 初始化或升级内置脚本版本及内容
+	if err := basemodels.AddBuiltinLuaScripts(); err != nil {
+		klog.V(6).Infof("初始化内置巡检脚本失败: %v", err)
+		return err
+	}
+	return nil
 }
 
 // UpgradeDB 升级集群巡检插件数据库结构与数据。
