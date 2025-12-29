@@ -13,5 +13,6 @@ var Metadata = plugins.Module{
 		Version:     "1.0.0",
 		Description: "提供主备高可用能力：多实例部署时仅一个为主节点，通过 Kubernetes 原生机制完成选主。使用前请务必启用 /health/ready 就绪探针。",
 	},
+	Tables:    []string{},
 	Lifecycle: &LeaderLifecycle{},
 }

@@ -13,6 +13,10 @@ var Metadata = plugins.Module{
 		Version:     "1.0.0",
 		Description: "Webhook接收器管理、测试发送与发送记录查询",
 	},
+	Tables: []string{
+		"webhook_receiver",
+		"webhook_log_record",
+	},
 	Menus: []plugins.Menu{
 		{
 			Key:   "plugin_webhook_index",

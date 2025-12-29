@@ -13,6 +13,9 @@ var Metadata = plugins.Module{
 		Version:     "1.0.12",
 		Description: "演示固定列表与CRUD功能",
 	},
+	Tables: []string{
+		"demo_items",
+	},
 	Crons: []string{
 		"* * * * *",
 		"*/2 * * * *",

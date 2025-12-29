@@ -13,6 +13,11 @@ var Metadata = plugins.Module{
 		Version:     "1.0.0",
 		Description: "K8s 事件采集、规则过滤与Webhook转发",
 	},
+	Tables: []string{
+		"k8s_event_configs",
+		"k8s_events",
+		"eventhandler_event_forward_settings",
+	},
 	Menus: []plugins.Menu{
 		{
 			Key:   "plugin_eventhandler_index",
