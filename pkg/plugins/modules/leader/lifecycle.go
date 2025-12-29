@@ -48,7 +48,7 @@ func (l *LeaderLifecycle) Disable(ctx plugins.BaseContext) error {
 
 // Uninstall 卸载Leader选举插件
 // 该插件不涉及可删除的持久化资源，卸载阶段仅打印日志
-func (l *LeaderLifecycle) Uninstall(ctx plugins.InstallContext) error {
+func (l *LeaderLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	klog.V(6).Infof("卸载Leader选举插件")
 	return nil
 }

@@ -42,13 +42,18 @@ func (d *DemoLifecycle) Disable(ctx plugins.BaseContext) error {
 	return nil
 }
 
-// Uninstall 卸载Demo插件，删除相关的表及数据
-func (d *DemoLifecycle) Uninstall(ctx plugins.InstallContext) error {
-	klog.V(6).Infof("卸载Demo插件，删除相关的表及数据")
-	if err := models.DropDB(); err != nil {
-		return err
+// Uninstall 卸载Demo插件，根据keepData参数决定是否删除相关的表及数据
+func (d *DemoLifecycle) Uninstall(ctx plugins.UninstallContext) error {
+	klog.V(6).Infof("卸载Demo插件")
+	// 根据keepData参数决定是否删除数据库
+	if !ctx.KeepData() {
+		if err := models.DropDB(); err != nil {
+			return err
+		}
+		klog.V(6).Infof("卸载Demo插件完成，已删除相关表及数据")
+	} else {
+		klog.V(6).Infof("卸载Demo插件完成，保留相关表及数据")
 	}
-	klog.V(6).Infof("卸载Demo插件完成，已删除相关表及数据")
 	return nil
 }
 

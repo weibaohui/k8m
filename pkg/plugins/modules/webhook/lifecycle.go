@@ -27,7 +27,7 @@ func (w *WebhookLifecycle) Disable(ctx plugins.BaseContext) error {
 	return nil
 }
 
-func (w *WebhookLifecycle) Uninstall(ctx plugins.InstallContext) error {
+func (w *WebhookLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	klog.V(6).Infof("卸载Webhook插件成功")
 	return nil
 }

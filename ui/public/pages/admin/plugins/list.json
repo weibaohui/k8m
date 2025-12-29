@@ -66,6 +66,15 @@
                         },
                         {
                             "type": "button",
+                            "icon": "fas fa-trash-restore text-info",
+                            "actionType": "ajax",
+                            "label": "卸载保留数据",
+                            "visibleOn": "this.status == '已禁用'",
+                            "confirmText": "确认卸载该插件但保留数据？卸载后需要重新注册才可再次安装。",
+                            "api": "post:/admin/plugin/uninstall-keep-data/${name}"
+                        },
+                        {
+                            "type": "button",
                             "icon": "fas fa-level-up-alt text-info",
                             "actionType": "ajax",
                             "label": "升级",

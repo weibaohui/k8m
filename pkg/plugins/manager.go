@@ -177,7 +177,7 @@ func (m *Manager) Disable(name string) error {
 
 // Uninstall 卸载指定插件（可选），调用生命周期的 Uninstall
 // 注意：该方法用于实际启停周期调用，非管理员API配置写入
-func (m *Manager) Uninstall(name string) error {
+func (m *Manager) Uninstall(name string, keepData bool) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	mod, ok := m.modules[name]
@@ -185,7 +185,7 @@ func (m *Manager) Uninstall(name string) error {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
 	if mod.Lifecycle != nil {
-		ctx := installContextImpl{baseContextImpl{meta: mod.Meta}}
+		ctx := uninstallContextImpl{baseContextImpl{meta: mod.Meta}, keepData}
 		if err := mod.Lifecycle.Uninstall(ctx); err != nil {
 			klog.V(6).Infof("卸载插件失败: %s，错误: %v", name, err)
 			return err

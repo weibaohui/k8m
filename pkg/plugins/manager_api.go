@@ -55,8 +55,10 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 	grp.POST("/enable/:name", m.EnablePlugin)
 	// 禁用插件
 	grp.POST("/disable/:name", m.DisablePlugin)
-	// 卸载插件
+	// 卸载插件（删除数据）
 	grp.POST("/uninstall/:name", m.UninstallPlugin)
+	// 卸载插件（保留数据）
+	grp.POST("/uninstall-keep-data/:name", m.UninstallPluginKeepData)
 	// 升级插件
 	grp.POST("/upgrade/:name", m.UpgradePlugin)
 
@@ -260,12 +262,30 @@ func (m *Manager) EnablePlugin(c *gin.Context) {
 	amis.WriteJsonOKMsg(c, "已保存插件为已启用，需重启后生效")
 }
 
-// UninstallPlugin 卸载指定名称的插件
+// UninstallPlugin 卸载指定名称的插件（删除数据）
 // 路径参数为插件名，卸载失败时返回错误
 func (m *Manager) UninstallPlugin(c *gin.Context) {
 	name := c.Param("name")
-	klog.V(6).Infof("卸载插件配置请求: %s", name)
-	if err := m.Uninstall(name); err != nil {
+	klog.V(6).Infof("卸载插件配置请求(删除数据): %s", name)
+	if err := m.Uninstall(name, false); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusDiscovered, params); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOKMsg(c, "已保存插件为未安装（已发现），需重启后生效")
+}
+
+// UninstallPluginKeepData 卸载指定名称的插件（保留数据）
+// 路径参数为插件名，卸载失败时返回错误
+func (m *Manager) UninstallPluginKeepData(c *gin.Context) {
+	name := c.Param("name")
+	klog.V(6).Infof("卸载插件配置请求(保留数据): %s", name)
+	if err := m.Uninstall(name, true); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

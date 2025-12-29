@@ -29,3 +29,10 @@ type EnableContext interface {
 type RunContext interface {
 	BaseContext
 }
+
+// UninstallContext 卸载期上下文（可选择是否保留数据库）
+type UninstallContext interface {
+	BaseContext
+	// KeepData 返回是否保留数据的选项
+	KeepData() bool
+}

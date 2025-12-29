@@ -46,12 +46,15 @@ func (l *EventHandlerLifecycle) Disable(ctx plugins.BaseContext) error {
 	return nil
 }
 
-// Uninstall 中文函数注释：卸载事件转发插件，停止后台任务并删除相关表。
-func (l *EventHandlerLifecycle) Uninstall(ctx plugins.InstallContext) error {
+// Uninstall 中文函数注释：卸载事件转发插件，停止后台任务并根据keepData参数决定是否删除相关表。
+func (l *EventHandlerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	StopLeaderWatch()
-	if err := models.DropDB(); err != nil {
-		klog.V(6).Infof("卸载事件转发插件失败: %v", err)
-		return err
+	// 根据keepData参数决定是否删除数据库
+	if !ctx.KeepData() {
+		if err := models.DropDB(); err != nil {
+			klog.V(6).Infof("卸载事件转发插件失败: %v", err)
+			return err
+		}
 	}
 	klog.V(6).Infof("卸载事件转发插件成功")
 	return nil
@@ -68,4 +71,3 @@ func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 func (l *EventHandlerLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
-
