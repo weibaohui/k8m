@@ -81,6 +81,15 @@ func (m *Manager) RegisterParamRoutes(params *gin.RouterGroup) {
 
 }
 
+// countMenusRecursive 递归计算菜单总数，包括子菜单
+func countMenusRecursive(menus []Menu) int {
+	count := len(menus)
+	for _, menu := range menus {
+		count += countMenusRecursive(menu.Children)
+	}
+	return count
+}
+
 // ListPlugins 获取所有已注册插件的Meta与状态
 // 返回插件名称、标题、版本、描述及当前状态（中文）
 func (m *Manager) ListPlugins(c *gin.Context) {
@@ -115,7 +124,7 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			Description:  mod.Meta.Description,
 			Status:       statusToCN(status),
 			Menus:        mod.Menus,
-			MenuCount:    len(mod.Menus),
+			MenuCount:    countMenusRecursive(mod.Menus),
 			CronCount:    len(mod.Crons),
 			Tables:       mod.Tables,
 			TableCount:   len(mod.Tables),
