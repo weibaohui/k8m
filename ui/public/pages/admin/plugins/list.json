@@ -57,40 +57,44 @@
                                         "label": "描述"
                                     },
                                     {
-                                        "type": "table",
-                                        "title": "菜单列表",
-                                        "source": "${menus}",
-                                        "columns": [
+                                        "type": "panel",
+                                        "title": "数据库表",
+                                        "body": [
                                             {
-                                                "name": "menu",
-                                                "label": "菜单",
-                                                "type": "tpl",
-                                                "tpl": "${icon ? `<i class='${icon}'></i> ` : ''}${title}"
-                                            },
-                                            {
-                                                "name": "eventType",
-                                                "label": "点击",
-                                                "type": "tpl",
-                                                "tpl": "${customEvent?customEvent:url}"
-                                            },
-                                            {
-                                                "name": "order",
-                                                "label": "排序"
-                                            },
-                                            {
-                                                "name": "show",
-                                                "label": "显示条件"
+                                                "type": "static",
+                                                "tpl": "${tables|join:', '}"
                                             }
                                         ]
                                     },
                                     {
-                                        "type": "table",
-                                        "title": "数据库表列表",
-                                        "source": "${tables}",
-                                        "columns": [
+                                        "type": "panel",
+                                        "title": "菜单列表",
+                                        "body": [
                                             {
-                                                "name": "name",
-                                                "label": "表名"
+                                                "type": "table",
+                                                "source": "${menus}",
+                                                "columns": [
+                                                    {
+                                                        "name": "menu",
+                                                        "label": "菜单",
+                                                        "type": "tpl",
+                                                        "tpl": "${icon ? `<i class='${icon}'></i> ` : ''}${title}"
+                                                    },
+                                                    {
+                                                        "name": "eventType",
+                                                        "label": "点击",
+                                                        "type": "tpl",
+                                                        "tpl": "${customEvent?customEvent:url}"
+                                                    },
+                                                    {
+                                                        "name": "order",
+                                                        "label": "排序"
+                                                    },
+                                                    {
+                                                        "name": "show",
+                                                        "label": "显示条件"
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
