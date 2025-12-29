@@ -338,22 +338,11 @@
                     }
                 },
                 {
-                    "name": "menuCount",
-                    "label": "菜单数",
+                    "name": "count",
+                    "label": "构成",
+                    "width": "180px",
                     "type": "tpl",
-                    "tpl": "${menuCount}"
-                },
-                {
-                    "name": "tableCount",
-                    "label": "表数",
-                    "type": "tpl",
-                    "tpl": "${tableCount}"
-                },
-                {
-                    "name": "cronCount",
-                    "label": "定时任务数",
-                    "type": "tpl",
-                    "tpl": "${cronCount}"
+                    "tpl": "菜单:${menuCount|default:0}<br>库表:${tableCount|default:0}<br>定时任务:${cronCount|default:0}"
                 },
                 {
                     "name": "dependencies",
