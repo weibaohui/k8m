@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -118,7 +119,11 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			Routes:       m.collectPluginRouteCategories(mod.Meta.Name),
 		})
 	}
-	klog.V(6).Infof("获取插件列表，共计%d个", len(items))
+	klog.V(8).Infof("获取插件列表，共计%d个", len(items))
+	//对items 进行排序
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
 	amis.WriteJsonListWithTotal(c, int64(len(items)), items)
 }
 
