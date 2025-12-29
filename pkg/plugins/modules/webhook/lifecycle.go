@@ -39,9 +39,13 @@ func (w *WebhookLifecycle) Disable(ctx plugins.BaseContext) error {
 
 func (w *WebhookLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	klog.V(6).Infof("开始卸载Webhook插件")
-	if err := models.DropDB(); err != nil {
-		klog.V(6).Infof("卸载Webhook插件失败，删除数据库表失败: %v", err)
-		return err
+
+	// 根据keepData参数决定是否删除数据库
+	if !ctx.KeepData() {
+		if err := models.DropDB(); err != nil {
+			klog.V(6).Infof("卸载事件转发插件失败: %v", err)
+			return err
+		}
 	}
 	klog.V(6).Infof("卸载Webhook插件成功")
 	return nil
