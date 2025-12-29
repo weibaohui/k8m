@@ -13,6 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/models"
+	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 	"gorm.io/gorm"
 )
 
@@ -170,7 +171,7 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 	}
 
 	// 保存webhookNames
-	receiver := models.WebhookReceiver{}
+	receiver := hkmodels.WebhookReceiver{}
 	if names, nErr := receiver.GetNamesByIds(m.Webhooks); nErr == nil {
 		m.WebhookNames = strings.Join(names, ",")
 	} else {

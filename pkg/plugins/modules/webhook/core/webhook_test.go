@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 )
 
 func TestWebhookConfig(t *testing.T) {

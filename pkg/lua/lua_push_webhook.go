@@ -5,6 +5,8 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
+	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
+
 	"k8s.io/klog/v2"
 )
 
@@ -15,7 +17,7 @@ import (
 func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.SendResult, error) {
 
 	// 查询webhooks
-	receiver := &models.WebhookReceiver{}
+	receiver := &hkmodels.WebhookReceiver{}
 	receivers, err := receiver.ListByRecordID(recordID)
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)

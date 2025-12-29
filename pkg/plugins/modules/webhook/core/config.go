@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 )
 
 var registerAdaptersOnce sync.Once

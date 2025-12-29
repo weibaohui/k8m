@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 	"k8s.io/klog/v2"
 )
 

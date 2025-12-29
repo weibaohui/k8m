@@ -7,6 +7,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
+	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
+
 	"gorm.io/gorm"
 )
 
@@ -63,7 +65,7 @@ func (r *AdminRecordController) Push(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	receiver := &models.WebhookReceiver{}
+	receiver := &hkmodels.WebhookReceiver{}
 	receivers, err := receiver.ListByRecordID(recordID)
 
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/models"
 	"gorm.io/gorm"
 )
 
@@ -37,7 +38,7 @@ func (c *WebhookReceiver) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB
 }
 func (c *WebhookReceiver) ListByRecordID(recordID uint) ([]*WebhookReceiver, error) {
 	// 1. 查询 InspectionRecord
-	record := &InspectionRecord{}
+	record := &models.InspectionRecord{}
 	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", recordID)
 	})
@@ -46,7 +47,7 @@ func (c *WebhookReceiver) ListByRecordID(recordID uint) ([]*WebhookReceiver, err
 
 	}
 	// 2. 查询 Schedule，查找webhook
-	schedule := &InspectionSchedule{}
+	schedule := &models.InspectionSchedule{}
 	schedule, err = schedule.GetOne(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Where("id = ?", record.ScheduleID)
 	})

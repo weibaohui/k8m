@@ -9,7 +9,8 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	coremodels "github.com/weibaohui/k8m/pkg/models"
+	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
+
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/worker"
 	"gorm.io/gorm"
@@ -94,7 +95,7 @@ func (s *Controller) Save(c *gin.Context) {
 		}
 	}
 
-	receiver := coremodels.WebhookReceiver{}
+	receiver := hkmodels.WebhookReceiver{}
 	if names, nErr := receiver.GetNamesByIds(m.Webhooks); nErr == nil {
 		m.WebhookNames = strings.Join(names, ",")
 	} else {

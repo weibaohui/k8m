@@ -10,9 +10,10 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	coremodels "github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/config"
 	ehmodels "github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
+	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
+
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
@@ -237,7 +238,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 		return nil
 	}
 
-	receiver := &coremodels.WebhookReceiver{}
+	receiver := &hkmodels.WebhookReceiver{}
 	receivers, _, err := receiver.List(dao.BuildDefaultParams(), func(d *gorm.DB) *gorm.DB {
 		return d.Where("id IN ?", webhookIDs)
 	})
@@ -308,4 +309,3 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 	klog.V(6).Infof("批量Webhook推送成功: 规则=%s 集群=%s 事件数=%d", ruleName, cluster, len(events))
 	return nil
 }
-

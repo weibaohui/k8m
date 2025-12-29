@@ -9,8 +9,8 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/core"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 	"gorm.io/gorm"
 )
 
