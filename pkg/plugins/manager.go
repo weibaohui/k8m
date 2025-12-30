@@ -99,6 +99,30 @@ func (m *Manager) Install(name string) error {
 	return nil
 }
 
+// Upgrade 升级指定插件（版本变更触发），调用生命周期的 Upgrade
+// 该方法不改变当前状态，仅执行安全迁移逻辑
+func (m *Manager) Upgrade(name string, fromVersion string, toVersion string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	mod, ok := m.modules[name]
+	if !ok {
+		return fmt.Errorf("插件未注册: %s", name)
+	}
+	if mod.Lifecycle != nil {
+		ctx := upgradeContextImpl{
+			baseContextImpl: baseContextImpl{meta: mod.Meta},
+			from:            fromVersion,
+			to:              toVersion,
+		}
+		if err := mod.Lifecycle.Upgrade(ctx); err != nil {
+			klog.V(6).Infof("升级插件失败: %s，从 %s 到 %s，错误: %v", name, fromVersion, toVersion, err)
+			return err
+		}
+	}
+	klog.V(6).Infof("升级插件成功: %s，从 %s 到 %s", name, fromVersion, toVersion)
+	return nil
+}
+
 // Enable 启用指定插件，调用生命周期的 Enable
 // 注意：该方法用于实际启停周期调用，非管理员API配置写入
 func (m *Manager) Enable(name string) error {
@@ -130,32 +154,8 @@ func (m *Manager) Enable(name string) error {
 	return nil
 }
 
-// Upgrade 升级指定插件（版本变更触发），调用生命周期的 Upgrade
-// 该方法不改变当前状态，仅执行安全迁移逻辑
-func (m *Manager) Upgrade(name string, fromVersion string, toVersion string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	mod, ok := m.modules[name]
-	if !ok {
-		return fmt.Errorf("插件未注册: %s", name)
-	}
-	if mod.Lifecycle != nil {
-		ctx := upgradeContextImpl{
-			baseContextImpl: baseContextImpl{meta: mod.Meta},
-			from:            fromVersion,
-			to:              toVersion,
-		}
-		if err := mod.Lifecycle.Upgrade(ctx); err != nil {
-			klog.V(6).Infof("升级插件失败: %s，从 %s 到 %s，错误: %v", name, fromVersion, toVersion, err)
-			return err
-		}
-	}
-	klog.V(6).Infof("升级插件成功: %s，从 %s 到 %s", name, fromVersion, toVersion)
-	return nil
-}
-
-// Disable 禁用指定插件，调用生命周期的 Disable
-// 注意：该方法用于实际启停周期调用，非管理员API配置写入
+// Disable 禁用指定插件,调用生命周期的 Disable
+// 注意:该方法用于实际启停周期调用,非管理员API配置写入
 func (m *Manager) Disable(name string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -163,10 +163,22 @@ func (m *Manager) Disable(name string) error {
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
+	// 依赖检查:禁用前必须确保没有已启用的插件依赖于当前插件
+	for otherName, otherMod := range m.modules {
+		if m.status[otherName] != StatusEnabled {
+			continue
+		}
+		for _, dep := range otherMod.Dependencies {
+			if dep == name {
+				klog.V(6).Infof("禁用插件失败: %s,被插件依赖: %s", name, otherName)
+				return fmt.Errorf("无法禁用插件,插件 %s 依赖于当前插件", otherName)
+			}
+		}
+	}
 	if mod.Lifecycle != nil {
 		ctx := baseContextImpl{meta: mod.Meta}
 		if err := mod.Lifecycle.Disable(ctx); err != nil {
-			klog.V(6).Infof("禁用插件失败: %s，错误: %v", name, err)
+			klog.V(6).Infof("禁用插件失败: %s,错误: %v", name, err)
 			return err
 		}
 	}
