@@ -1,4 +1,4 @@
-package inspection
+package controller
 
 import (
 	"context"
@@ -11,8 +11,9 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/lua"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 	"gorm.io/gorm"
 )
@@ -20,26 +21,28 @@ import (
 type AdminScheduleController struct {
 }
 
-func RegisterAdminScheduleRoutes(admin *gin.RouterGroup) {
+func RegisterAdminScheduleRoutes(arg *gin.RouterGroup) {
+	admin := arg.Group("/plugins/" + modules.PluginNameInspection)
+
 	ctrl := &AdminScheduleController{}
-	admin.GET("/inspection/schedule/list", ctrl.List)
-	admin.GET("/inspection/schedule/record/id/:id/event/list", ctrl.EventList)
-	admin.POST("/inspection/schedule/record/id/:id/summary", ctrl.SummaryByRecordID)
-	admin.GET("/inspection/schedule/record/id/:id/output/list", ctrl.OutputList)
-	admin.POST("/inspection/schedule/save", ctrl.Save)
-	admin.POST("/inspection/schedule/delete/:ids", ctrl.Delete)
-	admin.POST("/inspection/schedule/save/id/:id/status/:enabled", ctrl.QuickSave)
-	admin.POST("/inspection/schedule/start/id/:id", ctrl.Start)
-	admin.POST("/inspection/schedule/id/:id/update_script_code", ctrl.UpdateScriptCode)
-	admin.POST("/inspection/schedule/id/:id/summary", ctrl.SummaryBySchedule)
-	admin.POST("/inspection/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", ctrl.SummaryBySchedule)
-	admin.GET("/inspection/event/status/option_list", ctrl.EventStatusOptionList)
+	admin.GET("/schedule/list", ctrl.List)
+	admin.GET("/schedule/record/id/:id/event/list", ctrl.EventList)
+	admin.POST("/schedule/record/id/:id/summary", ctrl.SummaryByRecordID)
+	admin.GET("/schedule/record/id/:id/output/list", ctrl.OutputList)
+	admin.POST("/schedule/save", ctrl.Save)
+	admin.POST("/schedule/delete/:ids", ctrl.Delete)
+	admin.POST("/schedule/save/id/:id/status/:enabled", ctrl.QuickSave)
+	admin.POST("/schedule/start/id/:id", ctrl.Start)
+	admin.POST("/schedule/id/:id/update_script_code", ctrl.UpdateScriptCode)
+	admin.POST("/schedule/id/:id/summary", ctrl.SummaryBySchedule)
+	admin.POST("/schedule/id/:id/summary/cluster/:cluster/start_time/:start_time/end_time/:end_time", ctrl.SummaryBySchedule)
+	admin.GET("/event/status/option_list", ctrl.EventStatusOptionList)
 }
 
 // @Summary 获取巡检计划列表
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/list [get]
+// @Router /admin/plugins/inspection/schedule/list [get]
 func (s *AdminScheduleController) List(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.InspectionSchedule{}
@@ -56,7 +59,7 @@ func (s *AdminScheduleController) List(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/record/id/{id}/output/list [get]
+// @Router /admin/plugins/inspection/schedule/record/id/{id}/output/list [get]
 func (s *AdminScheduleController) OutputList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
@@ -79,7 +82,7 @@ func (s *AdminScheduleController) OutputList(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/record/id/{id}/event/list [get]
+// @Router /admin/plugins/inspection/schedule/record/id/{id}/event/list [get]
 func (s *AdminScheduleController) EventList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
@@ -101,7 +104,7 @@ func (s *AdminScheduleController) EventList(c *gin.Context) {
 // @Summary 获取巡检事件状态选项列表
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/inspection/event/status/option_list [get]
+// @Router /admin/plugins/inspection/event/status/option_list [get]
 func (s *AdminScheduleController) EventStatusOptionList(c *gin.Context) {
 	m := &models.InspectionCheckEvent{}
 	events, _, err := m.List(nil, func(db *gorm.DB) *gorm.DB {
@@ -131,7 +134,7 @@ func (s *AdminScheduleController) EventStatusOptionList(c *gin.Context) {
 // @Summary 保存巡检计划
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/save [post]
+// @Router /admin/plugins/inspection/schedule/save [post]
 func (s *AdminScheduleController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.InspectionSchedule{}
@@ -199,7 +202,7 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 // @Security BearerAuth
 // @Param ids path string true "巡检计划ID，多个用逗号分隔"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/delete/{ids} [post]
+// @Router /admin/plugins/inspection/schedule/delete/{ids} [post]
 func (s *AdminScheduleController) Delete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
@@ -245,7 +248,7 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 // @Param id path int true "巡检计划ID"
 // @Param enabled path string true "状态，例如：true、false"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/save/id/{id}/status/{enabled} [post]
+// @Router /admin/plugins/inspection/schedule/save/id/{id}/status/{enabled} [post]
 func (s *AdminScheduleController) QuickSave(c *gin.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
@@ -282,7 +285,7 @@ func (s *AdminScheduleController) QuickSave(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path int true "巡检计划ID"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/start/id/{id} [post]
+// @Router /admin/plugins/inspection/schedule/start/id/{id} [post]
 func (s *AdminScheduleController) Start(c *gin.Context) {
 	id := c.Param("id")
 	m := &models.InspectionSchedule{
@@ -315,7 +318,7 @@ func (s *AdminScheduleController) Start(c *gin.Context) {
 // @Param id path int true "巡检计划ID"
 // @Param script_codes body string true "脚本代码"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/id/{id}/update_script_code [post]
+// @Router /admin/plugins/inspection/schedule/id/{id}/update_script_code [post]
 func (s *AdminScheduleController) UpdateScriptCode(c *gin.Context) {
 	id := c.Param("id")
 	type requestBody struct {

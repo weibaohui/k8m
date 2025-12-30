@@ -3,7 +3,7 @@ package lua
 import (
 	"fmt"
 
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 

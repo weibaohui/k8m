@@ -153,3 +153,13 @@ func (c *InspectionScriptResult) GetOne(params *dao.Params, queryFuncs ...func(*
 func (c *InspectionScriptResult) BatchSave(params *dao.Params, events []*InspectionScriptResult, batchSize int, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericBatchSave(params, events, batchSize, queryFuncs...)
 }
+
+// TableName 指定表名为 inspection_records
+func (c *InspectionRecord) TableName() string {
+	return "inspection_records"
+}
+
+// TableName 指定表名为 inspection_script_results
+func (c *InspectionScriptResult) TableName() string {
+	return "inspection_script_results"
+}

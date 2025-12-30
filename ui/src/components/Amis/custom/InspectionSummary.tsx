@@ -64,7 +64,7 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         if (cluster) {
             clusterBase64 = toUrlSafeBase64(cluster)
         }
-        url = `/admin/inspection/schedule/id/${realScheduleId}/summary/cluster/${clusterBase64}/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
+        url = `/admin/plugins/inspection/schedule/id/${realScheduleId}/summary/cluster/${clusterBase64}/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
 
         fetcher({ url, method: 'post' })
             .then((response: any) => {

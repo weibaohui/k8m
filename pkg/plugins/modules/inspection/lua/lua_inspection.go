@@ -12,7 +12,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/kom/kom"
 	lua "github.com/yuin/gopher-lua"
 	"gorm.io/gorm"
@@ -136,20 +136,20 @@ func (p *Inspection) runLuaCheck(item *models.InspectionLuaScript) CheckResult {
 	timeout := time.Duration(timeoutSeconds) * time.Second
 
 	start := time.Now()
-	
+
 	// 创建可取消的上下文
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	
+
 	// 为 Lua 状态设置上下文，使其能够响应取消信号
 	p.lua.SetContext(ctx)
-	
+
 	// 使用channel来处理超时
 	type result struct {
 		err error
 	}
 	resultChan := make(chan result, 1)
-	
+
 	// 在goroutine中执行Lua脚本
 	go func() {
 		defer func() {
@@ -159,7 +159,7 @@ func (p *Inspection) runLuaCheck(item *models.InspectionLuaScript) CheckResult {
 				resultChan <- result{err: fmt.Errorf("脚本执行发生panic: %v", r)}
 			}
 		}()
-		
+
 		err := p.lua.DoString(item.Script)
 		resultChan <- result{err: err}
 	}()

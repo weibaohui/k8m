@@ -30,7 +30,7 @@
             "title": "新建规则 (ESC 关闭)",
             "body": {
               "type": "form",
-              "api": "post:/admin/inspection/script/save",
+              "api": "post:/admin/plugins/inspection/script/save",
               "body": [
                 {
                   "type": "input-text",
@@ -124,7 +124,7 @@
           "label": "Lua脚本说明",
           "icon": "fas fa-book text-primary",
           "actionType": "url",
-          "url": "/#/k/${''|selectedClusterBase64}/admin/inspection/lua_doc",
+          "url": "/#/k/${''|selectedClusterBase64}/plugins/inspection/lua_doc",
           "blank": false
         },
         "reload",
@@ -134,7 +134,7 @@
           "label": "重置内置规则",
           "actionType": "ajax",
           "confirmText": "该操作将先删除所有自定义规则，然后重新加载内置规则，是否执行?",
-          "api": "post:/admin/inspection/script/load"
+          "api": "post:/admin/plugins/inspection/script/load"
         }
       ],
       "loadDataOnce": false,
@@ -146,7 +146,7 @@
           "label": "批量删除",
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
-          "api": "post:/admin/inspection/script/delete/${ids}"
+          "api": "post:/admin/plugins/inspection/script/delete/${ids}"
         }
       ],
       "footerToolbar": [
@@ -163,7 +163,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/admin/inspection/script/list",
+      "api": "get:/admin/plugins/inspection/script/list",
       "columns": [
         {
           "type": "operation",
@@ -182,7 +182,7 @@
                 "title": "编辑规则 (ESC 关闭)",
                 "body": {
                   "type": "form",
-                  "api": "post:/admin/inspection/script/save",
+                  "api": "post:/admin/plugins/inspection/script/save",
                   "body": [
                     {
                       "type": "hidden",

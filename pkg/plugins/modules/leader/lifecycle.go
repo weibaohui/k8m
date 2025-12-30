@@ -5,9 +5,9 @@ import (
 	"time"
 
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
-	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )

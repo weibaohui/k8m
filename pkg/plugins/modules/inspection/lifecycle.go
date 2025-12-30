@@ -2,7 +2,10 @@ package inspection
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
@@ -58,6 +61,11 @@ func (l *InspectionLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 // Start 集群巡检插件自身没有需要在所有实例上运行的后台任务
 // 真正的定时巡检调度由 leader 插件在成为 Leader 时统一启动
 func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
+	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
+		if service.LeaderService().IsCurrentLeader() {
+			lua.InitClusterInspection()
+		}
+	}
 	return nil
 }
 

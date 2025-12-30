@@ -73,3 +73,8 @@ func (c *InspectionSchedule) CheckSkipZeroFailedCount(id *uint) bool {
 	klog.V(6).Infof("巡检计划id=%d配置了跳过0失败的条目=%v", *id, skip)
 	return skip
 }
+
+// TableName 指定表名为 inspection_schedules
+func (c *InspectionSchedule) TableName() string {
+	return "inspection_schedules"
+}

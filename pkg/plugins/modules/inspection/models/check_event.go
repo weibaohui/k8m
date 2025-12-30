@@ -12,7 +12,7 @@ import (
 type InspectionCheckEvent struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	RecordID    uint      `json:"record_id"`                        // 关联的巡检执行记录ID
-	EventStatus string    `json:"event_status"`                     // 事件状态（如“正常”、“失败”）
+	EventStatus string    `json:"event_status"`                     // 事件状态（如"正常"、"失败"）
 	EventMsg    string    `json:"event_msg"`                        // 事件消息
 	Extra       string    `gorm:"type:text" json:"extra,omitempty"` // 额外上下文
 	ScriptName  string    `json:"script_name"`                      // 检测脚本名称
@@ -49,4 +49,9 @@ func (c *InspectionCheckEvent) GetOne(params *dao.Params, queryFuncs ...func(*go
 // BatchSave 批量保存 InspectionCheckEvent 实例
 func (c *InspectionCheckEvent) BatchSave(params *dao.Params, events []*InspectionCheckEvent, batchSize int, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericBatchSave(params, events, batchSize, queryFuncs...)
+}
+
+// TableName 指定表名为 inspection_check_events
+func (c *InspectionCheckEvent) TableName() string {
+	return "inspection_check_events"
 }

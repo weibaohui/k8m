@@ -22,7 +22,7 @@
             "title": "新建定时巡检计划 (ESC 关闭)",
             "body": {
               "type": "form",
-              "api": "post:/admin/inspection/schedule/save",
+              "api": "post:/admin/plugins/inspection/schedule/save",
               "body": [
                 {
                   "type": "alert",
@@ -60,7 +60,7 @@
                   "name": "webhooks",
                   "label": "Webhook",
                   "multiple": true,
-                  "source": "/admin/plugins/webhook/option_list",
+                  "source": "/admin/plugins/plugins/webhook/option_list",
                   "labelField": "label",
                   "valueField": "value",
                   "placeholder": "请选择目标Webhook"
@@ -102,7 +102,6 @@
                   "type": "divider",
                   "title": "AI总结配置"
                 },
-               
                 {
                   "type": "switch",
                   "name": "ai_enabled",
@@ -162,7 +161,7 @@
           "label": "批量删除",
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
-          "api": "post:/admin/inspection/schedule/delete/${ids}"
+          "api": "post:/admin/plugins/inspection/schedule/delete/${ids}"
         }
       ],
       "footerToolbar": [
@@ -179,8 +178,8 @@
           "align": "right"
         }
       ],
-      "api": "get:/admin/inspection/schedule/list",
-      "quickSaveItemApi": "/admin/inspection/schedule/save/id/${id}/status/${enabled}",
+      "api": "get:/admin/plugins/inspection/schedule/list",
+      "quickSaveItemApi": "/admin/plugins/inspection/schedule/save/id/${id}/status/${enabled}",
       "columns": [
         {
           "type": "operation",
@@ -198,7 +197,7 @@
                 "title": "编辑巡检计划 (ESC 关闭)",
                 "body": {
                   "type": "form",
-                  "api": "post:/admin/inspection/schedule/save",
+                  "api": "post:/admin/plugins/inspection/schedule/save",
                   "body": [
                     {
                       "type": "alert",
@@ -285,7 +284,6 @@
                       "type": "divider",
                       "title": "AI总结配置"
                     },
-                    
                     {
                       "type": "switch",
                       "name": "ai_enabled",
@@ -356,12 +354,12 @@
                   "style": {
                     "height": "500px"
                   },
-                  "api": "post:/admin/inspection/schedule/id/$id/update_script_code",
+                  "api": "post:/admin/plugins/inspection/schedule/id/$id/update_script_code",
                   "body": [
                     {
                       "type": "transfer",
                       "name": "script_codes",
-                      "source": "get:/admin/inspection/script/option_list",
+                      "source": "get:/admin/plugins/inspection/script/option_list",
                       "searchable": true,
                       "statistics": true,
                       "resultListModeFollowSelect": true,
@@ -394,7 +392,7 @@
                   "icon": "fa-solid fa-clipboard-list text-primary",
                   "body": "巡检记录",
                   "blank": false,
-                  "href": "/#/k/${''|selectedClusterBase64}/admin/inspection/record?schedule_id=${id}"
+                  "href": "/#/k/${''|selectedClusterBase64}/plugins/inspection/record?schedule_id=${id}"
                 }
               ]
             }
