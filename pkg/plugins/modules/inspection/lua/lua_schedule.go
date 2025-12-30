@@ -10,7 +10,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/kom/kom"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"

@@ -6,4 +6,5 @@ const (
 	PluginNameLeader       = "leader"
 	PluginNameWebhook      = "webhook"
 	PluginNameEventHandler = "eventhandler"
+	PluginNameInspection   = "inspection"
 )

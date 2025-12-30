@@ -7,7 +7,7 @@
             "name": "recordCRUD",
             "autoFillHeight": true,
             "autoGenerateFilter": true,
-            "api": "get:/admin/inspection/record/list",
+            "api": "get:/admin/plugins/inspection/record/list",
             "headerToolbar": [
                 {
                     "type": "columns-toggler",
@@ -46,7 +46,7 @@
                             "icon": "fas fa-robot",
                             "level": "primary",
                             "size": "sm",
-                            "api": "post:/admin/inspection/schedule/record/id/$id/summary",
+                            "api": "post:/admin/plugins/inspection/schedule/record/id/$id/summary",
                             "confirmText": "确定要生成AI总结吗？",
                             "reload": "recordCRUD",
                             "messages": {
@@ -91,7 +91,7 @@
                                         "id": "scriptOutputCRUD",
                                         "name": "scriptOutputCRUD",
                                         "autoFillHeight": true,
-                                        "api": "get:/admin/inspection/schedule/record/id/$id/output/list",
+                                        "api": "get:/admin/plugins/inspection/schedule/record/id/$id/output/list",
                                         "headerToolbar": [
                                             {
                                                 "type": "columns-toggler",
@@ -182,7 +182,7 @@
                             "type": "button",
                             "actionType": "ajax",
                             "label": "重新触发webhook",
-                            "api": "post:/admin/inspection/schedule/record/id/$id/push"
+                            "api": "post:/admin/plugins/inspection/schedule/record/id/$id/push"
                         }
                     ]
                 },

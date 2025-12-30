@@ -1,4 +1,4 @@
-package inspection
+package controller
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
@@ -6,26 +6,28 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"k8s.io/klog/v2"
 )
 
 type AdminLuaScriptController struct {
 }
 
-func RegisterAdminLuaScriptRoutes(admin *gin.RouterGroup) {
+func RegisterAdminLuaScriptRoutes(arg *gin.RouterGroup) {
+	admin := arg.Group("/plugins/" + modules.PluginNameInspection)
 	ctrl := &AdminLuaScriptController{}
-	admin.GET("/inspection/script/list", ctrl.LuaScriptList)
-	admin.POST("/inspection/script/delete/:ids", ctrl.LuaScriptDelete)
-	admin.POST("/inspection/script/save", ctrl.LuaScriptSave)
-	admin.POST("/inspection/script/load", ctrl.LuaScriptLoad)
-	admin.GET("/inspection/script/option_list", ctrl.LuaScriptOptionList)
+	admin.GET("/script/list", ctrl.LuaScriptList)
+	admin.POST("/script/delete/:ids", ctrl.LuaScriptDelete)
+	admin.POST("/script/save", ctrl.LuaScriptSave)
+	admin.POST("/script/load", ctrl.LuaScriptLoad)
+	admin.GET("/script/option_list", ctrl.LuaScriptOptionList)
 }
 
 // @Summary 获取Lua脚本列表
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/inspection/script/list [get]
+// @Router /admin/plugins/inspection/script/list [get]
 func (s *AdminLuaScriptController) LuaScriptList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := &models.InspectionLuaScript{}
@@ -41,7 +43,7 @@ func (s *AdminLuaScriptController) LuaScriptList(c *gin.Context) {
 // @Summary 保存Lua脚本
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/inspection/script/save [post]
+// @Router /admin/plugins/inspection/script/save [post]
 func (s *AdminLuaScriptController) LuaScriptSave(c *gin.Context) {
 	params := dao.BuildParams(c)
 	m := models.InspectionLuaScript{}
@@ -67,7 +69,7 @@ func (s *AdminLuaScriptController) LuaScriptSave(c *gin.Context) {
 // @Security BearerAuth
 // @Param ids path string true "脚本ID，多个用逗号分隔"
 // @Success 200 {object} string
-// @Router /admin/inspection/script/delete/{ids} [post]
+// @Router /admin/plugins/inspection/script/delete/{ids} [post]
 func (s *AdminLuaScriptController) LuaScriptDelete(c *gin.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
@@ -86,7 +88,7 @@ func (s *AdminLuaScriptController) LuaScriptDelete(c *gin.Context) {
 // @Summary 获取Lua脚本选项列表
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/inspection/script/option_list [get]
+// @Router /admin/plugins/inspection/script/option_list [get]
 func (s *AdminLuaScriptController) LuaScriptOptionList(c *gin.Context) {
 	m := models.InspectionLuaScript{}
 	params := dao.BuildParams(c)
@@ -120,7 +122,7 @@ func (s *AdminLuaScriptController) LuaScriptOptionList(c *gin.Context) {
 // @Summary 加载内置Lua脚本
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/inspection/script/load [post]
+// @Router /admin/plugins/inspection/script/load [post]
 func (s *AdminLuaScriptController) LuaScriptLoad(c *gin.Context) {
 	// 删除后，重新插入内置脚本
 	err := dao.DB().Model(&models.InspectionLuaScript{}).Where("script_type = ?", constants.LuaScriptTypeBuiltin).Delete(&models.InspectionLuaScript{}).Error

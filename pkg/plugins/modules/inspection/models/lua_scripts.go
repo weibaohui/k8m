@@ -13,18 +13,18 @@ import (
 // 包含脚本名称、描述、分组、版本、类型和脚本内容等信息
 // 用于存储和管理自定义 Lua 脚本
 type InspectionLuaScript struct {
-	ID          uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name        string                  `json:"name"`                                   // 脚本名称，主键
-	Description string                  `json:"description"`                            // 脚本描述
-	Group       string                  `json:"group"`                                  // 分组
-	Version     string                  `json:"version"`                                // 版本
-	Kind        string                  `json:"kind"`                                   // 类型
-	ScriptType  constants.LuaScriptType `json:"script_type"`                            // 脚本类型 内置/自定义
-	Script      string                  `gorm:"type:text" json:"script"`                // 脚本内容
-	ScriptCode  string                  `gorm:"uniqueIndex;size:64" json:"script_code"` // 脚本唯一标识码，每个脚本唯一
-	TimeoutSeconds int                  `json:"timeout_seconds" gorm:"default:60"`      // 脚本执行超时时间（秒），默认60秒
-	CreatedAt   time.Time               `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt   time.Time               `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ID             uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Name           string                  `json:"name"`                                   // 脚本名称，主键
+	Description    string                  `json:"description"`                            // 脚本描述
+	Group          string                  `json:"group"`                                  // 分组
+	Version        string                  `json:"version"`                                // 版本
+	Kind           string                  `json:"kind"`                                   // 类型
+	ScriptType     constants.LuaScriptType `json:"script_type"`                            // 脚本类型 内置/自定义
+	Script         string                  `gorm:"type:text" json:"script"`                // 脚本内容
+	ScriptCode     string                  `gorm:"uniqueIndex;size:64" json:"script_code"` // 脚本唯一标识码，每个脚本唯一
+	TimeoutSeconds int                     `json:"timeout_seconds" gorm:"default:60"`      // 脚本执行超时时间（秒），默认60秒
+	CreatedAt      time.Time               `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt      time.Time               `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 
 }
 
@@ -75,4 +75,14 @@ func SetBuiltinLuaScriptsVersion(db *gorm.DB, version string) error {
 		UpdatedAt: time.Now(),
 	}
 	return db.Save(record).Error
+}
+
+// TableName 指定表名为 inspection_lua_scripts
+func (c *InspectionLuaScript) TableName() string {
+	return "inspection_lua_scripts"
+}
+
+// TableName 指定表名为 inspection_lua_script_builtin_versions
+func (c *InspectionLuaScriptBuiltinVersion) TableName() string {
+	return "inspection_lua_script_builtin_versions"
 }

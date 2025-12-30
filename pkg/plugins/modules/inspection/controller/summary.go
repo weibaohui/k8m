@@ -1,4 +1,4 @@
-package inspection
+package controller
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/lua"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -26,8 +26,8 @@ import (
 // @Param start_time path string false "开始时间(RFC3339格式)"
 // @Param end_time path string false "结束时间(RFC3339格式)"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/id/{id}/summary [post]
-// @Router /admin/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time} [post]
+// @Router /admin/plugins/inspection/schedule/id/{id}/summary [post]
+// @Router /admin/plugins/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time} [post]
 func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 100000000
@@ -218,7 +218,7 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
-// @Router /admin/inspection/schedule/record/id/{id}/summary [post]
+// @Router /admin/plugins/inspection/schedule/record/id/{id}/summary [post]
 func (s *AdminScheduleController) SummaryByRecordID(c *gin.Context) {
 	recordIDStr := c.Param("id")
 	if recordIDStr == "" {

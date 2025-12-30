@@ -3,7 +3,7 @@ package lua
 import (
 	"time"
 
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 )
 
 // CheckEvent 用于记录每次检测的详细信息，包括检测状态、消息、额外上下文、脚本名称、资源类型、描述、命名空间和资源名。
@@ -30,14 +30,14 @@ type CheckResult struct {
 // SummaryMsg 巡检记录汇总信息结构体
 // 用于替代原来的 map[string]any 返回类型，提供类型安全和更好的性能
 type SummaryMsg struct {
-	RecordDate        string                          `json:"record_date"`        // 巡检记录日期（本地时间格式）
-	RecordID          uint                            `json:"record_id"`          // 巡检记录ID
-	ScheduleID        *uint                           `json:"schedule_id"`        // 巡检计划ID
-	ScheduleName      string                          `json:"schedule_name"`      // 巡检计划名称
-	Cluster           string                          `json:"cluster"`            // 集群名称
-	TotalRules        int                             `json:"total_rules"`        // 总规则数
-	FailedCount       int                             `json:"failed_count"`       // 失败数量
-	FailedList        []*models.InspectionCheckEvent  `json:"failed_list"`        // 失败事件列表
-	AIEnabled         bool                            `json:"ai_enabled"`         // 是否启用AI汇总
-	AIPromptTemplate  string                          `json:"ai_prompt_template"` // AI提示模板
+	RecordDate       string                         `json:"record_date"`        // 巡检记录日期（本地时间格式）
+	RecordID         uint                           `json:"record_id"`          // 巡检记录ID
+	ScheduleID       *uint                          `json:"schedule_id"`        // 巡检计划ID
+	ScheduleName     string                         `json:"schedule_name"`      // 巡检计划名称
+	Cluster          string                         `json:"cluster"`            // 集群名称
+	TotalRules       int                            `json:"total_rules"`        // 总规则数
+	FailedCount      int                            `json:"failed_count"`       // 失败数量
+	FailedList       []*models.InspectionCheckEvent `json:"failed_list"`        // 失败事件列表
+	AIEnabled        bool                           `json:"ai_enabled"`         // 是否启用AI汇总
+	AIPromptTemplate string                         `json:"ai_prompt_template"` // AI提示模板
 }
