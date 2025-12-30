@@ -61,10 +61,13 @@ func (l *InspectionLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 // Start 集群巡检插件自身没有需要在所有实例上运行的后台任务
 // 真正的定时巡检调度由 leader 插件在成为 Leader 时统一启动
 func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
+	//启用了 leader 插件，且当前实例是 Leader 时才初始化巡检任务
 	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
 		if service.LeaderService().IsCurrentLeader() {
 			lua.InitClusterInspection()
 		}
+	} else {
+		lua.InitClusterInspection()
 	}
 	return nil
 }
