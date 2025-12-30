@@ -228,6 +228,83 @@ func (m *Manager) SetEngine(e *gin.Engine) {
 	m.mu.Unlock()
 }
 
+// topologicalSort 对已启用的插件进行拓扑排序，确保依赖先启动
+// 返回插件名称列表，按依赖顺序排列（被依赖的插件在前）
+func (m *Manager) topologicalSort() []string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	// 构建入度表和邻接表（仅针对已启用的插件）
+	inDegree := make(map[string]int)
+	graph := make(map[string][]string) // 反向图：dependency -> dependents
+	enabledNames := make([]string, 0)
+
+	// 初始化：收集所有已启用的插件
+	for name, status := range m.status {
+		if status == StatusEnabled {
+			enabledNames = append(enabledNames, name)
+			inDegree[name] = 0
+		}
+	}
+
+	// 构建图和计算入度
+	for _, name := range enabledNames {
+		mod, ok := m.modules[name]
+		if !ok {
+			continue
+		}
+		for _, dep := range mod.Dependencies {
+			// 只处理已启用的依赖
+			if m.status[dep] == StatusEnabled {
+				graph[dep] = append(graph[dep], name)
+				inDegree[name]++
+			}
+		}
+	}
+
+	// 拓扑排序（Kahn算法）
+	queue := make([]string, 0)
+	for _, name := range enabledNames {
+		if inDegree[name] == 0 {
+			queue = append(queue, name)
+		}
+	}
+
+	result := make([]string, 0, len(enabledNames))
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+		result = append(result, current)
+
+		for _, dependent := range graph[current] {
+			inDegree[dependent]--
+			if inDegree[dependent] == 0 {
+				queue = append(queue, dependent)
+			}
+		}
+	}
+
+	// 检测循环依赖
+	if len(result) != len(enabledNames) {
+		klog.V(6).Infof("警告：检测到循环依赖，部分插件可能无法正确排序")
+		// 将未排序的插件追加到结果末尾
+		for _, name := range enabledNames {
+			found := false
+			for _, r := range result {
+				if r == name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				result = append(result, name)
+			}
+		}
+	}
+
+	return result
+}
+
 // Start 启动插件管理：集中注册 + 默认启用策略
 func (m *Manager) Start() {
 	if registrar != nil {
@@ -235,8 +312,13 @@ func (m *Manager) Start() {
 	}
 	m.ApplyConfigFromDB()
 	//增加插件启动任务管理
-	//逐个启动插件中注册的后台任务。不阻塞
-	for name, mod := range m.modules {
+	//按依赖顺序逐个启动插件中注册的后台任务。不阻塞
+	sortedNames := m.topologicalSort()
+	for _, name := range sortedNames {
+		mod, ok := m.modules[name]
+		if !ok {
+			continue
+		}
 		if mod.Lifecycle != nil && m.status[name] == StatusEnabled {
 			ctx := baseContextImpl{meta: mod.Meta}
 			if err := mod.Lifecycle.Start(ctx); err != nil {
@@ -248,7 +330,12 @@ func (m *Manager) Start() {
 	}
 
 	//逐个启动插件中定义的cron表达式的定时任务
-	for name, mod := range m.modules {
+	// 同样按依赖顺序注册
+	for _, name := range sortedNames {
+		mod, ok := m.modules[name]
+		if !ok {
+			continue
+		}
 		if mod.Lifecycle == nil || len(mod.Crons) == 0 || m.status[name] != StatusEnabled {
 			continue
 		}

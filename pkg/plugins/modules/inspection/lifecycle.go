@@ -66,8 +66,6 @@ func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
 		if service.LeaderService().IsCurrentLeader() {
 			lua.InitClusterInspection()
 		}
-	} else {
-		lua.InitClusterInspection()
 	}
 	return nil
 }
