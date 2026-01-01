@@ -138,6 +138,7 @@ modules/
 * 版本控制
 * 依赖判断
 
+
 插件元信息包含：
 
 * 插件唯一名称
@@ -257,7 +258,7 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 
 ---
 
-## 15. 核心抽象与接口定义（仅定义，不实现）
+## 15. 核心抽象与接口定义
 
 > 本节用于**固化插件体系在代码层面的抽象模型**，只定义数据结构与接口签名，
 > 不涉及任何具体实现逻辑。
@@ -303,6 +304,8 @@ Meta 不参与业务逻辑，仅用于管理与展示。
 * Enable：启用阶段，注册运行期能力
 * Disable：禁用阶段，撤销运行期能力
 * Uninstall：卸载阶段，清理插件资源（可选）
+* Start：启动阶段，用于启动后端服务。按依赖顺序启动各插件。
+* StartCron：启动定时任务，用于启动定时任务
 
 生命周期方法由系统统一调度，插件不得自行调用。
 
@@ -321,6 +324,27 @@ Context 包含但不限于以下能力入口：
 * API 路由注册
 * 前端资源访问
 * SQL / 数据模型注册
+* EventBus 事件
+  ```go 
+  //发布
+  ctx.Bus().Publish(eventbus.Event{
+					Type: eventbus.EventLeaderElected,
+				})
+  //注册监听              
+  elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
+  lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
+		//监听两个channel，根据channel的信号启动或停止事件转发
+		go func() {
+			for {
+				select {
+				case <-elect:
+					klog.V(6).Infof("成为Leader")
+				case <-lost:
+					klog.V(6).Infof("不再是Leader")
+				}
+			}
+		}()
+  ```
 
 插件不得直接操作核心内部对象。
 
