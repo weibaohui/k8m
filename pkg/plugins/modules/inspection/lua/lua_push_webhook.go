@@ -5,7 +5,6 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
-	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 
 	"k8s.io/klog/v2"
 )
@@ -16,9 +15,8 @@ import (
 // 设计原则：单纯的webhook发送功能，不负责AI总结生成
 func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.SendResult, error) {
 
-	// 查询webhooks
-	receiver := &hkmodels.WebhookReceiver{}
-	receivers, err := receiver.ListByRecordID(recordID)
+	// 查询webhooks（通过inspection插件的辅助函数）
+	receivers, err := models.GetWebhookReceiversByRecordID(recordID)
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}

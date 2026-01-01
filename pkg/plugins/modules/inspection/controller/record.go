@@ -8,7 +8,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
-	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 
 	"gorm.io/gorm"
 )
@@ -67,8 +66,8 @@ func (r *AdminRecordController) Push(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	receiver := &hkmodels.WebhookReceiver{}
-	receivers, err := receiver.ListByRecordID(recordID)
+	// 使用inspection插件的辅助函数获取webhook接收器
+	receivers, err := models.GetWebhookReceiversByRecordID(recordID)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
