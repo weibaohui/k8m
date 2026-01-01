@@ -65,7 +65,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			RenewDeadline: 50 * time.Second,
 			RetryPeriod:   10 * time.Second,
 			OnStartedLeading: func(c context.Context) {
-				klog.V(6).Infof("成为Leader，启动定时任务（集群巡检、Helm仓库更新）")
+				klog.V(6).Infof("成为Leader")
 				service.LeaderService().SetCurrentLeader(true)
 				ctx.Bus().Publish(eventbus.Event{
 					Type: eventbus.EventLeaderElected,
@@ -74,7 +74,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				helm2.StartUpdateHelmRepoInBackground()
 			},
 			OnStoppedLeading: func() {
-				klog.V(6).Infof("不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
+				klog.V(6).Infof("不再是Leader")
 				service.LeaderService().SetCurrentLeader(false)
 				ctx.Bus().Publish(eventbus.Event{
 					Type: eventbus.EventLeaderLost,

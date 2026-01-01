@@ -1,6 +1,10 @@
 package eventbus
 
-import "sync"
+import (
+	"sync"
+
+	"k8s.io/klog/v2"
+)
 
 type EventBus struct {
 	mu          sync.RWMutex
@@ -33,11 +37,20 @@ func (b *EventBus) Publish(e Event) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
+	subscriberCount := len(b.subscribers[e.Type])
+	klog.V(6).Infof("Publishing event type=%v to %d subscribers", e.Type, subscriberCount)
+
+	droppedCount := 0
 	for _, ch := range b.subscribers[e.Type] {
 		select {
 		case ch <- e:
 		default:
+			droppedCount++
 			// 丢弃慢消费者
 		}
+	}
+
+	if droppedCount > 0 {
+		klog.V(6).Infof("Event type=%v dropped for %d slow consumers", e.Type, droppedCount)
 	}
 }
