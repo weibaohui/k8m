@@ -952,6 +952,6 @@ export const initialMenu: MenuItem[] = [
         icon: 'fa-solid fa-circle-info',
         eventType: 'custom',
         customEvent: '() => loadJsonPage("/about/about")',
-        order: 20,
+        order: 20000,
     },
 ];
