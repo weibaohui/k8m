@@ -73,16 +73,21 @@ func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 				select {
 				case <-elect:
 					StartLeaderWatch()
+					klog.V(6).Infof("成为Leader，启动事件转发")
+				case <-lost:
+					StopLeaderWatch()
+					klog.V(6).Infof("不再是Leader，停止事件转发")
 				case <-lost:
 					StopLeaderWatch()
 				}
 			}
 		}()
+		klog.V(6).Infof("根据实例Leader获取状态启动事件转发插件后台任务")
 	} else {
 		//没有启动Leader插件，直接启动事件转发
 		StartEventForwardingWatch()
+		klog.V(6).Infof("启动事件转发插件后台任务")
 	}
-	klog.V(6).Infof("启动事件转发插件后台任务")
 	return nil
 }
 

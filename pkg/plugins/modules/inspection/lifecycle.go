@@ -68,14 +68,18 @@ func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
 				select {
 				case <-elect:
 					lua.InitClusterInspection()
+					klog.V(6).Infof("成为Leader，初始化集群巡检任务")
 				case <-lost:
 					lua.StopClusterInspection()
+					klog.V(6).Infof("不再是Leader，停止集群巡检任务")
 				}
 			}
 		}()
+		klog.V(6).Infof("根据实例Leader获取状态启动集群巡检插件后台任务")
 	} else {
 		//没有启动Leader插件，直接启动事件转发
 		lua.InitClusterInspection()
+		klog.V(6).Infof("启动集群巡检插件后台任务")
 	}
 
 	return nil
