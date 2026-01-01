@@ -58,28 +58,6 @@ func (l *LeaderLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 // 由插件管理器在系统启动时统一调用，用于启动选举并在成为Leader时执行平台任务
 func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动Leader选举插件后台任务")
-	// 启动 Lease 同步（监听器）任务：仅当启用leader插件时启动
-	// 启用主备模式，不再同步集群状态 TODO clean
-	// go func() {
-	// 	cfg := flag.Init()
-	// 	leaseOpts := lease.Options{
-	// 		Namespace:                 cfg.LeaseNamespace,
-	// 		LeaseDurationSeconds:      cfg.LeaseDurationSeconds,
-	// 		LeaseRenewIntervalSeconds: cfg.LeaseRenewIntervalSeconds,
-	// 		ResyncPeriod:              30 * time.Second,
-	// 		ClusterID:                 cfg.HostClusterID,
-	// 	}
-	// 	leaseCtx := context.Background()
-	// 	if err := service.LeaseManager().Init(leaseCtx, leaseOpts); err == nil {
-	// 		if err := service.LeaseManager().StartWatcher(leaseCtx, service.ClusterService().Connect, service.ClusterService().Disconnect); err != nil {
-	// 			klog.V(6).Infof("启动 Lease 管理器监听器失败: %v", err)
-	// 		} else {
-	// 			klog.V(6).Infof("启动 Lease 管理器监听器成功")
-	// 		}
-	// 	} else {
-	// 		klog.V(6).Infof("初始化 Lease 管理器失败: %v", err)
-	// 	}
-	// }()
 
 	// 启动 Leader 选举逻辑
 	go func() {
@@ -91,14 +69,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			OnStartedLeading: func(c context.Context) {
 				klog.V(6).Infof("成为Leader，启动定时任务（集群巡检、Helm仓库更新）")
 				service.LeaderService().SetCurrentLeader(true)
-				// 启动 Lease 过期清理（仅Leader）
-				// cleanupCtx, cancel := context.WithCancel(context.Background())
-				// l.cleanupCancel = cancel
-				// if err := service.LeaseManager().StartLeaderCleanup(cleanupCtx); err != nil {
-				// 	klog.V(6).Infof("启动 Lease 管理器过期清理失败: %v", err)
-				// } else {
-				// 	klog.V(6).Infof("启动 Lease 管理器过期清理成功")
-				// }
+
 				// 只有当集群巡检插件启用时才启动巡检定时任务
 				if plugins.ManagerInstance().IsEnabled(modules.PluginNameInspection) {
 					lua.InitClusterInspection()
