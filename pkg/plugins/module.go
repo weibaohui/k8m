@@ -10,7 +10,8 @@ type Module struct {
 	Menus []Menu
 	// Dependencies 插件依赖的其他插件名称列表；启用前需确保均已启用
 	Dependencies []string
-
+	// RunAfter 不依赖RunAfter中的插件，但是必须在他们之后启动
+	RunAfter []string
 	// Lifecycle 生命周期实现（由系统调度调用）
 	Lifecycle Lifecycle
 	// Crons 插件的定时任务调度表达式（5段 cron）

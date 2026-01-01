@@ -240,18 +240,19 @@ func (m *Manager) SetEngine(e *gin.Engine) {
 	m.mu.Unlock()
 }
 
-// topologicalSort 对已启用的插件进行拓扑排序，确保依赖先启动
-// 返回插件名称列表，按依赖顺序排列（被依赖的插件在前）
+// topologicalSort 对已启用的插件进行拓扑排序,确保依赖先启动
+// 返回插件名称列表,按依赖顺序排列(被依赖的插件在前)
+// 同时支持 RunAfter 字段,确保插件在 RunAfter 列表中的插件之后启动
 func (m *Manager) topologicalSort() []string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	// 构建入度表和邻接表（仅针对已启用的插件）
+	// 构建入度表和邻接表(仅针对已启用的插件)
 	inDegree := make(map[string]int)
-	graph := make(map[string][]string) // 反向图：dependency -> dependents
+	graph := make(map[string][]string) // 反向图:dependency -> dependents
 	enabledNames := make([]string, 0)
 
-	// 初始化：收集所有已启用的插件
+	// 初始化:收集所有已启用的插件
 	for name, status := range m.status {
 		if status == StatusEnabled {
 			enabledNames = append(enabledNames, name)
@@ -265,10 +266,19 @@ func (m *Manager) topologicalSort() []string {
 		if !ok {
 			continue
 		}
+		// 处理 Dependencies:强依赖关系
 		for _, dep := range mod.Dependencies {
 			// 只处理已启用的依赖
 			if m.status[dep] == StatusEnabled {
 				graph[dep] = append(graph[dep], name)
+				inDegree[name]++
+			}
+		}
+		// 处理 RunAfter:启动顺序约束,必须在指定插件之后启动
+		for _, runAfter := range mod.RunAfter {
+			// 只处理已启用的插件
+			if m.status[runAfter] == StatusEnabled {
+				graph[runAfter] = append(graph[runAfter], name)
 				inDegree[name]++
 			}
 		}
