@@ -346,10 +346,17 @@
                 },
                 {
                     "name": "dependencies",
-                    "label": "依赖",
+                    "label": "运行依赖<br><span class='text-gray-500 text-xs'>缺失无法运行</span>",
                     "type": "tpl",
                     "tpl": "${dependencies|join:', '}",
-                    "width": "240px"
+                    "width": "160px"
+                },
+                {
+                    "name": "runAfter",
+                    "label": "启动依赖<br><span class='text-gray-500 text-xs'>在此之后启动</span>",
+                    "type": "tpl",
+                    "tpl": "${runAfter|join:', '}",
+                    "width": "160px"
                 },
                 {
                     "name": "description",

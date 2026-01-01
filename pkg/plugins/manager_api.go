@@ -14,29 +14,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// extractPluginName 从路由路径中提取插件名
-// 规则：寻找 "/plugins/" 段，返回其后第一个路径段作为插件名
-// 示例：
-// - /k8s/cluster/:cluster/plugins/demo/items    -> demo
-// - /admin/plugins/demo/remove/items/:id       -> demo
-// - /mgm/plugins/demo                          -> demo
-func extractPluginName(p string) (string, bool) {
-	idx := strings.Index(p, "/plugins/")
-	if idx < 0 {
-		return "", false
-	}
-	rest := p[idx+len("/plugins/"):]
-	if rest == "" {
-		return "", false
-	}
-	slash := strings.IndexByte(rest, '/')
-	if slash >= 0 {
-		return rest[:slash], true
-	}
-	klog.V(6).Infof("提取插件名: %s", rest)
-	return rest, true
-}
-
 // RegisterAdminRoutes 注册插件的管理员路由
 // 管理员路由通常用于插件的配置、管理和操作接口，需要较高的权限才能访问。
 // 提供功能：
@@ -129,6 +106,7 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 			Tables:       mod.Tables,
 			TableCount:   len(mod.Tables),
 			Dependencies: mod.Dependencies,
+			RunAfter:     mod.RunAfter,
 			Routes:       m.collectPluginRouteCategories(mod.Meta.Name),
 		})
 	}
@@ -546,4 +524,27 @@ func (m *Manager) SetPluginCronEnabled(c *gin.Context) {
 	m.RemoveCron(name, spec)
 	klog.V(6).Infof("关闭插件定时任务成功: %s，表达式: %s", name, spec)
 	amis.WriteJsonOK(c)
+}
+
+// extractPluginName 从路由路径中提取插件名
+// 规则：寻找 "/plugins/" 段，返回其后第一个路径段作为插件名
+// 示例：
+// - /k8s/cluster/:cluster/plugins/demo/items    -> demo
+// - /admin/plugins/demo/remove/items/:id       -> demo
+// - /mgm/plugins/demo                          -> demo
+func extractPluginName(p string) (string, bool) {
+	idx := strings.Index(p, "/plugins/")
+	if idx < 0 {
+		return "", false
+	}
+	rest := p[idx+len("/plugins/"):]
+	if rest == "" {
+		return "", false
+	}
+	slash := strings.IndexByte(rest, '/')
+	if slash >= 0 {
+		return rest[:slash], true
+	}
+	klog.V(6).Infof("提取插件名: %s", rest)
+	return rest, true
 }

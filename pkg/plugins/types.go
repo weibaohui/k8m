@@ -60,6 +60,7 @@ type PluginItemVO struct {
 	Tables       []string        `json:"tables,omitempty"`
 	TableCount   int             `json:"tableCount,omitempty"`
 	Dependencies []string        `json:"dependencies,omitempty"`
+	RunAfter     []string        `json:"runAfter,omitempty"`
 	Routes       RouteCategoryVO `json:"routes,omitempty"`
 }
 
