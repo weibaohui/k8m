@@ -9,10 +9,10 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/worker"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"gorm.io/gorm"
 )
 
@@ -95,13 +95,13 @@ func (s *Controller) Save(c *gin.Context) {
 		}
 	}
 
-	receiver := hkmodels.WebhookReceiver{}
-	if names, nErr := receiver.GetNamesByIds(m.Webhooks); nErr == nil {
-		m.WebhookNames = strings.Join(names, ",")
-	} else {
-		amis.WriteJsonError(c, nErr)
+	// 保存webhookNames
+	names, err := webhook.GetNamesByIds(strings.Split(m.Webhooks, ","))
+	if err != nil {
+		amis.WriteJsonError(c, err)
 		return
 	}
+	m.WebhookNames = strings.Join(names, ",")
 
 	normalize := func(v string) string {
 		t := strings.TrimSpace(v)

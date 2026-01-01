@@ -8,15 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/config"
 	ehmodels "github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
-	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"github.com/weibaohui/k8m/pkg/service"
-	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
 
@@ -238,14 +235,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 		return nil
 	}
 
-	receiver := &hkmodels.WebhookReceiver{}
-	receivers, _, err := receiver.List(dao.BuildDefaultParams(), func(d *gorm.DB) *gorm.DB {
-		return d.Where("id IN ?", webhookIDs)
-	})
-	if err != nil {
-		return fmt.Errorf("查询webhook接收器失败: %w", err)
-	}
-	if len(receivers) == 0 {
+	if len(webhookIDs) == 0 {
 		klog.V(6).Infof("规则 %s 未找到可用的webhook接收器，跳过推送", ruleName)
 		return nil
 	}
@@ -294,7 +284,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 		}
 	}
 
-	results := webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
+	results := webhook.PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
 
 	allFailed := true
 	for _, r := range results {
