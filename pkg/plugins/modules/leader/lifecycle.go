@@ -7,8 +7,6 @@ import (
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
@@ -72,10 +70,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				ctx.Bus().Publish(eventbus.Event{
 					Type: eventbus.EventLeaderElected,
 				})
-				// 只有当集群巡检插件启用时才启动巡检定时任务
-				if plugins.ManagerInstance().IsEnabled(modules.PluginNameInspection) {
-					lua.InitClusterInspection()
-				}
+
 				helm2.StartUpdateHelmRepoInBackground()
 			},
 			OnStoppedLeading: func() {
@@ -84,10 +79,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				ctx.Bus().Publish(eventbus.Event{
 					Type: eventbus.EventLeaderLost,
 				})
-				// 只有当集群巡检插件启用时才停止巡检定时任务
-				if plugins.ManagerInstance().IsEnabled(modules.PluginNameInspection) {
-					lua.StopClusterInspection()
-				}
+
 				helm2.StopUpdateHelmRepoInBackground()
 			},
 		}
