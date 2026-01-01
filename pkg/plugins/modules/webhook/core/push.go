@@ -48,3 +48,20 @@ func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookRece
 	}
 	return results
 }
+
+// PushMsgToAllTargetByIDs sends a message to multiple webhook receivers.
+func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*SendResult {
+	var results []*SendResult
+	//根据ID 获取所有receiver
+	m := models.WebhookReceiver{}
+	receivers, err := m.GetReceiversByIds(receiverIDs)
+	if err != nil {
+		klog.Errorf("[webhook] Failed to get receivers by ids %v: %v", receiverIDs, err)
+		return results
+	}
+	for _, receiver := range receivers {
+		result := PushMsgToSingleTarget(msg, raw, receiver)
+		results = append(results, result)
+	}
+	return results
+}

@@ -16,7 +16,7 @@ import (
 func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.SendResult, error) {
 
 	// 查询webhooks（通过inspection插件的辅助函数）
-	receivers, err := models.GetWebhookReceiversByRecordID(recordID)
+	webhookIDs, err := models.GetWebhookReceiverIDsByRecordID(recordID)
 	if err != nil {
 		return nil, fmt.Errorf("查询webhooks失败: %v", err)
 	}
@@ -37,7 +37,7 @@ func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.Se
 		}
 	}
 
-	results := webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
+	results := webhook.PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
 
 	return results, nil
 }

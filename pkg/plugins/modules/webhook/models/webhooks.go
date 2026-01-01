@@ -55,15 +55,15 @@ func (c *WebhookReceiver) GetNamesByIds(ids string) ([]string, error) {
 // 参数：ids - 逗号分隔的webhook ID字符串，例如 "1,2,3"
 // 返回：webhook接收器列表和错误信息
 // 如果ids为空，返回空列表
-func GetReceiversByIds(ids string) ([]*WebhookReceiver, error) {
+func (c *WebhookReceiver) GetReceiversByIds(ids []string) ([]*WebhookReceiver, error) {
 	// 检查 ids 是否为空
-	if strings.TrimSpace(ids) == "" {
+	if len(ids) == 0 {
 		return []*WebhookReceiver{}, nil
 	}
 
 	receiver := &WebhookReceiver{}
 	receivers, _, err := receiver.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
-		return db.Where("id in ?", strings.Split(ids, ","))
+		return db.Where("id in ?", ids)
 	})
 	if err != nil {
 		return nil, err

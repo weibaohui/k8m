@@ -67,14 +67,14 @@ func (r *AdminRecordController) Push(c *gin.Context) {
 		return
 	}
 	// 使用inspection插件的辅助函数获取webhook接收器
-	receivers, err := models.GetWebhookReceiversByRecordID(recordID)
+	receivers, err := models.GetWebhookReceiverIDsByRecordID(recordID)
 
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	webhook.PushMsgToAllTargets(summary, resultRaw, receivers)
+	webhook.PushMsgToAllTargetByIDs(summary, resultRaw, receivers)
 
 	amis.WriteJsonOK(c)
 }

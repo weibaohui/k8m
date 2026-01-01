@@ -2,9 +2,8 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
-	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +17,7 @@ import (
 // - 将跨插件的协调逻辑放在调用方（inspection插件）
 // - webhook插件通过export封装接口对外服务，隐藏SQL等实现细节
 // - 这样避免了插件间的循环依赖，职责更加清晰
-func GetWebhookReceiversByRecordID(recordID uint) ([]*hkmodels.WebhookReceiver, error) {
+func GetWebhookReceiverIDsByRecordID(recordID uint) ([]string, error) {
 	// 1. 查询 InspectionRecord
 	record := &InspectionRecord{}
 	record, err := record.GetOne(nil, func(db *gorm.DB) *gorm.DB {
@@ -37,10 +36,11 @@ func GetWebhookReceiversByRecordID(recordID uint) ([]*hkmodels.WebhookReceiver, 
 		return nil, fmt.Errorf("查询巡检计划失败: %v", err)
 	}
 
-	// 3. 调用webhook插件的封装接口查询接收器
-	receivers, err := webhook.GetReceiversByIds(schedule.Webhooks)
-	if err != nil {
-		return nil, fmt.Errorf("查询webhook接收器失败: %v", err)
+	// 3. 返回webhook IDs列表
+	webhookIDs := strings.Split(schedule.Webhooks, ",")
+	if len(webhookIDs) == 0 {
+		return []string{}, nil
 	}
-	return receivers, nil
+	return webhookIDs, nil
+
 }

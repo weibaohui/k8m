@@ -50,15 +50,12 @@ func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookRece
 	return core.PushMsgToAllTargets(msg, raw, receivers)
 }
 
-// GetReceiversByIds 根据逗号分隔的ID字符串查询webhook接收器列表
-// 参数：ids - 逗号分隔的webhook ID字符串，例如 "1,2,3"
-// 返回：webhook接收器列表和错误信息
-func GetReceiversByIds(ids string) ([]*models.WebhookReceiver, error) {
+func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*SendResult {
 	// 检查插件是否已启用
 	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
-		klog.V(4).Info("webhook 插件已禁用，返回空列表")
-		return []*models.WebhookReceiver{}, nil
+		klog.V(4).Infof("webhook 插件已禁用，跳过向 %d 个接收者发送消息", len(receiverIDs))
+		return nil
 	}
 
-	return models.GetReceiversByIds(ids)
+	return core.PushMsgToAllTargetByIDs(msg, raw, receiverIDs)
 }
