@@ -59,3 +59,13 @@ func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*Se
 
 	return core.PushMsgToAllTargetByIDs(msg, raw, receiverIDs)
 }
+
+func GetNamesByIds(ids []string) ([]string, error) {
+	// 检查插件是否已启用
+	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
+		klog.V(4).Info("webhook 插件已禁用，返回空列表")
+		return []string{}, nil
+	}
+	webhookReceiver := models.WebhookReceiver{}
+	return webhookReceiver.GetNamesByIds(ids)
+}

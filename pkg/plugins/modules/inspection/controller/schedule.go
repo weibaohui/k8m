@@ -14,7 +14,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
-	hkmodels "github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"gorm.io/gorm"
 )
 
@@ -174,13 +174,12 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 	}
 
 	// 保存webhookNames
-	receiver := hkmodels.WebhookReceiver{}
-	if names, nErr := receiver.GetNamesByIds(m.Webhooks); nErr == nil {
-		m.WebhookNames = strings.Join(names, ",")
-	} else {
-		amis.WriteJsonError(c, nErr)
+	names, err := webhook.GetNamesByIds(strings.Split(m.Webhooks, ","))
+	if err != nil {
+		amis.WriteJsonError(c, err)
 		return
 	}
+	m.WebhookNames = strings.Join(names, ",")
 
 	err = m.Save(params)
 	if err != nil {

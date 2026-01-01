@@ -1,7 +1,6 @@
 package models
 
 import (
-	"strings"
 	"time"
 
 	"github.com/weibaohui/k8m/internal/dao"
@@ -37,9 +36,9 @@ func (c *WebhookReceiver) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB
 }
 
 // GetNamesByIds 根据webhook ID列表获取对应的名称列表
-func (c *WebhookReceiver) GetNamesByIds(ids string) ([]string, error) {
+func (c *WebhookReceiver) GetNamesByIds(ids []string) ([]string, error) {
 	receivers, _, err := c.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
-		return db.Select("name").Where("id in ?", strings.Split(ids, ","))
+		return db.Select("name").Where("id in ?", ids)
 	})
 	if err != nil {
 		return nil, err
