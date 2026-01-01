@@ -12,7 +12,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameInspection,
 		Title:       "集群巡检插件",
 		Version:     "1.0.0",
-		Description: "基于 Lua 的集群巡检计划、规则管理与结果查看",
+		Description: "基于 Lua 的集群巡检计划、规则管理与结果查看。启用选举插件后，只有主实例执行，否则每个实例都执行。",
 	},
 	// 相关数据表名称，仅用于展示和管理，无强约束
 	Tables: []string{
@@ -81,9 +81,9 @@ var Metadata = plugins.Module{
 	},
 	// 依赖：需要 leader 插件提供主备能力，以及 webhook 插件用于通知
 	Dependencies: []string{
-		modules.PluginNameLeader,
 		modules.PluginNameWebhook,
 	},
+	RunAfter:          []string{modules.PluginNameLeader},
 	Lifecycle:         &InspectionLifecycle{},
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 }

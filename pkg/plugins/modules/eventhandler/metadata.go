@@ -11,7 +11,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameEventHandler,
 		Title:       "事件转发插件",
 		Version:     "1.0.0",
-		Description: "K8s 事件采集、规则过滤与Webhook转发",
+		Description: "K8s 事件采集、规则过滤与Webhook转发。启用选举插件后，只有主实例执行，否则每个实例都执行。",
 	},
 	Tables: []string{
 		"k8s_event_configs",

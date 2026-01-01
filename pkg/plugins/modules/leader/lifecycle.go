@@ -6,6 +6,7 @@ import (
 
 	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -59,7 +60,6 @@ func (l *LeaderLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动Leader选举插件后台任务")
 
-	// 启动 Leader 选举逻辑
 	go func() {
 		leaderCfg := Config{
 			LockName:      "k8m-leader-lock",
@@ -69,7 +69,9 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			OnStartedLeading: func(c context.Context) {
 				klog.V(6).Infof("成为Leader，启动定时任务（集群巡检、Helm仓库更新）")
 				service.LeaderService().SetCurrentLeader(true)
-
+				ctx.Bus().Publish(eventbus.Event{
+					Type: eventbus.EventLeaderElected,
+				})
 				// 只有当集群巡检插件启用时才启动巡检定时任务
 				if plugins.ManagerInstance().IsEnabled(modules.PluginNameInspection) {
 					lua.InitClusterInspection()
@@ -79,7 +81,9 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 			OnStoppedLeading: func() {
 				klog.V(6).Infof("不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
 				service.LeaderService().SetCurrentLeader(false)
-
+				ctx.Bus().Publish(eventbus.Event{
+					Type: eventbus.EventLeaderLost,
+				})
 				// 只有当集群巡检插件启用时才停止巡检定时任务
 				if plugins.ManagerInstance().IsEnabled(modules.PluginNameInspection) {
 					lua.StopClusterInspection()

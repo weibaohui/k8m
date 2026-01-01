@@ -2,6 +2,7 @@ package eventhandler
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"k8s.io/klog/v2"
@@ -64,9 +65,19 @@ func (l *EventHandlerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 // Start 中文函数注释：启动事件转发插件后台任务（不可阻塞），按主备状态控制事件转发启停。
 func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
-		//启动了Leader插件，那么需要检测当前实例是否为主
-		StartLeaderWatch()
-		return nil
+		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
+		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
+		//监听两个channel，根据channel的信号启动或停止事件转发
+		go func() {
+			for {
+				select {
+				case <-elect:
+					StartLeaderWatch()
+				case <-lost:
+					StopLeaderWatch()
+				}
+			}
+		}()
 	} else {
 		//没有启动Leader插件，直接启动事件转发
 		StartEventForwardingWatch()
