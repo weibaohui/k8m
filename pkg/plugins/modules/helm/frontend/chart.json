@@ -256,7 +256,7 @@
                           ],
                           "api": {
                             "method": "post",
-                            "url": "/k8s/helm/release/${release_name}/repo/${repository_name}/chart/${name}/version/${install_version}/install",
+                            "url": "/k8s/plugins/helm/release/${release_name}/repo/${repository_name}/chart/${name}/version/${install_version}/install",
                             "data": {
                               "values": "${values}",
                               "ns": "${ns}"

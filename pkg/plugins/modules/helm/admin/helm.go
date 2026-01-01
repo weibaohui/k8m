@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/models"
+	helm "github.com/weibaohui/k8m/pkg/plugins/modules/helm/service"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 

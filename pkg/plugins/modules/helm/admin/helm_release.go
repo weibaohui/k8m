@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
 	"k8s.io/klog/v2"
 )
 

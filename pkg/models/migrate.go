@@ -52,20 +52,12 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&ShellLog{}); err != nil {
 		errs = append(errs, err)
 	}
-	if err := dao.DB().AutoMigrate(&HelmRepository{}); err != nil {
-		errs = append(errs, err)
-	}
+
 	// MYSQL 下需要单独处理 content字段为LONGTEXT，pg、sqlite不需要处理，这个字段删掉了，不用了
 	// if dao.DB().Migrator().HasTable(&HelmRepository{}) && dao.DB().Dialector.Name() == "mysql" {
 	// 	dao.DB().Exec("ALTER TABLE helm_repositories MODIFY COLUMN content LONGTEXT")
 	// }
 
-	if err := dao.DB().AutoMigrate(&HelmChart{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&HelmRelease{}); err != nil {
-		errs = append(errs, err)
-	}
 	if err := dao.DB().AutoMigrate(&UserGroup{}); err != nil {
 		errs = append(errs, err)
 	}

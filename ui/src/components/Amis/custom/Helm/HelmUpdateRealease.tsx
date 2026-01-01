@@ -36,7 +36,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
 
             try {
                 const response = await fetcher({
-                    url: `/k8s/helm/release/ns/${namespace}/name/${releaseName}/revision/${revision}/values`,
+                    url: `/k8s/plugins/helm/release/ns/${namespace}/name/${releaseName}/revision/${revision}/values`,
                     method: 'get'
                 });
                 setValues((response.data as any)?.data || '');
@@ -53,7 +53,7 @@ const HelmUpdateRelease = React.forwardRef<HTMLSpanElement, HelmUpdateReleasePro
         setLoading(true);
         try {
             await fetcher({
-                url: '/k8s/helm/release/upgrade',
+                url: '/k8s/plugins/helm/release/upgrade',
                 method: 'post',
                 data: {
                     values,

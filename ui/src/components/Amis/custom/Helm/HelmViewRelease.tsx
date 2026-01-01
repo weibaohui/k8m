@@ -25,7 +25,7 @@ const HelmViewRelease = React.forwardRef<HTMLSpanElement, HelmViewReleaseProps>(
         const fetchValues = async () => {
             try {
                 const response = await fetcher({
-                    url: `/k8s/helm/release/ns/${namespace}/name/${releaseName}/revision/${revision}/values`,
+                    url: `/k8s/plugins/helm/release/ns/${namespace}/name/${releaseName}/revision/${revision}/values`,
                     method: 'get'
                 });
                 setValues((response.data as any)?.data || '');

@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
 	"gorm.io/gorm"
 )
 

@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +17,7 @@ import (
 func (pc *Controller) HelmRepoOptionList(c *gin.Context) {
 	params := dao.BuildParams(c)
 	params.OrderBy = "name"
+	//TODO 应该挪出去，不应该产生强依赖，考虑给插件增加param路由注册能力
 	m := &models.HelmRepository{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Distinct("name")

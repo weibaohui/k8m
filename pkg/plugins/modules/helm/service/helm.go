@@ -5,7 +5,7 @@ import (
 
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/pkg/flag"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
 	"k8s.io/klog/v2"
 )
 
