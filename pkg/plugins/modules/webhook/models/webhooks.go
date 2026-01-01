@@ -50,3 +50,23 @@ func (c *WebhookReceiver) GetNamesByIds(ids string) ([]string, error) {
 	}
 	return names, nil
 }
+
+// GetReceiversByIds 根据逗号分隔的ID字符串查询webhook接收器列表
+// 参数：ids - 逗号分隔的webhook ID字符串，例如 "1,2,3"
+// 返回：webhook接收器列表和错误信息
+// 如果ids为空，返回空列表
+func GetReceiversByIds(ids string) ([]*WebhookReceiver, error) {
+	// 检查 ids 是否为空
+	if strings.TrimSpace(ids) == "" {
+		return []*WebhookReceiver{}, nil
+	}
+
+	receiver := &WebhookReceiver{}
+	receivers, _, err := receiver.List(dao.BuildDefaultParams(), func(db *gorm.DB) *gorm.DB {
+		return db.Where("id in ?", strings.Split(ids, ","))
+	})
+	if err != nil {
+		return nil, err
+	}
+	return receivers, nil
+}

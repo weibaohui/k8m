@@ -49,3 +49,16 @@ func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookRece
 
 	return core.PushMsgToAllTargets(msg, raw, receivers)
 }
+
+// GetReceiversByIds 根据逗号分隔的ID字符串查询webhook接收器列表
+// 参数：ids - 逗号分隔的webhook ID字符串，例如 "1,2,3"
+// 返回：webhook接收器列表和错误信息
+func GetReceiversByIds(ids string) ([]*models.WebhookReceiver, error) {
+	// 检查插件是否已启用
+	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
+		klog.V(4).Info("webhook 插件已禁用，返回空列表")
+		return []*models.WebhookReceiver{}, nil
+	}
+
+	return models.GetReceiversByIds(ids)
+}
