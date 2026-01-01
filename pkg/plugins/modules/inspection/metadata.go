@@ -27,7 +27,7 @@ var Metadata = plugins.Module{
 	Menus: []plugins.Menu{
 		{
 			Key:   "plugin_inspection_index",
-			Title: "集群巡检",
+			Title: "集群巡检插件",
 			Icon:  "fa-solid fa-stethoscope",
 			Order: 40,
 			Show:  "isPlatformAdmin()==true",
