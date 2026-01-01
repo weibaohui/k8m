@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/robfig/cron/v3"
+	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"k8s.io/klog/v2"
 )
 
@@ -46,7 +47,7 @@ func (m *Manager) EnsureCron(name, spec string) error {
 	if _, ok := m.getCronEntry(name, spec); ok {
 		return nil
 	}
-	ctx := baseContextImpl{meta: mod.Meta}
+	ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 	n := name
 	s := spec
 	id, err := m.cron.AddFunc(s, func() {
@@ -98,7 +99,7 @@ func (m *Manager) RunCronOnce(name, spec string) error {
 	if !ok || mod.Lifecycle == nil {
 		return fmt.Errorf("插件未注册或未实现生命周期: %s", name)
 	}
-	ctx := baseContextImpl{meta: mod.Meta}
+	ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 	go func() {
 		m.setCronRunning(name, spec, true)
 		if err := mod.Lifecycle.StartCron(ctx, spec); err != nil {

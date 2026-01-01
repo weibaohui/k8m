@@ -5,6 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"k8s.io/klog/v2"
 )
 
@@ -52,7 +53,7 @@ func (m *Manager) ApplyConfigFromDB() {
 		switch st {
 		case StatusInstalled:
 			if mod.Lifecycle != nil {
-				ctx := installContextImpl{baseContextImpl{meta: mod.Meta}}
+				ctx := installContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}}
 				if err := mod.Lifecycle.Install(ctx); err != nil {
 					klog.V(6).Infof("启动时安装插件失败: %s，错误: %v", name, err)
 				} else {
@@ -61,7 +62,7 @@ func (m *Manager) ApplyConfigFromDB() {
 			}
 		case StatusEnabled:
 			if mod.Lifecycle != nil {
-				ctx := enableContextImpl{baseContextImpl{meta: mod.Meta}}
+				ctx := enableContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}}
 				if err := mod.Lifecycle.Enable(ctx); err != nil {
 					klog.V(6).Infof("启动时启用插件失败: %s，错误: %v", name, err)
 				} else {

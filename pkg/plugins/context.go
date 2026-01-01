@@ -1,9 +1,12 @@
 package plugins
 
+import "github.com/weibaohui/k8m/pkg/plugins/eventbus"
+
 // BaseContext 基础上下文（所有生命周期共享，只读能力）
 type BaseContext interface {
 	// Meta 返回插件元信息（名称、版本）
 	Meta() Meta
+	Bus() *eventbus.EventBus
 }
 
 // InstallContext 安装期上下文（只在首次安装时执行）

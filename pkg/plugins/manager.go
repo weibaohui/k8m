@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
+	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"k8s.io/klog/v2"
 )
 
@@ -87,8 +88,7 @@ func (m *Manager) Install(name string) error {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
 	if mod.Lifecycle != nil {
-		ctx := installContextImpl{baseContextImpl{meta: mod.Meta}}
-
+		ctx := installContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}}
 		if err := mod.Lifecycle.Install(ctx); err != nil {
 			klog.V(6).Infof("安装插件失败: %s，错误: %v", name, err)
 			return err
@@ -110,7 +110,7 @@ func (m *Manager) Upgrade(name string, fromVersion string, toVersion string) err
 	}
 	if mod.Lifecycle != nil {
 		ctx := upgradeContextImpl{
-			baseContextImpl: baseContextImpl{meta: mod.Meta},
+			baseContextImpl: baseContextImpl{meta: mod.Meta, bus: eventbus.New()},
 			from:            fromVersion,
 			to:              toVersion,
 		}
@@ -142,7 +142,7 @@ func (m *Manager) Enable(name string) error {
 		}
 	}
 	if mod.Lifecycle != nil {
-		ctx := enableContextImpl{baseContextImpl{meta: mod.Meta}}
+		ctx := enableContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}}
 		if err := mod.Lifecycle.Enable(ctx); err != nil {
 			klog.V(6).Infof("启用插件失败: %s，错误: %v", name, err)
 			return err
@@ -176,7 +176,7 @@ func (m *Manager) Disable(name string) error {
 		}
 	}
 	if mod.Lifecycle != nil {
-		ctx := baseContextImpl{meta: mod.Meta}
+		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 		if err := mod.Lifecycle.Disable(ctx); err != nil {
 			klog.V(6).Infof("禁用插件失败: %s,错误: %v", name, err)
 			return err
@@ -197,7 +197,7 @@ func (m *Manager) Uninstall(name string, keepData bool) error {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
 	if mod.Lifecycle != nil {
-		ctx := uninstallContextImpl{baseContextImpl{meta: mod.Meta}, keepData}
+		ctx := uninstallContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}, keepData}
 		if err := mod.Lifecycle.Uninstall(ctx); err != nil {
 			klog.V(6).Infof("卸载插件失败: %s，错误: %v", name, err)
 			return err
@@ -342,7 +342,7 @@ func (m *Manager) Start() {
 			continue
 		}
 		if mod.Lifecycle != nil && m.status[name] == StatusEnabled {
-			ctx := baseContextImpl{meta: mod.Meta}
+			ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 			if err := mod.Lifecycle.Start(ctx); err != nil {
 				klog.V(6).Infof("启动插件后台任务失败: %s，错误: %v", name, err)
 			} else {
@@ -361,7 +361,7 @@ func (m *Manager) Start() {
 		if mod.Lifecycle == nil || len(mod.Crons) == 0 || m.status[name] != StatusEnabled {
 			continue
 		}
-		ctx := baseContextImpl{meta: mod.Meta}
+		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 		for _, spec := range mod.Crons {
 			if _, err := cron.ParseStandard(spec); err != nil {
 				klog.V(6).Infof("插件 %s 的 cron 表达式非法: %s，错误: %v", name, spec, err)

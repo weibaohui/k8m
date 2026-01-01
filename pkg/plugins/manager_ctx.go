@@ -1,12 +1,18 @@
 package plugins
 
+import "github.com/weibaohui/k8m/pkg/plugins/eventbus"
+
 // baseContextImpl 基础上下文实现
 type baseContextImpl struct {
 	meta Meta
+	bus  *eventbus.EventBus
 }
 
 // Meta 返回插件元信息
 func (c baseContextImpl) Meta() Meta { return c.meta }
+
+// Meta 返回插件元信息
+func (c baseContextImpl) Bus() *eventbus.EventBus { return c.bus }
 
 // installContextImpl 安装期上下文实现
 type installContextImpl struct {
