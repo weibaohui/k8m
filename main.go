@@ -31,7 +31,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/gatewayapi"
-	"github.com/weibaohui/k8m/pkg/controller/helm"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/k8sgpt"
 	"github.com/weibaohui/k8m/pkg/controller/log"
@@ -349,8 +348,6 @@ func main() {
 		// doc
 		doc.RegisterRoutes(api)
 		k8sgpt.RegisterRoutes(api)
-		// helm release
-		helm.RegisterHelmReleaseRoutes(api)
 
 		// 集群操作相关的插件路由注册交由 Manager 统一处理
 		mgr.RegisterClusterRoutes(api)
@@ -369,8 +366,6 @@ func main() {
 		log.RegisterLogRoutes(mgm)
 		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
-		// helm chart
-		helm.RegisterHelmChartRoutes(mgm)
 
 		// 管理操作相关的插件路由注册交由 Manager 统一处理
 		mgr.RegisterManagementRoutes(mgm)
@@ -401,8 +396,6 @@ func main() {
 		user.RegisterAdminUserGroupRoutes(admin)
 		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
-		// helm Repo 操作
-		helm.RegisterHelmRepoRoutes(admin)
 
 		// 菜单自定义
 		menu.RegisterAdminMenuRoutes(admin)

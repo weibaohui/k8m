@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	helm2 "github.com/weibaohui/k8m/pkg/helm"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -70,8 +69,6 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				ctx.Bus().Publish(eventbus.Event{
 					Type: eventbus.EventLeaderElected,
 				})
-
-				helm2.StartUpdateHelmRepoInBackground()
 			},
 			OnStoppedLeading: func() {
 				klog.V(6).Infof("不再是Leader")
@@ -79,8 +76,6 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				ctx.Bus().Publish(eventbus.Event{
 					Type: eventbus.EventLeaderLost,
 				})
-
-				helm2.StopUpdateHelmRepoInBackground()
 			},
 		}
 		bg := context.Background()
