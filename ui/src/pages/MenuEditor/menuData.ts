@@ -781,48 +781,7 @@ export const initialMenu: MenuItem[] = [
                 customEvent: '() => loadJsonPage("/admin/config/config")',
                 order: 2,
             },
-            {
-                key: 'inspection_settings',
-                title: '集群巡检设置',
-                icon: 'fa-solid fa-stethoscope',
-                order: 3,
-                children: [
-                    {
-                        key: 'inspection_summary',
-                        title: '巡检汇总',
-                        icon: 'fa-solid fa-clipboard-list',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/summary")',
-                        order: 1,
-                    },
-                    {
-                        key: 'inspection_schedule',
-                        title: '巡检计划',
-                        icon: 'fa-solid fa-stethoscope',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/schedule")',
-                        order: 2,
-                    },
-                    {
-                        key: 'inspection_record',
-                        title: '巡检记录',
-                        icon: 'fa-solid fa-clipboard-list',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/record")',
-                        order: 3,
-                    },
-                    {
-                        key: 'script_management',
-                        title: '巡检规则',
-                        icon: 'fa-solid fa-clipboard-check',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/script")',
-                        order: 4,
-                    },
 
-
-                ],
-            },
             {
                 key: 'ai_model_config',
                 title: 'AI模型配置',
