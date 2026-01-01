@@ -379,39 +379,7 @@ export const initialMenu: MenuItem[] = [
             },
         ],
     },
-    {
-        key: 'Helm',
-        title: 'Helm应用',
-        icon: 'fab fa-app-store',
-        order: 10,
-        children: [
-            {
-                key: 'helm_repo',
-                title: '仓库',
-                icon: 'fas fa-database',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/helm/repo")',
-                order: 1,
-                show: 'isPlatformAdmin()==true',
-            },
-            {
-                key: 'helm_chart',
-                title: '应用包',
-                icon: 'fa-solid fa-cubes',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/helm/chart")',
-                order: 2,
-            },
-            {
-                key: 'helm_release',
-                title: '应用实例',
-                icon: 'fas fa-layer-group',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/helm/release")',
-                order: 3,
-            },
-        ],
-    },
+
     {
         key: 'config',
         title: '配置',
