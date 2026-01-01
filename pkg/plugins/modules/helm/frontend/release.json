@@ -75,7 +75,7 @@
           "actionType": "ajax",
           "confirmText": "确定要卸载吗？",
           "api": {
-            "url": "/k8s/helm/release/batch/uninstall",
+            "url": "/k8s/plugins/helm/release/batch/uninstall",
             "method": "post",
             "data": {
               "name_list": "${selectedItems | pick:name }",
@@ -102,7 +102,7 @@
           "align": "right"
         }
       ],
-      "api": "get:/k8s/helm/release/list",
+      "api": "get:/k8s/plugins/helm/release/list",
       "columns": [
         {
           "type": "operation",
@@ -213,7 +213,7 @@
                                 "type": "page",
                                 "body": {
                                   "type": "service",
-                                  "api": "/k8s/helm/release/ns/${namespace}/name/${name}/revision/${revision}/install_log",
+                                  "api": "/k8s/plugins/helm/release/ns/${namespace}/name/${name}/revision/${revision}/install_log",
                                   "body": [
                                     {
                                       "type": "tpl",
@@ -272,7 +272,7 @@
                       "type": "page",
                       "body": {
                         "type": "service",
-                        "api": "/k8s/helm/release/ns/${namespace}/name/${name}/revision/${revision}/notes",
+                        "api": "/k8s/plugins/helm/release/ns/${namespace}/name/${name}/revision/${revision}/notes",
                         "body": [
                           {
                             "type": "tpl",
@@ -385,7 +385,7 @@
                         "align": "right"
                       }
                     ],
-                    "api": "get:/k8s/helm/release/ns/${namespace}/name/${name}/history/list",
+                    "api": "get:/k8s/plugins/helm/release/ns/${namespace}/name/${name}/history/list",
                     "columns": [
                       {
                         "name": "revision",
