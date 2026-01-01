@@ -10,7 +10,7 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/config"
-	ehmodels "github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -126,7 +126,7 @@ func (w *EventWorker) processBatch() error {
 	w.processMutex.Lock()
 	defer w.processMutex.Unlock()
 
-	var modelEvent ehmodels.K8sEvent
+	var modelEvent models.K8sEvent
 	k8sEvents, err := modelEvent.ListUnprocessed(w.cfg.Worker.BatchSize)
 	if err != nil {
 		return fmt.Errorf("获取未处理事件失败: %w", err)
@@ -167,14 +167,14 @@ func (w *EventWorker) processBatch() error {
 		}
 		rule := config.RuleConfig{Namespaces: namespaces, Names: names, Reasons: reasons, Reverse: ec.RuleReverse}
 
-		grouped := make(map[string][]*ehmodels.K8sEvent)
+		grouped := make(map[string][]*models.K8sEvent)
 		for _, event := range k8sEvents {
 			if processedIDs[event.ID] {
 				continue
 			}
 			if event.Attempts >= w.cfg.Worker.MaxRetries {
 				klog.V(6).Infof("事件达到最大重试次数，标记为已处理: %s", event.EvtKey)
-				var m ehmodels.K8sEvent
+				var m models.K8sEvent
 				if err := m.MarkProcessedByID(event.ID, true); err != nil {
 					klog.V(6).Infof("标记事件已处理失败: %v", err)
 				}
@@ -205,7 +205,7 @@ func (w *EventWorker) processBatch() error {
 					}
 				}
 			} else {
-				var m ehmodels.K8sEvent
+				var m models.K8sEvent
 				for _, e := range events {
 					if err := m.MarkProcessedByID(e.ID, true); err != nil {
 						klog.V(6).Infof("标记事件已处理失败: %v", err)
@@ -219,7 +219,7 @@ func (w *EventWorker) processBatch() error {
 
 	for _, event := range k8sEvents {
 		if !processedIDs[event.ID] && !matchedIDs[event.ID] {
-			var m ehmodels.K8sEvent
+			var m models.K8sEvent
 			if err := m.MarkProcessedByID(event.ID, true); err != nil {
 				klog.V(6).Infof("标记事件已处理失败: %v", err)
 			}
@@ -229,7 +229,7 @@ func (w *EventWorker) processBatch() error {
 }
 
 // pushWebhookBatchForIDs 中文函数注释：根据指定的 webhookID 列表批量推送事件。
-func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string, events []*ehmodels.K8sEvent, ruleName string, aiEnabled bool, aiTemplate string) error {
+func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string, events []*models.K8sEvent, ruleName string, aiEnabled bool, aiTemplate string) error {
 	if len(webhookIDs) == 0 {
 		klog.V(6).Infof("规则 %s 未配置Webhook，跳过推送", ruleName)
 		return nil
