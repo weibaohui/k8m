@@ -2,6 +2,7 @@ package eventhandler
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"k8s.io/klog/v2"
 )
@@ -62,7 +63,14 @@ func (l *EventHandlerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 // Start 中文函数注释：启动事件转发插件后台任务（不可阻塞），按主备状态控制事件转发启停。
 func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
-	StartLeaderWatch()
+	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
+		//启动了Leader插件，那么需要检测当前实例是否为主
+		StartLeaderWatch()
+		return nil
+	} else {
+		//没有启动Leader插件，直接启动事件转发
+		StartEventForwardingWatch()
+	}
 	klog.V(6).Infof("启动事件转发插件后台任务")
 	return nil
 }

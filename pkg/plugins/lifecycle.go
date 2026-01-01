@@ -14,6 +14,7 @@ type Lifecycle interface {
 	Uninstall(ctx UninstallContext) error
 	// Start 启动后台任务入口；由系统在 Manager.Start 中调用；不可阻塞
 	Start(ctx BaseContext) error
+
 	// StartCron 启动定时任务入口；由系统根据metadata中的cron触发；不可阻塞
 	StartCron(ctx BaseContext, spec string) error
 }
