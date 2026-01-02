@@ -9,34 +9,28 @@ import (
 )
 
 type Config struct {
-	ID                          uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ProductName                 string `json:"product_name,omitempty"` // 产品名称
-	LoginType                   string `json:"login_type,omitempty"`
-	JwtTokenSecret              string `json:"jwt_token_secret,omitempty"`
-	NodeShellImage              string `json:"node_shell_image,omitempty"`
-	KubectlShellImage           string `json:"kubectl_shell_image,omitempty"`
-	ImagePullTimeout            int    `gorm:"default:30" json:"image_pull_timeout,omitempty"` // 镜像拉取超时时间（秒）
-	AnySelect                   bool   `gorm:"default:true" json:"any_select"`
-	PrintConfig                 bool   `json:"print_config"`
-	EnableAI                    bool   `gorm:"default:true" json:"enable_ai"`                                // 是否启用AI功能，默认开启
-	EnableSwagger               bool   `gorm:"default:true" json:"enable_swagger"`                           // 是否启用Swagger文档，默认开启
-	UseBuiltInModel             bool   `gorm:"default:true" json:"use_built_in_model"`                       // 是否使用内置模型，默认开启
-	MaxIterations               int32  `json:"max_iterations"`                                               //  模型自动对话的最大轮数
-	MaxHistory                  int32  `json:"max_history"`                                                  //  模型对话上下文历史记录数
-	ResourceCacheTimeout        int    `gorm:"default:60" json:"resource_cache_timeout,omitempty"`           // 资源缓存时间（秒）
-	HeartbeatIntervalSeconds    int    `gorm:"default:30" json:"heartbeat_interval_seconds,omitempty"`       // 心跳间隔时间（秒）
-	HeartbeatFailureThreshold   int    `gorm:"default:3" json:"heartbeat_failure_threshold,omitempty"`       // 心跳失败阈值
-	ReconnectMaxIntervalSeconds int    `gorm:"default:3600" json:"reconnect_max_interval_seconds,omitempty"` // 重连最大间隔时间（秒）
-	MaxRetryAttempts            int    `gorm:"default:100" json:"max_retry_attempts,omitempty"`              // 最大重试次数，默认100次
-	// 事件转发相关全局参数（平台配置）
-	EventForwardEnabled        bool      `gorm:"default:true" json:"event_forward_enabled"`                 // 是否启用事件转发
-	EventWatcherBufferSize     int       `gorm:"default:1000" json:"event_watcher_buffer_size,omitempty"`   // 事件Watcher缓存大小
-	EventWorkerBatchSize       int       `gorm:"default:50" json:"event_worker_batch_size,omitempty"`       // 事件Worker批处理大小
-	EventWorkerProcessInterval int       `gorm:"default:10" json:"event_worker_process_interval,omitempty"` // 事件Worker处理周期（秒）
-	EventWorkerMaxRetries      int       `gorm:"default:3" json:"event_worker_max_retries,omitempty"`       // 事件Worker最大重试次数
-	ModelID                    uint      `json:"model_id"`
-	CreatedAt                  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt                  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ID                          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	ProductName                 string    `json:"product_name,omitempty"` // 产品名称
+	LoginType                   string    `json:"login_type,omitempty"`
+	JwtTokenSecret              string    `json:"jwt_token_secret,omitempty"`
+	NodeShellImage              string    `json:"node_shell_image,omitempty"`
+	KubectlShellImage           string    `json:"kubectl_shell_image,omitempty"`
+	ImagePullTimeout            int       `gorm:"default:30" json:"image_pull_timeout,omitempty"` // 镜像拉取超时时间（秒）
+	AnySelect                   bool      `gorm:"default:true" json:"any_select"`
+	PrintConfig                 bool      `json:"print_config"`
+	EnableAI                    bool      `gorm:"default:true" json:"enable_ai"`                                // 是否启用AI功能，默认开启
+	EnableSwagger               bool      `gorm:"default:true" json:"enable_swagger"`                           // 是否启用Swagger文档，默认开启
+	UseBuiltInModel             bool      `gorm:"default:true" json:"use_built_in_model"`                       // 是否使用内置模型，默认开启
+	MaxIterations               int32     `json:"max_iterations"`                                               //  模型自动对话的最大轮数
+	MaxHistory                  int32     `json:"max_history"`                                                  //  模型对话上下文历史记录数
+	ResourceCacheTimeout        int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"`           // 资源缓存时间（秒）
+	HeartbeatIntervalSeconds    int       `gorm:"default:30" json:"heartbeat_interval_seconds,omitempty"`       // 心跳间隔时间（秒）
+	HeartbeatFailureThreshold   int       `gorm:"default:3" json:"heartbeat_failure_threshold,omitempty"`       // 心跳失败阈值
+	ReconnectMaxIntervalSeconds int       `gorm:"default:3600" json:"reconnect_max_interval_seconds,omitempty"` // 重连最大间隔时间（秒）
+	MaxRetryAttempts            int       `gorm:"default:100" json:"max_retry_attempts,omitempty"`              // 最大重试次数，默认100次
+	ModelID                     uint      `json:"model_id"`
+	CreatedAt                   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt                   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 
 func (c *Config) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*Config, int64, error) {
