@@ -14,10 +14,20 @@
   <img alt="GitHub Release" src="https://img.shields.io/github/v/release/weibaohui/k8m">
   <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/weibaohui/k8m/total">
   <img alt="GitHub Repo Issues" src="https://img.shields.io/github/issues/weibaohui/k8m">
- [![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
-[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
-![Alt](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg "Repobeats analytics image")
+ <!-- 第一个 MIT 许可证徽章 -->
+<a href="https://github.com/weibaohui/k8m/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License MIT" style="display: inline-block; vertical-align: middle;" />
+</a>
+
+<!-- 第二个 Trust Score 徽章 -->
+<a href="https://archestra.ai/mcp-catalog/weibaohui__k8m" target="_blank" rel="noopener noreferrer">
+  <img src="https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m" alt="Trust Score" style="display: inline-block; vertical-align: middle;" />
+</a>
+
+<!-- 第三个 Repobeats 分析徽章 -->
+<img src="https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg" alt="Repobeats analytics image" style="display: inline-block; vertical-align: middle;" />
 </p>
+
 
 <p align="center">
 
