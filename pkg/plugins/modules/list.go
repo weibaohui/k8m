@@ -10,4 +10,5 @@ const (
 	PluginNameInspection   = "inspection"
 	PluginNameHelm         = "helm"
 	PluginNameGlobalLog    = "gllog"
+	PluginNameSwagger      = "swagger"
 )
