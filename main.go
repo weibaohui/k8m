@@ -133,11 +133,9 @@ func Init() {
 
 	}()
 
-	// 启动watch和定时任务（仅在成为Leader时执行）
+	// 启动watch和定时任务
 	go func() {
 		service.McpService().Init()
-		// 多实例管理迁移至 leader 插件，仅在启用后由插件统一启动 Lease 同步与清理
-
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
@@ -145,8 +143,6 @@ func Init() {
 			service.PVService().Watch()
 			service.IngressService().Watch()
 			service.McpService().Start()
-
-			// Leader选举迁移为插件启动，主流程不再重复启动
 		})
 	}()
 
