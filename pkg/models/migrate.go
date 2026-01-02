@@ -237,7 +237,6 @@ func AddInnerAdminUserGroup() error {
 		klog.Errorf("已存在内置 平台管理员组 角色: %v", err)
 		return err
 	}
-	// 如果不存在，添加默认的内部MCP服务器配置
 	if count == 0 {
 		config := &UserGroup{
 			GroupName: "平台管理员组",
