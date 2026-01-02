@@ -104,11 +104,16 @@ definitions:
       any_select:
         type: boolean
       created_at:
-        description: Automatically managed by GORM for creation time
         type: string
       enable_ai:
         description: 是否启用AI功能，默认开启
         type: boolean
+      heartbeat_failure_threshold:
+        description: 心跳失败阈值
+        type: integer
+      heartbeat_interval_seconds:
+        description: 心跳间隔时间（秒）
+        type: integer
       id:
         type: integer
       image_pull_timeout:
@@ -126,6 +131,9 @@ definitions:
       max_iterations:
         description: 模型自动对话的最大轮数
         type: integer
+      max_retry_attempts:
+        description: 最大重试次数，默认100次
+        type: integer
       model_id:
         type: integer
       node_shell_image:
@@ -135,6 +143,9 @@ definitions:
       product_name:
         description: 产品名称
         type: string
+      reconnect_max_interval_seconds:
+        description: 重连最大间隔时间（秒）
+        type: integer
       resource_cache_timeout:
         description: 资源缓存时间（秒）
         type: integer
@@ -142,6 +153,7 @@ definitions:
         description: Automatically managed by GORM for update time
         type: string
       use_built_in_model:
+        description: 是否使用内置模型，默认开启
         type: boolean
     type: object
   models.CustomTemplate:
@@ -153,7 +165,6 @@ definitions:
         description: 模板内容，支持大文本存储
         type: string
       created_at:
-        description: Automatically managed by GORM for creation time
         type: string
       created_by:
         description: 创建者
@@ -183,7 +194,6 @@ definitions:
       certFile:
         type: string
       created_at:
-        description: Automatically managed by GORM for creation time
         type: string
       description:
         description: 仓库描述
@@ -219,6 +229,60 @@ definitions:
         type: string
       username:
         description: 认证用户名（加密存储）
+        type: string
+    type: object
+  models.KubeConfig:
+    properties:
+      burst:
+        description: Burst 设置突发请求数限制，默认为 2000
+        type: integer
+      ca_data:
+        description: ca 证书内容，支持大文本存储
+        type: string
+      cluster:
+        description: 类型，最大长度 100
+        type: string
+      cluster_name:
+        description: AWS EKS 集群名称
+        type: string
+      content:
+        description: 模板内容，支持大文本存储
+        type: string
+      created_at:
+        type: string
+      display_name:
+        type: string
+      id:
+        description: 模板 ID，主键，自增
+        type: integer
+      is_aws_eks:
+        description: 标识是否为AWS EKS集群
+        type: boolean
+      namespace:
+        type: string
+      proxy_url:
+        description: |-
+          kom 集群注册配置项
+          ProxyURL 设置 HTTP 代理，例如 http://127.0.0.1:7890
+        type: string
+      qps:
+        description: QPS 设置每秒查询数限制，默认为 200
+        type: number
+      region:
+        description: AWS 区域
+        type: string
+      server:
+        type: string
+      timeout:
+        description: Timeout 设置请求超时时间，单位为秒，默认为 30 秒
+        type: integer
+      token:
+        description: token 纳管相关 server\token\cadata
+        type: string
+      updated_at:
+        description: Automatically managed by GORM for update time
+        type: string
+      user:
         type: string
     type: object
   models.MCPServerConfig:
@@ -333,6 +397,22 @@ definitions:
         description: 只有file类型可以查、下载
         type: string
     type: object
+  profile.PasswordUpdateRequest:
+    properties:
+      confirmPassword:
+        description: 确认密码（加密后）
+        type: string
+      oldPassword:
+        description: 原密码（加密后）
+        type: string
+      password:
+        description: 新密码（加密后）
+        type: string
+    required:
+    - confirmPassword
+    - oldPassword
+    - password
+    type: object
 info:
   contact: {}
   description: 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
@@ -412,6 +492,109 @@ paths:
       security:
       - BearerAuth: []
       summary: 测试AI模型连接
+  /admin/ai_prompt/delete/{ids}:
+    post:
+      parameters:
+      - description: 提示词ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除AI提示词
+  /admin/ai_prompt/id/{id}/enabled/{enabled}:
+    post:
+      parameters:
+      - description: 提示词ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 启用状态，true或false
+        in: path
+        name: enabled
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快捷保存AI提示词启用状态
+  /admin/ai_prompt/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取AI提示词列表
+  /admin/ai_prompt/load:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 加载内置AI提示词
+  /admin/ai_prompt/option_list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取AI提示词选项列表
+  /admin/ai_prompt/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存AI提示词
+  /admin/ai_prompt/toggle/{id}:
+    post:
+      parameters:
+      - description: 提示词ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 启用/禁用AI提示词
+  /admin/ai_prompt/types:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取AI提示词类型列表
   /admin/cluster/{cluster}/disconnect:
     post:
       description: 断开一个正在运行的集群的连接
@@ -429,6 +612,71 @@ paths:
       security:
       - BearerAuth: []
       summary: 断开集群连接
+  /admin/cluster/aws/save:
+    post:
+      description: 保存AWS EKS集群配置到数据库并注册集群
+      parameters:
+      - description: AWS EKS配置信息
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存AWS EKS集群配置
+  /admin/cluster/config/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据集群ID获取kom相关配置参数
+      parameters:
+      - description: 集群ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.KubeConfig'
+      security:
+      - BearerAuth: []
+      summary: 获取集群配置参数
+      tags:
+      - cluster
+  /admin/cluster/config/save:
+    post:
+      consumes:
+      - application/json
+      description: 保存集群的kom相关配置参数
+      parameters:
+      - description: 集群配置参数
+        in: body
+        name: config
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存集群配置参数
+      tags:
+      - cluster
   /admin/cluster/file/option_list:
     get:
       description: 获取所有已发现集群的kubeconfig文件名列表，用于下拉选项
@@ -473,6 +721,24 @@ paths:
       security:
       - BearerAuth: []
       summary: 扫描集群
+  /admin/cluster/token/save:
+    post:
+      description: 保存Token方式集群配置到数据库并注册集群
+      parameters:
+      - description: Token集群配置信息
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存Token方式集群配置
   /admin/cluster_permissions/cluster/{cluster}/list:
     get:
       parameters:
@@ -757,398 +1023,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新系统配置
-  /admin/helm/repo/delete/{ids}:
-    post:
-      description: 删除一个或多个Helm仓库
-      parameters:
-      - description: 要删除的仓库ID，多个用逗号分隔
-        in: path
-        name: ids
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 操作成功
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 删除Helm仓库
-  /admin/helm/repo/list:
-    get:
-      description: 获取所有Helm仓库信息
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Helm仓库列表
-  /admin/helm/repo/option_list:
-    get:
-      description: 获取所有Helm仓库名称，用于下拉选项
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Helm仓库选项列表
-  /admin/helm/repo/save:
-    post:
-      description: 添加或更新一个Helm仓库信息
-      parameters:
-      - description: Helm仓库信息
-        in: body
-        name: repo
-        required: true
-        schema:
-          $ref: '#/definitions/models.HelmRepository'
-      responses:
-        "200":
-          description: 操作成功
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 添加或更新Helm仓库
-  /admin/helm/repo/update_index:
-    post:
-      description: 更新指定Helm仓库的索引信息
-      parameters:
-      - description: 要更新索引的仓库ID，多个用逗号分隔
-        in: body
-        name: ids
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: 操作成功
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 更新Helm仓库索引
-  /admin/inspection/event/status/option_list:
-    get:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取巡检事件状态选项列表
-  /admin/inspection/record/list:
-    get:
-      description: 根据巡检计划ID获取对应的巡检记录列表
-      parameters:
-      - description: 巡检计划ID
-        in: path
-        name: id
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取巡检记录列表
-  /admin/inspection/schedule/delete/{ids}:
-    post:
-      parameters:
-      - description: 巡检计划ID，多个用逗号分隔
-        in: path
-        name: ids
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 删除巡检计划
-  /admin/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}:
-    post:
-      description: 统计指定巡检计划的执行情况，支持按时间范围和集群过滤
-      parameters:
-      - description: 巡检计划ID
-        in: path
-        name: id
-        type: string
-      - description: 集群名称
-        in: path
-        name: cluster
-        type: string
-      - description: 开始时间(RFC3339格式)
-        in: path
-        name: start_time
-        type: string
-      - description: 结束时间(RFC3339格式)
-        in: path
-        name: end_time
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 统计巡检计划执行情况
-  /admin/inspection/schedule/id/{id}/update_script_code:
-    post:
-      parameters:
-      - description: 巡检计划ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 脚本代码
-        in: body
-        name: script_codes
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 更新巡检脚本代码
-  /admin/inspection/schedule/list:
-    get:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取巡检计划列表
-  /admin/inspection/schedule/record/id/{id}/event/list:
-    get:
-      parameters:
-      - description: 巡检记录ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取巡检事件列表
-  /admin/inspection/schedule/record/id/{id}/output/list:
-    get:
-      parameters:
-      - description: 巡检记录ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取巡检脚本输出列表
-  /admin/inspection/schedule/record/id/{id}/push:
-    post:
-      description: 将指定巡检记录的AI总结推送到所有配置的Webhook接收器
-      parameters:
-      - description: 巡检记录ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 推送巡检记录
-  /admin/inspection/schedule/record/id/{id}/summary:
-    post:
-      description: 为指定巡检记录生成AI总结
-      parameters:
-      - description: 巡检记录ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 生成巡检记录AI总结
-  /admin/inspection/schedule/save:
-    post:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 保存巡检计划
-  /admin/inspection/schedule/save/id/{id}/status/{enabled}:
-    post:
-      parameters:
-      - description: 巡检计划ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 状态，例如：true、false
-        in: path
-        name: enabled
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 快速更新巡检计划状态
-  /admin/inspection/schedule/start/id/{id}:
-    post:
-      parameters:
-      - description: 巡检计划ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 启动巡检计划
-  /admin/inspection/script/delete/{ids}:
-    post:
-      parameters:
-      - description: 脚本ID，多个用逗号分隔
-        in: path
-        name: ids
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 删除Lua脚本
-  /admin/inspection/script/list:
-    get:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取Lua脚本列表
-  /admin/inspection/script/load:
-    post:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 加载内置Lua脚本
-  /admin/inspection/script/option_list:
-    get:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取Lua脚本选项列表
-  /admin/inspection/script/save:
-    post:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 保存Lua脚本
-  /admin/inspection/webhook/delete/{ids}:
-    post:
-      parameters:
-      - description: Webhook接收器ID，多个用逗号分隔
-        in: path
-        name: ids
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 删除Webhook接收器
-  /admin/inspection/webhook/list:
-    get:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取Webhook接收器列表
-  /admin/inspection/webhook/option_list:
-    get:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取Webhook接收器选项列表
-  /admin/inspection/webhook/save:
-    post:
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 创建或更新Webhook接收器
   /admin/mcp/connect/{name}:
     post:
       parameters:
@@ -1358,6 +1232,352 @@ paths:
       security:
       - BearerAuth: []
       summary: 保存菜单
+  /admin/plugins/helm/repo/delete/{ids}:
+    post:
+      description: 删除一个或多个Helm仓库
+      parameters:
+      - description: 要删除的仓库ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除Helm仓库
+  /admin/plugins/helm/repo/list:
+    get:
+      description: 获取所有Helm仓库信息
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Helm仓库列表
+  /admin/plugins/helm/repo/option_list:
+    get:
+      description: 获取所有Helm仓库名称，用于下拉选项
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Helm仓库选项列表
+  /admin/plugins/helm/repo/save:
+    post:
+      description: 添加或更新一个Helm仓库信息
+      parameters:
+      - description: Helm仓库信息
+        in: body
+        name: repo
+        required: true
+        schema:
+          $ref: '#/definitions/models.HelmRepository'
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 添加或更新Helm仓库
+  /admin/plugins/helm/repo/update_index:
+    post:
+      description: 更新指定Helm仓库的索引信息
+      parameters:
+      - description: 要更新索引的仓库ID，多个用逗号分隔
+        in: body
+        name: ids
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新Helm仓库索引
+  /admin/plugins/inspection/event/status/option_list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检事件状态选项列表
+  /admin/plugins/inspection/record/list:
+    get:
+      description: 根据巡检计划ID获取对应的巡检记录列表
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检记录列表
+  /admin/plugins/inspection/schedule/delete/{ids}:
+    post:
+      parameters:
+      - description: 巡检计划ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除巡检计划
+  /admin/plugins/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}:
+    post:
+      description: 统计指定巡检计划的执行情况，支持按时间范围和集群过滤
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        type: string
+      - description: 集群名称
+        in: path
+        name: cluster
+        type: string
+      - description: 开始时间(RFC3339格式)
+        in: path
+        name: start_time
+        type: string
+      - description: 结束时间(RFC3339格式)
+        in: path
+        name: end_time
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 统计巡检计划执行情况
+  /admin/plugins/inspection/schedule/id/{id}/update_script_code:
+    post:
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 脚本代码
+        in: body
+        name: script_codes
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 更新巡检脚本代码
+  /admin/plugins/inspection/schedule/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检计划列表
+  /admin/plugins/inspection/schedule/record/id/{id}/event/list:
+    get:
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检事件列表
+  /admin/plugins/inspection/schedule/record/id/{id}/output/list:
+    get:
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取巡检脚本输出列表
+  /admin/plugins/inspection/schedule/record/id/{id}/push:
+    post:
+      description: 将指定巡检记录的AI总结推送到所有配置的Webhook接收器
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 推送巡检记录
+  /admin/plugins/inspection/schedule/record/id/{id}/summary:
+    post:
+      description: 为指定巡检记录生成AI总结
+      parameters:
+      - description: 巡检记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 生成巡检记录AI总结
+  /admin/plugins/inspection/schedule/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存巡检计划
+  /admin/plugins/inspection/schedule/save/id/{id}/status/{enabled}:
+    post:
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态，例如：true、false
+        in: path
+        name: enabled
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 快速更新巡检计划状态
+  /admin/plugins/inspection/schedule/start/id/{id}:
+    post:
+      parameters:
+      - description: 巡检计划ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 启动巡检计划，马上执行一次
+  /admin/plugins/inspection/script/delete/{ids}:
+    post:
+      parameters:
+      - description: 脚本ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 删除Lua脚本
+  /admin/plugins/inspection/script/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Lua脚本列表
+  /admin/plugins/inspection/script/load:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 加载内置Lua脚本
+  /admin/plugins/inspection/script/option_list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Lua脚本选项列表
+  /admin/plugins/inspection/script/save:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 保存Lua脚本
   /admin/user/2fa/disable/{id}:
     post:
       description: 禁用指定用户的二步验证
@@ -4907,6 +5127,28 @@ paths:
       security:
       - BearerAuth: []
       summary: 扩缩容Deployment
+  /k8s/cluster/{cluster}/deployment/batch_update_images:
+    post:
+      parameters:
+      - description: 集群名称
+        in: path
+        name: cluster
+        required: true
+        type: string
+      - description: Deployment镜像更新配置
+        in: body
+        name: deployments
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量更新Deployment镜像
   /k8s/cluster/{cluster}/doc/detail:
     post:
       parameters:
@@ -5146,253 +5388,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取GatewayClass选项列表
-  /k8s/cluster/{cluster}/helm/release/{release}/repo/{repo}/chart/{chart}/version/{version}/install:
-    post:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: Release名称
-        in: path
-        name: release
-        required: true
-        type: string
-      - description: 仓库名称
-        in: path
-        name: repo
-        required: true
-        type: string
-      - description: Chart名称
-        in: path
-        name: chart
-        required: true
-        type: string
-      - description: 版本号
-        in: path
-        name: version
-        required: true
-        type: string
-      - description: 安装参数
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 安装Helm Release
-  /k8s/cluster/{cluster}/helm/release/batch/uninstall:
-    post:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: 批量卸载参数
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 批量卸载Helm Release
-  /k8s/cluster/{cluster}/helm/release/list:
-    get:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取Release列表
-  /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/history/list:
-    get:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: Release名称
-        in: path
-        name: name
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取Release的历史版本
-  /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log:
-    get:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: Release名称
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: 版本号
-        in: path
-        name: revision
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取Release安装Log
-  /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/notes:
-    get:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: Release名称
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: 版本号
-        in: path
-        name: revision
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取ReleaseNote
-  /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/values:
-    get:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: Release名称
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: 版本号
-        in: path
-        name: revision
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 获取安装yaml
-  /k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/uninstall:
-    post:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: 命名空间
-        in: path
-        name: ns
-        required: true
-        type: string
-      - description: Release名称
-        in: path
-        name: name
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 卸载Helm Release
-  /k8s/cluster/{cluster}/helm/release/upgrade:
-    post:
-      parameters:
-      - description: 集群名称
-        in: query
-        name: cluster
-        required: true
-        type: string
-      - description: 升级参数
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 升级Helm Release
   /k8s/cluster/{cluster}/ingress_class/option_list:
     get:
       parameters:
@@ -5730,7 +5725,7 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取某个节点上的污点
-  /k8s/cluster/{cluster}/node/name/{node_name}/cluster_id/{cluster_id}/create_kubectl_shell:
+  /k8s/cluster/{cluster}/node/name/{node_name}/create_kubectl_shell:
     post:
       parameters:
       - description: 集群名称
@@ -5932,6 +5927,253 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取命名空间选项列表
+  /k8s/cluster/{cluster}/plugins/helm/release/{release}/repo/{repo}/chart/{chart}/version/{version}/install:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: Release名称
+        in: path
+        name: release
+        required: true
+        type: string
+      - description: 仓库名称
+        in: path
+        name: repo
+        required: true
+        type: string
+      - description: Chart名称
+        in: path
+        name: chart
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 安装参数
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 安装Helm Release
+  /k8s/cluster/{cluster}/plugins/helm/release/batch/uninstall:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 批量卸载参数
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 批量卸载Helm Release
+  /k8s/cluster/{cluster}/plugins/helm/release/list:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Release列表
+  /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/history/list:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Release名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Release的历史版本
+  /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Release名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: revision
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Release安装Log
+  /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/notes:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Release名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: revision
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取ReleaseNote
+  /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/values:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Release名称
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: revision
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取安装yaml
+  /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/uninstall:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 命名空间
+        in: path
+        name: ns
+        required: true
+        type: string
+      - description: Release名称
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 卸载Helm Release
+  /k8s/cluster/{cluster}/plugins/helm/release/upgrade:
+    post:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 升级参数
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 升级Helm Release
   /k8s/cluster/{cluster}/pod/labels/unique_labels:
     get:
       parameters:
@@ -6010,6 +6252,26 @@ paths:
       security:
       - BearerAuth: []
       summary: 流式获取Pod日志
+  /k8s/cluster/{cluster}/pod/name/option_list:
+    get:
+      parameters:
+      - description: 集群名称
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: 命名空间，为空则返回所有命名空间的Pod
+        in: query
+        name: ns
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 获取Pod名称选项列表
   ? /k8s/cluster/{cluster}/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/local_port/{local_port}/start
   : post:
       parameters:
@@ -6782,7 +7044,29 @@ paths:
       security:
       - BearerAuth: []
       summary: 保存模板
-  /mgm/helm/chart/list:
+  /mgm/log/operation/list:
+    get:
+      description: 获取所有操作日志
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: 操作日志列表
+  /mgm/log/shell/list:
+    get:
+      description: 获取所有Shell操作日志
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Shell日志列表
+  /mgm/plugins/helm/chart/list:
     get:
       description: 获取所有Helm Chart信息
       responses:
@@ -6793,7 +7077,7 @@ paths:
       security:
       - BearerAuth: []
       summary: Helm Chart列表
-  /mgm/helm/repo/{repo}/chart/{chart}/version/{version}/values:
+  /mgm/plugins/helm/repo/{repo}/chart/{chart}/version/{version}/values:
     get:
       description: 获取指定Helm仓库、Chart及版本的默认values.yaml内容
       parameters:
@@ -6820,7 +7104,7 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取Chart的默认values.yaml
-  /mgm/helm/repo/{repo}/chart/{chart}/versions:
+  /mgm/plugins/helm/repo/{repo}/chart/{chart}/versions:
     get:
       description: 获取指定Helm仓库和Chart的所有版本列表
       parameters:
@@ -6842,28 +7126,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Chart版本列表
-  /mgm/log/operation/list:
-    get:
-      description: 获取所有操作日志
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: 操作日志列表
-  /mgm/log/shell/list:
-    get:
-      description: 获取所有Shell操作日志
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Shell日志列表
   /mgm/user/profile:
     get:
       description: 获取当前登录用户的详细信息
@@ -7023,14 +7285,14 @@ paths:
       summary: 获取MCP密钥列表
   /mgm/user/profile/update_psw:
     post:
-      description: 修改当前登录用户的密码
+      description: 修改当前登录用户的密码，需要验证原密码并两次输入新密码确认
       parameters:
-      - description: 新密码（加密后）
+      - description: 密码修改请求
         in: body
-        name: password
+        name: request
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/profile.PasswordUpdateRequest'
       responses:
         "200":
           description: 操作成功

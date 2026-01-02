@@ -148,6 +148,290 @@ var doc = `{
                 }
             }
         },
+        "/admin/ai_prompt/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "删除AI提示词",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "提示词ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai_prompt/id/{id}/enabled/{enabled}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "快捷保存AI提示词启用状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "提示词ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "启用状态，true或false",
+                        "name": "enabled",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai_prompt/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取AI提示词列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai_prompt/load": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "加载内置AI提示词",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai_prompt/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取AI提示词选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai_prompt/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "保存AI提示词",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai_prompt/toggle/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "启用/禁用AI提示词",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "提示词ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai_prompt/types": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取AI提示词类型列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cluster/aws/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存AWS EKS集群配置到数据库并注册集群",
+                "summary": "保存AWS EKS集群配置",
+                "parameters": [
+                    {
+                        "description": "AWS EKS配置信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cluster/config/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存集群的kom相关配置参数",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cluster"
+                ],
+                "summary": "保存集群配置参数",
+                "parameters": [
+                    {
+                        "description": "集群配置参数",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cluster/config/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据集群ID获取kom相关配置参数",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cluster"
+                ],
+                "summary": "获取集群配置参数",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.KubeConfig"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/cluster/file/option_list": {
             "get": {
                 "security": [
@@ -217,6 +501,36 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cluster/token/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存Token方式集群配置到数据库并注册集群",
+                "summary": "保存Token方式集群配置",
+                "parameters": [
+                    {
+                        "description": "Token集群配置信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "type": "string"
                         }
@@ -730,672 +1044,6 @@ var doc = `{
                 }
             }
         },
-        "/admin/helm/repo/delete/{ids}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "删除一个或多个Helm仓库",
-                "summary": "删除Helm仓库",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "要删除的仓库ID，多个用逗号分隔",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "操作成功",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/helm/repo/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "获取所有Helm仓库信息",
-                "summary": "Helm仓库列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/helm/repo/option_list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "获取所有Helm仓库名称，用于下拉选项",
-                "summary": "Helm仓库选项列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/helm/repo/save": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "添加或更新一个Helm仓库信息",
-                "summary": "添加或更新Helm仓库",
-                "parameters": [
-                    {
-                        "description": "Helm仓库信息",
-                        "name": "repo",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.HelmRepository"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "操作成功",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/helm/repo/update_index": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "更新指定Helm仓库的索引信息",
-                "summary": "更新Helm仓库索引",
-                "parameters": [
-                    {
-                        "description": "要更新索引的仓库ID，多个用逗号分隔",
-                        "name": "ids",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "操作成功",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/event/status/option_list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取巡检事件状态选项列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/record/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "根据巡检计划ID获取对应的巡检记录列表",
-                "summary": "获取巡检记录列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "巡检计划ID",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/delete/{ids}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "删除巡检计划",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "巡检计划ID，多个用逗号分隔",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "统计指定巡检计划的执行情况，支持按时间范围和集群过滤",
-                "summary": "统计巡检计划执行情况",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "巡检计划ID",
-                        "name": "id",
-                        "in": "path"
-                    },
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "path"
-                    },
-                    {
-                        "type": "string",
-                        "description": "开始时间(RFC3339格式)",
-                        "name": "start_time",
-                        "in": "path"
-                    },
-                    {
-                        "type": "string",
-                        "description": "结束时间(RFC3339格式)",
-                        "name": "end_time",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/id/{id}/update_script_code": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "更新巡检脚本代码",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "巡检计划ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "脚本代码",
-                        "name": "script_codes",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取巡检计划列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/record/id/{id}/event/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取巡检事件列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "巡检记录ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/record/id/{id}/output/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取巡检脚本输出列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "巡检记录ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/record/id/{id}/push": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "将指定巡检记录的AI总结推送到所有配置的Webhook接收器",
-                "summary": "推送巡检记录",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "巡检记录ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/record/id/{id}/summary": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "为指定巡检记录生成AI总结",
-                "summary": "生成巡检记录AI总结",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "巡检记录ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/save": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "保存巡检计划",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/save/id/{id}/status/{enabled}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "快速更新巡检计划状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "巡检计划ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "状态，例如：true、false",
-                        "name": "enabled",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/schedule/start/id/{id}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "启动巡检计划",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "巡检计划ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/script/delete/{ids}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "删除Lua脚本",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "脚本ID，多个用逗号分隔",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/script/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取Lua脚本列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/script/load": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "加载内置Lua脚本",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/script/option_list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取Lua脚本选项列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/script/save": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "保存Lua脚本",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/webhook/delete/{ids}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "删除Webhook接收器",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Webhook接收器ID，多个用逗号分隔",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/webhook/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取Webhook接收器列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/webhook/option_list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取Webhook接收器选项列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/inspection/webhook/save": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "创建或更新Webhook接收器",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/mcp/connect/{name}": {
             "post": {
                 "security": [
@@ -1741,6 +1389,591 @@ var doc = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/helm/repo/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除一个或多个Helm仓库",
+                "summary": "删除Helm仓库",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "要删除的仓库ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/helm/repo/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Helm仓库信息",
+                "summary": "Helm仓库列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/helm/repo/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Helm仓库名称，用于下拉选项",
+                "summary": "Helm仓库选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/helm/repo/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "添加或更新一个Helm仓库信息",
+                "summary": "添加或更新Helm仓库",
+                "parameters": [
+                    {
+                        "description": "Helm仓库信息",
+                        "name": "repo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HelmRepository"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/helm/repo/update_index": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定Helm仓库的索引信息",
+                "summary": "更新Helm仓库索引",
+                "parameters": [
+                    {
+                        "description": "要更新索引的仓库ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/event/status/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取巡检事件状态选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/record/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据巡检计划ID获取对应的巡检记录列表",
+                "summary": "获取巡检记录列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检计划ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "删除巡检计划",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检计划ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "统计指定巡检计划的执行情况，支持按时间范围和集群过滤",
+                "summary": "统计巡检计划执行情况",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检计划ID",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间(RFC3339格式)",
+                        "name": "start_time",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间(RFC3339格式)",
+                        "name": "end_time",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/id/{id}/update_script_code": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "更新巡检脚本代码",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "巡检计划ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "脚本代码",
+                        "name": "script_codes",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取巡检计划列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/record/id/{id}/event/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取巡检事件列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/record/id/{id}/output/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取巡检脚本输出列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/record/id/{id}/push": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "将指定巡检记录的AI总结推送到所有配置的Webhook接收器",
+                "summary": "推送巡检记录",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/record/id/{id}/summary": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "为指定巡检记录生成AI总结",
+                "summary": "生成巡检记录AI总结",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "巡检记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "保存巡检计划",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/save/id/{id}/status/{enabled}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "快速更新巡检计划状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "巡检计划ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "状态，例如：true、false",
+                        "name": "enabled",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/schedule/start/id/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "启动巡检计划，马上执行一次",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "巡检计划ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/script/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "删除Lua脚本",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "脚本ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/script/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Lua脚本列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/script/load": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "加载内置Lua脚本",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/script/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Lua脚本选项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/inspection/script/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "保存Lua脚本",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -3979,6 +4212,42 @@ var doc = `{
                 }
             }
         },
+        "/k8s/cluster/{cluster}/deployment/batch_update_images": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "批量更新Deployment镜像",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Deployment镜像更新配置",
+                        "name": "deployments",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/k8s/cluster/{cluster}/doc/detail": {
             "post": {
                 "security": [
@@ -4346,395 +4615,6 @@ var doc = `{
                         "name": "cluster",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/batch/uninstall": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "批量卸载Helm Release",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "批量卸载参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取Release列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/history/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取Release的历史版本",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "ns",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取Release安装Log",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "ns",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "版本号",
-                        "name": "revision",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/notes": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取ReleaseNote",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "ns",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "版本号",
-                        "name": "revision",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/revision/{revision}/values": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取安装yaml",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "ns",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "版本号",
-                        "name": "revision",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/ns/{ns}/name/{name}/uninstall": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "卸载Helm Release",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "ns",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/upgrade": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "升级Helm Release",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "升级参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/helm/release/{release}/repo/{repo}/chart/{chart}/version/{version}/install": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "安装Helm Release",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release名称",
-                        "name": "release",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "仓库名称",
-                        "name": "repo",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Chart名称",
-                        "name": "chart",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "版本号",
-                        "name": "version",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "安装参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
                     }
                 ],
                 "responses": {
@@ -5323,7 +5203,7 @@ var doc = `{
                 }
             }
         },
-        "/k8s/cluster/{cluster}/node/name/{node_name}/cluster_id/{cluster_id}/create_kubectl_shell": {
+        "/k8s/cluster/{cluster}/node/name/{node_name}/create_kubectl_shell": {
             "post": {
                 "security": [
                     {
@@ -5626,6 +5506,395 @@ var doc = `{
                 }
             }
         },
+        "/k8s/cluster/{cluster}/plugins/helm/release/batch/uninstall": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "批量卸载Helm Release",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "批量卸载参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Release列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/history/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Release的历史版本",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "ns",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Release安装Log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "ns",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "版本号",
+                        "name": "revision",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/notes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取ReleaseNote",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "ns",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "版本号",
+                        "name": "revision",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/values": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取安装yaml",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "ns",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "版本号",
+                        "name": "revision",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/uninstall": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "卸载Helm Release",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "ns",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/upgrade": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "升级Helm Release",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "升级参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/plugins/helm/release/{release}/repo/{repo}/chart/{chart}/version/{version}/install": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "安装Helm Release",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release名称",
+                        "name": "release",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "仓库名称",
+                        "name": "repo",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chart名称",
+                        "name": "chart",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "版本号",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "安装参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/k8s/cluster/{cluster}/pod/labels/unique_labels": {
             "get": {
                 "security": [
@@ -5742,6 +6011,39 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": "日志流",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/k8s/cluster/{cluster}/pod/name/option_list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取Pod名称选项列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间，为空则返回所有命名空间的Pod",
+                        "name": "ns",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "string"
                         }
@@ -10250,7 +10552,45 @@ var doc = `{
                 }
             }
         },
-        "/mgm/helm/chart/list": {
+        "/mgm/log/operation/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有操作日志",
+                "summary": "操作日志列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/log/shell/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有Shell操作日志",
+                "summary": "Shell日志列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/helm/chart/list": {
             "get": {
                 "security": [
                     {
@@ -10269,7 +10609,7 @@ var doc = `{
                 }
             }
         },
-        "/mgm/helm/repo/{repo}/chart/{chart}/version/{version}/values": {
+        "/mgm/plugins/helm/repo/{repo}/chart/{chart}/version/{version}/values": {
             "get": {
                 "security": [
                     {
@@ -10311,7 +10651,7 @@ var doc = `{
                 }
             }
         },
-        "/mgm/helm/repo/{repo}/chart/{chart}/versions": {
+        "/mgm/plugins/helm/repo/{repo}/chart/{chart}/versions": {
             "get": {
                 "security": [
                     {
@@ -10336,44 +10676,6 @@ var doc = `{
                         "required": true
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/mgm/log/operation/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "获取所有操作日志",
-                "summary": "操作日志列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/mgm/log/shell/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "获取所有Shell操作日志",
-                "summary": "Shell日志列表",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -10657,16 +10959,16 @@ var doc = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "修改当前登录用户的密码",
+                "description": "修改当前登录用户的密码，需要验证原密码并两次输入新密码确认",
                 "summary": "修改密码",
                 "parameters": [
                     {
-                        "description": "新密码（加密后）",
-                        "name": "password",
+                        "description": "密码修改请求",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/profile.PasswordUpdateRequest"
                         }
                     }
                 ],
@@ -10985,12 +11287,19 @@ var doc = `{
                     "type": "boolean"
                 },
                 "created_at": {
-                    "description": "Automatically managed by GORM for creation time",
                     "type": "string"
                 },
                 "enable_ai": {
                     "description": "是否启用AI功能，默认开启",
                     "type": "boolean"
+                },
+                "heartbeat_failure_threshold": {
+                    "description": "心跳失败阈值",
+                    "type": "integer"
+                },
+                "heartbeat_interval_seconds": {
+                    "description": "心跳间隔时间（秒）",
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -11016,6 +11325,10 @@ var doc = `{
                     "description": "模型自动对话的最大轮数",
                     "type": "integer"
                 },
+                "max_retry_attempts": {
+                    "description": "最大重试次数，默认100次",
+                    "type": "integer"
+                },
                 "model_id": {
                     "type": "integer"
                 },
@@ -11029,6 +11342,10 @@ var doc = `{
                     "description": "产品名称",
                     "type": "string"
                 },
+                "reconnect_max_interval_seconds": {
+                    "description": "重连最大间隔时间（秒）",
+                    "type": "integer"
+                },
                 "resource_cache_timeout": {
                     "description": "资源缓存时间（秒）",
                     "type": "integer"
@@ -11038,6 +11355,7 @@ var doc = `{
                     "type": "string"
                 },
                 "use_built_in_model": {
+                    "description": "是否使用内置模型，默认开启",
                     "type": "boolean"
                 }
             }
@@ -11054,7 +11372,6 @@ var doc = `{
                     "type": "string"
                 },
                 "created_at": {
-                    "description": "Automatically managed by GORM for creation time",
                     "type": "string"
                 },
                 "created_by": {
@@ -11096,7 +11413,6 @@ var doc = `{
                     "type": "string"
                 },
                 "created_at": {
-                    "description": "Automatically managed by GORM for creation time",
                     "type": "string"
                 },
                 "description": {
@@ -11146,6 +11462,78 @@ var doc = `{
                 },
                 "username": {
                     "description": "认证用户名（加密存储）",
+                    "type": "string"
+                }
+            }
+        },
+        "models.KubeConfig": {
+            "type": "object",
+            "properties": {
+                "burst": {
+                    "description": "Burst 设置突发请求数限制，默认为 2000",
+                    "type": "integer"
+                },
+                "ca_data": {
+                    "description": "ca 证书内容，支持大文本存储",
+                    "type": "string"
+                },
+                "cluster": {
+                    "description": "类型，最大长度 100",
+                    "type": "string"
+                },
+                "cluster_name": {
+                    "description": "AWS EKS 集群名称",
+                    "type": "string"
+                },
+                "content": {
+                    "description": "模板内容，支持大文本存储",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "模板 ID，主键，自增",
+                    "type": "integer"
+                },
+                "is_aws_eks": {
+                    "description": "标识是否为AWS EKS集群",
+                    "type": "boolean"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "proxy_url": {
+                    "description": "kom 集群注册配置项\nProxyURL 设置 HTTP 代理，例如 http://127.0.0.1:7890",
+                    "type": "string"
+                },
+                "qps": {
+                    "description": "QPS 设置每秒查询数限制，默认为 200",
+                    "type": "number"
+                },
+                "region": {
+                    "description": "AWS 区域",
+                    "type": "string"
+                },
+                "server": {
+                    "type": "string"
+                },
+                "timeout": {
+                    "description": "Timeout 设置请求超时时间，单位为秒，默认为 30 秒",
+                    "type": "integer"
+                },
+                "token": {
+                    "description": "token 纳管相关 server\\token\\cadata",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "Automatically managed by GORM for update time",
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }
@@ -11315,6 +11703,28 @@ var doc = `{
                     "type": "string"
                 }
             }
+        },
+        "profile.PasswordUpdateRequest": {
+            "type": "object",
+            "required": [
+                "confirmPassword",
+                "oldPassword",
+                "password"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "description": "确认密码（加密后）",
+                    "type": "string"
+                },
+                "oldPassword": {
+                    "description": "原密码（加密后）",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "新密码（加密后）",
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -11352,7 +11762,7 @@ func (s *s) ReadDoc() string {
 	sInfo.Description = strings.Replace(sInfo.Description, "\n", "\\n", -1)
 
 	t, err := template.New("swagger_info").Funcs(template.FuncMap{
-		"marshal": func(v any) string {
+		"marshal": func(v interface{}) string {
 			a, _ := json.Marshal(v)
 			return string(a)
 		},

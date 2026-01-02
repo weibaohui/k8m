@@ -42,7 +42,7 @@ type podAffinity struct {
 // @Param version path string true "资源版本"
 // @Param ns path string true "命名空间"
 // @Param name path string true "资源名称"
-// @Success 200 {array} any
+// @Success 200 {array} interface{}
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_pod_affinity/ns/{ns}/name/{name} [get]
 func (ac *PodAffinityController) ListPodAffinity(c *gin.Context) {
 	name := c.Param("name")

@@ -954,11 +954,11 @@ func (cc *ContainerController) getContainerHealthChecksByName(item *unstructured
 
 // 健康检查配置结构体
 type HealthCheckInfo struct {
-	ContainerName  string         `json:"container_name"`
-	LivenessType   string         `json:"liveness_type"`
-	ReadinessType  string         `json:"readiness_type"`
-	ReadinessProbe map[string]any `json:"readiness_probe,omitempty"`
-	LivenessProbe  map[string]any `json:"liveness_probe,omitempty"`
+	ContainerName  string                 `json:"container_name"`
+	LivenessType   string                 `json:"liveness_type"`
+	ReadinessType  string                 `json:"readiness_type"`
+	ReadinessProbe map[string]interface{} `json:"readiness_probe,omitempty"`
+	LivenessProbe  map[string]interface{} `json:"liveness_probe,omitempty"`
 }
 
 // @Summary 更新容器健康检查配置

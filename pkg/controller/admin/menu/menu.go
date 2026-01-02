@@ -50,7 +50,7 @@ func (a *AdminMenuController) List(c *gin.Context) {
 // @Security BearerAuth
 // @Accept json
 // @Param data body models.Menu true "菜单内容"
-// @Success 200 {object} map[string]any
+// @Success 200 {object} map[string]interface{}
 // @Router /admin/menu/save [post]
 func (a *AdminMenuController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)

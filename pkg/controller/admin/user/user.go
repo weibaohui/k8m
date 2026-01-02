@@ -60,7 +60,7 @@ func (a *AdminUserController) List(c *gin.Context) {
 // @Security BearerAuth
 // @Accept json
 // @Param data body models.User true "用户信息"
-// @Success 200 {object} map[string]any
+// @Success 200 {object} map[string]interface{}
 // @Router /admin/user/save [post]
 func (a *AdminUserController) Save(c *gin.Context) {
 	params := dao.BuildParams(c)
@@ -178,7 +178,7 @@ func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB
 // @Summary 获取用户选项列表
 // @Description 获取用户选项列表，用于下拉选择
 // @Security BearerAuth
-// @Success 200 {object} map[string]any
+// @Success 200 {object} map[string]interface{}
 // @Router /admin/user/option_list [get]
 func (a *AdminUserController) UserOptionList(c *gin.Context) {
 
