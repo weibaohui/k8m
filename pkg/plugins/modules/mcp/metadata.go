@@ -11,7 +11,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameMCP,
 		Title:       "MCP 管理插件",
 		Version:     "1.0.0",
-		Description: "MCP (Model Context Protocol) 服务器管理。包括MCP服务器配置、工具管理、执行日志查看、开放MCP服务等功能。",
+		Description: "管理大模型对话使用的MCP服务器。包括MCP服务器配置、工具管理、执行日志查看、开放MCP服务等功能。",
 	},
 	Tables: []string{
 		"mcp_server_configs",
