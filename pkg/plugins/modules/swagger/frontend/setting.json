@@ -1,0 +1,21 @@
+{
+  "type": "page",
+  "title": "Swagger文档配置",
+  "body": [
+    {
+      "type": "form",
+      "title": "Swagger文档设置",
+      "initApi": "get:/admin/plugins/swagger/setting/get",
+      "api": "post:/admin/plugins/swagger/setting/update",
+      "body": [
+        {
+          "name": "enable_swagger",
+          "type": "switch",
+          "label": "Swagger文档",
+          "desc": "是否启用Swagger API文档，默认开启",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

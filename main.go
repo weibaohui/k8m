@@ -54,6 +54,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
+	swaggermodels "github.com/weibaohui/k8m/pkg/plugins/modules/swagger/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	_ "github.com/weibaohui/k8m/swagger"
 	"github.com/weibaohui/kom/callbacks"
@@ -206,7 +207,7 @@ func main() {
 	// @name Authorization
 	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
 	r.GET("/swagger/*any", func(c *gin.Context) {
-		if cfg.EnableSwagger {
+		if swaggermodels.IsEnabled() {
 			ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
 		} else {
 			c.JSON(http.StatusForbidden, gin.H{
