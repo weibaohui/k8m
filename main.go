@@ -266,7 +266,7 @@ func main() {
 			c.Status(http.StatusOK)
 			return
 		}
-		// 启用leader插件时，仅主实例返回200，否则503
+		// 启用leader插件时，仅主实例返回200，其他实例返回503，确保只有主实例接收请求
 		if service.LeaderService().IsCurrentLeader() {
 			c.Status(http.StatusOK)
 		} else {
