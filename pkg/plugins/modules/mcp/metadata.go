@@ -56,7 +56,7 @@ var Metadata = plugins.Module{
 		},
 	},
 	Dependencies:      []string{},
-	RunAfter:          []string{modules.PluginNameLeader},
+	RunAfter:          []string{},
 	Lifecycle:         &McpLifecycle{},
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 	ClusterRouter:     nil,
