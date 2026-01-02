@@ -19,8 +19,8 @@ var Metadata = plugins.Module{
 		{
 			Key:   "plugin_gllog",
 			Title: "全局日志",
-			Icon:  "fa-solid fa-file-log",
-			Order: 1,
+			Icon:  "fa-solid fa-file-lines",
+			Order: 150,
 			Children: []plugins.Menu{
 				{
 					Key:         "plugin_gllog_query",
