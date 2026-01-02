@@ -201,7 +201,7 @@
                         },
                         {
                             "type": "button",
-                            "icon": "fas fa-stop-circle text-warning",
+                            "icon": "fas fa-stop-circle text-danger",
                             "actionType": "ajax",
                             "label": "禁用",
                             "visibleOn": "this.status == '已启用'",
