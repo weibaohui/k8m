@@ -10,7 +10,8 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
+	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+
 	"k8s.io/klog/v2"
 )
 
@@ -27,7 +28,7 @@ func (m *mcpService) Init() {
 func (m *mcpService) Host() *MCPHost {
 	return m.host
 }
-func (m *mcpService) AddServer(ctx context.Context, server models.MCPServerConfig) {
+func (m *mcpService) AddServer(ctx context.Context, server mcpModels.MCPServerConfig) {
 	// 将server转换为mcp.ServerConfig
 	serverConfig := ServerConfig{
 		ID:      server.ID,
@@ -53,7 +54,7 @@ func (m *mcpService) AddServer(ctx context.Context, server models.MCPServerConfi
 	}
 
 }
-func (m *mcpService) AddServers(ctx context.Context, servers []models.MCPServerConfig) {
+func (m *mcpService) AddServers(ctx context.Context, servers []mcpModels.MCPServerConfig) {
 	for _, server := range servers {
 		// 将server转换为mcp.ServerConfig
 		serverConfig := ServerConfig{
@@ -83,7 +84,7 @@ func (m *mcpService) AddServers(ctx context.Context, servers []models.MCPServerC
 	}
 
 }
-func (m *mcpService) RemoveServer(server models.MCPServerConfig) {
+func (m *mcpService) RemoveServer(server mcpModels.MCPServerConfig) {
 	// 将server转换为mcp.ServerConfig
 	serverConfig := ServerConfig{
 		Name:    server.Name,
@@ -94,8 +95,8 @@ func (m *mcpService) RemoveServer(server models.MCPServerConfig) {
 }
 func (m *mcpService) Start() {
 
-	var mcpServers []models.MCPServerConfig
-	err := dao.DB().Model(&models.MCPServerConfig{}).Find(&mcpServers).Error
+	var mcpServers []mcpModels.MCPServerConfig
+	err := dao.DB().Model(&mcpModels.MCPServerConfig{}).Find(&mcpServers).Error
 	if err != nil {
 		return
 	}
@@ -103,23 +104,23 @@ func (m *mcpService) Start() {
 	m.AddServers(ctx, mcpServers)
 }
 
-func (m *mcpService) RemoveServerById(server models.MCPServerConfig) {
+func (m *mcpService) RemoveServerById(server mcpModels.MCPServerConfig) {
 	m.host.RemoveServerById(server.ID)
 }
 
-func (m *mcpService) UpdateServer(ctx context.Context, entity models.MCPServerConfig) {
+func (m *mcpService) UpdateServer(ctx context.Context, entity mcpModels.MCPServerConfig) {
 	m.RemoveServerById(entity)
 	m.AddServer(ctx, entity)
 }
 
-func (m *mcpService) GetTools(ctx context.Context, entity models.MCPServerConfig) ([]mcp2.Tool, error) {
+func (m *mcpService) GetTools(ctx context.Context, entity mcpModels.MCPServerConfig) ([]mcp2.Tool, error) {
 	return m.Host().GetTools(ctx, entity.Name)
 }
 
 func (m *mcpService) GetAllEnabledTools() []openai.Tool {
 
-	var tools []models.MCPTool
-	err := dao.DB().Model(&models.MCPTool{}).Where("enabled = ?", true).Find(&tools).Error
+	var tools []mcpModels.MCPTool
+	err := dao.DB().Model(&mcpModels.MCPTool{}).Where("enabled = ?", true).Find(&tools).Error
 	if err != nil {
 		return nil
 	}

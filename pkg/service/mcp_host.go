@@ -17,6 +17,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
+	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+
 	"k8s.io/klog/v2"
 )
 
@@ -39,7 +41,7 @@ type MCPHost struct {
 	// 记录每个服务器的提示能力
 	Prompts map[string][]mcp.Prompt
 
-	buffer    []*models.MCPToolLog
+	buffer    []*mcpModels.MCPToolLog
 	bufferMux sync.Mutex
 	ticker    *time.Ticker
 	stopChan  chan bool
@@ -61,7 +63,7 @@ func NewMCPHost() *MCPHost {
 		Resources: make(map[string][]mcp.Resource),
 		Prompts:   make(map[string][]mcp.Prompt),
 
-		buffer:   make([]*models.MCPToolLog, 0, 100),
+		buffer:   make([]*mcpModels.MCPToolLog, 0, 100),
 		ticker:   time.NewTicker(2 * time.Second),
 		stopChan: make(chan bool),
 	}
@@ -315,7 +317,7 @@ func (m *MCPHost) GetServerNameByToolName(toolName string) string {
 // LogToolExecution 记录工具执行日志
 func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName string, parameters any, result models.MCPToolCallResult, executeTime int64) {
 
-	log := &models.MCPToolLog{
+	log := &mcpModels.MCPToolLog{
 		ToolName:    toolName,
 		ServerName:  serverName,
 		Parameters:  utils.ToJSON(parameters),
