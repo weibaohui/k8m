@@ -13,18 +13,17 @@
 <p align="center">
   <img alt="GitHub Release" src="https://img.shields.io/github/v/release/weibaohui/k8m">
   <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/weibaohui/k8m/total">
-  <img alt="GitHub Repo License" src="https://img.shields.io/github/license/weibaohui/k8m">
   <img alt="GitHub Repo Issues" src="https://img.shields.io/github/issues/weibaohui/k8m">
+ [![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
+![Alt](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg "Repobeats analytics image")
 </p>
 
+<p align="center">
 
 [English](README_en.md) | [中文](README.md)
+</p>
 
-[![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
-
-[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
-
-![Alt](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg "Repobeats analytics image")
 
 **k8m** 是一款AI驱动的 Mini Kubernetes AI Dashboard 轻量级控制台工具，专为简化集群管理设计。它基于 AMIS 构建，并通过  [
 `kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了
