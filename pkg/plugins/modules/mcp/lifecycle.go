@@ -5,8 +5,6 @@ import (
 	"sync"
 
 	"github.com/weibaohui/k8m/pkg/plugins"
-	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
 	"k8s.io/klog/v2"
 )
@@ -65,30 +63,7 @@ func (l *McpLifecycle) Start(ctx plugins.BaseContext) error {
 		l.stopChan = make(chan struct{})
 	}
 
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
-		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
-		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
-
-		go func() {
-			for {
-				select {
-				case <-elect:
-					klog.V(6).Infof("成为 Leader，启动 MCP 服务")
-					mcpservice.StartMCPService()
-				case <-lost:
-					klog.V(6).Infof("不再是 Leader，停止 MCP 服务")
-					mcpservice.StopMCPService()
-				case <-l.stopChan:
-					return
-				}
-			}
-		}()
-
-		klog.V(6).Infof("根据实例 Leader 状态启动 MCP 插件后台任务")
-	} else {
-		mcpservice.StartMCPService()
-		klog.V(6).Infof("启动 MCP 插件后台任务")
-	}
+	klog.V(6).Infof("MCP 插件已启动")
 	return nil
 }
 

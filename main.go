@@ -19,7 +19,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
-	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
@@ -381,8 +380,6 @@ func main() {
 		// AI提示词管理
 		ai_prompt.RegisterAdminAIPromptRoutes(admin)
 		// MCP配置
-		mcp.RegisterMCPServerRoutes(admin)
-		mcp.RegisterMCPToolRoutes(admin)
 		// 集群授权相关
 		user.RegisterClusterPermissionRoutes(admin)
 		// 用户管理相关

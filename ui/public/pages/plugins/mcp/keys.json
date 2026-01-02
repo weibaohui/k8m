@@ -1,0 +1,218 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "mcpKeyCRUD",
+      "name": "mcpKeyCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 3,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新增 API 密钥",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新增 API 密钥  (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/mgm/plugins/mcp/keys/save",
+              "body": [
+                {
+                  "type": "static",
+                  "label": "说明",
+                  "tpl": "<div class='alert alert-info'><p>API 密钥用于外部系统访问 MCP 服务。请妥善保管您的密钥，不要泄露给他人。</p></div>"
+                },
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "密钥描述",
+                  "required": true,
+                  "placeholder": "请输入密钥描述，例如：开发环境密钥"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "mcpKeyCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "button",
+          "icon": "fas fa-key text-success",
+          "actionType": "ajax",
+          "label": "生成新密钥",
+          "api": "get:/mgm/plugins/mcp/keys/my/gen",
+          "onEvent": {
+            "success": {
+              "actions": [
+                {
+                  "actionType": "reload",
+                  "componentId": "mcpKeyCRUD"
+                },
+                {
+                  "actionType": "notify",
+                  "msg": "新密钥已生成",
+                  "msgType": "success"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "bulkActions": [
+        {
+          "type": "button",
+          "icon": "fas fa-trash text-danger",
+          "actionType": "ajax",
+          "tooltip": "删除密钥",
+          "confirmText": "确定要删除选中的密钥吗？此操作不可恢复！",
+          "api": "post:/mgm/plugins/mcp/keys/delete"
+        }
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/mgm/plugins/mcp/keys/list",
+      "columns": [
+        {
+          "name": "id",
+          "label": "ID",
+          "width": 80
+        },
+        {
+          "name": "description",
+          "label": "描述"
+        },
+        {
+          "name": "mcp_key",
+          "label": "API 密钥",
+          "type": "text",
+          "copyable": true
+        },
+        {
+          "name": "enabled",
+          "label": "状态",
+          "type": "mapping",
+          "map": {
+            "true": {
+              "type": "tag",
+              "tag": "已启用",
+              "color": "success"
+            },
+            "false": {
+              "type": "tag",
+              "tag": "已禁用",
+              "color": "danger"
+            }
+          }
+        },
+        {
+          "name": "last_used_at",
+          "label": "最后使用时间",
+          "width": 180
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "width": 180
+        },
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑密钥",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "编辑 API 密钥  (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/mgm/plugins/mcp/keys/save",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "description",
+                      "label": "密钥描述",
+                      "required": true,
+                      "placeholder": "请输入密钥描述"
+                    },
+                    {
+                      "type": "switch",
+                      "name": "enabled",
+                      "label": "启用密钥",
+                      "onText": "是",
+                      "offText": "否"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

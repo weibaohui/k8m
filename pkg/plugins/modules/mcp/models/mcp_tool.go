@@ -38,3 +38,16 @@ func (c *MCPTool) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.
 func (c *MCPTool) BatchSave(params *dao.Params, tools []*MCPTool, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericBatchSave(params, tools, 100, queryFuncs...)
 }
+
+func (c *MCPTool) ListByServer(db *gorm.DB, serverName string) ([]*MCPTool, int64, error) {
+	var items []*MCPTool
+	var total int64
+	query := db.Where("server_name = ?", serverName)
+	if err := query.Model(c).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	if err := query.Find(&items).Error; err != nil {
+		return nil, 0, err
+	}
+	return items, total, nil
+}

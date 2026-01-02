@@ -1,4 +1,4 @@
-package mcp
+package admin
 
 import (
 	"context"
@@ -13,17 +13,6 @@ import (
 )
 
 type ServerController struct {
-}
-
-// RegisterMCPServerRoutes 注册路由
-func RegisterMCPServerRoutes(admin *gin.RouterGroup) {
-	ctrl := &ServerController{}
-	admin.GET("/mcp/list", ctrl.List)
-	admin.POST("/mcp/connect/:name", ctrl.Connect)
-	admin.POST("/mcp/delete", ctrl.Delete)
-	admin.POST("/mcp/save", ctrl.Save)
-	admin.POST("/mcp/save/id/:id/status/:status", ctrl.QuickSave)
-	admin.GET("/mcp/log/list", ctrl.MCPLogList)
 }
 
 // @Summary 获取MCP服务器列表

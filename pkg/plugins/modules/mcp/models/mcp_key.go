@@ -36,3 +36,16 @@ func (c *McpKey) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm
 func (c *McpKey) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*McpKey, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
 }
+
+func (c *McpKey) ListByUser(db *gorm.DB, username string) ([]*McpKey, int64, error) {
+	var items []*McpKey
+	var total int64
+	query := db.Where("username = ?", username)
+	if err := query.Model(c).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	if err := query.Find(&items).Error; err != nil {
+		return nil, 0, err
+	}
+	return items, total, nil
+}
