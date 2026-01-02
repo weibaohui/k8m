@@ -57,7 +57,8 @@ var Metadata = plugins.Module{
 		},
 	},
 	// Dependencies 插件依赖的其他插件名称列表；启用前需确保均已启用
-	Dependencies: []string{
+	Dependencies: []string{},
+	RunAfter: []string{
 		modules.PluginNameLeader,
 	},
 
