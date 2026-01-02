@@ -227,7 +227,7 @@ func (m *MCPHost) GetAllTools(ctx context.Context) []openai.Tool {
 				Type: openai.ToolTypeFunction,
 				Function: &openai.FunctionDefinition{
 					// 在工具名称中添加服务器标识
-					Name:        utils.BuildMCPToolName(tool.Name, serverName),
+					Name:        BuildMCPToolName(tool.Name, serverName),
 					Description: tool.Name,
 					Parameters:  tool.InputSchema,
 				},
@@ -401,7 +401,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 
 			if strings.Contains(fullToolName, "@") {
 				// 如果识别的ToolName包含@，则解析ToolName
-				toolName, serverName, _ = utils.ParseMCPToolName(fullToolName)
+				toolName, serverName, _ = ParseMCPToolName(fullToolName)
 			} else {
 				toolName = fullToolName
 				serverName = m.GetServerNameByToolName(toolName)
