@@ -13,8 +13,8 @@
     },
     {
       "type": "crud",
-      "api": "/admin/plugins/mcp/server/list",
-      "quickSaveItemApi": "/admin/plugins/mcp/server/save/id/${id}/status/${enabled}",
+      "api": "/admin/plugins/mcp_runtime/server/list",
+      "quickSaveItemApi": "/admin/plugins/mcp_runtime/server/save/id/${id}/status/${enabled}",
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
@@ -50,7 +50,7 @@
             "title": "添加服务器",
             "body": {
               "type": "form",
-              "api": "/admin/plugins/mcp/server/save",
+              "api": "/admin/plugins/mcp_runtime/server/save",
               "body": [
                 {
                   "type": "alert",
@@ -104,7 +104,7 @@
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
           "api": {
-            "url": "/admin/plugins/mcp/server/delete",
+            "url": "/admin/plugins/mcp_runtime/server/delete",
             "method": "post",
             "data": {
               "ids": "${selectedItems | pick:id }"
@@ -157,8 +157,8 @@
                       "id": "toolsCRUD",
                       "name": "toolsCRUD",
                       "autoFillHeight": true,
-                      "api": "get:/admin/plugins/mcp/tool/server/${name}/list",
-                      "quickSaveItemApi": "/admin/plugins/mcp/tool/save/id/${id}/status/${enabled}",
+                      "api": "get:/admin/plugins/mcp_runtime/tool/server/${name}/list",
+                      "quickSaveItemApi": "/admin/plugins/mcp_runtime/tool/save/id/${id}/status/${enabled}",
                       "headerToolbar": [
                         {
                           "type": "columns-toggler",
@@ -274,7 +274,7 @@
                 "title": "编辑服务器",
                 "body": {
                   "type": "form",
-                  "api": "post:/admin/plugins/mcp/server/save",
+                  "api": "post:/admin/plugins/mcp_runtime/server/save",
                   "body": [
                     {
                       "type": "hidden",

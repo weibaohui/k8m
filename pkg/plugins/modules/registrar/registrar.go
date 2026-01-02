@@ -8,7 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp"
+	mcp "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/swagger"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"

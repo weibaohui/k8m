@@ -9,5 +9,5 @@ const (
 	PluginNameHelm         = "helm"
 	PluginNameGlobalLog    = "gllog"
 	PluginNameSwagger      = "swagger"
-	PluginNameMCP          = "mcp"
+	PluginNameMCPRuntime   = "mcp_runtime"
 )

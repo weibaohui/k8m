@@ -15,7 +15,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	mcpService "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/service"
+	mcpService "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
 	"k8s.io/klog/v2"
 )
 
@@ -45,7 +45,7 @@ func (c *chatService) getChatStreamBase(ctx context.Context, chat string, clearH
 		}
 	}
 
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCP) {
+	if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCPRuntime) {
 		tools := mcpService.McpService().GetAllEnabledTools()
 		klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
 		client.SetTools(tools)
@@ -75,7 +75,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 		klog.V(6).Infof("获取AI服务错误 : %v\n", err)
 		return fmt.Errorf("获取AI服务错误 : %v", err)
 	}
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCP) {
+	if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCPRuntime) {
 		tools := mcpService.McpService().GetAllEnabledTools()
 		klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
 		client.SetTools(tools)
@@ -119,7 +119,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 				continue
 			}
 
-			if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCP) {
+			if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCPRuntime) {
 				// 设置了工具
 				if len(response.Choices) > 0 {
 					for _, choice := range response.Choices {

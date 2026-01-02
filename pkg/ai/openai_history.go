@@ -7,7 +7,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
-	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 	"k8s.io/klog/v2"
 )
 

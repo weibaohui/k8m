@@ -7,8 +7,8 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/service"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
 	"k8s.io/klog/v2"
 )
 

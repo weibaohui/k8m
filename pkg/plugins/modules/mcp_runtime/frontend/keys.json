@@ -21,7 +21,7 @@
       "id": "apiKeysCRUD",
       "name": "apiKeysCRUD",
       "autoFillHeight": true,
-      "api": "get:/mgm/plugins/mcp/user/profile/mcp_keys/list",
+      "api": "get:/mgm/plugins/mcp_runtime/user/profile/mcp_keys/list",
       "headerToolbar": [
         {
           "type": "button",
@@ -34,7 +34,7 @@
             "closeOnOutside": true,
             "body": {
               "type": "form",
-              "api": "post:/mgm/plugins/mcp/user/profile/mcp_keys/create",
+              "api": "post:/mgm/plugins/mcp_runtime/user/profile/mcp_keys/create",
               "body": [
                 {
                   "type": "input-text",
@@ -61,7 +61,7 @@
               "className": "text-danger",
               "confirmText": "确认要删除该密钥吗？",
               "actionType": "ajax",
-              "api": "delete:/mgm/plugins/mcp/user/profile/mcp_keys/delete/${id}"
+              "api": "delete:/mgm/plugins/mcp_runtime/user/profile/mcp_keys/delete/${id}"
             }
           ]
         },

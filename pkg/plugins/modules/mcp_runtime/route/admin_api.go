@@ -3,12 +3,12 @@ package route
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/admin"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/admin"
 	"k8s.io/klog/v2"
 )
 
 func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
-	g := arg.Group("/plugins/" + modules.PluginNameMCP)
+	g := arg.Group("/plugins/" + modules.PluginNameMCPRuntime)
 
 	serverCtrl := &admin.ServerController{}
 	g.GET("/server/list", serverCtrl.List)
@@ -26,7 +26,7 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 }
 
 func RegisterPluginMgmRoutes(arg *gin.RouterGroup) {
-	mgm := arg.Group("/plugins/" + modules.PluginNameMCP)
+	mgm := arg.Group("/plugins/" + modules.PluginNameMCPRuntime)
 
 	keyCtrl := &admin.KeyController{}
 	mgm.GET("/user/profile/mcp_keys/list", keyCtrl.List)

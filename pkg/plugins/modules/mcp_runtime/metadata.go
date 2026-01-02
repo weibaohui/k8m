@@ -3,13 +3,13 @@ package mcp
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/route"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/route"
 )
 
 var Metadata = plugins.Module{
 	Meta: plugins.Meta{
-		Name:        modules.PluginNameMCP,
-		Title:       "MCP 管理插件",
+		Name:        modules.PluginNameMCPRuntime,
+		Title:       "MCP运行时管理插件",
 		Version:     "1.0.0",
 		Description: "管理大模型对话使用的MCP服务器。包括MCP服务器配置、工具管理、执行日志查看、开放MCP服务等功能。",
 	},
@@ -22,7 +22,7 @@ var Metadata = plugins.Module{
 	Menus: []plugins.Menu{
 		{
 			Key:   "plugin_mcp_index",
-			Title: "MCP管理",
+			Title: "MCP运行管理",
 			Icon:  "fa-solid fa-network-wired",
 			Order: 45,
 			Children: []plugins.Menu{
@@ -32,7 +32,7 @@ var Metadata = plugins.Module{
 					Icon:        "fa-solid fa-server",
 					Show:        "isPlatformAdmin()==true",
 					EventType:   "custom",
-					CustomEvent: `() => loadJsonPage("/plugins/mcp/server")`,
+					CustomEvent: `() => loadJsonPage("/plugins/mcp_runtime/server")`,
 					Order:       10,
 				},
 				{
@@ -41,7 +41,7 @@ var Metadata = plugins.Module{
 					Icon:        "fa-solid fa-list-alt",
 					Show:        "isPlatformAdmin()==true",
 					EventType:   "custom",
-					CustomEvent: `() => loadJsonPage("/plugins/mcp/log")`,
+					CustomEvent: `() => loadJsonPage("/plugins/mcp_runtime/log")`,
 					Order:       20,
 				},
 				{
@@ -49,7 +49,7 @@ var Metadata = plugins.Module{
 					Title:       "开放MCP服务",
 					Icon:        "fa-solid fa-key",
 					EventType:   "custom",
-					CustomEvent: `() => loadJsonPage("/plugins/mcp/keys")`,
+					CustomEvent: `() => loadJsonPage("/plugins/mcp_runtime/keys")`,
 					Order:       30,
 				},
 			},

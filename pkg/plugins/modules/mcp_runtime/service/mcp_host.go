@@ -17,7 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 
 	"k8s.io/klog/v2"
 )

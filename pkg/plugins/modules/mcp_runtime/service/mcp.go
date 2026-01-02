@@ -13,7 +13,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	uModels "github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 
 	"gorm.io/gorm"
 
