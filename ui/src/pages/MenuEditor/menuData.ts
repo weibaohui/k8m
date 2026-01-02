@@ -878,15 +878,8 @@ export const initialMenu: MenuItem[] = [
                 eventType: 'custom',
                 customEvent: '() => loadJsonPage("/user/profile/api_keys")',
                 order: 3,
-            },
-            {
-                key: 'user_profile_mcp_keys',
-                title: '开放MCP',
-                icon: 'fa-solid fa-share-nodes',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/user/profile/mcp_keys")',
-                order: 4,
-            },
+            }
+            
         ],
     },
      
