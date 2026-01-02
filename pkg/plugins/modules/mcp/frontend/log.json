@@ -1,115 +1,157 @@
 {
-  "type": "page",
-  "body": [
-    {
-      "type": "crud",
-      "id": "mcpLogCRUD",
-      "name": "mcpLogCRUD",
-      "autoFillHeight": true,
-      "autoGenerateFilter": {
-        "columnsNum": 3,
-        "showBtnToolbar": false
-      },
-      "headerToolbar": [
+    "type": "page",
+    "data": {
+        "kind": "MCP执行记录",
+        "group": "",
+        "version": ""
+    },
+    "body": [
         {
-          "type": "button",
-          "icon": "fas fa-trash text-danger",
-          "actionType": "ajax",
-          "label": "清空日志",
-          "confirmText": "确定要清空所有执行日志吗？此操作不可恢复！",
-          "api": "get:/admin/plugins/mcp/log/clear"
+            "type": "container",
+            "className": "floating-toolbar",
+            "body": [
+                {
+                    "type": "tpl",
+                    "tpl": "${kind}",
+                    "className": "mr-2"
+                }
+            ]
         },
         {
-          "type": "columns-toggler",
-          "align": "right",
-          "draggable": true,
-          "icon": "fas fa-cog",
-          "overlay": true,
-          "footerBtnSize": "sm"
-        },
-        {
-          "type": "tpl",
-          "tpl": "共${count}条",
-          "align": "right",
-          "visibleOn": "${count}"
-        },
-        "reload",
-        "bulkActions"
-      ],
-      "bulkActions": [],
-      "loadDataOnce": false,
-      "syncLocation": false,
-      "initFetch": true,
-      "perPage": 20,
-      "footerToolbar": [
-        {
-          "type": "pagination",
-          "align": "right"
-        },
-        {
-          "type": "statistics",
-          "align": "right"
-        },
-        {
-          "type": "switch-per-page",
-          "align": "right"
-        }
-      ],
-      "api": "get:/admin/plugins/mcp/log/list",
-      "columns": [
-        {
-          "name": "id",
-          "label": "ID",
-          "width": 80
-        },
-        {
-          "name": "server_name",
-          "label": "服务器名称"
-        },
-        {
-          "name": "tool_name",
-          "label": "工具名称"
-        },
-        {
-          "name": "status",
-          "label": "状态",
-          "type": "mapping",
-          "map": {
-            "success": {
-              "type": "tag",
-              "tag": "成功",
-              "color": "success"
+            "type": "crud",
+            "api": "/admin/plugins/mcp/server/log/list",
+            "autoFillHeight": true,
+            "autoGenerateFilter": {
+                "columnsNum": 4,
+                "showBtnToolbar": false
             },
-            "failed": {
-              "type": "tag",
-              "tag": "失败",
-              "color": "danger"
-            },
-            "running": {
-              "type": "tag",
-              "tag": "执行中",
-              "color": "primary"
-            }
-          }
-        },
-        {
-          "name": "request_params",
-          "label": "请求参数",
-          "type": "json",
-          "height": 100
-        },
-        {
-          "name": "response_result",
-          "label": "响应结果",
-          "type": "json",
-          "height": 100
-        },
-        {
-          "name": "created_at",
-          "label": "执行时间",
-          "width": 180
+            "headerToolbar": [
+                {
+                    "type": "columns-toggler",
+                    "align": "right",
+                    "draggable": true,
+                    "icon": "fas fa-cog",
+                    "overlay": true,
+                    "footerBtnSize": "sm"
+                },
+                {
+                    "type": "tpl",
+                    "tpl": "共${count}条",
+                    "align": "right",
+                    "visibleOn": "${count}"
+                },
+                {
+                    "type": "columns-toggler",
+                    "align": "left"
+                },
+                "reload"
+            ],
+            "loadDataOnce": false,
+            "syncLocation": false,
+            "perPage": 10,
+            "columns": [
+                {
+                    "name": "id",
+                    "label": "ID",
+                    "sortable": true
+                },
+                {
+                    "name": "created_at",
+                    "label": "执行时间",
+                    "type": "datetime",
+                    "sortable": true
+                },
+                {
+                    "name": "server_name",
+                    "label": "服务器名称",
+                    "searchable": true
+                },
+                {
+                    "name": "tool_name",
+                    "label": "工具名称",
+                    "searchable": true
+                },
+                {
+                    "name": "result",
+                    "label": "执行结果",
+                    "type": "tpl",
+                    "tpl": "详情",
+                    "className": "cursor-pointer",
+                    "onEvent": {
+                        "click": {
+                            "actions": [
+                                {
+                                    "actionType": "drawer",
+                                    "drawer": {
+                                        "closeOnEsc": true,
+                                        "closeOnOutside": true,
+                                        "title": "MCP工具执行详情",
+                                        "size": "lg",
+                                        "body": {
+                                            "type": "form",
+                                            "body": [
+                                                {
+                                                    "type": "static",
+                                                    "label": "发起人",
+                                                    "value": "${created_by}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "对话内容",
+                                                    "value": "${prompt}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "服务器名称",
+                                                    "value": "${server_name}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "工具名称",
+                                                    "value": "${tool_name}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "调用参数",
+                                                    "value": "${parameters|raw}",
+                                                    "levelExpand": 3
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "执行结果",
+                                                    "value": "${result|raw}"
+                                                },
+                                                {
+                                                    "type": "static",
+                                                    "label": "执行耗时",
+                                                    "value": "${execute_time}ms"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "duration",
+                    "label": "执行耗时",
+                    "type": "tpl",
+                    "tpl": "${execute_time}ms"
+                },
+                {
+                    "name": "created_by",
+                    "label": "发起人"
+                },
+                {
+                    "name": "error",
+                    "label": "错误信息",
+                    "type": "tpl",
+                    "tpl": "${error}",
+                    "className": "text-danger"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

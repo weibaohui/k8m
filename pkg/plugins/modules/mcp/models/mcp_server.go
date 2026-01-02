@@ -32,19 +32,3 @@ func (c *MCPServerConfig) Delete(params *dao.Params, ids string, queryFuncs ...f
 func (c *MCPServerConfig) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*MCPServerConfig, error) {
 	return dao.GenericGetOne(params, c, queryFuncs...)
 }
-
-func (c *MCPServerConfig) GetByID(db *gorm.DB, id string) (*MCPServerConfig, error) {
-	var result MCPServerConfig
-	if err := db.First(&result, id).Error; err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func (c *MCPServerConfig) GetByName(db *gorm.DB, name string) (*MCPServerConfig, error) {
-	var result MCPServerConfig
-	if err := db.Where("name = ?", name).First(&result).Error; err != nil {
-		return nil, err
-	}
-	return &result, nil
-}

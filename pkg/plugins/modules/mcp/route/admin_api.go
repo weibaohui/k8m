@@ -16,7 +16,7 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 	g.POST("/server/delete", serverCtrl.Delete)
 	g.POST("/server/save", serverCtrl.Save)
 	g.POST("/server/save/id/:id/status/:status", serverCtrl.QuickSave)
-	g.GET("/log/list", serverCtrl.MCPLogList)
+	g.GET("/server/log/list", serverCtrl.MCPLogList)
 
 	toolCtrl := &admin.ToolController{}
 	g.GET("/tool/server/:name/list", toolCtrl.List)
@@ -29,12 +29,9 @@ func RegisterPluginMgmRoutes(arg *gin.RouterGroup) {
 	mgm := arg.Group("/plugins/" + modules.PluginNameMCP)
 
 	keyCtrl := &admin.KeyController{}
-	mgm.GET("/keys/list", keyCtrl.List)
-	mgm.POST("/keys/save", keyCtrl.Save)
-	mgm.POST("/keys/delete", keyCtrl.Delete)
-	mgm.GET("/keys/my/list", keyCtrl.MyList)
-	mgm.GET("/keys/my/gen", keyCtrl.GenKey)
-	mgm.GET("/keys/refresh/jwt", keyCtrl.RefreshJWT)
+	mgm.GET("/user/profile/mcp_keys/list", keyCtrl.List)
+	mgm.POST("/user/profile/mcp_keys/create", keyCtrl.Create)
+	mgm.POST("/user/profile/mcp_keys/delete/:id", keyCtrl.Delete)
 
 	klog.V(6).Infof("注册 MCP 插件管理路由(mgm)")
 }
