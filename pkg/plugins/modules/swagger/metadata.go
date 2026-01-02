@@ -3,7 +3,6 @@ package swagger
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/swagger/route"
 )
 
 var Metadata = plugins.Module{
@@ -36,6 +35,5 @@ var Metadata = plugins.Module{
 	Dependencies: []string{},
 	RunAfter:     []string{},
 
-	Lifecycle:         &SwaggerLifecycle{},
-	PluginAdminRouter: route.RegisterAdminRoutes,
+	Lifecycle: &SwaggerLifecycle{},
 }
