@@ -22,13 +22,13 @@ var Metadata = plugins.Module{
 	Menus: []plugins.Menu{
 		{
 			Key:   "plugin_mcp_index",
-			Title: "MCP 管理",
+			Title: "MCP管理",
 			Icon:  "fa-solid fa-network-wired",
 			Order: 45,
 			Children: []plugins.Menu{
 				{
 					Key:         "plugin_mcp_server",
-					Title:       "MCP 服务器",
+					Title:       "MCP服务管理",
 					Icon:        "fa-solid fa-server",
 					Show:        "isPlatformAdmin()==true",
 					EventType:   "custom",
@@ -37,7 +37,7 @@ var Metadata = plugins.Module{
 				},
 				{
 					Key:         "plugin_mcp_log",
-					Title:       "执行日志",
+					Title:       "MCP执行日志",
 					Icon:        "fa-solid fa-list-alt",
 					Show:        "isPlatformAdmin()==true",
 					EventType:   "custom",
@@ -46,7 +46,7 @@ var Metadata = plugins.Module{
 				},
 				{
 					Key:         "plugin_mcp_keys",
-					Title:       "开放 MCP 服务",
+					Title:       "开放MCP服务",
 					Icon:        "fa-solid fa-key",
 					EventType:   "custom",
 					CustomEvent: `() => loadJsonPage("/plugins/mcp/keys")`,

@@ -766,22 +766,7 @@ export const initialMenu: MenuItem[] = [
                 customEvent: '() => loadJsonPage("/admin/user/user_group")',
                 order: 6,
             },
-            {
-                key: 'mcp_management',
-                title: 'MCP管理',
-                icon: 'fa-solid fa-server',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/mcp/mcp")',
-                order: 7,
-            },
-            {
-                key: 'mcp_tool_log',
-                title: 'MCP执行记录',
-                icon: 'fa-solid fa-history',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/mcp/mcp_log")',
-                order: 8,
-            },
+             
             {
                 key: 'condition_reverse',
                 title: '指标显示翻转',
