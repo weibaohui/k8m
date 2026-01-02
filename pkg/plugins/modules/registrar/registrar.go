@@ -4,6 +4,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/gllog"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
@@ -44,6 +45,11 @@ func init() {
 			klog.V(6).Infof("注册helm插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册helm插件成功")
+		}
+		if err := m.Register(gllog.Metadata); err != nil {
+			klog.V(6).Infof("注册gllog插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册gllog插件成功")
 		}
 	})
 }

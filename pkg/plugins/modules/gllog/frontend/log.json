@@ -162,7 +162,7 @@
       "id": "globalLogTable",
       "api": {
         "method": "get",
-        "url": "/mgm/log/global/list",
+        "url": "/mgm/plugins/gllog/list",
         "data": {
           "cluster": "${ ''|selectedCluster}",
           "namespace": "$namespace",
