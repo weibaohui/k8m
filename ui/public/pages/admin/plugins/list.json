@@ -203,9 +203,9 @@
                             "type": "button",
                             "icon": "fas fa-stop-circle text-warning",
                             "actionType": "ajax",
-                            "label": "关闭",
+                            "label": "禁用",
                             "visibleOn": "this.status == '已启用'",
-                            "confirmText": "确认关闭该插件？",
+                            "confirmText": "确认禁用该插件？",
                             "api": "post:/admin/plugin/disable/${name}"
                         },
                         {
