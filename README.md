@@ -3,6 +3,21 @@
 </div>
 
 
+<p align="center">
+ <a href="https://trendshift.io/repositories/14095" target="_blank"><img src="https://trendshift.io/api/badge/repositories/14095" alt="weibaohui%2Fk8m | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+</p>
+<p align="center">
+  <img alt="GitHub Repo Stars" src="https://img.shields.io/github/stars/weibaohui/k8m">
+  <img alt="GitHub Repo Forks" src="https://img.shields.io/github/forks/weibaohui/k8m">
+</p>
+<p align="center">
+  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/weibaohui/k8m">
+  <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/weibaohui/k8m/total">
+  <img alt="GitHub Repo License" src="https://img.shields.io/github/license/weibaohui/k8m">
+  <img alt="GitHub Repo Issues" src="https://img.shields.io/github/issues/weibaohui/k8m">
+</p>
+
+
 [English](README_en.md) | [中文](README.md)
 
 [![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
