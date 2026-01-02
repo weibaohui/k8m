@@ -6,6 +6,12 @@
 cd ../../../../
 swag init -g main.go  --exclude internal,pkg/comm/,pkg/service -o pkg/plugins/modules/swagger
 
+
+# 删除docs.go 中的最后三行
+sed -i '' '$d' pkg/plugins/modules/swagger/docs.go
+sed -i '' '$d' pkg/plugins/modules/swagger/docs.go
+sed -i '' '$d' pkg/plugins/modules/swagger/docs.go
+
 # 向docs.go添加RegisterSwagger函数
 echo "func RegisterSwagger() {
 	swag.Register(swag.Name, &s{})
