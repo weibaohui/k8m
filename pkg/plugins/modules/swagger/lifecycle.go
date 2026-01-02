@@ -34,6 +34,7 @@ func (s *SwaggerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 func (s *SwaggerLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动Swagger插件")
+	RegisterSwagger()
 	return nil
 }
 
