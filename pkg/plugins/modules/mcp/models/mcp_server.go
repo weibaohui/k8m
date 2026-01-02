@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// MCPServerConfig MCP服务器配置
 type MCPServerConfig struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	URL       string    `gorm:"not null" json:"url,omitempty"`

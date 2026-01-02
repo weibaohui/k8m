@@ -9,26 +9,19 @@
     "rootClose": true
   },
   "body": [
-    {
-      "type": "button",
-      "label": "查看使用说明",
-      "level": "link",
-      "className": "text-info",
-      "actionType": "dialog",
-      "dialog": {
-        "title": "MCP服务使用说明（ESC 关闭）",
-        "closeOnEsc": true,
-        "closeOnOutside": true,
-        "size": "lg",
-        "body": "<div><p><li>如使用NodePort方式访问，请将域名替换为集群节点IP，端口替换为NodePort端口</li><li>如使用网关方式访问，请将域名和端口替换为网关地址</li><li>如您不能确定访问方式，可联系系统管理员</li><li>动态路径、Auth Token 跟您的访问权限进行了绑定，请勿分享给他人</li></p></li></div>"
-      }
-    },
+    
+     {
+          "type": "alert",
+          "level": "danger",
+          "className": "mb-2",
+          "body": "<div class='alert alert-info'><p><strong>提示：</strong>动态地址或者Token都跟您的用户权限进行了绑定。请勿分享给他人。</p></div>"
+        },
     {
       "type": "crud",
       "id": "apiKeysCRUD",
       "name": "apiKeysCRUD",
       "autoFillHeight": true,
-      "api": "get:/mgm/user/profile/mcp_keys/list",
+      "api": "get:/mgm/plugins/mcp/user/profile/mcp_keys/list",
       "headerToolbar": [
         {
           "type": "button",
@@ -41,7 +34,7 @@
             "closeOnOutside": true,
             "body": {
               "type": "form",
-              "api": "post:/mgm/user/profile/mcp_keys/create",
+              "api": "post:/mgm/plugins/mcp/user/profile/mcp_keys/create",
               "body": [
                 {
                   "type": "input-text",
@@ -68,7 +61,7 @@
               "className": "text-danger",
               "confirmText": "确认要删除该密钥吗？",
               "actionType": "ajax",
-              "api": "delete:/mgm/user/profile/mcp_keys/delete/${id}"
+              "api": "delete:/mgm/plugins/mcp/user/profile/mcp_keys/delete/${id}"
             }
           ]
         },

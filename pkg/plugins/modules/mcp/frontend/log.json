@@ -19,7 +19,7 @@
         },
         {
             "type": "crud",
-            "api": "/admin/mcp/log/list",
+            "api": "/admin/plugins/mcp/server/log/list",
             "autoFillHeight": true,
             "autoGenerateFilter": {
                 "columnsNum": 4,

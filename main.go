@@ -19,7 +19,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
-	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
@@ -46,7 +45,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/svc"
 	"github.com/weibaohui/k8m/pkg/controller/template"
 	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
-	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/middleware"
@@ -134,14 +132,13 @@ func Init() {
 
 	// 启动watch和定时任务
 	go func() {
-		service.McpService().Init()
+
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
 			service.PVCService().Watch()
 			service.PVService().Watch()
 			service.IngressService().Watch()
-			service.McpService().Start()
 		})
 	}()
 
@@ -355,8 +352,6 @@ func main() {
 		profile.RegisterProfileRoutes(mgm)
 		// API密钥管理
 		apikey.RegisterAPIKeysRoutes(mgm)
-		// MCP密钥管理
-		mcpkey.RegisterMCPKeysRoutes(mgm)
 		// log
 		log.RegisterLogRoutes(mgm)
 		// 集群连接
@@ -381,8 +376,6 @@ func main() {
 		// AI提示词管理
 		ai_prompt.RegisterAdminAIPromptRoutes(admin)
 		// MCP配置
-		mcp.RegisterMCPServerRoutes(admin)
-		mcp.RegisterMCPToolRoutes(admin)
 		// 集群授权相关
 		user.RegisterClusterPermissionRoutes(admin)
 		// 用户管理相关

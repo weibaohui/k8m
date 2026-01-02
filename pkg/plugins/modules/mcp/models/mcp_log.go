@@ -8,16 +8,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// MCPToolLog MCP工具执行日志
 type MCPToolLog struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ToolName    string    `gorm:"index" json:"tool_name,omitempty"`      // 工具名称
-	ServerName  string    `gorm:"index" json:"server_name,omitempty"`    // 服务器名称
-	Parameters  string    `gorm:"type:text" json:"parameters,omitempty"` // 执行参数
+	ToolName    string    `gorm:"index" json:"tool_name,omitempty"`
+	ServerName  string    `gorm:"index" json:"server_name,omitempty"`
+	Parameters  string    `gorm:"type:text" json:"parameters,omitempty"`
 	Prompt      string    `gorm:"type:text" json:"prompt,omitempty"`
-	Result      string    `gorm:"type:text" json:"result,omitempty"` // 执行结果
-	Error       string    `gorm:"type:text" json:"error,omitempty"`  // 错误信息
-	ExecuteTime int64     `json:"execute_time,omitempty"`            // 执行时间(毫秒)
+	Result      string    `gorm:"type:text" json:"result,omitempty"`
+	Error       string    `gorm:"type:text" json:"error,omitempty"`
+	ExecuteTime int64     `json:"execute_time,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	CreatedBy   string    `gorm:"index" json:"created_by,omitempty"`
 }

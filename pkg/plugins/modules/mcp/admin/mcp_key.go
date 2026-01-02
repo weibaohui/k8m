@@ -1,4 +1,4 @@
-package mcpkey
+package admin
 
 import (
 	"time"
@@ -8,15 +8,15 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
-type Controller struct{}
+type KeyController struct{}
 
 func RegisterMCPKeysRoutes(mgm *gin.RouterGroup) {
-	ctrl := &Controller{}
+	ctrl := &KeyController{}
 	mgm.GET("/user/profile/mcp_keys/list", ctrl.List)
 	mgm.POST("/user/profile/mcp_keys/create", ctrl.Create)
 	mgm.POST("/user/profile/mcp_keys/delete/:id", ctrl.Delete)
@@ -31,7 +31,7 @@ func RegisterMCPKeysRoutes(mgm *gin.RouterGroup) {
 // @Param description body string false "密钥描述"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/mcp_keys/create [post]
-func (mc *Controller) Create(c *gin.Context) {
+func (mc *KeyController) Create(c *gin.Context) {
 	params := dao.BuildParams(c)
 
 	var req struct {
@@ -75,7 +75,7 @@ func (mc *Controller) Create(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/user/profile/mcp_keys/list [get]
-func (mc *Controller) List(c *gin.Context) {
+func (mc *KeyController) List(c *gin.Context) {
 	username := c.GetString(constants.JwtUserName)
 	params := dao.BuildParams(c)
 
@@ -98,7 +98,7 @@ func (mc *Controller) List(c *gin.Context) {
 // @Param id path string true "MCP密钥ID"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/mcp_keys/delete/{id} [post]
-func (mc *Controller) Delete(c *gin.Context) {
+func (mc *KeyController) Delete(c *gin.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 

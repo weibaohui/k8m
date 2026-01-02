@@ -7,48 +7,14 @@
   },
   "body": [
     {
-      "type": "container",
-      "className": "floating-toolbar",
-      "body": [
-        {
-          "type": "tpl",
-          "tpl": "${kind}",
-          "className": "mr-2"
-        },
-        {
-          "type": "button",
-          "label": "指南",
-          "level": "link",
-          "icon": "fas fa-lightbulb text-primary",
-          "actionType": "drawer",
-          "drawer": {
-            "overlay": false,
-            "closeOnEsc": true,
-            "closeOnOutside": true,
-            "size": "lg",
-            "title": "${kind} 参考样例（ESC 关闭）",
-            "body": [
-              {
-                "type": "websocketMarkdownViewer",
-                "url": "/ai/chat/any_selection",
-                "params": {
-                  "question": "MCP(Model Context Protocol，模型上下文协议) 是一种新的开放标准协议，用来在大模型和数据源之间建立安全双向的链接。MCP 遵循客户端-服务器架构（client-server），其中包含以下几个核心概念：MCP 主机（MCP Hosts）：发起请求的 LLM 应用程序（例如 Claude Desktop、IDE 或 AI 工具）。MCP 客户端（MCP Clients）：在主机程序内部，与 MCP server 保持 1: 1 的连接。MCP 服务器（MCP Servers）：为 MCP client 提供上下文、工具和 prompt 信息。本地资源（Local Resources）：本地计算机中可供 MCP server 安全访问的资源（例如文件、数据库）。远程资源（Remote Resources）：MCP server 可以连接到的远程资源（例如通过 API）。请参考上面的信息，详细解释MCP（Model Context Protocol，模型上下文协议）原理及使用场景、使用方法及注意事项。这里MCP跟k8s没有关系，不用关联。"
-                }
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
       "type": "alert",
       "level": "success",
       "body": "温馨提示：MCP服务器启用后，在大模型对话中，会自动注册使用。"
     },
     {
       "type": "crud",
-      "api": "/admin/mcp/list",
-      "quickSaveItemApi": "/admin/mcp/save/id/${id}/status/${enabled}",
+      "api": "/admin/plugins/mcp/server/list",
+      "quickSaveItemApi": "/admin/plugins/mcp/server/save/id/${id}/status/${enabled}",
       "autoFillHeight": true,
       "autoGenerateFilter": {
         "columnsNum": 4,
@@ -84,7 +50,7 @@
             "title": "添加服务器",
             "body": {
               "type": "form",
-              "api": "/admin/mcp/save",
+              "api": "/admin/plugins/mcp/server/save",
               "body": [
                 {
                   "type": "alert",
@@ -138,7 +104,7 @@
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
           "api": {
-            "url": "/admin/mcp/delete",
+            "url": "/admin/plugins/mcp/server/delete",
             "method": "post",
             "data": {
               "ids": "${selectedItems | pick:id }"
@@ -191,8 +157,8 @@
                       "id": "toolsCRUD",
                       "name": "toolsCRUD",
                       "autoFillHeight": true,
-                      "api": "get:/admin/mcp/server/${name}/tools/list",
-                      "quickSaveItemApi": "/admin/mcp/tool/save/id/${id}/status/${enabled}",
+                      "api": "get:/admin/plugins/mcp/tool/server/${name}/list",
+                      "quickSaveItemApi": "/admin/plugins/mcp/tool/save/id/${id}/status/${enabled}",
                       "headerToolbar": [
                         {
                           "type": "columns-toggler",
@@ -308,7 +274,7 @@
                 "title": "编辑服务器",
                 "body": {
                   "type": "form",
-                  "api": "post:/admin/mcp/save",
+                  "api": "post:/admin/plugins/mcp/server/save",
                   "body": [
                     {
                       "type": "hidden",

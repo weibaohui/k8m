@@ -1,23 +1,15 @@
-package mcp
+package admin
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
 	"gorm.io/gorm"
 )
 
 type ToolController struct {
-}
-
-// RegisterMCPToolRoutes 注册路由
-func RegisterMCPToolRoutes(admin *gin.RouterGroup) {
-	ctrl := &ToolController{}
-	admin.GET("/mcp/server/:name/tools/list", ctrl.List)
-	admin.POST("/mcp/tool/save/id/:id/status/:status", ctrl.QuickSave)
-
 }
 
 // @Summary 获取指定MCP服务器的工具列表

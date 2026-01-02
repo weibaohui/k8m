@@ -18,6 +18,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
+	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
 	"gorm.io/gorm"
 )
 
@@ -283,7 +284,7 @@ func (u *userService) GetGroupNames(username string) ([]string, error) {
 
 func (u *userService) GetUserByMCPKey(mcpKey string) (string, error) {
 	params := &dao.Params{}
-	m := &models.McpKey{}
+	m := &mcpModels.McpKey{}
 	queryFunc := func(db *gorm.DB) *gorm.DB {
 		return db.Select("username").Where(" mcp_key = ?", mcpKey)
 	}
