@@ -2,25 +2,30 @@
 <h1>K8M</h1>
 </div>
 
-<p align="center">
+<div align=center>
+ 
 [![weibaohui%2Fk8m | Trendshift](https://trendshift.io/api/badge/repositories/14095)](https://trendshift.io/repositories/14095)
-</p>
 
-<p align="center">
- [![codecov](https://codecov.io/gh/zeromicro/go-zero/branch/master/graph/badge.svg)](https://codecov.io/gh/zeromicro/go-zero)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zeromicro/go-zero)](https://goreportcard.com/report/github.com/zeromicro/go-zero)
+</div>
+
+<div align=center>
+ 
 ![GitHub Repo Stars](https://img.shields.io/github/stars/weibaohui/k8m)
 ![GitHub Repo Forks](https://img.shields.io/github/forks/weibaohui/k8m)
-</p>
 
-<p align="center">
+</div>
+
+<div align=center>
+
+ [![License MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
+ [![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/k8m)](https://goreportcard.com/report/github.com/weibaohui/k8m)
 ![GitHub Release](https://img.shields.io/github/v/release/weibaohui/k8m)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/weibaohui/k8m/total)
 ![GitHub Repo Issues](https://img.shields.io/github/issues/weibaohui/k8m)
-[![License MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
 [![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg)
-</p>
+
+</div>
 
 
 [English](README_en.md) | [中文](README.md)
