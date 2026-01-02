@@ -15,9 +15,9 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/ai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
-	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
 
 	"k8s.io/klog/v2"
 )
@@ -41,7 +41,7 @@ type MCPHost struct {
 	// 记录每个服务器的提示能力
 	Prompts map[string][]mcp.Prompt
 
-	buffer    []*mcpModels.MCPToolLog
+	buffer    []*models.MCPToolLog
 	bufferMux sync.Mutex
 	ticker    *time.Ticker
 	stopChan  chan bool
@@ -63,7 +63,7 @@ func NewMCPHost() *MCPHost {
 		Resources: make(map[string][]mcp.Resource),
 		Prompts:   make(map[string][]mcp.Prompt),
 
-		buffer:   make([]*mcpModels.MCPToolLog, 0, 100),
+		buffer:   make([]*models.MCPToolLog, 0, 100),
 		ticker:   time.NewTicker(2 * time.Second),
 		stopChan: make(chan bool),
 	}
@@ -121,6 +121,11 @@ func (m *MCPHost) SyncServerCapabilities(ctx context.Context, serverName string)
 		klog.V(6).Infof("failed to get prompts for %s: %v", serverName, err)
 	}
 
+	//如果都是0，则没有用
+	if len(tools) == 0 && len(resources) == 0 && len(prompts) == 0 {
+		return fmt.Errorf("MCP Server %s 没有提供任何能力", serverName)
+	}
+
 	// 只在更新共享资源时加锁
 	m.mutex.Lock()
 	m.Tools[serverName] = tools
@@ -136,16 +141,16 @@ func (m *MCPHost) ConnectServer(ctx context.Context, serverName string) error {
 	config, exists := m.configs[serverName]
 
 	if !exists {
-		return fmt.Errorf("server config not found: %s", serverName)
+		return fmt.Errorf("MCP Server 配置不存在: %s", serverName)
 	}
 
 	if !config.Enabled {
-		return fmt.Errorf("server is disabled: %s", serverName)
+		return fmt.Errorf("MCP Server 未启用: %s", serverName)
 	}
 
 	// 在锁外同步服务器能力
 	if err := m.SyncServerCapabilities(ctx, serverName); err != nil {
-		return fmt.Errorf("failed to sync server capabilities for %s: %v", serverName, err)
+		return fmt.Errorf("同步服务器 %s 的能力失败: %v", serverName, err)
 	}
 
 	return nil
@@ -161,7 +166,7 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Cli
 	}
 
 	username := m.getUserFromMCPCtx(ctx)
-	jwt, err := UserService().GenerateJWTTokenOnlyUserName(username, time.Hour*1)
+	jwt, err := amis.GenerateJWTTokenOnlyUserNameInMCP(username, time.Hour*1)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate JWT token for %s: %v", serverName, err)
 	}
@@ -317,7 +322,7 @@ func (m *MCPHost) GetServerNameByToolName(toolName string) string {
 // LogToolExecution 记录工具执行日志
 func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName string, parameters any, result models.MCPToolCallResult, executeTime int64) {
 
-	log := &mcpModels.MCPToolLog{
+	log := &models.MCPToolLog{
 		ToolName:    toolName,
 		ServerName:  serverName,
 		Parameters:  utils.ToJSON(parameters),
@@ -365,6 +370,9 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 	// 处理工具调用
 	if toolCalls != nil {
 		for _, toolCall := range toolCalls {
+
+			klog.V(6).Infof("Tool Call: %s\n", utils.ToJSON(toolCall))
+
 			startTime := time.Now()
 
 			fullToolName := toolCall.Function.Name
@@ -394,6 +402,7 @@ func (m *MCPHost) ExecTools(ctx context.Context, toolCalls []openai.ToolCall) []
 			var cli *client.Client
 			var toolName, serverName string
 			var err error
+
 			if strings.Contains(fullToolName, "@") {
 				// 如果识别的ToolName包含@，则解析ToolName
 				toolName, serverName, _ = utils.ParseMCPToolName(fullToolName)

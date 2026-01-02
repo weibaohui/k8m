@@ -34,7 +34,6 @@ var localUserService = &userService{
 var localOperationLogService = NewOperationLogService()
 var localShellLogService = &shellLogService{}
 var localAiService = &aiService{}
-var localMcpService = &mcpService{}
 var localPromptService = &promptService{}
 var localLeaderService = &leaderService{}
 
@@ -102,11 +101,6 @@ func ShellLogService() *shellLogService {
 func AIService() *aiService {
 	return localAiService
 
-}
-
-func McpService() *mcpService {
-
-	return localMcpService
 }
 
 func ConfigService() *configService {

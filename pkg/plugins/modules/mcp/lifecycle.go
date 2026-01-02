@@ -3,9 +3,11 @@ package mcp
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/service"
 	"k8s.io/klog/v2"
 )
 
@@ -56,12 +58,11 @@ func (l *McpLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 }
 
 func (l *McpLifecycle) Start(ctx plugins.BaseContext) error {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+	service.McpService().Init()
 
-	if l.stopChan == nil {
-		l.stopChan = make(chan struct{})
-	}
+	//todo MCPService 启动完毕后，再start，使用sleep 不好，最好改成事件性质的
+	time.Sleep(120 * time.Second)
+	service.McpService().Start()
 
 	klog.V(6).Infof("MCP 插件已启动")
 	return nil

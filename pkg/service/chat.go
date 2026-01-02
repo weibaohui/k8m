@@ -13,6 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
+	mcpService "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/service"
 	"k8s.io/klog/v2"
 )
 
@@ -42,7 +43,7 @@ func (c *chatService) getChatStreamBase(ctx context.Context, chat string, clearH
 		}
 	}
 
-	tools := McpService().GetAllEnabledTools()
+	tools := mcpService.McpService().GetAllEnabledTools()
 	klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
 	client.SetTools(tools)
 	stream, err := client.GetStreamCompletionWithTools(ctx, chat)
@@ -69,7 +70,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 		klog.V(6).Infof("获取AI服务错误 : %v\n", err)
 		return fmt.Errorf("获取AI服务错误 : %v", err)
 	}
-	tools := McpService().GetAllEnabledTools()
+	tools := mcpService.McpService().GetAllEnabledTools()
 	klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
 
 	client.SetTools(tools)
@@ -131,7 +132,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 
 						// 使用合并后的ToolCalls执行操作
 
-						results := McpService().Host().ExecTools(ctx, mergedCalls)
+						results := mcpService.McpService().Host().ExecTools(ctx, mergedCalls)
 						for _, r := range results {
 							currChatContent = append(currChatContent, gin.H{
 								"type": "执行结果",

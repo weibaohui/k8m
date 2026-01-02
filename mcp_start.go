@@ -14,7 +14,9 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/service"
+	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/service"
+	uService "github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/tools"
 	"k8s.io/klog/v2"
@@ -31,7 +33,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 
 		mcpKey := extractKey(r.URL.Path)
 		if mcpKey != "" {
-			username, err := service.UserService().GetUserByMCPKey(mcpKey)
+			username, err := uService.UserService().GetUserByMCPKey(mcpKey)
 			if err != nil {
 				klog.V(6).Infof("Failed to extract username from mcpKey: %v", err)
 			}
@@ -64,7 +66,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 			toolName := request.Params.Name
 			serverName := host.GetServerNameByToolName(toolName)
 			parameters := request.Params.Arguments
-			resultInfo := models.MCPToolCallResult{
+			resultInfo := mcpModels.MCPToolCallResult{
 				ToolName:   toolName,
 				Parameters: parameters,
 				Result:     errStr,
@@ -88,7 +90,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 			errStr = resultStr
 		}
 
-		resultInfo := models.MCPToolCallResult{
+		resultInfo := mcpModels.MCPToolCallResult{
 			ToolName:   toolName,
 			Parameters: parameters,
 			Result:     resultStr,

@@ -132,14 +132,13 @@ func Init() {
 
 	// 启动watch和定时任务
 	go func() {
-		service.McpService().Init()
+
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
 			service.NodeService().Watch()
 			service.PVCService().Watch()
 			service.PVService().Watch()
 			service.IngressService().Watch()
-			service.McpService().Start()
 		})
 	}()
 
