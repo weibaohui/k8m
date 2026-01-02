@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/swagger"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
 )
@@ -50,6 +51,11 @@ func init() {
 			klog.V(6).Infof("注册gllog插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册gllog插件成功")
+		}
+		if err := m.Register(swagger.Metadata); err != nil {
+			klog.V(6).Infof("注册swagger插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册swagger插件成功")
 		}
 	})
 }
