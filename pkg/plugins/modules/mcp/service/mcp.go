@@ -38,7 +38,7 @@ func (m *mcpService) AddServer(ctx context.Context, server models.MCPServerConfi
 	}
 	err := m.host.AddServer(serverConfig)
 	if err != nil {
-		klog.V(6).Infof("Failed to add server %s: %v", server.Name, err)
+		klog.V(6).Infof("添加服务器 %s 失败: %v", server.Name, err)
 		return
 	}
 
@@ -47,10 +47,10 @@ func (m *mcpService) AddServer(ctx context.Context, server models.MCPServerConfi
 		defer cancel()
 		err := m.host.ConnectServer(ctxc, server.Name)
 		if err != nil {
-			klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
+			klog.V(6).Infof("连接服务器 %s 失败: %v", server.Name, err)
 			return
 		}
-		klog.V(6).Infof("Successfully connected to server: %s", server.Name)
+		klog.V(6).Infof("成功连接到服务器: %s", server.Name)
 	}
 
 }
@@ -65,7 +65,7 @@ func (m *mcpService) AddServers(ctx context.Context, servers []models.MCPServerC
 		}
 		err := m.host.AddServer(serverConfig)
 		if err != nil {
-			klog.V(6).Infof("Failed to add server %s: %v", server.Name, err)
+			klog.V(6).Infof("添加服务器 %s 失败: %v", server.Name, err)
 			continue
 		}
 
@@ -76,10 +76,10 @@ func (m *mcpService) AddServers(ctx context.Context, servers []models.MCPServerC
 			err := m.host.ConnectServer(ctxc, server.Name)
 
 			if err != nil {
-				klog.V(6).Infof("Failed to connect to server %s: %v", server.Name, err)
+				klog.V(6).Infof("连接服务器 %s 失败: %v", server.Name, err)
 				continue
 			}
-			klog.V(6).Infof("Successfully connected to server: %s", server.Name)
+			klog.V(6).Infof("成功连接到服务器: %s", server.Name)
 		}
 	}
 
@@ -102,7 +102,7 @@ func (m *mcpService) Start() {
 	}
 	ctx := amis.GetContextForAdmin()
 	m.AddServers(ctx, mcpServers)
-	klog.V(6).Infof("Successfully started MCP service with %d servers", len(mcpServers))
+	klog.V(6).Infof("成功启动 MCP 服务，共 %d 个服务器", len(mcpServers))
 }
 
 func (m *mcpService) RemoveServerById(server models.MCPServerConfig) {

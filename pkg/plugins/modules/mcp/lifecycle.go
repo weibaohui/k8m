@@ -58,11 +58,13 @@ func (l *McpLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 }
 
 func (l *McpLifecycle) Start(ctx plugins.BaseContext) error {
-	service.McpService().Init()
 
-	//todo MCPService 启动完毕后，再start，使用sleep 不好，最好改成事件性质的
-	time.Sleep(120 * time.Second)
-	service.McpService().Start()
+	go func() {
+		service.McpService().Init()
+		//todo MCPService 启动完毕后，再start，使用sleep 不好，最好改成事件性质的
+		time.Sleep(30 * time.Second)
+		service.McpService().Start()
+	}()
 
 	klog.V(6).Infof("MCP 插件已启动")
 	return nil
