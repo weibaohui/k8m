@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -41,11 +40,15 @@ func NewBackgroundHelmCmd(helmBin string) *HelmCmd {
 		helmBin = "helm"
 	}
 
-	cfg := flag.Init()
+	setting, _ := models.GetOrCreateHelmSetting()
 
 	h := &HelmCmd{
 		HelmBin:      helmBin,
-		repoCacheDir: cfg.HelmCachePath,
+		repoCacheDir: setting.HelmCachePath,
+	}
+
+	if h.repoCacheDir == "" {
+		h.repoCacheDir = "/tmp/helm-cache"
 	}
 
 	// 确保目录存在
@@ -60,13 +63,17 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 		helmBin = "helm"
 	}
 
-	cfg := flag.Init()
+	setting, _ := models.GetOrCreateHelmSetting()
 
 	h := &HelmCmd{
 		HelmBin:      helmBin,
-		repoCacheDir: cfg.HelmCachePath,
+		repoCacheDir: setting.HelmCachePath,
 		clusterID:    clusterID,
 		cluster:      cluster,
+	}
+
+	if h.repoCacheDir == "" {
+		h.repoCacheDir = "/tmp/helm-cache"
 	}
 
 	// 确保目录存在
@@ -96,11 +103,15 @@ func NewHelmCmdWithNoCluster(helmBin string) *HelmCmd {
 		helmBin = "helm"
 	}
 
-	cfg := flag.Init()
+	setting, _ := models.GetOrCreateHelmSetting()
 
 	h := &HelmCmd{
 		HelmBin:      helmBin,
-		repoCacheDir: cfg.HelmCachePath,
+		repoCacheDir: setting.HelmCachePath,
+	}
+
+	if h.repoCacheDir == "" {
+		h.repoCacheDir = "/tmp/helm-cache"
 	}
 
 	// 确保目录存在

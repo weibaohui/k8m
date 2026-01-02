@@ -17,6 +17,10 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 	g.POST("/repo/update_index", ctrl.UpdateReposIndex)
 	g.POST("/repo/save", ctrl.Save)
 
+	settingCtrl := &admin.SettingController{}
+	g.GET("/setting/get", settingCtrl.GetSetting)
+	g.POST("/setting/update", settingCtrl.UpdateSetting)
+
 	klog.V(6).Infof("注册 Helm 插件管理路由(admin)")
 }
 

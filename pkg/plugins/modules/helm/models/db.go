@@ -7,13 +7,13 @@ import (
 
 // InitDB 初始化数据库表（GORM自动迁移）
 func InitDB() error {
-	return dao.DB().AutoMigrate(&HelmRepository{}, &HelmChart{}, &HelmRelease{})
+	return dao.DB().AutoMigrate(&HelmRepository{}, &HelmChart{}, &HelmRelease{}, &HelmSetting{})
 }
 
 // UpgradeDB 升级 Helm 插件数据库结构与数据
 func UpgradeDB(fromVersion string, toVersion string) error {
 	klog.V(6).Infof("开始升级 Helm 插件数据库：从版本 %s 到版本 %s", fromVersion, toVersion)
-	if err := dao.DB().AutoMigrate(&HelmRepository{}, &HelmChart{}, &HelmRelease{}); err != nil {
+	if err := dao.DB().AutoMigrate(&HelmRepository{}, &HelmChart{}, &HelmRelease{}, &HelmSetting{}); err != nil {
 		klog.V(6).Infof("自动迁移 Helm 插件数据库失败: %v", err)
 		return err
 	}
@@ -39,6 +39,12 @@ func DropDB() error {
 	if db.Migrator().HasTable(&HelmRelease{}) {
 		if err := db.Migrator().DropTable(&HelmRelease{}); err != nil {
 			klog.V(6).Infof("删除 Helm Release 表失败: %v", err)
+			return err
+		}
+	}
+	if db.Migrator().HasTable(&HelmSetting{}) {
+		if err := db.Migrator().DropTable(&HelmSetting{}); err != nil {
+			klog.V(6).Infof("删除 Helm Setting 表失败: %v", err)
 			return err
 		}
 	}

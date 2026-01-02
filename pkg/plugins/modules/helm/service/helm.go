@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/robfig/cron/v3"
-	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
 	"k8s.io/klog/v2"
 )
@@ -34,16 +33,20 @@ type Helm interface {
 }
 
 func StartUpdateHelmRepoInBackground() {
-	cfg := flag.Init()
-	//TODO 作为界面参数，插件中增加配置页面
-	cn := cfg.HelmUpdateCron
+	setting, err := models.GetOrCreateHelmSetting()
+	if err != nil {
+		klog.Errorf("获取 Helm 配置失败: %v", err)
+		return
+	}
+
+	cn := setting.HelmUpdateCron
 
 	if cn == "" {
 		klog.V(6).Infof(" HelmUpdateCron 表达式 为空，跳过定时任务")
 		return
 	}
-	if _, err := cron.ParseStandard(cfg.HelmUpdateCron); err != nil {
-		klog.Errorf("非法的 HelmUpdateCron 表达式 %q: %v", cfg.HelmUpdateCron, err)
+	if _, err := cron.ParseStandard(cn); err != nil {
+		klog.Errorf("非法的 HelmUpdateCron 表达式 %q: %v", cn, err)
 		return
 	}
 
@@ -56,13 +59,13 @@ func StartUpdateHelmRepoInBackground() {
 	}
 
 	inst := cron.New()
-	_, err := inst.AddFunc(cn, func() {
+	_, addErr := inst.AddFunc(cn, func() {
 		h := NewBackgroundHelmCmd("helm")
 		h.ReAddMissingRepo()
 		h.UpdateAllReposIndex()
 	})
-	if err != nil {
-		klog.Errorf("新增Helm更新定时任务失败: %v", err)
+	if addErr != nil {
+		klog.Errorf("新增Helm更新定时任务失败: %v", addErr)
 		return
 	}
 	helmCron = inst
