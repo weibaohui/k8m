@@ -2,5 +2,11 @@
 # go get -u github.com/swaggo/gin-swagger
 # go get -u github.com/swaggo/files
 # go get -u github.com/swaggo/swag/cmd/swag
-cd ../
-swag init -g main.go  --exclude internal,pkg/comm/,pkg/service -o swagger
+# 在 pkg/plugins/modules/swagger目录下执行本脚本
+cd ../../../../
+swag init -g main.go  --exclude internal,pkg/comm/,pkg/service -o pkg/plugins/modules/swagger
+
+# 向docs.go添加RegisterSwagger函数
+echo "func RegisterSwagger() {
+	swag.Register(swag.Name, &s{})
+}" >> pkg/plugins/modules/swagger/docs.go
