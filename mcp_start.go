@@ -16,7 +16,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/service"
-	uService "github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/tools"
 	"k8s.io/klog/v2"
@@ -33,7 +32,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 
 		mcpKey := extractKey(r.URL.Path)
 		if mcpKey != "" {
-			username, err := uService.UserService().GetUserByMCPKey(mcpKey)
+			username, err := service.McpService().GetUserByMCPKey(mcpKey)
 			if err != nil {
 				klog.V(6).Infof("Failed to extract username from mcpKey: %v", err)
 			}
@@ -46,8 +45,8 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 
 		auth := r.Header.Get("Authorization")
 		// 处理 Bearer 前缀
-		if strings.HasPrefix(auth, "Bearer ") {
-			auth = strings.TrimPrefix(auth, "Bearer ")
+		if after, ok := strings.CutPrefix(auth, "Bearer "); ok {
+			auth = after
 		}
 		klog.V(6).Infof("Authorization: %v", auth)
 		if username, err := utils.GetUsernameFromToken(auth, cfg.JwtTokenSecret); err == nil {

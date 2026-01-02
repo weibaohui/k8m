@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,7 +12,10 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	uModels "github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp/models"
+
+	"gorm.io/gorm"
 
 	"k8s.io/klog/v2"
 )
@@ -149,6 +153,33 @@ func (m *mcpService) GetAllEnabledTools() []openai.Tool {
 	}
 	return allTools
 
+}
+
+func (m *mcpService) GetUserByMCPKey(mcpKey string) (string, error) {
+	params := &dao.Params{}
+	md := &models.McpKey{}
+	queryFunc := func(db *gorm.DB) *gorm.DB {
+		return db.Select("username").Where(" mcp_key = ?", mcpKey)
+	}
+	item, err := md.GetOne(params, queryFunc)
+	if err != nil {
+		return "", err
+	}
+
+	if item.Username == "" {
+		return "", errors.New("username is empty")
+	}
+
+	// 检测用户是否被禁用
+	user := &uModels.User{}
+	disabled, err := user.IsDisabled(item.Username)
+	if err != nil {
+		return "", err
+	}
+	if disabled {
+		return "", fmt.Errorf("用户[%s]被禁用", item.Username)
+	}
+	return item.Username, nil
 }
 
 // BuildMCPToolName 构建完整的工具名称
