@@ -39,7 +39,7 @@ type Menu struct {
 	// - isUserInGroup('group')：判断用户是否在指定组（group为字符串） 自定义的各种用户组名称
 	// 字符串true/false，是否显示该菜单
 	// 注意：这是菜单的显示权限。
-	// 后端API业务逻辑需调用plugins.EnsureUserIsPlatformAdmin(*gin.Context)等方法进行显式权限校验，
+	// 后端API业务逻辑需调用service.AuthService().EnsureUserIsPlatformAdmin(*gin.Context)等方法进行显式权限校验，
 	// 后端API的权限校验不能依赖此表达式。
 	Show string `json:"show,omitempty"`
 }

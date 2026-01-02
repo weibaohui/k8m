@@ -6,16 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/models"
+	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
 // List 返回演示列表数据
 // 方法内进行角色校验，仅允许“user”角色访问（平台管理员通行）
 func List(c *gin.Context) {
-	// 方法内角色校验
-	ok, err := plugins.EnsureUserIsLogined(c)
+	ok, err := service.AuthService().EnsureUserIsLogined(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
@@ -35,7 +34,7 @@ func List(c *gin.Context) {
 // Create 新增演示项
 func Create(c *gin.Context) {
 	// 平台管理员校验
-	ok, err := plugins.EnsureUserIsPlatformAdmin(c)
+	ok, err := service.AuthService().EnsureUserIsPlatformAdmin(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
@@ -57,8 +56,7 @@ func Create(c *gin.Context) {
 
 // Update 更新演示项
 func Update(c *gin.Context) {
-	// 平台管理员校验
-	ok, err := plugins.EnsureUserIsPlatformAdmin(c)
+	ok, err := service.AuthService().EnsureUserIsPlatformAdmin(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
@@ -88,8 +86,7 @@ func Update(c *gin.Context) {
 
 // Delete 删除演示项
 func Delete(c *gin.Context) {
-	// 平台管理员校验
-	ok, err := plugins.EnsureUserIsPlatformAdmin(c)
+	ok, err := service.AuthService().EnsureUserIsPlatformAdmin(c)
 	if !ok {
 		amis.WriteJsonError(c, err)
 		return
