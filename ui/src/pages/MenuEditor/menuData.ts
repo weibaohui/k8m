@@ -889,14 +889,7 @@ export const initialMenu: MenuItem[] = [
             },
         ],
     },
-    {
-        key: 'open_api',
-        title: '开放API',
-        icon: 'fa-solid fa-code-branch',
-        eventType: 'custom',
-        customEvent: '() => open("/swagger/index.html")',
-        order: 19,
-    },
+     
 
     {
         key: 'about',
