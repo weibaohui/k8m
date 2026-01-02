@@ -10,3 +10,6 @@ swag init -g main.go  --exclude internal,pkg/comm/,pkg/service -o pkg/plugins/mo
 echo "func RegisterSwagger() {
 	swag.Register(swag.Name, &s{})
 }" >> pkg/plugins/modules/swagger/docs.go
+
+rm -rf pkg/plugins/modules/swagger/swagger.json
+rm -rf pkg/plugins/modules/swagger/swagger.yaml

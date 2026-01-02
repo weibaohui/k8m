@@ -10,7 +10,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameSwagger,
 		Title:       "Swagger文档",
 		Version:     "1.0.0",
-		Description: "Swagger API文档查看",
+		Description: "Swagger API文档查看。更新执行插件目录下的make.sh脚本生成文档。",
 	},
 	Tables: []string{},
 	Crons:  []string{},
