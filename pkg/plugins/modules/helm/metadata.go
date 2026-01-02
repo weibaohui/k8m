@@ -35,6 +35,15 @@ var Metadata = plugins.Module{
 					Order:       10,
 				},
 				{
+					Key:         "plugin_helm_run_params",
+					Title:       "Helm 运行参数管理",
+					Icon:        "fa-solid fa-gear",
+					Show:        "isPlatformAdmin()==true",
+					EventType:   "custom",
+					CustomEvent: `() => loadJsonPage("/plugins/helm/setting")`,
+					Order:       10,
+				},
+				{
 					Key:         "plugin_helm_chart",
 					Title:       "Chart 浏览",
 					Icon:        "fa-solid fa-cube",
