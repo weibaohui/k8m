@@ -29,10 +29,9 @@
 </p>
 
 
-<p align="center">
 
 [English](README_en.md) | [中文](README.md)
-</p>
+
 
 
 **k8m** 是一款AI驱动的 Mini Kubernetes AI Dashboard 轻量级控制台工具，专为简化集群管理设计。它基于 AMIS 构建，并通过  [
