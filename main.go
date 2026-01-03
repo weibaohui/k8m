@@ -229,6 +229,9 @@ func main() {
 	//这里应该是主要注册路径，真正的启动应该剥离出去
 	mgr.Start()
 
+	// 在/根目录下注册插件路由，注册由 Manager 统一处理
+	mgr.RegisterRootRoutes(&r.RouterGroup)
+
 	// 公共参数
 	params := r.Group("/params", middleware.AuthMiddleware())
 	{

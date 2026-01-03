@@ -20,5 +20,5 @@ var Metadata = plugins.Module{
 	Lifecycle:         &K8mMcpServerLifecycle{},
 	PluginAdminRouter: nil,
 	ClusterRouter:     nil,
-	ManagementRouter:  route.RegisterPluginMgmRoutes,
+	RootRouter:        route.RegisterRootRoutes,
 }

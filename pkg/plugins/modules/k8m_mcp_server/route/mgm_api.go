@@ -6,7 +6,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func RegisterPluginMgmRoutes(arg *gin.RouterGroup) {
+func RegisterRootRoutes(arg *gin.RouterGroup) {
 	g := arg.Group("/mcp/k8m")
 
 	sseServer := server.GetMcpSSEServer()
