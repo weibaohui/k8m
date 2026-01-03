@@ -48,7 +48,7 @@
                   "required": true,
                   "format": "YYYY-MM-DD",
                   "inputFormat": "YYYY-MM-DD",
-                  "value": "${NOW() + 365 * 24 * 3600  | date: 'YYYY-MM-DD'}",
+                  "value": "${DATETOSTR(DATEMODIFY(NOW(), 1, 'years'), 'YYYY-MM-DD')}",
                   "placeholder": "请选择过期时间"
                 }
               ]
