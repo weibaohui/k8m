@@ -42,7 +42,8 @@ func (ac *Controller) Create(c *gin.Context) {
 	var expiresAt time.Time
 	var err error
 	if req.ExpiresAt != "" {
-		expiresAt, err = time.Parse(time.RFC3339, req.ExpiresAt)
+		// 前端使用 "2006-01-02 15:04:05" 格式
+		expiresAt, err = time.Parse("2006-01-02 15:04:05", req.ExpiresAt)
 		if err != nil {
 			amis.WriteJsonError(c, fmt.Errorf("过期时间格式错误: %v", err))
 			return
