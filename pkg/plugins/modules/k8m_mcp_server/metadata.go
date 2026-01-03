@@ -11,7 +11,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameK8mMcpServer,
 		Title:       "K8M MCP Server插件",
 		Version:     "1.0.0",
-		Description: "将K8M作为MCP Server使用。可以添加到MCP运行管理中使用。",
+		Description: "将K8M作为MCP Server使用。可以添加到MCP运行管理中使用。本插件监听/mcp/k8m/sse提供服务。",
 	},
 	Tables:            []string{},
 	Menus:             []plugins.Menu{},
