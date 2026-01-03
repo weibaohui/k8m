@@ -337,6 +337,113 @@ ClusterRouter: func(cluster *gin.RouterGroup) {
 * SQL 定义具备幂等性
 * 不允许修改其他插件或核心表结构
 
+### 11.1 初始化（Install）
+
+初始化阶段负责创建数据库表结构和初始化基础数据：
+
+* 使用 GORM 的 AutoMigrate 自动创建表结构
+* 初始化基础数据（如果有）
+* 保证幂等性（可重复执行）
+
+示例代码：
+
+```go
+func InitDB() error {
+    return dao.DB().AutoMigrate(&Item{})
+}
+```
+
+### 11.2 升级（Upgrade）
+
+升级阶段负责版本变更时的数据迁移：
+
+* 使用 GORM 的 AutoMigrate 自动迁移表结构
+* 根据版本号进行安全迁移
+* 可在 UpgradeDB 函数中处理复杂的数据迁移逻辑
+* 保证幂等性（可重复执行）
+
+示例代码：
+
+```go
+func UpgradeDB(fromVersion string, toVersion string) error {
+    klog.V(6).Infof("开始升级插件数据库：从版本 %s 到版本 %s", fromVersion, toVersion)
+    if err := dao.DB().AutoMigrate(&Item{}); err != nil {
+        klog.V(6).Infof("自动迁移插件数据库失败: %v", err)
+        return err
+    }
+    klog.V(6).Infof("升级插件数据库完成")
+    return nil
+}
+```
+
+### 11.3 卸载删除数据（Uninstall with KeepData=false）
+
+卸载阶段负责彻底移除插件痕迹：
+
+* 使用 GORM Migrator.DropTable 删除所有相关表
+* 删除所有相关数据
+* 清理插件注册信息
+* 插件状态变为 Discovered，可再次安装
+
+示例代码：
+
+```go
+func DropDB() error {
+    db := dao.DB()
+    if db.Migrator().HasTable(&Item{}) {
+        if err := db.Migrator().DropTable(&Item{}); err != nil {
+            klog.V(6).Infof("删除插件表失败: %v", err)
+            return err
+        }
+        klog.V(6).Infof("已删除插件表及数据")
+    }
+    return nil
+}
+```
+
+在 Uninstall 生命周期方法中：
+
+```go
+func (l *PluginLifecycle) Uninstall(ctx plugins.UninstallContext) error {
+    if !ctx.KeepData() {
+        if err := models.DropDB(); err != nil {
+            return err
+        }
+        klog.V(6).Infof("卸载插件完成，已删除相关表及数据")
+    }
+    return nil
+}
+```
+
+### 11.4 卸载保留数据（Uninstall with KeepData=true）
+
+卸载阶段保留数据：
+
+* 不删除表和数据
+* 只清理插件注册信息
+* 插件状态变为 Discovered，可再次安装
+* 再次安装时，数据仍然存在
+
+示例代码：
+
+```go
+func (l *PluginLifecycle) Uninstall(ctx plugins.UninstallContext) error {
+    if ctx.KeepData() {
+        klog.V(6).Infof("卸载插件完成，保留相关表及数据")
+    }
+    return nil
+}
+```
+
+### 11.5 数据处理最佳实践
+
+* 表名必须包含插件名前缀，避免命名冲突
+* 使用 GORM 的 AutoMigrate 进行表结构管理
+* UpgradeDB 函数应处理版本间的数据迁移逻辑
+* DropDB 函数应删除所有相关表，确保彻底清理
+* 在 Uninstall 中根据 KeepData 参数决定是否删除数据
+* 所有数据库操作都应具备幂等性
+
 ---
 
 ## 12. 插件之间的关系约束
