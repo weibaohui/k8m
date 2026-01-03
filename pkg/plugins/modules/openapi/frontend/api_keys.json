@@ -40,6 +40,17 @@
                   "label": "描述信息",
                   "required": true,
                   "placeholder": "请输入密钥用途描述"
+                },
+                {
+                  "type": "input-datetime",
+                  "name": "expires_at",
+                  "label": "过期时间",
+                  "required": true,
+                  "format": "YYYY-MM-DD HH:mm:ss",
+                  "inputFormat": "YYYY-MM-DD HH:mm:ss",
+                  "placeholder": "请选择过期时间",
+                  "value": "${NOW + 365 * 24 * 3600 * 1000 | date: 'YYYY-MM-DD HH:mm:ss'}",
+                  "minDate": "${NOW + 24 * 3600 * 1000 | date: 'YYYY-MM-DD HH:mm:ss'}"
                 }
               ]
             }
@@ -66,6 +77,11 @@
         {
           "name": "description",
           "label": "描述信息"
+        },
+        {
+          "name": "expires_at",
+          "label": "过期时间",
+          "type": "datetime"
         },
         {
           "name": "key",

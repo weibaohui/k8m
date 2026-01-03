@@ -28,6 +28,7 @@ func (ac *Controller) Create(c *gin.Context) {
 
 	var req struct {
 		Description string `json:"description"`
+		ExpiresAt   string `json:"expires_at"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		amis.WriteJsonError(c, err)
@@ -37,11 +38,33 @@ func (ac *Controller) Create(c *gin.Context) {
 	// 从JWT中获取用户信息
 	username := c.GetString(constants.JwtUserName)
 
+	// 解析过期时间
+	var expiresAt time.Time
+	var err error
+	if req.ExpiresAt != "" {
+		expiresAt, err = time.Parse(time.RFC3339, req.ExpiresAt)
+		if err != nil {
+			amis.WriteJsonError(c, fmt.Errorf("过期时间格式错误: %v", err))
+			return
+		}
+	} else {
+		// 默认1年后过期
+		expiresAt = time.Now().Add(time.Hour * 24 * 365)
+	}
+
+	// 计算duration用于生成JWT
+	duration := time.Until(expiresAt)
+	if duration <= 0 {
+		amis.WriteJsonError(c, fmt.Errorf("过期时间必须大于当前时间"))
+		return
+	}
+
 	// 生成API密钥
 	apiKey := &models.ApiKey{
 		Username:    username,
-		Key:         generateAPIKey(username),
+		Key:         generateAPIKey(username, duration),
 		Description: req.Description,
+		ExpiresAt:   expiresAt,
 		LastUsedAt:  time.Now(),
 	}
 	if apiKey.Key == "" {
@@ -56,10 +79,8 @@ func (ac *Controller) Create(c *gin.Context) {
 
 	amis.WriteJsonOK(c)
 }
-func generateAPIKey(username string) string {
+func generateAPIKey(username string, duration time.Duration) string {
 	// 查询用户对应的集群
-	// todo 有效期应该是一个可配置项
-	duration := time.Hour * 24 * 365
 	token, err := service.UserService().GenerateJWTTokenOnlyUserName(username, duration)
 	if err != nil {
 		klog.Errorf("generateAPIKey error: %v", err)
