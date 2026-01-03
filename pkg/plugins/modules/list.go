@@ -11,4 +11,5 @@ const (
 	PluginNameSwagger      = "swagger"
 	PluginNameMCPRuntime   = "mcp_runtime"
 	PluginNameOpenAPI      = "openapi"
+	PluginNameK8mMcpServer = "k8m_mcp_server"
 )

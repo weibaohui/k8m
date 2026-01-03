@@ -60,3 +60,21 @@ func (m *Manager) RegisterPluginAdminRoutes(api *gin.RouterGroup) {
 		}
 	}
 }
+
+// RegisterRootRoutes 某个插件的根路由注册
+func (m *Manager) RegisterRootRoutes(root *gin.RouterGroup) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	// 记录路由分组（去重）
+	already := slices.Contains(m.apiGroups, root)
+	if !already {
+		m.apiGroups = append(m.apiGroups, root)
+	}
+	// 为已启用插件注册路由
+	for name, mod := range m.modules {
+		if m.status[name] == StatusEnabled && mod.RootRouter != nil {
+			klog.V(6).Infof("注册插件 根 路由: %s", name)
+			mod.RootRouter(root)
+		}
+	}
+}

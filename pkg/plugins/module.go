@@ -33,4 +33,9 @@ type Module struct {
 	// 该类API接口以/admin/plugins/xxx的形式暴露，不带集群ID
 	// 通常是插件管理员相关的操作页面,要求必须是平台管理员
 	PluginAdminRouter func(admin *gin.RouterGroup)
+
+	// RootRouter 根路由注册回调（启用后由Manager统一挂载）
+	// 该类API接口以/根目录为暴露点，一般不建议使用，如需使用要特别注意注册路由的正确性
+	// 通常是公开的API接口，无需登录即可访问
+	RootRouter func(root *gin.RouterGroup)
 }

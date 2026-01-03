@@ -181,15 +181,6 @@ func main() {
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	})
 
-	// MCP Server
-	sseServer := GetMcpSSEServer("/mcp/k8m/")
-	r.GET("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/message", adapt(sseServer.MessageHandler))
-	r.GET("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/message", adapt(sseServer.MessageHandler))
-
 	// @title           k8m API
 	// @version         1.0
 	// @securityDefinitions.apikey BearerAuth
@@ -237,6 +228,9 @@ func main() {
 	mgr.SetEngine(r)
 	//这里应该是主要注册路径，真正的启动应该剥离出去
 	mgr.Start()
+
+	// 在/根目录下注册插件路由，注册由 Manager 统一处理
+	mgr.RegisterRootRoutes(&r.RouterGroup)
 
 	// 公共参数
 	params := r.Group("/params", middleware.AuthMiddleware())

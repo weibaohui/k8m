@@ -11,7 +11,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameMCPRuntime,
 		Title:       "MCP运行时管理插件",
 		Version:     "1.0.0",
-		Description: "管理大模型对话使用的MCP服务器。包括MCP服务器配置、工具管理、执行日志查看、开放MCP服务等功能。",
+		Description: "管理大模型对话使用的MCP服务器。包括MCP服务器配置、工具管理、执行日志查看、开放MCP服务等功能。对话调用MCP时会自动添加Authorization头部，值为JWT token。",
 	},
 	Tables: []string{
 		"mcp_server_configs",
@@ -56,7 +56,7 @@ var Metadata = plugins.Module{
 		},
 	},
 	Dependencies:      []string{},
-	RunAfter:          []string{},
+	RunAfter:          []string{modules.PluginNameK8mMcpServer},
 	Lifecycle:         &McpLifecycle{},
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 	ClusterRouter:     nil,
