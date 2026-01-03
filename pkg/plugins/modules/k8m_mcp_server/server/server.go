@@ -37,9 +37,10 @@ func extractKey(path string) string {
 	return ""
 }
 
-// createServerConfig 根据指定的 basePath 创建并返回 MCP 服务器的配置。
 // createServerConfig 返回一个配置了 JWT 用户名提取、工具调用日志钩子及相关服务器和 SSE 选项的 MCP 服务器配置。
-// 配置包括从 HTTP Authorization 头部提取并解析 JWT 用户名的上下文函数，工具调用错误和成功后的日志记录钩子，以及基础路径和认证键等服务器参数。
+// 支持两种传递认证的方式，一是将mcpKey作为路径参数传递，二是将JWT token作为Authorization头部传递。
+// mcpKey 与用户的信息绑定，mcpKey代表了一个用户
+// token 与用户的JWT token绑定，代表了用户的权限，这个token与前端页面使用的jwt token 一致。
 func createServerConfig(basePath string) *mcp.ServerConfig {
 	cfg := flag.Init()
 
@@ -91,7 +92,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 	}
 
 	var actFn = func(ctx context.Context, id any, request *mcp2.CallToolRequest, result *mcp2.CallToolResult) {
-		klog.V(6).Infof("CallToolRequest: %v", utils.ToJSON(request))
+		klog.V(8).Infof("CallToolRequest: %v", utils.ToJSON(request))
 		host := service.McpService().Host()
 		toolName := request.Params.Name
 		serverName := host.GetServerNameByToolName(toolName)
