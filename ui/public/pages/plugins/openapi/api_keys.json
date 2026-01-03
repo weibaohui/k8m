@@ -74,6 +74,10 @@
           ]
         },
         {
+          "name": "username",
+          "label": "用户"
+        },
+        {
           "name": "description",
           "label": "描述信息"
         },
@@ -89,7 +93,7 @@
           "body": [
             {
               "type": "button",
-              "label": "查",
+              "label": "查看密钥",
               "level": "link",
               "actionType": "dialog",
               "dialog": {

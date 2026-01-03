@@ -17,7 +17,6 @@ type ApiKey struct {
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`        // 创建时间
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`                         // 更新时间
 	CreatedBy   string    `json:"created_by,omitempty"`                         // 创建人
-	LastUsedAt  time.Time `json:"last_used_at,omitempty"`                       // 最后使用时间
 }
 
 func (c *ApiKey) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*ApiKey, int64, error) {

@@ -72,7 +72,7 @@ func (ac *Controller) Create(c *gin.Context) {
 		Key:         generateAPIKey(username, duration),
 		Description: req.Description,
 		ExpiresAt:   expiresAt,
-		LastUsedAt:  time.Now(),
+		CreatedBy:   username,
 	}
 	if apiKey.Key == "" {
 		amis.WriteJsonError(c, fmt.Errorf("生成API密钥失败"))
