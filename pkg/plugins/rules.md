@@ -397,7 +397,7 @@ Module 只负责“声明”，不负责“执行”。
 
 插件元信息用于插件管理与系统识别，必须在编译期确定。
 
-Meta 必须包含以下字段：
+Meta 包含以下字段：
 
 * Name：插件唯一标识（系统级唯一）
 * Title：插件展示名称
@@ -415,11 +415,12 @@ Meta 不参与业务逻辑，仅用于管理与展示。
 生命周期接口包括：
 
 * Install：安装阶段，只执行一次，必须幂等
+* Upgrade：升级阶段，当版本变化时触发，用于安全迁移
 * Enable：启用阶段，注册运行期能力
 * Disable：禁用阶段，撤销运行期能力
 * Uninstall：卸载阶段，清理插件资源（可选）
-* Start：启动阶段，用于启动后端服务。按依赖顺序启动各插件。
-* StartCron：启动定时任务，用于启动定时任务
+* Start：启动阶段，用于启动后台任务。按依赖顺序启动各插件
+* StartCron：启动定时任务，用于执行定时任务逻辑
 
 生命周期方法由系统统一调度，插件不得自行调用。
 
@@ -433,32 +434,39 @@ Context 是插件访问系统能力的**唯一入口**，用于隔离插件与�
 
 Context 包含但不限于以下能力入口：
 
-* 菜单注册
-* 权限注册
-* API 路由注册
-* 前端资源访问
-* SQL / 数据模型注册
-* EventBus 事件
+* EventBus 事件总线
   ```go 
-  //发布
+  // 发布事件
   ctx.Bus().Publish(eventbus.Event{
-					Type: eventbus.EventLeaderElected,
-				})
-  //注册监听              
+      Type: eventbus.EventLeaderElected,
+      Data: any, // 可选的事件数据
+  })
+  
+  // 订阅事件
   elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
   lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
-		//监听两个channel，根据channel的信号启动或停止事件转发
-		go func() {
-			for {
-				select {
-				case <-elect:
-					klog.V(6).Infof("成为Leader")
-				case <-lost:
-					klog.V(6).Infof("不再是Leader")
-				}
-			}
-		}()
+  
+  // 监听多个 channel，根据 channel 的信号启动或停止事件转发
+  go func() {
+      for {
+          select {
+          case <-elect:
+              klog.V(6).Infof("成为Leader")
+          case <-lost:
+              klog.V(6).Infof("不再是Leader")
+          }
+      }
+  }()
   ```
+
+  EventBus 支持以下事件类型：
+  * EventLeaderElected：选举成为 Leader
+  * EventLeaderLost：失去 Leader 身份
+
+  EventBus 特性：
+  * Subscribe 返回一个只读 channel，用于接收事件
+  * Publish 会向所有订阅者发送事件，慢消费者的事件会被丢弃
+  * 每个订阅者的 channel 缓冲大小为 1，防止阻塞
 
 插件不得直接操作核心内部对象。
 
@@ -470,14 +478,24 @@ Context 包含但不限于以下能力入口：
 
 菜单声明仅描述菜单结构，不包含渲染逻辑。
 
-菜单字段至少包括：
+菜单字段包括：
 
-* ID
-* Title
-* Path（指向 AMIS 页面）
-* Permission（访问所需权限）
+* Key：菜单唯一标识
+* Title：菜单展示标题
+* Icon：图标（Font Awesome 类名）
+* URL：跳转地址
+* EventType：事件类型（'url' 或 'custom'）
+* CustomEvent：自定义事件，如：`() => loadJsonPage("/path")`
+* Order：排序号
+* Children：子菜单
+* Show：显示表达式（字符串形式的 JS 表达式）
+  * `isPlatformAdmin()`：判断是否为平台管理员
+  * `isUserHasRole('role')`：判断用户是否有指定角色（guest/platform_admin）
+  * `isUserInGroup('group')`：判断用户是否在指定组
 
 菜单仅在插件 Enable 后生效。
+
+> 注意：Show 表达式是菜单的显示权限。后端 API 业务逻辑需调用 service.AuthService().EnsureUserIsPlatformAdmin(*gin.Context) 等方法进行显式权限校验，后端 API 的权限校验不能依赖此表达式。
 
 ---
 
@@ -496,14 +514,20 @@ Context 包含但不限于以下能力入口：
 
 ### 15.7 权限能力声明（RBAC Capability）
 
-插件可声明一组权限定义。
+插件通过菜单的 Show 表达式和后端 API 的显式权限校验实现权限控制。
 
-权限定义包括：
+权限控制方式：
 
-* 权限唯一名称
-* 权限展示名称
+* 菜单显示权限：通过 Show 表达式控制菜单的可见性
+  * `isPlatformAdmin()`：判断是否为平台管理员
+  * `isUserHasRole('role')`：判断用户是否有指定角色（guest/platform_admin）
+  * `isUserInGroup('group')`：判断用户是否在指定组
 
-权限在 Install 阶段注册，在 Disable 阶段不删除。
+* 后端 API 权限：在业务逻辑中显式调用权限校验方法
+  * `service.AuthService().EnsureUserIsPlatformAdmin(*gin.Context)`：确保用户是平台管理员
+  * 其他自定义权限校验方法
+
+权限在插件启用时生效，禁用时不删除权限定义。
 
 ---
 
@@ -538,9 +562,12 @@ API 能力声明用于：
 插件管理器是插件体系的唯一调度者，负责：
 
 * 插件注册
-* 生命周期调度
+* 生命周期调度（Install、Upgrade、Enable、Disable、Uninstall、Start、StartCron）
 * 插件状态管理
-* 插件依赖校验
+* 插件依赖校验（Dependencies 和 RunAfter）
+* 拓扑排序（按依赖顺序启动插件）
+* 定时任务调度（基于 cron 表达式）
+* EventBus 管理（为每个生命周期提供独立的事件总线实例）
 
 Manager 不包含具体业务逻辑，仅负责流程与约束。
 
@@ -556,6 +583,15 @@ Manager 不包含具体业务逻辑，仅负责流程与约束。
 * Disabled：已禁用
 
 插件状态由系统维护，插件本身不得修改。
+
+状态转换关系：
+
+* Discover → Install：插件从已发现状态变为已安装状态
+* Install → Enable：插件从已安装状态变为已启用状态
+* Enable → Disable：插件从已启用状态变为已禁用状态
+* Disable → Enable：插件从已禁用状态变为已启用状态
+* Enabled/Disabled → Uninstall：插件从已启用或已禁用状态变为已发现状态
+* Upgrade：可在任何状态触发（版本变更时，不改变状态）
 
 ---
 
