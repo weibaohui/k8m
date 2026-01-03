@@ -10,4 +10,5 @@ const (
 	PluginNameGlobalLog    = "gllog"
 	PluginNameSwagger      = "swagger"
 	PluginNameMCPRuntime   = "mcp_runtime"
+	PluginNameOpenAPI      = "openapi"
 )

@@ -1,0 +1,98 @@
+{
+  "type": "page",
+  "title": "API密钥",
+  "remark": {
+    "body": "用户可以创建API密钥用于程序化访问平台，请妥善保管密钥信息。",
+    "icon": "question-mark",
+    "placement": "right",
+    "trigger": "click",
+    "rootClose": true
+  },
+  "body": [
+    {
+      "type": "alert",
+      "level": "info",
+      "body": "<div class='alert alert-info'><p><strong>API密钥使用说明：</strong></p><p>1. API密钥用于程序化访问平台，可用于自动化脚本或第三方工具集成。</p><p>2. 密钥具有与当前用户相同的权限。</p></div>"
+    },
+    {
+      "type": "crud",
+      "id": "apiKeysCRUD",
+      "name": "apiKeysCRUD",
+      "autoFillHeight": true,
+      "api": "get:/mgm/plugins/openapi/api_keys/list",
+      "headerToolbar": [
+        {
+          "type": "button",
+          "label": "创建密钥",
+          "level": "primary",
+          "actionType": "dialog",
+          "dialog": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "创建API密钥",
+            "body": {
+              "type": "form",
+              "api": "post:/mgm/plugins/openapi/api_keys/create",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "description",
+                  "label": "描述信息",
+                  "required": true,
+                  "placeholder": "请输入密钥用途描述"
+                }
+              ]
+            }
+          }
+        },
+        "reload"
+      ],
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "buttons": [
+            {
+              "type": "button",
+              "label": "删除",
+              "level": "link",
+              "className": "text-danger",
+              "confirmText": "确认要删除该密钥吗？",
+              "actionType": "ajax",
+              "api": "delete:/mgm/plugins/openapi/api_keys/delete/${id}"
+            }
+          ]
+        },
+        {
+          "name": "description",
+          "label": "描述信息"
+        },
+        {
+          "name": "key",
+          "label": "密钥值",
+          "type": "control",
+          "body": [
+            {
+              "type": "button",
+              "label": "查",
+              "level": "link",
+              "actionType": "dialog",
+              "dialog": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "size": "lg",
+                "title": "使用示例",
+                "body": "<div><p><code><a target='_blank' href='/swagger/index.html'>API 文档</a></code></p>在HTTP请求头中添加Header：<br><code>Authorization: Bearer <%=data.key%></code></div>"
+              }
+            }
+          ]
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}
