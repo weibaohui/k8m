@@ -62,9 +62,6 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&Config{}); err != nil {
 		errs = append(errs, err)
 	}
-	if err := dao.DB().AutoMigrate(&ApiKey{}); err != nil {
-		errs = append(errs, err)
-	}
 	if err := dao.DB().AutoMigrate(&ConditionReverse{}); err != nil {
 		errs = append(errs, err)
 	}

@@ -44,7 +44,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/svc"
 	"github.com/weibaohui/k8m/pkg/controller/template"
-	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/middleware"
@@ -350,8 +349,6 @@ func main() {
 		template.RegisterTemplateRoutes(mgm)
 		// user profile 用户自助操作
 		profile.RegisterProfileRoutes(mgm)
-		// API密钥管理
-		apikey.RegisterAPIKeysRoutes(mgm)
 		// log
 		log.RegisterLogRoutes(mgm)
 		// 集群连接

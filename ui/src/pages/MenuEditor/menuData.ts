@@ -855,16 +855,7 @@ export const initialMenu: MenuItem[] = [
                 eventType: 'custom',
                 customEvent: '() => loadJsonPage("/user/profile/my_clusters")',
                 order: 2,
-            },
-            {
-                key: 'user_profile_api_keys',
-                title: 'API密钥',
-                icon: 'fa-solid fa-key',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/user/profile/api_keys")',
-                order: 3,
             }
-            
         ],
     },
      
