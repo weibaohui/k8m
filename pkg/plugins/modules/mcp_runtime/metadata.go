@@ -56,7 +56,7 @@ var Metadata = plugins.Module{
 		},
 	},
 	Dependencies:      []string{},
-	RunAfter:          []string{},
+	RunAfter:          []string{modules.PluginNameK8mMcpServer},
 	Lifecycle:         &McpLifecycle{},
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 	ClusterRouter:     nil,
