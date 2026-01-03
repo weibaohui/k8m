@@ -34,9 +34,7 @@ var Metadata = plugins.Module{
 		},
 	},
 	Dependencies: []string{},
-	RunAfter: []string{
-		modules.PluginNameLeader,
-	},
+	RunAfter:     []string{},
 
 	Lifecycle: &GlobalLogLifecycle{},
 	//管理类操作API，要求是登录用户，可用于各类操作
