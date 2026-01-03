@@ -19,7 +19,7 @@
       "id": "apiKeysCRUD",
       "name": "apiKeysCRUD",
       "autoFillHeight": true,
-      "api": "get:/mgm/user/profile/api_keys/list",
+      "api": "get:/mgm/plugins/openapi/api_keys/list",
       "headerToolbar": [
         {
           "type": "button",
@@ -32,7 +32,7 @@
             "title": "创建API密钥",
             "body": {
               "type": "form",
-              "api": "post:/mgm/user/profile/api_keys/create",
+              "api": "post:/mgm/plugins/openapi/api_keys/create",
               "body": [
                 {
                   "type": "input-text",
@@ -40,6 +40,16 @@
                   "label": "描述信息",
                   "required": true,
                   "placeholder": "请输入密钥用途描述"
+                },
+                {
+                  "type": "input-date",
+                  "name": "expires_at",
+                  "label": "过期时间",
+                  "required": true,
+                  "format": "YYYY-MM-DD",
+                  "inputFormat": "YYYY-MM-DD",
+                  "value": "${DATETOSTR(DATEMODIFY(NOW(), 1, 'years'), 'YYYY-MM-DD')}",
+                  "placeholder": "请选择过期时间"
                 }
               ]
             }
@@ -59,13 +69,18 @@
               "className": "text-danger",
               "confirmText": "确认要删除该密钥吗？",
               "actionType": "ajax",
-              "api": "delete:/mgm/user/profile/api_keys/delete/${id}"
+              "api": "delete:/mgm/plugins/openapi/api_keys/delete/${id}"
             }
           ]
         },
         {
           "name": "description",
           "label": "描述信息"
+        },
+        {
+          "name": "expires_at",
+          "label": "过期时间",
+          "type": "datetime"
         },
         {
           "name": "key",

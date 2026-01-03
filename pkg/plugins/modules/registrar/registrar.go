@@ -9,6 +9,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
 	mcp "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/openapi"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/swagger"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
@@ -62,6 +63,11 @@ func init() {
 			klog.V(6).Infof("注册mcp插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册mcp插件成功")
+		}
+		if err := m.Register(openapi.Metadata); err != nil {
+			klog.V(6).Infof("注册openapi插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册openapi插件成功")
 		}
 	})
 }
