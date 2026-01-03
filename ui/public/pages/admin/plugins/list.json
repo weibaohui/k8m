@@ -12,6 +12,7 @@
             "type": "crud",
             "id": "pluginCRUD",
             "name": "pluginCRUD",
+            "perPage": 1000,
             "autoFillHeight": true,
             "autoGenerateFilter": {
                 "columnsNum": 4,
