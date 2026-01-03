@@ -42,11 +42,17 @@ func (ac *Controller) Create(c *gin.Context) {
 	var expiresAt time.Time
 	var err error
 	if req.ExpiresAt != "" {
-		// 前端使用 "2006-01-02 15:04:05" 格式
+		// 尝试解析完整时间格式 "2006-01-02 15:04:05"
 		expiresAt, err = time.Parse("2006-01-02 15:04:05", req.ExpiresAt)
 		if err != nil {
-			amis.WriteJsonError(c, fmt.Errorf("过期时间格式错误: %v", err))
-			return
+			// 如果失败，尝试解析日期格式 "2006-01-02"，解析为当天 23:59:59
+			expiresAt, err = time.Parse("2006-01-02", req.ExpiresAt)
+			if err != nil {
+				amis.WriteJsonError(c, fmt.Errorf("过期时间格式错误: %v", err))
+				return
+			}
+			// 设置为当天 23:59:59
+			expiresAt = time.Date(expiresAt.Year(), expiresAt.Month(), expiresAt.Day(), 23, 59, 59, 0, time.Local)
 		}
 	} else {
 		// 默认1年后过期
