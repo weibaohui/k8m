@@ -71,7 +71,17 @@ Discover → Install → Enable → Disable → Uninstall
 
 > Install 只执行一次，具有幂等性要求。
 
-### 3.3 Enable（启用）
+### 3.3 Upgrade（升级）
+
+升级阶段负责**版本变更时的安全迁移**：
+
+* 执行数据库迁移（表结构变更、数据迁移）
+* 权限模型更新
+* 其他版本兼容性处理
+
+> Upgrade 在版本号变化时触发，不改变插件状态。
+
+### 3.4 Enable（启用）
 
 启用阶段负责**运行期能力暴露**：
 
@@ -79,7 +89,7 @@ Discover → Install → Enable → Disable → Uninstall
 * API 可访问
 * 前端 AMIS JSON 可加载
 
-### 3.4 Disable（禁用）
+### 3.5 Disable（禁用）
 
 禁用阶段负责**能力收敛**：
 
@@ -89,17 +99,39 @@ Discover → Install → Enable → Disable → Uninstall
 
 > 禁用不删除数据、不删除权限定义。
 
-### 3.5 Uninstall（卸载）
+### 3.6 Uninstall（卸载）
 
 卸载阶段负责**彻底移除插件痕迹**（可选）：
 
-* 删除数据库表（如允许）
+* 删除数据库表（根据 keepData 参数决定）
 * 删除初始化数据
 * 清理插件注册信息
+
+> 卸载后插件条目保留，状态变为 Discovered，可再次安装。
+
+### 3.7 Start（启动后台任务）
+
+启动阶段负责**启动插件的后台任务**：
+
+* 启动非阻塞的后台协程
+* 监听 EventBus 事件
+* 启动定时任务
+
+> Start 在系统启动时调用，不可阻塞。
+
+### 3.8 StartCron（执行定时任务）
+
+定时任务执行阶段负责**执行插件定义的定时任务**：
+
+* 根据 metadata 中定义的 cron 表达式触发
+* 执行具体的定时任务逻辑
+
+> StartCron 由系统统一调度，不可阻塞。
 
 ### 转换关系
 
 * Discover → Install → Enable → Disable → Uninstall
+* Upgrade 可在任何状态触发（版本变更时）
 
 ---
 
@@ -125,7 +157,21 @@ Discover → Install → Enable → Disable → Uninstall
 ```text
 modules/
  └── <plugin-name>/
-     TODO 更新目录结构
+     ├── metadata.go          # 插件元信息与能力声明
+     ├── lifecycle.go         # 生命周期实现
+     ├── models/              # 数据模型定义
+     │   ├── db.go           # 数据库初始化/升级/删除
+     │   └── *.go            # 具体模型定义
+     ├── route/               # 路由注册
+     │   ├── cluster_api.go  # 集群类操作路由
+     │   ├── mgm_api.go      # 管理类操作路由
+     │   └── admin_api.go    # 插件管理员类操作路由
+     ├── frontend/            # 前端 AMIS JSON
+     │   └── *.json
+     ├── admin/               # 插件管理员类操作实现
+     ├── cluster/             # 集群类操作实现
+     ├── mgm/                 # 管理类操作实现
+     └── ...                  # 其他业务逻辑
 ```
 
 ---
@@ -137,16 +183,29 @@ modules/
 * 插件管理
 * 版本控制
 * 依赖判断
-
+* 启动顺序控制
 
 插件元信息包含：
 
-* 插件唯一名称
-* 展示名称
-* 版本号
-* 描述信息
+* Name：插件唯一标识（系统级唯一）
+* Title：插件展示名称
+* Version：插件版本号
+* Description：插件功能描述
 
 > 插件名称在系统内必须唯一。
+
+插件能力声明包含：
+
+* Menus：菜单声明（0..n）
+* Dependencies：插件依赖的其他插件名称列表；启用前需确保均已启用
+* RunAfter：不依赖 RunAfter 中的插件，但是必须在它们之后启动
+* Crons：插件的定时任务调度表达式（5段 cron）
+* Tables：插件使用的数据库表名列表
+* ClusterRouter：集群类操作路由注册回调
+* ManagementRouter：管理类操作路由注册回调
+* PluginAdminRouter：插件管理员类操作路由注册回调
+* RootRouter：根路由注册回调（公开API，无需登录）
+* Lifecycle：生命周期实现
 
 ---
 
@@ -160,14 +219,24 @@ modules/
 * 权限绑定
 * 页面入口定位
 
-菜单模型应至少包含：
+菜单模型包含以下字段：
 
-* ID
-* 标题
-* 路径（指向 AMIS 页面）
-* 所需权限
+* Key：菜单唯一标识
+* Title：菜单展示标题
+* Icon：图标（Font Awesome 类名）
+* URL：跳转地址
+* EventType：事件类型（'url' 或 'custom'）
+* CustomEvent：自定义事件，如：`() => loadJsonPage("/path")`
+* Order：排序号
+* Children：子菜单
+* Show：显示表达式（字符串形式的 JS 表达式）
+  * `isPlatformAdmin()`：判断是否为平台管理员
+  * `isUserHasRole('role')`：判断用户是否有指定角色（guest/platform_admin）
+  * `isUserInGroup('group')`：判断用户是否在指定组
 
 菜单仅在插件 **Enable** 后可见。
+
+> 注意：Show 表达式是菜单的显示权限。后端 API 业务逻辑需调用 service.AuthService().EnsureUserIsPlatformAdmin(*gin.Context) 等方法进行显式权限校验，后端 API 的权限校验不能依赖此表达式。
 
 ---
 
@@ -189,15 +258,38 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 ---
 
 ## 9. 权限模型（RBAC）
-分为三类操作权限
-3. 集群类操作，访问路径自动添加具体的集群ID。/k8s/cluster/<cluster-id>/plugins/<plugin-name>/xxxx的路径。要求必须是登录用户。
-适合针对集群操作的插件，如：集群监控、集群配置等。
 
-3. 管理类操作，访问路径自动添加具体的插件名称。/mgm/plugins/<plugin-name>/xxxx的路径。要求必须是登录用户。无法获取到集群ID。
-适合一般的管理类插件，如巡检配置等。
+插件通过三类 API 路由实现不同权限级别的操作：
 
-3. 平台管理员类操作，访问路径自动添加具体的插件名称。/admin/plugins/<plugin-name>/xxxx的路径。要求必须是平台管理员用户。无法获取到集群ID。
-适合对整个平台进行操作的插件，如分布式功能。
+### 9.1 集群类操作（ClusterRouter）
+
+* 访问路径：`/k8s/cluster/<cluster-id>/plugins/<plugin-name>/xxxx`
+* 权限要求：必须是登录用户
+* 适用场景：针对集群操作的插件，如集群监控、集群配置等
+* 特点：路径自动注入具体的集群 ID
+
+### 9.2 管理类操作（ManagementRouter）
+
+* 访问路径：`/mgm/plugins/<plugin-name>/xxxx`
+* 权限要求：必须是登录用户
+* 适用场景：一般的管理类插件，如巡检配置等
+* 特点：无法获取到集群 ID
+
+### 9.3 平台管理员类操作（PluginAdminRouter）
+
+* 访问路径：`/admin/plugins/<plugin-name>/xxxx`
+* 权限要求：必须是平台管理员用户
+* 适用场景：对整个平台进行操作的插件，如分布式功能
+* 特点：无法获取到集群 ID
+
+### 9.4 公开 API（RootRouter）
+
+* 访问路径：`/xxxx`
+* 权限要求：无需登录即可访问
+* 适用场景：公开的 API 接口
+* 特点：一般不建议使用，如需使用要特别注意注册路由的正确性
+
+> 后端 API 的权限校验不能依赖菜单的 Show 表达式，必须在业务逻辑中显式调用权限校验方法。
 
 ---
 
@@ -205,13 +297,30 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 
 插件后端 API 必须满足：
 
-* 路径以 `/mgm/plugins/<plugin-name>/` 开头
-* 路径以 `/k8s/cluster/<cluster-id>/plugins/<plugin-name>/` 开头
-* 路径以 `/admin/plugins/<plugin-name>/` 开头
+* 路径以 `/k8s/cluster/<cluster-id>/plugins/<plugin-name>/` 开头（集群类操作）
+* 路径以 `/mgm/plugins/<plugin-name>/` 开头（管理类操作）
+* 路径以 `/admin/plugins/<plugin-name>/` 开头（平台管理员类操作）
+* 路径以 `/` 开头（公开 API，一般不建议使用）
 * API 在 Enable 阶段注册
 * API 在 Disable 阶段不可访问
+* 插件 API 不允许绕过统一鉴权与审计体系
 
-插件 API 不允许绕过统一鉴权与审计体系。
+插件通过以下路由注册回调定义 API：
+
+* ClusterRouter：注册集群类操作路由
+* ManagementRouter：注册管理类操作路由
+* PluginAdminRouter：注册插件管理员类操作路由
+* RootRouter：注册根路由（公开 API）
+
+路由注册示例：
+
+```go
+ClusterRouter: func(cluster *gin.RouterGroup) {
+    g := cluster.Group("/plugins/" + pluginName)
+    g.GET("/items", handler.List)
+    g.POST("/items", handler.Create)
+}
+```
 
 ---
 
@@ -234,7 +343,12 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 
 * 插件之间 **不得直接相互调用内部实现**
 * 允许通过核心提供的公共能力交互
-* 插件依赖关系必须显式声明
+* 插件依赖关系必须显式声明（Dependencies 字段）
+* 插件启动顺序可以通过 RunAfter 字段控制
+  * Dependencies：强依赖关系，启用前必须确保所有依赖插件均已启用
+  * RunAfter：启动顺序约束，不依赖这些插件，但必须在它们之后启动
+* 系统启动时会按依赖顺序启动插件（拓扑排序）
+* 禁用插件时需要检查是否有其他插件依赖于当前插件
 
 ---
 
