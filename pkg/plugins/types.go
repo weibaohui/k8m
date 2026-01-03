@@ -65,7 +65,7 @@ type PluginItemVO struct {
 }
 
 // RouteCategoryVO 路由类别
-// 类别为 cluster/mgm/admin，routes 为该类别下的路由列表
+// 类别为 cluster/mgm/admin/root，routes 为该类别下的路由列表
 type RouteCategoryVO struct {
 	Cluster []RouteItem `json:"cluster,omitempty"`
 	Admin   []RouteItem `json:"admin,omitempty"`
