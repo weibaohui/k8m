@@ -181,15 +181,6 @@ func main() {
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	})
 
-	// MCP Server
-	sseServer := GetMcpSSEServer("/mcp/k8m/")
-	r.GET("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/message", adapt(sseServer.MessageHandler))
-	r.GET("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/message", adapt(sseServer.MessageHandler))
-
 	// @title           k8m API
 	// @version         1.0
 	// @securityDefinitions.apikey BearerAuth
