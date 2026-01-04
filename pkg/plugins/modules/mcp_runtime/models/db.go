@@ -5,16 +5,22 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"k8s.io/klog/v2"
 )
 
 func InitDB() error {
-	return dao.DB().AutoMigrate(
+	err := dao.DB().AutoMigrate(
 		&MCPServerConfig{},
 		&MCPTool{},
 		&MCPToolLog{},
 		&McpKey{},
 	)
+	if plugins.ManagerInstance().IsEnabled(modules.PluginNameK8mMcpServer) {
+		AddInnerMCPServer()
+	}
+	return err
 }
 
 func UpgradeDB(fromVersion string, toVersion string) error {
@@ -54,7 +60,6 @@ func DropDB() error {
 
 // AddInnerMCPServer 检查并初始化名为 "k8m" 的内部 MCP 服务器配置，不存在则创建，已存在则更新其 URL。
 func AddInnerMCPServer() error {
-	// todo 迁移到内置MCPServer的插件中。不是放在管理中
 	// 检查是否存在名为k8m的记录
 	var count int64
 	if err := dao.DB().Model(&MCPServerConfig{}).Where("name = ?", "k8m").Count(&count).Error; err != nil {
