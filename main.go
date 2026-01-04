@@ -162,9 +162,7 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
-	r.Use(middleware.SetCacheHeaders())
 	r.Use(middleware.AuthMiddleware())
-	r.Use(middleware.EnsureSelectedClusterMiddleware())
 
 	// 挂载子目录
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
@@ -263,7 +261,7 @@ func main() {
 	}))
 
 	r.Route("/k8s/cluster/{cluster}", func(api chi.Router) {
-		api.Use(middleware.AuthMiddleware())
+		api.Use(middleware.EnsureSelectedClusterMiddleware())
 
 		// cluster
 		cluster_status.RegisterClusterRoutes(api)
@@ -342,7 +340,6 @@ func main() {
 	})
 
 	r.Route("/mgm", func(mgm chi.Router) {
-		mgm.Use(middleware.AuthMiddleware())
 		template.RegisterTemplateRoutes(mgm)
 		// user profile 用户自助操作
 		profile.RegisterProfileRoutes(mgm)
