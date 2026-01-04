@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -13,10 +13,11 @@ import (
 
 type ResourceController struct{}
 
-func RegisterResourceRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterResourceRoutes(r chi.Router) {
 	ctrl := &ResourceController{}
-	api.GET("/node/top/list", ctrl.TopList)
-	api.GET("/node/usage/name/:name", ctrl.Usage)
+	r.Get("/node/top/list", response.Adapter(ctrl.TopList))
+	r.Get("/node/usage/name/{name}", response.Adapter(ctrl.Usage))
 }
 
 // @Summary 获取节点资源使用情况

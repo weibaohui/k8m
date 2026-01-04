@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -15,15 +15,15 @@ type AdminUserGroupController struct {
 }
 
 // AdminUserGroupController 用于用户组相关接口
-// 路由注册函数
-func RegisterAdminUserGroupRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAdminUserGroupRoutes(r chi.Router) {
 
 	ctrl := AdminUserGroupController{}
-	admin.GET("/user_group/list", ctrl.ListUserGroup)
-	admin.POST("/user_group/save", ctrl.SaveUserGroup)
-	admin.POST("/user_group/save_menu", ctrl.SaveUserGroupMenu)
-	admin.POST("/user_group/delete/:ids", ctrl.DeleteUserGroup)
-	admin.GET("/user_group/option_list", ctrl.GroupOptionList)
+	r.Get("/user_group/list", response.Adapter(ctrl.ListUserGroup))
+	r.Post("/user_group/save", response.Adapter(ctrl.SaveUserGroup))
+	r.Post("/user_group/save_menu", response.Adapter(ctrl.SaveUserGroupMenu))
+	r.Post("/user_group/delete/{ids}", response.Adapter(ctrl.DeleteUserGroup))
+	r.Get("/user_group/option_list", response.Adapter(ctrl.GroupOptionList))
 }
 
 // @Summary 获取用户组列表

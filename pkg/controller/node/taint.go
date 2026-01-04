@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -14,13 +14,14 @@ import (
 
 type TaintController struct{}
 
-func RegisterTaintRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterTaintRoutes(r chi.Router) {
 	ctrl := &TaintController{}
-	api.POST("/node/update_taints/name/:name", ctrl.Update)
-	api.POST("/node/delete_taints/name/:name", ctrl.Delete)
-	api.POST("/node/add_taints/name/:name", ctrl.Add)
-	api.GET("/node/list_taints/name/:name", ctrl.ListByName)
-	api.GET("/node/taints/list", ctrl.List)
+	r.Post("/node/update_taints/name/{name}", response.Adapter(ctrl.Update))
+	r.Post("/node/delete_taints/name/{name}", response.Adapter(ctrl.Delete))
+	r.Post("/node/add_taints/name/{name}", response.Adapter(ctrl.Add))
+	r.Get("/node/list_taints/name/{name}", response.Adapter(ctrl.ListByName))
+	r.Get("/node/taints/list", response.Adapter(ctrl.List))
 }
 
 // @Summary 获取所有节点上的污点

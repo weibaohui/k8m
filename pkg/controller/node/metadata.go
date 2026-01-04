@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -15,11 +15,12 @@ import (
 
 type MetadataController struct{}
 
-func RegisterMetadataRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterMetadataRoutes(r chi.Router) {
 	ctrl := &MetadataController{}
-	api.GET("/node/name/option_list", ctrl.NameOptionList)
-	api.GET("/node/labels/list", ctrl.AllLabelList)
-	api.GET("/node/labels/unique_labels", ctrl.UniqueLabels)
+	r.Get("/node/name/option_list", response.Adapter(ctrl.NameOptionList))
+	r.Get("/node/labels/list", response.Adapter(ctrl.AllLabelList))
+	r.Get("/node/labels/unique_labels", response.Adapter(ctrl.UniqueLabels))
 }
 
 // @Summary 获取节点名称选项列表

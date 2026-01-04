@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -14,11 +14,12 @@ import (
 
 type CRDController struct{}
 
-func RegisterCRDRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterCRDRoutes(r chi.Router) {
 	ctrl := &CRDController{}
-	api.GET("/crd/group/option_list", ctrl.GroupOptionList)
-	api.GET("/crd/kind/option_list", ctrl.KindOptionList)
-	api.GET("/crd/status", ctrl.CRDStatus)
+	r.Get("/crd/group/option_list", response.Adapter(ctrl.GroupOptionList))
+	r.Get("/crd/kind/option_list", response.Adapter(ctrl.KindOptionList))
+	r.Get("/crd/status", response.Adapter(ctrl.CRDStatus))
 }
 
 // @Summary 获取CRD组选项列表

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -22,18 +22,18 @@ import (
 type AdminClusterPermission struct{}
 
 // AdminClusterPermission 用于集群权限相关接口
-// 路由注册函数
-func RegisterClusterPermissionRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterClusterPermissionRoutes(r chi.Router) {
 	ctrl := &AdminClusterPermission{}
 	//  cluster_permissions 集群授权
-	admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", ctrl.ListClusterPermissions)
-	admin.GET("/cluster_permissions/user/:username/list", ctrl.ListClusterPermissionsByUserName)         // 列出指定用户拥有的集群权限
-	admin.GET("/cluster_permissions/cluster/:cluster/list", ctrl.ListClusterPermissionsByClusterID)      // 列出指定集群下所有授权情况
-	admin.GET("/cluster_permissions/cluster/:cluster/ns/list", ctrl.ListClusterNamespaceListByClusterID) // 列出指定集群下所有授权情况
-	admin.POST("/cluster_permissions/cluster/:cluster/role/:role/:authorization_type/save", ctrl.SaveClusterPermission)
-	admin.POST("/cluster_permissions/delete/:ids", ctrl.DeleteClusterPermission)
-	admin.POST("/cluster_permissions/update_namespaces/:id", ctrl.UpdateNamespaces)
-	admin.POST("/cluster_permissions/update_blacklist_namespaces/:id", ctrl.UpdateBlacklistNamespaces)
+	r.Get("/cluster_permissions/cluster/{cluster}/role/{role}/user/list", response.Adapter(ctrl.ListClusterPermissions))
+	r.Get("/cluster_permissions/user/{username}/list", response.Adapter(ctrl.ListClusterPermissionsByUserName))         // 列出指定用户拥有的集群权限
+	r.Get("/cluster_permissions/cluster/{cluster}/list", response.Adapter(ctrl.ListClusterPermissionsByClusterID))      // 列出指定集群下所有授权情况
+	r.Get("/cluster_permissions/cluster/{cluster}/ns/list", response.Adapter(ctrl.ListClusterNamespaceListByClusterID)) // 列出指定集群下所有授权情况
+	r.Post("/cluster_permissions/cluster/{cluster}/role/{role}/{authorization_type}/save", response.Adapter(ctrl.SaveClusterPermission))
+	r.Post("/cluster_permissions/delete/{ids}", response.Adapter(ctrl.DeleteClusterPermission))
+	r.Post("/cluster_permissions/update_namespaces/{id}", response.Adapter(ctrl.UpdateNamespaces))
+	r.Post("/cluster_permissions/update_blacklist_namespaces/{id}", response.Adapter(ctrl.UpdateBlacklistNamespaces))
 
 }
 

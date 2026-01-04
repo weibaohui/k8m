@@ -3,7 +3,7 @@ package k8sgpt
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
@@ -17,12 +17,13 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.GET("/k8s_gpt/kind/:kind/run", ctrl.ResourceRunAnalysis)
-	api.POST("/k8s_gpt/cluster/:user_cluster/run", ctrl.ClusterRunAnalysis)
-	api.GET("/k8s_gpt/cluster/:user_cluster/result", ctrl.GetClusterRunAnalysisResult)
-	api.GET("/k8s_gpt/var", ctrl.GetFields)
+	r.Get("/k8s_gpt/kind/{kind}/run", response.Adapter(ctrl.ResourceRunAnalysis))
+	r.Post("/k8s_gpt/cluster/{user_cluster}/run", response.Adapter(ctrl.ClusterRunAnalysis))
+	r.Get("/k8s_gpt/cluster/{user_cluster}/result", response.Adapter(ctrl.GetClusterRunAnalysisResult))
+	r.Get("/k8s_gpt/var", response.Adapter(ctrl.GetFields))
 }
 
 // @Summary 获取K8s资源字段信息

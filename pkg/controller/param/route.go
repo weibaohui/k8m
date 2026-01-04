@@ -1,24 +1,28 @@
 package param
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/go-chi/chi/v5"
+	"github.com/weibaohui/k8m/pkg/response"
+)
 
 type Controller struct {
 }
 
-func RegisterParamRoutes(params *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterParamRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	// 获取当前登录用户的角色，登录即可
-	params.GET("/user/role", ctrl.UserRole)
+	r.Get("/user/role", response.Adapter(ctrl.UserRole))
 	// 获取某个配置项
-	params.GET("/config/:key", ctrl.Config)
+	r.Get("/config/{key}", response.Adapter(ctrl.Config))
 	// 获取当前登录用户的集群列表,下拉列表
-	params.GET("/cluster/option_list", ctrl.ClusterOptionList)
+	r.Get("/cluster/option_list", response.Adapter(ctrl.ClusterOptionList))
 	// 获取当前登录用户的集群列表,table列表
-	params.GET("/cluster/all", ctrl.ClusterTableList)
+	r.Get("/cluster/all", response.Adapter(ctrl.ClusterTableList))
 	// 获取当前软件版本信息
-	params.GET("/version", ctrl.Version)
+	r.Get("/version", response.Adapter(ctrl.Version))
 	// 获取helm 仓库列表
-	params.GET("/helm/repo/option_list", ctrl.HelmRepoOptionList)
+	r.Get("/helm/repo/option_list", response.Adapter(ctrl.HelmRepoOptionList))
 	// 获取翻转显示的指标列表
-	params.GET("/condition/reverse/list", ctrl.Conditions)
+	r.Get("/condition/reverse/list", response.Adapter(ctrl.Conditions))
 }

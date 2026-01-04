@@ -1,7 +1,7 @@
 package node
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -11,14 +11,15 @@ import (
 
 type ActionController struct{}
 
-func RegisterActionRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterActionRoutes(r chi.Router) {
 	ctrl := &ActionController{}
-	api.POST("/node/drain/name/:name", ctrl.Drain)
-	api.POST("/node/cordon/name/:name", ctrl.Cordon)
-	api.POST("/node/uncordon/name/:name", ctrl.UnCordon)
-	api.POST("/node/batch/drain", ctrl.BatchDrain)
-	api.POST("/node/batch/cordon", ctrl.BatchCordon)
-	api.POST("/node/batch/uncordon", ctrl.BatchUnCordon)
+	r.Post("/node/drain/name/{name}", response.Adapter(ctrl.Drain))
+	r.Post("/node/cordon/name/{name}", response.Adapter(ctrl.Cordon))
+	r.Post("/node/uncordon/name/{name}", response.Adapter(ctrl.UnCordon))
+	r.Post("/node/batch/drain", response.Adapter(ctrl.BatchDrain))
+	r.Post("/node/batch/cordon", response.Adapter(ctrl.BatchCordon))
+	r.Post("/node/batch/uncordon", response.Adapter(ctrl.BatchUnCordon))
 }
 
 // @Summary 驱逐指定节点

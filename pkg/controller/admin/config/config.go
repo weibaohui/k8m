@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -11,10 +11,11 @@ import (
 type Controller struct {
 }
 
-func RegisterConfigRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterConfigRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	admin.GET("/config/all", ctrl.All)
-	admin.POST("/config/update", ctrl.Update)
+	r.Get("/config/all", response.Adapter(ctrl.All))
+	r.Post("/config/update", response.Adapter(ctrl.Update))
 }
 
 // @Summary 获取系统配置

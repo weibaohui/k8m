@@ -77,7 +77,7 @@ type DetailReq struct {
 // @Router /k8s/cluster/{cluster}/doc/detail [post]
 func (cc *Controller) Detail(c *response.Context) {
 	detail := &DetailReq{}
-	err := c.ShouldBindBodyWithJSON(&detail)
+	err := c.ShouldBindJSON(&detail)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}

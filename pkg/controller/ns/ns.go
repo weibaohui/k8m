@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -16,11 +16,12 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.GET("/ns/option_list", ctrl.OptionList)
-	api.POST("/ResourceQuota/create", ctrl.CreateResourceQuota)
-	api.POST("/LimitRange/create", ctrl.CreateLimitRange)
+	r.Get("/ns/option_list", response.Adapter(ctrl.OptionList))
+	r.Post("/ResourceQuota/create", response.Adapter(ctrl.CreateResourceQuota))
+	r.Post("/LimitRange/create", response.Adapter(ctrl.CreateLimitRange))
 
 }
 
