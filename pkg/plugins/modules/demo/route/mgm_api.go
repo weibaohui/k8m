@@ -9,13 +9,13 @@ import (
 )
 
 // RegisterMgmRoutes 注册Demo插件的管理类（mgm）路由
+// 从 gin 切换到 chi，使用直接路由方法替代 gin.Group
 func RegisterManagementRoutes(mrg chi.Router) {
-	g := mrg.Group("/plugins/" + modules.PluginNameDemo)
-
-	g.Get("/items", response.Adapter(mgm.List))
-	g.Post("/items", response.Adapter(mgm.Create))
-	g.Post("/items/{id}", response.Adapter(mgm.Update))
-	g.Post("/remove/items/{id}", response.Adapter(mgm.Delete))
+	prefix := "/plugins/" + modules.PluginNameDemo
+	mrg.Get(prefix+"/items", response.Adapter(mgm.List))
+	mrg.Post(prefix+"/items", response.Adapter(mgm.Create))
+	mrg.Post(prefix+"/items/{id}", response.Adapter(mgm.Update))
+	mrg.Post(prefix+"/remove/items/{id}", response.Adapter(mgm.Delete))
 
 	klog.V(6).Infof("注册demo插件管理路由")
 }

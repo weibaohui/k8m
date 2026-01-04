@@ -9,13 +9,13 @@ import (
 )
 
 // RegisterClusterRoutes 注册Demo插件的集群相关路由
+// 从 gin 切换到 chi，使用直接路由方法替代 gin.Group
 func RegisterClusterRoutes(crg chi.Router) {
-	g := crg.Group("/plugins/" + modules.PluginNameDemo)
-
-	g.Get("/items", response.Adapter(cluster.List))
-	g.Post("/items", response.Adapter(cluster.Create))
-	g.Post("/items/{id}", response.Adapter(cluster.Update))
-	g.Post("/remove/items/{id}", response.Adapter(cluster.Delete))
+	prefix := "/plugins/" + modules.PluginNameDemo
+	crg.Get(prefix+"/items", response.Adapter(cluster.List))
+	crg.Post(prefix+"/items", response.Adapter(cluster.Create))
+	crg.Post(prefix+"/items/{id}", response.Adapter(cluster.Update))
+	crg.Post(prefix+"/remove/items/{id}", response.Adapter(cluster.Delete))
 
 	klog.V(6).Infof("注册demo插件路由(cluster)")
 }
