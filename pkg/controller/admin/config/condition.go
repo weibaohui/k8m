@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -12,12 +12,14 @@ import (
 type ConditionController struct {
 }
 
-func RegisterConditionRoutes(admin *gin.RouterGroup) {
+// RegisterConditionRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterConditionRoutes(r chi.Router) {
 	ctrl := &ConditionController{}
-	admin.GET("/condition/list", ctrl.List)
-	admin.POST("/condition/save", ctrl.Save)
-	admin.POST("/condition/delete/:ids", ctrl.Delete)
-	admin.POST("/condition/save/id/:id/status/:status", ctrl.QuickSave)
+	r.Get("/condition/list", response.Adapter(ctrl.List))
+	r.Post("/condition/save", response.Adapter(ctrl.Save))
+	r.Post("/condition/delete/{ids}", response.Adapter(ctrl.Delete))
+	r.Post("/condition/save/id/{id}/status/{status}", response.Adapter(ctrl.QuickSave))
 }
 
 // @Summary 获取条件列表

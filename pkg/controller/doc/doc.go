@@ -3,7 +3,7 @@ package doc
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -13,11 +13,13 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// RegisterRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.GET("/doc/gvk/:api_version/:kind", ctrl.Doc)
-	api.GET("/doc/kind/:kind/group/:group/version/:version", ctrl.Doc)
-	api.POST("/doc/detail", ctrl.Detail)
+	r.Get("/doc/gvk/{api_version}/{kind}", response.Adapter(ctrl.Doc))
+	r.Get("/doc/kind/{kind}/group/{group}/version/{version}", response.Adapter(ctrl.Doc))
+	r.Post("/doc/detail", response.Adapter(ctrl.Detail))
 }
 
 // @Summary 获取Kubernetes资源文档信息

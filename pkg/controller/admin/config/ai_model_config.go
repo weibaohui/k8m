@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -16,13 +16,14 @@ type AIController struct {
 }
 
 // RegisterAIModelConfigRoutes 注册路由
-func RegisterAIModelConfigRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAIModelConfigRoutes(r chi.Router) {
 	ctrl := &AIController{}
-	admin.GET("/ai/model/list", ctrl.List)
-	admin.POST("/ai/model/save", ctrl.Save)
-	admin.POST("/ai/model/delete/:ids", ctrl.Delete)
-	admin.POST("/ai/model/id/:id/think/:status", ctrl.QuickSave)
-	admin.POST("/ai/model/test/id/:id", ctrl.TestConnection)
+	r.Get("/ai/model/list", response.Adapter(ctrl.List))
+	r.Post("/ai/model/save", response.Adapter(ctrl.Save))
+	r.Post("/ai/model/delete/{ids}", response.Adapter(ctrl.Delete))
+	r.Post("/ai/model/id/{id}/think/{status}", response.Adapter(ctrl.QuickSave))
+	r.Post("/ai/model/test/id/{id}", response.Adapter(ctrl.TestConnection))
 
 }
 

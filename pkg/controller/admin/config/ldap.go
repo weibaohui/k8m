@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -19,15 +19,17 @@ import (
 type LdapConfigController struct {
 }
 
-func RegisterLdapConfigRoutes(admin *gin.RouterGroup) {
+// RegisterLdapConfigRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterLdapConfigRoutes(r chi.Router) {
 	ctrl := &LdapConfigController{}
 	// ldap 配置
-	admin.GET("/config/ldap/list", ctrl.LDAPConfigList)
-	admin.GET("/config/ldap/:id", ctrl.LDAPConfigDetail)
-	admin.POST("/config/ldap/save", ctrl.LDAPConfigSave)
-	admin.POST("/config/ldap/delete/:ids", ctrl.LDAPConfigDelete)
-	admin.POST("/config/ldap/save/id/:id/status/:enabled", ctrl.LDAPConfigQuickSave)
-	admin.POST("/config/ldap/test_connect", ctrl.LDAPConfigTestConnect)
+	r.Get("/config/ldap/list", response.Adapter(ctrl.LDAPConfigList))
+	r.Get("/config/ldap/{id}", response.Adapter(ctrl.LDAPConfigDetail))
+	r.Post("/config/ldap/save", response.Adapter(ctrl.LDAPConfigSave))
+	r.Post("/config/ldap/delete/{ids}", response.Adapter(ctrl.LDAPConfigDelete))
+	r.Post("/config/ldap/save/id/{id}/status/{enabled}", response.Adapter(ctrl.LDAPConfigQuickSave))
+	r.Post("/config/ldap/test_connect", response.Adapter(ctrl.LDAPConfigTestConnect))
 }
 
 // LDAP配置列表
