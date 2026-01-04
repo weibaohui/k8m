@@ -35,11 +35,11 @@ func RegisterPluginAPIRoutes(arg chi.Router) {
 
 	arg.Get(prefix+"/release/list", response.Adapter(ctrl.ListRelease))
 	arg.Get(prefix+"/release/ns/{ns}/name/{name}/history/list", response.Adapter(ctrl.ListReleaseHistory))
-	arg.Post(prefix+"/release/{release}/repo/:repo/chart/:chart/version/{version}/install", response.Adapter(ctrl.InstallRelease))
+	arg.Post(prefix+"/release/{release}/repo/{repo}/chart/{chart}/version/{version}/install", response.Adapter(ctrl.InstallRelease))
 	arg.Post(prefix+"/release/ns/{ns}/name/{name}/uninstall", response.Adapter(ctrl.UninstallRelease))
-	arg.Get(prefix+"/release/ns/{ns}/name/{name}/revision/:revision/values", response.Adapter(ctrl.GetReleaseValues))
-	arg.Get(prefix+"/release/ns/{ns}/name/{name}/revision/:revision/notes", response.Adapter(ctrl.GetReleaseNote))
-	arg.Get(prefix+"/release/ns/{ns}/name/{name}/revision/:revision/install_log", response.Adapter(ctrl.GetReleaseInstallLog))
+	arg.Get(prefix+"/release/ns/{ns}/name/{name}/revision/{revision}/values", response.Adapter(ctrl.GetReleaseValues))
+	arg.Get(prefix+"/release/ns/{ns}/name/{name}/revision/{revision}/notes", response.Adapter(ctrl.GetReleaseNote))
+	arg.Get(prefix+"/release/ns/{ns}/name/{name}/revision/{revision}/install_log", response.Adapter(ctrl.GetReleaseInstallLog))
 	arg.Post(prefix+"/release/batch/uninstall", response.Adapter(ctrl.BatchUninstallRelease))
 	arg.Post(prefix+"/release/upgrade", response.Adapter(ctrl.UpgradeRelease))
 
@@ -52,8 +52,8 @@ func RegisterPluginAPIRoutes(arg chi.Router) {
 func RegisterPluginMgmRoutes(arg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameHelm
 	ctrl := &admin.ChartController{}
-	arg.Get(prefix+"/repo/:repo/chart/:chart/versions", response.Adapter(ctrl.ChartVersionOptionList))
-	arg.Get(prefix+"/repo/:repo/chart/:chart/version/{version}/values", response.Adapter(ctrl.GetChartValue))
+	arg.Get(prefix+"/repo/{repo}/chart/{chart}/versions", response.Adapter(ctrl.ChartVersionOptionList))
+	arg.Get(prefix+"/repo/{repo}/chart/{chart}/version/{version}/values", response.Adapter(ctrl.GetChartValue))
 	arg.Get(prefix+"/chart/list", response.Adapter(ctrl.ListChart))
 	klog.V(6).Infof("注册 Helm 插件管理路由(mgm)")
 }

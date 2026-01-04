@@ -39,7 +39,7 @@ func RegisterAdminScheduleRoutes(arg chi.Router) {
 	admin.Post("/schedule/start/id/{id}", response.Adapter(ctrl.Start))
 	admin.Post("/schedule/id/{id}/update_script_code", response.Adapter(ctrl.UpdateScriptCode))
 	admin.Post("/schedule/id/{id}/summary", response.Adapter(ctrl.SummaryBySchedule))
-	admin.Post("/schedule/id/{id}/summary/cluster/{cluster}/start_time/:start_time/end_time/:end_time", response.Adapter(ctrl.SummaryBySchedule))
+	admin.Post("/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}", response.Adapter(ctrl.SummaryBySchedule))
 	admin.Get("/event/status/option_list", response.Adapter(ctrl.EventStatusOptionList))
 
 	arg.Mount("/plugins/"+modules.PluginNameInspection, admin)

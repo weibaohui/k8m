@@ -24,7 +24,7 @@ func RegisterPluginAdminRoutes(arg chi.Router) {
 
 	toolCtrl := &admin.ToolController{}
 	g.Get("/tool/server/{name}/list", response.Adapter(toolCtrl.List))
-	g.Post("/tool/save/id/{id}/status/:status", response.Adapter(toolCtrl.QuickSave))
+	g.Post("/tool/save/id/{id}/status/{status}", response.Adapter(toolCtrl.QuickSave))
 
 	arg.Mount("/plugins/"+modules.PluginNameMCPRuntime, g)
 

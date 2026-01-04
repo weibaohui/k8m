@@ -17,8 +17,8 @@ type PortController struct{}
 
 func RegisterPortRoutes(api chi.Router) {
 	ctrl := &PortController{}
-	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", response.Adapter(ctrl.StartPortForward))
-	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/:container_name/pod_port/:pod_port/stop", response.Adapter(ctrl.StopPortForward))
+	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/local_port/{local_port}/start", response.Adapter(ctrl.StartPortForward))
+	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/stop", response.Adapter(ctrl.StopPortForward))
 	api.Get("/pod/port_forward/ns/{ns}/name/{name}/port/list", response.Adapter(ctrl.PortForwardList))
 }
 
