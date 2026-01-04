@@ -6,12 +6,10 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/go-chi/chi/v5"
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
@@ -20,29 +18,6 @@ import (
 )
 
 type AdminScheduleController struct {
-}
-
-// RegisterAdminScheduleRoutes 注册巡检计划路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
-// Chi 中使用 chi.NewRouter() 创建子路由
-func RegisterAdminScheduleRoutes(arg chi.Router) {
-	admin := chi.NewRouter()
-
-	ctrl := &AdminScheduleController{}
-	admin.Get("/schedule/list", response.Adapter(ctrl.List))
-	admin.Get("/schedule/record/id/{id}/event/list", response.Adapter(ctrl.EventList))
-	admin.Post("/schedule/record/id/{id}/summary", response.Adapter(ctrl.SummaryByRecordID))
-	admin.Get("/schedule/record/id/{id}/output/list", response.Adapter(ctrl.OutputList))
-	admin.Post("/schedule/save", response.Adapter(ctrl.Save))
-	admin.Post("/schedule/delete/{ids}", response.Adapter(ctrl.Delete))
-	admin.Post("/schedule/save/id/{id}/status/{enabled}", response.Adapter(ctrl.QuickSave))
-	admin.Post("/schedule/start/id/{id}", response.Adapter(ctrl.Start))
-	admin.Post("/schedule/id/{id}/update_script_code", response.Adapter(ctrl.UpdateScriptCode))
-	admin.Post("/schedule/id/{id}/summary", response.Adapter(ctrl.SummaryBySchedule))
-	admin.Post("/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time}", response.Adapter(ctrl.SummaryBySchedule))
-	admin.Get("/event/status/option_list", response.Adapter(ctrl.EventStatusOptionList))
-
-	arg.Mount("/plugins/"+modules.PluginNameInspection, admin)
 }
 
 // @Summary 获取巡检计划列表

@@ -1,11 +1,9 @@
 package controller
 
 import (
-	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -14,19 +12,6 @@ import (
 )
 
 type AdminRecordController struct {
-}
-
-// RegisterAdminRecordRoutes 注册巡检记录路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
-// Chi 中使用 chi.NewRouter() 创建子路由
-func RegisterAdminRecordRoutes(arg chi.Router) {
-	admin := chi.NewRouter()
-	ctrl := &AdminRecordController{}
-	admin.Get("/schedule/id/{id}/record/list", response.Adapter(ctrl.RecordList))
-	admin.Get("/record/list", response.Adapter(ctrl.RecordList))
-	admin.Post("/schedule/record/id/{id}/push", response.Adapter(ctrl.Push))
-
-	arg.Mount("/plugins/"+modules.PluginNameInspection, admin)
 }
 
 // @Summary 获取巡检记录列表

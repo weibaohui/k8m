@@ -2,29 +2,15 @@ package controller
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
 type AdminLuaScriptController struct {
-}
-
-func RegisterAdminLuaScriptRoutes(arg chi.Router) {
-	admin := chi.NewRouter()
-	ctrl := &AdminLuaScriptController{}
-	admin.Get("/script/list", response.Adapter(ctrl.LuaScriptList))
-	admin.Post("/script/delete/{ids}", response.Adapter(ctrl.LuaScriptDelete))
-	admin.Post("/script/save", response.Adapter(ctrl.LuaScriptSave))
-	admin.Post("/script/load", response.Adapter(ctrl.LuaScriptLoad))
-	admin.Get("/script/option_list", response.Adapter(ctrl.LuaScriptOptionList))
-
-	arg.Mount("/plugins/"+modules.PluginNameInspection, admin)
 }
 
 // @Summary 获取Lua脚本列表
