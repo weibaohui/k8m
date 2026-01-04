@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-chi/chi/v5"
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"

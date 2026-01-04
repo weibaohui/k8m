@@ -9,12 +9,13 @@ import (
 )
 
 // RegisterPluginAdminRoutes 注册Demo插件的插件管理员类（admin）路由
+// 从 gin 切换到 chi，使用 chi.RoutePrefix 替代 gin.Group
 func RegisterPluginAdminRoutes(arg chi.Router) {
-	g := arg.Group("/plugins/" + modules.PluginNameDemo)
-	g.Get("/items", response.Adapter(admin.List))
-	g.Post("/items", response.Adapter(admin.Create))
-	g.Post("/items/{id}", response.Adapter(admin.Update))
-	g.Post("/remove/items/{id}", response.Adapter(admin.Delete))
+	prefix := "/plugins/" + modules.PluginNameDemo
+	arg.Get(prefix+"/items", response.Adapter(admin.List))
+	arg.Post(prefix+"/items", response.Adapter(admin.Create))
+	arg.Post(prefix+"/items/{id}", response.Adapter(admin.Update))
+	arg.Post(prefix+"/remove/items/{id}", response.Adapter(admin.Delete))
 
 	klog.V(6).Infof("注册demo插件管理路由(admin)")
 }

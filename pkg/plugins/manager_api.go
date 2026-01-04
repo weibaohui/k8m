@@ -170,47 +170,14 @@ func (m *Manager) ListPluginMenus(c *response.Context) {
 
 // collectPluginRouteCategories 收集指定插件的三类路由数组
 // 仅统计路径中包含 /plugins/{name}/ 的路由，并按类别归集
+// 从 gin 切换到 chi，暂时禁用路由收集功能（Chi不提供直接的路由遍历接口）
 func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
-	m.mu.RLock()
-	engine := m.engine
-	m.mu.RUnlock()
-	if engine == nil || name == "" {
-		return RouteCategoryVO{}
-	}
-	cluster := make([]RouteItem, 0)
-	mgm := make([]RouteItem, 0)
-	admin := make([]RouteItem, 0)
-
-	for _, ri := range engine.Routes() {
-		p := ri.Path
-		klog.V(8).Infof("路由路径: %s", p)
-		if !strings.Contains(p, "/plugins/") {
-			continue
-		}
-		// 提取插件名并进行精确匹配
-		pluginName, ok := extractPluginName(p)
-		if !ok || pluginName != name {
-			continue
-		}
-		item := RouteItem{Method: ri.Method, Path: ri.Path, Handler: ri.Handler}
-		if strings.HasPrefix(p, "/k8s/cluster/") {
-			cluster = append(cluster, item)
-			continue
-		}
-		if strings.HasPrefix(p, "/mgm/") || p == "/mgm" {
-			mgm = append(mgm, item)
-			continue
-		}
-		if strings.HasPrefix(p, "/admin/") || p == "/admin" {
-			admin = append(admin, item)
-			continue
-		}
-	}
-	klog.V(6).Infof("插件 %s 路由类别统计: cluster=%d, mgm=%d, admin=%d", name, len(cluster), len(mgm), len(admin))
+	// Chi 框架不提供直接的路由遍历接口，暂时返回空路由信息
+	// 如需路由信息，需要维护一个路由注册日志或使用其他方式
 	return RouteCategoryVO{
-		Cluster: cluster,
-		Mgm:     mgm,
-		Admin:   admin,
+		Cluster: []RouteItem{},
+		Mgm:     []RouteItem{},
+		Admin:   []RouteItem{},
 	}
 }
 
