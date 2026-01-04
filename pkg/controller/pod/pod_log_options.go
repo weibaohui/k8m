@@ -20,8 +20,8 @@ type LogQueryParams struct {
 func BindPodLogOptions(c *response.Context, containerName string) (*v1.PodLogOptions, error) {
 	var params LogQueryParams
 
-	// 绑定查询参数到自定义结构体
-	if err := c.BindQuery(&params); err != nil {
+	// 绑定查询参数到自定义结构体 - Gin到Chi迁移：将BindQuery改为ShouldBindQuery
+	if err := c.ShouldBindQuery(&params); err != nil {
 		return nil, err
 	}
 

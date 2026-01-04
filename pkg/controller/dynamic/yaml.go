@@ -15,9 +15,10 @@ type YamlController struct{}
 
 func RegisterYamlRoutes(api chi.Router) {
 	ctrl := &YamlController{}
-	api.POST("/yaml/apply", ctrl.Apply)
-	api.POST("/yaml/upload", ctrl.UploadFile)
-	api.POST("/yaml/delete", ctrl.Delete)
+	// Gin到Chi迁移：将大写POST改为小写Post，并添加response.Adapter包装
+	api.Post("/yaml/apply", response.Adapter(ctrl.Apply))
+	api.Post("/yaml/upload", response.Adapter(ctrl.UploadFile))
+	api.Post("/yaml/delete", response.Adapter(ctrl.Delete))
 }
 
 // @Summary 上传YAML文件并应用
