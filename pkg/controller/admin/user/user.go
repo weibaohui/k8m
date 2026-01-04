@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -20,19 +20,18 @@ type AdminUserController struct {
 
 // AdminUser 用于用户相关接口
 // 路由注册函数
-func RegisterAdminUserRoutes(admin *gin.RouterGroup) {
-
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAdminUserRoutes(r chi.Router) {
 	ctrl := AdminUserController{}
 	// user 平台管理员可操作，管理用户
-	admin.GET("/user/list", ctrl.List)
-	admin.POST("/user/save/id/:id/status/:disabled", ctrl.UserStatusQuickSave)
-	admin.POST("/user/save", ctrl.Save)
-	admin.POST("/user/delete/:ids", ctrl.Delete)
-	admin.POST("/user/update_psw/:id", ctrl.UpdatePsw)
-	admin.GET("/user/option_list", ctrl.UserOptionList)
+	r.Get("/user/list", response.Adapter(ctrl.List))
+	r.Post("/user/save/id/{id}/status/{disabled}", response.Adapter(ctrl.UserStatusQuickSave))
+	r.Post("/user/save", response.Adapter(ctrl.Save))
+	r.Post("/user/delete/{ids}", response.Adapter(ctrl.Delete))
+	r.Post("/user/update_psw/{id}", response.Adapter(ctrl.UpdatePsw))
+	r.Get("/user/option_list", response.Adapter(ctrl.UserOptionList))
 	// 2FA 平台管理员可操作，管理用户
-	admin.POST("/user/2fa/disable/:id", ctrl.Disable2FA)
-
+	r.Post("/user/2fa/disable/{id}", response.Adapter(ctrl.Disable2FA))
 }
 
 // @Summary 获取用户列表

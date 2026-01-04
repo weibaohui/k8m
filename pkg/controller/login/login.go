@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -23,9 +23,11 @@ import (
 
 type Controller struct{}
 
-func RegisterLoginRoutes(auth *gin.RouterGroup) {
+// RegisterLoginRoutes 注册登录路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterLoginRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	auth.POST("/login", ctrl.LoginByPassword)
+	r.Post("/login", response.Adapter(ctrl.LoginByPassword))
 }
 
 // Request  用户结构体
@@ -228,7 +230,8 @@ func getUserInfo(username string) (*models.User, error) {
 }
 
 // validateTwoFA 验证2FA
-func validateTwoFA(user *models.User, code string, c *gin.Context) error {
+// 从 gin.Context 切换到 response.Context
+func validateTwoFA(user *models.User, code string, c *response.Context) error {
 	if user != nil && user.TwoFAEnabled {
 		if code == "" {
 			c.JSON(http.StatusUnauthorized, response.H{"message": "请输入2FA验证码"})

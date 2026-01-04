@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -17,22 +17,27 @@ import (
 type Controller struct {
 }
 
-func RegisterAdminClusterRoutes(admin *gin.RouterGroup) {
+// RegisterAdminClusterRoutes 注册集群管理路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAdminClusterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	admin.POST("/cluster/scan", ctrl.Scan)
-	admin.GET("/cluster/file/option_list", ctrl.FileOptionList)
-	admin.POST("/cluster/kubeconfig/save", ctrl.SaveKubeConfig)
-	admin.POST("/cluster/kubeconfig/remove", ctrl.RemoveKubeConfig)
-	admin.POST("/cluster/:cluster/disconnect", ctrl.Disconnect)
-	admin.POST("/cluster/aws/save", ctrl.SaveAWSEKSCluster)
-	admin.POST("/cluster/token/save", ctrl.SaveTokenCluster)
-	admin.GET("/cluster/config/:id", ctrl.GetClusterConfig)
-	admin.POST("/cluster/config/save", ctrl.SaveClusterConfig)
+	r.Post("/cluster/scan", response.Adapter(ctrl.Scan))
+	r.Get("/cluster/file/option_list", response.Adapter(ctrl.FileOptionList))
+	r.Post("/cluster/kubeconfig/save", response.Adapter(ctrl.SaveKubeConfig))
+	r.Post("/cluster/kubeconfig/remove", response.Adapter(ctrl.RemoveKubeConfig))
+	r.Post("/cluster/{cluster}/disconnect", response.Adapter(ctrl.Disconnect))
+	r.Post("/cluster/aws/save", response.Adapter(ctrl.SaveAWSEKSCluster))
+	r.Post("/cluster/token/save", response.Adapter(ctrl.SaveTokenCluster))
+	r.Get("/cluster/config/{id}", response.Adapter(ctrl.GetClusterConfig))
+	r.Post("/cluster/config/save", response.Adapter(ctrl.SaveClusterConfig))
 }
-func RegisterUserClusterRoutes(mgm *gin.RouterGroup) {
+
+// RegisterUserClusterRoutes 注册用户集群路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterUserClusterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	// 前端用户点击重连接按钮
-	mgm.POST("/cluster/:cluster/reconnect", ctrl.Reconnect)
+	r.Post("/cluster/{cluster}/reconnect", response.Adapter(ctrl.Reconnect))
 }
 
 // @Summary 获取文件类型的集群选项
