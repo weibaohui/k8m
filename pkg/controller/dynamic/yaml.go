@@ -13,7 +13,7 @@ import (
 
 type YamlController struct{}
 
-func RegisterYamlRoutes(api *chi.Router) {
+func RegisterYamlRoutes(api chi.Router) {
 	ctrl := &YamlController{}
 	api.POST("/yaml/apply", ctrl.Apply)
 	api.POST("/yaml/upload", ctrl.UploadFile)

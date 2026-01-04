@@ -17,7 +17,7 @@ import (
 
 type PodAntiAffinityController struct{}
 
-func RegisterPodAntiAffinityRoutes(api *chi.Router) {
+func RegisterPodAntiAffinityRoutes(api chi.Router) {
 	ctrl := &PodAntiAffinityController{}
 	api.POST("/{kind}/group/{group}/version/{version}/update_pod_anti_affinity/ns/{ns}/name/{name}", ctrl.UpdatePodAntiAffinity)
 	api.POST("/{kind}/group/{group}/version/{version}/delete_pod_anti_affinity/ns/{ns}/name/{name}", ctrl.DeletePodAntiAffinity)

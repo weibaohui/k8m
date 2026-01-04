@@ -13,7 +13,7 @@ import (
 type SSOConfigController struct {
 }
 
-func RegisterSSOConfigRoutes(admin *chi.Router) {
+func RegisterSSOConfigRoutes(admin chi.Router) {
 	ctrl := &SSOConfigController{}
 	// SSO 配置
 	admin.GET("/config/sso/list", ctrl.List)

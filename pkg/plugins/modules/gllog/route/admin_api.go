@@ -9,9 +9,10 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func RegisterManagementRoutes(arg *chi.Router) {
-	g := arg.Group("/plugins/" + modules.PluginNameGlobalLog)
-	g.GET("/list", ListGlobalLog)
+// RegisterManagementRoutes 注册全局日志插件管理路由 - Gin到Chi迁移
+func RegisterManagementRoutes(arg chi.Router) {
+	prefix := "/plugins/" + modules.PluginNameGlobalLog
+	arg.Get(prefix+"/list", response.Adapter(ListGlobalLog))
 	klog.V(6).Infof("注册全局日志插件管理路由(mgm)")
 }
 

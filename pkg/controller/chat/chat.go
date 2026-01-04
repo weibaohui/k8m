@@ -19,7 +19,7 @@ import (
 type Controller struct {
 }
 
-func RegisterChatRoutes(ai *chi.Router) {
+func RegisterChatRoutes(ai chi.Router) {
 	ctrl := &Controller{}
 	ai.GET("/chat/event", ctrl.Event)
 	ai.GET("/chat/log", ctrl.Log)

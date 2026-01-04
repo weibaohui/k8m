@@ -16,7 +16,7 @@ import (
 
 type TolerationController struct{}
 
-func RegisterTolerationRoutes(api *chi.Router) {
+func RegisterTolerationRoutes(api chi.Router) {
 	ctrl := &TolerationController{}
 	api.POST("/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name}", ctrl.Update)
 	api.POST("/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name}", ctrl.Delete)
