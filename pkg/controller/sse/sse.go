@@ -35,13 +35,13 @@ func WriteSSE(c *response.Context, stream io.ReadCloser) {
 			}
 			// 处理读取错误，向客户端发送错误消息
 			c.SSEvent("error", fmt.Sprintf("Error reading stream: %v", err))
-			c.Writer.Flush()
+			c.Flush()
 			break
 		}
 		// 发送 SSE 消息
 		c.SSEvent("message", line)
 		// 刷新输出缓冲区
-		c.Writer.Flush()
+		c.Flush()
 	}
 }
 func WriteSSEWithChannel(c *response.Context, logCh <-chan string, done chan struct{}) {
@@ -61,7 +61,7 @@ func WriteSSEWithChannel(c *response.Context, logCh <-chan string, done chan str
 			} else {
 				c.SSEvent("message", message)
 			}
-			c.Writer.Flush()
+			c.Flush()
 		case <-c.Request.Context().Done():
 			close(done) // 停止数据库查询
 			return
@@ -106,7 +106,7 @@ func WriteWebSocketChatCompletionStream(c *response.Context, stream *openai.Chat
 		}
 
 		// 发送数据给客户端
-		conn.WriteJSON(response.H{
+		conn.WriteJSON(map[string]interface{}{
 			"data": string(response.Choices[0].Delta.Content),
 		})
 	}

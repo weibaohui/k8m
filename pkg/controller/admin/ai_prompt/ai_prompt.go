@@ -18,17 +18,18 @@ type AdminAIPromptController struct {
 }
 
 // RegisterAdminAIPromptRoutes 注册AI提示词管理路由
-func RegisterAdminAIPromptRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAdminAIPromptRoutes(r chi.Router) {
 	ctrl := &AdminAIPromptController{}
-	admin.GET("/ai_prompt/list", ctrl.AIPromptList)
-	admin.POST("/ai_prompt/delete/:ids", ctrl.AIPromptDelete)
-	admin.POST("/ai_prompt/save", ctrl.AIPromptSave)
-	admin.POST("/ai_prompt/load", ctrl.AIPromptLoad)
-	admin.GET("/ai_prompt/option_list", ctrl.AIPromptOptionList)
-	admin.GET("/ai_prompt/types", ctrl.AIPromptTypes)
+	r.Get("/ai_prompt/list", response.Adapter(ctrl.AIPromptList))
+	r.Post("/ai_prompt/delete/{ids}", response.Adapter(ctrl.AIPromptDelete))
+	r.Post("/ai_prompt/save", response.Adapter(ctrl.AIPromptSave))
+	r.Post("/ai_prompt/load", response.Adapter(ctrl.AIPromptLoad))
+	r.Get("/ai_prompt/option_list", response.Adapter(ctrl.AIPromptOptionList))
+	r.Get("/ai_prompt/types", response.Adapter(ctrl.AIPromptTypes))
 
-	admin.POST("/ai_prompt/toggle/:id", ctrl.AIPromptToggle)                 // 添加启用/禁用路由
-	admin.POST("/ai_prompt/id/:id/enabled/:enabled", ctrl.AIPromptQuickSave) // 快捷保存启用状态
+	r.Post("/ai_prompt/toggle/{id}", response.Adapter(ctrl.AIPromptToggle))                  // 添加启用/禁用路由
+	r.Post("/ai_prompt/id/{id}/enabled/{enabled}", response.Adapter(ctrl.AIPromptQuickSave)) // 快捷保存启用状态
 }
 
 // @Summary 获取AI提示词列表

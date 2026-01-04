@@ -3,6 +3,7 @@ package response
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -107,6 +108,15 @@ func (c *Context) Flush() {
 	if f, ok := c.Writer.(http.Flusher); ok {
 		f.Flush()
 	}
+}
+
+func (c *Context) SSEvent(name string, data interface{}) {
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	if name != "" {
+		fmt.Fprintf(c.Writer, "event: %s\n", name)
+	}
+	fmt.Fprintf(c.Writer, "data: %v\n\n", data)
+	c.Flush()
 }
 
 func (c *Context) Param(key string) string {

@@ -5,7 +5,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -22,30 +21,29 @@ import (
 // 1. 插件列表（显示Meta信息与状态）
 // 2. 安装插件
 // 3. 卸载插件
-func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
-	grp := admin.Group("/plugin")
-
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func (m *Manager) RegisterAdminRoutes(r chi.Router) {
 	// 列出所有已注册插件的Meta和状态
-	grp.GET("/list", m.ListPlugins)
+	r.Get("/plugin/list", response.Adapter(m.ListPlugins))
 
 	// 安装插件
-	grp.POST("/install/:name", m.InstallPlugin)
+	r.Post("/plugin/install/{name}", response.Adapter(m.InstallPlugin))
 	// 启用插件
-	grp.POST("/enable/:name", m.EnablePlugin)
+	r.Post("/plugin/enable/{name}", response.Adapter(m.EnablePlugin))
 	// 禁用插件
-	grp.POST("/disable/:name", m.DisablePlugin)
+	r.Post("/plugin/disable/{name}", response.Adapter(m.DisablePlugin))
 	// 卸载插件（删除数据）
-	grp.POST("/uninstall/:name", m.UninstallPlugin)
+	r.Post("/plugin/uninstall/{name}", response.Adapter(m.UninstallPlugin))
 	// 卸载插件（保留数据）
-	grp.POST("/uninstall-keep-data/:name", m.UninstallPluginKeepData)
+	r.Post("/plugin/uninstall-keep-data/{name}", response.Adapter(m.UninstallPluginKeepData))
 	// 升级插件
-	grp.POST("/upgrade/:name", m.UpgradePlugin)
+	r.Post("/plugin/upgrade/{name}", response.Adapter(m.UpgradePlugin))
 
 	// 定时任务管理
-	grp.GET("/cron/:name", m.ListPluginCrons)
-	grp.POST("/cron/:name/run_once", m.RunPluginCronOnce)
+	r.Get("/plugin/cron/{name}", response.Adapter(m.ListPluginCrons))
+	r.Post("/plugin/cron/{name}/run_once", response.Adapter(m.RunPluginCronOnce))
 	// 统一开关接口（生效/关闭）
-	grp.POST("/cron/name/:name/spec/:spec/enabled/:enabled", m.SetPluginCronEnabled)
+	r.Post("/plugin/cron/name/{name}/spec/{spec}/enabled/{enabled}", response.Adapter(m.SetPluginCronEnabled))
 
 }
 
