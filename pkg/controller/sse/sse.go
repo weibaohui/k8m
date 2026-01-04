@@ -138,7 +138,7 @@ func WriteSSEChatCompletionStream(c *response.Context, stream *openai.ChatComple
 		// 发送 SSE 消息
 		c.SSEvent("message", response.Choices[0].Delta.Content)
 		// 刷新输出缓冲区
-		c.Writer.Flush()
+		c.Flush()
 	}
 
 }
