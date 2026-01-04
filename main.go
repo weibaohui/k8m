@@ -153,10 +153,7 @@ func main() {
 		r.Use(middleware.CustomRecovery())
 	}
 
-	if cfg.Debug {
-		// Debug 模式 注册 pprof 路由
-		r.Mount("/debug", cmiddleware.Profiler())
-	}
+	// CORS 中间件
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -176,6 +173,11 @@ func main() {
 	r.Handle("/assets/*", http.StripPrefix("/assets", http.FileServer(http.FS(assetsFS))))
 	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
 	r.Handle("/monacoeditorwork/*", http.StripPrefix("/monacoeditorwork", http.FileServer(http.FS(monacoFS))))
+
+	if cfg.Debug {
+		// Debug 模式 注册 pprof 路由
+		r.Mount("/debug", cmiddleware.Profiler())
+	}
 
 	r.Get("/favicon.ico", response.Adapter(func(c *response.Context) {
 		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
