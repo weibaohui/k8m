@@ -18,10 +18,10 @@ type TolerationController struct{}
 
 func RegisterTolerationRoutes(api *chi.Router) {
 	ctrl := &TolerationController{}
-	api.POST("/:kind/group/:group/version/:version/update_tolerations/ns/:ns/name/:name", ctrl.Update)
-	api.POST("/:kind/group/:group/version/:version/delete_tolerations/ns/:ns/name/:name", ctrl.Delete)
-	api.POST("/:kind/group/:group/version/:version/add_tolerations/ns/:ns/name/:name", ctrl.Add)
-	api.GET("/:kind/group/:group/version/:version/list_tolerations/ns/:ns/name/:name", ctrl.List)
+	api.POST("/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name}", ctrl.Update)
+	api.POST("/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name}", ctrl.Delete)
+	api.POST("/{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name}", ctrl.Add)
+	api.GET("/{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name}", ctrl.List)
 }
 
 // @Summary 获取资源容忍度列表

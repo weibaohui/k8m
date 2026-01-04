@@ -16,15 +16,14 @@ import (
 
 type Controller struct{}
 
-func RegisterProfileRoutes(mgm *chi.Router) {
+func RegisterProfileRoutes(mgm chi.Router) {
 	ctrl := &Controller{}
-	mgm.GET("/user/profile", ctrl.Profile)
-	mgm.GET("/user/profile/cluster/permissions/list", ctrl.ListUserPermissions)
-	mgm.POST("/user/profile/update_psw", ctrl.UpdatePsw)
-	// user profile 2FA 用户自助操作
-	mgm.POST("/user/profile/2fa/generate", ctrl.Generate2FASecret)
-	mgm.POST("/user/profile/2fa/disable", ctrl.Disable2FA)
-	mgm.POST("/user/profile/2fa/enable", ctrl.Enable2FA)
+	mgm.Get("/user/profile", response.Adapter(ctrl.Profile))
+	mgm.Get("/user/profile/cluster/permissions/list", response.Adapter(ctrl.ListUserPermissions))
+	mgm.Post("/user/profile/update_psw", response.Adapter(ctrl.UpdatePsw))
+	mgm.Post("/user/profile/2fa/generate", response.Adapter(ctrl.Generate2FASecret))
+	mgm.Post("/user/profile/2fa/disable", response.Adapter(ctrl.Disable2FA))
+	mgm.Post("/user/profile/2fa/enable", response.Adapter(ctrl.Enable2FA))
 }
 
 // @Summary 获取用户信息

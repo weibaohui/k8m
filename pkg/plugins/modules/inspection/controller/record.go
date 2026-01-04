@@ -16,12 +16,17 @@ import (
 type AdminRecordController struct {
 }
 
-func RegisterAdminRecordRoutes(arg *chi.Router) {
-	admin := arg.Group("/plugins/" + modules.PluginNameInspection)
+// RegisterAdminRecordRoutes 注册巡检记录路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+// Chi 中使用 chi.NewRouter() 创建子路由
+func RegisterAdminRecordRoutes(arg chi.Router) {
+	admin := chi.NewRouter()
 	ctrl := &AdminRecordController{}
-	admin.GET("/schedule/id/:id/record/list", ctrl.RecordList)
-	admin.GET("/record/list", ctrl.RecordList)
-	admin.POST("/schedule/record/id/:id/push", ctrl.Push)
+	admin.Get("/schedule/id/{id}/record/list", response.Adapter(ctrl.RecordList))
+	admin.Get("/record/list", response.Adapter(ctrl.RecordList))
+	admin.Post("/schedule/record/id/{id}/push", response.Adapter(ctrl.Push))
+
+	arg.Mount("/plugins/"+modules.PluginNameInspection, admin)
 }
 
 // @Summary 获取巡检记录列表

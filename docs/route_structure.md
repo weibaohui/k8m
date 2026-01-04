@@ -19,8 +19,8 @@ graph TD
 graph TD
     B[认证路由 /auth] --> B1[登录 POST /auth/login]
     B --> B2[SSO配置 GET /auth/sso/config]
-    B --> B3[OIDC认证 GET /auth/oidc/:name/sso]
-    B --> B4[OIDC回调 GET /auth/oidc/:name/callback]
+    B --> B3[OIDC认证 GET /auth/oidc/{name}/sso]
+    B --> B4[OIDC回调 GET /auth/oidc/{name}/callback]
 ```
 
 ## 公共参数路由
@@ -28,7 +28,7 @@ graph TD
 ```mermaid
 graph TD
     F[公共参数路由 /params] --> F1[用户角色 GET /params/user/role]
-    F --> F2[配置项 GET /params/config/:key]
+    F --> F2[配置项 GET /params/config/{key}]
     F --> F3[集群列表 GET /params/cluster/option_list]
     F --> F4[版本信息 GET /params/version]
     F --> F5[Helm仓库 GET /params/helm/repo/option_list]
@@ -62,7 +62,7 @@ graph TD
 
     %% 资源管理子节点
     D1 --> D1_1[YAML应用 POST /yaml/apply]
-    D1 --> D1_2[动态资源操作 /:kind/group/:group/version/:version/**]
+    D1 --> D1_2[动态资源操作 /{kind}/group/{group}/version/{version}/**]
 
     %% 工作负载子节点
     D2 --> D2_1[Pod管理]
@@ -113,7 +113,7 @@ graph TD
     E3 --> E3_2[操作日志 GET /mgm/log/operation/list]
 
     %% 集群管理子节点
-    E4 --> E4_1[集群重连 POST /mgm/cluster/:cluster/reconnect]
+    E4 --> E4_1[集群重连 POST /mgm/cluster/{cluster}/reconnect]
 ```
 
 ## 管理员路由

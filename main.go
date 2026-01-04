@@ -260,7 +260,7 @@ func main() {
 		}
 	})
 
-	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
+	api := r.Group("/k8s/cluster/{cluster}", middleware.AuthMiddleware())
 	{
 
 		// cluster

@@ -14,19 +14,19 @@ import (
 
 type PodLinkController struct{}
 
-func RegisterPodLinkRoutes(api *chi.Router) {
+func RegisterPodLinkRoutes(api chi.Router) {
 	ctrl := &PodLinkController{}
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", ctrl.LinksServices)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", ctrl.LinksEndpoints)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pvc", ctrl.LinksPVC)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pv", ctrl.LinksPV)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/ingress", ctrl.LinksIngress)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/env", ctrl.LinksEnv)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/envFromPod", ctrl.LinksEnvFromPod)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/configmap", ctrl.LinksConfigMap)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/secret", ctrl.LinksSecret)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/node", ctrl.LinksNode)
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/pod", ctrl.LinksPod)
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/services", response.Adapter(ctrl.LinksServices))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/endpoints", response.Adapter(ctrl.LinksEndpoints))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/pvc", response.Adapter(ctrl.LinksPVC))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/pv", response.Adapter(ctrl.LinksPV))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/ingress", response.Adapter(ctrl.LinksIngress))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/env", response.Adapter(ctrl.LinksEnv))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/envFromPod", response.Adapter(ctrl.LinksEnvFromPod))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/configmap", response.Adapter(ctrl.LinksConfigMap))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/secret", response.Adapter(ctrl.LinksSecret))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/node", response.Adapter(ctrl.LinksNode))
+	api.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/pod", response.Adapter(ctrl.LinksPod))
 
 }
 

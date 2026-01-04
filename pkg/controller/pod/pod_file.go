@@ -21,14 +21,16 @@ import (
 
 type FileController struct{}
 
-func RegisterPodFileRoutes(api *chi.Router) {
+// RegisterPodFileRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterPodFileRoutes(api chi.Router) {
 	ctrl := &FileController{}
-	api.POST("/file/list", ctrl.List)
-	api.POST("/file/show", ctrl.Show)
-	api.POST("/file/save", ctrl.Save)
-	api.GET("/file/download", ctrl.Download)
-	api.POST("/file/upload", ctrl.Upload)
-	api.POST("/file/delete", ctrl.Delete)
+	api.Post("/file/list", response.Adapter(ctrl.List))
+	api.Post("/file/show", response.Adapter(ctrl.Show))
+	api.Post("/file/save", response.Adapter(ctrl.Save))
+	api.Get("/file/download", response.Adapter(ctrl.Download))
+	api.Post("/file/upload", response.Adapter(ctrl.Upload))
+	api.Post("/file/delete", response.Adapter(ctrl.Delete))
 }
 
 type info struct {
@@ -58,7 +60,7 @@ func (fc *FileController) List(c *response.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -100,7 +102,7 @@ func (fc *FileController) Show(c *response.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -159,7 +161,7 @@ func (fc *FileController) Save(c *response.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -369,7 +371,7 @@ func (fc *FileController) Delete(c *response.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

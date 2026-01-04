@@ -496,8 +496,8 @@ func (m *Manager) SetPluginCronEnabled(c *response.Context) {
 // extractPluginName 从路由路径中提取插件名
 // 规则：寻找 "/plugins/" 段，返回其后第一个路径段作为插件名
 // 示例：
-// - /k8s/cluster/:cluster/plugins/demo/items    -> demo
-// - /admin/plugins/demo/remove/items/:id       -> demo
+// - /k8s/cluster/{cluster}/plugins/demo/items    -> demo
+// - /admin/plugins/demo/remove/items/{id}       -> demo
 // - /mgm/plugins/demo                          -> demo
 func extractPluginName(p string) (string, bool) {
 	idx := strings.Index(p, "/plugins/")

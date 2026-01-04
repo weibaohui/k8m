@@ -17,12 +17,14 @@ import (
 
 type PodAffinityController struct{}
 
-func RegisterPodAffinityRoutes(api *chi.Router) {
+// RegisterPodAffinityRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterPodAffinityRoutes(api chi.Router) {
 	ctrl := &PodAffinityController{}
-	api.POST("/:kind/group/:group/version/:version/update_pod_affinity/ns/:ns/name/:name", ctrl.UpdatePodAffinity)
-	api.POST("/:kind/group/:group/version/:version/delete_pod_affinity/ns/:ns/name/:name", ctrl.DeletePodAffinity)
-	api.POST("/:kind/group/:group/version/:version/add_pod_affinity/ns/:ns/name/:name", ctrl.AddPodAffinity)
-	api.GET("/:kind/group/:group/version/:version/list_pod_affinity/ns/:ns/name/:name", ctrl.ListPodAffinity)
+	api.Post("/{kind}/group/{group}/version/{version}/update_pod_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdatePodAffinity))
+	api.Post("/{kind}/group/{group}/version/{version}/delete_pod_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.DeletePodAffinity))
+	api.Post("/{kind}/group/{group}/version/{version}/add_pod_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.AddPodAffinity))
+	api.Get("/{kind}/group/{group}/version/{version}/list_pod_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.ListPodAffinity))
 
 }
 

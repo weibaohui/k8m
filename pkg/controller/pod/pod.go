@@ -21,11 +21,13 @@ import (
 
 type LogController struct{}
 
-func RegisterLogRoutes(api *chi.Router) {
+// RegisterLogRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterLogRoutes(api chi.Router) {
 	ctrl := &LogController{}
-	api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.StreamLogs)
-	api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.DownloadLogs)
-	api.GET("/pod/name/option_list", ctrl.PodNameOptionList)
+	api.Get("/pod/logs/sse/ns/{ns}/pod_name/{pod_name}/container/{container_name}", response.Adapter(ctrl.StreamLogs))
+	api.Get("/pod/logs/download/ns/{ns}/pod_name/{pod_name}/container/{container_name}", response.Adapter(ctrl.DownloadLogs))
+	api.Get("/pod/name/option_list", response.Adapter(ctrl.PodNameOptionList))
 }
 
 // StreamLogs 通过SSE流式传输Pod日志

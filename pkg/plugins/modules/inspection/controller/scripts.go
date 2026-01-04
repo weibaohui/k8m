@@ -15,14 +15,16 @@ import (
 type AdminLuaScriptController struct {
 }
 
-func RegisterAdminLuaScriptRoutes(arg *chi.Router) {
-	admin := arg.Group("/plugins/" + modules.PluginNameInspection)
+func RegisterAdminLuaScriptRoutes(arg chi.Router) {
+	admin := chi.NewRouter()
 	ctrl := &AdminLuaScriptController{}
-	admin.GET("/script/list", ctrl.LuaScriptList)
-	admin.POST("/script/delete/:ids", ctrl.LuaScriptDelete)
-	admin.POST("/script/save", ctrl.LuaScriptSave)
-	admin.POST("/script/load", ctrl.LuaScriptLoad)
-	admin.GET("/script/option_list", ctrl.LuaScriptOptionList)
+	admin.Get("/script/list", response.Adapter(ctrl.LuaScriptList))
+	admin.Post("/script/delete/{ids}", response.Adapter(ctrl.LuaScriptDelete))
+	admin.Post("/script/save", response.Adapter(ctrl.LuaScriptSave))
+	admin.Post("/script/load", response.Adapter(ctrl.LuaScriptLoad))
+	admin.Get("/script/option_list", response.Adapter(ctrl.LuaScriptOptionList))
+
+	arg.Mount("/plugins/"+modules.PluginNameInspection, admin)
 }
 
 // @Summary 获取Lua脚本列表

@@ -18,8 +18,8 @@ func RegisterSSOConfigRoutes(admin *chi.Router) {
 	// SSO 配置
 	admin.GET("/config/sso/list", ctrl.List)
 	admin.POST("/config/sso/save", ctrl.Save)
-	admin.POST("/config/sso/delete/:ids", ctrl.Delete)
-	admin.POST("/config/sso/save/id/:id/status/:enabled", ctrl.QuickSave)
+	admin.POST("/config/sso/delete/{ids}", ctrl.Delete)
+	admin.POST("/config/sso/save/id/{id}/status/{enabled}", ctrl.QuickSave)
 }
 
 // @Summary 获取SSO配置列表

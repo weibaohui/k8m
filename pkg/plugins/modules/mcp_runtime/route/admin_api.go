@@ -8,8 +8,11 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// RegisterPluginAdminRoutes 注册插件管理路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+// Chi 中使用 chi.NewRouter() 创建子路由
 func RegisterPluginAdminRoutes(arg chi.Router) {
-	g := arg.Group("/plugins/" + modules.PluginNameMCPRuntime)
+	g := chi.NewRouter()
 
 	serverCtrl := &admin.ServerController{}
 	g.Get("/server/list", response.Adapter(serverCtrl.List))
@@ -20,19 +23,26 @@ func RegisterPluginAdminRoutes(arg chi.Router) {
 	g.Get("/server/log/list", response.Adapter(serverCtrl.MCPLogList))
 
 	toolCtrl := &admin.ToolController{}
-	g.GET("/tool/server/:name/list", toolCtrl.List)
-	g.POST("/tool/save/id/:id/status/:status", toolCtrl.QuickSave)
+	g.Get("/tool/server/{name}/list", response.Adapter(toolCtrl.List))
+	g.Post("/tool/save/id/{id}/status/:status", response.Adapter(toolCtrl.QuickSave))
+
+	arg.Mount("/plugins/"+modules.PluginNameMCPRuntime, g)
 
 	klog.V(6).Infof("注册 MCP 插件管理路由(admin)")
 }
 
+// RegisterPluginMgmRoutes 注册插件管理路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+// Chi 中使用 chi.NewRouter() 创建子路由
 func RegisterPluginMgmRoutes(arg chi.Router) {
-	mgm := arg.Group("/plugins/" + modules.PluginNameMCPRuntime)
+	mgm := chi.NewRouter()
 
 	keyCtrl := &admin.KeyController{}
-	mgm.GET("/user/profile/mcp_keys/list", keyCtrl.List)
-	mgm.POST("/user/profile/mcp_keys/create", keyCtrl.Create)
-	mgm.POST("/user/profile/mcp_keys/delete/:id", keyCtrl.Delete)
+	mgm.Get("/user/profile/mcp_keys/list", response.Adapter(keyCtrl.List))
+	mgm.Post("/user/profile/mcp_keys/create", response.Adapter(keyCtrl.Create))
+	mgm.Post("/user/profile/mcp_keys/delete/{id}", response.Adapter(keyCtrl.Delete))
+
+	arg.Mount("/plugins/"+modules.PluginNameMCPRuntime, mgm)
 
 	klog.V(6).Infof("注册 MCP 插件管理路由(mgm)")
 }

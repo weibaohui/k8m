@@ -15,11 +15,11 @@ import (
 
 type PortController struct{}
 
-func RegisterPortRoutes(api *chi.Router) {
+func RegisterPortRoutes(api chi.Router) {
 	ctrl := &PortController{}
-	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", ctrl.StartPortForward)
-	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", ctrl.StopPortForward)
-	api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", ctrl.PortForwardList)
+	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", response.Adapter(ctrl.StartPortForward))
+	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/:container_name/pod_port/:pod_port/stop", response.Adapter(ctrl.StopPortForward))
+	api.Get("/pod/port_forward/ns/{ns}/name/{name}/port/list", response.Adapter(ctrl.PortForwardList))
 }
 
 // PortInfo 结构体用于描述端口转发信息

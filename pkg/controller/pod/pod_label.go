@@ -10,9 +10,9 @@ import (
 
 type LabelController struct{}
 
-func RegisterLabelRoutes(api *chi.Router) {
+func RegisterLabelRoutes(api chi.Router) {
 	ctrl := &LabelController{}
-	api.GET("/pod/labels/unique_labels", ctrl.UniqueLabels)
+	api.Get("/pod/labels/unique_labels", response.Adapter(ctrl.UniqueLabels))
 
 }
 

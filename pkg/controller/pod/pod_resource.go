@@ -16,8 +16,8 @@ type ResourceController struct{}
 
 func RegisterResourceRoutes(api *chi.Router) {
 	ctrl := &ResourceController{}
-	api.GET("/pod/usage/ns/:ns/name/:name", ctrl.Usage)
-	api.GET("/pod/top/ns/:ns/list", ctrl.TopList)
+	api.GET("/pod/usage/ns/{ns}/name/{name}", ctrl.Usage)
+	api.GET("/pod/top/ns/{ns}/list", ctrl.TopList)
 }
 
 // @Summary 获取Pod资源使用情况

@@ -141,6 +141,10 @@ func (c *Context) DefaultQuery(key, def string) string {
 	return def
 }
 
+func (c *Context) Header(key, value string) {
+	c.Writer.Header().Set(key, value)
+}
+
 type HandlerFunc func(*Context)
 
 func Adapter(h HandlerFunc) http.HandlerFunc {

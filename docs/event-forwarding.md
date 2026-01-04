@@ -17,7 +17,7 @@
     - `event_watcher_buffer_size`：Watcher 缓存大小
 - 规则配置（按集群与Webhook）：
   - 路径：界面「事件转发插件 → 事件转发规则」
-  - 接口：`/admin/plugins/eventhandler/list`、`/admin/plugins/eventhandler/save`、`/admin/plugins/eventhandler/delete/:ids`
+  - 接口：`/admin/plugins/eventhandler/list`、`/admin/plugins/eventhandler/save`、`/admin/plugins/eventhandler/delete/{ids}`
   - 字段包含：目标集群、Webhook、命名空间/名称/原因过滤、反选、AI总结等
 
 ## 原理流程

@@ -13,11 +13,13 @@ import (
 
 type MetadataController struct{}
 
-func RegisterMetadataRoutes(api *chi.Router) {
+// RegisterMetadataRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterMetadataRoutes(api chi.Router) {
 	ctrl := &MetadataController{}
-	api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", ctrl.UpdateLabels)           // CRD
-	api.GET("/:kind/group/:group/version/:version/annotations/ns/:ns/name/:name", ctrl.ListAnnotations)           // CRD
-	api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", ctrl.UpdateAnnotations) // CRD
+	api.Post("/{kind}/group/{group}/version/{version}/update_labels/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdateLabels))
+	api.Get("/{kind}/group/{group}/version/{version}/annotations/ns/{ns}/name/{name}", response.Adapter(ctrl.ListAnnotations))
+	api.Post("/{kind}/group/{group}/version/{version}/update_annotations/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdateAnnotations))
 }
 
 // @Summary 更新资源标签

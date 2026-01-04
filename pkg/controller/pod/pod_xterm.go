@@ -33,7 +33,7 @@ type XtermController struct{}
 
 func RegisterXtermRoutes(api *chi.Router) {
 	ctrl := &XtermController{}
-	api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", ctrl.Xterm)
+	api.GET("/pod/xterm/ns/{ns}/pod_name/{pod_name}", ctrl.Xterm)
 }
 
 var WebsocketMessageType = map[int]string{

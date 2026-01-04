@@ -17,8 +17,8 @@ func RegisterPluginAdminRoutes(arg *chi.Router) {
 
 	g.GET("/list", ctrl.List)
 	g.POST("/save", ctrl.Save)
-	g.POST("/delete/:ids", ctrl.Delete)
-	g.POST("/save/id/:id/status/:enabled", ctrl.QuickSave)
+	g.POST("/delete/{ids}", ctrl.Delete)
+	g.POST("/save/id/{id}/status/{enabled}", ctrl.QuickSave)
 
 	klog.V(6).Infof("注册事件转发插件管理路由(admin)")
 }
