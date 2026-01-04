@@ -21,19 +21,19 @@ type Controller struct {
 
 func RegisterChatRoutes(ai chi.Router) {
 	ctrl := &Controller{}
-	ai.GET("/chat/event", ctrl.Event)
-	ai.GET("/chat/log", ctrl.Log)
-	ai.GET("/chat/cron", ctrl.Cron)
-	ai.GET("/chat/describe", ctrl.Describe)
-	ai.GET("/chat/resource", ctrl.Resource)
-	ai.GET("/chat/any_question", ctrl.AnyQuestion)
-	ai.GET("/chat/any_selection", ctrl.AnySelection)
-	ai.GET("/chat/example", ctrl.Example)
-	ai.GET("/chat/example/field", ctrl.FieldExample)
-	ai.GET("/chat/ws_chatgpt", ctrl.GPTShell)
-	ai.GET("/chat/ws_chatgpt/history", ctrl.History)
-	ai.GET("/chat/ws_chatgpt/history/reset", ctrl.Reset)
-	ai.GET("/chat/k8s_gpt/resource", ctrl.K8sGPTResource)
+	ai.Get("/chat/event", response.Adapter(ctrl.Event))
+	ai.Get("/chat/log", response.Adapter(ctrl.Log))
+	ai.Get("/chat/cron", response.Adapter(ctrl.Cron))
+	ai.Get("/chat/describe", response.Adapter(ctrl.Describe))
+	ai.Get("/chat/resource", response.Adapter(ctrl.Resource))
+	ai.Get("/chat/any_question", response.Adapter(ctrl.AnyQuestion))
+	ai.Get("/chat/any_selection", response.Adapter(ctrl.AnySelection))
+	ai.Get("/chat/example", response.Adapter(ctrl.Example))
+	ai.Get("/chat/example/field", response.Adapter(ctrl.FieldExample))
+	ai.Get("/chat/ws_chatgpt", response.Adapter(ctrl.GPTShell))
+	ai.Get("/chat/ws_chatgpt/history", response.Adapter(ctrl.History))
+	ai.Get("/chat/ws_chatgpt/history/reset", response.Adapter(ctrl.Reset))
+	ai.Get("/chat/k8s_gpt/resource", response.Adapter(ctrl.K8sGPTResource))
 }
 
 type ResourceData struct {

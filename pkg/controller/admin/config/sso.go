@@ -15,11 +15,11 @@ type SSOConfigController struct {
 
 func RegisterSSOConfigRoutes(admin chi.Router) {
 	ctrl := &SSOConfigController{}
-	// SSO 配置
-	admin.GET("/config/sso/list", ctrl.List)
-	admin.POST("/config/sso/save", ctrl.Save)
-	admin.POST("/config/sso/delete/{ids}", ctrl.Delete)
-	admin.POST("/config/sso/save/id/{id}/status/{enabled}", ctrl.QuickSave)
+	// SSO 配置 - Gin到Chi迁移
+	admin.Get("/config/sso/list", response.Adapter(ctrl.List))
+	admin.Post("/config/sso/save", response.Adapter(ctrl.Save))
+	admin.Post("/config/sso/delete/{ids}", response.Adapter(ctrl.Delete))
+	admin.Post("/config/sso/save/id/{id}/status/{enabled}", response.Adapter(ctrl.QuickSave))
 }
 
 // @Summary 获取SSO配置列表
