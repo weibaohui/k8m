@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -20,11 +20,12 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.POST("/configmap/ns/:ns/name/:name/import", ctrl.Import)
-	api.POST("/configmap/ns/:ns/name/:name/:key/update_configmap", ctrl.Update)
-	api.POST("/configmap/create", ctrl.Create)
+	r.Post("/configmap/ns/{ns}/name/{name}/import", response.Adapter(ctrl.Import))
+	r.Post("/configmap/ns/{ns}/name/{name}/{key}/update_configmap", response.Adapter(ctrl.Update))
+	r.Post("/configmap/create", response.Adapter(ctrl.Create))
 }
 
 type info struct {

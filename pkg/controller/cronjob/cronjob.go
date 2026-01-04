@@ -1,7 +1,7 @@
 package cronjob
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -11,12 +11,13 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.POST("/cronjob/pause/ns/:ns/name/:name", ctrl.Pause)
-	api.POST("/cronjob/resume/ns/:ns/name/:name", ctrl.Resume)
-	api.POST("/cronjob/batch/resume", ctrl.BatchResume)
-	api.POST("/cronjob/batch/pause", ctrl.BatchPause)
+	r.Post("/cronjob/pause/ns/{ns}/name/{name}", response.Adapter(ctrl.Pause))
+	r.Post("/cronjob/resume/ns/{ns}/name/{name}", response.Adapter(ctrl.Resume))
+	r.Post("/cronjob/batch/resume", response.Adapter(ctrl.BatchResume))
+	r.Post("/cronjob/batch/pause", response.Adapter(ctrl.BatchPause))
 }
 
 // @Summary 暂停 CronJob

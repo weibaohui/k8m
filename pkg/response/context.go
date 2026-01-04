@@ -19,12 +19,12 @@ var ctxKey = ContextKey{}
 var decoder = schema.NewDecoder()
 
 type Context struct {
-	W       http.ResponseWriter
+	Writer  http.ResponseWriter
 	Request *http.Request
 }
 
 func New(w http.ResponseWriter, r *http.Request) *Context {
-	return &Context{W: w, Request: r}
+	return &Context{Writer: w, Request: r}
 }
 
 func FromRequest(r *http.Request) *Context {
@@ -35,23 +35,23 @@ func FromRequest(r *http.Request) *Context {
 }
 
 func (c *Context) JSON(status int, obj interface{}) {
-	c.W.Header().Set("Content-Type", "application/json; charset=utf-8")
-	c.W.WriteHeader(status)
+	c.Writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+	c.Writer.WriteHeader(status)
 	if obj != nil {
-		_ = json.NewEncoder(c.W).Encode(obj)
+		_ = json.NewEncoder(c.Writer).Encode(obj)
 	}
 }
 
 func (c *Context) String(status int, s string) {
-	c.W.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	c.W.WriteHeader(status)
-	_, _ = c.W.Write([]byte(s))
+	c.Writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	c.Writer.WriteHeader(status)
+	_, _ = c.Writer.Write([]byte(s))
 }
 
 func (c *Context) Data(status int, contentType string, data []byte) {
-	c.W.Header().Set("Content-Type", contentType)
-	c.W.WriteHeader(status)
-	_, _ = c.W.Write(data)
+	c.Writer.Header().Set("Content-Type", contentType)
+	c.Writer.WriteHeader(status)
+	_, _ = c.Writer.Write(data)
 }
 
 func (c *Context) AbortWithJSON(status int, obj interface{}) {
@@ -63,7 +63,7 @@ func (c *Context) AbortWithString(status int, s string) {
 }
 
 func (c *Context) Status(status int) *Context {
-	c.W.WriteHeader(status)
+	c.Writer.WriteHeader(status)
 	return c
 }
 
@@ -84,7 +84,7 @@ func (c *Context) ShouldBindQuery(obj interface{}) error {
 }
 
 func (c *Context) Redirect(code int, url string) {
-	http.Redirect(c.W, c.Request, url, code)
+	http.Redirect(c.Writer, c.Request, url, code)
 }
 
 func (c *Context) PostForm(key string) string {
@@ -104,7 +104,7 @@ func (c *Context) FormFile(key string) (*multipart.FileHeader, error) {
 }
 
 func (c *Context) Flush() {
-	if f, ok := c.W.(http.Flusher); ok {
+	if f, ok := c.Writer.(http.Flusher); ok {
 		f.Flush()
 	}
 }

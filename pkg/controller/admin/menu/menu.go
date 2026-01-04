@@ -3,7 +3,7 @@ package menu
 import (
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -16,15 +16,16 @@ type AdminMenuController struct {
 
 // AdminMenu 用于菜单相关接口
 // 路由注册函数
-func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAdminMenuRoutes(r chi.Router) {
 
 	ctrl := AdminMenuController{}
 	// menu 平台管理员可操作，管理菜单
-	admin.GET("/menu/list", ctrl.List)
-	admin.GET("/menu/history", ctrl.History)
-	admin.POST("/menu/save", ctrl.Save)
-	admin.POST("/menu/delete/:ids", ctrl.Delete)
-	admin.POST("/menu/history/delete/:id", ctrl.DeleteHistory)
+	r.Get("/menu/list", response.Adapter(ctrl.List))
+	r.Get("/menu/history", response.Adapter(ctrl.History))
+	r.Post("/menu/save", response.Adapter(ctrl.Save))
+	r.Post("/menu/delete/{ids}", response.Adapter(ctrl.Delete))
+	r.Post("/menu/history/delete/{id}", response.Adapter(ctrl.DeleteHistory))
 
 }
 

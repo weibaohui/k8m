@@ -1,7 +1,7 @@
 package template
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
@@ -11,12 +11,14 @@ import (
 type Controller struct {
 }
 
-func RegisterTemplateRoutes(mgm *gin.RouterGroup) {
+// RegisterTemplateRoutes 注册模板相关路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterTemplateRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	mgm.GET("/custom/template/kind/list", ctrl.ListKind)
-	mgm.GET("/custom/template/list", ctrl.List)
-	mgm.POST("/custom/template/save", ctrl.Save)
-	mgm.POST("/custom/template/delete/:ids", ctrl.Delete)
+	r.Get("/custom/template/kind/list", response.Adapter(ctrl.ListKind))
+	r.Get("/custom/template/list", response.Adapter(ctrl.List))
+	r.Post("/custom/template/save", response.Adapter(ctrl.Save))
+	r.Post("/custom/template/delete/{ids}", response.Adapter(ctrl.Delete))
 }
 
 // @Summary 模板列表

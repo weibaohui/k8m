@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -52,10 +53,10 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 // 参数路由用于插件的参数配置接口，只要登录即可访问，类似公共参数。
 // 提供功能：
 // 1. 获取已启用插件的菜单数据
-func (m *Manager) RegisterParamRoutes(params *gin.RouterGroup) {
-	grp := params.Group("/plugin")
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func (m *Manager) RegisterParamRoutes(r chi.Router) {
 	// 获取已启用插件的菜单数据
-	grp.GET("/menus", m.ListPluginMenus)
+	r.Get("/plugin/menus", response.Adapter(m.ListPluginMenus))
 
 }
 

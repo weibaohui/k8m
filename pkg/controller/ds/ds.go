@@ -1,7 +1,7 @@
 package ds
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -12,15 +12,17 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// RegisterRoutes 注册 DaemonSet 相关路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 
-	api.POST("/daemonset/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
-	api.GET("/daemonset/ns/:ns/name/:name/rollout/history", ctrl.History)
-	api.POST("/daemonset/ns/:ns/name/:name/restart", ctrl.Restart)
-	api.POST("/daemonset/batch/restart", ctrl.BatchRestart)
-	api.POST("/daemonset/batch/stop", ctrl.BatchStop)
-	api.POST("/daemonset/batch/restore", ctrl.BatchRestore)
+	r.Post("/daemonset/ns/{ns}/name/{name}/revision/{revision}/rollout/undo", response.Adapter(ctrl.Undo))
+	r.Get("/daemonset/ns/{ns}/name/{name}/rollout/history", response.Adapter(ctrl.History))
+	r.Post("/daemonset/ns/{ns}/name/{name}/restart", response.Adapter(ctrl.Restart))
+	r.Post("/daemonset/batch/restart", response.Adapter(ctrl.BatchRestart))
+	r.Post("/daemonset/batch/stop", response.Adapter(ctrl.BatchStop))
+	r.Post("/daemonset/batch/restore", response.Adapter(ctrl.BatchRestore))
 }
 
 // @Summary 获取DaemonSet回滚历史

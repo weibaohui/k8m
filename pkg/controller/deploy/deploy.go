@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -20,22 +20,24 @@ import (
 
 type ActionController struct{}
 
-func RegisterActionRoutes(api *gin.RouterGroup) {
+// RegisterActionRoutes 注册 Deployment 相关路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterActionRoutes(r chi.Router) {
 	ctrl := &ActionController{}
-	api.POST("/deploy/ns/:ns/name/:name/restart", ctrl.Restart)
-	api.POST("/deploy/batch/restart", ctrl.BatchRestart)
-	api.POST("/deploy/batch/stop", ctrl.BatchStop)
-	api.POST("/deploy/batch/restore", ctrl.BatchRestore)
-	api.POST("/deploy/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
-	api.GET("/deploy/ns/:ns/name/:name/rollout/history", ctrl.History)
-	api.GET("/deploy/ns/:ns/name/:name/revision/:revision/rollout/history", ctrl.HistoryRevisionDiff)
-	api.POST("/deploy/ns/:ns/name/:name/rollout/pause", ctrl.Pause)
-	api.POST("/deploy/ns/:ns/name/:name/rollout/resume", ctrl.Resume)
-	api.POST("/deploy/ns/:ns/name/:name/scale/replica/:replica", ctrl.Scale)
-	api.GET("/deploy/ns/:ns/name/:name/events/all", ctrl.Event)
-	api.GET("/deploy/ns/:ns/name/:name/hpa", ctrl.HPA)
-	api.POST("/deploy/create", ctrl.Create)
-	api.POST("/deployment/batch_update_images", ctrl.BatchUpdateImages)
+	r.Post("/deploy/ns/{ns}/name/{name}/restart", response.Adapter(ctrl.Restart))
+	r.Post("/deploy/batch/restart", response.Adapter(ctrl.BatchRestart))
+	r.Post("/deploy/batch/stop", response.Adapter(ctrl.BatchStop))
+	r.Post("/deploy/batch/restore", response.Adapter(ctrl.BatchRestore))
+	r.Post("/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/undo", response.Adapter(ctrl.Undo))
+	r.Get("/deploy/ns/{ns}/name/{name}/rollout/history", response.Adapter(ctrl.History))
+	r.Get("/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/history", response.Adapter(ctrl.HistoryRevisionDiff))
+	r.Post("/deploy/ns/{ns}/name/{name}/rollout/pause", response.Adapter(ctrl.Pause))
+	r.Post("/deploy/ns/{ns}/name/{name}/rollout/resume", response.Adapter(ctrl.Resume))
+	r.Post("/deploy/ns/{ns}/name/{name}/scale/replica/{replica}", response.Adapter(ctrl.Scale))
+	r.Get("/deploy/ns/{ns}/name/{name}/events/all", response.Adapter(ctrl.Event))
+	r.Get("/deploy/ns/{ns}/name/{name}/hpa", response.Adapter(ctrl.HPA))
+	r.Post("/deploy/create", response.Adapter(ctrl.Create))
+	r.Post("/deployment/batch_update_images", response.Adapter(ctrl.BatchUpdateImages))
 
 }
 

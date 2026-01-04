@@ -2,7 +2,7 @@ package ai_prompt
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -15,14 +15,16 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// RegisterRoutes 注册 ReplicaSet 相关路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.POST("/replicaset/ns/:ns/name/:name/restart", ctrl.Restart)
-	api.POST("/replicaset/batch/restart", ctrl.BatchRestart)
-	api.POST("/replicaset/batch/stop", ctrl.BatchStop)
-	api.POST("/replicaset/batch/restore", ctrl.BatchRestore)
-	api.GET("/replicaset/ns/:ns/name/:name/events/all", ctrl.Event)
-	api.GET("/replicaset/ns/:ns/name/:name/hpa", ctrl.HPA)
+	r.Post("/replicaset/ns/{ns}/name/{name}/restart", response.Adapter(ctrl.Restart))
+	r.Post("/replicaset/batch/restart", response.Adapter(ctrl.BatchRestart))
+	r.Post("/replicaset/batch/stop", response.Adapter(ctrl.BatchStop))
+	r.Post("/replicaset/batch/restore", response.Adapter(ctrl.BatchRestore))
+	r.Get("/replicaset/ns/{ns}/name/{name}/events/all", response.Adapter(ctrl.Event))
+	r.Get("/replicaset/ns/{ns}/name/{name}/hpa", response.Adapter(ctrl.HPA))
 }
 
 // Restart 重启指定的ReplicaSet

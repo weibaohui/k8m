@@ -24,7 +24,7 @@ import (
 func Adapt(fn func() http.Handler) response.HandlerFunc {
 	return func(c *response.Context) {
 		handler := fn()
-		handler.ServeHTTP(c.W, c.Request)
+		handler.ServeHTTP(c.Writer, c.Request)
 	}
 }
 

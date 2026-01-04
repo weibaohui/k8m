@@ -1,25 +1,27 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/admin"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
-func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
-	g := arg.Group("/plugins/" + modules.PluginNameWebhook)
+// RegisterPluginAdminRoutes 注册 webhook 插件管理路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterPluginAdminRoutes(r chi.Router) {
 	ctrl := &admin.Controller{}
 
-	g.GET("/list", ctrl.WebhookList)
-	g.POST("/delete/:ids", ctrl.WebhookDelete)
-	g.POST("/save", ctrl.WebhookSave)
-	g.POST("/id/:id/test", ctrl.WebhookTest)
-	g.GET("/option_list", ctrl.WebhookOptionList)
+	r.Get("/plugins/"+modules.PluginNameWebhook+"/list", response.Adapter(ctrl.WebhookList))
+	r.Post("/plugins/"+modules.PluginNameWebhook+"/delete/{ids}", response.Adapter(ctrl.WebhookDelete))
+	r.Post("/plugins/"+modules.PluginNameWebhook+"/save", response.Adapter(ctrl.WebhookSave))
+	r.Post("/plugins/"+modules.PluginNameWebhook+"/id/{id}/test", response.Adapter(ctrl.WebhookTest))
+	r.Get("/plugins/"+modules.PluginNameWebhook+"/option_list", response.Adapter(ctrl.WebhookOptionList))
 
-	g.GET("/records", ctrl.WebhookRecordList)
-	g.GET("/records/:id", ctrl.WebhookRecordDetail)
-	g.GET("/records/statistics", ctrl.WebhookRecordStatistics)
+	r.Get("/plugins/"+modules.PluginNameWebhook+"/records", response.Adapter(ctrl.WebhookRecordList))
+	r.Get("/plugins/"+modules.PluginNameWebhook+"/records/{id}", response.Adapter(ctrl.WebhookRecordDetail))
+	r.Get("/plugins/"+modules.PluginNameWebhook+"/records/statistics", response.Adapter(ctrl.WebhookRecordStatistics))
 
 	klog.V(6).Infof("注册webhook插件管理路由(admin)")
 }

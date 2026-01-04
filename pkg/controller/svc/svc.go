@@ -3,7 +3,7 @@ package svc
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -14,9 +14,11 @@ import (
 
 type ActionController struct{}
 
-func RegisterActionRoutes(api *gin.RouterGroup) {
+// RegisterActionRoutes 注册 Service 相关路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterActionRoutes(r chi.Router) {
 	ctrl := &ActionController{}
-	api.POST("/service/create", ctrl.Create)
+	r.Post("/service/create", response.Adapter(ctrl.Create))
 
 }
 
