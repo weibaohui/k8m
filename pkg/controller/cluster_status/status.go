@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 )
 
@@ -20,7 +21,7 @@ func RegisterClusterRoutes(api *gin.RouterGroup) {
 // @Param cache path string true "缓存时间（秒）"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/status/resource_count/cache_seconds/{cache} [get]
-func (cc *ClusterController) ClusterResourceCount(c *gin.Context) {
+func (cc *ClusterController) ClusterResourceCount(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -69,7 +70,7 @@ func countMenusRecursive(menus []Menu) int {
 
 // ListPlugins 获取所有已注册插件的Meta与状态
 // 返回插件名称、标题、版本、描述及当前状态（中文）
-func (m *Manager) ListPlugins(c *gin.Context) {
+func (m *Manager) ListPlugins(c *response.Context) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -120,7 +121,7 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 
 // ListPluginMenus 获取所有已启用插件的菜单定义
 // 返回前端可直接使用的菜单JSON（与前端 MenuItem 结构一致）
-func (m *Manager) ListPluginMenus(c *gin.Context) {
+func (m *Manager) ListPluginMenus(c *response.Context) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -216,7 +217,7 @@ func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
 
 // InstallPlugin 安装指定名称的插件
 // 路径参数为插件名，安装失败时返回错误
-func (m *Manager) InstallPlugin(c *gin.Context) {
+func (m *Manager) InstallPlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("安装插件配置请求: %s", name)
 
@@ -235,7 +236,7 @@ func (m *Manager) InstallPlugin(c *gin.Context) {
 
 // EnablePlugin 启用指定名称的插件
 // 路径参数为插件名，启用失败时返回错误
-func (m *Manager) EnablePlugin(c *gin.Context) {
+func (m *Manager) EnablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("启用插件配置请求: %s", name)
 	if err := m.Enable(name); err != nil {
@@ -253,7 +254,7 @@ func (m *Manager) EnablePlugin(c *gin.Context) {
 
 // UninstallPlugin 卸载指定名称的插件（删除数据）
 // 路径参数为插件名，卸载失败时返回错误
-func (m *Manager) UninstallPlugin(c *gin.Context) {
+func (m *Manager) UninstallPlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("卸载插件配置请求(删除数据): %s", name)
 	if err := m.Uninstall(name, false); err != nil {
@@ -271,7 +272,7 @@ func (m *Manager) UninstallPlugin(c *gin.Context) {
 
 // UninstallPluginKeepData 卸载指定名称的插件（保留数据）
 // 路径参数为插件名，卸载失败时返回错误
-func (m *Manager) UninstallPluginKeepData(c *gin.Context) {
+func (m *Manager) UninstallPluginKeepData(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("卸载插件配置请求(保留数据): %s", name)
 	if err := m.Uninstall(name, true); err != nil {
@@ -289,7 +290,7 @@ func (m *Manager) UninstallPluginKeepData(c *gin.Context) {
 
 // DisablePlugin 禁用指定名称的插件
 // 路径参数为插件名，禁用失败时返回错误
-func (m *Manager) DisablePlugin(c *gin.Context) {
+func (m *Manager) DisablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("禁用插件配置请求: %s", name)
 	if err := m.Disable(name); err != nil {
@@ -307,7 +308,7 @@ func (m *Manager) DisablePlugin(c *gin.Context) {
 
 // UpgradePlugin 升级指定名称的插件（当代码版本高于数据库记录版本时）
 // 路径参数为插件名，升级失败时返回错误
-func (m *Manager) UpgradePlugin(c *gin.Context) {
+func (m *Manager) UpgradePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("升级插件配置请求: %s", name)
 
@@ -367,7 +368,7 @@ type CronItemVO struct {
 }
 
 // ListPluginCrons 获取指定插件的定时任务定义与状态
-func (m *Manager) ListPluginCrons(c *gin.Context) {
+func (m *Manager) ListPluginCrons(c *response.Context) {
 	name := c.Param("name")
 	m.mu.RLock()
 	mod, ok := m.modules[name]
@@ -407,7 +408,7 @@ func (m *Manager) ListPluginCrons(c *gin.Context) {
 }
 
 // StartPluginCron 手动启动（注册）指定插件的一条定时任务
-func (m *Manager) StartPluginCron(c *gin.Context) {
+func (m *Manager) StartPluginCron(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -430,7 +431,7 @@ func (m *Manager) StartPluginCron(c *gin.Context) {
 }
 
 // EnablePluginCron 生效指定插件的一条定时任务（别名）
-func (m *Manager) EnablePluginCron(c *gin.Context) {
+func (m *Manager) EnablePluginCron(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -453,7 +454,7 @@ func (m *Manager) EnablePluginCron(c *gin.Context) {
 }
 
 // RunPluginCronOnce 立即执行指定插件的一条定时任务一次
-func (m *Manager) RunPluginCronOnce(c *gin.Context) {
+func (m *Manager) RunPluginCronOnce(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -476,7 +477,7 @@ func (m *Manager) RunPluginCronOnce(c *gin.Context) {
 }
 
 // StopPluginCron 强制停止（移除）指定插件的一条定时任务
-func (m *Manager) StopPluginCron(c *gin.Context) {
+func (m *Manager) StopPluginCron(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -498,7 +499,7 @@ func (m *Manager) StopPluginCron(c *gin.Context) {
 // SetPluginCronEnabled 设置插件定时任务开关（生效/关闭）
 // 路径参数：name 插件名、spec cron 表达式、enabled true/false
 // 行为：enabled=true 则生效（注册并调度）；enabled=false 则关闭（移除调度）
-func (m *Manager) SetPluginCronEnabled(c *gin.Context) {
+func (m *Manager) SetPluginCronEnabled(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Param("spec")
 	enabled := c.Param("enabled")

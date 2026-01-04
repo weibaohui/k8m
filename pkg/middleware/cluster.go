@@ -5,9 +5,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -17,9 +17,9 @@ import (
 // 2. 校验用户 JWT 是否有效，并判断用户是否有访问该集群的权限（非平台管理员需在授权集群列表中）；
 // 3. 校验目标集群是否已连接。
 // 校验不通过时将中止请求并返回相应的错误信息。
-func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
+func EnsureSelectedClusterMiddleware() response.HandlerFunc {
 
-	return func(c *gin.Context) {
+	return func(c *response.Context) {
 
 		// 获取请求路径
 		path := c.Request.URL.Path
@@ -63,7 +63,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		clusterID := string(clusterIDByte)
 
 		if clusterID == "" {
-			c.JSON(512, gin.H{
+			c.JSON(512, response.H{
 				"msg": "未指定集群，请先切换集群",
 			})
 			c.Abort()
@@ -72,7 +72,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		username := amis.GetLoginUser(c)
 		if username == "" {
-			c.JSON(512, gin.H{
+			c.JSON(512, response.H{
 				"msg": "未获取到登录用户名，请先登录",
 			})
 			c.Abort()
@@ -82,12 +82,12 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 		if !service.UserService().IsUserPlatformAdmin(username) {
 			clusters, err := service.UserService().GetClusterNames(username)
 			if err != nil {
-				c.JSON(512, gin.H{"msg": "获取集群授权失败"})
+				c.JSON(512, response.H{"msg": "获取集群授权失败"})
 				c.Abort()
 				return
 			}
 			if !slices.Contains(clusters, clusterID) {
-				c.JSON(512, gin.H{
+				c.JSON(512, response.H{
 					"msg": "无权限访问集群: " + clusterID,
 				})
 				c.Abort()
@@ -98,7 +98,7 @@ func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
 
 		// 如果设置了clusterID，但是集群未连接
 		if !service.ClusterService().IsConnected(clusterID) {
-			c.JSON(512, gin.H{
+			c.JSON(512, response.H{
 				"msg": "集群未连接，请先连接集群: " + clusterID,
 			})
 			c.Abort()

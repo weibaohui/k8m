@@ -7,6 +7,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +33,7 @@ func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} []models.Menu
 // @Router /admin/menu/list [get]
-func (a *AdminMenuController) List(c *gin.Context) {
+func (a *AdminMenuController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
@@ -52,7 +53,7 @@ func (a *AdminMenuController) List(c *gin.Context) {
 // @Param data body models.Menu true "菜单内容"
 // @Success 200 {object} map[string]interface{}
 // @Router /admin/menu/save [post]
-func (a *AdminMenuController) Save(c *gin.Context) {
+func (a *AdminMenuController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
 	if err := c.ShouldBind(&m); err != nil {
@@ -74,7 +75,7 @@ func (a *AdminMenuController) Save(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} []models.Menu
 // @Router /admin/menu/history [get]
-func (a *AdminMenuController) History(c *gin.Context) {
+func (a *AdminMenuController) History(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
 	params.PerPage = 100000
@@ -94,7 +95,7 @@ func (a *AdminMenuController) History(c *gin.Context) {
 // @Param ids path string true "菜单ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/menu/delete/{ids} [post]
-func (a *AdminMenuController) Delete(c *gin.Context) {
+func (a *AdminMenuController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
@@ -113,7 +114,7 @@ func (a *AdminMenuController) Delete(c *gin.Context) {
 // @Param id path int true "菜单历史记录ID"
 // @Success 200 {object} string
 // @Router /admin/menu/history/delete/{id} [delete]
-func (a *AdminMenuController) DeleteHistory(c *gin.Context) {
+func (a *AdminMenuController) DeleteHistory(c *response.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {

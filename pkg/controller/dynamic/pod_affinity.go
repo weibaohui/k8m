@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -44,7 +45,7 @@ type podAffinity struct {
 // @Param name path string true "资源名称"
 // @Success 200 {array} interface{}
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_pod_affinity/ns/{ns}/name/{name} [get]
-func (ac *PodAffinityController) ListPodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) ListPodAffinity(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -108,7 +109,7 @@ func (ac *PodAffinityController) ListPodAffinity(c *gin.Context) {
 // @Param podAffinity body podAffinity true "Pod亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_pod_affinity/ns/{ns}/name/{name} [post]
-func (ac *PodAffinityController) AddPodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) AddPodAffinity(c *response.Context) {
 	processPodAffinity(c, "add")
 }
 
@@ -123,7 +124,7 @@ func (ac *PodAffinityController) AddPodAffinity(c *gin.Context) {
 // @Param podAffinity body podAffinity true "Pod亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_pod_affinity/ns/{ns}/name/{name} [post]
-func (ac *PodAffinityController) UpdatePodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) UpdatePodAffinity(c *response.Context) {
 	processPodAffinity(c, "modify")
 }
 
@@ -138,10 +139,10 @@ func (ac *PodAffinityController) UpdatePodAffinity(c *gin.Context) {
 // @Param podAffinity body podAffinity true "Pod亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_pod_affinity/ns/{ns}/name/{name} [post]
-func (ac *PodAffinityController) DeletePodAffinity(c *gin.Context) {
+func (ac *PodAffinityController) DeletePodAffinity(c *response.Context) {
 	processPodAffinity(c, "delete")
 }
-func processPodAffinity(c *gin.Context, action string) {
+func processPodAffinity(c *response.Context, action string) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")

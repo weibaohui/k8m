@@ -3,15 +3,17 @@ package config
 import (
 	"encoding/base64"
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
-	"net/http"
 )
 
 type LdapConfigController struct {
@@ -29,7 +31,7 @@ func RegisterLdapConfigRoutes(admin *gin.RouterGroup) {
 }
 
 // LDAP配置列表
-func (lc *LdapConfigController) LDAPConfigList(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigList(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.LDAPConfig{}
 
@@ -48,7 +50,7 @@ func (lc *LdapConfigController) LDAPConfigList(c *gin.Context) {
 }
 
 // 获取单个LDAP配置
-func (lc *LdapConfigController) LDAPConfigDetail(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigDetail(c *response.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 	m := &models.LDAPConfig{}
@@ -56,14 +58,14 @@ func (lc *LdapConfigController) LDAPConfigDetail(c *gin.Context) {
 		return db.Where("id = ?", id)
 	})
 	if err != nil || conf == nil {
-		c.JSON(http.StatusNotFound, gin.H{"status": 1, "msg": "未找到配置"})
+		c.JSON(http.StatusNotFound, response.H{"status": 1, "msg": "未找到配置"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": 0, "msg": "ok", "data": conf})
+	c.JSON(http.StatusOK, response.H{"status": 0, "msg": "ok", "data": conf})
 }
 
 // 保存LDAP配置（新建/编辑）
-func (lc *LdapConfigController) LDAPConfigSave(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigSave(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.LDAPConfig{}
 	err := c.ShouldBindJSON(&m)
@@ -84,7 +86,7 @@ func (lc *LdapConfigController) LDAPConfigSave(c *gin.Context) {
 				// 仅当填写新密码时才加密
 				encrypted, err := utils.AesEncrypt([]byte(m.BindPassword))
 				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "msg": "密码加密失败"})
+					c.JSON(http.StatusInternalServerError, response.H{"status": 1, "msg": "密码加密失败"})
 					return
 				}
 				m.BindPassword = base64.StdEncoding.EncodeToString(encrypted)
@@ -95,7 +97,7 @@ func (lc *LdapConfigController) LDAPConfigSave(c *gin.Context) {
 		if m.BindPassword != "" {
 			encrypted, err := utils.AesEncrypt([]byte(m.BindPassword))
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "msg": "密码加密失败"})
+				c.JSON(http.StatusInternalServerError, response.H{"status": 1, "msg": "密码加密失败"})
 				return
 			}
 			m.BindPassword = base64.StdEncoding.EncodeToString(encrypted)
@@ -110,14 +112,14 @@ func (lc *LdapConfigController) LDAPConfigSave(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"id": m.ID,
 	})
 
 }
 
 // 删除LDAP配置（支持批量）
-func (lc *LdapConfigController) LDAPConfigDelete(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigDelete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.LDAPConfig{}
@@ -131,7 +133,7 @@ func (lc *LdapConfigController) LDAPConfigDelete(c *gin.Context) {
 }
 
 // LDAPConfigQuickSave 快速保存启用状态
-func (lc *LdapConfigController) LDAPConfigQuickSave(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigQuickSave(c *response.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 
@@ -153,13 +155,13 @@ func (lc *LdapConfigController) LDAPConfigQuickSave(c *gin.Context) {
 }
 
 // 获取ldap的enabled状态
-func (lc *LdapConfigController) GetLdapConfig(c *gin.Context) {
+func (lc *LdapConfigController) GetLdapConfig(c *response.Context) {
 	// 查询是否有启用的LDAP配置
 	var ldapConfig models.LDAPConfig
 	err := dao.DB().Where("enabled = ?", true).Order("id desc").Limit(1).Find(&ldapConfig).Error
 
 	// 构造前端需要的响应���式
-	response := gin.H{
+	response := response.H{
 		"enabled": ldapConfig.ID > 0, // 如果找���启用的配置，则ID > 0
 	}
 
@@ -171,7 +173,7 @@ func (lc *LdapConfigController) GetLdapConfig(c *gin.Context) {
 }
 
 // 测试LDAP连接
-func (lc *LdapConfigController) LDAPConfigTestConnect(c *gin.Context) {
+func (lc *LdapConfigController) LDAPConfigTestConnect(c *response.Context) {
 	type Req struct {
 		Host         string `json:"host"`
 		Port         int    `json:"port"`
@@ -182,7 +184,7 @@ func (lc *LdapConfigController) LDAPConfigTestConnect(c *gin.Context) {
 	}
 	var req Req
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "msg": "参数错误"})
+		c.JSON(http.StatusBadRequest, response.H{"status": 1, "msg": "参数错误"})
 		return
 	}
 
@@ -190,14 +192,14 @@ func (lc *LdapConfigController) LDAPConfigTestConnect(c *gin.Context) {
 	conn, err := ldap.Dial("tcp", addr)
 	if err != nil {
 		klog.Errorf("连接LDAP服务器失败: %v", err)
-		c.JSON(http.StatusOK, gin.H{"status": 1, "msg": fmt.Sprintf("连接LDAP服务器失败: %v", err)})
+		c.JSON(http.StatusOK, response.H{"status": 1, "msg": fmt.Sprintf("连接LDAP服务器失败: %v", err)})
 		return
 	}
 	defer conn.Close()
 
 	// 先尝试用明文密码绑定
 	if err := conn.Bind(req.BindDN, req.BindPassword); err == nil {
-		c.JSON(http.StatusOK, gin.H{"status": 0, "msg": "连接成功"})
+		c.JSON(http.StatusOK, response.H{"status": 0, "msg": "连接成功"})
 		return
 	}
 
@@ -207,12 +209,12 @@ func (lc *LdapConfigController) LDAPConfigTestConnect(c *gin.Context) {
 		if plain, err := utils.AesDecrypt(req.BindPassword); err == nil {
 			decryptedPwd = string(plain)
 			if err := conn.Bind(req.BindDN, decryptedPwd); err == nil {
-				c.JSON(http.StatusOK, gin.H{"status": 0, "msg": "连接成功"})
+				c.JSON(http.StatusOK, response.H{"status": 0, "msg": "连接成功"})
 				return
 			}
 		}
 	}
 
 	klog.Errorf("管理员账号或密码错误")
-	c.JSON(http.StatusOK, gin.H{"status": 1, "msg": "管理员账号或密码错误"})
+	c.JSON(http.StatusOK, response.H{"status": 1, "msg": "管理员账号或密码错误"})
 }

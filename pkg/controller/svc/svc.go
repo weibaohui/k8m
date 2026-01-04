@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +27,7 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/service/create [post]
 // Create 创建Service接口
-func (nc *ActionController) Create(c *gin.Context) {
+func (nc *ActionController) Create(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

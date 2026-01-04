@@ -21,6 +21,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -81,7 +82,7 @@ func removePod(ctx context.Context, selectedCluster string, ns string, podName s
 	kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.Pod{}).Name(podName).Namespace(ns).Delete()
 }
 
-func cmdLogger(c *gin.Context, cmd string) {
+func cmdLogger(c *response.Context, cmd string) {
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
 	containerName := c.Query("container_name")
@@ -122,7 +123,7 @@ func cmdLogger(c *gin.Context, cmd string) {
 // Xterm 通过 WebSocket 提供与 Kubernetes Pod 容器的交互式终端会话。
 // 支持 xterm.js 前端，处理终端输入输出、窗口大小调整、命令日志记录和连接保活。
 // 会话结束后可根据参数选择性删除目标 Pod。
-func (xc *XtermController) Xterm(c *gin.Context) {
+func (xc *XtermController) Xterm(c *response.Context) {
 	removeAfterExec := c.Query("remove")
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")

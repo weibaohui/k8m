@@ -5,16 +5,16 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
 // AuthMiddleware 登录校验
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func AuthMiddleware() response.HandlerFunc {
+	return func(c *response.Context) {
 		// 获取请求路径
 		path := c.Request.URL.Path
 		// 检查请求路径是否需要跳过登录检测
@@ -37,7 +37,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		cfg := flag.Init()
 		claims, err := utils.GetJWTClaims(c, cfg.JwtTokenSecret)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+			c.JSON(http.StatusUnauthorized, response.H{"message": err.Error()})
 			c.Abort()
 
 			return
@@ -50,31 +50,31 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 // PlatformAuthMiddleware 平台管理员角色校验
-func PlatformAuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func PlatformAuthMiddleware() response.HandlerFunc {
+	return func(c *response.Context) {
 		cfg := flag.Init()
 		claims, err := utils.GetJWTClaims(c, cfg.JwtTokenSecret)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+			c.JSON(http.StatusUnauthorized, response.H{"message": err.Error()})
 			c.Abort()
 			return
 		}
 
 		username, ok := claims[constants.JwtUserName].(string)
 		if !ok || username == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "无效的用户名"})
+			c.JSON(http.StatusUnauthorized, response.H{"error": "无效的用户名"})
 			c.Abort()
 			return
 		}
 		roles, err := service.UserService().GetRolesByUserName(username)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "角色查询失败"})
+			c.JSON(http.StatusInternalServerError, response.H{"error": "角色查询失败"})
 			c.Abort()
 			return
 		}
 		// 权限检查
 		if !slices.Contains(roles, constants.RolePlatformAdmin) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "平台管理员权限校验失败"})
+			c.JSON(http.StatusForbidden, response.H{"error": "平台管理员权限校验失败"})
 			c.Abort()
 			return
 		}

@@ -3,11 +3,11 @@ package admin
 import (
 	"sort"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 type ChartController struct {
@@ -18,7 +18,7 @@ type ChartController struct {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/plugins/helm/chart/list [get]
-func (hc *ChartController) ListChart(c *gin.Context) {
+func (hc *ChartController) ListChart(c *response.Context) {
 	// 从数据库查询列表
 	params := dao.BuildParams(c)
 	m := &models.HelmChart{}
@@ -39,7 +39,7 @@ func (hc *ChartController) ListChart(c *gin.Context) {
 // @Param version path string true "Chart版本"
 // @Success 200 {object} string "yaml内容"
 // @Router /mgm/plugins/helm/repo/{repo}/chart/{chart}/version/{version}/values [get]
-func (hc *ChartController) GetChartValue(c *gin.Context) {
+func (hc *ChartController) GetChartValue(c *response.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")
 	version := c.Param("version")
@@ -55,7 +55,7 @@ func (hc *ChartController) GetChartValue(c *gin.Context) {
 		return
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"yaml": value,
 	})
 }
@@ -68,7 +68,7 @@ func (hc *ChartController) GetChartValue(c *gin.Context) {
 // @Param chart path string true "Chart名称"
 // @Success 200 {object} string
 // @Router /mgm/plugins/helm/repo/{repo}/chart/{chart}/versions [get]
-func (hc *ChartController) ChartVersionOptionList(c *gin.Context) {
+func (hc *ChartController) ChartVersionOptionList(c *response.Context) {
 	repoName := c.Param("repo")
 	chartName := c.Param("chart")
 	h, err := getHelmWithNoCluster()
@@ -79,7 +79,7 @@ func (hc *ChartController) ChartVersionOptionList(c *gin.Context) {
 
 	versions, err := h.GetChartVersions(repoName, chartName)
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -89,7 +89,7 @@ func (hc *ChartController) ChartVersionOptionList(c *gin.Context) {
 		return utils.CompareVersions(versions[i], versions[j])
 	})
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": versions,
 	})
 

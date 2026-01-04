@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -37,7 +38,7 @@ func RegisterShellRoutes(api *gin.RouterGroup) {
 // @Param node_name path string true "节点名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/name/{node_name}/create_node_shell [post]
-func (nc *ShellController) CreateNodeShell(c *gin.Context) {
+func (nc *ShellController) CreateNodeShell(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -62,7 +63,7 @@ func (nc *ShellController) CreateNodeShell(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"podName":       podName,
 		"ns":            ns,
 		"containerName": containerName,
@@ -77,7 +78,7 @@ func (nc *ShellController) CreateNodeShell(c *gin.Context) {
 // @Param cluster_id path string true "集群ID，base64编码"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/name/{node_name}/create_kubectl_shell [post]
-func (nc *ShellController) CreateKubectlShell(c *gin.Context) {
+func (nc *ShellController) CreateKubectlShell(c *response.Context) {
 	clusterID, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -112,7 +113,7 @@ func (nc *ShellController) CreateKubectlShell(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"podName":       podName,
 		"ns":            ns,
 		"containerName": containerName,

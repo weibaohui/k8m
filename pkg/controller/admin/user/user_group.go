@@ -6,6 +6,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
@@ -30,7 +31,7 @@ func RegisterAdminUserGroupRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} []models.UserGroup
 // @Router /admin/user_group/list [get]
-func (a *AdminUserGroupController) ListUserGroup(c *gin.Context) {
+func (a *AdminUserGroupController) ListUserGroup(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 
@@ -49,7 +50,7 @@ func (a *AdminUserGroupController) ListUserGroup(c *gin.Context) {
 // @Param data body models.UserGroup true "用户组信息"
 // @Success 200 {object} map[string]interface{}
 // @Router /admin/user_group/save [post]
-func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
+func (a *AdminUserGroupController) SaveUserGroup(c *response.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.UserGroup{}
@@ -66,7 +67,7 @@ func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 	}
 	// 清除用户组的缓存
 	service.UserService().ClearCacheByKey(m.GroupName)
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"id": m.ID,
 	})
 }
@@ -78,7 +79,7 @@ func (a *AdminUserGroupController) SaveUserGroup(c *gin.Context) {
 // @Param data body map[string]interface{} true "菜单配置信息"
 // @Success 200 {object} map[string]interface{}
 // @Router /admin/user_group/save_menu [post]
-func (a *AdminUserGroupController) SaveUserGroupMenu(c *gin.Context) {
+func (a *AdminUserGroupController) SaveUserGroupMenu(c *response.Context) {
 	var requestData struct {
 		ID       uint   `json:"id" binding:"required"`
 		MenuData string `json:"menu_data"`
@@ -121,7 +122,7 @@ func (a *AdminUserGroupController) SaveUserGroupMenu(c *gin.Context) {
 // @Param ids path string true "用户组ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/user_group/delete/{ids} [post]
-func (a *AdminUserGroupController) DeleteUserGroup(c *gin.Context) {
+func (a *AdminUserGroupController) DeleteUserGroup(c *response.Context) {
 	ids := c.Param("ids")
 
 	params := dao.BuildParams(c)
@@ -142,14 +143,14 @@ func (a *AdminUserGroupController) DeleteUserGroup(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} []map[string]string
 // @Router /admin/user_group/option_list [get]
-func (a *AdminUserGroupController) GroupOptionList(c *gin.Context) {
+func (a *AdminUserGroupController) GroupOptionList(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.UserGroup{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Distinct("id,group_name")
 	})
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -164,7 +165,7 @@ func (a *AdminUserGroupController) GroupOptionList(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }

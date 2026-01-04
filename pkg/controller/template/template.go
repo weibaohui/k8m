@@ -5,6 +5,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 type Controller struct {
@@ -23,7 +24,7 @@ func RegisterTemplateRoutes(mgm *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/custom/template/list [get]
-func (t *Controller) List(c *gin.Context) {
+func (t *Controller) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}
 
@@ -41,7 +42,7 @@ func (t *Controller) List(c *gin.Context) {
 // @Param template body models.CustomTemplate true "模板信息"
 // @Success 200 {object} string "返回模板ID"
 // @Router /mgm/custom/template/save [post]
-func (t *Controller) Save(c *gin.Context) {
+func (t *Controller) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.CustomTemplate{}
 	err := c.ShouldBindJSON(&m)
@@ -60,7 +61,7 @@ func (t *Controller) Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"id": m.ID,
 	})
 }
@@ -71,7 +72,7 @@ func (t *Controller) Save(c *gin.Context) {
 // @Param ids path string true "要删除的模板ID，多个用逗号分隔"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/custom/template/delete/{ids} [post]
-func (t *Controller) Delete(c *gin.Context) {
+func (t *Controller) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}

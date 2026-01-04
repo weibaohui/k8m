@@ -3,6 +3,7 @@ package node
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog/v2"
@@ -26,7 +27,7 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 // @Param name path string true "节点名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/drain/name/{name} [post]
-func (nc *ActionController) Drain(c *gin.Context) {
+func (nc *ActionController) Drain(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -46,7 +47,7 @@ func (nc *ActionController) Drain(c *gin.Context) {
 // @Param name path string true "节点名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/cordon/name/{name} [post]
-func (nc *ActionController) Cordon(c *gin.Context) {
+func (nc *ActionController) Cordon(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -66,7 +67,7 @@ func (nc *ActionController) Cordon(c *gin.Context) {
 // @Param name path string true "节点名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/uncordon/name/{name} [post]
-func (nc *ActionController) UnCordon(c *gin.Context) {
+func (nc *ActionController) UnCordon(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -86,7 +87,7 @@ func (nc *ActionController) UnCordon(c *gin.Context) {
 // @Param name_list body []string true "节点名称列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/batch/drain [post]
-func (nc *ActionController) BatchDrain(c *gin.Context) {
+func (nc *ActionController) BatchDrain(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -125,7 +126,7 @@ func (nc *ActionController) BatchDrain(c *gin.Context) {
 // @Param name_list body []string true "节点名称列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/batch/cordon [post]
-func (nc *ActionController) BatchCordon(c *gin.Context) {
+func (nc *ActionController) BatchCordon(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -164,7 +165,7 @@ func (nc *ActionController) BatchCordon(c *gin.Context) {
 // @Param name_list body []string true "节点名称列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/batch/uncordon [post]
-func (nc *ActionController) BatchUnCordon(c *gin.Context) {
+func (nc *ActionController) BatchUnCordon(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

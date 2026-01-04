@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"golang.org/x/oauth2"
 )
 
@@ -26,7 +26,7 @@ type Client struct {
 }
 
 // NewOIDCClient  创建一个 OIDC 客户端
-func NewOIDCClient(c *gin.Context, cfg *models.SSOConfig) (*Client, error) {
+func NewOIDCClient(c *response.Context, cfg *models.SSOConfig) (*Client, error) {
 	ctx := c.Request.Context()
 	// 1. 探测 issuer 的元信息
 	provider, err := oidc.NewProvider(ctx, cfg.Issuer)

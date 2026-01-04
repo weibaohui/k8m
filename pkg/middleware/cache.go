@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
-func SetCacheHeaders() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func SetCacheHeaders() response.HandlerFunc {
+	return func(c *response.Context) {
 
 		// 获取请求路径
 		path := c.Request.URL.Path

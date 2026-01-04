@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -28,7 +28,7 @@ import (
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/id/{id}/summary [post]
 // @Router /admin/plugins/inspection/schedule/id/{id}/summary/cluster/{cluster}/start_time/{start_time}/end_time/{end_time} [post]
-func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
+func (s *AdminScheduleController) SummaryBySchedule(c *response.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 100000000
 	// 1. 获取scheduleID参数
@@ -87,7 +87,7 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 		return
 	}
 	if len(records) == 0 {
-		amis.WriteJsonData(c, gin.H{"summary": "无执行记录"})
+		amis.WriteJsonData(c, response.H{"summary": "无执行记录"})
 		return
 	}
 	tempScheduleIDs := make([]*uint, 0, 20)
@@ -145,10 +145,10 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 	}
 
 	// 5. 构建返回结构
-	result := gin.H{
+	result := response.H{
 		"total_clusters": totalClusters,
 		"total_runs":     totalRuns, // 新增字段：执行次数
-		"clusters":       []gin.H{},
+		"clusters":       []response.H{},
 	}
 	// 新增：如果 scheduleID 为空，增加运行巡检计划数
 	if scheduleID == "" {
@@ -162,23 +162,23 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 		clusterRunCount[r.Cluster]++
 	}
 	for cluster, kindMap := range clusterKindMap {
-		var kindArr []gin.H
+		var kindArr []response.H
 		for kind, count := range kindMap {
 			errCount := clusterKindErrMap[cluster][kind]
-			kindArr = append(kindArr, gin.H{
+			kindArr = append(kindArr, response.H{
 				"kind":        kind,
 				"count":       count,
 				"error_count": errCount,
 			})
 		}
-		result["clusters"] = append(result["clusters"].([]gin.H), gin.H{
+		result["clusters"] = append(result["clusters"].([]response.H), response.H{
 			"cluster":   cluster,
 			"run_count": clusterRunCount[cluster], // 新增字段：该集群执行次数
 			"kinds":     kindArr,
 		})
 	}
 	// 新增：统计最新一次执行情况
-	var latestRun gin.H
+	var latestRun response.H
 	if len(records) > 0 {
 		latestRecord := records[0]
 		kindStatus := map[string]map[string]int{} // kind -> status -> count
@@ -194,15 +194,15 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 				}
 			}
 		}
-		var kindArr []gin.H
+		var kindArr []response.H
 		for kind, statusMap := range kindStatus {
-			kindArr = append(kindArr, gin.H{
+			kindArr = append(kindArr, response.H{
 				"kind":         kind,
 				"normal_count": statusMap["pass"],
 				"error_count":  statusMap["fail"],
 			})
 		}
-		latestRun = gin.H{
+		latestRun = response.H{
 			"record_id":   latestRecord.ID,
 			"schedule_id": latestRecord.ScheduleID,
 			"run_time":    latestRecord.CreatedAt,
@@ -219,7 +219,7 @@ func (s *AdminScheduleController) SummaryBySchedule(c *gin.Context) {
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/record/id/{id}/summary [post]
-func (s *AdminScheduleController) SummaryByRecordID(c *gin.Context) {
+func (s *AdminScheduleController) SummaryByRecordID(c *response.Context) {
 	recordIDStr := c.Param("id")
 	if recordIDStr == "" {
 		amis.WriteJsonError(c, fmt.Errorf("缺少 record_id 参数"))

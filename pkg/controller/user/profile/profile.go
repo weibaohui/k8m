@@ -9,6 +9,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
@@ -31,7 +32,7 @@ func RegisterProfileRoutes(mgm *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/user/profile [get]
-func (uc *Controller) Profile(c *gin.Context) {
+func (uc *Controller) Profile(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 
@@ -56,7 +57,7 @@ func (uc *Controller) Profile(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/user/profile/cluster/permissions/list [get]
-func (uc *Controller) ListUserPermissions(c *gin.Context) {
+func (uc *Controller) ListUserPermissions(c *response.Context) {
 	params := dao.BuildParams(c)
 	clusters, err := service.UserService().GetClusters(params.UserName)
 	if err != nil {
@@ -69,7 +70,7 @@ func (uc *Controller) ListUserPermissions(c *gin.Context) {
 // PasswordUpdateRequest 密码修改请求结构体
 type PasswordUpdateRequest struct {
 	OldPassword     string `json:"oldPassword" binding:"required"`     // 原密码（加密后）
-	Password        string `json:"password" binding:"required"`         // 新密码（加密后）
+	Password        string `json:"password" binding:"required"`        // 新密码（加密后）
 	ConfirmPassword string `json:"confirmPassword" binding:"required"` // 确认密码（加密后）
 }
 
@@ -79,7 +80,7 @@ type PasswordUpdateRequest struct {
 // @Param request body PasswordUpdateRequest true "密码修改请求"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/update_psw [post]
-func (uc *Controller) UpdatePsw(c *gin.Context) {
+func (uc *Controller) UpdatePsw(c *response.Context) {
 	params := dao.BuildParams(c)
 	req := PasswordUpdateRequest{}
 	err := c.ShouldBindJSON(&req)

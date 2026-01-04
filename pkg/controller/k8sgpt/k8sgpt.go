@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
 	"github.com/weibaohui/k8m/pkg/k8sgpt/kubernetes"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -29,7 +30,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/k8s_gpt/var [get]
-func (cc *Controller) GetFields(c *gin.Context) {
+func (cc *Controller) GetFields(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -50,7 +51,7 @@ func (cc *Controller) GetFields(c *gin.Context) {
 	amis.WriteJsonData(c, v2)
 }
 
-func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
+func createAnalysisConfig(c *response.Context) *analysis.Analysis {
 	ctx := amis.GetContextWithUser(c)
 	clusterID := ""
 	clusterIDBase64 := c.Param("cluster") // 路径上传递的集群名称
@@ -86,7 +87,7 @@ func createAnalysisConfig(c *gin.Context) *analysis.Analysis {
 // @Param kind path string true "资源类型"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/k8s_gpt/kind/{kind}/run [get]
-func (cc *Controller) ResourceRunAnalysis(c *gin.Context) {
+func (cc *Controller) ResourceRunAnalysis(c *response.Context) {
 	cfg := createAnalysisConfig(c)
 	kind := c.Param("kind")
 	cfg.Filters = []string{kind}
@@ -104,7 +105,7 @@ func (cc *Controller) ResourceRunAnalysis(c *gin.Context) {
 // @Param user_cluster path string true "用户集群标识"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/k8s_gpt/cluster/{user_cluster}/run [post]
-func (cc *Controller) ClusterRunAnalysis(c *gin.Context) {
+func (cc *Controller) ClusterRunAnalysis(c *response.Context) {
 	userCluster := c.Param("user_cluster")
 	if userCluster != "" {
 		if id, err := utils.UrlSafeBase64Decode(userCluster); err == nil {
@@ -143,7 +144,7 @@ func (cc *Controller) ClusterRunAnalysis(c *gin.Context) {
 // @Param user_cluster path string true "用户集群标识"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/k8s_gpt/cluster/{user_cluster}/result [get]
-func (cc *Controller) GetClusterRunAnalysisResult(c *gin.Context) {
+func (cc *Controller) GetClusterRunAnalysisResult(c *response.Context) {
 	userCluster := c.Param("user_cluster")
 	if userCluster != "" {
 		if id, err := utils.UrlSafeBase64Decode(userCluster); err == nil {

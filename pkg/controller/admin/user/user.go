@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
@@ -39,7 +40,7 @@ func RegisterAdminUserRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} []models.User
 // @Router /admin/user/list [get]
-func (a *AdminUserController) List(c *gin.Context) {
+func (a *AdminUserController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 
@@ -62,7 +63,7 @@ func (a *AdminUserController) List(c *gin.Context) {
 // @Param data body models.User true "用户信息"
 // @Success 200 {object} map[string]interface{}
 // @Router /admin/user/save [post]
-func (a *AdminUserController) Save(c *gin.Context) {
+func (a *AdminUserController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.User{}
 	err := c.ShouldBindJSON(&m)
@@ -90,7 +91,7 @@ func (a *AdminUserController) Save(c *gin.Context) {
 	}
 	// 清除用户的缓存
 	service.UserService().ClearCacheByKey(m.Username)
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"id": m.ID,
 	})
 }
@@ -101,7 +102,7 @@ func (a *AdminUserController) Save(c *gin.Context) {
 // @Param ids path string true "用户ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/user/delete/{ids} [post]
-func (a *AdminUserController) Delete(c *gin.Context) {
+func (a *AdminUserController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.User{}
@@ -126,7 +127,7 @@ func (a *AdminUserController) Delete(c *gin.Context) {
 // @Param data body models.User true "新密码信息"
 // @Success 200 {object} string
 // @Router /admin/user/update_psw/{id} [post]
-func (a *AdminUserController) UpdatePsw(c *gin.Context) {
+func (a *AdminUserController) UpdatePsw(c *response.Context) {
 
 	id := c.Param("id")
 	params := dao.BuildParams(c)
@@ -165,7 +166,7 @@ func (a *AdminUserController) UpdatePsw(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB {
+func genQueryFuncs(c *response.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB {
 	params.UserName = ""
 	queryFuncs := []func(*gorm.DB) *gorm.DB{
 		func(db *gorm.DB) *gorm.DB {
@@ -180,13 +181,13 @@ func genQueryFuncs(c *gin.Context, params *dao.Params) []func(*gorm.DB) *gorm.DB
 // @Security BearerAuth
 // @Success 200 {object} map[string]interface{}
 // @Router /admin/user/option_list [get]
-func (a *AdminUserController) UserOptionList(c *gin.Context) {
+func (a *AdminUserController) UserOptionList(c *response.Context) {
 
 	var items []models.User
 	err := dao.DB().Model(&models.User{}).Select("username", "id").Distinct("username").Scan(&items).Error
 
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -201,7 +202,7 @@ func (a *AdminUserController) UserOptionList(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }
@@ -213,7 +214,7 @@ func (a *AdminUserController) UserOptionList(c *gin.Context) {
 // @Param id path string true "用户ID"
 // @Success 200 {object} string
 // @Router /admin/user/2fa/disable/{id} [post]
-func (a *AdminUserController) Disable2FA(c *gin.Context) {
+func (a *AdminUserController) Disable2FA(c *response.Context) {
 	params := dao.BuildParams(c)
 	userID := c.Param("id")
 
@@ -260,7 +261,7 @@ func (a *AdminUserController) Disable2FA(c *gin.Context) {
 // @Param disabled path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/user/save/id/{id}/status/{disabled} [post]
-func (a *AdminUserController) UserStatusQuickSave(c *gin.Context) {
+func (a *AdminUserController) UserStatusQuickSave(c *response.Context) {
 	id := c.Param("id")
 	disabled := c.Param("disabled")
 

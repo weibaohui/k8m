@@ -5,25 +5,25 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/core"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
 type Controller struct{}
 
-func (s *Controller) WebhookOptionList(c *gin.Context) {
+func (s *Controller) WebhookOptionList(c *response.Context) {
 	m := models.WebhookReceiver{}
 	params := dao.BuildParams(c)
 	params.PerPage = 100000
 	list, _, err := m.List(params)
 
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -38,12 +38,12 @@ func (s *Controller) WebhookOptionList(c *gin.Context) {
 	slice.SortBy(hooks, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": hooks,
 	})
 }
 
-func (s *Controller) WebhookTest(c *gin.Context) {
+func (s *Controller) WebhookTest(c *response.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 	m := &models.WebhookReceiver{
@@ -63,7 +63,7 @@ func (s *Controller) WebhookTest(c *gin.Context) {
 	amis.WriteJsonError(c, fmt.Errorf("unsupported platform: %s", m.Platform))
 }
 
-func (s *Controller) WebhookList(c *gin.Context) {
+func (s *Controller) WebhookList(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.WebhookReceiver{}
 
@@ -75,7 +75,7 @@ func (s *Controller) WebhookList(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-func (s *Controller) WebhookSave(c *gin.Context) {
+func (s *Controller) WebhookSave(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.WebhookReceiver{}
 	err := c.ShouldBindJSON(&m)
@@ -91,7 +91,7 @@ func (s *Controller) WebhookSave(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func (s *Controller) WebhookDelete(c *gin.Context) {
+func (s *Controller) WebhookDelete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.WebhookReceiver{}
@@ -103,7 +103,7 @@ func (s *Controller) WebhookDelete(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func (s *Controller) WebhookRecordList(c *gin.Context) {
+func (s *Controller) WebhookRecordList(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.WebhookLogRecord{}
 
@@ -117,7 +117,7 @@ func (s *Controller) WebhookRecordList(c *gin.Context) {
 	amis.WriteJsonListWithTotal(c, total, items)
 }
 
-func (s *Controller) WebhookRecordDetail(c *gin.Context) {
+func (s *Controller) WebhookRecordDetail(c *response.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 	m := &models.WebhookLogRecord{
@@ -131,7 +131,7 @@ func (s *Controller) WebhookRecordDetail(c *gin.Context) {
 	amis.WriteJsonData(c, record)
 }
 
-func (s *Controller) WebhookRecordStatistics(c *gin.Context) {
+func (s *Controller) WebhookRecordStatistics(c *response.Context) {
 	webhookID := utils.ToUInt(c.Query("webhook_id"))
 	startTimeStr := c.Query("start_time")
 	endTimeStr := c.Query("end_time")

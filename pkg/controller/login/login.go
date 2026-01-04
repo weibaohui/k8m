@@ -8,11 +8,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/totp"
 	"github.com/weibaohui/k8m/pkg/flag"
@@ -47,9 +48,9 @@ type Request struct {
 // @Success 200 {object} string "登录成功，返回JWT Token"
 // @Failure 401 {object} string "登录失败"
 // @Router /auth/login [post]
-func (lc *Controller) LoginByPassword(c *gin.Context) {
+func (lc *Controller) LoginByPassword(c *response.Context) {
 	var req Request
-	errorInfo := gin.H{"message": "用户名密码错误或用户被禁用"}
+	errorInfo := response.H{"message": "用户名密码错误或用户被禁用"}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		klog.Errorf("LoginByPassword %v", err.Error())
 		c.JSON(http.StatusUnauthorized, errorInfo)
@@ -85,7 +86,7 @@ func (lc *Controller) LoginByPassword(c *gin.Context) {
 		}
 		// Admin用户不需要2FA验证
 		token, _ := service.UserService().GenerateJWTTokenOnlyUserName(req.Username, time.Hour*24)
-		c.JSON(http.StatusOK, gin.H{"token": token})
+		c.JSON(http.StatusOK, response.H{"token": token})
 		return
 	} else {
 		// DB 用户名密码
@@ -128,18 +129,18 @@ func (lc *Controller) LoginByPassword(c *gin.Context) {
 				if v.TwoFAEnabled {
 					// 如果启用了2FA但未提供验证码
 					if req.Code == "" {
-						c.JSON(http.StatusUnauthorized, gin.H{"message": "请输入2FA验证码"})
+						c.JSON(http.StatusUnauthorized, response.H{"message": "请输入2FA验证码"})
 						return
 					}
 					// 验证2FA代码
 					if !totp.ValidateCode(v.TwoFASecret, req.Code) {
-						c.JSON(http.StatusUnauthorized, gin.H{"message": "2FA验证码错误"})
+						c.JSON(http.StatusUnauthorized, response.H{"message": "2FA验证码错误"})
 						return
 					}
 				}
 
 				token, _ := service.UserService().GenerateJWTTokenOnlyUserName(v.Username, 24*time.Hour)
-				c.JSON(http.StatusOK, gin.H{"token": token})
+				c.JSON(http.StatusOK, response.H{"token": token})
 				return
 			}
 		}
@@ -149,12 +150,12 @@ func (lc *Controller) LoginByPassword(c *gin.Context) {
 }
 
 // handleLDAPLogin 处理LDAP登录流程
-func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.Config) error {
+func handleLDAPLogin(c *response.Context, username, password, code string, cfg *flag.Config) error {
 	// 1. LDAP认证
 	_, err := service.UserService().LoginWithLdap(username, password, cfg)
 	if err != nil {
 		klog.Errorf("LDAP登录失败: %v", err)
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "LDAP登录验证失败"})
+		c.JSON(http.StatusUnauthorized, response.H{"message": "LDAP登录验证失败"})
 		return err
 	}
 
@@ -179,7 +180,7 @@ func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.
 		// 用户已存在，检查是否被禁用
 		if userModel.Disabled {
 			klog.Errorf("用户[%s]被禁用", username)
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "用户被禁用"})
+			c.JSON(http.StatusUnauthorized, response.H{"message": "用户被禁用"})
 			return errors.New("用户被禁用")
 		}
 		// 已存在直接走后续流程
@@ -187,13 +188,13 @@ func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.
 		// 用户不存在，插入
 		if err := service.UserService().CheckAndCreateUser(username, "ldap_config", defaultGroup); err != nil {
 			klog.Errorf("创建/检查LDAP用户失败: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "系统错误"})
+			c.JSON(http.StatusInternalServerError, response.H{"message": "系统错误"})
 			return err
 		}
 	} else {
 		// 其他数据库错误
 		klog.Errorf("查询用户失败: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "系统错误"})
+		c.JSON(http.StatusInternalServerError, response.H{"message": "系统错误"})
 		return err
 	}
 
@@ -201,7 +202,7 @@ func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.
 	user, err := getUserInfo(username)
 	if err != nil {
 		klog.Errorf("获取用户信息失败: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "系统错误"})
+		c.JSON(http.StatusInternalServerError, response.H{"message": "系统错误"})
 		return err
 	}
 
@@ -212,7 +213,7 @@ func handleLDAPLogin(c *gin.Context, username, password, code string, cfg *flag.
 
 	// 5. 生成token
 	token, _ := service.UserService().GenerateJWTTokenOnlyUserName(username, 24*time.Hour)
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, response.H{"token": token})
 	return nil
 }
 
@@ -230,11 +231,11 @@ func getUserInfo(username string) (*models.User, error) {
 func validateTwoFA(user *models.User, code string, c *gin.Context) error {
 	if user != nil && user.TwoFAEnabled {
 		if code == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "请输入2FA验证码"})
+			c.JSON(http.StatusUnauthorized, response.H{"message": "请输入2FA验证码"})
 			return errors.New("2FA验证码未提供")
 		}
 		if !totp.ValidateCode(user.TwoFASecret, code) {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "2FA验证码错误"})
+			c.JSON(http.StatusUnauthorized, response.H{"message": "2FA验证码错误"})
 			return errors.New("2FA验证码错误")
 		}
 	}

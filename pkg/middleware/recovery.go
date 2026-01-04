@@ -3,14 +3,14 @@ package middleware
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
 // CustomRecovery 是自定义的 Recovery 中间件
-func CustomRecovery() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func CustomRecovery() response.HandlerFunc {
+	return func(c *response.Context) {
 		defer func() {
 			if err := recover(); err != nil {
 				// 打印错误日志（可选）

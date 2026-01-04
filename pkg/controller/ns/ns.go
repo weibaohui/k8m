@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -28,7 +29,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/ns/option_list [get]
-func (nc *Controller) OptionList(c *gin.Context) {
+func (nc *Controller) OptionList(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -67,7 +68,7 @@ func handleRestrictedNamespace(selectedCluster string) ([]map[string]string, boo
 	return nil, false
 }
 
-func handlePlatformAdmin(c *gin.Context, selectedCluster string) ([]map[string]string, bool) {
+func handlePlatformAdmin(c *response.Context, selectedCluster string) ([]map[string]string, bool) {
 	user := amis.GetLoginUser(c)
 	if service.UserService().IsUserPlatformAdmin(user) {
 		ctx := amis.GetContextWithUser(c)
@@ -80,7 +81,7 @@ func handlePlatformAdmin(c *gin.Context, selectedCluster string) ([]map[string]s
 	return nil, false
 }
 
-func handleNormalUser(c *gin.Context, selectedCluster string) ([]map[string]string, bool) {
+func handleNormalUser(c *response.Context, selectedCluster string) ([]map[string]string, bool) {
 	user := amis.GetLoginUser(c)
 	clusterUserRoles, err := service.UserService().GetClusters(user)
 	if err != nil {
@@ -129,7 +130,7 @@ func handleUserWithoutNamespaceRestriction(ctx context.Context, selectedCluster 
 	return nsList, true
 }
 
-func handleBlacklist(c *gin.Context, selectedCluster string, list []map[string]string) ([]map[string]string, bool) {
+func handleBlacklist(c *response.Context, selectedCluster string, list []map[string]string) ([]map[string]string, bool) {
 	user := amis.GetLoginUser(c)
 	clusterUserRoles, err := service.UserService().GetClusters(user)
 	if err != nil {
@@ -167,7 +168,7 @@ func handleBlacklist(c *gin.Context, selectedCluster string, list []map[string]s
 
 // sortAndRespond 对命名空间列表进行去重、排序并返回响应
 // 每个list item中都有一个map，key为label和value，value为命名空间名称
-func sortAndRespond(c *gin.Context, list []map[string]string) {
+func sortAndRespond(c *response.Context, list []map[string]string) {
 	// 使用map进行去重
 	uniqMap := make(map[string]map[string]string)
 	for _, item := range list {
@@ -191,7 +192,7 @@ func sortAndRespond(c *gin.Context, list []map[string]string) {
 	slice.SortBy(list, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": list,
 	})
 }

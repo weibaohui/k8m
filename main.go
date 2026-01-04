@@ -51,6 +51,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/callbacks"
 	"k8s.io/klog/v2"
@@ -176,7 +177,7 @@ func main() {
 	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
 	r.StaticFS("/monacoeditorwork", http.FS(monacoFS))
 
-	r.GET("/favicon.ico", func(c *gin.Context) {
+	r.GET("/favicon.ico", func(c *response.Context) {
 		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	})
@@ -187,11 +188,11 @@ func main() {
 	// @in header
 	// @name Authorization
 	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
-	r.GET("/swagger/*any", func(c *gin.Context) {
+	r.GET("/swagger/*any", func(c *response.Context) {
 		if plugins.ManagerInstance().IsEnabled(modules.PluginNameSwagger) {
 			ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
 		} else {
-			c.JSON(http.StatusForbidden, gin.H{
+			c.JSON(http.StatusForbidden, response.H{
 				"error":   "Swagger documentation is disabled",
 				"message": "Swagger文档已被禁用，请联系管理员启用",
 			})
@@ -199,7 +200,7 @@ func main() {
 	})
 
 	// 直接返回 index.html
-	r.GET("/", func(c *gin.Context) {
+	r.GET("/", func(c *response.Context) {
 		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Internal Server Error")
@@ -208,13 +209,13 @@ func main() {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
 	})
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
+	r.GET("/ping", func(c *response.Context) {
+		c.JSON(http.StatusOK, response.H{
 			"message": "pong",
 		})
 	})
-	r.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	r.GET("/healthz", func(c *response.Context) {
+		c.JSON(http.StatusOK, response.H{"status": "ok"})
 	})
 
 	auth := r.Group("/auth")
@@ -245,7 +246,7 @@ func main() {
 	}
 
 	//增加动态的readiness探测路径
-	r.GET("/health/ready", func(c *gin.Context) {
+	r.GET("/health/ready", func(c *response.Context) {
 		// 未启用leader插件，默认就绪
 		if !mgr.IsEnabled(modules.PluginNameLeader) {
 			c.Status(http.StatusOK)

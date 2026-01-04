@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -16,6 +15,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	mcpService "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -141,7 +141,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 
 							results := mcpService.McpService().Host().ExecTools(ctx, mergedCalls)
 							for _, r := range results {
-								currChatContent = append(currChatContent, gin.H{
+								currChatContent = append(currChatContent, map[string]any{
 									"type": "执行结果",
 									"raw":  r,
 								})
@@ -182,7 +182,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 	}
 	return nil
 }
-func (c *chatService) Chat(ctx *gin.Context, chat string) string {
+func (c *chatService) Chat(ctx *response.Context, chat string) string {
 	ctxInst := amis.GetContextWithUser(ctx)
 	result, err := c.ChatWithCtx(ctxInst, chat)
 	if err != nil {

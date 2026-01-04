@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 )
 
-func GetSelectedCluster(c *gin.Context) (string, error) {
+func GetSelectedCluster(c *response.Context) (string, error) {
 	selectedCluster := c.GetString("cluster")
 	if kom.Cluster(selectedCluster) == nil {
 		return "", fmt.Errorf("cluster %s not found", selectedCluster)
@@ -22,12 +22,12 @@ func GetSelectedCluster(c *gin.Context) (string, error) {
 }
 
 // GetLoginUser 获取当前登录用户名
-func GetLoginUser(c *gin.Context) string {
+func GetLoginUser(c *response.Context) string {
 	user := c.GetString(constants.JwtUserName)
 	return user
 }
 
-func GetContextWithUser(c *gin.Context) context.Context {
+func GetContextWithUser(c *response.Context) context.Context {
 	user := GetLoginUser(c)
 	ctx := context.WithValue(c.Request.Context(), constants.JwtUserName, user)
 

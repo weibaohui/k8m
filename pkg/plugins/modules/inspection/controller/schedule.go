@@ -15,6 +15,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -43,7 +44,7 @@ func RegisterAdminScheduleRoutes(arg *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/list [get]
-func (s *AdminScheduleController) List(c *gin.Context) {
+func (s *AdminScheduleController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.InspectionSchedule{}
 
@@ -60,7 +61,7 @@ func (s *AdminScheduleController) List(c *gin.Context) {
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/record/id/{id}/output/list [get]
-func (s *AdminScheduleController) OutputList(c *gin.Context) {
+func (s *AdminScheduleController) OutputList(c *response.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
 	id := c.Param("id")
@@ -83,7 +84,7 @@ func (s *AdminScheduleController) OutputList(c *gin.Context) {
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/record/id/{id}/event/list [get]
-func (s *AdminScheduleController) EventList(c *gin.Context) {
+func (s *AdminScheduleController) EventList(c *response.Context) {
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
 	id := c.Param("id")
@@ -105,13 +106,13 @@ func (s *AdminScheduleController) EventList(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/event/status/option_list [get]
-func (s *AdminScheduleController) EventStatusOptionList(c *gin.Context) {
+func (s *AdminScheduleController) EventStatusOptionList(c *response.Context) {
 	m := &models.InspectionCheckEvent{}
 	events, _, err := m.List(nil, func(db *gorm.DB) *gorm.DB {
 		return db.Distinct("event_status")
 	})
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -126,7 +127,7 @@ func (s *AdminScheduleController) EventStatusOptionList(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }
@@ -135,7 +136,7 @@ func (s *AdminScheduleController) EventStatusOptionList(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/save [post]
-func (s *AdminScheduleController) Save(c *gin.Context) {
+func (s *AdminScheduleController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.InspectionSchedule{}
 	err := c.ShouldBindJSON(&m)
@@ -202,7 +203,7 @@ func (s *AdminScheduleController) Save(c *gin.Context) {
 // @Param ids path string true "巡检计划ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/delete/{ids} [post]
-func (s *AdminScheduleController) Delete(c *gin.Context) {
+func (s *AdminScheduleController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	// 清除定时 任务
@@ -248,7 +249,7 @@ func (s *AdminScheduleController) Delete(c *gin.Context) {
 // @Param enabled path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/save/id/{id}/status/{enabled} [post]
-func (s *AdminScheduleController) QuickSave(c *gin.Context) {
+func (s *AdminScheduleController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 
@@ -285,7 +286,7 @@ func (s *AdminScheduleController) QuickSave(c *gin.Context) {
 // @Param id path int true "巡检计划ID"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/start/id/{id} [post]
-func (s *AdminScheduleController) Start(c *gin.Context) {
+func (s *AdminScheduleController) Start(c *response.Context) {
 	id := c.Param("id")
 	m := &models.InspectionSchedule{
 		ID: utils.ToUInt(id),
@@ -318,7 +319,7 @@ func (s *AdminScheduleController) Start(c *gin.Context) {
 // @Param script_codes body string true "脚本代码"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/id/{id}/update_script_code [post]
-func (s *AdminScheduleController) UpdateScriptCode(c *gin.Context) {
+func (s *AdminScheduleController) UpdateScriptCode(c *response.Context) {
 	id := c.Param("id")
 	type requestBody struct {
 		ScriptCodes string `json:"script_codes"`

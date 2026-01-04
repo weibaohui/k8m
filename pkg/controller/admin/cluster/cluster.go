@@ -9,6 +9,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
@@ -39,11 +40,11 @@ func RegisterUserClusterRoutes(mgm *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/cluster/file/option_list [get]
-func (a *Controller) FileOptionList(c *gin.Context) {
+func (a *Controller) FileOptionList(c *response.Context) {
 	clusters := service.ClusterService().AllClusters()
 
 	if len(clusters) == 0 {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -62,7 +63,7 @@ func (a *Controller) FileOptionList(c *gin.Context) {
 		})
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": options,
 	})
 }
@@ -72,7 +73,7 @@ func (a *Controller) FileOptionList(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/cluster/scan [post]
-func (a *Controller) Scan(c *gin.Context) {
+func (a *Controller) Scan(c *response.Context) {
 	service.ClusterService().Scan()
 	amis.WriteJsonData(c, "ok")
 }
@@ -83,7 +84,7 @@ func (a *Controller) Scan(c *gin.Context) {
 // @Param cluster path string true "Base64编码的集群ID"
 // @Success 200 {object} string "已执行，请稍后刷新"
 // @Router /mgm/cluster/{cluster}/reconnect [post]
-func (a *Controller) Reconnect(c *gin.Context) {
+func (a *Controller) Reconnect(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
 	clusterID, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {
@@ -100,7 +101,7 @@ func (a *Controller) Reconnect(c *gin.Context) {
 // @Param cluster path string true "Base64编码的集群ID"
 // @Success 200 {object} string "已执行，请稍后刷新"
 // @Router /admin/cluster/{cluster}/disconnect [post]
-func (a *Controller) Disconnect(c *gin.Context) {
+func (a *Controller) Disconnect(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
 	clusterID, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {
@@ -121,7 +122,7 @@ func (a *Controller) Disconnect(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} models.KubeConfig
 // @Router /admin/cluster/config/{id} [get]
-func (a *Controller) GetClusterConfig(c *gin.Context) {
+func (a *Controller) GetClusterConfig(c *response.Context) {
 	id := c.Param("id")
 	if id == "" {
 		amis.WriteJsonError(c, errors.New("集群ID不能为空"))
@@ -162,7 +163,7 @@ func (a *Controller) GetClusterConfig(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/cluster/config/save [post]
-func (a *Controller) SaveClusterConfig(c *gin.Context) {
+func (a *Controller) SaveClusterConfig(c *response.Context) {
 	var configData struct {
 		ID       uint    `json:"id" binding:"required"`
 		ProxyURL string  `json:"proxyURL"`
@@ -199,7 +200,7 @@ func (a *Controller) SaveClusterConfig(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	
+
 	// 更新已加载集群的配置参数
 	if err := service.ClusterService().UpdateClusterConfig(configData.ID, configData.ProxyURL, configData.Timeout, configData.QPS, configData.Burst); err != nil {
 		// 记录错误但不影响保存操作的成功响应
@@ -207,7 +208,7 @@ func (a *Controller) SaveClusterConfig(c *gin.Context) {
 		// 下次重新扫描时会自动同步
 		// 这里可以考虑记录日志
 	}
-	
+
 	// 执行一下扫描
 	service.ClusterService().ScanClustersInDB()
 

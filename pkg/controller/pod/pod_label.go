@@ -4,6 +4,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -21,7 +22,7 @@ func RegisterLabelRoutes(api *gin.RouterGroup) {
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/pod/labels/unique_labels [get]
 // UniqueLabels 返回当前集群中所有唯一的 Pod 标签键列表，格式化为前端可用的选项数组。
-func (lc *LabelController) UniqueLabels(c *gin.Context) {
+func (lc *LabelController) UniqueLabels(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -40,7 +41,7 @@ func (lc *LabelController) UniqueLabels(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 )
@@ -24,7 +25,7 @@ func RegisterResourceRoutes(api *gin.RouterGroup) {
 // @Param name path string true "节点名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/usage/name/{name} [get]
-func (nc *ResourceController) Usage(c *gin.Context) {
+func (nc *ResourceController) Usage(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -48,7 +49,7 @@ func (nc *ResourceController) Usage(c *gin.Context) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/top/list [get]
-func (nc *ResourceController) TopList(c *gin.Context) {
+func (nc *ResourceController) TopList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/worker"
@@ -20,7 +20,7 @@ import (
 type Controller struct{}
 
 // GetSetting 中文函数注释：获取事件转发总开关与运行参数配置。
-func (s *Controller) GetSetting(c *gin.Context) {
+func (s *Controller) GetSetting(c *response.Context) {
 	setting, err := models.GetOrCreateEventForwardSetting()
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -30,7 +30,7 @@ func (s *Controller) GetSetting(c *gin.Context) {
 }
 
 // UpdateSetting 中文函数注释：更新事件转发总开关与运行参数配置。
-func (s *Controller) UpdateSetting(c *gin.Context) {
+func (s *Controller) UpdateSetting(c *response.Context) {
 	var in models.EventForwardSetting
 	if err := c.ShouldBindJSON(&in); err != nil {
 		amis.WriteJsonError(c, err)
@@ -60,7 +60,7 @@ func (s *Controller) UpdateSetting(c *gin.Context) {
 }
 
 // List 中文函数注释：获取事件配置列表。
-func (s *Controller) List(c *gin.Context) {
+func (s *Controller) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.K8sEventConfig{}
 	items, total, err := m.List(params, func(db *gorm.DB) *gorm.DB {
@@ -74,7 +74,7 @@ func (s *Controller) List(c *gin.Context) {
 }
 
 // Save 中文函数注释：保存或更新事件配置。
-func (s *Controller) Save(c *gin.Context) {
+func (s *Controller) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.K8sEventConfig{}
 	if err := c.ShouldBindJSON(&m); err != nil {
@@ -139,7 +139,7 @@ func (s *Controller) Save(c *gin.Context) {
 }
 
 // Delete 中文函数注释：删除事件配置。
-func (s *Controller) Delete(c *gin.Context) {
+func (s *Controller) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.K8sEventConfig{}
@@ -154,7 +154,7 @@ func (s *Controller) Delete(c *gin.Context) {
 }
 
 // QuickSave 中文函数注释：快速更新事件配置启用状态。
-func (s *Controller) QuickSave(c *gin.Context) {
+func (s *Controller) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 

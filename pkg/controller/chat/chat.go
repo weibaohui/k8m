@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
@@ -62,9 +63,9 @@ type ResourceData struct {
 	Question string `form:"question"`
 }
 
-func handleRequest(c *gin.Context, promptFunc func(data any) string) {
+func handleRequest(c *response.Context, promptFunc func(data any) string) {
 	if !service.AIService().IsEnabled() {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"result": "请先配置开启ChatGPT功能",
 		})
 		return
@@ -126,7 +127,7 @@ func renderTemplate(templateStr string, data any, contextBuilder func(ResourceDa
 // @Param regardingKind query string false "相关资源类型"
 // @Success 200 {object} string
 // @Router /ai/chat/event [get]
-func (cc *Controller) Event(c *gin.Context) {
+func (cc *Controller) Event(c *response.Context) {
 
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -153,7 +154,7 @@ func (cc *Controller) Event(c *gin.Context) {
 // @Param namespace query string false "命名空间"
 // @Success 200 {object} string
 // @Router /ai/chat/describe [get]
-func (cc *Controller) Describe(c *gin.Context) {
+func (cc *Controller) Describe(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	var data ResourceData
 	err := c.ShouldBindQuery(&data)
@@ -193,7 +194,7 @@ func (cc *Controller) Describe(c *gin.Context) {
 // @Param kind query string false "资源类型"
 // @Success 200 {object} string
 // @Router /ai/chat/example [get]
-func (cc *Controller) Example(c *gin.Context) {
+func (cc *Controller) Example(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeExample)
@@ -216,7 +217,7 @@ func (cc *Controller) Example(c *gin.Context) {
 // @Param field query string false "字段名称"
 // @Success 200 {object} string
 // @Router /ai/chat/example/field [get]
-func (cc *Controller) FieldExample(c *gin.Context) {
+func (cc *Controller) FieldExample(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeFieldExample)
@@ -239,7 +240,7 @@ func (cc *Controller) FieldExample(c *gin.Context) {
 // @Param kind query string false "资源类型"
 // @Success 200 {object} string
 // @Router /ai/chat/resource [get]
-func (cc *Controller) Resource(c *gin.Context) {
+func (cc *Controller) Resource(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeResource)
@@ -262,7 +263,7 @@ func (cc *Controller) Resource(c *gin.Context) {
 // @Param field query string false "相关字段"
 // @Success 200 {object} string
 // @Router /ai/chat/k8s_gpt/resource [get]
-func (cc *Controller) K8sGPTResource(c *gin.Context) {
+func (cc *Controller) K8sGPTResource(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeK8sGPTResource)
@@ -283,7 +284,7 @@ func (cc *Controller) K8sGPTResource(c *gin.Context) {
 // @Param question query string false "要解释的内容"
 // @Success 200 {object} string
 // @Router /ai/chat/any_selection [get]
-func (cc *Controller) AnySelection(c *gin.Context) {
+func (cc *Controller) AnySelection(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeAnySelection)
@@ -304,7 +305,7 @@ func (cc *Controller) AnySelection(c *gin.Context) {
 // @Param question query string false "问题内容"
 // @Success 200 {object} string
 // @Router /ai/chat/any_question [get]
-func (cc *Controller) AnyQuestion(c *gin.Context) {
+func (cc *Controller) AnyQuestion(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeAnyQuestion)
@@ -325,7 +326,7 @@ func (cc *Controller) AnyQuestion(c *gin.Context) {
 // @Param cron query string false "Cron表达式"
 // @Success 200 {object} string
 // @Router /ai/chat/cron [get]
-func (cc *Controller) Cron(c *gin.Context) {
+func (cc *Controller) Cron(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeCron)
@@ -343,7 +344,7 @@ func (cc *Controller) Cron(c *gin.Context) {
 // @Param data query string false "日志内容"
 // @Success 200 {object} string
 // @Router /ai/chat/log [get]
-func (cc *Controller) Log(c *gin.Context) {
+func (cc *Controller) Log(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
 		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeLog)

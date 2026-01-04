@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 )
@@ -27,7 +28,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param version path string true "API版本"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/doc/kind/{kind}/group/{group}/version/{version} [get]
-func (cc *Controller) Doc(c *gin.Context) {
+func (cc *Controller) Doc(c *response.Context) {
 	kind := c.Param("kind")
 	apiVersion := c.Param("api_version")
 	group := c.Param("group")
@@ -56,7 +57,7 @@ func (cc *Controller) Doc(c *gin.Context) {
 	docs := kom.Cluster(selectedCluster).WithContext(ctx).Status().Docs()
 	node := docs.FetchByGVK(apiVersion, kind)
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": []any{
 			node,
 		},
@@ -74,7 +75,7 @@ type DetailReq struct {
 // @Param request body DetailReq true "请求体，包含description字段"
 // @Success 200 {object} DetailReq
 // @Router /k8s/cluster/{cluster}/doc/detail [post]
-func (cc *Controller) Detail(c *gin.Context) {
+func (cc *Controller) Detail(c *response.Context) {
 	detail := &DetailReq{}
 	err := c.ShouldBindBodyWithJSON(&detail)
 	if err != nil {

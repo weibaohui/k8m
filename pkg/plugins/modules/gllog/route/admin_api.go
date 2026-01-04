@@ -5,6 +5,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/gllog/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -14,7 +15,7 @@ func RegisterManagementRoutes(arg *gin.RouterGroup) {
 	klog.V(6).Infof("注册全局日志插件管理路由(mgm)")
 }
 
-func ListGlobalLog(c *gin.Context) {
+func ListGlobalLog(c *response.Context) {
 	cluster := c.Query("cluster")
 	namespace := c.Query("namespace")
 	nodeName := c.Query("node_name")

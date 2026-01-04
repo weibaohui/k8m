@@ -6,6 +6,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -25,7 +26,7 @@ func RegisterSSOConfigRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/config/sso/list [get]
-func (sc *SSOConfigController) List(c *gin.Context) {
+func (sc *SSOConfigController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.SSOConfig{}
 
@@ -41,7 +42,7 @@ func (sc *SSOConfigController) List(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/config/sso/save [post]
-func (sc *SSOConfigController) Save(c *gin.Context) {
+func (sc *SSOConfigController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.SSOConfig{}
 	err := c.ShouldBindJSON(&m)
@@ -57,7 +58,7 @@ func (sc *SSOConfigController) Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"id": m.ID,
 	})
 }
@@ -67,7 +68,7 @@ func (sc *SSOConfigController) Save(c *gin.Context) {
 // @Param ids path string true "SSO配置ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/config/sso/delete/{ids} [post]
-func (sc *SSOConfigController) Delete(c *gin.Context) {
+func (sc *SSOConfigController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.SSOConfig{}
@@ -86,7 +87,7 @@ func (sc *SSOConfigController) Delete(c *gin.Context) {
 // @Param enabled path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/config/sso/save/id/{id}/status/{enabled} [post]
-func (sc *SSOConfigController) QuickSave(c *gin.Context) {
+func (sc *SSOConfigController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 

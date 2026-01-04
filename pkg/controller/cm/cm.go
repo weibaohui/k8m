@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +40,7 @@ type info struct {
 // @Param file formData file true "上传文件"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/configmap/ns/{ns}/name/{name}/import [post]
-func (cc *Controller) Import(c *gin.Context) {
+func (cc *Controller) Import(c *response.Context) {
 	item := &info{}
 	ns := c.Param("ns")
 	name := c.Param("name")
@@ -91,7 +92,7 @@ func (cc *Controller) Import(c *gin.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("更新configmap错误: %v", err))
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"value": "/#",
 	})
 }
@@ -105,7 +106,7 @@ func (cc *Controller) Import(c *gin.Context) {
 // @Param request body object true "请求体，包含update_configmap字段"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/configmap/ns/{ns}/name/{name}/{key}/update_configmap [post]
-func (cc *Controller) Update(c *gin.Context) {
+func (cc *Controller) Update(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	key := c.Param("key")
@@ -163,7 +164,7 @@ func (cc *Controller) Update(c *gin.Context) {
 // @Param request body object true "请求体，包含metadata和data字段"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/configmap/create [post]
-func (cc *Controller) Create(c *gin.Context) {
+func (cc *Controller) Create(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

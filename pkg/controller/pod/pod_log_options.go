@@ -3,7 +3,7 @@ package pod
 import (
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/response"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -17,7 +17,7 @@ type LogQueryParams struct {
 	TailLines    *int64 `form:"tailLines"`
 }
 
-func BindPodLogOptions(c *gin.Context, containerName string) (*v1.PodLogOptions, error) {
+func BindPodLogOptions(c *response.Context, containerName string) (*v1.PodLogOptions, error) {
 	var params LogQueryParams
 
 	// 绑定查询参数到自定义结构体

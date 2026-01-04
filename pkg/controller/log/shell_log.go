@@ -5,6 +5,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -16,14 +17,12 @@ func RegisterLogRoutes(mgm *gin.RouterGroup) {
 	mgm.GET("/log/operation/list", ctrl.ListOperation)
 }
 
-
-
 // @Summary Shell日志列表
 // @Description 获取所有Shell操作日志
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/log/shell/list [get]
-func (lc *Controller) ListShell(c *gin.Context) {
+func (lc *Controller) ListShell(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.ShellLog{}
 
@@ -46,7 +45,7 @@ func (lc *Controller) ListShell(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/log/operation/list [get]
-func (lc *Controller) ListOperation(c *gin.Context) {
+func (lc *Controller) ListOperation(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.OperationLog{}
 

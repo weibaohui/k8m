@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -20,7 +21,7 @@ func RegisterConfigRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/config/all [get]
-func (cc *Controller) All(c *gin.Context) {
+func (cc *Controller) All(c *response.Context) {
 	config, err := service.ConfigService().GetConfig()
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -34,7 +35,7 @@ func (cc *Controller) All(c *gin.Context) {
 // @Param config body models.Config true "配置信息"
 // @Success 200 {object} string
 // @Router /admin/config/update [post]
-func (cc *Controller) Update(c *gin.Context) {
+func (cc *Controller) Update(c *response.Context) {
 	var config models.Config
 	if err := c.ShouldBindJSON(&config); err != nil {
 		amis.WriteJsonError(c, err)

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
 	mcp2 "github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -16,15 +15,16 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/tools"
 	"k8s.io/klog/v2"
 )
 
-func Adapt(fn func() http.Handler) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func Adapt(fn func() http.Handler) response.HandlerFunc {
+	return func(c *response.Context) {
 		handler := fn()
-		handler.ServeHTTP(c.Writer, c.Request)
+		handler.ServeHTTP(c.W, c.Request)
 	}
 }
 

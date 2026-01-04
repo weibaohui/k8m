@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -94,7 +95,7 @@ func getPods(selectedCluster string, ctx context.Context, ns string, name string
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/services [get]
-func (pc *PodLinkController) LinksServices(c *gin.Context) {
+func (pc *PodLinkController) LinksServices(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -131,7 +132,7 @@ func (pc *PodLinkController) LinksServices(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/endpoints [get]
-func (pc *PodLinkController) LinksEndpoints(c *gin.Context) {
+func (pc *PodLinkController) LinksEndpoints(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -170,7 +171,7 @@ func (pc *PodLinkController) LinksEndpoints(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/pvc [get]
-func (pc *PodLinkController) LinksPVC(c *gin.Context) {
+func (pc *PodLinkController) LinksPVC(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -207,7 +208,7 @@ func (pc *PodLinkController) LinksPVC(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/pv [get]
-func (pc *PodLinkController) LinksPV(c *gin.Context) {
+func (pc *PodLinkController) LinksPV(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -244,7 +245,7 @@ func (pc *PodLinkController) LinksPV(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/ingress [get]
-func (pc *PodLinkController) LinksIngress(c *gin.Context) {
+func (pc *PodLinkController) LinksIngress(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -281,7 +282,7 @@ func (pc *PodLinkController) LinksIngress(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/env [get]
-func (pc *PodLinkController) LinksEnv(c *gin.Context) {
+func (pc *PodLinkController) LinksEnv(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -318,7 +319,7 @@ func (pc *PodLinkController) LinksEnv(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/envFromPod [get]
-func (pc *PodLinkController) LinksEnvFromPod(c *gin.Context) {
+func (pc *PodLinkController) LinksEnvFromPod(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -355,7 +356,7 @@ func (pc *PodLinkController) LinksEnvFromPod(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/configmap [get]
-func (pc *PodLinkController) LinksConfigMap(c *gin.Context) {
+func (pc *PodLinkController) LinksConfigMap(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -392,7 +393,7 @@ func (pc *PodLinkController) LinksConfigMap(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/secret [get]
-func (pc *PodLinkController) LinksSecret(c *gin.Context) {
+func (pc *PodLinkController) LinksSecret(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -429,7 +430,7 @@ func (pc *PodLinkController) LinksSecret(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/links/node [get]
-func (pc *PodLinkController) LinksNode(c *gin.Context) {
+func (pc *PodLinkController) LinksNode(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -455,7 +456,7 @@ func (pc *PodLinkController) LinksNode(c *gin.Context) {
 	}
 	amis.WriteJsonList(c, nodes)
 }
-func (pc *PodLinkController) LinksPod(c *gin.Context) {
+func (pc *PodLinkController) LinksPod(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)

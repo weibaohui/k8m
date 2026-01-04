@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 )
 
@@ -25,7 +26,7 @@ func RegisterYamlRoutes(api *gin.RouterGroup) {
 // @Param file formData file true "YAML文件"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/yaml/upload [post]
-func (yc *YamlController) UploadFile(c *gin.Context) {
+func (yc *YamlController) UploadFile(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -61,7 +62,7 @@ func (yc *YamlController) UploadFile(c *gin.Context) {
 // @Param body body yamlRequest true "YAML配置请求"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/yaml/apply [post]
-func (yc *YamlController) Apply(c *gin.Context) {
+func (yc *YamlController) Apply(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -76,7 +77,7 @@ func (yc *YamlController) Apply(c *gin.Context) {
 	}
 	yamlStr := req.Yaml
 	result := kom.Cluster(selectedCluster).WithContext(ctx).Applier().Apply(yamlStr)
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"result": result,
 	})
 
@@ -88,7 +89,7 @@ func (yc *YamlController) Apply(c *gin.Context) {
 // @Param body body yamlRequest true "YAML配置请求"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/yaml/delete [post]
-func (yc *YamlController) Delete(c *gin.Context) {
+func (yc *YamlController) Delete(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -103,7 +104,7 @@ func (yc *YamlController) Delete(c *gin.Context) {
 	}
 	yamlStr := req.Yaml
 	result := kom.Cluster(selectedCluster).WithContext(ctx).Applier().Delete(yamlStr)
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"result": result,
 	})
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -31,7 +32,7 @@ func RegisterAIModelConfigRoutes(admin *gin.RouterGroup) {
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/ai/model/id/{id}/think/{status} [post]
-func (m *AIController) QuickSave(c *gin.Context) {
+func (m *AIController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 
@@ -57,7 +58,7 @@ func (m *AIController) QuickSave(c *gin.Context) {
 // @Param id path int true "模型ID"
 // @Success 200 {object} string
 // @Router /admin/ai/model/test/id/{id} [post]
-func (m *AIController) TestConnection(c *gin.Context) {
+func (m *AIController) TestConnection(c *response.Context) {
 	id := c.Param("id")
 
 	var entity models.AIModelConfig
@@ -91,7 +92,7 @@ func (m *AIController) TestConnection(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai/model/save [post]
-func (m *AIController) Save(c *gin.Context) {
+func (m *AIController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	var config models.AIModelConfig
@@ -127,7 +128,7 @@ func (m *AIController) Save(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai/model/list [get]
-func (m *AIController) List(c *gin.Context) {
+func (m *AIController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	config := &models.AIModelConfig{}
@@ -144,7 +145,7 @@ func (m *AIController) List(c *gin.Context) {
 // @Param ids path string true "模型ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/ai/model/delete/{ids} [post]
-func (m *AIController) Delete(c *gin.Context) {
+func (m *AIController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	config := &models.AIModelConfig{}

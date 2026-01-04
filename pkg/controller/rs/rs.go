@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -32,7 +33,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param name path string true "ReplicaSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/replicaset/ns/{ns}/name/{name}/restart [post]
-func (cc *Controller) Restart(c *gin.Context) {
+func (cc *Controller) Restart(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -54,7 +55,7 @@ func (cc *Controller) Restart(c *gin.Context) {
 // @Param body body object true "包含name_list和ns_list的请求体"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/replicaset/batch/restart [post]
-func (cc *Controller) BatchRestart(c *gin.Context) {
+func (cc *Controller) BatchRestart(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -97,7 +98,7 @@ func (cc *Controller) BatchRestart(c *gin.Context) {
 // @Param body body object true "包含name_list和ns_list的请求体"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/replicaset/batch/stop [post]
-func (cc *Controller) BatchStop(c *gin.Context) {
+func (cc *Controller) BatchStop(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -140,7 +141,7 @@ func (cc *Controller) BatchStop(c *gin.Context) {
 // @Param body body object true "包含name_list和ns_list的请求体"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/replicaset/batch/restore [post]
-func (cc *Controller) BatchRestore(c *gin.Context) {
+func (cc *Controller) BatchRestore(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -184,7 +185,7 @@ func (cc *Controller) BatchRestore(c *gin.Context) {
 // @Param name path string true "ReplicaSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/replicaset/ns/{ns}/name/{name}/events/all [get]
-func (cc *Controller) Event(c *gin.Context) {
+func (cc *Controller) Event(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -256,7 +257,7 @@ func (cc *Controller) Event(c *gin.Context) {
 // @Param name path string true "ReplicaSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/replicaset/ns/{ns}/name/{name}/hpa [get]
-func (cc *Controller) HPA(c *gin.Context) {
+func (cc *Controller) HPA(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)

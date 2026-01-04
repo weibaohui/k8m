@@ -7,6 +7,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 )
@@ -27,7 +28,7 @@ func RegisterTaintRoutes(api *gin.RouterGroup) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/taints/list [get]
-func (tc *TaintController) List(c *gin.Context) {
+func (tc *TaintController) List(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -96,7 +97,7 @@ func (tc *TaintController) List(c *gin.Context) {
 // @Param name path string true "节点名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/list_taints/name/{name} [get]
-func (tc *TaintController) ListByName(c *gin.Context) {
+func (tc *TaintController) ListByName(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -129,7 +130,7 @@ type TaintInfo struct {
 // @Param body body TaintInfo true "污点信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/add_taints/name/{name} [post]
-func (tc *TaintController) Add(c *gin.Context) {
+func (tc *TaintController) Add(c *response.Context) {
 	if err := processTaint(c, "add"); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -144,7 +145,7 @@ func (tc *TaintController) Add(c *gin.Context) {
 // @Param body body TaintInfo true "污点信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/delete_taints/name/{name} [post]
-func (tc *TaintController) Delete(c *gin.Context) {
+func (tc *TaintController) Delete(c *response.Context) {
 	if err := processTaint(c, "del"); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -159,7 +160,7 @@ func (tc *TaintController) Delete(c *gin.Context) {
 // @Param body body TaintInfo true "污点信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/update_taints/name/{name} [post]
-func (tc *TaintController) Update(c *gin.Context) {
+func (tc *TaintController) Update(c *response.Context) {
 	if err := processTaint(c, "modify"); err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -167,7 +168,7 @@ func (tc *TaintController) Update(c *gin.Context) {
 	amis.WriteJsonOK(c)
 }
 
-func processTaint(c *gin.Context, mode string) error {
+func processTaint(c *response.Context, mode string) error {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)

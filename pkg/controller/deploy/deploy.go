@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -45,7 +46,7 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/batch/stop [post]
-func (nc *ActionController) BatchStop(c *gin.Context) {
+func (nc *ActionController) BatchStop(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -88,7 +89,7 @@ func (nc *ActionController) BatchStop(c *gin.Context) {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/batch/restore [post]
-func (nc *ActionController) BatchRestore(c *gin.Context) {
+func (nc *ActionController) BatchRestore(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -131,7 +132,7 @@ func (nc *ActionController) BatchRestore(c *gin.Context) {
 // @Param name path string true "Deployment名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/restart [post]
-func (nc *ActionController) Restart(c *gin.Context) {
+func (nc *ActionController) Restart(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -153,7 +154,7 @@ func (nc *ActionController) Restart(c *gin.Context) {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/batch/restart [post]
-func (nc *ActionController) BatchRestart(c *gin.Context) {
+func (nc *ActionController) BatchRestart(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -196,7 +197,7 @@ func (nc *ActionController) BatchRestart(c *gin.Context) {
 // @Param name path string true "Deployment名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/rollout/history [get]
-func (nc *ActionController) History(c *gin.Context) {
+func (nc *ActionController) History(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -223,7 +224,7 @@ func (nc *ActionController) History(c *gin.Context) {
 // @Param revision path string true "版本号"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/history [get]
-func (nc *ActionController) HistoryRevisionDiff(c *gin.Context) {
+func (nc *ActionController) HistoryRevisionDiff(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -261,7 +262,7 @@ func (nc *ActionController) HistoryRevisionDiff(c *gin.Context) {
 
 	current, _ := yaml.JSONToYAML([]byte(utils.ToJSON(rsVersion)))
 	latest, _ := yaml.JSONToYAML([]byte(utils.ToJSON(rsLatest)))
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"current": string(current),
 		"latest":  string(latest),
 	})
@@ -274,7 +275,7 @@ func (nc *ActionController) HistoryRevisionDiff(c *gin.Context) {
 // @Param name path string true "Deployment名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/rollout/pause [post]
-func (nc *ActionController) Pause(c *gin.Context) {
+func (nc *ActionController) Pause(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -296,7 +297,7 @@ func (nc *ActionController) Pause(c *gin.Context) {
 // @Param name path string true "Deployment名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/rollout/resume [post]
-func (nc *ActionController) Resume(c *gin.Context) {
+func (nc *ActionController) Resume(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -319,7 +320,7 @@ func (nc *ActionController) Resume(c *gin.Context) {
 // @Param replica path int true "副本数"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/scale/replica/{replica} [post]
-func (nc *ActionController) Scale(c *gin.Context) {
+func (nc *ActionController) Scale(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	replica := c.Param("replica")
@@ -345,7 +346,7 @@ func (nc *ActionController) Scale(c *gin.Context) {
 // @Param revision path string true "版本号"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/revision/{revision}/rollout/undo [post]
-func (nc *ActionController) Undo(c *gin.Context) {
+func (nc *ActionController) Undo(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -374,7 +375,7 @@ func (nc *ActionController) Undo(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/events/all [get]
 // Event 显示deploy下所有的事件列表，包括deploy、rs、pod
-func (nc *ActionController) Event(c *gin.Context) {
+func (nc *ActionController) Event(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -445,7 +446,7 @@ func (nc *ActionController) Event(c *gin.Context) {
 // @Param name path string true "Deployment名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/ns/{ns}/name/{name}/hpa [get]
-func (nc *ActionController) HPA(c *gin.Context) {
+func (nc *ActionController) HPA(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -470,7 +471,7 @@ func (nc *ActionController) HPA(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deploy/create [post]
 // 创建deployment
-func (nc *ActionController) Create(c *gin.Context) {
+func (nc *ActionController) Create(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -568,7 +569,7 @@ func (nc *ActionController) Create(c *gin.Context) {
 // @Param deployments body object true "Deployment镜像更新配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/deployment/batch_update_images [post]
-func (nc *ActionController) BatchUpdateImages(c *gin.Context) {
+func (nc *ActionController) BatchUpdateImages(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -26,7 +27,7 @@ func RegisterMetadataRoutes(api *gin.RouterGroup) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/name/option_list [get]
-func (nc *MetadataController) NameOptionList(c *gin.Context) {
+func (nc *MetadataController) NameOptionList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -39,7 +40,7 @@ func (nc *MetadataController) NameOptionList(c *gin.Context) {
 		WithCache(time.Second * 30).
 		List(&list).Error
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -59,7 +60,7 @@ func (nc *MetadataController) NameOptionList(c *gin.Context) {
 		})
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": options,
 	})
 }
@@ -69,7 +70,7 @@ func (nc *MetadataController) NameOptionList(c *gin.Context) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/labels/list [get]
-func (nc *MetadataController) AllLabelList(c *gin.Context) {
+func (nc *MetadataController) AllLabelList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -129,7 +130,7 @@ func (nc *MetadataController) AllLabelList(c *gin.Context) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/node/labels/unique_labels [get]
-func (nc *MetadataController) UniqueLabels(c *gin.Context) {
+func (nc *MetadataController) UniqueLabels(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -148,7 +149,7 @@ func (nc *MetadataController) UniqueLabels(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }

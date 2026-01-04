@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -40,7 +41,7 @@ func RegisterContainerRoutes(api *gin.RouterGroup) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/image_pull_secrets/ns/{ns}/name/{name} [get]
-func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
+func (cc *ContainerController) ImagePullSecretOptionList(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -60,14 +61,14 @@ func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 		Name(name).Get(&item).Error
 
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
 	}
 	imagePullSecrets, _ := cc.getImagePullSecrets(item)
 	if len(imagePullSecrets) == 0 {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -81,13 +82,13 @@ func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 		Where(fmt.Sprintf("type = '%s' or type = '%s' ", v1.SecretTypeDockerConfigJson, v1.SecretTypeDockercfg)).
 		List(&secretsList).Error
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
 	}
 	if len(secretsList) == 0 {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -100,7 +101,7 @@ func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 		})
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": options,
 		"value":   strings.Join(imagePullSecrets, ","),
 	})
@@ -117,7 +118,7 @@ func (cc *ContainerController) ImagePullSecretOptionList(c *gin.Context) {
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_resources_info/ns/{ns}/name/{name}/container/{container_name} [get]
-func (cc *ContainerController) ContainerResourcesInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerResourcesInfo(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -147,7 +148,7 @@ func (cc *ContainerController) ContainerResourcesInfo(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"name":           containerName,
 		"request_cpu":    requestCPU,
 		"limit_cpu":      limitCPU,
@@ -274,7 +275,7 @@ type resourceInfo struct {
 // @Param body body resourceInfo true "资源配置信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_resources/ns/{ns}/name/{name} [post]
-func (cc *ContainerController) UpdateResources(c *gin.Context) {
+func (cc *ContainerController) UpdateResources(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -379,7 +380,7 @@ func generateResourcePatch(kind string, info resourceInfo) (map[string]any, erro
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_info/ns/{ns}/name/{name}/container/{container_name} [get]
-func (cc *ContainerController) ContainerInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerInfo(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -410,7 +411,7 @@ func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 		return
 	}
 	image, tag := utils.GetImageNameAndTag(imageFullName)
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"name":              containerName,
 		"image":             image,
 		"tag":               tag,
@@ -431,7 +432,7 @@ func (cc *ContainerController) ContainerInfo(c *gin.Context) {
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_env/ns/{ns}/name/{name}/container/{container_name} [get]
-func (cc *ContainerController) ContainerEnvInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerEnvInfo(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -461,7 +462,7 @@ func (cc *ContainerController) ContainerEnvInfo(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"envs": envVars,
 	})
 
@@ -483,7 +484,7 @@ type ContainerEnv struct {
 // @Param body body ContainerEnv true "容器环境变量信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_env/ns/{ns}/name/{name} [post]
-func (cc *ContainerController) UpdateContainerEnv(c *gin.Context) {
+func (cc *ContainerController) UpdateContainerEnv(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -770,7 +771,7 @@ type imageInfo struct {
 // @Param body body imageInfo true "镜像信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_image/ns/{ns}/name/{name} [post]
-func (cc *ContainerController) UpdateImageTag(c *gin.Context) {
+func (cc *ContainerController) UpdateImageTag(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -861,7 +862,7 @@ func (cc *ContainerController) generateDynamicPatch(kind string, info imageInfo)
 // @Param container_name path string true "容器名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/container_health_checks/ns/{ns}/name/{name}/container/{container_name} [get]
-func (cc *ContainerController) ContainerHealthChecksInfo(c *gin.Context) {
+func (cc *ContainerController) ContainerHealthChecksInfo(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -892,7 +893,7 @@ func (cc *ContainerController) ContainerHealthChecksInfo(c *gin.Context) {
 		return
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"container_name":  containerName,
 		"readiness_probe": healthChecks["readinessProbe"],
 		"liveness_probe":  healthChecks["livenessProbe"],
@@ -972,7 +973,7 @@ type HealthCheckInfo struct {
 // @Param body body HealthCheckInfo true "健康检查配置信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_health_checks/ns/{ns}/name/{name} [post]
-func (cc *ContainerController) UpdateHealthChecks(c *gin.Context) {
+func (cc *ContainerController) UpdateHealthChecks(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")

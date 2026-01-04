@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -22,7 +22,7 @@ type ReleaseController struct {
 // @Param name path string true "Release名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/history/list [get]
-func (hr *ReleaseController) ListReleaseHistory(c *gin.Context) {
+func (hr *ReleaseController) ListReleaseHistory(c *response.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 
@@ -50,7 +50,7 @@ func (hr *ReleaseController) ListReleaseHistory(c *gin.Context) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/list [get]
-func (hr *ReleaseController) ListRelease(c *gin.Context) {
+func (hr *ReleaseController) ListRelease(c *response.Context) {
 	// 检查权限
 	err := handleCommonLogic(c, "list", "", "", "")
 	if err != nil {
@@ -95,7 +95,7 @@ func (hr *ReleaseController) ListRelease(c *gin.Context) {
 // @Param body body object true "安装参数"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/{release}/repo/{repo}/chart/{chart}/version/{version}/install [post]
-func (hr *ReleaseController) InstallRelease(c *gin.Context) {
+func (hr *ReleaseController) InstallRelease(c *response.Context) {
 
 	releaseName := c.Param("release")
 	repoName := c.Param("repo")
@@ -145,7 +145,7 @@ func (hr *ReleaseController) InstallRelease(c *gin.Context) {
 // @Param name path string true "Release名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/uninstall [post]
-func (hr *ReleaseController) UninstallRelease(c *gin.Context) {
+func (hr *ReleaseController) UninstallRelease(c *response.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 
@@ -176,7 +176,7 @@ func (hr *ReleaseController) UninstallRelease(c *gin.Context) {
 // @Param revision path string true "版本号"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/notes [get]
-func (hr *ReleaseController) GetReleaseNote(c *gin.Context) {
+func (hr *ReleaseController) GetReleaseNote(c *response.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	revision := c.Param("revision")
@@ -199,7 +199,7 @@ func (hr *ReleaseController) GetReleaseNote(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"note": note,
 	})
 }
@@ -212,7 +212,7 @@ func (hr *ReleaseController) GetReleaseNote(c *gin.Context) {
 // @Param revision path string true "版本号"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/install_log [get]
-func (hr *ReleaseController) GetReleaseInstallLog(c *gin.Context) {
+func (hr *ReleaseController) GetReleaseInstallLog(c *response.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 
@@ -233,7 +233,7 @@ func (hr *ReleaseController) GetReleaseInstallLog(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"result": rr.Result,
 	})
 }
@@ -246,7 +246,7 @@ func (hr *ReleaseController) GetReleaseInstallLog(c *gin.Context) {
 // @Param revision path string true "版本号"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/ns/{ns}/name/{name}/revision/{revision}/values [get]
-func (hr *ReleaseController) GetReleaseValues(c *gin.Context) {
+func (hr *ReleaseController) GetReleaseValues(c *response.Context) {
 	releaseName := c.Param("name")
 	ns := c.Param("ns")
 	revision := c.Param("revision")
@@ -286,7 +286,7 @@ func (hr *ReleaseController) GetReleaseValues(c *gin.Context) {
 // @Param body body object true "批量卸载参数"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/batch/uninstall [post]
-func (hr *ReleaseController) BatchUninstallRelease(c *gin.Context) {
+func (hr *ReleaseController) BatchUninstallRelease(c *response.Context) {
 	var req struct {
 		Names      []string `json:"name_list"`
 		Namespaces []string `json:"ns_list"`
@@ -326,7 +326,7 @@ func (hr *ReleaseController) BatchUninstallRelease(c *gin.Context) {
 // @Param body body object true "升级参数"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/plugins/helm/release/upgrade [post]
-func (hr *ReleaseController) UpgradeRelease(c *gin.Context) {
+func (hr *ReleaseController) UpgradeRelease(c *response.Context) {
 
 	var req struct {
 		Name      string `json:"name,omitempty"`

@@ -1,11 +1,11 @@
 package admin
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ type ToolController struct {
 // @Param name path string true "MCP服务器名称"
 // @Success 200 {object} string
 // @Router /admin/mcp/server/{name}/tools/list [get]
-func (m *ToolController) List(c *gin.Context) {
+func (m *ToolController) List(c *response.Context) {
 	name := c.Param("name")
 	params := dao.BuildParams(c)
 	params.PerPage = 10000
@@ -38,7 +38,7 @@ func (m *ToolController) List(c *gin.Context) {
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/mcp/tool/save/id/{id}/status/{status} [post]
-func (m *ToolController) QuickSave(c *gin.Context) {
+func (m *ToolController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 

@@ -8,6 +8,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
+	"github.com/weibaohui/k8m/pkg/response"
 
 	"gorm.io/gorm"
 )
@@ -30,7 +31,7 @@ func RegisterAdminRecordRoutes(arg *gin.RouterGroup) {
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/id/{id}/record/list [get]
 // @Router /admin/plugins/inspection/record/list [get]
-func (r *AdminRecordController) RecordList(c *gin.Context) {
+func (r *AdminRecordController) RecordList(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	m := &models.InspectionRecord{}
@@ -55,7 +56,7 @@ func (r *AdminRecordController) RecordList(c *gin.Context) {
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/record/id/{id}/push [post]
-func (r *AdminRecordController) Push(c *gin.Context) {
+func (r *AdminRecordController) Push(c *response.Context) {
 
 	recordIDStr := c.Param("id")
 
