@@ -18,9 +18,9 @@ type KeyController struct{}
 
 func RegisterMCPKeysRoutes(mgm chi.Router) {
 	ctrl := &KeyController{}
-	mgm.GET("/user/profile/mcp_keys/list", ctrl.List)
-	mgm.POST("/user/profile/mcp_keys/create", ctrl.Create)
-	mgm.POST("/user/profile/mcp_keys/delete/:id", ctrl.Delete)
+	mgm.Get("/user/profile/mcp_keys/list", response.Adapter(ctrl.List))
+	mgm.Post("/user/profile/mcp_keys/create", response.Adapter(ctrl.Create))
+	mgm.Post("/user/profile/mcp_keys/delete/{id}", response.Adapter(ctrl.Delete))
 }
 
 // Create 处理创建新的MCP密钥的HTTP请求。
