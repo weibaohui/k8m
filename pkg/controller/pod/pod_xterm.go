@@ -31,9 +31,9 @@ import (
 
 type XtermController struct{}
 
-func RegisterXtermRoutes(api *chi.Router) {
+func RegisterXtermRoutes(api chi.Router) {
 	ctrl := &XtermController{}
-	api.GET("/pod/xterm/ns/{ns}/pod_name/{pod_name}", ctrl.Xterm)
+	api.Get("/pod/xterm/ns/{ns}/pod_name/{pod_name}", response.Adapter(ctrl.Xterm))
 }
 
 var WebsocketMessageType = map[int]string{

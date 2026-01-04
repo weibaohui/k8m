@@ -14,10 +14,10 @@ import (
 
 type ResourceController struct{}
 
-func RegisterResourceRoutes(api *chi.Router) {
+func RegisterResourceRoutes(api chi.Router) {
 	ctrl := &ResourceController{}
-	api.GET("/pod/usage/ns/{ns}/name/{name}", ctrl.Usage)
-	api.GET("/pod/top/ns/{ns}/list", ctrl.TopList)
+	api.Get("/pod/usage/ns/{ns}/name/{name}", response.Adapter(ctrl.Usage))
+	api.Get("/pod/top/ns/{ns}/list", response.Adapter(ctrl.TopList))
 }
 
 // @Summary 获取Pod资源使用情况
