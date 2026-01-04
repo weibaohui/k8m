@@ -314,7 +314,7 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 路由注册示例：
 
 ```go
-ClusterRouter: func(cluster *gin.RouterGroup) {
+ClusterRouter: func(cluster chi.Router) {
     g := cluster.Group("/plugins/" + pluginName)
     g.GET("/items", handler.List)
     g.POST("/items", handler.Create)

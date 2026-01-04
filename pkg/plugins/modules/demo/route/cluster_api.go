@@ -1,14 +1,14 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/cluster"
 	"k8s.io/klog/v2"
 )
 
 // RegisterClusterRoutes 注册Demo插件的集群相关路由
-func RegisterClusterRoutes(crg *gin.RouterGroup) {
+func RegisterClusterRoutes(crg chi.Router) {
 	g := crg.Group("/plugins/" + modules.PluginNameDemo)
 
 	// 列表

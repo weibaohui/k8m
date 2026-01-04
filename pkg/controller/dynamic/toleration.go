@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -16,7 +16,7 @@ import (
 
 type TolerationController struct{}
 
-func RegisterTolerationRoutes(api *gin.RouterGroup) {
+func RegisterTolerationRoutes(api *chi.Router) {
 	ctrl := &TolerationController{}
 	api.POST("/:kind/group/:group/version/:version/update_tolerations/ns/:ns/name/:name", ctrl.Update)
 	api.POST("/:kind/group/:group/version/:version/delete_tolerations/ns/:ns/name/:name", ctrl.Delete)

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -16,7 +16,7 @@ import (
 type AdminRecordController struct {
 }
 
-func RegisterAdminRecordRoutes(arg *gin.RouterGroup) {
+func RegisterAdminRecordRoutes(arg *chi.Router) {
 	admin := arg.Group("/plugins/" + modules.PluginNameInspection)
 	ctrl := &AdminRecordController{}
 	admin.GET("/schedule/id/:id/record/list", ctrl.RecordList)

@@ -3,7 +3,7 @@ package admin
 import (
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -16,7 +16,7 @@ import (
 
 type KeyController struct{}
 
-func RegisterMCPKeysRoutes(mgm *gin.RouterGroup) {
+func RegisterMCPKeysRoutes(mgm chi.Router) {
 	ctrl := &KeyController{}
 	mgm.GET("/user/profile/mcp_keys/list", ctrl.List)
 	mgm.POST("/user/profile/mcp_keys/create", ctrl.Create)

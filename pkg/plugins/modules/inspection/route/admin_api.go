@@ -1,14 +1,14 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/controller"
 	"k8s.io/klog/v2"
 )
 
 // RegisterPluginAdminRoutes 注册集群巡检插件的管理员路由
 // 使用插件内部的 controller 包，完全自包含
-func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
+func RegisterPluginAdminRoutes(arg *chi.Router) {
 	controller.RegisterAdminScheduleRoutes(arg)
 	controller.RegisterAdminRecordRoutes(arg)
 	controller.RegisterAdminLuaScriptRoutes(arg)

@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -31,7 +31,7 @@ import (
 
 type XtermController struct{}
 
-func RegisterXtermRoutes(api *gin.RouterGroup) {
+func RegisterXtermRoutes(api *chi.Router) {
 	ctrl := &XtermController{}
 	api.GET("/pod/xterm/ns/:ns/pod_name/:pod_name", ctrl.Xterm)
 }

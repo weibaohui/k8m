@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -17,7 +17,7 @@ import (
 
 type PodAntiAffinityController struct{}
 
-func RegisterPodAntiAffinityRoutes(api *gin.RouterGroup) {
+func RegisterPodAntiAffinityRoutes(api *chi.Router) {
 	ctrl := &PodAntiAffinityController{}
 	api.POST("/:kind/group/:group/version/:version/update_pod_anti_affinity/ns/:ns/name/:name", ctrl.UpdatePodAntiAffinity)
 	api.POST("/:kind/group/:group/version/:version/delete_pod_anti_affinity/ns/:ns/name/:name", ctrl.DeletePodAntiAffinity)

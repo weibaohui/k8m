@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -13,7 +13,7 @@ import (
 type SSOConfigController struct {
 }
 
-func RegisterSSOConfigRoutes(admin *gin.RouterGroup) {
+func RegisterSSOConfigRoutes(admin *chi.Router) {
 	ctrl := &SSOConfigController{}
 	// SSO 配置
 	admin.GET("/config/sso/list", ctrl.List)

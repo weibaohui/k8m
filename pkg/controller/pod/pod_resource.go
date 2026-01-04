@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -14,7 +14,7 @@ import (
 
 type ResourceController struct{}
 
-func RegisterResourceRoutes(api *gin.RouterGroup) {
+func RegisterResourceRoutes(api *chi.Router) {
 	ctrl := &ResourceController{}
 	api.GET("/pod/usage/ns/:ns/name/:name", ctrl.Usage)
 	api.GET("/pod/top/ns/:ns/list", ctrl.TopList)

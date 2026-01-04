@@ -1,13 +1,13 @@
 package sso
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 )
 
 type AuthController struct{}
 
-func RegisterAuthRoutes(auth *gin.RouterGroup) {
+func RegisterAuthRoutes(auth *chi.Router) {
 	ctrl := &AuthController{}
 	ldap := &config.LdapConfigController{}
 	auth.GET("/sso/config", ctrl.GetSSOConfig)

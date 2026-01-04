@@ -3,7 +3,7 @@ package chat
 import (
 	"context"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -19,7 +19,7 @@ import (
 type Controller struct {
 }
 
-func RegisterChatRoutes(ai *gin.RouterGroup) {
+func RegisterChatRoutes(ai *chi.Router) {
 	ctrl := &Controller{}
 	ai.GET("/chat/event", ctrl.Event)
 	ai.GET("/chat/log", ctrl.Log)

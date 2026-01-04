@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -16,7 +16,7 @@ import (
 
 type Controller struct{}
 
-func RegisterProfileRoutes(mgm *gin.RouterGroup) {
+func RegisterProfileRoutes(mgm *chi.Router) {
 	ctrl := &Controller{}
 	mgm.GET("/user/profile", ctrl.Profile)
 	mgm.GET("/user/profile/cluster/permissions/list", ctrl.ListUserPermissions)

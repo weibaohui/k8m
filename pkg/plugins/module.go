@@ -1,6 +1,6 @@
 package plugins
 
-import "github.com/gin-gonic/gin"
+import "github.com/go-chi/chi/v5"
 
 // Module 插件（Feature Module）声明体，仅用于描述能力集合
 type Module struct {
@@ -22,20 +22,24 @@ type Module struct {
 	// ClusterRouter 路由注册回调（启用后由Manager统一挂载）
 	// 该类API接口以/k8s/cluster/clusterID/plugins/xxx的形式暴露，带有集群ID
 	// 通常是集群相关的操作页面，要求必须是已登录用户
-	ClusterRouter func(cluster *gin.RouterGroup)
+	// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+	ClusterRouter func(cluster chi.Router)
 
 	// ManagementRouter 管理操作路由注册回调（启用后由Manager统一挂载）
 	// 该类API接口以/mgm/plugins/xxx的形式暴露，不带集群ID
 	// 通常是管理类的操作页面，要求必须是已登录用户
-	ManagementRouter func(mgm *gin.RouterGroup)
+	// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+	ManagementRouter func(mgm chi.Router)
 
 	// PluginAdminRouter 插件管理员操作路由注册回调（启用后由Manager统一挂载）
 	// 该类API接口以/admin/plugins/xxx的形式暴露，不带集群ID
 	// 通常是插件管理员相关的操作页面,要求必须是平台管理员
-	PluginAdminRouter func(admin *gin.RouterGroup)
+	// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+	PluginAdminRouter func(admin chi.Router)
 
 	// RootRouter 根路由注册回调（启用后由Manager统一挂载）
 	// 该类API接口以/根目录为暴露点，一般不建议使用，如需使用要特别注意注册路由的正确性
 	// 通常是公开的API接口，无需登录即可访问
-	RootRouter func(root *gin.RouterGroup)
+	// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+	RootRouter func(root chi.Router)
 }

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -22,7 +22,7 @@ import (
 type AdminScheduleController struct {
 }
 
-func RegisterAdminScheduleRoutes(arg *gin.RouterGroup) {
+func RegisterAdminScheduleRoutes(arg *chi.Router) {
 	admin := arg.Group("/plugins/" + modules.PluginNameInspection)
 
 	ctrl := &AdminScheduleController{}

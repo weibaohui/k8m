@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -13,7 +13,7 @@ import (
 
 type MetadataController struct{}
 
-func RegisterMetadataRoutes(api *gin.RouterGroup) {
+func RegisterMetadataRoutes(api *chi.Router) {
 	ctrl := &MetadataController{}
 	api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", ctrl.UpdateLabels)           // CRD
 	api.GET("/:kind/group/:group/version/:version/annotations/ns/:ns/name/:name", ctrl.ListAnnotations)           // CRD

@@ -1,14 +1,14 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/admin"
 	"k8s.io/klog/v2"
 )
 
 // RegisterPluginAdminRoutes 中文函数注释：注册事件转发插件的管理员路由（平台管理员）。
-func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
+func RegisterPluginAdminRoutes(arg *chi.Router) {
 	g := arg.Group("/plugins/" + modules.PluginNameEventHandler)
 	ctrl := &admin.Controller{}
 

@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -13,7 +13,7 @@ import (
 
 type YamlController struct{}
 
-func RegisterYamlRoutes(api *gin.RouterGroup) {
+func RegisterYamlRoutes(api *chi.Router) {
 	ctrl := &YamlController{}
 	api.POST("/yaml/apply", ctrl.Apply)
 	api.POST("/yaml/upload", ctrl.UploadFile)

@@ -2,7 +2,7 @@ package pod
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -10,7 +10,7 @@ import (
 
 type LabelController struct{}
 
-func RegisterLabelRoutes(api *gin.RouterGroup) {
+func RegisterLabelRoutes(api *chi.Router) {
 	ctrl := &LabelController{}
 	api.GET("/pod/labels/unique_labels", ctrl.UniqueLabels)
 

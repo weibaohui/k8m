@@ -1,7 +1,7 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/admin"
 	"k8s.io/klog/v2"
@@ -9,7 +9,7 @@ import (
 
 // RegisterPluginAdminRoutes 注册 Helm 插件的管理员路由（平台管理员）
 // 对应原来的 /admin 路径下的路由
-func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
+func RegisterPluginAdminRoutes(arg chi.Router) {
 	g := arg.Group("/plugins/" + modules.PluginNameHelm)
 	ctrl := &admin.RepoController{}
 	g.GET("/repo/list", ctrl.List)
@@ -26,7 +26,7 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 
 // RegisterPluginAPIRoutes 注册 Helm 插件的 API 路由（K8s API）
 // 对应原来的 /k8s/cluster/{cluster} 路径下的路由
-func RegisterPluginAPIRoutes(arg *gin.RouterGroup) {
+func RegisterPluginAPIRoutes(arg chi.Router) {
 	api := arg.Group("/plugins/" + modules.PluginNameHelm)
 	ctrl := &admin.ReleaseController{}
 
@@ -45,7 +45,7 @@ func RegisterPluginAPIRoutes(arg *gin.RouterGroup) {
 
 // RegisterPluginMgmRoutes 注册 Helm 插件的管理路由（Mgm）
 // 对应原来的 /mgm 路径下的路由
-func RegisterPluginMgmRoutes(arg *gin.RouterGroup) {
+func RegisterPluginMgmRoutes(arg chi.Router) {
 	mgm := arg.Group("/plugins/" + modules.PluginNameHelm)
 	ctrl := &admin.ChartController{}
 	mgm.GET("/repo/:repo/chart/:chart/versions", ctrl.ChartVersionOptionList)

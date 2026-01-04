@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -15,7 +15,7 @@ import (
 
 type PortController struct{}
 
-func RegisterPortRoutes(api *gin.RouterGroup) {
+func RegisterPortRoutes(api *chi.Router) {
 	ctrl := &PortController{}
 	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", ctrl.StartPortForward)
 	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", ctrl.StopPortForward)

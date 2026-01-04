@@ -1,13 +1,13 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/openapi/admin"
 	"k8s.io/klog/v2"
 )
 
-func RegisterPluginMgmRoutes(arg *gin.RouterGroup) {
+func RegisterPluginMgmRoutes(arg chi.Router) {
 	g := arg.Group("/plugins/" + modules.PluginNameOpenAPI)
 	ctrl := &admin.Controller{}
 

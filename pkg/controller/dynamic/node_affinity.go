@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -17,7 +17,7 @@ import (
 
 type NodeAffinityController struct{}
 
-func RegisterNodeAffinityRoutes(api *gin.RouterGroup) {
+func RegisterNodeAffinityRoutes(api *chi.Router) {
 	ctrl := &NodeAffinityController{}
 	api.POST("/:kind/group/:group/version/:version/update_node_affinity/ns/:ns/name/:name", ctrl.UpdateNodeAffinity)
 	api.POST("/:kind/group/:group/version/:version/delete_node_affinity/ns/:ns/name/:name", ctrl.DeleteNodeAffinity)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
@@ -25,7 +25,7 @@ var WebsocketMessageType = map[int]string{
 
 type ShellController struct{}
 
-func RegisterShellRoutes(api *gin.RouterGroup) {
+func RegisterShellRoutes(api *chi.Router) {
 	ctrl := &ShellController{}
 	api.POST("/node/name/:node_name/create_node_shell", ctrl.CreateNodeShell)
 	api.POST("/node/name/:node_name/create_kubectl_shell", ctrl.CreateKubectlShell)

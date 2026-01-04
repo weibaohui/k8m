@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -14,7 +14,7 @@ import (
 
 type PodLinkController struct{}
 
-func RegisterPodLinkRoutes(api *gin.RouterGroup) {
+func RegisterPodLinkRoutes(api *chi.Router) {
 	ctrl := &PodLinkController{}
 	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/services", ctrl.LinksServices)
 	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/links/endpoints", ctrl.LinksEndpoints)

@@ -1,7 +1,7 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/gllog/models"
@@ -9,7 +9,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func RegisterManagementRoutes(arg *gin.RouterGroup) {
+func RegisterManagementRoutes(arg *chi.Router) {
 	g := arg.Group("/plugins/" + modules.PluginNameGlobalLog)
 	g.GET("/list", ListGlobalLog)
 	klog.V(6).Infof("注册全局日志插件管理路由(mgm)")

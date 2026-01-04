@@ -1,13 +1,13 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/admin"
 	"k8s.io/klog/v2"
 )
 
-func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
+func RegisterPluginAdminRoutes(arg chi.Router) {
 	g := arg.Group("/plugins/" + modules.PluginNameMCPRuntime)
 
 	serverCtrl := &admin.ServerController{}
@@ -25,7 +25,7 @@ func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
 	klog.V(6).Infof("注册 MCP 插件管理路由(admin)")
 }
 
-func RegisterPluginMgmRoutes(arg *gin.RouterGroup) {
+func RegisterPluginMgmRoutes(arg chi.Router) {
 	mgm := arg.Group("/plugins/" + modules.PluginNameMCPRuntime)
 
 	keyCtrl := &admin.KeyController{}

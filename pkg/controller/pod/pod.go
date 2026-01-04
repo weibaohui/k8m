@@ -8,7 +8,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -21,7 +21,7 @@ import (
 
 type LogController struct{}
 
-func RegisterLogRoutes(api *gin.RouterGroup) {
+func RegisterLogRoutes(api *chi.Router) {
 	ctrl := &LogController{}
 	api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.StreamLogs)
 	api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.DownloadLogs)
