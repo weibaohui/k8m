@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo/cluster"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -11,14 +12,10 @@ import (
 func RegisterClusterRoutes(crg chi.Router) {
 	g := crg.Group("/plugins/" + modules.PluginNameDemo)
 
-	// 列表
-	g.GET("/items", cluster.List)
-	// 新增
-	g.POST("/items", cluster.Create)
-	// 更新
-	g.POST("/items/:id", cluster.Update)
-	// 删除
-	g.POST("/remove/items/:id", cluster.Delete)
+	g.Get("/items", response.Adapter(cluster.List))
+	g.Post("/items", response.Adapter(cluster.Create))
+	g.Post("/items/{id}", response.Adapter(cluster.Update))
+	g.Post("/remove/items/{id}", response.Adapter(cluster.Delete))
 
 	klog.V(6).Infof("注册demo插件路由(cluster)")
 }

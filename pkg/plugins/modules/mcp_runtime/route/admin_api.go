@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/admin"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -11,12 +12,12 @@ func RegisterPluginAdminRoutes(arg chi.Router) {
 	g := arg.Group("/plugins/" + modules.PluginNameMCPRuntime)
 
 	serverCtrl := &admin.ServerController{}
-	g.GET("/server/list", serverCtrl.List)
-	g.GET("/server/connect/:name", serverCtrl.Connect)
-	g.POST("/server/delete", serverCtrl.Delete)
-	g.POST("/server/save", serverCtrl.Save)
-	g.POST("/server/save/id/:id/status/:status", serverCtrl.QuickSave)
-	g.GET("/server/log/list", serverCtrl.MCPLogList)
+	g.Get("/server/list", response.Adapter(serverCtrl.List))
+	g.Get("/server/connect/{name}", response.Adapter(serverCtrl.Connect))
+	g.Post("/server/delete", response.Adapter(serverCtrl.Delete))
+	g.Post("/server/save", response.Adapter(serverCtrl.Save))
+	g.Post("/server/save/id/{id}/status/{status}", response.Adapter(serverCtrl.QuickSave))
+	g.Get("/server/log/list", response.Adapter(serverCtrl.MCPLogList))
 
 	toolCtrl := &admin.ToolController{}
 	g.GET("/tool/server/:name/list", toolCtrl.List)

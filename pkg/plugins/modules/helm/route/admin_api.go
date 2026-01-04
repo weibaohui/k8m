@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/admin"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -12,10 +13,10 @@ import (
 func RegisterPluginAdminRoutes(arg chi.Router) {
 	g := arg.Group("/plugins/" + modules.PluginNameHelm)
 	ctrl := &admin.RepoController{}
-	g.GET("/repo/list", ctrl.List)
-	g.POST("/repo/delete/:ids", ctrl.Delete)
-	g.POST("/repo/update_index", ctrl.UpdateReposIndex)
-	g.POST("/repo/save", ctrl.Save)
+	g.Get("/repo/list", response.Adapter(ctrl.List))
+	g.Post("/repo/delete/:ids", response.Adapter(ctrl.Delete))
+	g.Post("/repo/update_index", response.Adapter(ctrl.UpdateReposIndex))
+	g.Post("/repo/save", response.Adapter(ctrl.Save))
 
 	settingCtrl := &admin.SettingController{}
 	g.GET("/setting/get", settingCtrl.GetSetting)

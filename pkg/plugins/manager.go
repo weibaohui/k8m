@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/robfig/cron/v3"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"k8s.io/klog/v2"
@@ -16,9 +17,10 @@ type Manager struct {
 	modules map[string]Module
 	status  map[string]Status
 	// apiGroups 已注册的后端API路由分组引用，用于支持启用时动态注册路由
-	apiGroups []*gin.RouterGroup
-	// engine Gin 引擎引用，用于统计已注册路由
-	engine *gin.Engine
+	// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+	apiGroups []chi.Router
+	// engine Chi 引擎引用，用于统计已注册路由
+	engine chi.Router
 	// cron 定时任务调度器
 	cron *cron.Cron
 	// cronIDs 记录每个插件每条 cron 的 EntryID
@@ -48,9 +50,10 @@ func NewManager() *Manager {
 // newManager 创建并返回插件管理器
 func newManager() *Manager {
 	return &Manager{
-		modules:   make(map[string]Module),
-		status:    make(map[string]Status),
-		apiGroups: make([]*gin.RouterGroup, 0),
+		modules: make(map[string]Module),
+		status:  make(map[string]Status),
+		// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+		apiGroups: make([]chi.Router, 0),
 		cron: cron.New(
 			cron.WithChain(
 				cron.Recover(cron.DefaultLogger),
@@ -232,9 +235,10 @@ func SetRegistrar(f func(*Manager)) {
 	registrar = f
 }
 
-// SetEngine 设置 Gin 引擎
+// SetEngine 设置 Chi 引擎
 // 便于后续统计与展示插件已注册的路由
-func (m *Manager) SetEngine(e *gin.Engine) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.Engine
+func (m *Manager) SetEngine(e chi.Router) {
 	m.mu.Lock()
 	m.engine = e
 	m.mu.Unlock()
