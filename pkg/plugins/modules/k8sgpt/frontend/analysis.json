@@ -1,0 +1,107 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": true,
+      "syncLocation": false,
+      "perPage": 10,
+      "api": "get:/params/cluster/all",
+      "columns": [
+        {
+          "name": "k8s_gpt_problems_count",
+          "label": "智检",
+          "type": "container",
+          "body": [
+           
+            {
+              "type": "container",
+              "body": [
+                {
+                  "type": "button",
+                  "label": "分析",
+                  "level": "link",
+                  "actionType": "ajax",
+                  "api": "post:/mgm/plugins/k8sgpt/cluster/${cluster_id_base64}/run"
+                },
+                {
+                  "type": "button",
+                  "label": "查看",
+                  "level": "link",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "overlay": false,
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "AI 智能巡检 集群${clusterName} （ESC 关闭）",
+                    "body": [
+                      {
+                        "type": "k8sGPT",
+                        "api": "/mgm/plugins/k8sgpt/cluster/${cluster_id_base64}/result"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "clusterName",
+          "label": "集群名称",
+          "type": "text",
+          "sortable": true
+        },
+        {
+           "name": "issue",
+          "label": "问题",
+              "type": "tpl",
+              "tpl": "<% if (data.k8s_gpt_problems_count) { %><span class='label label-danger'><%=data.k8s_gpt_problems_count%></span><% } %>"
+        },
+        {
+          "name": "clusterConnectStatus",
+          "label": "可访问性",
+          "type": "mapping",
+          "map": {
+            "connected": "<span class='label label-success'>已连接</span>",
+            "disconnected": "<span class='label label-danger'>未连接</span>",
+            "failed": "<span class='label label-danger'>连接失败</span>",
+            "connecting": "<span class='label label-warning'>连接中</span>",
+            "*": "<span class='label label-default'>${clusterConnectStatus}</span>"
+          }
+           
+        }
+      ]
+    }
+  ]
+}

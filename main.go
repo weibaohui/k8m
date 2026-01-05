@@ -31,7 +31,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/gatewayapi"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
-	"github.com/weibaohui/k8m/pkg/controller/k8sgpt"
 	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
 	"github.com/weibaohui/k8m/pkg/controller/node"
@@ -157,7 +156,7 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
-	r.Use(chim.Compress(8, "text/html", "text/css"))
+	r.Use(chim.Compress(9, "text/html", "text/css", "application/json", "text/javascript", "font/woff2"))
 	r.Use(middleware.AuthMiddleware())
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
 	r.Use(chim.Heartbeat("/ping"))
@@ -271,7 +270,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		ingressclass.RegisterRoutes(api)
 		gatewayapi.RegisterRoutes(api)
 		doc.RegisterRoutes(api)
-		k8sgpt.RegisterRoutes(api)
 		mgr.RegisterClusterRoutes(api)
 	})
 
