@@ -158,6 +158,8 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	}))
 	r.Use(middleware.AuthMiddleware())
 
+	r.Use(middleware.EnsureSelectedClusterMiddleware())
+
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
 	r.Handle("/public/pages/*", http.StripPrefix("/public/pages", http.FileServer(http.FS(pagesFS))))
 	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")

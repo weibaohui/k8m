@@ -58,8 +58,13 @@ func EnsureSelectedClusterMiddleware() func(http.Handler) http.Handler {
 				return
 			}
 
-			// 获取clusterID
-			clusterBase64 := c.Param("cluster")
+			// 获取clusterID - 从URL路径中解析，格式: /k8s/cluster/{clusterBase64}/...
+			// 由于中间件在路由匹配之前执行，无法使用 chi.URLParam，需要手动解析
+			pathParts := strings.Split(strings.Trim(path, "/"), "/")
+			var clusterBase64 string
+			if len(pathParts) >= 3 && pathParts[0] == "k8s" && pathParts[1] == "cluster" {
+				clusterBase64 = pathParts[2]
+			}
 			clusterIDByte, _ := utils.UrlSafeBase64Decode(clusterBase64)
 			clusterID := string(clusterIDByte)
 
