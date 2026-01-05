@@ -258,14 +258,6 @@ func firstSegment(path string) string {
 	return parts[0]
 }
 
-// getHandlerName 从 handler 中提取函数名
-func getHandlerName(handler http.Handler) string {
-	if handler == nil {
-		return ""
-	}
-	return fmt.Sprintf("%T", handler)
-}
-
 // InstallPlugin 安装指定名称的插件
 // 路径参数为插件名，安装失败时返回错误
 func (m *Manager) InstallPlugin(c *response.Context) {
