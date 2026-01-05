@@ -3,12 +3,13 @@ package route
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
 func RegisterManagementRoutes(arg chi.Router) {
-	prefix := "/plugins/ai"
+	prefix := "/plugins/" + modules.PluginNameAI
 
 	ctrl := &chat.Controller{}
 
