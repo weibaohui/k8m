@@ -1,183 +1,105 @@
 {
   "type": "page",
-  "title": "K8sGPT资源分析",
   "body": [
     {
-      "type": "form",
-      "title": "分析配置",
-      "mode": "inline",
-      "target": "analysisTable",
-      "submitText": "执行分析",
-      "body": [
-        {
-          "type": "select",
-          "name": "cluster",
-          "label": "集群",
-          "placeholder": "选择集群",
-          "source": "get:/params/cluster/option_list",
-          "searchable": true,
-          "clearable": true,
-          "required": true,
-          "value": "${''|selectedCluster}",
-          "onEvent": {
-            "change": {
-              "actions": [
-                {
-                  "actionType": "custom",
-                  "script": "window.setCurrentClusterId(event.data.value || '')"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "type": "select",
-          "name": "kind",
-          "label": "资源类型",
-          "placeholder": "选择资源类型",
-          "clearable": true,
-          "options": [
-            {
-              "label": "Pod",
-              "value": "Pod"
-            },
-            {
-              "label": "Deployment",
-              "value": "Deployment"
-            },
-            {
-              "label": "Service",
-              "value": "Service"
-            },
-            {
-              "label": "ReplicaSet",
-              "value": "ReplicaSet"
-            },
-            {
-              "label": "PersistentVolumeClaim",
-              "value": "PersistentVolumeClaim"
-            },
-            {
-              "label": "Ingress",
-              "value": "Ingress"
-            },
-            {
-              "label": "StatefulSet",
-              "value": "StatefulSet"
-            },
-            {
-              "label": "CronJob",
-              "value": "CronJob"
-            },
-            {
-              "label": "Node",
-              "value": "Node"
-            },
-            {
-              "label": "ValidatingWebhookConfiguration",
-              "value": "ValidatingWebhookConfiguration"
-            },
-            {
-              "label": "MutatingWebhookConfiguration",
-              "value": "MutatingWebhookConfiguration"
-            },
-            {
-              "label": "HorizontalPodAutoScaler",
-              "value": "HorizontalPodAutoScaler"
-            },
-            {
-              "label": "PodDisruptionBudget",
-              "value": "PodDisruptionBudget"
-            },
-            {
-              "label": "NetworkPolicy",
-              "value": "NetworkPolicy"
-            }
-          ]
-        },
-        {
-          "type": "select",
-          "name": "namespace",
-          "label": "命名空间",
-          "searchable": true,
-          "clearable": true,
-          "source": {
-            "method": "get",
-            "url": "/k8s/ns/option_list",
-            "data": {
-              "__cluster": "${ ''|selectedCluster}"
-            }
-          },
-          "disabledOn": "!this.cluster && !''|selectedCluster"
-        }
-      ]
-    },
-    {
-      "type": "divider"
-    },
-    {
       "type": "crud",
-      "name": "analysisTable",
-      "id": "analysisTable",
-      "api": {
-        "method": "get",
-        "url": "/k8s/cluster/${cluster}/plugins/k8sgpt/k8s_gpt/kind/${kind}/run",
-        "data": {
-          "ns": "$namespace"
-        }
-      },
+      "id": "detailCRUD",
+      "name": "detailCRUD",
       "autoFillHeight": true,
-      "autoGenerateFilter": false,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
       "headerToolbar": [
         {
           "type": "columns-toggler",
           "align": "right",
           "draggable": true,
           "icon": "fas fa-cog",
-          "overlay": true
-        },
-        "reload"
-      ],
-      "footerToolbar": [
-        {
-          "type": "pagination",
-          "align": "right"
+          "overlay": true,
+          "footerBtnSize": "sm"
         },
         {
-          "type": "switch-per-page",
-          "align": "right"
-        }
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
       ],
+      "loadDataOnce": true,
+      "syncLocation": false,
+      "perPage": 10,
+      "api": "get:/params/cluster/all",
       "columns": [
         {
-          "name": "kind",
-          "label": "资源类型",
-          "type": "text",
-          "width": 150
+          "name": "k8s_gpt_problems_count",
+          "label": "智检",
+          "type": "container",
+          "body": [
+           
+            {
+              "type": "container",
+              "body": [
+                {
+                  "type": "button",
+                  "label": "分析",
+                  "level": "link",
+                  "actionType": "ajax",
+                  "api": "post:/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
+                },
+                {
+                  "type": "button",
+                  "label": "查看",
+                  "level": "link",
+                  "actionType": "drawer",
+                  "drawer": {
+                    "overlay": false,
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "lg",
+                    "title": "AI 智能巡检 集群${clusterName} （ESC 关闭）",
+                    "body": [
+                      {
+                        "type": "k8sGPT",
+                        "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/result"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
-          "name": "name",
-          "label": "资源名称",
+          "name": "clusterName",
+          "label": "集群名称",
           "type": "text",
-          "width": 200
+          "sortable": true
         },
         {
-          "name": "error",
+           "name": "issue",
           "label": "问题",
-          "type": "tpl",
-          "tpl": "${error|length} 个问题",
-          "width": 100
+              "type": "tpl",
+              "tpl": "<% if (data.k8s_gpt_problems_count) { %><span class='label label-danger'><%=data.k8s_gpt_problems_count%></span><% } %>"
         },
         {
-          "name": "details",
-          "label": "详情",
-          "type": "tpl",
-          "tpl": "${details}",
-          "popOver": {
-            "title": "完整详情",
-            "body": "<pre>${details}</pre>",
-            "showIcon": false
+          "name": "clusterConnectStatus",
+          "label": "可访问性",
+          "type": "mapping",
+          "map": {
+            "connected": "<span class='label label-success'>已连接</span>",
+            "disconnected": "<span class='label label-danger'>未连接</span>",
+            "failed": "<span class='label label-danger'>连接失败</span>",
+            "connecting": "<span class='label label-warning'>连接中</span>",
+            "*": "<span class='label label-default'>${clusterConnectStatus}</span>"
           }
+           
         }
       ]
     }
