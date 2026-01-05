@@ -1,29 +1,29 @@
 package log
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
 type Controller struct{}
 
-func RegisterLogRoutes(mgm *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterLogRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	mgm.GET("/log/shell/list", ctrl.ListShell)
-	mgm.GET("/log/operation/list", ctrl.ListOperation)
+	r.Get("/log/shell/list", response.Adapter(ctrl.ListShell))
+	r.Get("/log/operation/list", response.Adapter(ctrl.ListOperation))
 }
-
-
 
 // @Summary Shell日志列表
 // @Description 获取所有Shell操作日志
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/log/shell/list [get]
-func (lc *Controller) ListShell(c *gin.Context) {
+func (lc *Controller) ListShell(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.ShellLog{}
 
@@ -46,7 +46,7 @@ func (lc *Controller) ListShell(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/log/operation/list [get]
-func (lc *Controller) ListOperation(c *gin.Context) {
+func (lc *Controller) ListOperation(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.OperationLog{}
 

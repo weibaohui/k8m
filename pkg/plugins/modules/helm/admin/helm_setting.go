@@ -1,14 +1,14 @@
 package admin
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 type SettingController struct{}
 
-func (s *SettingController) GetSetting(c *gin.Context) {
+func (s *SettingController) GetSetting(c *response.Context) {
 	setting, err := models.GetOrCreateHelmSetting()
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -17,7 +17,7 @@ func (s *SettingController) GetSetting(c *gin.Context) {
 	amis.WriteJsonData(c, setting)
 }
 
-func (s *SettingController) UpdateSetting(c *gin.Context) {
+func (s *SettingController) UpdateSetting(c *response.Context) {
 	var in models.HelmSetting
 	if err := c.ShouldBindJSON(&in); err != nil {
 		amis.WriteJsonError(c, err)

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/openapi/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -23,7 +23,7 @@ type Controller struct{}
 // @Param description body string false "密钥描述"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/api_keys/create [post]
-func (ac *Controller) Create(c *gin.Context) {
+func (ac *Controller) Create(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	var req struct {
@@ -102,7 +102,7 @@ func generateAPIKey(username string, duration time.Duration) string {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/user/profile/api_keys/list [get]
-func (ac *Controller) List(c *gin.Context) {
+func (ac *Controller) List(c *response.Context) {
 	username := c.GetString(constants.JwtUserName)
 	params := dao.BuildParams(c)
 
@@ -125,7 +125,7 @@ func (ac *Controller) List(c *gin.Context) {
 // @Param id path string true "API密钥ID"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/api_keys/delete/{id} [post]
-func (ac *Controller) Delete(c *gin.Context) {
+func (ac *Controller) Delete(c *response.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 

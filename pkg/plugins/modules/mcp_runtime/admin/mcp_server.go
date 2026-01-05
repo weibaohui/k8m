@@ -3,12 +3,12 @@ package admin
 import (
 	"context"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -19,7 +19,7 @@ type ServerController struct {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/list [get]
-func (m *ServerController) List(c *gin.Context) {
+func (m *ServerController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	var mcpServer models.MCPServerConfig
 	list, count, err := mcpServer.List(params)
@@ -31,7 +31,7 @@ func (m *ServerController) List(c *gin.Context) {
 // @Param name path string true "MCP服务器名称"
 // @Success 200 {object} string
 // @Router /admin/mcp/connect/{name} [post]
-func (m *ServerController) Connect(c *gin.Context) {
+func (m *ServerController) Connect(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	err := service.McpService().Host().ConnectServer(ctx, name)
@@ -43,7 +43,7 @@ func (m *ServerController) Connect(c *gin.Context) {
 // @Param request body object true "删除请求体包含IDs数组"
 // @Success 200 {object} string
 // @Router /admin/mcp/delete [post]
-func (m *ServerController) Delete(c *gin.Context) {
+func (m *ServerController) Delete(c *response.Context) {
 	var req struct {
 		IDs []int `json:"ids"`
 	}
@@ -67,7 +67,7 @@ func (m *ServerController) Delete(c *gin.Context) {
 // @Param request body models.MCPServerConfig true "MCP服务器配置信息"
 // @Success 200 {object} string
 // @Router /admin/mcp/save [post]
-func (m *ServerController) Save(c *gin.Context) {
+func (m *ServerController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	var entity models.MCPServerConfig
@@ -96,7 +96,7 @@ func (m *ServerController) Save(c *gin.Context) {
 // @Param status path string true "服务器状态(true/false)"
 // @Success 200 {object} string
 // @Router /admin/mcp/save/id/{id}/status/{status} [post]
-func (m *ServerController) QuickSave(c *gin.Context) {
+func (m *ServerController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 	params := dao.BuildParams(c)
@@ -133,7 +133,7 @@ func (m *ServerController) QuickSave(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/mcp/log/list [get]
-func (m *ServerController) MCPLogList(c *gin.Context) {
+func (m *ServerController) MCPLogList(c *response.Context) {
 	params := dao.BuildParams(c)
 	var tool models.MCPToolLog
 	list, count, err := tool.List(params)

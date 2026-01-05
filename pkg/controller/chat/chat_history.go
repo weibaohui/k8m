@@ -1,8 +1,8 @@
 package chat
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
@@ -10,7 +10,7 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /ai/chat/history [get]
-func (cc *Controller) History(c *gin.Context) {
+func (cc *Controller) History(c *response.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -27,7 +27,7 @@ func (cc *Controller) History(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /ai/chat/reset [post]
-func (cc *Controller) Reset(c *gin.Context) {
+func (cc *Controller) Reset(c *response.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
 		amis.WriteJsonError(c, err)

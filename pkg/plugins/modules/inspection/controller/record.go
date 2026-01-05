@@ -1,26 +1,17 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
+	"github.com/weibaohui/k8m/pkg/response"
 
 	"gorm.io/gorm"
 )
 
 type AdminRecordController struct {
-}
-
-func RegisterAdminRecordRoutes(arg *gin.RouterGroup) {
-	admin := arg.Group("/plugins/" + modules.PluginNameInspection)
-	ctrl := &AdminRecordController{}
-	admin.GET("/schedule/id/:id/record/list", ctrl.RecordList)
-	admin.GET("/record/list", ctrl.RecordList)
-	admin.POST("/schedule/record/id/:id/push", ctrl.Push)
 }
 
 // @Summary 获取巡检记录列表
@@ -30,7 +21,7 @@ func RegisterAdminRecordRoutes(arg *gin.RouterGroup) {
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/id/{id}/record/list [get]
 // @Router /admin/plugins/inspection/record/list [get]
-func (r *AdminRecordController) RecordList(c *gin.Context) {
+func (r *AdminRecordController) RecordList(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	m := &models.InspectionRecord{}
@@ -55,7 +46,7 @@ func (r *AdminRecordController) RecordList(c *gin.Context) {
 // @Param id path string true "巡检记录ID"
 // @Success 200 {object} string
 // @Router /admin/plugins/inspection/schedule/record/id/{id}/push [post]
-func (r *AdminRecordController) Push(c *gin.Context) {
+func (r *AdminRecordController) Push(c *response.Context) {
 
 	recordIDStr := c.Param("id")
 

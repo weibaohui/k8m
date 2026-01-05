@@ -1,112 +1,109 @@
 package middleware
 
 import (
+	"context"
+	"net/http"
 	"path/filepath"
 	"slices"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-// EnsureSelectedClusterMiddleware 返回一个 Gin 中间件，用于强制校验请求是否已选择并有权限访问指定集群。
+// EnsureSelectedClusterMiddleware 返回一个 Chi 中间件，用于强制校验请求是否已选择并有权限访问指定集群。
 // 对于静态文件和部分白名单路径会直接跳过校验。其余请求将：
 // 1. 校验 URL 中的集群参数是否存在且有效；
 // 2. 校验用户 JWT 是否有效，并判断用户是否有访问该集群的权限（非平台管理员需在授权集群列表中）；
 // 3. 校验目标集群是否已连接。
-// 校验不通过时将中止请求并返回相应的错误信息。
-func EnsureSelectedClusterMiddleware() gin.HandlerFunc {
+// 校验不通过时将中止请求并返回相应的错误信息。 - Gin到Chi迁移
+func EnsureSelectedClusterMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			c := response.New(w, r)
+			// 获取请求路径
+			path := r.URL.Path
 
-	return func(c *gin.Context) {
+			// 检查文件后缀，如果是静态文件则直接跳过
+			ext := filepath.Ext(path)
+			if ext != "" {
+				// 常见的静态文件后缀
+				staticExts := []string{".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".map"}
+				if slices.Contains(staticExts, ext) {
+					// 静态文件请求，直接跳过集群检测
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
 
-		// 获取请求路径
-		path := c.Request.URL.Path
-
-		// 检查文件后缀，如果是静态文件则直接跳过
-		ext := filepath.Ext(path)
-		if ext != "" {
-			// 常见的静态文件后缀
-			staticExts := []string{".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".map"}
-			if slices.Contains(staticExts, ext) {
-				// 静态文件请求，直接跳过集群检测
-				c.Next()
+			// 检查请求路径是否需要跳过集群检测
+			if path == "/" ||
+				path == "/favicon.ico" ||
+				path == "/healthz" ||
+				strings.HasPrefix(path, "/health/") ||
+				strings.HasPrefix(path, "/monacoeditorwork/") ||
+				strings.HasPrefix(path, "/swagger/") ||
+				strings.HasPrefix(path, "/debug/") ||
+				strings.HasPrefix(path, "/mcp/") ||
+				strings.HasPrefix(path, "/auth/") ||
+				strings.HasPrefix(path, "/assets/") ||
+				strings.HasPrefix(path, "/ai/") || // ai 聊天不带cluster
+				strings.HasPrefix(path, "/params/") || // 配置参数
+				strings.HasPrefix(path, "/mgm/") || // 个人中心
+				strings.HasPrefix(path, "/admin/") || // 管理后台
+				strings.HasPrefix(path, "/public/") {
+				next.ServeHTTP(w, r)
 				return
 			}
-		}
 
-		// 检查请求路径是否需要跳过集群检测
-		if path == "/" ||
-			path == "/favicon.ico" ||
-			path == "/healthz" ||
-			strings.HasPrefix(path, "/health/") ||
-			strings.HasPrefix(path, "/monacoeditorwork/") ||
-			strings.HasPrefix(path, "/swagger/") ||
-			strings.HasPrefix(path, "/debug/") ||
-			strings.HasPrefix(path, "/mcp/") ||
-			strings.HasPrefix(path, "/auth/") ||
-			strings.HasPrefix(path, "/assets/") ||
-			strings.HasPrefix(path, "/ai/") || // ai 聊天不带cluster
-			strings.HasPrefix(path, "/params/") || // 配置参数
-			strings.HasPrefix(path, "/mgm/") || // 个人中心
-			strings.HasPrefix(path, "/admin/") || // 管理后台
-			strings.HasPrefix(path, "/public/") {
-			c.Next()
-			return
+			// 获取clusterID
+			clusterBase64 := c.Param("cluster")
+			clusterIDByte, _ := utils.UrlSafeBase64Decode(clusterBase64)
+			clusterID := string(clusterIDByte)
 
-		}
-
-		// 获取clusterID
-		clusterBase64 := c.Param("cluster")
-		clusterIDByte, _ := utils.UrlSafeBase64Decode(clusterBase64)
-		clusterID := string(clusterIDByte)
-
-		if clusterID == "" {
-			c.JSON(512, gin.H{
-				"msg": "未指定集群，请先切换集群",
-			})
-			c.Abort()
-			return
-		}
-
-		username := amis.GetLoginUser(c)
-		if username == "" {
-			c.JSON(512, gin.H{
-				"msg": "未获取到登录用户名，请先登录",
-			})
-			c.Abort()
-			return
-		}
-		// 如果不是平台管理员，检查是否有权限访问该集群
-		if !service.UserService().IsUserPlatformAdmin(username) {
-			clusters, err := service.UserService().GetClusterNames(username)
-			if err != nil {
-				c.JSON(512, gin.H{"msg": "获取集群授权失败"})
-				c.Abort()
-				return
-			}
-			if !slices.Contains(clusters, clusterID) {
-				c.JSON(512, gin.H{
-					"msg": "无权限访问集群: " + clusterID,
+			if clusterID == "" {
+				c.JSON(512, response.H{
+					"msg": "未指定集群，请先切换集群",
 				})
-				c.Abort()
 				return
 			}
 
-		}
+			username := amis.GetLoginUser(c)
+			if username == "" {
+				c.JSON(512, response.H{
+					"msg": "未获取到登录用户名，请先登录",
+				})
+				return
+			}
+			// 如果不是平台管理员，检查是否有权限访问该集群
+			if !service.UserService().IsUserPlatformAdmin(username) {
+				clusters, err := service.UserService().GetClusterNames(username)
+				if err != nil {
+					c.JSON(512, response.H{"msg": "获取集群授权失败"})
+					return
+				}
+				if !slices.Contains(clusters, clusterID) {
+					c.JSON(512, response.H{
+						"msg": "无权限访问集群: " + clusterID,
+					})
+					return
+				}
+			}
 
-		// 如果设置了clusterID，但是集群未连接
-		if !service.ClusterService().IsConnected(clusterID) {
-			c.JSON(512, gin.H{
-				"msg": "集群未连接，请先连接集群: " + clusterID,
-			})
-			c.Abort()
-			return
-		}
-		c.Set("cluster", clusterID)
+			// 如果设置了clusterID，但是集群未连接
+			if !service.ClusterService().IsConnected(clusterID) {
+				c.JSON(512, response.H{
+					"msg": "集群未连接，请先连接集群: " + clusterID,
+				})
+				return
+			}
+			// 使用 context.WithValue 设置集群信息
+			ctx := context.WithValue(r.Context(), "cluster", clusterID)
 
-		// 继续处理下一个中间件或最终路由
-		c.Next()
+			// 继续处理下一个中间件或最终路由
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
 	}
 }

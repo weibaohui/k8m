@@ -3,15 +3,15 @@ package admin
 import (
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	helm "github.com/weibaohui/k8m/pkg/plugins/modules/helm/service"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
 
-func getHelm(c *gin.Context) (helm.Helm, error) {
+func getHelm(c *response.Context) (helm.Helm, error) {
 
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -30,7 +30,7 @@ func getHelmWithNoCluster() (helm.Helm, error) {
 	return cmd, nil
 }
 
-func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, repoName string) error {
+func handleCommonLogic(c *response.Context, action string, releaseName, namespace, repoName string) error {
 	cluster, _ := amis.GetSelectedCluster(c)
 
 	username := amis.GetLoginUser(c)
@@ -58,7 +58,7 @@ func handleCommonLogic(c *gin.Context, action string, releaseName, namespace, re
 	go service.OperationLogService().Add(&log)
 	return err
 }
-func check(c *gin.Context, cluster, ns, name, action string) error {
+func check(c *response.Context, cluster, ns, name, action string) error {
 	ctx := amis.GetContextWithUser(c)
 	var nsList []string
 	if ns != "" {

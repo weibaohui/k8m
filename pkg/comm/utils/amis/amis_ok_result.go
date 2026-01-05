@@ -1,28 +1,28 @@
 package amis
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
-func WriteJsonOK(c *gin.Context) {
-	c.JSON(200, gin.H{
+func WriteJsonOK(c *response.Context) {
+	c.JSON(200, response.H{
 		"status": 0,
 		"msg":    "success",
 	})
 }
-func WriteJsonOKMsg(c *gin.Context, msg string) {
-	c.JSON(200, gin.H{
+func WriteJsonOKMsg(c *response.Context, msg string) {
+	c.JSON(200, response.H{
 		"status": 0,
 		"msg":    msg,
 	})
 }
-func WriteJsonError(c *gin.Context, err error) {
-	c.JSON(200, gin.H{
+func WriteJsonError(c *response.Context, err error) {
+	c.JSON(200, response.H{
 		"status": 1,
 		"msg":    err.Error(),
 	})
 }
-func WriteJsonErrorOrOK(c *gin.Context, err error) {
+func WriteJsonErrorOrOK(c *response.Context, err error) {
 	if err == nil {
 		WriteJsonOK(c)
 		return
@@ -31,8 +31,8 @@ func WriteJsonErrorOrOK(c *gin.Context, err error) {
 	WriteJsonError(c, err)
 }
 
-func WriteJsonData[T any](c *gin.Context, data T) {
-	c.JSON(200, gin.H{
+func WriteJsonData[T any](c *response.Context, data T) {
+	c.JSON(200, response.H{
 		"status": 0,
 		"msg":    "success",
 		"data":   data,

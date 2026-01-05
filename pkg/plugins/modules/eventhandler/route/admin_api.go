@@ -1,24 +1,25 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/admin"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
-// RegisterPluginAdminRoutes 中文函数注释：注册事件转发插件的管理员路由（平台管理员）。
-func RegisterPluginAdminRoutes(arg *gin.RouterGroup) {
-	g := arg.Group("/plugins/" + modules.PluginNameEventHandler)
+// RegisterPluginAdminRoutes 中文函数注释：注册事件转发插件的管理员路由（平台管理员） - Gin到Chi迁移
+func RegisterPluginAdminRoutes(arg chi.Router) {
 	ctrl := &admin.Controller{}
+	prefix := "/plugins/" + modules.PluginNameEventHandler
 
-	g.GET("/setting/get", ctrl.GetSetting)
-	g.POST("/setting/update", ctrl.UpdateSetting)
+	arg.Get(prefix+"/setting/get", response.Adapter(ctrl.GetSetting))
+	arg.Post(prefix+"/setting/update", response.Adapter(ctrl.UpdateSetting))
 
-	g.GET("/list", ctrl.List)
-	g.POST("/save", ctrl.Save)
-	g.POST("/delete/:ids", ctrl.Delete)
-	g.POST("/save/id/:id/status/:enabled", ctrl.QuickSave)
+	arg.Get(prefix+"/list", response.Adapter(ctrl.List))
+	arg.Post(prefix+"/save", response.Adapter(ctrl.Save))
+	arg.Post(prefix+"/delete/{ids}", response.Adapter(ctrl.Delete))
+	arg.Post(prefix+"/save/id/{id}/status/{enabled}", response.Adapter(ctrl.QuickSave))
 
 	klog.V(6).Infof("注册事件转发插件管理路由(admin)")
 }

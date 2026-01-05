@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/utils/totp"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 // Disable2FA 禁用2FA
@@ -17,7 +17,7 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/2fa/disable [post]
-func (uc *Controller) Disable2FA(c *gin.Context) {
+func (uc *Controller) Disable2FA(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户信息
@@ -51,7 +51,7 @@ func (uc *Controller) Disable2FA(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string "返回密钥、二维码和备用码"
 // @Router /mgm/user/profile/2fa/generate [post]
-func (uc *Controller) Generate2FASecret(c *gin.Context) {
+func (uc *Controller) Generate2FASecret(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户信息
@@ -104,7 +104,7 @@ func (uc *Controller) Generate2FASecret(c *gin.Context) {
 	}
 
 	// 返回数据给前端
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"secret":       secret,
 		"qr_url":       qrURL,
 		"backup_codes": backupCodes,
@@ -120,7 +120,7 @@ func (uc *Controller) Generate2FASecret(c *gin.Context) {
 // @Param app_name body string false "应用名称"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/2fa/enable [post]
-func (uc *Controller) Enable2FA(c *gin.Context) {
+func (uc *Controller) Enable2FA(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	// 获取用户输入的验证码

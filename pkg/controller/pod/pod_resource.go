@@ -5,18 +5,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 )
 
 type ResourceController struct{}
 
-func RegisterResourceRoutes(api *gin.RouterGroup) {
+func RegisterResourceRoutes(api chi.Router) {
 	ctrl := &ResourceController{}
-	api.GET("/pod/usage/ns/:ns/name/:name", ctrl.Usage)
-	api.GET("/pod/top/ns/:ns/list", ctrl.TopList)
+	api.Get("/pod/usage/ns/{ns}/name/{name}", response.Adapter(ctrl.Usage))
+	api.Get("/pod/top/ns/{ns}/list", response.Adapter(ctrl.TopList))
 }
 
 // @Summary 获取Pod资源使用情况
@@ -26,7 +27,7 @@ func RegisterResourceRoutes(api *gin.RouterGroup) {
 // @Param name path string true "Pod名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/pod/usage/ns/{ns}/name/{name} [get]
-func (rc *ResourceController) Usage(c *gin.Context) {
+func (rc *ResourceController) Usage(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
@@ -55,7 +56,7 @@ func (rc *ResourceController) Usage(c *gin.Context) {
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/pod/top/ns/{ns}/list [get]
 // TopList 返回指定命名空间下所有 Pod 的资源使用情况（CPU、内存等），支持多命名空间查询，并以便于前端排序的格式输出。
-func (rc *ResourceController) TopList(c *gin.Context) {
+func (rc *ResourceController) TopList(c *response.Context) {
 	ns := c.Param("ns")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)

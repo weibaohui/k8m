@@ -3,20 +3,23 @@ package doc
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 )
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// RegisterRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.GET("/doc/gvk/:api_version/:kind", ctrl.Doc)
-	api.GET("/doc/kind/:kind/group/:group/version/:version", ctrl.Doc)
-	api.POST("/doc/detail", ctrl.Detail)
+	r.Get("/doc/gvk/{api_version}/{kind}", response.Adapter(ctrl.Doc))
+	r.Get("/doc/kind/{kind}/group/{group}/version/{version}", response.Adapter(ctrl.Doc))
+	r.Post("/doc/detail", response.Adapter(ctrl.Detail))
 }
 
 // @Summary 获取Kubernetes资源文档信息
@@ -27,7 +30,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param version path string true "API版本"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/doc/kind/{kind}/group/{group}/version/{version} [get]
-func (cc *Controller) Doc(c *gin.Context) {
+func (cc *Controller) Doc(c *response.Context) {
 	kind := c.Param("kind")
 	apiVersion := c.Param("api_version")
 	group := c.Param("group")
@@ -56,7 +59,7 @@ func (cc *Controller) Doc(c *gin.Context) {
 	docs := kom.Cluster(selectedCluster).WithContext(ctx).Status().Docs()
 	node := docs.FetchByGVK(apiVersion, kind)
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": []any{
 			node,
 		},
@@ -74,9 +77,9 @@ type DetailReq struct {
 // @Param request body DetailReq true "请求体，包含description字段"
 // @Success 200 {object} DetailReq
 // @Router /k8s/cluster/{cluster}/doc/detail [post]
-func (cc *Controller) Detail(c *gin.Context) {
+func (cc *Controller) Detail(c *response.Context) {
 	detail := &DetailReq{}
-	err := c.ShouldBindBodyWithJSON(&detail)
+	err := c.ShouldBindJSON(&detail)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 	}

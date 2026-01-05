@@ -5,20 +5,21 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 )
 
 type PortController struct{}
 
-func RegisterPortRoutes(api *gin.RouterGroup) {
+func RegisterPortRoutes(api chi.Router) {
 	ctrl := &PortController{}
-	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/local_port/:local_port/start", ctrl.StartPortForward)
-	api.POST("/pod/port_forward/ns/:ns/name/:name/container/:container_name/pod_port/:pod_port/stop", ctrl.StopPortForward)
-	api.GET("/pod/port_forward/ns/:ns/name/:name/port/list", ctrl.PortForwardList)
+	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/local_port/{local_port}/start", response.Adapter(ctrl.StartPortForward))
+	api.Post("/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/stop", response.Adapter(ctrl.StopPortForward))
+	api.Get("/pod/port_forward/ns/{ns}/name/{name}/port/list", response.Adapter(ctrl.PortForwardList))
 }
 
 // PortInfo 结构体用于描述端口转发信息
@@ -50,7 +51,7 @@ var portForwardTableMutex sync.RWMutex
 // @Param local_port path string true "本地端口"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/local_port/{local_port}/start [post]
-func (pc *PortController) StartPortForward(c *gin.Context) {
+func (pc *PortController) StartPortForward(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("name")
 	ns := c.Param("ns")
@@ -131,7 +132,7 @@ func (pc *PortController) StartPortForward(c *gin.Context) {
 // @Param pod_port path string true "Pod端口"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/pod/port_forward/ns/{ns}/name/{name}/container/{container_name}/pod_port/{pod_port}/stop [post]
-func (pc *PortController) StopPortForward(c *gin.Context) {
+func (pc *PortController) StopPortForward(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	containerName := c.Param("container_name")
@@ -162,7 +163,7 @@ func (pc *PortController) StopPortForward(c *gin.Context) {
 // @Param name path string true "Pod名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/pod/port_forward/ns/{ns}/name/{name}/port/list [get]
-func (pc *PortController) PortForwardList(c *gin.Context) {
+func (pc *PortController) PortForwardList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	name := c.Param("name")
 	ns := c.Param("ns")

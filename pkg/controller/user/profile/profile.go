@@ -4,26 +4,26 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
 type Controller struct{}
 
-func RegisterProfileRoutes(mgm *gin.RouterGroup) {
+func RegisterProfileRoutes(mgm chi.Router) {
 	ctrl := &Controller{}
-	mgm.GET("/user/profile", ctrl.Profile)
-	mgm.GET("/user/profile/cluster/permissions/list", ctrl.ListUserPermissions)
-	mgm.POST("/user/profile/update_psw", ctrl.UpdatePsw)
-	// user profile 2FA 用户自助操作
-	mgm.POST("/user/profile/2fa/generate", ctrl.Generate2FASecret)
-	mgm.POST("/user/profile/2fa/disable", ctrl.Disable2FA)
-	mgm.POST("/user/profile/2fa/enable", ctrl.Enable2FA)
+	mgm.Get("/user/profile", response.Adapter(ctrl.Profile))
+	mgm.Get("/user/profile/cluster/permissions/list", response.Adapter(ctrl.ListUserPermissions))
+	mgm.Post("/user/profile/update_psw", response.Adapter(ctrl.UpdatePsw))
+	mgm.Post("/user/profile/2fa/generate", response.Adapter(ctrl.Generate2FASecret))
+	mgm.Post("/user/profile/2fa/disable", response.Adapter(ctrl.Disable2FA))
+	mgm.Post("/user/profile/2fa/enable", response.Adapter(ctrl.Enable2FA))
 }
 
 // @Summary 获取用户信息
@@ -31,7 +31,7 @@ func RegisterProfileRoutes(mgm *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/user/profile [get]
-func (uc *Controller) Profile(c *gin.Context) {
+func (uc *Controller) Profile(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.User{}
 
@@ -56,7 +56,7 @@ func (uc *Controller) Profile(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/user/profile/cluster/permissions/list [get]
-func (uc *Controller) ListUserPermissions(c *gin.Context) {
+func (uc *Controller) ListUserPermissions(c *response.Context) {
 	params := dao.BuildParams(c)
 	clusters, err := service.UserService().GetClusters(params.UserName)
 	if err != nil {
@@ -69,7 +69,7 @@ func (uc *Controller) ListUserPermissions(c *gin.Context) {
 // PasswordUpdateRequest 密码修改请求结构体
 type PasswordUpdateRequest struct {
 	OldPassword     string `json:"oldPassword" binding:"required"`     // 原密码（加密后）
-	Password        string `json:"password" binding:"required"`         // 新密码（加密后）
+	Password        string `json:"password" binding:"required"`        // 新密码（加密后）
 	ConfirmPassword string `json:"confirmPassword" binding:"required"` // 确认密码（加密后）
 }
 
@@ -79,7 +79,7 @@ type PasswordUpdateRequest struct {
 // @Param request body PasswordUpdateRequest true "密码修改请求"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/update_psw [post]
-func (uc *Controller) UpdatePsw(c *gin.Context) {
+func (uc *Controller) UpdatePsw(c *response.Context) {
 	params := dao.BuildParams(c)
 	req := PasswordUpdateRequest{}
 	err := c.ShouldBindJSON(&req)

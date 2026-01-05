@@ -3,10 +3,11 @@ package menu
 import (
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -15,15 +16,16 @@ type AdminMenuController struct {
 
 // AdminMenu 用于菜单相关接口
 // 路由注册函数
-func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAdminMenuRoutes(r chi.Router) {
 
 	ctrl := AdminMenuController{}
 	// menu 平台管理员可操作，管理菜单
-	admin.GET("/menu/list", ctrl.List)
-	admin.GET("/menu/history", ctrl.History)
-	admin.POST("/menu/save", ctrl.Save)
-	admin.POST("/menu/delete/:ids", ctrl.Delete)
-	admin.POST("/menu/history/delete/:id", ctrl.DeleteHistory)
+	r.Get("/menu/list", response.Adapter(ctrl.List))
+	r.Get("/menu/history", response.Adapter(ctrl.History))
+	r.Post("/menu/save", response.Adapter(ctrl.Save))
+	r.Post("/menu/delete/{ids}", response.Adapter(ctrl.Delete))
+	r.Post("/menu/history/delete/{id}", response.Adapter(ctrl.DeleteHistory))
 
 }
 
@@ -32,7 +34,7 @@ func RegisterAdminMenuRoutes(admin *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} []models.Menu
 // @Router /admin/menu/list [get]
-func (a *AdminMenuController) List(c *gin.Context) {
+func (a *AdminMenuController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
@@ -52,7 +54,7 @@ func (a *AdminMenuController) List(c *gin.Context) {
 // @Param data body models.Menu true "菜单内容"
 // @Success 200 {object} map[string]interface{}
 // @Router /admin/menu/save [post]
-func (a *AdminMenuController) Save(c *gin.Context) {
+func (a *AdminMenuController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
 	if err := c.ShouldBind(&m); err != nil {
@@ -74,7 +76,7 @@ func (a *AdminMenuController) Save(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} []models.Menu
 // @Router /admin/menu/history [get]
-func (a *AdminMenuController) History(c *gin.Context) {
+func (a *AdminMenuController) History(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
 	params.PerPage = 100000
@@ -94,7 +96,7 @@ func (a *AdminMenuController) History(c *gin.Context) {
 // @Param ids path string true "菜单ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/menu/delete/{ids} [post]
-func (a *AdminMenuController) Delete(c *gin.Context) {
+func (a *AdminMenuController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.Menu{}
@@ -113,7 +115,7 @@ func (a *AdminMenuController) Delete(c *gin.Context) {
 // @Param id path int true "菜单历史记录ID"
 // @Success 200 {object} string
 // @Router /admin/menu/history/delete/{id} [delete]
-func (a *AdminMenuController) DeleteHistory(c *gin.Context) {
+func (a *AdminMenuController) DeleteHistory(c *response.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {

@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -15,12 +16,13 @@ import (
 
 type TolerationController struct{}
 
-func RegisterTolerationRoutes(api *gin.RouterGroup) {
+func RegisterTolerationRoutes(api chi.Router) {
 	ctrl := &TolerationController{}
-	api.POST("/:kind/group/:group/version/:version/update_tolerations/ns/:ns/name/:name", ctrl.Update)
-	api.POST("/:kind/group/:group/version/:version/delete_tolerations/ns/:ns/name/:name", ctrl.Delete)
-	api.POST("/:kind/group/:group/version/:version/add_tolerations/ns/:ns/name/:name", ctrl.Add)
-	api.GET("/:kind/group/:group/version/:version/list_tolerations/ns/:ns/name/:name", ctrl.List)
+	// Gin到Chi迁移：将大写POST/GET改为小写Post/Get，并添加response.Adapter包装
+	api.Post("/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name}", response.Adapter(ctrl.Update))
+	api.Post("/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name}", response.Adapter(ctrl.Delete))
+	api.Post("/{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name}", response.Adapter(ctrl.Add))
+	api.Get("/{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name}", response.Adapter(ctrl.List))
 }
 
 // @Summary 获取资源容忍度列表
@@ -33,7 +35,7 @@ func RegisterTolerationRoutes(api *gin.RouterGroup) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_tolerations/ns/{ns}/name/{name} [get]
-func (tc *TolerationController) List(c *gin.Context) {
+func (tc *TolerationController) List(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -98,7 +100,7 @@ func (tc *TolerationController) List(c *gin.Context) {
 // @Param body body Tolerations true "容忍度配置信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name} [post]
-func (tc *TolerationController) Add(c *gin.Context) {
+func (tc *TolerationController) Add(c *response.Context) {
 	processTolerations(c, "add")
 }
 
@@ -113,7 +115,7 @@ func (tc *TolerationController) Add(c *gin.Context) {
 // @Param body body Tolerations true "容忍度配置信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name} [post]
-func (tc *TolerationController) Update(c *gin.Context) {
+func (tc *TolerationController) Update(c *response.Context) {
 	processTolerations(c, "modify")
 }
 
@@ -128,11 +130,11 @@ func (tc *TolerationController) Update(c *gin.Context) {
 // @Param body body Tolerations true "容忍度配置信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name} [post]
-func (tc *TolerationController) Delete(c *gin.Context) {
+func (tc *TolerationController) Delete(c *response.Context) {
 	processTolerations(c, "delete")
 }
 
-func processTolerations(c *gin.Context, action string) {
+func processTolerations(c *response.Context, action string) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")

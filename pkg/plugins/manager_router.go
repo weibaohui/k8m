@@ -3,12 +3,12 @@ package plugins
 import (
 	"slices"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"k8s.io/klog/v2"
 )
 
 // RegisterClusterRoutes 某个插件的集群操作相关的路由注册
-func (m *Manager) RegisterClusterRoutes(api *gin.RouterGroup) {
+func (m *Manager) RegisterClusterRoutes(api chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// 记录路由分组（去重）
@@ -26,7 +26,7 @@ func (m *Manager) RegisterClusterRoutes(api *gin.RouterGroup) {
 }
 
 // RegisterManagementRoutes 某个插件的管理相关的操作的路由注册
-func (m *Manager) RegisterManagementRoutes(api *gin.RouterGroup) {
+func (m *Manager) RegisterManagementRoutes(api chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// 记录路由分组（去重）
@@ -44,7 +44,7 @@ func (m *Manager) RegisterManagementRoutes(api *gin.RouterGroup) {
 }
 
 // RegisterPluginAdminRoutes 某个插件的管理相关的操作的路由注册
-func (m *Manager) RegisterPluginAdminRoutes(api *gin.RouterGroup) {
+func (m *Manager) RegisterPluginAdminRoutes(api chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// 记录路由分组（去重）
@@ -62,7 +62,7 @@ func (m *Manager) RegisterPluginAdminRoutes(api *gin.RouterGroup) {
 }
 
 // RegisterRootRoutes 某个插件的根路由注册
-func (m *Manager) RegisterRootRoutes(root *gin.RouterGroup) {
+func (m *Manager) RegisterRootRoutes(root chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// 记录路由分组（去重）

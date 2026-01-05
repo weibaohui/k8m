@@ -5,19 +5,21 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type CRDController struct{}
 
-func RegisterCRDRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterCRDRoutes(r chi.Router) {
 	ctrl := &CRDController{}
-	api.GET("/crd/group/option_list", ctrl.GroupOptionList)
-	api.GET("/crd/kind/option_list", ctrl.KindOptionList)
-	api.GET("/crd/status", ctrl.CRDStatus)
+	r.Get("/crd/group/option_list", response.Adapter(ctrl.GroupOptionList))
+	r.Get("/crd/kind/option_list", response.Adapter(ctrl.KindOptionList))
+	r.Get("/crd/status", response.Adapter(ctrl.CRDStatus))
 }
 
 // @Summary 获取CRD组选项列表
@@ -25,7 +27,7 @@ func RegisterCRDRoutes(api *gin.RouterGroup) {
 // @Param cluster query string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/crd/group/option_list [get]
-func (cc *CRDController) GroupOptionList(c *gin.Context) {
+func (cc *CRDController) GroupOptionList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -42,7 +44,7 @@ func (cc *CRDController) GroupOptionList(c *gin.Context) {
 		})
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": options,
 	})
 }
@@ -53,7 +55,7 @@ func (cc *CRDController) GroupOptionList(c *gin.Context) {
 // @Param spec[group] query string true "CRD组名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/crd/kind/option_list [get]
-func (cc *CRDController) KindOptionList(c *gin.Context) {
+func (cc *CRDController) KindOptionList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -63,7 +65,7 @@ func (cc *CRDController) KindOptionList(c *gin.Context) {
 	g := c.Query("spec[group]")
 	if g == "" {
 		// 还没选group
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -79,7 +81,7 @@ func (cc *CRDController) KindOptionList(c *gin.Context) {
 		})
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": options,
 	})
 }

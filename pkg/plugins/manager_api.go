@@ -5,11 +5,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -20,30 +21,29 @@ import (
 // 1. 插件列表（显示Meta信息与状态）
 // 2. 安装插件
 // 3. 卸载插件
-func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
-	grp := admin.Group("/plugin")
-
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func (m *Manager) RegisterAdminRoutes(r chi.Router) {
 	// 列出所有已注册插件的Meta和状态
-	grp.GET("/list", m.ListPlugins)
+	r.Get("/plugin/list", response.Adapter(m.ListPlugins))
 
 	// 安装插件
-	grp.POST("/install/:name", m.InstallPlugin)
+	r.Post("/plugin/install/{name}", response.Adapter(m.InstallPlugin))
 	// 启用插件
-	grp.POST("/enable/:name", m.EnablePlugin)
+	r.Post("/plugin/enable/{name}", response.Adapter(m.EnablePlugin))
 	// 禁用插件
-	grp.POST("/disable/:name", m.DisablePlugin)
+	r.Post("/plugin/disable/{name}", response.Adapter(m.DisablePlugin))
 	// 卸载插件（删除数据）
-	grp.POST("/uninstall/:name", m.UninstallPlugin)
+	r.Post("/plugin/uninstall/{name}", response.Adapter(m.UninstallPlugin))
 	// 卸载插件（保留数据）
-	grp.POST("/uninstall-keep-data/:name", m.UninstallPluginKeepData)
+	r.Post("/plugin/uninstall-keep-data/{name}", response.Adapter(m.UninstallPluginKeepData))
 	// 升级插件
-	grp.POST("/upgrade/:name", m.UpgradePlugin)
+	r.Post("/plugin/upgrade/{name}", response.Adapter(m.UpgradePlugin))
 
 	// 定时任务管理
-	grp.GET("/cron/:name", m.ListPluginCrons)
-	grp.POST("/cron/:name/run_once", m.RunPluginCronOnce)
+	r.Get("/plugin/cron/{name}", response.Adapter(m.ListPluginCrons))
+	r.Post("/plugin/cron/{name}/run_once", response.Adapter(m.RunPluginCronOnce))
 	// 统一开关接口（生效/关闭）
-	grp.POST("/cron/name/:name/spec/:spec/enabled/:enabled", m.SetPluginCronEnabled)
+	r.Post("/plugin/cron/name/{name}/spec/{spec}/enabled/{enabled}", response.Adapter(m.SetPluginCronEnabled))
 
 }
 
@@ -51,10 +51,10 @@ func (m *Manager) RegisterAdminRoutes(admin *gin.RouterGroup) {
 // 参数路由用于插件的参数配置接口，只要登录即可访问，类似公共参数。
 // 提供功能：
 // 1. 获取已启用插件的菜单数据
-func (m *Manager) RegisterParamRoutes(params *gin.RouterGroup) {
-	grp := params.Group("/plugin")
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func (m *Manager) RegisterParamRoutes(r chi.Router) {
 	// 获取已启用插件的菜单数据
-	grp.GET("/menus", m.ListPluginMenus)
+	r.Get("/plugin/menus", response.Adapter(m.ListPluginMenus))
 
 }
 
@@ -69,7 +69,7 @@ func countMenusRecursive(menus []Menu) int {
 
 // ListPlugins 获取所有已注册插件的Meta与状态
 // 返回插件名称、标题、版本、描述及当前状态（中文）
-func (m *Manager) ListPlugins(c *gin.Context) {
+func (m *Manager) ListPlugins(c *response.Context) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -120,7 +120,7 @@ func (m *Manager) ListPlugins(c *gin.Context) {
 
 // ListPluginMenus 获取所有已启用插件的菜单定义
 // 返回前端可直接使用的菜单JSON（与前端 MenuItem 结构一致）
-func (m *Manager) ListPluginMenus(c *gin.Context) {
+func (m *Manager) ListPluginMenus(c *response.Context) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -170,53 +170,20 @@ func (m *Manager) ListPluginMenus(c *gin.Context) {
 
 // collectPluginRouteCategories 收集指定插件的三类路由数组
 // 仅统计路径中包含 /plugins/{name}/ 的路由，并按类别归集
+// 从 gin 切换到 chi，暂时禁用路由收集功能（Chi不提供直接的路由遍历接口）
 func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
-	m.mu.RLock()
-	engine := m.engine
-	m.mu.RUnlock()
-	if engine == nil || name == "" {
-		return RouteCategoryVO{}
-	}
-	cluster := make([]RouteItem, 0)
-	mgm := make([]RouteItem, 0)
-	admin := make([]RouteItem, 0)
-
-	for _, ri := range engine.Routes() {
-		p := ri.Path
-		klog.V(8).Infof("路由路径: %s", p)
-		if !strings.Contains(p, "/plugins/") {
-			continue
-		}
-		// 提取插件名并进行精确匹配
-		pluginName, ok := extractPluginName(p)
-		if !ok || pluginName != name {
-			continue
-		}
-		item := RouteItem{Method: ri.Method, Path: ri.Path, Handler: ri.Handler}
-		if strings.HasPrefix(p, "/k8s/cluster/") {
-			cluster = append(cluster, item)
-			continue
-		}
-		if strings.HasPrefix(p, "/mgm/") || p == "/mgm" {
-			mgm = append(mgm, item)
-			continue
-		}
-		if strings.HasPrefix(p, "/admin/") || p == "/admin" {
-			admin = append(admin, item)
-			continue
-		}
-	}
-	klog.V(6).Infof("插件 %s 路由类别统计: cluster=%d, mgm=%d, admin=%d", name, len(cluster), len(mgm), len(admin))
+	// Chi 框架不提供直接的路由遍历接口，暂时返回空路由信息
+	// 如需路由信息，需要维护一个路由注册日志或使用其他方式
 	return RouteCategoryVO{
-		Cluster: cluster,
-		Mgm:     mgm,
-		Admin:   admin,
+		Cluster: []RouteItem{},
+		Mgm:     []RouteItem{},
+		Admin:   []RouteItem{},
 	}
 }
 
 // InstallPlugin 安装指定名称的插件
 // 路径参数为插件名，安装失败时返回错误
-func (m *Manager) InstallPlugin(c *gin.Context) {
+func (m *Manager) InstallPlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("安装插件配置请求: %s", name)
 
@@ -235,7 +202,7 @@ func (m *Manager) InstallPlugin(c *gin.Context) {
 
 // EnablePlugin 启用指定名称的插件
 // 路径参数为插件名，启用失败时返回错误
-func (m *Manager) EnablePlugin(c *gin.Context) {
+func (m *Manager) EnablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("启用插件配置请求: %s", name)
 	if err := m.Enable(name); err != nil {
@@ -253,7 +220,7 @@ func (m *Manager) EnablePlugin(c *gin.Context) {
 
 // UninstallPlugin 卸载指定名称的插件（删除数据）
 // 路径参数为插件名，卸载失败时返回错误
-func (m *Manager) UninstallPlugin(c *gin.Context) {
+func (m *Manager) UninstallPlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("卸载插件配置请求(删除数据): %s", name)
 	if err := m.Uninstall(name, false); err != nil {
@@ -271,7 +238,7 @@ func (m *Manager) UninstallPlugin(c *gin.Context) {
 
 // UninstallPluginKeepData 卸载指定名称的插件（保留数据）
 // 路径参数为插件名，卸载失败时返回错误
-func (m *Manager) UninstallPluginKeepData(c *gin.Context) {
+func (m *Manager) UninstallPluginKeepData(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("卸载插件配置请求(保留数据): %s", name)
 	if err := m.Uninstall(name, true); err != nil {
@@ -289,7 +256,7 @@ func (m *Manager) UninstallPluginKeepData(c *gin.Context) {
 
 // DisablePlugin 禁用指定名称的插件
 // 路径参数为插件名，禁用失败时返回错误
-func (m *Manager) DisablePlugin(c *gin.Context) {
+func (m *Manager) DisablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("禁用插件配置请求: %s", name)
 	if err := m.Disable(name); err != nil {
@@ -307,7 +274,7 @@ func (m *Manager) DisablePlugin(c *gin.Context) {
 
 // UpgradePlugin 升级指定名称的插件（当代码版本高于数据库记录版本时）
 // 路径参数为插件名，升级失败时返回错误
-func (m *Manager) UpgradePlugin(c *gin.Context) {
+func (m *Manager) UpgradePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("升级插件配置请求: %s", name)
 
@@ -367,7 +334,7 @@ type CronItemVO struct {
 }
 
 // ListPluginCrons 获取指定插件的定时任务定义与状态
-func (m *Manager) ListPluginCrons(c *gin.Context) {
+func (m *Manager) ListPluginCrons(c *response.Context) {
 	name := c.Param("name")
 	m.mu.RLock()
 	mod, ok := m.modules[name]
@@ -407,7 +374,7 @@ func (m *Manager) ListPluginCrons(c *gin.Context) {
 }
 
 // StartPluginCron 手动启动（注册）指定插件的一条定时任务
-func (m *Manager) StartPluginCron(c *gin.Context) {
+func (m *Manager) StartPluginCron(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -430,7 +397,7 @@ func (m *Manager) StartPluginCron(c *gin.Context) {
 }
 
 // EnablePluginCron 生效指定插件的一条定时任务（别名）
-func (m *Manager) EnablePluginCron(c *gin.Context) {
+func (m *Manager) EnablePluginCron(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -453,7 +420,7 @@ func (m *Manager) EnablePluginCron(c *gin.Context) {
 }
 
 // RunPluginCronOnce 立即执行指定插件的一条定时任务一次
-func (m *Manager) RunPluginCronOnce(c *gin.Context) {
+func (m *Manager) RunPluginCronOnce(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -476,7 +443,7 @@ func (m *Manager) RunPluginCronOnce(c *gin.Context) {
 }
 
 // StopPluginCron 强制停止（移除）指定插件的一条定时任务
-func (m *Manager) StopPluginCron(c *gin.Context) {
+func (m *Manager) StopPluginCron(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Query("spec")
 	if spec == "" {
@@ -498,7 +465,7 @@ func (m *Manager) StopPluginCron(c *gin.Context) {
 // SetPluginCronEnabled 设置插件定时任务开关（生效/关闭）
 // 路径参数：name 插件名、spec cron 表达式、enabled true/false
 // 行为：enabled=true 则生效（注册并调度）；enabled=false 则关闭（移除调度）
-func (m *Manager) SetPluginCronEnabled(c *gin.Context) {
+func (m *Manager) SetPluginCronEnabled(c *response.Context) {
 	name := c.Param("name")
 	spec := c.Param("spec")
 	enabled := c.Param("enabled")
@@ -529,8 +496,8 @@ func (m *Manager) SetPluginCronEnabled(c *gin.Context) {
 // extractPluginName 从路由路径中提取插件名
 // 规则：寻找 "/plugins/" 段，返回其后第一个路径段作为插件名
 // 示例：
-// - /k8s/cluster/:cluster/plugins/demo/items    -> demo
-// - /admin/plugins/demo/remove/items/:id       -> demo
+// - /k8s/cluster/{cluster}/plugins/demo/items    -> demo
+// - /admin/plugins/demo/remove/items/{id}       -> demo
 // - /mgm/plugins/demo                          -> demo
 func extractPluginName(p string) (string, bool) {
 	idx := strings.Index(p, "/plugins/")

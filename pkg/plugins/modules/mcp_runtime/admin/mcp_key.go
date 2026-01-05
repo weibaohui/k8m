@@ -3,23 +3,24 @@ package admin
 import (
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
 type KeyController struct{}
 
-func RegisterMCPKeysRoutes(mgm *gin.RouterGroup) {
+func RegisterMCPKeysRoutes(mgm chi.Router) {
 	ctrl := &KeyController{}
-	mgm.GET("/user/profile/mcp_keys/list", ctrl.List)
-	mgm.POST("/user/profile/mcp_keys/create", ctrl.Create)
-	mgm.POST("/user/profile/mcp_keys/delete/:id", ctrl.Delete)
+	mgm.Get("/user/profile/mcp_keys/list", response.Adapter(ctrl.List))
+	mgm.Post("/user/profile/mcp_keys/create", response.Adapter(ctrl.Create))
+	mgm.Post("/user/profile/mcp_keys/delete/{id}", response.Adapter(ctrl.Delete))
 }
 
 // Create 处理创建新的MCP密钥的HTTP请求。
@@ -31,7 +32,7 @@ func RegisterMCPKeysRoutes(mgm *gin.RouterGroup) {
 // @Param description body string false "密钥描述"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/mcp_keys/create [post]
-func (mc *KeyController) Create(c *gin.Context) {
+func (mc *KeyController) Create(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	var req struct {
@@ -75,7 +76,7 @@ func (mc *KeyController) Create(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/user/profile/mcp_keys/list [get]
-func (mc *KeyController) List(c *gin.Context) {
+func (mc *KeyController) List(c *response.Context) {
 	username := c.GetString(constants.JwtUserName)
 	params := dao.BuildParams(c)
 
@@ -98,7 +99,7 @@ func (mc *KeyController) List(c *gin.Context) {
 // @Param id path string true "MCP密钥ID"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/user/profile/mcp_keys/delete/{id} [post]
-func (mc *KeyController) Delete(c *gin.Context) {
+func (mc *KeyController) Delete(c *response.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 

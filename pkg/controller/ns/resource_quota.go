@@ -3,9 +3,9 @@ package ns
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -18,7 +18,7 @@ import (
 // @Param body body object true "资源配额配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/ns/create_resource_quota [post]
-func (nc *Controller) CreateResourceQuota(c *gin.Context) {
+func (nc *Controller) CreateResourceQuota(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

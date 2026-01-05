@@ -4,10 +4,10 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +19,7 @@ type RepoController struct {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/plugins/helm/repo/list [get]
-func (r *RepoController) List(c *gin.Context) {
+func (r *RepoController) List(c *response.Context) {
 	// 从数据库查询列表
 	params := dao.BuildParams(c)
 	m := &models.HelmRepository{}
@@ -38,7 +38,7 @@ func (r *RepoController) List(c *gin.Context) {
 // @Param repo body models.HelmRepository true "Helm仓库信息"
 // @Success 200 {object} string "操作成功"
 // @Router /admin/plugins/helm/repo/save [post]
-func (r *RepoController) Save(c *gin.Context) {
+func (r *RepoController) Save(c *response.Context) {
 	var repo models.HelmRepository
 	if err := c.ShouldBindJSON(&repo); err != nil {
 		amis.WriteJsonError(c, err)
@@ -63,14 +63,14 @@ func (r *RepoController) Save(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/plugins/helm/repo/option_list [get]
-func RepoOptionList(c *gin.Context) {
+func RepoOptionList(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.HelmRepository{}
 	items, _, err := m.List(params, func(db *gorm.DB) *gorm.DB {
 		return db.Distinct("name")
 	})
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -85,7 +85,7 @@ func RepoOptionList(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }
@@ -96,7 +96,7 @@ func RepoOptionList(c *gin.Context) {
 // @Param ids path string true "要删除的仓库ID，多个用逗号分隔"
 // @Success 200 {object} string "操作成功"
 // @Router /admin/plugins/helm/repo/delete/{ids} [post]
-func (r *RepoController) Delete(c *gin.Context) {
+func (r *RepoController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 
 	h, err := getHelmWithNoCluster()
@@ -131,7 +131,7 @@ func (r *RepoController) Delete(c *gin.Context) {
 // @Param ids body string true "要更新索引的仓库ID，多个用逗号分隔"
 // @Success 200 {object} string "操作成功"
 // @Router /admin/plugins/helm/repo/update_index [post]
-func (r *RepoController) UpdateReposIndex(c *gin.Context) {
+func (r *RepoController) UpdateReposIndex(c *response.Context) {
 	var req struct {
 		IDs string `json:"ids"`
 	}

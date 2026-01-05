@@ -2,11 +2,12 @@ package ai_prompt
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -17,24 +18,25 @@ type AdminAIPromptController struct {
 }
 
 // RegisterAdminAIPromptRoutes 注册AI提示词管理路由
-func RegisterAdminAIPromptRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterAdminAIPromptRoutes(r chi.Router) {
 	ctrl := &AdminAIPromptController{}
-	admin.GET("/ai_prompt/list", ctrl.AIPromptList)
-	admin.POST("/ai_prompt/delete/:ids", ctrl.AIPromptDelete)
-	admin.POST("/ai_prompt/save", ctrl.AIPromptSave)
-	admin.POST("/ai_prompt/load", ctrl.AIPromptLoad)
-	admin.GET("/ai_prompt/option_list", ctrl.AIPromptOptionList)
-	admin.GET("/ai_prompt/types", ctrl.AIPromptTypes)
+	r.Get("/ai_prompt/list", response.Adapter(ctrl.AIPromptList))
+	r.Post("/ai_prompt/delete/{ids}", response.Adapter(ctrl.AIPromptDelete))
+	r.Post("/ai_prompt/save", response.Adapter(ctrl.AIPromptSave))
+	r.Post("/ai_prompt/load", response.Adapter(ctrl.AIPromptLoad))
+	r.Get("/ai_prompt/option_list", response.Adapter(ctrl.AIPromptOptionList))
+	r.Get("/ai_prompt/types", response.Adapter(ctrl.AIPromptTypes))
 
-	admin.POST("/ai_prompt/toggle/:id", ctrl.AIPromptToggle)                 // 添加启用/禁用路由
-	admin.POST("/ai_prompt/id/:id/enabled/:enabled", ctrl.AIPromptQuickSave) // 快捷保存启用状态
+	r.Post("/ai_prompt/toggle/{id}", response.Adapter(ctrl.AIPromptToggle))                  // 添加启用/禁用路由
+	r.Post("/ai_prompt/id/{id}/enabled/{enabled}", response.Adapter(ctrl.AIPromptQuickSave)) // 快捷保存启用状态
 }
 
 // @Summary 获取AI提示词列表
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/list [get]
-func (s *AdminAIPromptController) AIPromptList(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptList(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.AIPrompt{}
 
@@ -62,7 +64,7 @@ func (s *AdminAIPromptController) AIPromptList(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/save [post]
-func (s *AdminAIPromptController) AIPromptSave(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptSave(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.AIPrompt{}
 	err := c.ShouldBindJSON(&m)
@@ -94,7 +96,7 @@ func (s *AdminAIPromptController) AIPromptSave(c *gin.Context) {
 // @Param enabled path string true "启用状态，true或false"
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/id/{id}/enabled/{enabled} [post]
-func (s *AdminAIPromptController) AIPromptQuickSave(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptQuickSave(c *response.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 	params := dao.BuildParams(c)
@@ -147,7 +149,7 @@ func (s *AdminAIPromptController) AIPromptQuickSave(c *gin.Context) {
 // @Param ids path string true "提示词ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/delete/{ids} [post]
-func (s *AdminAIPromptController) AIPromptDelete(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptDelete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	params.UserName = ""
@@ -171,7 +173,7 @@ func (s *AdminAIPromptController) AIPromptDelete(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/option_list [get]
-func (s *AdminAIPromptController) AIPromptOptionList(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptOptionList(c *response.Context) {
 	m := models.AIPrompt{}
 	params := dao.BuildParams(c)
 	params.PerPage = 100000
@@ -184,7 +186,7 @@ func (s *AdminAIPromptController) AIPromptOptionList(c *gin.Context) {
 	list, _, err := m.List(params, queryFunc)
 
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -203,7 +205,7 @@ func (s *AdminAIPromptController) AIPromptOptionList(c *gin.Context) {
 	slice.SortBy(prompts, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": prompts,
 	})
 }
@@ -212,7 +214,7 @@ func (s *AdminAIPromptController) AIPromptOptionList(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/load [post]
-func (s *AdminAIPromptController) AIPromptLoad(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptLoad(c *response.Context) {
 	// 删除后，重新插入内置提示词
 	err := dao.DB().Model(&models.AIPrompt{}).Where("is_builtin = ?", true).Delete(&models.AIPrompt{}).Error
 	if err != nil {
@@ -233,7 +235,7 @@ func (s *AdminAIPromptController) AIPromptLoad(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/types [get]
-func (s *AdminAIPromptController) AIPromptTypes(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptTypes(c *response.Context) {
 	types := []map[string]string{
 		{"label": "事件分析", "value": string(constants.AIPromptTypeEvent)},
 		{"label": "资源描述", "value": string(constants.AIPromptTypeDescribe)},
@@ -246,7 +248,7 @@ func (s *AdminAIPromptController) AIPromptTypes(c *gin.Context) {
 		{"label": "定时任务", "value": string(constants.AIPromptTypeCron)},
 		{"label": "日志分析", "value": string(constants.AIPromptTypeLog)},
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": types,
 	})
 }
@@ -256,7 +258,7 @@ func (s *AdminAIPromptController) AIPromptTypes(c *gin.Context) {
 // @Param id path string true "提示词ID"
 // @Success 200 {object} string
 // @Router /admin/ai_prompt/toggle/{id} [post]
-func (s *AdminAIPromptController) AIPromptToggle(c *gin.Context) {
+func (s *AdminAIPromptController) AIPromptToggle(c *response.Context) {
 	id := c.Param("id")
 	params := dao.BuildParams(c)
 

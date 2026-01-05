@@ -4,19 +4,22 @@ import (
 	"fmt"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type MetadataController struct{}
 
-func RegisterMetadataRoutes(api *gin.RouterGroup) {
+// RegisterMetadataRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterMetadataRoutes(api chi.Router) {
 	ctrl := &MetadataController{}
-	api.POST("/:kind/group/:group/version/:version/update_labels/ns/:ns/name/:name", ctrl.UpdateLabels)           // CRD
-	api.GET("/:kind/group/:group/version/:version/annotations/ns/:ns/name/:name", ctrl.ListAnnotations)           // CRD
-	api.POST("/:kind/group/:group/version/:version/update_annotations/ns/:ns/name/:name", ctrl.UpdateAnnotations) // CRD
+	api.Post("/{kind}/group/{group}/version/{version}/update_labels/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdateLabels))
+	api.Get("/{kind}/group/{group}/version/{version}/annotations/ns/{ns}/name/{name}", response.Adapter(ctrl.ListAnnotations))
+	api.Post("/{kind}/group/{group}/version/{version}/update_annotations/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdateAnnotations))
 }
 
 // @Summary 更新资源标签
@@ -30,7 +33,7 @@ func RegisterMetadataRoutes(api *gin.RouterGroup) {
 // @Param labels body map[string]string true "标签键值对"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_labels/ns/{ns}/name/{name} [post]
-func (mc *MetadataController) UpdateLabels(c *gin.Context) {
+func (mc *MetadataController) UpdateLabels(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -114,7 +117,7 @@ var immutableKeys = []string{
 // @Param name path string true "资源名称"
 // @Success 200 {object} map[string]string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/annotations/ns/{ns}/name/{name} [get]
-func (mc *MetadataController) ListAnnotations(c *gin.Context) {
+func (mc *MetadataController) ListAnnotations(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -142,7 +145,7 @@ func (mc *MetadataController) ListAnnotations(c *gin.Context) {
 		delete(annotations, key)
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"annotations": annotations,
 	})
 }
@@ -158,7 +161,7 @@ func (mc *MetadataController) ListAnnotations(c *gin.Context) {
 // @Param annotations body map[string]interface{} true "注解键值对"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_annotations/ns/{ns}/name/{name} [post]
-func (mc *MetadataController) UpdateAnnotations(c *gin.Context) {
+func (mc *MetadataController) UpdateAnnotations(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")

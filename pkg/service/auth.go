@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -32,7 +32,7 @@ func hasIntersect(a, b []string) bool {
 	return false
 }
 
-func (a *authService) EnsureUserHasRoles(c *gin.Context, roles ...string) (bool, error) {
+func (a *authService) EnsureUserHasRoles(c *response.Context, roles ...string) (bool, error) {
 	user := amis.GetLoginUser(c)
 	if UserService().IsUserPlatformAdmin(user) {
 		return true, nil
@@ -50,7 +50,7 @@ func (a *authService) EnsureUserHasRoles(c *gin.Context, roles ...string) (bool,
 	return false, errors.New("无权限访问该路由")
 }
 
-func (a *authService) EnsureUserIsPlatformAdmin(c *gin.Context) (bool, error) {
+func (a *authService) EnsureUserIsPlatformAdmin(c *response.Context) (bool, error) {
 	user := amis.GetLoginUser(c)
 	if UserService().IsUserPlatformAdmin(user) {
 		return true, nil
@@ -59,7 +59,7 @@ func (a *authService) EnsureUserIsPlatformAdmin(c *gin.Context) (bool, error) {
 	return false, errors.New("仅平台管理员可访问")
 }
 
-func (a *authService) EnsureUserIsLogined(c *gin.Context) (bool, error) {
+func (a *authService) EnsureUserIsLogined(c *response.Context) (bool, error) {
 	user := amis.GetLoginUser(c)
 	if user == "" {
 		return false, errors.New("未登录用户")

@@ -5,12 +5,13 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"gorm.io/gorm"
@@ -21,18 +22,18 @@ import (
 type AdminClusterPermission struct{}
 
 // AdminClusterPermission 用于集群权限相关接口
-// 路由注册函数
-func RegisterClusterPermissionRoutes(admin *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterClusterPermissionRoutes(r chi.Router) {
 	ctrl := &AdminClusterPermission{}
 	//  cluster_permissions 集群授权
-	admin.GET("/cluster_permissions/cluster/:cluster/role/:role/user/list", ctrl.ListClusterPermissions)
-	admin.GET("/cluster_permissions/user/:username/list", ctrl.ListClusterPermissionsByUserName)         // 列出指定用户拥有的集群权限
-	admin.GET("/cluster_permissions/cluster/:cluster/list", ctrl.ListClusterPermissionsByClusterID)      // 列出指定集群下所有授权情况
-	admin.GET("/cluster_permissions/cluster/:cluster/ns/list", ctrl.ListClusterNamespaceListByClusterID) // 列出指定集群下所有授权情况
-	admin.POST("/cluster_permissions/cluster/:cluster/role/:role/:authorization_type/save", ctrl.SaveClusterPermission)
-	admin.POST("/cluster_permissions/delete/:ids", ctrl.DeleteClusterPermission)
-	admin.POST("/cluster_permissions/update_namespaces/:id", ctrl.UpdateNamespaces)
-	admin.POST("/cluster_permissions/update_blacklist_namespaces/:id", ctrl.UpdateBlacklistNamespaces)
+	r.Get("/cluster_permissions/cluster/{cluster}/role/{role}/user/list", response.Adapter(ctrl.ListClusterPermissions))
+	r.Get("/cluster_permissions/user/{username}/list", response.Adapter(ctrl.ListClusterPermissionsByUserName))         // 列出指定用户拥有的集群权限
+	r.Get("/cluster_permissions/cluster/{cluster}/list", response.Adapter(ctrl.ListClusterPermissionsByClusterID))      // 列出指定集群下所有授权情况
+	r.Get("/cluster_permissions/cluster/{cluster}/ns/list", response.Adapter(ctrl.ListClusterNamespaceListByClusterID)) // 列出指定集群下所有授权情况
+	r.Post("/cluster_permissions/cluster/{cluster}/role/{role}/{authorization_type}/save", response.Adapter(ctrl.SaveClusterPermission))
+	r.Post("/cluster_permissions/delete/{ids}", response.Adapter(ctrl.DeleteClusterPermission))
+	r.Post("/cluster_permissions/update_namespaces/{id}", response.Adapter(ctrl.UpdateNamespaces))
+	r.Post("/cluster_permissions/update_blacklist_namespaces/{id}", response.Adapter(ctrl.UpdateBlacklistNamespaces))
 
 }
 
@@ -42,7 +43,7 @@ func RegisterClusterPermissionRoutes(admin *gin.RouterGroup) {
 // @Param role path string true "角色"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/role/{role}/user/list [get]
-func (a *AdminClusterPermission) ListClusterPermissions(c *gin.Context) {
+func (a *AdminClusterPermission) ListClusterPermissions(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
 	cluster, err := utils.DecodeBase64(clusterBase64)
@@ -72,7 +73,7 @@ func (a *AdminClusterPermission) ListClusterPermissions(c *gin.Context) {
 // @Param username path string true "用户名"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/user/{username}/list [get]
-func (a *AdminClusterPermission) ListClusterPermissionsByUserName(c *gin.Context) {
+func (a *AdminClusterPermission) ListClusterPermissionsByUserName(c *response.Context) {
 	username := c.Param("username")
 	clusters, err := service.UserService().GetClusters(username)
 	if err != nil {
@@ -87,7 +88,7 @@ func (a *AdminClusterPermission) ListClusterPermissionsByUserName(c *gin.Context
 // @Param cluster path string true "集群ID(base64)"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/list [get]
-func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *gin.Context) {
+func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
 	cluster, err := utils.DecodeBase64(clusterBase64)
 	if err != nil {
@@ -112,7 +113,7 @@ func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *gin.Contex
 // @Param cluster path string true "集群ID(base64)"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/ns/list [get]
-func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *gin.Context) {
+func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	clusterBase64 := c.Param("cluster")
 	cluster, err := utils.DecodeBase64(clusterBase64)
@@ -124,7 +125,7 @@ func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *gin.Cont
 	err = kom.Cluster(cluster).WithContext(ctx).Resource(&v1.Namespace{}).List(&list).Error
 
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -139,7 +140,7 @@ func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *gin.Cont
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 
@@ -152,7 +153,7 @@ func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *gin.Cont
 // @Param authorization_type path string true "授权类型"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/role/{role}/{authorization_type}/save [post]
-func (a *AdminClusterPermission) SaveClusterPermission(c *gin.Context) {
+func (a *AdminClusterPermission) SaveClusterPermission(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
 	authorizationType := c.Param("authorization_type")
@@ -214,7 +215,7 @@ func (a *AdminClusterPermission) SaveClusterPermission(c *gin.Context) {
 // @Param ids path string true "权限ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/delete/{ids} [post]
-func (a *AdminClusterPermission) DeleteClusterPermission(c *gin.Context) {
+func (a *AdminClusterPermission) DeleteClusterPermission(c *response.Context) {
 	ids := c.Param("ids")
 
 	params := dao.BuildParams(c)
@@ -236,7 +237,7 @@ func (a *AdminClusterPermission) DeleteClusterPermission(c *gin.Context) {
 // @Param id path int true "权限ID"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/update_namespaces/{id} [post]
-func (a *AdminClusterPermission) UpdateNamespaces(c *gin.Context) {
+func (a *AdminClusterPermission) UpdateNamespaces(c *response.Context) {
 	id := c.Param("id")
 	type requestBody struct {
 		Namespaces string `json:"namespaces"`
@@ -270,7 +271,7 @@ func (a *AdminClusterPermission) UpdateNamespaces(c *gin.Context) {
 // @Param id path int true "权限ID"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/update_blacklist_namespaces/{id} [post]
-func (a *AdminClusterPermission) UpdateBlacklistNamespaces(c *gin.Context) {
+func (a *AdminClusterPermission) UpdateBlacklistNamespaces(c *response.Context) {
 	id := c.Param("id")
 	type requestBody struct {
 		BlacklistNamespaces string `json:"blacklist_namespaces"`

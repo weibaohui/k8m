@@ -1,31 +1,32 @@
 package config
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
 type SSOConfigController struct {
 }
 
-func RegisterSSOConfigRoutes(admin *gin.RouterGroup) {
+func RegisterSSOConfigRoutes(admin chi.Router) {
 	ctrl := &SSOConfigController{}
-	// SSO 配置
-	admin.GET("/config/sso/list", ctrl.List)
-	admin.POST("/config/sso/save", ctrl.Save)
-	admin.POST("/config/sso/delete/:ids", ctrl.Delete)
-	admin.POST("/config/sso/save/id/:id/status/:enabled", ctrl.QuickSave)
+	// SSO 配置 - Gin到Chi迁移
+	admin.Get("/config/sso/list", response.Adapter(ctrl.List))
+	admin.Post("/config/sso/save", response.Adapter(ctrl.Save))
+	admin.Post("/config/sso/delete/{ids}", response.Adapter(ctrl.Delete))
+	admin.Post("/config/sso/save/id/{id}/status/{enabled}", response.Adapter(ctrl.QuickSave))
 }
 
 // @Summary 获取SSO配置列表
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/config/sso/list [get]
-func (sc *SSOConfigController) List(c *gin.Context) {
+func (sc *SSOConfigController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.SSOConfig{}
 
@@ -41,7 +42,7 @@ func (sc *SSOConfigController) List(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/config/sso/save [post]
-func (sc *SSOConfigController) Save(c *gin.Context) {
+func (sc *SSOConfigController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.SSOConfig{}
 	err := c.ShouldBindJSON(&m)
@@ -57,7 +58,7 @@ func (sc *SSOConfigController) Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"id": m.ID,
 	})
 }
@@ -67,7 +68,7 @@ func (sc *SSOConfigController) Save(c *gin.Context) {
 // @Param ids path string true "SSO配置ID，多个用逗号分隔"
 // @Success 200 {object} string
 // @Router /admin/config/sso/delete/{ids} [post]
-func (sc *SSOConfigController) Delete(c *gin.Context) {
+func (sc *SSOConfigController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.SSOConfig{}
@@ -86,7 +87,7 @@ func (sc *SSOConfigController) Delete(c *gin.Context) {
 // @Param enabled path string true "状态，例如：true、false"
 // @Success 200 {object} string
 // @Router /admin/config/sso/save/id/{id}/status/{enabled} [post]
-func (sc *SSOConfigController) QuickSave(c *gin.Context) {
+func (sc *SSOConfigController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	enabled := c.Param("enabled")
 

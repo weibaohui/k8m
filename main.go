@@ -8,12 +8,11 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-contrib/pprof"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
+	cmiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/swaggo/http-swagger" // 导入 swagger 文档
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
@@ -51,6 +50,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/callbacks"
 	"k8s.io/klog/v2"
@@ -86,9 +86,6 @@ func Init() {
 	// 打印版本和 Git commit 信息
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
-	if !cfg.Debug {
-		gin.SetMode(gin.ReleaseMode)
-	}
 
 	// 初始化ChatService
 	service.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
@@ -143,11 +140,11 @@ func Init() {
 
 }
 
-// main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与资源监控，配置 Gin 路由和中间件，挂载前端静态资源，并提供认证、集群与资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。
+// main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与资源监控，配置 Chi 路由和中间件，挂载前端静态资源，并提供认证、集群与资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。
 func main() {
 	Init()
 
-	r := gin.Default()
+	r := chi.NewRouter()
 
 	cfg := flag.Init()
 
@@ -156,30 +153,34 @@ func main() {
 		r.Use(middleware.CustomRecovery())
 	}
 
-	if cfg.Debug {
-		// Debug 模式 注册 pprof 路由
-		pprof.Register(r)
-	}
-	r.Use(cors.Default())
-	r.Use(gzip.Gzip(gzip.BestCompression))
-	r.Use(middleware.SetCacheHeaders())
+	// CORS 中间件
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 	r.Use(middleware.AuthMiddleware())
-	r.Use(middleware.EnsureSelectedClusterMiddleware())
-
-	r.MaxMultipartMemory = 100 << 20 // 100 MiB
 
 	// 挂载子目录
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
-	r.StaticFS("/public/pages", http.FS(pagesFS))
+	r.Handle("/public/pages/*", http.StripPrefix("/public/pages", http.FileServer(http.FS(pagesFS))))
 	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
-	r.StaticFS("/assets", http.FS(assetsFS))
+	r.Handle("/assets/*", http.StripPrefix("/assets", http.FileServer(http.FS(assetsFS))))
 	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
-	r.StaticFS("/monacoeditorwork", http.FS(monacoFS))
+	r.Handle("/monacoeditorwork/*", http.StripPrefix("/monacoeditorwork", http.FileServer(http.FS(monacoFS))))
 
-	r.GET("/favicon.ico", func(c *gin.Context) {
+	if cfg.Debug {
+		// Debug 模式 注册 pprof 路由
+		r.Mount("/debug", cmiddleware.Profiler())
+	}
+
+	r.Get("/favicon.ico", response.Adapter(func(c *response.Context) {
 		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
 		c.Data(http.StatusOK, "image/x-icon", favicon)
-	})
+	}))
 
 	// @title           k8m API
 	// @version         1.0
@@ -187,41 +188,39 @@ func main() {
 	// @in header
 	// @name Authorization
 	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
-	r.GET("/swagger/*any", func(c *gin.Context) {
+	r.Get("/swagger/*", func(w http.ResponseWriter, r *http.Request) {
 		if plugins.ManagerInstance().IsEnabled(modules.PluginNameSwagger) {
-			ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
+			swaggerFiles.Handler.ServeHTTP(w, r)
 		} else {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error":   "Swagger documentation is disabled",
-				"message": "Swagger文档已被禁用，请联系管理员启用",
-			})
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(`{"error":"Swagger documentation is disabled","message":"Swagger文档已被禁用，请联系管理员启用"}`))
 		}
 	})
 
 	// 直接返回 index.html
-	r.GET("/", func(c *gin.Context) {
+	r.Get("/", response.Adapter(func(c *response.Context) {
 		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Internal Server Error")
 			return
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
-	})
+	}))
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
+	r.Get("/ping", response.Adapter(func(c *response.Context) {
+		c.JSON(http.StatusOK, response.H{
 			"message": "pong",
 		})
-	})
-	r.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+	}))
+	r.Get("/healthz", response.Adapter(func(c *response.Context) {
+		c.JSON(http.StatusOK, response.H{"status": "ok"})
+	}))
 
-	auth := r.Group("/auth")
-	{
+	r.Route("/auth", func(auth chi.Router) {
 		login.RegisterLoginRoutes(auth)
 		sso.RegisterAuthRoutes(auth)
-	}
+	})
 
 	// 初始化插件管理器并启动（集中注册与默认启用策略在 Start 中完成）
 	mgr := plugins.ManagerInstance()
@@ -230,22 +229,24 @@ func main() {
 	mgr.Start()
 
 	// 在/根目录下注册插件路由，注册由 Manager 统一处理
-	mgr.RegisterRootRoutes(&r.RouterGroup)
+	r.Route("/", func(root chi.Router) {
+		mgr.RegisterRootRoutes(root)
+	})
 
 	// 公共参数
-	params := r.Group("/params", middleware.AuthMiddleware())
-	{
+	r.Route("/params", func(params chi.Router) {
+		params.Use(middleware.AuthMiddleware())
 		param.RegisterParamRoutes(params)
 		// 注册插件菜单列表
 		mgr.RegisterParamRoutes(params)
-	}
-	ai := r.Group("/ai", middleware.AuthMiddleware())
-	{
+	})
+	r.Route("/ai", func(ai chi.Router) {
+		ai.Use(middleware.AuthMiddleware())
 		chat.RegisterChatRoutes(ai)
-	}
+	})
 
 	//增加动态的readiness探测路径
-	r.GET("/health/ready", func(c *gin.Context) {
+	r.Get("/health/ready", response.Adapter(func(c *response.Context) {
 		// 未启用leader插件，默认就绪
 		if !mgr.IsEnabled(modules.PluginNameLeader) {
 			c.Status(http.StatusOK)
@@ -257,10 +258,10 @@ func main() {
 		} else {
 			c.Status(http.StatusServiceUnavailable)
 		}
-	})
+	}))
 
-	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
-	{
+	r.Route("/k8s/cluster/{cluster}", func(api chi.Router) {
+		api.Use(middleware.EnsureSelectedClusterMiddleware())
 
 		// cluster
 		cluster_status.RegisterClusterRoutes(api)
@@ -336,10 +337,9 @@ func main() {
 
 		// 集群操作相关的插件路由注册交由 Manager 统一处理
 		mgr.RegisterClusterRoutes(api)
-	}
+	})
 
-	mgm := r.Group("/mgm", middleware.AuthMiddleware())
-	{
+	r.Route("/mgm", func(mgm chi.Router) {
 		template.RegisterTemplateRoutes(mgm)
 		// user profile 用户自助操作
 		profile.RegisterProfileRoutes(mgm)
@@ -350,10 +350,10 @@ func main() {
 
 		// 管理操作相关的插件路由注册交由 Manager 统一处理
 		mgr.RegisterManagementRoutes(mgm)
-	}
+	})
 
-	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
-	{
+	r.Route("/admin", func(admin chi.Router) {
+		admin.Use(middleware.PlatformAuthMiddleware())
 		// condition
 		config.RegisterConditionRoutes(admin)
 		// sso
@@ -384,10 +384,10 @@ func main() {
 
 		// 平台管理员级别管理插件路由注册交由 Manager 统一处理
 		mgr.RegisterPluginAdminRoutes(admin)
-	}
+	})
 
 	showBootInfo(Version, cfg.Port)
-	err := r.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), r)
 	if err != nil {
 		klog.Fatalf("Error %v", err)
 	}

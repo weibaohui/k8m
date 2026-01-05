@@ -1,17 +1,19 @@
 package cluster_status
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 )
 
 type ClusterController struct{}
 
-func RegisterClusterRoutes(api *gin.RouterGroup) {
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterClusterRoutes(r chi.Router) {
 	ctrl := &ClusterController{}
-	api.GET("/status/resource_count/cache_seconds/:cache", ctrl.ClusterResourceCount)
+	r.Get("/status/resource_count/cache_seconds/{cache}", response.Adapter(ctrl.ClusterResourceCount))
 }
 
 // @Summary 获取集群资源数量统计
@@ -20,7 +22,7 @@ func RegisterClusterRoutes(api *gin.RouterGroup) {
 // @Param cache path string true "缓存时间（秒）"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/status/resource_count/cache_seconds/{cache} [get]
-func (cc *ClusterController) ClusterResourceCount(c *gin.Context) {
+func (cc *ClusterController) ClusterResourceCount(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 // Version 获取版本号
@@ -15,10 +15,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /params/version [get]
-func (pc *Controller) Version(c *gin.Context) {
+func (pc *Controller) Version(c *response.Context) {
 
 	cfg := flag.Init()
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"version":   cfg.Version,
 		"gitCommit": cfg.GitCommit,
 		"gitTag":    cfg.GitTag,

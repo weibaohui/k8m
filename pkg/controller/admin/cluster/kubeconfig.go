@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	komaws "github.com/weibaohui/kom/kom/aws"
 	"gorm.io/gorm"
@@ -20,7 +20,7 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/cluster/kubeconfig/save [post]
-func (a *Controller) SaveKubeConfig(c *gin.Context) {
+func (a *Controller) SaveKubeConfig(c *response.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.KubeConfig{}
@@ -91,7 +91,7 @@ func (a *Controller) SaveKubeConfig(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /admin/cluster/kubeconfig/remove [post]
-func (a *Controller) RemoveKubeConfig(c *gin.Context) {
+func (a *Controller) RemoveKubeConfig(c *response.Context) {
 
 	params := dao.BuildParams(c)
 	m := models.KubeConfig{}
@@ -120,7 +120,7 @@ func (a *Controller) RemoveKubeConfig(c *gin.Context) {
 // @Param request body object true "AWS EKS配置信息"
 // @Success 200 {object} string "保存成功"
 // @Router /admin/cluster/aws/save [post]
-func (a *Controller) SaveAWSEKSCluster(c *gin.Context) {
+func (a *Controller) SaveAWSEKSCluster(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	// 定义请求结构体
@@ -223,7 +223,7 @@ func (a *Controller) SaveAWSEKSCluster(c *gin.Context) {
 // @Param request body object true "Token集群配置信息"
 // @Success 200 {object} string "保存成功"
 // @Router /admin/cluster/token/save [post]
-func (a *Controller) SaveTokenCluster(c *gin.Context) {
+func (a *Controller) SaveTokenCluster(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	// 定义请求结构体

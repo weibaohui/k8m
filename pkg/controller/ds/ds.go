@@ -1,9 +1,10 @@
 package ds
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/klog/v2"
@@ -11,15 +12,17 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// RegisterRoutes 注册 DaemonSet 相关路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 
-	api.POST("/daemonset/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
-	api.GET("/daemonset/ns/:ns/name/:name/rollout/history", ctrl.History)
-	api.POST("/daemonset/ns/:ns/name/:name/restart", ctrl.Restart)
-	api.POST("/daemonset/batch/restart", ctrl.BatchRestart)
-	api.POST("/daemonset/batch/stop", ctrl.BatchStop)
-	api.POST("/daemonset/batch/restore", ctrl.BatchRestore)
+	r.Post("/daemonset/ns/{ns}/name/{name}/revision/{revision}/rollout/undo", response.Adapter(ctrl.Undo))
+	r.Get("/daemonset/ns/{ns}/name/{name}/rollout/history", response.Adapter(ctrl.History))
+	r.Post("/daemonset/ns/{ns}/name/{name}/restart", response.Adapter(ctrl.Restart))
+	r.Post("/daemonset/batch/restart", response.Adapter(ctrl.BatchRestart))
+	r.Post("/daemonset/batch/stop", response.Adapter(ctrl.BatchStop))
+	r.Post("/daemonset/batch/restore", response.Adapter(ctrl.BatchRestore))
 }
 
 // @Summary 获取DaemonSet回滚历史
@@ -29,7 +32,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param name path string true "DaemonSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/daemonset/ns/{ns}/name/{name}/rollout/history [get]
-func (cc *Controller) History(c *gin.Context) {
+func (cc *Controller) History(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -55,7 +58,7 @@ func (cc *Controller) History(c *gin.Context) {
 // @Param name path string true "DaemonSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/daemonset/ns/{ns}/name/{name}/restart [post]
-func (cc *Controller) Restart(c *gin.Context) {
+func (cc *Controller) Restart(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -76,7 +79,7 @@ func (cc *Controller) Restart(c *gin.Context) {
 // @Param body body object true "包含name_list和ns_list的请求体"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/daemonset/batch/restart [post]
-func (cc *Controller) BatchRestart(c *gin.Context) {
+func (cc *Controller) BatchRestart(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -120,7 +123,7 @@ func (cc *Controller) BatchRestart(c *gin.Context) {
 // @Param revision path string true "回滚版本"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/daemonset/ns/{ns}/name/{name}/revision/{revision}/rollout/undo [post]
-func (cc *Controller) Undo(c *gin.Context) {
+func (cc *Controller) Undo(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -147,7 +150,7 @@ func (cc *Controller) Undo(c *gin.Context) {
 // @Param body body object true "包含name_list和ns_list的请求体"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/daemonset/batch/stop [post]
-func (cc *Controller) BatchStop(c *gin.Context) {
+func (cc *Controller) BatchStop(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -189,7 +192,7 @@ func (cc *Controller) BatchStop(c *gin.Context) {
 // @Param body body object true "包含name_list和ns_list的请求体"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/daemonset/batch/restore [post]
-func (cc *Controller) BatchRestore(c *gin.Context) {
+func (cc *Controller) BatchRestore(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

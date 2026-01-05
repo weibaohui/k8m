@@ -11,23 +11,26 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
 
 type FileController struct{}
 
-func RegisterPodFileRoutes(api *gin.RouterGroup) {
+// RegisterPodFileRoutes 注册路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterPodFileRoutes(api chi.Router) {
 	ctrl := &FileController{}
-	api.POST("/file/list", ctrl.List)
-	api.POST("/file/show", ctrl.Show)
-	api.POST("/file/save", ctrl.Save)
-	api.GET("/file/download", ctrl.Download)
-	api.POST("/file/upload", ctrl.Upload)
-	api.POST("/file/delete", ctrl.Delete)
+	api.Post("/file/list", response.Adapter(ctrl.List))
+	api.Post("/file/show", response.Adapter(ctrl.Show))
+	api.Post("/file/save", response.Adapter(ctrl.Save))
+	api.Get("/file/download", response.Adapter(ctrl.Download))
+	api.Post("/file/upload", response.Adapter(ctrl.Upload))
+	api.Post("/file/delete", response.Adapter(ctrl.Delete))
 }
 
 type info struct {
@@ -49,7 +52,7 @@ type info struct {
 // @Param body body info true "文件信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/file/list [post]
-func (fc *FileController) List(c *gin.Context) {
+func (fc *FileController) List(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -57,7 +60,7 @@ func (fc *FileController) List(c *gin.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -91,7 +94,7 @@ func (fc *FileController) List(c *gin.Context) {
 // @Param body body info true "文件信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/file/show [post]
-func (fc *FileController) Show(c *gin.Context) {
+func (fc *FileController) Show(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -99,7 +102,7 @@ func (fc *FileController) Show(c *gin.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -139,7 +142,7 @@ func (fc *FileController) Show(c *gin.Context) {
 		return
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"content": string(fileContent),
 	})
 }
@@ -150,7 +153,7 @@ func (fc *FileController) Show(c *gin.Context) {
 // @Param body body info true "文件信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/file/save [post]
-func (fc *FileController) Save(c *gin.Context) {
+func (fc *FileController) Save(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -158,7 +161,7 @@ func (fc *FileController) Save(c *gin.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -199,7 +202,7 @@ func (fc *FileController) Save(c *gin.Context) {
 // @Param namespace query string true "命名空间"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/file/download [get]
-func (fc *FileController) Download(c *gin.Context) {
+func (fc *FileController) Download(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -254,7 +257,7 @@ func (fc *FileController) Download(c *gin.Context) {
 // @Param file formData file true "上传文件"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/file/upload [post]
-func (fc *FileController) Upload(c *gin.Context) {
+func (fc *FileController) Upload(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -270,8 +273,8 @@ func (fc *FileController) Upload(c *gin.Context) {
 	info.FileName = c.PostForm("fileName")
 
 	if info.FileName == "" {
-		amis.WriteJsonData(c, gin.H{
-			"file": gin.H{
+		amis.WriteJsonData(c, response.H{
+			"file": response.H{
 				"uid":    -1,
 				"name":   info.FileName,
 				"status": "error",
@@ -281,8 +284,8 @@ func (fc *FileController) Upload(c *gin.Context) {
 		return
 	}
 	if info.Path == "" {
-		amis.WriteJsonData(c, gin.H{
-			"file": gin.H{
+		amis.WriteJsonData(c, response.H{
+			"file": response.H{
 				"uid":    -1,
 				"name":   info.FileName,
 				"status": "error",
@@ -298,8 +301,8 @@ func (fc *FileController) Upload(c *gin.Context) {
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
-			"file": gin.H{
+		amis.WriteJsonData(c, response.H{
+			"file": response.H{
 				"uid":    -1,
 				"name":   info.FileName,
 				"status": "error",
@@ -312,8 +315,8 @@ func (fc *FileController) Upload(c *gin.Context) {
 	// 保存上传文件
 	tempFilePath, err := saveUploadedFile(file)
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
-			"file": gin.H{
+		amis.WriteJsonData(c, response.H{
+			"file": response.H{
 				"uid":    -1,
 				"name":   info.FileName,
 				"status": "error",
@@ -326,8 +329,8 @@ func (fc *FileController) Upload(c *gin.Context) {
 
 	// 上传文件到 Pod 中
 	if err := uploadToPod(ctx, selectedCluster, info, tempFilePath); err != nil {
-		amis.WriteJsonData(c, gin.H{
-			"file": gin.H{
+		amis.WriteJsonData(c, response.H{
+			"file": response.H{
 				"uid":    -1,
 				"name":   info.FileName,
 				"status": "error",
@@ -344,8 +347,8 @@ func (fc *FileController) Upload(c *gin.Context) {
 	//    response: '{"status": "success"}', // 服务端响应内容
 	//    linkProps: '{"download": "image"}', // 下载链接额外的 HTML 属性
 	// }
-	amis.WriteJsonData(c, gin.H{
-		"file": gin.H{
+	amis.WriteJsonData(c, response.H{
+		"file": response.H{
 			"uid":    -1,
 			"name":   info.FileName,
 			"status": "done",
@@ -360,7 +363,7 @@ func (fc *FileController) Upload(c *gin.Context) {
 // @Param body body info true "文件信息"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/file/delete [post]
-func (fc *FileController) Delete(c *gin.Context) {
+func (fc *FileController) Delete(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -368,7 +371,7 @@ func (fc *FileController) Delete(c *gin.Context) {
 	}
 
 	info := &info{}
-	err = c.ShouldBindBodyWithJSON(info)
+	err = c.ShouldBindJSON(info)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

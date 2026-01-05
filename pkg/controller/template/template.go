@@ -1,21 +1,24 @@
 package template
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 type Controller struct {
 }
 
-func RegisterTemplateRoutes(mgm *gin.RouterGroup) {
+// RegisterTemplateRoutes 注册模板相关路由
+// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+func RegisterTemplateRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	mgm.GET("/custom/template/kind/list", ctrl.ListKind)
-	mgm.GET("/custom/template/list", ctrl.List)
-	mgm.POST("/custom/template/save", ctrl.Save)
-	mgm.POST("/custom/template/delete/:ids", ctrl.Delete)
+	r.Get("/custom/template/kind/list", response.Adapter(ctrl.ListKind))
+	r.Get("/custom/template/list", response.Adapter(ctrl.List))
+	r.Post("/custom/template/save", response.Adapter(ctrl.Save))
+	r.Post("/custom/template/delete/{ids}", response.Adapter(ctrl.Delete))
 }
 
 // @Summary 模板列表
@@ -23,7 +26,7 @@ func RegisterTemplateRoutes(mgm *gin.RouterGroup) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /mgm/custom/template/list [get]
-func (t *Controller) List(c *gin.Context) {
+func (t *Controller) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}
 
@@ -41,7 +44,7 @@ func (t *Controller) List(c *gin.Context) {
 // @Param template body models.CustomTemplate true "模板信息"
 // @Success 200 {object} string "返回模板ID"
 // @Router /mgm/custom/template/save [post]
-func (t *Controller) Save(c *gin.Context) {
+func (t *Controller) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 	m := models.CustomTemplate{}
 	err := c.ShouldBindJSON(&m)
@@ -60,7 +63,7 @@ func (t *Controller) Save(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"id": m.ID,
 	})
 }
@@ -71,7 +74,7 @@ func (t *Controller) Save(c *gin.Context) {
 // @Param ids path string true "要删除的模板ID，多个用逗号分隔"
 // @Success 200 {object} string "操作成功"
 // @Router /mgm/custom/template/delete/{ids} [post]
-func (t *Controller) Delete(c *gin.Context) {
+func (t *Controller) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	m := &models.CustomTemplate{}

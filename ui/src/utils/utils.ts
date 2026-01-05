@@ -95,7 +95,7 @@ export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string):
     if (!url.startsWith('/k8s')) {
         return url;
     }
-    // 已经带有 /k8s/cluster/:cluster 的，避免重复插入
+    // 已经带有 /k8s/cluster/{cluster} 的，避免重复插入
     if (url.startsWith('/k8s/cluster/')) {
         return url;
     }

@@ -3,8 +3,8 @@ package dao
 import (
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 // Params 用于处理分页和排序参数，以及上下文中的用户信息
@@ -27,7 +27,7 @@ func BuildDefaultParams() *Params {
 }
 
 // BuildParams 从 gin.Context 中获取分页和排序参数
-func BuildParams(c *gin.Context) *Params {
+func BuildParams(c *response.Context) *Params {
 	// 获取排序字段，默认为 "id"
 	orderBy := c.DefaultQuery("orderBy", "id")
 

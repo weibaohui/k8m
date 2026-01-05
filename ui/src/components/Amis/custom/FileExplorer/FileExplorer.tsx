@@ -212,6 +212,9 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 containers={containerOptions}
                                 onContainerChange={setSelectedContainer}
                             />
+                            <span style={{ marginLeft: '8px',fontSize: '12px', color: '#888' }}>
+                                鼠标右键管理文件
+                            </span>
                             <div style={{ height: 'calc(100vh - 150px)', overflowY: 'auto' }}>
                                 <FileTree
                                     treeData={treeData}

@@ -2,10 +2,10 @@ package param
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm/models"
+	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,7 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /params/helm/repo/option_list [get]
-func (pc *Controller) HelmRepoOptionList(c *gin.Context) {
+func (pc *Controller) HelmRepoOptionList(c *response.Context) {
 	params := dao.BuildParams(c)
 	params.OrderBy = "name"
 	//TODO 应该挪出去，不应该产生强依赖，考虑给插件增加param路由注册能力
@@ -23,7 +23,7 @@ func (pc *Controller) HelmRepoOptionList(c *gin.Context) {
 		return db.Distinct("name")
 	})
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -38,7 +38,7 @@ func (pc *Controller) HelmRepoOptionList(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }
