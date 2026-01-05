@@ -16,7 +16,7 @@ package analyzer
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/common"
 )
 
 var (

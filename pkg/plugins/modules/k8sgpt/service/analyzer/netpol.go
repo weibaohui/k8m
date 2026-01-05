@@ -16,9 +16,9 @@ package analyzer
 import (
 	"fmt"
 
-	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/kubernetes"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/common"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/kubernetes"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/util"
 	"github.com/weibaohui/kom/kom"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"

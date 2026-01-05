@@ -5,7 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/analysis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )

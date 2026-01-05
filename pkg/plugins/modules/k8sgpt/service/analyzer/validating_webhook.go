@@ -16,20 +16,20 @@ package analyzer
 import (
 	"fmt"
 
-	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/kubernetes"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/common"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/kubernetes"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/util"
 	"github.com/weibaohui/kom/kom"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-type MutatingWebhookAnalyzer struct{}
+type ValidatingWebhookAnalyzer struct{}
 
-func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
+func (ValidatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
-	kind := "MutatingWebhookConfiguration"
+	kind := "ValidatingWebhookConfiguration"
 	apiDoc := kubernetes.K8sApiReference{
 		Kind: kind,
 		ApiVersion: schema.GroupVersion{
@@ -42,19 +42,17 @@ func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, erro
 	AnalyzerErrorsMetric.DeletePartialMatch(map[string]string{
 		"analyzer_name": kind,
 	})
-	var mutatingWebhooks []*admissionregistrationv1.MutatingWebhookConfiguration
-	err := kom.Cluster(a.ClusterID).WithContext(a.Context).Resource(&admissionregistrationv1.MutatingWebhookConfiguration{}).WithLabelSelector(a.LabelSelector).List(&mutatingWebhooks).Error
+	var validatingWebhooks []*admissionregistrationv1.ValidatingWebhookConfiguration
+	err := kom.Cluster(a.ClusterID).WithContext(a.Context).Resource(&admissionregistrationv1.ValidatingWebhookConfiguration{}).WithLabelSelector(a.LabelSelector).List(&validatingWebhooks).Error
 
 	if err != nil {
 		return nil, err
 	}
-
 	var preAnalysis = map[string]common.PreAnalysis{}
 
-	for _, webhookConfig := range mutatingWebhooks {
+	for _, webhookConfig := range validatingWebhooks {
 		for _, webhook := range webhookConfig.Webhooks {
 			var failures []common.Failure
-
 			if webhook.ClientConfig.Service == nil {
 				continue
 			}
@@ -65,7 +63,7 @@ func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, erro
 			if err != nil {
 				// If the service is not found, we can't check the pods
 				failures = append(failures, common.Failure{
-					Text:          fmt.Sprintf("Service %s not found as mapped to by Mutating Webhook %s", svc.Name, webhook.Name),
+					Text:          fmt.Sprintf("Service %s not found as mapped to by Validating Webhook %s", svc.Name, webhook.Name),
 					KubernetesDoc: apiDoc.GetApiDocV2("spec.webhook.clientConfig.service"),
 					Sensitive: []common.Sensitive{
 						{
@@ -79,8 +77,8 @@ func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, erro
 					},
 				})
 				preAnalysis[fmt.Sprintf("%s/%s", webhookConfig.Namespace, webhook.Name)] = common.PreAnalysis{
-					MutatingWebhook: *webhookConfig,
-					FailureDetails:  failures,
+					ValidatingWebhook: *webhookConfig,
+					FailureDetails:    failures,
 				}
 				AnalyzerErrorsMetric.WithLabelValues(kind, webhook.Name, webhookConfig.Namespace).Set(float64(len(failures)))
 				continue
@@ -93,13 +91,14 @@ func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, erro
 			// Get pods within service
 			var pods []*corev1.Pod
 			err = kom.Cluster(a.ClusterID).WithContext(a.Context).Resource(&corev1.Pod{}).WithLabelSelector(util.MapToString(service.Spec.Selector)).Namespace(svc.Namespace).List(&pods).Error
+
 			if err != nil {
 				return nil, err
 			}
 
 			if len(pods) == 0 {
 				failures = append(failures, common.Failure{
-					Text:          fmt.Sprintf("No active pods found within service %s as mapped to by Mutating Webhook %s", svc.Name, webhook.Name),
+					Text:          fmt.Sprintf("No active pods found within service %s as mapped to by Validating Webhook %s", svc.Name, webhook.Name),
 					KubernetesDoc: apiDoc.GetApiDocV2("spec.webhook.clientConfig.service"),
 					Sensitive: []common.Sensitive{
 						{
@@ -115,7 +114,7 @@ func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, erro
 					doc := apiDoc.GetApiDocV2("spec.webhook")
 					failures = append(failures, common.Failure{
 						Text: fmt.Sprintf(
-							"Mutating Webhook (%s) is pointing to an inactive receiver pod (%s)",
+							"Validating Webhook (%s) is pointing to an inactive receiver pod (%s)",
 							webhook.Name,
 							pod.Name,
 						),
@@ -139,8 +138,8 @@ func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, erro
 			}
 			if len(failures) > 0 {
 				preAnalysis[fmt.Sprintf("%s/%s", webhookConfig.Namespace, webhook.Name)] = common.PreAnalysis{
-					MutatingWebhook: *webhookConfig,
-					FailureDetails:  failures,
+					ValidatingWebhook: *webhookConfig,
+					FailureDetails:    failures,
 				}
 				AnalyzerErrorsMetric.WithLabelValues(kind, webhook.Name, webhookConfig.Namespace).Set(float64(len(failures)))
 			}
@@ -153,7 +152,7 @@ func (MutatingWebhookAnalyzer) Analyze(a common.Analyzer) ([]common.Result, erro
 			Error: value.FailureDetails,
 		}
 
-		parent, found := util.GetParent(a.Context, a.ClusterID, value.MutatingWebhook.ObjectMeta)
+		parent, found := util.GetParent(a.Context, a.ClusterID, value.ValidatingWebhook.ObjectMeta)
 		if found {
 			currentAnalysis.ParentObject = parent
 		}
