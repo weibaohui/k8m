@@ -33,6 +33,7 @@ var Metadata = plugins.Module{
 			},
 		},
 	},
-	Lifecycle:     &K8sGPTLifecycle{},
-	ClusterRouter: route.RegisterClusterRoutes,
+	Lifecycle:        &K8sGPTLifecycle{},
+	ClusterRouter:    route.RegisterClusterRoutes,
+	ManagementRouter: route.RegisterMgmRoutes,
 }

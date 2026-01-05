@@ -51,7 +51,7 @@
                   "label": "分析",
                   "level": "link",
                   "actionType": "ajax",
-                  "api": "post:/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
+                  "api": "post:/mgm/plugins/k8sgpt/cluster/${cluster_id_base64}/run"
                 },
                 {
                   "type": "button",
@@ -67,7 +67,7 @@
                     "body": [
                       {
                         "type": "k8sGPT",
-                        "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/result"
+                        "api": "/mgm/plugins/k8sgpt/cluster/${cluster_id_base64}/result"
                       }
                     ]
                   }
