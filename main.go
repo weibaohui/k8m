@@ -11,8 +11,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	cmiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	swaggerFiles "github.com/swaggo/files"
 	_ "github.com/swaggo/http-swagger" // 导入 swagger 文档
+	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
@@ -176,9 +176,15 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	}))
 
+	// @title           k8m API
+	// @version         1.0
+	// @securityDefinitions.apikey BearerAuth
+	// @in header
+	// @name Authorization
+	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
 	r.Get("/swagger/*", func(w http.ResponseWriter, r *http.Request) {
 		if mgr.IsEnabled(modules.PluginNameSwagger) {
-			swaggerFiles.Handler.ServeHTTP(w, r)
+			httpSwagger.Handler().ServeHTTP(w, r)
 		} else {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusForbidden)
