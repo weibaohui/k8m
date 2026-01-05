@@ -141,19 +141,13 @@ func Init() {
 }
 
 // main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与资源监控，配置 Chi 路由和中间件，挂载前端静态资源，并提供认证、集群与资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。
-func main() {
-	Init()
-
-	r := chi.NewRouter()
-
+func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	cfg := flag.Init()
 
-	// 开启Recovery中间件
 	if !cfg.Debug {
 		r.Use(middleware.CustomRecovery())
 	}
 
-	// CORS 中间件
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -164,7 +158,6 @@ func main() {
 	}))
 	r.Use(middleware.AuthMiddleware())
 
-	// 挂载子目录
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
 	r.Handle("/public/pages/*", http.StripPrefix("/public/pages", http.FileServer(http.FS(pagesFS))))
 	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
@@ -173,7 +166,6 @@ func main() {
 	r.Handle("/monacoeditorwork/*", http.StripPrefix("/monacoeditorwork", http.FileServer(http.FS(monacoFS))))
 
 	if cfg.Debug {
-		// Debug 模式 注册 pprof 路由
 		r.Mount("/debug", cmiddleware.Profiler())
 	}
 
@@ -182,14 +174,8 @@ func main() {
 		c.Data(http.StatusOK, "image/x-icon", favicon)
 	}))
 
-	// @title           k8m API
-	// @version         1.0
-	// @securityDefinitions.apikey BearerAuth
-	// @in header
-	// @name Authorization
-	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
 	r.Get("/swagger/*", func(w http.ResponseWriter, r *http.Request) {
-		if plugins.ManagerInstance().IsEnabled(modules.PluginNameSwagger) {
+		if mgr.IsEnabled(modules.PluginNameSwagger) {
 			swaggerFiles.Handler.ServeHTTP(w, r)
 		} else {
 			w.Header().Set("Content-Type", "application/json")
@@ -198,9 +184,8 @@ func main() {
 		}
 	})
 
-	// 直接返回 index.html
 	r.Get("/", response.Adapter(func(c *response.Context) {
-		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
+		index, err := embeddedFiles.ReadFile("ui/dist/index.html")
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Internal Server Error")
 			return
@@ -222,22 +207,13 @@ func main() {
 		sso.RegisterAuthRoutes(auth)
 	})
 
-	// 初始化插件管理器并启动（集中注册与默认启用策略在 Start 中完成）
-	mgr := plugins.ManagerInstance()
-	mgr.SetEngine(r)
-	//这里应该是主要注册路径，真正的启动应该剥离出去
-	mgr.Start()
-
-	// 在/根目录下注册插件路由，注册由 Manager 统一处理
 	r.Route("/", func(root chi.Router) {
 		mgr.RegisterRootRoutes(root)
 	})
 
-	// 公共参数
 	r.Route("/params", func(params chi.Router) {
 		params.Use(middleware.AuthMiddleware())
 		param.RegisterParamRoutes(params)
-		// 注册插件菜单列表
 		mgr.RegisterParamRoutes(params)
 	})
 	r.Route("/ai", func(ai chi.Router) {
@@ -245,14 +221,11 @@ func main() {
 		chat.RegisterChatRoutes(ai)
 	})
 
-	//增加动态的readiness探测路径
 	r.Get("/health/ready", response.Adapter(func(c *response.Context) {
-		// 未启用leader插件，默认就绪
 		if !mgr.IsEnabled(modules.PluginNameLeader) {
 			c.Status(http.StatusOK)
 			return
 		}
-		// 启用leader插件时，仅主实例返回200，其他实例返回503，确保只有主实例接收请求
 		if service.LeaderService().IsCurrentLeader() {
 			c.Status(http.StatusOK)
 		} else {
@@ -263,131 +236,90 @@ func main() {
 	r.Route("/k8s/cluster/{cluster}", func(api chi.Router) {
 		api.Use(middleware.EnsureSelectedClusterMiddleware())
 
-		// cluster
 		cluster_status.RegisterClusterRoutes(api)
-		// CRD status
 		dynamic.RegisterCRDRoutes(api)
-
-		// CRD action
 		dynamic.RegisterActionRoutes(api)
-
 		dynamic.RegisterMetadataRoutes(api)
-		// Container 信息
 		dynamic.RegisterContainerRoutes(api)
-		// 节点亲和性
 		dynamic.RegisterNodeAffinityRoutes(api)
-		// Pod亲和性
 		dynamic.RegisterPodAffinityRoutes(api)
-		// Pod反亲和性
 		dynamic.RegisterPodAntiAffinityRoutes(api)
-		// 容忍度
 		dynamic.RegisterTolerationRoutes(api)
-
-		// Pod关联资源
 		dynamic.RegisterPodLinkRoutes(api)
-		// k8s pod
 		pod.RegisterLabelRoutes(api)
 		pod.RegisterLogRoutes(api)
 		pod.RegisterXtermRoutes(api)
-		// pod 文件浏览上传下载
 		pod.RegisterPodFileRoutes(api)
-		// Pod 资源使用情况
 		pod.RegisterResourceRoutes(api)
-		// Pod 端口转发
 		pod.RegisterPortRoutes(api)
-
-		// k8s deploy
 		deploy.RegisterActionRoutes(api)
-		// p8s svc
 		svc.RegisterActionRoutes(api)
-		// k8s node
 		node.RegisterActionRoutes(api)
-		// 资源情况
 		node.RegisterResourceRoutes(api)
-		// 节点污点
 		node.RegisterTaintRoutes(api)
-		// label等基础信息
 		node.RegisterMetadataRoutes(api)
 		node.RegisterShellRoutes(api)
-		// k8s ns
 		ns.RegisterRoutes(api)
-		// yaml
 		dynamic.RegisterYamlRoutes(api)
-
-		// k8s sts
 		sts.RegisterRoutes(api)
-		// k8s ds
 		ds.RegisterRoutes(api)
-
-		// k8s rs
 		rs.RegisterRoutes(api)
-		// k8s configmap
 		cm.RegisterRoutes(api)
-		// k8s cronjob
 		cronjob.RegisterRoutes(api)
-		// k8s storage_class
 		storageclass.RegisterRoutes(api)
-		// k8s ingress_class
 		ingressclass.RegisterRoutes(api)
-		// k8s gateway_class
 		gatewayapi.RegisterRoutes(api)
-		// doc
 		doc.RegisterRoutes(api)
 		k8sgpt.RegisterRoutes(api)
-
-		// 集群操作相关的插件路由注册交由 Manager 统一处理
 		mgr.RegisterClusterRoutes(api)
 	})
 
 	r.Route("/mgm", func(mgm chi.Router) {
 		template.RegisterTemplateRoutes(mgm)
-		// user profile 用户自助操作
 		profile.RegisterProfileRoutes(mgm)
-		// log
 		log.RegisterLogRoutes(mgm)
-		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
-
-		// 管理操作相关的插件路由注册交由 Manager 统一处理
 		mgr.RegisterManagementRoutes(mgm)
 	})
 
 	r.Route("/admin", func(admin chi.Router) {
 		admin.Use(middleware.PlatformAuthMiddleware())
-		// condition
 		config.RegisterConditionRoutes(admin)
-		// sso
 		config.RegisterSSOConfigRoutes(admin)
-		// ldap
 		config.RegisterLdapConfigRoutes(admin)
-		// 平台参数配置
 		config.RegisterConfigRoutes(admin)
-		// 大模型列表管理
 		config.RegisterAIModelConfigRoutes(admin)
-		// AI提示词管理
 		ai_prompt.RegisterAdminAIPromptRoutes(admin)
-		// MCP配置
-		// 集群授权相关
 		user.RegisterClusterPermissionRoutes(admin)
-		// 用户管理相关
 		user.RegisterAdminUserRoutes(admin)
-		// 用户组管理相关
 		user.RegisterAdminUserGroupRoutes(admin)
-		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
-
-		// 菜单自定义
 		menu.RegisterAdminMenuRoutes(admin)
-
-		// 插件管理器自身的管理页面的操作注册
 		mgr.RegisterAdminRoutes(admin)
-
-		// 平台管理员级别管理插件路由注册交由 Manager 统一处理
 		mgr.RegisterPluginAdminRoutes(admin)
 	})
 
+	return r
+}
+
+func main() {
+	Init()
+
+	mgr := plugins.ManagerInstance()
+	mgr.SetRouterBuilder(func(r chi.Router) http.Handler {
+		return buildRouter(mgr, r)
+	})
+
+	mgr.SetEngine(chi.NewRouter())
+	mgr.Start()
+
+	initialRouter := chi.NewRouter()
+	ah := plugins.NewAtomicHandler(buildRouter(mgr, initialRouter))
+	mgr.SetAtomicHandler(ah)
+
+	cfg := flag.Init()
 	showBootInfo(Version, cfg.Port)
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), r)
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), ah)
 	if err != nil {
 		klog.Fatalf("Error %v", err)
 	}

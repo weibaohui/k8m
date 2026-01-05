@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/go-chi/chi/v5"
@@ -12,20 +13,16 @@ import (
 
 // Manager 管理插件的注册、安装、启用和禁用
 type Manager struct {
-	mu      sync.RWMutex
-	modules map[string]Module
-	status  map[string]Status
-	// apiGroups 已注册的后端API路由分组引用，用于支持启用时动态注册路由
-	// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
-	apiGroups []chi.Router
-	// engine Chi 引擎引用，用于统计已注册路由
-	engine chi.Router
-	// cron 定时任务调度器
-	cron *cron.Cron
-	// cronIDs 记录每个插件每条 cron 的 EntryID
-	cronIDs map[string]map[string]cron.EntryID
-	// cronRunning 记录每个插件每条 cron 是否正在运行
-	cronRunning map[string]map[string]bool
+	mu            sync.RWMutex
+	modules       map[string]Module
+	status        map[string]Status
+	apiGroups     []chi.Router
+	engine        chi.Router
+	cron          *cron.Cron
+	cronIDs       map[string]map[string]cron.EntryID
+	cronRunning   map[string]map[string]bool
+	atomicHandler *AtomicHandler
+	routerBuilder func(chi.Router) http.Handler
 }
 
 var (
@@ -153,6 +150,9 @@ func (m *Manager) Enable(name string) error {
 	m.status[name] = StatusEnabled
 	klog.V(6).Infof("启用插件成功: %s", name)
 
+	m.mu.Unlock()
+	m.rebuildRouter()
+
 	return nil
 }
 
@@ -160,12 +160,11 @@ func (m *Manager) Enable(name string) error {
 // 注意:该方法用于实际启停周期调用,非管理员API配置写入
 func (m *Manager) Disable(name string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	mod, ok := m.modules[name]
 	if !ok {
+		m.mu.Unlock()
 		return fmt.Errorf("插件未注册: %s", name)
 	}
-	// 依赖检查:禁用前必须确保没有已启用的插件依赖于当前插件
 	for otherName, otherMod := range m.modules {
 		if m.status[otherName] != StatusEnabled {
 			continue
@@ -173,6 +172,7 @@ func (m *Manager) Disable(name string) error {
 		for _, dep := range otherMod.Dependencies {
 			if dep == name {
 				klog.V(6).Infof("禁用插件失败: %s,被插件依赖: %s", name, otherName)
+				m.mu.Unlock()
 				return fmt.Errorf("无法禁用插件,插件 %s 依赖于当前插件", otherName)
 			}
 		}
@@ -181,11 +181,16 @@ func (m *Manager) Disable(name string) error {
 		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 		if err := mod.Lifecycle.Disable(ctx); err != nil {
 			klog.V(6).Infof("禁用插件失败: %s,错误: %v", name, err)
+			m.mu.Unlock()
 			return err
 		}
 	}
 	m.status[name] = StatusDisabled
 	klog.V(6).Infof("禁用插件成功: %s", name)
+
+	m.mu.Unlock()
+	m.rebuildRouter()
+
 	return nil
 }
 
@@ -393,4 +398,27 @@ func (m *Manager) Start() {
 		}
 	}
 	m.cron.Start()
+}
+
+func (m *Manager) rebuildRouter() {
+	if m.atomicHandler == nil || m.routerBuilder == nil {
+		return
+	}
+
+	newRouter := chi.NewRouter()
+	newHandler := m.routerBuilder(newRouter)
+	m.atomicHandler.Store(newHandler)
+	klog.V(6).Infof("路由树已重新构建")
+}
+
+func (m *Manager) SetAtomicHandler(ah *AtomicHandler) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.atomicHandler = ah
+}
+
+func (m *Manager) SetRouterBuilder(builder func(chi.Router) http.Handler) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.routerBuilder = builder
 }
