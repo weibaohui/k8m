@@ -220,12 +220,10 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	})
 
 	r.Route("/params", func(params chi.Router) {
-		params.Use(middleware.AuthMiddleware())
 		param.RegisterParamRoutes(params)
 		mgr.RegisterParamRoutes(params)
 	})
 	r.Route("/ai", func(ai chi.Router) {
-		ai.Use(middleware.AuthMiddleware())
 		chat.RegisterChatRoutes(ai)
 	})
 
@@ -242,8 +240,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	}))
 
 	r.Route("/k8s/cluster/{cluster}", func(api chi.Router) {
-		api.Use(middleware.EnsureSelectedClusterMiddleware())
-
 		cluster_status.RegisterClusterRoutes(api)
 		dynamic.RegisterCRDRoutes(api)
 		dynamic.RegisterActionRoutes(api)
