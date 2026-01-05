@@ -411,10 +411,12 @@ func (m *Manager) Start() {
 		}
 	}
 	m.cron.Start()
+	m.rebuildRouter()
 }
 
 func (m *Manager) rebuildRouter() {
 	if m.atomicHandler == nil || m.routerBuilder == nil {
+		klog.V(6).Infof("路由重建跳过: atomicHandler=%v, routerBuilder=%v", m.atomicHandler != nil, m.routerBuilder != nil)
 		return
 	}
 
@@ -429,6 +431,7 @@ func (m *Manager) SetAtomicHandler(ah *AtomicHandler) {
 	m.mu.Lock()
 	m.atomicHandler = ah
 	m.mu.Unlock()
+	m.rebuildRouter()
 }
 
 func (m *Manager) SetRouterBuilder(builder func(chi.Router) http.Handler) {
