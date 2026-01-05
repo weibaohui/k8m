@@ -2,8 +2,8 @@ package route
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	chat "github.com/weibaohui/k8m/pkg/plugins/modules/ai/controller"
 	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
