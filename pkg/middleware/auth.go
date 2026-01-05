@@ -23,6 +23,7 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 			// 检查请求路径是否需要跳过登录检测
 			if path == "/" ||
 				path == "/favicon.ico" ||
+				path == "/ping" ||
 				path == "/healthz" ||
 				strings.HasPrefix(path, "/monacoeditorwork/") ||
 				strings.HasPrefix(path, "/swagger/") ||

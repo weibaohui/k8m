@@ -42,6 +42,7 @@ func EnsureSelectedClusterMiddleware() func(http.Handler) http.Handler {
 			if path == "/" ||
 				path == "/favicon.ico" ||
 				path == "/healthz" ||
+				path == "/ping" ||
 				strings.HasPrefix(path, "/health/") ||
 				strings.HasPrefix(path, "/monacoeditorwork/") ||
 				strings.HasPrefix(path, "/swagger/") ||

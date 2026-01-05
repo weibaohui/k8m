@@ -9,6 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/go-chi/chi/v5"
+	chim "github.com/go-chi/chi/v5/middleware"
 	cmiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	_ "github.com/swaggo/http-swagger" // 导入 swagger 文档
@@ -145,7 +146,7 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	cfg := flag.Init()
 
 	if !cfg.Debug {
-		r.Use(middleware.CustomRecovery())
+		r.Use(chim.Recoverer)
 	}
 
 	r.Use(cors.Handler(cors.Options{
@@ -156,9 +157,10 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+	r.Use(chim.Compress(8, "text/html", "text/css"))
 	r.Use(middleware.AuthMiddleware())
-
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
+	r.Use(chim.Heartbeat("/ping"))
 
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
 	r.Handle("/public/pages/*", http.StripPrefix("/public/pages", http.FileServer(http.FS(pagesFS))))
@@ -201,11 +203,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
 	}))
 
-	r.Get("/ping", response.Adapter(func(c *response.Context) {
-		c.JSON(http.StatusOK, response.H{
-			"message": "pong",
-		})
-	}))
 	r.Get("/healthz", response.Adapter(func(c *response.Context) {
 		c.JSON(http.StatusOK, response.H{"status": "ok"})
 	}))
