@@ -157,7 +157,7 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
-	r.Use(chim.Compress(8, "text/html", "text/css"))
+	r.Use(chim.Compress(9, "text/html", "text/css", "application/json", "text/javascript", "font/woff2"))
 	r.Use(middleware.AuthMiddleware())
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
 	r.Use(chim.Heartbeat("/ping"))
