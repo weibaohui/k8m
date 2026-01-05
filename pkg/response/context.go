@@ -19,6 +19,10 @@ type ContextKey struct{}
 var ctxKey = ContextKey{}
 var decoder = schema.NewDecoder()
 
+func init() {
+	decoder.IgnoreUnknownKeys(true)
+}
+
 type Context struct {
 	Writer  http.ResponseWriter
 	Request *http.Request
