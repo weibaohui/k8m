@@ -146,6 +146,8 @@ func SaveYamlTemplateTool() mcp2.Tool {
 	return mcp2.NewTool(
 		"save_k8s_yaml_template",
 		mcp2.WithDescription("保存Yaml为模版"),
+		mcp2.WithTitleAnnotation("Save YAML Template"),
+		mcp2.WithDestructiveHintAnnotation(true),
 		mcp2.WithString("cluster", mcp2.Description("模板适配集群（可为空）")),
 		mcp2.WithString("yaml", mcp2.Required(), mcp2.Description("yaml模板内容，文本类型")),
 		mcp2.WithString("name", mcp2.Description("模板名称")),

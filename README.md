@@ -2,14 +2,35 @@
 <h1>K8M</h1>
 </div>
 
+<div align=center>
+ 
+[![weibaohui%2Fk8m | Trendshift](https://trendshift.io/api/badge/repositories/14095)](https://trendshift.io/repositories/14095)
+
+</div>
+
+<div align=center>
+ 
+![GitHub Repo Stars](https://img.shields.io/github/stars/weibaohui/k8m)
+![GitHub Repo Forks](https://img.shields.io/github/forks/weibaohui/k8m)
+
+</div>
+
+<div align=center>
+
+ [![License MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
+ [![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/k8m)](https://goreportcard.com/report/github.com/weibaohui/k8m)
+![GitHub Release](https://img.shields.io/github/v/release/weibaohui/k8m)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/weibaohui/k8m/total)
+![GitHub Repo Issues](https://img.shields.io/github/issues/weibaohui/k8m)
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
+![Repobeats analytics image](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg)
+
+</div>
+
 
 [English](README_en.md) | [中文](README.md)
 
-[![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
 
-[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
-
-![Alt](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg "Repobeats analytics image")
 
 **k8m** 是一款AI驱动的 Mini Kubernetes AI Dashboard 轻量级控制台工具，专为简化集群管理设计。它基于 AMIS 构建，并通过  [
 `kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了
@@ -258,5 +279,4 @@ pnpm run dev
 <br><img width="214" alt="Image" src="https://github.com/user-attachments/assets/166db141-42c5-42c4-9964-8e25cf12d04c" />
 
 ## 微信群
-![输入图片说明](https://foruda.gitee.com/images/1765708669297174589/3faf8812_77493.png "屏幕截图")
-
+![输入图片说明](https://foruda.gitee.com/images/1767451670394096278/7e9e2bf7_77493.png "屏幕截图")
