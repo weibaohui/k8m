@@ -20,8 +20,8 @@ import (
 	"time"
 
 	openapi_v2 "github.com/google/gnostic/openapiv2"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/analyzer"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/analyzer"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/common"
 	"github.com/weibaohui/kom/kom"
 )
 

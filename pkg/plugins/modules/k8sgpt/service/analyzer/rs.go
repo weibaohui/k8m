@@ -16,8 +16,8 @@ package analyzer
 import (
 	"fmt"
 
-	"github.com/weibaohui/k8m/pkg/k8sgpt/common"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/util"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/common"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/util"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
 )

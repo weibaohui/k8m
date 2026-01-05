@@ -5,7 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/k8sgpt/analysis"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/analysis"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 )
@@ -75,7 +75,7 @@ func (cc *Controller) ClusterRunAnalysis(c *response.Context) {
 			"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
 
 		if result, err := analysis.Run(cfg); err == nil {
-			service.ClusterService().SetClusterScanStatus(cfg.ClusterID, result)
+			service.ClusterService().GetClusterByID(cfg.ClusterID).SetClusterScanStatus(result)
 		}
 	}()
 
@@ -104,7 +104,7 @@ func (cc *Controller) ClusterRunAnalysisMgm(c *response.Context) {
 			"MutatingWebhookConfiguration", "HorizontalPodAutoScaler", "PodDisruptionBudget", "NetworkPolicy"}
 
 		if result, err := analysis.Run(cfg); err == nil {
-			service.ClusterService().SetClusterScanStatus(cfg.ClusterID, result)
+			service.ClusterService().GetClusterByID(cfg.ClusterID).SetClusterScanStatus(result)
 		}
 	}()
 
@@ -122,7 +122,7 @@ func (cc *Controller) GetClusterRunAnalysisResultMgm(c *response.Context) {
 	}
 	cfg := createAnalysisConfig(c)
 	cfg.ClusterID = clusterIDBase64
-	scanResult := service.ClusterService().GetClusterScanResult(cfg.ClusterID)
+	scanResult := service.ClusterService().GetClusterByID(cfg.ClusterID).GetClusterScanResult()
 	if scanResult == nil {
 		amis.WriteJsonOKMsg(c, "暂无数据，请先点击执行检查")
 		return
