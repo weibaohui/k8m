@@ -13,16 +13,16 @@ import (
 
 // Manager 管理插件的注册、安装、启用和禁用
 type Manager struct {
-	mu            sync.RWMutex
-	modules       map[string]Module
-	status        map[string]Status
-	apiGroups     []chi.Router
-	engine        chi.Router
-	cron          *cron.Cron
-	cronIDs       map[string]map[string]cron.EntryID
-	cronRunning   map[string]map[string]bool
-	atomicHandler *AtomicHandler
-	routerBuilder func(chi.Router) http.Handler
+	mu            sync.RWMutex                       // 读写锁，保护插件并发安全
+	modules       map[string]Module                  // 已注册的插件模块，key为模块名
+	status        map[string]Status                  // 插件状态，key为模块名
+	apiGroups     []chi.Router                       // 插件API路由组，用于注册HTTP路由
+	engine        chi.Router                         // Chi路由引擎，用于构建HTTP路由
+	cron          *cron.Cron                         // 定时任务调度器
+	cronIDs       map[string]map[string]cron.EntryID // 定时任务ID，key为模块名+任务名
+	cronRunning   map[string]map[string]bool         // 定时任务运行状态，key为模块名+任务名
+	atomicHandler *AtomicHandler                     // 用于插件启用禁用后动态处理api路由。原子处理器，用于并发安全的处理器管理
+	routerBuilder func(chi.Router) http.Handler      // 路由构建函数，用于构建最终HTTP处理器。用于插件启用禁用后动态处理api路由
 }
 
 var (

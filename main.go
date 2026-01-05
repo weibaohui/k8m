@@ -311,7 +311,6 @@ func main() {
 	mgr.SetRouterBuilder(func(r chi.Router) http.Handler {
 		return buildRouter(mgr, r)
 	})
-
 	mgr.SetEngine(chi.NewRouter())
 	mgr.Start()
 
