@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/weibaohui/k8m/pkg/ai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -13,6 +14,23 @@ type aiService struct {
 	innerModel  string
 	innerApiKey string
 	innerApiUrl string
+}
+
+var (
+	// aiInstance 单例实例
+	aiInstance *aiService
+	// aiOnce 用于确保单例只被初始化一次
+	aiOnce sync.Once
+)
+
+// AIService 获取AI服务的单例实例
+// 返回值:
+//   - *aiService: AI服务实例
+func AIService() *aiService {
+	aiOnce.Do(func() {
+		aiInstance = &aiService{}
+	})
+	return aiInstance
 }
 
 func (c *aiService) SetVars(apikey, apiUrl, model string) {

@@ -1,4 +1,4 @@
-package chat
+package controller
 
 import (
 	"context"
@@ -9,9 +9,11 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
-	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
@@ -64,7 +66,8 @@ type ResourceData struct {
 }
 
 func handleRequest(c *response.Context, promptFunc func(data any) string) {
-	if !service.AIService().IsEnabled() {
+	enabled := plugins.ManagerInstance().IsEnabled(modules.PluginNameAI)
+	if !enabled {
 		amis.WriteJsonData(c, response.H{
 			"result": "请先配置开启ChatGPT功能",
 		})
@@ -82,7 +85,7 @@ func handleRequest(c *response.Context, promptFunc func(data any) string) {
 
 	prompt := promptFunc(data)
 
-	stream, err := service.ChatService().GetChatStreamWithoutHistory(ctxInst, prompt)
+	stream, err := service.GetChatService().GetChatStreamWithoutHistory(ctxInst, prompt)
 	if err != nil {
 		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
 		return
@@ -364,7 +367,7 @@ func (cc *Controller) Log(c *response.Context) {
 // 返回值：
 // - 模板字符串，如果数据库查询失败则返回内置模板内容。
 func getPromptWithFallback(ctx context.Context, promptType constants.AIPromptType) string {
-	templateStr, err := service.PromptService().GetPrompt(ctx, promptType)
+	templateStr, err := service.GetPromptService().GetPrompt(ctx, promptType)
 	if err != nil {
 		klog.Errorf("获取%s prompt模板失败: %v", promptType, err)
 		// 如果获取失败，使用内置模板

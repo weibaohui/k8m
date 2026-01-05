@@ -4,16 +4,34 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"gorm.io/gorm"
 )
 
 // promptService 提示词服务结构体
 // 用于管理和获取AI提示词相关的业务逻辑
 type promptService struct {
+}
+
+var (
+	// instance 单例实例
+	instance *promptService
+	// once 用于确保单例只被初始化一次
+	once sync.Once
+)
+
+// GetPromptService 获取提示词服务的单例实例
+// 返回值:
+//   - *promptService: 提示词服务实例
+func GetPromptService() *promptService {
+	once.Do(func() {
+		instance = &promptService{}
+	})
+	return instance
 }
 
 // GetPrompt 根据提示词类型获取提示词内容

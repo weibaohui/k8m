@@ -8,6 +8,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
+	aimodels "github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -68,7 +70,7 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 			return fmt.Errorf("未指定有效的模型ID")
 		}
 		// 不使用内置模型，从数据库中加载配置
-		modelConfig := &models.AIModelConfig{
+		modelConfig := &aimodels.AIModelConfig{
 			ID: m.ModelID,
 		}
 		modelConfig, err = modelConfig.GetOne(nil)
@@ -142,6 +144,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(m), color.RedString("↑↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
 		cfg.ShowConfigCloseMethod()
 	}
-	_ = AIService().ResetDefaultClient()
+	_ = service.AIService().ResetDefaultClient()
 	return nil
 }

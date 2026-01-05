@@ -1,4 +1,4 @@
-package chat
+package controller
 
 import (
 	"bytes"
@@ -9,8 +9,10 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
-	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
@@ -40,8 +42,7 @@ var WebsocketMessageType = map[int]string{
 //
 // 若 AI 服务未启用或参数绑定失败，将返回相应错误信息。
 func (cc *Controller) GPTShell(c *response.Context) {
-
-	if !service.AIService().IsEnabled() {
+	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameAI) {
 		amis.WriteJsonData(c, response.H{
 			"result": "请先配置开启ChatGPT功能",
 		})
@@ -175,7 +176,7 @@ func (cc *Controller) GPTShell(c *response.Context) {
 
 			klog.V(6).Infof("prompt: %s", string(data))
 
-			err = service.ChatService().RunOneRound(ctxInst, string(data), &outBuffer)
+			err = service.GetChatService().RunOneRound(ctxInst, string(data), &outBuffer)
 
 			if err != nil {
 				klog.V(6).Infof("failed to write %v bytes to tty: %s", len(dataBuffer), err)

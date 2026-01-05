@@ -10,7 +10,6 @@ import (
 var localPodService = &podService{
 	podLabels: make(map[string][]*PodLabels),
 }
-var localChatService = &chatService{}
 var localNodeService = &nodeService{
 	nodeLabels: make(map[string][]*NodeLabels),
 }
@@ -33,8 +32,6 @@ var localUserService = &userService{
 }
 var localOperationLogService = NewOperationLogService()
 var localShellLogService = &shellLogService{}
-var localAiService = &aiService{}
-var localPromptService = &promptService{}
 var localLeaderService = &leaderService{}
 
 // init 中文函数注释：在 service 初始化时向 lease 包注入 ClusterID → RestConfig 的解析器，避免循环引入。
@@ -48,18 +45,11 @@ func init() {
 	}
 }
 
-func PromptService() *promptService {
-	return localPromptService
-}
-
 // LeaderService 中文函数注释：获取 Leader 服务实例。
 func LeaderService() *leaderService {
 	return localLeaderService
 }
 
-func ChatService() *chatService {
-	return localChatService
-}
 func DeploymentService() *deployService {
 	return localDeploymentService
 }
@@ -97,10 +87,6 @@ func OperationLogService() *operationLogService {
 }
 func ShellLogService() *shellLogService {
 	return localShellLogService
-}
-func AIService() *aiService {
-	return localAiService
-
 }
 
 func ConfigService() *configService {

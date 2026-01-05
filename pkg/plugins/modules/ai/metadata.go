@@ -45,8 +45,9 @@ var Metadata = plugins.Module{
 			},
 		},
 	},
-	Dependencies:     []string{},
-	RunAfter:         []string{},
-	Lifecycle:        &AILifecycle{},
-	ManagementRouter: route.RegisterManagementRoutes,
+	Dependencies:      []string{},
+	RunAfter:          []string{},
+	Lifecycle:         &AILifecycle{},
+	ManagementRouter:  route.RegisterManagementRoutes,
+	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 }

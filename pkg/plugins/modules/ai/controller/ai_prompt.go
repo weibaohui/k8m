@@ -1,4 +1,4 @@
-package ai_prompt
+package controller
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
@@ -6,7 +6,7 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"

@@ -1,9 +1,9 @@
-package chat
+package controller
 
 import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
-	"github.com/weibaohui/k8m/pkg/service"
 )
 
 // @Summary 获取聊天历史记录
