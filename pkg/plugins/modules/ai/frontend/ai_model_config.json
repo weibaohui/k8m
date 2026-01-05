@@ -1,0 +1,312 @@
+{
+  "type": "page",
+  "title": "AI模型配置",
+  "body": [
+    {
+      "type": "crud",
+      "id": "detailCRUD",
+      "name": "detailCRUD",
+      "autoFillHeight": true,
+      "autoGenerateFilter": {
+        "columnsNum": 4,
+        "showBtnToolbar": false
+      },
+      "headerToolbar": [
+        {
+          "type": "button",
+          "icon": "fas fa-plus text-primary",
+          "actionType": "drawer",
+          "label": "新建配置",
+          "drawer": {
+            "closeOnEsc": true,
+            "closeOnOutside": true,
+            "title": "新建AI模型配置 (ESC 关闭)",
+            "body": {
+              "type": "form",
+              "api": "post:/admin/ai/model/save",
+              "body": [
+                {
+                  "name": "api_url",
+                  "type": "input-url",
+                  "label": "API地址",
+                  "required": true,
+                  "desc": "大模型的自定义API URL"
+                },
+                {
+                  "name": "api_model",
+                  "type": "input-text",
+                  "label": "模型名称",
+                  "required": true,
+                  "desc": "大模型的自定义模型名称"
+                },
+                {
+                  "name": "api_key",
+                  "type": "input-password",
+                  "label": "API密钥",
+                  "required": true,
+                  "desc": "大模型的自定义API Key"
+                },
+                {
+                  "name": "temperature",
+                  "type": "input-number",
+                  "precision": 2,
+                  "step": 0.01,
+                  "min": 0,
+                  "max": 2,
+                  "label": "模型温度",
+                  "value": "0.7",
+                  "desc": "temperature,控制大模型输出的随机程度"
+                },
+                {
+                  "name": "top_p",
+                  "type": "input-number",
+                  "precision": 2,
+                  "step": 0.01,
+                  "min": 0,
+                  "max": 1,
+                  "label": "核采样",
+                  "value": "1",
+                  "desc": "top_p,越大词汇量越大，输出越多样"
+                },
+                {
+                  "name": "think",
+                  "type": "switch",
+                  "label": "思考链",
+                  "desc": "关闭思考链后，大模型每次回答都直接输出结果"
+                }
+              ],
+              "submitText": "保存",
+              "resetText": "重置",
+              "messages": {
+                "saveSuccess": "保存成功",
+                "saveFailed": "保存失败"
+              },
+              "onEvent": {
+                "submitSucc": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "detailCRUD"
+                    },
+                    {
+                      "actionType": "closeDrawer"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "columns-toggler",
+          "align": "right",
+          "draggable": true,
+          "icon": "fas fa-cog",
+          "overlay": true,
+          "footerBtnSize": "sm"
+        },
+        {
+          "type": "tpl",
+          "tpl": "共${count}条",
+          "align": "right",
+          "visibleOn": "${count}"
+        },
+        {
+          "type": "columns-toggler",
+          "align": "left"
+        },
+        "reload",
+        "bulkActions"
+      ],
+      "loadDataOnce": false,
+      "syncLocation": false,
+      "initFetch": true,
+      "perPage": 10,
+      "bulkActions": [
+        {
+          "label": "批量删除",
+          "actionType": "ajax",
+          "confirmText": "确定要批量删除?",
+          "api": "post:/admin/ai/model/delete/${ids}"
+        }
+      ],
+      "footerToolbar": [
+        {
+          "type": "pagination",
+          "align": "right"
+        },
+        {
+          "type": "statistics",
+          "align": "right"
+        },
+        {
+          "type": "switch-per-page",
+          "align": "right"
+        }
+      ],
+      "api": "get:/admin/ai/model/list",
+      "quickSaveItemApi": "/admin/ai/model/id/${id}/think/${think}",
+      "columns": [
+        {
+          "type": "operation",
+          "label": "操作",
+          "width": 120,
+          "buttons": [
+            {
+              "type": "button",
+              "icon": "fas fa-vial text-info",
+              "tooltip": "测试联通性",
+              "actionType": "ajax",
+              "api": "post:/admin/ai/model/test/id/${id}"
+            },
+            {
+              "type": "button",
+              "icon": "fas fa-edit text-primary",
+              "actionType": "drawer",
+              "tooltip": "编辑配置",
+              "drawer": {
+                "closeOnEsc": true,
+                "closeOnOutside": true,
+                "title": "编辑大模型配置  (ESC 关闭)",
+                "body": {
+                  "type": "form",
+                  "api": "post:/admin/ai/model/save",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "id"
+                    },
+                    {
+                      "name": "api_url",
+                      "type": "input-url",
+                      "label": "API地址",
+                      "required": true,
+                      "desc": "大模型的自定义API URL"
+                    },
+                    {
+                      "name": "api_model",
+                      "type": "input-text",
+                      "label": "模型名称",
+                      "required": true,
+                      "desc": "大模型的自定义模型名称"
+                    },
+                    {
+                      "name": "api_key",
+                      "type": "input-password",
+                      "label": "API密钥",
+                      "required": true,
+                      "desc": "大模型的自定义API Key"
+                    },
+                    {
+                      "name": "temperature",
+                      "type": "input-number",
+                      "precision": 2,
+                      "step": 0.01,
+                      "min": 0,
+                      "max": 2,
+                      "label": "模型温度",
+                      "value": "0.7",
+                      "desc": "temperature,控制大模型输出的随机程度"
+                    },
+                    {
+                      "name": "top_p",
+                      "type": "input-number",
+                      "precision": 2,
+                      "step": 0.01,
+                      "min": 0,
+                      "max": 1,
+                      "label": "核采样",
+                      "value": "1",
+                      "desc": "top_p,越大词汇量越大，输出越多样"
+                    },
+                    {
+                      "name": "think",
+                      "type": "switch",
+                      "label": "思考链",
+                      "desc": "关闭思考链后，大模型每次回答都直接输出结果"
+                    }
+                  ],
+                  "submitText": "保存",
+                  "resetText": "重置",
+                  "messages": {
+                    "saveSuccess": "保存成功",
+                    "saveFailed": "保存失败"
+                  },
+                  "onEvent": {
+                    "submitSucc": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "detailCRUD"
+                        },
+                        {
+                          "actionType": "closeDrawer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "id",
+          "label": "ID",
+          "type": "text"
+        },
+        {
+          "name": "api_model",
+          "label": "模型名称",
+          "type": "text"
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "tpl",
+          "tpl": "${api_key|truncate:6}"
+        },
+        {
+          "name": "api_url",
+          "label": "API 地址",
+          "type": "text"
+        },
+        {
+          "name": "temperature",
+          "label": "Temperature",
+          "type": "text"
+        },
+        {
+          "name": "top_p",
+          "label": "Top P",
+          "type": "text"
+        },
+        {
+          "name": "think",
+          "label": "思考链",
+          "type": "switch",
+          "onText": "开启",
+          "offText": "关闭",
+          "quickEdit": {
+            "mode": "inline",
+            "type": "switch",
+            "onText": "开启",
+            "offText": "关闭",
+            "saveImmediately": true,
+            "resetOnFailed": true
+          }
+        },
+        {
+          "name": "description",
+          "label": "描述",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}

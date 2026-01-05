@@ -21,7 +21,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
-	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cluster_status"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
@@ -218,9 +217,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	r.Route("/params", func(params chi.Router) {
 		param.RegisterParamRoutes(params)
 		mgr.RegisterParamRoutes(params)
-	})
-	r.Route("/ai", func(ai chi.Router) {
-		chat.RegisterChatRoutes(ai)
 	})
 
 	r.Get("/health/ready", response.Adapter(func(c *response.Context) {
