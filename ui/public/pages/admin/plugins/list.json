@@ -120,11 +120,6 @@
                                                                 {
                                                                     "name": "path",
                                                                     "label": "路径"
-                                                                },
-                                                                {
-                                                                    "name": "handler",
-                                                                    "label": "处理器",
-                                                                    "width": "280px"
                                                                 }
                                                             ]
                                                         }
@@ -143,11 +138,6 @@
                                                                 {
                                                                     "name": "path",
                                                                     "label": "路径"
-                                                                },
-                                                                {
-                                                                    "name": "handler",
-                                                                    "label": "处理器",
-                                                                    "width": "280px"
                                                                 }
                                                             ]
                                                         }
@@ -166,11 +156,6 @@
                                                                 {
                                                                     "name": "path",
                                                                     "label": "路径"
-                                                                },
-                                                                {
-                                                                    "name": "handler",
-                                                                    "label": "处理器",
-                                                                    "width": "280px"
                                                                 }
                                                             ]
                                                         }
