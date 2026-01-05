@@ -73,9 +73,8 @@ type RouteCategoryVO struct {
 }
 
 // RouteItem 路由条目
-// 展示 HTTP 方法、路径、处理器名
+// 展示 HTTP 方法、路径
 type RouteItem struct {
-	Method  string `json:"method"`
-	Path    string `json:"path"`
-	Handler string `json:"handler,omitempty"`
+	Method string `json:"method"`
+	Path   string `json:"path"`
 }

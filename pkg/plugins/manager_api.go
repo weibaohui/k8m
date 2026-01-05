@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"net/http"
 	"sort"
 	"strings"
 
@@ -170,15 +171,99 @@ func (m *Manager) ListPluginMenus(c *response.Context) {
 
 // collectPluginRouteCategories 收集指定插件的三类路由数组
 // 仅统计路径中包含 /plugins/{name}/ 的路由，并按类别归集
-// 从 gin 切换到 chi，暂时禁用路由收集功能（Chi不提供直接的路由遍历接口）
+// 使用 chi.Walk 遍历路由并解析插件名和类别
 func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
-	// Chi 框架不提供直接的路由遍历接口，暂时返回空路由信息
-	// 如需路由信息，需要维护一个路由注册日志或使用其他方式
-	return RouteCategoryVO{
+	result := RouteCategoryVO{
 		Cluster: []RouteItem{},
 		Mgm:     []RouteItem{},
 		Admin:   []RouteItem{},
 	}
+
+	if m.engine == nil {
+		klog.V(6).Infof("路由引擎为空，无法收集路由信息")
+		return result
+	}
+
+	chi.Walk(m.engine, func(
+		method string,
+		route string,
+		handler http.Handler,
+		middlewares ...func(http.Handler) http.Handler,
+	) error {
+		plugin, scope := parsePluginRoute(route)
+		if plugin == "" || plugin != name {
+			return nil
+		}
+
+		item := RouteItem{
+			Method: method,
+			Path:   route,
+		}
+
+		switch scope {
+		case "mgm":
+			result.Mgm = append(result.Mgm, item)
+		case "k8s":
+			result.Cluster = append(result.Cluster, item)
+		case "admin":
+			result.Admin = append(result.Admin, item)
+		}
+
+		return nil
+	})
+
+	return result
+}
+
+// parsePluginRoute 解析路由路径，提取插件名和类别
+// 返回: 插件名, 类别(mgm/k8s/admin)
+// 示例:
+// - /mgm/plugins/demo/status -> demo, mgm
+// - /k8s/cluster/{clusterID}/plugins/demo/pods -> demo, k8s
+// - /admin/plugins/demo/reload -> demo, admin
+func parsePluginRoute(route string) (string, string) {
+	// /mgm/plugins/xxxx/...
+	if strings.HasPrefix(route, "/mgm/plugins/") {
+		rest := strings.TrimPrefix(route, "/mgm/plugins/")
+		return firstSegment(rest), "mgm"
+	}
+
+	// /admin/plugins/xxxx/...
+	if strings.HasPrefix(route, "/admin/plugins/") {
+		rest := strings.TrimPrefix(route, "/admin/plugins/")
+		return firstSegment(rest), "admin"
+	}
+
+	// /k8s/cluster/{clusterID}/plugins/xxxx/...
+	if strings.HasPrefix(route, "/k8s/cluster/") &&
+		strings.Contains(route, "/plugins/") {
+
+		idx := strings.Index(route, "/plugins/")
+		if idx > 0 {
+			rest := route[idx+len("/plugins/"):]
+			return firstSegment(rest), "k8s"
+		}
+	}
+
+	return "", ""
+}
+
+// firstSegment 提取路径的第一段
+// 示例: "demo/status" -> "demo"
+func firstSegment(path string) string {
+	if path == "" {
+		return ""
+	}
+	parts := strings.SplitN(path, "/", 2)
+	return parts[0]
+}
+
+// getHandlerName 从 handler 中提取函数名
+func getHandlerName(handler http.Handler) string {
+	if handler == nil {
+		return ""
+	}
+	return fmt.Sprintf("%T", handler)
 }
 
 // InstallPlugin 安装指定名称的插件
