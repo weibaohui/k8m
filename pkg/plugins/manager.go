@@ -421,6 +421,7 @@ func (m *Manager) rebuildRouter() {
 	newRouter := chi.NewRouter()
 	newHandler := m.routerBuilder(newRouter)
 	m.atomicHandler.Store(newHandler)
+	m.engine = newRouter
 	klog.V(6).Infof("路由树已重新构建")
 }
 

@@ -191,6 +191,7 @@ func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
 		handler http.Handler,
 		middlewares ...func(http.Handler) http.Handler,
 	) error {
+		klog.V(6).Infof("遍历路由: %s %s", method, route)
 		plugin, scope := parsePluginRoute(route)
 		if plugin == "" || plugin != name {
 			return nil
@@ -223,6 +224,7 @@ func (m *Manager) collectPluginRouteCategories(name string) RouteCategoryVO {
 // - /k8s/cluster/{clusterID}/plugins/demo/pods -> demo, k8s
 // - /admin/plugins/demo/reload -> demo, admin
 func parsePluginRoute(route string) (string, string) {
+	klog.V(6).Infof("解析路由路径: %s", route)
 	// /mgm/plugins/xxxx/...
 	if strings.HasPrefix(route, "/mgm/plugins/") {
 		rest := strings.TrimPrefix(route, "/mgm/plugins/")
