@@ -87,7 +87,10 @@ const Preview: React.FC<PreviewProps> = ({ menuData, navigate: propNavigate }) =
 
     const convertToTreeData = (data: MenuItem[]) => {
         // 过滤掉不显示的菜单项
-        const filteredData = data.filter(item => shouldShowMenuItem(item, visibilityContext));
+        const filteredData = data.filter(item => shouldShowMenuItem(item, {
+            ...visibilityContext,
+            groups: Array.isArray(_menuData) ? _menuData.map((item: { key: string }) => item.key) as string[] : []
+        }));
 
         return filteredData.map((item): {
             key: string;
