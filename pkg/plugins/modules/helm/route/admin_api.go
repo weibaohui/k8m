@@ -10,7 +10,6 @@ import (
 
 // RegisterPluginAdminRoutes 注册 Helm 插件的管理员路由（平台管理员）
 // 对应原来的 /admin 路径下的路由
-// 从 gin 切换到 chi，使用直接路由方法替代 gin.Group，使用小写方法名
 func RegisterPluginAdminRoutes(arg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameHelm
 	ctrl := &admin.RepoController{}
@@ -28,7 +27,6 @@ func RegisterPluginAdminRoutes(arg chi.Router) {
 
 // RegisterPluginAPIRoutes 注册 Helm 插件的 API 路由（K8s API）
 // 对应原来的 /k8s/cluster/{cluster} 路径下的路由
-// 从 gin 切换到 chi，使用直接路由方法替代 gin.Group，使用小写方法名
 func RegisterPluginAPIRoutes(arg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameHelm
 	ctrl := &admin.ReleaseController{}
@@ -48,7 +46,6 @@ func RegisterPluginAPIRoutes(arg chi.Router) {
 
 // RegisterPluginMgmRoutes 注册 Helm 插件的管理路由（Mgm）
 // 对应原来的 /mgm 路径下的路由
-// 从 gin 切换到 chi，使用直接路由方法替代 gin.Group，使用小写方法名
 func RegisterPluginMgmRoutes(arg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameHelm
 	ctrl := &admin.ChartController{}

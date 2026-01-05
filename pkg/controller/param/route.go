@@ -8,7 +8,6 @@ import (
 type Controller struct {
 }
 
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
 func RegisterParamRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	// 获取当前登录用户的角色，登录即可

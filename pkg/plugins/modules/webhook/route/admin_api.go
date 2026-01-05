@@ -9,7 +9,7 @@ import (
 )
 
 // RegisterPluginAdminRoutes 注册 webhook 插件管理路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterPluginAdminRoutes(r chi.Router) {
 	ctrl := &admin.Controller{}
 

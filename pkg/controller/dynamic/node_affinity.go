@@ -18,7 +18,7 @@ import (
 type NodeAffinityController struct{}
 
 // RegisterNodeAffinityRoutes 注册路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterNodeAffinityRoutes(api chi.Router) {
 	ctrl := &NodeAffinityController{}
 	api.Post("/{kind}/group/{group}/version/{version}/update_node_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdateNodeAffinity))

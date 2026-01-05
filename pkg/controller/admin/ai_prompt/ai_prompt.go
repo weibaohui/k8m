@@ -18,7 +18,7 @@ type AdminAIPromptController struct {
 }
 
 // RegisterAdminAIPromptRoutes 注册AI提示词管理路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterAdminAIPromptRoutes(r chi.Router) {
 	ctrl := &AdminAIPromptController{}
 	r.Get("/ai_prompt/list", response.Adapter(ctrl.AIPromptList))

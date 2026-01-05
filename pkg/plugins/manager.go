@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/go-chi/chi/v5"
@@ -12,20 +13,16 @@ import (
 
 // Manager 管理插件的注册、安装、启用和禁用
 type Manager struct {
-	mu      sync.RWMutex
-	modules map[string]Module
-	status  map[string]Status
-	// apiGroups 已注册的后端API路由分组引用，用于支持启用时动态注册路由
-	// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
-	apiGroups []chi.Router
-	// engine Chi 引擎引用，用于统计已注册路由
-	engine chi.Router
-	// cron 定时任务调度器
-	cron *cron.Cron
-	// cronIDs 记录每个插件每条 cron 的 EntryID
-	cronIDs map[string]map[string]cron.EntryID
-	// cronRunning 记录每个插件每条 cron 是否正在运行
-	cronRunning map[string]map[string]bool
+	mu            sync.RWMutex
+	modules       map[string]Module
+	status        map[string]Status
+	apiGroups     []chi.Router
+	engine        chi.Router
+	cron          *cron.Cron
+	cronIDs       map[string]map[string]cron.EntryID
+	cronRunning   map[string]map[string]bool
+	atomicHandler *AtomicHandler
+	routerBuilder func(chi.Router) http.Handler
 }
 
 var (
@@ -51,7 +48,7 @@ func newManager() *Manager {
 	return &Manager{
 		modules: make(map[string]Module),
 		status:  make(map[string]Status),
-		// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 		apiGroups: make([]chi.Router, 0),
 		cron: cron.New(
 			cron.WithChain(
@@ -65,17 +62,20 @@ func newManager() *Manager {
 }
 
 func (m *Manager) Register(module Module) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
 	name := module.Meta.Name
 	if name == "" {
 		return fmt.Errorf("插件名称不能为空")
 	}
-	if _, ok := m.modules[name]; ok {
+	m.mu.RLock()
+	_, ok := m.modules[name]
+	m.mu.RUnlock()
+	if ok {
 		return fmt.Errorf("插件已存在: %s", name)
 	}
+	m.mu.Lock()
 	m.modules[name] = module
 	m.status[name] = StatusDiscovered
+	m.mu.Unlock()
 	klog.V(6).Infof("注册插件: %s（版本: %s）", module.Meta.Name, module.Meta.Version)
 	return nil
 }
@@ -83,9 +83,9 @@ func (m *Manager) Register(module Module) error {
 // Install 安装指定插件（幂等），调用生命周期的 Install
 // 注意：该方法用于实际启停周期调用，非管理员API配置写入
 func (m *Manager) Install(name string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.mu.RLock()
 	mod, ok := m.modules[name]
+	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
@@ -96,7 +96,9 @@ func (m *Manager) Install(name string) error {
 			return err
 		}
 	}
+	m.mu.Lock()
 	m.status[name] = StatusInstalled
+	m.mu.Unlock()
 	klog.V(6).Infof("安装插件成功: %s", name)
 	return nil
 }
@@ -104,9 +106,9 @@ func (m *Manager) Install(name string) error {
 // Upgrade 升级指定插件（版本变更触发），调用生命周期的 Upgrade
 // 该方法不改变当前状态，仅执行安全迁移逻辑
 func (m *Manager) Upgrade(name string, fromVersion string, toVersion string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.mu.RLock()
 	mod, ok := m.modules[name]
+	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
@@ -128,16 +130,20 @@ func (m *Manager) Upgrade(name string, fromVersion string, toVersion string) err
 // Enable 启用指定插件，调用生命周期的 Enable
 // 注意：该方法用于实际启停周期调用，非管理员API配置写入
 func (m *Manager) Enable(name string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.mu.RLock()
 	mod, ok := m.modules[name]
+	m.mu.RUnlock()
 	if !ok {
+
 		return fmt.Errorf("插件未注册: %s", name)
 	}
 	// 依赖检查：启用前必须确保所有依赖插件均已启用
 	if len(mod.Dependencies) > 0 {
 		for _, dep := range mod.Dependencies {
-			if m.status[dep] != StatusEnabled {
+			m.mu.RLock()
+			ds := m.status[dep]
+			m.mu.RUnlock()
+			if ds != StatusEnabled {
 				klog.V(6).Infof("启用插件失败: %s，依赖未启用: %s", name, dep)
 				return fmt.Errorf("依赖插件未启用: %s", dep)
 			}
@@ -150,8 +156,12 @@ func (m *Manager) Enable(name string) error {
 			return err
 		}
 	}
+	m.mu.Lock()
 	m.status[name] = StatusEnabled
+	m.mu.Unlock()
+
 	klog.V(6).Infof("启用插件成功: %s", name)
+	m.rebuildRouter()
 
 	return nil
 }
@@ -159,15 +169,17 @@ func (m *Manager) Enable(name string) error {
 // Disable 禁用指定插件,调用生命周期的 Disable
 // 注意:该方法用于实际启停周期调用,非管理员API配置写入
 func (m *Manager) Disable(name string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.mu.RLock()
 	mod, ok := m.modules[name]
+	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
-	// 依赖检查:禁用前必须确保没有已启用的插件依赖于当前插件
 	for otherName, otherMod := range m.modules {
-		if m.status[otherName] != StatusEnabled {
+		m.mu.RLock()
+		ost := m.status[otherName]
+		m.mu.RUnlock()
+		if ost != StatusEnabled {
 			continue
 		}
 		for _, dep := range otherMod.Dependencies {
@@ -184,17 +196,22 @@ func (m *Manager) Disable(name string) error {
 			return err
 		}
 	}
+	m.mu.Lock()
 	m.status[name] = StatusDisabled
+	m.mu.Unlock()
 	klog.V(6).Infof("禁用插件成功: %s", name)
+
+	m.rebuildRouter()
+
 	return nil
 }
 
 // Uninstall 卸载指定插件（可选），调用生命周期的 Uninstall
 // 注意：该方法用于实际启停周期调用，非管理员API配置写入
 func (m *Manager) Uninstall(name string, keepData bool) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.mu.RLock()
 	mod, ok := m.modules[name]
+	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
@@ -205,8 +222,9 @@ func (m *Manager) Uninstall(name string, keepData bool) error {
 			return err
 		}
 	}
-	// 卸载后保留插件条目，使其仍然显示在列表中并可再次安装
+	m.mu.Lock()
 	m.status[name] = StatusDiscovered
+	m.mu.Unlock()
 	klog.V(6).Infof("卸载插件成功: %s", name)
 	return nil
 }
@@ -214,15 +232,16 @@ func (m *Manager) Uninstall(name string, keepData bool) error {
 // IsEnabled 返回插件是否处于启用状态
 func (m *Manager) IsEnabled(name string) bool {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
-	return m.status[name] == StatusEnabled
+	enabled := m.status[name] == StatusEnabled
+	m.mu.RUnlock()
+	return enabled
 }
 
 // StatusOf 获取插件当前状态
 func (m *Manager) StatusOf(name string) (Status, bool) {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
 	s, ok := m.status[name]
+	m.mu.RUnlock()
 	return s, ok
 }
 
@@ -236,7 +255,6 @@ func SetRegistrar(f func(*Manager)) {
 
 // SetEngine 设置 Chi 引擎
 // 便于后续统计与展示插件已注册的路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.Engine
 func (m *Manager) SetEngine(e chi.Router) {
 	m.mu.Lock()
 	m.engine = e
@@ -393,4 +411,27 @@ func (m *Manager) Start() {
 		}
 	}
 	m.cron.Start()
+}
+
+func (m *Manager) rebuildRouter() {
+	if m.atomicHandler == nil || m.routerBuilder == nil {
+		return
+	}
+
+	newRouter := chi.NewRouter()
+	newHandler := m.routerBuilder(newRouter)
+	m.atomicHandler.Store(newHandler)
+	klog.V(6).Infof("路由树已重新构建")
+}
+
+func (m *Manager) SetAtomicHandler(ah *AtomicHandler) {
+	m.mu.Lock()
+	m.atomicHandler = ah
+	m.mu.Unlock()
+}
+
+func (m *Manager) SetRouterBuilder(builder func(chi.Router) http.Handler) {
+	m.mu.Lock()
+	m.routerBuilder = builder
+	m.mu.Unlock()
 }

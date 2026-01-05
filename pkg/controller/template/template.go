@@ -12,7 +12,7 @@ type Controller struct {
 }
 
 // RegisterTemplateRoutes 注册模板相关路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterTemplateRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	r.Get("/custom/template/kind/list", response.Adapter(ctrl.ListKind))

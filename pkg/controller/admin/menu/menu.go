@@ -16,7 +16,7 @@ type AdminMenuController struct {
 
 // AdminMenu 用于菜单相关接口
 // 路由注册函数
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterAdminMenuRoutes(r chi.Router) {
 
 	ctrl := AdminMenuController{}

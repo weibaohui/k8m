@@ -9,7 +9,6 @@ import (
 )
 
 // RegisterMgmRoutes 注册Demo插件的管理类（mgm）路由
-// 从 gin 切换到 chi，使用直接路由方法替代 gin.Group
 func RegisterManagementRoutes(mrg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameDemo
 	mrg.Get(prefix+"/items", response.Adapter(mgm.List))

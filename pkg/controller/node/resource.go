@@ -13,7 +13,6 @@ import (
 
 type ResourceController struct{}
 
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
 func RegisterResourceRoutes(r chi.Router) {
 	ctrl := &ResourceController{}
 	r.Get("/node/top/list", response.Adapter(ctrl.TopList))

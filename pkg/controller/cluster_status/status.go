@@ -10,7 +10,6 @@ import (
 
 type ClusterController struct{}
 
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
 func RegisterClusterRoutes(r chi.Router) {
 	ctrl := &ClusterController{}
 	r.Get("/status/resource_count/cache_seconds/{cache}", response.Adapter(ctrl.ClusterResourceCount))

@@ -18,7 +18,6 @@ type TolerationController struct{}
 
 func RegisterTolerationRoutes(api chi.Router) {
 	ctrl := &TolerationController{}
-	// Gin到Chi迁移：将大写POST/GET改为小写Post/Get，并添加response.Adapter包装
 	api.Post("/{kind}/group/{group}/version/{version}/update_tolerations/ns/{ns}/name/{name}", response.Adapter(ctrl.Update))
 	api.Post("/{kind}/group/{group}/version/{version}/delete_tolerations/ns/{ns}/name/{name}", response.Adapter(ctrl.Delete))
 	api.Post("/{kind}/group/{group}/version/{version}/add_tolerations/ns/{ns}/name/{name}", response.Adapter(ctrl.Add))

@@ -19,7 +19,6 @@ type PodAntiAffinityController struct{}
 
 func RegisterPodAntiAffinityRoutes(api chi.Router) {
 	ctrl := &PodAntiAffinityController{}
-	// Gin到Chi迁移：将大写POST/GET改为小写Post/Get，并添加response.Adapter包装
 	api.Post("/{kind}/group/{group}/version/{version}/update_pod_anti_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdatePodAntiAffinity))
 	api.Post("/{kind}/group/{group}/version/{version}/delete_pod_anti_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.DeletePodAntiAffinity))
 	api.Post("/{kind}/group/{group}/version/{version}/add_pod_anti_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.AddPodAntiAffinity))

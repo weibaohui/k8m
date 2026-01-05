@@ -22,7 +22,7 @@ import (
 // 1. 插件列表（显示Meta信息与状态）
 // 2. 安装插件
 // 3. 卸载插件
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func (m *Manager) RegisterAdminRoutes(r chi.Router) {
 	// 列出所有已注册插件的Meta和状态
 	r.Get("/plugin/list", response.Adapter(m.ListPlugins))
@@ -52,7 +52,7 @@ func (m *Manager) RegisterAdminRoutes(r chi.Router) {
 // 参数路由用于插件的参数配置接口，只要登录即可访问，类似公共参数。
 // 提供功能：
 // 1. 获取已启用插件的菜单数据
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func (m *Manager) RegisterParamRoutes(r chi.Router) {
 	// 获取已启用插件的菜单数据
 	r.Get("/plugin/menus", response.Adapter(m.ListPluginMenus))
@@ -71,8 +71,6 @@ func countMenusRecursive(menus []Menu) int {
 // ListPlugins 获取所有已注册插件的Meta与状态
 // 返回插件名称、标题、版本、描述及当前状态（中文）
 func (m *Manager) ListPlugins(c *response.Context) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
 
 	items := make([]PluginItemVO, 0, len(m.modules))
 	// 读取数据库中的配置状态
@@ -122,8 +120,6 @@ func (m *Manager) ListPlugins(c *response.Context) {
 // ListPluginMenus 获取所有已启用插件的菜单定义
 // 返回前端可直接使用的菜单JSON（与前端 MenuItem 结构一致）
 func (m *Manager) ListPluginMenus(c *response.Context) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
 
 	type MenuVO struct {
 		Key         string   `json:"key,omitempty"`
@@ -160,7 +156,12 @@ func (m *Manager) ListPluginMenus(c *response.Context) {
 	// 顶层按插件名称分组，将每个插件的菜单作为其子菜单
 	var result []MenuVO
 	for name, mod := range m.modules {
-		if m.status[name] != StatusEnabled {
+
+		m.mu.RLock()
+		sn := m.status[name]
+		m.mu.RUnlock()
+
+		if sn != StatusEnabled {
 			continue
 		}
 		result = append(result, convertMenusToVO(mod.Menus)...)
@@ -274,7 +275,7 @@ func (m *Manager) InstallPlugin(c *response.Context) {
 		return
 	}
 
-	amis.WriteJsonOKMsg(c, "已保存插件为已安装，需重启后生效")
+	amis.WriteJsonOKMsg(c, "已安装")
 }
 
 // EnablePlugin 启用指定名称的插件
@@ -292,7 +293,7 @@ func (m *Manager) EnablePlugin(c *response.Context) {
 		return
 	}
 
-	amis.WriteJsonOKMsg(c, "已保存插件为已启用，需重启后生效")
+	amis.WriteJsonOKMsg(c, "已启用")
 }
 
 // UninstallPlugin 卸载指定名称的插件（删除数据）
@@ -310,7 +311,7 @@ func (m *Manager) UninstallPlugin(c *response.Context) {
 		return
 	}
 
-	amis.WriteJsonOKMsg(c, "已保存插件为未安装（已发现），需重启后生效")
+	amis.WriteJsonOKMsg(c, "已卸载并删除数据")
 }
 
 // UninstallPluginKeepData 卸载指定名称的插件（保留数据）
@@ -328,7 +329,7 @@ func (m *Manager) UninstallPluginKeepData(c *response.Context) {
 		return
 	}
 
-	amis.WriteJsonOKMsg(c, "已保存插件为未安装（已发现），需重启后生效")
+	amis.WriteJsonOKMsg(c, "已卸载但保留数据")
 }
 
 // DisablePlugin 禁用指定名称的插件
@@ -346,7 +347,7 @@ func (m *Manager) DisablePlugin(c *response.Context) {
 		return
 	}
 
-	amis.WriteJsonOKMsg(c, "已保存插件为已禁用，需重启后生效")
+	amis.WriteJsonOKMsg(c, "已禁用")
 }
 
 // UpgradePlugin 升级指定名称的插件（当代码版本高于数据库记录版本时）
@@ -398,7 +399,7 @@ func (m *Manager) UpgradePlugin(c *response.Context) {
 		return
 	}
 
-	amis.WriteJsonOKMsg(c, "插件升级成功，已记录新版本，需重启后生效")
+	amis.WriteJsonOKMsg(c, "插件升级成功")
 }
 
 // CronItemVO 定时任务状态展示结构体
@@ -515,7 +516,7 @@ func (m *Manager) RunPluginCronOnce(c *response.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	klog.V(6).Infof("手动执行插件定时任务一次成功: %s，表达式: %s", name, spec)
+	klog.V(6).Infof("手动执行插件定时任务成功: %s，表达式: %s", name, spec)
 	amis.WriteJsonOK(c)
 }
 
@@ -568,27 +569,4 @@ func (m *Manager) SetPluginCronEnabled(c *response.Context) {
 	m.RemoveCron(name, spec)
 	klog.V(6).Infof("关闭插件定时任务成功: %s，表达式: %s", name, spec)
 	amis.WriteJsonOK(c)
-}
-
-// extractPluginName 从路由路径中提取插件名
-// 规则：寻找 "/plugins/" 段，返回其后第一个路径段作为插件名
-// 示例：
-// - /k8s/cluster/{cluster}/plugins/demo/items    -> demo
-// - /admin/plugins/demo/remove/items/{id}       -> demo
-// - /mgm/plugins/demo                          -> demo
-func extractPluginName(p string) (string, bool) {
-	idx := strings.Index(p, "/plugins/")
-	if idx < 0 {
-		return "", false
-	}
-	rest := p[idx+len("/plugins/"):]
-	if rest == "" {
-		return "", false
-	}
-	slash := strings.IndexByte(rest, '/')
-	if slash >= 0 {
-		return rest[:slash], true
-	}
-	klog.V(6).Infof("提取插件名: %s", rest)
-	return rest, true
 }

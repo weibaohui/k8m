@@ -13,7 +13,7 @@ import (
 type Controller struct{}
 
 // RegisterRoutes 注册 DaemonSet 相关路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 

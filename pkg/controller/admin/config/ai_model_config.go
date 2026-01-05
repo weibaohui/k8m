@@ -16,7 +16,7 @@ type AIController struct {
 }
 
 // RegisterAIModelConfigRoutes 注册路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterAIModelConfigRoutes(r chi.Router) {
 	ctrl := &AIController{}
 	r.Get("/ai/model/list", response.Adapter(ctrl.List))

@@ -24,7 +24,7 @@ import (
 type Controller struct{}
 
 // RegisterLoginRoutes 注册登录路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterLoginRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	r.Post("/login", response.Adapter(ctrl.LoginByPassword))
@@ -230,7 +230,7 @@ func getUserInfo(username string) (*models.User, error) {
 }
 
 // validateTwoFA 验证2FA
-// 从 gin.Context 切换到 response.Context
+
 func validateTwoFA(user *models.User, code string, c *response.Context) error {
 	if user != nil && user.TwoFAEnabled {
 		if code == "" {

@@ -20,7 +20,7 @@ type AdminUserController struct {
 
 // AdminUser 用于用户相关接口
 // 路由注册函数
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterAdminUserRoutes(r chi.Router) {
 	ctrl := AdminUserController{}
 	// user 平台管理员可操作，管理用户

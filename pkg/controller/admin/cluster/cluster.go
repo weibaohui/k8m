@@ -18,7 +18,7 @@ type Controller struct {
 }
 
 // RegisterAdminClusterRoutes 注册集群管理路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterAdminClusterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	r.Post("/cluster/scan", response.Adapter(ctrl.Scan))
@@ -33,7 +33,7 @@ func RegisterAdminClusterRoutes(r chi.Router) {
 }
 
 // RegisterUserClusterRoutes 注册用户集群路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterUserClusterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	// 前端用户点击重连接按钮
