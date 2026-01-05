@@ -126,9 +126,9 @@ func (m *Manager) Upgrade(name string, fromVersion string, toVersion string) err
 // 注意：该方法用于实际启停周期调用，非管理员API配置写入
 func (m *Manager) Enable(name string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	mod, ok := m.modules[name]
 	if !ok {
+		m.mu.Unlock()
 		return fmt.Errorf("插件未注册: %s", name)
 	}
 	// 依赖检查：启用前必须确保所有依赖插件均已启用
@@ -136,6 +136,7 @@ func (m *Manager) Enable(name string) error {
 		for _, dep := range mod.Dependencies {
 			if m.status[dep] != StatusEnabled {
 				klog.V(6).Infof("启用插件失败: %s，依赖未启用: %s", name, dep)
+				m.mu.Unlock()
 				return fmt.Errorf("依赖插件未启用: %s", dep)
 			}
 		}
@@ -144,6 +145,7 @@ func (m *Manager) Enable(name string) error {
 		ctx := enableContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}}
 		if err := mod.Lifecycle.Enable(ctx); err != nil {
 			klog.V(6).Infof("启用插件失败: %s，错误: %v", name, err)
+			m.mu.Unlock()
 			return err
 		}
 	}
