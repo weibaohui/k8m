@@ -17,7 +17,7 @@ func createAnalysisConfig(c *response.Context) *analysis.Analysis {
 	clusterID := ""
 	clusterIDBase64 := c.Param("cluster")
 	if clusterIDBase64 != "" {
-		if id, err := utils.DecodeBase64(clusterIDBase64); err == nil {
+		if id, err := utils.UrlSafeBase64Decode(clusterIDBase64); err == nil {
 			if id != "" {
 				clusterID = id
 			}
