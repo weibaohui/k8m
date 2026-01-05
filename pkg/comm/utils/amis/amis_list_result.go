@@ -1,7 +1,7 @@
 package amis
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 type ListResponse[T any] struct {
@@ -9,9 +9,9 @@ type ListResponse[T any] struct {
 	Rows  []T   `json:"rows"`
 }
 
-func WriteJsonList[T any](c *gin.Context, data []T) {
+func WriteJsonList[T any](c *response.Context, data []T) {
 	if len(data) > 0 {
-		c.JSON(200, gin.H{
+		c.JSON(200, response.H{
 			"status": 0,
 			"msg":    "success",
 			"data": ListResponse[T]{
@@ -20,7 +20,7 @@ func WriteJsonList[T any](c *gin.Context, data []T) {
 			},
 		})
 	} else {
-		c.JSON(200, gin.H{
+		c.JSON(200, response.H{
 			"status": 0,
 			"msg":    "无数据",
 			"data": ListResponse[T]{
@@ -31,9 +31,9 @@ func WriteJsonList[T any](c *gin.Context, data []T) {
 	}
 }
 
-func WriteJsonListWithTotal[T any](c *gin.Context, total int64, data []T) {
+func WriteJsonListWithTotal[T any](c *response.Context, total int64, data []T) {
 	if len(data) > 0 {
-		c.JSON(200, gin.H{
+		c.JSON(200, response.H{
 			"status": 0,
 			"msg":    "success",
 			"data": ListResponse[T]{
@@ -42,7 +42,7 @@ func WriteJsonListWithTotal[T any](c *gin.Context, total int64, data []T) {
 			},
 		})
 	} else {
-		c.JSON(200, gin.H{
+		c.JSON(200, response.H{
 			"status": 0,
 			"msg":    "无数据",
 			"data": ListResponse[T]{
@@ -54,10 +54,10 @@ func WriteJsonListWithTotal[T any](c *gin.Context, total int64, data []T) {
 
 }
 
-func WriteJsonListWithError[T any](c *gin.Context, data []T, err error) {
+func WriteJsonListWithError[T any](c *response.Context, data []T, err error) {
 	if err != nil {
 
-		c.JSON(200, gin.H{
+		c.JSON(200, response.H{
 			"status": 0,
 			"msg":    "无数据",
 			"data": ListResponse[T]{
@@ -69,10 +69,10 @@ func WriteJsonListWithError[T any](c *gin.Context, data []T, err error) {
 	}
 	WriteJsonList(c, data)
 }
-func WriteJsonListTotalWithError[T any](c *gin.Context, total int64, data []T, err error) {
+func WriteJsonListTotalWithError[T any](c *response.Context, total int64, data []T, err error) {
 	if err != nil {
 
-		c.JSON(200, gin.H{
+		c.JSON(200, response.H{
 			"status": 0,
 			"msg":    "无数据",
 			"data": ListResponse[T]{

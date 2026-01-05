@@ -8,11 +8,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	mcpService "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
@@ -42,9 +45,12 @@ func (c *chatService) getChatStreamBase(ctx context.Context, chat string, clearH
 		}
 	}
 
-	tools := McpService().GetAllEnabledTools()
-	klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
-	client.SetTools(tools)
+	if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCPRuntime) {
+		tools := mcpService.McpService().GetAllEnabledTools()
+		klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
+		client.SetTools(tools)
+	}
+
 	stream, err := client.GetStreamCompletionWithTools(ctx, chat)
 	if err != nil {
 		klog.V(6).Infof("ChatCompletion error: %v\n", err)
@@ -69,10 +75,11 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 		klog.V(6).Infof("获取AI服务错误 : %v\n", err)
 		return fmt.Errorf("获取AI服务错误 : %v", err)
 	}
-	tools := McpService().GetAllEnabledTools()
-	klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
-
-	client.SetTools(tools)
+	if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCPRuntime) {
+		tools := mcpService.McpService().GetAllEnabledTools()
+		klog.V(6).Infof("GPTShell 对话携带tools %d", len(tools))
+		client.SetTools(tools)
+	}
 
 	// currChatContent tracks chat content that needs to be sent
 	// to the LLM in each iteration of  the agentic loop below
@@ -112,39 +119,40 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 				continue
 			}
 
-			// 设置了工具
-			if len(response.Choices) > 0 {
-				for _, choice := range response.Choices {
-					// 大模型选择了执行工具
-					// 解析当前的ToolCalls
-					var currentCalls []openai.ToolCall
-					if err = json.Unmarshal([]byte(utils.ToJSON(choice.Delta.ToolCalls)), &currentCalls); err == nil {
-						toolCallBuffer = append(toolCallBuffer, currentCalls...)
-					}
-
-					// 当收到空的ToolCalls时，表示一个完整的ToolCall已经接收完成
-					if len(choice.Delta.ToolCalls) == 0 && len(toolCallBuffer) > 0 {
-						// 合并并处理完整的ToolCall
-						mergedCalls := MergeToolCalls(toolCallBuffer)
-
-						klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
-
-						// 使用合并后的ToolCalls执行操作
-
-						results := McpService().Host().ExecTools(ctx, mergedCalls)
-						for _, r := range results {
-							currChatContent = append(currChatContent, gin.H{
-								"type": "执行结果",
-								"raw":  r,
-							})
-							_, _ = writer.Write([]byte(utils.ToJSON(r)))
+			if plugins.ManagerInstance().IsEnabled(modules.PluginNameMCPRuntime) {
+				// 设置了工具
+				if len(response.Choices) > 0 {
+					for _, choice := range response.Choices {
+						// 大模型选择了执行工具
+						// 解析当前的ToolCalls
+						var currentCalls []openai.ToolCall
+						if err = json.Unmarshal([]byte(utils.ToJSON(choice.Delta.ToolCalls)), &currentCalls); err == nil {
+							toolCallBuffer = append(toolCallBuffer, currentCalls...)
 						}
 
-						// 清空缓冲区
-						toolCallBuffer = nil
+						// 当收到空的ToolCalls时，表示一个完整的ToolCall已经接收完成
+						if len(choice.Delta.ToolCalls) == 0 && len(toolCallBuffer) > 0 {
+							// 合并并处理完整的ToolCall
+							mergedCalls := MergeToolCalls(toolCallBuffer)
+
+							klog.V(6).Infof("合并最终ToolCalls: %v", utils.ToJSON(mergedCalls))
+
+							// 使用合并后的ToolCalls执行操作
+
+							results := mcpService.McpService().Host().ExecTools(ctx, mergedCalls)
+							for _, r := range results {
+								currChatContent = append(currChatContent, map[string]any{
+									"type": "执行结果",
+									"raw":  r,
+								})
+								_, _ = writer.Write([]byte(utils.ToJSON(r)))
+							}
+
+							// 清空缓冲区
+							toolCallBuffer = nil
+						}
 					}
 				}
-
 			}
 
 			// 发送数据给客户端
@@ -174,7 +182,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 	}
 	return nil
 }
-func (c *chatService) Chat(ctx *gin.Context, chat string) string {
+func (c *chatService) Chat(ctx *response.Context, chat string) string {
 	ctxInst := amis.GetContextWithUser(ctx)
 	result, err := c.ChatWithCtx(ctxInst, chat)
 	if err != nil {

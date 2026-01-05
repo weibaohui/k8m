@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	utils2 "github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"github.com/weibaohui/kom/utils"
@@ -21,21 +22,21 @@ import (
 
 type ActionController struct{}
 
-func RegisterActionRoutes(api *gin.RouterGroup) {
+func RegisterActionRoutes(r chi.Router) {
 	ctrl := &ActionController{}
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name", ctrl.Fetch)                         // CRD
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/json", ctrl.FetchJson)                // CRD
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/event", ctrl.Event)                   // CRD
-	api.GET("/:kind/group/:group/version/:version/ns/:ns/name/:name/hpa", ctrl.HPA)                       // CRD
-	api.POST("/:kind/group/:group/version/:version/ns/:ns/name/:name/scale/replica/:replica", ctrl.Scale) // CRD
-	api.POST("/:kind/group/:group/version/:version/remove/ns/:ns/name/:name", ctrl.Remove)                // CRD
-	api.POST("/:kind/group/:group/version/:version/batch/remove", ctrl.BatchRemove)                       // CRD
-	api.POST("/:kind/group/:group/version/:version/force_remove", ctrl.BatchForceRemove)                  // CRD
-	api.POST("/:kind/group/:group/version/:version/update/ns/:ns/name/:name", ctrl.Save)                  // CRD       // CRD
-	api.POST("/:kind/group/:group/version/:version/describe/ns/:ns/name/:name", ctrl.Describe)            // CRD
-	api.POST("/:kind/group/:group/version/:version/list/ns/:ns", ctrl.List)                               // CRD
-	api.POST("/:kind/group/:group/version/:version/list/ns/", ctrl.List)                                  // CRD
-	api.POST("/:kind/group/:group/version/:version/list", ctrl.List)
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}", response.Adapter(ctrl.Fetch))                          // CRD
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/json", response.Adapter(ctrl.FetchJson))                 // CRD
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/event", response.Adapter(ctrl.Event))                    // CRD
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/hpa", response.Adapter(ctrl.HPA))                        // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/scale/replica/{replica}", response.Adapter(ctrl.Scale)) // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/remove/ns/{ns}/name/{name}", response.Adapter(ctrl.Remove))                 // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/batch/remove", response.Adapter(ctrl.BatchRemove))                          // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/force_remove", response.Adapter(ctrl.BatchForceRemove))                     // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/update/ns/{ns}/name/{name}", response.Adapter(ctrl.Save))                   // CRD       // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/describe/ns/{ns}/name/{name}", response.Adapter(ctrl.Describe))             // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/list/ns/{ns}", response.Adapter(ctrl.List))                                 // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/list/ns/", response.Adapter(ctrl.List))                                     // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/list", response.Adapter(ctrl.List))
 
 }
 
@@ -48,7 +49,7 @@ func RegisterActionRoutes(api *gin.RouterGroup) {
 // @Param ns path string true "命名空间"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list/ns/{ns} [post]
-func (ac *ActionController) List(c *gin.Context) {
+func (ac *ActionController) List(c *response.Context) {
 	ns := c.Param("ns")
 	group := c.Param("group")
 	kind := c.Param("kind")
@@ -212,7 +213,7 @@ func (ac *ActionController) fillList(selectedCluster string, kind string, list [
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/event [get]
-func (ac *ActionController) Event(c *gin.Context) {
+func (ac *ActionController) Event(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -256,7 +257,7 @@ func (ac *ActionController) Event(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name} [get]
-func (ac *ActionController) Fetch(c *gin.Context) {
+func (ac *ActionController) Fetch(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -282,7 +283,7 @@ func (ac *ActionController) Fetch(c *gin.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"yaml": yamlStr,
 	})
 }
@@ -297,7 +298,7 @@ func (ac *ActionController) Fetch(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/json [get]
-func (ac *ActionController) FetchJson(c *gin.Context) {
+func (ac *ActionController) FetchJson(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -331,7 +332,7 @@ func (ac *ActionController) FetchJson(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/remove/ns/{ns}/name/{name} [post]
-func (ac *ActionController) Remove(c *gin.Context) {
+func (ac *ActionController) Remove(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -374,7 +375,7 @@ type NamesPayload struct {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/batch/remove [post]
-func (ac *ActionController) BatchRemove(c *gin.Context) {
+func (ac *ActionController) BatchRemove(c *response.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
@@ -421,7 +422,7 @@ func (ac *ActionController) BatchRemove(c *gin.Context) {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/force_remove [post]
-func (ac *ActionController) BatchForceRemove(c *gin.Context) {
+func (ac *ActionController) BatchForceRemove(c *response.Context) {
 	kind := c.Param("kind")
 	group := c.Param("group")
 	version := c.Param("version")
@@ -469,7 +470,7 @@ func (ac *ActionController) BatchForceRemove(c *gin.Context) {
 // @Param yaml body string true "资源YAML内容"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update/ns/{ns}/name/{name} [post]
-func (ac *ActionController) Save(c *gin.Context) {
+func (ac *ActionController) Save(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -519,7 +520,7 @@ func (ac *ActionController) Save(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/describe/ns/{ns}/name/{name} [post]
-func (ac *ActionController) Describe(c *gin.Context) {
+func (ac *ActionController) Describe(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")
@@ -553,7 +554,7 @@ func (ac *ActionController) Describe(c *gin.Context) {
 // @Param replica path string true "副本数"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/scale/replica/{replica} [post]
-func (ac *ActionController) Scale(c *gin.Context) {
+func (ac *ActionController) Scale(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	replica := c.Param("replica")
@@ -585,7 +586,7 @@ func (ac *ActionController) Scale(c *gin.Context) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/hpa [get]
-func (ac *ActionController) HPA(c *gin.Context) {
+func (ac *ActionController) HPA(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	kind := c.Param("kind")

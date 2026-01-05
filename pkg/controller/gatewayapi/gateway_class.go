@@ -2,17 +2,18 @@ package gatewayapi
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.GET("/gateway_class/option_list", ctrl.GatewayClassOptionList)
+	r.Get("/gateway_class/option_list", response.Adapter(ctrl.GatewayClassOptionList))
 
 }
 
@@ -21,7 +22,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param cluster path string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/gateway_class/option_list [get]
-func (cc *Controller) GatewayClassOptionList(c *gin.Context) {
+func (cc *Controller) GatewayClassOptionList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -34,7 +35,7 @@ func (cc *Controller) GatewayClassOptionList(c *gin.Context) {
 		CRD("gateway.networking.k8s.io", "v1", "GatewayClass").
 		Resource(&gatewayapiv1.GatewayClass{}).List(&list).Error
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -49,7 +50,7 @@ func (cc *Controller) GatewayClassOptionList(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }

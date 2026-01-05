@@ -33,7 +33,7 @@ const InspectionEventListComponent: React.FC<InspectionEventListComponentProps> 
         setLoading(true);
         setError(null);
         fetcher({
-            url: `/admin/inspection/schedule/record/id/${record_id}/event/list`,
+            url: `/admin/plugins/inspection/schedule/record/id/${record_id}/event/list`,
             method: 'get',
         })
             .then((res: any) => {

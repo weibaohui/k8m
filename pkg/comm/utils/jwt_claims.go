@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 // GetJWTClaims 从 Gin 上下文的请求头或查询参数中提取并解析 JWT，返回其 claims。
 // 若未提供 Token、Token 无效或 claims 解析失败，则返回相应错误。
-func GetJWTClaims(c *gin.Context, jwtTokenSecret string) (jwt.MapClaims, error) {
+func GetJWTClaims(c *response.Context, jwtTokenSecret string) (jwt.MapClaims, error) {
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
 		// 尝试从query中获取

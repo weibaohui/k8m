@@ -1,29 +1,24 @@
 package main
 
 import (
-	"context"
 	"embed"
 	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/fatih/color"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-contrib/pprof"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/go-chi/chi/v5"
+	chim "github.com/go-chi/chi/v5/middleware"
+	cmiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	_ "github.com/swaggo/http-swagger" // 导入 swagger 文档
+	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
-	"github.com/weibaohui/k8m/pkg/controller/admin/event"
-	"github.com/weibaohui/k8m/pkg/controller/admin/inspection"
-	"github.com/weibaohui/k8m/pkg/controller/admin/mcp"
 	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
 	"github.com/weibaohui/k8m/pkg/controller/chat"
@@ -35,7 +30,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/gatewayapi"
-	"github.com/weibaohui/k8m/pkg/controller/helm"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/k8sgpt"
 	"github.com/weibaohui/k8m/pkg/controller/log"
@@ -50,19 +44,15 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/sts"
 	"github.com/weibaohui/k8m/pkg/controller/svc"
 	"github.com/weibaohui/k8m/pkg/controller/template"
-	"github.com/weibaohui/k8m/pkg/controller/user/apikey"
-	"github.com/weibaohui/k8m/pkg/controller/user/mcpkey"
 	"github.com/weibaohui/k8m/pkg/controller/user/profile"
-	"github.com/weibaohui/k8m/pkg/eventhandler"
 	"github.com/weibaohui/k8m/pkg/flag"
-	helm2 "github.com/weibaohui/k8m/pkg/helm"
-	"github.com/weibaohui/k8m/pkg/leader"
-	"github.com/weibaohui/k8m/pkg/lease"
-	"github.com/weibaohui/k8m/pkg/lua"
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
-	_ "github.com/weibaohui/k8m/swagger"
 	"github.com/weibaohui/kom/callbacks"
 	"k8s.io/klog/v2"
 )
@@ -97,9 +87,6 @@ func Init() {
 	// 打印版本和 Git commit 信息
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
-	if !cfg.Debug {
-		gin.SetMode(gin.ReleaseMode)
-	}
 
 	// 初始化ChatService
 	service.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
@@ -140,32 +127,8 @@ func Init() {
 
 	}()
 
-	// 启动watch和定时任务（仅在成为Leader时执行）
+	// 启动watch和定时任务
 	go func() {
-		service.McpService().Init()
-		// 初始化 Lease 同步（监听器与后续 Leader 清理）
-		cfg := flag.Init()
-		leaseOpts := lease.Options{
-			Namespace:                 cfg.LeaseNamespace,
-			LeaseDurationSeconds:      cfg.LeaseDurationSeconds,
-			LeaseRenewIntervalSeconds: cfg.LeaseRenewIntervalSeconds,
-			ResyncPeriod:              30 * time.Second,
-			ClusterID:                 cfg.HostClusterID,
-		}
-		leaseCtx := context.Background()
-		if err = service.LeaseManager().Init(leaseCtx, leaseOpts); err == nil {
-			err = service.LeaseManager().StartWatcher(leaseCtx, service.ClusterService().Connect, service.ClusterService().Disconnect)
-			if err != nil {
-				klog.Errorf("启动 Lease 管理器监听器失败: %v", err)
-			}
-			// 启动 Lease 过期清理（Leader）
-			err = service.LeaseManager().StartLeaderCleanup(leaseCtx)
-			if err != nil {
-				klog.Errorf("启动 Lease 管理器过期清理失败: %v", err)
-			}
-		} else {
-			klog.Errorf("初始化 Lease 管理器失败: %v", err)
-		}
 
 		service.ClusterService().DelayStartFunc(func() {
 			service.PodService().Watch()
@@ -173,89 +136,47 @@ func Init() {
 			service.PVCService().Watch()
 			service.PVService().Watch()
 			service.IngressService().Watch()
-			service.McpService().Start()
-
-			// 启动Leader选举，成功后再启动定时任务
-			leaderCfg := leader.Config{
-				LockName:      "k8m-leader-lock",
-				LeaseDuration: 60 * time.Second, // 增加到60秒
-				RenewDeadline: 50 * time.Second, // 增加到50秒
-				RetryPeriod:   10 * time.Second, // 增加到10秒
-				OnStartedLeading: func(ctx context.Context) {
-					klog.V(2).Infof("[leader] 成为Leader，启动定时任务（集群巡检、Helm仓库更新）")
-					lua.InitClusterInspection()
-					// 启动helm 更新repo定时任务
-					helm2.StartUpdateHelmRepoInBackground()
-					// leader 启动对event的webhook处理
-					eventhandler.StartEventForwardingWatch()
-				},
-				OnStoppedLeading: func() {
-					klog.V(2).Infof("[leader] 不再是Leader，停止定时任务（集群巡检、Helm仓库更新）")
-					// 停止集群巡检任务
-					lua.StopClusterInspection()
-					// 停止helm更新任务
-					helm2.StopUpdateHelmRepoInBackground()
-					// leader 启动对event的webhook处理
-					eventhandler.StopEventForwardingWatch()
-				},
-			}
-
-			// 使用后台context
-			ctx := context.Background()
-			if err := leader.Run(ctx, leaderCfg); err != nil {
-				klog.Errorf("[leader] Leader选举失败: %v", err)
-			}
 		})
 	}()
 
 }
 
-// main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与资源监控，配置 Gin 路由和中间件，挂载前端静态资源，并提供认证、集群与资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。
-func main() {
-	Init()
-
-	r := gin.Default()
-
+// main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与资源监控，配置 Chi 路由和中间件，挂载前端静态资源，并提供认证、集群与资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。
+func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	cfg := flag.Init()
 
-	// 开启Recovery中间件
 	if !cfg.Debug {
-		r.Use(middleware.CustomRecovery())
+		r.Use(chim.Recoverer)
 	}
 
-	if cfg.Debug {
-		// Debug 模式 注册 pprof 路由
-		pprof.Register(r)
-	}
-	r.Use(cors.Default())
-	r.Use(gzip.Gzip(gzip.BestCompression))
-	r.Use(middleware.SetCacheHeaders())
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+	r.Use(chim.Compress(8, "text/html", "text/css"))
 	r.Use(middleware.AuthMiddleware())
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
+	r.Use(chim.Heartbeat("/ping"))
 
-	r.MaxMultipartMemory = 100 << 20 // 100 MiB
-
-	// 挂载子目录
 	pagesFS, _ := fs.Sub(embeddedFiles, "ui/dist/pages")
-	r.StaticFS("/public/pages", http.FS(pagesFS))
+	r.Handle("/public/pages/*", http.StripPrefix("/public/pages", http.FileServer(http.FS(pagesFS))))
 	assetsFS, _ := fs.Sub(embeddedFiles, "ui/dist/assets")
-	r.StaticFS("/assets", http.FS(assetsFS))
+	r.Handle("/assets/*", http.StripPrefix("/assets", http.FileServer(http.FS(assetsFS))))
 	monacoFS, _ := fs.Sub(embeddedFiles, "ui/dist/monacoeditorwork")
-	r.StaticFS("/monacoeditorwork", http.FS(monacoFS))
+	r.Handle("/monacoeditorwork/*", http.StripPrefix("/monacoeditorwork", http.FileServer(http.FS(monacoFS))))
 
-	r.GET("/favicon.ico", func(c *gin.Context) {
+	if cfg.Debug {
+		r.Mount("/debug", cmiddleware.Profiler())
+	}
+
+	r.Get("/favicon.ico", response.Adapter(func(c *response.Context) {
 		favicon, _ := embeddedFiles.ReadFile("ui/dist/favicon.ico")
 		c.Data(http.StatusOK, "image/x-icon", favicon)
-	})
-
-	// MCP Server
-	sseServer := GetMcpSSEServer("/mcp/k8m/")
-	r.GET("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/message", adapt(sseServer.MessageHandler))
-	r.GET("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/sse", adapt(sseServer.SSEHandler))
-	r.POST("/mcp/k8m/:key/message", adapt(sseServer.MessageHandler))
+	}))
 
 	// @title           k8m API
 	// @version         1.0
@@ -263,191 +184,142 @@ func main() {
 	// @in header
 	// @name Authorization
 	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
-	r.GET("/swagger/*any", func(c *gin.Context) {
-		if cfg.EnableSwagger {
-			ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
+	r.Get("/swagger/*", func(w http.ResponseWriter, r *http.Request) {
+		if mgr.IsEnabled(modules.PluginNameSwagger) {
+			httpSwagger.Handler().ServeHTTP(w, r)
 		} else {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error":   "Swagger documentation is disabled",
-				"message": "Swagger文档已被禁用，请联系管理员启用",
-			})
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(`{"error":"Swagger documentation is disabled","message":"Swagger文档已被禁用，请联系管理员启用"}`))
 		}
 	})
 
-	// 直接返回 index.html
-	r.GET("/", func(c *gin.Context) {
-		index, err := embeddedFiles.ReadFile("ui/dist/index.html") // 这里路径必须匹配
+	r.Get("/", response.Adapter(func(c *response.Context) {
+		index, err := embeddedFiles.ReadFile("ui/dist/index.html")
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Internal Server Error")
 			return
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", index)
-	})
+	}))
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	r.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+	r.Get("/healthz", response.Adapter(func(c *response.Context) {
+		c.JSON(http.StatusOK, response.H{"status": "ok"})
+	}))
 
-	auth := r.Group("/auth")
-	{
+	r.Route("/auth", func(auth chi.Router) {
 		login.RegisterLoginRoutes(auth)
 		sso.RegisterAuthRoutes(auth)
-	}
+	})
 
-	// 公共参数
-	params := r.Group("/params", middleware.AuthMiddleware())
-	{
+	r.Route("/", func(root chi.Router) {
+		mgr.RegisterRootRoutes(root)
+	})
+
+	r.Route("/params", func(params chi.Router) {
 		param.RegisterParamRoutes(params)
-	}
-	ai := r.Group("/ai", middleware.AuthMiddleware())
-	{
+		mgr.RegisterParamRoutes(params)
+	})
+	r.Route("/ai", func(ai chi.Router) {
 		chat.RegisterChatRoutes(ai)
-	}
-	api := r.Group("/k8s/cluster/:cluster", middleware.AuthMiddleware())
-	{
+	})
 
-		// cluster
+	r.Get("/health/ready", response.Adapter(func(c *response.Context) {
+		if !mgr.IsEnabled(modules.PluginNameLeader) {
+			c.Status(http.StatusOK)
+			return
+		}
+		if service.LeaderService().IsCurrentLeader() {
+			c.Status(http.StatusOK)
+		} else {
+			c.Status(http.StatusServiceUnavailable)
+		}
+	}))
+
+	r.Route("/k8s/cluster/{cluster}", func(api chi.Router) {
 		cluster_status.RegisterClusterRoutes(api)
-		// CRD status
 		dynamic.RegisterCRDRoutes(api)
-
-		// CRD action
 		dynamic.RegisterActionRoutes(api)
-
 		dynamic.RegisterMetadataRoutes(api)
-		// Container 信息
 		dynamic.RegisterContainerRoutes(api)
-		// 节点亲和性
 		dynamic.RegisterNodeAffinityRoutes(api)
-		// Pod亲和性
 		dynamic.RegisterPodAffinityRoutes(api)
-		// Pod反亲和性
 		dynamic.RegisterPodAntiAffinityRoutes(api)
-		// 容忍度
 		dynamic.RegisterTolerationRoutes(api)
-
-		// Pod关联资源
 		dynamic.RegisterPodLinkRoutes(api)
-		// k8s pod
 		pod.RegisterLabelRoutes(api)
 		pod.RegisterLogRoutes(api)
 		pod.RegisterXtermRoutes(api)
-		// pod 文件浏览上传下载
 		pod.RegisterPodFileRoutes(api)
-		// Pod 资源使用情况
 		pod.RegisterResourceRoutes(api)
-		// Pod 端口转发
 		pod.RegisterPortRoutes(api)
-
-		// k8s deploy
 		deploy.RegisterActionRoutes(api)
-		// p8s svc
 		svc.RegisterActionRoutes(api)
-		// k8s node
 		node.RegisterActionRoutes(api)
-		// 资源情况
 		node.RegisterResourceRoutes(api)
-		// 节点污点
 		node.RegisterTaintRoutes(api)
-		// label等基础信息
 		node.RegisterMetadataRoutes(api)
 		node.RegisterShellRoutes(api)
-		// k8s ns
 		ns.RegisterRoutes(api)
-		// yaml
 		dynamic.RegisterYamlRoutes(api)
-
-		// k8s sts
 		sts.RegisterRoutes(api)
-		// k8s ds
 		ds.RegisterRoutes(api)
-
-		// k8s rs
 		rs.RegisterRoutes(api)
-		// k8s configmap
 		cm.RegisterRoutes(api)
-		// k8s cronjob
 		cronjob.RegisterRoutes(api)
-		// k8s storage_class
 		storageclass.RegisterRoutes(api)
-		// k8s ingress_class
 		ingressclass.RegisterRoutes(api)
-		// k8s gateway_class
 		gatewayapi.RegisterRoutes(api)
-		// doc
 		doc.RegisterRoutes(api)
 		k8sgpt.RegisterRoutes(api)
-		// helm release
-		helm.RegisterHelmReleaseRoutes(api)
+		mgr.RegisterClusterRoutes(api)
+	})
 
-	}
-
-	mgm := r.Group("/mgm", middleware.AuthMiddleware())
-	{
+	r.Route("/mgm", func(mgm chi.Router) {
 		template.RegisterTemplateRoutes(mgm)
-		// user profile 用户自助操作
 		profile.RegisterProfileRoutes(mgm)
-		// API密钥管理
-		apikey.RegisterAPIKeysRoutes(mgm)
-		// MCP密钥管理
-		mcpkey.RegisterMCPKeysRoutes(mgm)
-		// log
 		log.RegisterLogRoutes(mgm)
-		// 集群连接
 		cluster.RegisterUserClusterRoutes(mgm)
-		// helm chart
-		helm.RegisterHelmChartRoutes(mgm)
-	}
+		mgr.RegisterManagementRoutes(mgm)
+	})
 
-	admin := r.Group("/admin", middleware.PlatformAuthMiddleware())
-	{
-		// condition
+	r.Route("/admin", func(admin chi.Router) {
+		admin.Use(middleware.PlatformAuthMiddleware())
 		config.RegisterConditionRoutes(admin)
-		// sso
 		config.RegisterSSOConfigRoutes(admin)
-		// ldap
 		config.RegisterLdapConfigRoutes(admin)
-		// 平台参数配置
 		config.RegisterConfigRoutes(admin)
-		// 大模型列表管理
 		config.RegisterAIModelConfigRoutes(admin)
-		// AI提示词管理
 		ai_prompt.RegisterAdminAIPromptRoutes(admin)
-		// 集群巡检定时任务
-		inspection.RegisterAdminScheduleRoutes(admin)
-		// K8s事件转发配置
-		event.RegisterAdminEventRoutes(admin)
-		// 集群巡检记录
-		inspection.RegisterAdminRecordRoutes(admin)
-		// 集群巡检脚本lua脚本管理
-		inspection.RegisterAdminLuaScriptRoutes(admin)
-		// 集群巡检webhook管理
-		inspection.RegisterAdminWebhookRoutes(admin)
-		// MCP配置
-		mcp.RegisterMCPServerRoutes(admin)
-		mcp.RegisterMCPToolRoutes(admin)
-		// 集群授权相关
 		user.RegisterClusterPermissionRoutes(admin)
-		// 用户管理相关
 		user.RegisterAdminUserRoutes(admin)
-		// 用户组管理相关
 		user.RegisterAdminUserGroupRoutes(admin)
-		// 管理集群、纳管\解除纳管\扫描
 		cluster.RegisterAdminClusterRoutes(admin)
-		// helm Repo 操作
-		helm.RegisterHelmRepoRoutes(admin)
-
-		// 菜单自定义
 		menu.RegisterAdminMenuRoutes(admin)
-	}
+		mgr.RegisterAdminRoutes(admin)
+		mgr.RegisterPluginAdminRoutes(admin)
+	})
 
+	return r
+}
+
+func main() {
+	Init()
+
+	mgr := plugins.ManagerInstance()
+	mgr.SetRouterBuilder(func(r chi.Router) http.Handler {
+		return buildRouter(mgr, r)
+	})
+	mgr.SetEngine(chi.NewRouter())
+	mgr.Start()
+
+	initialRouter := chi.NewRouter()
+	ah := plugins.NewAtomicHandler(buildRouter(mgr, initialRouter))
+	mgr.SetAtomicHandler(ah)
+
+	cfg := flag.Init()
 	showBootInfo(Version, cfg.Port)
-	err := r.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), ah)
 	if err != nil {
 		klog.Fatalf("Error %v", err)
 	}

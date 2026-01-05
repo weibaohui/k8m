@@ -1,8 +1,9 @@
 package cronjob
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/batch/v1"
 	"k8s.io/klog/v2"
@@ -10,12 +11,12 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.POST("/cronjob/pause/ns/:ns/name/:name", ctrl.Pause)
-	api.POST("/cronjob/resume/ns/:ns/name/:name", ctrl.Resume)
-	api.POST("/cronjob/batch/resume", ctrl.BatchResume)
-	api.POST("/cronjob/batch/pause", ctrl.BatchPause)
+	r.Post("/cronjob/pause/ns/{ns}/name/{name}", response.Adapter(ctrl.Pause))
+	r.Post("/cronjob/resume/ns/{ns}/name/{name}", response.Adapter(ctrl.Resume))
+	r.Post("/cronjob/batch/resume", response.Adapter(ctrl.BatchResume))
+	r.Post("/cronjob/batch/pause", response.Adapter(ctrl.BatchPause))
 }
 
 // @Summary 暂停 CronJob
@@ -25,7 +26,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param name path string true "CronJob 名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/cronjob/pause/ns/{ns}/name/{name} [post]
-func (cc *Controller) Pause(c *gin.Context) {
+func (cc *Controller) Pause(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -47,7 +48,7 @@ func (cc *Controller) Pause(c *gin.Context) {
 // @Param name path string true "CronJob 名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/cronjob/resume/ns/{ns}/name/{name} [post]
-func (cc *Controller) Resume(c *gin.Context) {
+func (cc *Controller) Resume(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -68,7 +69,7 @@ func (cc *Controller) Resume(c *gin.Context) {
 // @Param request body object true "批量恢复请求体，包含 name_list 和 ns_list"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/cronjob/batch/resume [post]
-func (cc *Controller) BatchResume(c *gin.Context) {
+func (cc *Controller) BatchResume(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -110,7 +111,7 @@ func (cc *Controller) BatchResume(c *gin.Context) {
 // @Param request body object true "批量暂停请求体，包含 name_list 和 ns_list"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/cronjob/batch/pause [post]
-func (cc *Controller) BatchPause(c *gin.Context) {
+func (cc *Controller) BatchPause(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {

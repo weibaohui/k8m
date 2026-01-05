@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/response"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -22,7 +22,7 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /auth/sso/config [get]
-func (au *AuthController) GetSSOConfig(c *gin.Context) {
+func (au *AuthController) GetSSOConfig(c *response.Context) {
 	// 获取所有的SSO配置
 	var ssoConfigs []models.SSOConfig
 	err := dao.DB().Select([]string{"name", "type"}).Where("enabled = ? ", true).Find(&ssoConfigs).Error
@@ -43,7 +43,7 @@ func (au *AuthController) GetSSOConfig(c *gin.Context) {
 // @Param name path string true "SSO名称"
 // @Success 302 {string} string
 // @Router /auth/oidc/{name}/sso [get]
-func (au *AuthController) GetAuthCodeURL(c *gin.Context) {
+func (au *AuthController) GetAuthCodeURL(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("use sso name: %s", name)
 	// 从配置文件中读取默认的OIDC客户端配置
@@ -65,7 +65,7 @@ func (au *AuthController) GetAuthCodeURL(c *gin.Context) {
 // @Param code query string true "认证代码"
 // @Success 200 {string} string
 // @Router /auth/oidc/{name}/callback [get]
-func (au *AuthController) HandleCallback(c *gin.Context) {
+func (au *AuthController) HandleCallback(c *response.Context) {
 	name := c.Param("name")
 	ctx := c.Request.Context()
 	client, err := getDefaultOIDCClient(c, name)
@@ -76,25 +76,25 @@ func (au *AuthController) HandleCallback(c *gin.Context) {
 	code := c.Query("code")
 	oauth2Token, err := client.OAuth2Config.Exchange(ctx, code)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Token exchange error: %v", err)
+		amis.WriteJsonError(c, err)
 		return
 	}
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
-		c.String(http.StatusInternalServerError, "No id_token in token response")
+		amis.WriteJsonError(c, fmt.Errorf("No id_token in token response"))
 		return
 	}
 
 	idToken, err := client.Verifier.Verify(ctx, rawIDToken)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Token verify error: %v", err)
+		amis.WriteJsonError(c, err)
 		return
 	}
 
 	var claims map[string]any
 	if err = idToken.Claims(&claims); err != nil {
-		c.String(http.StatusInternalServerError, "Parse claims error: %v", err)
+		amis.WriteJsonError(c, err)
 		return
 	}
 
@@ -130,7 +130,7 @@ func (au *AuthController) HandleCallback(c *gin.Context) {
 }
 
 // 获取默认OIDC客户端配置
-func getDefaultOIDCClient(c *gin.Context, name string) (*Client, error) {
+func getDefaultOIDCClient(c *response.Context, name string) (*Client, error) {
 	// 通过name 获取配置
 	var dbConfig *models.SSOConfig
 	err := dao.DB().Where("name = ?", name).First(&dbConfig).Error
@@ -185,9 +185,9 @@ func GetUserGroups(claims map[string]any) string {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /auth/ldap/config [get]
-func (au *AuthController) GetLdapEnabled(c *gin.Context) {
+func (au *AuthController) GetLdapEnabled(c *response.Context) {
 	cfg := flag.Init()
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"enabled": cfg.LdapEnabled,
 	})
 }

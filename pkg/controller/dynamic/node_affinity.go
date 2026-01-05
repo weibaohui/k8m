@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -16,12 +17,14 @@ import (
 
 type NodeAffinityController struct{}
 
-func RegisterNodeAffinityRoutes(api *gin.RouterGroup) {
+// RegisterNodeAffinityRoutes 注册路由
+
+func RegisterNodeAffinityRoutes(api chi.Router) {
 	ctrl := &NodeAffinityController{}
-	api.POST("/:kind/group/:group/version/:version/update_node_affinity/ns/:ns/name/:name", ctrl.UpdateNodeAffinity)
-	api.POST("/:kind/group/:group/version/:version/delete_node_affinity/ns/:ns/name/:name", ctrl.DeleteNodeAffinity)
-	api.POST("/:kind/group/:group/version/:version/add_node_affinity/ns/:ns/name/:name", ctrl.AddNodeAffinity)
-	api.GET("/:kind/group/:group/version/:version/list_node_affinity/ns/:ns/name/:name", ctrl.ListNodeAffinity)
+	api.Post("/{kind}/group/{group}/version/{version}/update_node_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdateNodeAffinity))
+	api.Post("/{kind}/group/{group}/version/{version}/delete_node_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.DeleteNodeAffinity))
+	api.Post("/{kind}/group/{group}/version/{version}/add_node_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.AddNodeAffinity))
+	api.Get("/{kind}/group/{group}/version/{version}/list_node_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.ListNodeAffinity))
 
 }
 
@@ -39,9 +42,9 @@ type nodeAffinity struct {
 // @Param version path string true "资源版本"
 // @Param ns path string true "命名空间"
 // @Param name path string true "资源名称"
-// @Success 200 {array} any
+// @Success 200 {array} interface{}
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_node_affinity/ns/{ns}/name/{name} [get]
-func (ac *NodeAffinityController) ListNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) ListNodeAffinity(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -131,7 +134,7 @@ func (ac *NodeAffinityController) ListNodeAffinity(c *gin.Context) {
 // @Param nodeAffinity body nodeAffinity true "节点亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_node_affinity/ns/{ns}/name/{name} [post]
-func (ac *NodeAffinityController) AddNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) AddNodeAffinity(c *response.Context) {
 	processNodeAffinity(c, "add")
 }
 
@@ -146,7 +149,7 @@ func (ac *NodeAffinityController) AddNodeAffinity(c *gin.Context) {
 // @Param nodeAffinity body nodeAffinity true "节点亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_node_affinity/ns/{ns}/name/{name} [post]
-func (ac *NodeAffinityController) UpdateNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) UpdateNodeAffinity(c *response.Context) {
 	processNodeAffinity(c, "modify")
 }
 
@@ -161,10 +164,10 @@ func (ac *NodeAffinityController) UpdateNodeAffinity(c *gin.Context) {
 // @Param nodeAffinity body nodeAffinity true "节点亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_node_affinity/ns/{ns}/name/{name} [post]
-func (ac *NodeAffinityController) DeleteNodeAffinity(c *gin.Context) {
+func (ac *NodeAffinityController) DeleteNodeAffinity(c *response.Context) {
 	processNodeAffinity(c, "delete")
 }
-func processNodeAffinity(c *gin.Context, action string) {
+func processNodeAffinity(c *response.Context, action string) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
-func DownloadLog(c *gin.Context, containerName string, stream io.ReadCloser) {
+func DownloadLog(c *response.Context, containerName string, stream io.ReadCloser) {
 	defer func() {
 		if err := stream.Close(); err != nil {
 			// 处理关闭流时的错误

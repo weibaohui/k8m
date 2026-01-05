@@ -7,7 +7,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/models"
+	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 	"k8s.io/klog/v2"
 )
 
@@ -49,7 +49,7 @@ func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
 				Role:    openai.ChatMessageRoleUser,
 				Content: item,
 			})
-		case models.MCPToolCallResult:
+		case mcpModels.MCPToolCallResult:
 			klog.V(2).Infof("Adding user message to history: %v", item)
 			history = append(history, openai.ChatCompletionMessage{
 				Role:    openai.ChatMessageRoleUser,
@@ -63,7 +63,7 @@ func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
 					Content: m,
 				})
 			}
-		case []models.MCPToolCallResult:
+		case []mcpModels.MCPToolCallResult:
 			klog.V(2).Infof("Adding MCPToolCallResult array to history: %v", item)
 			for _, m := range item {
 				history = append(history, openai.ChatCompletionMessage{

@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 )
@@ -18,13 +18,13 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /params/cluster/option_list [get]
-func (pc *Controller) ClusterOptionList(c *gin.Context) {
+func (pc *Controller) ClusterOptionList(c *response.Context) {
 	user := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
 
 	if len(clusters) == 0 {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -32,7 +32,7 @@ func (pc *Controller) ClusterOptionList(c *gin.Context) {
 	if !service.UserService().IsUserPlatformAdmin(user) {
 		userCluster, err := service.UserService().GetClusterNames(user)
 		if err != nil {
-			amis.WriteJsonData(c, gin.H{
+			amis.WriteJsonData(c, response.H{
 				"options": make([]map[string]string, 0),
 			})
 			return
@@ -56,7 +56,7 @@ func (pc *Controller) ClusterOptionList(c *gin.Context) {
 		})
 	}
 
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": options,
 	})
 }
@@ -66,14 +66,14 @@ func (pc *Controller) ClusterOptionList(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /params/cluster/all [get]
-func (pc *Controller) ClusterTableList(c *gin.Context) {
+func (pc *Controller) ClusterTableList(c *response.Context) {
 	user := amis.GetLoginUser(c)
 
 	clusters := service.ClusterService().AllClusters()
 	if !service.UserService().IsUserPlatformAdmin(user) {
 		userCluster, err := service.UserService().GetClusterNames(user)
 		if err != nil {
-			amis.WriteJsonData(c, gin.H{
+			amis.WriteJsonData(c, response.H{
 				"options": make([]map[string]string, 0),
 			})
 			return

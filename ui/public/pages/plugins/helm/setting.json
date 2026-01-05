@@ -1,0 +1,28 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "form",
+      "title": "Helm 配置",
+      "initApi": "get:/admin/plugins/helm/setting/get",
+      "api": "post:/admin/plugins/helm/setting/update",
+      "body": [
+       
+        {
+          "name": "helm_cache_path",
+          "type": "input-text",
+          "label": "Helm缓存路径",
+          "value": "",
+          "desc": "Helm本地缓存目录路径，留空则使用默认路径"
+        },
+        {
+          "name": "helm_update_cron",
+          "type": "input-text",
+          "label": "更新定时Cron",
+          "value": "",
+          "desc": "Helm仓库索引更新定时任务Cron表达式，例如：0 */6 * * * 表示每6小时更新一次"
+        }
+      ]
+    }
+  ]
+}

@@ -1,10 +1,10 @@
 package param
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/response"
 )
 
 // @Summary 翻转指标列表
@@ -12,7 +12,7 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} string
 // @Router /params/condition/reverse/list [get]
-func (pc *Controller) Conditions(c *gin.Context) {
+func (pc *Controller) Conditions(c *response.Context) {
 	var list []*models.ConditionReverse
 	err := dao.DB().Model(&models.ConditionReverse{}).
 		Select("name").

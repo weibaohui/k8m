@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -16,12 +17,12 @@ import (
 
 type PodAntiAffinityController struct{}
 
-func RegisterPodAntiAffinityRoutes(api *gin.RouterGroup) {
+func RegisterPodAntiAffinityRoutes(api chi.Router) {
 	ctrl := &PodAntiAffinityController{}
-	api.POST("/:kind/group/:group/version/:version/update_pod_anti_affinity/ns/:ns/name/:name", ctrl.UpdatePodAntiAffinity)
-	api.POST("/:kind/group/:group/version/:version/delete_pod_anti_affinity/ns/:ns/name/:name", ctrl.DeletePodAntiAffinity)
-	api.POST("/:kind/group/:group/version/:version/add_pod_anti_affinity/ns/:ns/name/:name", ctrl.AddPodAntiAffinity)
-	api.GET("/:kind/group/:group/version/:version/list_pod_anti_affinity/ns/:ns/name/:name", ctrl.ListPodAntiAffinity)
+	api.Post("/{kind}/group/{group}/version/{version}/update_pod_anti_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdatePodAntiAffinity))
+	api.Post("/{kind}/group/{group}/version/{version}/delete_pod_anti_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.DeletePodAntiAffinity))
+	api.Post("/{kind}/group/{group}/version/{version}/add_pod_anti_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.AddPodAntiAffinity))
+	api.Get("/{kind}/group/{group}/version/{version}/list_pod_anti_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.ListPodAntiAffinity))
 
 }
 
@@ -35,7 +36,7 @@ func RegisterPodAntiAffinityRoutes(api *gin.RouterGroup) {
 // @Param name path string true "资源名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/list_pod_anti_affinity/ns/{ns}/name/{name} [get]
-func (ac *PodAntiAffinityController) ListPodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) ListPodAntiAffinity(c *response.Context) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")
@@ -99,7 +100,7 @@ func (ac *PodAntiAffinityController) ListPodAntiAffinity(c *gin.Context) {
 // @Param body body podAffinity true "Pod反亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/add_pod_anti_affinity/ns/{ns}/name/{name} [post]
-func (ac *PodAntiAffinityController) AddPodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) AddPodAntiAffinity(c *response.Context) {
 	processPodAntiAffinity(c, "add")
 }
 
@@ -114,7 +115,7 @@ func (ac *PodAntiAffinityController) AddPodAntiAffinity(c *gin.Context) {
 // @Param body body podAffinity true "Pod反亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/update_pod_anti_affinity/ns/{ns}/name/{name} [post]
-func (ac *PodAntiAffinityController) UpdatePodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) UpdatePodAntiAffinity(c *response.Context) {
 	processPodAffinity(c, "modify")
 }
 
@@ -129,10 +130,10 @@ func (ac *PodAntiAffinityController) UpdatePodAntiAffinity(c *gin.Context) {
 // @Param body body podAffinity true "Pod反亲和性配置"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/{kind}/group/{group}/version/{version}/delete_pod_anti_affinity/ns/{ns}/name/{name} [post]
-func (ac *PodAntiAffinityController) DeletePodAntiAffinity(c *gin.Context) {
+func (ac *PodAntiAffinityController) DeletePodAntiAffinity(c *response.Context) {
 	processPodAntiAffinity(c, "delete")
 }
-func processPodAntiAffinity(c *gin.Context, action string) {
+func processPodAntiAffinity(c *response.Context, action string) {
 	name := c.Param("name")
 	ns := c.Param("ns")
 	group := c.Param("group")

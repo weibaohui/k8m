@@ -1,12 +1,9 @@
 package models
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/weibaohui/k8m/internal/dao"
-	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/flag"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -20,7 +17,6 @@ func init() {
 	klog.V(4).Info("数据库自动迁移完成")
 
 	_ = FixClusterName()
-	_ = AddInnerMCPServer()
 	_ = FixRoleName()
 	_ = InitConfigTable()
 	_ = InitConditionTable()
@@ -28,7 +24,6 @@ func init() {
 	_ = AddInnerAdminUserGroup()
 	_ = AddInnerAdminUser()
 	_ = MigrateAIModel()
-	_ = AddBuiltinLuaScripts()
 	_ = InitBuiltinAIPrompts()
 }
 func AutoMigrate() error {
@@ -54,44 +49,23 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&ShellLog{}); err != nil {
 		errs = append(errs, err)
 	}
-	if err := dao.DB().AutoMigrate(&HelmRepository{}); err != nil {
-		errs = append(errs, err)
-	}
+
 	// MYSQL 下需要单独处理 content字段为LONGTEXT，pg、sqlite不需要处理，这个字段删掉了，不用了
 	// if dao.DB().Migrator().HasTable(&HelmRepository{}) && dao.DB().Dialector.Name() == "mysql" {
 	// 	dao.DB().Exec("ALTER TABLE helm_repositories MODIFY COLUMN content LONGTEXT")
 	// }
 
-	if err := dao.DB().AutoMigrate(&HelmChart{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&HelmRelease{}); err != nil {
-		errs = append(errs, err)
-	}
 	if err := dao.DB().AutoMigrate(&UserGroup{}); err != nil {
 		errs = append(errs, err)
 	}
-	if err := dao.DB().AutoMigrate(&MCPServerConfig{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&MCPTool{}); err != nil {
-		errs = append(errs, err)
-	}
+
 	if err := dao.DB().AutoMigrate(&Config{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&ApiKey{}); err != nil {
 		errs = append(errs, err)
 	}
 	if err := dao.DB().AutoMigrate(&ConditionReverse{}); err != nil {
 		errs = append(errs, err)
 	}
-	if err := dao.DB().AutoMigrate(&MCPToolLog{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&McpKey{}); err != nil {
-		errs = append(errs, err)
-	}
+
 	if err := dao.DB().AutoMigrate(&SSOConfig{}); err != nil {
 		errs = append(errs, err)
 	}
@@ -101,30 +75,7 @@ func AutoMigrate() error {
 	if err := dao.DB().AutoMigrate(&AIModelConfig{}); err != nil {
 		errs = append(errs, err)
 	}
-	if err := dao.DB().AutoMigrate(&InspectionCheckEvent{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&InspectionRecord{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&InspectionSchedule{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&InspectionScriptResult{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&InspectionLuaScript{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&InspectionLuaScriptBuiltinVersion{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&WebhookReceiver{}); err != nil {
-		errs = append(errs, err)
-	}
-	if err := dao.DB().AutoMigrate(&WebhookLogRecord{}); err != nil {
-		errs = append(errs, err)
-	}
+
 	if err := dao.DB().AutoMigrate(&Menu{}); err != nil {
 		errs = append(errs, err)
 	}
@@ -132,15 +83,11 @@ func AutoMigrate() error {
 		errs = append(errs, err)
 	}
 
-	// 事件处理器配置表
-	if err := dao.DB().AutoMigrate(&K8sEventConfig{}); err != nil {
+	// 插件配置表
+	if err := dao.DB().AutoMigrate(&PluginConfig{}); err != nil {
 		errs = append(errs, err)
 	}
 
-	// 事件处理器：K8s事件存储表
-	if err := dao.DB().AutoMigrate(&K8sEvent{}); err != nil {
-		errs = append(errs, err)
-	}
 	// 删除 user 表 name 字段，已弃用
 	if dao.DB().Migrator().HasColumn(&User{}, "Role") {
 		if err := dao.DB().Migrator().DropColumn(&User{}, "Role"); err != nil {
@@ -162,34 +109,6 @@ func AutoMigrate() error {
 	return nil
 }
 
-func AddBuiltinLuaScripts() error {
-	// 检查数据库中记录的内置脚本版本
-	db := dao.DB()
-	version, err := GetBuiltinLuaScriptsVersion(db)
-	if err == nil {
-		// 有记录，判断是否需要更新
-		if version == BuiltinLuaScriptsVersion {
-			// 版本一致，无需更新
-			return nil
-		}
-	}
-	// 版本不一致或无记录，先删除所有内置脚本
-	if err := db.Where("script_type = ?", constants.LuaScriptTypeBuiltin).Delete(&InspectionLuaScript{}).Error; err != nil {
-		klog.Errorf("删除旧内置巡检脚本失败: %v", err)
-		return err
-	}
-	// 插入最新内置脚本
-	if err := db.CreateInBatches(BuiltinLuaScripts, 100).Error; err != nil {
-		klog.Errorf("插入内置巡检脚本失败: %v", err)
-		return err
-	}
-	// 更新版本号
-	if err := SetBuiltinLuaScriptsVersion(db, BuiltinLuaScriptsVersion); err != nil {
-		klog.Errorf("更新内置脚本版本号失败: %v", err)
-		return err
-	}
-	return nil
-}
 func FixRoleName() error {
 	// 将用户组表中角色进行统一，除了平台管理员以外，都更新为普通用户guest
 	err := dao.DB().Model(&UserGroup{}).Where("role != ?", "platform_admin").Update("role", "guest").Error
@@ -220,36 +139,6 @@ func FixClusterName() error {
 	return nil
 }
 
-// AddInnerMCPServer 检查并初始化名为 "k8m" 的内部 MCP 服务器配置，不存在则创建，已存在则更新其 URL。
-func AddInnerMCPServer() error {
-	// 检查是否存在名为k8m的记录
-	var count int64
-	if err := dao.DB().Model(&MCPServerConfig{}).Where("name = ?", "k8m").Count(&count).Error; err != nil {
-		klog.Errorf("查询MCP服务器配置失败: %v", err)
-		return err
-	}
-	cfg := flag.Init()
-	// 如果不存在，添加默认的内部MCP服务器配置
-	if count == 0 {
-		config := &MCPServerConfig{
-			Name:    "k8m",
-			URL:     fmt.Sprintf("http://localhost:%d/mcp/k8m/sse", cfg.Port),
-			Enabled: false,
-		}
-		if err := dao.DB().Create(config).Error; err != nil {
-			klog.Errorf("添加内部MCP服务器配置失败: %v", err)
-			return err
-		}
-		klog.V(4).Info("成功添加内部MCP服务器配置")
-	} else {
-		klog.V(4).Info("内部MCP服务器配置已存在")
-		dao.DB().Model(&MCPServerConfig{}).Select("url").
-			Where("name =?", "k8m").
-			Update("url", fmt.Sprintf("http://localhost:%d/mcp/k8m/sse", cfg.Port))
-	}
-
-	return nil
-}
 func InitConfigTable() error {
 	var count int64
 	if err := dao.DB().Model(&Config{}).Count(&count).Error; err != nil {
@@ -345,7 +234,6 @@ func AddInnerAdminUserGroup() error {
 		klog.Errorf("已存在内置 平台管理员组 角色: %v", err)
 		return err
 	}
-	// 如果不存在，添加默认的内部MCP服务器配置
 	if count == 0 {
 		config := &UserGroup{
 			GroupName: "平台管理员组",

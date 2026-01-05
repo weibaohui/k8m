@@ -242,6 +242,12 @@ spec:
               port: 3618
             initialDelaySeconds: 30
             periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3618
+            initialDelaySeconds: 5
+            periodSeconds: 5
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: k8m-data

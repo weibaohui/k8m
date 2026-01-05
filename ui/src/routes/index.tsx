@@ -19,7 +19,7 @@ const Router = () => {
     return (
         <Routes>
             <Route path='/login' element={<Login />}></Route>
-            <Route path='/k/:cluster/NodeExec' element={<NodeExec />}></Route>
+              <Route path='/k/:cluster/NodeExec' element={<NodeExec />}></Route>
             <Route path='/k/:cluster/PodExec' element={<PodExec />}></Route>
             <Route path='/k/:cluster/PodLog' element={<PodLog />}></Route>
             <Route path='/k/:cluster/MenuEditor' element={<MenuEditor />}></Route>

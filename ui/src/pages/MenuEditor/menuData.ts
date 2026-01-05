@@ -106,22 +106,6 @@ export const initialMenu: MenuItem[] = [
         ],
     },
     {
-        key: 'global_log',
-        title: '日志',
-        icon: 'fa-solid fa-file-alt',
-        order: 6.5,
-        children: [
-            {
-                key: 'global_log_query',
-                title: '日志查询',
-                icon: 'fa-solid fa-file-lines',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/log/global")',
-                order: 1,
-            }
-        ]
-    },
-    {
         key: 'crd',
         title: 'CRD',
         icon: 'fa-solid fa-file-code',
@@ -379,39 +363,7 @@ export const initialMenu: MenuItem[] = [
             },
         ],
     },
-    {
-        key: 'Helm',
-        title: 'Helm应用',
-        icon: 'fab fa-app-store',
-        order: 10,
-        children: [
-            {
-                key: 'helm_repo',
-                title: '仓库',
-                icon: 'fas fa-database',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/helm/repo")',
-                order: 1,
-                show: 'isPlatformAdmin()==true',
-            },
-            {
-                key: 'helm_chart',
-                title: '应用包',
-                icon: 'fa-solid fa-cubes',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/helm/chart")',
-                order: 2,
-            },
-            {
-                key: 'helm_release',
-                title: '应用实例',
-                icon: 'fas fa-layer-group',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/helm/release")',
-                order: 3,
-            },
-        ],
-    },
+
     {
         key: 'config',
         title: '配置',
@@ -781,80 +733,7 @@ export const initialMenu: MenuItem[] = [
                 customEvent: '() => loadJsonPage("/admin/config/config")',
                 order: 2,
             },
-            {
-                key: 'inspection_settings',
-                title: '集群巡检设置',
-                icon: 'fa-solid fa-stethoscope',
-                order: 3,
-                children: [
-                    {
-                        key: 'inspection_summary',
-                        title: '巡检汇总',
-                        icon: 'fa-solid fa-clipboard-list',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/summary")',
-                        order: 1,
-                    },
-                    {
-                        key: 'inspection_schedule',
-                        title: '巡检计划',
-                        icon: 'fa-solid fa-stethoscope',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/schedule")',
-                        order: 2,
-                    },
-                    {
-                        key: 'inspection_record',
-                        title: '巡检记录',
-                        icon: 'fa-solid fa-clipboard-list',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/record")',
-                        order: 3,
-                    },
-                    {
-                        key: 'script_management',
-                        title: '巡检规则',
-                        icon: 'fa-solid fa-clipboard-check',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/script")',
-                        order: 4,
-                    },
 
-
-                ],
-            },
-            {
-                key: 'event_webhook_config',
-                title: '集群事件转发',
-                icon: 'fa-solid fa-plug-circle-bolt',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/event/list")',
-                order: 2,
-            },
-            {
-                key: 'webhook_management',
-                title: 'webhook管理',
-                icon: 'fa-solid fa-clipboard-list',
-                order: 4,
-                children: [
-                    {
-                        key: 'webhook_management',
-                        title: 'webhook列表',
-                        icon: 'fa-solid fa-bell-concierge',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/webhook")',
-                        order: 5,
-                    },
-                    {
-                        key: 'webhook_record',
-                        title: 'webhook记录',
-                        icon: 'fa-solid fa-file-lines',
-                        eventType: 'custom',
-                        customEvent: '() => loadJsonPage("/admin/inspection/webhook_record")',
-                        order: 6,
-                    },
-                ],
-            },
             {
                 key: 'ai_model_config',
                 title: 'AI模型配置',
@@ -887,22 +766,7 @@ export const initialMenu: MenuItem[] = [
                 customEvent: '() => loadJsonPage("/admin/user/user_group")',
                 order: 6,
             },
-            {
-                key: 'mcp_management',
-                title: 'MCP管理',
-                icon: 'fa-solid fa-server',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/mcp/mcp")',
-                order: 7,
-            },
-            {
-                key: 'mcp_tool_log',
-                title: 'MCP执行记录',
-                icon: 'fa-solid fa-history',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/mcp/mcp_log")',
-                order: 8,
-            },
+             
             {
                 key: 'condition_reverse',
                 title: '指标显示翻转',
@@ -958,7 +822,15 @@ export const initialMenu: MenuItem[] = [
                         order: 2,
                     },
                 ],
-            }
+            },
+            {
+                key: 'plugins_mgr',
+                title: '插件管理',
+                icon: 'fa-solid fa-plug',
+                eventType: 'custom',
+                customEvent: '() => loadJsonPage("/admin/plugins/list")',
+                order: 19,
+            },
 
         ],
     },
@@ -983,39 +855,17 @@ export const initialMenu: MenuItem[] = [
                 eventType: 'custom',
                 customEvent: '() => loadJsonPage("/user/profile/my_clusters")',
                 order: 2,
-            },
-            {
-                key: 'user_profile_api_keys',
-                title: 'API密钥',
-                icon: 'fa-solid fa-key',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/user/profile/api_keys")',
-                order: 3,
-            },
-            {
-                key: 'user_profile_mcp_keys',
-                title: '开放MCP',
-                icon: 'fa-solid fa-share-nodes',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/user/profile/mcp_keys")',
-                order: 4,
-            },
+            }
         ],
     },
-    {
-        key: 'open_api',
-        title: '开放API',
-        icon: 'fa-solid fa-code-branch',
-        eventType: 'custom',
-        customEvent: '() => open("/swagger/index.html")',
-        order: 19,
-    },
+     
+
     {
         key: 'about',
         title: '关于',
         icon: 'fa-solid fa-circle-info',
         eventType: 'custom',
         customEvent: '() => loadJsonPage("/about/about")',
-        order: 20,
+        order: 20000,
     },
 ];

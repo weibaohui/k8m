@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/comm/xterm"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
@@ -39,10 +39,10 @@ var WebsocketMessageType = map[int]string{
 // - 自动处理连接异常、心跳超时和资源释放。
 //
 // 若 AI 服务未启用或参数绑定失败，将返回相应错误信息。
-func (cc *Controller) GPTShell(c *gin.Context) {
+func (cc *Controller) GPTShell(c *response.Context) {
 
 	if !service.AIService().IsEnabled() {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"result": "请先配置开启ChatGPT功能",
 		})
 		return

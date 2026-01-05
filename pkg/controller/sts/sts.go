@@ -1,9 +1,10 @@
 package sts
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/klog/v2"
@@ -11,17 +12,19 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+// RegisterRoutes 注册 StatefulSet 相关路由
+
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 
-	api.POST("/statefulset/ns/:ns/name/:name/revision/:revision/rollout/undo", ctrl.Undo)
-	api.GET("/statefulset/ns/:ns/name/:name/rollout/history", ctrl.History)
-	api.POST("/statefulset/ns/:ns/name/:name/restart", ctrl.Restart)
-	api.POST("/statefulset/batch/restart", ctrl.BatchRestart)
-	api.POST("/statefulset/batch/stop", ctrl.BatchStop)
-	api.POST("/statefulset/batch/restore", ctrl.BatchRestore)
-	api.POST("/statefulset/ns/:ns/name/:name/scale/replica/:replica", ctrl.Scale)
-	api.GET("/statefulset/ns/:ns/name/:name/hpa", ctrl.HPA)
+	r.Post("/statefulset/ns/{ns}/name/{name}/revision/{revision}/rollout/undo", response.Adapter(ctrl.Undo))
+	r.Get("/statefulset/ns/{ns}/name/{name}/rollout/history", response.Adapter(ctrl.History))
+	r.Post("/statefulset/ns/{ns}/name/{name}/restart", response.Adapter(ctrl.Restart))
+	r.Post("/statefulset/batch/restart", response.Adapter(ctrl.BatchRestart))
+	r.Post("/statefulset/batch/stop", response.Adapter(ctrl.BatchStop))
+	r.Post("/statefulset/batch/restore", response.Adapter(ctrl.BatchRestore))
+	r.Post("/statefulset/ns/{ns}/name/{name}/scale/replica/{replica}", response.Adapter(ctrl.Scale))
+	r.Get("/statefulset/ns/{ns}/name/{name}/hpa", response.Adapter(ctrl.HPA))
 
 }
 
@@ -32,7 +35,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param name path string true "StatefulSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/rollout/history [get]
-func (cc *Controller) History(c *gin.Context) {
+func (cc *Controller) History(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -58,7 +61,7 @@ func (cc *Controller) History(c *gin.Context) {
 // @Param name path string true "StatefulSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/restart [post]
-func (cc *Controller) Restart(c *gin.Context) {
+func (cc *Controller) Restart(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -80,7 +83,7 @@ func (cc *Controller) Restart(c *gin.Context) {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/batch/restart [post]
-func (cc *Controller) BatchRestart(c *gin.Context) {
+func (cc *Controller) BatchRestart(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -123,7 +126,7 @@ func (cc *Controller) BatchRestart(c *gin.Context) {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/batch/stop [post]
-func (cc *Controller) BatchStop(c *gin.Context) {
+func (cc *Controller) BatchStop(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -166,7 +169,7 @@ func (cc *Controller) BatchStop(c *gin.Context) {
 // @Param ns_list body []string true "命名空间列表"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/batch/restore [post]
-func (cc *Controller) BatchRestore(c *gin.Context) {
+func (cc *Controller) BatchRestore(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -210,7 +213,7 @@ func (cc *Controller) BatchRestore(c *gin.Context) {
 // @Param replica path int true "副本数"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/scale/replica/{replica} [post]
-func (cc *Controller) Scale(c *gin.Context) {
+func (cc *Controller) Scale(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	replica := c.Param("replica")
@@ -237,7 +240,7 @@ func (cc *Controller) Scale(c *gin.Context) {
 // @Param revision path int true "版本号"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/revision/{revision}/rollout/undo [post]
-func (cc *Controller) Undo(c *gin.Context) {
+func (cc *Controller) Undo(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	revision := c.Param("revision")
@@ -265,7 +268,7 @@ func (cc *Controller) Undo(c *gin.Context) {
 // @Param name path string true "StatefulSet名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/statefulset/ns/{ns}/name/{name}/hpa [get]
-func (cc *Controller) HPA(c *gin.Context) {
+func (cc *Controller) HPA(c *response.Context) {
 	ns := c.Param("ns")
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)

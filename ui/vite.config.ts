@@ -3,9 +3,55 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 import { copy } from 'fs-extra'
+import fs from 'fs'
 
 export default defineConfig(({ mode }) => {
     console.log('current mode', mode)
+
+    // 复制插件前端JSON到public目录
+    const copyPluginFrontendsToPublic = async () => {
+        const modulesDir = path.resolve(__dirname, '../pkg/plugins/modules');
+        const destRoot = path.resolve(__dirname, 'public/pages/plugins');
+        try {
+            if (!fs.existsSync(modulesDir)) return;
+            // 确保目标根目录存在
+            fs.mkdirSync(destRoot, { recursive: true });
+            const modules = fs.readdirSync(modulesDir, { withFileTypes: true })
+                .filter(d => d.isDirectory());
+            for (const m of modules) {
+                const frontendDir = path.join(modulesDir, m.name, 'frontend');
+                if (fs.existsSync(frontendDir)) {
+                    const dest = path.join(destRoot, m.name);
+                    await copy(frontendDir, dest, { overwrite: true });
+                }
+            }
+            console.log('[插件前端] 已复制到 public/pages/plugins');
+        } catch (e) {
+            console.warn('[插件前端] 复制到 public 失败：', e);
+        }
+    };
+
+    // 复制插件前端JSON到dist目录（构建时）
+    const copyPluginFrontendsToDist = async () => {
+        const modulesDir = path.resolve(__dirname, '../pkg/plugins/modules');
+        const destRoot = path.resolve(__dirname, 'dist/pages/plugins');
+        try {
+            if (!fs.existsSync(modulesDir)) return;
+            fs.mkdirSync(destRoot, { recursive: true });
+            const modules = fs.readdirSync(modulesDir, { withFileTypes: true })
+                .filter(d => d.isDirectory());
+            for (const m of modules) {
+                const frontendDir = path.join(modulesDir, m.name, 'frontend');
+                if (fs.existsSync(frontendDir)) {
+                    const dest = path.join(destRoot, m.name);
+                    await copy(frontendDir, dest, { overwrite: true });
+                }
+            }
+            console.log('[插件前端] 已复制到 dist/pages/plugins');
+        } catch (e) {
+            console.warn('[插件前端] 复制到 dist 失败：', e);
+        }
+    };
 
     return {
         base: '/',
@@ -166,6 +212,34 @@ export default defineConfig(({ mode }) => {
                 });
             }
         },
+        /**
+         * 插件：实时复制 Go 插件前端JSON到 public
+         */
+        {
+            name: 'copy-plugin-frontends-dev',
+            async configureServer(server: any) {
+                // 启动时先复制一次
+                await copyPluginFrontendsToPublic();
+                // 监听插件frontend目录变化，变化则复制
+                const watchRoot = path.resolve(__dirname, '../pkg/plugins/modules');
+                server.watcher.add(watchRoot);
+                server.watcher.on('add', (file: string) => {
+                    if (file.includes('/frontend/')) {
+                        copyPluginFrontendsToPublic();
+                    }
+                });
+                server.watcher.on('change', (file: string) => {
+                    if (file.includes('/frontend/')) {
+                        copyPluginFrontendsToPublic();
+                    }
+                });
+                server.watcher.on('unlink', (file: string) => {
+                    if (file.includes('/frontend/')) {
+                        copyPluginFrontendsToPublic();
+                    }
+                });
+            }
+        },
         {
             name: 'copy-monaco-loader',
             closeBundle() {
@@ -174,6 +248,13 @@ export default defineConfig(({ mode }) => {
                 copy('node_modules/monaco-editor/min/vs/language', 'dist/monacoeditorwork/language', { overwrite: true })
                 copy('node_modules/monaco-editor/min/vs/base', 'dist/monacoeditorwork/base', { overwrite: true })
                 copy('node_modules/monaco-editor/min/vs/basic-languages', 'dist/monacoeditorwork/basic-languages', { overwrite: true })
+            }
+        },
+        // 构建结束时复制插件前端到 dist
+        {
+            name: 'copy-plugin-frontends-build',
+            async closeBundle() {
+                await copyPluginFrontendsToDist();
             }
         },
         {

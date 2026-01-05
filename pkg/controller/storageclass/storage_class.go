@@ -2,8 +2,9 @@ package storageclass
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
 
 	v1 "k8s.io/api/storage/v1"
@@ -11,10 +12,10 @@ import (
 
 type Controller struct{}
 
-func RegisterRoutes(api *gin.RouterGroup) {
+func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
-	api.POST("/storage_class/set_default/name/:name", ctrl.SetDefault)
-	api.GET("/storage_class/option_list", ctrl.OptionList)
+	r.Post("/storage_class/set_default/name/{name}", response.Adapter(ctrl.SetDefault))
+	r.Get("/storage_class/option_list", response.Adapter(ctrl.OptionList))
 }
 
 // SetDefault 设置默认存储类
@@ -24,7 +25,7 @@ func RegisterRoutes(api *gin.RouterGroup) {
 // @Param name path string true "存储类名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/storage_class/set_default/name/{name} [post]
-func (cc *Controller) SetDefault(c *gin.Context) {
+func (cc *Controller) SetDefault(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
@@ -49,7 +50,7 @@ func (cc *Controller) SetDefault(c *gin.Context) {
 // @Param cluster path string true "集群名称"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/storage_class/option_list [get]
-func (cc *Controller) OptionList(c *gin.Context) {
+func (cc *Controller) OptionList(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -60,7 +61,7 @@ func (cc *Controller) OptionList(c *gin.Context) {
 	var list []v1.StorageClass
 	err = kom.Cluster(selectedCluster).WithContext(ctx).Resource(&v1.StorageClass{}).List(&list).Error
 	if err != nil {
-		amis.WriteJsonData(c, gin.H{
+		amis.WriteJsonData(c, response.H{
 			"options": make([]map[string]string, 0),
 		})
 		return
@@ -75,7 +76,7 @@ func (cc *Controller) OptionList(c *gin.Context) {
 	slice.SortBy(names, func(a, b map[string]string) bool {
 		return a["label"] < b["label"]
 	})
-	amis.WriteJsonData(c, gin.H{
+	amis.WriteJsonData(c, response.H{
 		"options": names,
 	})
 }

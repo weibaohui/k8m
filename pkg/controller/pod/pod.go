@@ -8,9 +8,10 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	v1 "k8s.io/api/core/v1"
@@ -20,11 +21,13 @@ import (
 
 type LogController struct{}
 
-func RegisterLogRoutes(api *gin.RouterGroup) {
+// RegisterLogRoutes 注册路由
+
+func RegisterLogRoutes(api chi.Router) {
 	ctrl := &LogController{}
-	api.GET("/pod/logs/sse/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.StreamLogs)
-	api.GET("/pod/logs/download/ns/:ns/pod_name/:pod_name/container/:container_name", ctrl.DownloadLogs)
-	api.GET("/pod/name/option_list", ctrl.PodNameOptionList)
+	api.Get("/pod/logs/sse/ns/{ns}/pod_name/{pod_name}/container/{container_name}", response.Adapter(ctrl.StreamLogs))
+	api.Get("/pod/logs/download/ns/{ns}/pod_name/{pod_name}/container/{container_name}", response.Adapter(ctrl.DownloadLogs))
+	api.Get("/pod/name/option_list", response.Adapter(ctrl.PodNameOptionList))
 }
 
 // StreamLogs 通过SSE流式传输Pod日志
@@ -36,7 +39,7 @@ func RegisterLogRoutes(api *gin.RouterGroup) {
 // @Param container_name path string true "容器名称"
 // @Success 200 {string} string "日志流"
 // @Router /k8s/cluster/{cluster}/pod/logs/sse/ns/{ns}/pod_name/{pod_name}/container/{container_name} [get]
-func (lc *LogController) StreamLogs(c *gin.Context) {
+func (lc *LogController) StreamLogs(c *response.Context) {
 
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
@@ -62,7 +65,7 @@ func (lc *LogController) StreamLogs(c *gin.Context) {
 	klog.V(8).Infof("StreamLogs metav1.ListOptions=%v", lop)
 	lc.streamPodLogsBySelector(c, ns, allPods, containerName, lop)
 }
-func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allPods bool, containerName string, options metav1.ListOptions) {
+func (lc *LogController) streamPodLogsBySelector(c *response.Context, ns string, allPods bool, containerName string, options metav1.ListOptions) {
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
@@ -156,7 +159,7 @@ func (lc *LogController) streamPodLogsBySelector(c *gin.Context, ns string, allP
 // @Param container_name path string true "容器名称"
 // @Success 200 {file} file "日志文件"
 // @Router /k8s/cluster/{cluster}/pod/logs/download/ns/{ns}/pod_name/{pod_name}/container/{container_name} [get]
-func (lc *LogController) DownloadLogs(c *gin.Context) {
+func (lc *LogController) DownloadLogs(c *response.Context) {
 
 	ns := c.Param("ns")
 	podName := c.Param("pod_name")
@@ -183,7 +186,7 @@ func (lc *LogController) DownloadLogs(c *gin.Context) {
 	lc.downloadPodLogsBySelector(c, ns, allPods, containerName, lop)
 }
 
-func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, allPods bool, containerName string, options metav1.ListOptions) {
+func (lc *LogController) downloadPodLogsBySelector(c *response.Context, ns string, allPods bool, containerName string, options metav1.ListOptions) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -286,7 +289,7 @@ func (lc *LogController) downloadPodLogsBySelector(c *gin.Context, ns string, al
 // @Param ns query string false "命名空间，为空则返回所有命名空间的Pod"
 // @Success 200 {object} string
 // @Router /k8s/cluster/{cluster}/pod/name/option_list [get]
-func (lc *LogController) PodNameOptionList(c *gin.Context) {
+func (lc *LogController) PodNameOptionList(c *response.Context) {
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
 		amis.WriteJsonError(c, err)
@@ -306,19 +309,19 @@ func (lc *LogController) PodNameOptionList(c *gin.Context) {
 		options := metav1.ListOptions{FieldSelector: fmt.Sprintf("spec.nodeName=%s", node)}
 		if ns != "" {
 			if err := q.List(&pods, options).Error; err != nil {
-				amis.WriteJsonData(c, gin.H{"options": make([]map[string]string, 0)})
+				amis.WriteJsonData(c, response.H{"options": make([]map[string]string, 0)})
 				return
 			}
 		} else {
 			// 遍历所有命名空间
 			if err := q.List(&pods, options).Error; err != nil {
-				amis.WriteJsonData(c, gin.H{"options": make([]map[string]string, 0)})
+				amis.WriteJsonData(c, response.H{"options": make([]map[string]string, 0)})
 				return
 			}
 		}
 	} else {
 		if err := q.List(&pods).Error; err != nil {
-			amis.WriteJsonData(c, gin.H{"options": make([]map[string]string, 0)})
+			amis.WriteJsonData(c, response.H{"options": make([]map[string]string, 0)})
 			return
 		}
 	}
@@ -333,5 +336,5 @@ func (lc *LogController) PodNameOptionList(c *gin.Context) {
 	for _, n := range names {
 		options = append(options, map[string]string{"label": n, "value": n})
 	}
-	amis.WriteJsonData(c, gin.H{"options": options})
+	amis.WriteJsonData(c, response.H{"options": options})
 }

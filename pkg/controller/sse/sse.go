@@ -6,13 +6,13 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/sashabaranov/go-openai"
+	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
 )
 
-func WriteSSE(c *gin.Context, stream io.ReadCloser) {
+func WriteSSE(c *response.Context, stream io.ReadCloser) {
 	defer func() {
 		if err := stream.Close(); err != nil {
 			// 处理关闭流时的错误
@@ -35,16 +35,16 @@ func WriteSSE(c *gin.Context, stream io.ReadCloser) {
 			}
 			// 处理读取错误，向客户端发送错误消息
 			c.SSEvent("error", fmt.Sprintf("Error reading stream: %v", err))
-			c.Writer.Flush()
+			c.Flush()
 			break
 		}
 		// 发送 SSE 消息
 		c.SSEvent("message", line)
 		// 刷新输出缓冲区
-		c.Writer.Flush()
+		c.Flush()
 	}
 }
-func WriteSSEWithChannel(c *gin.Context, logCh <-chan string, done chan struct{}) {
+func WriteSSEWithChannel(c *response.Context, logCh <-chan string, done chan struct{}) {
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
 	c.Writer.Header().Set("Cache-Control", "no-cache")
 	c.Writer.Header().Set("Connection", "keep-alive")
@@ -61,7 +61,7 @@ func WriteSSEWithChannel(c *gin.Context, logCh <-chan string, done chan struct{}
 			} else {
 				c.SSEvent("message", message)
 			}
-			c.Writer.Flush()
+			c.Flush()
 		case <-c.Request.Context().Done():
 			close(done) // 停止数据库查询
 			return
@@ -69,7 +69,7 @@ func WriteSSEWithChannel(c *gin.Context, logCh <-chan string, done chan struct{}
 	}
 }
 
-func WriteWebSocketChatCompletionStream(c *gin.Context, stream *openai.ChatCompletionStream) {
+func WriteWebSocketChatCompletionStream(c *response.Context, stream *openai.ChatCompletionStream) {
 	// 定义 WebSocket 升级器
 	var upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -106,14 +106,14 @@ func WriteWebSocketChatCompletionStream(c *gin.Context, stream *openai.ChatCompl
 		}
 
 		// 发送数据给客户端
-		conn.WriteJSON(gin.H{
+		conn.WriteJSON(map[string]interface{}{
 			"data": string(response.Choices[0].Delta.Content),
 		})
 	}
 
 }
 
-func WriteSSEChatCompletionStream(c *gin.Context, stream *openai.ChatCompletionStream) {
+func WriteSSEChatCompletionStream(c *response.Context, stream *openai.ChatCompletionStream) {
 	defer func() {
 		if err := stream.Close(); err != nil {
 			// 处理关闭流时的错误
@@ -138,7 +138,7 @@ func WriteSSEChatCompletionStream(c *gin.Context, stream *openai.ChatCompletionS
 		// 发送 SSE 消息
 		c.SSEvent("message", response.Choices[0].Delta.Content)
 		// 刷新输出缓冲区
-		c.Writer.Flush()
+		c.Flush()
 	}
 
 }

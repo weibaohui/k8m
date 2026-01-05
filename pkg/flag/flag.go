@@ -19,8 +19,8 @@ var config *Config
 var once sync.Once
 
 type Config struct {
-	Port                 int     // gin 监听端口
-	Host                 string  // gin 监听地址
+	Port                 int     // chi 监听端口
+	Host                 string  // chi 监听地址
 	KubeConfig           string  // KUBECONFIG文件路径
 	ApiKey               string  // OPENAI_API_KEY
 	ApiURL               string  // OPENAI_API_URL
@@ -88,8 +88,6 @@ type Config struct {
 	LdapAnonymousQuery  int    // 是否允许匿名查询LDAP
 	LdapUserField       string // LDAP用户字段
 	LdapLogin2AuthClose bool   // LDAP登录后是否关闭认证
-	HelmCachePath       string // Helm缓存路径
-	HelmUpdateCron      string // Helm更新定时执行 cron 表达式
 
 	// 集群管理参数
 	HeartbeatIntervalSeconds    int // 心跳间隔时间（秒）
@@ -237,10 +235,6 @@ func (c *Config) InitFlags() {
 	// 默认AI关闭思考过程输出为false
 	defaultThink := getEnvAsBool("THINK", false)
 
-	// 默认HELM配置
-	defaultHelmCachePath := getEnv("HELM_CACHE_PATH", "/tmp/helm-cache")
-	defaultHelmUpdateCron := getEnv("HELM_UPDATE_CRON", "0 */6 * * *")
-
 	// 参数配置
 	pflag.BoolVarP(&c.Debug, "debug", "d", defaultDebug, "调试模式")
 	pflag.IntVarP(&c.Port, "port", "p", defaultPort, "监听端口,默认3618")
@@ -301,10 +295,6 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.PgSSLMode, "pg-sslmode", defaultPgSSLMode, "PostgreSQL SSL模式")
 	pflag.StringVar(&c.PgTimeZone, "pg-timezone", defaultPgTimeZone, "PostgreSQL时区")
 	pflag.BoolVar(&c.PgLogMode, "pg-logmode", defaultPgLogMode, "PostgreSQL日志模式")
-
-	// Helm 配置
-	pflag.StringVar(&c.HelmCachePath, "helm-cache-path", defaultHelmCachePath, "Helm缓存路径")
-	pflag.StringVar(&c.HelmUpdateCron, "helm-update-cron", defaultHelmUpdateCron, "Helm更新定时执行 cron 表达式")
 
 	// 集群管理参数
 	pflag.IntVar(&c.HeartbeatIntervalSeconds, "heartbeat-interval", getEnvAsInt("HEARTBEAT_INTERVAL", 30), "心跳间隔时间（秒），默认30秒")
