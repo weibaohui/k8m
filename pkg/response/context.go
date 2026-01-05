@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"sync"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/schema"
@@ -18,6 +19,11 @@ type ContextKey struct{}
 
 var ctxKey = ContextKey{}
 var decoder = schema.NewDecoder()
+var contextPool = sync.Pool{
+	New: func() interface{} {
+		return &Context{}
+	},
+}
 
 func init() {
 	decoder.IgnoreUnknownKeys(true)
@@ -28,8 +34,16 @@ type Context struct {
 	Request *http.Request
 }
 
+func (c *Context) Reset() {
+	c.Writer = nil
+	c.Request = nil
+}
+
 func New(w http.ResponseWriter, r *http.Request) *Context {
-	return &Context{Writer: w, Request: r}
+	ctx := contextPool.Get().(*Context)
+	ctx.Writer = w
+	ctx.Request = r
+	return ctx
 }
 
 func FromRequest(r *http.Request) *Context {
@@ -154,6 +168,7 @@ type HandlerFunc func(*Context)
 func Adapter(h HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := New(w, r)
+		defer c.Reset()
 		ctx := context.WithValue(r.Context(), ctxKey, c)
 		r = r.WithContext(ctx)
 		h(c)
