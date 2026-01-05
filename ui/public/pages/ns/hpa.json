@@ -202,7 +202,7 @@
             "body": [
               {
                 "type": "k8sGPT",
-                "api": "/k8s/k8s_gpt/kind/${kind}/run"
+                "api": "/k8s/plugins/k8sgpt/kind/${kind}/run"
               }
             ]
           }
