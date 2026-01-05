@@ -31,7 +31,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
 	"github.com/weibaohui/k8m/pkg/controller/gatewayapi"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
-	"github.com/weibaohui/k8m/pkg/controller/k8sgpt"
 	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
 	"github.com/weibaohui/k8m/pkg/controller/node"
@@ -271,7 +270,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		ingressclass.RegisterRoutes(api)
 		gatewayapi.RegisterRoutes(api)
 		doc.RegisterRoutes(api)
-		k8sgpt.RegisterRoutes(api)
 		mgr.RegisterClusterRoutes(api)
 	})
 
