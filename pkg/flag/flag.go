@@ -19,8 +19,8 @@ var config *Config
 var once sync.Once
 
 type Config struct {
-	Port                 int     // gin 监听端口
-	Host                 string  // gin 监听地址
+	Port                 int     // chi 监听端口
+	Host                 string  // chi 监听地址
 	KubeConfig           string  // KUBECONFIG文件路径
 	ApiKey               string  // OPENAI_API_KEY
 	ApiURL               string  // OPENAI_API_URL

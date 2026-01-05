@@ -22,7 +22,7 @@ import (
 type FileController struct{}
 
 // RegisterPodFileRoutes 注册路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterPodFileRoutes(api chi.Router) {
 	ctrl := &FileController{}
 	api.Post("/file/list", response.Adapter(ctrl.List))

@@ -48,7 +48,7 @@ func newManager() *Manager {
 	return &Manager{
 		modules: make(map[string]Module),
 		status:  make(map[string]Status),
-		// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 		apiGroups: make([]chi.Router, 0),
 		cron: cron.New(
 			cron.WithChain(
@@ -255,7 +255,6 @@ func SetRegistrar(f func(*Manager)) {
 
 // SetEngine 设置 Chi 引擎
 // 便于后续统计与展示插件已注册的路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.Engine
 func (m *Manager) SetEngine(e chi.Router) {
 	m.mu.Lock()
 	m.engine = e

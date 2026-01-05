@@ -22,21 +22,20 @@ import (
 
 type ActionController struct{}
 
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
 func RegisterActionRoutes(r chi.Router) {
 	ctrl := &ActionController{}
-	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}", response.Adapter(ctrl.Fetch))                         // CRD
-	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/json", response.Adapter(ctrl.FetchJson))                // CRD
-	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/event", response.Adapter(ctrl.Event))                   // CRD
-	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/hpa", response.Adapter(ctrl.HPA))                       // CRD
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}", response.Adapter(ctrl.Fetch))                          // CRD
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/json", response.Adapter(ctrl.FetchJson))                 // CRD
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/event", response.Adapter(ctrl.Event))                    // CRD
+	r.Get("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/hpa", response.Adapter(ctrl.HPA))                        // CRD
 	r.Post("/{kind}/group/{group}/version/{version}/ns/{ns}/name/{name}/scale/replica/{replica}", response.Adapter(ctrl.Scale)) // CRD
-	r.Post("/{kind}/group/{group}/version/{version}/remove/ns/{ns}/name/{name}", response.Adapter(ctrl.Remove))                // CRD
-	r.Post("/{kind}/group/{group}/version/{version}/batch/remove", response.Adapter(ctrl.BatchRemove))                       // CRD
-	r.Post("/{kind}/group/{group}/version/{version}/force_remove", response.Adapter(ctrl.BatchForceRemove))                  // CRD
-	r.Post("/{kind}/group/{group}/version/{version}/update/ns/{ns}/name/{name}", response.Adapter(ctrl.Save))                  // CRD       // CRD
-	r.Post("/{kind}/group/{group}/version/{version}/describe/ns/{ns}/name/{name}", response.Adapter(ctrl.Describe))            // CRD
-	r.Post("/{kind}/group/{group}/version/{version}/list/ns/{ns}", response.Adapter(ctrl.List))                               // CRD
-	r.Post("/{kind}/group/{group}/version/{version}/list/ns/", response.Adapter(ctrl.List))                                  // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/remove/ns/{ns}/name/{name}", response.Adapter(ctrl.Remove))                 // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/batch/remove", response.Adapter(ctrl.BatchRemove))                          // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/force_remove", response.Adapter(ctrl.BatchForceRemove))                     // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/update/ns/{ns}/name/{name}", response.Adapter(ctrl.Save))                   // CRD       // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/describe/ns/{ns}/name/{name}", response.Adapter(ctrl.Describe))             // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/list/ns/{ns}", response.Adapter(ctrl.List))                                 // CRD
+	r.Post("/{kind}/group/{group}/version/{version}/list/ns/", response.Adapter(ctrl.List))                                     // CRD
 	r.Post("/{kind}/group/{group}/version/{version}/list", response.Adapter(ctrl.List))
 
 }

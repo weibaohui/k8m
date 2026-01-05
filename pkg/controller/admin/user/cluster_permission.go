@@ -22,7 +22,7 @@ import (
 type AdminClusterPermission struct{}
 
 // AdminClusterPermission 用于集群权限相关接口
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterClusterPermissionRoutes(r chi.Router) {
 	ctrl := &AdminClusterPermission{}
 	//  cluster_permissions 集群授权

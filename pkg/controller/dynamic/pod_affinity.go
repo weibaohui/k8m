@@ -18,7 +18,7 @@ import (
 type PodAffinityController struct{}
 
 // RegisterPodAffinityRoutes 注册路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterPodAffinityRoutes(api chi.Router) {
 	ctrl := &PodAffinityController{}
 	api.Post("/{kind}/group/{group}/version/{version}/update_pod_affinity/ns/{ns}/name/{name}", response.Adapter(ctrl.UpdatePodAffinity))

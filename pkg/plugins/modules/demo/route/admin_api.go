@@ -9,7 +9,6 @@ import (
 )
 
 // RegisterPluginAdminRoutes 注册Demo插件的插件管理员类（admin）路由
-// 从 gin 切换到 chi，使用 chi.RoutePrefix 替代 gin.Group
 func RegisterPluginAdminRoutes(arg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameDemo
 	arg.Get(prefix+"/items", response.Adapter(admin.List))

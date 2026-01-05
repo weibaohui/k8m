@@ -21,7 +21,7 @@ import (
 type ActionController struct{}
 
 // RegisterActionRoutes 注册 Deployment 相关路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterActionRoutes(r chi.Router) {
 	ctrl := &ActionController{}
 	r.Post("/deploy/ns/{ns}/name/{name}/restart", response.Adapter(ctrl.Restart))

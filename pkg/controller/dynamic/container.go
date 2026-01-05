@@ -17,7 +17,6 @@ import (
 
 type ContainerController struct{}
 
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
 func RegisterContainerRoutes(r chi.Router) {
 	ctrl := &ContainerController{}
 	r.Get("/{kind}/group/{group}/version/{version}/container_info/ns/{ns}/name/{name}/container/{container_name}", response.Adapter(ctrl.ContainerInfo))

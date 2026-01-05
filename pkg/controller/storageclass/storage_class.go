@@ -12,7 +12,6 @@ import (
 
 type Controller struct{}
 
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
 func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	r.Post("/storage_class/set_default/name/{name}", response.Adapter(ctrl.SetDefault))

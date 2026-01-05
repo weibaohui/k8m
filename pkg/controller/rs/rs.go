@@ -16,7 +16,7 @@ import (
 type Controller struct{}
 
 // RegisterRoutes 注册 ReplicaSet 相关路由
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
+
 func RegisterRoutes(r chi.Router) {
 	ctrl := &Controller{}
 	r.Post("/replicaset/ns/{ns}/name/{name}/restart", response.Adapter(ctrl.Restart))

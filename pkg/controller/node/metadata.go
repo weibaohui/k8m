@@ -15,7 +15,6 @@ import (
 
 type MetadataController struct{}
 
-// 从 gin 切换到 chi，使用 chi.Router 替代 gin.RouterGroup
 func RegisterMetadataRoutes(r chi.Router) {
 	ctrl := &MetadataController{}
 	r.Get("/node/name/option_list", response.Adapter(ctrl.NameOptionList))
