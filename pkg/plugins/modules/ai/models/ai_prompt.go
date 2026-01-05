@@ -9,38 +9,51 @@ import (
 	"gorm.io/gorm"
 )
 
+// AIPrompt AI提示词模型
+// 用于存储和管理AI提示词的配置信息
 type AIPrompt struct {
 	ID          uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name        string                 `json:"name" gorm:"size:100;not null"`
-	Description string                 `json:"description" gorm:"size:500"`
-	PromptType  constants.AIPromptType `json:"prompt_type" gorm:"size:50;not null;index"`
-	Content     string                 `json:"content" gorm:"type:text;not null"`
-	IsBuiltin   bool                   `json:"is_builtin" gorm:"default:false;index"`
-	IsEnabled   bool                   `json:"is_enabled" gorm:"default:false;index"`
+	Name        string                 `json:"name" gorm:"size:100;not null"`             // 提示词名称
+	Description string                 `json:"description" gorm:"size:500"`               // 提示词描述
+	PromptType  constants.AIPromptType `json:"prompt_type" gorm:"size:50;not null;index"` // 提示词类型
+	Content     string                 `json:"content" gorm:"type:text;not null"`         // 提示词内容
+	IsBuiltin   bool                   `json:"is_builtin" gorm:"default:false;index"`     // 是否为内置提示词
+	IsEnabled   bool                   `json:"is_enabled" gorm:"default:false;index"`     // 是否启用
 	CreatedAt   time.Time              `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time              `json:"updated_at,omitempty"`
 }
 
+// TableName 表名
 func (AIPrompt) TableName() string {
 	return "ai_prompts"
 }
 
+// List 获取AI提示词列表
 func (m *AIPrompt) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*AIPrompt, int64, error) {
 	return dao.GenericQuery(params, m, queryFuncs...)
 }
 
+// Save 保存AI提示词
 func (m *AIPrompt) Save(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericSave(params, m, queryFuncs...)
 }
 
+// Delete 删除AI提示词
 func (m *AIPrompt) Delete(params *dao.Params, ids string, queryFuncs ...func(*gorm.DB) *gorm.DB) error {
 	return dao.GenericDelete(params, m, utils.ToInt64Slice(ids), queryFuncs...)
 }
 
+// GetOne 获取单个AI提示词
 func (m *AIPrompt) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) (*AIPrompt, error) {
 	return dao.GenericGetOne(params, m, queryFuncs...)
 }
 
+// GetBuiltinPromptContent 根据提示词类型获取内置提示词内容
+// 参数:
+//   - promptType: 提示词类型
+//
+// 返回值:
+//   - string: 提示词内容，如果未找到则返回空字符串
 func GetBuiltinPromptContent(promptType constants.AIPromptType) string {
 	for _, prompt := range BuiltinAIPrompts {
 		if prompt.PromptType == promptType && prompt.IsEnabled {
@@ -50,6 +63,7 @@ func GetBuiltinPromptContent(promptType constants.AIPromptType) string {
 	return ""
 }
 
+// BuiltinAIPrompts 内置AI提示词
 var BuiltinAIPrompts = []AIPrompt{
 	{
 		Name:        "K8s事件分析",
