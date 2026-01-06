@@ -7,11 +7,11 @@ import (
 	"io"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	mcpService "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
@@ -20,6 +20,23 @@ import (
 )
 
 type chatService struct{}
+
+var (
+	// chatInstance 单例实例
+	chatInstance *chatService
+	// chatOnce 用于确保单例只被初始化一次
+	chatOnce sync.Once
+)
+
+// GetChatService 获取聊天服务的单例实例
+// 返回值:
+//   - *chatService: 聊天服务实例
+func GetChatService() *chatService {
+	chatOnce.Do(func() {
+		chatInstance = &chatService{}
+	})
+	return chatInstance
+}
 
 // getChatStreamBase 是 GetChatStream 和 GetChatStreamWithoutHistory 的通用实现，支持可选的历史清理
 // 参数 clearHistory 表示是否在请求前后都清空历史
@@ -67,7 +84,6 @@ func (c *chatService) GetChatStreamWithoutHistory(ctx context.Context, chat stri
 	return c.getChatStreamBase(ctx, chat, true)
 }
 func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Writer) error {
-	cfg := flag.Init()
 
 	client, err := AIService().DefaultClient()
 
@@ -89,7 +105,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 	currChatContent = append(currChatContent, chat)
 
 	currentIteration := int32(0)
-	maxIterations := cfg.MaxIterations
+	maxIterations := AIService().MaxIterations
 
 	for currentIteration < maxIterations {
 		klog.Infof("Starting iteration %d", currentIteration)

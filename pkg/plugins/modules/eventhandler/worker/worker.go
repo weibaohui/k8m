@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
-	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
 
@@ -250,7 +252,8 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 	resultRaw := utils.ToJSONCompact(events)
 
 	if aiEnabled && len(events) > 0 {
-		if service.AIService().IsEnabled() {
+
+		if plugins.ManagerInstance().IsEnabled(modules.PluginNameAI) {
 			customTemplate := aiTemplate
 			if strings.TrimSpace(customTemplate) == "" {
 				customTemplate = `请先输出统计数据（含集群名称、规则名称、数量等基本信息）
@@ -272,7 +275,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 `
 			prompt = fmt.Sprintf(prompt, customTemplate, resultRaw)
 
-			aiSummary, err := service.ChatService().ChatWithCtxNoHistory(w.ctx, prompt)
+			aiSummary, err := service.GetChatService().ChatWithCtxNoHistory(w.ctx, prompt)
 			if err != nil {
 				klog.V(6).Infof("AI总结失败，回退到字符串拼接: %v", err)
 				summary = summary + "【AI总结失败】"

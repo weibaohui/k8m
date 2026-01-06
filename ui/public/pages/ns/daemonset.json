@@ -101,7 +101,7 @@
                           "body": [
                             {
                               "type": "websocketMarkdownViewer",
-                              "url": "/ai/chat/example/field",
+                              "url": "/mgm/plugins/ai/chat/example/field",
                               "params": {
                                 "kind": "${kind}",
                                 "group": "${group}",
@@ -177,7 +177,7 @@
             "body": [
               {
                 "type": "websocketMarkdownViewer",
-                "url": "/ai/chat/example",
+                "url": "/mgm/plugins/ai/chat/example",
                 "params": {
                   "kind": "${kind}",
                   "group": "${group}",
@@ -419,7 +419,7 @@
                           "body": [
                             {
                               "type": "websocketMarkdownViewer",
-                              "url": "/ai/chat/describe",
+                              "url": "/mgm/plugins/ai/chat/describe",
                               "params": {
                                 "kind": "${kind}",
                                 "group": "${group}",
@@ -558,7 +558,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/ai/chat/example/field",
+                                          "url": "/mgm/plugins/ai/chat/example/field",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",
@@ -1522,7 +1522,7 @@
                                                           "body": [
                                                             {
                                                               "type": "websocketMarkdownViewer",
-                                                              "url": "/ai/chat/example/field",
+                                                              "url": "/mgm/plugins/ai/chat/example/field",
                                                               "params": {
                                                                 "kind": "${kind}",
                                                                 "group": "${group}",
@@ -1829,7 +1829,7 @@
                                     "body": [
                                       {
                                         "type": "websocketMarkdownViewer",
-                                        "url": "/ai/chat/event",
+                                        "url": "/mgm/plugins/ai/chat/event",
                                         "params": {
                                           "note": "${note}",
                                           "source": "${source}",
@@ -2076,7 +2076,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/ai/chat/describe",
+                                                        "url": "/mgm/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2219,7 +2219,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/ai/chat/example/field",
+                                                                    "url": "/mgm/plugins/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -2341,7 +2341,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/ai/chat/describe",
+                                                        "url": "/mgm/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2484,7 +2484,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/ai/chat/example/field",
+                                                                    "url": "/mgm/plugins/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -2629,7 +2629,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/ai/chat/describe",
+                                                        "url": "/mgm/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2772,7 +2772,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/ai/chat/example/field",
+                                                                    "url": "/mgm/plugins/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -2910,7 +2910,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/ai/chat/describe",
+                                                        "url": "/mgm/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -3053,7 +3053,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/ai/chat/example/field",
+                                                                    "url": "/mgm/plugins/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -3214,7 +3214,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/ai/chat/describe",
+                                                        "url": "/mgm/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -3357,7 +3357,7 @@
                                                                 "body": [
                                                                   {
                                                                     "type": "websocketMarkdownViewer",
-                                                                    "url": "/ai/chat/example/field",
+                                                                    "url": "/mgm/plugins/ai/chat/example/field",
                                                                     "params": {
                                                                       "kind": "${kind}",
                                                                       "group": "${group}",
@@ -3595,7 +3595,7 @@
                                             "body": [
                                               {
                                                 "type": "websocketMarkdownViewer",
-                                                "url": "/ai/chat/describe",
+                                                "url": "/mgm/plugins/ai/chat/describe",
                                                 "params": {
                                                   "describe": "${result}",
                                                   "kind": "${kind}",
@@ -3738,7 +3738,7 @@
                                                         "body": [
                                                           {
                                                             "type": "websocketMarkdownViewer",
-                                                            "url": "/ai/chat/example/field",
+                                                            "url": "/mgm/plugins/ai/chat/example/field",
                                                             "params": {
                                                               "kind": "${kind}",
                                                               "group": "${group}",
@@ -3894,7 +3894,7 @@
                                             "body": [
                                               {
                                                 "type": "websocketMarkdownViewer",
-                                                "url": "/ai/chat/describe",
+                                                "url": "/mgm/plugins/ai/chat/describe",
                                                 "params": {
                                                   "describe": "${result}",
                                                   "kind": "${kind}",
@@ -4037,7 +4037,7 @@
                                                         "body": [
                                                           {
                                                             "type": "websocketMarkdownViewer",
-                                                            "url": "/ai/chat/example/field",
+                                                            "url": "/mgm/plugins/ai/chat/example/field",
                                                             "params": {
                                                               "kind": "${kind}",
                                                               "group": "${group}",
@@ -4299,7 +4299,7 @@
                               "body": [
                                 {
                                   "type": "websocketMarkdownViewer",
-                                  "url": "/ai/chat/any_question",
+                                  "url": "/mgm/plugins/ai/chat/any_question",
                                   "params": {
                                     "kind": "${kind}",
                                     "group": "${group}",
@@ -4662,7 +4662,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/ai/chat/any_question",
+                                          "url": "/mgm/plugins/ai/chat/any_question",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",
@@ -5029,7 +5029,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/ai/chat/any_question",
+                                          "url": "/mgm/plugins/ai/chat/any_question",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",
@@ -5329,7 +5329,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/ai/chat/any_question",
+                                          "url": "/mgm/plugins/ai/chat/any_question",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",

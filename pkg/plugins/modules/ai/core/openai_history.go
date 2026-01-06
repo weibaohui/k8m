@@ -1,4 +1,4 @@
-package ai
+package core
 
 import (
 	"context"
@@ -39,6 +39,7 @@ func (c *OpenAIClient) ClearHistory(ctx context.Context) error {
 	c.memory.ClearUserHistory(username)
 	return nil
 }
+
 func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
 	history := c.GetHistory(ctx)
 	for _, content := range contents {
@@ -107,5 +108,4 @@ func (c *OpenAIClient) fillChatHistory(ctx context.Context, contents ...any) {
 	}
 	username := getUsernameFromContext(ctx)
 	c.memory.SetUserHistory(username, history)
-
 }

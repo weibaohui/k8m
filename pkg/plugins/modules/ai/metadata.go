@@ -1,0 +1,63 @@
+package ai
+
+import (
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/route"
+)
+
+var Metadata = plugins.Module{
+	Meta: plugins.Meta{
+		Name:        modules.PluginNameAI,
+		Title:       "AI 插件",
+		Version:     "1.0.0",
+		Description: "AI功能插件，提供K8s资源智能分析、事件问诊、日志分析、Cron表达式解析等功能。支持自定义AI模型配置。",
+	},
+	Tables: []string{
+		"ai_model_configs",
+		"ai_prompts",
+		"ai_run_configs",
+	},
+	Menus: []plugins.Menu{
+		{
+			Key:   "plugin_ai_index",
+			Title: "AI 管理",
+			Icon:  "fa-solid fa-brain",
+			Order: 30,
+			Children: []plugins.Menu{
+				{
+					Key:         "plugin_ai_model",
+					Title:       "AI模型配置",
+					Icon:        "fa-solid fa-robot",
+					Show:        "isPlatformAdmin()==true",
+					EventType:   "custom",
+					CustomEvent: `() => loadJsonPage("/plugins/ai/ai_model_config")`,
+					Order:       10,
+				},
+				{
+					Key:         "plugin_ai_prompt",
+					Title:       "Prompt模板管理",
+					Icon:        "fa-solid fa-wand-magic-sparkles",
+					Show:        "isPlatformAdmin()==true",
+					EventType:   "custom",
+					CustomEvent: `() => loadJsonPage("/plugins/ai/ai_prompt")`,
+					Order:       20,
+				},
+				{
+					Key:         "plugin_ai_run_config",
+					Title:       "AI运行配置",
+					Icon:        "fa-solid fa-cog",
+					Show:        "isPlatformAdmin()==true",
+					EventType:   "custom",
+					CustomEvent: `() => loadJsonPage("/plugins/ai/ai_run_config")`,
+					Order:       30,
+				},
+			},
+		},
+	},
+	Dependencies:      []string{},
+	RunAfter:          []string{},
+	Lifecycle:         &AILifecycle{},
+	ManagementRouter:  route.RegisterManagementRoutes,
+	PluginAdminRouter: route.RegisterPluginAdminRoutes,
+}

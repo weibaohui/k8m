@@ -8,9 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// AIModelConfig 用于存储多种AI模型配置
-// 支持后续选择不同模型
-
 type AIModelConfig struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	ApiKey      string    `json:"api_key"`
@@ -18,7 +15,7 @@ type AIModelConfig struct {
 	ApiModel    string    `json:"api_model"`
 	Temperature float32   `json:"temperature"`
 	TopP        float32   `json:"top_p"`
-	Think       bool      `json:"think"` // 是否关闭思考模式
+	Think       bool      `json:"think"`
 	Description string    `json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`

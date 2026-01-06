@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
-	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 )
 
@@ -85,7 +85,7 @@ func (cc *Controller) Detail(c *response.Context) {
 	}
 	if detail.Description != "" {
 		q := fmt.Sprintf("请翻译下面的语句，注意直接给出翻译内容，不要解释。待翻译内如如下：\n\n%s", detail.Description)
-		chatService := service.ChatService()
+		chatService := service.GetChatService()
 		result := chatService.Chat(c, q)
 		detail.Translate = result
 	}

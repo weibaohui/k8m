@@ -1,15 +1,15 @@
-package chat
+package controller
 
 import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
-	"github.com/weibaohui/k8m/pkg/service"
 )
 
 // @Summary 获取聊天历史记录
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /ai/chat/history [get]
+// @Router /mgm/plugins/ai/ws_chatgpt/history [get]
 func (cc *Controller) History(c *response.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
@@ -26,7 +26,7 @@ func (cc *Controller) History(c *response.Context) {
 // @Summary 重置聊天历史记录
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /ai/chat/reset [post]
+// @Router /mgm/plugins/ai/ws_chatgpt/reset [post]
 func (cc *Controller) Reset(c *response.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {

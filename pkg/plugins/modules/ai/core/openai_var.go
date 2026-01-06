@@ -1,4 +1,4 @@
-package ai
+package core
 
 var sysPrompt = `
 你是 一个专注于操作和处理 Kubernetes 集群相关任务的 AI 助手。你的任务是协助用户解决 Kubernetes 相关的问题，帮助调试，以及在用户的 Kubernetes 集群上执行操作。

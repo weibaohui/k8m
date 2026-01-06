@@ -1,4 +1,4 @@
-package ai
+package core
 
 import (
 	"errors"
@@ -20,6 +20,7 @@ type OpenAIClient struct {
 	tools       []openai.Tool
 	maxHistory  int32
 	memory      *memoryService
+	think       bool // AI是否开启思考过程输出
 
 	// organizationId string
 }
@@ -99,6 +100,7 @@ func (c *OpenAIClient) Configure(config IAIConfig) error {
 	c.temperature = config.GetTemperature()
 	c.topP = config.GetTopP()
 	c.maxHistory = config.GetMaxHistory()
+	c.think = config.GetThink()
 	c.memory = NewMemoryService()
 	return nil
 }

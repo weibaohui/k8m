@@ -142,7 +142,7 @@ const K8sGPTComponent = React.forwardRef<HTMLDivElement, K8sGPTProps>((props, _)
                                             {expandedItems[`${itemKey}-${index}`] && (
                                                 <div style={{marginTop: '8px', marginBottom: '16px'}}>
                                                     <WebSocketMarkdownViewerComponent
-                                                        url="/ai/chat/k8s_gpt/resource"
+                                                        url="/mgm/plugins/ai/chat/k8s_gpt/resource"
                                                         params={{
                                                             kind: item.kind,
                                                             name: item.name,

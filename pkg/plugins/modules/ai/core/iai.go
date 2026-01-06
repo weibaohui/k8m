@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package ai
+package core
 
 import (
 	"context"
@@ -55,6 +55,7 @@ type IAIConfig interface {
 	GetCompartmentId() string
 	GetOrganizationId() string
 	GetCustomHeaders() []http.Header
+	GetThink() bool
 }
 
 func NewClient(provider string) IAI {
@@ -86,6 +87,7 @@ type Provider struct {
 	MaxTokens      int
 	OrganizationId string
 	CustomHeaders  []http.Header
+	Think          bool
 }
 
 func (p *Provider) GetBaseURL() string {
@@ -148,6 +150,10 @@ func (p *Provider) GetOrganizationId() string {
 
 func (p *Provider) GetCustomHeaders() []http.Header {
 	return p.CustomHeaders
+}
+
+func (p *Provider) GetThink() bool {
+	return p.Think
 }
 
 var passwordlessProviders = []string{"localai", "ollama", "amazonsagemaker", "amazonbedrock", "googlevertexai", "oci"}

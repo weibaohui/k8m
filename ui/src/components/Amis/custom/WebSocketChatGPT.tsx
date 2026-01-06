@@ -25,10 +25,10 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         const token = localStorage.getItem('token');
         url = url + (url.includes('?') ? '&' : '?') + `token=${token}`;
 
-        let historyUrl = '/ai/chat/ws_chatgpt/history'
+        let historyUrl = '/mgm/plugins/ai/chat/ws_chatgpt/history'
         historyUrl = historyUrl + (historyUrl.includes('?') ? '&' : '?') + `token=${token}`;
 
-        let historyResetUrl = '/ai/chat/ws_chatgpt/history/reset'
+        let historyResetUrl = '/mgm/plugins/ai/chat/ws_chatgpt/history/reset'
         historyResetUrl = historyResetUrl + (historyResetUrl.includes('?') ? '&' : '?') + `token=${token}`;
 
         const [messages, setMessages] = useState<{ role: "user" | "ai"; content: string }[]>([]);

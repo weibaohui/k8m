@@ -16,12 +16,10 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/weibaohui/k8m/pkg/cb"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/controller/admin/ai_prompt"
 	"github.com/weibaohui/k8m/pkg/controller/admin/cluster"
 	"github.com/weibaohui/k8m/pkg/controller/admin/config"
 	"github.com/weibaohui/k8m/pkg/controller/admin/menu"
 	"github.com/weibaohui/k8m/pkg/controller/admin/user"
-	"github.com/weibaohui/k8m/pkg/controller/chat"
 	"github.com/weibaohui/k8m/pkg/controller/cluster_status"
 	"github.com/weibaohui/k8m/pkg/controller/cm"
 	"github.com/weibaohui/k8m/pkg/controller/cronjob"
@@ -49,6 +47,7 @@ import (
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	aiService "github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -88,7 +87,7 @@ func Init() {
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 
 	// 初始化ChatService
-	service.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
+	aiService.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
 
 	go func() {
 		// 初始化kom
@@ -219,9 +218,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		param.RegisterParamRoutes(params)
 		mgr.RegisterParamRoutes(params)
 	})
-	r.Route("/ai", func(ai chi.Router) {
-		chat.RegisterChatRoutes(ai)
-	})
 
 	r.Get("/health/ready", response.Adapter(func(c *response.Context) {
 		if !mgr.IsEnabled(modules.PluginNameLeader) {
@@ -287,8 +283,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		config.RegisterSSOConfigRoutes(admin)
 		config.RegisterLdapConfigRoutes(admin)
 		config.RegisterConfigRoutes(admin)
-		config.RegisterAIModelConfigRoutes(admin)
-		ai_prompt.RegisterAdminAIPromptRoutes(admin)
 		user.RegisterClusterPermissionRoutes(admin)
 		user.RegisterAdminUserRoutes(admin)
 		user.RegisterAdminUserGroupRoutes(admin)

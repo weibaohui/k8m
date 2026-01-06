@@ -1,30 +1,17 @@
-package config
+package controller
 
 import (
 	"fmt"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
-	"github.com/weibaohui/k8m/pkg/service"
 )
 
-type AIController struct {
-}
-
-// RegisterAIModelConfigRoutes 注册路由
-
-func RegisterAIModelConfigRoutes(r chi.Router) {
-	ctrl := &AIController{}
-	r.Get("/ai/model/list", response.Adapter(ctrl.List))
-	r.Post("/ai/model/save", response.Adapter(ctrl.Save))
-	r.Post("/ai/model/delete/{ids}", response.Adapter(ctrl.Delete))
-	r.Post("/ai/model/id/{id}/think/{status}", response.Adapter(ctrl.QuickSave))
-	r.Post("/ai/model/test/id/{id}", response.Adapter(ctrl.TestConnection))
-
+type AIModelConfigController struct {
 }
 
 // @Summary 快速保存AI模型思考状态
@@ -32,8 +19,8 @@ func RegisterAIModelConfigRoutes(r chi.Router) {
 // @Param id path int true "模型ID"
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
-// @Router /admin/ai/model/id/{id}/think/{status} [post]
-func (m *AIController) QuickSave(c *response.Context) {
+// @Router /admin/plugins/ai/model/id/{id}/think/{status} [post]
+func (m *AIModelConfigController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
 
@@ -58,8 +45,8 @@ func (m *AIController) QuickSave(c *response.Context) {
 // @Security BearerAuth
 // @Param id path int true "模型ID"
 // @Success 200 {object} string
-// @Router /admin/ai/model/test/id/{id} [post]
-func (m *AIController) TestConnection(c *response.Context) {
+// @Router /admin/plugins/ai/model/test/id/{id} [post]
+func (m *AIModelConfigController) TestConnection(c *response.Context) {
 	id := c.Param("id")
 
 	var entity models.AIModelConfig
@@ -92,8 +79,8 @@ func (m *AIController) TestConnection(c *response.Context) {
 // @Summary 创建或更新AI模型配置
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/ai/model/save [post]
-func (m *AIController) Save(c *response.Context) {
+// @Router /admin/plugins/ai/model/save [post]
+func (m *AIModelConfigController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	var config models.AIModelConfig
@@ -128,8 +115,8 @@ func (m *AIController) Save(c *response.Context) {
 // @Summary 获取AI模型配置列表
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/ai/model/list [get]
-func (m *AIController) List(c *response.Context) {
+// @Router /admin/plugins/ai/model/list [get]
+func (m *AIModelConfigController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 
 	config := &models.AIModelConfig{}
@@ -145,8 +132,8 @@ func (m *AIController) List(c *response.Context) {
 // @Security BearerAuth
 // @Param ids path string true "模型ID，多个用逗号分隔"
 // @Success 200 {object} string
-// @Router /admin/ai/model/delete/{ids} [post]
-func (m *AIController) Delete(c *response.Context) {
+// @Router /admin/plugins/ai/model/delete/{ids} [post]
+func (m *AIModelConfigController) Delete(c *response.Context) {
 	ids := c.Param("ids")
 	params := dao.BuildParams(c)
 	config := &models.AIModelConfig{}

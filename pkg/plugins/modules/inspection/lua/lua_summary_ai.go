@@ -8,8 +8,10 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
-	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -112,7 +114,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg *SummaryMsg) (
 	}
 
 	// 检查AI服务是否可用
-	if !service.AIService().IsEnabled() {
+	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameAI) {
 		klog.V(6).Infof("AI服务未启用，返回基础汇总")
 		return basicSummary, nil
 	}
@@ -203,7 +205,8 @@ func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg *Summary
 		`
 	prompt = fmt.Sprintf(prompt, customTemplate, utils.ToJSONCompact(msg))
 
-	summary, err := service.ChatService().ChatWithCtxNoHistory(ctx, prompt)
+	// TODO 跨插件调用不好， 后续优化
+	summary, err := service.GetChatService().ChatWithCtxNoHistory(ctx, prompt)
 	if err != nil {
 		return "", fmt.Errorf("AI汇总请求失败: %v", err)
 	}

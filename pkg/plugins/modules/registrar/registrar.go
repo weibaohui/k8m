@@ -2,6 +2,7 @@ package registrar
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/gllog"
@@ -80,6 +81,11 @@ func init() {
 			klog.V(6).Infof("注册k8sgpt插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册k8sgpt插件成功")
+		}
+		if err := m.Register(ai.Metadata); err != nil {
+			klog.V(6).Infof("注册ai插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册ai插件成功")
 		}
 	})
 }

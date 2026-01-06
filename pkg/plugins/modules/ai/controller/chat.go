@@ -1,39 +1,23 @@
-package chat
+package controller
 
 import (
 	"context"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
-	"github.com/weibaohui/k8m/pkg/models"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
-	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
 	"k8s.io/klog/v2"
 )
 
 type Controller struct {
-}
-
-func RegisterChatRoutes(ai chi.Router) {
-	ctrl := &Controller{}
-	ai.Get("/chat/event", response.Adapter(ctrl.Event))
-	ai.Get("/chat/log", response.Adapter(ctrl.Log))
-	ai.Get("/chat/cron", response.Adapter(ctrl.Cron))
-	ai.Get("/chat/describe", response.Adapter(ctrl.Describe))
-	ai.Get("/chat/resource", response.Adapter(ctrl.Resource))
-	ai.Get("/chat/any_question", response.Adapter(ctrl.AnyQuestion))
-	ai.Get("/chat/any_selection", response.Adapter(ctrl.AnySelection))
-	ai.Get("/chat/example", response.Adapter(ctrl.Example))
-	ai.Get("/chat/example/field", response.Adapter(ctrl.FieldExample))
-	ai.Get("/chat/ws_chatgpt", response.Adapter(ctrl.GPTShell))
-	ai.Get("/chat/ws_chatgpt/history", response.Adapter(ctrl.History))
-	ai.Get("/chat/ws_chatgpt/history/reset", response.Adapter(ctrl.Reset))
-	ai.Get("/chat/k8s_gpt/resource", response.Adapter(ctrl.K8sGPTResource))
 }
 
 type ResourceData struct {
@@ -64,7 +48,8 @@ type ResourceData struct {
 }
 
 func handleRequest(c *response.Context, promptFunc func(data any) string) {
-	if !service.AIService().IsEnabled() {
+	enabled := plugins.ManagerInstance().IsEnabled(modules.PluginNameAI)
+	if !enabled {
 		amis.WriteJsonData(c, response.H{
 			"result": "请先配置开启ChatGPT功能",
 		})
@@ -82,7 +67,7 @@ func handleRequest(c *response.Context, promptFunc func(data any) string) {
 
 	prompt := promptFunc(data)
 
-	stream, err := service.ChatService().GetChatStreamWithoutHistory(ctxInst, prompt)
+	stream, err := service.GetChatService().GetChatStreamWithoutHistory(ctxInst, prompt)
 	if err != nil {
 		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
 		return
@@ -126,7 +111,7 @@ func renderTemplate(templateStr string, data any, contextBuilder func(ResourceDa
 // @Param type query string false "事件类型"
 // @Param regardingKind query string false "相关资源类型"
 // @Success 200 {object} string
-// @Router /ai/chat/event [get]
+// @Router /mgm/plugins/ai/chat/event [get]
 func (cc *Controller) Event(c *response.Context) {
 
 	handleRequest(c, func(data any) string {
@@ -153,7 +138,7 @@ func (cc *Controller) Event(c *response.Context) {
 // @Param name query string false "资源名称"
 // @Param namespace query string false "命名空间"
 // @Success 200 {object} string
-// @Router /ai/chat/describe [get]
+// @Router /mgm/plugins/ai/chat/describe [get]
 func (cc *Controller) Describe(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	var data ResourceData
@@ -193,7 +178,7 @@ func (cc *Controller) Describe(c *response.Context) {
 // @Param version query string false "资源版本"
 // @Param kind query string false "资源类型"
 // @Success 200 {object} string
-// @Router /ai/chat/example [get]
+// @Router /mgm/plugins/ai/chat/example [get]
 func (cc *Controller) Example(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -216,7 +201,7 @@ func (cc *Controller) Example(c *response.Context) {
 // @Param kind query string false "资源类型"
 // @Param field query string false "字段名称"
 // @Success 200 {object} string
-// @Router /ai/chat/example/field [get]
+// @Router /mgm/plugins/ai/chat/example/field [get]
 func (cc *Controller) FieldExample(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -239,7 +224,7 @@ func (cc *Controller) FieldExample(c *response.Context) {
 // @Param version query string false "资源版本"
 // @Param kind query string false "资源类型"
 // @Success 200 {object} string
-// @Router /ai/chat/resource [get]
+// @Router /mgm/plugins/ai/chat/resource [get]
 func (cc *Controller) Resource(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -262,7 +247,7 @@ func (cc *Controller) Resource(c *response.Context) {
 // @Param kind query string false "资源类型"
 // @Param field query string false "相关字段"
 // @Success 200 {object} string
-// @Router /ai/chat/k8s_gpt/resource [get]
+// @Router /mgm/plugins/ai/chat/k8s_gpt/resource [get]
 func (cc *Controller) K8sGPTResource(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -283,7 +268,7 @@ func (cc *Controller) K8sGPTResource(c *response.Context) {
 // @Security BearerAuth
 // @Param question query string false "要解释的内容"
 // @Success 200 {object} string
-// @Router /ai/chat/any_selection [get]
+// @Router /mgm/plugins/ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -304,7 +289,7 @@ func (cc *Controller) AnySelection(c *response.Context) {
 // @Param kind query string false "资源类型"
 // @Param question query string false "问题内容"
 // @Success 200 {object} string
-// @Router /ai/chat/any_question [get]
+// @Router /mgm/plugins/ai/chat/any_question [get]
 func (cc *Controller) AnyQuestion(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -325,7 +310,7 @@ func (cc *Controller) AnyQuestion(c *response.Context) {
 // @Security BearerAuth
 // @Param cron query string false "Cron表达式"
 // @Success 200 {object} string
-// @Router /ai/chat/cron [get]
+// @Router /mgm/plugins/ai/chat/cron [get]
 func (cc *Controller) Cron(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -343,7 +328,7 @@ func (cc *Controller) Cron(c *response.Context) {
 // @Security BearerAuth
 // @Param data query string false "日志内容"
 // @Success 200 {object} string
-// @Router /ai/chat/log [get]
+// @Router /mgm/plugins/ai/chat/log [get]
 func (cc *Controller) Log(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -364,7 +349,7 @@ func (cc *Controller) Log(c *response.Context) {
 // 返回值：
 // - 模板字符串，如果数据库查询失败则返回内置模板内容。
 func getPromptWithFallback(ctx context.Context, promptType constants.AIPromptType) string {
-	templateStr, err := service.PromptService().GetPrompt(ctx, promptType)
+	templateStr, err := service.GetPromptService().GetPrompt(ctx, promptType)
 	if err != nil {
 		klog.Errorf("获取%s prompt模板失败: %v", promptType, err)
 		// 如果获取失败，使用内置模板
