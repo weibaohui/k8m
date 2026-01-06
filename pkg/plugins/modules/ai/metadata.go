@@ -14,7 +14,7 @@ var Metadata = plugins.Module{
 		Description: "AI功能插件，提供K8s资源智能分析、事件问诊、日志分析、Cron表达式解析等功能。支持自定义AI模型配置。",
 	},
 	Tables: []string{
-		"ai_models",
+		"ai_model_configs",
 		"ai_prompts",
 	},
 	Menus: []plugins.Menu{
