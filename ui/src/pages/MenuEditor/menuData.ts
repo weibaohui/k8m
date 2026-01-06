@@ -734,22 +734,7 @@ export const initialMenu: MenuItem[] = [
                 order: 2,
             },
 
-            {
-                key: 'ai_model_config',
-                title: 'AI模型配置',
-                icon: 'fa-solid fa-sliders',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/config/ai_model_config")',
-                order: 5,
-            },
-            {
-                key: 'ai_prompt_management',
-                title: 'AI提示词管理',
-                icon: 'fa-solid fa-comment-dots',
-                eventType: 'custom',
-                customEvent: '() => loadJsonPage("/ai/ai_prompt")',
-                order: 4.5,
-            },
+            
             {
                 key: 'user_management',
                 title: '用户管理',
