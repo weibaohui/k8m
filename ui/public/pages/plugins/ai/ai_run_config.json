@@ -1,8 +1,9 @@
 {
-  "title": "AI运行配置",
+  "type": "page",
   "body": [
     {
       "type": "form",
+      "title": "AI运行配置",
       "api": {
         "method": "post",
         "url": "/admin/plugins/ai/run_config"

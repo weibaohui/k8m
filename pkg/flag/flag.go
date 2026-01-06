@@ -43,7 +43,6 @@ type Config struct {
 
 	EnableSwagger        bool   // 是否启用Swagger文档，默认开启
 	ConnectCluster       bool   // 启动程序后，是否自动连接发现的集群，默认关闭
-	UseBuiltInModel      bool   // 是否使用内置大模型参数，默认开启
 	ProductName          string // 产品名称，默认为K8M
 	ResourceCacheTimeout int    // 资源缓存时间（秒）
 
@@ -82,12 +81,6 @@ type Config struct {
 	LdapAnonymousQuery  int    // 是否允许匿名查询LDAP
 	LdapUserField       string // LDAP用户字段
 	LdapLogin2AuthClose bool   // LDAP登录后是否关闭认证
-
-	// 集群管理参数
-	HeartbeatIntervalSeconds    int // 心跳间隔时间（秒）
-	HeartbeatFailureThreshold   int // 心跳失败阈值
-	ReconnectMaxIntervalSeconds int // 重连最大间隔时间（秒）
-	MaxRetryAttempts            int // 最大重试次数，默认100次
 
 	// Lease 同步参数
 	LeaseNamespace            string // Lease 所在命名空间，默认自动检测
@@ -265,12 +258,6 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.PgTimeZone, "pg-timezone", defaultPgTimeZone, "PostgreSQL时区")
 	pflag.BoolVar(&c.PgLogMode, "pg-logmode", defaultPgLogMode, "PostgreSQL日志模式")
 
-	// 集群管理参数
-	pflag.IntVar(&c.HeartbeatIntervalSeconds, "heartbeat-interval", getEnvAsInt("HEARTBEAT_INTERVAL", 30), "心跳间隔时间（秒），默认30秒")
-	pflag.IntVar(&c.HeartbeatFailureThreshold, "heartbeat-failure-threshold", getEnvAsInt("HEARTBEAT_FAILURE_THRESHOLD", 3), "心跳失败阈值，默认3次")
-	pflag.IntVar(&c.ReconnectMaxIntervalSeconds, "reconnect-max-interval", getEnvAsInt("RECONNECT_MAX_INTERVAL", 3600), "重连最大间隔时间（秒），默认3600秒")
-	pflag.IntVar(&c.MaxRetryAttempts, "max-retry-attempts", getEnvAsInt("MAX_RETRY_ATTEMPTS", 100), "最大重试次数，默认100次")
-
 	// Lease 同步参数
 	pflag.StringVar(&c.HostClusterID, "host-cluster-id", getEnv("HOST_CLUSTER_ID", ""), "为空会使用InCluster模式，否则会使用HostClusterID指定的集群。集群ID从k8m界面-多集群管理中复制")
 	pflag.StringVar(&c.LeaseNamespace, "lease-namespace", getEnv("LEASE_NAMESPACE", ""), "Lease 命名空间，默认自动检测")
@@ -317,16 +304,6 @@ func getEnvAsBool(key string, defaultValue bool) bool {
 	if value, exists := os.LookupEnv(key); exists {
 		if boolValue, err := strconv.ParseBool(value); err == nil {
 			return boolValue
-		}
-	}
-	return defaultValue
-}
-
-// getEnvAsInt32 返回指定环境变量的 int32 类型值，不存在或解析失败时返回默认值。
-func getEnvAsInt32(key string, defaultValue int32) int32 {
-	if value, exists := os.LookupEnv(key); exists {
-		if intValue, err := strconv.ParseInt(value, 10, 32); err == nil {
-			return int32(intValue)
 		}
 	}
 	return defaultValue

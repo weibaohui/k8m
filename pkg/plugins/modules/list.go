@@ -14,4 +14,5 @@ const (
 	PluginNameK8mMcpServer = "k8m_mcp_server"
 	PluginNameK8sGPT       = "k8sgpt"
 	PluginNameAI           = "ai"
+	PluginNameHeartbeat    = "heartbeat"
 )

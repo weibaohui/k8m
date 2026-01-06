@@ -17,6 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
+	heartbeatinterface "github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat/interface"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/analysis"
 	"github.com/weibaohui/kom/kom"
 	komaws "github.com/weibaohui/kom/kom/aws"
@@ -31,43 +32,17 @@ type clusterService struct {
 	clusterConfigs        []*ClusterConfig                    // 文件名+context名称 -> 集群配置
 	AggregateDelaySeconds int                                 // 聚合延迟时间
 	callbackRegisterFunc  func(cluster *ClusterConfig) func() // 用来注册回调参数的回调方法
-	// 心跳管理
-	heartbeatCancel           sync.Map // 心跳取消函数，改为sync.Map
-	HeartbeatIntervalSeconds  int      // 心跳间隔秒数，默认30
-	HeartbeatFailureThreshold int      // 心跳失败阈值，默认3
-
-	// 自动重连管理
-	reconnectCancel             sync.Map // 自动重连取消函数，改为sync.Map
-	ReconnectMaxIntervalSeconds int      // 自动重连最大退避秒数，默认3600
-	MaxRetryAttempts            int      // 最大重试次数，默认100次
-
 }
 
 func newClusterService() *clusterService {
-	cfg := flag.Init()
 	// Service.ClusterService()使用了init启动，那么会优先于main函数中的执行逻辑（config update from db）
 	// 导致return 实例的时候，使用的是cfg中的默认值
 	// 因此我们在下面加载下数据库中的配置，确保在后台管理界面中设置的值，是生效的
 	_ = ConfigService().UpdateFlagFromDBConfig()
 	return &clusterService{
-		clusterConfigs:              []*ClusterConfig{},
-		AggregateDelaySeconds:       61,
-		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
-		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
-		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
-		MaxRetryAttempts:            cfg.MaxRetryAttempts,
+		clusterConfigs:        []*ClusterConfig{},
+		AggregateDelaySeconds: 61,
 	}
-}
-
-func (c *clusterService) UpdateHeartbeatSettings() {
-	cfg := flag.Init()
-
-	c.HeartbeatIntervalSeconds = cfg.HeartbeatIntervalSeconds
-	c.HeartbeatFailureThreshold = cfg.HeartbeatFailureThreshold
-	c.ReconnectMaxIntervalSeconds = cfg.ReconnectMaxIntervalSeconds
-	c.MaxRetryAttempts = cfg.MaxRetryAttempts
-	klog.V(4).Infof("更新集群心跳和重连配置：心跳间隔 %d 秒，心跳失败阈值 %d，重连最大间隔 %d 秒，最大重试次数 %d",
-		c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold, c.ReconnectMaxIntervalSeconds, c.MaxRetryAttempts)
 }
 
 func (c *clusterService) SetRegisterCallbackFunc(callback func(cluster *ClusterConfig) func()) {
@@ -83,6 +58,7 @@ type ClusterConfig struct {
 	Server                  string                         `json:"server,omitempty"`            // 集群地址
 	ServerVersion           string                         `json:"serverVersion,omitempty"`     // 通过这个值来判断集群是否可用
 	HeartbeatHistory        []HeartbeatRecord              `json:"heartbeat_history,omitempty"`
+	HeartbeatMu             sync.RWMutex                   // 保护HeartbeatHistory的读写锁
 	UserName                string                         `json:"userName,omitempty"`                // 用户名
 	Namespace               string                         `json:"namespace,omitempty"`               // kubeconfig 限制Namespace
 	Err                     string                         `json:"err,omitempty"`                     // 连接错误信息
@@ -132,35 +108,6 @@ type HeartbeatRecord struct {
 	Index   int    `json:"index"`
 	Success bool   `json:"success"`
 	Time    string `json:"time"`
-}
-
-// appendHeartbeatRecord 追加一条心跳记录，并裁剪为阈值长度
-// 中文函数注释：将成功/失败结果与本地时间写入 HeartbeatHistory，保持长度不超过阈值
-func (c *clusterService) appendHeartbeatRecord(cluster *ClusterConfig, success bool, ts time.Time) {
-	if cluster == nil {
-		return
-	}
-	if cluster.HeartbeatHistory == nil {
-		cluster.HeartbeatHistory = make([]HeartbeatRecord, 0)
-	}
-	// 追加一条记录
-	rec := HeartbeatRecord{
-		Success: success,
-		Time:    ts.Local().Format("2006-01-02 15:04:05"),
-	}
-	cluster.HeartbeatHistory = append(cluster.HeartbeatHistory, rec)
-	// 裁剪为最近阈值条目
-	threshold := c.HeartbeatFailureThreshold
-	if threshold <= 0 {
-		threshold = 3 // 兜底：默认 3 次
-	}
-	if len(cluster.HeartbeatHistory) > threshold {
-		cluster.HeartbeatHistory = cluster.HeartbeatHistory[len(cluster.HeartbeatHistory)-threshold:]
-	}
-	// 重新标注窗口内的序号为 1..N
-	for i := range cluster.HeartbeatHistory {
-		cluster.HeartbeatHistory[i].Index = i + 1
-	}
 }
 
 // SetClusterWatchStarted 设置集群Watch启动状态
@@ -401,11 +348,15 @@ func (c *clusterService) disconnectWithOption(clusterID string, stopReconnect bo
 	if cc == nil {
 		return
 	}
-	// 停止心跳
-	c.StopHeartbeat(clusterID)
-	// 根据需要停止自动重连
+	// 停止心跳（使用插件）
+	if heartbeatManager := heartbeatinterface.GlobalHeartbeatManager; heartbeatManager != nil {
+		heartbeatManager.StopHeartbeat(clusterID)
+	}
+	// 根据需要停止自动重连（使用插件）
 	if stopReconnect {
-		c.StopReconnect(clusterID)
+		if heartbeatManager := heartbeatinterface.GlobalHeartbeatManager; heartbeatManager != nil {
+			heartbeatManager.StopReconnect(clusterID)
+		}
 	}
 	// 清理本地状态
 	cc.ServerVersion = ""
@@ -776,7 +727,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 		} else {
 			// 集群外模式
 			opts := c.buildRegisterOptions(clusterConfig)
-			if _, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID, opts...); err != nil {
+			if _, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.GetRestConfig(), clusterID, opts...); err != nil {
 				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
 				clusterConfig.Err = err.Error()
 				return false, err // 保持"连接中"状态
@@ -789,8 +740,12 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 	clusterConfig.Err = "" // 清除错误信息
 
-	// 启动心跳监测
-	c.StartHeartbeat(clusterID)
+	// 启动心跳（使用插件）
+	if heartbeatManager := heartbeatinterface.GlobalHeartbeatManager; heartbeatManager != nil {
+		heartbeatManager.StartHeartbeat(clusterID)
+	} else {
+		klog.V(6).Infof("心跳插件未启用，跳过心跳启动")
+	}
 
 	// 执行回调注册
 	if c.callbackRegisterFunc != nil {
@@ -1111,211 +1066,4 @@ func (c *clusterService) UpdateClusterConfig(dbID uint, proxyURL string, timeout
 	}
 
 	return nil
-}
-
-// StartHeartbeat 启动心跳任务
-// @Description 周期性检测集群连通性并记录心跳历史；当心跳失败次数达到阈值时，自动取消当前心跳、清理历史并执行重连。
-// @Param clusterID 集群ID
-func (c *clusterService) StartHeartbeat(clusterID string) {
-	// 初始化心跳配置默认值
-	if c.HeartbeatIntervalSeconds <= 0 {
-		c.HeartbeatIntervalSeconds = 30
-	}
-	if c.HeartbeatFailureThreshold <= 0 {
-		c.HeartbeatFailureThreshold = 3
-	}
-
-	// 如果已有心跳，先停止
-	if cancelInterface, ok := c.heartbeatCancel.Load(clusterID); ok {
-		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
-			cancel()
-		}
-		c.heartbeatCancel.Delete(clusterID)
-	}
-
-	cluster := c.GetClusterByID(clusterID)
-	if cluster == nil {
-		klog.V(6).Infof("启动心跳失败：未找到集群 %s", clusterID)
-		return
-	}
-	// 仅在已连接时启动心跳
-	if cluster.ClusterConnectStatus != constants.ClusterConnectStatusConnected {
-		klog.V(6).Infof("集群 %s 非已连接状态，心跳不启动", clusterID)
-		return
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	c.heartbeatCancel.Store(clusterID, cancel)
-
-	interval := time.Duration(c.HeartbeatIntervalSeconds) * time.Second
-	ticker := time.NewTicker(interval)
-	klog.V(6).Infof("集群 %s 心跳启动，间隔 %ds，失败阈值 %d，自动重连最大退避秒数 %ds", clusterID, c.HeartbeatIntervalSeconds, c.HeartbeatFailureThreshold, c.ReconnectMaxIntervalSeconds)
-
-	go func() {
-		defer ticker.Stop()
-		failureCount := 0
-		for {
-			select {
-			case <-ctx.Done():
-				klog.V(6).Infof("集群 %s 心跳已停止", clusterID)
-				return
-			case <-ticker.C:
-				// 若集群不再是已连接状态，则停止心跳
-				if cluster.ClusterConnectStatus != constants.ClusterConnectStatusConnected {
-					klog.V(6).Infof("集群 %s 心跳检测：状态已非已连接，停止心跳", clusterID)
-
-					cancel()
-					return
-				}
-				// restConfig 必须存在
-				if cluster.restConfig == nil {
-					failureCount++
-					klog.V(6).Infof("集群 %s 心跳检测失败：restConfig 不存在（累计失败 %d）", clusterID, failureCount)
-					// 记录本次心跳失败
-					c.appendHeartbeatRecord(cluster, false, time.Now())
-				} else {
-					clientset, err := kubernetes.NewForConfig(cluster.restConfig)
-					if err != nil {
-						failureCount++
-						klog.V(6).Infof("集群 %s 创建 clientset 失败：%v（累计失败 %d）", clusterID, err, failureCount)
-						// 记录本次心跳失败
-						c.appendHeartbeatRecord(cluster, false, time.Now())
-					} else {
-						sv, err := clientset.Discovery().ServerVersion()
-						if err != nil {
-							failureCount++
-							klog.V(6).Infof("集群 %s 心跳检测读取版本失败：%v（累计失败 %d）", clusterID, err, failureCount)
-							cluster.Err = err.Error()
-							// 记录本次心跳失败
-							c.appendHeartbeatRecord(cluster, false, time.Now())
-						} else {
-							// 成功，重置失败计数并同步版本
-							failureCount = 0
-							if sv != nil {
-								cluster.ServerVersion = sv.GitVersion
-							}
-							klog.V(6).Infof("集群 %s 心跳检测成功，当前版本：%s", clusterID, cluster.ServerVersion)
-							// 记录本次心跳成功
-							c.appendHeartbeatRecord(cluster, true, time.Now())
-						}
-					}
-				}
-
-				if failureCount >= c.HeartbeatFailureThreshold {
-					// 达到失败阈值，切换为断开并停止心跳，并启动独立的自动重连循环
-					cluster.ClusterConnectStatus = constants.ClusterConnectStatusDisconnected
-					klog.V(6).Infof("集群 %s 心跳连续失败达到阈值，状态切换为未连接，启动自动重连循环", clusterID)
-
-					// 停止当前心跳循环
-					cancel()
-
-					// 启动自动重连循环（退避重试直到成功或被停止）
-					c.StartReconnect(clusterID)
-					return
-				}
-			}
-		}
-	}()
-}
-
-// StopHeartbeat 停止指定集群的心跳任务
-// @Description 若心跳存在则停止并清理取消函数。
-func (c *clusterService) StopHeartbeat(clusterID string) {
-	if cancelInterface, ok := c.heartbeatCancel.Load(clusterID); ok {
-		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
-			cancel()
-		}
-		c.heartbeatCancel.Delete(clusterID)
-		klog.V(6).Infof("集群 %s 心跳任务已停止", clusterID)
-	}
-}
-
-// StartReconnect 启动指定集群的自动重连循环
-// 中文函数注释：当集群处于不可用状态时，周期性地执行“先断开清理、再尝试连接”，并采用指数退避策略（最大退避秒数可配置）；
-// 当检测到集群成功连接后，自动结束重连循环。日志均为中文，便于观察。
-func (c *clusterService) StartReconnect(clusterID string) {
-	// 初始化重连配置默认值
-	if c.ReconnectMaxIntervalSeconds <= 0 {
-		c.ReconnectMaxIntervalSeconds = 3600
-	}
-
-	// 若已有自动重连任务，先停止
-	if cancelInterface, ok := c.reconnectCancel.Load(clusterID); ok {
-		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
-			cancel()
-		}
-		c.reconnectCancel.Delete(clusterID)
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	c.reconnectCancel.Store(clusterID, cancel)
-
-	klog.V(6).Infof("集群 %s 自动重连循环启动（最大退避 %ds，最大重试次数 %d）", clusterID, c.ReconnectMaxIntervalSeconds, c.MaxRetryAttempts)
-
-	go func(id string) {
-		attempt := 0
-		backoff := 1 // 初始退避秒数
-		maxIntervalSeconds := c.ReconnectMaxIntervalSeconds
-		maxRetryAttempts := c.MaxRetryAttempts
-		// 如果最大重试次数小于等于0，则设置默认值100
-		if maxRetryAttempts <= 0 {
-			maxRetryAttempts = 100
-		}
-
-		for {
-			select {
-			case <-ctx.Done():
-				klog.V(6).Infof("集群 %s 自动重连循环已停止", id)
-				return
-			default:
-			}
-
-			// 若已连接则结束重连
-			if c.IsConnected(id) {
-				klog.V(6).Infof("集群 %s 已连接，自动重连循环结束", id)
-				cancel()
-				c.reconnectCancel.Delete(id)
-				return
-			}
-
-			attempt++
-			// 检查是否超过最大重试次数
-			if attempt > maxRetryAttempts {
-				klog.V(6).Infof("集群 %s 自动重连已达到最大重试次数 %d，停止重连", id, maxRetryAttempts)
-				cancel()
-				c.reconnectCancel.Delete(id)
-				return
-			}
-
-			klog.V(6).Infof("集群 %s 自动重连第 %d 次尝试：先断开清理后重连", id, attempt)
-
-			// 尝试连接
-			c.Connect(id)
-
-			// 若连接成功，结束重连循环
-			if c.IsConnected(id) {
-				klog.V(6).Infof("集群 %s 自动重连成功", id)
-				cancel()
-				c.reconnectCancel.Delete(id)
-				return
-			}
-
-			// 指数退避，封顶
-			backoff = min(backoff*2, maxIntervalSeconds)
-			klog.V(6).Infof("集群 %s 自动重连失败，%ds 后重试", id, backoff)
-			time.Sleep(time.Duration(backoff) * time.Second)
-		}
-	}(clusterID)
-}
-
-// StopReconnect 停止指定集群的自动重连循环
-// 中文函数注释：若自动重连循环存在则停止，并清理取消函数。
-func (c *clusterService) StopReconnect(clusterID string) {
-	if cancelInterface, ok := c.reconnectCancel.Load(clusterID); ok {
-		if cancel, ok := cancelInterface.(context.CancelFunc); ok && cancel != nil {
-			cancel()
-		}
-		c.reconnectCancel.Delete(clusterID)
-		klog.V(6).Infof("集群 %s 自动重连循环已停止", clusterID)
-	}
 }

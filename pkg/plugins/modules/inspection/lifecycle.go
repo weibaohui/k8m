@@ -1,6 +1,8 @@
 package inspection
 
 import (
+	"context"
+
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
@@ -11,7 +13,9 @@ import (
 
 // InspectionLifecycle 巡检插件生命周期实现
 // 数据库迁移由插件自身负责（通过 InitDB/UpgradeDB），巡检任务调度则由 leader 插件在成为 Leader 时按插件状态调用 lua.InitClusterInspection 完成。
-type InspectionLifecycle struct{}
+type InspectionLifecycle struct {
+	leaderWatchCancel context.CancelFunc
+}
 
 func (l *InspectionLifecycle) Install(ctx plugins.InstallContext) error {
 	klog.V(6).Infof("安装集群巡检插件")
@@ -43,6 +47,12 @@ func (l *InspectionLifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *InspectionLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用集群巡检插件")
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
 	return nil
 }
 
@@ -62,7 +72,10 @@ func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
 	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
-		//监听两个channel，根据channel的信号启动或停止事件转发
+
+		leaderWatchCtx, cancel := context.WithCancel(context.Background())
+		l.leaderWatchCancel = cancel
+
 		go func() {
 			for {
 				select {
@@ -72,12 +85,14 @@ func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
 				case <-lost:
 					lua.StopClusterInspection()
 					klog.V(6).Infof("不再是Leader，停止集群巡检任务")
+				case <-leaderWatchCtx.Done():
+					klog.V(6).Infof("巡检插件 Leader 监听 goroutine 退出")
+					return
 				}
 			}
 		}()
 		klog.V(6).Infof("根据实例Leader获取状态启动集群巡检插件后台任务")
 	} else {
-		//没有启动Leader插件，直接启动事件转发
 		lua.InitClusterInspection()
 		klog.V(6).Infof("启动集群巡检插件后台任务")
 	}

@@ -42,6 +42,12 @@ func (l *LeaderLifecycle) Enable(ctx plugins.EnableContext) error {
 // 禁用阶段仅打印日志；选举停止与任务收敛由选举停止回调处理
 func (l *LeaderLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用Leader选举插件")
+
+	if l.cleanupCancel != nil {
+		l.cleanupCancel()
+		l.cleanupCancel = nil
+	}
+
 	return nil
 }
 
@@ -56,6 +62,9 @@ func (l *LeaderLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 // 由插件管理器在系统启动时统一调用，用于启动选举并在成为Leader时执行平台任务
 func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动Leader选举插件后台任务")
+
+	electionCtx, cancel := context.WithCancel(context.Background())
+	l.cleanupCancel = cancel
 
 	go func() {
 		leaderCfg := Config{
@@ -78,8 +87,7 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 				})
 			},
 		}
-		bg := context.Background()
-		if err := Run(bg, leaderCfg); err != nil {
+		if err := Run(electionCtx, leaderCfg); err != nil {
 			klog.V(6).Infof("Leader选举失败: %v", err)
 		}
 	}()
