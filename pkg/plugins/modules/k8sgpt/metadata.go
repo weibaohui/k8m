@@ -33,6 +33,7 @@ var Metadata = plugins.Module{
 			},
 		},
 	},
+	Dependencies:     []string{modules.PluginNameAI},
 	Lifecycle:        &K8sGPTLifecycle{},
 	ClusterRouter:    route.RegisterClusterRoutes,
 	ManagementRouter: route.RegisterMgmRoutes,

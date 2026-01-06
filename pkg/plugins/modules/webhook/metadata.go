@@ -45,6 +45,7 @@ var Metadata = plugins.Module{
 			},
 		},
 	},
+	RunAfter:          []string{modules.PluginNameAI},
 	Lifecycle:         &WebhookLifecycle{},
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 }

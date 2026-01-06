@@ -83,7 +83,7 @@ var Metadata = plugins.Module{
 	Dependencies: []string{
 		modules.PluginNameWebhook,
 	},
-	RunAfter:          []string{modules.PluginNameLeader},
+	RunAfter:          []string{modules.PluginNameLeader, modules.PluginNameAI},
 	Lifecycle:         &InspectionLifecycle{},
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
 }
