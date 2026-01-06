@@ -9,14 +9,14 @@ import (
 var Metadata = plugins.Module{
 	Meta: plugins.Meta{
 		Name:        modules.PluginNameHeartbeat,
-		Title:       "集群心跳检测",
+		Title:       "集群心跳重连插件",
 		Version:     "1.0.0",
 		Description: "管理集群心跳检测和自动重连功能",
 	},
 	Menus: []plugins.Menu{
 		{
 			Key:   "plugin_heartbeat_index",
-			Title: "心跳检测",
+			Title: "心跳重连管理",
 			Icon:  "fa-solid fa-heartbeat",
 			Order: 15,
 			Children: []plugins.Menu{
