@@ -77,8 +77,6 @@ func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 				case <-lost:
 					StopLeaderWatch()
 					klog.V(6).Infof("不再是Leader，停止事件转发")
-				case <-lost:
-					StopLeaderWatch()
 				}
 			}
 		}()

@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/service"
+	"k8s.io/klog/v2"
 )
 
 // HeartbeatConfig 心跳配置结构
@@ -46,14 +48,42 @@ func SaveHeartbeatConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 保存配置到全局标志变量
-	cfg := flag.Init()
-	cfg.HeartbeatIntervalSeconds = config.HeartbeatIntervalSeconds
-	cfg.HeartbeatFailureThreshold = config.HeartbeatFailureThreshold
-	cfg.ReconnectMaxIntervalSeconds = config.ReconnectMaxIntervalSeconds
-	cfg.MaxRetryAttempts = config.MaxRetryAttempts
+	// 获取当前数据库配置
+	dbConfig, err := service.ConfigService().GetConfig()
+	if err != nil {
+		klog.V(6).Infof("获取数据库配置失败: %v", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"code": 1,
+			"msg":  "获取配置失败: " + err.Error(),
+		})
+		return
+	}
 
-	// 这里应该添加保存到配置文件的逻辑
+	// 更新心跳相关配置
+	dbConfig.HeartbeatIntervalSeconds = config.HeartbeatIntervalSeconds
+	dbConfig.HeartbeatFailureThreshold = config.HeartbeatFailureThreshold
+	dbConfig.ReconnectMaxIntervalSeconds = config.ReconnectMaxIntervalSeconds
+	dbConfig.MaxRetryAttempts = config.MaxRetryAttempts
+
+	// 保存到数据库
+	if err := service.ConfigService().UpdateConfig(dbConfig); err != nil {
+		klog.V(6).Infof("保存心跳配置失败: %v", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"code": 1,
+			"msg":  "保存配置失败: " + err.Error(),
+		})
+		return
+	}
+
+	klog.V(6).Infof("心跳配置已保存: 间隔=%d秒, 失败阈值=%d, 最大重连间隔=%d秒, 最大重试次数=%d",
+		config.HeartbeatIntervalSeconds,
+		config.HeartbeatFailureThreshold,
+		config.ReconnectMaxIntervalSeconds,
+		config.MaxRetryAttempts)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
