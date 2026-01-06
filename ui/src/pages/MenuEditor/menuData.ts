@@ -747,7 +747,7 @@ export const initialMenu: MenuItem[] = [
                 title: 'AI提示词管理',
                 icon: 'fa-solid fa-comment-dots',
                 eventType: 'custom',
-                customEvent: '() => loadJsonPage("/admin/ai_prompt")',
+                customEvent: '() => loadJsonPage("/ai/ai_prompt")',
                 order: 4.5,
             },
             {

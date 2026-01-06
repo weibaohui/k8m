@@ -106,7 +106,7 @@ const GlobalTextSelector: React.FC = () => {
                         {
                             amisRender({
                                 "type": "websocketMarkdownViewer",
-                                "url": "/ai/chat/any_selection",
+                                "url": "/mgm/plugins/ai/chat/any_selection",
                                 "params": {
                                     "question": selection.text
                                 },

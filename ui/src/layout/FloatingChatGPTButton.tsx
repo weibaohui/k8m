@@ -90,7 +90,7 @@ const FloatingChatGPTButton = () => {
             >
                 {amisRender({
                     type: "chatgpt",
-                    url: "/ai/chat/ws_chatgpt",
+                    url: "/mgm/plugins/ai/chat/ws_chatgpt",
                 })}
             </Drawer>
         </>
