@@ -43,5 +43,12 @@ func RegisterPluginAdminRoutes(arg chi.Router) {
 	arg.Post(prefix+"/ai_prompt/toggle/{id}", response.Adapter(ac.AIPromptToggle))                  // 添加启用/禁用路由
 	arg.Post(prefix+"/ai_prompt/id/{id}/enabled/{enabled}", response.Adapter(ac.AIPromptQuickSave)) // 快捷保存启用状态
 
-	klog.V(6).Infof("注册 AI 插件 提示词 管理路由")
+	amc := &controller.AIModelConfigController{}
+	arg.Get(prefix+"/model/list", response.Adapter(amc.List))
+	arg.Post(prefix+"/model/save", response.Adapter(amc.Save))
+	arg.Post(prefix+"/model/delete/{ids}", response.Adapter(amc.Delete))
+	arg.Post(prefix+"/model/id/{id}/think/{status}", response.Adapter(amc.QuickSave))
+	arg.Post(prefix+"/model/test/id/{id}", response.Adapter(amc.TestConnection))
+
+	klog.V(6).Infof("注册 AI 插件 admin管理路由")
 }

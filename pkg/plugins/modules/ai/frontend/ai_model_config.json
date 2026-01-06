@@ -23,7 +23,7 @@
             "title": "新建AI模型配置 (ESC 关闭)",
             "body": {
               "type": "form",
-              "api": "post:/admin/ai/model/save",
+              "api": "post:/admin/plugins/ai/model/save",
               "body": [
                 {
                   "name": "api_url",
@@ -127,7 +127,7 @@
           "label": "批量删除",
           "actionType": "ajax",
           "confirmText": "确定要批量删除?",
-          "api": "post:/admin/ai/model/delete/${ids}"
+          "api": "post:/admin/plugins/ai/model/delete/${ids}"
         }
       ],
       "footerToolbar": [
@@ -144,8 +144,8 @@
           "align": "right"
         }
       ],
-      "api": "get:/admin/ai/model/list",
-      "quickSaveItemApi": "/admin/ai/model/id/${id}/think/${think}",
+      "api": "get:/admin/plugins/ai/model/list",
+      "quickSaveItemApi": "/admin/plugins/ai/model/id/${id}/think/${think}",
       "columns": [
         {
           "type": "operation",
@@ -157,7 +157,7 @@
               "icon": "fas fa-vial text-info",
               "tooltip": "测试联通性",
               "actionType": "ajax",
-              "api": "post:/admin/ai/model/test/id/${id}"
+              "api": "post:/admin/plugins/ai/model/test/id/${id}"
             },
             {
               "type": "button",
@@ -170,7 +170,7 @@
                 "title": "编辑大模型配置  (ESC 关闭)",
                 "body": {
                   "type": "form",
-                  "api": "post:/admin/ai/model/save",
+                  "api": "post:/admin/plugins/ai/model/save",
                   "body": [
                     {
                       "type": "hidden",

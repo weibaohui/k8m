@@ -30,7 +30,7 @@ var Metadata = plugins.Module{
 					Icon:        "fa-solid fa-robot",
 					Show:        "isPlatformAdmin()==true",
 					EventType:   "custom",
-					CustomEvent: `() => loadJsonPage("/admin/config/ai_model_config")`,
+					CustomEvent: `() => loadJsonPage("/plugins/ai/ai_model_config")`,
 					Order:       10,
 				},
 				{
@@ -39,7 +39,7 @@ var Metadata = plugins.Module{
 					Icon:        "fa-solid fa-wand-magic-sparkles",
 					Show:        "isPlatformAdmin()==true",
 					EventType:   "custom",
-					CustomEvent: `() => loadJsonPage("/admin/config/ai_prompt_config")`,
+					CustomEvent: `() => loadJsonPage("/plugins/ai/ai_prompt")`,
 					Order:       20,
 				},
 			},
