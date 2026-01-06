@@ -101,7 +101,7 @@
                           "body": [
                             {
                               "type": "websocketMarkdownViewer",
-                              "url": "/ai/chat/example/field",
+                              "url": "/mgm/plugins/ai/chat/example/field",
                               "params": {
                                 "kind": "${kind}",
                                 "group": "${group}",
@@ -177,7 +177,7 @@
             "body": [
               {
                 "type": "websocketMarkdownViewer",
-                "url": "/ai/chat/example",
+                "url": "/mgm/plugins/ai/chat/example",
                 "params": {
                   "kind": "${kind}",
                   "group": "${group}",
@@ -378,7 +378,7 @@
                           "body": [
                             {
                               "type": "websocketMarkdownViewer",
-                              "url": "/ai/chat/describe",
+                              "url": "/mgm/plugins/ai/chat/describe",
                               "params": {
                                 "kind": "${kind}",
                                 "group": "${group}",
@@ -517,7 +517,7 @@
                                       "body": [
                                         {
                                           "type": "websocketMarkdownViewer",
-                                          "url": "/ai/chat/example/field",
+                                          "url": "/mgm/plugins/ai/chat/example/field",
                                           "params": {
                                             "kind": "${kind}",
                                             "group": "${group}",

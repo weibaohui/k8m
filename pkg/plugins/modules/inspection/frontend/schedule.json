@@ -443,7 +443,7 @@
                 "body": [
                   {
                     "type": "websocketMarkdownViewer",
-                    "url": "/ai/chat/cron",
+                    "url": "/mgm/plugins/ai/chat/cron",
                     "params": {
                       "cron": "${cron}"
                     }

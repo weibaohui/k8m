@@ -32,7 +32,7 @@ var WebsocketMessageType = map[int]string{
 // @Param resource query string false "资源类型"
 // @Param content query string false "对话内容"
 // @Success 101 {string} string "Switching Protocols"
-// @Router /ai/chat/gptshell [get]
+// @Router /mgm/plugins/ai/chat/gptshell [get]
 // GPTShell 通过 WebSocket 提供与 ChatGPT 及工具集成的交互式对话终端。
 //
 // 该函数升级 HTTP 连接为 WebSocket，维持心跳检测，实现双向消息流转：

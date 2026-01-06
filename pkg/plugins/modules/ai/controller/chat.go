@@ -129,7 +129,7 @@ func renderTemplate(templateStr string, data any, contextBuilder func(ResourceDa
 // @Param type query string false "事件类型"
 // @Param regardingKind query string false "相关资源类型"
 // @Success 200 {object} string
-// @Router /ai/chat/event [get]
+// @Router /mgm/plugins/ai/chat/event [get]
 func (cc *Controller) Event(c *response.Context) {
 
 	handleRequest(c, func(data any) string {
@@ -156,7 +156,7 @@ func (cc *Controller) Event(c *response.Context) {
 // @Param name query string false "资源名称"
 // @Param namespace query string false "命名空间"
 // @Success 200 {object} string
-// @Router /ai/chat/describe [get]
+// @Router /mgm/plugins/ai/chat/describe [get]
 func (cc *Controller) Describe(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	var data ResourceData
@@ -196,7 +196,7 @@ func (cc *Controller) Describe(c *response.Context) {
 // @Param version query string false "资源版本"
 // @Param kind query string false "资源类型"
 // @Success 200 {object} string
-// @Router /ai/chat/example [get]
+// @Router /mgm/plugins/ai/chat/example [get]
 func (cc *Controller) Example(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -219,7 +219,7 @@ func (cc *Controller) Example(c *response.Context) {
 // @Param kind query string false "资源类型"
 // @Param field query string false "字段名称"
 // @Success 200 {object} string
-// @Router /ai/chat/example/field [get]
+// @Router /mgm/plugins/ai/chat/example/field [get]
 func (cc *Controller) FieldExample(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -242,7 +242,7 @@ func (cc *Controller) FieldExample(c *response.Context) {
 // @Param version query string false "资源版本"
 // @Param kind query string false "资源类型"
 // @Success 200 {object} string
-// @Router /ai/chat/resource [get]
+// @Router /mgm/plugins/ai/chat/resource [get]
 func (cc *Controller) Resource(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -265,7 +265,7 @@ func (cc *Controller) Resource(c *response.Context) {
 // @Param kind query string false "资源类型"
 // @Param field query string false "相关字段"
 // @Success 200 {object} string
-// @Router /ai/chat/k8s_gpt/resource [get]
+// @Router /mgm/plugins/ai/chat/k8s_gpt/resource [get]
 func (cc *Controller) K8sGPTResource(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -286,7 +286,7 @@ func (cc *Controller) K8sGPTResource(c *response.Context) {
 // @Security BearerAuth
 // @Param question query string false "要解释的内容"
 // @Success 200 {object} string
-// @Router /ai/chat/any_selection [get]
+// @Router /mgm/plugins/ai/chat/any_selection [get]
 func (cc *Controller) AnySelection(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -307,7 +307,7 @@ func (cc *Controller) AnySelection(c *response.Context) {
 // @Param kind query string false "资源类型"
 // @Param question query string false "问题内容"
 // @Success 200 {object} string
-// @Router /ai/chat/any_question [get]
+// @Router /mgm/plugins/ai/chat/any_question [get]
 func (cc *Controller) AnyQuestion(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -328,7 +328,7 @@ func (cc *Controller) AnyQuestion(c *response.Context) {
 // @Security BearerAuth
 // @Param cron query string false "Cron表达式"
 // @Success 200 {object} string
-// @Router /ai/chat/cron [get]
+// @Router /mgm/plugins/ai/chat/cron [get]
 func (cc *Controller) Cron(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板
@@ -346,7 +346,7 @@ func (cc *Controller) Cron(c *response.Context) {
 // @Security BearerAuth
 // @Param data query string false "日志内容"
 // @Success 200 {object} string
-// @Router /ai/chat/log [get]
+// @Router /mgm/plugins/ai/chat/log [get]
 func (cc *Controller) Log(c *response.Context) {
 	handleRequest(c, func(data any) string {
 		// 从数据库获取prompt模板

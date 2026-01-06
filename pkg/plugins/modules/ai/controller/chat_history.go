@@ -9,7 +9,7 @@ import (
 // @Summary 获取聊天历史记录
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /ai/chat/history [get]
+// @Router /mgm/plugins/ai/chat/history [get]
 func (cc *Controller) History(c *response.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
@@ -26,7 +26,7 @@ func (cc *Controller) History(c *response.Context) {
 // @Summary 重置聊天历史记录
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /ai/chat/reset [post]
+// @Router /mgm/plugins/ai/chat/reset [post]
 func (cc *Controller) Reset(c *response.Context) {
 	client, err := service.AIService().DefaultClient()
 	if err != nil {
