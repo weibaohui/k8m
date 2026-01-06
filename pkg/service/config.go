@@ -54,7 +54,7 @@ func (s *configService) UpdateConfig(config *models.Config) error {
 	return nil
 }
 
-// UpdateFlagFromDBConfig 从数据库中加载配置，更新Flag方法中的值
+// UpdateFlagFromDBConfig 从数据库中加载配置，更新AI服务配置
 func (s *configService) UpdateFlagFromDBConfig() error {
 	cfg := flag.Init()
 	m, err := s.GetConfig()
@@ -62,8 +62,10 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		return err
 	}
 
-	cfg.AnySelect = m.AnySelect
-	cfg.UseBuiltInModel = m.UseBuiltInModel
+	// 更新AI服务配置
+	aiService := service.AIService()
+	aiService.AnySelect = m.AnySelect
+	aiService.UseBuiltInModel = m.UseBuiltInModel
 	if !m.UseBuiltInModel {
 		if m.ModelID == 0 {
 			klog.Errorf("UpdateFlagFromDBConfig 未指定有效的模型ID")
@@ -77,15 +79,15 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		if err != nil {
 			return err
 		}
-		cfg.ApiKey = modelConfig.ApiKey
-		cfg.ApiModel = modelConfig.ApiModel
-		cfg.ApiURL = modelConfig.ApiURL
-		cfg.Think = modelConfig.Think
+		aiService.ApiKey = modelConfig.ApiKey
+		aiService.ApiModel = modelConfig.ApiModel
+		aiService.ApiURL = modelConfig.ApiURL
+		aiService.Think = modelConfig.Think
 		if modelConfig.Temperature > 0 {
-			cfg.Temperature = modelConfig.Temperature
+			aiService.Temperature = modelConfig.Temperature
 		}
 		if modelConfig.TopP > 0 {
-			cfg.TopP = modelConfig.TopP
+			aiService.TopP = modelConfig.TopP
 		}
 	}
 
@@ -116,9 +118,11 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 
 	if m.MaxHistory > 0 {
 		cfg.MaxHistory = m.MaxHistory
+		aiService.MaxHistory = m.MaxHistory
 	}
 	if m.MaxIterations > 0 {
 		cfg.MaxIterations = m.MaxIterations
+		aiService.MaxIterations = m.MaxIterations
 	}
 
 	// 集群管理参数

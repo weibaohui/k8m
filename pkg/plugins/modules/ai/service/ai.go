@@ -6,6 +6,8 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/core"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"k8s.io/klog/v2"
@@ -15,6 +17,17 @@ type aiService struct {
 	innerModel  string
 	innerApiKey string
 	innerApiUrl string
+	// AI配置参数
+	UseBuiltInModel bool    // 是否使用内置大模型参数
+	AnySelect       bool    // 是否开启任意选择
+	MaxHistory      int32   // 模型对话上下文历史记录数
+	MaxIterations   int32   // 模型自动对话的最大轮数
+	ApiKey          string  // 大模型的自定义API Key
+	ApiModel        string  // 大模型的自定义模型名称
+	ApiURL          string  // 大模型的自定义API URL
+	Think           bool    // AI是否开启思考过程输出
+	Temperature     float32 // 模型温度
+	TopP            float32 // 模型topP参数
 }
 
 var (
@@ -70,39 +83,36 @@ func (c *aiService) ResetDefaultClient() error {
 }
 
 func (c *aiService) openAIClient() (core.IAI, error) {
-	cfg := flag.Init()
-
 	aiProvider := core.Provider{
 		Name:        "openai",
-		Model:       cfg.ApiModel,
-		Password:    cfg.ApiKey,
-		BaseURL:     cfg.ApiURL,
+		Model:       c.ApiModel,
+		Password:    c.ApiKey,
+		BaseURL:     c.ApiURL,
 		Temperature: 0.7,
 		TopP:        1,
 		MaxHistory:  10,
 		TopK:        0,
 		MaxTokens:   1000,
+		Think:       c.Think,
 	}
-	if cfg.EnableAI && cfg.UseBuiltInModel {
+	if c.UseBuiltInModel {
 		aiProvider.BaseURL = c.innerApiUrl
 		aiProvider.Password = c.innerApiKey
 		aiProvider.Model = c.innerModel
 	}
 
-	// Temperature: 0.7,
-	// 	TopP:        1,
-	// 		MaxHistory:  10,
-	if cfg.Temperature > 0 {
-		aiProvider.Temperature = cfg.Temperature
+	if c.Temperature > 0 {
+		aiProvider.Temperature = c.Temperature
 	}
-	if cfg.TopP > 0 {
-		aiProvider.TopP = cfg.TopP
+	if c.TopP > 0 {
+		aiProvider.TopP = c.TopP
 	}
-	if cfg.MaxHistory > 0 {
-		aiProvider.MaxHistory = cfg.MaxHistory
+	if c.MaxHistory > 0 {
+		aiProvider.MaxHistory = c.MaxHistory
 	}
 
-	if cfg.Debug {
+	// 检查全局调试模式
+	if flag.Init().Debug {
 		klog.V(4).Infof("ai BaseURL: %v\n", aiProvider.BaseURL)
 		klog.V(4).Infof("ai Model : %v\n", aiProvider.Model)
 		klog.V(4).Infof("ai Key: %v\n", utils.MaskString(aiProvider.Password, 5))
@@ -116,8 +126,7 @@ func (c *aiService) openAIClient() (core.IAI, error) {
 }
 
 func (c *aiService) IsEnabled() bool {
-	cfg := flag.Init()
-	enable := cfg.EnableAI
+	enable := plugins.ManagerInstance().IsEnabled(modules.PluginNameAI)
 	klog.V(4).Infof("ChatGPT 状态:%v\n", enable)
 	return enable
 }
@@ -138,9 +147,8 @@ func (c *aiService) TestClient(url string, key string, model string) (core.IAI, 
 	return aiClient, nil
 }
 
-// UpdateFlagFromAIRunConfig 从AI运行配置表更新全局标志配置
+// UpdateFlagFromAIRunConfig 从AI运行配置表更新AI服务配置
 func (c *aiService) UpdateFlagFromAIRunConfig() error {
-	cfg := flag.Init()
 	// 获取AI运行配置
 	runConfig, err := AIRunConfigService().GetDefault()
 	if err != nil {
@@ -149,10 +157,10 @@ func (c *aiService) UpdateFlagFromAIRunConfig() error {
 	}
 
 	// 更新标志配置
-	cfg.UseBuiltInModel = runConfig.UseBuiltInModel
-	cfg.AnySelect = runConfig.AnySelect
-	cfg.MaxHistory = runConfig.MaxHistory
-	cfg.MaxIterations = runConfig.MaxIterations
+	c.UseBuiltInModel = runConfig.UseBuiltInModel
+	c.AnySelect = runConfig.AnySelect
+	c.MaxHistory = runConfig.MaxHistory
+	c.MaxIterations = runConfig.MaxIterations
 
 	// 如果不使用内置模型，加载模型配置
 	if !runConfig.UseBuiltInModel {
@@ -168,15 +176,15 @@ func (c *aiService) UpdateFlagFromAIRunConfig() error {
 			return err
 		}
 
-		cfg.ApiKey = modelConfig.ApiKey
-		cfg.ApiModel = modelConfig.ApiModel
-		cfg.ApiURL = modelConfig.ApiURL
-		cfg.Think = modelConfig.Think
+		c.ApiKey = modelConfig.ApiKey
+		c.ApiModel = modelConfig.ApiModel
+		c.ApiURL = modelConfig.ApiURL
+		c.Think = modelConfig.Think
 		if modelConfig.Temperature > 0 {
-			cfg.Temperature = modelConfig.Temperature
+			c.Temperature = modelConfig.Temperature
 		}
 		if modelConfig.TopP > 0 {
-			cfg.TopP = modelConfig.TopP
+			c.TopP = modelConfig.TopP
 		}
 	}
 

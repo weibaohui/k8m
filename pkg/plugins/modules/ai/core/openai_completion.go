@@ -6,13 +6,11 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/flag"
 	"k8s.io/klog/v2"
 )
 
 func (c *OpenAIClient) processThinkFlag(contents ...any) []any {
-	cfg := flag.Init()
-	if !cfg.Think {
+	if !c.think {
 		for i := range contents {
 			if txt, ok := contents[i].(string); ok {
 				if strings.Contains(txt, "/no_think") {

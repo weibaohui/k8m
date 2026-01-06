@@ -12,7 +12,6 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	mcpService "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
@@ -85,7 +84,6 @@ func (c *chatService) GetChatStreamWithoutHistory(ctx context.Context, chat stri
 	return c.getChatStreamBase(ctx, chat, true)
 }
 func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Writer) error {
-	cfg := flag.Init()
 
 	client, err := AIService().DefaultClient()
 
@@ -107,7 +105,7 @@ func (c *chatService) RunOneRound(ctx context.Context, chat string, writer io.Wr
 	currChatContent = append(currChatContent, chat)
 
 	currentIteration := int32(0)
-	maxIterations := cfg.MaxIterations
+	maxIterations := AIService().MaxIterations
 
 	for currentIteration < maxIterations {
 		klog.Infof("Starting iteration %d", currentIteration)
