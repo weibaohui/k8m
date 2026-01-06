@@ -58,7 +58,7 @@ func (c *aiService) SetVars(apikey, apiUrl, model string) {
 func (c *aiService) DefaultClient() (core.IAI, error) {
 	enable := c.IsEnabled()
 	if !enable {
-		return nil, fmt.Errorf("ChatGPT功能未开启")
+		return nil, fmt.Errorf("AI 功能未开启")
 	}
 
 	if local != nil {
@@ -67,6 +67,8 @@ func (c *aiService) DefaultClient() (core.IAI, error) {
 
 	if client, err := c.openAIClient(); err == nil {
 		local = client
+	} else {
+		return nil, err
 	}
 	return local, nil
 }
@@ -75,7 +77,7 @@ func (c *aiService) DefaultClient() (core.IAI, error) {
 func (c *aiService) ResetDefaultClient() error {
 	enable := c.IsEnabled()
 	if !enable {
-		return fmt.Errorf("ChatGPT功能未开启")
+		return fmt.Errorf("AI功能未开启")
 	}
 	local = nil
 	klog.V(6).Infof("AI DefaultClient Reset ")
