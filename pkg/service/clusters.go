@@ -17,6 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
+	heartbeatinterface "github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat/interface"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt/service/analysis"
 	"github.com/weibaohui/kom/kom"
 	komaws "github.com/weibaohui/kom/kom/aws"
@@ -401,10 +402,16 @@ func (c *clusterService) disconnectWithOption(clusterID string, stopReconnect bo
 	if cc == nil {
 		return
 	}
-	// 停止心跳
-	c.StopHeartbeat(clusterID)
-	// 根据需要停止自动重连
+	// 停止心跳（使用插件）
+	if heartbeatManager := heartbeatinterface.GlobalHeartbeatManager; heartbeatManager != nil {
+		heartbeatManager.StopHeartbeat(clusterID)
+	}
+	// 根据需要停止自动重连（使用插件）
 	if stopReconnect {
+		if heartbeatManager := heartbeatinterface.GlobalHeartbeatManager; heartbeatManager != nil {
+			heartbeatManager.StopReconnect(clusterID)
+		}
+	} else {
 		c.StopReconnect(clusterID)
 	}
 	// 清理本地状态
@@ -776,7 +783,7 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 		} else {
 			// 集群外模式
 			opts := c.buildRegisterOptions(clusterConfig)
-			if _, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.restConfig, clusterID, opts...); err != nil {
+			if _, err := kom.Clusters().RegisterByConfigWithID(clusterConfig.GetRestConfig(), clusterID, opts...); err != nil {
 				klog.V(4).Infof("注册集群[%s]失败: %v", clusterID, err)
 				clusterConfig.Err = err.Error()
 				return false, err // 保持"连接中"状态
@@ -789,8 +796,12 @@ func (c *clusterService) RegisterCluster(clusterConfig *ClusterConfig) (bool, er
 	clusterConfig.ClusterConnectStatus = constants.ClusterConnectStatusConnected
 	clusterConfig.Err = "" // 清除错误信息
 
-	// 启动心跳监测
-	c.StartHeartbeat(clusterID)
+	// 启动心跳（使用插件）
+	if heartbeatManager := heartbeatinterface.GlobalHeartbeatManager; heartbeatManager != nil {
+		heartbeatManager.StartHeartbeat(clusterID)
+	} else {
+		klog.V(6).Infof("心跳插件未启用，跳过心跳启动")
+	}
 
 	// 执行回调注册
 	if c.callbackRegisterFunc != nil {
@@ -1168,13 +1179,13 @@ func (c *clusterService) StartHeartbeat(clusterID string) {
 					return
 				}
 				// restConfig 必须存在
-				if cluster.restConfig == nil {
+				if cluster.GetRestConfig() == nil {
 					failureCount++
 					klog.V(6).Infof("集群 %s 心跳检测失败：restConfig 不存在（累计失败 %d）", clusterID, failureCount)
 					// 记录本次心跳失败
 					c.appendHeartbeatRecord(cluster, false, time.Now())
 				} else {
-					clientset, err := kubernetes.NewForConfig(cluster.restConfig)
+					clientset, err := kubernetes.NewForConfig(cluster.GetRestConfig())
 					if err != nil {
 						failureCount++
 						klog.V(6).Infof("集群 %s 创建 clientset 失败：%v（累计失败 %d）", clusterID, err, failureCount)

@@ -6,6 +6,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/gllog"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection"
 	k8m_mcp_server "github.com/weibaohui/k8m/pkg/plugins/modules/k8m_mcp_server"
@@ -86,6 +87,11 @@ func init() {
 			klog.V(6).Infof("注册ai插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册ai插件成功")
+		}
+		if err := m.Register(heartbeat.Metadata); err != nil {
+			klog.V(6).Infof("注册heartbeat插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册heartbeat插件成功")
 		}
 	})
 }

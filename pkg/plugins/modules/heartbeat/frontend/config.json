@@ -1,0 +1,52 @@
+{
+  "type": "page",
+  "title": "集群心跳配置",
+  "body": {
+    "type": "form",
+    "api": "post:/admin/plugins/heartbeat/config",
+    "initApi": "get:/admin/plugins/heartbeat/config",
+    "controls": [
+      {
+        "name": "heartbeat_interval_seconds",
+        "type": "input-number",
+        "suffix": "秒",
+        "label": "集群心跳间隔时间",
+        "value": 30,
+        "desc": "集群心跳检测的时间间隔（单位：秒），默认30秒。"
+      },
+      {
+        "name": "heartbeat_failure_threshold",
+        "type": "input-number",
+        "label": "心跳失败阈值",
+        "value": 3,
+        "desc": "连续心跳失败的最大次数，超过后将触发重连，默认3次。"
+      },
+      {
+        "name": "reconnect_max_interval_seconds",
+        "type": "input-number",
+        "suffix": "秒",
+        "label": "重连最大间隔时间",
+        "value": 300,
+        "desc": "重连时的最大间隔时间（单位：秒），默认300秒。"
+      },
+      {
+        "name": "max_retry_attempts",
+        "type": "input-number",
+        "label": "最大重试次数",
+        "value": 100,
+        "desc": "重连时的最大重试次数，默认100次。"
+      }
+    ],
+    "actions": [
+      {
+        "type": "submit",
+        "label": "保存配置"
+      },
+      {
+        "type": "button",
+        "label": "取消",
+        "actionType": "back"
+      }
+    ]
+  }
+}
