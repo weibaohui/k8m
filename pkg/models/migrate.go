@@ -140,8 +140,6 @@ func InitConfigTable() error {
 	if count == 0 {
 		config := &Config{
 			PrintConfig: false,
-			EnableAI:    true,
-			AnySelect:   true,
 			LoginType:   "password",
 		}
 		if err := dao.DB().Create(config).Error; err != nil {

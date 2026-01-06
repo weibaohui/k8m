@@ -5,7 +5,6 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/models"
 
 	"gorm.io/gorm"
 )
@@ -59,44 +58,4 @@ func (c *AIRunConfig) GetDefault() (*AIRunConfig, error) {
 		return nil, err
 	}
 	return &config, nil
-}
-
-// MigrateAIRunConfig 从旧的config表迁移AI运行配置到新表
-func MigrateAIRunConfig() error {
-	config := &AIRunConfig{}
-	_, count, err := config.List(nil)
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		return nil // 已有数据，不需要迁移
-	}
-
-	// 从旧的config表迁移数据
-	var oldConfig models.Config
-	err = dao.DB().First(&oldConfig).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			// 没有旧配置，创建默认配置
-			config = &AIRunConfig{
-				UseBuiltInModel: true,
-				MaxHistory:      10,
-				MaxIterations:   10,
-				AnySelect:       true,
-			}
-			return config.Save(nil)
-		}
-		return err
-	}
-
-	// 创建新配置
-	newConfig := &AIRunConfig{
-		UseBuiltInModel: oldConfig.UseBuiltInModel,
-		ModelID:         oldConfig.ModelID,
-		MaxHistory:      oldConfig.MaxHistory,
-		MaxIterations:   oldConfig.MaxIterations,
-		AnySelect:       oldConfig.AnySelect,
-	}
-
-	return newConfig.Save(nil)
 }

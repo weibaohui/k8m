@@ -16,10 +16,7 @@ func UpgradeDB(fromVersion string, toVersion string) error {
 		klog.V(6).Infof("自动迁移 AI 插件数据库失败: %v", err)
 		return err
 	}
-	if err := MigrateAIRunConfig(); err != nil {
-		klog.V(6).Infof("迁移 AI 运行配置失败: %v", err)
-		return err
-	}
+
 	klog.V(6).Infof("升级 AI 插件数据库完成")
 	return nil
 }

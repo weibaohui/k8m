@@ -24,14 +24,6 @@ func (s *configService) GetConfig() (*models.Config, error) {
 	if err := s.db.First(&config).Error; err != nil {
 		return nil, err
 	}
-
-	if config.MaxHistory == 0 {
-		config.MaxHistory = 10
-	}
-	if config.MaxIterations == 0 {
-		config.MaxIterations = 10
-	}
-
 	return &config, nil
 }
 
