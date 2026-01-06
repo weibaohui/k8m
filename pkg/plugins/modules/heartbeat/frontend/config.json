@@ -36,17 +36,6 @@
         "value": 100,
         "desc": "重连时的最大重试次数，默认100次。"
       }
-    ],
-    "actions": [
-      {
-        "type": "submit",
-        "label": "保存配置"
-      },
-      {
-        "type": "button",
-        "label": "取消",
-        "actionType": "back"
-      }
     ]
   }
 }
