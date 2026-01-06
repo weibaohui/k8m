@@ -50,11 +50,25 @@ func (l *HelmLifecycle) Enable(ctx plugins.EnableContext) error {
 // Disable 禁用 Helm 插件
 func (l *HelmLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用 Helm 插件")
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
+	helm.StopUpdateHelmRepoInBackground()
 	return nil
 }
 
 // Uninstall 卸载 Helm 插件
 func (l *HelmLifecycle) Uninstall(ctx plugins.UninstallContext) error {
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
+	helm.StopUpdateHelmRepoInBackground()
 
 	// 根据keepData参数决定是否删除数据库
 	if !ctx.KeepData() {
@@ -74,6 +88,9 @@ func (l *HelmLifecycle) Start(ctx plugins.BaseContext) error {
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
 
+		leaderWatchCtx, cancel := context.WithCancel(context.Background())
+		l.leaderWatchCancel = cancel
+
 		go func() {
 			for {
 				select {
@@ -83,6 +100,9 @@ func (l *HelmLifecycle) Start(ctx plugins.BaseContext) error {
 				case <-lost:
 					klog.V(6).Infof("不再是Leader，停止 Helm 仓库更新定时任务")
 					helm.StopUpdateHelmRepoInBackground()
+				case <-leaderWatchCtx.Done():
+					klog.V(6).Infof("Helm 插件 Leader 监听 goroutine 退出")
+					return
 				}
 			}
 		}()

@@ -1,6 +1,8 @@
 package inspection
 
 import (
+	"context"
+
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
@@ -11,7 +13,9 @@ import (
 
 // InspectionLifecycle 巡检插件生命周期实现
 // 数据库迁移由插件自身负责（通过 InitDB/UpgradeDB），巡检任务调度则由 leader 插件在成为 Leader 时按插件状态调用 lua.InitClusterInspection 完成。
-type InspectionLifecycle struct{}
+type InspectionLifecycle struct {
+	leaderWatchCancel context.CancelFunc
+}
 
 func (l *InspectionLifecycle) Install(ctx plugins.InstallContext) error {
 	klog.V(6).Infof("安装集群巡检插件")

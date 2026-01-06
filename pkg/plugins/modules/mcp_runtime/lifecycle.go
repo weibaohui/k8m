@@ -16,6 +16,7 @@ type McpLifecycle struct {
 	leaderWatchMu sync.Mutex
 	stopChan      chan struct{}
 	cancelLeader  context.CancelFunc
+	cancelStart   context.CancelFunc
 }
 
 func (l *McpLifecycle) Install(ctx plugins.InstallContext) error {
@@ -43,10 +44,22 @@ func (l *McpLifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *McpLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用 MCP 插件")
+
+	if l.cancelStart != nil {
+		l.cancelStart()
+		l.cancelStart = nil
+	}
+
 	return nil
 }
 
 func (l *McpLifecycle) Uninstall(ctx plugins.UninstallContext) error {
+
+	if l.cancelStart != nil {
+		l.cancelStart()
+		l.cancelStart = nil
+	}
+
 	if !ctx.KeepData() {
 		if err := models.DropDB(); err != nil {
 			klog.V(6).Infof("卸载 MCP 插件失败: %v", err)
@@ -59,11 +72,18 @@ func (l *McpLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 func (l *McpLifecycle) Start(ctx plugins.BaseContext) error {
 
+	startCtx, cancel := context.WithCancel(context.Background())
+	l.cancelStart = cancel
+
 	go func() {
 		service.McpService().Init()
-		//todo MCPService 启动完毕后，再start，使用sleep 不好，最好改成事件性质的
-		time.Sleep(30 * time.Second)
-		service.McpService().Start()
+		select {
+		case <-time.After(30 * time.Second):
+			service.McpService().Start()
+		case <-startCtx.Done():
+			klog.V(6).Infof("MCP 插件启动 goroutine 退出")
+			return
+		}
 	}()
 
 	klog.V(6).Infof("MCP 插件已启动")

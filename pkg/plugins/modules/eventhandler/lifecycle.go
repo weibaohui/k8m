@@ -1,6 +1,8 @@
 package eventhandler
 
 import (
+	"context"
+
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
@@ -9,7 +11,9 @@ import (
 )
 
 // EventHandlerLifecycle 中文函数注释：事件转发插件生命周期实现。
-type EventHandlerLifecycle struct{}
+type EventHandlerLifecycle struct {
+	leaderWatchCancel context.CancelFunc
+}
 
 // Install 中文函数注释：安装事件转发插件，初始化数据库表结构。
 func (l *EventHandlerLifecycle) Install(ctx plugins.InstallContext) error {
@@ -43,6 +47,12 @@ func (l *EventHandlerLifecycle) Enable(ctx plugins.EnableContext) error {
 
 // Disable 中文函数注释：禁用事件转发插件，停止后台任务与事件转发。
 func (l *EventHandlerLifecycle) Disable(ctx plugins.BaseContext) error {
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
 	StopLeaderWatch()
 	klog.V(6).Infof("禁用事件转发插件")
 	return nil
@@ -50,7 +60,14 @@ func (l *EventHandlerLifecycle) Disable(ctx plugins.BaseContext) error {
 
 // Uninstall 中文函数注释：卸载事件转发插件，停止后台任务并根据keepData参数决定是否删除相关表。
 func (l *EventHandlerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
 	StopLeaderWatch()
+
 	// 根据keepData参数决定是否删除数据库
 	if !ctx.KeepData() {
 		if err := models.DropDB(); err != nil {
@@ -67,7 +84,10 @@ func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
-		//监听两个channel，根据channel的信号启动或停止事件转发
+
+		leaderWatchCtx, cancel := context.WithCancel(context.Background())
+		l.leaderWatchCancel = cancel
+
 		go func() {
 			for {
 				select {
@@ -77,12 +97,14 @@ func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 				case <-lost:
 					StopLeaderWatch()
 					klog.V(6).Infof("不再是Leader，停止事件转发")
+				case <-leaderWatchCtx.Done():
+					klog.V(6).Infof("事件转发插件 Leader 监听 goroutine 退出")
+					return
 				}
 			}
 		}()
 		klog.V(6).Infof("根据实例Leader获取状态启动事件转发插件后台任务")
 	} else {
-		//没有启动Leader插件，直接启动事件转发
 		StartEventForwardingWatch()
 		klog.V(6).Infof("启动事件转发插件后台任务")
 	}
