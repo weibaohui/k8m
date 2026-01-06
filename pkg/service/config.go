@@ -74,20 +74,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		cfg.ResourceCacheTimeout = 60
 	}
 
-	// 集群管理参数
-	if m.HeartbeatIntervalSeconds > 0 {
-		cfg.HeartbeatIntervalSeconds = m.HeartbeatIntervalSeconds
-	}
-	if m.HeartbeatFailureThreshold > 0 {
-		cfg.HeartbeatFailureThreshold = m.HeartbeatFailureThreshold
-	}
-	if m.ReconnectMaxIntervalSeconds > 0 {
-		cfg.ReconnectMaxIntervalSeconds = m.ReconnectMaxIntervalSeconds
-	}
-	if m.MaxRetryAttempts > 0 {
-		cfg.MaxRetryAttempts = m.MaxRetryAttempts
-	}
-
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret
 	// LoginType 暂不启用，因为就一种password

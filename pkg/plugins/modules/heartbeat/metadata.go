@@ -32,6 +32,9 @@ var Metadata = plugins.Module{
 			},
 		},
 	},
+	Tables: []string{
+		"heartbeat_settings",
+	},
 	Dependencies: []string{},
 	RunAfter: []string{
 		modules.PluginNameLeader,

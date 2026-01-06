@@ -6,47 +6,47 @@ import (
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/constants"
-	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat/models"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 )
 
+var (
+	instance     *HeartbeatManager
+	instanceOnce sync.Once
+)
+
 // HeartbeatManager 心跳管理服务
 type HeartbeatManager struct {
 	// 心跳管理
-	heartbeatCancel           sync.Map // 心跳取消函数
-	HeartbeatIntervalSeconds  int      // 心跳间隔秒数
-	HeartbeatFailureThreshold int      // 心跳失败阈值
-
+	heartbeatCancel sync.Map // 心跳取消函数
 	// 自动重连管理
-	reconnectCancel             sync.Map // 自动重连取消函数
-	ReconnectMaxIntervalSeconds int      // 自动重连最大退避秒数
-	MaxRetryAttempts            int      // 最大重试次数
+	reconnectCancel sync.Map // 自动重连取消函数
+
+	HeartbeatIntervalSeconds    int // 心跳间隔秒数
+	HeartbeatFailureThreshold   int // 心跳失败阈值
+	ReconnectMaxIntervalSeconds int // 自动重连最大退避秒数
+	MaxRetryAttempts            int // 最大重试次数
 }
 
-// NewHeartbeatManager 创建心跳管理服务实例
+// NewHeartbeatManager 创建心跳管理服务实例（单例模式）
 func NewHeartbeatManager() *HeartbeatManager {
-	cfg := flag.Init()
-	hm := &HeartbeatManager{
-		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
-		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
-		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
-		MaxRetryAttempts:            cfg.MaxRetryAttempts,
-	}
-	if hm.HeartbeatIntervalSeconds <= 0 {
-		hm.HeartbeatIntervalSeconds = 30
-	}
-	if hm.HeartbeatFailureThreshold <= 0 {
-		hm.HeartbeatFailureThreshold = 3
-	}
-	if hm.ReconnectMaxIntervalSeconds <= 0 {
-		hm.ReconnectMaxIntervalSeconds = 3600
-	}
-	if hm.MaxRetryAttempts <= 0 {
-		hm.MaxRetryAttempts = 100
-	}
-	return hm
+	instanceOnce.Do(func() {
+		cfg, err := models.GetOrCreateHeartbeatSetting()
+		if err != nil {
+			klog.V(6).Infof("获取心跳配置失败，使用默认值: %v", err)
+			cfg = models.DefaultHeartbeatSetting()
+		}
+
+		instance = &HeartbeatManager{
+			HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
+			HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
+			ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
+			MaxRetryAttempts:            cfg.MaxRetryAttempts,
+		}
+	})
+	return instance
 }
 
 // StartHeartbeat 启动心跳任务
@@ -152,13 +152,6 @@ func (h *HeartbeatManager) StopHeartbeat(clusterID string) {
 
 // StartReconnect 启动指定集群的自动重连循环
 func (h *HeartbeatManager) StartReconnect(clusterID string) {
-	// 初始化重连配置默认值
-	if h.ReconnectMaxIntervalSeconds <= 0 {
-		h.ReconnectMaxIntervalSeconds = 3600
-	}
-	if h.MaxRetryAttempts <= 0 {
-		h.MaxRetryAttempts = 100
-	}
 
 	// 若已有自动重连任务，先停止
 	if cancelInterface, ok := h.reconnectCancel.Load(clusterID); ok {
@@ -238,7 +231,12 @@ func (h *HeartbeatManager) StopReconnect(clusterID string) {
 
 // UpdateSettings 更新心跳设置
 func (h *HeartbeatManager) UpdateSettings() {
-	cfg := flag.Init()
+	cfg, err := models.GetOrCreateHeartbeatSetting()
+	if err != nil {
+		klog.V(6).Infof("获取心跳配置失败: %v", err)
+		return
+	}
+
 	h.HeartbeatIntervalSeconds = cfg.HeartbeatIntervalSeconds
 	h.HeartbeatFailureThreshold = cfg.HeartbeatFailureThreshold
 	h.ReconnectMaxIntervalSeconds = cfg.ReconnectMaxIntervalSeconds

@@ -2,7 +2,8 @@ package controller
 
 import (
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat/models"
+	hs "github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat/service"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
@@ -60,15 +61,13 @@ func (h *Controller) GetHeartbeatStatus(c *response.Context) {
 
 // GetHeartbeatConfig 获取当前心跳配置
 func (h *Controller) GetHeartbeatConfig(c *response.Context) {
-	cfg := flag.Init()
-	config := HeartbeatConfig{
-		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
-		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
-		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
-		MaxRetryAttempts:            cfg.MaxRetryAttempts,
+	cfg, err := models.GetOrCreateHeartbeatSetting()
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
 
-	amis.WriteJsonData(c, config)
+	amis.WriteJsonData(c, cfg)
 }
 
 // SaveHeartbeatConfig 保存心跳配置
@@ -79,25 +78,22 @@ func (h *Controller) SaveHeartbeatConfig(c *response.Context) {
 		return
 	}
 
-	// 获取当前数据库配置
-	dbConfig, err := service.ConfigService().GetConfig()
-	if err != nil {
-		amis.WriteJsonError(c, err)
-		return
+	// 构造心跳配置
+	setting := &models.HeartbeatSetting{
+		HeartbeatIntervalSeconds:    config.HeartbeatIntervalSeconds,
+		HeartbeatFailureThreshold:   config.HeartbeatFailureThreshold,
+		ReconnectMaxIntervalSeconds: config.ReconnectMaxIntervalSeconds,
+		MaxRetryAttempts:            config.MaxRetryAttempts,
 	}
 
-	// 更新心跳相关配置
-	dbConfig.HeartbeatIntervalSeconds = config.HeartbeatIntervalSeconds
-	dbConfig.HeartbeatFailureThreshold = config.HeartbeatFailureThreshold
-	dbConfig.ReconnectMaxIntervalSeconds = config.ReconnectMaxIntervalSeconds
-	dbConfig.MaxRetryAttempts = config.MaxRetryAttempts
-
 	// 保存到数据库
-	if err := service.ConfigService().UpdateConfig(dbConfig); err != nil {
+	if _, err := models.UpdateHeartbeatSetting(setting); err != nil {
 		klog.V(6).Infof("保存心跳配置失败: %v", err)
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	hs.NewHeartbeatManager().UpdateSettings()
 
 	klog.V(6).Infof("心跳配置已保存: 间隔=%d秒, 失败阈值=%d, 最大重连间隔=%d秒, 最大重试次数=%d",
 		config.HeartbeatIntervalSeconds,
