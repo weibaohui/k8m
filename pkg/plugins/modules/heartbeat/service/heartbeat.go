@@ -30,23 +30,29 @@ type HeartbeatManager struct {
 // NewHeartbeatManager 创建心跳管理服务实例
 func NewHeartbeatManager() *HeartbeatManager {
 	cfg := flag.Init()
-	return &HeartbeatManager{
+	hm := &HeartbeatManager{
 		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
 		HeartbeatFailureThreshold:   cfg.HeartbeatFailureThreshold,
 		ReconnectMaxIntervalSeconds: cfg.ReconnectMaxIntervalSeconds,
 		MaxRetryAttempts:            cfg.MaxRetryAttempts,
 	}
+	if hm.HeartbeatIntervalSeconds <= 0 {
+		hm.HeartbeatIntervalSeconds = 30
+	}
+	if hm.HeartbeatFailureThreshold <= 0 {
+		hm.HeartbeatFailureThreshold = 3
+	}
+	if hm.ReconnectMaxIntervalSeconds <= 0 {
+		hm.ReconnectMaxIntervalSeconds = 3600
+	}
+	if hm.MaxRetryAttempts <= 0 {
+		hm.MaxRetryAttempts = 100
+	}
+	return hm
 }
 
 // StartHeartbeat 启动心跳任务
 func (h *HeartbeatManager) StartHeartbeat(clusterID string) {
-	// 初始化心跳配置默认值
-	if h.HeartbeatIntervalSeconds <= 0 {
-		h.HeartbeatIntervalSeconds = 30
-	}
-	if h.HeartbeatFailureThreshold <= 0 {
-		h.HeartbeatFailureThreshold = 3
-	}
 
 	// 如果已有心跳，先停止
 	if cancelInterface, ok := h.heartbeatCancel.Load(clusterID); ok {
