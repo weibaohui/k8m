@@ -62,13 +62,6 @@ func (h *HeartbeatLifecycle) Disable(ctx plugins.BaseContext) error {
 func (h *HeartbeatLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	klog.V(6).Infof("卸载心跳插件")
 
-	if h.leaderWatchCancel != nil {
-		h.leaderWatchCancel()
-		h.leaderWatchCancel = nil
-	}
-
-	h.StopHeartbeat()
-
 	// 根据keepData参数决定是否删除数据库
 	if !ctx.KeepData() {
 		if err := models.DropDB(); err != nil {

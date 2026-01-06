@@ -62,14 +62,6 @@ func (l *HelmLifecycle) Disable(ctx plugins.BaseContext) error {
 
 // Uninstall 卸载 Helm 插件
 func (l *HelmLifecycle) Uninstall(ctx plugins.UninstallContext) error {
-
-	if l.leaderWatchCancel != nil {
-		l.leaderWatchCancel()
-		l.leaderWatchCancel = nil
-	}
-
-	helm.StopUpdateHelmRepoInBackground()
-
 	// 根据keepData参数决定是否删除数据库
 	if !ctx.KeepData() {
 		if err := models.DropDB(); err != nil {

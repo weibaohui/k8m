@@ -60,14 +60,6 @@ func (l *EventHandlerLifecycle) Disable(ctx plugins.BaseContext) error {
 
 // Uninstall 中文函数注释：卸载事件转发插件，停止后台任务并根据keepData参数决定是否删除相关表。
 func (l *EventHandlerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
-
-	if l.leaderWatchCancel != nil {
-		l.leaderWatchCancel()
-		l.leaderWatchCancel = nil
-	}
-
-	StopLeaderWatch()
-
 	// 根据keepData参数决定是否删除数据库
 	if !ctx.KeepData() {
 		if err := models.DropDB(); err != nil {

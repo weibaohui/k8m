@@ -54,12 +54,6 @@ func (l *McpLifecycle) Disable(ctx plugins.BaseContext) error {
 }
 
 func (l *McpLifecycle) Uninstall(ctx plugins.UninstallContext) error {
-
-	if l.cancelStart != nil {
-		l.cancelStart()
-		l.cancelStart = nil
-	}
-
 	if !ctx.KeepData() {
 		if err := models.DropDB(); err != nil {
 			klog.V(6).Infof("卸载 MCP 插件失败: %v", err)
