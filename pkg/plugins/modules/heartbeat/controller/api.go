@@ -26,7 +26,7 @@ func (h *Controller) GetHeartbeatStatus(c *response.Context) {
 	statusList := make([]map[string]interface{}, 0, len(clusters))
 
 	for _, cluster := range clusters {
-		status := map[string]interface{}{
+		status := map[string]any{
 			"cluster_id":        cluster.ClusterID,
 			"cluster_name":      cluster.ClusterName,
 			"connect_status":    cluster.ClusterConnectStatus,
@@ -37,6 +37,7 @@ func (h *Controller) GetHeartbeatStatus(c *response.Context) {
 		}
 
 		// 获取最后一次心跳记录
+		cluster.HeartbeatMu.RLock()
 		if len(cluster.HeartbeatHistory) > 0 {
 			lastRecord := cluster.HeartbeatHistory[len(cluster.HeartbeatHistory)-1]
 			status["last_heartbeat"] = lastRecord.Time
@@ -52,7 +53,7 @@ func (h *Controller) GetHeartbeatStatus(c *response.Context) {
 			}
 			status["failure_count"] = failureCount
 		}
-
+		cluster.HeartbeatMu.RUnlock()
 		statusList = append(statusList, status)
 	}
 

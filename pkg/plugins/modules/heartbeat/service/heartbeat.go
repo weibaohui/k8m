@@ -251,6 +251,10 @@ func (h *HeartbeatManager) AppendHeartbeatRecord(cluster *service.ClusterConfig,
 	if cluster == nil {
 		return
 	}
+
+	cluster.HeartbeatMu.Lock()
+	defer cluster.HeartbeatMu.Unlock()
+
 	if cluster.HeartbeatHistory == nil {
 		cluster.HeartbeatHistory = make([]service.HeartbeatRecord, 0)
 	}

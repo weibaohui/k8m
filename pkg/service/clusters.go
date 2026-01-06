@@ -58,6 +58,7 @@ type ClusterConfig struct {
 	Server                  string                         `json:"server,omitempty"`            // 集群地址
 	ServerVersion           string                         `json:"serverVersion,omitempty"`     // 通过这个值来判断集群是否可用
 	HeartbeatHistory        []HeartbeatRecord              `json:"heartbeat_history,omitempty"`
+	HeartbeatMu             sync.RWMutex                   // 保护HeartbeatHistory的读写锁
 	UserName                string                         `json:"userName,omitempty"`                // 用户名
 	Namespace               string                         `json:"namespace,omitempty"`               // kubeconfig 限制Namespace
 	Err                     string                         `json:"err,omitempty"`                     // 连接错误信息
