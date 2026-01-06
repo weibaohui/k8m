@@ -31,7 +31,7 @@
               "style": {
                 "border": "none"
               },
-              "source": "get:/plugins/ai/ai_prompt/types",
+              "source": "get:/admin/plugins/ai/ai_prompt/types",
               "onEvent": {
                 "click": {
                   "actions": [
@@ -87,7 +87,7 @@
                     "title": "新建AI提示词 (ESC 关闭)",
                     "body": {
                       "type": "form",
-                      "api": "post:/plugins/ai/ai_prompt/save",
+                      "api": "post:/admin/plugins/ai/ai_prompt/save",
                       "body": [
                         {
                           "type": "input-text",
@@ -116,7 +116,7 @@
                           "name": "prompt_type",
                           "label": "提示词类型",
                           "required": true,
-                          "source": "get:/plugins/ai/ai_prompt/types",
+                          "source": "get:/admin/plugins/ai/ai_prompt/types",
                           "placeholder": "请选择提示词类型"
                         },
                         {
@@ -158,7 +158,7 @@
                   "label": "重置内置提示词",
                   "actionType": "ajax",
                   "confirmText": "该操作将先删除所有内置提示词，然后重新加载内置提示词，用户添加提示词不受影响。是否执行?",
-                  "api": "post:/plugins/ai/ai_prompt/load"
+                  "api": "post:/admin/plugins/ai/ai_prompt/load"
                 }
               ],
               "loadDataOnce": false,
@@ -170,7 +170,7 @@
                   "label": "批量删除",
                   "actionType": "ajax",
                   "confirmText": "确定要批量删除?",
-                  "api": "post:/plugins/ai/ai_prompt/delete/${ids}"
+                  "api": "post:/admin/plugins/ai/ai_prompt/delete/${ids}"
                 }
               ],
               "footerToolbar": [
@@ -187,8 +187,8 @@
                   "align": "right"
                 }
               ],
-              "api": "get:/plugins/ai/ai_prompt/list",
-              "quickSaveItemApi": "/plugins/ai/ai_prompt/id/${id}/enabled/${is_enabled}",
+              "api": "get:/admin/plugins/ai/ai_prompt/list",
+              "quickSaveItemApi": "/admin/plugins/ai/ai_prompt/id/${id}/enabled/${is_enabled}",
               "columns": [
                 {
                   "type": "operation",
@@ -207,7 +207,7 @@
                         "title": "编辑AI提示词 (ESC 关闭)",
                         "body": {
                           "type": "form",
-                          "api": "post:/plugins/ai/ai_prompt/save",
+                          "api": "post:/admin/plugins/ai/ai_prompt/save",
                           "body": [
                             {
                               "type": "hidden",
@@ -248,7 +248,7 @@
                               "name": "prompt_type",
                               "label": "提示词类型",
                               "required": true,
-                              "source": "get:/plugins/ai/ai_prompt/types",
+                              "source": "get:/admin/plugins/ai/ai_prompt/types",
                               "placeholder": "请选择提示词类型"
                             },
                             {
@@ -301,7 +301,7 @@
                   "name": "prompt_type",
                   "label": "类型",
                   "type": "mapping",
-                  "source": "get:/plugins/ai/ai_prompt/types"
+                  "source": "get:/admin/plugins/ai/ai_prompt/types"
                 },
                 {
                   "name": "is_builtin",
