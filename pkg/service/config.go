@@ -42,7 +42,7 @@ func (s *configService) UpdateConfig(config *models.Config) error {
 	return nil
 }
 
-// UpdateFlagFromDBConfig 从数据库中加载配置，更新AI服务配置
+// UpdateFlagFromDBConfig 从数据库中加载配置
 func (s *configService) UpdateFlagFromDBConfig() error {
 	cfg := flag.Init()
 	m, err := s.GetConfig()
