@@ -1,6 +1,7 @@
 package demo
 
 import (
+	"context"
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/plugins"
@@ -9,7 +10,9 @@ import (
 )
 
 // DemoLifecycle Demo插件生命周期实现
-type DemoLifecycle struct{}
+type DemoLifecycle struct {
+	cancelStart context.CancelFunc
+}
 
 // Install 安装Demo插件，初始化数据库表
 func (d *DemoLifecycle) Install(ctx plugins.InstallContext) error {
@@ -39,6 +42,12 @@ func (d *DemoLifecycle) Enable(ctx plugins.EnableContext) error {
 // Disable 禁用Demo插件
 func (d *DemoLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用Demo插件")
+
+	if d.cancelStart != nil {
+		d.cancelStart()
+		d.cancelStart = nil
+	}
+
 	return nil
 }
 
@@ -61,12 +70,25 @@ func (d *DemoLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 // 该方法由系统在 Manager.Start 时统一调用，用于启动非阻塞的后台协程或定时任务
 func (d *DemoLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动Demo插件后台任务")
+
+	startCtx, cancel := context.WithCancel(context.Background())
+	d.cancelStart = cancel
+
 	go func(meta plugins.Meta) {
 		ticker := time.NewTicker(30 * time.Second)
-		for range ticker.C {
-			klog.V(6).Infof("Demo插件后台任务运行中，插件: %s，版本: %s", meta.Name, meta.Version)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				klog.V(6).Infof("Demo插件后台任务运行中，插件: %s，版本: %s", meta.Name, meta.Version)
+			case <-startCtx.Done():
+				klog.V(6).Infof("Demo 插件启动 goroutine 退出")
+				return
+			}
 		}
 	}(ctx.Meta())
+
 	return nil
 }
 
