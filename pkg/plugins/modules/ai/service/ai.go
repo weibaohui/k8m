@@ -35,6 +35,8 @@ var (
 	aiInstance *aiService
 	// aiOnce 用于确保单例只被初始化一次
 	aiOnce sync.Once
+
+	local core.IAI
 )
 
 // AIService 获取AI服务的单例实例
@@ -52,8 +54,6 @@ func (c *aiService) SetVars(apikey, apiUrl, model string) {
 	c.innerApiUrl = apiUrl
 	c.innerApiKey = apikey
 }
-
-var local core.IAI
 
 func (c *aiService) DefaultClient() (core.IAI, error) {
 	enable := c.IsEnabled()
