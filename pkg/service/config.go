@@ -1,14 +1,11 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/fatih/color"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
-	aimodels "github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -62,35 +59,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		return err
 	}
 
-	// 更新AI服务配置
-	aiService := service.AIService()
-	aiService.AnySelect = m.AnySelect
-	aiService.UseBuiltInModel = m.UseBuiltInModel
-	if !m.UseBuiltInModel {
-		if m.ModelID == 0 {
-			klog.Errorf("UpdateFlagFromDBConfig 未指定有效的模型ID")
-			return fmt.Errorf("未指定有效的模型ID")
-		}
-		// 不使用内置模型，从数据库中加载配置
-		modelConfig := &aimodels.AIModelConfig{
-			ID: m.ModelID,
-		}
-		modelConfig, err = modelConfig.GetOne(nil)
-		if err != nil {
-			return err
-		}
-		aiService.ApiKey = modelConfig.ApiKey
-		aiService.ApiModel = modelConfig.ApiModel
-		aiService.ApiURL = modelConfig.ApiURL
-		aiService.Think = modelConfig.Think
-		if modelConfig.Temperature > 0 {
-			aiService.Temperature = modelConfig.Temperature
-		}
-		if modelConfig.TopP > 0 {
-			aiService.TopP = modelConfig.TopP
-		}
-	}
-
 	// if m.KubeConfig != "" {
 	// 	cfg.KubeConfig = m.KubeConfig
 	// }
@@ -116,15 +84,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		cfg.ResourceCacheTimeout = 60
 	}
 
-	if m.MaxHistory > 0 {
-		cfg.MaxHistory = m.MaxHistory
-		aiService.MaxHistory = m.MaxHistory
-	}
-	if m.MaxIterations > 0 {
-		cfg.MaxIterations = m.MaxIterations
-		aiService.MaxIterations = m.MaxIterations
-	}
-
 	// 集群管理参数
 	if m.HeartbeatIntervalSeconds > 0 {
 		cfg.HeartbeatIntervalSeconds = m.HeartbeatIntervalSeconds
@@ -139,6 +98,10 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		cfg.MaxRetryAttempts = m.MaxRetryAttempts
 	}
 
+	if service.AIService().IsEnabled() {
+		service.AIService().UpdateFlagFromAIRunConfig()
+	}
+
 	// JwtTokenSecret 暂不启用，因为前端也要处理
 	// cfg.JwtTokenSecret = m.JwtTokenSecret
 	// LoginType 暂不启用，因为就一种password
@@ -147,6 +110,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 		klog.Infof("已开启配置信息打印选项。下面是数据库配置的回显.\n%s:\n %+v\n%s\n", color.RedString("↓↓↓↓↓↓生产环境请务必关闭↓↓↓↓↓↓"), utils.ToJSON(m), color.RedString("↑↑↑↑↑↑生产环境请务必关闭↑↑↑↑↑↑"))
 		cfg.ShowConfigCloseMethod()
 	}
-	_ = service.AIService().ResetDefaultClient()
+
 	return nil
 }
