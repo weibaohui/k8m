@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
 	"sync"
 	"time"
 
@@ -273,48 +271,4 @@ func (h *HeartbeatManager) AppendHeartbeatRecord(cluster *service.ClusterConfig,
 	for i := range cluster.HeartbeatHistory {
 		cluster.HeartbeatHistory[i].Index = i + 1
 	}
-}
-
-// GetHeartbeatStatus 获取所有集群的心跳状态
-func GetHeartbeatStatus(w http.ResponseWriter, r *http.Request) {
-	clusters := service.ClusterService().AllClusters()
-	statusList := make([]map[string]interface{}, 0, len(clusters))
-
-	for _, cluster := range clusters {
-		status := map[string]interface{}{
-			"cluster_id":        cluster.ClusterID,
-			"cluster_name":      cluster.ClusterName,
-			"connect_status":    cluster.ClusterConnectStatus,
-			"server_version":    cluster.ServerVersion,
-			"last_heartbeat":    "",
-			"heartbeat_history": cluster.HeartbeatHistory,
-			"failure_count":     0,
-		}
-
-		// 获取最后一次心跳记录
-		if len(cluster.HeartbeatHistory) > 0 {
-			lastRecord := cluster.HeartbeatHistory[len(cluster.HeartbeatHistory)-1]
-			status["last_heartbeat"] = lastRecord.Time
-
-			// 计算连续失败次数
-			failureCount := 0
-			for i := len(cluster.HeartbeatHistory) - 1; i >= 0; i-- {
-				if !cluster.HeartbeatHistory[i].Success {
-					failureCount++
-				} else {
-					break
-				}
-			}
-			status["failure_count"] = failureCount
-		}
-
-		statusList = append(statusList, status)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"code": 0,
-		"msg":  "success",
-		"data": statusList,
-	})
 }

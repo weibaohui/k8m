@@ -1,13 +1,15 @@
-package service
+package controller
 
 import (
-	"encoding/json"
-	"net/http"
-
+	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"k8s.io/klog/v2"
 )
+
+type Controller struct {
+}
 
 // HeartbeatConfig 心跳配置结构
 type HeartbeatConfig struct {
@@ -17,8 +19,47 @@ type HeartbeatConfig struct {
 	MaxRetryAttempts            int `json:"max_retry_attempts"`             // 最大重试次数
 }
 
+// GetHeartbeatStatus 获取所有集群的心跳状态
+func (h *Controller) GetHeartbeatStatus(c *response.Context) {
+	clusters := service.ClusterService().AllClusters()
+	statusList := make([]map[string]interface{}, 0, len(clusters))
+
+	for _, cluster := range clusters {
+		status := map[string]interface{}{
+			"cluster_id":        cluster.ClusterID,
+			"cluster_name":      cluster.ClusterName,
+			"connect_status":    cluster.ClusterConnectStatus,
+			"server_version":    cluster.ServerVersion,
+			"last_heartbeat":    "",
+			"heartbeat_history": cluster.HeartbeatHistory,
+			"failure_count":     0,
+		}
+
+		// 获取最后一次心跳记录
+		if len(cluster.HeartbeatHistory) > 0 {
+			lastRecord := cluster.HeartbeatHistory[len(cluster.HeartbeatHistory)-1]
+			status["last_heartbeat"] = lastRecord.Time
+
+			// 计算连续失败次数
+			failureCount := 0
+			for i := len(cluster.HeartbeatHistory) - 1; i >= 0; i-- {
+				if !cluster.HeartbeatHistory[i].Success {
+					failureCount++
+				} else {
+					break
+				}
+			}
+			status["failure_count"] = failureCount
+		}
+
+		statusList = append(statusList, status)
+	}
+
+	amis.WriteJsonData(c, statusList)
+}
+
 // GetHeartbeatConfig 获取当前心跳配置
-func GetHeartbeatConfig(w http.ResponseWriter, r *http.Request) {
+func (h *Controller) GetHeartbeatConfig(c *response.Context) {
 	cfg := flag.Init()
 	config := HeartbeatConfig{
 		HeartbeatIntervalSeconds:    cfg.HeartbeatIntervalSeconds,
@@ -27,37 +68,21 @@ func GetHeartbeatConfig(w http.ResponseWriter, r *http.Request) {
 		MaxRetryAttempts:            cfg.MaxRetryAttempts,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"code": 0,
-		"msg":  "success",
-		"data": config,
-	})
+	amis.WriteJsonData(c, config)
 }
 
 // SaveHeartbeatConfig 保存心跳配置
-func SaveHeartbeatConfig(w http.ResponseWriter, r *http.Request) {
+func (h *Controller) SaveHeartbeatConfig(c *response.Context) {
 	var config HeartbeatConfig
-	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"code": 1,
-			"msg":  "参数错误: " + err.Error(),
-		})
+	if err := c.ShouldBind(&config); err != nil {
+		amis.WriteJsonError(c, err)
 		return
 	}
 
 	// 获取当前数据库配置
 	dbConfig, err := service.ConfigService().GetConfig()
 	if err != nil {
-		klog.V(6).Infof("获取数据库配置失败: %v", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"code": 1,
-			"msg":  "获取配置失败: " + err.Error(),
-		})
+		amis.WriteJsonError(c, err)
 		return
 	}
 
@@ -70,12 +95,7 @@ func SaveHeartbeatConfig(w http.ResponseWriter, r *http.Request) {
 	// 保存到数据库
 	if err := service.ConfigService().UpdateConfig(dbConfig); err != nil {
 		klog.V(6).Infof("保存心跳配置失败: %v", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"code": 1,
-			"msg":  "保存配置失败: " + err.Error(),
-		})
+		amis.WriteJsonError(c, err)
 		return
 	}
 
@@ -85,9 +105,6 @@ func SaveHeartbeatConfig(w http.ResponseWriter, r *http.Request) {
 		config.ReconnectMaxIntervalSeconds,
 		config.MaxRetryAttempts)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"code": 0,
-		"msg":  "保存成功",
-	})
+	amis.WriteJsonOK(c)
+
 }
