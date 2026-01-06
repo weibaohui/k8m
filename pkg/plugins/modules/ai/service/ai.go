@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/weibaohui/k8m/pkg/ai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/core"
 	"k8s.io/klog/v2"
 )
 
@@ -39,9 +39,9 @@ func (c *aiService) SetVars(apikey, apiUrl, model string) {
 	c.innerApiKey = apikey
 }
 
-var local ai.IAI
+var local core.IAI
 
-func (c *aiService) DefaultClient() (ai.IAI, error) {
+func (c *aiService) DefaultClient() (core.IAI, error) {
 	enable := c.IsEnabled()
 	if !enable {
 		return nil, fmt.Errorf("ChatGPT功能未开启")
@@ -68,10 +68,10 @@ func (c *aiService) ResetDefaultClient() error {
 	return nil
 }
 
-func (c *aiService) openAIClient() (ai.IAI, error) {
+func (c *aiService) openAIClient() (core.IAI, error) {
 	cfg := flag.Init()
 
-	aiProvider := ai.Provider{
+	aiProvider := core.Provider{
 		Name:        "openai",
 		Model:       cfg.ApiModel,
 		Password:    cfg.ApiKey,
@@ -107,7 +107,7 @@ func (c *aiService) openAIClient() (ai.IAI, error) {
 		klog.V(4).Infof("ai Key: %v\n", utils.MaskString(aiProvider.Password, 5))
 	}
 
-	aiClient := ai.NewClient(aiProvider.Name)
+	aiClient := core.NewClient(aiProvider.Name)
 	if err := aiClient.Configure(&aiProvider); err != nil {
 		return nil, err
 	}
@@ -121,16 +121,16 @@ func (c *aiService) IsEnabled() bool {
 	return enable
 }
 
-func (c *aiService) TestClient(url string, key string, model string) (ai.IAI, error) {
+func (c *aiService) TestClient(url string, key string, model string) (core.IAI, error) {
 	klog.V(6).Infof("TestClient url:%v key:%v model:%v\n", url, utils.MaskString(key, 5), model)
-	aiProvider := ai.Provider{
+	aiProvider := core.Provider{
 		Name:     "test",
 		Model:    model,
 		Password: key,
 		BaseURL:  url,
 	}
 
-	aiClient := ai.NewClient(aiProvider.Name)
+	aiClient := core.NewClient(aiProvider.Name)
 	if err := aiClient.Configure(&aiProvider); err != nil {
 		return nil, err
 	}

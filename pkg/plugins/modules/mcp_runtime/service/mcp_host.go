@@ -13,10 +13,10 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/internal/dao"
-	"github.com/weibaohui/k8m/pkg/ai"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/core"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 
 	"k8s.io/klog/v2"
@@ -347,7 +347,7 @@ func (m *MCPHost) LogToolExecution(ctx context.Context, toolName, serverName str
 	dao.DB().Create(log)
 }
 
-func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai ai.IAI, prompt string) (string, []models.MCPToolCallResult, error) {
+func (m *MCPHost) ProcessWithOpenAI(ctx context.Context, ai core.IAI, prompt string) (string, []models.MCPToolCallResult, error) {
 
 	// 创建带有工具的聊天完成请求
 	tools := m.GetAllTools(ctx)

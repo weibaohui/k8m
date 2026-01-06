@@ -18,7 +18,7 @@ import (
 	"time"
 
 	openapi_v2 "github.com/google/gnostic-models/openapiv2"
-	"github.com/weibaohui/k8m/pkg/ai"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/core"
 	regv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	autov2 "k8s.io/api/autoscaling/v2"
@@ -37,7 +37,7 @@ type Analyzer struct {
 	Context       context.Context
 	Namespace     string
 	LabelSelector string
-	AIClient      ai.IAI
+	AIClient      core.IAI
 	PreAnalysis   map[string]PreAnalysis
 	Results       []Result
 	OpenapiSchema *openapi_v2.Document
