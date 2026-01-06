@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -19,23 +18,6 @@ import (
 )
 
 type Controller struct {
-}
-
-func RegisterChatRoutes(ai chi.Router) {
-	ctrl := &Controller{}
-	ai.Get("/chat/event", response.Adapter(ctrl.Event))
-	ai.Get("/chat/log", response.Adapter(ctrl.Log))
-	ai.Get("/chat/cron", response.Adapter(ctrl.Cron))
-	ai.Get("/chat/describe", response.Adapter(ctrl.Describe))
-	ai.Get("/chat/resource", response.Adapter(ctrl.Resource))
-	ai.Get("/chat/any_question", response.Adapter(ctrl.AnyQuestion))
-	ai.Get("/chat/any_selection", response.Adapter(ctrl.AnySelection))
-	ai.Get("/chat/example", response.Adapter(ctrl.Example))
-	ai.Get("/chat/example/field", response.Adapter(ctrl.FieldExample))
-	ai.Get("/chat/ws_chatgpt", response.Adapter(ctrl.GPTShell))
-	ai.Get("/chat/ws_chatgpt/history", response.Adapter(ctrl.History))
-	ai.Get("/chat/ws_chatgpt/history/reset", response.Adapter(ctrl.Reset))
-	ai.Get("/chat/k8s_gpt/resource", response.Adapter(ctrl.K8sGPTResource))
 }
 
 type ResourceData struct {

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -15,21 +14,6 @@ import (
 // AdminAIPromptController AI提示词管理控制器
 // 提供AI提示词的增删改查功能
 type AdminAIPromptController struct {
-}
-
-// RegisterAdminAIPromptRoutes 注册AI提示词管理路由
-
-func RegisterAdminAIPromptRoutes(r chi.Router) {
-	ctrl := &AdminAIPromptController{}
-	r.Get("/ai_prompt/list", response.Adapter(ctrl.AIPromptList))
-	r.Post("/ai_prompt/delete/{ids}", response.Adapter(ctrl.AIPromptDelete))
-	r.Post("/ai_prompt/save", response.Adapter(ctrl.AIPromptSave))
-	r.Post("/ai_prompt/load", response.Adapter(ctrl.AIPromptLoad))
-	r.Get("/ai_prompt/option_list", response.Adapter(ctrl.AIPromptOptionList))
-	r.Get("/ai_prompt/types", response.Adapter(ctrl.AIPromptTypes))
-
-	r.Post("/ai_prompt/toggle/{id}", response.Adapter(ctrl.AIPromptToggle))                  // 添加启用/禁用路由
-	r.Post("/ai_prompt/id/{id}/enabled/{enabled}", response.Adapter(ctrl.AIPromptQuickSave)) // 快捷保存启用状态
 }
 
 // @Summary 获取AI提示词列表
