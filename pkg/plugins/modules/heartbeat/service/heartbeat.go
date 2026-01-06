@@ -93,32 +93,27 @@ func (h *HeartbeatManager) StartHeartbeat(clusterID string) {
 				if cluster.GetRestConfig() == nil {
 					failureCount++
 					klog.V(6).Infof("集群 %s 心跳检测失败：restConfig 不存在（累计失败 %d）", clusterID, failureCount)
-					// 记录本次心跳失败
-					appendHeartbeatRecord(cluster, false, time.Now())
+					h.AppendHeartbeatRecord(cluster, false, time.Now())
 				} else {
 					clientset, err := kubernetes.NewForConfig(cluster.GetRestConfig())
 					if err != nil {
 						failureCount++
 						klog.V(6).Infof("集群 %s 创建 clientset 失败：%v（累计失败 %d）", clusterID, err, failureCount)
-						// 记录本次心跳失败
-						appendHeartbeatRecord(cluster, false, time.Now())
+						h.AppendHeartbeatRecord(cluster, false, time.Now())
 					} else {
 						sv, err := clientset.Discovery().ServerVersion()
 						if err != nil {
 							failureCount++
 							klog.V(6).Infof("集群 %s 心跳检测读取版本失败：%v（累计失败 %d）", clusterID, err, failureCount)
 							cluster.Err = err.Error()
-							// 记录本次心跳失败
-							appendHeartbeatRecord(cluster, false, time.Now())
+							h.AppendHeartbeatRecord(cluster, false, time.Now())
 						} else {
-							// 成功，重置失败计数并同步版本
 							failureCount = 0
 							if sv != nil {
 								cluster.ServerVersion = sv.GitVersion
 							}
 							klog.V(6).Infof("集群 %s 心跳检测成功，当前版本：%s", clusterID, cluster.ServerVersion)
-							// 记录本次心跳成功
-							appendHeartbeatRecord(cluster, true, time.Now())
+							h.AppendHeartbeatRecord(cluster, true, time.Now())
 						}
 					}
 				}
@@ -249,26 +244,26 @@ func (h *HeartbeatManager) UpdateSettings() {
 		h.HeartbeatIntervalSeconds, h.HeartbeatFailureThreshold, h.ReconnectMaxIntervalSeconds, h.MaxRetryAttempts)
 }
 
-// appendHeartbeatRecord 追加一条心跳记录，并裁剪为阈值长度
-func appendHeartbeatRecord(cluster *service.ClusterConfig, success bool, ts time.Time) {
+// AppendHeartbeatRecord 追加一条心跳记录，并裁剪为阈值长度
+func (h *HeartbeatManager) AppendHeartbeatRecord(cluster *service.ClusterConfig, success bool, ts time.Time) {
 	if cluster == nil {
 		return
 	}
 	if cluster.HeartbeatHistory == nil {
 		cluster.HeartbeatHistory = make([]service.HeartbeatRecord, 0)
 	}
-	// 追加一条记录
 	rec := service.HeartbeatRecord{
 		Success: success,
 		Time:    ts.Local().Format("2006-01-02 15:04:05"),
 	}
 	cluster.HeartbeatHistory = append(cluster.HeartbeatHistory, rec)
-	// 裁剪为最近阈值条目
-	threshold := 3 // 兜底：默认 3 次
+	threshold := h.HeartbeatFailureThreshold
+	if threshold <= 0 {
+		threshold = 3
+	}
 	if len(cluster.HeartbeatHistory) > threshold {
 		cluster.HeartbeatHistory = cluster.HeartbeatHistory[len(cluster.HeartbeatHistory)-threshold:]
 	}
-	// 重新标注窗口内的序号为 1..N
 	for i := range cluster.HeartbeatHistory {
 		cluster.HeartbeatHistory[i].Index = i + 1
 	}

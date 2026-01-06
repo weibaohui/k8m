@@ -37,8 +37,6 @@ func (s *configService) UpdateConfig(config *models.Config) error {
 	if err != nil {
 		return err
 	}
-	// 让新修改的集群重连参数生效
-	ClusterService().UpdateHeartbeatSettings()
 	return nil
 }
 
