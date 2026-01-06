@@ -1,6 +1,8 @@
 package heartbeat
 
 import (
+	"context"
+
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
@@ -13,7 +15,8 @@ import (
 
 // HeartbeatLifecycle 心跳插件生命周期实现
 type HeartbeatLifecycle struct {
-	manager *service.HeartbeatManager
+	manager           *service.HeartbeatManager
+	leaderWatchCancel context.CancelFunc
 }
 
 // Install 安装心跳插件
@@ -46,12 +49,25 @@ func (h *HeartbeatLifecycle) Enable(ctx plugins.EnableContext) error {
 func (h *HeartbeatLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用心跳插件")
 
+	if h.leaderWatchCancel != nil {
+		h.leaderWatchCancel()
+		h.leaderWatchCancel = nil
+	}
+
+	h.StopHeartbeat()
 	return nil
 }
 
 // Uninstall 卸载心跳插件
 func (h *HeartbeatLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	klog.V(6).Infof("卸载心跳插件")
+
+	if h.leaderWatchCancel != nil {
+		h.leaderWatchCancel()
+		h.leaderWatchCancel = nil
+	}
+
+	h.StopHeartbeat()
 
 	// 根据keepData参数决定是否删除数据库
 	if !ctx.KeepData() {
@@ -71,7 +87,10 @@ func (h *HeartbeatLifecycle) Start(ctx plugins.BaseContext) error {
 	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
-		//监听两个channel，根据channel的信号启动或停止事件转发
+
+		leaderWatchCtx, cancel := context.WithCancel(context.Background())
+		h.leaderWatchCancel = cancel
+
 		go func() {
 			for {
 				select {
@@ -81,12 +100,14 @@ func (h *HeartbeatLifecycle) Start(ctx plugins.BaseContext) error {
 				case <-lost:
 					h.StopHeartbeat()
 					klog.V(6).Infof("不再是Leader，停止心跳检测")
+				case <-leaderWatchCtx.Done():
+					klog.V(6).Infof("心跳插件 Leader 监听 goroutine 退出")
+					return
 				}
 			}
 		}()
 		klog.V(6).Infof("根据实例Leader获取状态启动事件转发插件后台任务")
 	} else {
-		//没有启动Leader插件，直接启动心跳检测
 		h.StartHeartbeat()
 		klog.V(6).Infof("启动心跳插件后台任务")
 	}
