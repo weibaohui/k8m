@@ -6,7 +6,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -48,6 +47,7 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	cfg := flag.Init()
 	m, err := s.GetConfig()
 	if err != nil {
+		klog.Errorf("查询配置表: %v", err)
 		return err
 	}
 
@@ -88,10 +88,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	}
 	if m.MaxRetryAttempts > 0 {
 		cfg.MaxRetryAttempts = m.MaxRetryAttempts
-	}
-
-	if service.AIService().IsEnabled() {
-		service.AIService().UpdateFlagFromAIRunConfig()
 	}
 
 	// JwtTokenSecret 暂不启用，因为前端也要处理
