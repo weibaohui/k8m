@@ -1,8 +1,8 @@
 {
   "type": "page",
-  "title": "集群心跳配置",
   "body": {
     "type": "form",
+  "title": "集群心跳配置",
     "api": "post:/admin/plugins/heartbeat/config",
     "initApi": "get:/admin/plugins/heartbeat/config",
     "controls": [
