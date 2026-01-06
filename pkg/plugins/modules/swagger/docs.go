@@ -24,130 +24,6 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/ai/model/delete/{ids}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "删除AI模型配置",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "模型ID，多个用逗号分隔",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/ai/model/id/{id}/think/{status}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "快速保存AI模型思考状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "模型ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "状态，例如：true、false",
-                        "name": "status",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/ai/model/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取AI模型配置列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/ai/model/save": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "创建或更新AI模型配置",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/ai/model/test/id/{id}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "测试AI模型连接",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "模型ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/ai_prompt/delete/{ids}": {
             "post": {
                 "security": [
@@ -1394,6 +1270,175 @@ var doc = `{
                 }
             }
         },
+        "/admin/plugins/ai/model/delete/{ids}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "删除AI模型配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模型ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/ai/model/id/{id}/think/{status}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "快速保存AI模型思考状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "模型ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "状态，例如：true、false",
+                        "name": "status",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/ai/model/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取AI模型配置列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/ai/model/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "创建或更新AI模型配置",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/ai/model/test/id/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "测试AI模型连接",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "模型ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/ai/run_config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取AI运行配置",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AIRunConfig"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "更新AI运行配置",
+                "parameters": [
+                    {
+                        "description": "AI运行配置",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AIRunConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/plugins/helm/repo/delete/{ids}": {
             "post": {
                 "security": [
@@ -2325,478 +2370,6 @@ var doc = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/any_question": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "回答K8s相关问题",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "资源组",
-                        "name": "group",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源版本",
-                        "name": "version",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "问题内容",
-                        "name": "question",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/any_selection": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "解释选择内容",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "要解释的内容",
-                        "name": "question",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/cron": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "分析Cron表达式",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Cron表达式",
-                        "name": "cron",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/describe": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "分析K8s资源描述",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "资源组",
-                        "name": "group",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源版本",
-                        "name": "version",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源名称",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "namespace",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/event": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "分析K8s事件",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "事件备注",
-                        "name": "note",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "事件来源",
-                        "name": "source",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "事件原因",
-                        "name": "reason",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "事件类型",
-                        "name": "type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "相关资源类型",
-                        "name": "regardingKind",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/example": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取K8s资源使用示例",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "资源组",
-                        "name": "group",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源版本",
-                        "name": "version",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/example/field": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取K8s资源字段示例",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "资源组",
-                        "name": "group",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源版本",
-                        "name": "version",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "字段名称",
-                        "name": "field",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/gptshell": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "通过WebSocket提供GPT交互式对话终端",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "namespace",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源名称",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "resource",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "对话内容",
-                        "name": "content",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "101": {
-                        "description": "Switching Protocols",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/history": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取聊天历史记录",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/k8s_gpt/resource": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "K8s错误信息分析",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "错误内容",
-                        "name": "data",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源名称",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "相关字段",
-                        "name": "field",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/log": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "分析日志",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "日志内容",
-                        "name": "data",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/reset": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "重置聊天历史记录",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ai/chat/resource": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取K8s资源使用指南",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "资源组",
-                        "name": "group",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源版本",
-                        "name": "version",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 }
@@ -4675,135 +4248,6 @@ var doc = `{
                         "description": "IngressClass 名称",
                         "name": "name",
                         "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/k8s_gpt/cluster/{user_cluster}/result": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取集群K8sGPT分析结果",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户集群标识",
-                        "name": "user_cluster",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/k8s_gpt/cluster/{user_cluster}/run": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "对整个集群运行K8sGPT分析",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户集群标识",
-                        "name": "user_cluster",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/k8s_gpt/kind/{kind}/run": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "对指定资源类型运行K8sGPT分析",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/k8s_gpt/var": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取K8s资源字段信息",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -10590,6 +10034,478 @@ var doc = `{
                 }
             }
         },
+        "/mgm/plugins/ai/chat/any_question": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "回答K8s相关问题",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "资源组",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源版本",
+                        "name": "version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "问题内容",
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/any_selection": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "解释选择内容",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "要解释的内容",
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/cron": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "分析Cron表达式",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Cron表达式",
+                        "name": "cron",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/describe": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "分析K8s资源描述",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "资源组",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源版本",
+                        "name": "version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/event": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "分析K8s事件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "事件备注",
+                        "name": "note",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "事件来源",
+                        "name": "source",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "事件原因",
+                        "name": "reason",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "事件类型",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "相关资源类型",
+                        "name": "regardingKind",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/example": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取K8s资源使用示例",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "资源组",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源版本",
+                        "name": "version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "kind",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/example/field": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取K8s资源字段示例",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "资源组",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源版本",
+                        "name": "version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "字段名称",
+                        "name": "field",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/gptshell": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "通过WebSocket提供GPT交互式对话终端",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "集群名称",
+                        "name": "cluster",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "resource",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "对话内容",
+                        "name": "content",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/k8s_gpt/resource": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "K8s错误信息分析",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "错误内容",
+                        "name": "data",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "相关字段",
+                        "name": "field",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/log": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "分析日志",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "日志内容",
+                        "name": "data",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/resource": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取K8s资源使用指南",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "资源组",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源版本",
+                        "name": "version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "kind",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/ws_chatgpt/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取聊天历史记录",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/ws_chatgpt/reset": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "重置聊天历史记录",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/mgm/plugins/helm/chart/list": {
             "get": {
                 "security": [
@@ -11280,18 +11196,45 @@ var doc = `{
                 }
             }
         },
-        "models.Config": {
+        "models.AIRunConfig": {
             "type": "object",
             "properties": {
                 "any_select": {
+                    "description": "是否开启任意选择",
                     "type": "boolean"
                 },
                 "created_at": {
                     "type": "string"
                 },
-                "enable_ai": {
-                    "description": "是否启用AI功能，默认开启",
+                "id": {
+                    "type": "integer"
+                },
+                "max_history": {
+                    "description": "模型对话上下文历史记录数",
+                    "type": "integer"
+                },
+                "max_iterations": {
+                    "description": "模型自动对话的最大轮数",
+                    "type": "integer"
+                },
+                "model_id": {
+                    "description": "选择的模型ID",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "use_built_in_model": {
+                    "description": "是否使用内置模型，默认开启",
                     "type": "boolean"
+                }
+            }
+        },
+        "models.Config": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
                 },
                 "heartbeat_failure_threshold": {
                     "description": "心跳失败阈值",
@@ -11317,19 +11260,8 @@ var doc = `{
                 "login_type": {
                     "type": "string"
                 },
-                "max_history": {
-                    "description": "模型对话上下文历史记录数",
-                    "type": "integer"
-                },
-                "max_iterations": {
-                    "description": "模型自动对话的最大轮数",
-                    "type": "integer"
-                },
                 "max_retry_attempts": {
                     "description": "最大重试次数，默认100次",
-                    "type": "integer"
-                },
-                "model_id": {
                     "type": "integer"
                 },
                 "node_shell_image": {
@@ -11353,10 +11285,6 @@ var doc = `{
                 "updated_at": {
                     "description": "Automatically managed by GORM for update time",
                     "type": "string"
-                },
-                "use_built_in_model": {
-                    "description": "是否使用内置模型，默认开启",
-                    "type": "boolean"
                 }
             }
         },
