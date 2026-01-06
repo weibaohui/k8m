@@ -283,7 +283,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		config.RegisterSSOConfigRoutes(admin)
 		config.RegisterLdapConfigRoutes(admin)
 		config.RegisterConfigRoutes(admin)
-		config.RegisterAIModelConfigRoutes(admin)
 		user.RegisterClusterPermissionRoutes(admin)
 		user.RegisterAdminUserRoutes(admin)
 		user.RegisterAdminUserGroupRoutes(admin)
