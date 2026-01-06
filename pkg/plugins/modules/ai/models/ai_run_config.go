@@ -39,23 +39,8 @@ func (c *AIRunConfig) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *g
 // GetDefault 获取默认的AI运行配置
 func (c *AIRunConfig) GetDefault() (*AIRunConfig, error) {
 	var config AIRunConfig
-	err := dao.DB().First(&config).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			// 如果没有配置，创建默认配置
-			config = AIRunConfig{
-				UseBuiltInModel: true,
-				MaxHistory:      10,
-				MaxIterations:   10,
-				AnySelect:       true,
-			}
-			err = dao.DB().Create(&config).Error
-			if err != nil {
-				return nil, err
-			}
-			return &config, nil
-		}
-		return nil, err
-	}
-	return &config, nil
+	// 使用FirstOrCreate获取第一条记录，如果没有则创建默认配置
+	// 结构体定义中已通过gorm标签设置了默认值
+	err := dao.DB().FirstOrCreate(&config, AIRunConfig{}).Error
+	return &config, err
 }
