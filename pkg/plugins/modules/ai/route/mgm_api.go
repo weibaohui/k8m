@@ -50,5 +50,9 @@ func RegisterPluginAdminRoutes(arg chi.Router) {
 	arg.Post(prefix+"/model/id/{id}/think/{status}", response.Adapter(amc.QuickSave))
 	arg.Post(prefix+"/model/test/id/{id}", response.Adapter(amc.TestConnection))
 
+	arc := &controller.AIRunConfigController{}
+	arg.Get(prefix+"/run_config", response.Adapter(arc.GetRunConfig))
+	arg.Post(prefix+"/run_config", response.Adapter(arc.UpdateRunConfig))
+
 	klog.V(6).Infof("注册 AI 插件 admin管理路由")
 }

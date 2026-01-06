@@ -7,13 +7,17 @@ import (
 )
 
 func InitDB() error {
-	return dao.DB().AutoMigrate(&AIModelConfig{}, &AIPrompt{})
+	return dao.DB().AutoMigrate(&AIModelConfig{}, &AIPrompt{}, &AIRunConfig{})
 }
 
 func UpgradeDB(fromVersion string, toVersion string) error {
 	klog.V(6).Infof("开始升级 AI 插件数据库：从版本 %s 到版本 %s", fromVersion, toVersion)
-	if err := dao.DB().AutoMigrate(&AIModelConfig{}, &AIPrompt{}); err != nil {
+	if err := dao.DB().AutoMigrate(&AIModelConfig{}, &AIPrompt{}, &AIRunConfig{}); err != nil {
 		klog.V(6).Infof("自动迁移 AI 插件数据库失败: %v", err)
+		return err
+	}
+	if err := MigrateAIRunConfig(); err != nil {
+		klog.V(6).Infof("迁移 AI 运行配置失败: %v", err)
 		return err
 	}
 	klog.V(6).Infof("升级 AI 插件数据库完成")
@@ -31,6 +35,12 @@ func DropDB() error {
 	if db.Migrator().HasTable(&AIPrompt{}) {
 		if err := db.Migrator().DropTable(&AIPrompt{}); err != nil {
 			klog.V(6).Infof("删除 AI Prompt 表失败: %v", err)
+			return err
+		}
+	}
+	if db.Migrator().HasTable(&AIRunConfig{}) {
+		if err := db.Migrator().DropTable(&AIRunConfig{}); err != nil {
+			klog.V(6).Infof("删除 AI Run Config 表失败: %v", err)
 			return err
 		}
 	}

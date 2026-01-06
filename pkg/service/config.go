@@ -107,7 +107,6 @@ func (s *configService) UpdateFlagFromDBConfig() error {
 	}
 
 	cfg.PrintConfig = m.PrintConfig
-	cfg.EnableAI = m.EnableAI
 	if m.ResourceCacheTimeout > 0 {
 		cfg.ResourceCacheTimeout = m.ResourceCacheTimeout
 	}

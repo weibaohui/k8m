@@ -7,6 +7,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/core"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"k8s.io/klog/v2"
 )
 
@@ -135,4 +136,50 @@ func (c *aiService) TestClient(url string, key string, model string) (core.IAI, 
 		return nil, err
 	}
 	return aiClient, nil
+}
+
+// UpdateFlagFromAIRunConfig 从AI运行配置表更新全局标志配置
+func (c *aiService) UpdateFlagFromAIRunConfig() error {
+	cfg := flag.Init()
+	// 获取AI运行配置
+	runConfig, err := AIRunConfigService().GetDefault()
+	if err != nil {
+		klog.Errorf("UpdateFlagFromAIRunConfig 获取AI运行配置失败: %v", err)
+		return err
+	}
+
+	// 更新标志配置
+	cfg.UseBuiltInModel = runConfig.UseBuiltInModel
+	cfg.AnySelect = runConfig.AnySelect
+	cfg.MaxHistory = runConfig.MaxHistory
+	cfg.MaxIterations = runConfig.MaxIterations
+
+	// 如果不使用内置模型，加载模型配置
+	if !runConfig.UseBuiltInModel {
+		if runConfig.ModelID == 0 {
+			klog.Errorf("UpdateFlagFromAIRunConfig 未指定有效的模型ID")
+			return fmt.Errorf("未指定有效的模型ID")
+		}
+
+		modelConfig := &models.AIModelConfig{ID: runConfig.ModelID}
+		modelConfig, err := modelConfig.GetOne(nil)
+		if err != nil {
+			klog.Errorf("UpdateFlagFromAIRunConfig 获取模型配置失败: %v", err)
+			return err
+		}
+
+		cfg.ApiKey = modelConfig.ApiKey
+		cfg.ApiModel = modelConfig.ApiModel
+		cfg.ApiURL = modelConfig.ApiURL
+		cfg.Think = modelConfig.Think
+		if modelConfig.Temperature > 0 {
+			cfg.Temperature = modelConfig.Temperature
+		}
+		if modelConfig.TopP > 0 {
+			cfg.TopP = modelConfig.TopP
+		}
+	}
+
+	// 重置默认客户端，使新配置生效
+	return c.ResetDefaultClient()
 }

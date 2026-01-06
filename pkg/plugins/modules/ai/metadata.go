@@ -16,6 +16,7 @@ var Metadata = plugins.Module{
 	Tables: []string{
 		"ai_model_configs",
 		"ai_prompts",
+		"ai_run_configs",
 	},
 	Menus: []plugins.Menu{
 		{
@@ -41,6 +42,15 @@ var Metadata = plugins.Module{
 					EventType:   "custom",
 					CustomEvent: `() => loadJsonPage("/plugins/ai/ai_prompt")`,
 					Order:       20,
+				},
+				{
+					Key:         "plugin_ai_run_config",
+					Title:       "AI运行配置",
+					Icon:        "fa-solid fa-cog",
+					Show:        "isPlatformAdmin()==true",
+					EventType:   "custom",
+					CustomEvent: `() => loadJsonPage("/plugins/ai/ai_run_config")`,
+					Order:       30,
 				},
 			},
 		},

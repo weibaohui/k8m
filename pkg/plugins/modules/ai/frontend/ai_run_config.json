@@ -1,0 +1,78 @@
+{
+  "title": "AI运行配置",
+  "body": [
+    {
+      "type": "form",
+      "api": {
+        "method": "post",
+        "url": "/admin/plugins/ai/run_config"
+      },
+      "initApi": {
+        "method": "get",
+        "url": "/admin/plugins/ai/run_config"
+      },
+      "body": [
+        {
+          "type": "fieldSet",
+          "title": "AI运行配置",
+          "body": [
+            {
+              "name": "use_built_in_model",
+              "type": "switch",
+              "label": "内置参数",
+              "value": true,
+              "desc": "是否使用k8m内置AI大模型"
+            },
+            {
+              "label": "默认模型",
+              "type": "select",
+              "name": "model_id",
+              "searchable": true,
+              "selectMode": "table",
+              "initFetch": true,
+              "valueField": "id",
+              "labelField": "api_model",
+              "source": "get:/admin/plugins/ai/model/list",
+              "columns": [
+                {
+                  "name": "id",
+                  "label": "ID"
+                },
+                {
+                  "name": "api_model",
+                  "label": "模型名称"
+                },
+                {
+                  "name": "api_url",
+                  "label": "模型地址"
+                }
+              ],
+              "visibleOn": "!use_built_in_model"
+            },
+            {
+              "name": "max_history",
+              "type": "input-number",
+              "label": "上下文记忆",
+              "value": "10",
+              "desc": "适当的记忆量有助于提升回答精度"
+            },
+            {
+              "name": "max_iterations",
+              "type": "input-number",
+              "label": "自动对话轮数",
+              "value": "10",
+              "desc": "适当提升有助于提升回答完整度"
+            },
+            {
+              "name": "any_select",
+              "type": "switch",
+              "label": "任意选择",
+              "value": true,
+              "desc": "是否开启任意选择，默认开启"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -42,9 +42,6 @@ func (cc *Controller) Update(c *response.Context) {
 		return
 	}
 
-	if config.EnableAI == false {
-		config.AnySelect = false
-	}
 
 	if err := service.ConfigService().UpdateConfig(&config); err != nil {
 		amis.WriteJsonError(c, err)
