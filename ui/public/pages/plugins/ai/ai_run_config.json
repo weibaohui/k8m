@@ -70,6 +70,13 @@
               "label": "任意选择",
               "value": true,
               "desc": "是否开启任意选择，默认开启"
+            },
+            {
+              "name": "floating_window",
+              "type": "switch",
+              "label": "浮动窗口",
+              "value": true,
+              "desc": "是否开启浮动窗口，默认开启"
             }
           ]
         }

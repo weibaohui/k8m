@@ -14,20 +14,20 @@ import (
 )
 
 type aiService struct {
-	innerModel  string
-	innerApiKey string
-	innerApiUrl string
-	// AI配置参数
-	UseBuiltInModel bool    // 是否使用内置大模型参数
+	innerModel      string  // 内置模型
+	innerApiKey     string  // 内置模型API密钥
+	innerApiUrl     string  // 内置模型API地址
+	UseBuiltInModel bool    // 是否使用内置模型
 	AnySelect       bool    // 是否开启任意选择
-	MaxHistory      int32   // 模型对话上下文历史记录数
-	MaxIterations   int32   // 模型自动对话的最大轮数
-	ApiKey          string  // 大模型的自定义API Key
-	ApiModel        string  // 大模型的自定义模型名称
-	ApiURL          string  // 大模型的自定义API URL
-	Think           bool    // AI是否开启思考过程输出
-	Temperature     float32 // 模型温度
-	TopP            float32 // 模型topP参数
+	FloatingWindow  bool    // 是否开启浮动窗口
+	MaxHistory      int32   // 最大历史记录数
+	MaxIterations   int32   // 最大迭代次数
+	ApiKey          string  // 自定义模型API密钥
+	ApiModel        string  // 自定义模型名称
+	ApiURL          string  // 自定义模型API地址
+	Think           bool    // 是否开启思考模式
+	Temperature     float32 // 温度参数，控制生成文本的随机性
+	TopP            float32 // Top-p采样参数，控制生成文本的多样性
 }
 
 var (
@@ -158,9 +158,9 @@ func (c *aiService) UpdateFlagFromAIRunConfig() error {
 		return err
 	}
 
-	// 更新标志配置
 	c.UseBuiltInModel = runConfig.UseBuiltInModel
 	c.AnySelect = runConfig.AnySelect
+	c.FloatingWindow = runConfig.FloatingWindow
 	c.MaxHistory = runConfig.MaxHistory
 	c.MaxIterations = runConfig.MaxIterations
 

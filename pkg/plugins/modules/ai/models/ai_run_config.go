@@ -10,14 +10,15 @@ import (
 )
 
 type AIRunConfig struct {
-	ID              uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	UseBuiltInModel bool      `gorm:"default:true" json:"use_built_in_model"` // 是否使用内置模型，默认开启
-	ModelID         uint      `json:"model_id"`                               // 选择的模型ID
-	MaxHistory      int32     `gorm:"default:10" json:"max_history"`          // 模型对话上下文历史记录数
-	MaxIterations   int32     `gorm:"default:10" json:"max_iterations"`       // 模型自动对话的最大轮数
-	AnySelect       bool      `gorm:"default:true" json:"any_select"`         // 是否开启任意选择
-	CreatedAt       time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt       time.Time `json:"updated_at,omitempty"`
+	ID              uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 主键ID
+	UseBuiltInModel bool      `gorm:"default:true" json:"use_built_in_model"`       // 是否使用内置模型
+	ModelID         uint      `json:"model_id"`                                     // 模型ID
+	MaxHistory      int32     `gorm:"default:10" json:"max_history"`                // 最大历史记录数
+	MaxIterations   int32     `gorm:"default:10" json:"max_iterations"`             // 最大迭代次数
+	AnySelect       bool      `gorm:"default:true" json:"any_select"`               // 是否开启任意选择
+	FloatingWindow  bool      `gorm:"default:true" json:"floating_window"`          // 是否开启浮动窗口
+	CreatedAt       time.Time `json:"created_at,omitempty" gorm:"<-:create"`        // 创建时间
+	UpdatedAt       time.Time `json:"updated_at,omitempty"`                         // 更新时间
 }
 
 func (c *AIRunConfig) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*AIRunConfig, int64, error) {
@@ -36,11 +37,9 @@ func (c *AIRunConfig) GetOne(params *dao.Params, queryFuncs ...func(*gorm.DB) *g
 	return dao.GenericGetOne(params, c, queryFuncs...)
 }
 
-// GetDefault 获取默认的AI运行配置
 func (c *AIRunConfig) GetDefault() (*AIRunConfig, error) {
 	var config AIRunConfig
-	// 使用FirstOrCreate获取第一条记录，如果没有则创建默认配置
-	// 结构体定义中已通过gorm标签设置了默认值
+	//使用数据库默认值
 	err := dao.DB().FirstOrCreate(&config, AIRunConfig{}).Error
 	return &config, err
 }
