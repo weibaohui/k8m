@@ -9,21 +9,17 @@ import (
 )
 
 type Config struct {
-	ID                          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ProductName                 string    `json:"product_name,omitempty"` // 产品名称
-	LoginType                   string    `json:"login_type,omitempty"`
-	JwtTokenSecret              string    `json:"jwt_token_secret,omitempty"`
-	NodeShellImage              string    `json:"node_shell_image,omitempty"`
-	KubectlShellImage           string    `json:"kubectl_shell_image,omitempty"`
-	ImagePullTimeout            int       `gorm:"default:30" json:"image_pull_timeout,omitempty"` // 镜像拉取超时时间（秒）
-	PrintConfig                 bool      `json:"print_config"`
-	ResourceCacheTimeout        int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"`           // 资源缓存时间（秒）
-	HeartbeatIntervalSeconds    int       `gorm:"default:30" json:"heartbeat_interval_seconds,omitempty"`       // 心跳间隔时间（秒）
-	HeartbeatFailureThreshold   int       `gorm:"default:3" json:"heartbeat_failure_threshold,omitempty"`       // 心跳失败阈值
-	ReconnectMaxIntervalSeconds int       `gorm:"default:3600" json:"reconnect_max_interval_seconds,omitempty"` // 重连最大间隔时间（秒）
-	MaxRetryAttempts            int       `gorm:"default:100" json:"max_retry_attempts,omitempty"`              // 最大重试次数，默认100次
-	CreatedAt                   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt                   time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
+	ID                   uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	ProductName          string    `json:"product_name,omitempty"` // 产品名称
+	LoginType            string    `json:"login_type,omitempty"`
+	JwtTokenSecret       string    `json:"jwt_token_secret,omitempty"`
+	NodeShellImage       string    `json:"node_shell_image,omitempty"`
+	KubectlShellImage    string    `json:"kubectl_shell_image,omitempty"`
+	ImagePullTimeout     int       `gorm:"default:30" json:"image_pull_timeout,omitempty"` // 镜像拉取超时时间（秒）
+	PrintConfig          bool      `json:"print_config"`
+	ResourceCacheTimeout int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"` // 资源缓存时间（秒）
+	CreatedAt            time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+	UpdatedAt            time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }
 
 func (c *Config) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*Config, int64, error) {
