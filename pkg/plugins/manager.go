@@ -429,14 +429,10 @@ func (m *Manager) Start() {
 			continue
 		}
 		if mod.Lifecycle != nil && (m.status[name] == StatusEnabled || m.status[name] == StatusStopped) {
-			ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
-			if err := mod.Lifecycle.Start(ctx); err != nil {
+			if err := m.StartPlugin(name); err != nil {
 				klog.V(6).Infof("启动插件后台任务失败: %s，错误: %v", name, err)
 			} else {
 				klog.V(6).Infof("启动插件后台任务成功: %s", name)
-				m.mu.Lock()
-				m.status[name] = StatusRunning
-				m.mu.Unlock()
 			}
 		}
 	}

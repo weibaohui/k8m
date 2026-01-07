@@ -165,7 +165,7 @@ func (m *Manager) ListPluginMenus(c *response.Context) {
 		sn := m.status[name]
 		m.mu.RUnlock()
 
-		if sn != StatusEnabled {
+		if sn != StatusRunning {
 			continue
 		}
 		result = append(result, convertMenusToVO(mod.Menus)...)
