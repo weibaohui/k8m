@@ -107,3 +107,16 @@ func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 func (l *EventHandlerLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+// Stop 停止事件转发插件的后台任务
+func (l *EventHandlerLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止事件转发插件后台任务")
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
+	StopLeaderWatch()
+	return nil
+}

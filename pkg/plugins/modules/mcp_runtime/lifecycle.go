@@ -87,3 +87,14 @@ func (l *McpLifecycle) Start(ctx plugins.BaseContext) error {
 func (l *McpLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+func (l *McpLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止 MCP 插件后台任务")
+
+	if l.cancelStart != nil {
+		l.cancelStart()
+		l.cancelStart = nil
+	}
+
+	return nil
+}

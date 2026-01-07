@@ -98,3 +98,15 @@ func (d *DemoLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	klog.V(6).Infof("执行Demo插件定时任务，表达式: %s", spec)
 	return nil
 }
+
+// Stop 停止Demo插件的后台任务
+func (d *DemoLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止Demo插件后台任务")
+
+	if d.cancelStart != nil {
+		d.cancelStart()
+		d.cancelStart = nil
+	}
+
+	return nil
+}

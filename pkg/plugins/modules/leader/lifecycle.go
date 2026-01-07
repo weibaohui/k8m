@@ -98,3 +98,15 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 func (l *LeaderLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+// Stop 停止Leader选举插件的后台任务
+func (l *LeaderLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止Leader选举插件后台任务")
+
+	if l.cleanupCancel != nil {
+		l.cleanupCancel()
+		l.cleanupCancel = nil
+	}
+
+	return nil
+}

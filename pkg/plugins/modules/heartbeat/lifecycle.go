@@ -114,6 +114,19 @@ func (h *HeartbeatLifecycle) StartCron(ctx plugins.BaseContext, spec string) err
 	return nil
 }
 
+// Stop 停止心跳插件的后台任务
+func (h *HeartbeatLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止心跳插件后台任务")
+
+	if h.leaderWatchCancel != nil {
+		h.leaderWatchCancel()
+		h.leaderWatchCancel = nil
+	}
+
+	h.StopHeartbeat()
+	return nil
+}
+
 func (h *HeartbeatLifecycle) StartHeartbeat() {
 	// 初始化心跳管理器
 	h.manager = service.NewHeartbeatManager()

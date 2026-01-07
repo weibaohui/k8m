@@ -112,3 +112,16 @@ func (l *HelmLifecycle) Start(ctx plugins.BaseContext) error {
 func (l *HelmLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+// Stop 停止 Helm 插件的后台任务
+func (l *HelmLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止 Helm 插件后台任务")
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
+	helm.StopUpdateHelmRepoInBackground()
+	return nil
+}

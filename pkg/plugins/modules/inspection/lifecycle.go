@@ -104,3 +104,16 @@ func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
 func (l *InspectionLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+// Stop 停止集群巡检插件的后台任务
+func (l *InspectionLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止集群巡检插件后台任务")
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
+	lua.StopClusterInspection()
+	return nil
+}

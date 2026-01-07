@@ -58,3 +58,8 @@ func (o *OpenAPILifecycle) Start(ctx plugins.BaseContext) error {
 func (o *OpenAPILifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+func (o *OpenAPILifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止OpenAPI插件后台任务")
+	return nil
+}
