@@ -41,3 +41,8 @@ func (g *GlobalLogLifecycle) StartCron(ctx plugins.BaseContext, spec string) err
 	klog.V(6).Infof("执行全局日志插件定时任务，表达式: %s", spec)
 	return nil
 }
+
+func (g *GlobalLogLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止全局日志插件后台任务")
+	return nil
+}

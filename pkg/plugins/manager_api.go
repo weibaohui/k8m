@@ -31,6 +31,10 @@ func (m *Manager) RegisterAdminRoutes(r chi.Router) {
 	r.Post("/plugin/install/{name}", response.Adapter(m.InstallPlugin))
 	// 启用插件
 	r.Post("/plugin/enable/{name}", response.Adapter(m.EnablePlugin))
+	// 启动插件
+	r.Post("/plugin/start/{name}", response.Adapter(m.StartPluginAPI))
+	// 停止插件
+	r.Post("/plugin/stop/{name}", response.Adapter(m.StopPluginAPI))
 	// 禁用插件
 	r.Post("/plugin/disable/{name}", response.Adapter(m.DisablePlugin))
 	// 卸载插件（删除数据）
@@ -294,6 +298,42 @@ func (m *Manager) EnablePlugin(c *response.Context) {
 	}
 
 	amis.WriteJsonOKMsg(c, "已启用")
+}
+
+// StartPluginAPI 启动指定名称的插件
+// 路径参数为插件名，启动失败时返回错误
+func (m *Manager) StartPluginAPI(c *response.Context) {
+	name := c.Param("name")
+	klog.V(6).Infof("启动插件配置请求: %s", name)
+	if err := m.StartPlugin(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusRunning, params); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOKMsg(c, "已启动")
+}
+
+// StopPluginAPI 停止指定名称的插件
+// 路径参数为插件名，停止失败时返回错误
+func (m *Manager) StopPluginAPI(c *response.Context) {
+	name := c.Param("name")
+	klog.V(6).Infof("停止插件配置请求: %s", name)
+	if err := m.StopPlugin(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusStopped, params); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	amis.WriteJsonOKMsg(c, "已停止")
 }
 
 // UninstallPlugin 卸载指定名称的插件（删除数据）

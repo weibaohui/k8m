@@ -47,13 +47,6 @@ func (l *EventHandlerLifecycle) Enable(ctx plugins.EnableContext) error {
 
 // Disable 中文函数注释：禁用事件转发插件，停止后台任务与事件转发。
 func (l *EventHandlerLifecycle) Disable(ctx plugins.BaseContext) error {
-
-	if l.leaderWatchCancel != nil {
-		l.leaderWatchCancel()
-		l.leaderWatchCancel = nil
-	}
-
-	StopLeaderWatch()
 	klog.V(6).Infof("禁用事件转发插件")
 	return nil
 }
@@ -105,5 +98,18 @@ func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
 
 // StartCron 中文函数注释：事件转发插件不使用插件级 cron，留空实现。
 func (l *EventHandlerLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
+	return nil
+}
+
+// Stop 停止事件转发插件的后台任务
+func (l *EventHandlerLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止事件转发插件后台任务")
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
+	StopLeaderWatch()
 	return nil
 }

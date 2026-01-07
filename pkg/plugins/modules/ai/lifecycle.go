@@ -66,3 +66,8 @@ func (l *AILifecycle) Start(ctx plugins.BaseContext) error {
 func (l *AILifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+func (l *AILifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止 AI 插件后台任务")
+	return nil
+}

@@ -48,13 +48,6 @@ func (h *HeartbeatLifecycle) Enable(ctx plugins.EnableContext) error {
 // Disable 禁用心跳插件
 func (h *HeartbeatLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用心跳插件")
-
-	if h.leaderWatchCancel != nil {
-		h.leaderWatchCancel()
-		h.leaderWatchCancel = nil
-	}
-
-	h.StopHeartbeat()
 	return nil
 }
 
@@ -111,6 +104,19 @@ func (h *HeartbeatLifecycle) Start(ctx plugins.BaseContext) error {
 // StartCron 启动心跳插件的定时任务
 func (h *HeartbeatLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	klog.V(6).Infof("执行心跳插件定时任务，表达式: %s", spec)
+	return nil
+}
+
+// Stop 停止心跳插件的后台任务
+func (h *HeartbeatLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止心跳插件后台任务")
+
+	if h.leaderWatchCancel != nil {
+		h.leaderWatchCancel()
+		h.leaderWatchCancel = nil
+	}
+
+	h.StopHeartbeat()
 	return nil
 }
 

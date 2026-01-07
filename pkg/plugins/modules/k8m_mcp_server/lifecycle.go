@@ -42,3 +42,8 @@ func (k *K8mMcpServerLifecycle) Start(ctx plugins.BaseContext) error {
 func (k *K8mMcpServerLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+func (k *K8mMcpServerLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止K8M MCP Server插件后台任务")
+	return nil
+}

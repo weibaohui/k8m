@@ -42,3 +42,8 @@ func (k *K8sGPTLifecycle) Start(ctx plugins.BaseContext) error {
 func (k *K8sGPTLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+func (k *K8sGPTLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止K8sGPT插件后台任务")
+	return nil
+}

@@ -47,12 +47,6 @@ func (l *InspectionLifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *InspectionLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用集群巡检插件")
-
-	if l.leaderWatchCancel != nil {
-		l.leaderWatchCancel()
-		l.leaderWatchCancel = nil
-	}
-
 	return nil
 }
 
@@ -102,5 +96,18 @@ func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
 
 // StartCron 当前巡检插件不使用插件级 cron 表达式
 func (l *InspectionLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
+	return nil
+}
+
+// Stop 停止集群巡检插件的后台任务
+func (l *InspectionLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止集群巡检插件后台任务")
+
+	if l.leaderWatchCancel != nil {
+		l.leaderWatchCancel()
+		l.leaderWatchCancel = nil
+	}
+
+	lua.StopClusterInspection()
 	return nil
 }

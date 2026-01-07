@@ -42,3 +42,8 @@ func (s *SwaggerLifecycle) StartCron(ctx plugins.BaseContext, spec string) error
 	klog.V(6).Infof("启动Swagger插件定时任务")
 	return nil
 }
+
+func (s *SwaggerLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止Swagger插件后台任务")
+	return nil
+}

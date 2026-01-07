@@ -171,6 +171,7 @@ func (m *Manager) Enable(name string) error {
 func (m *Manager) Disable(name string) error {
 	m.mu.RLock()
 	mod, ok := m.modules[name]
+	st := m.status[name]
 	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
@@ -187,6 +188,12 @@ func (m *Manager) Disable(name string) error {
 				klog.V(6).Infof("禁用插件失败: %s,被插件依赖: %s", name, otherName)
 				return fmt.Errorf("无法禁用插件,插件 %s 依赖于当前插件", otherName)
 			}
+		}
+	}
+	if st == StatusRunning {
+		if err := m.StopPlugin(name); err != nil {
+			klog.V(6).Infof("禁用插件失败: %s,停止后台任务失败: %v", name, err)
+			return err
 		}
 	}
 	if mod.Lifecycle != nil {
@@ -211,9 +218,16 @@ func (m *Manager) Disable(name string) error {
 func (m *Manager) Uninstall(name string, keepData bool) error {
 	m.mu.RLock()
 	mod, ok := m.modules[name]
+	st := m.status[name]
 	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
+	}
+	if st == StatusRunning {
+		if err := m.StopPlugin(name); err != nil {
+			klog.V(6).Infof("卸载插件失败: %s，停止后台任务失败: %v", name, err)
+			return err
+		}
 	}
 	if mod.Lifecycle != nil {
 		ctx := uninstallContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}, keepData}
@@ -226,6 +240,58 @@ func (m *Manager) Uninstall(name string, keepData bool) error {
 	m.status[name] = StatusDiscovered
 	m.mu.Unlock()
 	klog.V(6).Infof("卸载插件成功: %s", name)
+	return nil
+}
+
+// StartPlugin 启动指定插件的后台任务，从 Enabled/Stopped 状态变为 Running 状态
+func (m *Manager) StartPlugin(name string) error {
+	m.mu.RLock()
+	mod, ok := m.modules[name]
+	st := m.status[name]
+	m.mu.RUnlock()
+	if !ok {
+		return fmt.Errorf("插件未注册: %s", name)
+	}
+	if st != StatusEnabled && st != StatusStopped {
+		return fmt.Errorf("插件状态不允许启动: %s，当前状态: %s", name, statusToCN(st))
+	}
+	if mod.Lifecycle != nil {
+		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
+		if err := mod.Lifecycle.Start(ctx); err != nil {
+			klog.V(6).Infof("启动插件后台任务失败: %s，错误: %v", name, err)
+			return err
+		}
+	}
+	m.mu.Lock()
+	m.status[name] = StatusRunning
+	m.mu.Unlock()
+	klog.V(6).Infof("启动插件后台任务成功: %s", name)
+	return nil
+}
+
+// StopPlugin 停止指定插件的后台任务，从 Running 状态变为 Stopped 状态
+func (m *Manager) StopPlugin(name string) error {
+	m.mu.RLock()
+	mod, ok := m.modules[name]
+	st := m.status[name]
+	m.mu.RUnlock()
+	if !ok {
+		return fmt.Errorf("插件未注册: %s", name)
+	}
+	if st != StatusRunning {
+		return fmt.Errorf("插件状态不允许停止: %s，当前状态: %s", name, statusToCN(st))
+	}
+	if mod.Lifecycle != nil {
+		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
+		if err := mod.Lifecycle.Stop(ctx); err != nil {
+			klog.V(6).Infof("停止插件后台任务失败: %s，错误: %v", name, err)
+			return err
+		}
+	}
+	m.mu.Lock()
+	m.status[name] = StatusStopped
+	m.mu.Unlock()
+	klog.V(6).Infof("停止插件后台任务成功: %s", name)
 	return nil
 }
 
@@ -362,12 +428,15 @@ func (m *Manager) Start() {
 		if !ok {
 			continue
 		}
-		if mod.Lifecycle != nil && m.status[name] == StatusEnabled {
+		if mod.Lifecycle != nil && (m.status[name] == StatusEnabled || m.status[name] == StatusStopped) {
 			ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 			if err := mod.Lifecycle.Start(ctx); err != nil {
 				klog.V(6).Infof("启动插件后台任务失败: %s，错误: %v", name, err)
 			} else {
 				klog.V(6).Infof("启动插件后台任务成功: %s", name)
+				m.mu.Lock()
+				m.status[name] = StatusRunning
+				m.mu.Unlock()
 			}
 		}
 	}
@@ -379,7 +448,7 @@ func (m *Manager) Start() {
 		if !ok {
 			continue
 		}
-		if mod.Lifecycle == nil || len(mod.Crons) == 0 || m.status[name] != StatusEnabled {
+		if mod.Lifecycle == nil || len(mod.Crons) == 0 || m.status[name] != StatusRunning {
 			continue
 		}
 		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}

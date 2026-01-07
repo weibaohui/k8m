@@ -60,3 +60,8 @@ func (w *WebhookLifecycle) Start(ctx plugins.BaseContext) error {
 func (w *WebhookLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 	return nil
 }
+
+func (w *WebhookLifecycle) Stop(ctx plugins.BaseContext) error {
+	klog.V(6).Infof("停止Webhook插件后台任务")
+	return nil
+}
