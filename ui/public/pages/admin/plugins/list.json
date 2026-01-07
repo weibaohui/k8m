@@ -183,7 +183,7 @@
                         },
                         {
                             "type": "button",
-                            "icon": "fas fa-play-circle text-success",
+                            "icon": "fas fa-toggle-on text-success",
                             "actionType": "ajax",
                             "label": "启用",
                             "visibleOn": "this.status == '已安装' || this.status == '已禁用'",
@@ -210,7 +210,7 @@
                         },
                         {
                             "type": "button",
-                            "icon": "fas fa-stop-circle text-danger",
+                            "icon": "fas fa-toggle-off text-danger",
                             "actionType": "ajax",
                             "label": "禁用",
                             "visibleOn": "this.status == '已停止'",
