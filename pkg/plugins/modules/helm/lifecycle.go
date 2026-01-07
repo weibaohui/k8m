@@ -68,7 +68,7 @@ func (l *HelmLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 // Start 启动 Helm 插件后台任务（不可阻塞）
 func (l *HelmLifecycle) Start(ctx plugins.BaseContext) error {
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
+	if plugins.ManagerInstance().IsRunning(modules.PluginNameLeader) {
 		// 如果启用了 Leader 插件，监听 Leader 选举事件
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)

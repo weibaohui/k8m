@@ -47,7 +47,7 @@ func DefaultEventHandlerConfig() *EventHandlerConfig {
 		return cfg
 	}
 	return &EventHandlerConfig{
-		Enabled: plugins.ManagerInstance().IsEnabled(modules.PluginNameEventHandler),
+		Enabled: plugins.ManagerInstance().IsRunning(modules.PluginNameEventHandler),
 		Watcher: WatcherConfig{
 			BufferSize: 1000,
 		},

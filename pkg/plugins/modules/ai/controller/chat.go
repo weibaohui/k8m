@@ -48,7 +48,7 @@ type ResourceData struct {
 }
 
 func handleRequest(c *response.Context, promptFunc func(data any) string) {
-	enabled := plugins.ManagerInstance().IsEnabled(modules.PluginNameAI)
+	enabled := plugins.ManagerInstance().IsRunning(modules.PluginNameAI)
 	if !enabled {
 		amis.WriteJsonData(c, response.H{
 			"result": "请先配置开启ChatGPT功能",

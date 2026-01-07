@@ -183,7 +183,7 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	// @name Authorization
 	// @description 请输入以 `Bearer ` 开头的 Token，例：Bearer xxxxxxxx。未列出接口请参考前端调用方法。Token在个人中心-API密钥菜单下申请。
 	r.Get("/swagger/*", func(w http.ResponseWriter, r *http.Request) {
-		if mgr.IsEnabled(modules.PluginNameSwagger) {
+		if mgr.IsRunning(modules.PluginNameSwagger) {
 			httpSwagger.Handler().ServeHTTP(w, r)
 		} else {
 			w.Header().Set("Content-Type", "application/json")
@@ -220,7 +220,7 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	})
 
 	r.Get("/health/ready", response.Adapter(func(c *response.Context) {
-		if !mgr.IsEnabled(modules.PluginNameLeader) {
+		if !mgr.IsRunning(modules.PluginNameLeader) {
 			c.Status(http.StatusOK)
 			return
 		}

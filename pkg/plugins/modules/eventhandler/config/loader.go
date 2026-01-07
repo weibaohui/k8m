@@ -29,7 +29,7 @@ func LoadAllFromDB() *EventHandlerConfig {
 		setting = models.DefaultEventForwardSetting()
 	}
 	cfg := &EventHandlerConfig{
-		Enabled: plugins.ManagerInstance().IsEnabled(modules.PluginNameEventHandler),
+		Enabled: plugins.ManagerInstance().IsRunning(modules.PluginNameEventHandler),
 		Watcher: WatcherConfig{
 			BufferSize: defaultInt(setting.EventWatcherBufferSize, 1000),
 		},

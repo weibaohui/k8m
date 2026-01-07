@@ -66,7 +66,7 @@ func (l *EventHandlerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 // Start 中文函数注释：启动事件转发插件后台任务（不可阻塞），按主备状态控制事件转发启停。
 func (l *EventHandlerLifecycle) Start(ctx plugins.BaseContext) error {
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
+	if plugins.ManagerInstance().IsRunning(modules.PluginNameLeader) {
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
 

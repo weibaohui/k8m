@@ -70,7 +70,7 @@ func (h *HeartbeatLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 func (h *HeartbeatLifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动心跳插件后台任务")
 
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
+	if plugins.ManagerInstance().IsRunning(modules.PluginNameLeader) {
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
 

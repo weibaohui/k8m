@@ -63,7 +63,7 @@ func (l *InspectionLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 }
 
 func (l *InspectionLifecycle) Start(ctx plugins.BaseContext) error {
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameLeader) {
+	if plugins.ManagerInstance().IsRunning(modules.PluginNameLeader) {
 		elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
 		lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
 

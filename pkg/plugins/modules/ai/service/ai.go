@@ -128,7 +128,7 @@ func (c *aiService) openAIClient() (core.IAI, error) {
 }
 
 func (c *aiService) IsEnabled() bool {
-	enable := plugins.ManagerInstance().IsEnabled(modules.PluginNameAI)
+	enable := plugins.ManagerInstance().IsRunning(modules.PluginNameAI)
 	klog.V(4).Infof("ChatGPT 状态:%v\n", enable)
 	return enable
 }

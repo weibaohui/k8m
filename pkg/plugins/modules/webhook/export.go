@@ -33,7 +33,7 @@ func NewWebhookConfig(receiver *models.WebhookReceiver) *WebhookConfig {
 
 func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookReceiver) *SendResult {
 	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
+	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
 		klog.V(4).Infof("webhook 插件已禁用，跳过向单个接收者发送消息 %s", receiver.Name)
 		return nil
 	}
@@ -42,7 +42,7 @@ func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookRecei
 
 func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookReceiver) []*SendResult {
 	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
+	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
 		klog.V(4).Infof("webhook 插件已禁用，跳过向 %d 个接收者发送消息", len(receivers))
 		return nil
 	}
@@ -52,7 +52,7 @@ func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookRece
 
 func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*SendResult {
 	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
+	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
 		klog.V(4).Infof("webhook 插件已禁用，跳过向 %d 个接收者发送消息", len(receiverIDs))
 		return nil
 	}
@@ -62,7 +62,7 @@ func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*Se
 
 func GetNamesByIds(ids []string) ([]string, error) {
 	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameWebhook) {
+	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
 		klog.V(4).Info("webhook 插件已禁用，返回空列表")
 		return []string{}, nil
 	}

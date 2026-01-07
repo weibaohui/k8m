@@ -114,7 +114,7 @@ func (s *ScheduleBackground) SummaryByAI(ctx context.Context, msg *SummaryMsg) (
 	}
 
 	// 检查AI服务是否可用
-	if !plugins.ManagerInstance().IsEnabled(modules.PluginNameAI) {
+	if !plugins.ManagerInstance().IsRunning(modules.PluginNameAI) {
 		klog.V(6).Infof("AI服务未启用，返回基础汇总")
 		return basicSummary, nil
 	}

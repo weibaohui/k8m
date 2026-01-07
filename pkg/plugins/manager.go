@@ -296,10 +296,10 @@ func (m *Manager) StopPlugin(name string) error {
 	return nil
 }
 
-// IsEnabled 返回插件是否处于启用状态
-func (m *Manager) IsEnabled(name string) bool {
+// IsRunning 返回插件是否处于启用状态
+func (m *Manager) IsRunning(name string) bool {
 	m.mu.RLock()
-	enabled := m.status[name] == StatusEnabled
+	enabled := m.status[name] == StatusRunning
 	m.mu.RUnlock()
 	return enabled
 }

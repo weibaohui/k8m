@@ -253,7 +253,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 
 	if aiEnabled && len(events) > 0 {
 
-		if plugins.ManagerInstance().IsEnabled(modules.PluginNameAI) {
+		if plugins.ManagerInstance().IsRunning(modules.PluginNameAI) {
 			customTemplate := aiTemplate
 			if strings.TrimSpace(customTemplate) == "" {
 				customTemplate = `请先输出统计数据（含集群名称、规则名称、数量等基本信息）

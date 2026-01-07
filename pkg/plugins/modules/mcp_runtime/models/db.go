@@ -17,7 +17,7 @@ func InitDB() error {
 		&MCPToolLog{},
 		&McpKey{},
 	)
-	if plugins.ManagerInstance().IsEnabled(modules.PluginNameK8mMcpServer) {
+	if plugins.ManagerInstance().IsRunning(modules.PluginNameK8mMcpServer) {
 		AddInnerMCPServer()
 	}
 	return err
