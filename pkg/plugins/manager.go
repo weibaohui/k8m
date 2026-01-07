@@ -258,7 +258,7 @@ func (m *Manager) StartPlugin(name string) error {
 // StopPlugin 停止指定插件的后台任务，从 Running 状态变为 Stopped 状态
 func (m *Manager) StopPlugin(name string) error {
 	m.mu.RLock()
-	_, ok := m.modules[name]
+	mod, ok := m.modules[name]
 	st := m.status[name]
 	m.mu.RUnlock()
 	if !ok {
@@ -266,6 +266,13 @@ func (m *Manager) StopPlugin(name string) error {
 	}
 	if st != StatusRunning {
 		return fmt.Errorf("插件状态不允许停止: %s，当前状态: %s", name, statusToCN(st))
+	}
+	if mod.Lifecycle != nil {
+		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
+		if err := mod.Lifecycle.Stop(ctx); err != nil {
+			klog.V(6).Infof("停止插件后台任务失败: %s，错误: %v", name, err)
+			return err
+		}
 	}
 	m.mu.Lock()
 	m.status[name] = StatusStopped
