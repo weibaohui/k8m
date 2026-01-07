@@ -80,18 +80,13 @@ func (m *Manager) ListPlugins(c *response.Context) {
 	// 读取数据库中的配置状态
 	params := dao.BuildDefaultParams()
 	cfgs, _, _ := (&models.PluginConfig{}).List(params)
-	cfgMap := make(map[string]string, len(cfgs))
 	cfgVerMap := make(map[string]string, len(cfgs))
 	for _, cfg := range cfgs {
-		cfgMap[cfg.Name] = cfg.Status
 		cfgVerMap[cfg.Name] = cfg.Version
 	}
 	for name, mod := range m.modules {
 		// 优先使用数据库中的配置状态；若不存在则显示为已发现
-		statusStr, ok := cfgMap[name]
-		if !ok {
-			statusStr = "discovered"
-		}
+		statusStr := statusToString(m.status[name])
 		status := statusFromString(statusStr)
 		dbVer := cfgVerMap[name]
 		canUpgrade := statusStr != "discovered" && utils.CompareVersions(mod.Meta.Version, dbVer)

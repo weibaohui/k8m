@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/weibaohui/k8m/internal/dao"
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/models"
-	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"k8s.io/klog/v2"
 )
 
@@ -26,8 +26,6 @@ func (m *Manager) PersistStatus(name string, status Status, params *dao.Params) 
 // ApplyConfigFromDB 启动时从数据库加载插件配置并应用
 // 根据持久化状态执行安装或启用操作；未配置的插件默认启用并写入数据库
 func (m *Manager) ApplyConfigFromDB() {
-	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	// 读取所有持久化配置
 	params := dao.BuildDefaultParams()
@@ -42,37 +40,29 @@ func (m *Manager) ApplyConfigFromDB() {
 	}
 
 	// 应用配置
-	for name, mod := range m.modules {
+	for name, _ := range m.modules {
 		st, ok := cfgMap[name]
 		if !ok {
 			// 默认标记为已发现，不写入数据库
 			st = StatusDiscovered
+			continue
 		}
-		m.status[name] = st
 
 		switch st {
-		case StatusInstalled:
-			if mod.Lifecycle != nil {
-				ctx := installContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}}
-				if err := mod.Lifecycle.Install(ctx); err != nil {
-					klog.V(6).Infof("启动时安装插件失败: %s，错误: %v", name, err)
-				} else {
-					klog.V(6).Infof("启动时安装插件成功: %s", name)
-				}
-			}
-		case StatusEnabled:
-			if mod.Lifecycle != nil {
-				ctx := enableContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}}
-				if err := mod.Lifecycle.Enable(ctx); err != nil {
-					klog.V(6).Infof("启动时启用插件失败: %s，错误: %v", name, err)
-				} else {
-					klog.V(6).Infof("启动时启用插件成功: %s", name)
-				}
-			}
+		case StatusEnabled, StatusRunning, StatusStopped:
+			klog.V(6).Infof("启动时标记插件为已安装: %s", name)
+			m.mu.Lock()
+			m.status[name] = StatusStopped
+			m.mu.Unlock()
 		case StatusDisabled:
-			klog.V(6).Infof("启动时禁用插件: %s", name)
+			m.mu.Lock()
+			m.status[name] = StatusDisabled
+			m.mu.Unlock()
 		case StatusDiscovered:
-			klog.V(6).Infof("启动时标记插件为已发现: %s", name)
+			m.mu.Lock()
+			m.status[name] = StatusDiscovered
+			m.mu.Unlock()
 		}
 	}
+	klog.V(6).Infof("启动时应用插件配置完成 %s", utils.ToJSON(m.status))
 }

@@ -252,6 +252,7 @@ func (m *Manager) StartPlugin(name string) error {
 	if st != StatusEnabled && st != StatusStopped {
 		return fmt.Errorf("插件状态不允许启动: %s，当前状态: %s", name, statusToCN(st))
 	}
+
 	if mod.Lifecycle != nil {
 		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
 		if err := mod.Lifecycle.Start(ctx); err != nil {
@@ -342,7 +343,7 @@ func (m *Manager) topologicalSort() []string {
 
 	// 初始化:收集所有已启用的插件
 	for name, status := range m.status {
-		if status == StatusEnabled {
+		if status == StatusEnabled || status == StatusStopped || status == StatusRunning {
 			enabledNames = append(enabledNames, name)
 			inDegree[name] = 0
 		}
@@ -357,7 +358,7 @@ func (m *Manager) topologicalSort() []string {
 		// 处理 Dependencies:强依赖关系
 		for _, dep := range mod.Dependencies {
 			// 只处理已启用的依赖
-			if m.status[dep] == StatusEnabled {
+			if m.status[dep] == StatusEnabled || m.status[dep] == StatusRunning || m.status[dep] == StatusStopped {
 				graph[dep] = append(graph[dep], name)
 				inDegree[name]++
 			}
@@ -365,7 +366,7 @@ func (m *Manager) topologicalSort() []string {
 		// 处理 RunAfter:启动顺序约束,必须在指定插件之后启动
 		for _, runAfter := range mod.RunAfter {
 			// 只处理已启用的插件
-			if m.status[runAfter] == StatusEnabled {
+			if m.status[runAfter] == StatusEnabled || m.status[runAfter] == StatusRunning || m.status[runAfter] == StatusStopped {
 				graph[runAfter] = append(graph[runAfter], name)
 				inDegree[name]++
 			}
@@ -418,12 +419,16 @@ func (m *Manager) Start() {
 	//增加插件启动任务管理
 	//按依赖顺序逐个启动插件中注册的后台任务。不阻塞
 	sortedNames := m.topologicalSort()
+
 	for _, name := range sortedNames {
+		m.mu.RLock()
 		mod, ok := m.modules[name]
+		st := m.status[name]
+		m.mu.RUnlock()
 		if !ok {
 			continue
 		}
-		if mod.Lifecycle != nil && (m.status[name] == StatusEnabled || m.status[name] == StatusStopped) {
+		if mod.Lifecycle != nil && (st == StatusEnabled || st == StatusStopped) {
 			if err := m.StartPlugin(name); err != nil {
 				klog.V(6).Infof("启动插件后台任务失败: %s，错误: %v", name, err)
 			} else {
