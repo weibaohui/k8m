@@ -3,6 +3,17 @@
     "title": "插件管理",
     "body": [
         {
+            "type": "collapse",
+            "header": "插件状态流转说明",
+            "collapsed": true,
+            "body": [
+                {
+                    "type": "tpl",
+                    "tpl": "<div style='padding: 10px; line-height: 1.8;'>\n  <strong>插件状态流转顺序：</strong>\n  <span class='label label-info'>已发现</span> →\n  <span class='label label-default'>已安装</span> →\n  <span class='label label-primary'>已启用</span> →\n  <span class='label label-success'>运行中</span> ↔\n  <span class='label label-warning'>已停止</span> →\n  <span class='label label-danger'>已禁用</span> →\n  <span class='label label-danger'>卸载</span>\n  <br><br>\n  <strong>各状态说明：</strong>\n  <ul style='margin: 10px 0; padding-left: 20px;'>\n    <li><strong>已发现</strong>：系统扫描到插件但未安装</li>\n    <li><strong>已安装</strong>：插件已安装到数据库，但未启用</li>\n    <li><strong>已启用</strong>：插件已启用，但未启动运行</li>\n    <li><strong>运行中</strong>：插件正在运行，可以停止</li>\n    <li><strong>已停止</strong>：插件已停止运行，可以启动或禁用</li>\n    <li><strong>已禁用</strong>：插件已禁用，可以启用或卸载</li>\n  </ul>\n</div>"
+                }
+            ]
+        },
+        {
             "type": "crud",
             "id": "pluginCRUD",
             "name": "pluginCRUD",
@@ -333,7 +344,7 @@
                         "已启用": "<span class='label label-primary'>已启用</span>",
                         "运行中": "<span class='label label-success'>运行中</span>",
                         "已停止": "<span class='label label-warning'>已停止</span>",
-                        "已禁用": "<span class='label label-secondary'>已禁用</span>",
+                        "已禁用": "<span class='label label-danger'>已禁用</span>",
                         "未知": "<span class='label label-danger'>未知</span>"
                     }
                 },
