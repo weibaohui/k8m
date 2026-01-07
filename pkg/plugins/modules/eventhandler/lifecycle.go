@@ -47,13 +47,6 @@ func (l *EventHandlerLifecycle) Enable(ctx plugins.EnableContext) error {
 
 // Disable 中文函数注释：禁用事件转发插件，停止后台任务与事件转发。
 func (l *EventHandlerLifecycle) Disable(ctx plugins.BaseContext) error {
-
-	if l.leaderWatchCancel != nil {
-		l.leaderWatchCancel()
-		l.leaderWatchCancel = nil
-	}
-
-	StopLeaderWatch()
 	klog.V(6).Infof("禁用事件转发插件")
 	return nil
 }

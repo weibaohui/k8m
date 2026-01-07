@@ -171,6 +171,7 @@ func (m *Manager) Enable(name string) error {
 func (m *Manager) Disable(name string) error {
 	m.mu.RLock()
 	mod, ok := m.modules[name]
+	st := m.status[name]
 	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
@@ -187,6 +188,12 @@ func (m *Manager) Disable(name string) error {
 				klog.V(6).Infof("禁用插件失败: %s,被插件依赖: %s", name, otherName)
 				return fmt.Errorf("无法禁用插件,插件 %s 依赖于当前插件", otherName)
 			}
+		}
+	}
+	if st == StatusRunning {
+		if err := m.StopPlugin(name); err != nil {
+			klog.V(6).Infof("禁用插件失败: %s,停止后台任务失败: %v", name, err)
+			return err
 		}
 	}
 	if mod.Lifecycle != nil {
@@ -211,9 +218,16 @@ func (m *Manager) Disable(name string) error {
 func (m *Manager) Uninstall(name string, keepData bool) error {
 	m.mu.RLock()
 	mod, ok := m.modules[name]
+	st := m.status[name]
 	m.mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
+	}
+	if st == StatusRunning {
+		if err := m.StopPlugin(name); err != nil {
+			klog.V(6).Infof("卸载插件失败: %s，停止后台任务失败: %v", name, err)
+			return err
+		}
 	}
 	if mod.Lifecycle != nil {
 		ctx := uninstallContextImpl{baseContextImpl{meta: mod.Meta, bus: eventbus.New()}, keepData}

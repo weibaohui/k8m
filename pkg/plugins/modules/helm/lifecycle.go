@@ -50,13 +50,6 @@ func (l *HelmLifecycle) Enable(ctx plugins.EnableContext) error {
 // Disable 禁用 Helm 插件
 func (l *HelmLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用 Helm 插件")
-
-	if l.leaderWatchCancel != nil {
-		l.leaderWatchCancel()
-		l.leaderWatchCancel = nil
-	}
-
-	helm.StopUpdateHelmRepoInBackground()
 	return nil
 }
 

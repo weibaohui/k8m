@@ -44,12 +44,6 @@ func (l *McpLifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *McpLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用 MCP 插件")
-
-	if l.cancelStart != nil {
-		l.cancelStart()
-		l.cancelStart = nil
-	}
-
 	return nil
 }
 

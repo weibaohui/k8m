@@ -47,12 +47,6 @@ func (l *InspectionLifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *InspectionLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用集群巡检插件")
-
-	if l.leaderWatchCancel != nil {
-		l.leaderWatchCancel()
-		l.leaderWatchCancel = nil
-	}
-
 	return nil
 }
 

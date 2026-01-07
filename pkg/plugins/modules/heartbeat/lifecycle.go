@@ -48,13 +48,6 @@ func (h *HeartbeatLifecycle) Enable(ctx plugins.EnableContext) error {
 // Disable 禁用心跳插件
 func (h *HeartbeatLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用心跳插件")
-
-	if h.leaderWatchCancel != nil {
-		h.leaderWatchCancel()
-		h.leaderWatchCancel = nil
-	}
-
-	h.StopHeartbeat()
 	return nil
 }
 

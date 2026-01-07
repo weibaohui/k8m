@@ -42,12 +42,6 @@ func (d *DemoLifecycle) Enable(ctx plugins.EnableContext) error {
 // Disable 禁用Demo插件
 func (d *DemoLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用Demo插件")
-
-	if d.cancelStart != nil {
-		d.cancelStart()
-		d.cancelStart = nil
-	}
-
 	return nil
 }
 

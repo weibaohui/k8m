@@ -39,15 +39,9 @@ func (l *LeaderLifecycle) Enable(ctx plugins.EnableContext) error {
 }
 
 // Disable 禁用Leader选举插件
-// 禁用阶段仅打印日志；选举停止与任务收敛由选举停止回调处理
+// 禁用阶段仅打印日志；选举停止与任务收敛由 Stop 方法处理
 func (l *LeaderLifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用Leader选举插件")
-
-	if l.cleanupCancel != nil {
-		l.cleanupCancel()
-		l.cleanupCancel = nil
-	}
-
 	return nil
 }
 
