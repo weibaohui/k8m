@@ -3,6 +3,7 @@ package plugins
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"sync"
 
 	"github.com/go-chi/chi/v5"
@@ -161,8 +162,6 @@ func (m *Manager) Enable(name string) error {
 	m.mu.Unlock()
 
 	klog.V(6).Infof("启用插件成功: %s", name)
-	m.rebuildRouter()
-
 	return nil
 }
 
@@ -207,8 +206,6 @@ func (m *Manager) Disable(name string) error {
 	m.status[name] = StatusDisabled
 	m.mu.Unlock()
 	klog.V(6).Infof("禁用插件成功: %s", name)
-
-	m.rebuildRouter()
 
 	return nil
 }
@@ -265,6 +262,8 @@ func (m *Manager) StartPlugin(name string) error {
 	m.mu.Lock()
 	m.status[name] = StatusRunning
 	m.mu.Unlock()
+	m.rebuildRouter()
+
 	klog.V(6).Infof("启动插件后台任务成功: %s", name)
 	return nil
 }
@@ -291,6 +290,8 @@ func (m *Manager) StopPlugin(name string) error {
 	m.mu.Lock()
 	m.status[name] = StatusStopped
 	m.mu.Unlock()
+	m.rebuildRouter()
+
 	klog.V(6).Infof("停止插件后台任务成功: %s", name)
 	return nil
 }
@@ -398,13 +399,7 @@ func (m *Manager) topologicalSort() []string {
 		klog.V(6).Infof("警告：检测到循环依赖，部分插件可能无法正确排序")
 		// 将未排序的插件追加到结果末尾
 		for _, name := range enabledNames {
-			found := false
-			for _, r := range result {
-				if r == name {
-					found = true
-					break
-				}
-			}
+			found := slices.Contains(result, name)
 			if !found {
 				result = append(result, name)
 			}
@@ -436,6 +431,8 @@ func (m *Manager) Start() {
 			}
 		}
 	}
+
+	m.rebuildRouter()
 
 	//逐个启动插件中定义的cron表达式的定时任务
 	// 同样按依赖顺序注册
@@ -476,7 +473,6 @@ func (m *Manager) Start() {
 		}
 	}
 	m.cron.Start()
-	m.rebuildRouter()
 }
 
 func (m *Manager) rebuildRouter() {
