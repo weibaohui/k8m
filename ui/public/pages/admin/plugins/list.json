@@ -32,13 +32,12 @@
                 {
                     "type": "operation",
                     "label": "操作",
-                    "width": "240px",
+                    "width": "120px",
                     "buttons": [
                         {
                             "type": "button",
-                            "icon": "fas fa-info-circle text-info",
+                            "icon": "fas fa-eye text-primary",
                             "actionType": "drawer",
-                            "label": "详情",
                             "drawer": {
                                 "closeOnEsc": true,
                                 "closeOnOutside": true,
@@ -173,150 +172,156 @@
                             }
                         },
                         {
-                            "type": "button",
-                            "icon": "fas fa-check-double text-primary",
-                            "actionType": "ajax",
-                            "label": "安装",
-                            "visibleOn": "this.status == '已发现'",
-                            "confirmText": "确认安装该插件？",
-                            "api": "post:/admin/plugin/install/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-toggle-on text-success",
-                            "actionType": "ajax",
-                            "label": "启用",
-                            "visibleOn": "this.status == '已安装' || this.status == '已禁用'",
-                            "confirmText": "确认启用该插件？",
-                            "api": "post:/admin/plugin/enable/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-play text-success",
-                            "actionType": "ajax",
-                            "label": "启动",
-                            "visibleOn": "this.status == '已启用' || this.status == '已停止'",
-                            "confirmText": "确认启动该插件？",
-                            "api": "post:/admin/plugin/start/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-stop text-danger",
-                            "actionType": "ajax",
-                            "label": "停止",
-                            "visibleOn": "this.status == '运行中'",
-                            "confirmText": "确认停止该插件？",
-                            "api": "post:/admin/plugin/stop/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-toggle-off text-danger",
-                            "actionType": "ajax",
-                            "label": "禁用",
-                            "visibleOn": "this.status == '已停止'",
-                            "confirmText": "确认禁用该插件？",
-                            "api": "post:/admin/plugin/disable/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-trash text-danger",
-                            "actionType": "ajax",
-                            "label": "卸载删除数据",
-                            "visibleOn": "this.status == '已禁用'",
-                            "confirmText": "确认卸载该插件？该插件下的数据会被删除。",
-                            "api": "post:/admin/plugin/uninstall/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-trash-restore text-info",
-                            "actionType": "ajax",
-                            "label": "卸载保留数据",
-                            "visibleOn": "this.status == '已禁用'",
-                            "confirmText": "确认卸载该插件但保留数据？",
-                            "api": "post:/admin/plugin/uninstall-keep-data/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-level-up-alt text-info",
-                            "actionType": "ajax",
-                            "label": "升级",
-                            "visibleOn": "this.canUpgrade && this.status != '已发现'",
-                            "confirmText": "确认升级该插件？",
-                            "api": "post:/admin/plugin/upgrade/${name}"
-                        },
-                        {
-                            "type": "button",
-                            "icon": "fas fa-clock text-info",
-                            "visibleOn": "this.cronCount && this.cronCount >0",
-                            "actionType": "drawer",
-                            "label": "定时任务",
-                            "drawer": {
-                                "closeOnEsc": true,
-                                "closeOnOutside": true,
-                                "size": "lg",
-                                "title": "${title} 任务详情（ESC 关闭）",
-                                "body": [
-                                    {
-                                        "type": "crud",
-                                        "api": "get:/admin/plugin/cron/${name}",
-                                        "quickSaveItemApi": "/admin/plugin/cron/name/${name}/spec/${spec|base64Encode}/enabled/${registered}",
-                                        "syncLocation": false,
-                                        "loadDataOnce": false,
-                                        "headerToolbar": [
-                                            "reload"
-                                        ],
-                                        "columns": [
+                            "type": "dropdown-button",
+                            "level": "link",
+                            "buttons": [
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-check-double text-primary",
+                                    "actionType": "ajax",
+                                    "label": "安装",
+                                    "visibleOn": "this.status == '已发现'",
+                                    "confirmText": "确认安装该插件？",
+                                    "api": "post:/admin/plugin/install/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-toggle-on text-success",
+                                    "actionType": "ajax",
+                                    "label": "启用",
+                                    "visibleOn": "this.status == '已安装' || this.status == '已禁用'",
+                                    "confirmText": "确认启用该插件？",
+                                    "api": "post:/admin/plugin/enable/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-play text-success",
+                                    "actionType": "ajax",
+                                    "label": "启动",
+                                    "visibleOn": "this.status == '已启用' || this.status == '已停止'",
+                                    "confirmText": "确认启动该插件？",
+                                    "api": "post:/admin/plugin/start/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-stop text-danger",
+                                    "actionType": "ajax",
+                                    "label": "停止",
+                                    "visibleOn": "this.status == '运行中'",
+                                    "confirmText": "确认停止该插件？",
+                                    "api": "post:/admin/plugin/stop/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-toggle-off text-danger",
+                                    "actionType": "ajax",
+                                    "label": "禁用",
+                                    "visibleOn": "this.status == '已停止'",
+                                    "confirmText": "确认禁用该插件？",
+                                    "api": "post:/admin/plugin/disable/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-trash text-danger",
+                                    "actionType": "ajax",
+                                    "label": "卸载删除数据",
+                                    "visibleOn": "this.status == '已禁用'",
+                                    "confirmText": "确认卸载该插件？该插件下的数据会被删除。",
+                                    "api": "post:/admin/plugin/uninstall/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-trash-restore text-info",
+                                    "actionType": "ajax",
+                                    "label": "卸载保留数据",
+                                    "visibleOn": "this.status == '已禁用'",
+                                    "confirmText": "确认卸载该插件但保留数据？",
+                                    "api": "post:/admin/plugin/uninstall-keep-data/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-level-up-alt text-info",
+                                    "actionType": "ajax",
+                                    "label": "升级",
+                                    "visibleOn": "this.canUpgrade && this.status != '已发现'",
+                                    "confirmText": "确认升级该插件？",
+                                    "api": "post:/admin/plugin/upgrade/${name}"
+                                },
+                                {
+                                    "type": "button",
+                                    "icon": "fas fa-clock text-info",
+                                    "visibleOn": "this.cronCount && this.cronCount >0",
+                                    "actionType": "drawer",
+                                    "label": "定时任务",
+                                    "drawer": {
+                                        "closeOnEsc": true,
+                                        "closeOnOutside": true,
+                                        "size": "lg",
+                                        "title": "${title} 任务详情（ESC 关闭）",
+                                        "body": [
                                             {
-                                                "name": "spec",
-                                                "label": "Cron表达式"
-                                            },
-                                            {
-                                                "name": "registered",
-                                                "label": "生效",
-                                                "type": "switch",
-                                                "onText": "开启",
-                                                "offText": "关闭",
-                                                "quickEdit": {
-                                                    "mode": "inline",
-                                                    "type": "switch",
-                                                    "saveImmediately": true,
-                                                    "resetOnFailed": true
-                                                }
-                                            },
-                                            {
-                                                "name": "next",
-                                                "label": "下次执行"
-                                            },
-                                            {
-                                                "name": "prev",
-                                                "label": "上次执行"
-                                            },
-                                            {
-                                                "name": "running",
-                                                "label": "运行中",
-                                                "type": "mapping",
-                                                "map": {
-                                                    "true": "<span class='label label-success'>是</span>",
-                                                    "false": "<span class='label label-default'>否</span>"
-                                                }
-                                            },
-                                            {
-                                                "type": "operation",
-                                                "label": "操作",
-                                                "buttons": [
+                                                "type": "crud",
+                                                "api": "get:/admin/plugin/cron/${name}",
+                                                "quickSaveItemApi": "/admin/plugin/cron/name/${name}/spec/${spec|base64Encode}/enabled/${registered}",
+                                                "syncLocation": false,
+                                                "loadDataOnce": false,
+                                                "headerToolbar": [
+                                                    "reload"
+                                                ],
+                                                "columns": [
                                                     {
-                                                        "type": "button",
-                                                        "icon": "fas fa-bolt text-primary",
-                                                        "label": "执行一次",
-                                                        "actionType": "ajax",
-                                                        "api": "post:/admin/plugin/cron/${name}/run_once?spec=${spec}"
+                                                        "name": "spec",
+                                                        "label": "Cron表达式"
+                                                    },
+                                                    {
+                                                        "name": "registered",
+                                                        "label": "生效",
+                                                        "type": "switch",
+                                                        "onText": "开启",
+                                                        "offText": "关闭",
+                                                        "quickEdit": {
+                                                            "mode": "inline",
+                                                            "type": "switch",
+                                                            "saveImmediately": true,
+                                                            "resetOnFailed": true
+                                                        }
+                                                    },
+                                                    {
+                                                        "name": "next",
+                                                        "label": "下次执行"
+                                                    },
+                                                    {
+                                                        "name": "prev",
+                                                        "label": "上次执行"
+                                                    },
+                                                    {
+                                                        "name": "running",
+                                                        "label": "运行中",
+                                                        "type": "mapping",
+                                                        "map": {
+                                                            "true": "<span class='label label-success'>是</span>",
+                                                            "false": "<span class='label label-default'>否</span>"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "operation",
+                                                        "label": "操作",
+                                                        "buttons": [
+                                                            {
+                                                                "type": "button",
+                                                                "icon": "fas fa-bolt text-primary",
+                                                                "label": "执行一次",
+                                                                "actionType": "ajax",
+                                                                "api": "post:/admin/plugin/cron/${name}/run_once?spec=${spec}"
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             }
                                         ]
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 },
@@ -326,13 +331,6 @@
                     "type": "tpl",
                     "tpl": "${title}(${name})",
                     "width": "240px"
-                },
-                {
-                    "type": "tpl",
-                    "name": "version",
-                    "width": "140px",
-                    "label": "版本",
-                    "tpl": "<span class='label label-default'>插&nbsp;&nbsp;&nbsp;&nbsp;件</span> ${version} <br><span class='label label-info'>数据库</span> ${dbVersion|default:-}"
                 },
                 {
                     "name": "status",
@@ -347,6 +345,18 @@
                         "已禁用": "<span class='label label-danger'>已禁用</span>",
                         "未知": "<span class='label label-danger'>未知</span>"
                     }
+                },
+                {
+                    "name": "description",
+                    "label": "描述",
+                    "width": "300px"
+                },
+                {
+                    "type": "tpl",
+                    "name": "version",
+                    "width": "140px",
+                    "label": "版本",
+                    "tpl": "<span class='label label-default'>插&nbsp;&nbsp;&nbsp;&nbsp;件</span> ${version} <br><span class='label label-info'>数据库</span> ${dbVersion|default:-}"
                 },
                 {
                     "name": "count",
@@ -368,11 +378,6 @@
                     "type": "tpl",
                     "tpl": "${runAfter|join:', '}",
                     "width": "160px"
-                },
-                {
-                    "name": "description",
-                    "label": "描述",
-                    "width": "300px"
                 }
             ],
             "bulkActions": []
