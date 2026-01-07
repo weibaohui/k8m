@@ -23,6 +23,8 @@ func (pc *Controller) Config(c *response.Context) {
 	switch key {
 	case "AnySelect":
 		s = fmt.Sprintf("%v", service.AIService().AnySelect)
+	case "FloatingWindow":
+		s = fmt.Sprintf("%v", service.AIService().FloatingWindow)
 	case "ProductName":
 		s = fmt.Sprintf("%v", cfg.ProductName)
 	}

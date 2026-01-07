@@ -31,7 +31,7 @@ const FloatingChatGPTButton = () => {
 
     useEffect(() => {
         fetcher({
-            url: '/params/config/AnySelect',
+            url: '/params/config/FloatingWindow',
             method: 'get'
         })
             .then(response => {
@@ -39,7 +39,7 @@ const FloatingChatGPTButton = () => {
                 setIsEnabled(response.data?.data === 'true');
             })
             .catch(error => {
-                console.error('Error fetching AnySelect config:', error);
+                console.error('Error fetching FloatingWindow config:', error);
                 setIsEnabled(false);
             });
     }, []);
