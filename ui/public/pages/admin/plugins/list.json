@@ -181,10 +181,28 @@
                         },
                         {
                             "type": "button",
+                            "icon": "fas fa-play text-success",
+                            "actionType": "ajax",
+                            "label": "启动",
+                            "visibleOn": "this.status == '已启用' || this.status == '已停止'",
+                            "confirmText": "确认启动该插件？",
+                            "api": "post:/admin/plugin/start/${name}"
+                        },
+                        {
+                            "type": "button",
+                            "icon": "fas fa-stop text-danger",
+                            "actionType": "ajax",
+                            "label": "停止",
+                            "visibleOn": "this.status == '运行中'",
+                            "confirmText": "确认停止该插件？",
+                            "api": "post:/admin/plugin/stop/${name}"
+                        },
+                        {
+                            "type": "button",
                             "icon": "fas fa-stop-circle text-danger",
                             "actionType": "ajax",
                             "label": "禁用",
-                            "visibleOn": "this.status == '已启用'",
+                            "visibleOn": "this.status == '已停止'",
                             "confirmText": "确认禁用该插件？",
                             "api": "post:/admin/plugin/disable/${name}"
                         },
@@ -312,8 +330,10 @@
                     "map": {
                         "已发现": "<span class='label label-info'>已发现</span>",
                         "已安装": "<span class='label label-default'>已安装</span>",
-                        "已启用": "<span class='label label-success'>已启用</span>",
-                        "已禁用": "<span class='label label-warning'>已禁用</span>",
+                        "已启用": "<span class='label label-primary'>已启用</span>",
+                        "运行中": "<span class='label label-success'>运行中</span>",
+                        "已停止": "<span class='label label-warning'>已停止</span>",
+                        "已禁用": "<span class='label label-secondary'>已禁用</span>",
                         "未知": "<span class='label label-danger'>未知</span>"
                     }
                 },
