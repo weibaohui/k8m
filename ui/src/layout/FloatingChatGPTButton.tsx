@@ -1,14 +1,16 @@
-import {useEffect, useState, useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 import Draggable from "react-draggable";
-import {render as amisRender} from "amis";
-import {Button, Drawer} from "antd";
-import {OpenAIFilled} from "@ant-design/icons";
+import { render as amisRender } from "amis";
+import { Button, Drawer } from "antd";
+import { OpenAIFilled } from "@ant-design/icons";
+import { fetcher } from "@/components/Amis/fetcher";
 
 const FloatingChatGPTButton = () => {
     const [visible, setVisible] = useState(false);
-    const [position, setPosition] = useState({x: 3000, y: 3000});
-    const [isDragging, setIsDragging] = useState(false); // 拖拽状态
-    const startPositionRef = useRef({x: 0, y: 0}); // 鼠标点击的初始位置
+    const [position, setPosition] = useState({ x: 3000, y: 3000 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [isEnabled, setIsEnabled] = useState(false);
+    const startPositionRef = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
         const buttonWidth = 30;
@@ -21,34 +23,51 @@ const FloatingChatGPTButton = () => {
             const parsedPosition = JSON.parse(savedPosition);
             const validX = Math.min(Math.max(parsedPosition.x, 0), maxX);
             const validY = Math.min(Math.max(parsedPosition.y, 0), maxY);
-            setPosition({x: validX, y: validY});
+            setPosition({ x: validX, y: validY });
         } else {
-            setPosition({x: maxX, y: maxY});
+            setPosition({ x: maxX, y: maxY });
         }
     }, []);
 
+    useEffect(() => {
+        fetcher({
+            url: '/params/config/AnySelect',
+            method: 'get'
+        })
+            .then(response => {
+                //@ts-ignore
+                setIsEnabled(response.data?.data === 'true');
+            })
+            .catch(error => {
+                console.error('Error fetching AnySelect config:', error);
+                setIsEnabled(false);
+            });
+    }, []);
+
     const handleDrag = (_: any, data: any) => {
-        setPosition({x: data.x, y: data.y});
-        localStorage.setItem("buttonPosition", JSON.stringify({x: data.x, y: data.y}));
+        setPosition({ x: data.x, y: data.y });
+        localStorage.setItem("buttonPosition", JSON.stringify({ x: data.x, y: data.y }));
     };
 
     const handleStart = (e: any) => {
-        startPositionRef.current = {x: e.clientX, y: e.clientY};
+        startPositionRef.current = { x: e.clientX, y: e.clientY };
         setIsDragging(true); // 开始拖动
     };
 
     const handleStop = (e: any) => {
-        const endPosition = {x: e.clientX, y: e.clientY};
+        const endPosition = { x: e.clientX, y: e.clientY };
         const distance = Math.sqrt(
             Math.pow(endPosition.x - startPositionRef.current.x, 2) +
             Math.pow(endPosition.y - startPositionRef.current.y, 2)
         );
-        if (distance < 1) { // 如果拖动距离小于5px，认为是点击
+        if (distance < 1) {
             setIsDragging(false);
         } else {
-            setTimeout(() => setIsDragging(false), 200); // 结束拖动，延迟一点避免误触发点击
+            setTimeout(() => setIsDragging(false), 200);
         }
     };
+
+    if (!isEnabled) return null;
 
     return (
         <>
@@ -63,7 +82,7 @@ const FloatingChatGPTButton = () => {
                 <Button
                     type="primary"
                     shape="circle"
-                    icon={<OpenAIFilled/>}
+                    icon={<OpenAIFilled />}
                     style={{
                         position: "fixed",
                         zIndex: 180000,
