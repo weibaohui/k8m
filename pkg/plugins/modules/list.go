@@ -18,4 +18,5 @@ const (
 	PluginNameK8sWatch     = "k8swatch"
 	PluginNameGatewayAPI   = "gatewayapi"
 	PluginNameIstio        = "istio"
+	PluginNameOpenKruise   = "openkruise"
 )
