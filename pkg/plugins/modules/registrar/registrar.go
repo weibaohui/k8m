@@ -11,6 +11,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection"
 	k8m_mcp_server "github.com/weibaohui/k8m/pkg/plugins/modules/k8m_mcp_server"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt"
+	k8swatch "github.com/weibaohui/k8m/pkg/plugins/modules/k8swatch"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
 	mcp "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/openapi"
@@ -92,6 +93,11 @@ func init() {
 			klog.V(6).Infof("注册heartbeat插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册heartbeat插件成功")
+		}
+		if err := m.Register(k8swatch.Metadata); err != nil {
+			klog.V(6).Infof("注册k8swatch插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册k8swatch插件成功")
 		}
 	})
 }

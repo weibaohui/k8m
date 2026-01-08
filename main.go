@@ -125,18 +125,6 @@ func Init() {
 
 	}()
 
-	// 启动watch和定时任务
-	go func() {
-
-		service.ClusterService().DelayStartFunc(func() {
-			service.PodService().Watch()
-			service.NodeService().Watch()
-			service.PVCService().Watch()
-			service.PVService().Watch()
-			service.IngressService().Watch()
-		})
-	}()
-
 }
 
 // main 启动并运行 Kubernetes 管理服务，完成配置初始化、集群注册与资源监控，配置 Chi 路由和中间件，挂载前端静态资源，并提供认证、集群与资源管理、AI 聊天、用户与平台管理等丰富的 HTTP API 接口。
