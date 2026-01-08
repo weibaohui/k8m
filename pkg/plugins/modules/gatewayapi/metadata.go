@@ -9,7 +9,7 @@ import (
 var Metadata = plugins.Module{
 	Meta: plugins.Meta{
 		Name:        modules.PluginNameGatewayAPI,
-		Title:       "Gateway API",
+		Title:       "Gateway API管理插件",
 		Version:     "1.0.0",
 		Description: "Kubernetes Gateway API 管理",
 	},
