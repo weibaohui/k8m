@@ -15,4 +15,5 @@ const (
 	PluginNameK8sGPT       = "k8sgpt"
 	PluginNameAI           = "ai"
 	PluginNameHeartbeat    = "heartbeat"
+	PluginNameK8sWatch     = "k8swatch"
 )
