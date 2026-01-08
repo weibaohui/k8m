@@ -336,6 +336,7 @@
                     "name": "status",
                     "label": "状态",
                     "type": "mapping",
+                    "width": "80px",
                     "map": {
                         "已发现": "<span class='label label-info'>已发现</span>",
                         "已安装": "<span class='label label-default'>已安装</span>",
