@@ -146,7 +146,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 	if !cfg.Debug {
 		r.Use(chim.Recoverer)
 	}
-
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -155,6 +154,9 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+	if cfg.Debug {
+		r.Use(chim.Logger)
+	}
 	r.Use(chim.Compress(9, "text/html", "text/css", "application/json", "text/javascript", "font/woff2"))
 	r.Use(middleware.AuthMiddleware())
 	r.Use(middleware.EnsureSelectedClusterMiddleware())
