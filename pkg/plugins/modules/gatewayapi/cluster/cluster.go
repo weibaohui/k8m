@@ -1,28 +1,23 @@
-package gatewayapi
+package cluster
 
 import (
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/kom/kom"
+	"k8s.io/klog/v2"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-type Controller struct{}
+func GatewayClassOptionList(c *response.Context) {
+	ok, err := service.AuthService().EnsureUserIsLogined(c)
+	if !ok {
+		amis.WriteJsonError(c, err)
+		return
+	}
 
-func RegisterRoutes(r chi.Router) {
-	ctrl := &Controller{}
-	r.Get("/gateway_class/option_list", response.Adapter(ctrl.GatewayClassOptionList))
-
-}
-
-// @Summary 获取GatewayClass选项列表
-// @Security BearerAuth
-// @Param cluster path string true "集群名称"
-// @Success 200 {object} string
-// @Router /k8s/cluster/{cluster}/gateway_class/option_list [get]
-func (cc *Controller) GatewayClassOptionList(c *response.Context) {
+	klog.V(6).Infof("获取GatewayClass选项列表")
 	ctx := amis.GetContextWithUser(c)
 	selectedCluster, err := amis.GetSelectedCluster(c)
 	if err != nil {
