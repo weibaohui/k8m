@@ -21,7 +21,6 @@ var Metadata = plugins.Module{
 			Title: "OpenKruise",
 			Icon:  "fa-solid fa-cube",
 			Order: 8,
-			Show:  "isOpenKruiseSupported()==true",
 			Children: []plugins.Menu{
 				{
 					Key:         "advanced-cloneset",
