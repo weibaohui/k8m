@@ -212,4 +212,3 @@ func (w *EventWatcher) processEvents() {
 func (w *EventWatcher) shouldProcessEvent(event *models.K8sEvent) bool {
 	return event.IsWarning()
 }
-

@@ -52,4 +52,3 @@ func containsPartial(list []string, v string) bool {
 	}
 	return false
 }
-

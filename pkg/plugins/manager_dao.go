@@ -40,7 +40,7 @@ func (m *Manager) ApplyConfigFromDB() {
 	}
 
 	// 应用配置
-	for name, _ := range m.modules {
+	for name := range m.modules {
 		st, ok := cfgMap[name]
 		if !ok {
 			// 默认标记为已发现，不写入数据库

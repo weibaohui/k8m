@@ -101,4 +101,3 @@ func (e *K8sEvent) ListUnprocessed(limit int) ([]*K8sEvent, error) {
 func (e *K8sEvent) SaveEvent() error {
 	return e.Save(dao.BuildDefaultParams())
 }
-

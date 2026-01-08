@@ -716,13 +716,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "MutatingWebhookConfiguration 合规性检查",
-		Description: "检查 MutatingWebhookConfiguration 的 webhook 指向的 Service 是否存在、是否有活跃 Pod、Pod 状态。",
-		Group:       "admissionregistration.k8s.io",
-		Version:     "v1",
-		Kind:        "MutatingWebhookConfiguration",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_MutatingWebhook_017",
+		Name:           "MutatingWebhookConfiguration 合规性检查",
+		Description:    "检查 MutatingWebhookConfiguration 的 webhook 指向的 Service 是否存在、是否有活跃 Pod、Pod 状态。",
+		Group:          "admissionregistration.k8s.io",
+		Version:        "v1",
+		Kind:           "MutatingWebhookConfiguration",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_MutatingWebhook_017",
 		TimeoutSeconds: 90, // 需要检查Service和Pod状态，较为复杂
 		Script: `
 			local mwcs, err = kubectl:GVK("admissionregistration.k8s.io", "v1", "MutatingWebhookConfiguration"):AllNamespace(""):List()
@@ -763,13 +763,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "NetworkPolicy 合规性检查",
-		Description: "检查 NetworkPolicy 是否允许所有 Pod，或未作用于任何 Pod。",
-		Group:       "networking",
-		Version:     "v1",
-		Kind:        "NetworkPolicy",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_NetworkPolicy_018",
+		Name:           "NetworkPolicy 合规性检查",
+		Description:    "检查 NetworkPolicy 是否允许所有 Pod，或未作用于任何 Pod。",
+		Group:          "networking",
+		Version:        "v1",
+		Kind:           "NetworkPolicy",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_NetworkPolicy_018",
 		TimeoutSeconds: 60, // 需要检查Pod选择器匹配
 		Script: `
 			local nps, err = kubectl:GVK("networking.k8s.io", "v1", "NetworkPolicy"):AllNamespace(""):List()
@@ -797,13 +797,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Node 合规性检查",
-		Description: "检查 Node 的 Condition 状态，非 Ready/EtcdIsVoter 且状态异常时报警。",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "Node",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Node_019",
+		Name:           "Node 合规性检查",
+		Description:    "检查 Node 的 Condition 状态，非 Ready/EtcdIsVoter 且状态异常时报警。",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "Node",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Node_019",
 		TimeoutSeconds: 45, // Node状态检查相对简单
 		Script: `
 			local nodes, err = kubectl:GVK("", "v1", "Node"):AllNamespace(""):List()
@@ -829,13 +829,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Pod 合规性检查",
-		Description: "检查 Pod 的 Pending、调度失败、CrashLoopBackOff、终止异常、ReadinessProbe 失败等状态。",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "Pod",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Pod_020",
+		Name:           "Pod 合规性检查",
+		Description:    "检查 Pod 的 Pending、调度失败、CrashLoopBackOff、终止异常、ReadinessProbe 失败等状态。",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "Pod",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Pod_020",
 		TimeoutSeconds: 120, // Pod状态检查复杂，需要检查多种状态
 		Script: `
 			local pods, err = kubectl:GVK("", "v1", "Pod"):AllNamespace(""):List()
@@ -873,13 +873,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "PVC 合规性检查",
-		Description: "检查 PVC Pending 状态下的 ProvisioningFailed 事件。",
-		Group:       "",
-		Version:     "v1",
-		Kind:        "PersistentVolumeClaim",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_PVC_021",
+		Name:           "PVC 合规性检查",
+		Description:    "检查 PVC Pending 状态下的 ProvisioningFailed 事件。",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "PersistentVolumeClaim",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_PVC_021",
 		TimeoutSeconds: 60, // 需要检查Event事件
 		Script: `
 			local pvcs, err = kubectl:GVK("", "v1", "PersistentVolumeClaim"):AllNamespace(""):List()
@@ -900,13 +900,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "ReplicaSet 合规性检查",
-		Description: "检测副本数为0且有 FailedCreate 的 ReplicaFailure。",
-		Group:       "apps",
-		Version:     "v1",
-		Kind:        "ReplicaSet",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_ReplicaSet_022",
+		Name:           "ReplicaSet 合规性检查",
+		Description:    "检测副本数为0且有 FailedCreate 的 ReplicaFailure。",
+		Group:          "apps",
+		Version:        "v1",
+		Kind:           "ReplicaSet",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_ReplicaSet_022",
 		TimeoutSeconds: 45, // ReplicaSet状态检查相对简单
 		Script: `
 			local rss, err = kubectl:GVK("apps", "v1", "ReplicaSet"):AllNamespace(""):List()
@@ -924,13 +924,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Security ServiceAccount 默认账户使用检测",
-		Description: "检测 default ServiceAccount 是否被 Pod 使用。",
-		Group:       "core",
-		Version:     "v1",
-		Kind:        "ServiceAccount",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Security_SA_023",
+		Name:           "Security ServiceAccount 默认账户使用检测",
+		Description:    "检测 default ServiceAccount 是否被 Pod 使用。",
+		Group:          "core",
+		Version:        "v1",
+		Kind:           "ServiceAccount",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Security_SA_023",
 		TimeoutSeconds: 60, // 需要检查Pod使用情况
 		Script: `
 			local sas, err = kubectl:GVK("", "v1", "ServiceAccount"):AllNamespace(""):List()
@@ -955,13 +955,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Security RoleBinding 通配符检测",
-		Description: "检测 RoleBinding 关联的 Role 是否包含通配符权限。",
-		Group:       "rbac.authorization.k8s.io",
-		Version:     "v1",
-		Kind:        "RoleBinding",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Security_RoleBinding_024",
+		Name:           "Security RoleBinding 通配符检测",
+		Description:    "检测 RoleBinding 关联的 Role 是否包含通配符权限。",
+		Group:          "rbac.authorization.k8s.io",
+		Version:        "v1",
+		Kind:           "RoleBinding",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Security_RoleBinding_024",
 		TimeoutSeconds: 75, // 需要检查Role权限规则
 		Script: `
 			local rbs, err = kubectl:GVK("rbac.authorization.k8s.io", "v1", "RoleBinding"):AllNamespace(""):List()
@@ -987,13 +987,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "Security Pod 安全上下文检测",
-		Description: "检测 Pod 是否存在特权容器或缺少安全上下文。",
-		Group:       "core",
-		Version:     "v1",
-		Kind:        "Pod",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_Security_Pod_025",
+		Name:           "Security Pod 安全上下文检测",
+		Description:    "检测 Pod 是否存在特权容器或缺少安全上下文。",
+		Group:          "core",
+		Version:        "v1",
+		Kind:           "Pod",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Security_Pod_025",
 		TimeoutSeconds: 90, // 需要检查所有Pod的安全上下文
 		Script: `
 			local pods, err = kubectl:GVK("", "v1", "Pod"):AllNamespace(""):List()
@@ -1017,13 +1017,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "StatefulSet 合规性检查",
-		Description: "检测 StatefulSet 关联的 Service、StorageClass 是否存在及 Pod 状态。",
-		Group:       "apps",
-		Version:     "v1",
-		Kind:        "StatefulSet",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_StatefulSet_026",
+		Name:           "StatefulSet 合规性检查",
+		Description:    "检测 StatefulSet 关联的 Service、StorageClass 是否存在及 Pod 状态。",
+		Group:          "apps",
+		Version:        "v1",
+		Kind:           "StatefulSet",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_StatefulSet_026",
 		TimeoutSeconds: 120, // 需要检查Service、StorageClass和Pod状态，较为复杂
 		Script: `
 			local stss, err = kubectl:GVK("apps", "v1", "StatefulSet"):AllNamespace(""):List()
@@ -1073,13 +1073,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "StorageClass 合规性检查",
-		Description: "检测 StorageClass 是否使用了已废弃的 provisioner，及是否存在多个默认 StorageClass。",
-		Group:       "storage.k8s.io",
-		Version:     "v1",
-		Kind:        "StorageClass",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_StorageClass_027",
+		Name:           "StorageClass 合规性检查",
+		Description:    "检测 StorageClass 是否使用了已废弃的 provisioner，及是否存在多个默认 StorageClass。",
+		Group:          "storage.k8s.io",
+		Version:        "v1",
+		Kind:           "StorageClass",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_StorageClass_027",
 		TimeoutSeconds: 30, // StorageClass检查相对简单
 		Script: `
 			local scs, err = kubectl:GVK("storage.k8s.io", "v1", "StorageClass"):AllNamespace(""):List()
@@ -1100,13 +1100,13 @@ var BuiltinLuaScripts = []InspectionLuaScript{
 		`,
 	},
 	{
-		Name:        "PersistentVolume 合规性检查",
-		Description: "检测 PV 是否为 Released/Failed 状态，及容量小于 1Gi。",
-		Group:       "core",
-		Version:     "v1",
-		Kind:        "PersistentVolume",
-		ScriptType:  constants.LuaScriptTypeBuiltin,
-		ScriptCode:  "Builtin_PV_028",
+		Name:           "PersistentVolume 合规性检查",
+		Description:    "检测 PV 是否为 Released/Failed 状态，及容量小于 1Gi。",
+		Group:          "core",
+		Version:        "v1",
+		Kind:           "PersistentVolume",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_PV_028",
 		TimeoutSeconds: 45, // PV状态和容量检查
 		Script: `
 			local pvs, err = kubectl:GVK("", "v1", "PersistentVolume"):AllNamespace(""):List()

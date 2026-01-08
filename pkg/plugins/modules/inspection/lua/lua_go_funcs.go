@@ -71,7 +71,7 @@ func toLValue(L *lua.LState, v any) lua.LValue {
 			return lua.LNil
 		}
 		tbl := L.NewTable()
-		
+
 		// 转换 Requests
 		if val.Requests != nil {
 			requestsTbl := L.NewTable()
@@ -80,7 +80,7 @@ func toLValue(L *lua.LState, v any) lua.LValue {
 			}
 			tbl.RawSetString("requests", requestsTbl)
 		}
-		
+
 		// 转换 Limits
 		if val.Limits != nil {
 			limitsTbl := L.NewTable()
@@ -89,7 +89,7 @@ func toLValue(L *lua.LState, v any) lua.LValue {
 			}
 			tbl.RawSetString("limits", limitsTbl)
 		}
-		
+
 		// 转换 Realtime
 		if val.Realtime != nil {
 			realtimeTbl := L.NewTable()
@@ -98,7 +98,7 @@ func toLValue(L *lua.LState, v any) lua.LValue {
 			}
 			tbl.RawSetString("realtime", realtimeTbl)
 		}
-		
+
 		// 转换 Allocatable
 		if val.Allocatable != nil {
 			allocatableTbl := L.NewTable()
@@ -107,7 +107,7 @@ func toLValue(L *lua.LState, v any) lua.LValue {
 			}
 			tbl.RawSetString("allocatable", allocatableTbl)
 		}
-		
+
 		// 转换 UsageFractions
 		if val.UsageFractions != nil {
 			usageFractionsTbl := L.NewTable()
@@ -120,7 +120,7 @@ func toLValue(L *lua.LState, v any) lua.LValue {
 			}
 			tbl.RawSetString("usageFractions", usageFractionsTbl)
 		}
-		
+
 		return tbl
 	case []*unstructured.Unstructured:
 		items := make([]any, len(val))

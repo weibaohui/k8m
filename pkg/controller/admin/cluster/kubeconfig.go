@@ -46,7 +46,7 @@ func (a *Controller) SaveKubeConfig(c *response.Context) {
 	}
 	index := 0
 	total := len(config.Contexts)
-	for contextName, _ := range config.Contexts {
+	for contextName := range config.Contexts {
 		index += 1
 		context := config.Contexts[contextName]
 		cluster := config.Clusters[context.Cluster]
@@ -169,7 +169,7 @@ func (a *Controller) SaveAWSEKSCluster(c *response.Context) {
 
 	index := 0
 	total := len(config.Contexts)
-	for contextName, _ := range config.Contexts {
+	for contextName := range config.Contexts {
 		index += 1
 		context := config.Contexts[contextName]
 		cluster := config.Clusters[context.Cluster]
