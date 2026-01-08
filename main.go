@@ -27,7 +27,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/controller/doc"
 	"github.com/weibaohui/k8m/pkg/controller/ds"
 	"github.com/weibaohui/k8m/pkg/controller/dynamic"
-	"github.com/weibaohui/k8m/pkg/controller/gatewayapi"
 	"github.com/weibaohui/k8m/pkg/controller/ingressclass"
 	"github.com/weibaohui/k8m/pkg/controller/log"
 	"github.com/weibaohui/k8m/pkg/controller/login"
@@ -254,7 +253,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		cronjob.RegisterRoutes(api)
 		storageclass.RegisterRoutes(api)
 		ingressclass.RegisterRoutes(api)
-		gatewayapi.RegisterRoutes(api)
 		doc.RegisterRoutes(api)
 		mgr.RegisterClusterRoutes(api)
 	})

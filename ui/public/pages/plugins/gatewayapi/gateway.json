@@ -768,7 +768,7 @@
             "type": "select",
             "clearable": true,
             "searchable": true,
-            "source": "/k8s/gateway_class/option_list"
+            "source": "/k8s/plugins/gatewayapi/gateway_class/option_list"
           }
         },
         {
