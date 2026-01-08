@@ -10,7 +10,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameK8sWatch,
 		Title:       "K8s资源监听插件",
 		Version:     "1.0.0",
-		Description: "监听Kubernetes资源变更，包括Pod、Node、PVC、PV、Ingress等",
+		Description: "监听Kubernetes资源变更，包括Pod、Node、PVC、PV、Ingress等。关闭后部分页面的实时数据不显示。",
 	},
 	Tables:       []string{},
 	Dependencies: []string{},
