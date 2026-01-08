@@ -17,6 +17,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/leader"
 	mcp "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/openapi"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/openkruise"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/swagger"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
@@ -110,6 +111,11 @@ func init() {
 			klog.V(6).Infof("注册istio插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册istio插件成功")
+		}
+		if err := m.Register(openkruise.Metadata); err != nil {
+			klog.V(6).Infof("注册openkruise插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册openkruise插件成功")
 		}
 	})
 }
