@@ -10,6 +10,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/istio"
 	k8m_mcp_server "github.com/weibaohui/k8m/pkg/plugins/modules/k8m_mcp_server"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/k8sgpt"
 	k8swatch "github.com/weibaohui/k8m/pkg/plugins/modules/k8swatch"
@@ -104,6 +105,11 @@ func init() {
 			klog.V(6).Infof("注册gatewayapi插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册gatewayapi插件成功")
+		}
+		if err := m.Register(istio.Metadata); err != nil {
+			klog.V(6).Infof("注册istio插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册istio插件成功")
 		}
 	})
 }

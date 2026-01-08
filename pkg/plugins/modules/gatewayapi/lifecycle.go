@@ -1,15 +1,11 @@
 package gatewayapi
 
 import (
-	"context"
-	"time"
-
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"k8s.io/klog/v2"
 )
 
 type GatewayAPILifecycle struct {
-	cancelStart context.CancelFunc
 }
 
 func (g *GatewayAPILifecycle) Install(ctx plugins.InstallContext) error {
@@ -44,25 +40,6 @@ func (g *GatewayAPILifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 func (g *GatewayAPILifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动GatewayAPI插件后台任务")
-
-	startCtx, cancel := context.WithCancel(context.Background())
-	g.cancelStart = cancel
-
-	go func(meta plugins.Meta) {
-		ticker := time.NewTicker(30 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				klog.V(6).Infof("GatewayAPI插件后台任务运行中，插件: %s，版本: %s", meta.Name, meta.Version)
-			case <-startCtx.Done():
-				klog.V(6).Infof("GatewayAPI 插件启动 goroutine 退出")
-				return
-			}
-		}
-	}(ctx.Meta())
-
 	return nil
 }
 
@@ -73,11 +50,5 @@ func (g *GatewayAPILifecycle) StartCron(ctx plugins.BaseContext, spec string) er
 
 func (g *GatewayAPILifecycle) Stop(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("停止GatewayAPI插件后台任务")
-
-	if g.cancelStart != nil {
-		g.cancelStart()
-		g.cancelStart = nil
-	}
-
 	return nil
 }
