@@ -5,6 +5,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/gatewayapi"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/gllog"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm"
@@ -98,6 +99,11 @@ func init() {
 			klog.V(6).Infof("注册k8swatch插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册k8swatch插件成功")
+		}
+		if err := m.Register(gatewayapi.Metadata); err != nil {
+			klog.V(6).Infof("注册gatewayapi插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册gatewayapi插件成功")
 		}
 	})
 }
