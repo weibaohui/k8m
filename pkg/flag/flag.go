@@ -41,7 +41,6 @@ type Config struct {
 	GitRepo           string // git仓库地址, 由编译时自动注入
 	BuildDate         string // 编译时间, 由编译时自动注入
 
-	EnableSwagger        bool   // 是否启用Swagger文档，默认开启
 	ConnectCluster       bool   // 启动程序后，是否自动连接发现的集群，默认关闭
 	ProductName          string // 产品名称，默认为K8M
 	ResourceCacheTimeout int    // 资源缓存时间（秒）
@@ -168,8 +167,6 @@ func (c *Config) InitFlags() {
 	// 默认不打印配置
 	defaultPrintConfig := getEnvAsBool("PRINT_CONFIG", false)
 
-	// 默认开启Swagger文档
-	defaultEnableSwagger := getEnvAsBool("ENABLE_SWAGGER", true)
 	// 默认关闭启动连接集群
 	defaultConnectCluster := getEnvAsBool("CONNECT_CLUSTER", false)
 
@@ -229,8 +226,6 @@ func (c *Config) InitFlags() {
 	pflag.BoolVar(&c.InCluster, "in-cluster", defaultInCluster, "是否自动注册纳管宿主集群，默认启用")
 	pflag.BoolVar(&c.ConnectCluster, "connect-cluster", defaultConnectCluster, "启动程序后，是否自动连接发现的集群，默认关闭  ")
 	pflag.IntVar(&c.ResourceCacheTimeout, "resource-cache-timeout", defaultResourceCacheTimeout, "资源缓存时间（秒），默认60秒")
-
-	pflag.BoolVar(&c.EnableSwagger, "enable-swagger", defaultEnableSwagger, "是否启用Swagger文档，默认开启")
 
 	// 数据库配置
 	pflag.StringVar(&c.DBDriver, "db-driver", getEnv("DB_DRIVER", "sqlite"), "数据库驱动类型: sqlite、mysql、postgresql等")
