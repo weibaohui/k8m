@@ -28,6 +28,7 @@
                 "bulkActions"
             ],
             "api": "get:/admin/plugin/list",
+            "showIndex": true,
             "columns": [
                 {
                     "type": "operation",
