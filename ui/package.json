@@ -32,7 +32,7 @@
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "i18n-jsautotranslate": "^3.17.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "jszip": "^3.10.1",
     "jwt-decode": "^4.0.0",
     "monaco-editor": "^0.52.2",
@@ -57,7 +57,7 @@
     "fs-extra": "^11.3.0",
     "sass": "^1.87.0",
     "typescript": "^5.8.3",
-    "vite": "^6.3.6",
+    "vite": "^6.4.1",
     "vite-plugin-monaco-editor": "^1.1.0"
   }
 }
