@@ -2,47 +2,148 @@
 <h1>K8M</h1>
 </div>
 
+<div align=center>
+ 
+[![weibaohui%2Fk8m | Trendshift](https://trendshift.io/api/badge/repositories/14095)](https://trendshift.io/repositories/14095)
+
+</div>
+
+<div align=center>
+ 
+![GitHub Repo Stars](https://img.shields.io/github/stars/weibaohui/k8m)
+![GitHub Repo Forks](https://img.shields.io/github/forks/weibaohui/k8m)
+
+</div>
+
+<div align=center>
+
+ [![License MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
+ [![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/k8m)](https://goreportcard.com/report/github.com/weibaohui/k8m)
+![GitHub Release](https://img.shields.io/github/v/release/weibaohui/k8m)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/weibaohui/k8m/total)
+![GitHub Repo Issues](https://img.shields.io/github/issues/weibaohui/k8m)
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/weibaohui/k8m)](https://archestra.ai/mcp-catalog/weibaohui__k8m)
+![Repobeats analytics image](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg)
+
+</div>
+
 
 [English](README_en.md) | [中文](README.md)
 
-[![k8m](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/weibaohui/k8m/blob/master/LICENSE)
 
-![Alt](https://repobeats.axiom.co/api/embed/9fde094e5c9a1d4c530e875864ee7919b17d0690.svg "Repobeats analytics image")
 
-**k8m** is an AI-driven Mini Kubernetes AI Dashboard lightweight console tool designed to simplify cluster management. It is built on AMIS and uses [`kom`](https://github.com/weibaohui/kom) as the Kubernetes API client. **k8m** comes with built-in interaction capabilities powered by the Qwen2.5-Coder-7B model and supports integration with your private AI models.
+**k8m** is an AI-driven Mini Kubernetes AI Dashboard lightweight console tool designed to simplify cluster management. It is built on AMIS and uses [`kom`](https://github.com/weibaohui/kom) as the Kubernetes API client. **k8m** comes with built-in Qwen2.5-Coder-7B, supports deepseek-ai/DeepSeek-R1-Distill-Qwen-7B model interaction capabilities, and supports integration with your own private AI models (including ollama).
+
+### Demo
+
+[DEMO](http://107.150.119.151:3618)
+[DEMO-InCluster Mode](http://107.150.119.151:31999)
+Username and password demo/demo
+
+### Documentation
+
+- For detailed configuration and usage instructions, please refer to [Documentation](docs/README.md).
+- For changelog, please refer to [Changelog](CHANGELOG.md).
+- For customizing AI model parameters and configuring private AI models, please refer to [Self-Hosted/Custom AI Model Support](docs/use-self-hosted-ai.md)
+  and [Ollama Configuration](docs/ollama.md).
+- For detailed configuration option descriptions, please refer to [Configuration Options](docs/config.md).
+- For database configuration, please refer to [Database Configuration](docs/database.md).
+- DeepWiki documentation: [Development Design Documentation](https://deepwiki.com/weibaohui/k8m)
 
 ### Key Features
 
-- **Compact Design**: All functionalities are packed into a single executable file for easy deployment and use.
-- **User-Friendly**: An intuitive user interface and straightforward workflows make Kubernetes management effortless.
-- **High Performance**: Backend built with Golang and frontend based on Baidu AMIS ensure high resource efficiency and fast responsiveness.
-- **AI-Driven Integration**: Provides intelligent support for managing Kubernetes with features like word explanation, resource guide, YAML attribute translation, Describe information interpretation, log AI diagnosis, and command recommendation, integrated with [`k8s-gpt`](https://github.com/k8sgpt-ai/k8sgpt) for Chinese display.
-- **MCP Integration**: Visual management of MCP, enabling large model calls to Tools, with 49 built-in k8s multi-cluster MCP tools, allowing for over a hundred cluster operations. It can serve as an MCP Server for other large model software, facilitating easy management of k8s with large models. Supports mainstream services like mcp.so.
-- **Multi-Cluster Management**: Automatically recognizes clusters using InCluster mode, scans configuration files in the same directory after configuring the kubeconfig path, and registers multiple clusters for management.
-- **Pod File Management**: Enables browsing, editing, uploading, downloading, and deleting files within Pods, simplifying daily operations.
-- **Pod Operations Management**: Supports real-time Pod log viewing, log downloads, and direct Shell command execution within Pods.
-- **CRD Management**: Automatically discovers and manages CRD resources to improve productivity.
-- **Helm Marketplace**: Supports free addition of Helm repositories, one-click installation, uninstallation, and upgrade of Helm applications.
-- **Cross-Platform Support**: Compatible with Linux, macOS, and Windows, and supports various architectures like x86 and ARM for seamless multi-platform operation.
-- **Fully Open Source**: All source code is open without any restrictions, allowing for free customization and extension, and commercial use.
+- **Miniaturized Design**: All functionalities are integrated into a single executable file for easy deployment and simple usage.
+- **Easy to Use**: Friendly user interface and intuitive operation workflow make Kubernetes management easier. Supports standard k8s, aws eks, k3s, kind, k0s and other cluster types.
+- **High Performance**: Backend built with Golang, frontend based on Baidu AMIS, ensuring high resource utilization and fast response speed.
+- **AI-Driven Integration**: Implements word explanation, resource guide, YAML attribute automatic translation, Describe information interpretation, log AI diagnosis, and running command recommendation based on ChatGPT, and integrates [k8s-gpt](https://github.com/k8sgpt-ai/k8sgpt) functionality for Chinese display, providing intelligent support for managing k8s.
+- **Feature Plugin**: Feature functions are plugin-based, enabled on demand, no resource consumption when not enabled.
+- **MCP Integration**: Visual management of MCP, enabling large model calls to Tools, with 49 built-in k8s multi-cluster MCP tools that can be combined to achieve over a hundred cluster operations. Can serve as MCP Server for other large model software. Easily implement large model management of k8s. Can record every MCP call in detail. Supports mcp.so mainstream services.
+- **MCP Permission Integration**: Multi-cluster management permissions and MCP large model call permissions are integrated. In a nutshell: whoever uses the large model executes MCP with their permissions. Safe usage without worries, avoiding unauthorized operations.
+- **Multi-Cluster Management**: Automatically recognizes clusters using InCluster mode internally, automatically scans configuration files in the same directory after configuring kubeconfig path, and registers multiple clusters for management simultaneously. Supports heartbeat detection and automatic reconnection.
+- **Multi-Cluster Permission Management**: Supports authorization for users and user groups, can authorize by cluster, including cluster read-only, Exec command, and cluster administrator three types of permissions. After authorizing user groups, users in the group all get corresponding authorization. Supports setting namespace blacklist/whitelist.
+- **Supports k8s Latest Features**: Supports APIGateway, OpenKruise and other functional features.
+- **Pod File Management**: In the file tree on the left side of the Console interface, right-click menu supports browsing, editing, uploading, downloading, and deleting files within Pods, simplifying daily operations.
+- **Pod Operation Management**: Supports real-time viewing of Pod logs, downloading logs, and directly executing Shell commands within Pods. Supports Ctrl+F search, similar to grep -A -B highlighted search.
+- **API Open**: Supports creating API KEY for third-party external access, provides swagger interface management page.
+- **Cluster Inspection Support**: Supports multi-cluster scheduled inspection, custom inspection rules, supports lua script rules. Supports sending to DingTalk groups, WeChat groups, Feishu groups and custom webhooks. Supports AI summary.
+- **k8s Event Forwarding**: Supports multi-cluster k8s Event forwarding to webhooks, can filter by cluster, keywords, namespace, name, etc., establishing multiple dedicated monitoring forwarding channels. Supports AI summary.
+- **CRD Management**: Can automatically discover and manage CRD resources, list all CRDs in tree form, improving work efficiency.
+- **Helm Marketplace**: Supports free addition of Helm repositories, one-click installation, uninstallation, and upgrade of Helm applications, supports automatic updates.
+- **Cross-Platform Support**: Compatible with Linux, macOS and Windows, and supports x86, ARM and other architectures, ensuring seamless multi-platform operation.
+- **Multi-Database Support**: Supports SQLite, MySql, PostgreSql and other databases.
+- **Fully Open Source**: Opens all source code without any restrictions, can be freely customized and extended, and can be used commercially.
 
 **k8m**'s design philosophy is "AI-driven, lightweight and efficient, simplifying complexity," helping developers and operators quickly get started and effortlessly manage Kubernetes clusters.
 
 ![](https://github.com/user-attachments/assets/0951d6c1-389c-49cb-b247-84de15b6ec0e)
 
+## **Plugin System**
+
+k8m adopts a plugin-based architecture where all functional modules exist as plugins, supporting flexible enable/disable and extension. The plugin system provides complete lifecycle management, dependency resolution, scheduled task scheduling, and other features.
+
+### Plugin Features
+
+- **Modular Design**: Each plugin is independently developed, deployed, and managed without affecting each other
+- **Lifecycle Management**: Supports complete plugin lifecycle including installation, enable, disable, uninstall, start, stop, etc.
+- **Dependency Management**: Supports dependency declaration between plugins, automatically loads in order
+- **Scheduled Tasks**: Supports defining scheduled tasks in plugins using standard cron expressions
+- **Route Registration**: Supports multiple route types including cluster routes, management routes, plugin management routes, etc.
+- **Database Management**: Plugins can declare database tables they use, system manages automatically
+- **Multi-Instance Support**: Implements master-standby switching in multi-instance environments through election plugin
+
+### Built-in Plugin List
+
+| Plugin Name | Plugin Title | Version | Description |
+|-------------|--------------|---------|-------------|
+| **leader** | Multi-Instance Election Plugin | 1.0.0 | Provides multi-instance automatic election capability: completes leader election through Kubernetes native mechanisms. Please ensure /health/ready readiness probe is enabled before use. After enabling, traffic will be concentrated on the master instance. |
+| **k8swatch** | K8s Resource Monitoring Plugin | 1.0.0 | Monitors Kubernetes resource changes, including Pod, Node, PVC, PV, Ingress, etc. After disabling, real-time data on some pages will not be displayed. |
+| **webhook** | Webhook Plugin | 1.0.0 | Webhook receiver management, test sending and sending record query |
+| **eventhandler** | Event Forwarding Plugin | 1.0.0 | K8s event collection, rule filtering and Webhook forwarding. After enabling election plugin, only master instance executes, otherwise each instance executes. |
+| **inspection** | Cluster Inspection Plugin | 1.0.0 | Lua-based cluster inspection plan, rule management and result viewing. After enabling election plugin, only master instance executes, otherwise each instance executes. |
+| **helm** | Helm Management Plugin | 1.0.0 | Helm repository, Chart, Release management. Includes repository addition, Chart browsing, Release installation upgrade uninstallation and other functions. Scheduled update of repository index. |
+| **gllog** | Global Log | 1.0.0 | Global log query, supports cross-cluster Pod log viewing |
+| **swagger** | Swagger Documentation | 1.0.0 | Swagger API documentation viewing. Execute make.sh script in plugin directory to generate documentation. |
+| **mcp_runtime** | MCP Runtime Management Plugin | 1.0.0 | Manages MCP servers used for large model conversations. Includes MCP server configuration, tool management, execution log viewing, open MCP service and other functions. When calling MCP in conversation, Authorization header will be automatically added with value JWT token. |
+| **openapi** | OpenAPI Plugin | 1.0.0 | API key management for programmatic access to platform |
+| **k8m_mcp_server** | K8M MCP Server Plugin | 1.0.0 | Uses K8M as MCP Server. Can be added to MCP runtime management for use. This plugin listens on /mcp/k8m/sse to provide service. |
+| **k8sgpt** | K8sGPT Plugin | 1.0.0 | Kubernetes resource AI intelligent analysis, supports intelligent diagnosis of multiple resource types such as Pod, Deployment, Service, etc. Source from https://github.com/k8sgpt-ai/k8sgpt project |
+| **ai** | AI Plugin | 1.0.0 | AI function plugin, provides K8s resource intelligent analysis, event consultation, log analysis, Cron expression parsing and other functions. Supports custom AI model configuration. |
+| **heartbeat** | Cluster Heartbeat Reconnection Plugin | 1.0.0 | Manages cluster heartbeat detection and automatic reconnection function |
+| **gatewayapi** | Gateway API Management Plugin | 1.0.0 | Kubernetes Gateway API management |
+| **istio** | Istio Management Plugin | 1.0.0 | Kubernetes Istio service mesh management |
+| **openkruise** | OpenKruise Management Plugin | 1.0.0 | Kubernetes OpenKruise advanced workload management |
+| **demo** | Demo Plugin | 1.0.12 | Demonstrates fixed list and CRUD functionality |
+
+### Plugin Development
+
+For detailed plugin development documentation, please refer to: [Plugin Architecture Documentation](pkg/plugins/readme.md)
+
+Plugin development includes the following contents:
+- Plugin metadata definition
+- Lifecycle interface implementation
+- Route registration
+- Database table management
+- Scheduled task configuration
+- Menu declaration
+- Dependency relationship management
+
 ## **Run**
 
-1. **Download**: Download the latest version from [GitHub](https://github.com/weibaohui/k8m).
+1. **Download**: Download the latest version from [GitHub release](https://github.com/weibaohui/k8m/releases).
 2. **Run**: Start with the `./k8m` command and visit [http://127.0.0.1:3618](http://127.0.0.1:3618).
-3. **Parameters**:
+3. **Login Username and Password**:
+    - Username: `k8m`
+    - Password: `k8m`
+    - Please note to change username/password and enable two-factor authentication after going online.
+4. **Parameters**:
 
 ```shell
 Usage of ./k8m:
-      --admin-password string            Administrator password (default "123456")
-      --admin-username string            Administrator username (default "admin")
-  -k, --chatgpt-key string               Custom API Key for large models (default "sk-xxxxxxx")
-  -m, --chatgpt-model string             Custom model name for large models (default "Qwen/Qwen2.5-7B-Instruct")
-  -u, --chatgpt-url string               Custom API URL for large models (default "https://api.siliconflow.cn/v1")
+      --enable-temp-admin                Whether to enable temporary admin account configuration, disabled by default
+      --admin-password string            Administrator password, takes effect after enabling temporary admin account configuration
+      --admin-username string            Administrator username, takes effect after enabling temporary admin account configuration
+      --print-config                     Whether to print configuration information (default false)
+      --connect-cluster                  Whether to automatically connect to existing clusters when starting, disabled by default
   -d, --debug                            Debug mode
       --in-cluster                       Whether to automatically register and manage the host cluster, enabled by default
       --jwt-token-secret string          Secret used for generating JWT token after login (default "your-secret-key")
@@ -50,9 +151,9 @@ Usage of ./k8m:
       --kubectl-shell-image string       Kubectl Shell image. Default is bitnami/kubectl:latest, must contain kubectl command (default "bitnami/kubectl:latest")
       --log-v int                        Log level for klog.klog.V(2) (default 2)
       --login-type string                Login method, password, oauth, token, etc., default is password (default "password")
+      --image-pull-timeout               Node Shell, Kubectl Shell image pull timeout. Default is 30 seconds
       --node-shell-image string          NodeShell image. Default is alpine:latest, must contain `nsenter` command (default "alpine:latest")
   -p, --port int                         Listening port (default 3618)
-      --sqlite-path string               Path to sqlite database file (default "./data/k8m.db")
   -v, --v Level                          Log level for klog (default 2)
 ```
 
@@ -72,26 +173,18 @@ services:
       - ./data:/app/data
 ```
 
-After startup, access port `3618`, default username: `admin`, default password: `123456`.
-
-If you want to quickly set up an experience through an online environment, you can visit: [k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m), fork the repository after that, and set up the experience.
+After startup, access port `3618`, default username: `k8m`, default password: `k8m`.
+If you want to quickly set up an experience through an online environment, you can visit: [k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
 
 ## **ChatGPT Configuration Guide**
 
 ### Built-in GPT
 
 Starting from version v0.0.8, GPT is built-in and does not require configuration.
-If you need to use your own GPT, please refer to the steps below.
+If you need to use your own GPT, please refer to the following documentation.
 
-### **Environment Variable Configuration**
-
-Set the environment variables to enable ChatGPT.
-
-```bash
-export OPENAI_API_KEY="sk-XXXXX"
-export OPENAI_API_URL="https://api.siliconflow.cn/v1"
-export OPENAI_MODEL="Qwen/Qwen2.5-7B-Instruct"
-```
+- [Self-Hosted/Custom AI Model Support](use-self-hosted-ai.md) - How to use self-hosted models
+- [Ollama Configuration](ollama.md) - How to configure and use Ollama large models
 
 ### **ChatGPT Status Debugging**
 
@@ -101,47 +194,48 @@ The following information will be output, check the logs to confirm whether Chat
 ```go
 ChatGPT enabled status:true
 ChatGPT enabled key:sk-hl**********************************************, url:https://api.siliconflow.cn/v1
-ChatGPT uses model set in environment variables:Qwen/Qwen2.5-Coder-7B-Instruc
+ChatGPT uses model set in environment variables:Qwen/Qwen2.5-7B-Instruc
 ```
 
 ### **ChatGPT Account**
 
 This project integrates the [github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai) SDK.
 For users in China, it's recommended to use the [Silicon Flow](https://cloud.siliconflow.cn/) service.
-After logging in, create an API_KEY at [https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak).
+After logging in, create an API_KEY at [https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak)
 
 ## **k8m Environment Variable Settings**
 
-Below is a table of environment variable settings supported by k8m and their functions:
+k8m supports flexible configuration through environment variables and command line parameters. The main parameters are as follows:
 
 | Environment Variable       | Default Value              | Description                                                                                   |
 |----------------------------|----------------------------|-----------------------------------------------------------------------------------------------|
 | `PORT`                     | `3618`                     | Listening port number                                                                         |
-| `KUBECONFIG`               | `~/.kube/config`           | Path to `kubeconfig` file                                                                     |
-| `OPENAI_API_KEY`           | `""`                       | API Key for large models                                                                      |
-| `OPENAI_API_URL`           | `""`                       | API URL for large models                                                                      |
-| `OPENAI_MODEL`             | `Qwen/Qwen2.5-7B-Instruct` | Default model name for large models, set to deepseek-ai/DeepSeek-R1-Distill-Qwen-7B if needed |
+| `KUBECONFIG`               | `~/.kube/config`           | Path to `kubeconfig` file, automatically scans and identifies all configuration files in the same directory |
+| `ANY_SELECT`               | `"true"`                   | Whether to enable arbitrary selection word explanation, enabled by default (default true)   |
 | `LOGIN_TYPE`               | `"password"`               | Login method (e.g., `password`, `oauth`, `token`)                                             |
-| `ADMIN_USERNAME`           | `"admin"`                  | Administrator username                                                                        |
-| `ADMIN_PASSWORD`           | `"123456"`                 | Administrator password                                                                        |
+| `ENABLE_TEMP_ADMIN`        | `"false"`                | Whether to enable temporary admin account configuration, disabled by default. Used for first login or forgotten password |
+| `ADMIN_USERNAME`           |                          | Administrator username, takes effect after enabling temporary admin account configuration    |
+| `ADMIN_PASSWORD`           |                          | Administrator password, takes effect after enabling temporary admin account configuration    |
 | `DEBUG`                    | `"false"`                  | Whether to enable `debug` mode                                                                |
-| `LOG_V`                    | `"2"`                      | Log output level, same usage as klog                                                          |
-| `JWT_TOKEN_SECRET`         | `"your-secret-key"`        | Secret used for generating JWT Token                                                          |
+| `LOG_V`                    | `"2"`                    | Log output level, same usage as klog                                                          |
+| `JWT_TOKEN_SECRET`         | `"your-secret-key"`        | Secret used for JWT Token generation                                                          |
 | `KUBECTL_SHELL_IMAGE`      | `bitnami/kubectl:latest`   | kubectl shell image address                                                                   |
 | `NODE_SHELL_IMAGE`         | `alpine:latest`            | Node shell image address                                                                      |
-| `SQLITE_PATH`              | `./data/k8m.db`            | Persistent database address, default sqlite database, file address ./data/k8m.db              |
-| `IN_CLUSTER`               | `"true"`                   | Whether to automatically register and manage the host cluster, enabled by default             |
+| `IMAGE_PULL_TIMEOUT`       | `"30"`                     | Node shell, kubectl shell image pull timeout (seconds)                                       |
+| `CONNECT_CLUSTER`          | `"false"`                | Whether to automatically connect to discovered clusters after starting the program, disabled by default |
+| `PRINT_CONFIG`             | `"false"`                | Whether to print configuration information                                                    |
+
+For detailed parameter description and more configuration methods, please refer to [docs/readme.md](docs/README.md).
 
 These environment variables can be set when running the application, for example:
 
 ```sh
 export PORT=8080
-export OPENAI_API_KEY="your-api-key"
 export GIN_MODE="release"
 ./k8m
 ```
 
-**Note: Environment variables will be overridden by startup parameters.**
+For other parameters, please refer to [docs/readme.md](docs/README.md).
 
 ## Running with Containerized k8s Cluster
 
@@ -308,6 +402,53 @@ All connected clusters in the interface can be used.
 4. Added quick enable/disable toggle for MCP Server
    ![Screenshot](https://foruda.gitee.com/images/1742916947056442916/6c33d7c2_77493.png)
 
-**v0.0.64 Update**
-1. Initial MCP support implementation
-   ![Screenshot](https://foruda.gitee.com/images/1742621225108846936/0a614dcb_77493.png)
+## Development & Debugging
+
+If you want to develop and debug locally, please execute local frontend build once first to automatically generate the dist directory. Because this project uses binary embedding, the frontend will error without dist.
+
+#### Step 1: Build Frontend
+
+```bash 
+cd ui
+pnpm run build
+```
+
+#### Compile and Debug Backend
+
+```bash
+# Download dependencies
+go mod tidy
+# Run
+air
+# Or
+go run *.go 
+# Listens on localhost:3618 port
+```
+
+#### Frontend Hot Reload
+
+```bash
+cd ui
+pnpm run dev
+# Vite service will listen on localhost:3000 port
+# Vite forwards backend access to 3618 port
+```
+
+Visit http://localhost:3000
+
+### HELP & SUPPORT
+
+If you have any further questions or need additional help, please feel free to contact me!
+
+### Special Thanks
+
+[zhaomingcheng01](https://github.com/zhaomingcheng01): Provided many high-quality suggestions, making outstanding contributions to k8m's usability and ease of use~
+
+[La0jin](https://github.com/La0jin): Provided online resources and maintenance, greatly improving k8m's presentation
+
+[eryajf](https://github.com/eryajf): Provided us with very useful github actions, adding automated release, build, publishing and other functions to k8m
+
+## Contact Me
+
+WeChat (大罗马的太阳) Search ID: daluomadetaiyang, note k8m.
+<br><img width="214" alt="Image" src="https://github.com/user-attachments/assets/166db141-42c5-42c4-9964-8e25cf12d04c" />
