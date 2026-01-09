@@ -1,10 +1,8 @@
-# k8m 插件（Feature Module）架构定义 v1.0
-
-
+# k8m 插件（Feature Module）架构定义 v1.1
 
 > 本文档用于**先行固化 k8m 插件体系的抽象、边界与约束**，在此基础上再开展代码实现。
 >
-> 目标不是“灵活”，而是：**可控、可裁剪、可维护、可规模化扩展**。
+> 目标不是"灵活"，而是：**可控、可裁剪、可维护、可规模化扩展**。
 
 ---
 
@@ -21,10 +19,11 @@ k8m 插件体系用于解决以下问题：
 
 1. **一个插件 = 一个完整功能单元（Feature Module）**
 2. 插件可安装 / 启用 / 禁用 / 卸载
-3. 插件能力边界清晰、显式声明
-4. 插件之间无隐式依赖
-5. 插件描述以 Go 代码为主，编译期加载
-6. 前端统一使用 AMIS JSON 作为渲染描述
+3. 插件可启动 / 停止后台任务
+4. 插件能力边界清晰、显式声明
+5. 插件之间无隐式依赖
+6. 插件描述以 Go 代码为主，编译期加载
+7. 前端统一使用 AMIS JSON 作为渲染描述
 
 ---
 
@@ -34,7 +33,7 @@ k8m 插件体系用于解决以下问题：
 
 在 k8m 中：
 
-> **插件不是 Hook，也不是轻量扩展，而是“可插拔子系统”。**
+> **插件不是 Hook，也不是轻量扩展，而是"可插拔子系统"。**
 
 插件通常具备以下能力中的若干项：
 
@@ -44,6 +43,7 @@ k8m 插件体系用于解决以下问题：
 * 权限定义（RBAC）
 * SQL 表结构或数据模型
 * 初始化 / 清理逻辑
+* 后台任务（协程、定时任务）
 
 ---
 
@@ -52,13 +52,18 @@ k8m 插件体系用于解决以下问题：
 插件具备完整、显式的生命周期：
 
 ```
-Discover → Install → Enable → Disable → Uninstall
+Discover → Install → Enable → Start → Running
+    ↓         ↓         ↓          ↓
+    └────────┴─────────┴──────────┴──→ Disable → Uninstall
+                        ↓
+                    Stop → Stopped
 ```
 
 ### 3.1 Discover（发现）
 
 * 插件在编译期通过 Go 注册
 * 系统启动时完成插件元信息加载
+* 初始状态为 `StatusDiscovered`
 
 ### 3.2 Install（安装）
 
@@ -69,6 +74,7 @@ Discover → Install → Enable → Disable → Uninstall
 * 注册权限模型
 
 > Install 只执行一次，具有幂等性要求。
+> 安装后状态变为 `StatusInstalled`。
 
 ### 3.3 Upgrade（升级）
 
@@ -82,11 +88,14 @@ Discover → Install → Enable → Disable → Uninstall
 
 ### 3.4 Enable（启用）
 
-启用阶段负责**运行期能力暴露**：
+启用阶段负责**配置级能力暴露**：
 
 * 菜单可见
 * API 可访问
 * 前端 AMIS JSON 可加载
+
+> 启用后状态变为 `StatusEnabled`。
+> 启用不启动后台任务，需要调用 Start 才能启动后台任务。
 
 ### 3.5 Disable（禁用）
 
@@ -97,6 +106,8 @@ Discover → Install → Enable → Disable → Uninstall
 * 前端资源返回 404
 
 > 禁用不删除数据、不删除权限定义。
+> 禁用前会自动停止后台任务（如果正在运行）。
+> 禁用后状态变为 `StatusDisabled`。
 
 ### 3.6 Uninstall（卸载）
 
@@ -106,7 +117,8 @@ Discover → Install → Enable → Disable → Uninstall
 * 删除初始化数据
 * 清理插件注册信息
 
-> 卸载后插件条目保留，状态变为 Discovered，可再次安装。
+> 卸载前会自动停止后台任务（如果正在运行）。
+> 卸载后插件条目保留，状态变为 `StatusDiscovered`，可再次安装。
 
 ### 3.7 Start（启动后台任务）
 
@@ -114,11 +126,23 @@ Discover → Install → Enable → Disable → Uninstall
 
 * 启动非阻塞的后台协程
 * 监听 EventBus 事件
-* 启动定时任务
 
-> Start 在系统启动时调用，不可阻塞。
+> Start 在系统启动时或手动调用时触发，不可阻塞。
+> 启动后状态变为 `StatusRunning`。
+> 只有 `StatusEnabled` 或 `StatusStopped` 状态的插件才能启动。
 
-### 3.8 StartCron（执行定时任务）
+### 3.8 Stop（停止后台任务）
+
+停止阶段负责**停止插件的后台任务**：
+
+* 停止后台协程
+* 清理资源
+
+> Stop 在手动调用或禁用/卸载插件时触发，不可阻塞。
+> 停止后状态变为 `StatusStopped`。
+> 只有 `StatusRunning` 状态的插件才能停止。
+
+### 3.9 StartCron（执行定时任务）
 
 定时任务执行阶段负责**执行插件定义的定时任务**：
 
@@ -126,10 +150,16 @@ Discover → Install → Enable → Disable → Uninstall
 * 执行具体的定时任务逻辑
 
 > StartCron 由系统统一调度，不可阻塞。
+> 定时任务在插件运行时（`StatusRunning`）才会执行。
 
 ### 转换关系
 
-* Discover → Install → Enable → Disable → Uninstall
+* Discover → Install → Enable → Start → Running
+* Running → Stop → Stopped
+* Stopped → Start → Running
+* Enabled/Stopped → Disable → Disabled
+* Disabled → Enable → Enabled
+* Enabled/Disabled/Running/Stopped → Uninstall → Discovered
 * Upgrade 可在任何状态触发（版本变更时）
 
 ---
@@ -167,9 +197,13 @@ modules/
      │   └── admin_api.go    # 插件管理员类操作路由
      ├── frontend/            # 前端 AMIS JSON
      │   └── *.json
-     ├── admin/               # 插件管理员类操作实现
-     ├── cluster/             # 集群类操作实现
-     ├── mgm/                 # 管理类操作实现
+     ├── controller/          # 控制器（可选）
+     │   └── *.go
+     ├── service/             # 服务层（可选）
+     │   └── *.go
+     ├── admin/               # 插件管理员类操作实现（可选）
+     ├── cluster/             # 集群类操作实现（可选）
+     ├── mgm/                 # 管理类操作实现（可选）
      └── ...                  # 其他业务逻辑
 ```
 
@@ -489,7 +523,7 @@ func (l *PluginLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 插件在代码层面被抽象为一个 **Module**，用于描述插件的能力集合。
 
-Module 只负责“声明”，不负责“执行”。
+Module 只负责"声明"，不负责"执行"。
 
 核心要素包括：
 
@@ -526,6 +560,7 @@ Meta 不参与业务逻辑，仅用于管理与展示。
 * Disable：禁用阶段，撤销运行期能力
 * Uninstall：卸载阶段，清理插件资源（可选）
 * Start：启动阶段，用于启动后台任务。按依赖顺序启动各插件
+* Stop：停止阶段，用于停止后台任务
 * StartCron：启动定时任务，用于执行定时任务逻辑
 
 生命周期方法由系统统一调度，插件不得自行调用。
@@ -541,17 +576,17 @@ Context 是插件访问系统能力的**唯一入口**，用于隔离插件与�
 Context 包含但不限于以下能力入口：
 
 * EventBus 事件总线
-  ```go 
+  ```go
   // 发布事件
   ctx.Bus().Publish(eventbus.Event{
       Type: eventbus.EventLeaderElected,
       Data: any, // 可选的事件数据
   })
-  
+
   // 订阅事件
   elect := ctx.Bus().Subscribe(eventbus.EventLeaderElected)
   lost := ctx.Bus().Subscribe(eventbus.EventLeaderLost)
-  
+
   // 监听多个 channel，根据 channel 的信号启动或停止事件转发
   go func() {
       for {
@@ -668,7 +703,7 @@ API 能力声明用于：
 插件管理器是插件体系的唯一调度者，负责：
 
 * 插件注册
-* 生命周期调度（Install、Upgrade、Enable、Disable、Uninstall、Start、StartCron）
+* 生命周期调度（Install、Upgrade、Enable、Disable、Uninstall、Start、Stop、StartCron）
 * 插件状态管理
 * 插件依赖校验（Dependencies 和 RunAfter）
 * 拓扑排序（按依赖顺序启动插件）
@@ -685,8 +720,10 @@ Manager 不包含具体业务逻辑，仅负责流程与约束。
 
 * Discovered：已发现，未安装
 * Installed：已安装，未启用
-* Enabled：已启用
-* Disabled：已禁用
+* Enabled：已启用（配置级别，插件已启用但未运行）
+* Running：运行中（运行时级别，插件正在运行）
+* Stopped：已停止（运行时级别，插件已停止但仍然是启用状态）
+* Disabled：已禁用（配置级别，插件被禁用）
 
 插件状态由系统维护，插件本身不得修改。
 
@@ -694,11 +731,531 @@ Manager 不包含具体业务逻辑，仅负责流程与约束。
 
 * Discover → Install：插件从已发现状态变为已安装状态
 * Install → Enable：插件从已安装状态变为已启用状态
-* Enable → Disable：插件从已启用状态变为已禁用状态
-* Disable → Enable：插件从已禁用状态变为已启用状态
-* Enabled/Disabled → Uninstall：插件从已启用或已禁用状态变为已发现状态
+* Enable → Start：插件从已启用状态变为运行中状态
+* Running → Stop：插件从运行中状态变为已停止状态
+* Stopped → Start：插件从已停止状态变为运行中状态
+* Enabled/Stopped → Disable：插件从已启用或已停止状态变为已禁用状态
+* Disabled → Enable：插件从已禁用状态变为已启用状态
+* Enabled/Disabled/Running/Stopped → Uninstall：插件从已启用、已禁用、运行中或已停止状态变为已发现状态
 * Upgrade：可在任何状态触发（版本变更时，不改变状态）
 
 ---
- 
- 
+
+## 16. 插件状态详细说明
+
+### 16.1 StatusDiscovered（已发现）
+
+* 插件已注册到系统中，但尚未安装
+* 可以执行 Install 操作
+* 不能执行 Enable、Disable、Start、Stop、Uninstall 操作
+
+### 16.2 StatusInstalled（已安装）
+
+* 插件已完成安装，数据库表已创建，基础数据已初始化
+* 可以执行 Enable、Uninstall 操作
+* 不能执行 Install、Disable、Start、Stop 操作
+
+### 16.3 StatusEnabled（已启用）
+
+* 插件已启用，菜单可见，API 可访问
+* 可以执行 Start、Disable、Uninstall 操作
+* 不能执行 Install、Enable 操作
+* Start 后状态变为 StatusRunning
+
+### 16.4 StatusRunning（运行中）
+
+* 插件正在运行，后台任务已启动
+* 可以执行 Stop、Disable、Uninstall 操作
+* 不能执行 Install、Enable、Start 操作
+* Stop 后状态变为 StatusStopped
+
+### 16.5 StatusStopped（已停止）
+
+* 插件已停止后台任务，但仍然是启用状态
+* 可以执行 Start、Disable、Uninstall 操作
+* 不能执行 Install、Enable、Stop 操作
+* Start 后状态变为 StatusRunning
+
+### 16.6 StatusDisabled（已禁用）
+
+* 插件已禁用，菜单隐藏，API 不可访问
+* 可以执行 Enable、Uninstall 操作
+* 不能执行 Install、Disable、Start、Stop 操作
+* Enable 后状态变为 StatusEnabled
+
+---
+
+## 17. 插件后台任务管理
+
+### 17.1 Start 方法
+
+Start 方法用于启动插件的后台任务：
+
+* 启动非阻塞的后台协程
+* 监听 EventBus 事件
+* 不可阻塞
+
+Start 方法由系统在以下情况调用：
+
+* 系统启动时，按依赖顺序启动已启用的插件
+* 手动调用 StartPlugin API
+
+### 17.2 Stop 方法
+
+Stop 方法用于停止插件的后台任务：
+
+* 停止后台协程
+* 清理资源
+* 不可阻塞
+
+Stop 方法由系统在以下情况调用：
+
+* 手动调用 StopPlugin API
+* 禁用插件时（Disable）
+* 卸载插件时（Uninstall）
+
+### 17.3 后台任务最佳实践
+
+* 使用 context.Context 实现优雅停止
+* 在 Start 方法中保存 context.CancelFunc，在 Stop 方法中调用
+* 后台任务应该监听 context.Done() 信号，及时退出
+* 避免在后台任务中使用阻塞操作
+* 使用 klog.V(6).Infof 打印日志
+
+示例代码：
+
+```go
+type PluginLifecycle struct {
+    cancelStart context.CancelFunc
+}
+
+func (l *PluginLifecycle) Start(ctx plugins.BaseContext) error {
+    klog.V(6).Infof("启动插件后台任务")
+
+    startCtx, cancel := context.WithCancel(context.Background())
+    l.cancelStart = cancel
+
+    go func(meta plugins.Meta) {
+        ticker := time.NewTicker(30 * time.Second)
+        defer ticker.Stop()
+
+        for {
+            select {
+            case <-ticker.C:
+                klog.V(6).Infof("插件后台任务运行中，插件: %s，版本: %s", meta.Name, meta.Version)
+            case <-startCtx.Done():
+                klog.V(6).Infof("插件启动 goroutine 退出")
+                return
+            }
+        }
+    }(ctx.Meta())
+
+    return nil
+}
+
+func (l *PluginLifecycle) Stop(ctx plugins.BaseContext) error {
+    klog.V(6).Infof("停止插件后台任务")
+
+    if l.cancelStart != nil {
+        l.cancelStart()
+        l.cancelStart = nil
+    }
+
+    return nil
+}
+```
+
+---
+
+## 18. 插件定时任务管理
+
+### 18.1 Crons 字段
+
+插件在 metadata 中声明定时任务：
+
+```go
+Crons: []string{
+    "* * * * *",      // 每分钟执行一次
+    "*/2 * * * *",    // 每2分钟执行一次
+}
+```
+
+### 18.2 StartCron 方法
+
+StartCron 方法用于执行定时任务：
+
+* 由系统根据 cron 表达式触发
+* 不可阻塞
+* 每个定时任务独立执行
+
+StartCron 方法由系统在以下情况调用：
+
+* 插件运行时（StatusRunning），根据 cron 表达式触发
+
+### 18.3 定时任务最佳实践
+
+* 避免在 StartCron 中执行耗时操作
+* 使用 goroutine 处理耗时任务
+* 使用 klog.V(6).Infof 打印日志
+* 确保定时任务具有幂等性
+
+示例代码：
+
+```go
+func (l *PluginLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
+    klog.V(6).Infof("执行插件定时任务，表达式: %s", spec)
+
+    go func() {
+        // 执行定时任务逻辑
+    }()
+
+    return nil
+}
+```
+
+---
+
+## 19. 插件依赖管理
+
+### 19.1 Dependencies 字段
+
+插件在 metadata 中声明依赖：
+
+```go
+Dependencies: []string{
+    "plugin1",
+    "plugin2",
+}
+```
+
+### 19.2 依赖检查规则
+
+* 启用插件前，必须确保所有依赖插件均已启用
+* 禁用插件前，必须确保没有其他插件依赖于当前插件
+* 系统启动时会按依赖顺序启动插件（拓扑排序）
+
+### 19.3 RunAfter 字段
+
+插件在 metadata 中声明启动顺序：
+
+```go
+RunAfter: []string{
+    "plugin1",
+    "plugin2",
+}
+```
+
+### 19.4 启动顺序规则
+
+* RunAfter 不表示依赖关系，仅表示启动顺序
+* 插件会在 RunAfter 列表中的插件之后启动
+* 系统启动时会综合考虑 Dependencies 和 RunAfter 进行拓扑排序
+
+---
+
+## 20. 插件路由管理
+
+### 20.1 路由注册时机
+
+* 插件在 Enable 时注册路由
+* 插件在 Disable 时撤销路由
+
+### 20.2 路由分类
+
+* ClusterRouter：集群类操作路由
+* ManagementRouter：管理类操作路由
+* PluginAdminRouter：插件管理员类操作路由
+* RootRouter：根路由（公开 API）
+
+### 20.3 路由访问权限
+
+* ClusterRouter：必须是登录用户
+* ManagementRouter：必须是登录用户
+* PluginAdminRouter：必须是平台管理员
+* RootRouter：无需登录
+
+### 20.4 路由注册示例
+
+```go
+ClusterRouter: func(cluster chi.Router) {
+    g := cluster.Group("/plugins/" + pluginName)
+    g.GET("/items", handler.List)
+    g.POST("/items", handler.Create)
+},
+
+ManagementRouter: func(mgm chi.Router) {
+    g := mgm.Group("/plugins/" + pluginName)
+    g.GET("/config", handler.GetConfig)
+    g.POST("/config", handler.SetConfig)
+},
+
+PluginAdminRouter: func(admin chi.Router) {
+    g := admin.Group("/plugins/" + pluginName)
+    g.GET("/settings", handler.GetSettings)
+    g.POST("/settings", handler.SetSettings)
+},
+```
+
+---
+
+## 21. 插件数据库管理
+
+### 21.1 表名规范
+
+* 表名必须包含插件名前缀
+* 使用下划线分隔单词
+* 示例：`plugin_name_items`
+
+### 21.2 数据库操作
+
+* 使用 GORM 进行数据库操作
+* 使用 AutoMigrate 进行表结构管理
+* 使用 Migrator.DropTable 删除表
+
+### 21.3 数据库操作示例
+
+```go
+type Item struct {
+    ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+    Name        string    `gorm:"size:255;not null" json:"name"`
+    Description string    `gorm:"type:text" json:"description"`
+    CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
+    UpdatedAt   time.Time `json:"updated_at,omitempty"`
+}
+
+func (Item) TableName() string {
+    return "plugin_name_items"
+}
+
+func InitDB() error {
+    return dao.DB().AutoMigrate(&Item{})
+}
+
+func DropDB() error {
+    db := dao.DB()
+    if db.Migrator().HasTable(&Item{}) {
+        return db.Migrator().DropTable(&Item{})
+    }
+    return nil
+}
+```
+
+---
+
+## 22. 插件日志规范
+
+### 22.1 日志级别
+
+* 使用 klog.V(6).Infof 打印日志
+* V(6) 表示日志级别为 6，用于调试和详细日志
+
+### 22.2 日志内容
+
+* 使用中文打印日志
+* 包含插件名称、版本、操作类型
+* 包含错误信息（如果有）
+
+### 22.3 日志示例
+
+```go
+klog.V(6).Infof("安装插件成功: %s", name)
+klog.V(6).Infof("安装插件失败: %s，错误: %v", name, err)
+klog.V(6).Infof("启动插件后台任务，插件: %s，版本: %s", meta.Name, meta.Version)
+```
+
+---
+
+## 23. 插件开发最佳实践
+
+### 23.1 生命周期方法实现
+
+* 确保所有生命周期方法具有幂等性
+* 使用 klog.V(6).Infof 打印日志
+* 返回明确的错误信息
+* 在 Start 方法中使用 context.Context 实现优雅停止
+
+### 23.2 错误处理
+
+* 返回明确的错误信息
+* 使用 klog.V(6).Infof 打印错误日志
+* 避免使用 panic
+
+### 23.3 资源管理
+
+* 在 Start 方法中分配资源
+* 在 Stop 方法中释放资源
+* 使用 defer 确保资源释放
+
+### 23.4 并发安全
+
+* 使用 sync.Mutex 保护共享资源
+* 避免在生命周期方法中使用阻塞操作
+* 使用 goroutine 处理耗时任务
+
+### 23.5 测试
+
+* 编写单元测试
+* 测试生命周期方法的幂等性
+* 测试插件的依赖关系
+
+---
+
+## 24. 插件示例
+
+### 24.1 完整插件示例
+
+```go
+package demo
+
+import (
+    "context"
+    "time"
+
+    "github.com/weibaohui/k8m/pkg/plugins"
+    "github.com/weibaohui/k8m/pkg/plugins/modules/demo/models"
+    "github.com/weibaohui/k8m/pkg/plugins/modules/demo/route"
+    "k8s.io/klog/v2"
+)
+
+var Metadata = plugins.Module{
+    Meta: plugins.Meta{
+        Name:        "demo",
+        Title:       "演示插件",
+        Version:     "1.0.0",
+        Description: "演示插件功能",
+    },
+    Tables: []string{
+        "demo_items",
+    },
+    Crons: []string{
+        "* * * * *",
+    },
+    Menus: []plugins.Menu{
+        {
+            Key:   "plugin_demo_index",
+            Title: "演示插件",
+            Icon:  "fa-solid fa-cube",
+            Order: 1,
+            Children: []plugins.Menu{
+                {
+                    Key:         "plugin_demo_cluster",
+                    Title:       "演示插件Cluster",
+                    Icon:        "fa-solid fa-puzzle-piece",
+                    EventType:   "custom",
+                    CustomEvent: `() => loadJsonPage("/plugins/demo/cluster")`,
+                    Order:       100,
+                },
+            },
+        },
+    },
+    Dependencies: []string{},
+    RunAfter: []string{
+        "leader",
+    },
+    Lifecycle: &DemoLifecycle{},
+    ClusterRouter: route.RegisterClusterRoutes,
+    ManagementRouter: route.RegisterManagementRoutes,
+    PluginAdminRouter: route.RegisterPluginAdminRoutes,
+}
+
+type DemoLifecycle struct {
+    cancelStart context.CancelFunc
+}
+
+func (d *DemoLifecycle) Install(ctx plugins.InstallContext) error {
+    if err := models.InitDB(); err != nil {
+        klog.V(6).Infof("安装Demo插件失败: %v", err)
+        return err
+    }
+    klog.V(6).Infof("安装Demo插件成功")
+    return nil
+}
+
+func (d *DemoLifecycle) Upgrade(ctx plugins.UpgradeContext) error {
+    klog.V(6).Infof("升级Demo插件：从版本 %s 到版本 %s", ctx.FromVersion(), ctx.ToVersion())
+    if err := models.UpgradeDB(ctx.FromVersion(), ctx.ToVersion()); err != nil {
+        return err
+    }
+    return nil
+}
+
+func (d *DemoLifecycle) Enable(ctx plugins.EnableContext) error {
+    klog.V(6).Infof("启用Demo插件")
+    return nil
+}
+
+func (d *DemoLifecycle) Disable(ctx plugins.BaseContext) error {
+    klog.V(6).Infof("禁用Demo插件")
+    return nil
+}
+
+func (d *DemoLifecycle) Uninstall(ctx plugins.UninstallContext) error {
+    klog.V(6).Infof("卸载Demo插件")
+    if !ctx.KeepData() {
+        if err := models.DropDB(); err != nil {
+            return err
+        }
+        klog.V(6).Infof("卸载Demo插件完成，已删除相关表及数据")
+    } else {
+        klog.V(6).Infof("卸载Demo插件完成，保留相关表及数据")
+    }
+    return nil
+}
+
+func (d *DemoLifecycle) Start(ctx plugins.BaseContext) error {
+    klog.V(6).Infof("启动Demo插件后台任务")
+
+    startCtx, cancel := context.WithCancel(context.Background())
+    d.cancelStart = cancel
+
+    go func(meta plugins.Meta) {
+        ticker := time.NewTicker(30 * time.Second)
+        defer ticker.Stop()
+
+        for {
+            select {
+            case <-ticker.C:
+                klog.V(6).Infof("Demo插件后台任务运行中，插件: %s，版本: %s", meta.Name, meta.Version)
+            case <-startCtx.Done():
+                klog.V(6).Infof("Demo 插件启动 goroutine 退出")
+                return
+            }
+        }
+    }(ctx.Meta())
+
+    return nil
+}
+
+func (d *DemoLifecycle) Stop(ctx plugins.BaseContext) error {
+    klog.V(6).Infof("停止Demo插件后台任务")
+
+    if d.cancelStart != nil {
+        d.cancelStart()
+        d.cancelStart = nil
+    }
+
+    return nil
+}
+
+func (d *DemoLifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
+    klog.V(6).Infof("执行Demo插件定时任务，表达式: %s", spec)
+    return nil
+}
+```
+
+---
+
+## 25. 总结
+
+k8m 插件体系是一个完整、可控、可扩展的插件架构，具有以下特点：
+
+1. **完整生命周期管理**：从发现到卸载，支持完整的插件生命周期
+2. **配置与运行分离**：区分配置级别的启用/禁用和运行时级别的运行/停止
+3. **依赖管理**：支持插件依赖声明和启动顺序控制
+4. **权限控制**：通过菜单显示表达式和后端 API 显式校验实现权限控制
+5. **后台任务管理**：支持后台协程和定时任务
+6. **数据库管理**：支持数据库表创建、升级和删除
+7. **路由管理**：支持多种类型的路由注册和权限控制
+8. **事件总线**：支持插件间事件通信
+
+通过遵循本文档的规范，开发者可以创建高质量、可维护、可扩展的插件。
