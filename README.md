@@ -47,10 +47,6 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 - 详细的配置和使用说明请参考[文档](docs/README.md)。
 - 更新日志请参考[更新日志](CHANGELOG.md)。
-- 如需自定义大模型参数、配置私有化大模型，请参考[自托管/自定义大模型支持](docs/use-self-hosted-ai.md)
-  和 [Ollama配置](docs/ollama.md)。
-- 详细的配置选项说明请参考[配置选项说明](docs/config.md)。
-- 数据库配置请参考[数据库配置说明](docs/database.md)。
 - DeepWiki 文档：[开发设计文档](https://deepwiki.com/weibaohui/k8m)
 
 ### 主要特点
@@ -133,66 +129,6 @@ services:
 启动之后，访问`3618`端口，默认用户：`k8m`，默认密码`k8m`。
 如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
 
-## **ChatGPT 配置指南**
-
-### 内置GPT
-
-从v0.0.8版本开始，将内置GPT，无需配置。
-如果您需要使用自己的GPT，请参考以下文档。
-
-- [自托管/自定义大模型支持](docs/use-self-hosted-ai.md) - 如何使用自托管的
-- [Ollama配置](docs/ollama.md) - 如何配置使用Ollama大模型。
-
-### **ChatGPT 状态调试**
-
-如果设置参数后，依然没有效果，请尝试使用`./k8m -v 6`获取更多的调试信息。
-会输出以下信息，通过查看日志，确认是否启用ChatGPT。
-
-```go
-ChatGPT 开启状态:true
-ChatGPT 启用 key:sk-hl**********************************************, url:https: // api.siliconflow.cn/v1
-ChatGPT 使用环境变量中设置的模型:Qwen/Qwen2.5-7B-Instruc
-```
-
-### **ChatGPT 账户**
-
-本项目集成了[github.com/sashabaranov/go-openai](https://github.com/sashabaranov/go-openai)SDK。
-国内访问推荐使用[硅基流动](https://cloud.siliconflow.cn/)的服务。
-登录后，在[https://cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak)创建API_KEY
-
-## **k8m 支持环境变量设置**
-
-k8m 支持通过环境变量和命令行参数灵活配置，主要参数如下：
-
-| 环境变量              | 默认值                   | 说明                                                           |
-| --------------------- | ------------------------ | -------------------------------------------------------------- |
-| `PORT`                | `3618`                   | 监听的端口号                                                   |
-| `KUBECONFIG`          | `~/.kube/config`         | `kubeconfig` 文件路径，会自动扫描识别同级目录下所有的配置文件  |
-| `ANY_SELECT`          | `"true"`                 | 是否开启任意选择划词解释，默认开启 (default true)              |
-| `LOGIN_TYPE`          | `"password"`             | 登录方式（如 `password`, `oauth`, `token`）                    |
-| `ENABLE_TEMP_ADMIN`   | `"false"`                | 是否启用临时管理员账户配置，默认关闭。初次登录、忘记密码时使用 |
-| `ADMIN_USERNAME`      |                          | 管理员用户名，启用临时管理员账户配置后生效                     |
-| `ADMIN_PASSWORD`      |                          | 管理员密码，启用临时管理员账户配置后生效                       |
-| `DEBUG`               | `"false"`                | 是否开启 `debug` 模式                                          |
-| `LOG_V`               | `"2"`                    | log输出日志，同klog用法                                        |
-| `JWT_TOKEN_SECRET`    | `"your-secret-key"`      | 用于 JWT Token 生成的密钥                                      |
-| `KUBECTL_SHELL_IMAGE` | `bitnami/kubectl:latest` | kubectl shell 镜像地址                                         |
-| `NODE_SHELL_IMAGE`    | `alpine:latest`          | Node shell 镜像地址                                            |
-| `IMAGE_PULL_TIMEOUT`  | `30`                     | Node shell、kubectl shell 镜像拉取超时时间（秒）               |
-| `CONNECT_CLUSTER`     | `"false"`                | 启动程序后，是否自动连接发现的集群，默认关闭                   |
-| `PRINT_CONFIG`        | `"false"`                | 是否打印配置信息                                               |
-
-详细参数说明和更多配置方式请参考 [docs/readme.md](docs/README.md)。
-
-这些环境变量可以通过在运行应用程序时设置，例如：
-
-```sh
-export PORT=8080
-export GIN_MODE="release"
-./k8m
-```
-
-其他参数请参考 [docs/readme.md](docs/README.md)。
 
 ## 容器化k8s集群方式运行
 
@@ -225,9 +161,24 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
   默认使用了nodePort开放，请访问31999端口。或自行配置Ingress
   http://NodePortIP:31999
 
-### 修改配置
 
-首选建议通过修改环境变量方式进行修改。 例如增加deploy.yaml中的env参数
+## **ChatGPT 配置指南**
+
+### 内置GPT
+
+从v0.0.8版本开始，将内置GPT，无需配置。
+如果您需要使用自己的GPT，请参考以下文档。
+
+- [自托管/自定义大模型支持](docs/use-self-hosted-ai.md) - 如何使用自托管的
+- [Ollama配置](docs/ollama.md) - 如何配置使用Ollama大模型。
+
+### **ChatGPT 状态调试**
+
+如果设置参数后，依然没有效果，请尝试使用`./k8m -v 6`获取更多的调试信息。
+会输出以下信息，通过查看日志，确认是否启用ChatGPT。
+  
+
+
 
 ## 开发调试
 
