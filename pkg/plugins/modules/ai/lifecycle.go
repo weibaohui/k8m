@@ -43,7 +43,6 @@ func (l *AILifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *AILifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用 AI 插件")
-	api.UnregisterAI()
 	return nil
 }
 

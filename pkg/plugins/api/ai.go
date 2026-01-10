@@ -23,11 +23,11 @@ type AIConfig interface {
 type noopAIChat struct{}
 
 func (noopAIChat) Chat(ctx context.Context, prompt string) (string, error) {
-	return "", nil
+	return "AI插件未开启", nil
 }
 
 func (noopAIChat) ChatNoHistory(ctx context.Context, prompt string) (string, error) {
-	return "", nil
+	return "AI插件未开启", nil
 }
 
 // noopAIConfig 为默认的空实现，提供安全的配置访问。
