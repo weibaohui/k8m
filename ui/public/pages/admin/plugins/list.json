@@ -176,6 +176,7 @@
                         {
                             "type": "dropdown-button",
                             "level": "link",
+                            "trigger": "hover",
                             "buttons": [
                                 {
                                     "type": "button",
@@ -397,6 +398,10 @@
                 }
             ],
             "bulkActions": []
+        },
+        {
+            "type": "container",
+            "body": "<br><br><br><br><br>"
         }
     ]
 }
