@@ -61,9 +61,9 @@ func AIConfigService() AIConfig {
 	return aiConfigVal.Load().(AIConfig)
 }
 
-// EnableAI 在运行期启用或切换 AI 能力实现。
+// RegisterAI 在运行期注册或切换 AI 能力实现。
 // 传入 nil 时自动回退为 noop 实现，保证始终非 nil。
-func EnableAI(chatImpl AIChat, cfgImpl AIConfig) {
+func RegisterAI(chatImpl AIChat, cfgImpl AIConfig) {
 	if chatImpl == nil {
 		chatImpl = noopAIChat{}
 	}
@@ -74,8 +74,8 @@ func EnableAI(chatImpl AIChat, cfgImpl AIConfig) {
 	aiConfigVal.Store(cfgImpl)
 }
 
-// DisableAI 在运行期禁用 AI 能力，实现回退为 noop。
-func DisableAI() {
+// UnregisterAI 在运行期取消注册 AI 能力，实现回退为 noop。
+func UnregisterAI() {
 	aiChatVal.Store(AIChat(noopAIChat{}))
 	aiConfigVal.Store(AIConfig(noopAIConfig{}))
 }

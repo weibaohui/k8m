@@ -220,5 +220,5 @@ func (a *aiConfigAdapter) FloatingWindow() bool {
 
 // RegisterAIAPI 将当前 AI 插件的实现注册到统一访问控制层。
 func RegisterAIAPI() {
-	api.EnableAI(&aiChatAdapter{}, &aiConfigAdapter{})
+	api.RegisterAI(&aiChatAdapter{}, &aiConfigAdapter{})
 }

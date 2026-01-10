@@ -43,7 +43,7 @@ func (l *AILifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *AILifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用 AI 插件")
-	api.DisableAI()
+	api.UnregisterAI()
 	return nil
 }
 
@@ -73,5 +73,6 @@ func (l *AILifecycle) StartCron(ctx plugins.BaseContext, spec string) error {
 
 func (l *AILifecycle) Stop(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("停止 AI 插件后台任务")
+	api.UnregisterAI()
 	return nil
 }
