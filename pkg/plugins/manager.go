@@ -343,8 +343,6 @@ func (m *Manager) SetEngine(e chi.Router) {
 // 返回插件名称列表,按依赖顺序排列(被依赖的插件在前)
 // 同时支持 RunAfter 字段,确保插件在 RunAfter 列表中的插件之后启动
 func (m *Manager) topologicalSort() []string {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
 
 	// 构建入度表和邻接表(仅针对已启用的插件)
 	inDegree := make(map[string]int)
@@ -361,22 +359,30 @@ func (m *Manager) topologicalSort() []string {
 
 	// 构建图和计算入度
 	for _, name := range enabledNames {
+		m.mu.RLock()
 		mod, ok := m.modules[name]
+		m.mu.RUnlock()
 		if !ok {
 			continue
 		}
 		// 处理 Dependencies:强依赖关系
 		for _, dep := range mod.Dependencies {
+			m.mu.RLock()
+			dst := m.status[dep]
+			m.mu.RUnlock()
 			// 只处理已启用的依赖
-			if m.status[dep] == StatusEnabled || m.status[dep] == StatusRunning || m.status[dep] == StatusStopped {
+			if dst == StatusEnabled || dst == StatusRunning || dst == StatusStopped {
 				graph[dep] = append(graph[dep], name)
 				inDegree[name]++
 			}
 		}
 		// 处理 RunAfter:启动顺序约束,必须在指定插件之后启动
 		for _, runAfter := range mod.RunAfter {
+			m.mu.RLock()
+			rst := m.status[runAfter]
+			m.mu.RUnlock()
 			// 只处理已启用的插件
-			if m.status[runAfter] == StatusEnabled || m.status[runAfter] == StatusRunning || m.status[runAfter] == StatusStopped {
+			if rst == StatusEnabled || rst == StatusRunning || rst == StatusStopped {
 				graph[runAfter] = append(graph[runAfter], name)
 				inDegree[name]++
 			}
@@ -452,11 +458,14 @@ func (m *Manager) Start() {
 	//逐个启动插件中定义的cron表达式的定时任务
 	// 同样按依赖顺序注册
 	for _, name := range sortedNames {
+		m.mu.RLock()
 		mod, ok := m.modules[name]
+		st := m.status[name]
+		m.mu.RUnlock()
 		if !ok {
 			continue
 		}
-		if mod.Lifecycle == nil || len(mod.Crons) == 0 || m.status[name] != StatusRunning {
+		if mod.Lifecycle == nil || len(mod.Crons) == 0 || st != StatusRunning {
 			continue
 		}
 		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
