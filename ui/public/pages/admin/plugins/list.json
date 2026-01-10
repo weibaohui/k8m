@@ -28,6 +28,7 @@
                 "bulkActions"
             ],
             "api": "get:/admin/plugin/list",
+            "quickSaveItemApi": "/admin/plugin/toggle/name/${name}/enabled/${enabled}",
             "showIndex": true,
             "columns": [
                 {
@@ -346,6 +347,18 @@
                         "已停止": "<span class='label label-warning'>已停止</span>",
                         "已禁用": "<span class='label label-danger'>已禁用</span>",
                         "未知": "<span class='label label-danger'>未知</span>"
+                    }
+                },
+                {
+                    "name": "enabled",
+                    "label": "启用",
+                    "quickEdit": {
+                        "mode": "inline",
+                        "type": "switch",
+                        "onText": "启用",
+                        "offText": "禁用",
+                        "saveImmediately": true,
+                        "resetOnFailed": true
                     }
                 },
                 {

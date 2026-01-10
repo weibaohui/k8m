@@ -54,6 +54,7 @@ type PluginItemVO struct {
 	CanUpgrade   bool            `json:"canUpgrade,omitempty"`
 	Description  string          `json:"description"`
 	Status       string          `json:"status"`
+	Enabled      bool            `json:"enabled"`
 	Menus        []Menu          `json:"menus,omitempty"`
 	MenuCount    int             `json:"menuCount,omitempty"`
 	CronCount    int             `json:"cronCount,omitempty"`
