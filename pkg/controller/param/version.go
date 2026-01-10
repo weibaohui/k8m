@@ -2,6 +2,7 @@ package param
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
@@ -17,6 +18,10 @@ import (
 // @Router /params/version [get]
 func (pc *Controller) Version(c *response.Context) {
 
+	podName := os.Getenv("POD_NAME")
+	namespace := os.Getenv("POD_NAMESPACE")
+	podIP := os.Getenv("POD_IP")
+
 	cfg := flag.Init()
 	amis.WriteJsonData(c, response.H{
 		"version":   cfg.Version,
@@ -28,5 +33,8 @@ func (pc *Controller) Version(c *response.Context) {
 		"compiler":  runtime.Compiler,
 		"platform":  fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"dbType":    cfg.DBDriver,
+		"podName":   podName,
+		"namespace": namespace,
+		"podIP":     podIP,
 	})
 }
