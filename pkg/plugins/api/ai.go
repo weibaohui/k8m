@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"sync/atomic"
+
+	"k8s.io/klog/v2"
 )
 
 // AIChat 抽象 AI 聊天能力，对调用方隐藏具体插件实现和内部逻辑。
@@ -23,10 +25,12 @@ type AIConfig interface {
 type noopAIChat struct{}
 
 func (noopAIChat) Chat(ctx context.Context, prompt string) (string, error) {
+	klog.V(4).Infof("AI 插件未开启,Chat 方法未执行 ")
 	return "AI插件未开启", nil
 }
 
 func (noopAIChat) ChatNoHistory(ctx context.Context, prompt string) (string, error) {
+	klog.V(4).Infof("AI 插件未开启,ChatNoHistory 方法未执行 ")
 	return "AI插件未开启", nil
 }
 
