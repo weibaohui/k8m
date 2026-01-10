@@ -163,6 +163,18 @@ spec:
           # image: ghcr.io/weibaohui/k8m:v0.26.2
           image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.26.2
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             # 是否开启debug模式
             - name: DEBUG
               value: "false"

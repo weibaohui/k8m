@@ -207,18 +207,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		mgr.RegisterParamRoutes(params)
 	})
 
-	r.Get("/health/ready", response.Adapter(func(c *response.Context) {
-		if !mgr.IsRunning(modules.PluginNameLeader) {
-			c.Status(http.StatusOK)
-			return
-		}
-		if service.LeaderService().IsCurrentLeader() {
-			c.Status(http.StatusOK)
-		} else {
-			c.Status(http.StatusServiceUnavailable)
-		}
-	}))
-
 	r.Route("/k8s/cluster/{cluster}", func(api chi.Router) {
 		cluster_status.RegisterClusterRoutes(api)
 		dynamic.RegisterCRDRoutes(api)

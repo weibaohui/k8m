@@ -3,6 +3,7 @@ package leader
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -80,7 +81,11 @@ func Run(ctx context.Context, cfg Config) error {
 		Callbacks: leaderelection.LeaderCallbacks{
 			// 成为Leader
 			OnStartedLeading: func(c context.Context) {
-				klog.V(6).Infof("开始作为Leader运行")
+				podName := os.Getenv("POD_NAME")
+				namespace := os.Getenv("POD_NAMESPACE")
+				podIP := os.Getenv("POD_IP")
+				klog.V(6).Infof("开始作为Leader运行,Leader身份: %s/%s(%s)", namespace, podName, podIP)
+
 				if cfg.OnStartedLeading != nil {
 					cfg.OnStartedLeading(c)
 				}
