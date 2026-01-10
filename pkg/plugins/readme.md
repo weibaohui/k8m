@@ -65,7 +65,7 @@ Discover → Install → Enable → Start → Running
 
 插件在系统中具备以下状态：
 
-#### StatusDiscovered（已发现）
+#### StatusUninstalled（未安装）
 * 插件在编译期通过 Go 注册，系统启动时完成元信息加载
 * 可执行：Install
 * 不可执行：Enable、Disable、Start、Stop、Uninstall
@@ -100,7 +100,7 @@ Discover → Install → Enable → Start → Running
 #### Install（安装）
 * **职责**：创建数据库表、初始化基础数据、注册权限模型
 * **特性**：只执行一次，必须具有幂等性
-* **状态变化**：Discovered → Installed
+* **状态变化**：Uninstalled → Installed
 
 #### Upgrade（升级）
 * **职责**：执行数据库迁移（表结构变更、数据迁移）、权限模型更新、版本兼容性处理
@@ -137,7 +137,7 @@ Discover → Install → Enable → Start → Running
 #### Uninstall（卸载）
 * **职责**：根据 keepData 参数决定是否删除数据库表和数据、清理插件注册信息
 * **特性**：自动停止后台任务（如正在运行），支持保留数据选项
-* **状态变化**：Enabled/Disabled/Running/Stopped → Discovered
+* **状态变化**：Enabled/Disabled/Running/Stopped → Uninstalled
 
 ---
 
@@ -386,7 +386,7 @@ func UpgradeDB(fromVersion string, toVersion string) error {
 * 使用 GORM Migrator.DropTable 删除所有相关表
 * 删除所有相关数据
 * 清理插件注册信息
-* 插件状态变为 Discovered，可再次安装
+* 插件状态变为 Uninstalled，可再次安装
 
 示例代码：
 
@@ -424,7 +424,7 @@ func (l *PluginLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 
 * 不删除表和数据
 * 只清理插件注册信息
-* 插件状态变为 Discovered，可再次安装
+* 插件状态变为 Uninstalled，可再次安装
 * 再次安装时，数据仍然存在
 
 示例代码：
