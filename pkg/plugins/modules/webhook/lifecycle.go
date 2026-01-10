@@ -3,6 +3,7 @@ package webhook
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/api"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/service"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
 	"k8s.io/klog/v2"
 )
@@ -55,8 +56,8 @@ func (w *WebhookLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 }
 
 func (w *WebhookLifecycle) Start(ctx plugins.BaseContext) error {
-	RegisterAllAdapters()
-	api.RegisterWebhook(webhookAPIService{})
+	service.RegisterAllAdapters()
+	service.RegisterWebhookAPI()
 	klog.V(6).Infof("启动Webhook插件成功")
 	return nil
 }

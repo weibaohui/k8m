@@ -1,4 +1,4 @@
-package webhook
+package service
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
@@ -9,27 +9,9 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type SendResult = core.SendResult
-type WebhookConfig = core.WebhookConfig
-type PlatformAdapter = core.PlatformAdapter
-
-var (
-	ErrInvalidPlatform = core.ErrInvalidPlatform
-	ErrInvalidURL      = core.ErrInvalidURL
-	ErrSenderNotFound  = core.ErrSenderNotFound
-	ErrSendFailed      = core.ErrSendFailed
-	ErrInvalidConfig   = core.ErrInvalidConfig
-)
-
 func RegisterAllAdapters() { core.RegisterAllAdapters() }
-func RegisterAdapter(platform string, adapter PlatformAdapter) {
+func RegisterAdapter(platform string, adapter core.PlatformAdapter) {
 	core.RegisterAdapter(platform, adapter)
-}
-func GetAdapter(platform string) (PlatformAdapter, error) { return core.GetAdapter(platform) }
-func GetRegisteredPlatforms() []string                    { return core.GetRegisteredPlatforms() }
-
-func NewWebhookConfig(receiver *models.WebhookReceiver) *WebhookConfig {
-	return core.NewWebhookConfig(receiver)
 }
 
 type webhookAPIService struct{}
@@ -74,4 +56,9 @@ func toAPISendResults(results []*core.SendResult) []*api.SendResult {
 		out = append(out, toAPISendResult(r))
 	}
 	return out
+}
+
+// RegisterWebhookAPI 将当前 Webhook 插件的实现注册到统一访问控制层。
+func RegisterWebhookAPI() {
+	api.RegisterWebhook(&webhookAPIService{})
 }
