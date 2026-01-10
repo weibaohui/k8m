@@ -32,45 +32,6 @@ func NewWebhookConfig(receiver *models.WebhookReceiver) *WebhookConfig {
 	return core.NewWebhookConfig(receiver)
 }
 
-func PushMsgToSingleTarget(msg string, raw string, receiver *models.WebhookReceiver) *SendResult {
-	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
-		klog.V(4).Infof("webhook 插件已禁用，跳过向单个接收者发送消息 %s", receiver.Name)
-		return nil
-	}
-	return core.PushMsgToSingleTarget(msg, raw, receiver)
-}
-
-func PushMsgToAllTargets(msg string, raw string, receivers []*models.WebhookReceiver) []*SendResult {
-	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
-		klog.V(4).Infof("webhook 插件已禁用，跳过向 %d 个接收者发送消息", len(receivers))
-		return nil
-	}
-
-	return core.PushMsgToAllTargets(msg, raw, receivers)
-}
-
-func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*SendResult {
-	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
-		klog.V(4).Infof("webhook 插件已禁用，跳过向 %d 个接收者发送消息", len(receiverIDs))
-		return nil
-	}
-
-	return core.PushMsgToAllTargetByIDs(msg, raw, receiverIDs)
-}
-
-func GetNamesByIds(ids []string) ([]string, error) {
-	// 检查插件是否已启用
-	if !plugins.ManagerInstance().IsRunning(modules.PluginNameWebhook) {
-		klog.V(4).Info("webhook 插件已禁用，返回空列表")
-		return []string{}, nil
-	}
-	webhookReceiver := models.WebhookReceiver{}
-	return webhookReceiver.GetNamesByIds(ids)
-}
-
 type webhookAPIService struct{}
 
 // PushMsgToAllTargetByIDs 中文函数注释：向指定接收者ID列表批量推送消息（统一访问层实现）。

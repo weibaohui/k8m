@@ -44,6 +44,16 @@ func WebhookService() Webhook {
 	return webhookVal.Load().(*webhookHolder).svc
 }
 
+// PushMsgToAllTargetByIDs 中文函数注释：向指定接收者ID列表批量推送消息（统一访问层便捷方法）。
+func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*SendResult {
+	return WebhookService().PushMsgToAllTargetByIDs(msg, raw, receiverIDs)
+}
+
+// GetNamesByIds 中文函数注释：根据接收者ID列表查询名称列表（统一访问层便捷方法）。
+func GetNamesByIds(ids []string) ([]string, error) {
+	return WebhookService().GetNamesByIds(ids)
+}
+
 // RegisterWebhook 中文函数注释：在运行期注册或切换 Webhook 能力实现。
 func RegisterWebhook(svc Webhook) {
 	if svc == nil {
@@ -56,4 +66,3 @@ func RegisterWebhook(svc Webhook) {
 func UnregisterWebhook() {
 	webhookVal.Store(&webhookHolder{svc: noopWebhook{}})
 }
-
