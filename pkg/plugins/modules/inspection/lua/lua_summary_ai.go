@@ -9,8 +9,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -205,8 +205,9 @@ func (s *ScheduleBackground) generateAISummary(ctx context.Context, msg *Summary
 		`
 	prompt = fmt.Sprintf(prompt, customTemplate, utils.ToJSONCompact(msg))
 
-	// TODO 跨插件调用不好， 后续优化
-	summary, err := service.GetChatService().ChatWithCtxNoHistory(ctx, prompt)
+	// 使用统一 AI 能力接口，避免跨插件直接依赖实现
+	ai := api.AIChatService()
+	summary, err := ai.ChatNoHistory(ctx, prompt)
 	if err != nil {
 		return "", fmt.Errorf("AI汇总请求失败: %v", err)
 	}

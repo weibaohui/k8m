@@ -87,10 +87,8 @@ func (cc *Controller) Detail(c *response.Context) {
 		q := fmt.Sprintf("请翻译下面的语句，注意直接给出翻译内容，不要解释。待翻译内如如下：\n\n%s", detail.Description)
 		ctxInst := amis.GetContextWithUser(c)
 		ai := api.AIChatService()
-		if ai != nil {
-			if result, err := ai.Chat(ctxInst, q); err == nil {
-				detail.Translate = result
-			}
+		if result, err := ai.Chat(ctxInst, q); err == nil {
+			detail.Translate = result
 		}
 	}
 

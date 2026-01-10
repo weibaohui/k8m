@@ -22,17 +22,9 @@ func (pc *Controller) Config(c *response.Context) {
 	s := ""
 	switch key {
 	case "AnySelect":
-		if cfgSvc := api.AIConfigService(); cfgSvc != nil {
-			s = fmt.Sprintf("%v", cfgSvc.AnySelect())
-		} else {
-			s = "false"
-		}
+		s = fmt.Sprintf("%v", api.AIConfigService().AnySelect())
 	case "FloatingWindow":
-		if cfgSvc := api.AIConfigService(); cfgSvc != nil {
-			s = fmt.Sprintf("%v", cfgSvc.FloatingWindow())
-		} else {
-			s = "false"
-		}
+		s = fmt.Sprintf("%v", api.AIConfigService().FloatingWindow())
 	case "ProductName":
 		s = fmt.Sprintf("%v", cfg.ProductName)
 	}

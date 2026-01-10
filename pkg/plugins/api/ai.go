@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"sync"
+	"sync/atomic"
 )
 
 // AIChat 抽象 AI 聊天能力，对调用方隐藏具体插件实现和内部逻辑。
@@ -19,36 +19,63 @@ type AIConfig interface {
 	FloatingWindow() bool
 }
 
+// noopAIChat 为默认的空实现，保证在未注册真实实现时也不会产生空指针。
+type noopAIChat struct{}
+
+func (noopAIChat) Chat(ctx context.Context, prompt string) (string, error) {
+	return "", nil
+}
+
+func (noopAIChat) ChatNoHistory(ctx context.Context, prompt string) (string, error) {
+	return "", nil
+}
+
+// noopAIConfig 为默认的空实现，提供安全的配置访问。
+type noopAIConfig struct{}
+
+func (noopAIConfig) AnySelect() bool {
+	return false
+}
+
+func (noopAIConfig) FloatingWindow() bool {
+	return false
+}
+
 var (
-	aiChatImpl   AIChat
-	aiConfigImpl AIConfig
-	aiMu         sync.RWMutex
+	aiChatVal   atomic.Value // 保存 AIChat 实现，始终为非 nil
+	aiConfigVal atomic.Value // 保存 AIConfig 实现，始终为非 nil
 )
 
-// RegisterAIChat 由 AI 插件在生命周期中调用，用于注册聊天能力实现。
-func RegisterAIChat(impl AIChat) {
-	aiMu.Lock()
-	defer aiMu.Unlock()
-	aiChatImpl = impl
+func init() {
+	aiChatVal.Store(AIChat(noopAIChat{}))
+	aiConfigVal.Store(AIConfig(noopAIConfig{}))
 }
 
-// RegisterAIConfig 由 AI 插件在生命周期中调用，用于注册配置视图实现。
-func RegisterAIConfig(impl AIConfig) {
-	aiMu.Lock()
-	defer aiMu.Unlock()
-	aiConfigImpl = impl
-}
-
-// AIChatService 返回已注册的 AIChat 实现，未注册时返回 nil。
+// AIChatService 返回当前生效的 AIChat 实现，始终非 nil。
 func AIChatService() AIChat {
-	aiMu.RLock()
-	defer aiMu.RUnlock()
-	return aiChatImpl
+	return aiChatVal.Load().(AIChat)
 }
 
-// AIConfigService 返回已注册的 AIConfig 实现，未注册时返回 nil。
+// AIConfigService 返回当前生效的 AIConfig 实现，始终非 nil。
 func AIConfigService() AIConfig {
-	aiMu.RLock()
-	defer aiMu.RUnlock()
-	return aiConfigImpl
+	return aiConfigVal.Load().(AIConfig)
+}
+
+// EnableAI 在运行期启用或切换 AI 能力实现。
+// 传入 nil 时自动回退为 noop 实现，保证始终非 nil。
+func EnableAI(chatImpl AIChat, cfgImpl AIConfig) {
+	if chatImpl == nil {
+		chatImpl = noopAIChat{}
+	}
+	if cfgImpl == nil {
+		cfgImpl = noopAIConfig{}
+	}
+	aiChatVal.Store(chatImpl)
+	aiConfigVal.Store(cfgImpl)
+}
+
+// DisableAI 在运行期禁用 AI 能力，实现回退为 noop。
+func DisableAI() {
+	aiChatVal.Store(AIChat(noopAIChat{}))
+	aiConfigVal.Store(AIConfig(noopAIConfig{}))
 }

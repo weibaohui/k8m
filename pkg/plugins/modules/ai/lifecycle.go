@@ -2,6 +2,7 @@ package ai
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"k8s.io/klog/v2"
@@ -42,6 +43,7 @@ func (l *AILifecycle) Enable(ctx plugins.EnableContext) error {
 
 func (l *AILifecycle) Disable(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("禁用 AI 插件")
+	api.DisableAI()
 	return nil
 }
 
