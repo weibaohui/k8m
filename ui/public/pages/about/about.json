@@ -14,6 +14,11 @@
           "initApi": "/params/version",
           "controls": [
             {
+              "type": "divider",
+              "title": "程序基本信息",
+              "titlePosition": "center"
+            },
+            {
               "type": "static",
               "name": "version",
               "label": "版本号",
@@ -68,21 +73,26 @@
               "disabled": true
             },
             {
+              "type": "divider",
+              "title": "容器运行信息",
+              "titlePosition": "center"
+            },
+            {
               "type": "text",
               "name": "podName",
-              "label": "容器实例Pod名称",
+              "label": "Pod名称",
               "disabled": true
             },
             {
               "type": "text",
               "name": "namespace",
-              "label": "容器实例命名空间",
+              "label": "命名空间",
               "disabled": true
             },
             {
               "type": "text",
               "name": "podIP",
-              "label": "容器实例Pod IP",
+              "label": "Pod IP",
               "disabled": true
             }
           ]
