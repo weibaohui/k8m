@@ -1,6 +1,10 @@
 package api
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+
+	"k8s.io/klog/v2"
+)
 
 // SendResult 抽象 webhook 发送结果，避免调用方依赖具体 webhook 插件实现。
 type SendResult struct {
@@ -22,10 +26,12 @@ type Webhook interface {
 type noopWebhook struct{}
 
 func (noopWebhook) PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*SendResult {
+	klog.V(4).Infof("Webhook 插件未开启,PushMsgToAllTargetByID 方法未执行 ")
 	return nil
 }
 
 func (noopWebhook) GetNamesByIds(ids []string) ([]string, error) {
+	klog.V(4).Infof("Webhook 插件未开启,GetNamesById 方法未执行")
 	return []string{}, nil
 }
 
@@ -35,23 +41,8 @@ type webhookHolder struct {
 	svc Webhook
 }
 
-func init() {
+func initWebhookNoop() {
 	webhookVal.Store(&webhookHolder{svc: noopWebhook{}})
-}
-
-// WebhookService 中文函数注释：返回当前生效的 Webhook 实现，始终非 nil。
-func WebhookService() Webhook {
-	return webhookVal.Load().(*webhookHolder).svc
-}
-
-// PushMsgToAllTargetByIDs 中文函数注释：向指定接收者ID列表批量推送消息（统一访问层便捷方法）。
-func PushMsgToAllTargetByIDs(msg string, raw string, receiverIDs []string) []*SendResult {
-	return WebhookService().PushMsgToAllTargetByIDs(msg, raw, receiverIDs)
-}
-
-// GetNamesByIds 中文函数注释：根据接收者ID列表查询名称列表（统一访问层便捷方法）。
-func GetNamesByIds(ids []string) ([]string, error) {
-	return WebhookService().GetNamesByIds(ids)
 }
 
 // RegisterWebhook 中文函数注释：在运行期注册或切换 Webhook 能力实现。

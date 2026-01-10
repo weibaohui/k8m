@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/robfig/cron/v3"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/eventbus"
 	"k8s.io/klog/v2"
 )
@@ -35,6 +36,7 @@ var (
 func ManagerInstance() *Manager {
 	managerOnce.Do(func() {
 		managerInstance = newManager()
+		api.InitNoopService()
 	})
 	return managerInstance
 }
