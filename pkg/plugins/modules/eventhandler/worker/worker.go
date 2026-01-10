@@ -15,7 +15,6 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 
-	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
 )
 
@@ -288,7 +287,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 		}
 	}
 
-	results := webhook.PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
+	results := api.WebhookService().PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
 
 	allFailed := true
 	for _, r := range results {

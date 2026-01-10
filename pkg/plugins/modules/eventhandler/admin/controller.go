@@ -8,11 +8,11 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/response"
 
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/worker"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"gorm.io/gorm"
 )
 
@@ -96,7 +96,7 @@ func (s *Controller) Save(c *response.Context) {
 	}
 
 	// 保存webhookNames
-	names, err := webhook.GetNamesByIds(strings.Split(m.Webhooks, ","))
+	names, err := api.WebhookService().GetNamesByIds(strings.Split(m.Webhooks, ","))
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
