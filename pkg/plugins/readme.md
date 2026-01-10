@@ -269,7 +269,9 @@ modules/
 
 菜单仅在插件 **Enable** 后可见。
 
-> 注意：Show 表达式是菜单的显示权限。后端 API 业务逻辑需调用 service.AuthService().EnsureUserIsPlatformAdmin(*gin.Context) 等方法进行显式权限校验，后端 API 的权限校验不能依赖此表达式。
+> Show 表达式是菜单的显示权限。
+> 所有请求后端 API(包括 /,/k8s/cluster/，/mgm/)，插件系统已注入登录校验。
+> /admin/ 开头的后端 API 是平台管理员类操作，要求访问用户必须是平台管理员角色（platform_admin），插件系统已注入登录校验、角色校验。其他校验需要自行实现。
 
 ---
 
@@ -315,14 +317,13 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 * 适用场景：对整个平台进行操作的插件，如分布式功能
 * 特点：无法获取到集群 ID
 
-### 9.4 公开 API（RootRouter）
+### 9.4 根路由 API（RootRouter）
 
 * 访问路径：`/xxxx`
-* 权限要求：无需登录即可访问
+* 权限要求：必须是登录用户
 * 适用场景：公开的 API 接口
 * 特点：一般不建议使用，如需使用要特别注意注册路由的正确性
 
-> 后端 API 的权限校验不能依赖菜单的 Show 表达式，必须在业务逻辑中显式调用权限校验方法。
 
 ---
 
@@ -333,17 +334,16 @@ AMIS JSON 仅用于描述界面结构，不参与权限决策。
 * 路径以 `/k8s/cluster/<cluster-id>/plugins/<plugin-name>/` 开头（集群类操作）
 * 路径以 `/mgm/plugins/<plugin-name>/` 开头（管理类操作）
 * 路径以 `/admin/plugins/<plugin-name>/` 开头（平台管理员类操作）
-* 路径以 `/` 开头（公开 API，一般不建议使用）
+* 路径以 `/` 开头（根路由 API，一般不建议使用）
 * API 在 Enable 阶段注册
 * API 在 Disable 阶段不可访问
-* 插件 API 不允许绕过统一鉴权与审计体系
 
 插件通过以下路由注册回调定义 API：
 
 * ClusterRouter：注册集群类操作路由
 * ManagementRouter：注册管理类操作路由
 * PluginAdminRouter：注册插件管理员类操作路由
-* RootRouter：注册根路由（公开 API）
+* RootRouter：注册根路由（根路由 API）
 
 路由注册示例：
 
@@ -635,8 +635,7 @@ Context 包含但不限于以下能力入口：
   * `isUserInGroup('group')`：判断用户是否在指定组
 
 菜单仅在插件 Enable 后生效。
-
-> 注意：Show 表达式是菜单的显示权限。后端 API 业务逻辑需调用 service.AuthService().EnsureUserIsPlatformAdmin(*gin.Context) 等方法进行显式权限校验，后端 API 的权限校验不能依赖此表达式。
+ 
 
 ---
 
@@ -663,10 +662,7 @@ Context 包含但不限于以下能力入口：
   * `isPlatformAdmin()`：判断是否为平台管理员
   * `isUserHasRole('role')`：判断用户是否有指定角色（guest/platform_admin）
   * `isUserInGroup('group')`：判断用户是否在指定组
-
-* 后端 API 权限：在业务逻辑中显式调用权限校验方法
-  * `service.AuthService().EnsureUserIsPlatformAdmin(*gin.Context)`：确保用户是平台管理员
-  * 其他自定义权限校验方法
+ 
 
 权限在插件启用时生效，禁用时不删除权限定义。
 
