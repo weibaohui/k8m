@@ -60,6 +60,7 @@ func (l *AILifecycle) Start(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("启动 AI 插件后台任务")
 	klog.V(6).Infof("更新 AI 插件 运行配置")
 	service.AIService().UpdateFlagFromAIRunConfig()
+	service.RegisterAIAPI()
 	return nil
 }
 
