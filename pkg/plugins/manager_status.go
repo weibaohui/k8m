@@ -4,8 +4,8 @@ package plugins
 type Status int
 
 const (
-	// StatusDiscovered 已发现
-	StatusDiscovered Status = iota
+	// StatusUninstalled 未安装
+	StatusUninstalled Status = iota
 	// StatusInstalled 已安装未启用
 	StatusInstalled
 	// StatusEnabled 已启用（配置级别，插件已启用但未运行）
@@ -21,8 +21,8 @@ const (
 // statusToCN 状态转中文字符串
 func statusToCN(s Status) string {
 	switch s {
-	case StatusDiscovered:
-		return "已发现"
+	case StatusUninstalled:
+		return "未安装"
 	case StatusInstalled:
 		return "已安装"
 	case StatusEnabled:
@@ -41,8 +41,8 @@ func statusToCN(s Status) string {
 // statusToString 状态转字符串
 func statusToString(s Status) string {
 	switch s {
-	case StatusDiscovered:
-		return "discovered"
+	case StatusUninstalled:
+		return "uninstalled"
 	case StatusInstalled:
 		return "installed"
 	case StatusEnabled:
@@ -61,8 +61,8 @@ func statusToString(s Status) string {
 // statusFromString 字符串转状态
 func statusFromString(s string) Status {
 	switch s {
-	case "discovered":
-		return StatusDiscovered
+	case "uninstalled":
+		return StatusUninstalled
 	case "installed":
 		return StatusInstalled
 	case "enabled":
@@ -74,6 +74,6 @@ func statusFromString(s string) Status {
 	case "disabled":
 		return StatusDisabled
 	default:
-		return StatusDiscovered
+		return StatusUninstalled
 	}
 }

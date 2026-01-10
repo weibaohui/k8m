@@ -77,7 +77,7 @@ func (m *Manager) Register(module Module) error {
 	}
 	m.mu.Lock()
 	m.modules[name] = module
-	m.status[name] = StatusDiscovered
+	m.status[name] = StatusUninstalled
 	m.mu.Unlock()
 	klog.V(6).Infof("注册插件: %s（版本: %s）", module.Meta.Name, module.Meta.Version)
 	return nil
@@ -236,7 +236,7 @@ func (m *Manager) Uninstall(name string, keepData bool) error {
 		}
 	}
 	m.mu.Lock()
-	m.status[name] = StatusDiscovered
+	m.status[name] = StatusUninstalled
 	m.mu.Unlock()
 	klog.V(6).Infof("卸载插件成功: %s", name)
 	return nil

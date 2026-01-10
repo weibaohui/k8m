@@ -27,6 +27,9 @@ func (m *Manager) RegisterAdminRoutes(r chi.Router) {
 	// 列出所有已注册插件的Meta和状态
 	r.Get("/plugin/list", response.Adapter(m.ListPlugins))
 
+	// 快捷启用/禁用插件（用于列表页面的开关）
+	r.Post("/plugin/toggle/name/{name}/enabled/{enabled}", response.Adapter(m.TogglePluginEnabled))
+
 	// 安装插件
 	r.Post("/plugin/install/{name}", response.Adapter(m.InstallPlugin))
 	// 启用插件
@@ -90,6 +93,8 @@ func (m *Manager) ListPlugins(c *response.Context) {
 		status := statusFromString(statusStr)
 		dbVer := cfgVerMap[name]
 		canUpgrade := statusStr != "discovered" && utils.CompareVersions(mod.Meta.Version, dbVer)
+		// Enabled: 已启用、运行中、已停止 状态表示插件已启用
+		enabled := status == StatusEnabled || status == StatusRunning || status == StatusStopped
 		items = append(items, PluginItemVO{
 			Name:         mod.Meta.Name,
 			Title:        mod.Meta.Title,
@@ -98,6 +103,7 @@ func (m *Manager) ListPlugins(c *response.Context) {
 			CanUpgrade:   canUpgrade,
 			Description:  mod.Meta.Description,
 			Status:       statusToCN(status),
+			Enabled:      enabled,
 			Menus:        mod.Menus,
 			MenuCount:    countMenusRecursive(mod.Menus),
 			CronCount:    len(mod.Crons),
@@ -341,7 +347,7 @@ func (m *Manager) UninstallPlugin(c *response.Context) {
 		return
 	}
 	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusDiscovered, params); err != nil {
+	if err := m.PersistStatus(name, StatusUninstalled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -359,7 +365,7 @@ func (m *Manager) UninstallPluginKeepData(c *response.Context) {
 		return
 	}
 	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusDiscovered, params); err != nil {
+	if err := m.PersistStatus(name, StatusUninstalled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -604,4 +610,66 @@ func (m *Manager) SetPluginCronEnabled(c *response.Context) {
 	m.RemoveCron(name, spec)
 	klog.V(6).Infof("关闭插件定时任务成功: %s，表达式: %s", name, spec)
 	amis.WriteJsonOK(c)
+}
+
+// TogglePluginEnabled 快捷切换插件启用/禁用状态
+// 路径参数：name 插件名、enabled true/false
+// 行为：enabled=true 则启用插件；enabled=false 则禁用插件
+func (m *Manager) TogglePluginEnabled(c *response.Context) {
+	name := c.Param("name")
+	enabled := c.Param("enabled")
+	if name == "" || enabled == "" {
+		amis.WriteJsonError(c, fmt.Errorf("缺少参数: name/enabled"))
+		return
+	}
+
+	m.mu.RLock()
+	currentStatus := m.status[name]
+	m.mu.RUnlock()
+
+	if enabled == "true" || enabled == "1" || enabled == "yes" {
+		// 启用插件：已安装或已禁用状态可以启用
+		if currentStatus != StatusInstalled && currentStatus != StatusDisabled {
+			amis.WriteJsonError(c, fmt.Errorf("插件当前状态不允许启用: %s", statusToCN(currentStatus)))
+			return
+		}
+		if err := m.Enable(name); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		params := dao.BuildParams(c)
+		if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		klog.V(6).Infof("快捷启用插件成功: %s", name)
+		amis.WriteJsonOKMsg(c, "已启用")
+		return
+	}
+
+	// 禁用插件：如果正在运行，先停止再禁用
+	if currentStatus == StatusRunning {
+		// 先停止插件
+		if err := m.StopPlugin(name); err != nil {
+			amis.WriteJsonError(c, fmt.Errorf("停止插件失败: %w", err))
+			return
+		}
+		klog.V(6).Infof("插件已停止: %s", name)
+	}
+	// 已停止/已启用/运行中 状态可以禁用
+	if currentStatus != StatusStopped && currentStatus != StatusRunning && currentStatus != StatusEnabled {
+		amis.WriteJsonError(c, fmt.Errorf("插件当前状态不允许禁用: %s", statusToCN(currentStatus)))
+		return
+	}
+	if err := m.Disable(name); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	params := dao.BuildParams(c)
+	if err := m.PersistStatus(name, StatusDisabled, params); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+	klog.V(6).Infof("快捷禁用插件成功: %s", name)
+	amis.WriteJsonOKMsg(c, "已禁用")
 }
