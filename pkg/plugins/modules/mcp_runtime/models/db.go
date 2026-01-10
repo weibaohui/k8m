@@ -18,7 +18,7 @@ func InitDB() error {
 		&McpKey{},
 	)
 	if plugins.ManagerInstance().IsRunning(modules.PluginNameK8mMcpServer) {
-		AddInnerMCPServer()
+		addInnerMCPServer()
 	}
 	return err
 }
@@ -59,7 +59,7 @@ func DropDB() error {
 }
 
 // AddInnerMCPServer 检查并初始化名为 "k8m" 的内部 MCP 服务器配置，不存在则创建，已存在则更新其 URL。
-func AddInnerMCPServer() error {
+func addInnerMCPServer() error {
 	// 检查是否存在名为k8m的记录
 	var count int64
 	if err := dao.DB().Model(&MCPServerConfig{}).Where("name = ?", "k8m").Count(&count).Error; err != nil {

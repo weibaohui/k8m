@@ -12,21 +12,17 @@ import (
 
 // Chi 中使用 chi.NewRouter() 创建子路由
 func RegisterPluginAdminRoutes(arg chi.Router) {
-	g := chi.NewRouter()
-
+	prefix := "/plugins/" + modules.PluginNameMCPRuntime
 	serverCtrl := &admin.ServerController{}
-	g.Get("/server/list", response.Adapter(serverCtrl.List))
-	g.Get("/server/connect/{name}", response.Adapter(serverCtrl.Connect))
-	g.Post("/server/delete", response.Adapter(serverCtrl.Delete))
-	g.Post("/server/save", response.Adapter(serverCtrl.Save))
-	g.Post("/server/save/id/{id}/status/{status}", response.Adapter(serverCtrl.QuickSave))
-	g.Get("/server/log/list", response.Adapter(serverCtrl.MCPLogList))
+	arg.Get(prefix+"/server/connect/{name}", response.Adapter(serverCtrl.Connect))
+	arg.Post(prefix+"/server/delete", response.Adapter(serverCtrl.Delete))
+	arg.Post(prefix+"/server/save", response.Adapter(serverCtrl.Save))
+	arg.Post(prefix+"/server/save/id/{id}/status/{status}", response.Adapter(serverCtrl.QuickSave))
+	arg.Get(prefix+"/server/log/list", response.Adapter(serverCtrl.MCPLogList))
 
 	toolCtrl := &admin.ToolController{}
-	g.Get("/tool/server/{name}/list", response.Adapter(toolCtrl.List))
-	g.Post("/tool/save/id/{id}/status/{status}", response.Adapter(toolCtrl.QuickSave))
-
-	arg.Mount("/plugins/"+modules.PluginNameMCPRuntime, g)
+	arg.Get(prefix+"/tool/server/{name}/list", response.Adapter(toolCtrl.List))
+	arg.Post(prefix+"/tool/save/id/{id}/status/{status}", response.Adapter(toolCtrl.QuickSave))
 
 	klog.V(6).Infof("注册 MCP 插件管理路由(admin)")
 }
@@ -35,14 +31,11 @@ func RegisterPluginAdminRoutes(arg chi.Router) {
 
 // Chi 中使用 chi.NewRouter() 创建子路由
 func RegisterPluginMgmRoutes(arg chi.Router) {
-	mgm := chi.NewRouter()
-
+	prefix := "/plugins/" + modules.PluginNameMCPRuntime
 	keyCtrl := &admin.KeyController{}
-	mgm.Get("/user/profile/mcp_keys/list", response.Adapter(keyCtrl.List))
-	mgm.Post("/user/profile/mcp_keys/create", response.Adapter(keyCtrl.Create))
-	mgm.Post("/user/profile/mcp_keys/delete/{id}", response.Adapter(keyCtrl.Delete))
-
-	arg.Mount("/plugins/"+modules.PluginNameMCPRuntime, mgm)
+	arg.Get(prefix+"/user/profile/mcp_keys/list", response.Adapter(keyCtrl.List))
+	arg.Post(prefix+"/user/profile/mcp_keys/create", response.Adapter(keyCtrl.Create))
+	arg.Post(prefix+"/user/profile/mcp_keys/delete/{id}", response.Adapter(keyCtrl.Delete))
 
 	klog.V(6).Infof("注册 MCP 插件管理路由(mgm)")
 }
