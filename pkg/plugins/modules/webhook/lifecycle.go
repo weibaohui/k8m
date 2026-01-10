@@ -2,7 +2,9 @@ package webhook
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/models"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook/service"
 	"k8s.io/klog/v2"
 )
 
@@ -39,7 +41,6 @@ func (w *WebhookLifecycle) Disable(ctx plugins.BaseContext) error {
 
 func (w *WebhookLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	klog.V(6).Infof("开始卸载Webhook插件")
-
 	// 根据keepData参数决定是否删除数据库
 	if !ctx.KeepData() {
 		if err := models.DropDB(); err != nil {
@@ -52,7 +53,8 @@ func (w *WebhookLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 }
 
 func (w *WebhookLifecycle) Start(ctx plugins.BaseContext) error {
-	RegisterAllAdapters()
+	service.RegisterAllAdapters()
+	service.RegisterWebhookAPI()
 	klog.V(6).Infof("启动Webhook插件成功")
 	return nil
 }
@@ -63,5 +65,6 @@ func (w *WebhookLifecycle) StartCron(ctx plugins.BaseContext, spec string) error
 
 func (w *WebhookLifecycle) Stop(ctx plugins.BaseContext) error {
 	klog.V(6).Infof("停止Webhook插件后台任务")
+	api.UnregisterWebhook()
 	return nil
 }

@@ -10,12 +10,11 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/config"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler/models"
 
-	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"k8s.io/klog/v2"
 )
 
@@ -275,7 +274,8 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 `
 			prompt = fmt.Sprintf(prompt, customTemplate, resultRaw)
 
-			aiSummary, err := service.GetChatService().ChatWithCtxNoHistory(w.ctx, prompt)
+			ai := api.AIChatService()
+			aiSummary, err := ai.ChatNoHistory(w.ctx, prompt)
 			if err != nil {
 				klog.V(6).Infof("AI总结失败，回退到字符串拼接: %v", err)
 				summary = summary + "【AI总结失败】"
@@ -287,7 +287,7 @@ func (w *EventWorker) pushWebhookBatchForIDs(cluster string, webhookIDs []string
 		}
 	}
 
-	results := webhook.PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
+	results := api.WebhookService().PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
 
 	allFailed := true
 	for _, r := range results {

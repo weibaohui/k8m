@@ -1,12 +1,14 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/flag"
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/core"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
@@ -53,6 +55,11 @@ func (c *aiService) SetVars(apikey, apiUrl, model string) {
 	c.innerModel = model
 	c.innerApiUrl = apiUrl
 	c.innerApiKey = apikey
+}
+
+// SetBuiltInModel 实现 api.AIInitializer 接口，设置内置 AI 模型的参数。
+func (c *aiService) SetBuiltInModel(apiKey, apiUrl, model string) {
+	c.SetVars(apiKey, apiUrl, model)
 }
 
 func (c *aiService) DefaultClient() (core.IAI, error) {
@@ -192,4 +199,31 @@ func (c *aiService) UpdateFlagFromAIRunConfig() error {
 
 	// 重置默认客户端，使新配置生效
 	return c.ResetDefaultClient()
+}
+
+// aiChatAdapter 实现统一访问层定义的 AIChat 接口，对外隐藏具体实现。
+type aiChatAdapter struct{}
+
+func (a *aiChatAdapter) Chat(ctx context.Context, prompt string) (string, error) {
+	return GetChatService().ChatWithCtx(ctx, prompt)
+}
+
+func (a *aiChatAdapter) ChatNoHistory(ctx context.Context, prompt string) (string, error) {
+	return GetChatService().ChatWithCtxNoHistory(ctx, prompt)
+}
+
+// aiConfigAdapter 实现统一访问层定义的 AIConfig 接口，提供只读配置视图。
+type aiConfigAdapter struct{}
+
+func (a *aiConfigAdapter) AnySelect() bool {
+	return AIService().AnySelect
+}
+
+func (a *aiConfigAdapter) FloatingWindow() bool {
+	return AIService().FloatingWindow
+}
+
+// RegisterAIAPI 将当前 AI 插件的实现注册到统一访问控制层。
+func RegisterAIAPI() {
+	api.RegisterAI(&aiChatAdapter{}, &aiConfigAdapter{})
 }

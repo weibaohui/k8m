@@ -4,8 +4,8 @@ import (
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 	"github.com/weibaohui/k8m/pkg/response"
 
 	"gorm.io/gorm"
@@ -65,7 +65,7 @@ func (r *AdminRecordController) Push(c *response.Context) {
 		return
 	}
 
-	webhook.PushMsgToAllTargetByIDs(summary, resultRaw, receivers)
+	api.WebhookService().PushMsgToAllTargetByIDs(summary, resultRaw, receivers)
 
 	amis.WriteJsonOK(c)
 }

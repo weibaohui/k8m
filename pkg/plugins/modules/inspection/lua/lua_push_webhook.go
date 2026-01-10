@@ -3,8 +3,8 @@ package lua
 import (
 	"fmt"
 
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
 
 	"k8s.io/klog/v2"
 )
@@ -13,7 +13,7 @@ import (
 // 该方法从数据库中获取已生成的AI总结，然后发送到所有关联的webhook
 // 调用时机：在AutoGenerateSummaryIfEnabled()完成后调用
 // 设计原则：单纯的webhook发送功能，不负责AI总结生成
-func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.SendResult, error) {
+func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*api.SendResult, error) {
 
 	// 查询webhooks（通过inspection插件的辅助函数）
 	webhookIDs, err := models.GetWebhookReceiverIDsByRecordID(recordID)
@@ -37,7 +37,7 @@ func (s *ScheduleBackground) PushToHooksByRecordID(recordID uint) ([]*webhook.Se
 		}
 	}
 
-	results := webhook.PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
+	results := api.WebhookService().PushMsgToAllTargetByIDs(summary, resultRaw, webhookIDs)
 
 	return results, nil
 }

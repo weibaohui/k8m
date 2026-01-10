@@ -5,7 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/flag"
-	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
+	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/response"
 )
 
@@ -22,9 +22,9 @@ func (pc *Controller) Config(c *response.Context) {
 	s := ""
 	switch key {
 	case "AnySelect":
-		s = fmt.Sprintf("%v", service.AIService().AnySelect)
+		s = fmt.Sprintf("%v", api.AIConfigService().AnySelect())
 	case "FloatingWindow":
-		s = fmt.Sprintf("%v", service.AIService().FloatingWindow)
+		s = fmt.Sprintf("%v", api.AIConfigService().FloatingWindow())
 	case "ProductName":
 		s = fmt.Sprintf("%v", cfg.ProductName)
 	}

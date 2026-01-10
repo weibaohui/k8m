@@ -85,9 +85,8 @@ func Init() {
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 
-	// 初始化ChatService
+	// 初始化 AI 内置模型参数（通过统一接口）
 	aiService.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
-
 	go func() {
 		// 初始化kom
 		// 先注册回调，后面集群连接后，需要执行回调
