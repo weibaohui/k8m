@@ -208,7 +208,7 @@ modules/
 * **ClusterRouter**：集群类操作路由注册回调（`/k8s/cluster/<cluster-id>/plugins/<plugin-name>/`）
 * **ManagementRouter**：管理类操作路由注册回调（`/mgm/plugins/<plugin-name>/`）
 * **PluginAdminRouter**：平台管理员类操作路由注册回调（`/admin/plugins/<plugin-name>/`）
-* **RootRouter**：根路由注册回调（公开 API，一般不建议使用）
+* **RootRouter**：根路由注册回调（根路由API，一般不建议使用）
 
 ### 6.3 依赖与启动顺序
 
@@ -279,7 +279,7 @@ RunAfter: []string{"leader"},                  // 仅顺序约束
 #### 根路由 API（RootRouter）
 * **访问路径**：`/xxxx`
 * **权限要求**：必须是登录用户
-* **适用场景**：公开的 API 接口
+* **适用场景**：特殊情况需要注册到根路由/下的 API 接口
 * **特点**：一般不建议使用，如需使用要特别注意注册路由的正确性
 
 > **路由注册时机**：API 在 Enable 阶段注册，在 Disable 阶段不可访问
