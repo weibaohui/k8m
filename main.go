@@ -45,8 +45,8 @@ import (
 	"github.com/weibaohui/k8m/pkg/middleware"
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
-	"github.com/weibaohui/k8m/pkg/plugins/api"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	aiService "github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -86,8 +86,7 @@ func Init() {
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
 
 	// 初始化 AI 内置模型参数（通过统一接口）
-	api.AIInitializerService().SetBuiltInModel(InnerApiKey, InnerApiUrl, InnerModel)
-
+	aiService.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
 	go func() {
 		// 初始化kom
 		// 先注册回调，后面集群连接后，需要执行回调
