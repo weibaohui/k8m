@@ -14,6 +14,11 @@
           "initApi": "/params/version",
           "controls": [
             {
+              "type": "divider",
+              "title": "版本信息",
+              "titlePosition": "center"
+            },
+            {
               "type": "static",
               "name": "version",
               "label": "版本号",
@@ -56,6 +61,11 @@
               "disabled": true
             },
             {
+              "type": "divider",
+              "title": "环境信息",
+              "titlePosition": "center"
+            },
+            {
               "type": "text",
               "name": "platform",
               "label": "平台",
@@ -65,6 +75,29 @@
               "type": "text",
               "name": "dbType",
               "label": "数据库类型",
+              "disabled": true
+            },
+            {
+              "type": "divider",
+              "title": "容器信息",
+              "titlePosition": "center"
+            },
+            {
+              "type": "text",
+              "name": "podName",
+              "label": "Pod名称",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "namespace",
+              "label": "命名空间",
+              "disabled": true
+            },
+            {
+              "type": "text",
+              "name": "podIP",
+              "label": "Pod IP",
               "disabled": true
             }
           ]

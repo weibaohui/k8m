@@ -3,10 +3,13 @@ package leader
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/klog/v2"
@@ -41,6 +44,7 @@ func Run(ctx context.Context, cfg Config) error {
 	// 非集群模式：没有指定集群、不是InCluster、也没有本地kubeconfig
 	if !hasCluster {
 		klog.V(6).Infof("无可用的K8s集群，直接作为Leader运行（不进行选举）")
+		_ = patchPodRoleLabel(ctx, clientset, "leader")
 		if cfg.OnStartedLeading != nil {
 			cfg.OnStartedLeading(ctx)
 		}
@@ -80,7 +84,13 @@ func Run(ctx context.Context, cfg Config) error {
 		Callbacks: leaderelection.LeaderCallbacks{
 			// 成为Leader
 			OnStartedLeading: func(c context.Context) {
-				klog.V(6).Infof("开始作为Leader运行")
+				podName := os.Getenv("POD_NAME")
+				namespace := os.Getenv("POD_NAMESPACE")
+				podIP := os.Getenv("POD_IP")
+				klog.V(6).Infof("开始作为Leader运行,Leader身份: %s/%s(%s)", namespace, podName, podIP)
+				if err := patchPodRoleLabel(c, clientset, "leader"); err != nil {
+					klog.Errorf("设置 Pod %s/%s(%s) leader label 失败: %v", namespace, podName, podIP, err)
+				}
 				if cfg.OnStartedLeading != nil {
 					cfg.OnStartedLeading(c)
 				}
@@ -88,6 +98,11 @@ func Run(ctx context.Context, cfg Config) error {
 			// 失去Leader
 			OnStoppedLeading: func() {
 				klog.V(6).Infof("停止作为Leader运行")
+				pctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+				defer cancel()
+				if err := patchPodRoleLabel(pctx, clientset, "follower"); err != nil {
+					klog.Errorf("恢复 follower label 失败: %v", err)
+				}
 				if cfg.OnStoppedLeading != nil {
 					cfg.OnStoppedLeading()
 				}
@@ -105,5 +120,46 @@ func Run(ctx context.Context, cfg Config) error {
 
 	klog.V(6).Infof("开始进行Leader选举（锁=%s/%s）", cfg.Namespace, cfg.LockName)
 	leaderelection.RunOrDie(ctx, leaderelectionCfg)
+	return nil
+}
+func patchPodRoleLabel(
+	ctx context.Context,
+	clientset kubernetes.Interface,
+	role string,
+) error {
+	podName := os.Getenv("POD_NAME")
+	namespace := os.Getenv("POD_NAMESPACE")
+
+	if podName == "" || namespace == "" {
+		return fmt.Errorf("POD_NAME or POD_NAMESPACE not set")
+	}
+
+	patch := fmt.Appendf(nil, `{
+	  "metadata": {
+	    "labels": {
+	      "k8m.io/role": "%s"
+	    }
+	  }
+	}`, role)
+
+	_, err := clientset.CoreV1().
+		Pods(namespace).
+		Patch(
+			ctx,
+			podName,
+			types.MergePatchType,
+			patch,
+			metav1.PatchOptions{},
+		)
+
+	if err != nil {
+		return fmt.Errorf("patch pod label failed: %w", err)
+	}
+
+	klog.V(6).Infof(
+		"patched pod %s/%s label k8m.io/role=%s",
+		namespace, podName, role,
+	)
+
 	return nil
 }
