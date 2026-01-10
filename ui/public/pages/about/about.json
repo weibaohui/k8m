@@ -15,7 +15,7 @@
           "controls": [
             {
               "type": "divider",
-              "title": "程序基本信息",
+              "title": "版本信息",
               "titlePosition": "center"
             },
             {
@@ -61,6 +61,11 @@
               "disabled": true
             },
             {
+              "type": "divider",
+              "title": "环境信息",
+              "titlePosition": "center"
+            },
+            {
               "type": "text",
               "name": "platform",
               "label": "平台",
@@ -74,7 +79,7 @@
             },
             {
               "type": "divider",
-              "title": "容器运行信息",
+              "title": "容器信息",
               "titlePosition": "center"
             },
             {
