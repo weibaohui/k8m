@@ -353,13 +353,11 @@
                     "name": "enabled",
                     "label": "启用",
                     "width": "80px",
-                    "type": "switch",
-                    "onText": "开启",
-                    "offText": "关闭",
-                    "visibleOn": "this.status == '已安装' || this.status == '已启用' || this.status == '运行中' || this.status == '已停止' || this.status == '已禁用'",
                     "quickEdit": {
                         "mode": "inline",
                         "type": "switch",
+                        "onText": "启用",
+                        "offText": "禁用",
                         "saveImmediately": true,
                         "resetOnFailed": true
                     }
