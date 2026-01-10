@@ -92,7 +92,7 @@ func (m *Manager) ListPlugins(c *response.Context) {
 		statusStr := statusToString(m.status[name])
 		status := statusFromString(statusStr)
 		dbVer := cfgVerMap[name]
-		canUpgrade := statusStr != "discovered" && utils.CompareVersions(mod.Meta.Version, dbVer)
+		canUpgrade := statusStr != "uninstalled" && utils.CompareVersions(mod.Meta.Version, dbVer)
 		// Enabled: 已启用、运行中、已停止 状态表示插件已启用
 		enabled := status == StatusEnabled || status == StatusRunning || status == StatusStopped
 		items = append(items, PluginItemVO{
