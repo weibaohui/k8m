@@ -347,7 +347,7 @@ func (m *Manager) UninstallPlugin(c *response.Context) {
 		return
 	}
 	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusDiscovered, params); err != nil {
+	if err := m.PersistStatus(name, StatusUninstalled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -365,7 +365,7 @@ func (m *Manager) UninstallPluginKeepData(c *response.Context) {
 		return
 	}
 	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusDiscovered, params); err != nil {
+	if err := m.PersistStatus(name, StatusUninstalled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

@@ -43,8 +43,8 @@ func (m *Manager) ApplyConfigFromDB() {
 	for name := range m.modules {
 		st, ok := cfgMap[name]
 		if !ok {
-			// 默认标记为已发现，不写入数据库
-			st = StatusDiscovered
+			// 默认标记为未安装，不写入数据库
+			st = StatusUninstalled
 			continue
 		}
 
@@ -58,9 +58,9 @@ func (m *Manager) ApplyConfigFromDB() {
 			m.mu.Lock()
 			m.status[name] = StatusDisabled
 			m.mu.Unlock()
-		case StatusDiscovered:
+		case StatusUninstalled:
 			m.mu.Lock()
-			m.status[name] = StatusDiscovered
+			m.status[name] = StatusUninstalled
 			m.mu.Unlock()
 		}
 	}
