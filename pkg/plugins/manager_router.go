@@ -8,6 +8,7 @@ import (
 )
 
 // RegisterClusterRoutes 某个插件的集群操作相关的路由注册
+// 路径/k8s/cluster/<clusterID>/plugins/<pluginName>/xxx
 func (m *Manager) RegisterClusterRoutes(api chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -26,6 +27,7 @@ func (m *Manager) RegisterClusterRoutes(api chi.Router) {
 }
 
 // RegisterManagementRoutes 某个插件的管理相关的操作的路由注册
+// 路径/mgm/plugins/<pluginName>/yyy
 func (m *Manager) RegisterManagementRoutes(api chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -44,6 +46,7 @@ func (m *Manager) RegisterManagementRoutes(api chi.Router) {
 }
 
 // RegisterPluginAdminRoutes 某个插件的管理相关的操作的路由注册
+// 路径/admin/plugins/<pluginName>/yyy
 func (m *Manager) RegisterPluginAdminRoutes(api chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -62,6 +65,7 @@ func (m *Manager) RegisterPluginAdminRoutes(api chi.Router) {
 }
 
 // RegisterRootRoutes 某个插件的根路由注册
+// 路径 /
 func (m *Manager) RegisterRootRoutes(root chi.Router) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
