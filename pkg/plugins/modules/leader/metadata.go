@@ -9,9 +9,9 @@ import (
 var Metadata = plugins.Module{
 	Meta: plugins.Meta{
 		Name:        modules.PluginNameLeader,
-		Title:       "多实例选举插件",
+		Title:       "多实例主备选举插件",
 		Version:     "1.0.0",
-		Description: "提供多实例自动选举能力：通过 Kubernetes 原生机制完成选主。使用前请务必启用 /health/ready 就绪探针。启用后访问流量会集中到主实例。",
+		Description: "提供多实例自动选举能力：通过 Kubernetes 原生机制完成选主。通过LabelSelector筛选具有k8m.io/role: leader的Pod为访问流量承载Pod。其他Pod不承载访问流量。",
 	},
 	Tables:    []string{},
 	Lifecycle: &LeaderLifecycle{},
