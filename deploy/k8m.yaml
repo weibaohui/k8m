@@ -89,11 +89,8 @@ spec:
       targetPort: 3618
   selector:
     app: k8m
+    k8m.io/role: leader
   type: ClusterIP
-  sessionAffinity: ClientIP
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 86400
 ---
 apiVersion: v1
 kind: Service
@@ -111,11 +108,8 @@ spec:
       nodePort: 31999
   selector:
     app: k8m
+    k8m.io/role: leader
   type: NodePort
-  sessionAffinity: ClientIP
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 86400
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
