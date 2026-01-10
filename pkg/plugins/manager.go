@@ -146,7 +146,8 @@ func (m *Manager) Enable(name string) error {
 			m.mu.RLock()
 			ds := m.status[dep]
 			m.mu.RUnlock()
-			if ds != StatusEnabled {
+			// 依赖的插件必须已启用，在运行中或者已停止
+			if ds != StatusEnabled && ds != StatusRunning && ds != StatusStopped {
 				klog.V(6).Infof("启用插件失败: %s，依赖未启用: %s", name, dep)
 				return fmt.Errorf("依赖插件未启用: %s", dep)
 			}
@@ -181,16 +182,19 @@ func (m *Manager) Disable(name string) error {
 		m.mu.RLock()
 		ost := m.status[otherName]
 		m.mu.RUnlock()
-		if ost != StatusEnabled {
+		// 仅检查已启用、运行中或已停止的插件是否依赖当前插件
+		if ost != StatusEnabled && ost != StatusRunning && ost != StatusStopped {
 			continue
 		}
 		for _, dep := range otherMod.Dependencies {
 			if dep == name {
 				klog.V(6).Infof("禁用插件失败: %s,被插件依赖: %s", name, otherName)
-				return fmt.Errorf("无法禁用插件,插件 %s 依赖于当前插件", otherName)
+				return fmt.Errorf("无法禁用插件,插件 %s 依赖于当前插件,必须先将其禁用", otherName)
 			}
 		}
 	}
+
+	// 如果插件正在运行,需要先停止
 	if st == StatusRunning {
 		if err := m.StopPlugin(name); err != nil {
 			klog.V(6).Infof("禁用插件失败: %s,停止后台任务失败: %v", name, err)
@@ -222,6 +226,7 @@ func (m *Manager) Uninstall(name string, keepData bool) error {
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
+	// 正在运行的插件需要先停止
 	if st == StatusRunning {
 		if err := m.StopPlugin(name); err != nil {
 			klog.V(6).Infof("卸载插件失败: %s，停止后台任务失败: %v", name, err)
@@ -251,6 +256,8 @@ func (m *Manager) StartPlugin(name string) error {
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
+
+	// 仅允许从 Enabled 或 Stopped 状态启动
 	if st != StatusEnabled && st != StatusStopped {
 		return fmt.Errorf("插件状态不允许启动: %s，当前状态: %s", name, statusToCN(st))
 	}
@@ -280,6 +287,7 @@ func (m *Manager) StopPlugin(name string) error {
 	if !ok {
 		return fmt.Errorf("插件未注册: %s", name)
 	}
+	// 仅允许从 Running 状态停止
 	if st != StatusRunning {
 		return fmt.Errorf("插件状态不允许停止: %s，当前状态: %s", name, statusToCN(st))
 	}
@@ -335,8 +343,6 @@ func (m *Manager) SetEngine(e chi.Router) {
 // 返回插件名称列表,按依赖顺序排列(被依赖的插件在前)
 // 同时支持 RunAfter 字段,确保插件在 RunAfter 列表中的插件之后启动
 func (m *Manager) topologicalSort() []string {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
 
 	// 构建入度表和邻接表(仅针对已启用的插件)
 	inDegree := make(map[string]int)
@@ -353,22 +359,30 @@ func (m *Manager) topologicalSort() []string {
 
 	// 构建图和计算入度
 	for _, name := range enabledNames {
+		m.mu.RLock()
 		mod, ok := m.modules[name]
+		m.mu.RUnlock()
 		if !ok {
 			continue
 		}
 		// 处理 Dependencies:强依赖关系
 		for _, dep := range mod.Dependencies {
+			m.mu.RLock()
+			dst := m.status[dep]
+			m.mu.RUnlock()
 			// 只处理已启用的依赖
-			if m.status[dep] == StatusEnabled || m.status[dep] == StatusRunning || m.status[dep] == StatusStopped {
+			if dst == StatusEnabled || dst == StatusRunning || dst == StatusStopped {
 				graph[dep] = append(graph[dep], name)
 				inDegree[name]++
 			}
 		}
 		// 处理 RunAfter:启动顺序约束,必须在指定插件之后启动
 		for _, runAfter := range mod.RunAfter {
+			m.mu.RLock()
+			rst := m.status[runAfter]
+			m.mu.RUnlock()
 			// 只处理已启用的插件
-			if m.status[runAfter] == StatusEnabled || m.status[runAfter] == StatusRunning || m.status[runAfter] == StatusStopped {
+			if rst == StatusEnabled || rst == StatusRunning || rst == StatusStopped {
 				graph[runAfter] = append(graph[runAfter], name)
 				inDegree[name]++
 			}
@@ -444,11 +458,14 @@ func (m *Manager) Start() {
 	//逐个启动插件中定义的cron表达式的定时任务
 	// 同样按依赖顺序注册
 	for _, name := range sortedNames {
+		m.mu.RLock()
 		mod, ok := m.modules[name]
+		st := m.status[name]
+		m.mu.RUnlock()
 		if !ok {
 			continue
 		}
-		if mod.Lifecycle == nil || len(mod.Crons) == 0 || m.status[name] != StatusRunning {
+		if mod.Lifecycle == nil || len(mod.Crons) == 0 || st != StatusRunning {
 			continue
 		}
 		ctx := baseContextImpl{meta: mod.Meta, bus: eventbus.New()}
