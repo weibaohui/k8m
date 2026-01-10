@@ -19,6 +19,12 @@ type AIConfig interface {
 	FloatingWindow() bool
 }
 
+// AIInitializer 提供 AI 插件初始化能力，用于设置内置模型参数。
+type AIInitializer interface {
+	// SetBuiltInModel 设置内置 AI 模型的参数（apiKey, apiUrl, model）
+	SetBuiltInModel(apiKey, apiUrl, model string)
+}
+
 // noopAIChat 为默认的空实现，保证在未注册真实实现时也不会产生空指针。
 type noopAIChat struct{}
 
@@ -42,8 +48,9 @@ func (noopAIConfig) FloatingWindow() bool {
 }
 
 var (
-	aiChatVal   atomic.Value // 保存 AIChat 实现，始终为非 nil
-	aiConfigVal atomic.Value // 保存 AIConfig 实现，始终为非 nil
+	aiChatVal        atomic.Value // 保存 AIChat 实现，始终为非 nil
+	aiConfigVal      atomic.Value // 保存 AIConfig 实现，始终为非 nil
+	aiInitializerVal atomic.Value // 保存 AIInitializer 实现，可能为 noop
 )
 
 type aiChatHolder struct {
@@ -54,9 +61,21 @@ type aiConfigHolder struct {
 	cfg AIConfig
 }
 
+type aiInitializerHolder struct {
+	init AIInitializer
+}
+
+// noopAIInitializer 为默认的空实现。
+type noopAIInitializer struct{}
+
+func (noopAIInitializer) SetBuiltInModel(apiKey, apiUrl, model string) {
+	// 什么都不做
+}
+
 func init() {
 	aiChatVal.Store(&aiChatHolder{chat: noopAIChat{}})
 	aiConfigVal.Store(&aiConfigHolder{cfg: noopAIConfig{}})
+	aiInitializerVal.Store(&aiInitializerHolder{init: noopAIInitializer{}})
 }
 
 // AIChatService 返回当前生效的 AIChat 实现，始终非 nil。
@@ -69,21 +88,31 @@ func AIConfigService() AIConfig {
 	return aiConfigVal.Load().(*aiConfigHolder).cfg
 }
 
+// AIInitializerService 返回当前生效的 AIInitializer 实现，始终非 nil。
+func AIInitializerService() AIInitializer {
+	return aiInitializerVal.Load().(*aiInitializerHolder).init
+}
+
 // RegisterAI 在运行期注册或切换 AI 能力实现。
 // 传入 nil 时自动回退为 noop 实现，保证始终非 nil。
-func RegisterAI(chatImpl AIChat, cfgImpl AIConfig) {
+func RegisterAI(chatImpl AIChat, cfgImpl AIConfig, initImpl AIInitializer) {
 	if chatImpl == nil {
 		chatImpl = noopAIChat{}
 	}
 	if cfgImpl == nil {
 		cfgImpl = noopAIConfig{}
 	}
+	if initImpl == nil {
+		initImpl = noopAIInitializer{}
+	}
 	aiChatVal.Store(&aiChatHolder{chat: chatImpl})
 	aiConfigVal.Store(&aiConfigHolder{cfg: cfgImpl})
+	aiInitializerVal.Store(&aiInitializerHolder{init: initImpl})
 }
 
 // UnregisterAI 在运行期取消注册 AI 能力，实现回退为 noop。
 func UnregisterAI() {
 	aiChatVal.Store(&aiChatHolder{chat: noopAIChat{}})
 	aiConfigVal.Store(&aiConfigHolder{cfg: noopAIConfig{}})
+	aiInitializerVal.Store(&aiInitializerHolder{init: noopAIInitializer{}})
 }

@@ -57,6 +57,11 @@ func (c *aiService) SetVars(apikey, apiUrl, model string) {
 	c.innerApiKey = apikey
 }
 
+// SetBuiltInModel 实现 api.AIInitializer 接口，设置内置 AI 模型的参数。
+func (c *aiService) SetBuiltInModel(apiKey, apiUrl, model string) {
+	c.SetVars(apiKey, apiUrl, model)
+}
+
 func (c *aiService) DefaultClient() (core.IAI, error) {
 	enable := c.IsEnabled()
 	if !enable {
@@ -220,5 +225,5 @@ func (a *aiConfigAdapter) FloatingWindow() bool {
 
 // RegisterAIAPI 将当前 AI 插件的实现注册到统一访问控制层。
 func RegisterAIAPI() {
-	api.RegisterAI(&aiChatAdapter{}, &aiConfigAdapter{})
+	api.RegisterAI(&aiChatAdapter{}, &aiConfigAdapter{}, AIService())
 }
