@@ -61,11 +61,12 @@ func (l *LeaderLifecycle) Start(ctx plugins.BaseContext) error {
 	l.cleanupCancel = cancel
 
 	go func() {
+		//TODO 改为配置项
 		leaderCfg := Config{
 			LockName:      "k8m-leader-lock",
-			LeaseDuration: 60 * time.Second,
-			RenewDeadline: 50 * time.Second,
-			RetryPeriod:   10 * time.Second,
+			LeaseDuration: 30 * time.Second,
+			RenewDeadline: 20 * time.Second,
+			RetryPeriod:   5 * time.Second,
 			OnStartedLeading: func(c context.Context) {
 				klog.V(6).Infof("成为Leader")
 				service.LeaderService().SetCurrentLeader(true)
