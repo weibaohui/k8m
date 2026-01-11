@@ -89,7 +89,7 @@ spec:
       targetPort: 3618
   selector:
     app: k8m
-    #k8m.io/role: leader #启用主备选举插件必须填,否则不会切换。单实例不要加，加了不能正常访问。
+    k8m.io/role: leader #启用主备选举插件必须填,否则不会切换
   type: ClusterIP
 ---
 apiVersion: v1
@@ -108,7 +108,7 @@ spec:
       nodePort: 31999
   selector:
     app: k8m
-    #k8m.io/role: leader #启用主备选举插件必须填,否则不会切换。单实例不要加，加了不能正常访问。
+    k8m.io/role: leader #启用主备选举插件必须填,否则不会切换
   type: NodePort
 ---
 apiVersion: v1
@@ -157,15 +157,15 @@ spec:
           # image: ghcr.io/weibaohui/k8m:v0.26.2
           image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.26.2
           env:
-            - name: POD_NAME   #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
+            - name: POD_NAME   #启用主备选举插件必须填,否则不会切换
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: POD_NAMESPACE  #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
+            - name: POD_NAMESPACE  #启用主备选举插件必须填,否则不会切换
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: POD_IP    #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
+            - name: POD_IP    #启用主备选举插件必须填,否则不会切换
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP

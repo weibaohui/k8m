@@ -161,6 +161,15 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
   默认使用了nodePort开放，请访问31999端口。或自行配置Ingress
   http://NodePortIP:31999
 
+## 生产部署启用主备选举插件，注意事项
+
+- 单实例运行service的定义`不要加` `k8m.io/role: leader` 标签，加了不能正常访问。
+- 多实例运行service的定义`必须加` `k8m.io/role: leader` 标签，否则不会切换。
+- 多实例运行的yaml如下：
+```docker
+kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main/deploy/k8m-ms.yaml
+```
+
 
 ## **ChatGPT 配置指南**
 
