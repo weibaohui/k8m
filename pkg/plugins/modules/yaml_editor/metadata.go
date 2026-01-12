@@ -21,11 +21,11 @@ var Metadata = plugins.Module{
 			Key:   "plugin_yaml_editor_index",
 			Title: "YAML 编辑器",
 			Icon:  "fa-solid fa-code",
-			Order: 40,
+			Order: 2,
 			Children: []plugins.Menu{
 				{
 					Key:         "plugin_yaml_editor_main",
-					Title:       "YAML 应用",
+					Title:       "YAML管理",
 					Icon:        "fa-solid fa-file-code",
 					EventType:   "custom",
 					CustomEvent: `() => loadJsonPage("/plugins/yaml_editor/main")`,
