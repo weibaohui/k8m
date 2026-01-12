@@ -185,15 +185,6 @@
               }
             ]
           }
-        },
-        {
-          "label": "创建",
-          "icon": "fas fa-dharmachakra text-primary",
-          "type": "button",
-          "level": "link",
-          "actionType": "url",
-          "blank": true,
-          "url": "/#/k/${''|selectedClusterBase64}/apply/apply?kind=${kind}"
         }
       ]
     },
