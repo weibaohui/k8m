@@ -243,7 +243,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 }}
                                 data={{ data }}
                                 height='calc(100vh - 100px)'
-                                width='96%'
+                                width='100%'
                             />
                         )}
                     </Splitter.Panel>
