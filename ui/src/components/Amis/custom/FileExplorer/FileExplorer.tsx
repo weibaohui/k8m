@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Splitter } from 'antd';
-import XTermComponent from '@/components/Amis/custom/XTerm';
 import { EventDataNode } from 'antd/es/tree';
 import MonacoEditorWithForm from '@/components/Amis/custom/MonacoEditorWithForm';
 import FileTree, { FileNode } from '@/components/Amis/custom/FileExplorer/components/FileTree';
 import ContextMenu from '@/components/Amis/custom/FileExplorer/components/ContextMenu';
 import ContainerSelector from '@/components/Amis/custom/FileExplorer/components/ContainerSelector';
 import { FileOperations } from '@/components/Amis/custom/FileExplorer/components/FileOperations';
+import XTermComponent from '@/components/Amis/custom/XTerm';
 
 interface FileExplorerProps {
     data: Record<string, any>
@@ -212,7 +212,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 containers={containerOptions}
                                 onContainerChange={setSelectedContainer}
                             />
-                            <span style={{ marginLeft: '8px',fontSize: '12px', color: '#888' }}>
+                            <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}>
                                 鼠标右键管理文件
                             </span>
                             <div style={{ height: 'calc(100vh - 150px)', overflowY: 'auto' }}>
@@ -235,6 +235,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     </Splitter.Panel>
                     <Splitter.Panel  >
                         {selectedContainer && (
+
                             <XTermComponent
                                 url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
                                 params={{
@@ -243,7 +244,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 }}
                                 data={{ data }}
                                 height='calc(100vh - 100px)'
-                                width='96%'
+                                width='100%'
                             />
                         )}
                     </Splitter.Panel>
