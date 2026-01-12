@@ -400,17 +400,44 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                 </div>
             </div>
             <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
-                <Select
-                    style={{ width: 200 }}
-                    value={selectedKind}
-                    onChange={(value) => {
-                        setCurrentPage(1);
-                        setSelectedKind(value);
-                    }}
-                    placeholder="按资源分类筛选"
-                    allowClear
-                    options={resourceTypesList.map(type => ({ label: type, value: type }))}
-                />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', color: '#595959' }}>资源分类：</span>
+                    <span
+                        style={{
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            backgroundColor: selectedKind === '' ? '#1890ff' : '#f0f0f0',
+                            color: selectedKind === '' ? '#fff' : '#262626',
+                            fontSize: '14px'
+                        }}
+                        onClick={() => {
+                            setCurrentPage(1);
+                            setSelectedKind('');
+                        }}
+                    >
+                        全部
+                    </span>
+                    {resourceTypesList.map(type => (
+                        <span
+                            key={type}
+                            style={{
+                                cursor: 'pointer',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                backgroundColor: selectedKind === type ? '#1890ff' : '#f0f0f0',
+                                color: selectedKind === type ? '#fff' : '#262626',
+                                fontSize: '14px'
+                            }}
+                            onClick={() => {
+                                setCurrentPage(1);
+                                setSelectedKind(type);
+                            }}
+                        >
+                            {type}
+                        </span>
+                    ))}
+                </div>
             </div>
             <List
                 dataSource={filteredTemplates}
