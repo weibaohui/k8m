@@ -4,6 +4,12 @@ import "@xterm/xterm/css/xterm.css";
 import { FitAddon } from "@xterm/addon-fit";
 import { AttachAddon } from "@xterm/addon-attach";
 import { formatFinalGetUrl, ProcessK8sUrlWithCluster } from "@/utils/utils.ts";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { Unicode11Addon } from "@xterm/addon-unicode11";
+import { SerializeAddon } from "@xterm/addon-serialize";
+import { WebglAddon } from '@xterm/addon-webgl';
+import { SearchAddon } from "@xterm/addon-search";
+import { ClipboardAddon } from '@xterm/addon-clipboard';
 
 interface XTermTestProps {
     url: string;
@@ -19,7 +25,6 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
     const termRef = useRef<Terminal | null>(null);
     const fitAddonRef = useRef<FitAddon | null>(null);
     const [terminalSize, setTerminalSize] = useState({ cols: 0, rows: 0 });
-    const [lastSentSize, setLastSentSize] = useState({ cols: 0, rows: 0 });
     const fitRafIdRef = useRef<number | null>(null);
 
     // 处理 URL
@@ -35,14 +40,20 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
     const sendResizeMessage = (cols: number, rows: number) => {
         const ws = wsRef.current;
         if (!ws || ws.readyState !== WebSocket.OPEN) {
-            console.warn("WebSocket not ready for resize message");
+            // console.warn("WebSocket not ready for resize message");
             return;
         }
+
+        // 避免发送无效尺寸
+        if (cols <= 0 || rows <= 0) {
+            console.warn(`Ignoring invalid resize message: ${cols}x${rows}`);
+            return;
+        }
+
         console.log(`Sending resize message: ${cols}x${rows}`);
         const size = JSON.stringify({ cols, rows });
         const payload = new TextEncoder().encode("\x01" + size);
         ws.send(payload);
-        setLastSentSize({ cols, rows });
     };
 
     /**
@@ -70,8 +81,15 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
             const availableWidth = viewportEl?.clientWidth ?? containerEl.clientWidth;
             const availableHeight = containerEl.clientHeight;
 
+
             if (availableWidth === 0 || availableHeight === 0) {
                 console.warn("Container size is 0, skipping fit");
+                return;
+            }
+
+            // 如果高度太小（比如小于 50px），可能布局还没准备好，跳过
+            if (availableHeight < 50) {
+                console.warn(`Container height too small (${availableHeight}px), skipping fit to avoid invalid rows`);
                 return;
             }
 
@@ -103,6 +121,13 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
             }
 
             console.log(`fitAddon proposed: ${proposed.cols}x${proposed.rows}`);
+
+            // 如果计算出的 rows 非常小（例如小于 5），可能是误判，进行保护
+            if (proposed.rows < 5) {
+                console.warn(`Proposed rows too small (${proposed.rows}), ignoring to prevent layout collapse`);
+                return;
+            }
+
             if (proposed.cols !== term.cols || proposed.rows !== term.rows) {
                 term.resize(proposed.cols, proposed.rows);
                 return;
@@ -132,6 +157,23 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
         fitAddonRef.current = fitAddon;
         term.loadAddon(fitAddon);
 
+
+
+        const webLinksAddon = new WebLinksAddon();
+        const unicode11Addon = new Unicode11Addon();
+        const serializeAddon = new SerializeAddon();
+        const webglAddon = new WebglAddon();
+        const searchAddon = new SearchAddon();
+        const clipboardAddon = new ClipboardAddon();
+
+        term.loadAddon(fitAddon);
+        term.loadAddon(webLinksAddon);
+        term.loadAddon(unicode11Addon);
+        term.loadAddon(serializeAddon);
+        term.loadAddon(webglAddon);
+        term.loadAddon(searchAddon);
+        term.loadAddon(clipboardAddon);
+
         term.open(terminalRef.current);
 
         // 2. 建立 WebSocket 连接
@@ -148,26 +190,41 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
         const attachAddon = new AttachAddon(ws);
         term.loadAddon(attachAddon);
 
+        // 辅助函数：轮询直到容器尺寸稳定
+        const waitForLayout = (attempts = 0) => {
+            if (attempts > 20) return; // 最多尝试 20 次 (约 2 秒)
+
+            const container = terminalRef.current;
+            if (container && container.clientHeight > 50) {
+                fitTerminal();
+                if (term.cols > 0 && term.rows > 0) {
+                    sendResizeMessage(term.cols, term.rows);
+                }
+            } else {
+                setTimeout(() => waitForLayout(attempts + 1), 200);
+            }
+        };
+
         // 4. WebSocket 事件处理
         ws.onopen = () => {
             console.log("WebSocket connected");
             term.focus();
 
-            // 延迟 fit 并同步尺寸，多次尝试确保成功
-            setTimeout(fitTerminal, 50);
-            setTimeout(fitTerminal, 200);
-            setTimeout(() => {
-                fitTerminal();
-                if (term.cols > 0 && term.rows > 0) {
-                    sendResizeMessage(term.cols, term.rows);
-                }
-            }, 500);
+            // 立即尝试 fit
+            fitTerminal();
 
-            // 1秒后再试一次，确保字体加载等因素稳定
-            setTimeout(() => {
+            // 启动轮询，等待布局就绪
+            waitForLayout();
+
+            // 额外延时保障
+            setTimeout(fitTerminal, 500);
+
+            // 等待字体加载
+            document.fonts?.ready.then(() => {
+                console.log("Fonts loaded, refitting...");
                 fitTerminal();
                 sendResizeMessage(term.cols, term.rows);
-            }, 1000);
+            });
         };
 
         ws.onclose = () => {
@@ -213,12 +270,14 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
                 fontSize: '12px',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap'
             }}>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <span>Status: {wsRef.current?.readyState === WebSocket.OPEN ? 'Connected' : 'Disconnected'}</span>
-                    <span>Term Size: {terminalSize.cols} x {terminalSize.rows}</span>
-                    <span>Last Sent: {lastSentSize.cols} x {lastSentSize.rows}</span>
+                    <span style={{ color: terminalSize.rows < 10 ? 'red' : 'inherit' }}>
+                        size: {terminalSize.cols} x {terminalSize.rows}
+                    </span>
                 </div>
                 <button
                     onClick={() => {
@@ -235,7 +294,8 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
                         backgroundColor: '#444',
                         color: '#fff',
                         border: '1px solid #666',
-                        borderRadius: '3px'
+                        borderRadius: '3px',
+                        marginLeft: '10px'
                     }}
                 >
                     Force Fit & Resize
@@ -246,7 +306,8 @@ const XTermTestComponent = React.forwardRef<HTMLDivElement, XTermTestProps>((pro
                 style={{
                     flex: 1,
                     overflow: 'hidden',
-                    backgroundColor: '#1e1e1e'
+                    backgroundColor: '#1e1e1e',
+                    minHeight: '100px' // 增加最小高度防止塌缩
                 }}
             />
         </div>
