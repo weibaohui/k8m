@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Splitter } from 'antd';
-import XTermComponent from '@/components/Amis/custom/XTerm';
 import { EventDataNode } from 'antd/es/tree';
 import MonacoEditorWithForm from '@/components/Amis/custom/MonacoEditorWithForm';
 import FileTree, { FileNode } from '@/components/Amis/custom/FileExplorer/components/FileTree';
@@ -247,7 +246,12 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                             //     width='100%'
                             // />
                             <XTermTestComponent
-
+                                url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
+                                params={{
+                                    "container_name": selectedContainer,
+                                    "remove": remove || "",
+                                }}
+                                data={{ data }}
                                 height='calc(100vh - 100px)'
                                 width='100%'
                             />
