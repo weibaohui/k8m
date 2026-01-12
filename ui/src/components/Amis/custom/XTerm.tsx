@@ -166,7 +166,6 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>((props, _) =
         const searchAddon = new SearchAddon();
         const clipboardAddon = new ClipboardAddon();
 
-        term.loadAddon(fitAddon);
         term.loadAddon(webLinksAddon);
         term.loadAddon(unicode11Addon);
         term.loadAddon(serializeAddon);
