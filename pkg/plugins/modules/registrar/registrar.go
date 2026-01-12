@@ -20,6 +20,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/openkruise"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/swagger"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/webhook"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/yaml_editor"
 	"k8s.io/klog/v2"
 )
 
@@ -116,6 +117,11 @@ func init() {
 			klog.V(6).Infof("注册openkruise插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册openkruise插件成功")
+		}
+		if err := m.Register(yaml_editor.Metadata); err != nil {
+			klog.V(6).Infof("注册yaml-editor插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册yaml-editor插件成功")
 		}
 	})
 }
