@@ -6,7 +6,7 @@ import FileTree, { FileNode } from '@/components/Amis/custom/FileExplorer/compon
 import ContextMenu from '@/components/Amis/custom/FileExplorer/components/ContextMenu';
 import ContainerSelector from '@/components/Amis/custom/FileExplorer/components/ContainerSelector';
 import { FileOperations } from '@/components/Amis/custom/FileExplorer/components/FileOperations';
-import XTermTestComponent from '../XTermTest';
+import XTermComponent from '@/components/Amis/custom/XTerm';
 
 interface FileExplorerProps {
     data: Record<string, any>
@@ -235,17 +235,8 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     </Splitter.Panel>
                     <Splitter.Panel  >
                         {selectedContainer && (
-                            // <XTermComponent
-                            //     url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
-                            //     params={{
-                            //         "container_name": selectedContainer,
-                            //         "remove": remove || "",
-                            //     }}
-                            //     data={{ data }}
-                            //     height='calc(100vh - 100px)'
-                            //     width='100%'
-                            // />
-                            <XTermTestComponent
+
+                            <XTermComponent
                                 url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
                                 params={{
                                     "container_name": selectedContainer,
