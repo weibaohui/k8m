@@ -7,6 +7,7 @@ import FileTree, { FileNode } from '@/components/Amis/custom/FileExplorer/compon
 import ContextMenu from '@/components/Amis/custom/FileExplorer/components/ContextMenu';
 import ContainerSelector from '@/components/Amis/custom/FileExplorer/components/ContainerSelector';
 import { FileOperations } from '@/components/Amis/custom/FileExplorer/components/FileOperations';
+import XTermTestComponent from '../XTermTest';
 
 interface FileExplorerProps {
     data: Record<string, any>
@@ -212,7 +213,7 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                                 containers={containerOptions}
                                 onContainerChange={setSelectedContainer}
                             />
-                            <span style={{ marginLeft: '8px',fontSize: '12px', color: '#888' }}>
+                            <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}>
                                 鼠标右键管理文件
                             </span>
                             <div style={{ height: 'calc(100vh - 150px)', overflowY: 'auto' }}>
@@ -235,13 +236,18 @@ const FileExplorerComponent = React.forwardRef<HTMLDivElement, FileExplorerProps
                     </Splitter.Panel>
                     <Splitter.Panel  >
                         {selectedContainer && (
-                            <XTermComponent
-                                url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
-                                params={{
-                                    "container_name": selectedContainer,
-                                    "remove": remove || "",
-                                }}
-                                data={{ data }}
+                            // <XTermComponent
+                            //     url={`/k8s/pod/xterm/ns/${namespace}/pod_name/${podName}`}
+                            //     params={{
+                            //         "container_name": selectedContainer,
+                            //         "remove": remove || "",
+                            //     }}
+                            //     data={{ data }}
+                            //     height='calc(100vh - 100px)'
+                            //     width='100%'
+                            // />
+                            <XTermTestComponent
+
                                 height='calc(100vh - 100px)'
                                 width='100%'
                             />
