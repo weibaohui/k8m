@@ -30,12 +30,41 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
         const fitAddonRef = useRef<FitAddon | null>(null);
         const termRef = useRef<Terminal | null>(null);
         const [terminalSize, setTerminalSize] = useState({ cols: 0, rows: 0 });
+        const fitRafIdRef = useRef<number | null>(null);
+        const lastSentSizeRef = useRef<{ cols: number; rows: number } | null>(null);
 
-        const adjustCols = (delta: number) => {
-            if (termRef.current) {
-                const newCols = Math.max(10, terminalSize.cols + delta);
-                termRef.current.resize(newCols, terminalSize.rows);
+        /**
+         * 向后端发送终端窗口大小变更消息，让 PTY 的列数/行数与前端一致
+         */
+        const sendResizeMessage = (cols: number, rows: number, force?: boolean) => {
+            const ws = wsRef.current;
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                return;
             }
+            if (!force) {
+                const last = lastSentSizeRef.current;
+                if (last && last.cols === cols && last.rows === rows) {
+                    return;
+                }
+            }
+            const size = JSON.stringify({ cols, rows });
+            const payload = new TextEncoder().encode("\x01" + size);
+            ws.send(payload);
+            lastSentSizeRef.current = { cols, rows };
+        };
+
+        /**
+         * 手动调整终端列数，并同步通知后端 PTY 变更窗口大小
+         */
+        const adjustCols = (delta: number) => {
+            const term = termRef.current;
+            if (!term) {
+                return;
+            }
+            const rows = Math.max(1, term.rows || terminalSize.rows || 1);
+            const newCols = Math.max(10, (term.cols || terminalSize.cols || 10) + delta);
+            term.resize(newCols, rows);
+            sendResizeMessage(newCols, rows);
         };
 
 
@@ -45,6 +74,7 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
                 screenReaderMode: true,
                 cursorBlink: true,
                 allowProposedApi: true,
+                fontFamily: 'Menlo, Monaco, "Courier New", monospace',
 
             });
 
@@ -85,12 +115,51 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
 
             fitAddonRef.current = fitAddon;
 
-
+            /**
+             * 根据容器实际显示尺寸拟合终端列行，避免出现可输入宽度偏小的问题
+             */
             const fitTerminal = () => {
-                requestAnimationFrame(() => {
+                if (fitRafIdRef.current != null) {
+                    cancelAnimationFrame(fitRafIdRef.current);
+                }
+                fitRafIdRef.current = requestAnimationFrame(() => {
+                    const containerEl = terminalRef.current;
+                    if (!containerEl) {
+                        return;
+                    }
+
+                    const termEl = term.element;
+                    const viewportEl = termEl?.querySelector('.xterm-viewport') as HTMLElement | null;
+                    const availableWidth = viewportEl?.clientWidth ?? containerEl.clientWidth;
+                    const availableHeight = containerEl.clientHeight;
+
+                    const core = (term as any)?._core;
+                    const cell = core?._renderService?.dimensions?.css?.cell;
+                    const cellWidth = typeof cell?.width === 'number' && cell.width > 0 ? cell.width : null;
+                    const cellHeight = typeof cell?.height === 'number' && cell.height > 0 ? cell.height : null;
+
+                    if (cellWidth != null && cellHeight != null) {
+                        const cols = Math.max(2, Math.floor(availableWidth / cellWidth));
+                        const rows = Math.max(1, Math.floor(availableHeight / cellHeight));
+
+                        if (cols !== term.cols || rows !== term.rows) {
+                            term.resize(cols, rows);
+                        }
+                        return;
+                    }
+
+                    const proposed = fitAddon.proposeDimensions();
+                    if (!proposed) {
+                        fitAddon.fit();
+                        return;
+                    }
+
+                    if (proposed.cols !== term.cols || proposed.rows !== term.rows) {
+                        term.resize(proposed.cols, proposed.rows);
+                        return;
+                    }
+
                     fitAddon.fit();
-                    const dimensions = term;
-                    setTerminalSize({ cols: dimensions.cols, rows: dimensions.rows });
                 });
             };
 
@@ -107,17 +176,30 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
                 setTimeout(fitTerminal, 50);
                 setTimeout(fitTerminal, 200);
                 setTimeout(fitTerminal, 500);
+                setTimeout(() => sendResizeMessage(term.cols, term.rows, true), 80);
+                setTimeout(() => sendResizeMessage(term.cols, term.rows, true), 220);
+                setTimeout(() => sendResizeMessage(term.cols, term.rows, true), 520);
+                document.fonts?.ready.then(() => {
+                    fitTerminal();
+                    sendResizeMessage(term.cols, term.rows, true);
+                }).catch(() => {
+                    fitTerminal();
+                    sendResizeMessage(term.cols, term.rows, true);
+                });
             };
             ws.onmessage = (event) => term.write(event.data);
             ws.onclose = () => term.write("\x1b[31mDisconnected\x1b[0m\r\n");
             ws.onerror = () => term.write("\x1b[31mError\x1b[0m\r\n");
             term.onResize(({ cols, rows }) => {
-                const size = JSON.stringify({ cols, rows: rows + 1 });
-                const send = new TextEncoder().encode("\x01" + size);
-                ws.send(send);
+                setTerminalSize({ cols, rows });
+                sendResizeMessage(cols, rows);
             });
 
             return () => {
+                if (fitRafIdRef.current != null) {
+                    cancelAnimationFrame(fitRafIdRef.current);
+                    fitRafIdRef.current = null;
+                }
                 resizeObserver.disconnect();
                 if (wsRef.current) {
                     wsRef.current.close();
@@ -205,5 +287,3 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>(
 );
 
 export default XTermComponent;
-
-
