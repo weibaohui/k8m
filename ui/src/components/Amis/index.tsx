@@ -59,8 +59,6 @@ registerRenderer({ type: 'websocketViewer', component: WebSocketViewerComponent 
 // @ts-ignore
 registerRenderer({ type: 'xterm', component: XTermComponent })
 // @ts-ignore
-registerRenderer({ type: 'xterm-test', component: XTermTestComponent })
-// @ts-ignore
 registerRenderer({ type: 'chatgpt', component: WebSocketChatGPT })
 // @ts-ignore
 registerRenderer({ type: 'mEditor', component: MonacoEditorWithForm })

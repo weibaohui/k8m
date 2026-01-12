@@ -251,7 +251,6 @@ const XTermComponent = React.forwardRef<HTMLDivElement, XTermProps>((props, _) =
         resizeObserver.observe(terminalRef.current);
 
         return () => {
-            console.log("Cleaning up XTermTestComponent");
             if (fitRafIdRef.current != null) {
                 cancelAnimationFrame(fitRafIdRef.current);
             }
