@@ -38,7 +38,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
         const fetchTemplates = async () => {
             try {
                 const response = await fetcher({
-                    url: `/plugins/yaml-editor/template/list?page=${currentPage}&perPage=${pageSize}${selectedKind ? `&kind=${selectedKind}` : ''}`,
+                    url: `/mgm/plugins/yaml_editor/template/list?page=${currentPage}&perPage=${pageSize}${selectedKind ? `&kind=${selectedKind}` : ''}`,
                     method: 'get'
                 });
                 const data = response.data;
@@ -61,7 +61,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
         const fetchResourceTypes = async () => {
             try {
                 const response = await fetcher({
-                    url: '/plugins/yaml-editor/template/kind/list',
+                    url: '/mgm/plugins/yaml_editor/template/kind/list',
                     method: 'get'
                 });
                 const data = await response.data;
@@ -102,7 +102,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
         if (editingTemplate && editForm.name.trim()) {
             try {
                 const response = await fetcher({
-                    url: '/plugins/yaml-editor/template/save',
+                    url: '/mgm/plugins/yaml_editor/template/save',
                     method: 'post',
                     data: {
                         id: editingTemplate.id,
@@ -144,7 +144,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
             onOk: async () => {
                 try {
                     const response = await fetcher({
-                        url: `/plugins/yaml-editor/template/delete/${templateId}`,
+                        url: `/mgm/plugins/yaml_editor/template/delete/${templateId}`,
                         method: 'delete'
                     });
 
@@ -258,7 +258,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                                             for (const template of newTemplates) {
                                                 try {
                                                     await fetcher({
-                                                        url: '/plugins/yaml-editor/template/save',
+                                                        url: '/mgm/plugins/yaml_editor/template/save',
                                                         method: 'post',
                                                         data: template
                                                     });
@@ -268,7 +268,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                                             }
                                             message.success(`成功导入 ${newTemplates.length} 个模板`);
                                             const response = await fetcher({
-                                                url: `/plugins/yaml-editor/template/list?page=${currentPage}&perPage=${pageSize}`,
+                                                url: `/mgm/plugins/yaml_editor/template/list?page=${currentPage}&perPage=${pageSize}`,
                                                 method: 'get'
                                             });
                                             //@ts-ignore
@@ -302,7 +302,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                         onClick={async () => {
                             try {
                                 const firstPageResponse = await fetcher({
-                                    url: `/plugins/yaml-editor/template/list?page=1&perPage=${pageSize}`,
+                                    url: `/mgm/plugins/yaml_editor/template/list?page=1&perPage=${pageSize}`,
                                     method: 'get'
                                 });
 
@@ -317,7 +317,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
 
                                 for (let page = 1; page <= totalPages; page++) {
                                     const response = await fetcher({
-                                        url: `/plugins/yaml-editor/template/list?page=${page}&perPage=${pageSize}`,
+                                        url: `/mgm/plugins/yaml_editor/template/list?page=${page}&perPage=${pageSize}`,
                                         method: 'get'
                                     });
 
@@ -371,7 +371,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                                 kind: selectedKind
                             };
                             fetcher({
-                                url: '/plugins/yaml-editor/template/save',
+                                url: '/mgm/plugins/yaml_editor/template/save',
                                 method: 'post',
                                 data: newTemplate
                             }).then(response => {

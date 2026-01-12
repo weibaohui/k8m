@@ -29,7 +29,7 @@ const YamlEditor = React.forwardRef<HTMLDivElement>(() => {
                 kind: ''
             };
             const response = await fetcher({
-                url: '/plugins/yaml-editor/template/save',
+                url: '/mgm/plugins/yaml_editor/template/save',
                 method: 'post',
                 data: newTemplate
             });

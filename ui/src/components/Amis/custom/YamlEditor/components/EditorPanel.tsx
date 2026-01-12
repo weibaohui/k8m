@@ -44,7 +44,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
 
         try {
             const response = await fetcher({
-                url: '/plugins/yaml-editor/yaml/delete',
+                url: '/k8s/plugins/yaml_editor/yaml/delete',
                 method: 'post',
                 data: {
                     yaml: content
@@ -95,7 +95,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
 
         try {
             const response = await fetcher({
-                url: '/plugins/yaml-editor/yaml/apply',
+                url: '/k8s/plugins/yaml_editor/yaml/apply',
                 method: 'post',
                 data: {
                     yaml: content
