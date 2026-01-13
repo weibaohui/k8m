@@ -60,7 +60,7 @@
                   "name": "webhooks",
                   "label": "Webhook",
                   "multiple": true,
-                  "source": "/admin/plugins/plugins/webhook/option_list",
+                  "source": "/admin/plugins/webhook/option_list",
                   "labelField": "label",
                   "valueField": "value",
                   "placeholder": "请选择目标Webhook"
