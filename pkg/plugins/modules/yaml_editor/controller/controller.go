@@ -134,6 +134,8 @@ func (t *Controller) DeleteTemplate(c *response.Context) {
 	amis.WriteJsonOK(c)
 }
 
+// ListKind 获取模板分类列表，用于左侧导航栏渲染。
+// 返回格式与 AI 提示词类型接口保持一致：{ data: { options: [{label,value}, ...] } }。
 func (t *Controller) ListKind(c *response.Context) {
 	var kinds []struct {
 		Kind string `json:"kind"`
@@ -151,5 +153,21 @@ func (t *Controller) ListKind(c *response.Context) {
 		return
 	}
 
-	amis.WriteJsonList(c, kinds)
+	options := make([]map[string]string, 0, len(kinds)+1)
+	options = append(options, map[string]string{
+		"label": "全部",
+		"value": "all",
+	})
+	for _, k := range kinds {
+		if k.Kind == "" {
+			continue
+		}
+		options = append(options, map[string]string{
+			"label": k.Kind,
+			"value": k.Kind,
+		})
+	}
+	amis.WriteJsonData(c, response.H{
+		"options": options,
+	})
 }

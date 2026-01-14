@@ -31,10 +31,7 @@
               "style": {
                 "border": "none"
               },
-              "source": {
-                "method": "get",
-                "url": "/mgm/plugins/yaml_editor/template/kind/list"
-              },
+              "source": "get:/mgm/plugins/yaml_editor/template/kind/list",
               "onEvent": {
                 "click": {
                   "actions": [
@@ -114,23 +111,6 @@
                           "label": "模板分类",
                           "placeholder": "请输入模板分类，如：Deployment、Service 等",
                           "description": "用于对模板进行分类管理，留空则归入未分类"
-                        },
-                        {
-                          "type": "switch",
-                          "name": "is_global",
-                          "label": "全局模板",
-                          "onText": "是",
-                          "offText": "否",
-                          "value": false,
-                          "description": "全局模板对所有集群可见，否则仅对指定集群可见"
-                        },
-                        {
-                          "type": "input-text",
-                          "name": "cluster",
-                          "label": "所属集群",
-                          "placeholder": "请输入集群名称",
-                          "description": "如果是全局模板，此字段可留空",
-                          "visibleOn": "${!is_global}"
                         },
                         {
                           "type": "editor",
@@ -251,18 +231,6 @@
                             },
                             {
                               "type": "static",
-                              "name": "is_global",
-                              "label": "全局模板",
-                              "tpl": "${is_global ? '是' : '否'}"
-                            },
-                            {
-                              "type": "static",
-                              "name": "cluster",
-                              "label": "所属集群",
-                              "visibleOn": "${!is_global}"
-                            },
-                            {
-                              "type": "static",
                               "name": "created_by",
                               "label": "创建者"
                             },
@@ -330,22 +298,6 @@
                               "label": "模板分类",
                               "placeholder": "请输入模板分类，如：Deployment、Service 等",
                               "description": "用于对模板进行分类管理，留空则归入未分类"
-                            },
-                            {
-                              "type": "switch",
-                              "name": "is_global",
-                              "label": "全局模板",
-                              "onText": "是",
-                              "offText": "否",
-                              "description": "全局模板对所有集群可见，否则仅对指定集群可见"
-                            },
-                            {
-                              "type": "input-text",
-                              "name": "cluster",
-                              "label": "所属集群",
-                              "placeholder": "请输入集群名称",
-                              "description": "如果是全局模板，此字段可留空",
-                              "visibleOn": "${!is_global}"
                             },
                             {
                               "type": "editor",
@@ -428,29 +380,6 @@
                   "searchable": true
                 },
                 {
-                  "name": "is_global",
-                  "label": "全局模板",
-                  "type": "status",
-                  "map": {
-                    "true": {
-                      "value": "是",
-                      "status": "success"
-                    },
-                    "false": {
-                      "value": "否",
-                      "status": "default"
-                    }
-                  },
-                  "width": "100px"
-                },
-                {
-                  "name": "cluster",
-                  "label": "所属集群",
-                  "type": "text",
-                  "width": "150px",
-                  "searchable": true
-                },
-                {
                   "name": "created_by",
                   "label": "创建者",
                   "type": "text",
@@ -459,12 +388,6 @@
                 {
                   "name": "created_at",
                   "label": "创建时间",
-                  "type": "datetime",
-                  "width": "180px"
-                },
-                {
-                  "name": "updated_at",
-                  "label": "更新时间",
                   "type": "datetime",
                   "width": "180px"
                 }
