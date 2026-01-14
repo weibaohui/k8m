@@ -35,6 +35,12 @@ func (k *K8mMcpServerLifecycle) Disable(ctx plugins.BaseContext) error {
 
 func (k *K8mMcpServerLifecycle) Uninstall(ctx plugins.UninstallContext) error {
 	klog.V(6).Infof("开始卸载K8M MCP Server插件")
+	if !ctx.KeepData() {
+		if err := models.DropDB(); err != nil {
+			klog.V(6).Infof("卸载 K8M MCP Server 插件失败: %v", err)
+			return err
+		}
+	}
 	klog.V(6).Infof("卸载K8M MCP Server插件成功")
 	return nil
 }
