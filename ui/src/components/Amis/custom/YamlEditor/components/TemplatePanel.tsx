@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, List, Input, Modal, Space, Drawer, Select, message } from 'antd';
-import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import { Button, List, Modal, Space, message } from 'antd';
 import { fetcher } from '@/components/Amis/fetcher';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -25,14 +24,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
     const pageSize = 10;
 
 
-    const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
-    const [drawerVisible, setDrawerVisible] = useState(false);
     const [selectedKind, setSelectedKind] = useState<string>('');
-    const [editForm, setEditForm] = useState({
-        name: '',
-        kind: '',
-        content: ''
-    });
     const [resourceTypesList, setResourceTypesList] = useState<string[]>([]);
     useEffect(() => {
         const fetchTemplates = async () => {
@@ -64,7 +56,7 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                     url: '/mgm/plugins/yaml_editor/template/kind/list',
                     method: 'get'
                 });
-                const data = await response.data;
+                const data = response.data;
                 //@ts-ignore
                 if (data?.data?.rows) {
                     //@ts-ignore
@@ -88,82 +80,6 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
     const filteredTemplates = templates.filter(template =>
         !selectedKind || template.kind === selectedKind
     );
-    const handleNameEdit = (template: TemplateItem) => {
-        setEditingTemplate(template);
-        setEditForm({
-            name: template.name,
-            kind: template.kind,
-            content: template.content
-        });
-        setDrawerVisible(true);
-    };
-
-    const handleEditSubmit = async () => {
-        if (editingTemplate && editForm.name.trim()) {
-            try {
-                const response = await fetcher({
-                    url: '/mgm/plugins/yaml_editor/template/save',
-                    method: 'post',
-                    data: {
-                        id: editingTemplate.id,
-                        ...editForm
-                    }
-                });
-
-                if (response.data?.status === 0) {
-                    setTemplates(prevTemplates =>
-                        prevTemplates.map(template =>
-                            template.id === editingTemplate.id
-                                ? { ...template, ...editForm }
-                                : template
-                        )
-                    );
-                    setDrawerVisible(false);
-                    setEditingTemplate(null);
-                    message.success('模板已成功更新');
-                } else {
-                    throw new Error(response.data?.msg || '更新失败');
-                }
-            } catch (error) {
-                console.error('Failed to update template:', error);
-                Modal.error({
-                    title: '保存失败',
-                    content: '无法更新模板：' + (error instanceof Error ? error.message : '未知错误')
-                });
-            }
-        }
-    };
-
-    const handleDelete = (templateId?: string) => {
-        if (!templateId) {
-            return;
-        }
-        Modal.confirm({
-            title: '确认删除',
-            content: '确定要删除这个模板吗？',
-            onOk: async () => {
-                try {
-                    const response = await fetcher({
-                        url: `/mgm/plugins/yaml_editor/template/delete/${templateId}`,
-                        method: 'delete'
-                    });
-
-                    if (response.data?.status === 0) {
-                        setTemplates(prevTemplates => prevTemplates.filter(t => t.id !== templateId));
-                        message.success('模板已成功删除');
-                    } else {
-                        throw new Error(response.data?.msg || '删除失败');
-                    }
-                } catch (error) {
-                    console.error('Failed to delete template:', error);
-                    Modal.error({
-                        title: '删除失败',
-                        content: '无法删除模板：' + (error instanceof Error ? error.message : '未知错误')
-                    });
-                }
-            }
-        });
-    };
 
     const renderTemplate = (template: TemplateItem) => (
         <List.Item key={template.id} className="list-item" style={{ cursor: 'pointer' }}
@@ -183,24 +99,6 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                     marginRight: '10px'
                 }}>
                     {template.name}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
-                    <Button
-                        type="text"
-                        icon={<EditFilled style={{ color: '#1890ff' }} />}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleNameEdit(template);
-                        }}
-                    />
-                    <Button
-                        type="text"
-                        icon={<DeleteFilled style={{ color: '#f23034' }} />}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(template.id);
-                        }}
-                    />
                 </div>
             </div>
         </List.Item>
@@ -465,49 +363,6 @@ const TemplatePanel: React.FC<TemplatePanelProps> = ({ onSelectTemplate, refresh
                     </Button>
                 </Space.Compact>
             </div>
-            <Drawer
-                title="编辑模板"
-                placement="right"
-                width={720}
-                open={drawerVisible}
-                onClose={() => setDrawerVisible(false)}
-                footer={
-                    <div style={{ textAlign: 'right' }}>
-                        <Button onClick={() => setDrawerVisible(false)} style={{ marginRight: 8 }}>
-                            取消
-                        </Button>
-                        <Button onClick={handleEditSubmit} type="primary">
-                            保存
-                        </Button>
-                    </div>
-                }
-            >
-                <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8 }}>模板名称</label>
-                    <Input
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        placeholder="请输入模板名称"
-                    />
-                </div>
-                <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8 }}>资源类型</label>
-                    <Input
-                        value={editForm.kind}
-                        onChange={(e) => setEditForm({ ...editForm, kind: e.target.value })}
-                        placeholder="请输入资源类型"
-                    />
-                </div>
-                <div>
-                    <label style={{ display: 'block', marginBottom: 8 }}>模板内容</label>
-                    <Input.TextArea
-                        value={editForm.content}
-                        onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                        placeholder="请输入YAML内容"
-                        rows={20}
-                    />
-                </div>
-            </Drawer>
         </div>
     );
 };
