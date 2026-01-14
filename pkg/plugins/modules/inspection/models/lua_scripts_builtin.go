@@ -5,7 +5,7 @@ import (
 )
 
 // BuiltinLuaScriptsVersion 统一管理所有内置脚本的版本号
-const BuiltinLuaScriptsVersion = "v1"
+const BuiltinLuaScriptsVersion = "v2"
 
 // BuiltinLuaScripts 内置检查脚本列表
 var BuiltinLuaScripts = []InspectionLuaScript{
