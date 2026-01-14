@@ -153,19 +153,19 @@ spec:
     spec:
       containers:
         - name: k8m
-          # image: docker.io/weibh/k8m:v0.26.3
-          # image: ghcr.io/weibaohui/k8m:v0.26.3
-          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.26.3
+          # image: docker.io/weibh/k8m:v0.26.6
+          # image: ghcr.io/weibaohui/k8m:v0.26.6
+          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.26.6
           env:
-            - name: POD_NAME   #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
+            - name: POD_NAME #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: POD_NAMESPACE  #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
+            - name: POD_NAMESPACE #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: POD_IP    #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
+            - name: POD_IP #启用主备选举插件必须填,否则不会切换，单实例运行可以加不影响。
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
