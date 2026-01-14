@@ -920,222 +920,6 @@ var doc = `{
                 }
             }
         },
-        "/admin/mcp/connect/{name}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "连接指定MCP服务器",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "MCP服务器名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/mcp/delete": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "删除MCP服务器",
-                "parameters": [
-                    {
-                        "description": "删除请求体包含IDs数组",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/mcp/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取MCP服务器列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/mcp/log/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取MCP服务器日志列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/mcp/save": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "创建或更新MCP服务器",
-                "parameters": [
-                    {
-                        "description": "MCP服务器配置信息",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.MCPServerConfig"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/mcp/save/id/{id}/status/{status}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "快速更新MCP服务器状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "MCP服务器ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "服务器状态(true/false)",
-                        "name": "status",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/mcp/server/{name}/tools/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取指定MCP服务器的工具列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "MCP服务器名称",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/mcp/tool/save/id/{id}/status/{status}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "快速更新MCP工具状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "工具ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "状态，例如：true、false",
-                        "name": "status",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/menu/delete/{ids}": {
             "post": {
                 "security": [
@@ -2014,6 +1798,222 @@ var doc = `{
                     }
                 ],
                 "summary": "保存Lua脚本",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/server/connect/{name}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "连接指定MCP服务器",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MCP服务器名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/server/delete": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "删除MCP服务器",
+                "parameters": [
+                    {
+                        "description": "删除请求体包含IDs数组",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/server/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取MCP服务器列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/server/log/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取MCP服务器日志列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/server/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "创建或更新MCP服务器",
+                "parameters": [
+                    {
+                        "description": "MCP服务器配置信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.MCPServerConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/server/save/id/{id}/status/{status}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "快速更新MCP服务器状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "MCP服务器ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "服务器状态(true/false)",
+                        "name": "status",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/tool/save/id/{id}/status/{status}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "快速更新MCP工具状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "工具ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "状态，例如：true、false",
+                        "name": "status",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plugins/mcp_runtime/tool/server/{name}/tools/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "获取指定MCP服务器的工具列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "MCP服务器名称",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -4160,33 +4160,6 @@ var doc = `{
                         "description": "上传文件",
                         "name": "file",
                         "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/gateway_class/option_list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "获取GatewayClass选项列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "path",
                         "required": true
                     }
                 ],
@@ -11204,28 +11177,35 @@ var doc = `{
                     "type": "boolean"
                 },
                 "created_at": {
+                    "description": "创建时间",
                     "type": "string"
                 },
+                "floating_window": {
+                    "description": "是否开启浮动窗口",
+                    "type": "boolean"
+                },
                 "id": {
+                    "description": "主键ID",
                     "type": "integer"
                 },
                 "max_history": {
-                    "description": "模型对话上下文历史记录数",
+                    "description": "最大历史记录数",
                     "type": "integer"
                 },
                 "max_iterations": {
-                    "description": "模型自动对话的最大轮数",
+                    "description": "最大迭代次数",
                     "type": "integer"
                 },
                 "model_id": {
-                    "description": "选择的模型ID",
+                    "description": "模型ID",
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "更新时间",
                     "type": "string"
                 },
                 "use_built_in_model": {
-                    "description": "是否使用内置模型，默认开启",
+                    "description": "是否使用内置模型",
                     "type": "boolean"
                 }
             }
@@ -11235,14 +11215,6 @@ var doc = `{
             "properties": {
                 "created_at": {
                     "type": "string"
-                },
-                "heartbeat_failure_threshold": {
-                    "description": "心跳失败阈值",
-                    "type": "integer"
-                },
-                "heartbeat_interval_seconds": {
-                    "description": "心跳间隔时间（秒）",
-                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -11260,10 +11232,6 @@ var doc = `{
                 "login_type": {
                     "type": "string"
                 },
-                "max_retry_attempts": {
-                    "description": "最大重试次数，默认100次",
-                    "type": "integer"
-                },
                 "node_shell_image": {
                     "type": "string"
                 },
@@ -11273,10 +11241,6 @@ var doc = `{
                 "product_name": {
                     "description": "产品名称",
                     "type": "string"
-                },
-                "reconnect_max_interval_seconds": {
-                    "description": "重连最大间隔时间（秒）",
-                    "type": "integer"
                 },
                 "resource_cache_timeout": {
                     "description": "资源缓存时间（秒）",
