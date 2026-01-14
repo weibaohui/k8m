@@ -288,17 +288,52 @@ func (m *Manager) InstallPlugin(c *response.Context) {
 func (m *Manager) EnablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("启用插件配置请求: %s", name)
-	if err := m.Enable(name); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+
+	st, ok := m.StatusOf(name)
 	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
-		amis.WriteJsonError(c, err)
-		return
+
+	// 1. 如果未安装，先进行安装
+	if !ok || st == StatusUninstalled {
+		klog.V(6).Infof("插件未安装，先进行安装: %s", name, st)
+		if err := m.Install(name); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		if err := m.PersistStatus(name, StatusInstalled, params); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		st = StatusInstalled
 	}
 
-	amis.WriteJsonOKMsg(c, "已启用")
+	// 2. 如果未启用，先进行启用
+	if st == StatusInstalled || st == StatusDisabled {
+		klog.V(6).Infof("插件未启用，先进行启用: %s", name)
+		if err := m.Enable(name); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		st = StatusEnabled
+	}
+
+	// 3. 如果未启动，进行启动
+	if st == StatusEnabled || st == StatusStopped {
+		klog.V(6).Infof("插件未启动，进行启动: %s", name)
+		if err := m.StartPlugin(name); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		if err := m.PersistStatus(name, StatusRunning, params); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+	}
+
+	amis.WriteJsonOKMsg(c, "已启用并启动")
 }
 
 // StartPluginAPI 启动指定名称的插件
@@ -378,11 +413,29 @@ func (m *Manager) UninstallPluginKeepData(c *response.Context) {
 func (m *Manager) DisablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("禁用插件配置请求: %s", name)
+
+	st, _ := m.StatusOf(name)
+	params := dao.BuildParams(c)
+
+	// 1. 如果正在运行，先停止
+	if st == StatusRunning {
+		klog.V(6).Infof("插件正在运行，先停止: %s", name)
+		if err := m.StopPlugin(name); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		if err := m.PersistStatus(name, StatusStopped, params); err != nil {
+			amis.WriteJsonError(c, err)
+			return
+		}
+		// st = StatusStopped
+	}
+
+	// 2. 禁用插件
 	if err := m.Disable(name); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	params := dao.BuildParams(c)
 	if err := m.PersistStatus(name, StatusDisabled, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
