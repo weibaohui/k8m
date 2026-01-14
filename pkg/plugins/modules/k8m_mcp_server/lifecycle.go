@@ -2,6 +2,7 @@ package k8m_mcp_server
 
 import (
 	"github.com/weibaohui/k8m/pkg/plugins"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/k8m_mcp_server/models"
 	"k8s.io/klog/v2"
 )
 
@@ -9,7 +10,11 @@ type K8mMcpServerLifecycle struct{}
 
 func (k *K8mMcpServerLifecycle) Install(ctx plugins.InstallContext) error {
 	klog.V(6).Infof("开始安装K8M MCP Server插件")
-	klog.V(6).Infof("安装K8M MCP Server插件成功")
+	if err := models.InitDB(); err != nil {
+		klog.V(6).Infof("安装 K8M MCP Server 插件失败: %v", err)
+		return err
+	}
+	klog.V(6).Infof("安装 K8M MCP Server 插件成功")
 	return nil
 }
 
