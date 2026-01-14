@@ -1,0 +1,401 @@
+{
+  "type": "page",
+  "body": [
+    {
+      "type": "flex",
+      "direction": "row",
+      "style": {
+        "height": "100vh"
+      },
+      "items": [
+        {
+          "type": "wrapper",
+          "size": "xs",
+          "style": {
+            "width": "280px",
+            "minWidth": "280px",
+            "borderRight": "1px solid #e8e9ea",
+            "padding": "16px",
+            "backgroundColor": "#f8f9fa"
+          },
+          "body": [
+            {
+              "type": "tpl",
+              "tpl": "<h5 style='margin-bottom: 16px; color: #495057;'>模板分类</h5>"
+            },
+            {
+              "type": "nav",
+              "id": "kindNav",
+              "stacked": true,
+              "className": "kind-nav",
+              "style": {
+                "border": "none"
+              },
+              "source": "get:/mgm/plugins/yaml_editor/template/kind/list",
+              "onEvent": {
+                "click": {
+                  "actions": [
+                    {
+                      "actionType": "reload",
+                      "componentId": "templateCRUD",
+                      "data": {
+                        "kind": "${event.data.item.value === 'all' ? '' : event.data.item.value}"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "wrapper",
+          "size": "auto",
+          "style": {
+            "flex": "1",
+            "padding": "16px"
+          },
+          "body": [
+            {
+              "type": "alert",
+              "level": "info",
+              "showIcon": true,
+              "body": "💡 <strong>使用提示：</strong>您可以创建 YAML 模板，方便快速部署常用资源。模板支持分类管理，可设置为全局模板或集群专属模板。",
+              "style": {
+                "marginBottom": "16px"
+              }
+            },
+            {
+              "type": "crud",
+              "id": "templateCRUD",
+              "name": "templateCRUD",
+              "autoFillHeight": true,
+              "autoGenerateFilter": {
+                "columnsNum": 3,
+                "showBtnToolbar": false
+              },
+              "headerToolbar": [
+                {
+                  "type": "button",
+                  "icon": "fas fa-plus text-primary",
+                  "actionType": "drawer",
+                  "label": "新建模板",
+                  "drawer": {
+                    "closeOnEsc": true,
+                    "closeOnOutside": true,
+                    "size": "xl",
+                    "title": "新建 YAML 模板 (ESC 关闭)",
+                    "body": {
+                      "type": "form",
+                      "api": "post:/mgm/plugins/yaml_editor/template/save",
+                      "body": [
+                        {
+                          "type": "input-text",
+                          "name": "name",
+                          "label": "模板名称",
+                          "required": true,
+                          "placeholder": "请输入模板名称",
+                          "validateOnChange": true,
+                          "validations": {
+                            "minLength": 2,
+                            "maxLength": 100
+                          },
+                          "validationErrors": {
+                            "minLength": "模板名称至少 2 个字符",
+                            "maxLength": "模板名称最多 100 个字符"
+                          }
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "kind",
+                          "label": "模板分类",
+                          "placeholder": "请输入模板分类，如：Deployment、Service 等",
+                          "description": "用于对模板进行分类管理，留空则归入未分类"
+                        },
+                        {
+                          "type": "editor",
+                          "name": "content",
+                          "label": "模板内容",
+                          "required": true,
+                          "language": "yaml",
+                          "placeholder": "请输入 YAML 格式的模板内容",
+                          "options": {
+                            "lineNumbers": "on",
+                            "tabSize": 2,
+                            "minimap": {
+                              "enabled": false
+                            }
+                          }
+                        }
+                      ],
+                      "submitText": "保存",
+                      "resetText": "重置",
+                      "messages": {
+                        "saveSuccess": "保存成功",
+                        "saveFailed": "保存失败"
+                      },
+                      "onEvent": {
+                        "submitSucc": {
+                          "actions": [
+                            {
+                              "actionType": "reload",
+                              "componentId": "templateCRUD"
+                            },
+                            {
+                              "actionType": "reload",
+                              "componentId": "kindNav"
+                            },
+                            {
+                              "actionType": "closeDrawer"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "reload",
+                "bulkActions"
+              ],
+              "loadDataOnce": false,
+              "syncLocation": false,
+              "initFetch": true,
+              "perPage": 10,
+              "bulkActions": [
+                {
+                  "label": "批量删除",
+                  "actionType": "ajax",
+                  "confirmText": "确定要批量删除选中的模板吗？",
+                  "api": "post:/mgm/plugins/yaml_editor/template/delete/${ids}",
+                  "onEvent": {
+                    "actionEvent": {
+                      "actions": [
+                        {
+                          "actionType": "reload",
+                          "componentId": "templateCRUD"
+                        },
+                        {
+                          "actionType": "reload",
+                          "componentId": "kindNav"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "footerToolbar": [
+                {
+                  "type": "pagination",
+                  "align": "right"
+                },
+                {
+                  "type": "statistics",
+                  "align": "right"
+                },
+                {
+                  "type": "switch-per-page",
+                  "align": "right"
+                }
+              ],
+              "api": "get:/mgm/plugins/yaml_editor/template/list",
+              "columns": [
+                {
+                  "type": "operation",
+                  "label": "操作",
+                  "width": 180,
+                  "buttons": [
+                    {
+                      "type": "button",
+                      "icon": "fas fa-eye text-info",
+                      "actionType": "drawer",
+                      "tooltip": "查看模板",
+                      "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "size": "xl",
+                        "title": "查看 YAML 模板 (ESC 关闭)",
+                        "body": {
+                          "type": "form",
+                          "mode": "horizontal",
+                          "disabled": true,
+                          "body": [
+                            {
+                              "type": "static",
+                              "name": "name",
+                              "label": "模板名称"
+                            },
+                            {
+                              "type": "static",
+                              "name": "kind",
+                              "label": "模板分类"
+                            },
+                            {
+                              "type": "static",
+                              "name": "created_by",
+                              "label": "创建者"
+                            },
+                            {
+                              "type": "static",
+                              "name": "created_at",
+                              "label": "创建时间"
+                            },
+                            {
+                              "type": "editor",
+                              "name": "content",
+                              "label": "模板内容",
+                              "language": "yaml",
+                              "disabled": true,
+                              "options": {
+                                "readOnly": true,
+                                "lineNumbers": "on",
+                                "tabSize": 2,
+                                "minimap": {
+                                  "enabled": false
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fas fa-edit text-primary",
+                      "actionType": "drawer",
+                      "tooltip": "编辑模板",
+                      "drawer": {
+                        "closeOnEsc": true,
+                        "closeOnOutside": true,
+                        "size": "xl",
+                        "title": "编辑 YAML 模板 (ESC 关闭)",
+                        "body": {
+                          "type": "form",
+                          "api": "post:/mgm/plugins/yaml_editor/template/save",
+                          "body": [
+                            {
+                              "type": "hidden",
+                              "name": "id"
+                            },
+                            {
+                              "type": "input-text",
+                              "name": "name",
+                              "label": "模板名称",
+                              "required": true,
+                              "placeholder": "请输入模板名称",
+                              "validateOnChange": true,
+                              "validations": {
+                                "minLength": 2,
+                                "maxLength": 100
+                              },
+                              "validationErrors": {
+                                "minLength": "模板名称至少 2 个字符",
+                                "maxLength": "模板名称最多 100 个字符"
+                              }
+                            },
+                            {
+                              "type": "input-text",
+                              "name": "kind",
+                              "label": "模板分类",
+                              "placeholder": "请输入模板分类，如：Deployment、Service 等",
+                              "description": "用于对模板进行分类管理，留空则归入未分类"
+                            },
+                            {
+                              "type": "editor",
+                              "name": "content",
+                              "label": "模板内容",
+                              "required": true,
+                              "language": "yaml",
+                              "placeholder": "请输入 YAML 格式的模板内容",
+                              "options": {
+                                "lineNumbers": "on",
+                                "tabSize": 2,
+                                "minimap": {
+                                  "enabled": false
+                                }
+                              }
+                            }
+                          ],
+                          "submitText": "保存",
+                          "resetText": "重置",
+                          "messages": {
+                            "saveSuccess": "保存成功",
+                            "saveFailed": "保存失败"
+                          },
+                          "onEvent": {
+                            "submitSucc": {
+                              "actions": [
+                                {
+                                  "actionType": "reload",
+                                  "componentId": "templateCRUD"
+                                },
+                                {
+                                  "actionType": "reload",
+                                  "componentId": "kindNav"
+                                },
+                                {
+                                  "actionType": "closeDrawer"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "icon": "fas fa-trash text-danger",
+                      "actionType": "ajax",
+                      "tooltip": "删除模板",
+                      "confirmText": "确定要删除该模板吗？",
+                      "api": "post:/mgm/plugins/yaml_editor/template/delete/${id}",
+                      "onEvent": {
+                        "actionEvent": {
+                          "actions": [
+                            {
+                              "actionType": "reload",
+                              "componentId": "templateCRUD"
+                            },
+                            {
+                              "actionType": "reload",
+                              "componentId": "kindNav"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "name",
+                  "label": "模板名称",
+                  "type": "text",
+                  "width": "200px",
+                  "searchable": true
+                },
+                {
+                  "name": "kind",
+                  "label": "模板分类",
+                  "type": "text",
+                  "width": "120px",
+                  "searchable": true
+                },
+                {
+                  "name": "created_by",
+                  "label": "创建者",
+                  "type": "text",
+                  "width": "120px"
+                },
+                {
+                  "name": "created_at",
+                  "label": "创建时间",
+                  "type": "datetime",
+                  "width": "180px"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

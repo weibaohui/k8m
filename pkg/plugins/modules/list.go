@@ -19,4 +19,5 @@ const (
 	PluginNameGatewayAPI   = "gatewayapi"
 	PluginNameIstio        = "istio"
 	PluginNameOpenKruise   = "openkruise"
+	PluginNameYamlEditor   = "yaml_editor"
 )

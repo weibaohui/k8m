@@ -22,7 +22,7 @@ import WebSocketViewerComponent from "@/components/Amis/custom/WebSocketViewer.t
 import WebSocketChatGPT from "@/components/Amis/custom/WebSocketChatGPT.tsx";
 import MonacoEditorWithForm from "@/components/Amis/custom/MonacoEditorWithForm.tsx";
 import GlobalTextSelector from '@/layout/TextSelectionPopover';
-import HistoryRecordsComponent from '@/components/Amis/custom/YamlApplyer/YamlApplyer.tsx';
+import YamlEditorComponent from '@/components/Amis/custom/YamlEditor/YamlEditor.tsx';
 import DiffEditorComponent from '@/components/Amis/custom/DiffEditor/index.tsx';
 import DeploymentRevisionDiffEditor from '@/components/Amis/custom/DiffEditor/DeploymentRevisonDiffEditor.tsx';
 import PodLogViewerComponent from '@/components/Amis/custom/LogView/PodLogViewer';
@@ -62,8 +62,7 @@ registerRenderer({ type: 'xterm', component: XTermComponent })
 registerRenderer({ type: 'chatgpt', component: WebSocketChatGPT })
 // @ts-ignore
 registerRenderer({ type: 'mEditor', component: MonacoEditorWithForm })
-// @ts-ignore
-registerRenderer({ type: 'historyRecord', component: HistoryRecordsComponent })
+registerRenderer({ type: 'yamlEditor', component: YamlEditorComponent })
 
 // @ts-ignore
 registerRenderer({ type: 'diffEditor', component: DiffEditorComponent })

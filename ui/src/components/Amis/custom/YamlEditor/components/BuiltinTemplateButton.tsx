@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button, Dropdown } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 
-// 内置模板数据 - 多级菜单结构
 const BUILTIN_TEMPLATES = {
   workload: {
     label: 'Workload',
@@ -215,9 +214,7 @@ metadata:
   namespace: default
 type: Opaque
 data:
-  # 示例：echo -n 'username' | base64
   username: BASE64_ENCODED_USERNAME
-  # 示例：echo -n 'password' | base64
   password: BASE64_ENCODED_PASSWORD
 `
       }
@@ -266,19 +263,10 @@ interface BuiltinTemplateButtonProps {
   style?: React.CSSProperties;
 }
 
-/**
- * 内置模板按钮组件
- * 提供常用的Kubernetes资源模板选择功能
- */
 const BuiltinTemplateButton: React.FC<BuiltinTemplateButtonProps> = ({ onSelectTemplate, style }) => {
   const [visible, setVisible] = useState(false);
 
-  /**
-   * 处理模板选择
-   * @param key 模板键值
-   */
   const handleMenuClick = ({ key }: { key: string }) => {
-    // 解析多级key，格式如: "workload.pod.deployment"
     const keys = key.split('.');
     let current: any = BUILTIN_TEMPLATES;
 
@@ -298,32 +286,21 @@ const BuiltinTemplateButton: React.FC<BuiltinTemplateButtonProps> = ({ onSelectT
     setVisible(false);
   };
 
-  /**
-   * 处理下拉菜单显示状态变化
-   * @param flag 显示状态
-   */
   const handleVisibleChange = (flag: boolean) => {
     setVisible(flag);
   };
 
-  /**
-   * 递归构建多级菜单项
-   * @param templates 模板对象
-   * @param parentKey 父级键值
-   */
   const buildMenuItems = (templates: any, parentKey = ''): any[] => {
     return Object.entries(templates).map(([key, value]: [string, any]) => {
       const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
       if (value.children) {
-        // 有子菜单
         return {
           key: fullKey,
           label: value.label,
           children: buildMenuItems(value.children, fullKey)
         };
       } else if (value.content) {
-        // 叶子节点，包含模板内容
         return {
           key: fullKey,
           label: value.label

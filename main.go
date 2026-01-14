@@ -232,7 +232,6 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		node.RegisterMetadataRoutes(api)
 		node.RegisterShellRoutes(api)
 		ns.RegisterRoutes(api)
-		dynamic.RegisterYamlRoutes(api)
 		sts.RegisterRoutes(api)
 		ds.RegisterRoutes(api)
 		rs.RegisterRoutes(api)

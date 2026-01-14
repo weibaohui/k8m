@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as monaco from 'monaco-editor';
 import { Button, Modal, List } from 'antd';
 import { fetcher } from "@/components/Amis/fetcher.ts";
-import BuiltinTemplateButton from './BuiltinTemplateButton';
+import BuiltinTemplateButton from '@/components/Amis/custom/YamlEditor/components/BuiltinTemplateButton';
 
 interface EditorPanelProps {
     onSaveSuccess: (content: string) => void;
@@ -44,7 +44,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
 
         try {
             const response = await fetcher({
-                url: '/k8s/yaml/delete',
+                url: '/k8s/plugins/yaml_editor/yaml/delete',
                 method: 'post',
                 data: {
                     yaml: content
@@ -81,7 +81,6 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
                 )
             });
 
-            // 删除后保持编辑器内容不变
         } catch (error) {
             Modal.error({
                 title: '删除失败',
@@ -96,7 +95,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
 
         try {
             const response = await fetcher({
-                url: '/k8s/yaml/apply',
+                url: '/k8s/plugins/yaml_editor/yaml/apply',
                 method: 'post',
                 data: {
                     yaml: content
@@ -177,10 +176,6 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
         input.click();
     };
 
-    /**
-     * 处理内置模板选择
-     * @param content 模板内容
-     */
     const handleTemplateSelect = (content: string) => {
         if (monacoInstance.current) {
             monacoInstance.current.setValue(content);
