@@ -250,6 +250,6 @@ func registerBuiltinImageConfigRiskLuaScripts() {
 
 // init 初始化并注册镜像配置风险巡检内置脚本。
 func init() {
-	klog.V(6).Info("自动注册镜像配置风险巡检内置脚本")
+	klog.V(6).Infof("自动注册镜像配置风险巡检内置脚本")
 	registerBuiltinImageConfigRiskLuaScripts()
 }
