@@ -16,7 +16,7 @@ type ToolController struct {
 // @Security BearerAuth
 // @Param name path string true "MCP服务器名称"
 // @Success 200 {object} string
-// @Router /admin/mcp/server/{name}/tools/list [get]
+// @Router /admin/plugins/mcp_runtime/tool/server/{name}/tools/list [get]
 func (m *ToolController) List(c *response.Context) {
 	name := c.Param("name")
 	params := dao.BuildParams(c)
@@ -37,7 +37,7 @@ func (m *ToolController) List(c *response.Context) {
 // @Param id path int true "工具ID"
 // @Param status path string true "状态，例如：true、false"
 // @Success 200 {object} string
-// @Router /admin/mcp/tool/save/id/{id}/status/{status} [post]
+// @Router /admin/plugins/mcp_runtime/tool/save/id/{id}/status/{status} [post]
 func (m *ToolController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
