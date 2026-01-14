@@ -18,7 +18,7 @@ type ServerController struct {
 // @Summary 获取MCP服务器列表
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/mcp/list [get]
+// @Router /admin/plugins/mcp_runtime/server/list [get]
 func (m *ServerController) List(c *response.Context) {
 	params := dao.BuildParams(c)
 	var mcpServer models.MCPServerConfig
@@ -30,7 +30,7 @@ func (m *ServerController) List(c *response.Context) {
 // @Security BearerAuth
 // @Param name path string true "MCP服务器名称"
 // @Success 200 {object} string
-// @Router /admin/mcp/connect/{name} [post]
+// @Router /admin/plugins/mcp_runtime/server/connect/{name} [post]
 func (m *ServerController) Connect(c *response.Context) {
 	name := c.Param("name")
 	ctx := amis.GetContextWithUser(c)
@@ -42,7 +42,7 @@ func (m *ServerController) Connect(c *response.Context) {
 // @Security BearerAuth
 // @Param request body object true "删除请求体包含IDs数组"
 // @Success 200 {object} string
-// @Router /admin/mcp/delete [post]
+// @Router /admin/plugins/mcp_runtime/server/delete [post]
 func (m *ServerController) Delete(c *response.Context) {
 	var req struct {
 		IDs []int `json:"ids"`
@@ -66,7 +66,7 @@ func (m *ServerController) Delete(c *response.Context) {
 // @Security BearerAuth
 // @Param request body models.MCPServerConfig true "MCP服务器配置信息"
 // @Success 200 {object} string
-// @Router /admin/mcp/save [post]
+// @Router /admin/plugins/mcp_runtime/server/save [post]
 func (m *ServerController) Save(c *response.Context) {
 	params := dao.BuildParams(c)
 
@@ -95,7 +95,7 @@ func (m *ServerController) Save(c *response.Context) {
 // @Param id path int true "MCP服务器ID"
 // @Param status path string true "服务器状态(true/false)"
 // @Success 200 {object} string
-// @Router /admin/mcp/save/id/{id}/status/{status} [post]
+// @Router /admin/plugins/mcp_runtime/server/save/id/{id}/status/{status} [post]
 func (m *ServerController) QuickSave(c *response.Context) {
 	id := c.Param("id")
 	status := c.Param("status")
@@ -132,7 +132,7 @@ func (m *ServerController) QuickSave(c *response.Context) {
 // @Summary 获取MCP服务器日志列表
 // @Security BearerAuth
 // @Success 200 {object} string
-// @Router /admin/mcp/log/list [get]
+// @Router /admin/plugins/mcp_runtime/server/log/list [get]
 func (m *ServerController) MCPLogList(c *response.Context) {
 	params := dao.BuildParams(c)
 	var tool models.MCPToolLog

@@ -283,22 +283,82 @@ func (m *Manager) InstallPlugin(c *response.Context) {
 	amis.WriteJsonOKMsg(c, "已安装")
 }
 
+// ensurePluginEnabledAndRunning 确保插件已安装、已启用且已启动
+// 该方法用于多个管理接口复用：若未安装则先安装；若未启用则先启用；若未启动则启动。
+func (m *Manager) ensurePluginEnabledAndRunning(name string, params *dao.Params) error {
+	st, ok := m.StatusOf(name)
+	if !ok || st == StatusUninstalled {
+		klog.V(6).Infof("插件未安装，先进行安装: %s", name)
+		if err := m.Install(name); err != nil {
+			return err
+		}
+		if err := m.PersistStatus(name, StatusInstalled, params); err != nil {
+			return err
+		}
+		st = StatusInstalled
+	}
+
+	if st == StatusInstalled || st == StatusDisabled {
+		klog.V(6).Infof("插件未启用，先进行启用: %s", name)
+		if err := m.Enable(name); err != nil {
+			return err
+		}
+		if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
+			return err
+		}
+		st = StatusEnabled
+	}
+
+	if st == StatusEnabled || st == StatusStopped {
+		klog.V(6).Infof("插件未启动，进行启动: %s", name)
+		if err := m.StartPlugin(name); err != nil {
+			return err
+		}
+		if err := m.PersistStatus(name, StatusRunning, params); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ensurePluginDisabled 确保插件处于禁用状态
+// 该方法用于多个管理接口复用：若插件正在运行则先停止，再执行禁用。
+func (m *Manager) ensurePluginDisabled(name string, params *dao.Params) error {
+	st, _ := m.StatusOf(name)
+	if st == StatusRunning {
+		klog.V(6).Infof("插件正在运行，先停止: %s", name)
+		if err := m.StopPlugin(name); err != nil {
+			return err
+		}
+		if err := m.PersistStatus(name, StatusStopped, params); err != nil {
+			return err
+		}
+	}
+
+	if err := m.Disable(name); err != nil {
+		return err
+	}
+	if err := m.PersistStatus(name, StatusDisabled, params); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // EnablePlugin 启用指定名称的插件
 // 路径参数为插件名，启用失败时返回错误
 func (m *Manager) EnablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("启用插件配置请求: %s", name)
-	if err := m.Enable(name); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+
 	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
+	if err := m.ensurePluginEnabledAndRunning(name, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
 
-	amis.WriteJsonOKMsg(c, "已启用")
+	amis.WriteJsonOKMsg(c, "已启用并启动")
 }
 
 // StartPluginAPI 启动指定名称的插件
@@ -378,12 +438,9 @@ func (m *Manager) UninstallPluginKeepData(c *response.Context) {
 func (m *Manager) DisablePlugin(c *response.Context) {
 	name := c.Param("name")
 	klog.V(6).Infof("禁用插件配置请求: %s", name)
-	if err := m.Disable(name); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
+
 	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusDisabled, params); err != nil {
+	if err := m.ensurePluginDisabled(name, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}
@@ -623,22 +680,10 @@ func (m *Manager) TogglePluginEnabled(c *response.Context) {
 		return
 	}
 
-	m.mu.RLock()
-	currentStatus := m.status[name]
-	m.mu.RUnlock()
+	params := dao.BuildParams(c)
 
 	if enabled == "true" || enabled == "1" || enabled == "yes" {
-		// 启用插件：已安装或已禁用状态可以启用
-		if currentStatus != StatusInstalled && currentStatus != StatusDisabled {
-			amis.WriteJsonError(c, fmt.Errorf("插件当前状态不允许启用: %s", statusToCN(currentStatus)))
-			return
-		}
-		if err := m.Enable(name); err != nil {
-			amis.WriteJsonError(c, err)
-			return
-		}
-		params := dao.BuildParams(c)
-		if err := m.PersistStatus(name, StatusEnabled, params); err != nil {
+		if err := m.ensurePluginEnabledAndRunning(name, params); err != nil {
 			amis.WriteJsonError(c, err)
 			return
 		}
@@ -647,26 +692,7 @@ func (m *Manager) TogglePluginEnabled(c *response.Context) {
 		return
 	}
 
-	// 禁用插件：如果正在运行，先停止再禁用
-	if currentStatus == StatusRunning {
-		// 先停止插件
-		if err := m.StopPlugin(name); err != nil {
-			amis.WriteJsonError(c, fmt.Errorf("停止插件失败: %w", err))
-			return
-		}
-		klog.V(6).Infof("插件已停止: %s", name)
-	}
-	// 已停止/已启用/运行中 状态可以禁用
-	if currentStatus != StatusStopped && currentStatus != StatusRunning && currentStatus != StatusEnabled {
-		amis.WriteJsonError(c, fmt.Errorf("插件当前状态不允许禁用: %s", statusToCN(currentStatus)))
-		return
-	}
-	if err := m.Disable(name); err != nil {
-		amis.WriteJsonError(c, err)
-		return
-	}
-	params := dao.BuildParams(c)
-	if err := m.PersistStatus(name, StatusDisabled, params); err != nil {
+	if err := m.ensurePluginDisabled(name, params); err != nil {
 		amis.WriteJsonError(c, err)
 		return
 	}

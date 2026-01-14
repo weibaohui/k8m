@@ -14,6 +14,7 @@ import (
 func RegisterPluginAdminRoutes(arg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameMCPRuntime
 	serverCtrl := &admin.ServerController{}
+	arg.Get(prefix+"/server/list", response.Adapter(serverCtrl.List))
 	arg.Get(prefix+"/server/connect/{name}", response.Adapter(serverCtrl.Connect))
 	arg.Post(prefix+"/server/delete", response.Adapter(serverCtrl.Delete))
 	arg.Post(prefix+"/server/save", response.Adapter(serverCtrl.Save))
