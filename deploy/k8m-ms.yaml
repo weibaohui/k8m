@@ -248,7 +248,7 @@ spec:
             # - name: PG_USER
             #   value: "postgres"
             # - name: PG_PASSWORD
-            #   value: ""
+            #   value: "postgres"
             # - name: PG_DATABASE
             #   value: "k8m"
             # - name: PG_SSLMODE
