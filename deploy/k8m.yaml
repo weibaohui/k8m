@@ -238,6 +238,25 @@ spec:
             #   value: "parseTime=True&loc=Local"
             # - name: MYSQL_LOGMODE
             #   value: "false"
+            # PostgreSQL数据库配置（如需启用请取消注释并配置）
+            # - name: DB_DRIVER
+            #   value: "postgresql"
+            # - name: PG_HOST
+            #   value: "127.0.0.1"
+            # - name: PG_PORT
+            #   value: "5432"
+            # - name: PG_USER
+            #   value: "postgres"
+            # - name: PG_PASSWORD
+            #   value: ""
+            # - name: PG_DATABASE
+            #   value: "k8m"
+            # - name: PG_SSLMODE
+            #   value: "disable"
+            # - name: PG_TIMEZONE
+            #   value: "Asia/Shanghai"
+            # - name: PG_LOGMODE
+            #   value: "false"
           ports:
             - containerPort: 3618
               protocol: TCP
