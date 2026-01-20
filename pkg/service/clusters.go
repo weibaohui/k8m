@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -145,7 +144,7 @@ func (c *ClusterConfig) GetClusterID() string {
 		id = "InCluster"
 	}
 	c.ClusterID = id
-	c.ClusterIDBase64 = base64.StdEncoding.EncodeToString([]byte(id))
+	c.ClusterIDBase64 = utils.UrlSafeBase64Encode(id)
 	return id
 }
 
