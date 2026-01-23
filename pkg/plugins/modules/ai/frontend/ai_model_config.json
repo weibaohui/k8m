@@ -43,7 +43,6 @@
                   "name": "api_key",
                   "type": "input-password",
                   "label": "API密钥",
-                  "required": true,
                   "desc": "大模型的自定义API Key"
                 },
                 {
@@ -194,7 +193,6 @@
                       "name": "api_key",
                       "type": "input-password",
                       "label": "API密钥",
-                      "required": true,
                       "desc": "大模型的自定义API Key"
                     },
                     {
