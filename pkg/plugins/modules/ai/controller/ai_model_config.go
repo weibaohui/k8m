@@ -94,10 +94,11 @@ func (m *AIModelConfigController) Save(c *response.Context) {
 		amis.WriteJsonError(c, fmt.Errorf("API URL不能为空"))
 		return
 	}
-	if config.ApiKey == "" {
-		amis.WriteJsonError(c, fmt.Errorf("API Key不能为空"))
-		return
-	}
+	// 本地模型或者私有化部署部分模型不需要
+	// if config.ApiKey == "" {
+	// 	amis.WriteJsonError(c, fmt.Errorf("API Key不能为空"))
+	// 	return
+	// }
 	if config.Temperature < 0 || config.Temperature > 2 {
 		amis.WriteJsonError(c, fmt.Errorf("Temperature参数应在0-2之间"))
 		return
