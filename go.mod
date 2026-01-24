@@ -27,7 +27,7 @@ require (
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.6
 	github.com/weibaohui/htpl v0.0.2
-	github.com/weibaohui/kom v0.2.70
+	github.com/weibaohui/kom v0.2.71
 	github.com/yuin/gopher-lua v1.1.1
 	golang.org/x/net v0.47.0
 	golang.org/x/oauth2 v0.32.0

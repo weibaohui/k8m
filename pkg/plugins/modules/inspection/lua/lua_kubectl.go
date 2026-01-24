@@ -1,7 +1,10 @@
 package lua
 
 import (
+	"fmt"
 	"io"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils"
@@ -305,6 +308,387 @@ func getPodResourceUsage(L *lua.LState) int {
 
 	// 返回查询结果
 	L.Push(table)
+	L.Push(lua.LNil)
+	return 2
+}
+
+// parseLuaTime 将 Lua 传入的时间（数字/字符串）解析为 time.Time。
+// - number：默认按 Unix 秒解析；当数值过大（>= 1e12）时按 Unix 毫秒解析
+// - string：支持 RFC3339、RFC3339Nano、"2006-01-02 15:04:05"、纯数字（同 number）
+func parseLuaTime(val lua.LValue) (time.Time, error) {
+	switch v := val.(type) {
+	case lua.LNumber:
+		n := float64(v)
+		if n >= 1e12 {
+			return time.UnixMilli(int64(n)), nil
+		}
+		return time.Unix(int64(n), 0), nil
+	case lua.LString:
+		s := strings.TrimSpace(v.String())
+		if s == "" {
+			return time.Time{}, fmt.Errorf("时间为空")
+		}
+		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+			if i >= 1e12 {
+				return time.UnixMilli(i), nil
+			}
+			return time.Unix(i, 0), nil
+		}
+		for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02 15:04:05"} {
+			if t, err := time.Parse(layout, s); err == nil {
+				return t, nil
+			}
+		}
+		return time.Time{}, fmt.Errorf("无法解析时间: %s", s)
+	default:
+		return time.Time{}, fmt.Errorf("不支持的时间类型: %s", val.Type().String())
+	}
+}
+
+// promResultToGoValue 将 Prometheus 查询结果转换为 Lua 可消费的数据结构。
+// - resultType="string"：返回 res.AsString()
+// - resultType="scalar"：返回 number
+// - resultType="vector"：返回 [{metric=map,value=number,timestamp=string},...]
+// - resultType="matrix"：返回 [{metric=map,samples=[{timestamp=string,value=number},...]},...]
+func promResultToGoValue(res *kom.PromResult, resultType string) (any, error) {
+	switch strings.ToLower(strings.TrimSpace(resultType)) {
+	case "", "string":
+		return res.AsString(), nil
+	case "scalar":
+		v, ok := res.AsScalar()
+		if !ok {
+			return nil, fmt.Errorf("查询结果不是标量")
+		}
+		return v, nil
+	case "vector":
+		samples := res.AsVector()
+		out := make([]any, 0, len(samples))
+		for _, s := range samples {
+			out = append(out, map[string]any{
+				"metric":    s.Metric,
+				"value":     s.Value,
+				"timestamp": s.Timestamp.Format(time.RFC3339),
+			})
+		}
+		return out, nil
+	case "matrix":
+		series := res.AsMatrix()
+		out := make([]any, 0, len(series))
+		for _, se := range series {
+			points := make([]any, 0, len(se.Samples))
+			for _, p := range se.Samples {
+				points = append(points, map[string]any{
+					"timestamp": p.Timestamp.Format(time.RFC3339),
+					"value":     p.Value,
+				})
+			}
+			out = append(out, map[string]any{
+				"metric":  se.Metric,
+				"samples": points,
+			})
+		}
+		return out, nil
+	default:
+		return res.AsString(), nil
+	}
+}
+
+// promQuery 实现 kubectl:PromQuery(opts) 方法。
+// 用于执行 Prometheus 瞬时查询，返回 Lua 值和错误信息。
+// opts 支持字段：
+// - address: string，外部 Prometheus 地址
+// - namespace/service(or svcName): string，集群内 Prometheus Service 定位（优先使用 address，其次使用 namespace+service）
+// - expr: string，PromQL 表达式
+// - at: number|string，可选，指定瞬时时间点（不传则为当前时间）
+// - timeoutSeconds: number，可选，查询超时（秒）
+// - resultType: string，可选，string/scalar/vector/matrix（默认 string）
+func promQuery(L *lua.LState) int {
+	ud := L.CheckUserData(1)
+	obj, ok := ud.Value.(*Kubectl)
+	if !ok {
+		L.ArgError(1, "expected kubectl")
+		return 0
+	}
+	if obj.k == nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString("kubectl 未初始化"))
+		return 2
+	}
+	tbl := L.CheckTable(2)
+
+	exprVal := tbl.RawGetString("expr")
+	if exprVal == lua.LNil {
+		exprVal = tbl.RawGetString("Expr")
+	}
+	expr := strings.TrimSpace(exprVal.String())
+	if expr == "" {
+		L.Push(lua.LNil)
+		L.Push(lua.LString("缺少 expr 参数"))
+		return 2
+	}
+
+	address := strings.TrimSpace(tbl.RawGetString("address").String())
+	if address == "" {
+		address = strings.TrimSpace(tbl.RawGetString("Address").String())
+	}
+	namespace := strings.TrimSpace(tbl.RawGetString("namespace").String())
+	if namespace == "" {
+		namespace = strings.TrimSpace(tbl.RawGetString("Namespace").String())
+	}
+	if namespace == "" {
+		namespace = strings.TrimSpace(tbl.RawGetString("inClusterNamespace").String())
+	}
+	service := strings.TrimSpace(tbl.RawGetString("service").String())
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("Service").String())
+	}
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("svcName").String())
+	}
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("SvcName").String())
+	}
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("inClusterService").String())
+	}
+
+	timeoutSeconds := int64(0)
+	if v := tbl.RawGetString("timeoutSeconds"); v.Type() == lua.LTNumber {
+		timeoutSeconds = int64(lua.LVAsNumber(v))
+	} else if v := tbl.RawGetString("TimeoutSeconds"); v.Type() == lua.LTNumber {
+		timeoutSeconds = int64(lua.LVAsNumber(v))
+	}
+
+	resultType := strings.TrimSpace(tbl.RawGetString("resultType").String())
+	if resultType == "" {
+		resultType = strings.TrimSpace(tbl.RawGetString("ResultType").String())
+	}
+	if resultType == "" {
+		resultType = "string"
+	}
+
+	ctx := utils.GetContextWithAdmin()
+
+	client := obj.k.WithContext(ctx).Prometheus()
+	var query *kom.PromQuery
+	if address != "" {
+		klog.V(6).Infof("执行 Prometheus 瞬时查询，使用外部地址：%s", address)
+		query = client.WithAddress(address).Expr(expr)
+	} else {
+		klog.V(6).Infof("执行 Prometheus 瞬时查询，使用集群内服务：%s/%s", namespace, service)
+		query = client.WithInClusterEndpoint(namespace, service).Expr(expr)
+	}
+	if timeoutSeconds > 0 {
+		query = query.WithTimeout(time.Duration(timeoutSeconds) * time.Second)
+	}
+
+	var (
+		res *kom.PromResult
+		err error
+	)
+	if v := tbl.RawGetString("at"); v != lua.LNil {
+		at, perr := parseLuaTime(v)
+		if perr != nil {
+			L.Push(lua.LNil)
+			L.Push(lua.LString(perr.Error()))
+			return 2
+		}
+		klog.V(6).Infof("执行 Prometheus 瞬时查询，指定时间点：%s", at.Format(time.RFC3339))
+		res, err = query.QueryAt(at)
+	} else if v := tbl.RawGetString("At"); v != lua.LNil {
+		at, perr := parseLuaTime(v)
+		if perr != nil {
+			L.Push(lua.LNil)
+			L.Push(lua.LString(perr.Error()))
+			return 2
+		}
+		klog.V(6).Infof("执行 Prometheus 瞬时查询，指定时间点：%s", at.Format(time.RFC3339))
+		res, err = query.QueryAt(at)
+	} else {
+		klog.V(6).Infof("执行 Prometheus 瞬时查询，当前时间点")
+		res, err = query.Query()
+	}
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	out, terr := promResultToGoValue(res, resultType)
+	if terr != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(terr.Error()))
+		return 2
+	}
+
+	L.Push(toLValue(L, out))
+	L.Push(lua.LNil)
+	return 2
+}
+
+// promQueryRange 实现 kubectl:PromQueryRange(opts) 方法。
+// 用于执行 Prometheus 区间查询，返回 Lua 值和错误信息。
+// opts 支持字段：
+// - address: string，外部 Prometheus 地址
+// - namespace/service(or svcName): string，集群内 Prometheus Service 定位（优先使用 address，其次使用 namespace+service）
+// - expr: string，PromQL 表达式
+// - start/end: number|string，必填，时间范围
+// - stepSeconds/step: number|string，可选，步长（秒或 "1m" 这类 duration，默认 60 秒）
+// - timeoutSeconds: number，可选，查询超时（秒）
+// - resultType: string，可选，string/matrix（默认 string）
+func promQueryRange(L *lua.LState) int {
+	ud := L.CheckUserData(1)
+	obj, ok := ud.Value.(*Kubectl)
+	if !ok {
+		L.ArgError(1, "expected kubectl")
+		return 0
+	}
+	if obj.k == nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString("kubectl 未初始化"))
+		return 2
+	}
+	tbl := L.CheckTable(2)
+
+	exprVal := tbl.RawGetString("expr")
+	if exprVal == lua.LNil {
+		exprVal = tbl.RawGetString("Expr")
+	}
+	expr := strings.TrimSpace(exprVal.String())
+	if expr == "" {
+		L.Push(lua.LNil)
+		L.Push(lua.LString("缺少 expr 参数"))
+		return 2
+	}
+
+	startVal := tbl.RawGetString("start")
+	if startVal == lua.LNil {
+		startVal = tbl.RawGetString("Start")
+	}
+	endVal := tbl.RawGetString("end")
+	if endVal == lua.LNil {
+		endVal = tbl.RawGetString("End")
+	}
+	if startVal == lua.LNil || endVal == lua.LNil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString("缺少 start/end 参数"))
+		return 2
+	}
+	start, err := parseLuaTime(startVal)
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+	end, err := parseLuaTime(endVal)
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	step := time.Minute
+	if v := tbl.RawGetString("stepSeconds"); v.Type() == lua.LTNumber {
+		sec := int64(lua.LVAsNumber(v))
+		if sec > 0 {
+			step = time.Duration(sec) * time.Second
+		}
+	} else if v := tbl.RawGetString("StepSeconds"); v.Type() == lua.LTNumber {
+		sec := int64(lua.LVAsNumber(v))
+		if sec > 0 {
+			step = time.Duration(sec) * time.Second
+		}
+	} else if v := tbl.RawGetString("step"); v.Type() == lua.LTNumber {
+		sec := int64(lua.LVAsNumber(v))
+		if sec > 0 {
+			step = time.Duration(sec) * time.Second
+		}
+	} else if v := tbl.RawGetString("Step"); v.Type() == lua.LTNumber {
+		sec := int64(lua.LVAsNumber(v))
+		if sec > 0 {
+			step = time.Duration(sec) * time.Second
+		}
+	} else if v := tbl.RawGetString("step"); v.Type() == lua.LTString {
+		if d, derr := time.ParseDuration(strings.TrimSpace(v.String())); derr == nil && d > 0 {
+			step = d
+		}
+	} else if v := tbl.RawGetString("Step"); v.Type() == lua.LTString {
+		if d, derr := time.ParseDuration(strings.TrimSpace(v.String())); derr == nil && d > 0 {
+			step = d
+		}
+	}
+
+	timeoutSeconds := int64(0)
+	if v := tbl.RawGetString("timeoutSeconds"); v.Type() == lua.LTNumber {
+		timeoutSeconds = int64(lua.LVAsNumber(v))
+	} else if v := tbl.RawGetString("TimeoutSeconds"); v.Type() == lua.LTNumber {
+		timeoutSeconds = int64(lua.LVAsNumber(v))
+	}
+
+	resultType := strings.TrimSpace(tbl.RawGetString("resultType").String())
+	if resultType == "" {
+		resultType = strings.TrimSpace(tbl.RawGetString("ResultType").String())
+	}
+	if resultType == "" {
+		resultType = "string"
+	}
+
+	address := strings.TrimSpace(tbl.RawGetString("address").String())
+	if address == "" {
+		address = strings.TrimSpace(tbl.RawGetString("Address").String())
+	}
+	namespace := strings.TrimSpace(tbl.RawGetString("namespace").String())
+	if namespace == "" {
+		namespace = strings.TrimSpace(tbl.RawGetString("Namespace").String())
+	}
+	if namespace == "" {
+		namespace = strings.TrimSpace(tbl.RawGetString("inClusterNamespace").String())
+	}
+	service := strings.TrimSpace(tbl.RawGetString("service").String())
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("Service").String())
+	}
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("svcName").String())
+	}
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("SvcName").String())
+	}
+	if service == "" {
+		service = strings.TrimSpace(tbl.RawGetString("inClusterService").String())
+	}
+
+	ctx := utils.GetContextWithAdmin()
+
+	client := obj.k.WithContext(ctx).Prometheus()
+	var query *kom.PromQuery
+	if address != "" {
+		klog.V(6).Infof("执行 Prometheus 区间查询，使用外部地址：%s", address)
+		query = client.WithAddress(address).Expr(expr)
+	} else {
+		klog.V(6).Infof("执行 Prometheus 区间查询，使用集群内服务：%s/%s", namespace, service)
+		query = client.WithInClusterEndpoint(namespace, service).Expr(expr)
+	}
+	if timeoutSeconds > 0 {
+		query = query.WithTimeout(time.Duration(timeoutSeconds) * time.Second)
+	}
+
+	klog.V(6).Infof("执行 Prometheus 区间查询，start=%s，end=%s，step=%s", start.Format(time.RFC3339), end.Format(time.RFC3339), step.String())
+	res, err := query.QueryRange(start, end, step)
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	out, terr := promResultToGoValue(res, resultType)
+	if terr != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(terr.Error()))
+		return 2
+	}
+
+	L.Push(toLValue(L, out))
 	L.Push(lua.LNil)
 	return 2
 }
