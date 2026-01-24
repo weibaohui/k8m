@@ -226,6 +226,7 @@ func buildRouter(mgr *plugins.Manager, r chi.Router) http.Handler {
 		pod.RegisterPortRoutes(api)
 		deploy.RegisterActionRoutes(api)
 		svc.RegisterActionRoutes(api)
+		svc.RegisterPortForwardRoutes(api)
 		node.RegisterActionRoutes(api)
 		node.RegisterResourceRoutes(api)
 		node.RegisterTaintRoutes(api)

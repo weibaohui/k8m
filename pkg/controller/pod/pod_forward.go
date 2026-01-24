@@ -1,6 +1,7 @@
 package pod
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"sync"
@@ -71,55 +72,11 @@ func (pc *PortController) StartPortForward(c *response.Context) {
 		return
 	}
 
-	// 前端是界面点选而来
-	// // 检查pod是否存在
-	// var pod v1.Pod
-	// err = kom.Cluster(selectedCluster).WithContext(ctx).
-	// 	Resource(&v1.Pod{}).
-	// 	Namespace(ns).
-	// 	Name(name).
-	// 	Get(&pod).Error
-	//
-	// if err != nil {
-	// 	amis.WriteJsonError(c, err)
-	// 	return
-	// }
-
-	stopCh := make(chan struct{})
-	key := getMapKey(selectedCluster, ns, name, containerName, podPort)
-
-	if localPort == "" {
-		localPort = getRandomPort()
+	_, err = StartPortForwardByPod(ctx, selectedCluster, ns, name, containerName, podPort, localPort)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
-	go func() {
-		portForwardTableMutex.Lock()
-		portForwardTable[key] = &PortInfo{
-			Cluster:       selectedCluster,
-			Namespace:     ns,
-			Name:          name,
-			ContainerName: containerName, // 可后续补充
-			LocalPort:     localPort,
-			PodPort:       podPort,
-			Status:        "running",
-			StopCh:        stopCh,
-		}
-		portForwardTableMutex.Unlock()
-		err = kom.Cluster(selectedCluster).WithContext(ctx).
-			Resource(&v1.Pod{}).
-			Namespace(ns).
-			Name(name).
-			Ctl().Pod().
-			ContainerName(containerName).
-			PortForward(localPort, podPort, stopCh).Error
-		if err != nil {
-			portForwardTableMutex.Lock()
-			if pf, ok := portForwardTable[key]; ok {
-				pf.Status = "failed"
-			}
-			portForwardTableMutex.Unlock()
-		}
-
-	}()
 	amis.WriteJsonOK(c)
 }
 
@@ -242,4 +199,73 @@ func getRandomPort() string {
 			return portStr
 		}
 	}
+}
+
+// StartPortForwardByPod 通过 Pod 信息启动端口转发。
+// localPort 为空时将随机分配一个本地端口并返回。
+func StartPortForwardByPod(ctx context.Context, selectedCluster, ns, podName, containerName, podPort, localPort string) (string, error) {
+	if _, err := strconv.Atoi(podPort); err != nil {
+		return "", fmt.Errorf("无效的容器组端口号: %s", podPort)
+	}
+	if localPort == "" {
+		localPort = getRandomPort()
+	}
+
+	stopCh := make(chan struct{})
+	key := getMapKey(selectedCluster, ns, podName, containerName, podPort)
+
+	portForwardTableMutex.Lock()
+	portForwardTable[key] = &PortInfo{
+		Cluster:       selectedCluster,
+		Namespace:     ns,
+		Name:          podName,
+		ContainerName: containerName,
+		LocalPort:     localPort,
+		PodPort:       podPort,
+		Status:        "running",
+		StopCh:        stopCh,
+	}
+	portForwardTableMutex.Unlock()
+
+	go func() {
+		err := kom.Cluster(selectedCluster).WithContext(ctx).
+			Resource(&v1.Pod{}).
+			Namespace(ns).
+			Name(podName).
+			Ctl().Pod().
+			ContainerName(containerName).
+			PortForward(localPort, podPort, stopCh).Error
+		if err != nil {
+			portForwardTableMutex.Lock()
+			if pf, ok := portForwardTable[key]; ok {
+				pf.Status = "failed"
+			}
+			portForwardTableMutex.Unlock()
+		}
+	}()
+
+	return localPort, nil
+}
+
+// StopPortForwardByPod 通过 Pod 信息停止端口转发。
+func StopPortForwardByPod(selectedCluster, ns, podName, containerName, podPort string) {
+	key := getMapKey(selectedCluster, ns, podName, containerName, podPort)
+	portForwardTableMutex.Lock()
+	if pf, ok := portForwardTable[key]; ok {
+		pf.StopCh <- struct{}{}
+		pf.Status = "stopped"
+		pf.LocalPort = ""
+	}
+	portForwardTableMutex.Unlock()
+}
+
+// GetPortForwardStatus 获取指定 Pod 端口转发的状态与本地端口。
+func GetPortForwardStatus(selectedCluster, ns, podName, containerName, podPort string) (status, localPort string, ok bool) {
+	key := getMapKey(selectedCluster, ns, podName, containerName, podPort)
+	portForwardTableMutex.RLock()
+	defer portForwardTableMutex.RUnlock()
+	if pf, exists := portForwardTable[key]; exists {
+		return pf.Status, pf.LocalPort, true
+	}
+	return "", "", false
 }
