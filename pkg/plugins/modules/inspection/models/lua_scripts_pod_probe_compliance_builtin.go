@@ -203,6 +203,8 @@ var builtinLuaScriptsPrometheusExample = []InspectionLuaScript{
 			local stepSeconds = 60
 
 			local value, err = kubectl:PromQueryRange({
+				-- 注意：示例中的 Prometheus 地址仅用于本地演示；生产环境请替换为「k8m 运行实例可访问到」的 Prometheus 地址
+				-- 例如：k8m 若运行在集群内 Pod 中，请填写集群内可访问的 Service 地址或 Ingress 地址
 				address = "http://127.0.0.1:43329/",
 				expr = [[sum by (instance) (irate(node_cpu_seconds_total{mode!="idle"}[1m])) / sum by (instance) (irate(node_cpu_seconds_total[1m])) * 100]],
 				start = start,
@@ -236,6 +238,8 @@ var builtinLuaScriptsPrometheusExample = []InspectionLuaScript{
 		TimeoutSeconds: 30,
 		Script: `
 			local value, err = kubectl:PromQuery({
+				-- 注意：示例中的 Prometheus 地址仅用于本地演示；生产环境请替换为「k8m 运行实例可访问到」的 Prometheus 地址
+				-- 例如：k8m 若运行在集群内 Pod 中，请填写集群内可访问的 Service 地址或 Ingress 地址
 				address = "http://127.0.0.1:43329/",
 				expr = [[sum by (instance) (irate(node_cpu_seconds_total{mode!="idle"}[1m])) / sum by (instance) (irate(node_cpu_seconds_total[1m])) * 100]],
 				timeoutSeconds = 5,
