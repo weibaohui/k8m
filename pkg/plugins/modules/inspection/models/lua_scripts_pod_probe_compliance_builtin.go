@@ -187,14 +187,90 @@ var builtinLuaScriptsPodProbeCompliance = []InspectionLuaScript{
 	},
 }
 
+var builtinLuaScriptsPrometheusExample = []InspectionLuaScript{
+	{
+		Name:           "Prometheus 查询示例 | 区间查询 QueryRange",
+		Description:    "示例：通过 kubectl:PromQueryRange 执行 PromQL 区间查询，并返回矩阵结果。",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "Prometheus",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Prometheus_001",
+		TimeoutSeconds: 30,
+		Script: `
+			local start = os.time() - 3600
+			local finish = os.time()
+			local stepSeconds = 60
+
+			local value, err = kubectl:PromQueryRange({
+				address = "http://127.0.0.1:43329/",
+				expr = [[sum by (instance) (irate(node_cpu_seconds_total{mode!="idle"}[1m])) / sum by (instance) (irate(node_cpu_seconds_total[1m])) * 100]],
+				start = start,
+				["end"] = finish,
+				stepSeconds = stepSeconds,
+				timeoutSeconds = 5,
+				resultType = "matrix"
+			})
+
+			log({ action = "PromQueryRange", address = "http://127.0.0.1:43329/", expr = "node_cpu_usage_percent", start = start, ["end"] = finish, stepSeconds = stepSeconds, value = value, err = err })
+
+			if err then
+				check_event("失败", "Prometheus 区间查询失败: " .. tostring(err), { address = "http://127.0.0.1:43329/", expr = "node_cpu_usage_percent", start = start, ["end"] = finish, stepSeconds = stepSeconds })
+				print("Prometheus 区间查询失败: " .. tostring(err))
+				return
+			end
+
+			print("Prometheus 区间查询结果（matrix）:")
+			log(value)
+			print("Prometheus 区间查询示例执行完成")
+		`,
+	},
+	{
+		Name:           "Prometheus 查询示例 | 瞬时查询 Query",
+		Description:    "示例：通过 kubectl:PromQuery 执行 PromQL 瞬时查询，并返回向量结果。",
+		Group:          "",
+		Version:        "v1",
+		Kind:           "Prometheus",
+		ScriptType:     constants.LuaScriptTypeBuiltin,
+		ScriptCode:     "Builtin_Prometheus_002",
+		TimeoutSeconds: 30,
+		Script: `
+			local value, err = kubectl:PromQuery({
+				address = "http://127.0.0.1:43329/",
+				expr = [[sum by (instance) (irate(node_cpu_seconds_total{mode!="idle"}[1m])) / sum by (instance) (irate(node_cpu_seconds_total[1m])) * 100]],
+				timeoutSeconds = 5,
+				resultType = "vector"
+			})
+
+			log({ action = "PromQuery", address = "http://127.0.0.1:43329/", expr = "node_cpu_usage_percent", value = value, err = err })
+
+			if err then
+				check_event("失败", "Prometheus 瞬时查询失败: " .. tostring(err), { address = "http://127.0.0.1:43329/", expr = "node_cpu_usage_percent" })
+				print("Prometheus 瞬时查询失败: " .. tostring(err))
+				return
+			end
+
+			print("Prometheus 瞬时查询结果（vector）:")
+			log(value)
+			print("Prometheus 瞬时查询示例执行完成")
+		`,
+	},
+}
+
 // registerBuiltinPodProbeComplianceLuaScripts 注册 Pod 探针配置合规性检查相关内置脚本。
 func registerBuiltinPodProbeComplianceLuaScripts() {
 	BuiltinLuaScripts = append(BuiltinLuaScripts, builtinLuaScriptsPodProbeCompliance...)
+}
+
+// registerBuiltinPrometheusExampleLuaScripts 注册 Prometheus 查询示例相关内置脚本。
+func registerBuiltinPrometheusExampleLuaScripts() {
+	BuiltinLuaScripts = append(BuiltinLuaScripts, builtinLuaScriptsPrometheusExample...)
 }
 
 // init 初始化并注册 Pod 探针配置合规性检查内置脚本。
 func init() {
 	klog.V(6).Infof("自动注册 Pod 探针配置合规性检查内置脚本")
 	registerBuiltinPodProbeComplianceLuaScripts()
+	klog.V(6).Infof("自动注册 Prometheus 查询示例内置脚本")
+	registerBuiltinPrometheusExampleLuaScripts()
 }
-

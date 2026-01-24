@@ -62,6 +62,8 @@ func (p *Inspection) registerKubectlFunc() {
 		"Get":                 getResource,
 		"GetLogs":             getLogs,
 		"GetPodResourceUsage": getPodResourceUsage,
+		"PromQuery":           promQuery,
+		"PromQueryRange":      promQueryRange,
 	}))
 	p.lua.SetMetatable(ud, mt)
 }
