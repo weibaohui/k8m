@@ -125,9 +125,10 @@ func (pc *PortForwardController) StartPortForward(c *response.Context) {
 	klog.V(6).Infof("Service端口转发开始 集群=%s Service=%s/%s selector=%s Pod=%s 容器=%s 端口=%s 协议=%s", selectedCluster, ns, svcName, labelSelector, targetPod.Name, containerName, podPort, protocol)
 
 	tableKey := getSvcForwardMapKey(selectedCluster, ns, svcName, svcPortStr)
+	var oldEntry *svcPortForwardEntry
 	svcPortForwardTableMutex.Lock()
 	if old, ok := svcPortForwardTable[tableKey]; ok {
-		pod.StopPortForwardByPod(selectedCluster, ns, old.PodName, old.ContainerName, old.PodPort)
+		oldEntry = old
 	}
 	svcPortForwardTable[tableKey] = &svcPortForwardEntry{
 		Cluster:       selectedCluster,
@@ -139,6 +140,9 @@ func (pc *PortForwardController) StartPortForward(c *response.Context) {
 		PodPort:       podPort,
 	}
 	svcPortForwardTableMutex.Unlock()
+	if oldEntry != nil {
+		pod.StopPortForwardByPod(selectedCluster, ns, oldEntry.PodName, oldEntry.ContainerName, oldEntry.PodPort)
+	}
 
 	_, err = pod.StartPortForwardByPod(ctx, selectedCluster, ns, targetPod.Name, containerName, podPort, localPort)
 	if err != nil {

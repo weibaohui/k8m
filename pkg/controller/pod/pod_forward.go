@@ -101,14 +101,16 @@ func (pc *PortController) StopPortForward(c *response.Context) {
 	}
 
 	key := getMapKey(selectedCluster, ns, name, containerName, podPort)
+	var stopCh chan struct{}
 	portForwardTableMutex.Lock()
-
 	if pf, ok := portForwardTable[key]; ok {
-		pf.StopCh <- struct{}{}
+		stopCh = pf.StopCh
+		pf.StopCh = nil
 		pf.Status = "stopped"
 		pf.LocalPort = ""
 	}
 	portForwardTableMutex.Unlock()
+	closeStopChSafely(stopCh)
 
 	amis.WriteJsonOK(c)
 }
@@ -214,7 +216,14 @@ func StartPortForwardByPod(ctx context.Context, selectedCluster, ns, podName, co
 	stopCh := make(chan struct{})
 	key := getMapKey(selectedCluster, ns, podName, containerName, podPort)
 
+	var oldStopCh chan struct{}
 	portForwardTableMutex.Lock()
+	if old, ok := portForwardTable[key]; ok {
+		oldStopCh = old.StopCh
+		old.StopCh = nil
+		old.Status = "stopped"
+		old.LocalPort = ""
+	}
 	portForwardTable[key] = &PortInfo{
 		Cluster:       selectedCluster,
 		Namespace:     ns,
@@ -226,6 +235,7 @@ func StartPortForwardByPod(ctx context.Context, selectedCluster, ns, podName, co
 		StopCh:        stopCh,
 	}
 	portForwardTableMutex.Unlock()
+	closeStopChSafely(oldStopCh)
 
 	go func() {
 		err := kom.Cluster(selectedCluster).WithContext(ctx).
@@ -250,13 +260,16 @@ func StartPortForwardByPod(ctx context.Context, selectedCluster, ns, podName, co
 // StopPortForwardByPod 通过 Pod 信息停止端口转发。
 func StopPortForwardByPod(selectedCluster, ns, podName, containerName, podPort string) {
 	key := getMapKey(selectedCluster, ns, podName, containerName, podPort)
+	var stopCh chan struct{}
 	portForwardTableMutex.Lock()
 	if pf, ok := portForwardTable[key]; ok {
-		pf.StopCh <- struct{}{}
+		stopCh = pf.StopCh
+		pf.StopCh = nil
 		pf.Status = "stopped"
 		pf.LocalPort = ""
 	}
 	portForwardTableMutex.Unlock()
+	closeStopChSafely(stopCh)
 }
 
 // GetPortForwardStatus 获取指定 Pod 端口转发的状态与本地端口。
@@ -268,4 +281,14 @@ func GetPortForwardStatus(selectedCluster, ns, podName, containerName, podPort s
 		return pf.Status, pf.LocalPort, true
 	}
 	return "", "", false
+}
+
+func closeStopChSafely(stopCh chan struct{}) {
+	if stopCh == nil {
+		return
+	}
+	defer func() {
+		_ = recover()
+	}()
+	close(stopCh)
 }
