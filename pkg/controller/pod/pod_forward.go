@@ -212,6 +212,10 @@ func StartPortForwardByPod(ctx context.Context, selectedCluster, ns, podName, co
 	if localPort == "" {
 		localPort = getRandomPort()
 	}
+	localPortInt, err := strconv.Atoi(localPort)
+	if err != nil || localPortInt < 1 || localPortInt > 65535 {
+		return "", fmt.Errorf("无效的本地端口号: %s", localPort)
+	}
 
 	stopCh := make(chan struct{})
 	key := getMapKey(selectedCluster, ns, podName, containerName, podPort)
