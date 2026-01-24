@@ -146,6 +146,13 @@ func (pc *PortForwardController) StartPortForward(c *response.Context) {
 
 	_, err = pod.StartPortForwardByPod(ctx, selectedCluster, ns, targetPod.Name, containerName, podPort, localPort)
 	if err != nil {
+		svcPortForwardTableMutex.Lock()
+		if oldEntry != nil {
+			svcPortForwardTable[tableKey] = oldEntry
+		} else {
+			delete(svcPortForwardTable, tableKey)
+		}
+		svcPortForwardTableMutex.Unlock()
 		amis.WriteJsonError(c, err)
 		return
 	}
