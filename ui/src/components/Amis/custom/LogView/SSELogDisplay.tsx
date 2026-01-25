@@ -429,18 +429,24 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     };
 
     return (
-        <div ref={dom} style={{ whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#1f1f1f' }}>
             {/* AI Controls */}
-            <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#333', padding: '5px 10px', borderRadius: 4 }}>
+            <div style={{ padding: '8px 16px', borderBottom: '1px solid #333', background: '#2c2c2c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Space>
-                    <RobotOutlined style={{ color: '#1890ff' }} />
-                    <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能解析:</span>
-                    <Switch checked={aiEnabled} onChange={setAiEnabled} checkedChildren="开启" unCheckedChildren="关闭" />
-                    <Button type="link" onClick={() => setAskModalVisible(true)} style={{ color: '#40a9ff' }}>
+                    <RobotOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
+                    <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能解析</span>
+                    <Switch
+                        checked={aiEnabled}
+                        onChange={setAiEnabled}
+                        checkedChildren="开启"
+                        unCheckedChildren="关闭"
+                        size="small"
+                    />
+                    <Button type="link" onClick={() => setAskModalVisible(true)} style={{ color: '#40a9ff', paddingLeft: 8 }}>
                         询问 AI
                     </Button>
                 </Space>
-                {aiEnabled && <Tag color="blue">自动总结中...</Tag>}
+                {aiEnabled && <Tag color="blue" style={{ marginRight: 0 }}>自动总结中...</Tag>}
             </div>
 
             {/* AI Ask Modal */}
@@ -495,20 +501,22 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                     style={{ marginBottom: 12 }}
                 />
             </Modal>
-            {/* 过滤结果提示及关闭按钮 */}
-            {filteredLines && (
-                <div style={{ background: '#222', color: '#0f0', padding: '4px', marginBottom: '8px' }}>
-                    <span>已过滤 {filteredLines.length} 条日志</span>
-                    <a style={{ marginLeft: '16px', color: '#f66', cursor: 'pointer' }} onClick={handleCloseFilter}>关闭过滤</a>
-                </div>
-            )}
-            {errorMessage && <div
-                style={{ color: errorMessage == "Connected" ? '#00FF00' : 'red' }}>{errorMessage} 共计：{lines.length}行</div>}
 
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
+            {/* Main Content Area */}
+            <div ref={dom} style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
                 {/* Left Column: Log Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <pre style={{ whiteSpace: 'pre-wrap' }}>
+                <div style={{ flex: 1, backgroundColor: 'black', color: 'white', padding: '10px', overflow: 'auto' }}>
+                    {/* 过滤结果提示及关闭按钮 */}
+                    {filteredLines && (
+                        <div style={{ background: '#222', color: '#0f0', padding: '4px', marginBottom: '8px', position: 'sticky', top: 0 }}>
+                            <span>已过滤 {filteredLines.length} 条日志</span>
+                            <a style={{ marginLeft: '16px', color: '#f66', cursor: 'pointer' }} onClick={handleCloseFilter}>关闭过滤</a>
+                        </div>
+                    )}
+                    {errorMessage && <div
+                        style={{ color: errorMessage == "Connected" ? '#00FF00' : 'red' }}>{errorMessage} 共计：{lines.length}行</div>}
+
+                    <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
                         {(filteredLines || lines).map((item, index) => {
                             if (item.type === 'summary') {
                                 return null; // Summary rendered in right column
@@ -536,8 +544,8 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
                 {/* Right Column: AI Summary Cards */}
                 {aiEnabled && (
-                    <div style={{ width: '320px', marginLeft: '16px', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
-                        <div style={{ color: '#1890ff', marginBottom: 8, fontWeight: 'bold' }}>AI 智能总结列表</div>
+                    <div style={{ width: '320px', backgroundColor: '#141414', borderLeft: '1px solid #333', overflowY: 'auto', padding: '10px' }}>
+                        <div style={{ color: '#1890ff', marginBottom: 12, fontWeight: 'bold', borderBottom: '1px solid #333', paddingBottom: 8 }}>AI 智能总结列表</div>
                         {lines
                             .filter(item => item.type === 'summary')
                             .slice().reverse() // Show newest first
