@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders } from "@/utils/utils.ts";
 import AnsiToHtml from 'ansi-to-html';
-import { Modal, Input, Alert, Button, Switch, Card, Tag, Collapse, Space, message, Select } from 'antd';
-import { RobotOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Modal, Input, Alert, Button, Switch, Card, Tag, Collapse, Space, message, Select, Spin } from 'antd';
+import { RobotOutlined, ClockCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -242,10 +242,24 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const linesRef = useRef<LogItem[]>([]);
     const filteredLinesRef = useRef<LogItem[] | null>(null);
 
+    // AI Status State
+    const [aiStatus, setAiStatus] = useState<'idle' | 'pending' | 'analyzing'>('idle');
+    const [nextSummaryTime, setNextSummaryTime] = useState(0);
+    const [newLogCount, setNewLogCount] = useState(0);
+    const [countdown, setCountdown] = useState(0);
+
     // Sync lines to ref for interval access
     useEffect(() => {
         linesRef.current = lines;
-    }, [lines]);
+        // Check for new logs since last summary
+        if (aiEnabled && lastSummaryTimeRef.current > 0) {
+            const newLogs = lines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastSummaryTimeRef.current).length;
+            setNewLogCount(newLogs);
+            if (newLogs > 0 && aiStatus === 'idle') {
+                setAiStatus('pending');
+            }
+        }
+    }, [lines, aiEnabled, aiStatus]);
 
     // Sync filteredLines to ref
     useEffect(() => {
@@ -258,15 +272,28 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         if (aiEnabled) {
             // Immediate trigger when enabled
             triggerSummary();
+            setNextSummaryTime(Date.now() + summaryInterval);
 
             interval = setInterval(() => {
                 const now = Date.now();
                 const lastTime = lastSummaryTimeRef.current;
                 const currentLines = linesRef.current;
 
+                // Update countdown
+                if (aiStatus !== 'analyzing') {
+                    setCountdown(Math.max(0, Math.ceil((lastTime + summaryInterval - now) / 1000)));
+                }
+
                 // 1. Time based: custom interval
                 if (now - lastTime > summaryInterval) {
-                    triggerSummary();
+                    if (newLogCount > 0) {
+                        triggerSummary();
+                    } else {
+                        // Heartbeat skip: reset timer but don't trigger if no new logs
+                        lastSummaryTimeRef.current = Date.now(); // reset base time
+                        setNextSummaryTime(Date.now() + summaryInterval);
+                        setAiStatus('idle');
+                    }
                     return;
                 }
 
@@ -278,10 +305,13 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                         triggerSummary();
                     }
                 }
-            }, 5000);
+            }, 1000); // Check every 1s for countdown
+        } else {
+            setAiStatus('idle');
+            setNewLogCount(0);
         }
         return () => clearInterval(interval);
-    }, [aiEnabled, summaryInterval]);
+    }, [aiEnabled, summaryInterval, newLogCount, aiStatus]);
 
     const triggerSummary = async () => {
         const currentLines = linesRef.current;
@@ -289,9 +319,15 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
         // Get logs since last summary
         const logItems = currentLines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastSummaryTimeRef.current);
-        if (logItems.length === 0) return;
+        if (logItems.length === 0) {
+            setAiStatus('idle');
+            return;
+        }
 
+        setAiStatus('analyzing');
         lastSummaryTimeRef.current = Date.now();
+        setNextSummaryTime(Date.now() + summaryInterval);
+
         const logContent = logItems.map(l => l.content).join('\n').slice(-5000); // Limit size
 
         try {
@@ -343,6 +379,9 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
         } catch (e) {
             console.error("Failed to fetch summary", e);
+        } finally {
+            setAiStatus('idle');
+            setNewLogCount(0);
         }
     };
 
@@ -575,6 +614,28 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                 {/* Right Column: AI Summary Cards */}
                 {aiEnabled && (
                     <div style={{ width: '320px', backgroundColor: '#141414', borderLeft: '1px solid #333', overflowY: 'auto', padding: '10px' }}>
+                        {/* Status Bar */}
+                        <Card size="small" style={{ marginBottom: 12, background: '#1f1f1f', border: '1px solid #333' }} bodyStyle={{ padding: '8px 12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                <span style={{ color: '#aaa', fontSize: '12px' }}>AI 状态</span>
+                                <Tag color={aiStatus === 'analyzing' ? 'processing' : aiStatus === 'pending' ? 'warning' : 'default'} style={{ marginRight: 0 }}>
+                                    {aiStatus === 'analyzing' ? <><LoadingOutlined /> 分析中</> :
+                                        aiStatus === 'pending' ? '待总结' : '监控中'}
+                                </Tag>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ color: '#fff', fontSize: '13px' }}>
+                                    {aiStatus === 'analyzing' ? '正在生成智能简报...' :
+                                        newLogCount > 0 ? `检测到 ${newLogCount} 条新日志` : '暂无新日志'}
+                                </span>
+                                {aiStatus !== 'analyzing' && (
+                                    <span style={{ color: '#666', fontSize: '12px' }}>
+                                        {countdown}s 后
+                                    </span>
+                                )}
+                            </div>
+                        </Card>
+
                         <div style={{ color: '#1890ff', marginBottom: 12, fontWeight: 'bold', borderBottom: '1px solid #333', paddingBottom: 8 }}>AI 智能总结列表</div>
                         {lines
                             .filter(item => item.type === 'summary')
