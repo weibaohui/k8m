@@ -244,7 +244,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
     // AI Status State
     const [aiStatus, setAiStatus] = useState<'idle' | 'pending' | 'analyzing'>('idle');
-    const [nextSummaryTime, setNextSummaryTime] = useState(0);
     const [newLogCount, setNewLogCount] = useState(0);
     const [countdown, setCountdown] = useState(0);
 
@@ -272,7 +271,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         if (aiEnabled) {
             // Immediate trigger when enabled
             triggerSummary();
-            setNextSummaryTime(Date.now() + summaryInterval);
 
             interval = setInterval(() => {
                 const now = Date.now();
@@ -291,7 +289,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                     } else {
                         // Heartbeat skip: reset timer but don't trigger if no new logs
                         lastSummaryTimeRef.current = Date.now(); // reset base time
-                        setNextSummaryTime(Date.now() + summaryInterval);
                         setAiStatus('idle');
                     }
                     return;
@@ -326,7 +323,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
         setAiStatus('analyzing');
         lastSummaryTimeRef.current = Date.now();
-        setNextSummaryTime(Date.now() + summaryInterval);
 
         const logContent = logItems.map(l => l.content).join('\n').slice(-5000); // Limit size
 
@@ -494,27 +490,11 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                             unCheckedChildren="关闭"
                             size="small"
                         />
-                        {aiEnabled && (
-                            <Select
-                                size="small"
-                                value={summaryInterval}
-                                onChange={setSummaryInterval}
-                                style={{ width: 100 }}
-                                options={[
-                                    { label: '30 秒', value: 30 * 1000 },
-                                    { label: '1 分钟', value: 60 * 1000 },
-                                    { label: '2 分钟', value: 2 * 60 * 1000 },
-                                    { label: '5 分钟', value: 5 * 60 * 1000 },
-                                    { label: '10 分钟', value: 10 * 60 * 1000 },
-                                ]}
-                                prefix={<ClockCircleOutlined />}
-                            />
-                        )}
+
                         <Button type="link" onClick={() => setAskModalVisible(true)} style={{ color: '#40a9ff', paddingLeft: 8 }}>
                             询问 AI
                         </Button>
                     </Space>
-                    {aiEnabled && <Tag color="blue" style={{ marginRight: 0 }}>自动总结中...</Tag>}
                 </div>
             </div>
 
@@ -622,6 +602,20 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                                     {aiStatus === 'analyzing' ? <><LoadingOutlined /> 分析中</> :
                                         aiStatus === 'pending' ? '待总结' : '监控中'}
                                 </Tag>
+                                <Select
+                                    size="small"
+                                    value={summaryInterval}
+                                    onChange={setSummaryInterval}
+                                    style={{ width: 100 }}
+                                    options={[
+                                        { label: '30 秒', value: 30 * 1000 },
+                                        { label: '1 分钟', value: 60 * 1000 },
+                                        { label: '2 分钟', value: 2 * 60 * 1000 },
+                                        { label: '5 分钟', value: 5 * 60 * 1000 },
+                                        { label: '10 分钟', value: 10 * 60 * 1000 },
+                                    ]}
+                                    prefix={<ClockCircleOutlined />}
+                                />
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ color: '#fff', fontSize: '13px' }}>
