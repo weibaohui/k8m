@@ -231,6 +231,8 @@ func (s *AdminAIPromptController) AIPromptTypes(c *response.Context) {
 		{"label": "任意问题", "value": string(constants.AIPromptTypeAnyQuestion)},
 		{"label": "定时任务", "value": string(constants.AIPromptTypeCron)},
 		{"label": "日志分析", "value": string(constants.AIPromptTypeLog)},
+		{"label": "日志总结", "value": string(constants.AIPromptTypeLogSummary)},
+		{"label": "日志问答", "value": string(constants.AIPromptTypeLogAsk)},
 	}
 	amis.WriteJsonData(c, response.H{
 		"options": types,
