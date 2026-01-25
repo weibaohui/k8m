@@ -4,7 +4,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/constants"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
