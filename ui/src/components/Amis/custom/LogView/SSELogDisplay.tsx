@@ -237,11 +237,17 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const [asking, setAsking] = useState(false);
     const lastSummaryTimeRef = useRef(Date.now());
     const linesRef = useRef<LogItem[]>([]);
+    const filteredLinesRef = useRef<LogItem[] | null>(null);
 
     // Sync lines to ref for interval access
     useEffect(() => {
         linesRef.current = lines;
     }, [lines]);
+
+    // Sync filteredLines to ref
+    useEffect(() => {
+        filteredLinesRef.current = filteredLines;
+    }, [filteredLines]);
 
     // Auto Summary
     useEffect(() => {
@@ -339,7 +345,8 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         setAsking(true);
         setAskAnswer('');
 
-        const currentLines = linesRef.current;
+        // 优先使用过滤后的日志，如果没有过滤则使用所有日志
+        const currentLines = filteredLinesRef.current || linesRef.current;
         const recentLogs = currentLines
             .filter(l => l.type === 'log')
             .slice(-100)
