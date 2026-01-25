@@ -59,54 +59,8 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
             title={showTitle ? `${namespace}/${name}` : undefined}
         >
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Select
-                    style={{ minWidth: 200 }}
-                    value={isAllContainers ? 'ALL_CONTAINERS' : selectedContainer}
-                    onChange={(value) => {
-                        if (value === 'ALL_CONTAINERS') {
-                            setIsAllContainers(true);
-                            setSelectedContainer('');
-                        } else {
-                            setIsAllContainers(false);
-                            setSelectedContainer(value);
-                        }
-                    }}
-                    options={[
-                        { label: '全部容器', value: 'ALL_CONTAINERS' },
-                        ...containers.map(container => ({
-                            label: container.name,
-                            value: container.name
-                        }))
-                    ]}
-                    placeholder="选择容器"
-                />
-                <LogOptionsComponent
-                    tailLines={tailLines}
-                    follow={follow}
-                    timestamps={timestamps}
-                    previous={previous}
-                    sinceTime={sinceTime}
-                    onTailLinesChange={setTailLines}
-                    onFollowChange={setFollow}
-                    onTimestampsChange={setTimestamps}
-                    onPreviousChange={setPrevious}
-                    onSinceTimeChange={setSinceTime}
-                />
-                {(selectedContainer || isAllContainers) && (
-                    <SSELogDownloadComponent
-                        url={`/k8s/pod/logs/download/ns/${namespace}/pod_name/${name}/container/${selectedContainer}`}
-                        data={{
-                            tailLines: tailLines,
-                            sinceTime: sinceTime,
-                            previous: previous,
-                            timestamps: timestamps,
-                            allContainers: isAllContainers,
-                        }}
-                    />
-                )}
-            </div>
-            <div style={{ padding: '4px', borderRadius: '4px', height: 'calc(100vh)', overflow: 'auto' }}>
+            {/* Remove separate toolbar div as it's now integrated into SSELogDisplayComponent */}
+            <div style={{ padding: '0', borderRadius: '4px', height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
                 {(selectedContainer || isAllContainers) && (
                     <SSELogDisplayComponent
                         url={isAllContainers
@@ -120,7 +74,56 @@ const PodLogViewerComponent: React.FC<PodLogViewerProps> = ({ namespace, name, d
                             previous: previous,
                             timestamps: timestamps,
                             allContainers: isAllContainers,
+                            namespace: namespace,
+                            podName: name,
                         }}
+                        extraControls={
+                            <>
+                                <Select
+                                    style={{ minWidth: 200 }}
+                                    value={isAllContainers ? 'ALL_CONTAINERS' : selectedContainer}
+                                    onChange={(value) => {
+                                        if (value === 'ALL_CONTAINERS') {
+                                            setIsAllContainers(true);
+                                            setSelectedContainer('');
+                                        } else {
+                                            setIsAllContainers(false);
+                                            setSelectedContainer(value);
+                                        }
+                                    }}
+                                    options={[
+                                        { label: '全部容器', value: 'ALL_CONTAINERS' },
+                                        ...containers.map(container => ({
+                                            label: container.name,
+                                            value: container.name
+                                        }))
+                                    ]}
+                                    placeholder="选择容器"
+                                />
+                                <LogOptionsComponent
+                                    tailLines={tailLines}
+                                    follow={follow}
+                                    timestamps={timestamps}
+                                    previous={previous}
+                                    sinceTime={sinceTime}
+                                    onTailLinesChange={setTailLines}
+                                    onFollowChange={setFollow}
+                                    onTimestampsChange={setTimestamps}
+                                    onPreviousChange={setPrevious}
+                                    onSinceTimeChange={setSinceTime}
+                                />
+                                <SSELogDownloadComponent
+                                    url={`/k8s/pod/logs/download/ns/${namespace}/pod_name/${name}/container/${selectedContainer}`}
+                                    data={{
+                                        tailLines: tailLines,
+                                        sinceTime: sinceTime,
+                                        previous: previous,
+                                        timestamps: timestamps,
+                                        allContainers: isAllContainers,
+                                    }}
+                                />
+                            </>
+                        }
                     />
                 )}
             </div>

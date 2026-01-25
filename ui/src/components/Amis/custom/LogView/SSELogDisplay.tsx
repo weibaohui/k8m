@@ -20,6 +20,8 @@ interface SSEComponentProps {
         namespace?: string;      // 命名空间，用于 AI 上下文
         podName?: string;        // Pod 名称，用于 AI 上下文
     };
+    // 扩展属性，用于接收外部传入的控制元素
+    extraControls?: React.ReactNode;
 }
 
 interface AISummaryData {
@@ -430,23 +432,31 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#1f1f1f' }}>
-            {/* AI Controls */}
+            {/* Controls Toolbar */}
             <div style={{ padding: '8px 16px', borderBottom: '1px solid #333', background: '#2c2c2c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Space>
-                    <RobotOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
-                    <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能解析</span>
-                    <Switch
-                        checked={aiEnabled}
-                        onChange={setAiEnabled}
-                        checkedChildren="开启"
-                        unCheckedChildren="关闭"
-                        size="small"
-                    />
-                    <Button type="link" onClick={() => setAskModalVisible(true)} style={{ color: '#40a9ff', paddingLeft: 8 }}>
-                        询问 AI
-                    </Button>
-                </Space>
-                {aiEnabled && <Tag color="blue" style={{ marginRight: 0 }}>自动总结中...</Tag>}
+                {/* Left side: External Controls (e.g., Container Select, Options, Download) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {props.extraControls}
+                </div>
+
+                {/* Right side: AI Controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Space>
+                        <RobotOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
+                        <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能解析</span>
+                        <Switch
+                            checked={aiEnabled}
+                            onChange={setAiEnabled}
+                            checkedChildren="开启"
+                            unCheckedChildren="关闭"
+                            size="small"
+                        />
+                        <Button type="link" onClick={() => setAskModalVisible(true)} style={{ color: '#40a9ff', paddingLeft: 8 }}>
+                            询问 AI
+                        </Button>
+                    </Space>
+                    {aiEnabled && <Tag color="blue" style={{ marginRight: 0 }}>自动总结中...</Tag>}
+                </div>
             </div>
 
             {/* AI Ask Modal */}
