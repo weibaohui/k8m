@@ -15,6 +15,8 @@ func RegisterManagementRoutes(arg chi.Router) {
 
 	arg.Get(prefix+"/chat/event", response.Adapter(ctrl.Event))
 	arg.Get(prefix+"/chat/log", response.Adapter(ctrl.Log))
+	arg.Post(prefix+"/chat/log/summary", response.Adapter(ctrl.LogSummary))
+	arg.Post(prefix+"/chat/log/ask", response.Adapter(ctrl.LogAsk))
 	arg.Get(prefix+"/chat/cron", response.Adapter(ctrl.Cron))
 	arg.Get(prefix+"/chat/resource", response.Adapter(ctrl.Resource))
 	arg.Get(prefix+"/chat/any_question", response.Adapter(ctrl.AnyQuestion))

@@ -5,7 +5,7 @@ import (
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/constants"
 	"gorm.io/gorm"
 )
 
@@ -233,6 +233,46 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n- 回答要直接，不要加入上下衔接、开篇语气词、结尾语气词等啰嗦的信息
 		\n- 请不要向我提问，也不要向我确认信息，请不要让我检查markdown格式
 		\n- 不要使用工具tools`,
+		IsBuiltin: true,
+		IsEnabled: true,
+	},
+	{
+		Name:        "日志智能总结",
+		Description: "对一段时间内的日志进行阶段性总结，识别异常和状态",
+		PromptType:  constants.AIPromptTypeLogSummary,
+		Content: `请你作为运维专家，对以下 Kubernetes Pod 日志片段进行阶段性总结。
+		\n日志内容：
+		\n${Data}
+		\n请输出一段 JSON 格式的总结，不要包含 markdown 格式标记（如 code block），直接返回 JSON 字符串。
+		\nJSON 结构如下：
+		\n{
+			"status": "normal" | "warning" | "error", // 系统运行状态
+			"summary": "简短的总结摘要（50字以内）",
+			"issues": ["主要异常点1", "主要异常点2"], // 如果没有异常则为空数组
+			"reasons": ["可能的原因1", "可能的原因2"], // 对应异常的原因分析
+			"suggestions": ["排查建议1", "排查建议2"] // 可执行的建议
+		}
+		\n注意：
+		\n- 必须是合法的 JSON 格式
+		\n- 如果日志量较少且无异常，状态为 normal
+		\n- 重点关注 Error/Exception/Panic 等关键词
+		\n- 使用中文`,
+		IsBuiltin: true,
+		IsEnabled: true,
+	},
+	{
+		Name:        "日志智能问答",
+		Description: "基于当前日志上下文回答用户问题",
+		PromptType:  constants.AIPromptTypeLogAsk,
+		Content: `请你作为 Kubernetes 专家，基于以下日志片段回答用户的问题。
+		\n日志片段：
+		\n${Data}
+		\n用户问题：${Question}
+		\n注意：
+		\n- 仅基于提供的日志内容进行回答，不要编造信息
+		\n- 如果日志中没有相关信息，请明确告知
+		\n- 使用中文回答
+		\n- 回答要简洁明了`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},

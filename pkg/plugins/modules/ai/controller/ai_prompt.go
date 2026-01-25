@@ -4,7 +4,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/constants"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
@@ -231,6 +231,8 @@ func (s *AdminAIPromptController) AIPromptTypes(c *response.Context) {
 		{"label": "任意问题", "value": string(constants.AIPromptTypeAnyQuestion)},
 		{"label": "定时任务", "value": string(constants.AIPromptTypeCron)},
 		{"label": "日志分析", "value": string(constants.AIPromptTypeLog)},
+		{"label": "日志总结", "value": string(constants.AIPromptTypeLogSummary)},
+		{"label": "日志问答", "value": string(constants.AIPromptTypeLogAsk)},
 	}
 	amis.WriteJsonData(c, response.H{
 		"options": types,

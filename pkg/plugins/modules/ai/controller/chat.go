@@ -2,14 +2,20 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
 
+	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/htpl"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
-	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/controller/sse"
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/constants"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -32,19 +38,19 @@ type ResourceData struct {
 	// 定时任务
 	Cron string `form:"cron"`
 	// 日志
-	Data      string `form:"data"`
-	Field     string `form:"field"`
-	Name      string `form:"name"`
-	Namespace string `form:"namespace"`
+	Data      string `form:"data" json:"data"`
+	Field     string `form:"field" json:"field"`
+	Name      string `form:"name" json:"name"`
+	Namespace string `form:"namespace" json:"namespace"`
 	// 事件
-	Note                string `form:"note"`
-	Source              string `form:"source"`
-	Reason              string `form:"reason"`
-	ReportingController string `form:"reportingController"`
-	Type                string `form:"type"`
-	RegardingKind       string `form:"regardingKind"`
+	Note                string `form:"note" json:"note"`
+	Source              string `form:"source" json:"source"`
+	Reason              string `form:"reason" json:"reason"`
+	ReportingController string `form:"reportingController" json:"reportingController"`
+	Type                string `form:"type" json:"type"`
+	RegardingKind       string `form:"regardingKind" json:"regardingKind"`
 	// AnyQuestion 任意提问
-	Question string `form:"question"`
+	Question string `form:"question" json:"question"`
 }
 
 func handleRequest(c *response.Context, promptFunc func(data any) string) {
@@ -73,6 +79,62 @@ func handleRequest(c *response.Context, promptFunc func(data any) string) {
 		return
 	}
 	sse.WriteWebSocketChatCompletionStream(c, stream)
+}
+
+func handlePostRequest(c *response.Context, promptFunc func(data any) string) {
+	enabled := plugins.ManagerInstance().IsRunning(modules.PluginNameAI)
+	if !enabled {
+		amis.WriteJsonData(c, response.H{
+			"result": "请先配置开启ChatGPT功能",
+		})
+		return
+	}
+
+	var data ResourceData
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	ctxInst := amis.GetContextWithUser(c)
+
+	prompt := promptFunc(data)
+
+	stream, err := service.GetChatService().GetChatStreamWithoutHistory(ctxInst, prompt)
+	if err != nil {
+		klog.V(2).Infof("Error Stream chat request:%v\n\n", err)
+		return
+	}
+	writeSSE(c, stream)
+}
+
+func writeSSE(c *response.Context, stream *openai.ChatCompletionStream) {
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.WriteHeader(http.StatusOK)
+
+	defer func() {
+		if err := stream.Close(); err != nil {
+			klog.V(6).Infof("stream close error:%v", err)
+		}
+	}()
+
+	for {
+		resp, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			klog.V(2).Infof("Stream recv error: %v", err)
+			break
+		}
+
+		msg, _ := json.Marshal(resp)
+		fmt.Fprintf(c.Writer, "data: %s\n\n", msg)
+		c.Flush()
+	}
 }
 
 // renderTemplate 通用的模板处理函数
@@ -356,4 +418,42 @@ func getPromptWithFallback(ctx context.Context, promptType constants.AIPromptTyp
 		templateStr = models.GetBuiltinPromptContent(promptType)
 	}
 	return templateStr
+}
+
+// @Summary 日志智能总结
+// @Security BearerAuth
+// @Param data body ResourceData true "日志内容"
+// @Success 200 {object} string
+// @Router /mgm/plugins/ai/chat/log/summary [post]
+func (cc *Controller) LogSummary(c *response.Context) {
+	handlePostRequest(c, func(data any) string {
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeLogSummary)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Data": utils.ToJSON(d.Data),
+			}
+		})
+	})
+}
+
+// @Summary 日志智能问答
+// @Security BearerAuth
+// @Param data body ResourceData true "日志内容"
+// @Param question body ResourceData true "问题"
+// @Success 200 {object} string
+// @Router /mgm/plugins/ai/chat/log/ask [post]
+func (cc *Controller) LogAsk(c *response.Context) {
+	handlePostRequest(c, func(data any) string {
+		// 从数据库获取prompt模板
+		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeLogAsk)
+
+		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
+			return map[string]any{
+				"Data":     utils.ToJSON(d.Data),
+				"Question": d.Question,
+			}
+		})
+	})
 }

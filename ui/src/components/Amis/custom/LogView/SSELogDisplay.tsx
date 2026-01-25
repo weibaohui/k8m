@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders } from "@/utils/utils.ts";
 import AnsiToHtml from 'ansi-to-html';
-import { Modal, Input, Alert } from 'antd';
+import { Modal, Input, Alert, Button, Switch, Card, Tag, Collapse, Space, message, Select, Spin } from 'antd';
+import { RobotOutlined, ClockCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -16,7 +17,25 @@ interface SSEComponentProps {
         labelSelector?: string;  // 对应 -l app=nginx
         allPods?: boolean;       // 对应 --all-pods
         allContainers?: boolean; // 对应 --all-containers
+        namespace?: string;      // 命名空间，用于 AI 上下文
+        podName?: string;        // Pod 名称，用于 AI 上下文
     };
+    // 扩展属性，用于接收外部传入的控制元素
+    extraControls?: React.ReactNode;
+}
+
+interface AISummaryData {
+    status: 'normal' | 'warning' | 'error';
+    summary: string;
+    issues?: string[];
+    reasons?: string[];
+    suggestions?: string[];
+}
+
+interface LogItem {
+    type: 'log' | 'summary';
+    content: string | AISummaryData;
+    timestamp?: number;
 }
 
 // SSE 组件，使用 forwardRef 让父组件可以手动控制
@@ -44,7 +63,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const dom = useRef<HTMLDivElement | null>(null);
     const eventSourceRef = useRef<EventSource | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
-    const [lines, setLines] = useState<string[]>([]);
+    const [lines, setLines] = useState<LogItem[]>([]);
 
 
     // 连接 SSE 服务器
@@ -57,7 +76,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
         eventSourceRef.current.addEventListener('message', (event) => {
             const newLine = event.data;
-            setLines((prevLines) => [...prevLines, newLine]);
+            setLines((prevLines) => [...prevLines, { type: 'log', content: newLine, timestamp: Date.now() }]);
         });
         eventSourceRef.current.addEventListener('open', (_) => {
             // setErrorMessage('Connected');
@@ -96,7 +115,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const converter = new AnsiToHtml();
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [filterCommand, setFilterCommand] = useState('');
-    const [filteredLines, setFilteredLines] = useState<string[] | null>(null);
+    const [filteredLines, setFilteredLines] = useState<LogItem[] | null>(null);
     const inputRef = useRef<any>(null);
 
     // 监听ctrl+f快捷键，弹出命令行输入框
@@ -133,7 +152,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
      * 支持grep xxx -A n -B m -i
      * 返回过滤后的行和关键字
      */
-    function filterLinesByCommand(command: string, lines: string[]): { result: string[], keyword: string, ignoreCase: boolean } {
+    function filterLinesByCommand(command: string, lines: LogItem[]): { result: LogItem[], keyword: string, ignoreCase: boolean } {
         // 简单解析命令
         const grepMatch = command.match(/grep\s+([^-\s]+)(.*)/);
         if (!grepMatch) return { result: [], keyword: '', ignoreCase: false };
@@ -147,8 +166,10 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         if (afterMatch) after = parseInt(afterMatch[1]);
         if (beforeMatch) before = parseInt(beforeMatch[1]);
         // 过滤逻辑
-        const result: string[] = [];
-        lines.forEach((line, idx) => {
+        const result: LogItem[] = [];
+        lines.forEach((item, idx) => {
+            if (item.type !== 'log' || typeof item.content !== 'string') return;
+            const line = item.content;
             let match = false;
             if (ignoreCase) {
                 match = line.toLowerCase().includes(keyword.toLowerCase());
@@ -210,8 +231,305 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         setFilterCommand('');
     };
 
+    // AI Logic
+    const [aiEnabled, setAiEnabled] = useState(false);
+    const [summaryInterval, setSummaryInterval] = useState(2 * 60 * 1000); // Default 2 minutes
+    const [askModalVisible, setAskModalVisible] = useState(false);
+    const [askQuestion, setAskQuestion] = useState('');
+    const [askAnswer, setAskAnswer] = useState('');
+    const [asking, setAsking] = useState(false);
+    const lastSummaryTimeRef = useRef(Date.now());
+    const linesRef = useRef<LogItem[]>([]);
+    const filteredLinesRef = useRef<LogItem[] | null>(null);
+
+    // AI Status State
+    const [aiStatus, setAiStatus] = useState<'idle' | 'analyzing'>('idle');
+    const [nextSummaryTime, setNextSummaryTime] = useState(0);
+    const [countdown, setCountdown] = useState(0);
+
+    // Calculate new logs count derived from state (Real-time)
+    const newLogCount = lines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastSummaryTimeRef.current).length;
+
+    // Sync lines to ref for interval access
+    useEffect(() => {
+        linesRef.current = lines;
+    }, [lines]);
+
+    // Sync filteredLines to ref
+    useEffect(() => {
+        filteredLinesRef.current = filteredLines;
+    }, [filteredLines]);
+
+    // Auto Summary
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (aiEnabled) {
+            // Immediate trigger when enabled
+            triggerSummary();
+
+            interval = setInterval(() => {
+                const now = Date.now();
+                const lastTime = lastSummaryTimeRef.current;
+                const currentLines = linesRef.current;
+
+                // Update countdown
+                if (aiStatus !== 'analyzing') {
+                    setCountdown(Math.max(0, Math.ceil((lastTime + summaryInterval - now) / 1000)));
+                }
+
+                // 1. Time based: custom interval
+                if (now - lastTime > summaryInterval) {
+                    // Calculate current new logs using refs to ensure latest data in closure
+                    const currentNewLogs = currentLines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastTime).length;
+
+                    if (currentNewLogs > 0) {
+                        triggerSummary();
+                    } else {
+                        // Heartbeat skip: reset timer but don't trigger if no new logs
+                        lastSummaryTimeRef.current = Date.now(); // reset base time
+                        setNextSummaryTime(Date.now() + summaryInterval);
+                        setAiStatus('idle');
+                    }
+                    return;
+                }
+
+                // 2. Error rate based: > 20 errors since last summary (and at least 30s interval)
+                if (now - lastTime > 30 * 1000) {
+                    const recentLogs = currentLines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastTime);
+                    const errorCount = recentLogs.filter(l => /error|exception|fail|panic/i.test(l.content as string)).length;
+                    if (errorCount > 20) {
+                        triggerSummary();
+                    }
+                }
+            }, 1000); // Check every 1s for countdown
+        } else {
+            setAiStatus('idle');
+        }
+        return () => clearInterval(interval);
+    }, [aiEnabled, summaryInterval, aiStatus]);
+
+    const triggerSummary = async () => {
+        const currentLines = linesRef.current;
+        if (currentLines.length === 0) return;
+
+        // Get logs since last summary
+        const logItems = currentLines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastSummaryTimeRef.current);
+        if (logItems.length === 0) {
+            setAiStatus('idle');
+            return;
+        }
+
+        setAiStatus('analyzing');
+        lastSummaryTimeRef.current = Date.now();
+
+        const logContent = logItems.map(l => l.content).join('\n').slice(-5000); // Limit size
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/mgm/plugins/ai/chat/log/summary`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: logContent })
+            });
+
+            const reader = res.body?.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+            while (true) {
+                const { done, value } = await reader!.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') continue;
+                        try {
+                            const json = JSON.parse(data);
+                            if (json.choices && json.choices[0].delta.content) {
+                                fullText += json.choices[0].delta.content;
+                            }
+                        } catch (e) { }
+                    }
+                }
+            }
+
+            try {
+                const jsonMatch = fullText.match(/```json\n([\s\S]*)\n```/) || fullText.match(/\{[\s\S]*\}/);
+                const jsonStr = jsonMatch ? jsonMatch[0].replace(/```json|```/g, '') : fullText;
+                const summaryData = JSON.parse(jsonStr);
+
+                setLines(prev => [...prev, {
+                    type: 'summary',
+                    content: summaryData,
+                    timestamp: Date.now()
+                }]);
+            } catch (e) {
+                console.error("Failed to parse AI summary", fullText);
+            }
+
+        } catch (e) {
+            console.error("Failed to fetch summary", e);
+        } finally {
+            setAiStatus('idle');
+        }
+    };
+
+    const handleAskAI = async () => {
+        if (!askQuestion) return;
+        setAsking(true);
+        setAskAnswer('');
+
+        // 优先使用过滤后的日志，如果没有过滤则使用所有日志
+        const currentLines = filteredLinesRef.current || linesRef.current;
+        const recentLogsList = currentLines
+            .filter(l => l.type === 'log')
+            .slice(-100);
+
+        const recentLogs = recentLogsList
+            .map(l => l.content)
+            .join('\n');
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/mgm/plugins/ai/chat/log/ask`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: recentLogs, question: askQuestion })
+            });
+
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader!.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') continue;
+                        try {
+                            const json = JSON.parse(data);
+                            if (json.choices && json.choices[0].delta.content) {
+                                setAskAnswer(prev => prev + json.choices[0].delta.content);
+                            }
+                        } catch (e) { }
+                    }
+                }
+            }
+        } catch (e) {
+            message.error("请求失败");
+        } finally {
+            setAsking(false);
+        }
+    };
+
+    // Render AI Summary Card
+    const renderSummaryCard = (item: LogItem, index: number) => {
+        const summary = item.content as AISummaryData;
+        return (
+            <Card key={index} size="small" style={{ marginBottom: 8, border: '1px solid #1890ff', background: '#001529' }}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                    <Space>
+                        <Tag color={summary.status === 'error' ? 'red' : summary.status === 'warning' ? 'orange' : 'green'}>
+                            {summary.status.toUpperCase()}
+                        </Tag>
+                        <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能总结</span>
+                        <span style={{ color: '#aaa' }}>{new Date(item.timestamp || 0).toLocaleTimeString()}</span>
+                    </Space>
+                    <div style={{ color: '#fff' }}>{summary.summary}</div>
+                    {summary.issues && summary.issues.length > 0 && (
+                        <Collapse ghost size="small">
+                            <Collapse.Panel header={<span style={{ color: '#ff4d4f' }}>发现 {summary.issues.length} 个异常</span>} key="1">
+                                <ul style={{ color: '#ddd' }}>
+                                    {summary.issues.map((issue, i) => <li key={i}>{issue}</li>)}
+                                </ul>
+                                {summary.suggestions && (
+                                    <div style={{ marginTop: 8 }}>
+                                        <div style={{ color: '#40a9ff' }}>建议：</div>
+                                        <ul style={{ color: '#ddd' }}>
+                                            {summary.suggestions.map((s, i) => <li key={i}>{s}</li>)}
+                                        </ul>
+                                    </div>
+                                )}
+                            </Collapse.Panel>
+                        </Collapse>
+                    )}
+                </Space>
+            </Card>
+        );
+    };
+
     return (
-        <div ref={dom} style={{ whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#1f1f1f' }}>
+            {/* Controls Toolbar */}
+            <div style={{ padding: '8px 16px', borderBottom: '1px solid #333', background: '#2c2c2c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {/* Left side: External Controls (e.g., Container Select, Options, Download) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {props.extraControls}
+                </div>
+
+                {/* Right side: AI Controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Space>
+                        <RobotOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
+                        <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能解析</span>
+                        <Switch
+                            checked={aiEnabled}
+                            onChange={setAiEnabled}
+                            checkedChildren="开启"
+                            unCheckedChildren="关闭"
+                            size="small"
+                        />
+
+                        <Button type="link" onClick={() => setAskModalVisible(true)} style={{ color: '#40a9ff', paddingLeft: 8 }}>
+                            询问 AI
+                        </Button>
+                    </Space>
+                </div>
+            </div>
+
+            {/* AI Ask Modal */}
+            <Modal
+                title="AI 智能问答"
+                open={askModalVisible}
+                onCancel={() => setAskModalVisible(false)}
+                footer={null}
+                width={600}
+            >
+                <div style={{ marginBottom: 16 }}>
+                    <div style={{ marginBottom: 8, color: '#666', fontSize: '12px' }}>
+                        即将发送 <span style={{ color: '#1890ff', fontWeight: 'bold' }}>
+                            {Math.min(100, (filteredLinesRef.current || linesRef.current).filter(l => l.type === 'log').length)}
+                        </span> 条最近日志进行分析(如太多，可使用Ctrl+F 过滤)
+                    </div>
+                    <Input.TextArea
+                        rows={3}
+                        value={askQuestion}
+                        onChange={e => setAskQuestion(e.target.value)}
+                        placeholder="请输入关于当前日志的问题..."
+                    />
+                    <div style={{ marginTop: 8, textAlign: 'right' }}>
+                        <Button type="primary" onClick={handleAskAI} loading={asking} disabled={!askQuestion}>
+                            提问
+                        </Button>
+                    </div>
+                </div>
+                {askAnswer && (
+                    <Card size="small" style={{ background: '#f5f5f5' }}>
+                        <div style={{ whiteSpace: 'pre-wrap' }}>{askAnswer}</div>
+                    </Card>
+                )}
+            </Modal>
+
             {/* 过滤命令弹窗 */}
             <Modal
                 title="日志过滤 (如: grep 关键字 -A 2 -B 2 -i )"
@@ -236,34 +554,95 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                     style={{ marginBottom: 12 }}
                 />
             </Modal>
-            {/* 过滤结果提示及关闭按钮 */}
-            {filteredLines && (
-                <div style={{ background: '#222', color: '#0f0', padding: '4px', marginBottom: '8px' }}>
-                    <span>已过滤 {filteredLines.length} 条日志</span>
-                    <a style={{ marginLeft: '16px', color: '#f66', cursor: 'pointer' }} onClick={handleCloseFilter}>关闭过滤</a>
+
+            {/* Main Content Area */}
+            <div ref={dom} style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+                {/* Left Column: Log Content */}
+                <div style={{ flex: 1, backgroundColor: 'black', color: 'white', padding: '10px', overflow: 'auto' }}>
+                    {/* 过滤结果提示及关闭按钮 */}
+                    {filteredLines && (
+                        <div style={{ background: '#222', color: '#0f0', padding: '4px', marginBottom: '8px', position: 'sticky', top: 0 }}>
+                            <span>已过滤 {filteredLines.length} 条日志</span>
+                            <a style={{ marginLeft: '16px', color: '#f66', cursor: 'pointer' }} onClick={handleCloseFilter}>关闭过滤</a>
+                        </div>
+                    )}
+                    {errorMessage && <div
+                        style={{ color: errorMessage == "Connected" ? '#00FF00' : 'red' }}>{errorMessage} 共计：{lines.length}行</div>}
+
+                    <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+                        {(filteredLines || lines).map((item, index) => {
+                            if (item.type === 'summary') {
+                                return null; // Summary rendered in right column
+                            }
+
+                            const lineContent = item.content as string;
+                            let html = converter.toHtml(lineContent);
+                            // 关键字高亮（仅过滤时生效）
+                            if (filteredLines && filterKeyword) {
+                                // 使用正则替换所有关键字为黄色背景
+                                const reg = new RegExp(filterKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), ignoreCaseFilter ? 'gi' : 'g');
+                                html = html.replace(reg, '<span style="background:yellow;color:black;">' + filterKeyword + '</span>');
+                            }
+                            return (
+                                <div
+                                    key={index}
+                                    dangerouslySetInnerHTML={{
+                                        __html: html
+                                    }}
+                                />
+                            );
+                        })}
+                    </pre>
                 </div>
-            )}
-            {errorMessage && <div
-                style={{ color: errorMessage == "Connected" ? '#00FF00' : 'red' }}>{errorMessage} 共计：{lines.length}行</div>}
-            <pre style={{ whiteSpace: 'pre-wrap' }}>
-                {(filteredLines || lines).map((line, index) => {
-                    let html = converter.toHtml(line);
-                    // 关键字高亮（仅过滤时生效）
-                    if (filteredLines && filterKeyword) {
-                        // 使用正则替换所有关键字为黄色背景
-                        const reg = new RegExp(filterKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), ignoreCaseFilter ? 'gi' : 'g');
-                        html = html.replace(reg, '<span style="background:yellow;color:black;">' + filterKeyword + '</span>');
-                    }
-                    return (
-                        <div
-                            key={index}
-                            dangerouslySetInnerHTML={{
-                                __html: html
-                            }}
-                        />
-                    );
-                })}
-            </pre>
+
+                {/* Right Column: AI Summary Cards */}
+                {aiEnabled && (
+                    <div style={{ width: '320px', backgroundColor: '#141414', borderLeft: '1px solid #333', overflowY: 'auto', padding: '10px' }}>
+                        {/* Status Bar */}
+                        <Card size="small" style={{ marginBottom: 12, background: '#1f1f1f', border: '1px solid #333' }} bodyStyle={{ padding: '8px 12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                <span style={{ color: '#aaa', fontSize: '12px' }}>AI 状态</span>
+                                <Tag color={aiStatus === 'analyzing' ? 'processing' : newLogCount > 0 ? 'warning' : 'default'} style={{ marginRight: 0 }}>
+                                    {aiStatus === 'analyzing' ? <><LoadingOutlined /> 分析中</> :
+                                        newLogCount > 0 ? '待总结' : '监控中'}
+                                </Tag>
+                                <Select
+                                    size="small"
+                                    value={summaryInterval}
+                                    onChange={setSummaryInterval}
+                                    style={{ width: 100 }}
+                                    options={[
+                                        { label: '30 秒', value: 30 * 1000 },
+                                        { label: '1 分钟', value: 60 * 1000 },
+                                        { label: '2 分钟', value: 2 * 60 * 1000 },
+                                        { label: '5 分钟', value: 5 * 60 * 1000 },
+                                        { label: '10 分钟', value: 10 * 60 * 1000 },
+                                    ]}
+                                    prefix={<ClockCircleOutlined />}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ color: '#fff', fontSize: '13px' }}>
+                                    {aiStatus === 'analyzing' ? '正在生成智能简报...' :
+                                        newLogCount > 0 ? `检测到 ${newLogCount} 条新日志` : '暂无新日志'}
+                                </span>
+                                {aiStatus !== 'analyzing' && (
+                                    <span style={{ color: '#666', fontSize: '12px' }}>
+                                        {countdown}s 后
+                                    </span>
+                                )}
+                            </div>
+                        </Card>
+
+                        <div style={{ color: '#1890ff', marginBottom: 12, fontWeight: 'bold', borderBottom: '1px solid #333', paddingBottom: 8 }}>AI 智能总结列表</div>
+                        {lines
+                            .filter(item => item.type === 'summary')
+                            .slice().reverse() // Show newest first
+                            .map((item, index) => renderSummaryCard(item, index))
+                        }
+                    </div>
+                )}
+            </div>
         </div>
     );
 });
