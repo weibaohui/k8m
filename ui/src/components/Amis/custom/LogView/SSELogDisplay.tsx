@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders } from "@/utils/utils.ts";
 import AnsiToHtml from 'ansi-to-html';
-import { Modal, Input, Alert, Button, Switch, Card, Tag, Collapse, Space, message } from 'antd';
-import { RobotOutlined } from '@ant-design/icons';
+import { Modal, Input, Alert, Button, Switch, Card, Tag, Collapse, Space, message, Select } from 'antd';
+import { RobotOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
 // 定义组件的 Props 接口
 interface SSEComponentProps {
@@ -233,6 +233,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
     // AI Logic
     const [aiEnabled, setAiEnabled] = useState(false);
+    const [summaryInterval, setSummaryInterval] = useState(2 * 60 * 1000); // Default 2 minutes
     const [askModalVisible, setAskModalVisible] = useState(false);
     const [askQuestion, setAskQuestion] = useState('');
     const [askAnswer, setAskAnswer] = useState('');
@@ -255,13 +256,16 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (aiEnabled) {
+            // Immediate trigger when enabled
+            triggerSummary();
+
             interval = setInterval(() => {
                 const now = Date.now();
                 const lastTime = lastSummaryTimeRef.current;
                 const currentLines = linesRef.current;
 
-                // 1. Time based: 2 minutes
-                if (now - lastTime > 2 * 60 * 1000) {
+                // 1. Time based: custom interval
+                if (now - lastTime > summaryInterval) {
                     triggerSummary();
                     return;
                 }
@@ -277,7 +281,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
             }, 5000);
         }
         return () => clearInterval(interval);
-    }, [aiEnabled]);
+    }, [aiEnabled, summaryInterval]);
 
     const triggerSummary = async () => {
         const currentLines = linesRef.current;
@@ -451,6 +455,22 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                             unCheckedChildren="关闭"
                             size="small"
                         />
+                        {aiEnabled && (
+                            <Select
+                                size="small"
+                                value={summaryInterval}
+                                onChange={setSummaryInterval}
+                                style={{ width: 100 }}
+                                options={[
+                                    { label: '30 秒', value: 30 * 1000 },
+                                    { label: '1 分钟', value: 60 * 1000 },
+                                    { label: '2 分钟', value: 2 * 60 * 1000 },
+                                    { label: '5 分钟', value: 5 * 60 * 1000 },
+                                    { label: '10 分钟', value: 10 * 60 * 1000 },
+                                ]}
+                                prefix={<ClockCircleOutlined />}
+                            />
+                        )}
                         <Button type="link" onClick={() => setAskModalVisible(true)} style={{ color: '#40a9ff', paddingLeft: 8 }}>
                             询问 AI
                         </Button>
