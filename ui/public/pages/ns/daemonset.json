@@ -410,7 +410,7 @@
                           "body": [
                             {
                               "type": "websocketMarkdownViewer",
-                              "url": "/mgm/plugins/ai/chat/describe",
+                              "url": "/k8s/plugins/ai/chat/describe",
                               "params": {
                                 "kind": "${kind}",
                                 "group": "${group}",
@@ -2067,7 +2067,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/mgm/plugins/ai/chat/describe",
+                                                        "url": "/k8s/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2332,7 +2332,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/mgm/plugins/ai/chat/describe",
+                                                        "url": "/k8s/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2620,7 +2620,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/mgm/plugins/ai/chat/describe",
+                                                        "url": "/k8s/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -2901,7 +2901,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/mgm/plugins/ai/chat/describe",
+                                                        "url": "/k8s/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -3205,7 +3205,7 @@
                                                     "body": [
                                                       {
                                                         "type": "websocketMarkdownViewer",
-                                                        "url": "/mgm/plugins/ai/chat/describe",
+                                                        "url": "/k8s/plugins/ai/chat/describe",
                                                         "params": {
                                                           "describe": "${result}",
                                                           "kind": "${kind}",
@@ -3586,7 +3586,7 @@
                                             "body": [
                                               {
                                                 "type": "websocketMarkdownViewer",
-                                                "url": "/mgm/plugins/ai/chat/describe",
+                                                "url": "/k8s/plugins/ai/chat/describe",
                                                 "params": {
                                                   "describe": "${result}",
                                                   "kind": "${kind}",
@@ -3885,7 +3885,7 @@
                                             "body": [
                                               {
                                                 "type": "websocketMarkdownViewer",
-                                                "url": "/mgm/plugins/ai/chat/describe",
+                                                "url": "/k8s/plugins/ai/chat/describe",
                                                 "params": {
                                                   "describe": "${result}",
                                                   "kind": "${kind}",

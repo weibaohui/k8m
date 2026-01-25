@@ -4923,6 +4923,56 @@ var doc = `{
                 }
             }
         },
+        "/k8s/cluster/{cluster}/plugins/ai/chat/describe": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "分析K8s资源描述",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "资源组",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源版本",
+                        "name": "version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源类型",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/k8s/cluster/{cluster}/plugins/helm/release/batch/uninstall": {
             "post": {
                 "security": [
@@ -6475,112 +6525,6 @@ var doc = `{
                         "description": "存储类名称",
                         "name": "name",
                         "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/yaml/apply": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "应用YAML配置",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "YAML配置请求",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dynamic.yamlRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/yaml/delete": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "删除YAML配置",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "YAML配置请求",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dynamic.yamlRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/k8s/cluster/{cluster}/yaml/upload": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "上传YAML文件并应用",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "集群名称",
-                        "name": "cluster",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "YAML文件",
-                        "name": "file",
-                        "in": "formData",
                         "required": true
                     }
                 ],
@@ -10103,56 +10047,6 @@ var doc = `{
                 }
             }
         },
-        "/mgm/plugins/ai/chat/describe": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "summary": "分析K8s资源描述",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "资源组",
-                        "name": "group",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源版本",
-                        "name": "version",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源类型",
-                        "name": "kind",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "资源名称",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "命名空间",
-                        "name": "namespace",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/mgm/plugins/ai/chat/event": {
             "get": {
                 "security": [
@@ -11154,17 +11048,6 @@ var doc = `{
                     "type": "string"
                 },
                 "request_memory": {
-                    "type": "string"
-                }
-            }
-        },
-        "dynamic.yamlRequest": {
-            "type": "object",
-            "required": [
-                "yaml"
-            ],
-            "properties": {
-                "yaml": {
                     "type": "string"
                 }
             }
