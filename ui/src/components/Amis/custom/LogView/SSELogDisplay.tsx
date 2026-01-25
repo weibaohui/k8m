@@ -385,9 +385,11 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
         // 优先使用过滤后的日志，如果没有过滤则使用所有日志
         const currentLines = filteredLinesRef.current || linesRef.current;
-        const recentLogs = currentLines
+        const recentLogsList = currentLines
             .filter(l => l.type === 'log')
-            .slice(-100)
+            .slice(-100);
+
+        const recentLogs = recentLogsList
             .map(l => l.content)
             .join('\n');
 
@@ -504,6 +506,11 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                 width={600}
             >
                 <div style={{ marginBottom: 16 }}>
+                    <div style={{ marginBottom: 8, color: '#666', fontSize: '12px' }}>
+                        即将发送 <span style={{ color: '#1890ff', fontWeight: 'bold' }}>
+                            {Math.min(100, (filteredLinesRef.current || linesRef.current).filter(l => l.type === 'log').length)}
+                        </span> 条最近日志进行分析(如太多，可使用Ctrl+F 过滤)
+                    </div>
                     <Input.TextArea
                         rows={3}
                         value={askQuestion}
