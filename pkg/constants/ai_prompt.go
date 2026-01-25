@@ -33,4 +33,10 @@ const (
 
 	// AIPromptTypeLog 日志分析类型
 	AIPromptTypeLog AIPromptType = "Log"
+
+	// AIPromptTypeLogSummary 日志总结类型
+	AIPromptTypeLogSummary AIPromptType = "LogSummary"
+
+	// AIPromptTypeLogAsk 日志问答类型
+	AIPromptTypeLogAsk AIPromptType = "LogAsk"
 )
