@@ -243,22 +243,17 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
     const filteredLinesRef = useRef<LogItem[] | null>(null);
 
     // AI Status State
-    const [aiStatus, setAiStatus] = useState<'idle' | 'pending' | 'analyzing'>('idle');
-    const [newLogCount, setNewLogCount] = useState(0);
+    const [aiStatus, setAiStatus] = useState<'idle' | 'analyzing'>('idle');
+    const [nextSummaryTime, setNextSummaryTime] = useState(0);
     const [countdown, setCountdown] = useState(0);
+
+    // Calculate new logs count derived from state (Real-time)
+    const newLogCount = lines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastSummaryTimeRef.current).length;
 
     // Sync lines to ref for interval access
     useEffect(() => {
         linesRef.current = lines;
-        // Check for new logs since last summary
-        if (aiEnabled && lastSummaryTimeRef.current > 0) {
-            const newLogs = lines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastSummaryTimeRef.current).length;
-            setNewLogCount(newLogs);
-            if (newLogs > 0 && aiStatus === 'idle') {
-                setAiStatus('pending');
-            }
-        }
-    }, [lines, aiEnabled, aiStatus]);
+    }, [lines]);
 
     // Sync filteredLines to ref
     useEffect(() => {
@@ -284,11 +279,15 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
                 // 1. Time based: custom interval
                 if (now - lastTime > summaryInterval) {
-                    if (newLogCount > 0) {
+                    // Calculate current new logs using refs to ensure latest data in closure
+                    const currentNewLogs = currentLines.filter(l => l.type === 'log' && l.timestamp && l.timestamp > lastTime).length;
+
+                    if (currentNewLogs > 0) {
                         triggerSummary();
                     } else {
                         // Heartbeat skip: reset timer but don't trigger if no new logs
                         lastSummaryTimeRef.current = Date.now(); // reset base time
+                        setNextSummaryTime(Date.now() + summaryInterval);
                         setAiStatus('idle');
                     }
                     return;
@@ -305,10 +304,9 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
             }, 1000); // Check every 1s for countdown
         } else {
             setAiStatus('idle');
-            setNewLogCount(0);
         }
         return () => clearInterval(interval);
-    }, [aiEnabled, summaryInterval, newLogCount, aiStatus]);
+    }, [aiEnabled, summaryInterval, aiStatus]);
 
     const triggerSummary = async () => {
         const currentLines = linesRef.current;
@@ -377,7 +375,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
             console.error("Failed to fetch summary", e);
         } finally {
             setAiStatus('idle');
-            setNewLogCount(0);
         }
     };
 
@@ -598,9 +595,9 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                         <Card size="small" style={{ marginBottom: 12, background: '#1f1f1f', border: '1px solid #333' }} bodyStyle={{ padding: '8px 12px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                                 <span style={{ color: '#aaa', fontSize: '12px' }}>AI 状态</span>
-                                <Tag color={aiStatus === 'analyzing' ? 'processing' : aiStatus === 'pending' ? 'warning' : 'default'} style={{ marginRight: 0 }}>
+                                <Tag color={aiStatus === 'analyzing' ? 'processing' : newLogCount > 0 ? 'warning' : 'default'} style={{ marginRight: 0 }}>
                                     {aiStatus === 'analyzing' ? <><LoadingOutlined /> 分析中</> :
-                                        aiStatus === 'pending' ? '待总结' : '监控中'}
+                                        newLogCount > 0 ? '待总结' : '监控中'}
                                 </Tag>
                                 <Select
                                     size="small"
