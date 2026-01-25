@@ -290,7 +290,7 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`/api/mgm/plugins/ai/chat/log/summary`, {
+            const res = await fetch(`/mgm/plugins/ai/chat/log/summary`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -392,6 +392,42 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
         }
     };
 
+    // Render AI Summary Card
+    const renderSummaryCard = (item: LogItem, index: number) => {
+        const summary = item.content as AISummaryData;
+        return (
+            <Card key={index} size="small" style={{ marginBottom: 8, border: '1px solid #1890ff', background: '#001529' }}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                    <Space>
+                        <Tag color={summary.status === 'error' ? 'red' : summary.status === 'warning' ? 'orange' : 'green'}>
+                            {summary.status.toUpperCase()}
+                        </Tag>
+                        <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能总结</span>
+                        <span style={{ color: '#aaa' }}>{new Date(item.timestamp || 0).toLocaleTimeString()}</span>
+                    </Space>
+                    <div style={{ color: '#fff' }}>{summary.summary}</div>
+                    {summary.issues && summary.issues.length > 0 && (
+                        <Collapse ghost size="small">
+                            <Collapse.Panel header={<span style={{ color: '#ff4d4f' }}>发现 {summary.issues.length} 个异常</span>} key="1">
+                                <ul style={{ color: '#ddd' }}>
+                                    {summary.issues.map((issue, i) => <li key={i}>{issue}</li>)}
+                                </ul>
+                                {summary.suggestions && (
+                                    <div style={{ marginTop: 8 }}>
+                                        <div style={{ color: '#40a9ff' }}>建议：</div>
+                                        <ul style={{ color: '#ddd' }}>
+                                            {summary.suggestions.map((s, i) => <li key={i}>{s}</li>)}
+                                        </ul>
+                                    </div>
+                                )}
+                            </Collapse.Panel>
+                        </Collapse>
+                    )}
+                </Space>
+            </Card>
+        );
+    };
+
     return (
         <div ref={dom} style={{ whiteSpace: 'pre-wrap', backgroundColor: 'black', color: 'white', padding: '10px' }}>
             {/* AI Controls */}
@@ -468,61 +504,48 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
             )}
             {errorMessage && <div
                 style={{ color: errorMessage == "Connected" ? '#00FF00' : 'red' }}>{errorMessage} 共计：{lines.length}行</div>}
-            <pre style={{ whiteSpace: 'pre-wrap' }}>
-                {(filteredLines || lines).map((item, index) => {
-                    if (item.type === 'summary') {
-                        const summary = item.content as AISummaryData;
-                        return (
-                            <Card key={index} size="small" style={{ marginBottom: 8, border: '1px solid #1890ff', background: '#001529' }}>
-                                <Space direction="vertical" style={{ width: '100%' }}>
-                                    <Space>
-                                        <Tag color={summary.status === 'error' ? 'red' : summary.status === 'warning' ? 'orange' : 'green'}>
-                                            {summary.status.toUpperCase()}
-                                        </Tag>
-                                        <span style={{ color: '#fff', fontWeight: 'bold' }}>AI 智能总结</span>
-                                        <span style={{ color: '#aaa' }}>{new Date(item.timestamp || 0).toLocaleTimeString()}</span>
-                                    </Space>
-                                    <div style={{ color: '#fff' }}>{summary.summary}</div>
-                                    {summary.issues && summary.issues.length > 0 && (
-                                        <Collapse ghost size="small">
-                                            <Collapse.Panel header={<span style={{ color: '#ff4d4f' }}>发现 {summary.issues.length} 个异常</span>} key="1">
-                                                <ul style={{ color: '#ddd' }}>
-                                                    {summary.issues.map((issue, i) => <li key={i}>{issue}</li>)}
-                                                </ul>
-                                                {summary.suggestions && (
-                                                    <div style={{ marginTop: 8 }}>
-                                                        <div style={{ color: '#40a9ff' }}>建议：</div>
-                                                        <ul style={{ color: '#ddd' }}>
-                                                            {summary.suggestions.map((s, i) => <li key={i}>{s}</li>)}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                            </Collapse.Panel>
-                                        </Collapse>
-                                    )}
-                                </Space>
-                            </Card>
-                        );
-                    }
 
-                    const lineContent = item.content as string;
-                    let html = converter.toHtml(lineContent);
-                    // 关键字高亮（仅过滤时生效）
-                    if (filteredLines && filterKeyword) {
-                        // 使用正则替换所有关键字为黄色背景
-                        const reg = new RegExp(filterKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), ignoreCaseFilter ? 'gi' : 'g');
-                        html = html.replace(reg, '<span style="background:yellow;color:black;">' + filterKeyword + '</span>');
-                    }
-                    return (
-                        <div
-                            key={index}
-                            dangerouslySetInnerHTML={{
-                                __html: html
-                            }}
-                        />
-                    );
-                })}
-            </pre>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {/* Left Column: Log Content */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <pre style={{ whiteSpace: 'pre-wrap' }}>
+                        {(filteredLines || lines).map((item, index) => {
+                            if (item.type === 'summary') {
+                                return null; // Summary rendered in right column
+                            }
+
+                            const lineContent = item.content as string;
+                            let html = converter.toHtml(lineContent);
+                            // 关键字高亮（仅过滤时生效）
+                            if (filteredLines && filterKeyword) {
+                                // 使用正则替换所有关键字为黄色背景
+                                const reg = new RegExp(filterKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), ignoreCaseFilter ? 'gi' : 'g');
+                                html = html.replace(reg, '<span style="background:yellow;color:black;">' + filterKeyword + '</span>');
+                            }
+                            return (
+                                <div
+                                    key={index}
+                                    dangerouslySetInnerHTML={{
+                                        __html: html
+                                    }}
+                                />
+                            );
+                        })}
+                    </pre>
+                </div>
+
+                {/* Right Column: AI Summary Cards */}
+                {aiEnabled && (
+                    <div style={{ width: '320px', marginLeft: '16px', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
+                        <div style={{ color: '#1890ff', marginBottom: 8, fontWeight: 'bold' }}>AI 智能总结列表</div>
+                        {lines
+                            .filter(item => item.type === 'summary')
+                            .slice().reverse() // Show newest first
+                            .map((item, index) => renderSummaryCard(item, index))
+                        }
+                    </div>
+                )}
+            </div>
         </div>
     );
 });
