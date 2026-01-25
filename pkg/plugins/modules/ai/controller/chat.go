@@ -138,7 +138,7 @@ func (cc *Controller) Event(c *response.Context) {
 // @Param name query string false "资源名称"
 // @Param namespace query string false "命名空间"
 // @Success 200 {object} string
-// @Router /mgm/plugins/ai/chat/describe [get]
+// @Router /k8s/cluster/{cluster}/plugins/ai/chat/describe [get]
 func (cc *Controller) Describe(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	var data ResourceData

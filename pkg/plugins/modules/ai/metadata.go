@@ -60,4 +60,5 @@ var Metadata = plugins.Module{
 	Lifecycle:         &AILifecycle{},
 	ManagementRouter:  route.RegisterManagementRoutes,
 	PluginAdminRouter: route.RegisterPluginAdminRoutes,
+	ClusterRouter:     route.RegisterClusterRoutes,
 }
