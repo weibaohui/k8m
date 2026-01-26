@@ -1,12 +1,14 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strings"
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/yaml_editor/models"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/kom"
@@ -16,6 +18,51 @@ type Controller struct{}
 
 type yamlRequest struct {
 	Yaml string `json:"yaml"`
+}
+
+type aiGenerateRequest struct {
+	Prompt string `json:"prompt"`
+}
+
+// AIGenerate 使用 AI 生成 Kubernetes YAML 配置
+func (yc *Controller) AIGenerate(c *response.Context) {
+	var req aiGenerateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("提取prompt错误。\n %v", err))
+		return
+	}
+
+	// 构建 AI 提示词
+	prompt := fmt.Sprintf(`你是一个 Kubernetes 专家。请根据以下描述生成准确、完整的 Kubernetes YAML 配置。
+
+要求：
+1. 只返回 YAML 代码，不要包含任何解释、注释或其他文本
+2. YAML 格式必须正确，缩进使用 2 个空格
+3. 包含所有必需的字段（apiVersion, kind, metadata, spec 等）
+4. 如果描述涉及多个资源，请使用 YAML 文档分隔符 "---" 分隔
+5. 确保资源名称和标签符合 Kubernetes 命名规范
+
+用户描述：%s
+
+请直接返回 YAML 代码：`, req.Prompt)
+
+	ctx := context.Background()
+	result, err := service.GetChatService().ChatWithCtxNoHistory(ctx, prompt)
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("AI 生成失败：%v", err))
+		return
+	}
+
+	// 清理可能存在的 markdown 代码块标记
+	result = strings.TrimSpace(result)
+	result = strings.TrimPrefix(result, "```yaml")
+	result = strings.TrimPrefix(result, "```")
+	result = strings.TrimSuffix(result, "```")
+	result = strings.TrimSpace(result)
+
+	amis.WriteJsonData(c, response.H{
+		"yaml": result,
+	})
 }
 
 func (yc *Controller) UploadFile(c *response.Context) {

@@ -14,6 +14,7 @@ func RegisterClusterRoutes(arg chi.Router) {
 	arg.Post(prefix+"/yaml/apply", response.Adapter(ctrl.Apply))
 	arg.Post(prefix+"/yaml/upload", response.Adapter(ctrl.UploadFile))
 	arg.Post(prefix+"/yaml/delete", response.Adapter(ctrl.Delete))
+	arg.Post(prefix+"/ai/generate", response.Adapter(ctrl.AIGenerate))
 	klog.V(6).Infof("注册 YAML 编辑器插件集群路由")
 }
 
