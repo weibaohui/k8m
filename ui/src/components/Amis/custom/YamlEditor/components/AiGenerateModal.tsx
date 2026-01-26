@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Input, Button, Space, Typography, Spin, Alert, List, Tag } from 'antd';
 import { RobotOutlined, SendOutlined, BulbOutlined, CopyOutlined } from '@ant-design/icons';
+import { fetcher } from '@/components/Amis/fetcher';
 
 const { TextArea } = Input;
 const { Title, Text, Paragraph } = Typography;
@@ -39,19 +40,21 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
         setGeneratedYaml('');
 
         try {
-            const response = await fetch('/k8s/plugins/yaml_editor/ai/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ prompt }),
+
+            // 调用后端API
+            const result = await fetcher({
+                url: '/mgm/plugins/yaml_editor/ai/generate',
+                method: 'post',
+                data: JSON.stringify({ prompt })
             });
 
-            const result = await response.json();
-
-            if (result.status === 0 && result.data && result.data.yaml) {
-                setGeneratedYaml(result.data.yaml);
+            console.log('API响应:', result);
+            //@ts-ignore
+            if (result.status === 200 && result.data && result.data.data && result.data.data.yaml) {
+                //@ts-ignore
+                setGeneratedYaml(result.data.data.yaml);
             } else {
+                //@ts-ignore
                 throw new Error(result.msg || '生成失败');
             }
         } catch (err) {
