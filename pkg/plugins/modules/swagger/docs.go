@@ -10273,20 +10273,61 @@ var doc = `{
                 }
             }
         },
-        "/mgm/plugins/ai/chat/log": {
-            "get": {
+        "/mgm/plugins/ai/chat/log/ask": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "summary": "分析日志",
+                "summary": "日志智能问答",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "日志内容",
                         "name": "data",
-                        "in": "query"
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResourceData"
+                        }
+                    },
+                    {
+                        "description": "问题",
+                        "name": "question",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResourceData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/log/summary": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "日志智能总结",
+                "parameters": [
+                    {
+                        "description": "日志内容",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResourceData"
+                        }
                     }
                 ],
                 "responses": {
@@ -10332,6 +10373,35 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mgm/plugins/ai/chat/yaml/generate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "使用 AI 生成 Kubernetes YAML 配置",
+                "parameters": [
+                    {
+                        "description": "YAML 生成请求",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.YamlGenerateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.YamlGenerateResponse"
                         }
                     }
                 }
@@ -10909,6 +10979,83 @@ var doc = `{
         }
     },
     "definitions": {
+        "controller.ResourceData": {
+            "type": "object",
+            "properties": {
+                "cron": {
+                    "description": "定时任务",
+                    "type": "string"
+                },
+                "data": {
+                    "description": "日志",
+                    "type": "string"
+                },
+                "describe": {
+                    "description": "资源描述",
+                    "type": "string"
+                },
+                "field": {
+                    "type": "string"
+                },
+                "group": {
+                    "description": "资源组",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "资源类型",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "note": {
+                    "description": "事件",
+                    "type": "string"
+                },
+                "question": {
+                    "description": "AnyQuestion 任意提问",
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "regardingKind": {
+                    "type": "string"
+                },
+                "reportingController": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "version": {
+                    "description": "资源版本",
+                    "type": "string"
+                }
+            }
+        },
+        "controller.YamlGenerateRequest": {
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.YamlGenerateResponse": {
+            "type": "object",
+            "properties": {
+                "yaml": {
+                    "type": "string"
+                }
+            }
+        },
         "doc.DetailReq": {
             "type": "object",
             "properties": {

@@ -445,7 +445,7 @@ func (cc *Controller) LogAsk(c *response.Context) {
 // @Security BearerAuth
 // @Param data body YamlGenerateRequest true "YAML 生成请求"
 // @Success 200 {object} YamlGenerateResponse
-// @Router /k8s/plugins/ai/yaml/generate [post]
+// @Router /mgm/plugins/ai/chat/yaml/generate [post]
 func (cc *Controller) YamlGenerate(c *response.Context) {
 	var req YamlGenerateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
