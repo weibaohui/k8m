@@ -40,7 +40,6 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
         setGeneratedYaml('');
 
         try {
-
             // 调用后端API
             const result = await fetcher({
                 url: '/mgm/plugins/yaml_editor/ai/generate',
@@ -48,7 +47,6 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
                 data: JSON.stringify({ prompt })
             });
 
-            console.log('API响应:', result);
             //@ts-ignore
             if (result.status === 200 && result.data && result.data.data && result.data.data.yaml) {
                 //@ts-ignore
