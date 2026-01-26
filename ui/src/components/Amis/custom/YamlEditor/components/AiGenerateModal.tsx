@@ -47,7 +47,7 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
         try {
             // 调用后端API
             const response = await fetcher({
-                url: '/k8s/plugins/ai/yaml/generate',
+                url: '/mgm/plugins/ai/chat/yaml/generate',
                 method: 'post',
                 data: { prompt }
             });
