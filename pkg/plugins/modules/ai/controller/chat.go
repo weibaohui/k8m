@@ -463,7 +463,7 @@ func (cc *Controller) LogAsk(c *response.Context) {
 // @Security BearerAuth
 // @Param data body YamlGenerateRequest true "YAML 生成请求"
 // @Success 200 {object} YamlGenerateResponse
-// @Router /mgm/plugins/ai/chat/yaml/generate [post]
+// @Router /k8s/plugins/ai/yaml/generate [post]
 func (cc *Controller) YamlGenerate(c *response.Context) {
 	var req YamlGenerateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -471,19 +471,15 @@ func (cc *Controller) YamlGenerate(c *response.Context) {
 		return
 	}
 
-	// 构建 AI 提示词
-	prompt := fmt.Sprintf(`你是一个 Kubernetes 专家。请根据以下描述生成准确、完整的 Kubernetes YAML 配置。
+	// 从数据库获取prompt模板
+	templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeYamlGenerate)
 
-要求：
-1. 只返回 YAML 代码，不要包含任何解释、注释或其他文本
-2. YAML 格式必须正确，缩进使用 2 个空格
-3. 包含所有必需的字段（apiVersion, kind, metadata, spec 等）
-4. 如果描述涉及多个资源，请使用 YAML 文档分隔符 "---" 分隔
-5. 确保资源名称和标签符合 Kubernetes 命名规范
-
-用户描述：%s
-
-请直接返回 YAML 代码：`, req.Prompt)
+	// 渲染模板，将用户的描述替换到模板中
+	prompt := renderTemplate(templateStr, ResourceData{Question: req.Prompt}, func(d ResourceData) map[string]any {
+		return map[string]any{
+			"Prompt": d.Question,
+		}
+	})
 
 	ctx := context.Background()
 	result, err := service.GetChatService().ChatWithCtxNoHistory(ctx, prompt)

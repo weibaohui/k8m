@@ -39,4 +39,7 @@ const (
 
 	// AIPromptTypeLogAsk 日志问答类型
 	AIPromptTypeLogAsk AIPromptType = "LogAsk"
+
+	// AIPromptTypeYamlGenerate YAML生成类型
+	AIPromptTypeYamlGenerate AIPromptType = "YamlGenerate"
 )

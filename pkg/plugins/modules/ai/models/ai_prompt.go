@@ -276,4 +276,23 @@ var BuiltinAIPrompts = []AIPrompt{
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
+	{
+		Name:        "YAML生成",
+		Description: "根据自然语言描述生成Kubernetes YAML配置",
+		PromptType:  constants.AIPromptTypeYamlGenerate,
+		Content: `你是一个 Kubernetes 专家。请根据以下描述生成准确、完整的 Kubernetes YAML 配置。
+
+要求：
+1. 只返回 YAML 代码，不要包含任何解释、注释或其他文本
+2. YAML 格式必须正确，缩进使用 2 个空格
+3. 包含所有必需的字段（apiVersion, kind, metadata, spec 等）
+4. 如果描述涉及多个资源，请使用 YAML 文档分隔符 "---" 分隔
+5. 确保资源名称和标签符合 Kubernetes 命名规范
+
+用户描述：${Prompt}
+
+请直接返回 YAML 代码`,
+		IsBuiltin: true,
+		IsEnabled: true,
+	},
 }
