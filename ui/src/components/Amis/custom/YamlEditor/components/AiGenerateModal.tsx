@@ -12,13 +12,6 @@ interface AiGenerateModalProps {
     onGenerateSuccess: (yaml: string) => void;
 }
 
-// API 响应接口定义
-interface ApiResponse<T = any> {
-    data: T;
-    status: number;
-    msg?: string;
-}
-
 // AI 生成响应接口
 interface AiGenerateResponse {
     yaml: string;
@@ -54,7 +47,7 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
         try {
             // 调用后端API
             const response = await fetcher({
-                url: '/mgm/plugins/yaml_editor/ai/generate',
+                url: '/k8s/plugins/ai/yaml/generate',
                 method: 'post',
                 data: { prompt }
             });

@@ -33,6 +33,7 @@ func RegisterClusterRoutes(arg chi.Router) {
 	prefix := "/plugins/" + modules.PluginNameAI
 	ctrl := &controller.Controller{}
 	arg.Get(prefix+"/chat/describe", response.Adapter(ctrl.Describe))
+	arg.Post(prefix+"/yaml/generate", response.Adapter(ctrl.YamlGenerate))
 }
 
 func RegisterPluginAdminRoutes(arg chi.Router) {

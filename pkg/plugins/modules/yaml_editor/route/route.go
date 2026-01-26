@@ -24,6 +24,5 @@ func RegisterManagementRoutes(arg chi.Router) {
 	arg.Get(prefix+"/template/list", response.Adapter(ctrl.List))
 	arg.Post(prefix+"/template/save", response.Adapter(ctrl.Save))
 	arg.Post(prefix+"/template/delete/{ids}", response.Adapter(ctrl.DeleteTemplate))
-	arg.Post(prefix+"/ai/generate", response.Adapter(ctrl.AIGenerate))
 	klog.V(6).Infof("注册 YAML 编辑器插件管理路由")
 }
