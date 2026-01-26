@@ -10283,17 +10283,8 @@ var doc = `{
                 "summary": "日志智能问答",
                 "parameters": [
                     {
-                        "description": "日志内容",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.ResourceData"
-                        }
-                    },
-                    {
-                        "description": "问题",
-                        "name": "question",
+                        "description": "请求数据（包含日志内容和问题）",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {

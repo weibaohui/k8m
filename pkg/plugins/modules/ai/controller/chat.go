@@ -423,8 +423,7 @@ func (cc *Controller) LogSummary(c *response.Context) {
 
 // @Summary 日志智能问答
 // @Security BearerAuth
-// @Param data body ResourceData true "日志内容"
-// @Param question body ResourceData true "问题"
+// @Param request body ResourceData true "请求数据（包含日志内容和问题）"
 // @Success 200 {object} string
 // @Router /mgm/plugins/ai/chat/log/ask [post]
 func (cc *Controller) LogAsk(c *response.Context) {
@@ -453,6 +452,12 @@ func (cc *Controller) YamlGenerate(c *response.Context) {
 		return
 	}
 
+	enabled := plugins.ManagerInstance().IsRunning(modules.PluginNameAI)
+	if !enabled {
+		amis.WriteJsonError(c, fmt.Errorf("请先配置开启ChatGPT功能"))
+		return
+	}
+
 	// 从数据库获取prompt模板
 	templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeYamlGenerate)
 
@@ -463,7 +468,7 @@ func (cc *Controller) YamlGenerate(c *response.Context) {
 		}
 	})
 
-	ctx := context.Background()
+	ctx := amis.GetContextWithUser(c)
 	result, err := service.GetChatService().ChatWithCtxNoHistory(ctx, prompt)
 	if err != nil {
 		amis.WriteJsonError(c, fmt.Errorf("AI 生成失败：%v", err))
