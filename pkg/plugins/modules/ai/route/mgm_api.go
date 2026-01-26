@@ -14,7 +14,6 @@ func RegisterManagementRoutes(arg chi.Router) {
 	ctrl := &controller.Controller{}
 
 	arg.Get(prefix+"/chat/event", response.Adapter(ctrl.Event))
-	arg.Get(prefix+"/chat/log", response.Adapter(ctrl.Log))
 	arg.Post(prefix+"/chat/log/summary", response.Adapter(ctrl.LogSummary))
 	arg.Post(prefix+"/chat/log/ask", response.Adapter(ctrl.LogAsk))
 	arg.Get(prefix+"/chat/cron", response.Adapter(ctrl.Cron))
@@ -27,6 +26,8 @@ func RegisterManagementRoutes(arg chi.Router) {
 	arg.Get(prefix+"/chat/ws_chatgpt/history", response.Adapter(ctrl.History))
 	arg.Get(prefix+"/chat/ws_chatgpt/history/reset", response.Adapter(ctrl.Reset))
 	arg.Get(prefix+"/chat/k8s_gpt/resource", response.Adapter(ctrl.K8sGPTResource))
+	arg.Post(prefix+"/chat/yaml/generate", response.Adapter(ctrl.YamlGenerate))
+
 	klog.V(6).Infof("注册 AI 插件管理路由")
 }
 func RegisterClusterRoutes(arg chi.Router) {

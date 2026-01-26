@@ -202,25 +202,7 @@ var BuiltinAIPrompts = []AIPrompt{
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
-	{
-		Name:        "日志分析",
-		Description: "分析应用程序或系统日志",
-		PromptType:  constants.AIPromptTypeLog,
-		Content: `请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:
-		\n${Data}
-		\n请提供：
-		\n1. 日志级别和类型分析
-		\n2. 关键信息提取
-		\n3. 问题识别和诊断
-		\n4. 解决建议和后续行动
-		\n注意：
-		\n- 使用中文进行回答
-		\n- 回答要直接，不要加入啰嗦的信息
-		\n- 不要向我提问或确认信息
-		\n- 不要使用工具tools`,
-		IsBuiltin: true,
-		IsEnabled: true,
-	},
+
 	{
 		Name:        "任意选择",
 		Description: "对任意选择的文字内容进行详细解释",
@@ -273,6 +255,25 @@ var BuiltinAIPrompts = []AIPrompt{
 		\n- 如果日志中没有相关信息，请明确告知
 		\n- 使用中文回答
 		\n- 回答要简洁明了`,
+		IsBuiltin: true,
+		IsEnabled: true,
+	},
+	{
+		Name:        "YAML生成",
+		Description: "根据自然语言描述生成Kubernetes YAML配置",
+		PromptType:  constants.AIPromptTypeYamlGenerate,
+		Content: `你是一个 Kubernetes 专家。请根据以下描述生成准确、完整的 Kubernetes YAML 配置。
+
+要求：
+1. 只返回 YAML 代码，不要包含任何解释、注释或其他文本
+2. YAML 格式必须正确，缩进使用 2 个空格
+3. 包含所有必需的字段（apiVersion, kind, metadata, spec 等）
+4. 如果描述涉及多个资源，请使用 YAML 文档分隔符 "---" 分隔
+5. 确保资源名称和标签符合 Kubernetes 命名规范
+
+用户描述：${Prompt}
+
+请直接返回 YAML 代码`,
 		IsBuiltin: true,
 		IsEnabled: true,
 	},

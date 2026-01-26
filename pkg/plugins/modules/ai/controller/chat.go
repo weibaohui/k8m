@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/htpl"
@@ -386,24 +387,6 @@ func (cc *Controller) Cron(c *response.Context) {
 	})
 }
 
-// @Summary 分析日志
-// @Security BearerAuth
-// @Param data query string false "日志内容"
-// @Success 200 {object} string
-// @Router /mgm/plugins/ai/chat/log [get]
-func (cc *Controller) Log(c *response.Context) {
-	handleRequest(c, func(data any) string {
-		// 从数据库获取prompt模板
-		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeLog)
-
-		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
-			return map[string]any{
-				"Data": utils.ToJSON(d.Data),
-			}
-		})
-	})
-}
-
 // getPromptWithFallback 根据提示类型从数据库获取模板，若失败则回退到内置模板。
 // 参数说明：
 // - ctx: 请求上下文，用于数据库或服务调用的上下文传递。
@@ -440,8 +423,7 @@ func (cc *Controller) LogSummary(c *response.Context) {
 
 // @Summary 日志智能问答
 // @Security BearerAuth
-// @Param data body ResourceData true "日志内容"
-// @Param question body ResourceData true "问题"
+// @Param request body ResourceData true "请求数据（包含日志内容和问题）"
 // @Success 200 {object} string
 // @Router /mgm/plugins/ai/chat/log/ask [post]
 func (cc *Controller) LogAsk(c *response.Context) {
@@ -456,4 +438,61 @@ func (cc *Controller) LogAsk(c *response.Context) {
 			}
 		})
 	})
+}
+
+// @Summary 使用 AI 生成 Kubernetes YAML 配置
+// @Security BearerAuth
+// @Param data body YamlGenerateRequest true "YAML 生成请求"
+// @Success 200 {object} YamlGenerateResponse
+// @Router /mgm/plugins/ai/chat/yaml/generate [post]
+func (cc *Controller) YamlGenerate(c *response.Context) {
+	var req YamlGenerateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("提取prompt错误。\n %v", err))
+		return
+	}
+
+	enabled := plugins.ManagerInstance().IsRunning(modules.PluginNameAI)
+	if !enabled {
+		amis.WriteJsonError(c, fmt.Errorf("请先配置开启ChatGPT功能"))
+		return
+	}
+
+	// 从数据库获取prompt模板
+	templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeYamlGenerate)
+
+	// 渲染模板，将用户的描述替换到模板中
+	prompt := renderTemplate(templateStr, ResourceData{Question: req.Prompt}, func(d ResourceData) map[string]any {
+		return map[string]any{
+			"Prompt": d.Question,
+		}
+	})
+
+	ctx := amis.GetContextWithUser(c)
+	result, err := service.GetChatService().ChatWithCtxNoHistory(ctx, prompt)
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("AI 生成失败：%v", err))
+		return
+	}
+
+	// 清理可能存在的 markdown 代码块标记
+	result = strings.TrimSpace(result)
+	result = strings.TrimPrefix(result, "```yaml")
+	result = strings.TrimPrefix(result, "```")
+	result = strings.TrimSuffix(result, "```")
+	result = strings.TrimSpace(result)
+
+	amis.WriteJsonData(c, response.H{
+		"yaml": result,
+	})
+}
+
+// YamlGenerateRequest YAML 生成请求结构
+type YamlGenerateRequest struct {
+	Prompt string `json:"prompt"`
+}
+
+// YamlGenerateResponse YAML 生成响应结构
+type YamlGenerateResponse struct {
+	Yaml string `json:"yaml"`
 }

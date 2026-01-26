@@ -230,9 +230,9 @@ func (s *AdminAIPromptController) AIPromptTypes(c *response.Context) {
 		{"label": "任意选择", "value": string(constants.AIPromptTypeAnySelection)},
 		{"label": "任意问题", "value": string(constants.AIPromptTypeAnyQuestion)},
 		{"label": "定时任务", "value": string(constants.AIPromptTypeCron)},
-		{"label": "日志分析", "value": string(constants.AIPromptTypeLog)},
 		{"label": "日志总结", "value": string(constants.AIPromptTypeLogSummary)},
 		{"label": "日志问答", "value": string(constants.AIPromptTypeLogAsk)},
+		{"label": "YAML生成", "value": string(constants.AIPromptTypeYamlGenerate)},
 	}
 	amis.WriteJsonData(c, response.H{
 		"options": types,

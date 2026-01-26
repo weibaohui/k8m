@@ -1,8 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { Button, Modal, List } from 'antd';
+import { RobotOutlined } from '@ant-design/icons';
 import { fetcher } from "@/components/Amis/fetcher.ts";
 import BuiltinTemplateButton from '@/components/Amis/custom/YamlEditor/components/BuiltinTemplateButton';
+import AiGenerateModal from '@/components/Amis/custom/YamlEditor/components/AiGenerateModal';
 
 interface EditorPanelProps {
     onSaveSuccess: (content: string) => void;
@@ -12,6 +14,7 @@ interface EditorPanelProps {
 const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent = '' }) => {
     const monacoInstance = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const editorRef = useRef<HTMLDivElement>(null);
+    const [aiModalVisible, setAiModalVisible] = useState(false);
 
     useEffect(() => {
         if (editorRef.current) {
@@ -182,6 +185,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
         }
     };
 
+    const handleAiGenerateSuccess = (yaml: string) => {
+        if (monacoInstance.current) {
+            monacoInstance.current.setValue(yaml);
+        }
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ marginBottom: '10px' }}>
@@ -189,6 +198,13 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
                     应用
                 </Button>
                 <BuiltinTemplateButton onSelectTemplate={handleTemplateSelect} style={{ marginRight: '8px' }} />
+                <Button
+                    onClick={() => setAiModalVisible(true)}
+                    icon={<RobotOutlined />}
+                    style={{ marginRight: '8px' }}
+                >
+                    AI 生成
+                </Button>
                 <Button onClick={() => {
                     Modal.confirm({
                         title: '确认删除',
@@ -203,6 +219,11 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onSaveSuccess, initialContent
                 </Button>
             </div>
             <div ref={editorRef} style={{ flex: 1, border: '1px solid #d9d9d9' }} />
+            <AiGenerateModal
+                visible={aiModalVisible}
+                onCancel={() => setAiModalVisible(false)}
+                onGenerateSuccess={handleAiGenerateSuccess}
+            />
         </div>
     );
 };
