@@ -12,6 +12,18 @@ interface AiGenerateModalProps {
     onGenerateSuccess: (yaml: string) => void;
 }
 
+// API 响应接口定义
+interface ApiResponse<T = any> {
+    data: T;
+    status: number;
+    msg?: string;
+}
+
+// AI 生成响应接口
+interface AiGenerateResponse {
+    yaml: string;
+}
+
 const EXAMPLES = [
     { label: '部署 Nginx', description: '创建一个 Nginx 部署，3 个副本，使用 latest 镜像' },
     { label: '部署 Redis', description: '创建一个 Redis 单实例部署，设置密码为 redis123' },
@@ -41,19 +53,21 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
 
         try {
             // 调用后端API
-            const result = await fetcher({
+            const response = await fetcher({
                 url: '/mgm/plugins/yaml_editor/ai/generate',
                 method: 'post',
-                data: JSON.stringify({ prompt })
+                data: { prompt }
             });
 
-            //@ts-ignore
-            if (result.status === 200 && result.data && result.data.data && result.data.data.yaml) {
-                //@ts-ignore
-                setGeneratedYaml(result.data.data.yaml);
+            if (response?.data?.status === 0) {
+                const responseData = response.data.data as AiGenerateResponse;
+                if (responseData?.yaml) {
+                    setGeneratedYaml(responseData.yaml);
+                } else {
+                    throw new Error(response.data.msg || '生成失败');
+                }
             } else {
-                //@ts-ignore
-                throw new Error(result.msg || '生成失败');
+                throw new Error(response.data?.msg || '生成失败');
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : '生成失败，请重试');
