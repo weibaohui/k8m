@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { appendQueryParam, ProcessK8sUrlWithCluster, replacePlaceholders } from "@/utils/utils.ts";
 import AnsiToHtml from 'ansi-to-html';
-import { Modal, Input, Alert, Button, Switch, Card, Tag, Collapse, Space, message, Select, Spin } from 'antd';
+import { Modal, Input, Alert, Button, Switch, Card, Tag, Collapse, Space, message, Select } from 'antd';
 import { RobotOutlined, ClockCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 
 // 定义组件的 Props 接口
@@ -244,7 +244,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
 
     // AI Status State
     const [aiStatus, setAiStatus] = useState<'idle' | 'analyzing'>('idle');
-    const [nextSummaryTime, setNextSummaryTime] = useState(0);
     const [countdown, setCountdown] = useState(0);
 
     // Calculate new logs count derived from state (Real-time)
@@ -287,7 +286,6 @@ const SSELogDisplayComponent = React.forwardRef((props: SSEComponentProps, _) =>
                     } else {
                         // Heartbeat skip: reset timer but don't trigger if no new logs
                         lastSummaryTimeRef.current = Date.now(); // reset base time
-                        setNextSummaryTime(Date.now() + summaryInterval);
                         setAiStatus('idle');
                     }
                     return;
