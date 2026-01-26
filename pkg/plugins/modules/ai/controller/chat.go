@@ -387,24 +387,6 @@ func (cc *Controller) Cron(c *response.Context) {
 	})
 }
 
-// @Summary 分析日志
-// @Security BearerAuth
-// @Param data query string false "日志内容"
-// @Success 200 {object} string
-// @Router /mgm/plugins/ai/chat/log [get]
-func (cc *Controller) Log(c *response.Context) {
-	handleRequest(c, func(data any) string {
-		// 从数据库获取prompt模板
-		templateStr := getPromptWithFallback(c.Request.Context(), constants.AIPromptTypeLog)
-
-		return renderTemplate(templateStr, data, func(d ResourceData) map[string]any {
-			return map[string]any{
-				"Data": utils.ToJSON(d.Data),
-			}
-		})
-	})
-}
-
 // getPromptWithFallback 根据提示类型从数据库获取模板，若失败则回退到内置模板。
 // 参数说明：
 // - ctx: 请求上下文，用于数据库或服务调用的上下文传递。

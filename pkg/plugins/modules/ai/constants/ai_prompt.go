@@ -31,9 +31,6 @@ const (
 	// AIPromptTypeCron Cron表达式类型
 	AIPromptTypeCron AIPromptType = "Cron"
 
-	// AIPromptTypeLog 日志分析类型
-	AIPromptTypeLog AIPromptType = "Log"
-
 	// AIPromptTypeLogSummary 日志总结类型
 	AIPromptTypeLogSummary AIPromptType = "LogSummary"
 

@@ -202,25 +202,7 @@ var BuiltinAIPrompts = []AIPrompt{
 		IsBuiltin: true,
 		IsEnabled: true,
 	},
-	{
-		Name:        "日志分析",
-		Description: "分析应用程序或系统日志",
-		PromptType:  constants.AIPromptTypeLog,
-		Content: `请你作为k8s、Devops、软件工程专家，对下面的Log做出分析:
-		\n${Data}
-		\n请提供：
-		\n1. 日志级别和类型分析
-		\n2. 关键信息提取
-		\n3. 问题识别和诊断
-		\n4. 解决建议和后续行动
-		\n注意：
-		\n- 使用中文进行回答
-		\n- 回答要直接，不要加入啰嗦的信息
-		\n- 不要向我提问或确认信息
-		\n- 不要使用工具tools`,
-		IsBuiltin: true,
-		IsEnabled: true,
-	},
+
 	{
 		Name:        "任意选择",
 		Description: "对任意选择的文字内容进行详细解释",
