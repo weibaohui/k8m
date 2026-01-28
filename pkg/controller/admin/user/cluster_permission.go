@@ -46,7 +46,7 @@ func RegisterClusterPermissionRoutes(r chi.Router) {
 func (a *AdminClusterPermission) ListClusterPermissions(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
-	cluster, err := utils.DecodeBase64(clusterBase64)
+	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -90,7 +90,7 @@ func (a *AdminClusterPermission) ListClusterPermissionsByUserName(c *response.Co
 // @Router /admin/cluster_permissions/cluster/{cluster}/list [get]
 func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
-	cluster, err := utils.DecodeBase64(clusterBase64)
+	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -116,7 +116,7 @@ func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *response.C
 func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
 	clusterBase64 := c.Param("cluster")
-	cluster, err := utils.DecodeBase64(clusterBase64)
+	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -157,7 +157,7 @@ func (a *AdminClusterPermission) SaveClusterPermission(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
 	role := c.Param("role")
 	authorizationType := c.Param("authorization_type")
-	cluster, err := utils.DecodeBase64(clusterBase64)
+	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

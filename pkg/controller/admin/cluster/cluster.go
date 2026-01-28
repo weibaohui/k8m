@@ -91,7 +91,7 @@ func (a *Controller) Scan(c *response.Context) {
 // @Router /mgm/cluster/{cluster}/reconnect [post]
 func (a *Controller) Reconnect(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
-	clusterID, err := utils.DecodeBase64(clusterBase64)
+	clusterID, err := utils.UrlSafeBase64Decode(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -108,7 +108,7 @@ func (a *Controller) Reconnect(c *response.Context) {
 // @Router /admin/cluster/{cluster}/disconnect [post]
 func (a *Controller) Disconnect(c *response.Context) {
 	clusterBase64 := c.Param("cluster")
-	clusterID, err := utils.DecodeBase64(clusterBase64)
+	clusterID, err := utils.UrlSafeBase64Decode(clusterBase64)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
