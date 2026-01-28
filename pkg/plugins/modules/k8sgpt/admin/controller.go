@@ -85,7 +85,7 @@ func (cc *Controller) ClusterRunAnalysis(c *response.Context) {
 func (cc *Controller) ClusterRunAnalysisMgm(c *response.Context) {
 	clusterIDBase64 := c.Param("cluster")
 	if clusterIDBase64 != "" {
-		if id, err := utils.DecodeBase64(clusterIDBase64); err == nil {
+		if id, err := utils.UrlSafeBase64Decode(clusterIDBase64); err == nil {
 			if id != "" {
 				clusterIDBase64 = id
 			}
@@ -114,7 +114,7 @@ func (cc *Controller) ClusterRunAnalysisMgm(c *response.Context) {
 func (cc *Controller) GetClusterRunAnalysisResultMgm(c *response.Context) {
 	clusterIDBase64 := c.Param("cluster")
 	if clusterIDBase64 != "" {
-		if id, err := utils.DecodeBase64(clusterIDBase64); err == nil {
+		if id, err := utils.UrlSafeBase64Decode(clusterIDBase64); err == nil {
 			if id != "" {
 				clusterIDBase64 = id
 			}
