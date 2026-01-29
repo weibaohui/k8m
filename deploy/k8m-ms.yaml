@@ -153,9 +153,9 @@ spec:
     spec:
       containers:
         - name: k8m
-          # image: docker.io/weibh/k8m:v0.26.12
-          # image: ghcr.io/weibaohui/k8m:v0.26.12
-          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.26.12
+          # image: docker.io/weibh/k8m:v0.26.13
+          # image: ghcr.io/weibaohui/k8m:v0.26.13
+          image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m:v0.26.13
           env:
             - name: POD_NAME #启用主备选举插件必须填,否则不会切换
               valueFrom:
