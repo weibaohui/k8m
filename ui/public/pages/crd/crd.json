@@ -541,7 +541,7 @@
                   "icon": "fas fa-list text-primary",
                   "body": "实例列表",
                   "blank": true,
-                  "href": "/#/k/${''|selectedClusterBase64}/crd/namespaced_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "href": "/#/k/${''|selectedClusterMd5}/crd/namespaced_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
                   "visibleOn": "spec.scope=='Namespaced'"
                 },
                 {
@@ -549,7 +549,7 @@
                   "icon": "fas fa-list text-primary",
                   "body": "实例列表",
                   "blank": true,
-                  "href": "/#/k/${''|selectedClusterBase64}/crd/cluster_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
+                  "href": "/#/k/${''|selectedClusterMd5}/crd/cluster_cr?kind=${spec.names.kind}&group=${spec.group}&version=${spec.versions[0].name}",
                   "visibleOn": "spec.scope=='Cluster'"
                 }
               ]

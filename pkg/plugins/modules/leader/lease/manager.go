@@ -96,11 +96,14 @@ func (m *manager) EnsureOnConnect(ctx context.Context, clusterID string) error {
 	labels := map[string]string{
 		"app":       "k8m",
 		"type":      "cluster-sync",
-		"clusterID": utils.UrlSafeBase64Encode(clusterID),
+		"clusterMD": utils.MD5Hex(clusterID),
+	}
+	annotations := map[string]string{
+		"clusterID": clusterID,
 	}
 
-	m.createOrUpdateLease(ctx, name, labels)
-	go m.loopRenewLease(name, labels, m.durationSec, m.renewSec, m.instanceID)
+	m.createOrUpdateLease(ctx, name, labels, annotations)
+	go m.loopRenewLease(name, labels, annotations, m.durationSec, m.renewSec, m.instanceID)
 	return nil
 }
 
@@ -135,10 +138,23 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 			if !isLeaseValid(l, m.durationSec) {
 				return
 			}
-			cid := l.Labels["clusterID"]
-			clusterID, err := utils.UrlSafeBase64Decode(cid)
-			if err != nil {
-				klog.V(6).Infof("解码 Lease 标签 clusterID 失败：%v", err)
+			clusterID := ""
+			if l.Annotations != nil {
+				clusterID = l.Annotations["clusterID"]
+			}
+			if clusterID == "" {
+				cid := l.Labels["clusterID"]
+				if cid != "" {
+					decoded, err := utils.UrlSafeBase64Decode(cid)
+					if err != nil {
+						klog.V(6).Infof("解码 Lease 标签 clusterID 失败：%v", err)
+						return
+					}
+					clusterID = decoded
+				}
+			}
+			if clusterID == "" {
+				klog.V(6).Infof("未获取到 Lease 关联集群标识，跳过处理：%s", l.Name)
 				return
 			}
 			if deref(l.Spec.HolderIdentity) == m.instanceID {
@@ -159,10 +175,23 @@ func (m *manager) StartWatcher(ctx context.Context, onConnect func(string), onDi
 				return
 			}
 
-			cid := l.Labels["clusterID"]
-			clusterID, err := utils.UrlSafeBase64Decode(cid)
-			if err != nil {
-				klog.V(6).Infof("解码 Lease 标签 clusterID 失败：%v", err)
+			clusterID := ""
+			if l.Annotations != nil {
+				clusterID = l.Annotations["clusterID"]
+			}
+			if clusterID == "" {
+				cid := l.Labels["clusterID"]
+				if cid != "" {
+					decoded, err := utils.UrlSafeBase64Decode(cid)
+					if err != nil {
+						klog.V(6).Infof("解码 Lease 标签 clusterID 失败：%v", err)
+						return
+					}
+					clusterID = decoded
+				}
+			}
+			if clusterID == "" {
+				klog.V(6).Infof("未获取到 Lease 关联集群标识，跳过处理：%s", l.Name)
 				return
 			}
 
@@ -209,14 +238,15 @@ func (m *manager) StartLeaderCleanup(ctx context.Context) error {
 }
 
 // createOrUpdateLease 中文函数注释：创建 Lease；若已存在则更新其续约时间与持有者。
-func (m *manager) createOrUpdateLease(ctx context.Context, name string, labels map[string]string) {
+func (m *manager) createOrUpdateLease(ctx context.Context, name string, labels map[string]string, annotations map[string]string) {
 	lc := m.clientset.CoordinationV1().Leases(m.namespace)
 	n := time.Now()
 	ld := int32(m.durationSec)
 	l := &coordinationv1.Lease{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: labels,
+			Name:        name,
+			Labels:      labels,
+			Annotations: annotations,
 		},
 		Spec: coordinationv1.LeaseSpec{
 			HolderIdentity:       ptrString(m.instanceID),
@@ -233,7 +263,7 @@ func (m *manager) createOrUpdateLease(ctx context.Context, name string, labels m
 }
 
 // loopRenewLease 中文函数注释：循环续约 Lease，更新续约时间与持有者信息。
-func (m *manager) loopRenewLease(name string, labels map[string]string, durationSec int, renewSec int, instanceID string) {
+func (m *manager) loopRenewLease(name string, labels map[string]string, annotations map[string]string, durationSec int, renewSec int, instanceID string) {
 	lc := m.clientset.CoordinationV1().Leases(m.namespace)
 	t := time.NewTicker(time.Duration(renewSec) * time.Second)
 	defer t.Stop()
@@ -242,8 +272,9 @@ func (m *manager) loopRenewLease(name string, labels map[string]string, duration
 		ld := int32(durationSec)
 		l := &coordinationv1.Lease{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:   name,
-				Labels: labels,
+				Name:        name,
+				Labels:      labels,
+				Annotations: annotations,
 			},
 			Spec: coordinationv1.LeaseSpec{
 				HolderIdentity:       ptrString(instanceID),

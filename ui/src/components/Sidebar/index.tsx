@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useCRDStatus } from '@/hooks/useCRDStatus';
 import { shouldShowMenuItem } from '@/utils/menuVisibility';
-import { getCurrentClusterId, toUrlSafeBase64 } from '@/utils/utils';
+import { getCurrentClusterId, normalizeClusterIdentifier } from '@/utils/utils';
 import { fetcher } from '@/components/Amis/fetcher';
 
 type AntdMenuItem = Required<MenuProps>['items'][number];
@@ -73,16 +73,16 @@ const Sidebar = () => {
             .map((item): AntdMenuItem => {
                 /**
                  * 跳转到指定页面路径
-                 * 在跳转前，始终在路径前加上 `k/<clusterID>` 前缀（clusterID 为 URL 安全 Base64 编码）。
+                 * 在跳转前，始终在路径前加上 `k/<clusterID>` 前缀（clusterID 为 MD5 编码）。
                  * 例如：传入 `/admin`，最终跳转为 `#/k/<clusterID>/admin`。
                  * 若未选择集群，则按原路径跳转。
                  */
                 const loadJsonPage = (path: string) => {
                     const clusterId = getCurrentClusterId();
                     if (clusterId) {
-                        const encoded = toUrlSafeBase64(clusterId);
+                        const normalized = normalizeClusterIdentifier(clusterId);
                         const purePath = path.startsWith('/') ? path : `/${path}`;
-                        navigate(`/k/${encoded}${purePath}`);
+                        navigate(`/k/${normalized}${purePath}`);
                     } else {
                         navigate(path);
                     }

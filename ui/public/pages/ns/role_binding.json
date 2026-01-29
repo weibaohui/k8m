@@ -605,7 +605,7 @@
               "type": "link",
               "body": "<strong class='text-green-500 font-black'>[${roleRef.kind}]</strong>${roleRef.name}",
               "blank": false,
-              "href": "/#/k/${''|selectedClusterBase64}/ns/role?metadata[name]=${roleRef.name}"
+              "href": "/#/k/${''|selectedClusterMd5}/ns/role?metadata[name]=${roleRef.name}"
             }
           ],
           "searchable": {
@@ -626,7 +626,7 @@
                 "type": "link",
                 "body": "<strong class='text-green-500 font-black'>[${kind}]</strong>${name}",
                 "blank": false,
-                "href": "${kind == 'ServiceAccount' ? '/#/k/${''|selectedClusterBase64}/ns/service_account?metadata[name]=' + name : ''}"
+                "href": "${kind == 'ServiceAccount' ? '/#/k/${''|selectedClusterMd5}/ns/service_account?metadata[name]=' + name : ''}"
               }
             ]
           },

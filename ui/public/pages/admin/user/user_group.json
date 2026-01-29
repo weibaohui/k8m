@@ -185,7 +185,7 @@
                           "icon": "fas fa-external-link-alt",
                           "level": "info",
                           "actionType": "url",
-                          "url": "/#/k/${''|selectedClusterBase64}/MenuEditor",
+                          "url": "/#/k/${''|selectedClusterMd5}/MenuEditor",
                           "blank": true,
                           "className": "mb-2"
                         }

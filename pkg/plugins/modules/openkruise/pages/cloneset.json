@@ -876,7 +876,7 @@
                                   "actionType": "url",
                                   "icon": "fa fa-terminal text-primary",
                                   "blank": true,
-                                  "url": "/#/k/${''|selectedClusterBase64}/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+                                  "url": "/#/k/${''|selectedClusterMd5}/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
                                 },
                                 {
                                   "type": "button",

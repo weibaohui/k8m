@@ -6,7 +6,6 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/go-chi/chi/v5"
 	"github.com/weibaohui/k8m/internal/dao"
-	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -86,12 +85,12 @@ func (a *Controller) Scan(c *response.Context) {
 // @Summary 重新连接集群
 // @Description 重新连接一个已断开的集群
 // @Security BearerAuth
-// @Param cluster path string true "Base64编码的集群ID"
+// @Param cluster path string true "集群标识（MD5）"
 // @Success 200 {object} string "已执行，请稍后刷新"
 // @Router /mgm/cluster/{cluster}/reconnect [post]
 func (a *Controller) Reconnect(c *response.Context) {
-	clusterBase64 := c.Param("cluster")
-	clusterID, err := utils.UrlSafeBase64Decode(clusterBase64)
+	clusterIdentifier := c.Param("cluster")
+	clusterID, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -103,12 +102,12 @@ func (a *Controller) Reconnect(c *response.Context) {
 // @Summary 断开集群连接
 // @Description 断开一个正在运行的集群的连接
 // @Security BearerAuth
-// @Param cluster path string true "Base64编码的集群ID"
+// @Param cluster path string true "集群标识（MD5）"
 // @Success 200 {object} string "已执行，请稍后刷新"
 // @Router /admin/cluster/{cluster}/disconnect [post]
 func (a *Controller) Disconnect(c *response.Context) {
-	clusterBase64 := c.Param("cluster")
-	clusterID, err := utils.UrlSafeBase64Decode(clusterBase64)
+	clusterIdentifier := c.Param("cluster")
+	clusterID, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

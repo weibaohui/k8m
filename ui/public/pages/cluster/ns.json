@@ -711,7 +711,7 @@
                   "icon": "fa-solid fa-chart-pie text-primary",
                   "body": "查看资源配额",
                   "blank": false,
-                  "href": "/#/k/${''|selectedClusterBase64}/ns/resource_quota?metadata[namespace]=${metadata.name}"
+                  "href": "/#/k/${''|selectedClusterMd5}/ns/resource_quota?metadata[namespace]=${metadata.name}"
                 },
                 {
                   "type": "button",
@@ -867,7 +867,7 @@
                   "icon": "fa-solid fa-compress text-primary",
                   "body": "查看限制范围",
                   "blank": false,
-                  "href": "/#/k/${''|selectedClusterBase64}/ns/limit_range?metadata[namespace]=${metadata.name}"
+                  "href": "/#/k/${''|selectedClusterMd5}/ns/limit_range?metadata[namespace]=${metadata.name}"
                 }
               ]
             }
@@ -925,7 +925,7 @@
               "type": "link",
               "body": "<% if (data.metadata.annotations && data.metadata.annotations['pod.count.total']) { %><%= data.metadata.annotations['pod.count.total'] %> <% } else { %><span class='text-gray-300 text-xs'>N/A</span><% } %>",
               "blank": false,
-              "href": "/#/k/${''|selectedClusterBase64}/ns/pod?metadata[namespace]=${metadata.name}"
+              "href": "/#/k/${''|selectedClusterMd5}/ns/pod?metadata[namespace]=${metadata.name}"
             }
           ]
         },

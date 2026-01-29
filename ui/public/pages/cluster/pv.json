@@ -764,7 +764,7 @@
               "type": "link",
               "body": "${spec.claimRef ? spec.claimRef.namespace + '/' + spec.claimRef.name : ''}",
               "blank": false,
-              "href": "/#/k/${''|selectedClusterBase64}/ns/pvc?metadata.name=${spec.claimRef.name}"
+              "href": "/#/k/${''|selectedClusterMd5}/ns/pvc?metadata.name=${spec.claimRef.name}"
             }
           ],
           "searchable": {

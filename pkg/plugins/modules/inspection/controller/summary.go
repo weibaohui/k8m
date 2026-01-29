@@ -14,6 +14,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/response"
+	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )
@@ -56,12 +57,13 @@ func (s *AdminScheduleController) SummaryBySchedule(c *response.Context) {
 	}
 
 	// 获取cluster参数
-	clusterBase64 := c.Param("cluster")
-
-	if clusterDecode, err := utils.UrlSafeBase64Decode(clusterBase64); err == nil {
-		cluster = string(clusterDecode)
-	} else {
-		klog.V(6).Infof("cluster=%s,%v ", cluster, err)
+	clusterIdentifier := c.Param("cluster")
+	if clusterIdentifier != "" {
+		if clusterID, err := service.ClusterService().ResolveClusterID(clusterIdentifier); err == nil {
+			cluster = clusterID
+		} else {
+			klog.V(6).Infof("解析cluster参数失败: cluster=%s, err=%v", clusterIdentifier, err)
+		}
 	}
 
 	// 2. 查询所有该scheduleID下的InspectionRecord

@@ -392,7 +392,7 @@
                   "icon": "fa-solid fa-clipboard-list text-primary",
                   "body": "巡检记录",
                   "blank": false,
-                  "href": "/#/k/${''|selectedClusterBase64}/plugins/inspection/record?schedule_id=${id}"
+                  "href": "/#/k/${''|selectedClusterMd5}/plugins/inspection/record?schedule_id=${id}"
                 }
               ]
             }

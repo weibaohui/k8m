@@ -580,7 +580,7 @@
               "level": "link",
               "actionType": "url",
               "blank": false,
-              "url": "/#/k/${''|selectedClusterBase64}/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
+              "url": "/#/k/${''|selectedClusterMd5}/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
             },
             {
               "type": "button",

@@ -193,7 +193,7 @@
                     "level": "link",
                     "actionType": "url",
                     "blank": true,
-                    "url": "/#/k/${''|selectedClusterBase64}/apply/apply?kind=${kind}"
+                    "url": "/#/k/${''|selectedClusterMd5}/apply/apply?kind=${kind}"
                 }
             ]
         },
@@ -568,7 +568,7 @@
                             "type": "link",
                             "body": "${metadata.annotations['gateway.count']||'-'}",
                             "blank": false,
-                            "href": "/#/k/${''|selectedClusterBase64}/ns/gateway?spec[gatewayClassName]=${metadata.name}"
+                            "href": "/#/k/${''|selectedClusterMd5}/ns/gateway?spec[gatewayClassName]=${metadata.name}"
                         }
                     ]
                 },

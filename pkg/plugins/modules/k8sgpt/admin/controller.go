@@ -15,12 +15,10 @@ type Controller struct{}
 func createAnalysisConfig(c *response.Context) *analysis.Analysis {
 	ctx := amis.GetContextWithUser(c)
 	clusterID := ""
-	clusterIDBase64 := c.Param("cluster")
-	if clusterIDBase64 != "" {
-		if id, err := utils.UrlSafeBase64Decode(clusterIDBase64); err == nil {
-			if id != "" {
-				clusterID = id
-			}
+	clusterIdentifier := c.Param("cluster")
+	if clusterIdentifier != "" {
+		if id, err := service.ClusterService().ResolveClusterID(clusterIdentifier); err == nil && id != "" {
+			clusterID = id
 		}
 	}
 
@@ -56,10 +54,8 @@ func (cc *Controller) ResourceRunAnalysis(c *response.Context) {
 func (cc *Controller) ClusterRunAnalysis(c *response.Context) {
 	userCluster := c.Param("user_cluster")
 	if userCluster != "" {
-		if id, err := utils.UrlSafeBase64Decode(userCluster); err == nil {
-			if string(id) != "" {
-				userCluster = string(id)
-			}
+		if id, err := service.ClusterService().ResolveClusterID(userCluster); err == nil && id != "" {
+			userCluster = id
 		}
 	}
 	cfg := createAnalysisConfig(c)
@@ -83,16 +79,14 @@ func (cc *Controller) ClusterRunAnalysis(c *response.Context) {
 }
 
 func (cc *Controller) ClusterRunAnalysisMgm(c *response.Context) {
-	clusterIDBase64 := c.Param("cluster")
-	if clusterIDBase64 != "" {
-		if id, err := utils.UrlSafeBase64Decode(clusterIDBase64); err == nil {
-			if id != "" {
-				clusterIDBase64 = id
-			}
-		}
+	clusterIdentifier := c.Param("cluster")
+	clusterID, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
 	cfg := createAnalysisConfig(c)
-	cfg.ClusterID = clusterIDBase64
+	cfg.ClusterID = clusterID
 	cfg.Context = utils.GetContextWithAdmin()
 	if !service.ClusterService().IsConnected(cfg.ClusterID) {
 		amis.WriteJsonError(c, fmt.Errorf("集群 %s 未连接", cfg.ClusterID))
@@ -112,16 +106,14 @@ func (cc *Controller) ClusterRunAnalysisMgm(c *response.Context) {
 }
 
 func (cc *Controller) GetClusterRunAnalysisResultMgm(c *response.Context) {
-	clusterIDBase64 := c.Param("cluster")
-	if clusterIDBase64 != "" {
-		if id, err := utils.UrlSafeBase64Decode(clusterIDBase64); err == nil {
-			if id != "" {
-				clusterIDBase64 = id
-			}
-		}
+	clusterIdentifier := c.Param("cluster")
+	clusterID, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
+	if err != nil {
+		amis.WriteJsonError(c, err)
+		return
 	}
 	cfg := createAnalysisConfig(c)
-	cfg.ClusterID = clusterIDBase64
+	cfg.ClusterID = clusterID
 	scanResult := service.ClusterService().GetClusterByID(cfg.ClusterID).GetClusterScanResult()
 	if scanResult == nil {
 		amis.WriteJsonOKMsg(c, "暂无数据，请先点击执行检查")

@@ -741,7 +741,7 @@
               "actionType": "url",
               "icon": "fa fa-terminal text-primary",
               "blank": true,
-              "url": "/#/k/${''|selectedClusterBase64}/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
+              "url": "/#/k/${''|selectedClusterMd5}/PodExec?namespace=${metadata.namespace}&name=${metadata.name}"
             },
             {
               "tooltip": "日志",
@@ -750,7 +750,7 @@
               "level": "link",
               "actionType": "url",
               "blank": true,
-              "url": "/#/k/${''|selectedClusterBase64}/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
+              "url": "/#/k/${''|selectedClusterMd5}/PodLog?namespace=${metadata.namespace}&name=${metadata.name}"
             },
             {
               "type": "button",

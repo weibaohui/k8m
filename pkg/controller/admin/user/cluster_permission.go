@@ -39,14 +39,14 @@ func RegisterClusterPermissionRoutes(r chi.Router) {
 
 // @Summary 获取指定集群指定角色的用户权限列表
 // @Security BearerAuth
-// @Param cluster path string true "集群ID(base64)"
+// @Param cluster path string true "集群标识（MD5）"
 // @Param role path string true "角色"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/role/{role}/user/list [get]
 func (a *AdminClusterPermission) ListClusterPermissions(c *response.Context) {
-	clusterBase64 := c.Param("cluster")
+	clusterIdentifier := c.Param("cluster")
 	role := c.Param("role")
-	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
+	cluster, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -85,12 +85,12 @@ func (a *AdminClusterPermission) ListClusterPermissionsByUserName(c *response.Co
 
 // @Summary 获取指定集群下所有用户的权限角色列表
 // @Security BearerAuth
-// @Param cluster path string true "集群ID(base64)"
+// @Param cluster path string true "集群标识（MD5）"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/list [get]
 func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *response.Context) {
-	clusterBase64 := c.Param("cluster")
-	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
+	clusterIdentifier := c.Param("cluster")
+	cluster, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -110,13 +110,13 @@ func (a *AdminClusterPermission) ListClusterPermissionsByClusterID(c *response.C
 
 // @Summary 获取指定集群下所有命名空间名称
 // @Security BearerAuth
-// @Param cluster path string true "集群ID(base64)"
+// @Param cluster path string true "集群标识（MD5）"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/ns/list [get]
 func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *response.Context) {
 	ctx := amis.GetContextWithUser(c)
-	clusterBase64 := c.Param("cluster")
-	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
+	clusterIdentifier := c.Param("cluster")
+	cluster, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -148,16 +148,16 @@ func (a *AdminClusterPermission) ListClusterNamespaceListByClusterID(c *response
 
 // @Summary 批量为指定集群添加用户角色权限
 // @Security BearerAuth
-// @Param cluster path string true "集群ID(base64)"
+// @Param cluster path string true "集群标识（MD5）"
 // @Param role path string true "角色"
 // @Param authorization_type path string true "授权类型"
 // @Success 200 {object} string
 // @Router /admin/cluster_permissions/cluster/{cluster}/role/{role}/{authorization_type}/save [post]
 func (a *AdminClusterPermission) SaveClusterPermission(c *response.Context) {
-	clusterBase64 := c.Param("cluster")
+	clusterIdentifier := c.Param("cluster")
 	role := c.Param("role")
 	authorizationType := c.Param("authorization_type")
-	cluster, err := utils.UrlSafeBase64Decode(clusterBase64)
+	cluster, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

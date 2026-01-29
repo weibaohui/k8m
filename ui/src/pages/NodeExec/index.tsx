@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { fetcher } from '@/components/Amis/fetcher.ts';
 import FileExplorerComponent from '@/components/Amis/custom/FileExplorer/FileExplorer';
 import { Pod } from '@/store/pod';
-import { getCurrentClusterIdInBase64 } from '@/utils/utils';
+import { getCurrentClusterIdInMd5 } from '@/utils/utils';
 
 
 interface PodShell {
@@ -19,7 +19,7 @@ const NodeExec: React.FC = () => {
     const nodeName = searchParams.get('nodeName') || '';
     const type = searchParams.get('type') || ''; //NodeShell or KubectlShell
 
-    const clusterID = getCurrentClusterIdInBase64();
+    const clusterID = getCurrentClusterIdInMd5();
     const [podShell, setPodShell] = useState<PodShell>();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>();
