@@ -570,7 +570,7 @@
               "type": "link",
               "body": "${metadata.annotations['ingress.count']||'-'}",
               "blank": false,
-              "href": "/#/k/${''|selectedClusterBase64}/ns/ing?spec[ingressClassName]=${metadata.name}"
+              "href": "/#/k/${''|selectedClusterMd5}/ns/ing?spec[ingressClassName]=${metadata.name}"
             }
           ]
         },

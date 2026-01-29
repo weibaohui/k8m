@@ -74,39 +74,19 @@ function parseLocalStorageExpression(expression: string): string | null {
 }
 
 
-export function toUrlSafeBase64(str: string) {
-    // 先转 UTF-8，再 btoa
-    const utf8Str = unescape(encodeURIComponent(str));
-    const base64 = btoa(utf8Str);
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
 
-export function fromUrlSafeBase64(str: string): string {
-    try {
-        const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-        // 补足 '='
-        const padLength = (4 - (base64.length % 4)) % 4;
-        const padded = base64 + '='.repeat(padLength);
-        return atob(padded);
-    } catch (e) {
-        return '';
-    }
-}
 
 /**
  * 规范化集群标识：
  * - 若传入的是集群ID（形如 FileName/ContextName），则转换为 MD5（hex 小写）；
- * - 若传入已经是 MD5 或历史 Base64，则原样返回；
+ * - 若传入已经是 MD5，则原样返回；
  * - InCluster 保持原样返回。
  */
 export function normalizeClusterIdentifier(input: string): string {
     const v = (input || '').trim()
     if (!v) return ''
-    if (v === 'InCluster') return v
-    if (v.includes('/')) {
-        return CryptoJS.MD5(v).toString()
-    }
-    return v
+    if (v.length === 32) return v
+    return CryptoJS.MD5(v).toString()
 }
 
 export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string): string {
@@ -174,8 +154,6 @@ export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T
  * 获取当前选中的集群ID（从 URL 哈希路径中解析）
  * 解析位置形如：`#/k/{clusterIdentifier}/xxx/yyy`，其中 `clusterIdentifier` 为集群标识：
  * - 推荐使用 cluster_md（MD5）；
- * - 兼容历史 URL 安全 Base64；
- * - 也兼容 InCluster。
  * @returns {string} 当前集群标识，未选择时返回空字符串
  */
 export function getCurrentClusterId(): string {
@@ -194,16 +172,12 @@ export function getCurrentClusterId(): string {
     if (idx >= 0 && parts.length > idx + 1 && parts[idx + 1]) {
         const clusterIdentifier = parts[idx + 1] || '';
         if (!clusterIdentifier) return '';
-        const decoded = fromUrlSafeBase64(clusterIdentifier);
-        if (decoded && decoded.includes('/')) {
-            return normalizeClusterIdentifier(decoded);
-        }
-        return clusterIdentifier;
+        return normalizeClusterIdentifier(clusterIdentifier);
     }
     return '';
 }
 
-export function getCurrentClusterIdInBase64(): string {
+export function getCurrentClusterIdInMd5(): string {
     return getCurrentClusterId();
 }
 
