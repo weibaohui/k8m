@@ -1,3 +1,6 @@
+// @ts-ignore
+import CryptoJS from 'crypto-js'
+
 export const sleep = (time = 10, fn?: () => void) => {
     return new Promise((resolve) => {
         const timer = setTimeout(() => {
@@ -72,7 +75,7 @@ function parseLocalStorageExpression(expression: string): string | null {
 
 
 export function toUrlSafeBase64(str: string) {
-// 先转 UTF-8，再 btoa
+    // 先转 UTF-8，再 btoa
     const utf8Str = unescape(encodeURIComponent(str));
     const base64 = btoa(utf8Str);
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -90,6 +93,22 @@ export function fromUrlSafeBase64(str: string): string {
     }
 }
 
+/**
+ * 规范化集群标识：
+ * - 若传入的是集群ID（形如 FileName/ContextName），则转换为 MD5（hex 小写）；
+ * - 若传入已经是 MD5 或历史 Base64，则原样返回；
+ * - InCluster 保持原样返回。
+ */
+export function normalizeClusterIdentifier(input: string): string {
+    const v = (input || '').trim()
+    if (!v) return ''
+    if (v === 'InCluster') return v
+    if (v.includes('/')) {
+        return CryptoJS.MD5(v).toString()
+    }
+    return v
+}
+
 export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string): string {
     // 仅处理 /k8s 开头的接口
     if (!url.startsWith('/k8s')) {
@@ -102,7 +121,7 @@ export function ProcessK8sUrlWithCluster(url: string, overrideCluster?: string):
 
     // 选择覆盖的 cluster，否则使用本地已选 cluster
     const originCluster = (overrideCluster && String(overrideCluster)) || getCurrentClusterId();
-    const cluster = originCluster ? toUrlSafeBase64(originCluster) : '';
+    const cluster = originCluster ? normalizeClusterIdentifier(originCluster) : '';
     // 未选择集群时，不插入 cluster 段，避免生成 /k8s/cluster//...
     if (!cluster) {
         return url;
@@ -153,9 +172,11 @@ export function GetValueByPath<T = any>(obj: any, path: string, defaultValue?: T
 
 /**
  * 获取当前选中的集群ID（从 URL 哈希路径中解析）
- * 解析位置形如：`#/k/ClusterID/xxxx/yyy`，其中第二段为集群ID。
- * 使用 URL 安全 Base64 解码，不兼容旧的 `#/cluster/...` 路径。
- * @returns {string} 当前集群ID，未选择时返回空字符串
+ * 解析位置形如：`#/k/{clusterIdentifier}/xxx/yyy`，其中 `clusterIdentifier` 为集群标识：
+ * - 推荐使用 cluster_md（MD5）；
+ * - 兼容历史 URL 安全 Base64；
+ * - 也兼容 InCluster。
+ * @returns {string} 当前集群标识，未选择时返回空字符串
  */
 export function getCurrentClusterId(): string {
     if (typeof window === 'undefined') return '';
@@ -171,28 +192,31 @@ export function getCurrentClusterId(): string {
     const idx = parts.indexOf('k');
 
     if (idx >= 0 && parts.length > idx + 1 && parts[idx + 1]) {
-        const encoded = parts[idx + 1];
-        const decoded = fromUrlSafeBase64(encoded);
-        // 严格按 Base64 解码，失败则视为未选择
-        return decoded || '';
+        const clusterIdentifier = parts[idx + 1] || '';
+        if (!clusterIdentifier) return '';
+        const decoded = fromUrlSafeBase64(clusterIdentifier);
+        if (decoded && decoded.includes('/')) {
+            return normalizeClusterIdentifier(decoded);
+        }
+        return clusterIdentifier;
     }
     return '';
 }
 
 export function getCurrentClusterIdInBase64(): string {
-    return  getCurrentClusterId() ? toUrlSafeBase64(getCurrentClusterId()) : '';
+    return getCurrentClusterId();
 }
 
 /**
  * 设置当前选中的集群ID（写入到 URL 哈希路径）
- * 目标位置：`#/k/ClusterID/xxxx/yyy`。若已有 k 段则替换其后 ID；
- * 若不存在，则在现有哈希路径前插入 `k/ClusterID`，保留剩余路径与查询参数。
- * @param {string} clusterId 要设置的集群ID
+ * 目标位置：`#/k/{clusterIdentifier}/xxx/yyy`。若已有 k 段则替换其后标识；
+ * 若不存在，则在现有哈希路径前插入 `k/{clusterIdentifier}`，保留剩余路径与查询参数。
+ * @param {string} clusterIdOrIdentifier 允许传入集群ID或集群标识（MD5）
  */
-export function setCurrentClusterId(clusterId: string): void {
-    if (typeof window === 'undefined' || !clusterId) return;
+export function setCurrentClusterId(clusterIdOrIdentifier: string): void {
+    if (typeof window === 'undefined' || !clusterIdOrIdentifier) return;
 
-    const encoded = toUrlSafeBase64(clusterId);
+    const encoded = normalizeClusterIdentifier(clusterIdOrIdentifier);
     const rawHash = window.location.hash || '';
     const hashBody = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash;
 
@@ -203,7 +227,7 @@ export function setCurrentClusterId(clusterId: string): void {
     // 统一为以 '/' 开头的路径
     pathOnly = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
     // 去掉前导 '/'
-    const segs = pathOnly.replace(/^\/+/,'').split('/').filter(s => s.length > 0);
+    const segs = pathOnly.replace(/^\/+/, '').split('/').filter(s => s.length > 0);
     const idx = segs.indexOf('k');
     if (idx >= 0) {
         // 如果存在 k 段，移除该段以及紧随其后的 ID 段（若存在）
@@ -214,7 +238,7 @@ export function setCurrentClusterId(clusterId: string): void {
     const newPath = '/' + newSegs.join('/');
 
     window.location.hash = `#${newPath}${queryPart}`;
-    console.info('已切换到指定集群，更新哈希路径');
+    console.info('已切换到指定集群，更新哈希路径:', window.location.hash);
 }
 
 /**

@@ -209,18 +209,6 @@ func (c *clusterService) ResolveClusterID(clusterIdentifier string) (string, err
 		}
 	}
 
-	// 2) 兼容旧的 base64 编码
-	if decoded, err := utils.UrlSafeBase64Decode(clusterIdentifier); err == nil && decoded != "" {
-		if c.GetClusterByID(decoded) != nil {
-			return decoded, nil
-		}
-	}
-
-	// 3) 直接当作 clusterID 处理
-	if c.GetClusterByID(clusterIdentifier) != nil || clusterIdentifier == "InCluster" {
-		return clusterIdentifier, nil
-	}
-
 	return "", fmt.Errorf("未找到集群: %s", clusterIdentifier)
 }
 

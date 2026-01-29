@@ -51,7 +51,7 @@ func (pc *Controller) ClusterOptionList(c *response.Context) {
 		}
 		options = append(options, map[string]any{
 			"label": fmt.Sprintf("%s %s", flag, name),
-			"value": name,
+			"value": cluster.ClusterMD,
 			// "disabled": cluster.ServerVersion == "",
 		})
 	}

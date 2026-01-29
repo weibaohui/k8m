@@ -2,7 +2,6 @@ package helm
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
@@ -53,7 +53,7 @@ func NewBackgroundHelmCmd(helmBin string) *HelmCmd {
 
 	// 确保目录存在
 	if err := os.MkdirAll(h.repoCacheDir, 0755); err != nil {
-		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
+		klog.V(6).Infof("[helm-cmd] 创建缓存目录失败: %v", err)
 	}
 	return h
 }
@@ -78,15 +78,15 @@ func NewHelmCmd(helmBin string, clusterID string, cluster *service.ClusterConfig
 
 	// 确保目录存在
 	if err := os.MkdirAll(h.repoCacheDir, 0755); err != nil {
-		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
+		klog.V(6).Infof("[helm-cmd] 创建缓存目录失败: %v", err)
 	}
 	// 将kubeconfig 字符串 存放到临时目录
 	// 每次都固定格式，<cluster_name>-kubeconfig.yaml
-	encodedClusterID := base64.URLEncoding.EncodeToString([]byte(clusterID))
-	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", h.repoCacheDir, encodedClusterID)
+	clusterFileKey := utils.MD5Hex(clusterID)
+	kubeconfigPath := fmt.Sprintf("%s/%s-kubeconfig.yaml", h.repoCacheDir, clusterFileKey)
 	kubeconfig := cluster.GetKubeconfig()
 	if err := os.WriteFile(kubeconfigPath, []byte(kubeconfig), 0644); err != nil {
-		klog.V(6).Infof("[helm-cmd] warn: write kubeconfig to file failed: %v", err)
+		klog.V(6).Infof("[helm-cmd] 写入 kubeconfig 临时文件失败: %v", err)
 	}
 	h.kubeconfigPath = kubeconfigPath
 
@@ -116,7 +116,7 @@ func NewHelmCmdWithNoCluster(helmBin string) *HelmCmd {
 
 	// 确保目录存在
 	if err := os.MkdirAll(h.repoCacheDir, 0755); err != nil {
-		klog.V(6).Infof("[helm-cmd] warn: create repo cache dir failed: %v", err)
+		klog.V(6).Infof("[helm-cmd] 创建缓存目录失败: %v", err)
 	}
 	return h
 }
