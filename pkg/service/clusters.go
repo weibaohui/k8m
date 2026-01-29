@@ -188,11 +188,9 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 	return nil
 }
 
-// ResolveClusterID 中文函数注释：将集群标识解析为真实的集群ID（FileName/ContextName 或 InCluster）。
-// 支持的输入：
-// 1) ClusterMD（MD5）；2) URL安全Base64（历史兼容）；3) 直接传入集群ID。
-func (c *clusterService) ResolveClusterID(clusterIdentifier string) (string, error) {
-	if clusterIdentifier == "" {
+// ResolveClusterID 中文函数注释：将集群标识解析为真实的集群ID。
+func (c *clusterService) ResolveClusterID(clusterIdMd5 string) (string, error) {
+	if clusterIdMd5 == "" {
 		return "", fmt.Errorf("集群标识不能为空")
 	}
 
@@ -204,12 +202,12 @@ func (c *clusterService) ResolveClusterID(clusterIdentifier string) (string, err
 		if cc.GetClusterID() == "" {
 			continue
 		}
-		if cc.ClusterMD == clusterIdentifier {
+		if cc.ClusterMD == clusterIdMd5 {
 			return cc.ClusterID, nil
 		}
 	}
 
-	return "", fmt.Errorf("未找到集群: %s", clusterIdentifier)
+	return "", fmt.Errorf("未找到集群: %s", clusterIdMd5)
 }
 
 // GetCertificateExpiry 获取集群证书的过期时间
