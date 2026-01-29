@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"strings"
 )
 
@@ -42,4 +44,10 @@ func UrlSafeBase64Decode(s string) (string, error) {
 		return "", err
 	}
 	return string(decodedBytes), nil
+}
+
+// MD5Hex 中文函数注释：对输入字符串计算 MD5，并返回 32 位小写十六进制字符串。
+func MD5Hex(s string) string {
+	sum := md5.Sum([]byte(s))
+	return hex.EncodeToString(sum[:])
 }
