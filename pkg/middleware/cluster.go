@@ -67,14 +67,14 @@ func EnsureSelectedClusterMiddleware() func(http.Handler) http.Handler {
 			}
 			if clusterIdentifier == "" {
 				c.JSON(512, response.H{
-					"msg": "未指定集群1，请先切换集群",
+					"msg": "未指定集群，请先切换集群",
 				})
 				return
 			}
 			clusterID, err := service.ClusterService().ResolveClusterID(clusterIdentifier)
 			if err != nil {
 				c.JSON(512, response.H{
-					"msg": "未找到集群2，请先切换集群",
+					"msg": "未找到集群，请先切换集群",
 				})
 				return
 			}
@@ -104,7 +104,7 @@ func EnsureSelectedClusterMiddleware() func(http.Handler) http.Handler {
 			// 如果设置了clusterID，但是集群未连接
 			if !service.ClusterService().IsConnected(clusterID) {
 				c.JSON(512, response.H{
-					"msg": "集群未连接3，请先连接集群: " + clusterID,
+					"msg": "集群未连接，请先连接集群: " + clusterID,
 				})
 				return
 			}
