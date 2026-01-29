@@ -571,7 +571,7 @@
               "type": "link",
               "body": "${metadata.annotations['pvc.count']||'-'}",
               "blank": false,
-              "href": "/#/k/${''|selectedClusterBase64}/ns/pvc?spec[storageClassName]=${metadata.name}"
+              "href": "/#/k/${''|selectedClusterMd5}/ns/pvc?spec[storageClassName]=${metadata.name}"
             }
           ]
         },
@@ -584,7 +584,7 @@
               "type": "link",
               "body": "${metadata.annotations['pv.count']||'-'}",
               "blank": false,
-              "href": "/#/k/${''|selectedClusterBase64}/cluster/pv?spec[storageClassName]=${metadata.name}"
+              "href": "/#/k/${''|selectedClusterMd5}/cluster/pv?spec[storageClassName]=${metadata.name}"
             }
           ]
         },

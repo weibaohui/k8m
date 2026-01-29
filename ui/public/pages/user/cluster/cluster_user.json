@@ -55,7 +55,7 @@
               "icon": "fas fa-link  text-primary",
               "label": "连接",
               "actionType": "ajax",
-              "api": "post:/mgm/cluster/${cluster_id_base64}/reconnect"
+              "api": "post:/mgm/cluster/${cluster_md}/reconnect"
             },
             {
               "type": "button",
@@ -151,7 +151,7 @@
                   "label": "检测",
                   "level": "link",
                   "actionType": "ajax",
-                  "api": "post:/k8s/k8s_gpt/cluster/${cluster_id_base64}/run"
+                  "api": "post:/k8s/k8s_gpt/cluster/${cluster_md}/run"
                 },
                 {
                   "type": "button",
@@ -167,7 +167,7 @@
                     "body": [
                       {
                         "type": "k8sGPT",
-                        "api": "/k8s/k8s_gpt/cluster/${cluster_id_base64}/result"
+                        "api": "/k8s/k8s_gpt/cluster/${cluster_md}/result"
                       }
                     ]
                   }

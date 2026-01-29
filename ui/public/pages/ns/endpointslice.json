@@ -629,7 +629,7 @@
                             "type": "link",
                             "icon": "fa-solid fa-arrow-up-right-from-square text-blue-500",
                             "body": "查看",
-                            "href": "/#/k/${''|selectedClusterBase64}/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
+                            "href": "/#/k/${''|selectedClusterMd5}/ns/pod?metadata[name]=${targetRef.name}&metadata[namespace]=${targetRef.namespace}",
                             "blank": false
                           }
                         ]

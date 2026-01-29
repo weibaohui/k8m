@@ -582,7 +582,7 @@
                   "icon": "fa-brands fa-docker text-primary",
                   "body": "容器列表",
                   "blank": false,
-                  "href": "/#/k/${''|selectedClusterBase64}/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
+                  "href": "/#/k/${''|selectedClusterMd5}/ns/pod?metadata[ownerReferences][name]=${metadata.name}&metadata[namespace]=${metadata.namespace}"
                 },
                 {
                   "type": "button",

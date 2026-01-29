@@ -16,7 +16,7 @@ import {
 } from "antd";
 import dayjs, { Dayjs } from 'dayjs';
 import { fetcher } from '@/components/Amis/fetcher';
-import { replacePlaceholders, toUrlSafeBase64 } from '@/utils/utils';
+import { replacePlaceholders, normalizeClusterIdentifier } from '@/utils/utils';
 import { DownOutlined } from '@ant-design/icons';
 import InspectionEventListComponent from './InspectionEventList';
 import { useClusterOptions } from './useClusterOptions';
@@ -60,11 +60,11 @@ const InspectionSummaryComponent = React.forwardRef<HTMLDivElement, InspectionSu
         const sTime = (params?.startTime || startTime).format('YYYY-MM-DDTHH:mm:ss') + 'Z';
         const eTime = (params?.endTime || endTime).format('YYYY-MM-DDTHH:mm:ss') + 'Z';
         let url = '';
-        let clusterBase64 = "";
+        let clusterIdMd5 = "";
         if (cluster) {
-            clusterBase64 = toUrlSafeBase64(cluster)
+            clusterIdMd5 = normalizeClusterIdentifier(cluster)
         }
-        url = `/admin/plugins/inspection/schedule/id/${realScheduleId}/summary/cluster/${clusterBase64}/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
+        url = `/admin/plugins/inspection/schedule/id/${realScheduleId}/summary/cluster/${clusterIdMd5}/start_time/${encodeURIComponent(sTime)}/end_time/${encodeURIComponent(eTime)}`;
 
         fetcher({ url, method: 'post' })
             .then((response: any) => {

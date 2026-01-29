@@ -51,7 +51,7 @@ func (pc *Controller) ClusterOptionList(c *response.Context) {
 		}
 		options = append(options, map[string]any{
 			"label": fmt.Sprintf("%s %s", flag, name),
-			"value": name,
+			"value": cluster.ClusterMD,
 			// "disabled": cluster.ServerVersion == "",
 		})
 	}
@@ -85,6 +85,7 @@ func (pc *Controller) ClusterTableList(c *response.Context) {
 	// 增加cluster.NotAfter
 	configs := service.ClusterService().ConnectedClusters() // 优化：移到循环外部
 	for _, cluster := range clusters {
+		cluster.GetClusterID()
 		// InCluster AWS
 		if !(cluster.IsInCluster || cluster.IsAWSEKS) && slice.ContainBy(configs, func(item *service.ClusterConfig) bool {
 			return item.ClusterID == cluster.ClusterID

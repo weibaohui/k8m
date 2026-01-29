@@ -49,13 +49,13 @@ func (c *clusterService) SetRegisterCallbackFunc(callback func(cluster *ClusterC
 }
 
 type ClusterConfig struct {
-	ClusterID               string                         `json:"cluster_id,omitempty"`        // 自动生成，不要赋值
-	ClusterIDBase64         string                         `json:"cluster_id_base64,omitempty"` // 自动生成，不要赋值
-	FileName                string                         `json:"fileName,omitempty"`          // kubeconfig 文件名称
-	ContextName             string                         `json:"contextName,omitempty"`       // context名称
-	ClusterName             string                         `json:"clusterName,omitempty"`       // 集群名称
-	Server                  string                         `json:"server,omitempty"`            // 集群地址
-	ServerVersion           string                         `json:"serverVersion,omitempty"`     // 通过这个值来判断集群是否可用
+	ClusterID               string                         `json:"cluster_id,omitempty"`    // 自动生成，不要赋值
+	ClusterMD               string                         `json:"cluster_md,omitempty"`    // 自动生成，不要赋值
+	FileName                string                         `json:"fileName,omitempty"`      // kubeconfig 文件名称
+	ContextName             string                         `json:"contextName,omitempty"`   // context名称
+	ClusterName             string                         `json:"clusterName,omitempty"`   // 集群名称
+	Server                  string                         `json:"server,omitempty"`        // 集群地址
+	ServerVersion           string                         `json:"serverVersion,omitempty"` // 通过这个值来判断集群是否可用
 	HeartbeatHistory        []HeartbeatRecord              `json:"heartbeat_history,omitempty"`
 	HeartbeatMu             sync.RWMutex                   // 保护HeartbeatHistory的读写锁
 	UserName                string                         `json:"userName,omitempty"`                // 用户名
@@ -144,7 +144,7 @@ func (c *ClusterConfig) GetClusterID() string {
 		id = "InCluster"
 	}
 	c.ClusterID = id
-	c.ClusterIDBase64 = utils.UrlSafeBase64Encode(id)
+	c.ClusterMD = utils.MD5Hex(id)
 	return id
 }
 
@@ -186,6 +186,28 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 		}
 	}
 	return nil
+}
+
+// ResolveClusterID 中文函数注释：将集群标识解析为真实的集群ID。
+func (c *clusterService) ResolveClusterID(clusterIdMd5 string) (string, error) {
+	if clusterIdMd5 == "" {
+		return "", fmt.Errorf("集群标识不能为空")
+	}
+
+	// 1) 优先按 ClusterMD 匹配
+	for _, cc := range c.clusterConfigs {
+		if cc == nil {
+			continue
+		}
+		if cc.GetClusterID() == "" {
+			continue
+		}
+		if cc.ClusterMD == clusterIdMd5 {
+			return cc.ClusterID, nil
+		}
+	}
+
+	return "", fmt.Errorf("未找到集群: %s", clusterIdMd5)
 }
 
 // GetCertificateExpiry 获取集群证书的过期时间
