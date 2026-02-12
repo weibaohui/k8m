@@ -171,6 +171,15 @@ func (c *clusterService) GetClusterByID(id string) *ClusterConfig {
 			return v
 		}
 	}
+
+	//增加MD5解析，如果ID混用为MD5，也能正常解析
+	real_id, err := c.ResolveClusterID(id)
+	if err == nil {
+		//报错说明不是md5格式的ID
+		//不报错，那就说明是MD5值的id，需要转换回原ID
+		id = real_id
+	}
+
 	// 解析selectedCluster
 	// 第一个/前面的字符是fileName。其他的都是contextName
 	// 有可能会出现多个/，如config/aws-x-x-x/demo
