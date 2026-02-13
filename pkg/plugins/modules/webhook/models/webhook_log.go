@@ -11,20 +11,20 @@ import (
 // WebhookLogRecord webhook发送日志记录
 type WebhookLogRecord struct {
 	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	WebhookID    uint      `gorm:"index:idx_webhook_log_webhook_id" json:"webhook_id,omitempty"` // webhook接收器ID
-	WebhookName  string    `gorm:"size:255" json:"webhook_name,omitempty"`           // webhook名称
-	ReceiverID   string    `gorm:"size:64" json:"receiver_id,omitempty"`             // 接收器ID
-	Method       string    `gorm:"size:16" json:"method,omitempty"`                  // HTTP方法
-	URL          string    `gorm:"size:255" json:"url,omitempty"`                    // 请求URL
-	StatusCode   int       `json:"status_code,omitempty"`                            // 响应状态码
-	Success      bool      `gorm:"index:idx_webhook_log_success" json:"success,omitempty"`       // 是否成功
-	Duration     int64     `json:"duration,omitempty"`                               // 请求耗时(纳秒)
-	ErrorMessage string    `gorm:"type:text" json:"error_message,omitempty"`         // 错误信息
-	Summary      string    `gorm:"type:text" json:"summary,omitempty"`               // 日志摘要
-	Detail       string    `gorm:"type:text" json:"detail,omitempty"`                // 完整日志详情(JSON格式)
+	WebhookID    uint      `gorm:"index:idx_webhook_log_webhook_id" json:"webhook_id,omitempty"`     // webhook接收器ID
+	WebhookName  string    `gorm:"size:255" json:"webhook_name,omitempty"`                           // webhook名称
+	ReceiverID   string    `gorm:"size:64" json:"receiver_id,omitempty"`                             // 接收器ID
+	Method       string    `gorm:"size:16" json:"method,omitempty"`                                  // HTTP方法
+	URL          string    `gorm:"type:text" json:"url,omitempty"`                                   // 请求URL
+	StatusCode   int       `json:"status_code,omitempty"`                                            // 响应状态码
+	Success      bool      `gorm:"index:idx_webhook_log_success" json:"success,omitempty"`           // 是否成功
+	Duration     int64     `json:"duration,omitempty"`                                               // 请求耗时(纳秒)
+	ErrorMessage string    `gorm:"type:text" json:"error_message,omitempty"`                         // 错误信息
+	Summary      string    `gorm:"type:text" json:"summary,omitempty"`                               // 日志摘要
+	Detail       string    `gorm:"type:text" json:"detail,omitempty"`                                // 完整日志详情(JSON格式)
 	RequestTime  time.Time `gorm:"index:idx_webhook_log_request_time" json:"request_time,omitempty"` // 请求时间
-	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"`            // 创建时间
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`                             // 更新时间
+	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"`                            // 创建时间
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`                                             // 更新时间
 }
 
 // List 查询webhook日志列表
