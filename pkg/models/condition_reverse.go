@@ -12,7 +12,7 @@ import (
 type ConditionReverse struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Name        string    `gorm:"size:100;uniqueIndex:idx_name" json:"name,omitempty"` // 指标名称，使用包含方式查找。如Pressure、Unavailable等
-	Enabled     bool      `json:"enabled,omitempty"`                                   // 指标描述
+	Enabled     bool      `json:"enabled,omitempty"`                                   // 是否启用
 	Description string    `gorm:"type:text" json:"description,omitempty"`              // 指标描述
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"` // 更新时间

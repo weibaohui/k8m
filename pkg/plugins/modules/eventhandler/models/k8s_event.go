@@ -15,7 +15,7 @@ type K8sEvent struct {
 	EvtKey    string    `gorm:"size:255;uniqueIndex:idx_evt_key" json:"evt_key"`
 	Cluster   string    `gorm:"size:128;index:idx_cluster" json:"cluster"`
 	Namespace string    `gorm:"size:64;index:idx_namespace" json:"namespace"`
-	Name      string    `gorm:"size:128" json:"name"`
+	Name      string    `gorm:"size:255" json:"name"`
 	Type      string    `gorm:"size:16" json:"type"`
 	Reason    string    `gorm:"size:128" json:"reason"`
 	Level     string    `gorm:"size:16" json:"level"`
