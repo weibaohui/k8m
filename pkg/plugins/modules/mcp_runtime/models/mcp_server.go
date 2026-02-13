@@ -10,8 +10,8 @@ import (
 
 type MCPServerConfig struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	URL       string    `gorm:"not null" json:"url,omitempty"`
-	Name      string    `gorm:"uniqueIndex;not null;type:varchar(255)" json:"name,omitempty"`
+	URL       string    `gorm:"size:255;not null" json:"url,omitempty"`
+	Name      string    `gorm:"size:255;uniqueIndex:idx_name;not null" json:"name,omitempty"`
 	Enabled   bool      `gorm:"default:false" json:"enabled,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`

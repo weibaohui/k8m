@@ -11,19 +11,19 @@ import (
 // K8sEventConfig 中文函数注释：Event 监听 转发 发送webhook配置表。
 type K8sEventConfig struct {
 	ID               uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name             string `json:"name"`                                // 事件转发配置名称
-	Description      string `json:"description"`                         // 事件转发配置描述
-	Clusters         string `json:"clusters"`                            // 目标集群列表
-	Webhooks         string `json:"webhooks"`                            // webhook列表
-	WebhookNames     string `json:"webhook_names"`                       // webhook 名称列表
-	Enabled          bool   `json:"enabled"`                             // 是否启用该任务
-	AIEnabled        bool   `json:"ai_enabled"`                          // 是否启用AI总结功能
-	AIPromptTemplate string `gorm:"type:text" json:"ai_prompt_template"` // AI总结提示词模板
+	Name             string `gorm:"size:100" json:"name"`                                // 事件转发配置名称
+	Description      string `gorm:"type:text" json:"description"`                         // 事件转发配置描述
+	Clusters         string `gorm:"type:text" json:"clusters"`                            // 目标集群列表
+	Webhooks         string `gorm:"type:text" json:"webhooks"`                            // webhook列表
+	WebhookNames     string `gorm:"type:text" json:"webhook_names"`                       // webhook 名称列表
+	Enabled          bool   `json:"enabled"`                                              // 是否启用该任务
+	AIEnabled        bool   `json:"ai_enabled"`                                           // 是否启用AI总结功能
+	AIPromptTemplate string `gorm:"type:text" json:"ai_prompt_template"`                  // AI总结提示词模板
 
-	RuleNamespaces string `json:"rule_namespaces" gorm:"type:text"` // []string 精确匹配命名空间
-	RuleNames      string `json:"rule_names" gorm:"type:text"`      // []string 包含匹配名称
-	RuleReasons    string `json:"rule_reasons" gorm:"type:text"`    // []string 包含匹配Reason、Message两个字段
-	RuleReverse    bool   `json:"rule_reverse" gorm:"default:false"`
+	RuleNamespaces string `gorm:"type:text" json:"rule_namespaces"` // []string 精确匹配命名空间
+	RuleNames      string `gorm:"type:text" json:"rule_names"`      // []string 包含匹配名称
+	RuleReasons    string `gorm:"type:text" json:"rule_reasons"`    // []string 包含匹配Reason、Message两个字段
+	RuleReverse    bool   `gorm:"default:false" json:"rule_reverse"`
 
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`

@@ -10,15 +10,15 @@ import (
 
 type HelmRelease struct {
 	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ReleaseName  string    `gorm:"index" json:"release_name,omitempty"`       // Release 名称
-	RepoName     string    `json:"repo_name,omitempty"`                       // 仓库名称
-	Namespace    string    `gorm:"not null;index" json:"namespace,omitempty"` // 命名空间
-	ChartName    string    `gorm:"not null" json:"chart_name,omitempty"`      // Chart 名称
-	ChartVersion string    `json:"chart_version,omitempty"`                   // Chart 版本
-	Values       string    `json:"values,omitempty"`                          // values.yaml 内容
-	Status       string    `json:"status,omitempty"`                          // 安装状态
-	Cluster      string    `json:"cluster,omitempty"`
-	Result       string    `json:"result,omitempty"` // 描述
+	ReleaseName  string    `gorm:"size:255;index:idx_release_name" json:"release_name,omitempty"` // Release 名称
+	RepoName     string    `gorm:"size:255" json:"repo_name,omitempty"`                           // 仓库名称
+	Namespace    string    `gorm:"size:100;not null;index:idx_namespace" json:"namespace,omitempty"` // 命名空间
+	ChartName    string    `gorm:"size:255;not null" json:"chart_name,omitempty"`                 // Chart 名称
+	ChartVersion string    `gorm:"size:64" json:"chart_version,omitempty"`                        // Chart 版本
+	Values       string    `gorm:"type:text" json:"values,omitempty"`                              // values.yaml 内容
+	Status       string    `gorm:"size:50" json:"status,omitempty"`                                // 安装状态
+	Cluster      string    `gorm:"size:100;index:idx_cluster" json:"cluster,omitempty"`
+	Result       string    `gorm:"type:text" json:"result,omitempty"` // 描述
 	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 }

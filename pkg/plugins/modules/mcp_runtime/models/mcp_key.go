@@ -10,15 +10,15 @@ import (
 
 type McpKey struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Username    string    `gorm:"index;not null" json:"username,omitempty"`
+	Username    string    `gorm:"size:255;index:idx_username;not null" json:"username,omitempty"`
 	McpKey      string    `gorm:"type:text" json:"mcp_key,omitempty"`
-	Description string    `json:"description,omitempty"`
+	Description string    `gorm:"type:text" json:"description,omitempty"`
 	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`
 	Jwt         string    `gorm:"type:text" json:"jwt"`
 	LastUsedAt  time.Time `json:"last_used_at,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
-	CreatedBy   string    `json:"created_by,omitempty"`
+	CreatedBy   string    `gorm:"size:255" json:"created_by,omitempty"`
 }
 
 func (c *McpKey) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*McpKey, int64, error) {
