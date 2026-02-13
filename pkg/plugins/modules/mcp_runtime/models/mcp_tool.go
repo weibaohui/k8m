@@ -10,8 +10,8 @@ import (
 
 type MCPTool struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ServerName  string    `gorm:"size:255;index:idx_server_name" json:"server_name,omitempty"`
-	Name        string    `gorm:"size:255;uniqueIndex:idx_name;not null" json:"name,omitempty"`
+	ServerName  string    `gorm:"size:255;uniqueIndex:idx_server_tool" json:"server_name,omitempty"`
+	Name        string    `gorm:"size:255;uniqueIndex:idx_server_tool;not null" json:"name,omitempty"`
 	Description string    `gorm:"type:text" json:"description,omitempty"`
 	InputSchema string    `gorm:"type:text" json:"input_schema,omitempty"`
 	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`
