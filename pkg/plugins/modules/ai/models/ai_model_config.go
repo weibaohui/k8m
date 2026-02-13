@@ -10,7 +10,7 @@ import (
 
 type AIModelConfig struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	ApiKey      string    `gorm:"size:255" json:"api_key"`
+	ApiKey      string    `gorm:"type:text" json:"api_key"`
 	ApiURL      string    `gorm:"size:255" json:"api_url"`
 	ApiModel    string    `gorm:"size:100" json:"api_model"`
 	Temperature float32   `json:"temperature"`
