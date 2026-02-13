@@ -11,14 +11,14 @@ import (
 // SSOConfig SSO配置表
 type SSOConfig struct {
 	ID                 uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name               string    `json:"name,omitempty"`                                    // 配置名称
-	Type               string    `gorm:"default:oidc" json:"type,omitempty"`                // 配置类型
-	ClientID           string    `gorm:"type:text;" json:"client_id,omitempty"`             // OAuth2客户端ID
-	ClientSecret       string    `gorm:"type:text;" json:"client_secret,omitempty"`         // OAuth2客户端密钥
-	Issuer             string    `gorm:"type:text;" json:"issuer,omitempty"`                // 认证服务器地址
-	Enabled            bool      `gorm:"default:false" json:"enabled,omitempty"`            // 是否启用SSO
-	PreferUserNameKeys string    `gorm:"type:text;" json:"prefer_user_name_keys,omitempty"` // 用户自定义获取用户名的字段顺序，适用于如果用户名字段不在默认字段中情况
-	Scopes             string    `gorm:"type:text;" json:"scopes,omitempty"`                // 授权范围
+	Name               string    `gorm:"size:100;uniqueIndex:idx_name" json:"name,omitempty"` // 配置名称
+	Type               string    `gorm:"size:20;default:oidc" json:"type,omitempty"`          // 配置类型
+	ClientID           string    `gorm:"type:text" json:"client_id,omitempty"`                // OAuth2客户端ID
+	ClientSecret       string    `gorm:"type:text" json:"client_secret,omitempty"`            // OAuth2客户端密钥
+	Issuer             string    `gorm:"type:text" json:"issuer,omitempty"`                   // 认证服务器地址
+	Enabled            bool      `gorm:"default:false" json:"enabled,omitempty"`              // 是否启用SSO
+	PreferUserNameKeys string    `gorm:"type:text" json:"prefer_user_name_keys,omitempty"`    // 用户自定义获取用户名的字段顺序，适用于如果用户名字段不在默认字段中情况
+	Scopes             string    `gorm:"type:text" json:"scopes,omitempty"`                   // 授权范围
 	CreatedAt          time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt          time.Time `json:"updated_at,omitempty"` // 更新时间
 }

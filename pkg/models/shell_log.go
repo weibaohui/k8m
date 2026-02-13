@@ -10,14 +10,14 @@ import (
 
 // ShellLog 用户导入ShellLog
 type ShellLog struct {
-	ID            uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
-	UserName      string    `json:"username,omitempty"`
-	Cluster       string    `json:"cluster,omitempty"`
-	Namespace     string    `json:"namespace,omitempty"`
-	PodName       string    `json:"pod_name,omitempty"`
-	ContainerName string    `json:"container_name,omitempty"`
-	Command       string    `json:"command,omitempty"` // shell 执行命令
-	Role          string    `json:"role,omitempty"`
+	ID            uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`      // 模板 ID，主键，自增
+	UserName      string    `gorm:"size:255;index:idx_username" json:"username,omitempty"`
+	Cluster       string    `gorm:"size:100;index:idx_cluster" json:"cluster,omitempty"`
+	Namespace     string    `gorm:"size:100;index:idx_namespace" json:"namespace,omitempty"`
+	PodName       string    `gorm:"size:255;index:idx_pod_name" json:"pod_name,omitempty"`
+	ContainerName string    `gorm:"size:255" json:"container_name,omitempty"`
+	Command       string    `gorm:"type:text" json:"command,omitempty"` // shell 执行命令
+	Role          string    `gorm:"size:50" json:"role,omitempty"`
 	CreatedAt     time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt     time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }

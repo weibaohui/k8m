@@ -10,19 +10,19 @@ import (
 
 // OperationLog 用户导入OperationLog
 type OperationLog struct {
-	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
-	UserName     string    `json:"username,omitempty"`
-	Role         string    `json:"role,omitempty"`
-	Cluster      string    `gorm:"index" json:"cluster,omitempty"`
-	Namespace    string    `json:"namespace,omitempty"`
-	Name         string    `json:"name,omitempty"`
-	Group        string    `json:"group,omitempty"`                       // 资源group
-	Kind         string    `json:"kind,omitempty"`                        // 资源kind
-	Action       string    `json:"action,omitempty"`                      // 操作类型
-	Params       string    `gorm:"type:text" json:"params,omitempty"`     // 操作参数
-	ActionResult string    `json:"action_result,omitempty"`               // 操作结果
-	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"` // Automatically managed by GORM for creation time
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`                  // Automatically managed by GORM for update time
+	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`   // 模板 ID，主键，自增
+	UserName     string    `gorm:"size:255;index:idx_username" json:"username,omitempty"`
+	Role         string    `gorm:"size:50;index:idx_role" json:"role,omitempty"`
+	Cluster      string    `gorm:"size:100;index:idx_cluster" json:"cluster,omitempty"`
+	Namespace    string    `gorm:"size:100;index:idx_namespace" json:"namespace,omitempty"`
+	Name         string    `gorm:"size:255;index:idx_name" json:"name,omitempty"`
+	Group        string    `gorm:"size:100;index:idx_group" json:"group,omitempty"`           // 资源group
+	Kind         string    `gorm:"size:100;index:idx_kind" json:"kind,omitempty"`             // 资源kind
+	Action       string    `gorm:"size:50;index:idx_action" json:"action,omitempty"`          // 操作类型
+	Params       string    `gorm:"type:text" json:"params,omitempty"`                         // 操作参数
+	ActionResult string    `gorm:"type:text" json:"action_result,omitempty"`                 // 操作结果
+	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"`                     // Automatically managed by GORM for creation time
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`                                      // Automatically managed by GORM for update time
 
 }
 
