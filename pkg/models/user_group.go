@@ -10,9 +10,9 @@ import (
 
 type UserGroup struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	GroupName   string    `gorm:"index" json:"group_name,omitempty"`
-	Description string    `json:"description,omitempty"`
-	Role        string    `gorm:"index" json:"role,omitempty"` // 管理员/只读
+	GroupName   string    `gorm:"size:100;uniqueIndex:idx_user_group_group_name" json:"group_name,omitempty"`
+	Description string    `gorm:"type:text" json:"description,omitempty"`
+	Role        string    `gorm:"size:50;index:idx_user_group_role" json:"role,omitempty"` // 管理员/只读
 	MenuData    string    `gorm:"type:text" json:"menu_data"`
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`

@@ -10,15 +10,15 @@ import (
 
 type MCPToolLog struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ToolName    string    `gorm:"index" json:"tool_name,omitempty"`
-	ServerName  string    `gorm:"index" json:"server_name,omitempty"`
+	ToolName    string    `gorm:"size:255;index:idx_mcp_tool_log_tool_name" json:"tool_name,omitempty"`
+	ServerName  string    `gorm:"size:255;index:idx_mcp_tool_log_server_name" json:"server_name,omitempty"`
 	Parameters  string    `gorm:"type:text" json:"parameters,omitempty"`
 	Prompt      string    `gorm:"type:text" json:"prompt,omitempty"`
 	Result      string    `gorm:"type:text" json:"result,omitempty"`
 	Error       string    `gorm:"type:text" json:"error,omitempty"`
 	ExecuteTime int64     `json:"execute_time,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	CreatedBy   string    `gorm:"index" json:"created_by,omitempty"`
+	CreatedBy   string    `gorm:"size:255;index:idx_mcp_tool_log_created_by" json:"created_by,omitempty"`
 }
 
 func (c *MCPToolLog) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*MCPToolLog, int64, error) {

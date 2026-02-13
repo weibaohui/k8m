@@ -12,13 +12,13 @@ import (
 // 用于记录插件的配置状态（已发现/已安装/已启用/已禁用），启动时根据该表动态应用
 type PluginConfig struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name        string    `gorm:"uniqueIndex;not null" json:"name,omitempty"`        // 插件名称，唯一
-	Status      string    `gorm:"type:varchar(32);not null" json:"status,omitempty"` // 状态：discovered/installed/enabled/disabled
-	Version     string    `gorm:"type:varchar(64)" json:"version,omitempty"`         // 当前数据库记录的插件版本
-	Description string    `json:"description,omitempty"`                             // 描述信息
+	Name        string    `gorm:"size:255;uniqueIndex:idx_plugin_config_name;not null" json:"name,omitempty"` // 插件名称，唯一（已包含表名前缀，无需修改）
+	Status      string    `gorm:"size:32;not null" json:"status,omitempty"`                                   // 状态：discovered/installed/enabled/disabled
+	Version     string    `gorm:"size:64" json:"version,omitempty"`                                            // 当前数据库记录的插件版本
+	Description string    `gorm:"type:text" json:"description,omitempty"`                                      // 描述信息
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
-	CreatedBy   string    `json:"created_by,omitempty"`
+	CreatedBy   string    `gorm:"size:255" json:"created_by,omitempty"`
 }
 
 // List 列出所有记录

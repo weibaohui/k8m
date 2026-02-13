@@ -10,11 +10,11 @@ import (
 
 type WebhookReceiver struct {
 	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name         string    `json:"name,omitempty"`     // webhook名称
-	Platform     string    `json:"platform,omitempty"` // feishu,dingtalk
-	TargetURL    string    `json:"target_url,omitempty"`
+	Name         string    `gorm:"size:255;uniqueIndex:idx_webhook_receiver_name" json:"name,omitempty"` // webhook名称
+	Platform     string    `gorm:"size:50" json:"platform,omitempty"`                    // feishu,dingtalk
+	TargetURL    string    `gorm:"size:255" json:"target_url,omitempty"`
 	BodyTemplate string    `gorm:"type:text" json:"body_template,omitempty"` // 发送到webhook的body模板
-	SignSecret   string    `json:"sign_secret,omitempty"`
+	SignSecret   string    `gorm:"size:255" json:"sign_secret,omitempty"`
 	CreatedAt    time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt    time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
 }

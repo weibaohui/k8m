@@ -10,8 +10,8 @@ import (
 
 type HelmSetting struct {
 	ID             uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	HelmCachePath  string `json:"helm_cache_path"`
-	HelmUpdateCron string `json:"helm_update_cron"`
+	HelmCachePath  string `gorm:"size:255" json:"helm_cache_path"`
+	HelmUpdateCron string `gorm:"size:64" json:"helm_update_cron"`
 
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`

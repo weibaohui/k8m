@@ -10,11 +10,11 @@ import (
 
 type Config struct {
 	ID                   uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	ProductName          string    `json:"product_name,omitempty"` // 产品名称
-	LoginType            string    `json:"login_type,omitempty"`
-	JwtTokenSecret       string    `json:"jwt_token_secret,omitempty"`
-	NodeShellImage       string    `json:"node_shell_image,omitempty"`
-	KubectlShellImage    string    `json:"kubectl_shell_image,omitempty"`
+	ProductName          string    `gorm:"size:100" json:"product_name,omitempty"`             // 产品名称
+	LoginType            string    `gorm:"size:50" json:"login_type,omitempty"`
+	JwtTokenSecret       string    `gorm:"size:255" json:"jwt_token_secret,omitempty"`
+	NodeShellImage       string    `gorm:"size:255" json:"node_shell_image,omitempty"`
+	KubectlShellImage    string    `gorm:"size:255" json:"kubectl_shell_image,omitempty"`
 	ImagePullTimeout     int       `gorm:"default:30" json:"image_pull_timeout,omitempty"` // 镜像拉取超时时间（秒）
 	PrintConfig          bool      `json:"print_config"`
 	ResourceCacheTimeout int       `gorm:"default:60" json:"resource_cache_timeout,omitempty"` // 资源缓存时间（秒）

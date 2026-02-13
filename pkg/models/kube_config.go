@@ -13,24 +13,24 @@ import (
 type KubeConfig struct {
 	ID          uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
 	Content     string `gorm:"type:text" json:"content,omitempty"`           // 模板内容，支持大文本存储
-	Server      string `json:"server,omitempty"`
-	User        string `json:"user,omitempty"`
-	Cluster     string `json:"cluster,omitempty"` // 类型，最大长度 100
-	Namespace   string `json:"namespace,omitempty"`
-	DisplayName string `json:"display_name,omitempty"`
+	Server      string `gorm:"size:255;index:idx_kube_config_server" json:"server,omitempty"`
+	User        string `gorm:"size:255;index:idx_kube_config_user" json:"user,omitempty"`
+	Cluster     string `gorm:"size:100;index:idx_kube_config_cluster" json:"cluster,omitempty"` // 类型，最大长度 100
+	Namespace   string `gorm:"size:100;index:idx_kube_config_namespace" json:"namespace,omitempty"`
+	DisplayName string `gorm:"size:255;index:idx_kube_config_display_name" json:"display_name,omitempty"`
 	// aws 集群相关
-	AccessKey       string `json:"-"`                    // AWS Access Key ID
-	SecretAccessKey string `json:"-"`                    // AWS Secret Access Key
-	ClusterName     string `json:"cluster_name"`         // AWS EKS 集群名称
-	Region          string `json:"region"`               // AWS 区域
-	IsAWSEKS        bool   `json:"is_aws_eks,omitempty"` // 标识是否为AWS EKS集群
+	AccessKey       string `gorm:"size:255" json:"-"`                    // AWS Access Key ID
+	SecretAccessKey string `gorm:"size:255" json:"-"`                    // AWS Secret Access Key
+	ClusterName     string `gorm:"size:100;index:idx_kube_config_cluster_name" json:"cluster_name"` // AWS EKS 集群名称
+	Region          string `gorm:"size:50;index:idx_kube_config_region" json:"region"` // AWS 区域
+	IsAWSEKS        bool   `json:"is_aws_eks,omitempty"`                   // 标识是否为AWS EKS集群
 	// token 纳管相关 server\token\cadata
 	Token  string `gorm:"type:text" json:"token,omitempty"`   // token 内容，支持大文本存储
 	CACert string `gorm:"type:text" json:"ca_data,omitempty"` // ca 证书内容，支持大文本存储
 
 	// kom 集群注册配置项
 	// ProxyURL 设置 HTTP 代理，例如 http://127.0.0.1:7890
-	ProxyURL string `gorm:"type:varchar(255)" json:"proxy_url,omitempty"`
+	ProxyURL string `gorm:"size:255" json:"proxy_url,omitempty"`
 	// Timeout 设置请求超时时间，单位为秒，默认为 30 秒
 	Timeout int `gorm:"default:30" json:"timeout,omitempty"`
 	// QPS 设置每秒查询数限制，默认为 200

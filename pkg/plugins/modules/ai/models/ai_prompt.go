@@ -13,12 +13,12 @@ import (
 // 用于存储和管理AI提示词的配置信息
 type AIPrompt struct {
 	ID          uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name        string                 `json:"name" gorm:"size:100;not null"`             // 提示词名称
-	Description string                 `json:"description" gorm:"size:500"`               // 提示词描述
-	PromptType  constants.AIPromptType `json:"prompt_type" gorm:"size:50;not null;index"` // 提示词类型
-	Content     string                 `json:"content" gorm:"type:text;not null"`         // 提示词内容
-	IsBuiltin   bool                   `json:"is_builtin" gorm:"default:false;index"`     // 是否为内置提示词
-	IsEnabled   bool                   `json:"is_enabled" gorm:"default:false;index"`     // 是否启用
+	Name        string                 `gorm:"size:100;not null" json:"name"`                        // 提示词名称
+	Description string                 `gorm:"size:500" json:"description"`                          // 提示词描述
+	PromptType  constants.AIPromptType `gorm:"size:50;not null;index:idx_ai_prompt_prompt_type" json:"prompt_type"` // 提示词类型
+	Content     string                 `gorm:"type:text;not null" json:"content"`                    // 提示词内容
+	IsBuiltin   bool                   `gorm:"default:false;index:idx_ai_prompt_is_builtin" json:"is_builtin"` // 是否为内置提示词
+	IsEnabled   bool                   `gorm:"default:false;index:idx_ai_prompt_is_enabled" json:"is_enabled"` // 是否启用
 	CreatedAt   time.Time              `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time              `json:"updated_at,omitempty"`
 }

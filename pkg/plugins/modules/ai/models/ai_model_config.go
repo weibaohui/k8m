@@ -10,13 +10,13 @@ import (
 
 type AIModelConfig struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	ApiKey      string    `json:"api_key"`
-	ApiURL      string    `json:"api_url"`
-	ApiModel    string    `json:"api_model"`
+	ApiKey      string    `gorm:"type:text" json:"api_key"`
+	ApiURL      string    `gorm:"size:255" json:"api_url"`
+	ApiModel    string    `gorm:"size:100" json:"api_model"`
 	Temperature float32   `json:"temperature"`
 	TopP        float32   `json:"top_p"`
 	Think       bool      `json:"think"`
-	Description string    `json:"description,omitempty"`
+	Description string    `gorm:"type:text" json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
 }

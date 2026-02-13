@@ -11,19 +11,19 @@ import (
 // User 用户导入User
 type User struct {
 	ID               uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Username         string    `gorm:"type:varchar(255);uniqueIndex;not null" json:"username,omitempty"`
-	Salt             string    `gorm:"not null" json:"salt,omitempty"`
-	Password         string    `gorm:"not null" json:"password,omitempty"`
-	GroupNames       string    `json:"group_names,omitempty"`
-	Source           string    `json:"source,omitempty"` // 来源，如：db, ldap_config.json, oauth
+	Username         string    `gorm:"size:255;uniqueIndex:idx_user_username;not null" json:"username,omitempty"`
+	Salt             string    `gorm:"size:100;not null" json:"salt,omitempty"`
+	Password         string    `gorm:"size:255;not null" json:"password,omitempty"`
+	GroupNames       string    `gorm:"type:text" json:"group_names,omitempty"`
+	Source           string    `gorm:"size:50" json:"source,omitempty"` // 来源，如：db, ldap_config.json, oauth
 	CreatedAt        time.Time `json:"created_at,omitempty" gorm:"<-:create"`
-	UpdatedAt        time.Time `json:"updated_at,omitempty"`                          // Automatically managed by GORM for update time
-	TwoFAEnabled     bool      `gorm:"default:false" json:"two_fa_enabled,omitempty"` // 是否启用2FA
-	TwoFAType        string    `gorm:"size:20" json:"two_fa_type,omitempty"`          // 2FA类型：如 'totp', 'sms', 'email'
-	TwoFASecret      string    `gorm:"size:100" json:"two_fa_secret,omitempty"`       // 2FA密钥
-	TwoFABackupCodes string    `gorm:"size:500" json:"two_fa_backup_codes,omitempty"` // 备用恢复码，逗号分隔
-	TwoFAAppName     string    `gorm:"size:100" json:"two_fa_app_name,omitempty"`     // 2FA应用名称，用于提醒用户使用的是哪个软件
-	Disabled         bool      `gorm:"default:false" json:"disabled,omitempty"`       // 是否启用
+	UpdatedAt        time.Time `json:"updated_at,omitempty"`                                      // Automatically managed by GORM for update time
+	TwoFAEnabled     bool      `gorm:"default:false" json:"two_fa_enabled,omitempty"`             // 是否启用2FA
+	TwoFAType        string    `gorm:"size:20" json:"two_fa_type,omitempty"`                      // 2FA类型：如 'totp', 'sms', 'email'
+	TwoFASecret      string    `gorm:"size:100" json:"two_fa_secret,omitempty"`                   // 2FA密钥
+	TwoFABackupCodes string    `gorm:"size:500" json:"two_fa_backup_codes,omitempty"`             // 备用恢复码，逗号分隔
+	TwoFAAppName     string    `gorm:"size:100" json:"two_fa_app_name,omitempty"`                 // 2FA应用名称，用于提醒用户使用的是哪个软件
+	Disabled         bool      `gorm:"default:false" json:"disabled,omitempty"`                   // 是否启用
 }
 
 func (c *User) List(params *dao.Params, queryFuncs ...func(*gorm.DB) *gorm.DB) ([]*User, int64, error) {

@@ -80,7 +80,8 @@ func openSqliteDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, er
 		dsn = fmt.Sprintf("file:%s?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)", cfg.SqlitePath)
 	}
 	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
-		Logger: customLogger,
+		Logger:                                   customLogger,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		return nil, err
@@ -159,7 +160,8 @@ func openPostgresDB(cfg *flag.Config, customLogger logger.Interface) (*gorm.DB, 
 		cfg.PgTimeZone,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: customLogger,
+		Logger:                                   customLogger,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		klog.Errorf("初始化postgres数据库异常: %v", err)
