@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/weibaohui/k8m/internal/dao"
@@ -77,7 +78,12 @@ func AutoMigrate() error {
 
 	// 插件配置表
 	if err := dao.DB().AutoMigrate(&PluginConfig{}); err != nil {
-		errs = append(errs, err)
+		errs = append(errs, fmt.Errorf("PluginConfig 表迁移失败: %w", err))
+	} else {
+		// 验证表是否真的创建成功
+		if !dao.DB().Migrator().HasTable(&PluginConfig{}) {
+			errs = append(errs, fmt.Errorf("PluginConfig 表创建失败：表不存在"))
+		}
 	}
 
 	// 删除 user 表 name 字段，已弃用
@@ -92,10 +98,15 @@ func AutoMigrate() error {
 	}
 
 	// 打印所有非nil的错误
-	for _, err := range errs {
+	for i, err := range errs {
 		if err != nil {
-			klog.Errorf("数据库迁移报错: %v", err.Error())
+			klog.Errorf("数据库迁移报错[%d]: %v", i, err)
 		}
+	}
+
+	// 如果有错误，返回合并后的错误
+	if len(errs) > 0 {
+		return fmt.Errorf("数据库迁移发生 %d 个错误", len(errs))
 	}
 
 	return nil
